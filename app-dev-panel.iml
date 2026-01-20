@@ -4,11 +4,18 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/libs/API/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/yii-debug/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/libs/Adapter/Yiisoft/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/libs/API/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/libs/Adapter/Yiisoft/tests" isTestSource="true" packagePrefix="AppDevPanel\Adapter\Yiisoft\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/app/vendor/nikic/fast-route/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/libs/API/API" isTestSource="false" packagePrefix="Yiisoft\Yii\Debug\Api\" />
+      <sourceFolder url="file://$MODULE_DIR$/app/vendor" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/libs/Adapter/Yiisoft/src" isTestSource="false" packagePrefix="AppDevPanel\Adapter\Yiisoft\" />
+      <sourceFolder url="file://$MODULE_DIR$/libs/Kernel/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/libs/yii-dev-panel/packages/yii-dev-panel-sdk" />
       <excludeFolder url="file://$MODULE_DIR$/libs/yii-dev-panel/packages/yii-dev-toolbar" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
+      <excludeFolder url="file://$MODULE_DIR$/app/public/assets" />
+      <excludeFolder url="file://$MODULE_DIR$/app/runtime" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/alexkart/curl-builder" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/app-dev-panel/adapter-yiisoft" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/app-dev-panel/api" />

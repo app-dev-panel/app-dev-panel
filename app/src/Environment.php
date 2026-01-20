@@ -37,7 +37,7 @@ final class Environment
     public static function appEnv(): string
     {
         /** @var non-empty-string */
-        return self::$values['APP_ENV'];
+        return self::$values['APP_ENV'] ?? 'dev';
     }
 
     public static function isDev(): bool
@@ -78,7 +78,7 @@ final class Environment
 
     private static function setEnvironment(): void
     {
-        $environment = self::getRawValue('APP_ENV');
+        $environment = self::getRawValue('APP_ENV') ?? 'dev';
 
         if (!in_array($environment, self::ENVIRONMENTS, true)) {
             if ($environment === null) {

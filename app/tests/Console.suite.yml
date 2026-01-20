@@ -1,4 +1,0 @@
-actor: ConsoleTester
-modules:
-  enabled:
-    - Cli

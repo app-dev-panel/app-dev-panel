@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Inspector\Command;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector\Command;
 
 use Symfony\Component\Process\Process;
 use Yiisoft\Aliases\Aliases;
-use Yiisoft\Yii\Debug\Api\Inspector\CommandInterface;
-use Yiisoft\Yii\Debug\Api\Inspector\CommandResponse;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\CommandInterface;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\CommandResponse;
 
 class PsalmCommand implements CommandInterface
 {

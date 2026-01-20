@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Inspector\Database;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database;
 
 interface SchemaProviderInterface
 {

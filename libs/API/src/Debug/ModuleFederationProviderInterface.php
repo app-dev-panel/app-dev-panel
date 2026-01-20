@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Debug;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Debug;
 
-use Yiisoft\Yii\Debug\Collector\CollectorInterface;
+use AppDevPanel\Adapter\Yiisoft\Collector\CollectorInterface;
 
 interface ModuleFederationProviderInterface extends CollectorInterface
 {

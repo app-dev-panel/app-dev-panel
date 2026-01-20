@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Debug\Provider;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Debug\Provider;
 
 use Psr\Container\ContainerInterface;
 use Yiisoft\Di\ServiceProviderInterface;
 use Yiisoft\Router\RouteCollectorInterface;
-use Yiisoft\Yii\Debug\Api\Debug\Http\HttpApplicationWrapper;
-use Yiisoft\Yii\Debug\Api\Debug\Http\RouteCollectorWrapper;
+use AppDevPanel\Adapter\Yiisoft\Api\Debug\Http\HttpApplicationWrapper;
+use AppDevPanel\Adapter\Yiisoft\Api\Debug\Http\RouteCollectorWrapper;
 use Yiisoft\Yii\Http\Application;
 
 final class DebugApiProvider implements ServiceProviderInterface

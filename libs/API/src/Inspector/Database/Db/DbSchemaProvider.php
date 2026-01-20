@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Inspector\Database\Db;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\Db;
 
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Query\Query;
 use Yiisoft\Db\Schema\ColumnSchemaInterface;
 use Yiisoft\Db\Schema\TableSchemaInterface;
-use Yiisoft\Yii\Debug\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\SchemaProviderInterface;
 
 class DbSchemaProvider implements SchemaProviderInterface
 {

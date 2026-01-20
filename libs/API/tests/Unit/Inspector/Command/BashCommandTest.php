@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Tests\Unit\Inspector\Command;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Tests\Unit\Inspector\Command;
 
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Aliases\Aliases;
-use Yiisoft\Yii\Debug\Api\Inspector\Command\BashCommand;
-use Yiisoft\Yii\Debug\Api\Inspector\CommandResponse;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Command\BashCommand;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\CommandResponse;
 
 final class BashCommandTest extends TestCase
 {

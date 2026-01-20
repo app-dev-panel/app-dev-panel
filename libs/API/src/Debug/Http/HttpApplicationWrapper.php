@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Debug\Http;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Debug\Http;
 
 use Closure;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-use Yiisoft\Yii\Debug\Api\Debug\Middleware\MiddlewareDispatcherMiddleware;
+use AppDevPanel\Adapter\Yiisoft\Api\Debug\Middleware\MiddlewareDispatcherMiddleware;
 use Yiisoft\Yii\Http\Application;
 
 final class HttpApplicationWrapper

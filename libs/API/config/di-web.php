@@ -5,14 +5,14 @@ declare(strict_types=1);
 use Cycle\Database\DatabaseProviderInterface;
 use Psr\Container\ContainerInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
-use Yiisoft\Yii\Debug\Api\Debug\Http\HttpApplicationWrapper;
-use Yiisoft\Yii\Debug\Api\Debug\Http\RouteCollectorWrapper;
-use Yiisoft\Yii\Debug\Api\Debug\Repository\CollectorRepository;
-use Yiisoft\Yii\Debug\Api\Debug\Repository\CollectorRepositoryInterface;
-use Yiisoft\Yii\Debug\Api\Inspector\Database\Cycle\CycleSchemaProvider;
-use Yiisoft\Yii\Debug\Api\Inspector\Database\Db\DbSchemaProvider;
-use Yiisoft\Yii\Debug\Api\Inspector\Database\SchemaProviderInterface;
-use Yiisoft\Yii\Debug\Storage\StorageInterface;
+use AppDevPanel\Adapter\Yiisoft\Api\Debug\Http\HttpApplicationWrapper;
+use AppDevPanel\Adapter\Yiisoft\Api\Debug\Http\RouteCollectorWrapper;
+use AppDevPanel\Adapter\Yiisoft\Api\Debug\Repository\CollectorRepository;
+use AppDevPanel\Adapter\Yiisoft\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\Cycle\CycleSchemaProvider;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\Db\DbSchemaProvider;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Adapter\Yiisoft\Storage\StorageInterface;
 
 /**
  * @var $params array

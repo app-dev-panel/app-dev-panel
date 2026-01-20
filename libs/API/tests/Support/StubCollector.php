@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Tests\Support;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Tests\Support;
 
-use Yiisoft\Yii\Debug\Collector\CollectorInterface;
+use AppDevPanel\Adapter\Yiisoft\Collector\CollectorInterface;
 
 final class StubCollector implements CollectorInterface
 {

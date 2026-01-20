@@ -1,0 +1,30 @@
+{
+    "name": "app-dev-panel/cli",
+    "type": "library",
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^8.2",
+        "app-dev-panel/kernel": "*"
+    },
+    "require-dev": {
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../Kernel"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "AppDevPanel\\Cli\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AppDevPanel\\Cli\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --testdox --no-interaction"
+    }
+}

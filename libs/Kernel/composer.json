@@ -1,0 +1,38 @@
+{
+    "name": "app-dev-panel/kernel",
+    "type": "library",
+    "description": "Add Devp Panel Kernel",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.2",
+        "ext-mbstring": "*",
+        "guzzlehttp/psr7": "^2.4",
+        "psr/container": "^2.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/http-client": "^1.0",
+        "psr/http-message": "^1.0|^2.0",
+        "psr/log": "^1.0|^2.0|^3.0",
+        "symfony/console": "^6.0|^7.0|^8.0",
+        "symfony/var-dumper": "^6.4|^7.0|^8.0",
+        "yiisoft/json": "^1.0",
+        "yiisoft/proxy": "^1.0.1",
+        "yiisoft/strings": "^2.2",
+        "yiisoft/var-dumper": "^1.7"
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "AppDevPanel\\Kernel\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AppDevPanel\\Kernel\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --testdox --no-interaction"
+    }
+}

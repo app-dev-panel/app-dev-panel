@@ -20,10 +20,15 @@
     {
       "type": "path",
       "url": "libs/API"
+    },
+    {
+      "type": "path",
+      "url": "libs/Kernel"
     }
   ],
   "require": {
     "php": "^8.4",
+    "app-dev-panel/kernel": "*",
     "app-dev-panel/adapter-yiisoft": "*",
     "app-dev-panel/api": "*"
   },

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api;
+namespace AppDevPanel\Adapter\Yiisoft\Api;
 
 use Closure;
 use Psr\Http\Message\StreamInterface;

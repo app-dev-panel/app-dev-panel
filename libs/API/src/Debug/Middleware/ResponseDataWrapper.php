@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Debug\Middleware;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Debug\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -12,7 +12,7 @@ use Yiisoft\DataResponse\DataResponse;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
 use Yiisoft\Http\Status;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Yii\Debug\Api\Debug\Exception\NotFoundException;
+use AppDevPanel\Adapter\Yiisoft\Api\Debug\Exception\NotFoundException;
 
 final class ResponseDataWrapper implements MiddlewareInterface
 {

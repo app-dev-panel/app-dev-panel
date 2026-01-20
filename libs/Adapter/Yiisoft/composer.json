@@ -1,16 +1,11 @@
 {
     "name": "app-dev-panel/adapter-yiisoft",
     "type": "library",
-    "description": "Yii Framework Debug Panel Extension",
-    "keywords": [
-        "yii",
-        "debug",
-        "debugger"
-    ],
-    "license": "BSD-3-Clause",
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ext-mbstring": "*",
+        "app-dev-panel/kernel": "*",
+        "app-dev-panel/cli": "*",
         "guzzlehttp/psr7": "^2.4",
         "jetbrains/phpstorm-attributes": "^1.0",
         "psr/container": "^2.0",
@@ -18,7 +13,6 @@
         "psr/http-client": "^1.0",
         "psr/http-message": "^1.0|^2.0",
         "psr/log": "^1.0|^2.0|^3.0",
-        "symfony/console": "^5.4|^6.0",
         "symfony/var-dumper": "^6.4|^7.0|^8.0",
         "yiisoft/aliases": "^3.0",
         "yiisoft/arrays": "^2.0|^3.0",
@@ -47,15 +41,24 @@
         "yiisoft/yii-console": "^2.0",
         "yiisoft/yii-http": "^1.0"
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../Kernel"
+        },
+        {
+            "type": "path",
+            "url": "../../Cli"
+        }
+    ],
     "autoload": {
         "psr-4": {
-            "Yiisoft\\Yii\\Debug\\": "Adapter/Yiisoft3/src",
-            "Yiisoft\\Yii\\Debug\\Tests\\Shared\\": "tests/Shared"
+            "AppDevPanel\\Adapter\\Yiisoft\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Yiisoft\\Yii\\Debug\\Tests\\": "tests"
+            "AppDevPanel\\Adapter\\Yiisoft\\Tests\\": "tests"
         }
     },
     "extra": {

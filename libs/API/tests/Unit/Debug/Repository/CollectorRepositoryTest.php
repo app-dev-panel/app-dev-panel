@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Tests\Unit\Debug\Repository;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Tests\Unit\Debug\Repository;
 
 use PHPUnit\Framework\TestCase;
-use Yiisoft\Yii\Debug\Api\Debug\Repository\CollectorRepository;
-use Yiisoft\Yii\Debug\Storage\MemoryStorage;
+use AppDevPanel\Adapter\Yiisoft\Api\Debug\Repository\CollectorRepository;
+use AppDevPanel\Adapter\Yiisoft\Storage\MemoryStorage;
 
 final class CollectorRepositoryTest extends TestCase
 {

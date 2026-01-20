@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Inspector;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector;
 
 class CommandResponse
 {

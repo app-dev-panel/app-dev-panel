@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use Codeception\Extension;
-use Yiisoft\Yii\Debug\Api\Debug\Middleware\DebugHeaders;
-use Yiisoft\Yii\Debug\Api\Inspector\Command\CodeceptionCommand;
-use Yiisoft\Yii\Debug\Api\Inspector\Command\PHPUnitCommand;
-use Yiisoft\Yii\Debug\Api\Inspector\Command\PsalmCommand;
+use AppDevPanel\Adapter\Yiisoft\Api\Debug\Middleware\DebugHeaders;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Command\CodeceptionCommand;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Command\PHPUnitCommand;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Command\PsalmCommand;
 
 $testCommands = [];
 if (class_exists(\PHPUnit\Framework\Test::class)) {

@@ -9,16 +9,16 @@ use Psr\Log\LoggerInterface;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\VarDumper\ClosureExporter;
 use Yiisoft\VarDumper\UseStatementParser;
-use Yiisoft\Yii\Debug\Collector\ContainerInterfaceProxy;
-use Yiisoft\Yii\Debug\Collector\ContainerProxyConfig;
-use Yiisoft\Yii\Debug\Collector\LogCollector;
-use Yiisoft\Yii\Debug\Collector\LoggerInterfaceProxy;
-use Yiisoft\Yii\Debug\Collector\ServiceCollector;
-use Yiisoft\Yii\Debug\Collector\Stream\FilesystemStreamCollector;
-use Yiisoft\Yii\Debug\DebuggerIdGenerator;
-use Yiisoft\Yii\Debug\DebugServer\LoggerDecorator;
-use Yiisoft\Yii\Debug\Storage\FileStorage;
-use Yiisoft\Yii\Debug\Storage\StorageInterface;
+use AppDevPanel\Kernel\Collector\ContainerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\ContainerProxyConfig;
+use AppDevPanel\Kernel\Collector\LogCollector;
+use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\ServiceCollector;
+use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
+use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
+use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 
 /**
  * @var array $params
@@ -26,7 +26,7 @@ use Yiisoft\Yii\Debug\Storage\StorageInterface;
 
 $common = [
     StorageInterface::class => static function (ContainerInterface $container, Aliases $aliases) use ($params) {
-        $params = $params['yiisoft/yii-debug'];
+        $params = $params['app-dev-panel/yii-debug'];
         $debuggerIdGenerator = $container->get(DebuggerIdGenerator::class);
         $excludedClasses = $params['dumper.excludedClasses'];
         $fileStorage = new FileStorage($aliases->get($params['path']), $debuggerIdGenerator, $excludedClasses);
@@ -39,13 +39,13 @@ $common = [
     },
 ];
 
-if (!(bool) ($params['yiisoft/yii-debug']['enabled'] ?? false)) {
+if (!(bool) ($params['app-dev-panel/yii-debug']['enabled'] ?? false)) {
     return $common;
 }
 
 return array_merge([
     ContainerProxyConfig::class => static function (ContainerInterface $container) use ($params) {
-        $params = $params['yiisoft/yii-debug'];
+        $params = $params['app-dev-panel/yii-debug'];
         $collector = $container->get(ServiceCollector::class);
         $dispatcher = $container->get(EventDispatcherInterface::class);
         $isDebuggerEnabled = (bool) ($params['enabled'] ?? false);

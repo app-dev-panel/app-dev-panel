@@ -7,33 +7,33 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Yiisoft\Injector\Injector;
-use Yiisoft\Yii\Debug\Collector\Console\CommandCollector;
-use Yiisoft\Yii\Debug\Collector\Console\ConsoleAppInfoCollector;
-use Yiisoft\Yii\Debug\Collector\ContainerInterfaceProxy;
-use Yiisoft\Yii\Debug\Collector\EventCollector;
-use Yiisoft\Yii\Debug\Collector\EventDispatcherInterfaceProxy;
-use Yiisoft\Yii\Debug\Collector\ExceptionCollector;
-use Yiisoft\Yii\Debug\Collector\HttpClientCollector;
-use Yiisoft\Yii\Debug\Collector\HttpClientInterfaceProxy;
-use Yiisoft\Yii\Debug\Collector\LogCollector;
-use Yiisoft\Yii\Debug\Collector\LoggerInterfaceProxy;
-use Yiisoft\Yii\Debug\Collector\ServiceCollector;
-use Yiisoft\Yii\Debug\Collector\Stream\FilesystemStreamCollector;
-use Yiisoft\Yii\Debug\Collector\Stream\HttpStreamCollector;
-use Yiisoft\Yii\Debug\Collector\TimelineCollector;
-use Yiisoft\Yii\Debug\Collector\VarDumperCollector;
-use Yiisoft\Yii\Debug\Collector\Web\RequestCollector;
-use Yiisoft\Yii\Debug\Collector\Web\WebAppInfoCollector;
-use Yiisoft\Yii\Debug\Command\DebugResetCommand;
-use Yiisoft\Yii\Debug\Command\DebugServerBroadcastCommand;
-use Yiisoft\Yii\Debug\Command\DebugServerCommand;
+use AppDevPanel\Kernel\Collector\Console\CommandCollector;
+use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
+use AppDevPanel\Kernel\Collector\ContainerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\EventCollector;
+use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
+use AppDevPanel\Kernel\Collector\ExceptionCollector;
+use AppDevPanel\Kernel\Collector\HttpClientCollector;
+use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
+use AppDevPanel\Kernel\Collector\LogCollector;
+use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\ServiceCollector;
+use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
+use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
+use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\VarDumperCollector;
+use AppDevPanel\Kernel\Collector\Web\RequestCollector;
+use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
+use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Cli\Command\DebugServerBroadcastCommand;
+use AppDevPanel\Cli\Command\DebugServerCommand;
 
 /**
  * @var $params array
  */
 
 return [
-    'yiisoft/yii-debug' => [
+    'app-dev-panel/yii-debug' => [
         'enabled' => true,
         'devServer' => [
             'enabled' => true,
@@ -92,7 +92,7 @@ return [
     ],
     'yiisoft/yii-console' => [
         'commands' => [
-            'debug:reset' => DebugResetCommand::class,
+            DebugResetCommand::COMMAND_NAME => DebugResetCommand::class,
             DebugServerCommand::COMMAND_NAME => DebugServerCommand::class,
             DebugServerBroadcastCommand::COMMAND_NAME => DebugServerBroadcastCommand::class,
         ],

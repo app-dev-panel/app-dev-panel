@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Tests\Unit\Inspector;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Tests\Unit\Inspector;
 
 use PHPUnit\Framework\TestCase;
-use Yiisoft\Yii\Debug\Api\Inspector\CommandResponse;
+use AppDevPanel\Adapter\Yiisoft\Api\Inspector\CommandResponse;
 
 final class CommandResponseTest extends TestCase
 {

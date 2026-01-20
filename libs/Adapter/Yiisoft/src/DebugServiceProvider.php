@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug;
+namespace AppDevPanel\Adapter\Yiisoft;
 
 use Psr\Container\ContainerInterface;
 use Yiisoft\Di\ServiceProviderInterface;
-use Yiisoft\Yii\Debug\Collector\ContainerInterfaceProxy;
-use Yiisoft\Yii\Debug\Collector\ContainerProxyConfig;
+use AppDevPanel\Kernel\Collector\ContainerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\ContainerProxyConfig;
 
 final class DebugServiceProvider implements ServiceProviderInterface
 {

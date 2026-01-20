@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Yii\Debug\Api\Inspector\Test;
+namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector\Test;
 
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Test;

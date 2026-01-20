@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 use Yiisoft\ErrorHandler\Event\ApplicationError;
 use Yiisoft\Profiler\ProfilerInterface;
-use Yiisoft\Yii\Debug\Collector\ExceptionCollector;
-use Yiisoft\Yii\Debug\Collector\Web\RequestCollector;
-use Yiisoft\Yii\Debug\Collector\Web\WebAppInfoCollector;
-use Yiisoft\Yii\Debug\Debugger;
+use AppDevPanel\Kernel\Collector\ExceptionCollector;
+use AppDevPanel\Kernel\Collector\Web\RequestCollector;
+use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
+use AppDevPanel\Kernel\Debugger;
 use Yiisoft\Yii\Http\Event\AfterEmit;
 use Yiisoft\Yii\Http\Event\AfterRequest;
 use Yiisoft\Yii\Http\Event\ApplicationShutdown;
 use Yiisoft\Yii\Http\Event\ApplicationStartup;
 use Yiisoft\Yii\Http\Event\BeforeRequest;
 
-if (!(bool) ($params['yiisoft/yii-debug']['enabled'] ?? false)) {
+if (!(bool) ($params['app-dev-panel/yii-debug']['enabled'] ?? false)) {
     return [];
 }
 

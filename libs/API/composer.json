@@ -36,7 +36,7 @@
         "yiisoft/middleware-dispatcher": "^5.2",
         "yiisoft/translator": "^3.0",
         "yiisoft/var-dumper": "^1.4",
-        "yiisoft/yii-debug": "dev-master",
+        "app-dev-panel/kernel": "*",
         "zircote/swagger-php": "^4.0"
     },
     "require-dev": {
