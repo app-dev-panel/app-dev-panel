@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./build",
+    "noEmit": false,
+    "declaration": true,
+    "sourceMap": true,
+    "composite": true
+  },
+  "include": ["src"]
+}

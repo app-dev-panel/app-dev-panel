@@ -1,0 +1,101 @@
+{
+  "name": "app-dev-panel/app-dev-panel",
+  "type": "project",
+  "authors": [
+    {
+      "name": "Dmitriy Derepko",
+      "email": "xepozz@list.ru"
+    }
+  ],
+  "license": "MIT",
+  "support": {
+    "issues": "https://github.com/app-dev-panel/app-dev-panel/issues",
+    "source": "https://github.com/app-dev-panel/app-dev-panel"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "libs/Adapter/*"
+    },
+    {
+      "type": "path",
+      "url": "libs/API"
+    }
+  ],
+  "require": {
+    "php": "^8.4",
+    "app-dev-panel/adapter-yiisoft": "*",
+    "app-dev-panel/api": "*"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.64",
+    "phpstan/phpstan": "^2.1",
+    "phpstan/phpstan-strict-rules": "^2.0",
+    "phpunit/phpunit": "^10.5|^11.0",
+    "symfony/var-dumper": "^7.0"
+  },
+  "scripts-aliases": {
+    "linter:check": [
+      "linter",
+      "stan",
+      "analyze",
+      "phpstan"
+    ],
+    "phpcs:fix": [
+      "phpcs",
+      "per2",
+      "per",
+      "percs",
+      "codestyle",
+      "cs"
+    ],
+    "test:unit": [
+      "phpunit",
+      "unit"
+    ],
+    "build:prod": [
+      "build"
+    ]
+  },
+  "scripts-descriptions": {
+    "test": "Runs all types of tests in turn",
+    "test:unit": "Runs unit tests only",
+    "linter:check": "Runs static code analysis",
+    "linter:baseline": "Generates a baseline for current linter errors",
+    "phpcs:check": "Checks source code for codestyle errors",
+    "phpcs:fix": "Corrects codestyle in source code",
+    "build:prod": "Compiles PHAR assembly of the LSP Server",
+    "build:run": "Runs the compiled PHAR assembly"
+  },
+  "scripts": {
+    "test": "@test:unit",
+    "test:unit": "phpunit --testdox",
+    "linter:check": "phpstan analyse --configuration phpstan.neon",
+    "linter:baseline": "phpstan analyse --configuration phpstan.neon --generate-baseline",
+    "phpcs:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --verbose --diff",
+    "phpcs:fix": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --verbose --diff",
+    "build:prod": "bin/build.sh",
+    "build:run": [
+      "Composer\\Config::disableProcessTimeout",
+      "@php var/prod/build.phar serve --port=5007"
+    ]
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.x-dev",
+      "dev-main": "1.x-dev"
+    }
+  },
+  "config": {
+    "optimize-autoloader": false,
+    "preferred-install": {
+      "*": "dist"
+    },
+    "sort-packages": true,
+    "allow-plugins": {
+      "yiisoft/config": false
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

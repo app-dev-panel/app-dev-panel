@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "./build",
+    "noEmit": false,
+    "declaration": true,
+    "sourceMap": true,
+    "composite": true
+  },
+  "include": ["src"],
+  "references": [
+    {"path": "../yii-dev-panel-sdk/tsconfig.build.json"},
+    {"path": "../yii-dev-toolbar/tsconfig.build.json"}
+  ]
+}

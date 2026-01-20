@@ -1,0 +1,88 @@
+{
+    "name": "app-dev-panel/api",
+    "type": "library",
+    "description": "Yii Debug API",
+    "keywords": [
+        "yii-debug-api",
+        "yiisoft",
+        "yii",
+        "debug",
+        "api"
+    ],
+    "homepage": "https://www.yiiframework.com/",
+    "license": "BSD-3-Clause",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.1",
+        "alexkart/curl-builder": "^1.0",
+        "gitonomy/gitlib": "^1.3",
+        "guzzlehttp/guzzle": "^7.5",
+        "guzzlehttp/psr7": "^2.4",
+        "httpsoft/http-message": "^1.1",
+        "psr/container": "^2.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-message": "^1.0|^2.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0",
+        "psr/simple-cache": "^2.0|^3.0",
+        "symfony/process": "^5.4|^6.0",
+        "yiisoft/aliases": "^3.0",
+        "yiisoft/config": "^1.1",
+        "yiisoft/data-response": "^2.0",
+        "yiisoft/di": "^1.0",
+        "yiisoft/friendly-exception": "^1.1",
+        "yiisoft/http": "^1.2",
+        "yiisoft/middleware-dispatcher": "^5.2",
+        "yiisoft/translator": "^3.0",
+        "yiisoft/var-dumper": "^1.4",
+        "yiisoft/yii-debug": "dev-master",
+        "zircote/swagger-php": "^4.0"
+    },
+    "require-dev": {
+        "codeception/codeception": "^5.0",
+        "maglnet/composer-require-checker": "^4.2",
+        "phpunit/phpunit": "^9.6",
+        "rector/rector": "^1.0.0",
+        "roave/infection-static-analysis-plugin": "^1.16",
+        "spatie/phpunit-watcher": "^1.23",
+        "vimeo/psalm": "^5.22",
+        "yiisoft/active-record": "dev-master",
+        "yiisoft/assets": "^4.0",
+        "yiisoft/csrf": "^2.0",
+        "yiisoft/db": "1.2 as dev-master",
+        "yiisoft/db-sqlite": "^1.0",
+        "yiisoft/psr-dummy-provider": "^1.0",
+        "yiisoft/router-fastroute": "^3.0",
+        "yiisoft/test-support": "^3.0",
+        "yiisoft/yii-cycle": "dev-master",
+        "yiisoft/yii-http": "^1.0",
+        "yiisoft/yii-view": "^6.0"
+    },
+    "suggest": {
+        "yiisoft/assets": "Support custom debug panels",
+        "yiisoft/yii-view": "Support custom debug panels"
+    },
+    "autoload": {
+        "psr-4": {
+            "Yiisoft\\Yii\\Debug\\Api\\": "API"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Yiisoft\\Yii\\Debug\\Api\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --testdox --no-interaction",
+        "test-watch": "phpunit-watcher watch"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "infection/extension-installer": true,
+            "composer/package-versions-deprecated": true,
+            "yiisoft/config": false
+        }
+    }
+}

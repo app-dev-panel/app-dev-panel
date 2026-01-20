@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "./build",
+    "module": "esnext",
+    "composite": false,
+    "sourceMap": false
+  }
+}

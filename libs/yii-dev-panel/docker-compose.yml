@@ -1,0 +1,11 @@
+version: '3.5'
+
+services:
+  dev-panel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_BUILD_ID: 'docker'
+    ports:
+      - 4170:4173

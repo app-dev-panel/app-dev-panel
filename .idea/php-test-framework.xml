@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpTestFrameworkSettings">
+    <test_tools>
+      <tool tool_name="Testo">
+        <settings>
+          <configurations>
+            <local_configuration />
+          </configurations>
+        </settings>
+      </tool>
+    </test_tools>
+  </component>
+</project>

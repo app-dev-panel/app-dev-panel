@@ -1,0 +1,13 @@
+**/.DS_Store
+.github
+.idea
+**/docs
+examples
+docker-compose.yml
+Dockerfile
+**/README.md
+**/node_modules
+**/build
+**/dist
+**/dev-dist
+**/**/*.tsbuildinfo
