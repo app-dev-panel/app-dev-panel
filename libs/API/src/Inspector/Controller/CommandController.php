@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector\Controller;
+namespace AppDevPanel\Api\Inspector\Controller;
 
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
@@ -11,8 +11,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\Config\ConfigInterface;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Command\BashCommand;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\CommandInterface;
+use AppDevPanel\Api\Inspector\Command\BashCommand;
+use AppDevPanel\Api\Inspector\CommandInterface;
 
 use function array_key_exists;
 use function is_array;
@@ -28,7 +28,7 @@ class CommandController
     public function index(ConfigInterface $config, Aliases $aliases): ResponseInterface
     {
         $params = $config->get('params');
-        $configCommandMap = $params['yiisoft/yii-debug-api']['inspector']['commandMap'] ?? [];
+        $configCommandMap = $params['app-dev-panel/yii-debug-api']['inspector']['commandMap'] ?? [];
 
         $result = [];
         foreach ($configCommandMap as $groupName => $commands) {
@@ -66,7 +66,7 @@ class CommandController
         Aliases $aliases,
     ): ResponseInterface {
         $params = $config->get('params');
-        $commandMap = $params['yiisoft/yii-debug-api']['inspector']['commandMap'] ?? [];
+        $commandMap = $params['app-dev-panel/yii-debug-api']['inspector']['commandMap'] ?? [];
 
         $commandList = [];
         foreach ($commandMap as $commands) {

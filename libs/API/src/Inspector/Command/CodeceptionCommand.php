@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector\Command;
+namespace AppDevPanel\Api\Inspector\Command;
 
 use Symfony\Component\Process\Process;
 use Yiisoft\Aliases\Aliases;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\CommandInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\CommandResponse;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Test\CodeceptionJSONReporter;
+use AppDevPanel\Api\Inspector\CommandInterface;
+use AppDevPanel\Api\Inspector\CommandResponse;
+use AppDevPanel\Api\Inspector\Test\CodeceptionJSONReporter;
 
 class CodeceptionCommand implements CommandInterface
 {

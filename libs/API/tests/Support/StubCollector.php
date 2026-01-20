@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Tests\Support;
+namespace AppDevPanel\Api\Tests\Support;
 
 use AppDevPanel\Adapter\Yiisoft\Collector\CollectorInterface;
 

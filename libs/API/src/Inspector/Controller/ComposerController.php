@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector\Controller;
+namespace AppDevPanel\Api\Inspector\Controller;
 
 use Exception;
 use InvalidArgumentException;
@@ -10,8 +10,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Command\BashCommand;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\CommandResponse;
+use AppDevPanel\Api\Inspector\Command\BashCommand;
+use AppDevPanel\Api\Inspector\CommandResponse;
 
 final class ComposerController
 {

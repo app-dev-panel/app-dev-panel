@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database;
+namespace AppDevPanel\Api\Inspector\Database;
 
 interface SchemaProviderInterface
 {

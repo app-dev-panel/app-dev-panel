@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector\Controller;
+namespace AppDevPanel\Api\Inspector\Controller;
 
 use Alexkart\CurlBuilder\Command;
 use FilesystemIterator;
@@ -28,9 +28,9 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 use Yiisoft\Translator\CategorySource;
 use Yiisoft\VarDumper\VarDumper;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Repository\CollectorRepositoryInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\ApplicationState;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Inspector\ApplicationState;
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Adapter\Yiisoft\Collector\Web\RequestCollector;
 
 class InspectController

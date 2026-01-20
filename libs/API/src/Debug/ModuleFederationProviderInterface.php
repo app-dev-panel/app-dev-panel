@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Debug;
+namespace AppDevPanel\Api\Debug;
 
-use AppDevPanel\Adapter\Yiisoft\Collector\CollectorInterface;
+use AppDevPanel\Kernel\Collector\CollectorInterface;
 
 interface ModuleFederationProviderInterface extends CollectorInterface
 {

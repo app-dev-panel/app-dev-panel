@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use Codeception\Extension;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Middleware\DebugHeaders;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Command\CodeceptionCommand;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Command\PHPUnitCommand;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Command\PsalmCommand;
+use AppDevPanel\Api\Debug\Middleware\DebugHeaders;
+use AppDevPanel\Api\Inspector\Command\CodeceptionCommand;
+use AppDevPanel\Api\Inspector\Command\PHPUnitCommand;
+use AppDevPanel\Api\Inspector\Command\PsalmCommand;
 
 $testCommands = [];
 if (class_exists(\PHPUnit\Framework\Test::class)) {
@@ -17,13 +17,13 @@ if (class_exists(Extension::class)) {
 }
 
 return [
-    'yiisoft/yii-debug' => [
+    'app-dev-panel/yii-debug' => [
         'ignoredRequests' => [
             '/debug**',
             '/inspect**',
         ],
     ],
-    'yiisoft/yii-debug-api' => [
+    'app-dev-panel/yii-debug-api' => [
         'enabled' => true,
         'allowedIPs' => ['127.0.0.1', '::1'],
         'allowedHosts' => [],

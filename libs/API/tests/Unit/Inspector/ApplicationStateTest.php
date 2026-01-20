@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Tests\Unit\Inspector;
+namespace AppDevPanel\Api\Tests\Unit\Inspector;
 
 use PHPUnit\Framework\TestCase;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\ApplicationState;
+use AppDevPanel\Api\Inspector\ApplicationState;
 
 final class ApplicationStateTest extends TestCase
 {

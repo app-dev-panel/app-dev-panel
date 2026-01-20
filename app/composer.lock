@@ -145,7 +145,7 @@
             "dist": {
                 "type": "path",
                 "url": "../libs/API",
-                "reference": "a1cae5d987aa1119f7ded372fd2927d49bcd3fe8"
+                "reference": "f17d4a83ae537f0308dae4b39f1ed76e40b22af1"
             },
             "require": {
                 "alexkart/curl-builder": "^1.0",
@@ -171,6 +171,7 @@
                 "yiisoft/middleware-dispatcher": "^5.2",
                 "yiisoft/translator": "^3.0",
                 "yiisoft/var-dumper": "^1.4",
+                "yiisoft/yii-middleware": "^1.1.0",
                 "zircote/swagger-php": "^4.0"
             },
             "require-dev": {
@@ -198,14 +199,26 @@
                 "yiisoft/yii-view": "Support custom debug panels"
             },
             "type": "library",
+            "extra": {
+                "config-plugin-options": {
+                    "source-directory": "config"
+                },
+                "config-plugin": {
+                    "params": "params.php",
+                    "bootstrap-web": "bootstrap-web.php",
+                    "di-web": "di-web.php",
+                    "di-providers-web": "di-providers-web.php",
+                    "routes": "routes.php"
+                }
+            },
             "autoload": {
                 "psr-4": {
-                    "Yiisoft\\Yii\\Debug\\Api\\": "API"
+                    "AppDevPanel\\Api\\": "src"
                 }
             },
             "autoload-dev": {
                 "psr-4": {
-                    "Yiisoft\\Yii\\Debug\\Api\\Tests\\": "tests"
+                    "AppDevPanel\\Api\\Tests\\": "tests"
                 }
             },
             "scripts": {
@@ -5763,6 +5776,91 @@
                 }
             ],
             "time": "2025-12-18T21:00:08+00:00"
+        },
+        {
+            "name": "yiisoft/yii-middleware",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/yii-middleware.git",
+                "reference": "4c21fd7a34f4a2a60d937bfdaeb4f9be72985e74"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/yii-middleware/zipball/4c21fd7a34f4a2a60d937bfdaeb4f9be72985e74",
+                "reference": "4c21fd7a34f4a2a60d937bfdaeb4f9be72985e74",
+                "shasum": ""
+            },
+            "require": {
+                "php": "8.1 - 8.4",
+                "psr/event-dispatcher": "^1.0",
+                "psr/http-factory": "^1.0",
+                "psr/http-message": "^1.0|^2.0",
+                "psr/http-server-handler": "^1.0",
+                "psr/http-server-middleware": "^1.0",
+                "psr/log": "^3.0",
+                "yiisoft/aliases": "^3.0",
+                "yiisoft/cookies": "^1.2.3",
+                "yiisoft/friendly-exception": "^1.0",
+                "yiisoft/http": "^1.2",
+                "yiisoft/network-utilities": "^1.2",
+                "yiisoft/router": "^4.0",
+                "yiisoft/session": "^3.0",
+                "yiisoft/strings": "^2.1",
+                "yiisoft/validator": "^1.0|^2.0"
+            },
+            "require-dev": {
+                "httpsoft/http-message": "^1.0",
+                "maglnet/composer-require-checker": "^4.2",
+                "phpunit/phpunit": "^10.5.45",
+                "psr/clock": "^1.0",
+                "rector/rector": "^2.0.10",
+                "roave/infection-static-analysis-plugin": "^1.16",
+                "spatie/phpunit-watcher": "^1.23",
+                "vimeo/psalm": "^5.26.1 || ^6.8.9",
+                "yiisoft/router-fastroute": "^4.0",
+                "yiisoft/test-support": "^3.0"
+            },
+            "suggest": {
+                "yiisoft/event-dispatcher": "For using events",
+                "yiisoft/translator": "For updating translator's locale"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Yiisoft\\Yii\\Middleware\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Yii Middleware",
+            "homepage": "https://www.yiiframework.com/",
+            "keywords": [
+                "framework",
+                "middleware",
+                "yii"
+            ],
+            "support": {
+                "chat": "https://t.me/yii3en",
+                "forum": "https://www.yiiframework.com/forum/",
+                "irc": "ircs://irc.libera.chat:6697/yii",
+                "issues": "https://github.com/yiisoft/yii-middleware/issues?state=open",
+                "source": "https://github.com/yiisoft/yii-middleware",
+                "wiki": "https://www.yiiframework.com/wiki/"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/yiisoft",
+                    "type": "github"
+                },
+                {
+                    "url": "https://opencollective.com/yiisoft",
+                    "type": "opencollective"
+                }
+            ],
+            "time": "2025-06-10T07:51:48+00:00"
         },
         {
             "name": "yiisoft/yii-runner",

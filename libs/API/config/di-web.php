@@ -5,14 +5,14 @@ declare(strict_types=1);
 use Cycle\Database\DatabaseProviderInterface;
 use Psr\Container\ContainerInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Http\HttpApplicationWrapper;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Http\RouteCollectorWrapper;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Repository\CollectorRepository;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Repository\CollectorRepositoryInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\Cycle\CycleSchemaProvider;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\Db\DbSchemaProvider;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\SchemaProviderInterface;
-use AppDevPanel\Adapter\Yiisoft\Storage\StorageInterface;
+use AppDevPanel\Api\Debug\Http\HttpApplicationWrapper;
+use AppDevPanel\Api\Debug\Http\RouteCollectorWrapper;
+use AppDevPanel\Api\Debug\Repository\CollectorRepository;
+use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Inspector\Database\Cycle\CycleSchemaProvider;
+use AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider;
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 
 /**
  * @var $params array
@@ -38,12 +38,12 @@ return [
     },
     HttpApplicationWrapper::class => [
         '__construct()' => [
-            'middlewareDefinitions' => $params['yiisoft/yii-debug-api']['middlewares'],
+            'middlewareDefinitions' => $params['app-dev-panel/yii-debug-api']['middlewares'],
         ],
     ],
     RouteCollectorWrapper::class => [
         '__construct()' => [
-            'middlewareDefinitions' => $params['yiisoft/yii-debug-api']['middlewares'],
+            'middlewareDefinitions' => $params['app-dev-panel/yii-debug-api']['middlewares'],
         ],
     ],
 ];

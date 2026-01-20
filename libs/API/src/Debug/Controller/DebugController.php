@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Debug\Controller;
+namespace AppDevPanel\Api\Debug\Controller;
 
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -13,13 +13,13 @@ use Yiisoft\Assets\AssetPublisherInterface;
 use Yiisoft\DataResponse\DataResponse;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
 use Yiisoft\Router\CurrentRoute;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Exception\NotFoundException;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Exception\PackageNotInstalledException;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\HtmlViewProviderInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\ModuleFederationProviderInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Repository\CollectorRepositoryInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\ServerSentEventsStream;
-use AppDevPanel\Adapter\Yiisoft\Storage\StorageInterface;
+use AppDevPanel\Api\Debug\Exception\NotFoundException;
+use AppDevPanel\Api\Debug\Exception\PackageNotInstalledException;
+use AppDevPanel\Api\Debug\HtmlViewProviderInterface;
+use AppDevPanel\Api\Debug\ModuleFederationProviderInterface;
+use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\ServerSentEventsStream;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 use Yiisoft\Yii\View\ViewRenderer;
 
 /**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Tests\Unit\Debug\Middleware;
+namespace AppDevPanel\Api\Tests\Unit\Debug\Middleware;
 
 use HttpSoft\Message\Response;
 use HttpSoft\Message\ResponseFactory;
@@ -15,8 +15,8 @@ use Throwable;
 use Yiisoft\DataResponse\DataResponse;
 use Yiisoft\DataResponse\DataResponseFactory;
 use Yiisoft\Router\CurrentRoute;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Exception\NotFoundException;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Middleware\ResponseDataWrapper;
+use AppDevPanel\Api\Debug\Exception\NotFoundException;
+use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 
 final class ResponseDataWrapperTest extends TestCase
 {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\Cycle;
+namespace AppDevPanel\Api\Inspector\Database\Cycle;
 
 use Cycle\Database\ColumnInterface;
 use Cycle\Database\DatabaseProviderInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 
 class CycleSchemaProvider implements SchemaProviderInterface
 {

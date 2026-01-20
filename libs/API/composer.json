@@ -36,6 +36,7 @@
         "yiisoft/middleware-dispatcher": "^5.2",
         "yiisoft/translator": "^3.0",
         "yiisoft/var-dumper": "^1.4",
+        "yiisoft/yii-middleware": "^1.1.0",
         "app-dev-panel/kernel": "*",
         "zircote/swagger-php": "^4.0"
     },
@@ -65,17 +66,29 @@
     },
     "autoload": {
         "psr-4": {
-            "Yiisoft\\Yii\\Debug\\Api\\": "API"
+            "AppDevPanel\\Api\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Yiisoft\\Yii\\Debug\\Api\\Tests\\": "tests"
+            "AppDevPanel\\Api\\Tests\\": "tests"
         }
     },
     "scripts": {
         "test": "phpunit --testdox --no-interaction",
         "test-watch": "phpunit-watcher watch"
+    },
+    "extra": {
+        "config-plugin-options": {
+            "source-directory": "config"
+        },
+        "config-plugin": {
+            "params": "params.php",
+            "bootstrap-web": "bootstrap-web.php",
+            "di-web": "di-web.php",
+            "di-providers-web": "di-providers-web.php",
+            "routes": "routes.php"
+        }
     },
     "config": {
         "sort-packages": true,

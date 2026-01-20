@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector;
+namespace AppDevPanel\Api\Inspector;
 
 interface CommandInterface
 {

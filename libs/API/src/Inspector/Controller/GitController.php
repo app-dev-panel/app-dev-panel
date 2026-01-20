@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Inspector\Controller;
+namespace AppDevPanel\Api\Inspector\Controller;
 
 use Gitonomy\Git\Commit;
 use Gitonomy\Git\Reference\Branch;

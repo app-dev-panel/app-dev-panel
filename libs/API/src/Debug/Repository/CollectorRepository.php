@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Debug\Repository;
+namespace AppDevPanel\Api\Debug\Repository;
 
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Exception\NotFoundException;
-use AppDevPanel\Adapter\Yiisoft\Storage\StorageInterface;
+use AppDevPanel\Api\Debug\Exception\NotFoundException;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 
 final class CollectorRepository implements CollectorRepositoryInterface
 {

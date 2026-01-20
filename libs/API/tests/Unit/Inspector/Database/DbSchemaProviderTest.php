@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Tests\Unit\Inspector\Database;
+namespace AppDevPanel\Api\Tests\Unit\Inspector\Database;
 
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Cache\NullCache;
@@ -10,7 +10,7 @@ use Yiisoft\Db\Cache\SchemaCache;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Sqlite\Connection;
 use Yiisoft\Db\Sqlite\Driver;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Database\Db\DbSchemaProvider;
+use AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider;
 
 final class DbSchemaProviderTest extends TestCase
 {

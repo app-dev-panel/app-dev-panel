@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Tests\Unit\Debug\Provider;
+namespace AppDevPanel\Api\Tests\Unit\Debug\Provider;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Yiisoft\Router\RouteCollectorInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Http\RouteCollectorWrapper;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Middleware\DebugHeaders;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Provider\DebugApiProvider;
+use AppDevPanel\Api\Debug\Http\RouteCollectorWrapper;
+use AppDevPanel\Api\Debug\Middleware\DebugHeaders;
+use AppDevPanel\Api\Debug\Provider\DebugApiProvider;
 
 final class DebugApiProviderTest extends TestCase
 {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Debug\Http;
+namespace AppDevPanel\Api\Debug\Http;
 
 use Closure;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Middleware\MiddlewareDispatcherMiddleware;
+use AppDevPanel\Api\Debug\Middleware\MiddlewareDispatcherMiddleware;
 use Yiisoft\Yii\Http\Application;
 
 final class HttpApplicationWrapper
@@ -17,7 +17,7 @@ final class HttpApplicationWrapper
     ) {
     }
 
-    public function wrap(Application $application): void
+    public function wrap(Application $application): Application
     {
         $middlewareDispatcher = $this->middlewareDispatcher;
         $middlewareDefinitions = $this->middlewareDefinitions;
@@ -26,14 +26,22 @@ final class HttpApplicationWrapper
             /**
              * @psalm-suppress InaccessibleProperty
              */
-            static fn (Application $application) => $application->dispatcher = $middlewareDispatcher->withMiddlewares([
-                ...$middlewareDefinitions,
-                ['class' => MiddlewareDispatcherMiddleware::class, '$middlewareDispatcher' => $application->dispatcher],
-            ]),
+            static function (Application $application) use ($middlewareDispatcher, $middlewareDefinitions)  {
+                $middlewareDispatcher = $middlewareDispatcher->withMiddlewares([
+                    ...$middlewareDefinitions,
+                    ['class' => MiddlewareDispatcherMiddleware::class, '$middlewareDispatcher' => $application->dispatcher],
+                ]);
+
+                return new Application(
+                    $middlewareDispatcher,
+                    $application->eventDispatcher,
+                );
+//                return $application->dispatcher = $middlewareDispatcher;
+            },
             null,
             $application
         );
 
-        $closure($application);
+        return $closure($application);
     }
 }

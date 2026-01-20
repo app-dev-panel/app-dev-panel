@@ -8,18 +8,18 @@ use Yiisoft\DataResponse\Middleware\FormatDataResponseAsJson;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Validator\ValidatorInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Controller\DebugController;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Middleware\ResponseDataWrapper;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Controller\CacheController;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Controller\CommandController;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Controller\ComposerController;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Controller\GitController;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Controller\InspectController;
-use AppDevPanel\Adapter\Yiisoft\Api\Inspector\Controller\OpcacheController;
+use AppDevPanel\Api\Debug\Controller\DebugController;
+use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
+use AppDevPanel\Api\Inspector\Controller\CacheController;
+use AppDevPanel\Api\Inspector\Controller\CommandController;
+use AppDevPanel\Api\Inspector\Controller\ComposerController;
+use AppDevPanel\Api\Inspector\Controller\GitController;
+use AppDevPanel\Api\Inspector\Controller\InspectController;
+use AppDevPanel\Api\Inspector\Controller\OpcacheController;
 use Yiisoft\Yii\Middleware\CorsAllowAll;
 use Yiisoft\Yii\Middleware\IpFilter;
 
-if (!(bool) ($params['yiisoft/yii-debug-api']['enabled'] ?? false)) {
+if (!(bool) ($params['app-dev-panel/yii-debug-api']['enabled'] ?? false)) {
     return [];
 }
 
@@ -32,7 +32,7 @@ return [
                 return new IpFilter(
                     validator: $validator,
                     responseFactory: $responseFactory,
-                    ipRanges: $params['yiisoft/yii-debug-api']['allowedIPs']
+                    ipRanges: $params['app-dev-panel/yii-debug-api']['allowedIPs']
                 );
             }
         )
@@ -67,7 +67,7 @@ return [
                 return new IpFilter(
                     validator: $validator,
                     responseFactory: $responseFactory,
-                    ipRanges: $params['yiisoft/yii-debug-api']['allowedIPs']
+                    ipRanges: $params['app-dev-panel/yii-debug-api']['allowedIPs']
                 );
             }
         )

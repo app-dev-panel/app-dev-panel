@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Tests\Unit\Debug\Middleware;
+namespace AppDevPanel\Api\Tests\Unit\Debug\Middleware;
 
 use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequest;
@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Middleware\DebugHeaders;
+use AppDevPanel\Api\Debug\Middleware\DebugHeaders;
 use AppDevPanel\Adapter\Yiisoft\DebuggerIdGenerator;
 
 final class DebugHeadersTest extends TestCase

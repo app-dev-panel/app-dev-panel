@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Debug\Provider;
+namespace AppDevPanel\Api\Debug\Provider;
 
 use Psr\Container\ContainerInterface;
 use Yiisoft\Di\ServiceProviderInterface;
 use Yiisoft\Router\RouteCollectorInterface;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Http\HttpApplicationWrapper;
-use AppDevPanel\Adapter\Yiisoft\Api\Debug\Http\RouteCollectorWrapper;
+use AppDevPanel\Api\Debug\Http\HttpApplicationWrapper;
+use AppDevPanel\Api\Debug\Http\RouteCollectorWrapper;
 use Yiisoft\Yii\Http\Application;
 
 final class DebugApiProvider implements ServiceProviderInterface
@@ -46,9 +46,8 @@ final class DebugApiProvider implements ServiceProviderInterface
                 Application $application
             ): Application {
                 $applicationWrapper = $container->get(HttpApplicationWrapper::class);
-                $applicationWrapper->wrap($application);
 
-                return $application;
+                return$applicationWrapper->wrap($application);
             };
         }
         return $extensions;

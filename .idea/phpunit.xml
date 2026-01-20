@@ -4,9 +4,9 @@
     <option name="directories">
       <list>
         <option value="$PROJECT_DIR$/yii-debug/tests" />
+        <option value="$PROJECT_DIR$/libs/Adapter/Yiisoft/tests" />
         <option value="$PROJECT_DIR$/app/vendor/nikic/fast-route/test" />
         <option value="$PROJECT_DIR$/libs/API/tests" />
-        <option value="$PROJECT_DIR$/libs/Adapter/Yiisoft/tests" />
       </list>
     </option>
   </component>

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Debug\Middleware;
+namespace AppDevPanel\Api\Debug\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
-use AppDevPanel\Adapter\Yiisoft\DebuggerIdGenerator;
+use AppDevPanel\Kernel\DebuggerIdGenerator;
 
 /**
  * Adds debug headers to response. Information from these headers may be used to request information about

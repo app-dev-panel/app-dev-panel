@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Debug\Http;
+namespace AppDevPanel\Api\Debug\Http;
 
 use Yiisoft\Router\RouteCollectorInterface;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Debug;
+namespace AppDevPanel\Api\Debug;
 
 if (!class_exists(\Yiisoft\Assets\AssetBundle::class)) {
     class AssetBundle

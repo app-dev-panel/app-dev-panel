@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\Api\Debug\Exception;
+namespace AppDevPanel\Api\Debug\Exception;
 
 use Exception;
 use Throwable;
@@ -33,7 +33,7 @@ final class PackageNotInstalledException extends Exception implements FriendlyEx
             Probably you forgot to install the package.
 
             Run `composer require {$this->packageName}` and configure the package in your application.
-            Visit [yiisoft/yii-debug-api](https://github.com/{$this->packageName}) for more details.
+            Visit [app-dev-panel/yii-debug-api](https://github.com/{$this->packageName}) for more details.
             MARKDOWN;
     }
 }
