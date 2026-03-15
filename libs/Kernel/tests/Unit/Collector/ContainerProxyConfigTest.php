@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
@@ -33,14 +33,9 @@ final class ContainerProxyConfigTest extends TestCase
                 new EventDispatcherInterfaceProxy($dispatcherMock, new EventCollector(new TimelineCollector()))
             )
         );
-        $this->assertNotSame(
-            $config,
-            $config->withDecoratedServices(
-                [
-                    LoggerInterface::class => [LoggerInterfaceProxy::class, LogCollector::class],
-                ]
-            )
-        );
+        $this->assertNotSame($config, $config->withDecoratedServices([
+            LoggerInterface::class => [LoggerInterfaceProxy::class, LogCollector::class]
+        ]));
     }
 
     public function testGetters(): void
@@ -49,7 +44,7 @@ final class ContainerProxyConfigTest extends TestCase
         $config = new ContainerProxyConfig(
             true,
             [
-                LoggerInterface::class => [LoggerInterfaceProxy::class, LogCollector::class],
+                LoggerInterface::class => [LoggerInterfaceProxy::class, LogCollector::class]
             ],
             $dispatcherMock,
             $this->createServiceCollector(),
@@ -64,7 +59,7 @@ final class ContainerProxyConfigTest extends TestCase
         $this->assertEquals('@tests/runtime', $config->getProxyCachePath());
         $this->assertEquals(
             [
-                LoggerInterface::class => [LoggerInterfaceProxy::class, LogCollector::class],
+                LoggerInterface::class => [LoggerInterfaceProxy::class, LogCollector::class]
             ],
             $config->getDecoratedServices()
         );

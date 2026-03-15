@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Collector\Console;
 
@@ -23,6 +23,7 @@ final class CommandCollector implements SummaryCollectorInterface
      * Let -1 mean that it was not set during the process.
      */
     private const UNDEFINED_EXIT_CODE = -1;
+
     private array $commands = [];
 
     public function __construct(
@@ -52,7 +53,7 @@ final class CommandCollector implements SummaryCollectorInterface
                 'input' => $this->castInputToString($event->getInput()),
                 'output' => $this->fetchOutput($event->getOutput()),
                 'error' => $event->getError()->getMessage(),
-                'exitCode' => $event->getExitCode(),
+                'exitCode' => $event->getExitCode()
             ];
 
             return;
@@ -64,7 +65,7 @@ final class CommandCollector implements SummaryCollectorInterface
                 'command' => $command,
                 'input' => $this->castInputToString($event->getInput()),
                 'output' => $this->fetchOutput($event->getOutput()),
-                'exitCode' => $event->getExitCode(),
+                'exitCode' => $event->getExitCode()
             ];
             return;
         }
@@ -76,7 +77,7 @@ final class CommandCollector implements SummaryCollectorInterface
             'input' => $this->castInputToString($event->getInput()),
             'output' => $this->fetchOutput($event->getOutput()),
             'arguments' => $definition?->getArguments() ?? [],
-            'options' => $definition?->getOptions() ?? [],
+            'options' => $definition?->getOptions() ?? []
         ];
     }
 
@@ -107,8 +108,8 @@ final class CommandCollector implements SummaryCollectorInterface
                 'name' => $commandEvent['name'],
                 'class' => $commandEvent['command'] instanceof Command ? $commandEvent['command']::class : null,
                 'input' => $commandEvent['input'],
-                'exitCode' => $commandEvent['exitCode'] ?? self::UNDEFINED_EXIT_CODE,
-            ],
+                'exitCode' => $commandEvent['exitCode'] ?? self::UNDEFINED_EXIT_CODE
+            ]
         ];
     }
 
@@ -132,7 +133,7 @@ final class CommandCollector implements SummaryCollectorInterface
         return [
             ConsoleErrorEvent::class,
             ConsoleTerminateEvent::class,
-            ConsoleEvent::class,
+            ConsoleEvent::class
         ];
     }
 }

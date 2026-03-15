@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Inspector\Command;
 
@@ -13,7 +13,7 @@ final class BashCommand implements CommandInterface
 {
     public function __construct(
         private Aliases $aliases,
-        private array $command,
+        private array $command
     ) {
     }
 
@@ -33,10 +33,7 @@ final class BashCommand implements CommandInterface
 
         $process = new Process($this->command);
 
-        $process
-            ->setWorkingDirectory($projectDirectory)
-            ->setTimeout(null)
-            ->run();
+        $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
 
         $processOutput = rtrim($process->getOutput());
 
@@ -44,7 +41,7 @@ final class BashCommand implements CommandInterface
             return new CommandResponse(
                 status: CommandResponse::STATUS_FAIL,
                 result: null,
-                errors: array_filter([$processOutput, $process->getErrorOutput()]),
+                errors: array_filter([$processOutput, $process->getErrorOutput()])
             );
         }
 

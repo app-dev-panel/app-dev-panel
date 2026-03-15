@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Tests\Unit\Debug\Middleware;
 
@@ -18,9 +18,11 @@ final class DebugHeadersTest extends TestCase
     public function testHeaders(): void
     {
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
-        $urlGenerator->method('generate')->willReturnCallback(
-            fn (string $route, array $parameters) => $route . '?' . http_build_query($parameters)
-        );
+        $urlGenerator
+            ->method('generate')
+            ->willReturnCallback(
+                static fn(string $route, array $parameters) => $route . '?' . http_build_query($parameters)
+            );
         $idGenerator = new DebuggerIdGenerator();
         $expectedId = $idGenerator->getId();
 
@@ -33,7 +35,7 @@ final class DebugHeadersTest extends TestCase
 
     protected function createRequestHandler(): RequestHandlerInterface
     {
-        return new class () implements RequestHandlerInterface {
+        return new class() implements RequestHandlerInterface {
             public function handle($request): ResponseInterface
             {
                 return new Response(200);

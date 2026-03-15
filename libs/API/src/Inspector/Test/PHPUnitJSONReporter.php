@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Inspector\Test;
 
@@ -37,10 +37,10 @@ class PHPUnitJSONReporter implements ResultPrinter
         $path = getenv(self::ENVIRONMENT_VARIABLE_DIRECTORY_NAME) ?: getcwd();
         ksort($this->data);
 
-        file_put_contents(
-            $path . DIRECTORY_SEPARATOR . self::FILENAME,
-            json_encode(array_values($this->data), JSON_THROW_ON_ERROR)
-        );
+        file_put_contents($path . DIRECTORY_SEPARATOR . self::FILENAME, json_encode(
+            array_values($this->data),
+            JSON_THROW_ON_ERROR
+        ));
     }
 
     public function write(string $buffer): void
@@ -105,7 +105,7 @@ class PHPUnitJSONReporter implements ResultPrinter
             'file' => $this->parseFilename($test),
             'test' => $parsedName,
             'status' => 'ok',
-            'stacktrace' => [],
+            'stacktrace' => []
         ];
     }
 
@@ -132,7 +132,7 @@ class PHPUnitJSONReporter implements ResultPrinter
             'file' => $this->parseFilename($test),
             'test' => $parsedName,
             'status' => $t->getMessage(),
-            'stacktrace' => $t->getTrace(),
+            'stacktrace' => $t->getTrace()
         ];
     }
 }

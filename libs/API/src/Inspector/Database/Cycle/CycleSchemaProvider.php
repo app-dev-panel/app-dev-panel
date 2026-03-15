@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Inspector\Database\Cycle;
 
@@ -10,8 +10,9 @@ use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 
 class CycleSchemaProvider implements SchemaProviderInterface
 {
-    public function __construct(private DatabaseProviderInterface $databaseProvider)
-    {
+    public function __construct(
+        private DatabaseProviderInterface $databaseProvider
+    ) {
     }
 
     public function getTables(): array
@@ -26,7 +27,7 @@ class CycleSchemaProvider implements SchemaProviderInterface
                 'table' => $schema->getName(),
                 'primaryKeys' => $schema->getPrimaryKeys(),
                 'columns' => $this->serializeCycleColumnsSchemas($schema->getColumns()),
-                'records' => $records,
+                'records' => $records
             ];
         }
 
@@ -45,7 +46,7 @@ class CycleSchemaProvider implements SchemaProviderInterface
             'table' => $schema->getName(),
             'primaryKeys' => $schema->getPrimaryKeys(),
             'columns' => $this->serializeCycleColumnsSchemas($schema->getColumns()),
-            'records' => $records,
+            'records' => $records
         ];
     }
 
@@ -63,7 +64,7 @@ class CycleSchemaProvider implements SchemaProviderInterface
                 'dbType' => $columnSchema->getType(),
                 'defaultValue' => $columnSchema->getDefaultValue(),
                 'comment' => null, // unsupported for now
-                'allowNull' => $columnSchema->isNullable(),
+                'allowNull' => $columnSchema->isNullable()
             ];
         }
         return $result;

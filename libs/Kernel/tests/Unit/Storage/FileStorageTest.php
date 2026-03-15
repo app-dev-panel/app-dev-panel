@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Storage;
 
@@ -79,9 +79,6 @@ final class FileStorageTest extends AbstractStorageTestCase
 
     public function getStorage(DebuggerIdGenerator $idGenerator): FileStorage
     {
-        return new FileStorage(
-            (new Aliases())->get($this->path),
-            $idGenerator,
-        );
+        return new FileStorage(new Aliases()->get($this->path), $idGenerator);
     }
 }

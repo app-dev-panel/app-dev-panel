@@ -1,7 +1,8 @@
 <?php
 
-declare(strict_types=1);
-declare(ticks=1);
+declare(strict_types = 1);
+
+declare(ticks = 1);
 
 namespace AppDevPanel\Cli\Command;
 
@@ -17,6 +18,7 @@ use AppDevPanel\Kernel\DebugServer\Connection;
 final class DebugServerBroadcastCommand extends Command
 {
     public const COMMAND_NAME = 'dev:broadcast';
+
     protected static $defaultName = self::COMMAND_NAME;
 
     protected static $defaultDescription = 'Runs PHP built-in web server';
@@ -24,9 +26,7 @@ final class DebugServerBroadcastCommand extends Command
     public function configure(): void
     {
         $this
-            ->setHelp(
-                'Broadcasts a message to all connected clients.'
-            )
+            ->setHelp('Broadcasts a message to all connected clients.')
             ->addOption('message', 'm', InputOption::VALUE_OPTIONAL, 'A text to broadcast', 'Test message')
             ->addOption('env', 'e', InputOption::VALUE_OPTIONAL, 'It is only used for testing.');
     }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Inspector\Command;
 
@@ -14,8 +14,9 @@ class CodeceptionCommand implements CommandInterface
 {
     public const COMMAND_NAME = 'test/codeception';
 
-    public function __construct(private Aliases $aliases)
-    {
+    public function __construct(
+        private Aliases $aliases
+    ) {
     }
 
     public static function getTitle(): string
@@ -42,15 +43,12 @@ class CodeceptionCommand implements CommandInterface
             $extension,
             '--override',
             "extensions: config: {$extension}: output-path: {$debugDirectory}",
-            '-vvv',
+            '-vvv'
         ];
 
         $process = new Process($params);
 
-        $process
-            ->setWorkingDirectory($projectDirectory)
-            ->setTimeout(null)
-            ->run();
+        $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
 
         $processOutput = json_decode(
             file_get_contents($debugDirectory . DIRECTORY_SEPARATOR . CodeceptionJSONReporter::FILENAME),
@@ -63,7 +61,7 @@ class CodeceptionCommand implements CommandInterface
             return new CommandResponse(
                 status: CommandResponse::STATUS_FAIL,
                 result: null,
-                errors: array_filter([$processOutput, $process->getErrorOutput()]),
+                errors: array_filter([$processOutput, $process->getErrorOutput()])
             );
         }
 

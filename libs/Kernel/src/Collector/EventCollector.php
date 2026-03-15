@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Collector;
 
@@ -40,9 +40,9 @@ final class EventCollector implements SummaryCollectorInterface
         $this->events[] = [
             'name' => $event::class,
             'event' => $event,
-            'file' => (new ReflectionClass($event))->getFileName(),
+            'file' => new ReflectionClass($event)->getFileName(),
             'line' => $line,
-            'time' => microtime(true),
+            'time' => microtime(true)
         ];
         $this->timelineCollector->collect($this, spl_object_id($event), $event::class);
     }
@@ -54,8 +54,8 @@ final class EventCollector implements SummaryCollectorInterface
         }
         return [
             'event' => [
-                'total' => count($this->events),
-            ],
+                'total' => count($this->events)
+            ]
         ];
     }
 

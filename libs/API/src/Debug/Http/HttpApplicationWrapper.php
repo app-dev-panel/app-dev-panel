@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Debug\Http;
 
@@ -13,7 +13,7 @@ final class HttpApplicationWrapper
 {
     public function __construct(
         private MiddlewareDispatcher $middlewareDispatcher,
-        private array $middlewareDefinitions,
+        private array $middlewareDefinitions
     ) {
     }
 
@@ -26,17 +26,18 @@ final class HttpApplicationWrapper
             /**
              * @psalm-suppress InaccessibleProperty
              */
-            static function (Application $application) use ($middlewareDispatcher, $middlewareDefinitions)  {
+            static function (Application $application) use ($middlewareDispatcher, $middlewareDefinitions) {
                 $middlewareDispatcher = $middlewareDispatcher->withMiddlewares([
                     ...$middlewareDefinitions,
-                    ['class' => MiddlewareDispatcherMiddleware::class, '$middlewareDispatcher' => $application->dispatcher],
+                    [
+                        'class' => MiddlewareDispatcherMiddleware::class,
+                        '$middlewareDispatcher' => $application->dispatcher
+                    ]
                 ]);
 
-                return new Application(
-                    $middlewareDispatcher,
-                    $application->eventDispatcher,
-                );
-//                return $application->dispatcher = $middlewareDispatcher;
+                return new Application($middlewareDispatcher, $application->eventDispatcher);
+
+                //                return $application->dispatcher = $middlewareDispatcher;
             },
             null,
             $application

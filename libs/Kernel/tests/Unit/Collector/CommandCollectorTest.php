@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
@@ -24,26 +24,13 @@ final class CommandCollectorTest extends AbstractCollectorTestCase
     protected function collectTestData(CollectorInterface $collector): void
     {
         $collector->collect(
-            new ConsoleCommandEvent(
-                new Command('test'),
-                new StringInput('test'),
-                new ConsoleBufferedOutput()
-            )
+            new ConsoleCommandEvent(new Command('test'), new StringInput('test'), new ConsoleBufferedOutput())
         );
         $collector->collect(
-            new ConsoleErrorEvent(
-                new StringInput('test1'),
-                new ConsoleBufferedOutput(),
-                new Exception()
-            )
+            new ConsoleErrorEvent(new StringInput('test1'), new ConsoleBufferedOutput(), new Exception())
         );
         $collector->collect(
-            new ConsoleTerminateEvent(
-                new Command('test1'),
-                new StringInput('test1'),
-                new ConsoleBufferedOutput(),
-                0
-            )
+            new ConsoleTerminateEvent(new Command('test1'), new StringInput('test1'), new ConsoleBufferedOutput(), 0)
         );
     }
 

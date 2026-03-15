@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel;
 
@@ -24,7 +24,7 @@ final class Debugger
          */
         private readonly array $collectors,
         private array $ignoredRequests = [],
-        private array $ignoredCommands = [],
+        private array $ignoredCommands = []
     ) {
         register_shutdown_function([$this, 'shutdown']);
     }
@@ -93,7 +93,7 @@ final class Debugger
         }
         $path = $request->getUri()->getPath();
         foreach ($this->ignoredRequests as $pattern) {
-            if ((new WildcardPattern($pattern))->match($path)) {
+            if (new WildcardPattern($pattern)->match($path)) {
                 return true;
             }
         }
@@ -109,7 +109,7 @@ final class Debugger
             return true;
         }
         foreach ($this->ignoredCommands as $pattern) {
-            if ((new WildcardPattern($pattern))->match($command)) {
+            if (new WildcardPattern($pattern)->match($command)) {
                 return true;
             }
         }

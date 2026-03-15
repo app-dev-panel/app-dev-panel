@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Helper;
 
@@ -35,6 +35,6 @@ final class BacktraceIgnoreMatcher
         if (empty($patterns)) {
             return false;
         }
-        return (new CombinedRegexp($patterns))->matches($string);
+        return new CombinedRegexp($patterns)->matches($string);
     }
 }

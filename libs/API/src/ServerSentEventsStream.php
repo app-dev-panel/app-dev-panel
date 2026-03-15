@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api;
 
@@ -13,7 +13,7 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
     private bool $eof = false;
 
     public function __construct(
-        private Closure $stream,
+        private Closure $stream
     ) {
     }
 
@@ -77,7 +77,7 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
      */
     public function read(int $length): string
     {
-        $continue = ($this->stream)($this->buffer);
+        $continue = ( $this->stream )($this->buffer);
 
         if (!$continue) {
             $this->eof = true;

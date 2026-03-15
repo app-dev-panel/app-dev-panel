@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Tests\Unit\Debug\Repository;
 
@@ -21,7 +21,7 @@ final class CollectorRepositoryTest extends TestCase
 
         $this->assertSame(
             [
-                ['total' => 7],
+                ['total' => 7]
             ],
             $repository->getSummary()
         );
@@ -34,10 +34,7 @@ final class CollectorRepositoryTest extends TestCase
 
         $repository = new CollectorRepository($storage);
 
-        $this->assertSame(
-            ['stub' => ['key' => 'value']],
-            $repository->getDetail('testId')
-        );
+        $this->assertSame(['stub' => ['key' => 'value']], $repository->getDetail('testId'));
     }
 
     public function testDumpObject(): void
@@ -47,10 +44,7 @@ final class CollectorRepositoryTest extends TestCase
 
         $repository = new CollectorRepository($storage);
 
-        $this->assertSame(
-            ['object' => []],
-            $repository->getDumpObject('testId')
-        );
+        $this->assertSame(['object' => []], $repository->getDumpObject('testId'));
     }
 
     public function testObject(): void
@@ -58,12 +52,7 @@ final class CollectorRepositoryTest extends TestCase
         $storage = new MemoryStorage();
 
         $objectId = '123';
-        $storage->write(
-            'testId',
-            ['stub' => ['key' => 'value']],
-            ['stdClass#' . $objectId => 'value'],
-            ['total' => 7],
-        );
+        $storage->write('testId', ['stub' => ['key' => 'value']], ['stdClass#' . $objectId => 'value'], ['total' => 7]);
 
         $repository = new CollectorRepository($storage);
 
@@ -72,7 +61,7 @@ final class CollectorRepositoryTest extends TestCase
         $this->assertSame(
             [
                 'stdClass',
-                'value',
+                'value'
             ],
             $object
         );

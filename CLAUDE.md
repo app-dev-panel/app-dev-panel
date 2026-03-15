@@ -14,7 +14,8 @@ fully framework-independent. The first adapter targets Yii 3; additional adapter
 - **Backend**: PHP 8.4, PSR standards (PSR-3, PSR-7, PSR-11, PSR-14, PSR-15, PSR-16, PSR-17, PSR-18)
 - **Frontend**: React 18, TypeScript 5.5, Vite, Material-UI 5, Redux Toolkit
 - **Build**: Composer (PHP), npm workspaces + Lerna (JS), Docker
-- **Testing**: PHPUnit (backend), Vitest (frontend), PHPStan + Psalm (static analysis)
+- **Testing**: PHPUnit 11 (backend), Vitest (frontend)
+- **Code Quality**: [Mago](https://mago.carthage.software/) (linter + formatter + static analyzer, written in Rust)
 
 ## Repository Structure
 
@@ -74,19 +75,57 @@ ADP follows a **layered architecture**:
 ## Key Commands
 
 ```bash
-# PHP backend
+# Install
 composer install                    # Install PHP dependencies
+
+# Tests
 composer test                       # Run PHPUnit tests
+composer test:coverage              # Run tests with coverage report
+
+# Code quality (Mago)
+composer format:check               # Check code formatting (dry-run)
+composer format:fix                 # Fix code formatting
+composer lint                       # Run linter
+composer analyze                    # Run static analyzer
+composer check                      # Run all checks (format + lint + analyze)
+composer fix                        # Fix formatting, then run lint + analyze
 
 # Frontend
 cd libs/yii-dev-panel
 npm install                         # Install JS dependencies
 npm run dev                         # Start Vite dev server
 npm run build                       # Production build
+```
 
-# CLI
-php yii dev                         # Start debug server
-php yii debug:reset                 # Clear debug data
+## CI/CD
+
+GitHub Actions runs on every push and PR:
+
+- **Tests**: Matrix of PHP 8.4/8.5 on Linux and Windows
+- **Mago**: Format check, lint, and static analysis
+- **PR Reports**: Coverage report and Mago analysis posted as PR comments
+
+## Development Workflow
+
+After implementing a feature or fix, you **must** run and pass all checks before completing:
+
+```bash
+composer fix                        # Fix formatting + run lint + analyze
+composer test                       # Run all tests
+```
+
+All checks must be green before merging. CI enforces this automatically.
+
+### Baselines
+
+Mago uses baseline files to suppress existing issues in legacy code:
+- `mago-lint-baseline.php` — Lint baseline
+- `mago-analyze-baseline.php` — Analyzer baseline
+
+New code must not introduce new issues. To regenerate baselines after fixing existing issues:
+```bash
+composer lint:baseline
+composer analyze:baseline
 ```
 
 ## Module-Level Documentation

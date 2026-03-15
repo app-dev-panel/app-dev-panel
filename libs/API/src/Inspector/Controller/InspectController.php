@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
@@ -37,7 +37,7 @@ class InspectController
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-        private Aliases $aliases,
+        private Aliases $aliases
     ) {
     }
 
@@ -67,8 +67,8 @@ class InspectController
         $locales = array_keys($params['locale']['locales']);
         if ($locales === []) {
             throw new RuntimeException(
-                'Unable to determine list of available locales. ' .
-                'Make sure that "$params[\'locale\'][\'locales\']" contains all available locales.'
+                'Unable to determine list of available locales. '
+                . 'Make sure that "$params[\'locale\'][\'locales\']" contains all available locales.'
             );
         }
         $messages = [];
@@ -109,27 +109,27 @@ class InspectController
 
         $categorySource = null;
         foreach ($categorySources as $possibleCategorySource) {
-            if ($possibleCategorySource->getName() === $categoryName) {
-                $categorySource = $possibleCategorySource;
+            if ($possibleCategorySource->getName() !== $categoryName) {
+                continue;
             }
+
+            $categorySource = $possibleCategorySource;
         }
         if ($categorySource === null) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Invalid category name "%s". Only the following categories are available: "%s"',
-                    $categoryName,
-                    implode(
-                        '", "',
-                        array_map(fn (CategorySource $categorySource) => $categorySource->getName(), $categorySources)
-                    )
-                )
-            );
+            throw new InvalidArgumentException(sprintf(
+                'Invalid category name "%s". Only the following categories are available: "%s"',
+                $categoryName,
+                implode('", "', array_map(
+                    static fn(CategorySource $categorySource) => $categorySource->getName(),
+                    $categorySources
+                ))
+            ));
         }
         $messages = $categorySource->getMessages($locale);
         $messages = array_replace_recursive($messages, [
             $translationId => [
-                'message' => $newMessage,
-            ],
+                'message' => $newMessage
+            ]
         ]);
         $categorySource->write($locale, $messages);
 
@@ -162,12 +162,12 @@ class InspectController
             }
             if ($destination === false) {
                 return $this->responseFactory->createResponse([
-                    'message' => sprintf('Cannot find source of class "%s".', $class),
+                    'message' => sprintf('Cannot find source of class "%s".', $class)
                 ], 404);
             }
             return $this->readFile($destination, [
                 'startLine' => $startLine ?? null,
-                'endLine' => $endLine ?? null,
+                'endLine' => $endLine ?? null
             ]);
         }
 
@@ -185,7 +185,7 @@ class InspectController
 
         if ($destination === false) {
             return $this->responseFactory->createResponse([
-                'message' => sprintf('Destination "%s" does not exist', $path),
+                'message' => sprintf('Destination "%s" does not exist', $path)
             ], 404);
         }
 
@@ -218,12 +218,9 @@ class InspectController
                 continue;
             }
             $path = $this->removeBasePath($rootPath, $path);
-            $files[] = array_merge(
-                [
-                    'path' => $path,
-                ],
-                $this->serializeFileInfo($file)
-            );
+            $files[] = array_merge([
+                'path' => $path
+            ], $this->serializeFileInfo($file));
         }
 
         return $this->responseFactory->createResponse($files);
@@ -237,12 +234,12 @@ class InspectController
         $inspected = [...get_declared_classes(), ...get_declared_interfaces()];
         // TODO: think how to ignore heavy objects
         $patterns = [
-            fn (string $class) => !str_starts_with($class, 'ComposerAutoloaderInit'),
-            fn (string $class) => !str_starts_with($class, 'Composer\\'),
-            fn (string $class) => !str_starts_with($class, 'Yiisoft\\Yii\\Debug\\'),
-            fn (string $class) => !str_starts_with($class, 'Yiisoft\\ErrorHandler\\ErrorHandler'),
-            fn (string $class) => !str_contains($class, '@anonymous'),
-            fn (string $class) => !is_subclass_of($class, Throwable::class),
+            static fn(string $class) => !str_starts_with($class, 'ComposerAutoloaderInit'),
+            static fn(string $class) => !str_starts_with($class, 'Composer\\'),
+            static fn(string $class) => !str_starts_with($class, 'Yiisoft\\Yii\\Debug\\'),
+            static fn(string $class) => !str_starts_with($class, 'Yiisoft\\ErrorHandler\\ErrorHandler'),
+            static fn(string $class) => !str_contains($class, '@anonymous'),
+            static fn(string $class) => !is_subclass_of($class, Throwable::class)
         ];
         foreach ($patterns as $patternFunction) {
             $inspected = array_filter($inspected, $patternFunction);
@@ -281,7 +278,7 @@ class InspectController
 
         return $this->responseFactory->createResponse([
             'object' => $result,
-            'path' => $reflection->getFileName(),
+            'path' => $reflection->getFileName()
         ]);
     }
 
@@ -307,7 +304,7 @@ class InspectController
                 'methods' => $data['methods'],
                 'defaults' => $data['defaults'],
                 'override' => $data['override'],
-                'middlewares' => $data['middlewareDefinitions'] ?? [],
+                'middlewares' => $data['middlewareDefinitions'] ?? []
             ];
         }
         $response = VarDumper::create($routes)->asPrimitives(5);
@@ -324,7 +321,7 @@ class InspectController
         $path = $queryParams['route'] ?? null;
         if ($path === null) {
             return $this->responseFactory->createResponse([
-                'message' => 'Path is not specified.',
+                'message' => 'Path is not specified.'
             ], 422);
         }
         $path = trim($path);
@@ -342,7 +339,7 @@ class InspectController
         $result = $matcher->match($request);
         if (!$result->isSuccess()) {
             return $this->responseFactory->createResponse([
-                'result' => false,
+                'result' => false
             ]);
         }
 
@@ -354,7 +351,7 @@ class InspectController
 
         return $this->responseFactory->createResponse([
             'result' => true,
-            'action' => $action,
+            'action' => $action
         ]);
     }
 
@@ -398,7 +395,7 @@ class InspectController
             'common' => VarDumper::create($config->get('events'))->asPrimitives(),
             // TODO: change events-web to events-web when it will be possible
             'console' => [], //VarDumper::create($config->get('events-web'))->asPrimitives(),
-            'web' => VarDumper::create($config->get('events-web'))->asPrimitives(),
+            'web' => VarDumper::create($config->get('events-web'))->asPrimitives()
         ]);
     }
 
@@ -409,62 +406,56 @@ class InspectController
         $request = $request->getQueryParams();
         $debugEntryId = $request['debugEntryId'] ?? null;
 
-
         $data = $collectorRepository->getDetail($debugEntryId);
         $rawRequest = $data[RequestCollector::class]['requestRaw'];
 
         $request = Message::parseRequest($rawRequest);
 
         try {
-            $output = (new Command())
+            $output = new Command()
                 ->setRequest($request)
                 ->build();
         } catch (Throwable $e) {
             return $this->responseFactory->createResponse([
                 'command' => null,
-                'exception' => (string)$e,
+                'exception' => (string) $e
             ]);
         }
 
         return $this->responseFactory->createResponse([
-            'command' => $output,
+            'command' => $output
         ]);
     }
 
     private function removeBasePath(string $rootPath, string $path): string|array|null
     {
-        return preg_replace(
-            '/^' . preg_quote($rootPath, '/') . '/',
-            '',
-            $path,
-            1
-        );
+        return preg_replace('/^' . preg_quote($rootPath, '/') . '/', '', $path, 1);
     }
 
     private function getUserOwner(int $uid): array
     {
-        if ($uid === 0 || !function_exists('posix_getpwuid') || false === ($info = posix_getpwuid($uid))) {
+        if ($uid === 0 || !function_exists('posix_getpwuid') || false === ( $info = posix_getpwuid($uid) )) {
             return [
-                'id' => $uid,
+                'id' => $uid
             ];
         }
         return [
             'uid' => $info['uid'],
             'gid' => $info['gid'],
-            'name' => $info['name'],
+            'name' => $info['name']
         ];
     }
 
     private function getGroupOwner(int $gid): array
     {
-        if ($gid === 0 || !function_exists('posix_getgrgid') || false === ($info = posix_getgrgid($gid))) {
+        if ($gid === 0 || !function_exists('posix_getgrgid') || false === ( $info = posix_getgrgid($gid) )) {
             return [
-                'id' => $gid,
+                'id' => $gid
             ];
         }
         return [
             'gid' => $info['gid'],
-            'name' => $info['name'],
+            'name' => $info['name']
         ];
     }
 
@@ -477,7 +468,7 @@ class InspectController
             'group' => $this->getGroupOwner((int) $file->getGroup()),
             'size' => $file->getSize(),
             'type' => $file->getType(),
-            'permissions' => substr(sprintf('%o', $file->getPerms()), -4),
+            'permissions' => substr(sprintf('%o', $file->getPerms()), -4)
         ];
     }
 
@@ -485,17 +476,15 @@ class InspectController
     {
         $rootPath = $this->aliases->get('@root');
         $file = new SplFileInfo($destination);
-        return $this->responseFactory->createResponse(
-            array_merge(
-                $extra,
-                [
-                    'directory' => $this->removeBasePath($rootPath, dirname($destination)),
-                    'content' => file_get_contents($destination),
-                    'path' => $this->removeBasePath($rootPath, $destination),
-                    'absolutePath' => $destination,
-                ],
-                $this->serializeFileInfo($file)
-            )
-        );
+        return $this->responseFactory->createResponse(array_merge(
+            $extra,
+            [
+                'directory' => $this->removeBasePath($rootPath, dirname($destination)),
+                'content' => file_get_contents($destination),
+                'path' => $this->removeBasePath($rootPath, $destination),
+                'absolutePath' => $destination
+            ],
+            $this->serializeFileInfo($file)
+        ));
     }
 }

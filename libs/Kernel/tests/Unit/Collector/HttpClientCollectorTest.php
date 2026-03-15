@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
@@ -22,7 +22,7 @@ final class HttpClientCollectorTest extends AbstractCollectorTestCase
             new Request('GET', 'http://example.com'),
             startTime: 10.10,
             line: 'file1:123',
-            uniqueId: 'test1',
+            uniqueId: 'test1'
         );
         $collector->collect(
             new Request('POST', 'http://yiiframework.com'),
@@ -37,21 +37,9 @@ final class HttpClientCollectorTest extends AbstractCollectorTestCase
             uniqueId: 'test3'
         );
 
-        $collector->collectTotalTime(
-            new Response(200, [], 'test'),
-            endTime: 13.10,
-            uniqueId: 'test1'
-        );
-        $collector->collectTotalTime(
-            new Response(200, [], 'test'),
-            endTime: 12.20,
-            uniqueId: 'test2'
-        );
-        $collector->collectTotalTime(
-            new Response(200, [], 'test'),
-            endTime: 20.00,
-            uniqueId: 'test4'
-        );
+        $collector->collectTotalTime(new Response(200, [], 'test'), endTime: 13.10, uniqueId: 'test1');
+        $collector->collectTotalTime(new Response(200, [], 'test'), endTime: 12.20, uniqueId: 'test2');
+        $collector->collectTotalTime(new Response(200, [], 'test'), endTime: 20.00, uniqueId: 'test4');
     }
 
     protected function getCollector(): CollectorInterface

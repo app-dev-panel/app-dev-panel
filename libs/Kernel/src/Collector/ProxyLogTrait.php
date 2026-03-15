@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Collector;
 
@@ -35,15 +35,15 @@ trait ProxyLogTrait
      */
     private function processLogData(array &$arguments, mixed &$result, ?object &$error): void
     {
-        if (!($this->config->getLogLevel() & ContainerInterfaceProxy::LOG_ARGUMENTS)) {
+        if (!( $this->config->getLogLevel() & ContainerInterfaceProxy::LOG_ARGUMENTS )) {
             $arguments = null;
         }
 
-        if (!($this->config->getLogLevel() & ContainerInterfaceProxy::LOG_RESULT)) {
+        if (!( $this->config->getLogLevel() & ContainerInterfaceProxy::LOG_RESULT )) {
             $result = null;
         }
 
-        if (!($this->config->getLogLevel() & ContainerInterfaceProxy::LOG_ERROR)) {
+        if (!( $this->config->getLogLevel() & ContainerInterfaceProxy::LOG_ERROR )) {
             $error = null;
         }
     }
@@ -66,7 +66,7 @@ trait ProxyLogTrait
             $this->getCurrentResultStatus(),
             $error,
             $timeStart,
-            microtime(true),
+            microtime(true)
         );
     }
 
@@ -79,19 +79,21 @@ trait ProxyLogTrait
         ?object $error,
         float $timeStart
     ): void {
-        $this->config->getDispatcher()?->dispatch(
-            new ProxyMethodCallEvent(
-                $service,
-                $instance::class,
-                $method,
-                $arguments,
-                $result,
-                $this->getCurrentResultStatus(),
-                $error,
-                $timeStart,
-                microtime(true),
-            )
-        );
+        $this->config
+            ->getDispatcher()
+            ?->dispatch(
+                new ProxyMethodCallEvent(
+                    $service,
+                    $instance::class,
+                    $method,
+                    $arguments,
+                    $result,
+                    $this->getCurrentResultStatus(),
+                    $error,
+                    $timeStart,
+                    microtime(true)
+                )
+            );
     }
 
     private function getCurrentResultStatus(): string

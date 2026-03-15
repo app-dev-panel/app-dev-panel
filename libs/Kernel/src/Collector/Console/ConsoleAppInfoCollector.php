@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Collector\Console;
 
@@ -33,12 +33,13 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
             return [];
         }
         return [
-            'applicationProcessingTime' => $this->applicationProcessingTimeStopped - $this->applicationProcessingTimeStarted,
+            'applicationProcessingTime' =>
+                $this->applicationProcessingTimeStopped - $this->applicationProcessingTimeStarted,
             'preloadTime' => $this->applicationProcessingTimeStarted - $this->requestProcessingTimeStarted,
             'applicationEmit' => $this->applicationProcessingTimeStopped - $this->requestProcessingTimeStopped,
             'requestProcessingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted,
             'memoryPeakUsage' => memory_get_peak_usage(),
-            'memoryUsage' => memory_get_usage(),
+            'memoryUsage' => memory_get_usage()
         ];
     }
 
@@ -76,16 +77,16 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
         return [
             'console' => [
                 'php' => [
-                    'version' => PHP_VERSION,
+                    'version' => PHP_VERSION
                 ],
                 'request' => [
                     'startTime' => $this->requestProcessingTimeStarted,
-                    'processingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted,
+                    'processingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted
                 ],
                 'memory' => [
-                    'peakUsage' => memory_get_peak_usage(),
-                ],
-            ],
+                    'peakUsage' => memory_get_peak_usage()
+                ]
+            ]
         ];
     }
 

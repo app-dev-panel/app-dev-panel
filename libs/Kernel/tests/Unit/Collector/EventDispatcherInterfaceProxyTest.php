@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
@@ -20,11 +20,7 @@ final class EventDispatcherInterfaceProxyTest extends TestCase
         $collector->startup();
 
         $eventDispatcherMock = $this->createMock(EventDispatcherInterface::class);
-        $eventDispatcherMock
-            ->expects($this->once())
-            ->method('dispatch')
-            ->with($event)
-            ->willReturn($event);
+        $eventDispatcherMock->expects($this->once())->method('dispatch')->with($event)->willReturn($event);
         $eventDispatcher = new EventDispatcherInterfaceProxy($eventDispatcherMock, $collector);
 
         $newEvent = $eventDispatcher->dispatch($event);
@@ -35,7 +31,7 @@ final class EventDispatcherInterfaceProxyTest extends TestCase
 
     public function testProxyDecoratedCall(): void
     {
-        $dispatcher = new class () implements EventDispatcherInterface {
+        $dispatcher = new class() implements EventDispatcherInterface {
             public $var = null;
 
             public function getProxiedCall(): string

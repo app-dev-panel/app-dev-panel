@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Inspector\Test;
 
@@ -16,9 +16,10 @@ use ReflectionObject;
 final class CodeceptionJSONReporter extends Extension
 {
     protected array $config = [
-        'output-path' => __DIR__,
+        'output-path' => __DIR__
     ];
     private array $data = [];
+
     public const FILENAME = 'codeception-report.json';
 
     public function _initialize(): void
@@ -30,7 +31,7 @@ final class CodeceptionJSONReporter extends Extension
         Events::TEST_SUCCESS => 'success',
         Events::TEST_FAIL => 'fail',
         Events::TEST_ERROR => 'error',
-        Events::RESULT_PRINT_AFTER => 'all',
+        Events::RESULT_PRINT_AFTER => 'all'
     ];
 
     public function success(TestEvent $event): void
@@ -40,7 +41,7 @@ final class CodeceptionJSONReporter extends Extension
             'test' => $this->getTestName($event),
             'time' => $event->getTime(),
             'status' => 'ok',
-            'stacktrace' => [],
+            'stacktrace' => []
         ];
     }
 
@@ -51,7 +52,7 @@ final class CodeceptionJSONReporter extends Extension
             'test' => $this->getTestName($event),
             'time' => $event->getTime(),
             'status' => 'fail',
-            'stacktrace' => $event->getFail()->getTrace(),
+            'stacktrace' => $event->getFail()->getTrace()
         ];
     }
 
@@ -62,7 +63,7 @@ final class CodeceptionJSONReporter extends Extension
             'test' => $this->getTestName($event),
             'time' => $event->getTime(),
             'status' => 'error',
-            'stacktrace' => $event->getFail()->getTrace(),
+            'stacktrace' => $event->getFail()->getTrace()
         ];
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Collector;
 
@@ -50,7 +50,7 @@ final class HttpClientCollector implements SummaryCollectorInterface
             'method' => $request->getMethod(),
             'uri' => (string) $request->getUri(),
             'headers' => $request->getHeaders(),
-            'line' => $line,
+            'line' => $line
         ];
         $this->timelineCollector->collect($this, $uniqueId);
     }
@@ -90,16 +90,12 @@ final class HttpClientCollector implements SummaryCollectorInterface
         }
         return [
             'http' => [
-                'count' => array_sum(array_map(static fn (array $requests) => count($requests), $this->requests)),
-                'totalTime' => array_sum(
-                    array_merge(
-                        ...array_map(
-                            static fn (array $entry) => array_column($entry, 'totalTime'),
-                            array_values($this->requests)
-                        )
-                    )
-                ),
-            ],
+                'count' => array_sum(array_map(static fn(array $requests) => count($requests), $this->requests)),
+                'totalTime' => array_sum(array_merge(...array_map(static fn(array $entry) => array_column(
+                    $entry,
+                    'totalTime'
+                ), array_values($this->requests))))
+            ]
         ];
     }
 }

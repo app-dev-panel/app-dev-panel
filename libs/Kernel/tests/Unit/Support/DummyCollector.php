@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Support;
 
@@ -34,7 +34,7 @@ final class DummyCollector implements CollectorInterface
         return [
             'int' => 123,
             'str' => 'asdas',
-            'object' => new stdClass(),
+            'object' => new stdClass()
         ];
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Tests\Unit\Debug\Middleware;
 
@@ -41,12 +41,15 @@ final class ResponseDataWrapperTest extends TestCase
         $this->assertInstanceOf(DataResponse::class, $response);
 
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals([
-            'id' => null,
-            'data' => $controllerRawResponse,
-            'error' => null,
-            'success' => true,
-        ], $response->getData());
+        $this->assertEquals(
+            [
+                'id' => null,
+                'data' => $controllerRawResponse,
+                'error' => null,
+                'success' => true
+            ],
+            $response->getData()
+        );
     }
 
     public function testDataResponseErrorStatus(): void
@@ -62,12 +65,15 @@ final class ResponseDataWrapperTest extends TestCase
         $this->assertInstanceOf(DataResponse::class, $response);
 
         $this->assertEquals(400, $response->getStatusCode());
-        $this->assertEquals([
-            'id' => null,
-            'data' => $controllerRawResponse,
-            'error' => null,
-            'success' => false,
-        ], $response->getData());
+        $this->assertEquals(
+            [
+                'id' => null,
+                'data' => $controllerRawResponse,
+                'error' => null,
+                'success' => false
+            ],
+            $response->getData()
+        );
     }
 
     public function testDataResponseException(): void
@@ -83,19 +89,22 @@ final class ResponseDataWrapperTest extends TestCase
         $this->assertInstanceOf(DataResponse::class, $response);
 
         $this->assertEquals(404, $response->getStatusCode());
-        $this->assertEquals([
-            'id' => null,
-            'data' => null,
-            'error' => $errorMessage,
-            'success' => false,
-        ], $response->getData());
+        $this->assertEquals(
+            [
+                'id' => null,
+                'data' => null,
+                'error' => $errorMessage,
+                'success' => false
+            ],
+            $response->getData()
+        );
     }
 
     private function createRequestHandler(ResponseInterface $response): RequestHandlerInterface
     {
-        return new class ($response) implements RequestHandlerInterface {
+        return new class($response) implements RequestHandlerInterface {
             public function __construct(
-                private ResponseInterface $response,
+                private ResponseInterface $response
             ) {
             }
 
@@ -108,9 +117,9 @@ final class ResponseDataWrapperTest extends TestCase
 
     private function createExceptionRequestHandler(Throwable $exception): RequestHandlerInterface
     {
-        return new class ($exception) implements RequestHandlerInterface {
+        return new class($exception) implements RequestHandlerInterface {
             public function __construct(
-                private Throwable $exception,
+                private Throwable $exception
             ) {
             }
 
@@ -130,9 +139,6 @@ final class ResponseDataWrapperTest extends TestCase
 
     private function createDataResponseFactory(): DataResponseFactory
     {
-        return new DataResponseFactory(
-            new ResponseFactory(),
-            new StreamFactory(),
-        );
+        return new DataResponseFactory(new ResponseFactory(), new StreamFactory());
     }
 }

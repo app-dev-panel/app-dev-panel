@@ -1,0 +1,145 @@
+name: PR Report
+
+on:
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  coverage:
+    name: Coverage Report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sockets
+          coverage: pcov
+          tools: composer:v2
+        env:
+          COMPOSER_ALLOW_SUPERUSER: 1
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Run tests with coverage
+        run: composer test:coverage
+
+      - name: Coverage comment
+        uses: danhunsaker/clover-reporter-action@v0.5.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          clover-file: coverage.xml
+
+  mago-report:
+    name: Mago Report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring
+          coverage: none
+          tools: composer:v2
+        env:
+          COMPOSER_ALLOW_SUPERUSER: 1
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Setup Mago
+        uses: nhedger/setup-mago@v1
+
+      - name: Run format check
+        id: format
+        continue-on-error: true
+        run: |
+          mago fmt --check 2>&1 | tee /tmp/mago-format.txt
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Run linter
+        id: lint
+        continue-on-error: true
+        run: |
+          mago lint 2>&1 | tee /tmp/mago-lint.txt
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Run analyzer
+        id: analyze
+        continue-on-error: true
+        run: |
+          mago analyze 2>&1 | tee /tmp/mago-analyze.txt
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Build PR comment
+        id: comment
+        run: |
+          {
+            echo 'body<<MAGO_EOF'
+            echo '## Mago Report'
+            echo ''
+
+            FORMAT_STATUS="${{ steps.format.outcome == 'success' && '✅' || '❌' }}"
+            LINT_STATUS="${{ steps.lint.outcome == 'success' && '✅' || '❌' }}"
+            ANALYZE_STATUS="${{ steps.analyze.outcome == 'success' && '✅' || '❌' }}"
+
+            echo "| Check | Status |"
+            echo "|-------|--------|"
+            echo "| Format | ${FORMAT_STATUS} |"
+            echo "| Lint | ${LINT_STATUS} |"
+            echo "| Analyze | ${ANALYZE_STATUS} |"
+            echo ''
+
+            if [ "${{ steps.format.outcome }}" != "success" ]; then
+              echo '<details><summary>Format output</summary>'
+              echo ''
+              echo '```'
+              head -100 /tmp/mago-format.txt
+              echo '```'
+              echo '</details>'
+              echo ''
+            fi
+
+            if [ "${{ steps.lint.outcome }}" != "success" ]; then
+              echo '<details><summary>Lint output</summary>'
+              echo ''
+              echo '```'
+              head -100 /tmp/mago-lint.txt
+              echo '```'
+              echo '</details>'
+              echo ''
+            fi
+
+            if [ "${{ steps.analyze.outcome }}" != "success" ]; then
+              echo '<details><summary>Analyze output</summary>'
+              echo ''
+              echo '```'
+              head -100 /tmp/mago-analyze.txt
+              echo '```'
+              echo '</details>'
+              echo ''
+            fi
+
+            echo 'MAGO_EOF'
+          } >> $GITHUB_OUTPUT
+
+      - name: Post PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: mago-report
+          message: ${{ steps.comment.outputs.body }}
+
+      - name: Fail if checks failed
+        if: steps.format.outcome != 'success' || steps.lint.outcome != 'success' || steps.analyze.outcome != 'success'
+        run: exit 1

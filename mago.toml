@@ -1,0 +1,54 @@
+[source]
+paths = [
+    "libs/Kernel/src",
+    "libs/Kernel/tests",
+    "libs/API/src",
+    "libs/API/tests",
+    "libs/Cli/src",
+    "libs/Cli/tests",
+    "libs/Adapter/Yiisoft/src",
+]
+includes = ["vendor"]
+excludes = [
+    "app/**",
+    "libs/yii-dev-panel/**",
+    "var/**",
+    "cache/**",
+    "runtime/**",
+]
+extensions = ["php"]
+
+[formatter]
+preset = "psr-12"
+
+[analyzer]
+baseline = "mago-analyze-baseline.php"
+
+[linter]
+baseline = "mago-lint-baseline.php"
+
+[linter.rules]
+# Disable noisy rules that don't add value for this codebase
+literal-named-argument = { enabled = false }
+tagged-todo = { enabled = false }
+halstead = { enabled = false }
+no-else-clause = { enabled = false }
+no-boolean-flag-parameter = { enabled = false }
+prefer-arrow-function = { enabled = false }
+no-redundant-math = { enabled = false }
+no-shorthand-ternary = { enabled = false }
+no-multi-assignments = { enabled = false }
+single-class-per-file = { enabled = false }
+no-nested-ternary = { enabled = false }
+
+# Downgrade to warnings for existing codebase patterns
+too-many-methods = { level = "warning" }
+excessive-parameter-list = { level = "warning" }
+cyclomatic-complexity = { level = "warning", threshold = 15 }
+kan-defect = { level = "warning" }
+no-error-control-operator = { level = "warning" }
+no-empty = { level = "warning" }
+no-isset = { level = "warning" }
+no-empty-catch-clause = { level = "warning" }
+require-preg-quote-delimiter = { level = "warning" }
+strict-behavior = { level = "warning" }

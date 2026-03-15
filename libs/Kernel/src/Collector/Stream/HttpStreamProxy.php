@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Collector\Stream;
 
@@ -51,11 +51,7 @@ final class HttpStreamProxy implements StreamWrapperInterface
             return;
         }
         foreach ($this->operations as $name => $operation) {
-            self::$collector->collect(
-                operation: $name,
-                path: $operation['path'],
-                args: $operation['args'],
-            );
+            self::$collector->collect(operation: $name, path: $operation['path'], args: $operation['args']);
         }
         self::unregister();
     }
@@ -117,15 +113,15 @@ final class HttpStreamProxy implements StreamWrapperInterface
              * @link https://www.php.net/manual/en/context.http.php
              */
             $method = $context['http']['method'] ?? $context['https']['method'] ?? 'GET';
-            $headers = (array) ($context['http']['header'] ?? $context['https']['header'] ?? []);
+            $headers = (array) ( $context['http']['header'] ?? $context['https']['header'] ?? [] );
 
             $this->operations['read'] = [
                 'path' => $this->decorated->filename,
                 'args' => [
                     'method' => $method,
                     'response_headers' => $metadata['wrapper_data'],
-                    'request_headers' => $headers,
-                ],
+                    'request_headers' => $headers
+                ]
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -176,7 +172,7 @@ final class HttpStreamProxy implements StreamWrapperInterface
         if (!$this->ignored) {
             $this->operations[__FUNCTION__] = [
                 'path' => $this->decorated->filename,
-                'args' => [],
+                'args' => []
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -194,8 +190,8 @@ final class HttpStreamProxy implements StreamWrapperInterface
                 'path' => $path,
                 'args' => [
                     'mode' => $mode,
-                    'options' => $options,
-                ],
+                    'options' => $options
+                ]
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -207,8 +203,8 @@ final class HttpStreamProxy implements StreamWrapperInterface
             $this->operations[__FUNCTION__] = [
                 'path' => $path_from,
                 'args' => [
-                    'path_to' => $path_to,
-                ],
+                    'path_to' => $path_to
+                ]
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -220,8 +216,8 @@ final class HttpStreamProxy implements StreamWrapperInterface
             $this->operations[__FUNCTION__] = [
                 'path' => $path,
                 'args' => [
-                    'options' => $options,
-                ],
+                    'options' => $options
+                ]
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -257,7 +253,7 @@ final class HttpStreamProxy implements StreamWrapperInterface
         if (!$this->ignored) {
             $this->operations['write'] = [
                 'path' => $this->decorated->filename,
-                'args' => [],
+                'args' => []
             ];
         }
 
@@ -269,7 +265,7 @@ final class HttpStreamProxy implements StreamWrapperInterface
         if (!$this->ignored) {
             $this->operations[__FUNCTION__] = [
                 'path' => $path,
-                'args' => [],
+                'args' => []
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -287,7 +283,9 @@ final class HttpStreamProxy implements StreamWrapperInterface
         }
 
         $backtrace = debug_backtrace();
-        return BacktraceIgnoreMatcher::isIgnoredByClass($backtrace, self::$ignoredClasses)
-            || BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, self::$ignoredPathPatterns);
+        return (
+            BacktraceIgnoreMatcher::isIgnoredByClass($backtrace, self::$ignoredClasses)
+            || BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, self::$ignoredPathPatterns)
+        );
     }
 }

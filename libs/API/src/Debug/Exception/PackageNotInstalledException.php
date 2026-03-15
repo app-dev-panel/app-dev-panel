@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Debug\Exception;
 
@@ -21,10 +21,7 @@ final class PackageNotInstalledException extends Exception implements FriendlyEx
 
     public function getName(): string
     {
-        return sprintf(
-            'Package "%s" is not installed.',
-            $this->packageName,
-        );
+        return sprintf('Package "%s" is not installed.', $this->packageName);
     }
 
     public function getSolution(): string

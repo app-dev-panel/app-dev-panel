@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Collector;
 
@@ -19,7 +19,7 @@ final class VarDumperCollector implements SummaryCollectorInterface
     {
         $this->vars[] = [
             'variable' => $variable,
-            'line' => $line,
+            'line' => $line
         ];
         $this->timelineCollector->collect($this, count($this->vars));
     }
@@ -41,8 +41,8 @@ final class VarDumperCollector implements SummaryCollectorInterface
 
         return [
             'var-dumper' => [
-                'total' => count($this->vars),
-            ],
+                'total' => count($this->vars)
+            ]
         ];
     }
 }

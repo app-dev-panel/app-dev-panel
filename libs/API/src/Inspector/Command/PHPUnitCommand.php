@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Inspector\Command;
 
@@ -14,8 +14,9 @@ class PHPUnitCommand implements CommandInterface
 {
     public const COMMAND_NAME = 'test/phpunit';
 
-    public function __construct(private Aliases $aliases)
-    {
+    public function __construct(
+        private Aliases $aliases
+    ) {
     }
 
     public static function getTitle(): string
@@ -38,7 +39,7 @@ class PHPUnitCommand implements CommandInterface
             'vendor/bin/phpunit',
             '--printer',
             $extension,
-            '-vvv',
+            '-vvv'
         ];
 
         $process = new Process($params);
@@ -60,7 +61,7 @@ class PHPUnitCommand implements CommandInterface
             return new CommandResponse(
                 status: CommandResponse::STATUS_FAIL,
                 result: null,
-                errors: array_filter([$processOutput, $process->getErrorOutput()]),
+                errors: array_filter([$processOutput, $process->getErrorOutput()])
             );
         }
 

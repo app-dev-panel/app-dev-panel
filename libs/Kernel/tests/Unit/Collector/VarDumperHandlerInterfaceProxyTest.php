@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
@@ -16,9 +16,7 @@ final class VarDumperHandlerInterfaceProxyTest extends TestCase
     public function testMethodHandle(): void
     {
         $handler = $this->createMock(HandlerInterface::class);
-        $handler
-            ->expects($this->once())
-            ->method('handle');
+        $handler->expects($this->once())->method('handle');
         $timeline = new TimelineCollector();
         $timeline->startup();
         $collector = new VarDumperCollector($timeline);
@@ -27,17 +25,23 @@ final class VarDumperHandlerInterfaceProxyTest extends TestCase
 
         $proxy->handle(true, 50, true);
 
-        $this->assertEquals([
+        $this->assertEquals(
             [
-                'variable' => true,
-                'line' => __FILE__ . ':28',
+                [
+                    'variable' => true,
+                    'line' => __FILE__ . ':28'
+                ]
             ],
-        ], $collector->getCollected());
-        $this->assertEquals([
-            'var-dumper' => [
-                'total' => 1,
+            $collector->getCollected()
+        );
+        $this->assertEquals(
+            [
+                'var-dumper' => [
+                    'total' => 1
+                ]
             ],
-        ], $collector->getSummary());
+            $collector->getSummary()
+        );
 
         $this->assertCount(1, $timeline->getCollected());
 
@@ -49,7 +53,7 @@ final class VarDumperHandlerInterfaceProxyTest extends TestCase
 
     public function testProxyDecoratedCall(): void
     {
-        $handler = new class () implements HandlerInterface {
+        $handler = new class() implements HandlerInterface {
             public $var = null;
 
             public function getProxiedCall(): string

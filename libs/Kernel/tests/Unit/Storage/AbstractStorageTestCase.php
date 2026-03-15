@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Storage;
 
@@ -84,12 +84,8 @@ abstract class AbstractStorageTestCase extends TestCase
     protected function createFakeCollector(array $data)
     {
         $collector = $this->getMockBuilder(CollectorInterface::class)->getMock();
-        $collector
-            ->method('getCollected')
-            ->willReturn($data);
-        $collector
-            ->method('getName')
-            ->willReturn('Mock_Collector');
+        $collector->method('getCollected')->willReturn($data);
+        $collector->method('getName')->willReturn('Mock_Collector');
 
         return $collector;
     }
@@ -97,16 +93,10 @@ abstract class AbstractStorageTestCase extends TestCase
     protected function createFakeSummaryCollector(array $data)
     {
         $collector = $this->getMockBuilder(SummaryCollectorInterface::class)->getMock();
-        $collector
-            ->method('getCollected')
-            ->willReturn($data);
-        $collector
-            ->method('getName')
-            ->willReturn('SummaryMock_Collector');
+        $collector->method('getCollected')->willReturn($data);
+        $collector->method('getName')->willReturn('SummaryMock_Collector');
 
-        $collector
-            ->method('getSummary')
-            ->willReturn(['summary' => 'summary data']);
+        $collector->method('getSummary')->willReturn(['summary' => 'summary data']);
 
         return $collector;
     }

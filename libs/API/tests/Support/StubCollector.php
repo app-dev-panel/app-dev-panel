@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Tests\Support;
 
@@ -8,8 +8,9 @@ use AppDevPanel\Adapter\Yiisoft\Collector\CollectorInterface;
 
 final class StubCollector implements CollectorInterface
 {
-    public function __construct(private array $data = [])
-    {
+    public function __construct(
+        private array $data = []
+    ) {
     }
 
     public function getName(): string

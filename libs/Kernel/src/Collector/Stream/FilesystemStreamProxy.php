@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Collector\Stream;
 
@@ -48,11 +48,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
             return;
         }
         foreach ($this->operations as $name => $operation) {
-            self::$collector->collect(
-                operation: $name,
-                path: $operation['path'],
-                args: $operation['args'],
-            );
+            self::$collector->collect(operation: $name, path: $operation['path'], args: $operation['args']);
         }
         self::unregister();
     }
@@ -90,8 +86,10 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     private function isIgnored(): bool
     {
         $backtrace = debug_backtrace();
-        return BacktraceIgnoreMatcher::isIgnoredByClass($backtrace, self::$ignoredClasses)
-            || BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, self::$ignoredPathPatterns);
+        return (
+            BacktraceIgnoreMatcher::isIgnoredByClass($backtrace, self::$ignoredClasses)
+            || BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, self::$ignoredPathPatterns)
+        );
     }
 
     public function stream_open(string $path, string $mode, int $options, ?string &$opened_path): bool
@@ -105,7 +103,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
         if (!$this->ignored) {
             $this->operations['read'] = [
                 'path' => $this->decorated->filename,
-                'args' => [],
+                'args' => []
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -156,7 +154,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
         if (!$this->ignored) {
             $this->operations['readdir'] = [
                 'path' => $this->decorated->filename,
-                'args' => [],
+                'args' => []
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -174,8 +172,8 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
                 'path' => $path,
                 'args' => [
                     'mode' => $mode,
-                    'options' => $options,
-                ],
+                    'options' => $options
+                ]
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -187,8 +185,8 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
             $this->operations['rename'] = [
                 'path' => $path_from,
                 'args' => [
-                    'path_to' => $path_to,
-                ],
+                    'path_to' => $path_to
+                ]
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -200,8 +198,8 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
             $this->operations['rmdir'] = [
                 'path' => $path,
                 'args' => [
-                    'options' => $options,
-                ],
+                    'options' => $options
+                ]
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -237,7 +235,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
         if (!$this->ignored) {
             $this->operations['write'] = [
                 'path' => $this->decorated->filename,
-                'args' => [],
+                'args' => []
             ];
         }
 
@@ -249,7 +247,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
         if (!$this->isIgnored()) {
             $this->operations['unlink'] = [
                 'path' => $path,
-                'args' => [],
+                'args' => []
             ];
         }
         return $this->__call(__FUNCTION__, func_get_args());

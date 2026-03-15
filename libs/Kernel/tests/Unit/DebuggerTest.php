@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit;
 
@@ -145,19 +145,19 @@ final class DebuggerTest extends TestCase
     {
         yield [
             ['app:ignored-command'],
-            'app:ignored-command',
+            'app:ignored-command'
         ];
         yield [
             ['app:ignored-command1', 'app:ignored-command2'],
-            'app:ignored-command2',
+            'app:ignored-command2'
         ];
         yield [
             ['app:ignored-command'],
-            null,
+            null
         ];
         yield [
             ['app:ignored-command'],
-            '',
+            ''
         ];
     }
 
@@ -183,11 +183,11 @@ final class DebuggerTest extends TestCase
     {
         yield [
             [],
-            'app:not-ignored-command',
+            'app:not-ignored-command'
         ];
         yield [
             ['app:ignored-command'],
-            'app:not-ignored-command',
+            'app:not-ignored-command'
         ];
     }
 

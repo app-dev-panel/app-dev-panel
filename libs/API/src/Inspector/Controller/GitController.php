@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
@@ -19,7 +19,7 @@ final class GitController
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-        private Aliases $aliases,
+        private Aliases $aliases
     ) {
     }
 
@@ -36,13 +36,13 @@ final class GitController
         $result = [
             'currentBranch' => $branch->getName(),
             'sha' => $branch->getCommitHash(),
-            'remotes' => array_map(fn (string $name) => [
+            'remotes' => array_map(static fn(string $name) => [
                 'name' => $name,
-                'url' => trim($git->run('remote', ['get-url', $name])),
+                'url' => trim($git->run('remote', ['get-url', $name]))
             ], $remoteNames),
-            'branches' => array_map(fn (Branch $branch) => $branch->getName(), $branches),
+            'branches' => array_map(static fn(Branch $branch) => $branch->getName(), $branches),
             'lastCommit' => $this->serializeCommit($branch->getCommit()),
-            'status' => explode("\n", $git->run('status')),
+            'status' => explode("\n", $git->run('status'))
         ];
         $response = VarDumper::create($result)->asPrimitives(255);
         return $this->responseFactory->createResponse($response);
@@ -58,7 +58,7 @@ final class GitController
         $result = [
             'currentBranch' => $branch->getName(),
             'sha' => $branch->getCommitHash(),
-            'commits' => array_map($this->serializeCommit(...), $git->getLog(limit: 20)->getCommits()),
+            'commits' => array_map($this->serializeCommit(...), $git->getLog(limit: 20)->getCommits())
         ];
         $response = VarDumper::create($result)->asPrimitives(255);
         return $this->responseFactory->createResponse($response);
@@ -90,13 +90,11 @@ final class GitController
             throw new InvalidArgumentException('Command should not be empty.');
         }
         if (!in_array($command, $availableCommands, true)) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Unknown command "%s". Available commands: "%s".',
-                    $command,
-                    implode('", "', $availableCommands),
-                )
-            );
+            throw new InvalidArgumentException(sprintf(
+                'Unknown command "%s". Available commands: "%s".',
+                $command,
+                implode('", "', $availableCommands)
+            ));
         }
 
         if ($command === 'pull') {
@@ -121,23 +119,25 @@ final class GitController
             }
         }
 
-        throw new InvalidArgumentException(
-            sprintf(
-                'Could find any repositories up from "%s" directory.',
-                $projectPath,
-            )
-        );
+        throw new InvalidArgumentException(sprintf(
+            'Could find any repositories up from "%s" directory.',
+            $projectPath
+        ));
     }
 
     private function serializeCommit(?Commit $commit): array
     {
-        return $commit === null ? [] : [
-            'sha' => $commit->getShortHash(),
-            'message' => $commit->getSubjectMessage(),
-            'author' => [
-                'name' => $commit->getAuthorName(),
-                'email' => $commit->getAuthorEmail(),
-            ],
-        ];
+        return (
+            $commit === null
+                ? []
+                : [
+                    'sha' => $commit->getShortHash(),
+                    'message' => $commit->getSubjectMessage(),
+                    'author' => [
+                        'name' => $commit->getAuthorName(),
+                        'email' => $commit->getAuthorEmail()
+                    ]
+                ]
+        );
     }
 }

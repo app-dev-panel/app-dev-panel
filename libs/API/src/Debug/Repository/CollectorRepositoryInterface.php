@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Debug\Repository;
 
@@ -15,5 +15,5 @@ interface CollectorRepositoryInterface
     /**
      * @return array{string, mixed}|null Returns a list with object class, and it's value or null
      */
-    public function getObject(string $id, string $objectId): array|null;
+    public function getObject(string $id, string $objectId): ?array;
 }

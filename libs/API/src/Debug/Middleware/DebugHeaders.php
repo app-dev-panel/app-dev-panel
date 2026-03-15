@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Debug\Middleware;
 
@@ -17,8 +17,10 @@ use AppDevPanel\Kernel\DebuggerIdGenerator;
  */
 final class DebugHeaders implements MiddlewareInterface
 {
-    public function __construct(private DebuggerIdGenerator $idGenerator, private UrlGeneratorInterface $urlGenerator)
-    {
+    public function __construct(
+        private DebuggerIdGenerator $idGenerator,
+        private UrlGeneratorInterface $urlGenerator
+    ) {
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -26,8 +28,6 @@ final class DebugHeaders implements MiddlewareInterface
         $response = $handler->handle($request);
         $link = $this->urlGenerator->generate('debug/api/view', ['id' => $this->idGenerator->getId()]);
 
-        return $response
-            ->withHeader('X-Debug-Id', $this->idGenerator->getId())
-            ->withHeader('X-Debug-Link', $link);
+        return $response->withHeader('X-Debug-Id', $this->idGenerator->getId())->withHeader('X-Debug-Link', $link);
     }
 }

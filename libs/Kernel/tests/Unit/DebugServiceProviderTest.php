@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit;
 
@@ -16,7 +16,7 @@ final class DebugServiceProviderTest extends TestCase
     public function testRegister(): void
     {
         $config = ContainerConfig::create()->withProviders([
-            new DebugServiceProvider(),
+            new DebugServiceProvider()
         ]);
         $container = new Container($config);
 

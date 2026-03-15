@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Tests\Unit\Debug\Provider;
 
@@ -30,13 +30,15 @@ final class DebugApiProviderTest extends TestCase
         $middlewares = [DebugHeaders::class];
 
         $container = $this->createMock(ContainerInterface::class);
-        $container->expects($this->once())
+        $container
+            ->expects($this->once())
             ->method('get')
             ->with(RouteCollectorWrapper::class)
             ->willReturn(new RouteCollectorWrapper($middlewares));
 
         $routeCollector = $this->createMock(RouteCollectorInterface::class);
-        $routeCollector->expects($this->once())
+        $routeCollector
+            ->expects($this->once())
             ->method('prependMiddleware')
             ->with(...$middlewares)
             ->willReturn($routeCollector);

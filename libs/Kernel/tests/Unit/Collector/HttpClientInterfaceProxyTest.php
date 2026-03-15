@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
@@ -23,10 +23,7 @@ final class HttpClientInterfaceProxyTest extends TestCase
         $response = new Response(200, [], 'test');
 
         $client = $this->createMock(ClientInterface::class);
-        $client->expects($this->once())
-            ->method('sendRequest')
-            ->with($request)
-            ->willReturn($response);
+        $client->expects($this->once())->method('sendRequest')->with($request)->willReturn($response);
         $collector = new HttpClientCollector(new TimelineCollector());
         $collector->startup();
 
@@ -40,7 +37,7 @@ final class HttpClientInterfaceProxyTest extends TestCase
 
     public function testProxyDecoratedCall(): void
     {
-        $httpClient = new class () implements ClientInterface {
+        $httpClient = new class() implements ClientInterface {
             public $var = null;
 
             public function getProxiedCall(): string

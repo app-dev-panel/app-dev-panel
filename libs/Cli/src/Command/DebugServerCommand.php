@@ -1,7 +1,8 @@
 <?php
 
-declare(strict_types=1);
-declare(ticks=1);
+declare(strict_types = 1);
+
+declare(ticks = 1);
 
 namespace AppDevPanel\Cli\Command;
 
@@ -16,13 +17,14 @@ use AppDevPanel\Kernel\DebugServer\Connection;
 final class DebugServerCommand extends Command
 {
     public const COMMAND_NAME = 'dev';
+
     protected static $defaultName = self::COMMAND_NAME;
 
     protected static $defaultDescription = 'Runs PHP built-in web server';
 
     public function __construct(
         private readonly string $address = '0.0.0.0',
-        private readonly int $port = 8890,
+        private readonly int $port = 8890
     ) {
         parent::__construct();
     }
@@ -52,12 +54,7 @@ final class DebugServerCommand extends Command
         $socket = Connection::create();
         $socket->bind();
 
-        $io->success(
-            sprintf(
-                'Listening on "%s".',
-                $socket->getUri(),
-            )
-        );
+        $io->success(sprintf('Listening on "%s".', $socket->getUri()));
 
         if (\function_exists('pcntl_signal')) {
             $io->success('Quit the server with CTRL-C or COMMAND-C.');
@@ -78,7 +75,7 @@ final class DebugServerCommand extends Command
             $type = match ($data[0]) {
                 Connection::MESSAGE_TYPE_VAR_DUMPER => 'VarDumper',
                 Connection::MESSAGE_TYPE_LOGGER => 'Logger',
-                default => 'Plain text',
+                default => 'Plain text'
             };
 
             $io->block($data[1], $type);

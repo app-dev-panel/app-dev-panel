@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Debug\Provider;
 
@@ -38,7 +38,7 @@ final class DebugApiProvider implements ServiceProviderInterface
                 $routerCollectionWrapper->wrap($routeCollector);
 
                 return $routeCollector;
-            },
+            }
         ];
         if (class_exists(Application::class)) {
             $extensions[Application::class] = static function (
@@ -47,7 +47,7 @@ final class DebugApiProvider implements ServiceProviderInterface
             ): Application {
                 $applicationWrapper = $container->get(HttpApplicationWrapper::class);
 
-                return$applicationWrapper->wrap($application);
+                return $applicationWrapper->wrap($application);
             };
         }
         return $extensions;

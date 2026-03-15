@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Collector\Web;
 
@@ -61,7 +61,7 @@ final class RequestCollector implements SummaryCollectorInterface
             'request' => $this->request,
             'requestRaw' => $requestRaw,
             'response' => $this->response,
-            'responseRaw' => $responseRaw,
+            'responseRaw' => $responseRaw
         ];
     }
 
@@ -103,11 +103,11 @@ final class RequestCollector implements SummaryCollectorInterface
                 'query' => $this->requestQuery,
                 'method' => $this->requestMethod,
                 'isAjax' => $this->requestIsAjax,
-                'userIp' => $this->userIp,
+                'userIp' => $this->userIp
             ],
             'response' => [
-                'statusCode' => $this->responseStatusCode,
-            ],
+                'statusCode' => $this->responseStatusCode
+            ]
         ];
     }
 

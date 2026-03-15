@@ -24,66 +24,78 @@
     {
       "type": "path",
       "url": "libs/Kernel"
+    },
+    {
+      "type": "path",
+      "url": "libs/Cli"
     }
   ],
   "require": {
     "php": "^8.4",
     "app-dev-panel/kernel": "*",
     "app-dev-panel/adapter-yiisoft": "*",
-    "app-dev-panel/api": "*"
+    "app-dev-panel/api": "*",
+    "yiisoft/router-fastroute": "^4.0"
   },
   "require-dev": {
-    "friendsofphp/php-cs-fixer": "^3.64",
-    "phpstan/phpstan": "^2.1",
-    "phpstan/phpstan-strict-rules": "^2.0",
-    "phpunit/phpunit": "^10.5|^11.0",
+    "carthage-software/mago": "^1.0",
+    "phpunit/phpunit": "^11.0",
     "symfony/var-dumper": "^7.0"
   },
   "scripts-aliases": {
-    "linter:check": [
-      "linter",
-      "stan",
-      "analyze",
-      "phpstan"
+    "lint": [
+      "linter"
     ],
-    "phpcs:fix": [
-      "phpcs",
-      "per2",
-      "per",
-      "percs",
+    "fix": [
+      "cs",
       "codestyle",
-      "cs"
+      "format"
     ],
     "test:unit": [
       "phpunit",
       "unit"
-    ],
-    "build:prod": [
-      "build"
     ]
   },
   "scripts-descriptions": {
-    "test": "Runs all types of tests in turn",
+    "test": "Runs all tests",
     "test:unit": "Runs unit tests only",
-    "linter:check": "Runs static code analysis",
-    "linter:baseline": "Generates a baseline for current linter errors",
-    "phpcs:check": "Checks source code for codestyle errors",
-    "phpcs:fix": "Corrects codestyle in source code",
-    "build:prod": "Compiles PHAR assembly of the LSP Server",
-    "build:run": "Runs the compiled PHAR assembly"
+    "test:coverage": "Runs unit tests with code coverage (clover format)",
+    "lint": "Runs mago linter",
+    "analyze": "Runs mago static analyzer",
+    "format:check": "Checks code formatting (dry-run)",
+    "format:fix": "Fixes code formatting",
+    "check": "Runs all checks: format, lint, analyze",
+    "fix": "Fixes code style and runs all checks",
+    "lint:baseline": "Regenerates the mago lint baseline",
+    "analyze:baseline": "Regenerates the mago analyze baseline"
   },
   "scripts": {
     "test": "@test:unit",
     "test:unit": "phpunit --testdox",
-    "linter:check": "phpstan analyse --configuration phpstan.neon",
-    "linter:baseline": "phpstan analyse --configuration phpstan.neon --generate-baseline",
-    "phpcs:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --verbose --diff",
-    "phpcs:fix": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --verbose --diff",
-    "build:prod": "bin/build.sh",
-    "build:run": [
-      "Composer\\Config::disableProcessTimeout",
-      "@php var/prod/build.phar serve --port=5007"
-    ]
+    "test:coverage": "phpunit --coverage-clover=coverage.xml --coverage-text",
+    "lint": "mago lint",
+    "analyze": "mago analyze",
+    "format:check": "mago fmt --check",
+    "format:fix": "mago fmt",
+    "check": [
+      "@format:check",
+      "@lint",
+      "@analyze"
+    ],
+    "fix": [
+      "@format:fix",
+      "@lint",
+      "@analyze"
+    ],
+    "lint:baseline": "mago lint --generate-baseline --baseline=mago-lint-baseline.php",
+    "analyze:baseline": "mago analyze --generate-baseline --baseline=mago-analyze-baseline.php"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "AppDevPanel\\Kernel\\Tests\\": "libs/Kernel/tests",
+      "AppDevPanel\\Api\\Tests\\": "libs/API/tests",
+      "AppDevPanel\\Cli\\Tests\\": "libs/Cli/tests"
+    }
   },
   "extra": {
     "branch-alias": {
@@ -98,7 +110,8 @@
     },
     "sort-packages": true,
     "allow-plugins": {
-      "yiisoft/config": false
+      "yiisoft/config": false,
+      "carthage-software/mago": true
     }
   },
   "minimum-stability": "dev",

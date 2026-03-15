@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
@@ -17,7 +17,7 @@ final class TimelineCollectorTest extends AbstractCollectorTestCase
     protected function collectTestData(CollectorInterface $collector): void
     {
         $collector->collect(new LogCollector($collector), '123');
-        $collector->collect(new LogCollector($collector), '345', 'context2', __FILE__ . ':' . 123);
+        $collector->collect(new LogCollector($collector), '345', 'context2', __FILE__ . ':' . ( 123 ));
     }
 
     protected function getCollector(): CollectorInterface
@@ -39,6 +39,6 @@ final class TimelineCollectorTest extends AbstractCollectorTestCase
         $this->assertCount(4, $data[1]);
         $this->assertSame(LogCollector::class, $data[1][2]);
         $this->assertSame('345', $data[1][1]);
-        $this->assertSame(['context2', __FILE__ . ':' . 123], $data[1][3]);
+        $this->assertSame(['context2', __FILE__ . ':' . ( 123 )], $data[1][3]);
     }
 }

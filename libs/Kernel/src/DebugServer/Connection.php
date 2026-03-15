@@ -2,7 +2,7 @@
 
 /** @noinspection PhpComposerExtensionStubsInspection */
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\DebugServer;
 
@@ -29,7 +29,7 @@ final class Connection
     private string $uri;
 
     public function __construct(
-        private readonly Socket $socket,
+        private readonly Socket $socket
     ) {
     }
 
@@ -40,18 +40,14 @@ final class Connection
         $socket_last_error = socket_last_error($socket);
 
         if ($socket_last_error) {
-            throw new RuntimeException(
-                sprintf(
-                    '"socket_last_error" returned %d: "%s".',
-                    $socket_last_error,
-                    socket_strerror($socket_last_error),
-                ),
-            );
+            throw new RuntimeException(sprintf(
+                '"socket_last_error" returned %d: "%s".',
+                $socket_last_error,
+                socket_strerror($socket_last_error)
+            ));
         }
 
-        return new self(
-            $socket,
-        );
+        return new self($socket);
     }
 
     public function bind(): void
@@ -62,13 +58,11 @@ final class Connection
         if (!socket_bind($this->socket, $file)) {
             $socket_last_error = socket_last_error($this->socket);
 
-            throw new RuntimeException(
-                sprintf(
-                    'An error occurred while reading the socket. "socket_last_error" returned %d: "%s".',
-                    $socket_last_error,
-                    socket_strerror($socket_last_error),
-                ),
-            );
+            throw new RuntimeException(sprintf(
+                'An error occurred while reading the socket. "socket_last_error" returned %d: "%s".',
+                $socket_last_error,
+                socket_strerror($socket_last_error)
+            ));
         }
     }
 
@@ -115,7 +109,12 @@ final class Connection
             while ($bytesRead < $bytesToRead) {
                 //$buffer = socket_read($this->socket,  $bytesToRead - $bytesRead);
                 //$bufferLength = strlen($buffer);
-                $bufferLength = socket_recv($this->socket, $buffer, min($bytesToRead - $bytesRead, self::DEFAULT_BUFFER_SIZE), MSG_DONTWAIT);
+                $bufferLength = socket_recv(
+                    $this->socket,
+                    $buffer,
+                    min($bytesToRead - $bytesRead, self::DEFAULT_BUFFER_SIZE),
+                    MSG_DONTWAIT
+                );
                 if ($bufferLength === false) {
                     if ($repeat === $maxRepeats) {
                         break;

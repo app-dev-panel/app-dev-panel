@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Storage;
 
@@ -50,14 +50,9 @@ final class FileStorage implements StorageInterface
     {
         clearstatcache();
         $data = [];
-        $pattern = sprintf(
-            '%s/**/%s/%s.json',
-            $this->path,
-            $id ?? '**',
-            $type,
-        );
+        $pattern = sprintf('%s/**/%s/%s.json', $this->path, $id ?? '**', $type);
         $dataFiles = glob($pattern, GLOB_NOSORT);
-        uasort($dataFiles, static fn ($a, $b) => filemtime($a) <=> filemtime($b));
+        uasort($dataFiles, static fn($a, $b) => filemtime($a) <=> filemtime($b));
 
         foreach ($dataFiles as $file) {
             $dir = dirname($file);
@@ -89,7 +84,7 @@ final class FileStorage implements StorageInterface
 
     public function getData(): array
     {
-        return array_map(static fn (CollectorInterface $collector) => $collector->getCollected(), $this->collectors);
+        return array_map(static fn(CollectorInterface $collector) => $collector->getCollected(), $this->collectors);
     }
 
     public function clear(): void
@@ -104,13 +99,15 @@ final class FileStorage implements StorageInterface
     {
         $summaryData = [
             'id' => $this->idGenerator->getId(),
-            'collectors' => array_keys($this->collectors),
+            'collectors' => array_keys($this->collectors)
         ];
 
         foreach ($this->collectors as $collector) {
-            if ($collector instanceof SummaryCollectorInterface) {
-                $summaryData = [...$summaryData, ...$collector->getSummary()];
+            if (!$collector instanceof SummaryCollectorInterface) {
+                continue;
             }
+
+            $summaryData = [...$summaryData, ...$collector->getSummary()];
         }
 
         return $summaryData;
@@ -126,7 +123,7 @@ final class FileStorage implements StorageInterface
             return;
         }
 
-        uasort($summaryFiles, static fn ($a, $b) => filemtime($b) <=> filemtime($a));
+        uasort($summaryFiles, static fn($a, $b) => filemtime($b) <=> filemtime($a));
         $excessFiles = array_slice($summaryFiles, $this->historySize);
         foreach ($excessFiles as $file) {
             $path1 = dirname($file);

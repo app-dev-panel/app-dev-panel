@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit;
 
@@ -38,7 +38,7 @@ final class FlattenExceptionTest extends TestCase
 
     public function testTrace(): void
     {
-        $i = (new Exception('test'));
+        $i = new Exception('test');
         $flattened = new FlattenException($i);
 
         $trace = $flattened->getTrace();
@@ -62,20 +62,20 @@ final class FlattenExceptionTest extends TestCase
     public function testTraceAsString(): void
     {
         $exception = $this->createException('test');
-        $this->assertEquals($exception->getTraceAsString(), (new FlattenException($exception))->getTraceAsString());
+        $this->assertEquals($exception->getTraceAsString(), new FlattenException($exception)->getTraceAsString());
     }
 
     public function testToString(): void
     {
         $exception = new Exception();
-        $this->assertEquals($exception->__toString(), (new FlattenException($exception))->__toString(), 'empty');
+        $this->assertEquals($exception->__toString(), new FlattenException($exception)->__toString(), 'empty');
         $exception = new Exception('test');
-        $this->assertEquals($exception->__toString(), (new FlattenException($exception))->__toString());
+        $this->assertEquals($exception->__toString(), new FlattenException($exception)->__toString());
     }
 
     public function testClass(): void
     {
-        $this->assertEquals('Exception', (new FlattenException(new Exception()))->getClass());
+        $this->assertEquals('Exception', new FlattenException(new Exception())->getClass());
     }
 
     public function testArguments(): never
@@ -88,13 +88,12 @@ final class FlattenExceptionTest extends TestCase
         $incomplete = unserialize('O:14:"BogusTestClass":0:{}');
 
         $exception = $this->createException([
-            (object)['foo' => 1],
+            (object) ['foo' => 1],
             new RuntimeException('test'),
             $incomplete,
             $dh,
             $fh,
-            function () {
-            },
+            static function () {},
             [1, 2],
             ['foo' => 123],
             null,
@@ -105,7 +104,7 @@ final class FlattenExceptionTest extends TestCase
             '0',
             '',
             INF,
-            NAN,
+            NAN
         ]);
 
         $flattened = new FlattenException($exception);
@@ -125,7 +124,10 @@ final class FlattenExceptionTest extends TestCase
 
         $args = $array[$i++];
         $this->assertSame($args[0], 'object');
-        $this->assertTrue(Closure::class === $args[1] || is_subclass_of($args[1], '\\' . Closure::class), 'Expect object class name to be Closure or a subclass of Closure.');
+        $this->assertTrue(
+            Closure::class === $args[1] || is_subclass_of($args[1], '\\' . Closure::class),
+            'Expect object class name to be Closure or a subclass of Closure.'
+        );
 
         $this->assertSame(['array', [['integer', 1], ['integer', 2]]], $array[$i++]);
         $this->assertSame(['array', ['foo' => ['integer', 123]]], $array[$i++]);
@@ -145,7 +147,7 @@ final class FlattenExceptionTest extends TestCase
 
     public function testClosureSerialize(): void
     {
-        $exception = $this->createException(fn () => 1 + 1);
+        $exception = $this->createException(static fn() => 1 + 1);
 
         $flattened = new FlattenException($exception);
         $this->assertStringContainsString(Closure::class, serialize($flattened));

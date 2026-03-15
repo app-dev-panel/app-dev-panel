@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel;
 
@@ -67,8 +67,9 @@ final class Dumper
     private function buildObjectsCache(mixed $variable, ?int $depth = null, int $level = 0): void
     {
         if (is_object($variable)) {
-            if (array_key_exists($variable::class, $this->excludedClasses) ||
-                array_key_exists($objectDescription = $this->getObjectDescription($variable), $this->objects)
+            if (
+                array_key_exists($variable::class, $this->excludedClasses)
+                || array_key_exists($objectDescription = $this->getObjectDescription($variable), $this->objects)
             ) {
                 return;
             }
@@ -100,7 +101,7 @@ final class Dumper
         bool $format,
         int $depth,
         int $objectCollapseLevel,
-        bool $inlineObject,
+        bool $inlineObject
     ): string {
         $options = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
 
@@ -110,7 +111,7 @@ final class Dumper
 
         return json_encode(
             $this->dumpNestedInternal($variable, $depth, 0, $objectCollapseLevel, $inlineObject),
-            $options,
+            $options
         );
     }
 
@@ -197,7 +198,7 @@ final class Dumper
                         $depth,
                         $level + 1,
                         $objectCollapseLevel,
-                        $inlineObject,
+                        $inlineObject
                     );
                 }
                 if ($inlineObject) {
@@ -231,7 +232,7 @@ final class Dumper
             return 'protected $' . substr($property, 3);
         }
 
-        if (($pos = strpos($property, '::')) !== false) {
+        if (( $pos = strpos($property, '::') ) !== false) {
             return 'private $' . substr($property, $pos + 2);
         }
 
@@ -264,6 +265,6 @@ final class Dumper
      */
     private function exportClosure(Closure $closure): string
     {
-        return (self::$closureExporter ??= new ClosureExporter())->export($closure);
+        return ( self::$closureExporter ??= new ClosureExporter() )->export($closure);
     }
 }

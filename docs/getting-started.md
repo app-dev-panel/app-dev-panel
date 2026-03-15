@@ -81,14 +81,69 @@ See `libs/Adapter/Yiisoft/` for a reference implementation.
 ## Running Tests
 
 ```bash
-# Backend tests
-cd libs/Kernel && composer test
-cd libs/API && composer test
-cd libs/Cli && composer test
+# Run all backend tests from project root
+composer test
 
-# Frontend tests
+# Run with code coverage
+composer test:coverage
+```
+
+## Code Quality (Mago)
+
+ADP uses [Mago](https://mago.carthage.software/) — a blazing-fast PHP toolchain written in Rust that
+combines a linter, formatter, and static analyzer in one binary.
+
+### Available Commands
+
+```bash
+# Check code formatting (dry-run, no changes)
+composer format:check
+
+# Fix code formatting
+composer format:fix
+
+# Run linter (find code smells, inconsistencies)
+composer lint
+
+# Run static analyzer (find type errors, logic bugs)
+composer analyze
+
+# Run all checks at once
+composer check
+
+# Fix formatting, then run lint + analyze
+composer fix
+```
+
+### Configuration
+
+Mago is configured via `mago.toml` in the project root. Key settings:
+
+- **Source paths**: `libs/Kernel/src`, `libs/API/src`, `libs/Cli/src`, `libs/Adapter/Yiisoft/src` + their tests
+- **Formatter preset**: PSR-12
+- **Vendor included**: For type information resolution
+
+### Development Workflow
+
+After completing any feature or bugfix:
+
+```bash
+composer fix       # Fix formatting + run linter + analyzer
+composer test      # Run all tests
+```
+
+All checks must pass before the feature is considered complete. CI enforces this on PRs.
+
+## CI/CD
+
+GitHub Actions automatically runs on every PR:
+
+- **Test matrix**: PHP 8.4 and 8.5 on Linux and Windows
+- **Mago checks**: Format, lint, and analyze as separate jobs
+- **PR comments**: Code coverage report and Mago results posted directly to the PR
+
+## Frontend Tests
+
+```bash
 cd libs/yii-dev-panel && npm test
-
-# Static analysis
-cd libs/Kernel && vendor/bin/phpstan analyse
 ```

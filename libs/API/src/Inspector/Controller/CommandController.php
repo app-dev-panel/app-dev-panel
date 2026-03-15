@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
@@ -21,7 +21,7 @@ use function is_string;
 class CommandController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
+        private DataResponseFactoryInterface $responseFactory
     ) {
     }
 
@@ -40,7 +40,7 @@ class CommandController
                     'name' => $name,
                     'title' => $command::getTitle(),
                     'group' => $groupName,
-                    'description' => $command::getDescription(),
+                    'description' => $command::getDescription()
                 ];
             }
         }
@@ -52,7 +52,7 @@ class CommandController
                 'name' => $commandName,
                 'title' => $scriptName,
                 'group' => 'composer',
-                'description' => implode("\n", $commands),
+                'description' => implode("\n", $commands)
             ];
         }
 
@@ -63,7 +63,7 @@ class CommandController
         ServerRequestInterface $request,
         ContainerInterface $container,
         ConfigInterface $config,
-        Aliases $aliases,
+        Aliases $aliases
     ): ResponseInterface {
         $params = $config->get('params');
         $commandMap = $params['app-dev-panel/yii-debug-api']['inspector']['commandMap'] ?? [];
@@ -87,36 +87,32 @@ class CommandController
         $commandName = $request['command'] ?? null;
 
         if ($commandName === null) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Command must not be null. Available commands: "%s".',
-                    implode('", "', array_keys($commandList))
-                )
-            );
+            throw new InvalidArgumentException(sprintf('Command must not be null. Available commands: "%s".', implode(
+                '", "',
+                array_keys($commandList)
+            )));
         }
 
         if (!array_key_exists($commandName, $commandList)) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Unknown command "%s". Available commands: "%s".',
-                    $commandName,
-                    implode('", "', array_keys($commandList))
-                )
-            );
+            throw new InvalidArgumentException(sprintf(
+                'Unknown command "%s". Available commands: "%s".',
+                $commandName,
+                implode('", "', array_keys($commandList))
+            ));
         }
 
         $commandClass = $commandList[$commandName];
         if (is_string($commandClass) && $container->has($commandClass)) {
             $command = $container->get($commandClass);
         } else {
-            $command = new BashCommand($aliases, (array)$commandClass);
+            $command = new BashCommand($aliases, (array) $commandClass);
         }
         $result = $command->run();
 
         return $this->responseFactory->createResponse([
             'status' => $result->getStatus(),
             'result' => $result->getResult(),
-            'error' => $result->getErrors(),
+            'error' => $result->getErrors()
         ]);
     }
 

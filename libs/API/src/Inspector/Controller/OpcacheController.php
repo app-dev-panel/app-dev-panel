@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
@@ -11,21 +11,21 @@ use Yiisoft\Http\Status;
 final class OpcacheController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
+        private DataResponseFactoryInterface $responseFactory
     ) {
     }
 
     public function index(): ResponseInterface
     {
-        if (!\function_exists('opcache_get_status') || ($status = \opcache_get_status(true)) === false) {
+        if (!\function_exists('opcache_get_status') || ( $status = \opcache_get_status(true) ) === false) {
             return $this->responseFactory->createResponse([
-                'message' => 'OPcache is not installed or configured',
+                'message' => 'OPcache is not installed or configured'
             ], Status::UNPROCESSABLE_ENTITY);
         }
 
         return $this->responseFactory->createResponse([
             'status' => $status,
-            'configuration' => \opcache_get_configuration(),
+            'configuration' => \opcache_get_configuration()
         ]);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
@@ -19,9 +19,7 @@ final class LoggerInterfaceProxyTest extends TestCase
     public function testLogMethods(string $method, string $level, string $message, array $context): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger
-            ->expects($this->once())
-            ->method($method);
+        $logger->expects($this->once())->method($method);
         $collector = $this->createMock(LogCollector::class);
         $collector
             ->expects($this->once())
@@ -36,9 +34,7 @@ final class LoggerInterfaceProxyTest extends TestCase
     public function testMethodLog($method, string $level, string $message, array $context): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger
-            ->expects($this->once())
-            ->method('log');
+        $logger->expects($this->once())->method('log');
         $collector = $this->createMock(LogCollector::class);
         $collector
             ->expects($this->once())
@@ -63,7 +59,7 @@ final class LoggerInterfaceProxyTest extends TestCase
 
     public function testProxyDecoratedCall(): void
     {
-        $logger = new class () implements LoggerInterface {
+        $logger = new class() implements LoggerInterface {
             use LoggerTrait;
 
             public $var = null;

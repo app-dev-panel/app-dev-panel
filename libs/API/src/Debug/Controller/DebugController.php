@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Api\Debug\Controller;
 
@@ -56,17 +56,16 @@ final class DebugController
     public function view(
         CurrentRoute $currentRoute,
         ServerRequestInterface $serverRequest,
-        ContainerInterface $container,
+        ContainerInterface $container
     ): ResponseInterface {
-        $data = $this->collectorRepository->getDetail(
-            $currentRoute->getArgument('id')
-        );
+        $data = $this->collectorRepository->getDetail($currentRoute->getArgument('id'));
 
         $collectorClass = $serverRequest->getQueryParams()['collector'] ?? null;
         if ($collectorClass !== null) {
-            $data = $data[$collectorClass] ?? throw new NotFoundException(
-                sprintf("Requested collector doesn't exist: %s.", $collectorClass)
-            );
+            $data = $data[$collectorClass] ?? throw new NotFoundException(sprintf(
+                "Requested collector doesn't exist: %s.",
+                $collectorClass
+            ));
         }
         if (is_subclass_of($collectorClass, HtmlViewProviderInterface::class)) {
             return $this->createHtmlPanelResponse($container, $collectorClass, $data);
@@ -86,9 +85,7 @@ final class DebugController
      */
     public function dump(CurrentRoute $currentRoute): ResponseInterface
     {
-        $data = $this->collectorRepository->getDumpObject(
-            $currentRoute->getArgument('id')
-        );
+        $data = $this->collectorRepository->getDumpObject($currentRoute->getArgument('id'));
 
         if ($currentRoute->getArgument('collector') !== null) {
             if (isset($data[$currentRoute->getArgument('collector')])) {
@@ -119,7 +116,7 @@ final class DebugController
 
         return $this->responseFactory->createResponse([
             'class' => $data[0],
-            'value' => $data[1],
+            'value' => $data[1]
         ]);
     }
 
@@ -128,7 +125,7 @@ final class DebugController
         ResponseFactoryInterface $responseFactory
     ): ResponseInterface {
         // TODO implement OS signal handling
-        $compareFunction = function () use ($storage) {
+        $compareFunction = static function () use ($storage) {
             $read = $storage->read(StorageInterface::TYPE_SUMMARY, null);
             return md5(json_encode($read, JSON_THROW_ON_ERROR));
         };
@@ -136,42 +133,41 @@ final class DebugController
         $maxRetries = 10;
         $retries = 0;
 
-        return $responseFactory->createResponse()
+        return $responseFactory
+            ->createResponse()
             ->withHeader('Content-Type', 'text/event-stream')
             ->withHeader('Cache-Control', 'no-cache')
             ->withHeader('Connection', 'keep-alive')
-            ->withBody(
-                new ServerSentEventsStream(function (array &$buffer) use (
-                    $compareFunction,
-                    &$hash,
-                    &$retries,
-                    $maxRetries
-                ) {
-                    $newHash = $compareFunction();
+            ->withBody(new ServerSentEventsStream(static function (array &$buffer) use (
+                $compareFunction,
+                &$hash,
+                &$retries,
+                $maxRetries
+            ) {
+                $newHash = $compareFunction();
 
-                    if ($hash !== $newHash) {
-                        $response = [
-                            'type' => 'debug-updated',
-                            'payload' => [],
-                        ];
+                if ($hash !== $newHash) {
+                    $response = [
+                        'type' => 'debug-updated',
+                        'payload' => []
+                    ];
 
-                        $buffer[] = json_encode($response);
-                        $hash = $newHash;
-                    }
+                    $buffer[] = json_encode($response);
+                    $hash = $newHash;
+                }
 
-                    // break the loop if the client aborted the connection (closed the page)
-                    if (connection_aborted()) {
-                        return false;
-                    }
-                    if ($retries++ > $maxRetries) {
-                        return false;
-                    }
+                // break the loop if the client aborted the connection (closed the page)
+                if (connection_aborted()) {
+                    return false;
+                }
+                if ($retries++ > $maxRetries) {
+                    return false;
+                }
 
-                    sleep(1);
+                sleep(1);
 
-                    return true;
-                })
-            );
+                return true;
+            }));
     }
 
     private function createJsPanelResponse(
@@ -191,14 +187,11 @@ final class DebugController
             || !$container->has(AssetManager::class)
             || !$container->has(AssetPublisherInterface::class)
         ) {
-            throw new PackageNotInstalledException(
-                'yiisoft/assets',
-                sprintf(
-                    '"%s" or "%s" is not defined in the dependency container.',
-                    AssetManager::class,
-                    AssetPublisherInterface::class,
-                ),
-            );
+            throw new PackageNotInstalledException('yiisoft/assets', sprintf(
+                '"%s" or "%s" is not defined in the dependency container.',
+                AssetManager::class,
+                AssetPublisherInterface::class
+            ));
         }
         /**
          * @psalm-suppress UndefinedClass
@@ -220,7 +213,7 @@ final class DebugController
             'url' => $urls[0],
             'module' => $module,
             'scope' => $scope,
-            'data' => $data,
+            'data' => $data
         ]);
     }
 
@@ -233,20 +226,18 @@ final class DebugController
             /**
              * @psalm-suppress UndefinedClass
              */
-            throw new PackageNotInstalledException(
-                'yiisoft/yii-view',
-                sprintf(
-                    '"%s" is not defined in the dependency container.',
-                    ViewRenderer::class,
-                )
-            );
+            throw new PackageNotInstalledException('yiisoft/yii-view', sprintf(
+                '"%s" is not defined in the dependency container.',
+                ViewRenderer::class
+            ));
         }
         $viewRenderer = $container->get(ViewRenderer::class);
         $viewDirectory = dirname($collectorClass::getView());
         $viewPath = basename($collectorClass::getView());
 
-        return $viewRenderer
-            ->withViewPath($viewDirectory)
-            ->renderPartial($viewPath, ['data' => $data, 'collectorClass' => $collectorClass]);
+        return $viewRenderer->withViewPath($viewDirectory)->renderPartial($viewPath, [
+            'data' => $data,
+            'collectorClass' => $collectorClass
+        ]);
     }
 }

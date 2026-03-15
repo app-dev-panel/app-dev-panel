@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AppDevPanel\Kernel\Collector;
 
@@ -47,7 +47,7 @@ final class ServiceCollector implements SummaryCollectorInterface
             'status' => $status,
             'error' => $error,
             'timeStart' => $timeStart,
-            'timeEnd' => $timeEnd,
+            'timeEnd' => $timeEnd
         ];
         $this->timelineCollector->collect($this, count($this->items));
     }
@@ -59,8 +59,8 @@ final class ServiceCollector implements SummaryCollectorInterface
         }
         return [
             'service' => [
-                'total' => count($this->items),
-            ],
+                'total' => count($this->items)
+            ]
         ];
     }
 
