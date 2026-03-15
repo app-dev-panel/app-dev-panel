@@ -385,6 +385,132 @@ message = "Argument #1 of function `json_decode` is possibly `false`, but parame
 count = 2
 
 [[issues]]
+file = "libs/API/src/Inspector/Controller/DatabaseController.php"
+code = "possibly-null-argument"
+message = 'Argument #1 of method `AppDevPanel\Api\Inspector\Database\SchemaProviderInterface::gettable` is possibly `null`, but parameter type `string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "array-to-string-conversion"
+message = "Potential array in right operand of string concatenation."
+count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 4
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `ReflectionClass::getmethod`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `ReflectionClass::hasmethod`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `class_exists`: expected `string`, but found `truthy-mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `realpath`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `str_starts_with`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Api\Inspector\Controller\FileController::removebasepath`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Api\Inspector\Controller\FileController::removebasepath`: expected `string`, but found `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "possibly-false-argument"
+message = 'Argument #1 of method `AppDevPanel\Api\Inspector\Controller\FileController::removebasepath` is possibly `false`, but parameter type `string` does not accept it.'
+count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "possibly-false-argument"
+message = "Argument #2 of function `str_starts_with` is possibly `false`, but parameter type `string` does not accept it."
+count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "possibly-false-operand"
+message = "Possibly false left operand used in string concatenation (type `false|string`)."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Api\Inspector\Controller\FileController::serializefileinfo`: expected `SplFileInfo`, but possibly received `RecursiveDirectoryIterator|SplFileInfo|null|string`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #1 of `str_starts_with`: expected `string`, but possibly received `array<array-key, mixed>|null|string`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "possibly-null-argument"
+message = "Argument #1 of function `str_starts_with` is possibly `null`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "possibly-null-operand"
+message = "Possibly null right operand used in string concatenation (type `array<array-key, mixed>|null|string`)."
+count = 2
+
+[[issues]]
 file = "libs/API/src/Inspector/Controller/GitController.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `nonnull`."
@@ -404,80 +530,8 @@ count = 5
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "array-to-string-conversion"
-message = "Potential array in right operand of string concatenation."
-count = 2
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "invalid-array-element-key"
-message = "Invalid array key type."
-count = 2
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "invalid-method-access"
-message = "Attempting to access a method on a non-object type (`string`)."
-count = 4
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getdetail`: expected `string`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `ReflectionClass::getmethod`: expected `string`, but found `nonnull`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `ReflectionClass::hasmethod`: expected `string`, but found `nonnull`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Yiisoft\Translator\CategorySource::getmessages`: expected `string`, but found `nonnull`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Yiisoft\Translator\CategorySource::write`: expected `string`, but found `nonnull`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `class_exists`: expected `string`, but found `nonnull`."
-count = 2
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `class_exists`: expected `string`, but found `truthy-mixed`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `end`: expected `array<array-key, ('T.end() extends mixed)>|object`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `guzzlehttp\psr7\message::parserequest`: expected `string`, but found `mixed`.'
 count = 2
 
 [[issues]]
@@ -495,62 +549,20 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `realpath`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `str_starts_with`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `trim`: expected `string`, but found `nonnull`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `AppDevPanel\Api\Inspector\Controller\InspectController::removebasepath`: expected `string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `AppDevPanel\Api\Inspector\Controller\InspectController::removebasepath`: expected `string`, but found `nonnull`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `nonnull`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
 message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
-count = 4
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
-count = 9
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 21
+count = 7
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-assignment"
 message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
-count = 8
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
@@ -559,58 +571,106 @@ message = "Attempting to access a method on a non-object type (`mixed`)."
 count = 3
 
 [[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-operand"
-message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "possibly-false-argument"
-message = 'Argument #1 of method `AppDevPanel\Api\Inspector\Controller\InspectController::removebasepath` is possibly `false`, but parameter type `string` does not accept it.'
+file = "libs/API/src/Inspector/Controller/RequestController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getdetail`: expected `string`, but found `mixed`.'
 count = 2
 
 [[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "possibly-false-argument"
-message = "Argument #2 of function `str_starts_with` is possibly `false`, but parameter type `string` does not accept it."
+file = "libs/API/src/Inspector/Controller/RequestController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `guzzlehttp\psr7\message::parserequest`: expected `string`, but found `mixed`.'
 count = 2
 
 [[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "possibly-false-operand"
-message = "Possibly false left operand used in string concatenation (type `false|string`)."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Api\Inspector\Controller\InspectController::serializefileinfo`: expected `SplFileInfo`, but possibly received `RecursiveDirectoryIterator|SplFileInfo|null|string`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "possibly-invalid-argument"
-message = "Possible argument type mismatch for argument #1 of `str_starts_with`: expected `string`, but possibly received `array<array-key, mixed>|null|string`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "possibly-null-argument"
-message = "Argument #1 of function `str_starts_with` is possibly `null`, but parameter type `string` does not accept it."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "possibly-null-argument"
-message = 'Argument #1 of method `AppDevPanel\Api\Inspector\Database\SchemaProviderInterface::gettable` is possibly `null`, but parameter type `string` does not accept it.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "possibly-null-operand"
-message = "Possibly null right operand used in string concatenation (type `array<array-key, mixed>|null|string`)."
+file = "libs/API/src/Inspector/Controller/RequestController.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
 count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RequestController.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 5
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RoutingController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `end`: expected `array<array-key, ('T.end() extends mixed)>|object`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RoutingController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `trim`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RoutingController.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 6
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RoutingController.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 5
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "invalid-array-element-key"
+message = "Invalid array key type."
+count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Yiisoft\Translator\CategorySource::getmessages`: expected `string`, but found `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Yiisoft\Translator\CategorySource::write`: expected `string`, but found `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 4
 
 [[issues]]
 file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"

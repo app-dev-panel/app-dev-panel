@@ -49,15 +49,21 @@ message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
+file = "libs/API/src/Inspector/Controller/DatabaseController.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
 count = 1
 
 [[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "kan-defect"
-message = "Class has a high kan defect score (3.72)."
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
 count = 1
 
 [[issues]]
@@ -67,27 +73,9 @@ message = "Do not commit debug functions."
 count = 1
 
 [[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "no-empty"
-message = "Use of the `empty` construct."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "readable-literal"
-message = "Numeric literal could use underscore separators for readability."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "too-many-methods"
-message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -344,9 +332,21 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "no-empty"
 message = "Use of the `empty` construct."
 count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 2
 
 [[issues]]
 file = "libs/Kernel/tests/Support/Stub/PhpStreamProxy.php"

@@ -121,7 +121,6 @@ final class DebugController
 
     public function eventStream(StorageInterface $storage, ResponseFactoryInterface $responseFactory): ResponseInterface
     {
-        // TODO implement OS signal handling
         $compareFunction = static function () use ($storage) {
             $read = $storage->read(StorageInterface::TYPE_SUMMARY, null);
             return md5(json_encode($read, JSON_THROW_ON_ERROR));

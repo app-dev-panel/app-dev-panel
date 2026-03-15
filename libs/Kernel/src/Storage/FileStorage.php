@@ -70,29 +70,11 @@ final class FileStorage implements StorageInterface
             FileHelper::ensureDirectory($basePath);
 
             $dumper = Dumper::create($this->getData(), $this->excludedClasses);
-            $result = file_put_contents($basePath . self::TYPE_DATA . '.json', $dumper->asJson(30));
-            if ($result === false) {
-                throw new \RuntimeException(sprintf(
-                    'Failed to write file "%s".',
-                    $basePath . self::TYPE_DATA . '.json',
-                ));
-            }
-            $result = file_put_contents($basePath . self::TYPE_OBJECTS . '.json', $dumper->asJsonObjectsMap(30));
-            if ($result === false) {
-                throw new \RuntimeException(sprintf(
-                    'Failed to write file "%s".',
-                    $basePath . self::TYPE_OBJECTS . '.json',
-                ));
-            }
+            $this->writeFileExclusive($basePath . self::TYPE_DATA . '.json', $dumper->asJson(30));
+            $this->writeFileExclusive($basePath . self::TYPE_OBJECTS . '.json', $dumper->asJsonObjectsMap(30));
 
             $summaryData = Dumper::create($this->collectSummaryData())->asJson();
-            $result = file_put_contents($basePath . self::TYPE_SUMMARY . '.json', $summaryData);
-            if ($result === false) {
-                throw new \RuntimeException(sprintf(
-                    'Failed to write file "%s".',
-                    $basePath . self::TYPE_SUMMARY . '.json',
-                ));
-            }
+            $this->writeFileExclusive($basePath . self::TYPE_SUMMARY . '.json', $summaryData);
         } finally {
             $this->collectors = [];
             $this->gc();
@@ -131,30 +113,63 @@ final class FileStorage implements StorageInterface
     }
 
     /**
+     * Writes content to a file with an exclusive lock to prevent race conditions.
+     *
+     * @throws \RuntimeException if the file cannot be written.
+     */
+    private function writeFileExclusive(string $filePath, string $content): void
+    {
+        $result = file_put_contents($filePath, $content, LOCK_EX);
+        if ($result === false) {
+            throw new \RuntimeException(sprintf('Failed to write file "%s".', $filePath));
+        }
+    }
+
+    /**
      * Removes obsolete data files
      */
     private function gc(): void
     {
-        $summaryFiles = glob($this->path . '/**/**/summary.json', GLOB_NOSORT);
-        if (empty($summaryFiles) || count($summaryFiles) <= $this->historySize) {
+        $lockFile = $this->path . '/.gc.lock';
+        $lockHandle = @fopen($lockFile, 'c');
+        if ($lockHandle === false) {
             return;
         }
 
-        uasort($summaryFiles, static fn($a, $b) => filemtime($b) <=> filemtime($a));
-        $excessFiles = array_slice($summaryFiles, $this->historySize);
-        foreach ($excessFiles as $file) {
-            $path1 = dirname($file);
-            $path2 = dirname($file, 2);
-            $path3 = dirname($file, 3);
-            $resource = substr($path1, strlen($path3));
+        if (!flock($lockHandle, LOCK_EX | LOCK_NB)) {
+            fclose($lockHandle);
+            return;
+        }
 
-            FileHelper::removeDirectory($this->path . $resource);
-
-            // Clean empty group directories
-            $group = substr($path2, strlen($path3));
-            if (FileHelper::isEmptyDirectory($this->path . $group)) {
-                FileHelper::removeDirectory($this->path . $group);
+        try {
+            $summaryFiles = glob($this->path . '/**/**/summary.json', GLOB_NOSORT);
+            if (empty($summaryFiles) || count($summaryFiles) <= $this->historySize) {
+                return;
             }
+
+            uasort($summaryFiles, static fn($a, $b) => filemtime($b) <=> filemtime($a));
+            $excessFiles = array_slice($summaryFiles, $this->historySize);
+            foreach ($excessFiles as $file) {
+                if (!file_exists($file)) {
+                    continue;
+                }
+                $path1 = dirname($file);
+                $path2 = dirname($file, 2);
+                $path3 = dirname($file, 3);
+                $resource = substr($path1, strlen($path3));
+
+                FileHelper::removeDirectory($this->path . $resource);
+
+                // Clean empty group directories
+                $group = substr($path2, strlen($path3));
+                if (FileHelper::isEmptyDirectory($this->path . $group)) {
+                    FileHelper::removeDirectory($this->path . $group);
+                }
+            }
+        } finally {
+            flock($lockHandle, LOCK_UN);
+            fclose($lockHandle);
+            @unlink($lockFile);
         }
     }
 }

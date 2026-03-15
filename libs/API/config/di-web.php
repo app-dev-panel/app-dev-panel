@@ -9,6 +9,8 @@ use AppDevPanel\Api\Debug\Http\HttpApplicationWrapper;
 use AppDevPanel\Api\Debug\Http\RouteCollectorWrapper;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Inspector\Controller\InspectController;
+use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\Cycle\CycleSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
@@ -20,6 +22,16 @@ use AppDevPanel\Kernel\Storage\StorageInterface;
 
 return [
     CollectorRepositoryInterface::class => static fn (StorageInterface $storage) => new CollectorRepository($storage),
+    InspectController::class => [
+        '__construct()' => [
+            'params' => $params,
+        ],
+    ],
+    TranslationController::class => [
+        '__construct()' => [
+            'params' => $params,
+        ],
+    ],
     SchemaProviderInterface::class => function (ContainerInterface $container) {
         if ($container->has(DatabaseProviderInterface::class)) {
             return $container->get(CycleSchemaProvider::class);

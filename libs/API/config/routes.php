@@ -13,9 +13,14 @@ use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
+use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Controller\OpcacheController;
+use AppDevPanel\Api\Inspector\Controller\RequestController;
+use AppDevPanel\Api\Inspector\Controller\RoutingController;
+use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use Yiisoft\Yii\Middleware\CorsAllowAll;
 use Yiisoft\Yii\Middleware\IpFilter;
 
@@ -91,31 +96,31 @@ return [
                 ->action([InspectController::class, 'object'])
                 ->name('object'),
             Route::get('/files')
-                ->action([InspectController::class, 'files'])
+                ->action([FileController::class, 'files'])
                 ->name('files'),
             Route::get('/routes')
-                ->action([InspectController::class, 'routes'])
+                ->action([RoutingController::class, 'routes'])
                 ->name('routes'),
             Route::get('/route/check')
-                ->action([InspectController::class, 'checkRoute'])
+                ->action([RoutingController::class, 'checkRoute'])
                 ->name('route/check'),
             Route::get('/translations')
-                ->action([InspectController::class, 'getTranslations'])
+                ->action([TranslationController::class, 'getTranslations'])
                 ->name('getTranslations'),
             Route::put('/translations')
-                ->action([InspectController::class, 'putTranslation'])
+                ->action([TranslationController::class, 'putTranslation'])
                 ->name('putTranslation'),
             Route::get('/table')
-                ->action([InspectController::class, 'getTables'])
+                ->action([DatabaseController::class, 'getTables'])
                 ->name('getTables'),
             Route::get('/table/{name}')
-                ->action([InspectController::class, 'getTable'])
+                ->action([DatabaseController::class, 'getTable'])
                 ->name('getTable'),
             Route::put('/request')
-                ->action([InspectController::class, 'request'])
+                ->action([RequestController::class, 'request'])
                 ->name('request'),
             Route::post('/curl/build')
-                ->action([InspectController::class, 'buildCurl'])
+                ->action([RequestController::class, 'buildCurl'])
                 ->name('curl/build'),
             Group::create('/git')
                 ->namePrefix('/git')

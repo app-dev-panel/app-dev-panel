@@ -27,10 +27,10 @@ class CacheController
             throw new RuntimeException('Cache key must not be empty.');
         }
         if (!$container->has(CacheInterface::class)) {
-            // TODO: fix message
-            throw new RuntimeException(
-                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.',
-            );
+            throw new RuntimeException(sprintf(
+                '"%s" is not available in the DI container. Make sure a PSR-16 cache implementation is configured.',
+                CacheInterface::class,
+            ));
         }
         $cache = $container->get(CacheInterface::class);
 
@@ -56,10 +56,10 @@ class CacheController
             throw new RuntimeException('Cache key must not be empty.');
         }
         if (!$container->has(CacheInterface::class)) {
-            // TODO: fix message
-            throw new RuntimeException(
-                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.',
-            );
+            throw new RuntimeException(sprintf(
+                '"%s" is not available in the DI container. Make sure a PSR-16 cache implementation is configured.',
+                CacheInterface::class,
+            ));
         }
         $cache = $container->get(CacheInterface::class);
 
@@ -77,10 +77,10 @@ class CacheController
     public function clear(ContainerInterface $container): ResponseInterface
     {
         if (!$container->has(CacheInterface::class)) {
-            // TODO: fix message
-            throw new RuntimeException(
-                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.',
-            );
+            throw new RuntimeException(sprintf(
+                '"%s" is not available in the DI container. Make sure a PSR-16 cache implementation is configured.',
+                CacheInterface::class,
+            ));
         }
         $cache = $container->get(CacheInterface::class);
 

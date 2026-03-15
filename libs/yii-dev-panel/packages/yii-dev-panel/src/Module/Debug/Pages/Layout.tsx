@@ -64,18 +64,17 @@ import {useSearchParams} from 'react-router-dom';
 
 function parseCollectorName(text: string) {
     return text
+        .replace('AppDevPanel\\Kernel\\Collector\\Web\\', '')
+        .replace('AppDevPanel\\Kernel\\Collector\\Console\\', '')
+        .replace('AppDevPanel\\Kernel\\Collector\\Stream\\', '')
+        .replace('AppDevPanel\\Kernel\\Collector\\', '')
+        .replace('AppDevPanel\\Adapter\\Yiisoft\\Collector\\Web\\', '')
         .replace('Yiisoft\\Assets\\Debug\\', '')
         .replace('Yiisoft\\Db\\Debug\\', '')
         .replace('Yiisoft\\Mailer\\Debug\\', '')
         .replace('Yiisoft\\Validator\\Debug\\', '')
         .replace('Yiisoft\\Yii\\View\\Debug\\', '')
         .replace('Yiisoft\\Yii\\Queue\\Debug\\', '')
-        .replace('Yiisoft\\Yii\\Debug\\Collector\\Web\\', '')
-        .replace('Yiisoft\\Yii\\Debug\\Collector\\Console\\', '')
-        .replace('Yiisoft\\Yii\\Debug\\Collector\\Database\\', '')
-        .replace('Yiisoft\\Yii\\Debug\\Collector\\Queue\\', '')
-        .replace('Yiisoft\\Yii\\Debug\\Collector\\Stream\\', '')
-        .replace('Yiisoft\\Yii\\Debug\\Collector\\', '')
         .replace('Yiisoft\\Yii\\View\\Renderer\\Debug\\', '');
 }
 
