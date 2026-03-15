@@ -14,7 +14,9 @@ use Yiisoft\Yii\Http\Event\ApplicationShutdown;
 use Yiisoft\Yii\Http\Event\ApplicationStartup;
 use Yiisoft\Yii\Http\Event\BeforeRequest;
 
-if (!(bool) ($params['app-dev-panel/yii-debug']['enabled'] ?? false)) {
+require_once __DIR__ . '/helpers.php';
+
+if (!isAppDevPanelEnabled($params)) {
     return [];
 }
 

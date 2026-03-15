@@ -5,7 +5,9 @@ declare(strict_types=1);
 use Yiisoft\Definitions\ReferencesArray;
 use AppDevPanel\Kernel\Debugger;
 
-if (!(bool)($params['app-dev-panel/yii-debug']['enabled'] ?? false)) {
+require_once __DIR__ . '/helpers.php';
+
+if (!isAppDevPanelEnabled($params)) {
     return [];
 }
 
