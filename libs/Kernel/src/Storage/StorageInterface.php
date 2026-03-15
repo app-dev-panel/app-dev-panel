@@ -53,6 +53,17 @@ interface StorageInterface
     public function read(string $type, ?string $id): array;
 
     /**
+     * Write a debug entry directly to storage without using collectors.
+     * Used by the ingestion API for external (non-PHP) data.
+     *
+     * @param string $id unique debug entry ID
+     * @param array $summary summary metadata
+     * @param array $data collector data
+     * @param array $objects serialized objects (can be empty)
+     */
+    public function write(string $id, array $summary, array $data, array $objects): void;
+
+    /**
      * Flush data from collectors into storage
      */
     public function flush(): void;

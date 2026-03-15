@@ -176,51 +176,9 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Ingestion\Controller\IngestionController::writetostorage`: expected `string`, but found `nonnull`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `array_merge`: expected `array<string('collectors')|string('context')|string('id'), nonnull>`, but found `nonnull`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #3 of `AppDevPanel\Api\Ingestion\Controller\IngestionController::writetostorage`: expected `array<array-key, mixed>`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Ingestion/Controller/IngestionController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 6
-
-[[issues]]
-file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "mixed-assignment"
-message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
-count = 3
-
-[[issues]]
-file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "mixed-operand"
-message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\api\ingestion\controller\ingestioncontroller::writeentry`. Saw type `nonnull`.'
-count = 1
+count = 4
 
 [[issues]]
 file = "libs/API/src/Ingestion/Controller/IngestionController.php"

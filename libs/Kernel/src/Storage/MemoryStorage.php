@@ -25,22 +25,46 @@ final class MemoryStorage implements StorageInterface
 
     public function read(string $type, ?string $id = null): array
     {
-        if ($type === self::TYPE_SUMMARY) {
-            return [
-                $this->idGenerator->getId() => [
+        $result = [];
+
+        // Include data from direct writes
+        foreach ($this->entries as $entryId => $entryData) {
+            if ($id !== null && $entryId !== $id) {
+                continue;
+            }
+            $result[$entryId] = $entryData[$type] ?? [];
+        }
+
+        // Include data from collectors (current session)
+        if ($id === null || $id === $this->idGenerator->getId()) {
+            if ($type === self::TYPE_SUMMARY) {
+                $result[$this->idGenerator->getId()] = [
                     'id' => $this->idGenerator->getId(),
                     'collectors' => array_keys($this->collectors),
-                ],
-            ];
+                ];
+            } elseif ($type === self::TYPE_OBJECTS) {
+                $collected = $this->getData();
+                $result[$this->idGenerator->getId()] = empty($collected)
+                    ? []
+                    : array_merge(...array_values($collected));
+            } else {
+                $result[$this->idGenerator->getId()] = $this->getData();
+            }
         }
 
-        if ($type === self::TYPE_OBJECTS) {
-            return [
-                $this->idGenerator->getId() => array_merge(...array_values($this->getData())),
-            ];
-        }
+        return $result;
+    }
 
-        return [$this->idGenerator->getId() => $this->getData()];
+    /** @var array<string, array<string, array>> */
+    private array $entries = [];
+
+    public function write(string $id, array $summary, array $data, array $objects): void
+    {
+        $this->entries[$id] = [
+            self::TYPE_SUMMARY => $summary,
+            self::TYPE_DATA => $data,
+            self::TYPE_OBJECTS => $objects,
+        ];
     }
 
     public function getData(): array

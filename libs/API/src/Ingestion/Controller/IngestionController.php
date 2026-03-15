@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Ingestion\Controller;
 
 use AppDevPanel\Kernel\DebuggerIdGenerator;
-use AppDevPanel\Kernel\Dumper;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
@@ -133,10 +132,14 @@ final class IngestionController
     private function writeEntry(array $entry): string
     {
         $idGenerator = new DebuggerIdGenerator();
+        /** @var string $id */
         $id = $entry['debugId'] ?? $idGenerator->getId();
 
+        /** @var array $collectors */
         $collectors = $entry['collectors'];
+        /** @var array $context */
         $context = $entry['context'] ?? [];
+        /** @var array $summaryExtra */
         $summaryExtra = $entry['summary'] ?? [];
 
         $summary = array_merge([
@@ -145,58 +148,8 @@ final class IngestionController
             'context' => $context,
         ], $summaryExtra);
 
-        $data = $collectors;
-
-        // Write directly to storage path
-        $this->writeToStorage($id, $summary, $data);
+        $this->storage->write($id, $summary, $collectors, $collectors);
 
         return $id;
-    }
-
-    /**
-     * Write debug entry files to storage using the same layout as FileStorage.
-     */
-    private function writeToStorage(string $id, array $summary, array $data): void
-    {
-        $summaryJson = Json::encode($summary);
-        $dataJson = Dumper::create($data)->asJson(30);
-        $objectsJson = Dumper::create($data)->asJsonObjectsMap(30);
-
-        // Use StorageInterface::read to determine the base path pattern
-        // For now, write via a dedicated method approach:
-        // We access the storage path through reflection or use a direct write approach.
-        $this->directWrite($id, $summaryJson, $dataJson, $objectsJson);
-    }
-
-    /**
-     * Write files directly to the storage directory.
-     *
-     * This bypasses the collector-based flush mechanism to allow external data ingestion.
-     */
-    private function directWrite(string $id, string $summaryJson, string $dataJson, string $objectsJson): void
-    {
-        // Determine storage path from existing data or use configured path.
-        // We need access to the storage path. For FileStorage, we use reflection.
-        $storage = $this->storage;
-        $reflection = new \ReflectionClass($storage);
-
-        if (!$reflection->hasProperty('path')) {
-            // For non-FileStorage (e.g., MemoryStorage), use a fallback approach
-            // by reading current data structure
-            throw new \RuntimeException(
-                'Direct ingestion requires FileStorage. Current storage does not support direct writes.',
-            );
-        }
-
-        $pathProp = $reflection->getProperty('path');
-        $basePath = $pathProp->getValue($storage) . '/' . date('Y-m-d') . '/' . $id . '/';
-
-        if (!is_dir($basePath)) {
-            mkdir($basePath, 0775, true);
-        }
-
-        file_put_contents($basePath . StorageInterface::TYPE_SUMMARY . '.json', $summaryJson, LOCK_EX);
-        file_put_contents($basePath . StorageInterface::TYPE_DATA . '.json', $dataJson, LOCK_EX);
-        file_put_contents($basePath . StorageInterface::TYPE_OBJECTS . '.json', $objectsJson, LOCK_EX);
     }
 }

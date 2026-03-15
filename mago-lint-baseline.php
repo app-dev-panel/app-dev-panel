@@ -38,12 +38,6 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "explicit-octal"
-message = "Use explicit octal numeral notation."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Ingestion/Controller/IngestionController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
 count = 4
@@ -443,6 +437,18 @@ file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
 count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/MemoryStorage.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Support/Stub/PhpStreamProxy.php"

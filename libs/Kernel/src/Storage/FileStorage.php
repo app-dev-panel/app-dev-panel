@@ -62,6 +62,20 @@ final class FileStorage implements StorageInterface
         return $data;
     }
 
+    public function write(string $id, array $summary, array $data, array $objects): void
+    {
+        $basePath = $this->path . '/' . date('Y-m-d') . '/' . $id . '/';
+
+        FileHelper::ensureDirectory($basePath);
+
+        $this->writeFileExclusive($basePath . self::TYPE_SUMMARY . '.json', Json::encode($summary));
+        $this->writeFileExclusive($basePath . self::TYPE_DATA . '.json', Dumper::create($data)->asJson(30));
+        $this->writeFileExclusive(
+            $basePath . self::TYPE_OBJECTS . '.json',
+            Dumper::create($objects)->asJsonObjectsMap(30),
+        );
+    }
+
     public function flush(): void
     {
         $basePath = $this->path . '/' . date('Y-m-d') . '/' . $this->idGenerator->getId() . '/';
