@@ -8,6 +8,8 @@ namespace AppDevPanel\Cli\Command;
 
 use AppDevPanel\Kernel\DebugServer\Broadcaster;
 use AppDevPanel\Kernel\DebugServer\Connection;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,6 +23,14 @@ use Yiisoft\Yii\Console\ExitCode;
 final class DebugServerBroadcastCommand extends Command
 {
     public const COMMAND_NAME = 'dev:broadcast';
+
+    private readonly LoggerInterface $logger;
+
+    public function __construct(?LoggerInterface $logger = null)
+    {
+        $this->logger = $logger ?? new NullLogger();
+        parent::__construct();
+    }
 
     public function configure(): void
     {
@@ -43,11 +53,16 @@ final class DebugServerBroadcastCommand extends Command
         $broadcaster = new Broadcaster();
         /** @var string $data */
         $data = $input->getOption('message');
+
+        $this->logger->info('Starting broadcast.', ['message' => $data]);
+
         $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, $data);
         $broadcaster->broadcast(
             Connection::MESSAGE_TYPE_VAR_DUMPER,
             VarDumper::create(['$data' => $data])->asJson(false),
         );
+
+        $this->logger->info('Broadcast complete.', ['message' => $data]);
 
         return ExitCode::OK;
     }
