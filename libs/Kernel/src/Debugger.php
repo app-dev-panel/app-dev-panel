@@ -8,13 +8,12 @@ use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Strings\WildcardPattern;
-use Yiisoft\Yii\Console\Event\ApplicationStartup;
-use Yiisoft\Yii\Http\Event\BeforeRequest;
 
 final class Debugger
 {
     private bool $skipCollect = false;
     private bool $active = false;
+    private bool $shutdownRegistered = false;
 
     public function __construct(
         private readonly DebuggerIdGenerator $idGenerator,
@@ -25,26 +24,30 @@ final class Debugger
         private readonly array $collectors,
         private array $ignoredRequests = [],
         private array $ignoredCommands = [],
-    ) {
-        register_shutdown_function([$this, 'shutdown']);
-    }
+    ) {}
 
     public function getId(): string
     {
         return $this->idGenerator->getId();
     }
 
-    public function startup(object $event): void
+    public function startup(StartupContext $context): void
     {
         $this->active = true;
         $this->skipCollect = false;
 
-        if ($event instanceof BeforeRequest && $this->isRequestIgnored($event->getRequest())) {
+        if (!$this->shutdownRegistered) {
+            register_shutdown_function([$this, 'shutdown']);
+            $this->shutdownRegistered = true;
+        }
+
+        $request = $context->getRequest();
+        if ($request !== null && $this->isRequestIgnored($request)) {
             $this->skipCollect = true;
             return;
         }
 
-        if ($event instanceof ApplicationStartup && $this->isCommandIgnored($event->commandName)) {
+        if ($context->isCommand() && $this->isCommandIgnored($context->getCommandName())) {
             $this->skipCollect = true;
             return;
         }
