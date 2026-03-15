@@ -70,8 +70,12 @@ final class GitController
         $parsedBody = \json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $branch = $parsedBody['branch'] ?? null;
 
-        if ($branch === null) {
+        if ($branch === null || $branch === '') {
             throw new InvalidArgumentException('Branch should not be empty.');
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9\/_.\-]+$/', $branch)) {
+            throw new InvalidArgumentException(sprintf('Invalid branch name "%s".', $branch));
         }
 
         $git->getWorkingCopy()->checkout($branch);

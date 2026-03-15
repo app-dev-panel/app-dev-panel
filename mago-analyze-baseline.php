@@ -387,8 +387,14 @@ count = 2
 [[issues]]
 file = "libs/API/src/Inspector/Controller/GitController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `nonnull`."
 count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/GitController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/GitController.php"
@@ -423,12 +429,6 @@ count = 2
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Psr\Container\ContainerInterface::get`: expected `string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `ReflectionClass::getmethod`: expected `string`, but found `nonnull`."
 count = 1
 
@@ -459,6 +459,12 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `class_exists`: expected `string`, but found `nonnull`."
+count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/InspectController.php"
+code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `class_exists`: expected `string`, but found `truthy-mixed`."
 count = 1
 
@@ -477,6 +483,12 @@ count = 2
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `interface_exists`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/InspectController.php"
+code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `ksort`: expected `array<('K.ksort() extends array-key), ('V.ksort() extends mixed)>`, but found `mixed`."
 count = 1
 
@@ -484,12 +496,6 @@ count = 1
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `realpath`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `reflectionclass::__construct`: expected `('T.reflectionclass extends object)|class-string<'T.reflectionclass extends object>`, but found `mixed`."
 count = 1
 
 [[issues]]
@@ -519,8 +525,14 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/InspectController.php"
+code = "mixed-argument"
 message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
-count = 2
+count = 4
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
@@ -550,6 +562,24 @@ count = 3
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-operand"
 message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/InspectController.php"
+code = "possibly-false-argument"
+message = 'Argument #1 of method `AppDevPanel\Api\Inspector\Controller\InspectController::removebasepath` is possibly `false`, but parameter type `string` does not accept it.'
+count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/InspectController.php"
+code = "possibly-false-argument"
+message = "Argument #2 of function `str_starts_with` is possibly `false`, but parameter type `string` does not accept it."
+count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/InspectController.php"
+code = "possibly-false-operand"
+message = "Possibly false left operand used in string concatenation (type `false|string`)."
 count = 1
 
 [[issues]]
@@ -610,13 +640,13 @@ count = 2
 file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 7
+count = 8
 
 [[issues]]
 file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 15
+count = 20
 
 [[issues]]
 file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
@@ -640,7 +670,7 @@ count = 1
 file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #1 of `Yiisoft\Db\Query\Query::from`: expected `Yiisoft\Db\Expression\ExpressionInterface|array<array-key, mixed>|string`, but found `mixed`.'
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
@@ -652,7 +682,7 @@ count = 1
 file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
 code = "possible-method-access-on-null"
 message = "Attempting to call a method on `null`."
-count = 4
+count = 5
 
 [[issues]]
 file = "libs/API/src/Inspector/Test/CodeceptionJSONReporter.php"
@@ -754,6 +784,12 @@ count = 1
 file = "libs/API/tests/Support/StubCollector.php"
 code = "unused-property"
 message = "Property `$data` is never used."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Debug/Controller/DebugControllerTest.php"
+code = "deprecated-class"
+message = 'Class `Yiisoft\DataResponse\DataResponseFactory` is deprecated and should no longer be used.'
 count = 1
 
 [[issues]]
@@ -2311,6 +2347,18 @@ message = "Assigning `mixed` type to a variable may lead to unexpected behavior.
 count = 2
 
 [[issues]]
+file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
+code = "redundant-comparison"
+message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
+code = "redundant-logical-operation"
+message = "Redundant `&&` operation: left operand is always truthy and right operand is evaluated."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/tests/Unit/Collector/LogCollectorTest.php"
 code = "non-existent-method"
 message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
@@ -2521,6 +2569,12 @@ message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector
 count = 2
 
 [[issues]]
+file = "libs/Kernel/tests/Unit/DebugServer/ConnectionTest.php"
+code = "redundant-type-comparison"
+message = "Redundant type assertion: `$errors` of type `array<array-key, mixed>` is always not `array<array-key, mixed>`."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/tests/Unit/DumperTest.php"
 code = "ambiguous-object-property-access"
 message = "Cannot statically verify property access on a generic `object` type."
@@ -2639,6 +2693,24 @@ file = "libs/Kernel/tests/Unit/Helper/StreamWrapper/StreamWrapperTest.php"
 code = "non-existent-property"
 message = 'Property `$stream` does not exist on interface `AppDevPanel\Kernel\Helper\StreamWrapper\StreamWrapperInterface`.'
 count = 2
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/ProxyDecoratedCallsTest.php"
+code = "ambiguous-object-method-access"
+message = "Cannot statically verify method call on a generic `object` type."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/ProxyDecoratedCallsTest.php"
+code = "ambiguous-object-property-access"
+message = "Cannot statically verify property access on a generic `object` type."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/ProxyDecoratedCallsTest.php"
+code = "incompatible-property-visibility"
+message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `class@anonymous:9720836125357557984-1142:1323` used by `class@anonymous:9720836125357557984-1142:1323`: visibility differs (public vs private protected(set))'
+count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"

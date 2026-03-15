@@ -57,7 +57,7 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (3.37)."
+message = "Class has a high kan defect score (3.72)."
 count = 1
 
 [[issues]]
@@ -76,6 +76,12 @@ count = 1
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/InspectController.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
 count = 1
 
 [[issues]]
@@ -374,14 +380,32 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
 count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/DebuggerTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/DumperTest.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
 count = 1
 
 [[issues]]
@@ -401,3 +425,9 @@ file = "libs/Kernel/tests/Unit/Helper/BacktraceIgnoreMatcherTest.php"
 code = "require-preg-quote-delimiter"
 message = "Missing delimiter argument in `preg_quote()` call"
 count = 5
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/ProxyDecoratedCallsTest.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 1

@@ -109,6 +109,10 @@ class InspectController
         $translationId = $body['translation'] ?? '';
         $newMessage = $body['message'] ?? '';
 
+        if (!preg_match('/^[a-zA-Z]{2,3}([_-][a-zA-Z0-9]{2,8})*$/', $locale)) {
+            throw new InvalidArgumentException(sprintf('Invalid locale "%s".', $locale));
+        }
+
         $categorySource = null;
         foreach ($categorySources as $possibleCategorySource) {
             if ($possibleCategorySource->getName() !== $categoryName) {
@@ -175,7 +179,7 @@ class InspectController
 
         $path = $request['path'] ?? '';
 
-        $rootPath = $this->aliases->get('@root');
+        $rootPath = realpath($this->aliases->get('@root'));
 
         $destination = $this->removeBasePath($rootPath, $path);
 
@@ -189,6 +193,12 @@ class InspectController
             return $this->responseFactory->createResponse([
                 'message' => sprintf('Destination "%s" does not exist', $path),
             ], 404);
+        }
+
+        if (!str_starts_with($destination, $rootPath)) {
+            return $this->responseFactory->createResponse([
+                'message' => 'Access denied: path is outside the project root.',
+            ], 403);
         }
 
         if (!is_dir($destination)) {
@@ -264,7 +274,15 @@ class InspectController
     public function object(ContainerInterface $container, ServerRequestInterface $request): ResponseInterface
     {
         $queryParams = $request->getQueryParams();
-        $className = $queryParams['classname'];
+        $className = $queryParams['classname'] ?? null;
+
+        if ($className === null || $className === '') {
+            throw new InvalidArgumentException('Query parameter "classname" is required.');
+        }
+
+        if (!class_exists($className) && !interface_exists($className)) {
+            throw new InvalidArgumentException(sprintf('Class "%s" does not exist.', $className));
+        }
 
         $reflection = new ReflectionClass($className);
 
@@ -273,6 +291,13 @@ class InspectController
         }
         if ($reflection->implementsInterface(Throwable::class)) {
             throw new InvalidArgumentException('Inspector cannot initialize exceptions.');
+        }
+
+        if (!$container->has($className)) {
+            throw new InvalidArgumentException(sprintf(
+                'Class "%s" is not registered in the DI container.',
+                $className,
+            ));
         }
 
         $variable = $container->get($className);
@@ -362,11 +387,17 @@ class InspectController
         return $this->responseFactory->createResponse($schemaProvider->getTables());
     }
 
-    public function getTable(SchemaProviderInterface $schemaProvider, CurrentRoute $currentRoute): ResponseInterface
-    {
+    public function getTable(
+        SchemaProviderInterface $schemaProvider,
+        CurrentRoute $currentRoute,
+        ServerRequestInterface $request,
+    ): ResponseInterface {
         $tableName = $currentRoute->getArgument('name');
+        $queryParams = $request->getQueryParams();
+        $limit = min((int) ($queryParams['limit'] ?? 1000), 10000);
+        $offset = max((int) ($queryParams['offset'] ?? 0), 0);
 
-        return $this->responseFactory->createResponse($schemaProvider->getTable($tableName));
+        return $this->responseFactory->createResponse($schemaProvider->getTable($tableName, $limit, $offset));
     }
 
     public function request(
