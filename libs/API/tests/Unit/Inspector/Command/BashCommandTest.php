@@ -38,4 +38,28 @@ final class BashCommandTest extends TestCase
         $this->assertSame('failed', $response->getResult());
         $this->assertSame([], $response->getErrors());
     }
+
+    public function testFail(): void
+    {
+        $aliases = new Aliases([
+            '@root' => dirname(__DIR__, 3) . '/Support/Application',
+        ]);
+        $command = new BashCommand($aliases, ['bash', 'fail.sh', '2']);
+
+        $response = $command->run();
+
+        $this->assertSame(CommandResponse::STATUS_FAIL, $response->getStatus());
+        $this->assertNull($response->getResult());
+        $this->assertNotEmpty($response->getErrors());
+    }
+
+    public function testGetTitle(): void
+    {
+        $this->assertSame('Bash', BashCommand::getTitle());
+    }
+
+    public function testGetDescription(): void
+    {
+        $this->assertSame('Runs any commands from the project root.', BashCommand::getDescription());
+    }
 }
