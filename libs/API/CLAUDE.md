@@ -166,7 +166,7 @@ Capability checking: the middleware maps inspector path prefixes to capability n
 
 ### Inspector OpenAPI Spec
 
-`openapi/inspector.yaml` defines the Inspector API contract (OpenAPI 3.1) that external applications must implement to be proxied. Capabilities map to endpoint groups: `config`, `routes`, `files`, `cache`, `database`, `translations`, `events`, `commands`, `git`.
+`openapi/inspector.yaml` defines the Inspector API contract (OpenAPI 3.1) that external applications must implement to be proxied. Capabilities map to endpoint groups: `config`, `routes`, `files`, `cache`, `database`, `translations`, `events`, `commands`, `git`, `classes`, `object`, `phpinfo`, `opcache`, `request`, `composer`.
 
 ## Middleware Chain
 

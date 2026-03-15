@@ -45,17 +45,19 @@ packages/
     ├── src/
     │   ├── Config.ts       # Build configuration (VITE_BUILD_ID, VITE_ENV)
     │   ├── API/            # API clients (RTK Query)
-    │   │   ├── createBaseQuery.ts       # Dynamic base URL factory
+    │   │   ├── createBaseQuery.ts       # Dynamic base URL factory (supports ?service= param)
     │   │   ├── errorNotificationMiddleware.ts
     │   │   ├── Debug/      # Debug API (debugApi, debugSlice)
-    │   │   └── Application/# Application state (ApplicationSlice)
+    │   │   ├── Services/   # Service Registry API (servicesApi)
+    │   │   └── Application/# Application state (ApplicationSlice, activeServiceId)
     │   ├── Component/      # Reusable components
     │   │   ├── ServerSentEventsObserver.ts  # SSE connection manager
     │   │   ├── useServerSentEvents.ts       # SSE React hook
     │   │   ├── JsonRenderer.tsx             # JSON display component
     │   │   ├── CodeHighlight.tsx            # Syntax highlighting
     │   │   ├── MenuPanel.tsx                # Sidebar menu
-    │   │   └── Grid.tsx                     # Data grid wrapper
+    │   │   ├── Grid.tsx                     # Data grid wrapper
+    │   │   └── ServiceSelector.tsx          # Service selector dropdown (multi-app)
     │   ├── Adapter/        # Framework adapters
     │   │   ├── mui/        # MUI type extensions
     │   │   ├── yii/        # Yii-specific input matchers
@@ -85,7 +87,7 @@ Redux store is created via `createStore()` in `store.ts`:
 
 ```
 Reducers:
-├── application          # baseUrl, pageSize, toolbar, favorites, autoLatest
+├── application          # baseUrl, pageSize, toolbar, favorites, autoLatest, activeServiceId
 ├── notifications        # toast alerts
 ├── store.debug          # current debug entry, request IDs
 ├── store.openApi        # API spec entries (name → URL)
@@ -93,7 +95,8 @@ Reducers:
 ├── api.debug            # RTK Query cache (debug endpoints)
 ├── api.inspector        # RTK Query cache (inspector endpoints)
 ├── api.inspector.git    # RTK Query cache (git endpoints)
-└── api.gii              # RTK Query cache (gii endpoints)
+├── api.gii              # RTK Query cache (gii endpoints)
+└── api.services         # RTK Query cache (service registry endpoints)
 ```
 
 Key features:
@@ -103,7 +106,7 @@ Key features:
 
 ## API Communication
 
-**Dynamic base URL**: `createBaseQuery(prefix)` reads `application.baseUrl` from Redux state at request time, enabling connection to any backend instance.
+**Dynamic base URL**: `createBaseQuery(prefix)` reads `application.baseUrl` from Redux state at request time, enabling connection to any backend instance. When `application.activeServiceId` is set (not `local`), it appends `?service=<id>` to all inspector API requests for multi-app proxying.
 
 **RTK Query APIs**:
 | API | Prefix | Endpoints |
@@ -112,6 +115,7 @@ Key features:
 | `inspectorApi` | `/debug/api/inspector/` | getParameters, getConfiguration, getTable, runCommand, doRequest (20+) |
 | `gitApi` | `/debug/api/inspector/git/` | getSummary, getLog, checkout, command |
 | `giiApi` | `/gii/api` | getGenerators, postPreview, postGenerate, postDiff |
+| `servicesApi` | `/debug/api/services/` | getServices, registerService, deregisterService |
 
 **Server-Sent Events (SSE)**:
 - Endpoint: `/debug/api/event-stream`
