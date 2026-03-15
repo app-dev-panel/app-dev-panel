@@ -12,6 +12,8 @@ use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
+use AppDevPanel\Api\Inspector\Controller\ServiceController;
+use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
@@ -76,6 +78,22 @@ return [
             Route::get('/openapi.json')
                 ->action([IngestionController::class, 'openapi'])
                 ->name('openapi'),
+            Group::create('/services')
+                ->namePrefix('services/')
+                ->routes(
+                    Route::post('/register')
+                        ->action([ServiceController::class, 'register'])
+                        ->name('register'),
+                    Route::post('/heartbeat')
+                        ->action([ServiceController::class, 'heartbeat'])
+                        ->name('heartbeat'),
+                    Route::get('[/]')
+                        ->action([ServiceController::class, 'list'])
+                        ->name('list'),
+                    Route::delete('/{service}')
+                        ->action([ServiceController::class, 'deregister'])
+                        ->name('deregister'),
+                ),
         ),
     Group::create('/inspect/api')
         ->withCors(CorsAllowAll::class)
@@ -91,6 +109,7 @@ return [
         )
         ->middleware(FormatDataResponseAsJson::class)
         ->middleware(ResponseDataWrapper::class)
+        ->middleware(InspectorProxyMiddleware::class)
         ->namePrefix('inspect/api/')
         ->routes(
             Route::get('/events')

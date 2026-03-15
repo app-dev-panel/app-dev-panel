@@ -1,0 +1,442 @@
+openapi: 3.1.0
+info:
+  title: ADP Inspector API
+  description: |
+    Contract for external applications implementing the ADP Inspector interface.
+    External apps implement a subset of these endpoints to expose their live state
+    to the ADP frontend via the Inspector Proxy.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:9090
+    description: External application inspector server
+
+paths:
+  /inspect/api/config:
+    get:
+      operationId: getConfig
+      summary: Application configuration
+      tags: [config]
+      parameters:
+        - name: group
+          in: query
+          schema:
+            type: string
+            default: default
+      responses:
+        "200":
+          description: Configuration data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /inspect/api/params:
+    get:
+      operationId: getParams
+      summary: Application parameters
+      tags: [config]
+      responses:
+        "200":
+          description: Application parameters
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /inspect/api/routes:
+    get:
+      operationId: getRoutes
+      summary: Registered routes
+      tags: [routes]
+      responses:
+        "200":
+          description: List of application routes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RouteInfo"
+
+  /inspect/api/route/check:
+    get:
+      operationId: checkRoute
+      summary: Test route matching
+      tags: [routes]
+      parameters:
+        - name: route
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: method
+          in: query
+          schema:
+            type: string
+            default: GET
+      responses:
+        "200":
+          description: Route match result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                  action:
+                    type: array
+                    items:
+                      type: string
+
+  /inspect/api/files:
+    get:
+      operationId: getFiles
+      summary: File explorer
+      tags: [files]
+      parameters:
+        - name: path
+          in: query
+          schema:
+            type: string
+        - name: class
+          in: query
+          schema:
+            type: string
+        - name: method
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: File listing or file content
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileInfo"
+
+  /inspect/api/cache:
+    get:
+      operationId: viewCache
+      summary: View cache entry
+      tags: [cache]
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cached value
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      operationId: deleteCache
+      summary: Delete cache key
+      tags: [cache]
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deletion result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+
+  /inspect/api/cache/clear:
+    post:
+      operationId: clearCache
+      summary: Clear all cache
+      tags: [cache]
+      responses:
+        "200":
+          description: Clear result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+
+  /inspect/api/table:
+    get:
+      operationId: getTables
+      summary: Database tables
+      tags: [database]
+      responses:
+        "200":
+          description: List of tables with schemas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TableInfo"
+
+  /inspect/api/table/{name}:
+    get:
+      operationId: getTable
+      summary: Table data with pagination
+      tags: [database]
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Table schema and records
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /inspect/api/translations:
+    get:
+      operationId: getTranslations
+      summary: Translation catalogs
+      tags: [translations]
+      responses:
+        "200":
+          description: All translations by category and locale
+          content:
+            application/json:
+              schema:
+                type: object
+    put:
+      operationId: putTranslation
+      summary: Update a translation
+      tags: [translations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [category, locale, translation, message]
+              properties:
+                category:
+                  type: string
+                locale:
+                  type: string
+                translation:
+                  type: string
+                message:
+                  type: string
+      responses:
+        "200":
+          description: Updated messages
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /inspect/api/events:
+    get:
+      operationId: getEvents
+      summary: Event listeners
+      tags: [events]
+      responses:
+        "200":
+          description: Event listener configuration
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /inspect/api/command:
+    get:
+      operationId: getCommands
+      summary: Available commands
+      tags: [commands]
+      responses:
+        "200":
+          description: List of available commands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CommandInfo"
+    post:
+      operationId: runCommand
+      summary: Execute a command
+      tags: [commands]
+      parameters:
+        - name: command
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Command output
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommandResponse"
+
+  /inspect/api/git/summary:
+    get:
+      operationId: getGitSummary
+      summary: Git repository summary
+      tags: [git]
+      responses:
+        "200":
+          description: Branch, remotes, status
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /inspect/api/git/log:
+    get:
+      operationId: getGitLog
+      summary: Recent commits
+      tags: [git]
+      responses:
+        "200":
+          description: Last 20 commits
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /inspect/api/git/checkout:
+    post:
+      operationId: gitCheckout
+      summary: Switch branch
+      tags: [git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [branch]
+              properties:
+                branch:
+                  type: string
+      responses:
+        "200":
+          description: Checkout result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /inspect/api/git/command:
+    post:
+      operationId: gitCommand
+      summary: Run git pull/fetch
+      tags: [git]
+      parameters:
+        - name: command
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [pull, fetch]
+      responses:
+        "200":
+          description: Command result
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  schemas:
+    RouteInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        pattern:
+          type: string
+        methods:
+          type: array
+          items:
+            type: string
+        handler:
+          type: string
+        middlewares:
+          type: array
+          items:
+            type: string
+
+    FileInfo:
+      type: object
+      properties:
+        path:
+          type: string
+        type:
+          type: string
+          enum: [file, directory]
+        size:
+          type: integer
+        content:
+          type: string
+          description: Present only when reading a single file
+        permissions:
+          type: string
+        owner:
+          type: string
+        group:
+          type: string
+
+    TableInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        columns:
+          type: array
+          items:
+            type: object
+        recordCount:
+          type: integer
+
+    CommandInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    CommandResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        result:
+          type: string
+        errors:
+          type: string

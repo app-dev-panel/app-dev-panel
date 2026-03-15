@@ -85,9 +85,21 @@ message = "Do not commit debug functions."
 count = 1
 
 [[issues]]
+file = "libs/API/src/Inspector/Controller/ServiceController.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 3
+
+[[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Middleware/InspectorProxyMiddleware.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
 count = 1
 
 [[issues]]
@@ -178,6 +190,30 @@ count = 1
 file = "libs/API/tests/Unit/Inspector/Controller/RoutingControllerTest.php"
 code = "no-redundant-use"
 message = "Unused import: `ServerRequestFactoryInterface`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Middleware/InspectorProxyMiddlewareTest.php"
+code = "no-redundant-use"
+message = "Unused import: `ServerRequestInterface`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Middleware/InspectorProxyMiddlewareTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -421,6 +457,30 @@ message = "Interface has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/Kernel/src/Service/FileServiceRegistry.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Service/FileServiceRegistry.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Service/ServiceDescriptor.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Service/ServiceDescriptor.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -532,4 +592,22 @@ count = 5
 file = "libs/Kernel/tests/Unit/ProxyDecoratedCallsTest.php"
 code = "braced-string-interpolation"
 message = "Unbraced variable in string interpolation."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Service/FileServiceRegistryTest.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Service/FileServiceRegistryTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Service/FileServiceRegistryTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1

@@ -14,6 +14,8 @@ use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\Cycle\CycleSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Kernel\Service\FileServiceRegistry;
+use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 
 /**
@@ -22,6 +24,10 @@ use AppDevPanel\Kernel\Storage\StorageInterface;
 
 return [
     CollectorRepositoryInterface::class => static fn (StorageInterface $storage) => new CollectorRepository($storage),
+    ServiceRegistryInterface::class => static function (ContainerInterface $container) use ($params) {
+        $storagePath = $params['app-dev-panel/yii-debug-api']['path'] ?? sys_get_temp_dir() . '/adp-services';
+        return new FileServiceRegistry($storagePath);
+    },
     InspectController::class => [
         '__construct()' => [
             'params' => $params,

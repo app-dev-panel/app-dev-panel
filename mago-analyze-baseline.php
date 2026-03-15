@@ -631,6 +631,12 @@ message = "Assigning `mixed` type to a variable may lead to unexpected behavior.
 count = 5
 
 [[issues]]
+file = "libs/API/src/Inspector/Controller/ServiceController.php"
+code = "invalid-type-cast"
+message = "Casting `mixed` to `array`."
+count = 1
+
+[[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "invalid-array-element-key"
 message = "Invalid array key type."
@@ -1219,6 +1225,42 @@ message = "Assigning `mixed` type to a variable may lead to unexpected behavior.
 count = 3
 
 [[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+count = 6
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 13
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
+code = "possibly-false-iterator"
+message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
+count = 1
+
+[[issues]]
 file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
@@ -1229,6 +1271,36 @@ file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
 count = 20
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Middleware/InspectorProxyMiddlewareTest.php"
+code = "less-specific-nested-argument-type"
+message = 'Argument type mismatch for argument #4 of `appdevpanel\kernel\service\servicedescriptor::__construct`: expected `array<array-key, string>`, but provided type `array<array-key, mixed>` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Middleware/InspectorProxyMiddlewareTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 6
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Middleware/InspectorProxyMiddlewareTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertstringcontainsstring`: expected `string`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Middleware/InspectorProxyMiddlewareTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Middleware/InspectorProxyMiddlewareTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
 
 [[issues]]
 file = "libs/API/tests/Unit/ServerSentEventsStreamTest.php"
@@ -2293,6 +2365,24 @@ message = "This member selector uses a non-literal string type (`string`); its s
 count = 3
 
 [[issues]]
+file = "libs/Kernel/src/Service/ServiceDescriptor.php"
+code = "invalid-type-cast"
+message = "Casting `mixed` to `array`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Service/ServiceDescriptor.php"
+code = "invalid-type-cast"
+message = "Casting `mixed` to `float`."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Service/ServiceDescriptor.php"
+code = "less-specific-nested-argument-type"
+message = 'Argument type mismatch for argument #4 of `appdevpanel\kernel\service\servicedescriptor::__construct`: expected `array<array-key, string>`, but provided type `array<array-key, mixed>` is less specific.'
+count = 1
+
+[[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "possibly-false-argument"
 message = "Argument #1 of function `uasort` is possibly `false`, but parameter type `array<non-negative-int, non-empty-string>` does not accept it."
@@ -3112,6 +3202,12 @@ count = 2
 file = "libs/Kernel/tests/Unit/ProxyDecoratedCallsTest.php"
 code = "incompatible-property-visibility"
 message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `class@anonymous:9720836125357557984-1142:1323` used by `class@anonymous:9720836125357557984-1142:1323`: visibility differs (public vs private protected(set))'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Service/FileServiceRegistryTest.php"
+code = "possibly-false-iterator"
+message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
 count = 1
 
 [[issues]]
