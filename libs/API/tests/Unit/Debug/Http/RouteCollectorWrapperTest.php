@@ -15,10 +15,7 @@ final class RouteCollectorWrapperTest extends TestCase
         $middlewareDefinitions = ['middleware1', 'middleware2'];
 
         $routeCollector = $this->createMock(RouteCollectorInterface::class);
-        $routeCollector
-            ->expects($this->once())
-            ->method('prependMiddleware')
-            ->with('middleware1', 'middleware2');
+        $routeCollector->expects($this->once())->method('prependMiddleware')->with('middleware1', 'middleware2');
 
         $wrapper = new RouteCollectorWrapper($middlewareDefinitions);
         $wrapper->wrap($routeCollector);
@@ -27,9 +24,7 @@ final class RouteCollectorWrapperTest extends TestCase
     public function testWrapWithEmptyMiddleware(): void
     {
         $routeCollector = $this->createMock(RouteCollectorInterface::class);
-        $routeCollector
-            ->expects($this->once())
-            ->method('prependMiddleware');
+        $routeCollector->expects($this->once())->method('prependMiddleware');
 
         $wrapper = new RouteCollectorWrapper([]);
         $wrapper->wrap($routeCollector);

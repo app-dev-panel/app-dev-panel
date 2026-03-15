@@ -12,7 +12,7 @@ final class ServerSentEventsStreamTest extends TestCase
 {
     public function testImplementsStreamInterface(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => false);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
         $this->assertInstanceOf(StreamInterface::class, $stream);
     }
 
@@ -32,7 +32,7 @@ final class ServerSentEventsStreamTest extends TestCase
 
     public function testEofAfterStreamReturnsFalse(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => false);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
         $this->assertFalse($stream->eof());
 
         $stream->read(1024);
@@ -53,7 +53,7 @@ final class ServerSentEventsStreamTest extends TestCase
 
     public function testClose(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => true);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => true);
         $this->assertFalse($stream->eof());
 
         $stream->close();
@@ -62,65 +62,65 @@ final class ServerSentEventsStreamTest extends TestCase
 
     public function testDetach(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => true);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => true);
         $stream->detach();
         $this->assertTrue($stream->eof());
     }
 
     public function testGetSize(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => false);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
         $this->assertSame(0, $stream->getSize());
     }
 
     public function testTell(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => false);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
         $this->assertSame(0, $stream->tell());
     }
 
     public function testIsNotSeekable(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => false);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
         $this->assertFalse($stream->isSeekable());
     }
 
     public function testSeekThrowsException(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => false);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
         $this->expectException(\RuntimeException::class);
         $stream->seek(0);
     }
 
     public function testRewindThrowsException(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => false);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
         $this->expectException(\RuntimeException::class);
         $stream->rewind();
     }
 
     public function testIsNotWritable(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => false);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
         $this->assertFalse($stream->isWritable());
     }
 
     public function testWriteThrowsException(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => false);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
         $this->expectException(\RuntimeException::class);
         $stream->write('test');
     }
 
     public function testIsReadable(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => false);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
         $this->assertTrue($stream->isReadable());
     }
 
     public function testGetMetadata(): void
     {
-        $stream = new ServerSentEventsStream(static fn (array &$buffer) => false);
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
         $this->assertSame([], $stream->getMetadata());
     }
 

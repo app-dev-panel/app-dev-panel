@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Debug\Middleware;
 
-use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Api\Debug\Middleware\DebugHeaders;
+use AppDevPanel\Kernel\DebuggerIdGenerator;
 use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequest;
 use PHPUnit\Framework\TestCase;

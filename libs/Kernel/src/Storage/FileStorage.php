@@ -55,8 +55,8 @@ final class FileStorage implements StorageInterface
 
         foreach ($dataFiles as $file) {
             $dir = dirname($file);
-            $id = substr($dir, strlen(dirname($file, 2)) + 1);
-            $data[$id] = Json::decode(file_get_contents($file));
+            $entryId = substr($dir, strlen(dirname($file, 2)) + 1);
+            $data[$entryId] = Json::decode(file_get_contents($file));
         }
 
         return $data;
@@ -70,11 +70,29 @@ final class FileStorage implements StorageInterface
             FileHelper::ensureDirectory($basePath);
 
             $dumper = Dumper::create($this->getData(), $this->excludedClasses);
-            file_put_contents($basePath . self::TYPE_DATA . '.json', $dumper->asJson(30));
-            file_put_contents($basePath . self::TYPE_OBJECTS . '.json', $dumper->asJsonObjectsMap(30));
+            $result = file_put_contents($basePath . self::TYPE_DATA . '.json', $dumper->asJson(30));
+            if ($result === false) {
+                throw new \RuntimeException(sprintf(
+                    'Failed to write file "%s".',
+                    $basePath . self::TYPE_DATA . '.json',
+                ));
+            }
+            $result = file_put_contents($basePath . self::TYPE_OBJECTS . '.json', $dumper->asJsonObjectsMap(30));
+            if ($result === false) {
+                throw new \RuntimeException(sprintf(
+                    'Failed to write file "%s".',
+                    $basePath . self::TYPE_OBJECTS . '.json',
+                ));
+            }
 
             $summaryData = Dumper::create($this->collectSummaryData())->asJson();
-            file_put_contents($basePath . self::TYPE_SUMMARY . '.json', $summaryData);
+            $result = file_put_contents($basePath . self::TYPE_SUMMARY . '.json', $summaryData);
+            if ($result === false) {
+                throw new \RuntimeException(sprintf(
+                    'Failed to write file "%s".',
+                    $basePath . self::TYPE_SUMMARY . '.json',
+                ));
+            }
         } finally {
             $this->collectors = [];
             $this->gc();

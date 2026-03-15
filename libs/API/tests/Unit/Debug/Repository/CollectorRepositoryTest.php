@@ -13,7 +13,8 @@ final class CollectorRepositoryTest extends TestCase
     public function testSummary(): void
     {
         $storage = $this->createStub(StorageInterface::class);
-        $storage->method('read')
+        $storage
+            ->method('read')
             ->willReturn([
                 'testId' => ['total' => 7],
             ]);
@@ -31,8 +32,7 @@ final class CollectorRepositoryTest extends TestCase
     public function testSummaryEmpty(): void
     {
         $storage = $this->createStub(StorageInterface::class);
-        $storage->method('read')
-            ->willReturn([]);
+        $storage->method('read')->willReturn([]);
 
         $repository = new CollectorRepository($storage);
 
@@ -42,7 +42,8 @@ final class CollectorRepositoryTest extends TestCase
     public function testDetail(): void
     {
         $storage = $this->createStub(StorageInterface::class);
-        $storage->method('read')
+        $storage
+            ->method('read')
             ->willReturn([
                 'testId' => ['stub' => ['key' => 'value']],
             ]);
@@ -55,7 +56,8 @@ final class CollectorRepositoryTest extends TestCase
     public function testDumpObject(): void
     {
         $storage = $this->createStub(StorageInterface::class);
-        $storage->method('read')
+        $storage
+            ->method('read')
             ->willReturn([
                 'testId' => ['object' => []],
             ]);
@@ -69,7 +71,8 @@ final class CollectorRepositoryTest extends TestCase
     {
         $objectId = '123';
         $storage = $this->createStub(StorageInterface::class);
-        $storage->method('read')
+        $storage
+            ->method('read')
             ->willReturn([
                 'testId' => ['stdClass#' . $objectId => 'value'],
             ]);
@@ -90,7 +93,8 @@ final class CollectorRepositoryTest extends TestCase
     public function testObjectNotFound(): void
     {
         $storage = $this->createStub(StorageInterface::class);
-        $storage->method('read')
+        $storage
+            ->method('read')
             ->willReturn([
                 'testId' => [],
             ]);

@@ -106,6 +106,6 @@ final class LoggerInterfaceProxy implements LoggerInterface
     private function getCallStack(): array
     {
         /** @psalm-var array{file: string, line: int} */
-        return debug_backtrace()[1];
+        return debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1];
     }
 }

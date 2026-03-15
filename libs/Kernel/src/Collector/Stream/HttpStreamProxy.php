@@ -282,7 +282,7 @@ final class HttpStreamProxy implements StreamWrapperInterface
             return true;
         }
 
-        $backtrace = debug_backtrace();
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4);
         return (
             BacktraceIgnoreMatcher::isIgnoredByClass($backtrace, self::$ignoredClasses)
             || BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, self::$ignoredPathPatterns)

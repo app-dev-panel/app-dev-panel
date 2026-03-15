@@ -21,7 +21,7 @@ final class HttpClientInterfaceProxy implements ClientInterface
     public function sendRequest(RequestInterface $request): ResponseInterface
     {
         /** @psalm-var array{file: string, line: int} $callStack */
-        $callStack = debug_backtrace()[0];
+        $callStack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
 
         $uniqueId = random_bytes(36);
         $startTime = microtime(true);
