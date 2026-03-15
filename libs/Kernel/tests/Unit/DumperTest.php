@@ -400,7 +400,7 @@ final class DumperTest extends TestCase
         yield 'closure inside std class' => [
             $closureInsideObject,
             <<<S
-                {"stdClass#{$closureInsideObjectId}":{"public \$closure":"fn () => true"},"Closure#{$closureObjectId}":"fn () => true"}
+                {"stdClass#{$closureInsideObjectId}":{"public \$closure":"static fn() => true"},"Closure#{$closureObjectId}":"static fn() => true"}
                 S,
         ];
     }
@@ -597,7 +597,7 @@ final class DumperTest extends TestCase
         yield 'short function' => [
             $shortFunctionObject,
             <<<S
-                {"Closure#{$shortFunctionObjectId}":"fn () => 1"}
+                {"Closure#{$shortFunctionObjectId}":"static fn() => 1"}
                 S,
         ];
 
@@ -609,7 +609,7 @@ final class DumperTest extends TestCase
         yield 'short static function' => [
             $staticShortFunctionObject,
             <<<S
-                {"Closure#{$staticShortFunctionObjectId}":"static fn () => 1"}
+                {"Closure#{$staticShortFunctionObjectId}":"static fn() => 1"}
                 S,
         ];
 
@@ -623,7 +623,7 @@ final class DumperTest extends TestCase
         yield 'function' => [
             $functionObject,
             <<<S
-                {"Closure#{$functionObjectId}":"function () {\\n    return 1;\\n}"}
+                {"Closure#{$functionObjectId}":"static function () {\\n    return 1;\\n}"}
                 S,
         ];
 
@@ -699,7 +699,7 @@ final class DumperTest extends TestCase
             [$closureInArrayObject],
             // @formatter:on
             <<<S
-                [{"Closure#{$closureInArrayObjectId}":"fn () => new \\\DateTimeZone('')"}]
+                [{"Closure#{$closureInArrayObjectId}":"static fn() => new \\\DateTimeZone('')"}]
                 S,
         ];
 
@@ -711,7 +711,7 @@ final class DumperTest extends TestCase
         yield 'original class name' => [
             $closureWithUsualClassNameObject,
             <<<S
-                {"Closure#{$closureWithUsualClassNameObjectId}":"fn (\\\Yiisoft\\\Yii\\\Debug\\\Dumper \$date) => new \\\DateTimeZone('')"}
+                {"Closure#{$closureWithUsualClassNameObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
                 S,
         ];
 
@@ -723,7 +723,7 @@ final class DumperTest extends TestCase
         yield 'class alias' => [
             $closureWithAliasedClassNameObject,
             <<<S
-                {"Closure#{$closureWithAliasedClassNameObjectId}":"fn (\\\Yiisoft\\\Yii\\\Debug\\\Dumper \$date) => new \\\DateTimeZone('')"}
+                {"Closure#{$closureWithAliasedClassNameObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
                 S,
         ];
 
@@ -735,7 +735,7 @@ final class DumperTest extends TestCase
         yield 'namespace alias' => [
             $closureWithAliasedNamespaceObject,
             <<<S
-                {"Closure#{$closureWithAliasedNamespaceObjectId}":"fn (\\\Yiisoft\\\Yii\\\Debug\\\Dumper \$date) => new \\\DateTimeZone('')"}
+                {"Closure#{$closureWithAliasedNamespaceObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
                 S,
         ];
         // @formatter:off
@@ -746,7 +746,7 @@ final class DumperTest extends TestCase
         yield 'closure with null-collision operator' => [
             $closureWithNullCollisionOperatorObject,
             <<<S
-                {"Closure#{$closureWithNullCollisionOperatorObjectId}":"fn () => \$_ENV['var'] ?? null"}
+                {"Closure#{$closureWithNullCollisionOperatorObjectId}":"static fn() => \$_ENV['var'] ?? null"}
                 S,
         ];
         yield 'utf8 supported' => [
@@ -764,7 +764,7 @@ final class DumperTest extends TestCase
         yield 'closure in property supported' => [
             $objectWithClosureInProperty,
             <<<S
-                {"stdClass#{$objectWithClosureInPropertyId}":{"public \$a":{"Closure#{$objectWithClosureInPropertyClosureId}":"fn () => 1"}}}
+                {"stdClass#{$objectWithClosureInPropertyId}":{"public \$a":{"Closure#{$objectWithClosureInPropertyClosureId}":"static fn() => 1"}}}
                 S,
         ];
         yield 'binary string' => [

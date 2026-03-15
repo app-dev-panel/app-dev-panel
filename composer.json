@@ -39,8 +39,16 @@
   },
   "require-dev": {
     "carthage-software/mago": "^1.0",
+    "nyholm/psr7": "^1.8",
     "phpunit/phpunit": "^11.0",
-    "symfony/var-dumper": "^7.0"
+    "symfony/event-dispatcher-contracts": "^3.6",
+    "symfony/var-dumper": "^7.0",
+    "yiisoft/cache": "^3.2",
+    "yiisoft/db-sqlite": "^1.2",
+    "yiisoft/error-handler": "^4.3",
+    "yiisoft/event-dispatcher": "^1.1",
+    "yiisoft/yii-console": "^2.4",
+    "yiisoft/yii-http": "^1.1"
   },
   "scripts-aliases": {
     "lint": [

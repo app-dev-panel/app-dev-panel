@@ -29,7 +29,7 @@ final class VarDumperHandlerInterfaceProxyTest extends TestCase
             [
                 [
                     'variable' => true,
-                    'line' => __FILE__ . ':28',
+                    'line' => __FILE__ . ':26',
                 ],
             ],
             $collector->getCollected(),

@@ -22,6 +22,8 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
     }
 
     #[DataProvider('dataSkipCollectOnMatchIgnoreReferences')]
+    #[\PHPUnit\Framework\Attributes\RequiresPhpExtension('sockets')]
+    #[\PHPUnit\Framework\Attributes\Group('network')]
     public function testSkipCollectOnMatchIgnoreReferences(
         string $url,
         callable $before,

@@ -24,7 +24,7 @@ final class LoggerInterfaceProxyTest extends TestCase
         $collector
             ->expects($this->once())
             ->method('collect')
-            ->with($level, $message, $context, __FILE__ . ':32');
+            ->with($level, $message, $context, __FILE__ . ':30');
         $proxy = new LoggerInterfaceProxy($logger, $collector);
 
         $proxy->$method($message, $context);
@@ -39,7 +39,7 @@ final class LoggerInterfaceProxyTest extends TestCase
         $collector
             ->expects($this->once())
             ->method('collect')
-            ->with($level, $message, $context, __FILE__ . ':49');
+            ->with($level, $message, $context, __FILE__ . ':45');
         $proxy = new LoggerInterfaceProxy($logger, $collector);
 
         $proxy->log($level, $message, $context);

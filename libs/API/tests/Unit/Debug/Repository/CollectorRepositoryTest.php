@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Tests\Unit\Debug\Repository;
 
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
-use AppDevPanel\Kernel\Storage\MemoryStorage;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 use PHPUnit\Framework\TestCase;
 
 final class CollectorRepositoryTest extends TestCase
 {
     public function testSummary(): void
     {
-        $storage = new MemoryStorage();
+        $storage = $this->createStub(StorageInterface::class);
+        $storage->method('read')
+            ->willReturn([
+                'testId' => ['total' => 7],
+            ]);
+
         $repository = new CollectorRepository($storage);
-
-        $this->assertSame([], $repository->getSummary());
-
-        $storage->write('testId', ['stub' => ['key' => 'value']], [], ['total' => 7]);
 
         $this->assertSame(
             [
@@ -27,10 +28,24 @@ final class CollectorRepositoryTest extends TestCase
         );
     }
 
+    public function testSummaryEmpty(): void
+    {
+        $storage = $this->createStub(StorageInterface::class);
+        $storage->method('read')
+            ->willReturn([]);
+
+        $repository = new CollectorRepository($storage);
+
+        $this->assertSame([], $repository->getSummary());
+    }
+
     public function testDetail(): void
     {
-        $storage = new MemoryStorage();
-        $storage->write('testId', ['stub' => ['key' => 'value']], [], ['total' => 7]);
+        $storage = $this->createStub(StorageInterface::class);
+        $storage->method('read')
+            ->willReturn([
+                'testId' => ['stub' => ['key' => 'value']],
+            ]);
 
         $repository = new CollectorRepository($storage);
 
@@ -39,8 +54,11 @@ final class CollectorRepositoryTest extends TestCase
 
     public function testDumpObject(): void
     {
-        $storage = new MemoryStorage();
-        $storage->write('testId', ['stub' => ['key' => 'value']], ['object' => []], ['total' => 7]);
+        $storage = $this->createStub(StorageInterface::class);
+        $storage->method('read')
+            ->willReturn([
+                'testId' => ['object' => []],
+            ]);
 
         $repository = new CollectorRepository($storage);
 
@@ -49,10 +67,12 @@ final class CollectorRepositoryTest extends TestCase
 
     public function testObject(): void
     {
-        $storage = new MemoryStorage();
-
         $objectId = '123';
-        $storage->write('testId', ['stub' => ['key' => 'value']], ['stdClass#' . $objectId => 'value'], ['total' => 7]);
+        $storage = $this->createStub(StorageInterface::class);
+        $storage->method('read')
+            ->willReturn([
+                'testId' => ['stdClass#' . $objectId => 'value'],
+            ]);
 
         $repository = new CollectorRepository($storage);
 
@@ -65,5 +85,18 @@ final class CollectorRepositoryTest extends TestCase
             ],
             $object,
         );
+    }
+
+    public function testObjectNotFound(): void
+    {
+        $storage = $this->createStub(StorageInterface::class);
+        $storage->method('read')
+            ->willReturn([
+                'testId' => [],
+            ]);
+
+        $repository = new CollectorRepository($storage);
+
+        $this->assertNull($repository->getObject('testId', '999'));
     }
 }
