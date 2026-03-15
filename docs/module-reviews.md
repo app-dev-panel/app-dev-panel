@@ -129,6 +129,28 @@
 **10. `ModuleFederationAssetBundle` — empty/stub class (ModuleFederationAssetBundle.php)**
 - Likely placeholder that was never implemented
 
+**6. DoS: Missing database pagination (DbSchemaProvider.php, CycleSchemaProvider.php)**
+- `$records = new Query($this->db)->from($schema->getName())->all()` reads ALL records into memory
+- A table with 1M+ rows will consume gigabytes of RAM, crash PHP
+- No LIMIT parameter, no pagination support
+
+**7. Null dereference in createJsPanelResponse (DebugController.php:204-206)**
+- `$urls = end($js)` returns `false` when `$js` is empty
+- `$urls[0]` then causes a TypeError
+- No bounds checking on array access
+
+**8. Git branch name injection (GitController.php:71-75)**
+- Branch name from user input passed directly to `$git->getWorkingCopy()->checkout($branch)`
+- No sanitization for special characters — potential command injection through crafted branch names
+
+**9. Translation write without path validation (InspectController.php:96-138)**
+- `$locale` parameter from user input not validated for `../` traversal
+- `$categorySource->write($locale, $messages)` could write to unexpected locations
+
+**10. Silent exception swallowing (InspectController.php:81-89)**
+- `catch (Throwable) {}` with empty body silently hides all errors during translation loading
+- Makes debugging impossible
+
 ### Minor Issues
 
 **11. Hardcoded 'Yiisoft\Yii\Debug' in filter patterns (InspectController.php:238)**
@@ -151,6 +173,11 @@
 | P1 | Split InspectController into domain-specific controllers | Maintainability, SRP |
 | P1 | Replace polling SSE with real event-driven approach | Performance — free up PHP workers |
 | P1 | Replace ApplicationState with proper DI | Remove global state |
+| P0 | Add pagination/LIMIT to database queries | Security — prevent DoS |
+| P0 | Validate git branch names before checkout | Security — prevent injection |
+| P0 | Validate locale in translation write endpoint | Security — prevent path traversal |
+| P1 | Fix null dereference in createJsPanelResponse | Stability — prevent TypeError |
+| P1 | Replace empty catch blocks with logging | Debuggability |
 | P2 | Add CSRF protection to mutation endpoints | Security hardening |
 | P2 | Add return type to eventListeners() | Type safety |
 | P2 | Replace hardcoded old namespace in class filters | Correctness |
@@ -323,7 +350,7 @@ Old references to `Yiisoft\Yii\Debug\` remain in:
 
 | Priority | Count | Theme |
 |----------|-------|-------|
-| P0 (Critical) | 7 | Security fixes, critical bugs |
-| P1 (High) | 14 | Architecture improvements, performance |
-| P2 (Medium) | 12 | Design improvements, hardening |
-| P3 (Low) | 9 | Code quality, documentation |
+| P0 (Critical) | 12 | Security fixes, critical bugs |
+| P1 (High) | 17 | Architecture improvements, performance, stability |
+| P2 (Medium) | 14 | Design improvements, hardening |
+| P3 (Low) | 10 | Code quality, documentation |
