@@ -877,6 +877,258 @@ message = "Call to documented magic method `method()` on a class that cannot han
 count = 6
 
 [[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CacheControllerTest.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CacheControllerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 6
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CacheControllerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CacheControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CommandControllerTest.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+count = 4
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CommandControllerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CommandControllerTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_column`: expected `array<array-key, array<string('group'), ('V.array_column() extends mixed)>|object>|list<array<string('group'), ('V.array_column() extends mixed)>|object>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CommandControllerTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_column`: expected `array<array-key, array<string('name'), ('V.array_column() extends mixed)>|object>|list<array<string('name'), ('V.array_column() extends mixed)>|object>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CommandControllerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CommandControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ComposerControllerTest.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ComposerControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ComposerControllerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 4
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ComposerControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ControllerTestCase.php"
+code = "deprecated-class"
+message = 'Class `Yiisoft\DataResponse\DataResponseFactory` is deprecated and should no longer be used.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ControllerTestCase.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+count = 7
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "less-specific-nested-argument-type"
+message = "Argument type mismatch for argument #1 of `array_column`: expected `array<array-key, array<string('baseName'), ('V.array_column() extends mixed)>|object>|list<array<string('baseName'), ('V.array_column() extends mixed)>|object>`, but provided type `array<array-key, mixed>` is less specific."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_column`: expected `array<array-key, array<string('baseName'), ('V.array_column() extends mixed)>|object>|list<array<string('baseName'), ('V.array_column() extends mixed)>|object>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 12
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertstringcontainsstring`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 6
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 7
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "possibly-false-iterator"
+message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+count = 6
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
+code = "match-not-exhaustive"
+message = "Non-exhaustive `match` expression: subject of type `string` is not fully handled."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `strcmp`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 5
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `strcmp`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/RoutingControllerTest.php"
+code = "invalid-argument"
+message = 'Invalid argument type for argument #1 of `yiisoft\router\matchingresult::fromfailure`: expected `array<array-key, string>`, but found `list{int(405)}`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/RoutingControllerTest.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+count = 3
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/RoutingControllerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 5
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/RoutingControllerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 3
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/RoutingControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
 file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'

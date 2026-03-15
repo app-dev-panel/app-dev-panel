@@ -91,6 +91,66 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CacheControllerTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ComposerControllerTest.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ComposerControllerTest.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 3
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ControllerTestCase.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/RoutingControllerTest.php"
+code = "no-redundant-use"
+message = "Unused import: `ServerRequestFactoryInterface`."
+count = 1
+
+[[issues]]
 file = "libs/API/tests/Unit/ServerSentEventsStreamTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
@@ -406,7 +466,7 @@ count = 1
 file = "libs/Kernel/tests/Unit/DumperTest.php"
 code = "braced-string-interpolation"
 message = "Unbraced variable in string interpolation."
-count = 1
+count = 3
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/DumperTest.php"

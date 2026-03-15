@@ -31,7 +31,7 @@ final class RoutingController
                 'methods' => $data['methods'],
                 'defaults' => $data['defaults'],
                 'override' => $data['override'],
-                'middlewares' => $data['middlewareDefinitions'] ?? [],
+                'middlewares' => $data['middlewares'] ?? $data['middlewareDefinitions'] ?? [],
             ];
         }
         $response = VarDumper::create($routes)->asPrimitives(5);
@@ -72,7 +72,8 @@ final class RoutingController
 
         $route = $result->route();
         $reflection = new \ReflectionObject($route);
-        $property = $reflection->getProperty('middlewareDefinitions');
+        $propertyName = $reflection->hasProperty('middlewareDefinitions') ? 'middlewareDefinitions' : 'middlewares';
+        $property = $reflection->getProperty($propertyName);
         $middlewareDefinitions = $property->getValue($route);
         $action = end($middlewareDefinitions);
 
