@@ -1183,6 +1183,36 @@ message = "Assigning `mixed` type to a variable may lead to unexpected behavior.
 count = 6
 
 [[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/RequestControllerTest.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/RequestControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/RequestControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertstringcontainsstring`: expected `string`, but found `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/RequestControllerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/RequestControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/RoutingControllerTest.php"
 code = "invalid-argument"
 message = 'Invalid argument type for argument #1 of `yiisoft\router\matchingresult::fromfailure`: expected `array<array-key, string>`, but found `list{int(405)}`.'
@@ -1235,6 +1265,42 @@ file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
 code = "possibly-false-iterator"
 message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
 count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "possibly-invalid-argument"
+message = '''Possible argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::container`: expected `array<string, object>`, but possibly received `array{'tag@translation.categorySource': array{}}`.'''
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "possibly-invalid-argument"
+message = '''Possible argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::container`: expected `array<string, object>`, but possibly received `array{'tag@translation.categorySource': list{Yiisoft\Translator\CategorySource}}`.'''
+count = 3
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"

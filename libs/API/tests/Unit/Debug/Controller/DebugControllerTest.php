@@ -46,6 +46,68 @@ final class DebugControllerTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
     }
 
+    public function testView(): void
+    {
+        $detailData = [
+            'AppDevPanel\\Kernel\\Collector\\LogCollector' => ['logs' => []],
+            'AppDevPanel\\Kernel\\Collector\\EventCollector' => ['events' => []],
+        ];
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->once())->method('getDetail')->with('123')->willReturn($detailData);
+
+        $currentRoute = $this->createCurrentRoute(['id' => '123']);
+        $request = new \Nyholm\Psr7\ServerRequest('GET', '/test');
+        $container = $this->createMock(\Psr\Container\ContainerInterface::class);
+
+        $controller = new DebugController($this->createResponseFactory(), $repository);
+        $response = $controller->view($currentRoute, $request, $container);
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testViewWithCollector(): void
+    {
+        $detailData = [
+            'AppDevPanel\\Kernel\\Collector\\LogCollector' => ['logs' => [['level' => 'info']]],
+            'AppDevPanel\\Kernel\\Collector\\EventCollector' => ['events' => []],
+        ];
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->once())->method('getDetail')->with('123')->willReturn($detailData);
+
+        $currentRoute = $this->createCurrentRoute(['id' => '123']);
+        $request = new \Nyholm\Psr7\ServerRequest(
+            'GET',
+            '/test?collector=AppDevPanel%5CKernel%5CCollector%5CLogCollector',
+        );
+        $container = $this->createMock(\Psr\Container\ContainerInterface::class);
+
+        $controller = new DebugController($this->createResponseFactory(), $repository);
+        $response = $controller->view($currentRoute, $request, $container);
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testViewWithCollectorNotFound(): void
+    {
+        $detailData = [
+            'AppDevPanel\\Kernel\\Collector\\LogCollector' => ['logs' => []],
+        ];
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->once())->method('getDetail')->with('123')->willReturn($detailData);
+
+        $currentRoute = $this->createCurrentRoute(['id' => '123']);
+        $request = new \Nyholm\Psr7\ServerRequest('GET', '/test?collector=NonExistent');
+        $container = $this->createMock(\Psr\Container\ContainerInterface::class);
+
+        $controller = new DebugController($this->createResponseFactory(), $repository);
+
+        $this->expectException(NotFoundException::class);
+        $controller->view($currentRoute, $request, $container);
+    }
+
     public function testDump(): void
     {
         $dumpData = ['class' => 'stdClass', 'properties' => ['name' => 'test']];
