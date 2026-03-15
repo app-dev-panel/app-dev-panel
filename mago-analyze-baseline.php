@@ -1141,6 +1141,12 @@ message = "Expression being iterated (type `false|list<non-empty-string>`) might
 count = 1
 
 [[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/GitControllerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 16
+
+[[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
 code = "less-specific-argument"
 message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
