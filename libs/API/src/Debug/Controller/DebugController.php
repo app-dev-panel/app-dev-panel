@@ -203,11 +203,21 @@ final class DebugController
 
         $js = $assetManager->getJsFiles();
 
+        if (empty($js)) {
+            return $this->responseFactory->createResponse([
+                '__isPanelRemote__' => true,
+                'url' => null,
+                'module' => $module,
+                'scope' => $scope,
+                'data' => $data,
+            ]);
+        }
+
         $urls = end($js);
 
         return $this->responseFactory->createResponse([
             '__isPanelRemote__' => true,
-            'url' => $urls[0],
+            'url' => is_array($urls) && isset($urls[0]) ? $urls[0] : null,
             'module' => $module,
             'scope' => $scope,
             'data' => $data,
