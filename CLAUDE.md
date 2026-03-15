@@ -193,8 +193,9 @@ composer analyze:baseline
 | Test Writer | `/test <file or class>` | Write tests in consistent style, inline mocks, no test environment |
 | Doc Reviewer | `/review-docs [module]` | Review/update docs for LLM consumption, remove fluff |
 | Arch Reviewer | `/review-arch [module]` | Check dependency rules, abstraction leaks, circular deps |
+| Frontend Designer | `/frontend-designer [component or page]` | Design and implement React/MUI frontend components, pages, modules |
 
-Skill definitions: `.claude/skills/test/SKILL.md`, `.claude/skills/review-docs/SKILL.md`, `.claude/skills/review-arch/SKILL.md`.
+Skill definitions: `.claude/skills/test/SKILL.md`, `.claude/skills/review-docs/SKILL.md`, `.claude/skills/review-arch/SKILL.md`, `.claude/skills/frontend-designer/SKILL.md`.
 
 ## Module-Level Documentation
 
