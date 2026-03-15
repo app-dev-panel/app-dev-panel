@@ -1,6 +1,6 @@
 # API Module
 
-HTTP layer for ADP. Exposes debug data and application inspection via REST endpoints and SSE.
+HTTP layer for ADP. Three domains: **Debug** (stored debug entries), **Inspector** (live app state), **Ingestion** (external data intake).
 
 ## Package
 
@@ -15,21 +15,26 @@ HTTP layer for ADP. Exposes debug data and application inspection via REST endpo
 src/
 ├── Debug/
 │   ├── Controller/
-│   │   └── DebugController.php          # Debug data endpoints
+│   │   └── DebugController.php          # Debug data endpoints (Debugger mode)
 │   ├── Middleware/
-│   │   ├── ResponseDataWrapper.php      # Wraps responses in standard format
+│   │   ├── ResponseDataWrapper.php      # Wraps responses in {id, data, error, success, status}
 │   │   ├── DebugHeaders.php             # Adds X-Debug-Id, X-Debug-Link headers
 │   │   └── MiddlewareDispatcherMiddleware.php
 │   └── Repository/
 │       ├── CollectorRepositoryInterface.php
 │       └── CollectorRepository.php      # Reads debug data from storage
 ├── Inspector/
-│   ├── Controller/
-│   │   ├── InspectController.php        # Application introspection
-│   │   ├── GitController.php            # Git operations
-│   │   ├── CommandController.php        # Command execution
-│   │   ├── ComposerController.php       # Composer management
-│   │   ├── CacheController.php          # Cache inspection
+│   ├── Controller/                      # Inspector mode — live app state
+│   │   ├── InspectController.php        # config, params, classes, object, phpinfo, events
+│   │   ├── RoutingController.php        # routes, route check
+│   │   ├── DatabaseController.php       # table list, table data with pagination
+│   │   ├── FileController.php           # file explorer, file read
+│   │   ├── TranslationController.php    # translation catalogs, update
+│   │   ├── RequestController.php        # re-execute request, build cURL
+│   │   ├── GitController.php            # git summary, log, checkout, commands
+│   │   ├── CommandController.php        # list/execute commands + composer scripts
+│   │   ├── ComposerController.php       # composer.json/lock, inspect, require
+│   │   ├── CacheController.php          # view/delete/clear cache
 │   │   └── OpcacheController.php        # OPcache status
 │   ├── Database/
 │   │   ├── SchemaProviderInterface.php
@@ -42,6 +47,9 @@ src/
 │   │   ├── CodeceptionCommand.php
 │   │   └── PsalmCommand.php
 │   └── ApplicationState.php
+├── Ingestion/
+│   └── Controller/
+│       └── IngestionController.php      # External data intake (any language)
 ├── ServerSentEventsStream.php           # SSE implementation
 └── ModuleFederationAssetBundle.php      # Remote panel support
 config/
@@ -120,6 +128,19 @@ config/
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/` | OPcache status + configuration |
+
+### Ingestion API (`/debug/api/ingest`)
+
+Language-agnostic endpoints for external applications to send debug data. Defined by OpenAPI 3.1 spec at `openapi/ingestion.yaml`.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/` | Ingest single debug entry (collectors + optional context/summary) |
+| POST | `/batch` | Ingest multiple entries at once |
+| POST | `/log` | Shorthand: ingest a single log entry |
+| GET | `/openapi.json` | Serve the OpenAPI spec |
+
+Pre-built clients: Python (`clients/python/`), TypeScript (`clients/typescript/`).
 
 ## Middleware Chain
 
