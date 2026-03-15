@@ -86,13 +86,11 @@ final class ServiceController
         $result = array_map(static function (ServiceDescriptor $descriptor): array {
             return [
                 ...$descriptor->toArray(),
-                'status' => $descriptor->isOnline() ? 'online' : 'offline',
+                'online' => $descriptor->isOnline(),
             ];
         }, $services);
 
-        return $this->responseFactory->createResponse([
-            'services' => array_values($result),
-        ]);
+        return $this->responseFactory->createResponse(array_values($result));
     }
 
     public function deregister(ServerRequestInterface $request, CurrentRoute $route): ResponseInterface

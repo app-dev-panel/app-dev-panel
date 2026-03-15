@@ -25,9 +25,11 @@ import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
 import Container from '@mui/material/Container';
 import Drawer from '@mui/material/Drawer';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import {ErrorFallback} from '@yiisoft/yii-dev-panel-sdk/Component/ErrorFallback';
 import {ScrollTopButton} from '@yiisoft/yii-dev-panel-sdk/Component/ScrollTop';
+import {ServiceSelector} from '@yiisoft/yii-dev-panel-sdk/Component/ServiceSelector';
 import {YiiIcon} from '@yiisoft/yii-dev-panel-sdk/Component/SvgIcon/YiiIcon';
 import {Config} from '@yiisoft/yii-dev-panel-sdk/Config';
 import {NotificationSnackbar} from '@yiisoft/yii-dev-panel/Application/Component/NotificationSnackbar';
@@ -195,7 +197,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             </Drawer>
             <NotificationSnackbar />
             <Container maxWidth="lg" sx={(theme) => ({[theme.breakpoints.down('md')]: {px: 2}})}>
-                <BreadcrumbsWrapper toggleDrawer={toggleDrawer} />
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <BreadcrumbsWrapper toggleDrawer={toggleDrawer} />
+                    <ServiceSelector />
+                </Stack>
                 <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[window.location.pathname]}>
                     <Outlet />
                 </ErrorBoundary>

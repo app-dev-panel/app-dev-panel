@@ -129,10 +129,10 @@ final class ServiceControllerTest extends ControllerTestCase
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
-        $this->assertArrayHasKey('services', $data);
-        $this->assertCount(1, $data['services']);
-        $this->assertSame('svc-alpha', $data['services'][0]['service']);
-        $this->assertSame('online', $data['services'][0]['status']);
+        $this->assertIsArray($data);
+        $this->assertCount(1, $data);
+        $this->assertSame('svc-alpha', $data[0]['service']);
+        $this->assertTrue($data[0]['online']);
     }
 
     public function testListEmpty(): void
@@ -141,7 +141,7 @@ final class ServiceControllerTest extends ControllerTestCase
         $response = $controller->list();
 
         $data = $this->responseData($response);
-        $this->assertSame([], $data['services']);
+        $this->assertSame([], $data);
     }
 
     public function testDeregister(): void
@@ -158,7 +158,7 @@ final class ServiceControllerTest extends ControllerTestCase
         // Verify it's gone
         $listResponse = $controller->list();
         $listData = $this->responseData($listResponse);
-        $this->assertSame([], $listData['services']);
+        $this->assertSame([], $listData);
     }
 
     public function testDeregisterEmptyService(): void
