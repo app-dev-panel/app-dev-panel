@@ -87,7 +87,7 @@ return [
             'help',
             'list',
             'serve',
-            'debug/reset',
+            'debug:reset',
         ],
     ],
     'yiisoft/yii-console' => [
