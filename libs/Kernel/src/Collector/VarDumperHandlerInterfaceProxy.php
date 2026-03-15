@@ -18,7 +18,7 @@ final class VarDumperHandlerInterfaceProxy implements HandlerInterface
 
     public function handle(mixed $variable, int $depth, bool $highlight = false): void
     {
-        $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
 
         $callStack = null;
         foreach ($stack as $value) {
