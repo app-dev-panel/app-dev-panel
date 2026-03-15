@@ -51,8 +51,13 @@ final class DebugServerCommand extends Command
             return ExitCode::OK;
         }
 
-        $socket = Connection::create();
-        $socket->bind();
+        try {
+            $socket = Connection::create();
+            $socket->bind();
+        } catch (\RuntimeException $e) {
+            $io->error('Failed to start debug server: ' . $e->getMessage());
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
 
         $io->success(sprintf('Listening on "%s".', $socket->getUri()));
 
@@ -71,7 +76,12 @@ final class DebugServerCommand extends Command
                 break;
             }
 
-            $data = \json_decode($message[1], null, 512, JSON_THROW_ON_ERROR);
+            try {
+                $data = \json_decode($message[1], null, 512, JSON_THROW_ON_ERROR);
+            } catch (\JsonException $e) {
+                $io->warning('Failed to decode message: ' . $e->getMessage());
+                continue;
+            }
             $type = match ($data[0]) {
                 Connection::MESSAGE_TYPE_VAR_DUMPER => 'VarDumper',
                 Connection::MESSAGE_TYPE_LOGGER => 'Logger',

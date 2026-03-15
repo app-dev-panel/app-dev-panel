@@ -42,19 +42,23 @@ final class DebugServerBroadcastCommand extends Command
             return ExitCode::OK;
         }
 
-        $socket = Connection::create();
-        if (\function_exists('pcntl_signal')) {
-            $io->success('Quit the server with CTRL-C or COMMAND-C.');
-
-            \pcntl_signal(\SIGINT, static function () use ($socket): void {
-                $socket->close();
-                exit(1);
-            });
+        try {
+            $socket = Connection::create();
+        } catch (\RuntimeException $e) {
+            $io->error('Failed to create socket: ' . $e->getMessage());
+            return ExitCode::UNSPECIFIED_ERROR;
         }
 
-        $data = $input->getOption('message');
-        $socket->broadcast(Connection::MESSAGE_TYPE_LOGGER, $data);
-        $socket->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, VarDumper::create(['$data' => $data])->asJson(false));
+        try {
+            $data = $input->getOption('message');
+            $socket->broadcast(Connection::MESSAGE_TYPE_LOGGER, $data);
+            $socket->broadcast(
+                Connection::MESSAGE_TYPE_VAR_DUMPER,
+                VarDumper::create(['$data' => $data])->asJson(false),
+            );
+        } finally {
+            $socket->close();
+        }
 
         return ExitCode::OK;
     }
