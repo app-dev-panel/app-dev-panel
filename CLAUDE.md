@@ -7,7 +7,7 @@ ADP is a **universal application inspection tool** — framework-agnostic, langu
 Two fundamental modes:
 
 - **Debugger** — Collects data per request or command execution. Every intercepted action (logs, SQL queries, HTTP calls, events, exceptions) is stored permanently. All historical entries remain accessible — 100 API requests means 100 inspectable debug entries. Storage: JSON files per entry (summary + data + objects).
-- **Inspector** — Real-time application viewer. Browse files, configs, cache, routes, translations. Run tests, scripts, composer commands. State exists only for the current view — no history. Inspector operates on live application state.
+- **Inspector** — Real-time application viewer. Browse files, configs, cache, routes, translations. Run tests, scripts, composer commands. State exists only for the current view — no history. Inspector operates on live application state. Supports multi-app proxying: external services register via the Service Registry API and inspector requests are proxied to them via `InspectorProxyMiddleware`.
 
 Debugger and Inspector integrate: e.g., "execute SQL query" action next to DB connection logs, "view source file" next to exception traces.
 
@@ -48,7 +48,8 @@ Origin: fork/consolidation from Yii Debug into a monorepo, evolving to be fully 
 │   ├── python/                   # Python ingestion client (adp-client)
 │   └── typescript/               # TypeScript ingestion client (@app-dev-panel/client)
 ├── openapi/
-│   └── ingestion.yaml            # OpenAPI 3.1 spec for ingestion endpoints
+│   ├── ingestion.yaml            # OpenAPI 3.1 spec for ingestion endpoints
+│   └── inspector.yaml            # OpenAPI 3.1 spec for inspector contract (external apps)
 ├── scripts/
 │   └── generate-clients.sh       # Client code generation from OpenAPI spec
 ├── CLAUDE.md

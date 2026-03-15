@@ -35,7 +35,10 @@ src/
 │   │   ├── CommandController.php        # list/execute commands + composer scripts
 │   │   ├── ComposerController.php       # composer.json/lock, inspect, require
 │   │   ├── CacheController.php          # view/delete/clear cache
-│   │   └── OpcacheController.php        # OPcache status
+│   │   ├── OpcacheController.php        # OPcache status
+│   │   └── ServiceController.php       # Service registration (register, heartbeat, list, deregister)
+│   ├── Middleware/
+│   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services
 │   ├── Database/
 │   │   ├── SchemaProviderInterface.php
 │   │   ├── CycleSchemaProvider.php      # Cycle ORM schema
@@ -142,6 +145,29 @@ Language-agnostic endpoints for external applications to send debug data. Define
 
 Pre-built clients: Python (`clients/python/`), TypeScript (`clients/typescript/`).
 
+### Service Registry API (`/debug/api/services`)
+
+Manages external application registrations for multi-app inspector proxying.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/register` | Register an external service (body: `service`, `inspectorUrl`, `language`, `capabilities`) |
+| POST | `/heartbeat` | Heartbeat to keep service online (body: `service`) |
+| GET | `/` | List all registered services with online/offline status |
+| DELETE | `/{service}` | Deregister a service by name |
+
+Service name `local` is reserved for the host PHP application.
+
+### Inspector Proxy
+
+`InspectorProxyMiddleware` is wired into the `/inspect/api` route group. When a request includes `?service=<name>`, the middleware proxies the request to the registered service's `inspectorUrl` instead of handling it locally. Requests without `?service` or with `?service=local` are handled by the local PHP controllers.
+
+Capability checking: the middleware maps inspector path prefixes to capability names (e.g., `/routes` -> `routes`, `/table` -> `database`). If the target service does not declare the required capability, a 501 response is returned.
+
+### Inspector OpenAPI Spec
+
+`openapi/inspector.yaml` defines the Inspector API contract (OpenAPI 3.1) that external applications must implement to be proxied. Capabilities map to endpoint groups: `config`, `routes`, `files`, `cache`, `database`, `translations`, `events`, `commands`, `git`.
+
 ## Middleware Chain
 
 All API requests pass through:
@@ -150,6 +176,10 @@ All API requests pass through:
 2. **CorsAllowAll** — Adds permissive CORS headers
 3. **ResponseDataWrapper** — Wraps all responses in `{id, data, error, success, status}`
 4. **DebugHeaders** — Adds `X-Debug-Id` and `X-Debug-Link` response headers
+
+Inspector route group (`/inspect/api`) additionally includes:
+
+5. **InspectorProxyMiddleware** — Routes requests with `?service=<name>` to external service URLs
 
 ## Response Format
 
