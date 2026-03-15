@@ -14,6 +14,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -38,6 +39,7 @@ class InspectController
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
         private Aliases $aliases,
+        private LoggerInterface $logger,
     ) {}
 
     public function config(ContainerInterface $container, ServerRequestInterface $request): ResponseInterface
@@ -85,7 +87,8 @@ class InspectController
                         $categorySource->getMessages($locale),
                     );
                 }
-            } catch (Throwable) {
+            } catch (Throwable $exception) {
+                $this->logger->warning($exception->getMessage(), ['exception' => $exception]);
             }
         }
 
