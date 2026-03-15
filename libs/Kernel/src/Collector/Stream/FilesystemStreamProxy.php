@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector\Stream;
 
-use Yiisoft\Strings\CombinedRegexp;
 use AppDevPanel\Kernel\Helper\BacktraceIgnoreMatcher;
 use AppDevPanel\Kernel\Helper\StreamWrapper\StreamWrapper;
 use AppDevPanel\Kernel\Helper\StreamWrapper\StreamWrapperInterface;
+use Yiisoft\Strings\CombinedRegexp;
 
 use const SEEK_SET;
 
@@ -48,11 +48,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
             return;
         }
         foreach ($this->operations as $name => $operation) {
-            self::$collector->collect(
-                operation: $name,
-                path: $operation['path'],
-                args: $operation['args'],
-            );
+            self::$collector->collect(operation: $name, path: $operation['path'], args: $operation['args']);
         }
         self::unregister();
     }
@@ -89,9 +85,11 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
 
     private function isIgnored(): bool
     {
-        $backtrace = debug_backtrace();
-        return BacktraceIgnoreMatcher::isIgnoredByClass($backtrace, self::$ignoredClasses)
-            || BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, self::$ignoredPathPatterns);
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4);
+        return (
+            BacktraceIgnoreMatcher::isIgnoredByClass($backtrace, self::$ignoredClasses)
+            || BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, self::$ignoredPathPatterns)
+        );
     }
 
     public function stream_open(string $path, string $mode, int $options, ?string &$opened_path): bool

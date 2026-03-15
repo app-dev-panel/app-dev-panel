@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector\Web;
 
-use Yiisoft\Yii\Console\Event\ApplicationStartup;
 use AppDevPanel\Kernel\Collector\CollectorTrait;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use Yiisoft\Yii\Console\Event\ApplicationStartup;
 use Yiisoft\Yii\Http\Event\AfterEmit;
 use Yiisoft\Yii\Http\Event\AfterRequest;
 use Yiisoft\Yii\Http\Event\BeforeRequest;
@@ -22,9 +22,8 @@ final class WebAppInfoCollector implements SummaryCollectorInterface
     private float $requestProcessingTimeStopped = 0;
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {
@@ -32,7 +31,8 @@ final class WebAppInfoCollector implements SummaryCollectorInterface
             return [];
         }
         return [
-            'applicationProcessingTime' => $this->applicationProcessingTimeStopped - $this->applicationProcessingTimeStarted,
+            'applicationProcessingTime' =>
+                $this->applicationProcessingTimeStopped - $this->applicationProcessingTimeStarted,
             'requestProcessingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted,
             'applicationEmit' => $this->applicationProcessingTimeStopped - $this->requestProcessingTimeStopped,
             'preloadTime' => $this->requestProcessingTimeStarted - $this->applicationProcessingTimeStarted,

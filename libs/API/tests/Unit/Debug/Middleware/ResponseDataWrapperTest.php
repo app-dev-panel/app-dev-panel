@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Debug\Middleware;
 
+use AppDevPanel\Api\Debug\Exception\NotFoundException;
+use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use HttpSoft\Message\Response;
 use HttpSoft\Message\ResponseFactory;
 use HttpSoft\Message\ServerRequest;
@@ -15,8 +17,6 @@ use Throwable;
 use Yiisoft\DataResponse\DataResponse;
 use Yiisoft\DataResponse\DataResponseFactory;
 use Yiisoft\Router\CurrentRoute;
-use AppDevPanel\Api\Debug\Exception\NotFoundException;
-use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 
 final class ResponseDataWrapperTest extends TestCase
 {
@@ -41,12 +41,15 @@ final class ResponseDataWrapperTest extends TestCase
         $this->assertInstanceOf(DataResponse::class, $response);
 
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals([
-            'id' => null,
-            'data' => $controllerRawResponse,
-            'error' => null,
-            'success' => true,
-        ], $response->getData());
+        $this->assertEquals(
+            [
+                'id' => null,
+                'data' => $controllerRawResponse,
+                'error' => null,
+                'success' => true,
+            ],
+            $response->getData(),
+        );
     }
 
     public function testDataResponseErrorStatus(): void
@@ -62,12 +65,15 @@ final class ResponseDataWrapperTest extends TestCase
         $this->assertInstanceOf(DataResponse::class, $response);
 
         $this->assertEquals(400, $response->getStatusCode());
-        $this->assertEquals([
-            'id' => null,
-            'data' => $controllerRawResponse,
-            'error' => null,
-            'success' => false,
-        ], $response->getData());
+        $this->assertEquals(
+            [
+                'id' => null,
+                'data' => $controllerRawResponse,
+                'error' => null,
+                'success' => false,
+            ],
+            $response->getData(),
+        );
     }
 
     public function testDataResponseException(): void
@@ -76,28 +82,30 @@ final class ResponseDataWrapperTest extends TestCase
         $middleware = $this->createMiddleware();
         $response = $middleware->process(
             new ServerRequest(),
-            $this->createExceptionRequestHandler(new NotFoundException($errorMessage))
+            $this->createExceptionRequestHandler(new NotFoundException($errorMessage)),
         );
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertInstanceOf(DataResponse::class, $response);
 
         $this->assertEquals(404, $response->getStatusCode());
-        $this->assertEquals([
-            'id' => null,
-            'data' => null,
-            'error' => $errorMessage,
-            'success' => false,
-        ], $response->getData());
+        $this->assertEquals(
+            [
+                'id' => null,
+                'data' => null,
+                'error' => $errorMessage,
+                'success' => false,
+            ],
+            $response->getData(),
+        );
     }
 
     private function createRequestHandler(ResponseInterface $response): RequestHandlerInterface
     {
-        return new class ($response) implements RequestHandlerInterface {
+        return new class($response) implements RequestHandlerInterface {
             public function __construct(
                 private ResponseInterface $response,
-            ) {
-            }
+            ) {}
 
             public function handle($request): ResponseInterface
             {
@@ -108,11 +116,10 @@ final class ResponseDataWrapperTest extends TestCase
 
     private function createExceptionRequestHandler(Throwable $exception): RequestHandlerInterface
     {
-        return new class ($exception) implements RequestHandlerInterface {
+        return new class($exception) implements RequestHandlerInterface {
             public function __construct(
                 private Throwable $exception,
-            ) {
-            }
+            ) {}
 
             public function handle($request): ResponseInterface
             {
@@ -130,9 +137,6 @@ final class ResponseDataWrapperTest extends TestCase
 
     private function createDataResponseFactory(): DataResponseFactory
     {
-        return new DataResponseFactory(
-            new ResponseFactory(),
-            new StreamFactory(),
-        );
+        return new DataResponseFactory(new ResponseFactory(), new StreamFactory());
     }
 }

@@ -1,10 +1,10 @@
 import '@yiisoft/yii-dev-toolbar/wdyr';
 
+import {Config} from '@yiisoft/yii-dev-panel-sdk/Config';
 import App from '@yiisoft/yii-dev-toolbar/App';
 import '@yiisoft/yii-dev-toolbar/index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {Config} from '@yiisoft/yii-dev-panel-sdk/Config';
 
 (function YiiDevPanelToolbarWidget(scope) {
     scope.init = function () {
@@ -25,14 +25,8 @@ import {Config} from '@yiisoft/yii-dev-panel-sdk/Config';
         config: {
             containerId: 'yii-dev-toolbar',
             options: {
-                router: {
-                    basename: '',
-                    useHashRouter: Config.appEnv === 'github',
-                },
-                backend: {
-                    baseUrl: import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8080',
-                    usePreferredUrl: false,
-                },
+                router: {basename: '', useHashRouter: Config.appEnv === 'github'},
+                backend: {baseUrl: import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8080', usePreferredUrl: false},
             },
         },
     }),

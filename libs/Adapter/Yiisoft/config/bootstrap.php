@@ -15,7 +15,9 @@ use AppDevPanel\Kernel\DebugServer\VarDumperHandler;
 
 return [
     static function (ContainerInterface $container) use ($params) {
-        if (!($params['app-dev-panel/yii-debug']['enabled'] ?? false)) {
+        require_once __DIR__ . '/helpers.php';
+
+        if (!isAppDevPanelEnabled($params)) {
             return;
         }
         if (!$container->has(VarDumperCollector::class)) {

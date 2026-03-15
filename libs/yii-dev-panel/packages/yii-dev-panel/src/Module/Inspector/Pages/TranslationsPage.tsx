@@ -4,6 +4,7 @@ import {FullScreenCircularProgress} from '@yiisoft/yii-dev-panel-sdk/Component/F
 import {DataTable} from '@yiisoft/yii-dev-panel-sdk/Component/Grid';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel-sdk/Component/JsonRenderer';
 import {regexpQuote} from '@yiisoft/yii-dev-panel-sdk/Helper/regexpQuote';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {
     useGetTranslationsQuery,
     usePutTranslationsMutation,
@@ -14,7 +15,6 @@ import {
 } from '@yiisoft/yii-dev-panel/Module/Inspector/Context/TranslationUpdaterContext';
 import {useCallback, useContext, useMemo, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 const TempComponent = (params: GridRenderCellParams) => {
     const {updater} = useContext(TranslationUpdaterContext);
@@ -72,12 +72,7 @@ export const TranslationsPage = () => {
 
     const updateTranslationHandler = useCallback(
         (category: string, locale: string, translation: string, message: string) => {
-            const object = {
-                category,
-                locale,
-                translation,
-                message,
-            };
+            const object = {category, locale, translation, message};
             console.log(object);
             putTranslationsMutation(object);
         },

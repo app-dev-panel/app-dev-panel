@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Inspector\Command\BashCommand;
+use AppDevPanel\Api\Inspector\CommandInterface;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -11,8 +13,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\Config\ConfigInterface;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use AppDevPanel\Api\Inspector\Command\BashCommand;
-use AppDevPanel\Api\Inspector\CommandInterface;
 
 use function array_key_exists;
 use function is_array;
@@ -22,8 +22,7 @@ class CommandController
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-    ) {
-    }
+    ) {}
 
     public function index(ConfigInterface $config, Aliases $aliases): ResponseInterface
     {
@@ -87,29 +86,25 @@ class CommandController
         $commandName = $request['command'] ?? null;
 
         if ($commandName === null) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Command must not be null. Available commands: "%s".',
-                    implode('", "', array_keys($commandList))
-                )
-            );
+            throw new InvalidArgumentException(sprintf('Command must not be null. Available commands: "%s".', implode(
+                '", "',
+                array_keys($commandList),
+            )));
         }
 
         if (!array_key_exists($commandName, $commandList)) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Unknown command "%s". Available commands: "%s".',
-                    $commandName,
-                    implode('", "', array_keys($commandList))
-                )
-            );
+            throw new InvalidArgumentException(sprintf(
+                'Unknown command "%s". Available commands: "%s".',
+                $commandName,
+                implode('", "', array_keys($commandList)),
+            ));
         }
 
         $commandClass = $commandList[$commandName];
         if (is_string($commandClass) && $container->has($commandClass)) {
             $command = $container->get($commandClass);
         } else {
-            $command = new BashCommand($aliases, (array)$commandClass);
+            $command = new BashCommand($aliases, (array) $commandClass);
         }
         $result = $command->run();
 

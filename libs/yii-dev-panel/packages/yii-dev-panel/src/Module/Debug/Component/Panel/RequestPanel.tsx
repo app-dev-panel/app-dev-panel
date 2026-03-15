@@ -1,9 +1,8 @@
 import {Accordion, AccordionDetails, AccordionSummary, Alert, AlertTitle, Divider, Typography} from '@mui/material';
+import Box from '@mui/material/Box';
 import {HTTPMethod} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Debug';
 import {CodeHighlight} from '@yiisoft/yii-dev-panel-sdk/Component/CodeHighlight';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel/Module/Debug/Component/JsonRenderer';
-import Box from '@mui/material/Box';
-import React from 'react';
 
 type Response = {
     content: string;
@@ -19,9 +18,7 @@ type Response = {
     responseStatusCode: number;
     userIp: string;
 };
-type RequestPanelProps = {
-    data: Response;
-};
+type RequestPanelProps = {data: Response};
 
 const ResponseAccordion = ({data}: {data: Response}) => {
     if (typeof data.responseRaw !== 'string') {

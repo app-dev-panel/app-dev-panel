@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel;
 
+use AppDevPanel\Kernel\Collector\CollectorInterface;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Strings\WildcardPattern;
 use Yiisoft\Yii\Console\Event\ApplicationStartup;
-use AppDevPanel\Kernel\Collector\CollectorInterface;
-use AppDevPanel\Kernel\Storage\StorageInterface;
 use Yiisoft\Yii\Http\Event\BeforeRequest;
 
 final class Debugger
@@ -93,7 +93,7 @@ final class Debugger
         }
         $path = $request->getUri()->getPath();
         foreach ($this->ignoredRequests as $pattern) {
-            if ((new WildcardPattern($pattern))->match($path)) {
+            if (new WildcardPattern($pattern)->match($path)) {
                 return true;
             }
         }
@@ -109,7 +109,7 @@ final class Debugger
             return true;
         }
         foreach ($this->ignoredCommands as $pattern) {
-            if ((new WildcardPattern($pattern))->match($command)) {
+            if (new WildcardPattern($pattern)->match($command)) {
                 return true;
             }
         }

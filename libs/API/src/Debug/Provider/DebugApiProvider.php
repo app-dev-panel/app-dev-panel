@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Debug\Provider;
 
+use AppDevPanel\Api\Debug\Http\HttpApplicationWrapper;
+use AppDevPanel\Api\Debug\Http\RouteCollectorWrapper;
 use Psr\Container\ContainerInterface;
 use Yiisoft\Di\ServiceProviderInterface;
 use Yiisoft\Router\RouteCollectorInterface;
-use AppDevPanel\Api\Debug\Http\HttpApplicationWrapper;
-use AppDevPanel\Api\Debug\Http\RouteCollectorWrapper;
 use Yiisoft\Yii\Http\Application;
 
 final class DebugApiProvider implements ServiceProviderInterface
@@ -29,7 +29,7 @@ final class DebugApiProvider implements ServiceProviderInterface
         $extensions = [
             RouteCollectorInterface::class => static function (
                 ContainerInterface $container,
-                RouteCollectorInterface $routeCollector
+                RouteCollectorInterface $routeCollector,
             ) {
                 /**
                  * Register debug middlewares twice because a `Subfolder` middleware may rewrite base URL
@@ -43,11 +43,11 @@ final class DebugApiProvider implements ServiceProviderInterface
         if (class_exists(Application::class)) {
             $extensions[Application::class] = static function (
                 ContainerInterface $container,
-                Application $application
+                Application $application,
             ): Application {
                 $applicationWrapper = $container->get(HttpApplicationWrapper::class);
 
-                return$applicationWrapper->wrap($application);
+                return $applicationWrapper->wrap($application);
             };
         }
         return $extensions;

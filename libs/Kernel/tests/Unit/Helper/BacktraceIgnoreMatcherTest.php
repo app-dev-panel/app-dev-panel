@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Helper;
 
+use AppDevPanel\Kernel\Helper\BacktraceIgnoreMatcher;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use stdClass;
-use AppDevPanel\Kernel\Helper\BacktraceIgnoreMatcher;
 
 final class BacktraceIgnoreMatcherTest extends TestCase
 {
@@ -36,41 +36,18 @@ final class BacktraceIgnoreMatcherTest extends TestCase
         $backtrace[2] = $backtrace[0];
 
         $this->assertTrue(BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, [preg_quote($file)]));
-        $this->assertTrue(
-            BacktraceIgnoreMatcher::isIgnoredByFile(
-                $backtrace,
-                [preg_quote(dirname($file) . DIRECTORY_SEPARATOR) . '*']
-            )
-        );
+        $this->assertTrue(BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, [
+            preg_quote(dirname($file) . DIRECTORY_SEPARATOR) . '*',
+        ]));
         $this->assertFalse(BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, [preg_quote(__FILE__)]));
     }
 
     public function testStringMatches(): void
     {
-        $this->assertTrue(
-            BacktraceIgnoreMatcher::doesStringMatchPattern(
-                'dev/123/456',
-                ['dev/123/456']
-            )
-        );
-        $this->assertTrue(
-            BacktraceIgnoreMatcher::doesStringMatchPattern(
-                'dev/123/456',
-                ['456']
-            )
-        );
-        $this->assertTrue(
-            BacktraceIgnoreMatcher::doesStringMatchPattern(
-                'dev/123/456',
-                ['dev/.*/456']
-            )
-        );
-        $this->assertTrue(
-            BacktraceIgnoreMatcher::doesStringMatchPattern(
-                'dev/123/456',
-                ['dev*/456', 'dev/123/*']
-            )
-        );
+        $this->assertTrue(BacktraceIgnoreMatcher::doesStringMatchPattern('dev/123/456', ['dev/123/456']));
+        $this->assertTrue(BacktraceIgnoreMatcher::doesStringMatchPattern('dev/123/456', ['456']));
+        $this->assertTrue(BacktraceIgnoreMatcher::doesStringMatchPattern('dev/123/456', ['dev/.*/456']));
+        $this->assertTrue(BacktraceIgnoreMatcher::doesStringMatchPattern('dev/123/456', ['dev*/456', 'dev/123/*']));
     }
 
     public function testEmptyBacktrace(): void

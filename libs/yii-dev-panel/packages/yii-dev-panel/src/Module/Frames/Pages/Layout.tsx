@@ -31,9 +31,7 @@ const PoliciesList = () => {
         </ul>
     );
 };
-type ErrorResolutionBoxProps = {
-    url: string;
-};
+type ErrorResolutionBoxProps = {url: string};
 const ErrorResolutionBox = ({url}: ErrorResolutionBoxProps) => {
     return (
         <InfoBox

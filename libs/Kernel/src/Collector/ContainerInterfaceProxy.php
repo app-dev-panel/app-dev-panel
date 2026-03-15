@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
+use AppDevPanel\Kernel\ProxyDecoratedCalls;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Yiisoft\Proxy\ProxyManager;
 use Yiisoft\Proxy\ProxyTrait;
-use AppDevPanel\Kernel\ProxyDecoratedCalls;
 
 use function is_callable;
 use function is_object;
@@ -106,7 +106,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
             return $this->getCommonMethodProxy(
                 interface_exists($service) || class_exists($service) ? $service : $instance::class,
                 $instance,
-                $this->config->getDecoratedServiceConfig($service)
+                $this->config->getDecoratedServiceConfig($service),
             );
         }
 
@@ -133,16 +133,19 @@ final class ContainerInterfaceProxy implements ContainerInterface
     {
         $methods = [];
         foreach ($callbacks as $method => $callback) {
-            if (is_string($method) && is_callable($callback)) {
-                $methods[$method] = $callback;
+            if (!(is_string($method) && is_callable($callback))) {
+                continue;
             }
+
+            $methods[$method] = $callback;
         }
 
-        return $this->proxyManager->createObjectProxy(
+        return $this->proxyManager->createObjectProxy($service, ServiceMethodProxy::class, [
             $service,
-            ServiceMethodProxy::class,
-            [$service, $instance, $methods, $this->config]
-        );
+            $instance,
+            $methods,
+            $this->config,
+        ]);
     }
 
     private function getServiceProxyFromArray(object $instance, array $params): ?object
@@ -150,12 +153,14 @@ final class ContainerInterfaceProxy implements ContainerInterface
         try {
             $proxyClass = array_shift($params);
             foreach ($params as $index => $param) {
-                if (is_string($param)) {
-                    try {
-                        $params[$index] = $this->get($param);
-                    } catch (Exception) {
-                        //leave as is
-                    }
+                if (!is_string($param)) {
+                    continue;
+                }
+
+                try {
+                    $params[$index] = $this->get($param);
+                } catch (Exception) {
+                    //leave as is
                 }
             }
             return new $proxyClass($instance, ...$params);
@@ -169,11 +174,11 @@ final class ContainerInterfaceProxy implements ContainerInterface
      */
     private function getCommonServiceProxy(string $service, object $instance): object
     {
-        return $this->proxyManager->createObjectProxy(
+        return $this->proxyManager->createObjectProxy($service, ServiceProxy::class, [
             $service,
-            ServiceProxy::class,
-            [$service, $instance, $this->config]
-        );
+            $instance,
+            $this->config,
+        ]);
     }
 
     private function setServiceProxyCache(string $service, object $instance): void
@@ -198,6 +203,6 @@ final class ContainerInterfaceProxy implements ContainerInterface
             $this->logProxy(ContainerInterface::class, $this->decorated, 'has', [$id], $result, $timeStart);
         }
 
-        return (bool)$result;
+        return (bool) $result;
     }
 }

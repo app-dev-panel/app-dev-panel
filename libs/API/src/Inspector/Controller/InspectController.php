@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Inspector\Controller;
 
 use Alexkart\CurlBuilder\Command;
+use AppDevPanel\Adapter\Yiisoft\Collector\Web\RequestCollector;
+use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Inspector\ApplicationState;
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use FilesystemIterator;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
@@ -13,6 +17,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use RecursiveDirectoryIterator;
 use ReflectionClass;
 use RuntimeException;
@@ -28,18 +33,14 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 use Yiisoft\Translator\CategorySource;
 use Yiisoft\VarDumper\VarDumper;
-use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
-use AppDevPanel\Api\Inspector\ApplicationState;
-use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
-use AppDevPanel\Adapter\Yiisoft\Collector\Web\RequestCollector;
 
 class InspectController
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
         private Aliases $aliases,
-    ) {
-    }
+        private LoggerInterface $logger,
+    ) {}
 
     public function config(ContainerInterface $container, ServerRequestInterface $request): ResponseInterface
     {
@@ -67,8 +68,8 @@ class InspectController
         $locales = array_keys($params['locale']['locales']);
         if ($locales === []) {
             throw new RuntimeException(
-                'Unable to determine list of available locales. ' .
-                'Make sure that "$params[\'locale\'][\'locales\']" contains all available locales.'
+                'Unable to determine list of available locales. '
+                . 'Make sure that "$params[\'locale\'][\'locales\']" contains all available locales.',
             );
         }
         $messages = [];
@@ -83,10 +84,11 @@ class InspectController
                 foreach ($locales as $locale) {
                     $messages[$categoryName][$locale] = array_merge(
                         $messages[$categoryName][$locale] ?? [],
-                        $categorySource->getMessages($locale)
+                        $categorySource->getMessages($locale),
                     );
                 }
-            } catch (Throwable) {
+            } catch (Throwable $exception) {
+                $this->logger->warning($exception->getMessage(), ['exception' => $exception]);
             }
         }
 
@@ -109,21 +111,21 @@ class InspectController
 
         $categorySource = null;
         foreach ($categorySources as $possibleCategorySource) {
-            if ($possibleCategorySource->getName() === $categoryName) {
-                $categorySource = $possibleCategorySource;
+            if ($possibleCategorySource->getName() !== $categoryName) {
+                continue;
             }
+
+            $categorySource = $possibleCategorySource;
         }
         if ($categorySource === null) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Invalid category name "%s". Only the following categories are available: "%s"',
-                    $categoryName,
-                    implode(
-                        '", "',
-                        array_map(fn (CategorySource $categorySource) => $categorySource->getName(), $categorySources)
-                    )
-                )
-            );
+            throw new InvalidArgumentException(sprintf(
+                'Invalid category name "%s". Only the following categories are available: "%s"',
+                $categoryName,
+                implode('", "', array_map(
+                    static fn(CategorySource $categorySource) => $categorySource->getName(),
+                    $categorySources,
+                )),
+            ));
         }
         $messages = $categorySource->getMessages($locale);
         $messages = array_replace_recursive($messages, [
@@ -195,7 +197,7 @@ class InspectController
 
         $directoryIterator = new RecursiveDirectoryIterator(
             $destination,
-            FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO
+            FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO,
         );
 
         $files = [];
@@ -218,12 +220,9 @@ class InspectController
                 continue;
             }
             $path = $this->removeBasePath($rootPath, $path);
-            $files[] = array_merge(
-                [
-                    'path' => $path,
-                ],
-                $this->serializeFileInfo($file)
-            );
+            $files[] = array_merge([
+                'path' => $path,
+            ], $this->serializeFileInfo($file));
         }
 
         return $this->responseFactory->createResponse($files);
@@ -237,12 +236,12 @@ class InspectController
         $inspected = [...get_declared_classes(), ...get_declared_interfaces()];
         // TODO: think how to ignore heavy objects
         $patterns = [
-            fn (string $class) => !str_starts_with($class, 'ComposerAutoloaderInit'),
-            fn (string $class) => !str_starts_with($class, 'Composer\\'),
-            fn (string $class) => !str_starts_with($class, 'Yiisoft\\Yii\\Debug\\'),
-            fn (string $class) => !str_starts_with($class, 'Yiisoft\\ErrorHandler\\ErrorHandler'),
-            fn (string $class) => !str_contains($class, '@anonymous'),
-            fn (string $class) => !is_subclass_of($class, Throwable::class),
+            static fn(string $class) => !str_starts_with($class, 'ComposerAutoloaderInit'),
+            static fn(string $class) => !str_starts_with($class, 'Composer\\'),
+            static fn(string $class) => !str_starts_with($class, 'Yiisoft\\Yii\\Debug\\'),
+            static fn(string $class) => !str_starts_with($class, 'Yiisoft\\ErrorHandler\\ErrorHandler'),
+            static fn(string $class) => !str_contains($class, '@anonymous'),
+            static fn(string $class) => !is_subclass_of($class, Throwable::class),
         ];
         foreach ($patterns as $patternFunction) {
             $inspected = array_filter($inspected, $patternFunction);
@@ -318,7 +317,7 @@ class InspectController
     public function checkRoute(
         ServerRequestInterface $request,
         UrlMatcherInterface $matcher,
-        ServerRequestFactoryInterface $serverRequestFactory
+        ServerRequestFactoryInterface $serverRequestFactory,
     ): ResponseInterface {
         $queryParams = $request->getQueryParams();
         $path = $queryParams['route'] ?? null;
@@ -372,7 +371,7 @@ class InspectController
 
     public function request(
         ServerRequestInterface $request,
-        CollectorRepositoryInterface $collectorRepository
+        CollectorRepositoryInterface $collectorRepository,
     ): ResponseInterface {
         $request = $request->getQueryParams();
         $debugEntryId = $request['debugEntryId'] ?? null;
@@ -404,11 +403,10 @@ class InspectController
 
     public function buildCurl(
         ServerRequestInterface $request,
-        CollectorRepositoryInterface $collectorRepository
+        CollectorRepositoryInterface $collectorRepository,
     ): ResponseInterface {
         $request = $request->getQueryParams();
         $debugEntryId = $request['debugEntryId'] ?? null;
-
 
         $data = $collectorRepository->getDetail($debugEntryId);
         $rawRequest = $data[RequestCollector::class]['requestRaw'];
@@ -416,13 +414,13 @@ class InspectController
         $request = Message::parseRequest($rawRequest);
 
         try {
-            $output = (new Command())
+            $output = new Command()
                 ->setRequest($request)
                 ->build();
         } catch (Throwable $e) {
             return $this->responseFactory->createResponse([
                 'command' => null,
-                'exception' => (string)$e,
+                'exception' => (string) $e,
             ]);
         }
 
@@ -433,12 +431,7 @@ class InspectController
 
     private function removeBasePath(string $rootPath, string $path): string|array|null
     {
-        return preg_replace(
-            '/^' . preg_quote($rootPath, '/') . '/',
-            '',
-            $path,
-            1
-        );
+        return preg_replace('/^' . preg_quote($rootPath, '/') . '/', '', $path, 1);
     }
 
     private function getUserOwner(int $uid): array
@@ -485,17 +478,15 @@ class InspectController
     {
         $rootPath = $this->aliases->get('@root');
         $file = new SplFileInfo($destination);
-        return $this->responseFactory->createResponse(
-            array_merge(
-                $extra,
-                [
-                    'directory' => $this->removeBasePath($rootPath, dirname($destination)),
-                    'content' => file_get_contents($destination),
-                    'path' => $this->removeBasePath($rootPath, $destination),
-                    'absolutePath' => $destination,
-                ],
-                $this->serializeFileInfo($file)
-            )
-        );
+        return $this->responseFactory->createResponse(array_merge(
+            $extra,
+            [
+                'directory' => $this->removeBasePath($rootPath, dirname($destination)),
+                'content' => file_get_contents($destination),
+                'path' => $this->removeBasePath($rootPath, $destination),
+                'absolutePath' => $destination,
+            ],
+            $this->serializeFileInfo($file),
+        ));
     }
 }

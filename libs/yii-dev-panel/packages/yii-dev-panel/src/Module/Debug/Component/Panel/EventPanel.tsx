@@ -3,23 +3,16 @@ import Timeline from '@mui/lab/Timeline';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineDot from '@mui/lab/TimelineDot';
 import TimelineItem from '@mui/lab/TimelineItem';
-import TimelineOppositeContent, { timelineOppositeContentClasses } from '@mui/lab/TimelineOppositeContent';
+import TimelineOppositeContent, {timelineOppositeContentClasses} from '@mui/lab/TimelineOppositeContent';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import {Alert, AlertTitle, IconButton, Tooltip} from '@mui/material';
+import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import {parseFilename, parseFilePathWithLineAnchor} from '@yiisoft/yii-dev-panel-sdk/Helper/filePathParser';
 import {formatMicrotime} from '@yiisoft/yii-dev-panel-sdk/Helper/formatDate';
 import {TimelineContentWrapper} from '@yiisoft/yii-dev-panel/Module/Debug/Component/Timeline/TimelineContentWrapper';
-import Box from '@mui/material/Box';
-import React from 'react';
 
-type EventType = {
-    event: string;
-    file: string;
-    line: string;
-    name: string;
-    time: number;
-};
+type EventType = {event: string; file: string; line: string; name: string; time: number};
 
 const Line = ({event}: {event: EventType}) => {
     const line = parseFilename(event.line);
@@ -39,9 +32,7 @@ const Line = ({event}: {event: EventType}) => {
     );
 };
 
-type EventTimelineProps = {
-    events: EventType[];
-};
+type EventTimelineProps = {events: EventType[]};
 export const EventPanel = ({events}: EventTimelineProps) => {
     if (!events || events.length === 0) {
         return (
@@ -54,7 +45,7 @@ export const EventPanel = ({events}: EventTimelineProps) => {
     }
 
     return (
-        <Timeline sx={{ [`& .${timelineOppositeContentClasses.root}`]: { flex: 0 } }}>
+        <Timeline sx={{[`& .${timelineOppositeContentClasses.root}`]: {flex: 0}}}>
             {events &&
                 events.map((event, index) => (
                     <TimelineItem key={index}>

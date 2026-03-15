@@ -9,9 +9,9 @@ use AppDevPanel\Kernel\Storage\StorageInterface;
 
 final class CollectorRepository implements CollectorRepositoryInterface
 {
-    public function __construct(private StorageInterface $storage)
-    {
-    }
+    public function __construct(
+        private StorageInterface $storage,
+    ) {}
 
     public function getSummary(?string $id = null): array
     {
@@ -33,12 +33,12 @@ final class CollectorRepository implements CollectorRepositoryInterface
         return $this->loadData(StorageInterface::TYPE_OBJECTS, $id);
     }
 
-    public function getObject(string $id, string $objectId): array|null
+    public function getObject(string $id, string $objectId): ?array
     {
         $dump = $this->loadData(StorageInterface::TYPE_OBJECTS, $id);
 
         foreach ($dump as $name => $value) {
-            if (($pos = strrpos((string)$name, "#$objectId")) !== false) {
+            if (($pos = strrpos((string) $name, "#{$objectId}")) !== false) {
                 return [substr($name, 0, $pos), $value];
             }
         }

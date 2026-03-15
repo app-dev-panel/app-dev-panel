@@ -15,9 +15,8 @@ final class EventCollector implements SummaryCollectorInterface
     private array $events = [];
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {
@@ -40,7 +39,7 @@ final class EventCollector implements SummaryCollectorInterface
         $this->events[] = [
             'name' => $event::class,
             'event' => $event,
-            'file' => (new ReflectionClass($event))->getFileName(),
+            'file' => new ReflectionClass($event)->getFileName(),
             'line' => $line,
             'time' => microtime(true),
         ];

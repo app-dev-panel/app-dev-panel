@@ -2,10 +2,7 @@ import {Badge, Button} from '@mui/material';
 import {DebugEntry} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Debug';
 import {CollectorsMap} from '@yiisoft/yii-dev-panel-sdk/Helper/collectors';
 
-type ValidatorItemProps = {
-    data: DebugEntry;
-    iframeUrlHandler: (url: string) => void;
-};
+type ValidatorItemProps = {data: DebugEntry; iframeUrlHandler: (url: string) => void};
 
 export const ValidatorItem = (props: ValidatorItemProps) => {
     const {data, iframeUrlHandler, ...others} = props;
@@ -25,11 +22,7 @@ export const ValidatorItem = (props: ValidatorItemProps) => {
                 }}
                 color={data.validator.invalid === 0 ? 'info' : 'warning'}
                 variant="contained"
-                sx={{
-                    whiteSpace: 'nowrap',
-                    textTransform: 'none',
-                    borderRadius: 0,
-                }}
+                sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
             >
                 Validator
             </Button>

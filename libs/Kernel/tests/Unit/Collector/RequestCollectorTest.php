@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\UriInterface;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 use Yiisoft\Yii\Http\Event\AfterRequest;
 use Yiisoft\Yii\Http\Event\BeforeRequest;
 
@@ -26,33 +26,21 @@ final class RequestCollectorTest extends AbstractCollectorTestCase
         $responseMock = $this->createMock(ResponseInterface::class);
         $uriMock = $this->createMock(UriInterface::class);
         $bodyMock = $this->createMock(StreamInterface::class);
-        $bodyMock->method('tell')
-            ->willReturn(1);
+        $bodyMock->method('tell')->willReturn(1);
 
-        $uriMock->method('getPath')
-            ->willReturn('url');
-        $uriMock->method('getQuery')
-            ->willReturn('');
-        $uriMock->method('__toString')
-            ->willReturn('http://test.site/url');
+        $uriMock->method('getPath')->willReturn('url');
+        $uriMock->method('getQuery')->willReturn('');
+        $uriMock->method('__toString')->willReturn('http://test.site/url');
 
-        $requestMock->method('getMethod')
-            ->willReturn('GET');
-        $requestMock->method('getHeaders')
-            ->willReturn([]);
-        $requestMock->method('getHeaderLine')
-            ->willReturn('');
-        $requestMock->method('getUri')
-            ->willReturn($uriMock);
-        $requestMock->method('getBody')
-            ->willReturn($bodyMock);
+        $requestMock->method('getMethod')->willReturn('GET');
+        $requestMock->method('getHeaders')->willReturn([]);
+        $requestMock->method('getHeaderLine')->willReturn('');
+        $requestMock->method('getUri')->willReturn($uriMock);
+        $requestMock->method('getBody')->willReturn($bodyMock);
 
-        $responseMock->method('getStatusCode')
-            ->willReturn(200);
-        $responseMock->method('getHeaders')
-            ->willReturn([]);
-        $responseMock->method('getBody')
-            ->willReturn($bodyMock);
+        $responseMock->method('getStatusCode')->willReturn(200);
+        $responseMock->method('getHeaders')->willReturn([]);
+        $responseMock->method('getBody')->willReturn($bodyMock);
 
         $collector->collect(new BeforeRequest($requestMock));
         $collector->collect(new AfterRequest($responseMock));

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Support;
 
-use stdClass;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
+use stdClass;
 
 final class DummyCollector implements CollectorInterface
 {

@@ -22,7 +22,7 @@ final class Dumper
 
     private function __construct(
         private readonly mixed $variable,
-        array $excludedClasses
+        array $excludedClasses,
     ) {
         $this->excludedClasses = array_flip($excludedClasses);
     }
@@ -67,8 +67,9 @@ final class Dumper
     private function buildObjectsCache(mixed $variable, ?int $depth = null, int $level = 0): void
     {
         if (is_object($variable)) {
-            if (array_key_exists($variable::class, $this->excludedClasses) ||
-                array_key_exists($objectDescription = $this->getObjectDescription($variable), $this->objects)
+            if (
+                array_key_exists($variable::class, $this->excludedClasses)
+                || array_key_exists($objectDescription = $this->getObjectDescription($variable), $this->objects)
             ) {
                 return;
             }
@@ -128,7 +129,7 @@ final class Dumper
         int $depth,
         int $level,
         int $objectCollapseLevel,
-        bool $inlineObject
+        bool $inlineObject,
     ): mixed {
         switch (gettype($variable)) {
             case 'array':
@@ -148,7 +149,7 @@ final class Dumper
                         $depth,
                         $level + 1,
                         $objectCollapseLevel,
-                        $inlineObject
+                        $inlineObject,
                     );
                 }
 

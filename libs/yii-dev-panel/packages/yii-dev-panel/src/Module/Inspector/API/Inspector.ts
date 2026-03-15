@@ -1,10 +1,7 @@
 import {createApi} from '@reduxjs/toolkit/query/react';
 import {createBaseQuery} from '@yiisoft/yii-dev-panel-sdk/API/createBaseQuery';
 
-type ObjectType = {
-    object: object;
-    path: string;
-};
+type ObjectType = {object: object; path: string};
 export type InspectorFile = {
     path: string;
     baseName: string;
@@ -24,31 +21,14 @@ export type InspectorFileContent = {
 
 export type ConfigurationType = Record<string, object | string>;
 export type ClassesType = string[];
-export type CommandType = {
-    name: string;
-    title: string;
-    group: string;
-    description: string;
-};
-export type CommandResponseType<T = any> = {
-    status: 'ok' | 'error' | 'fail';
-    result: T;
-    errors: string[];
-};
+export type CommandType = {name: string; title: string; group: string; description: string};
+export type CommandResponseType<T = any> = {status: 'ok' | 'error' | 'fail'; result: T; errors: string[]};
 export type CacheResponseType = any;
-export type PutTranslationArgumentType = {
-    category: string;
-    locale: string;
-    translation: string;
-    message: string;
-};
+export type PutTranslationArgumentType = {category: string; locale: string; translation: string; message: string};
 
 type ComposerResponse = {
     json: {require: Record<string, string>; 'require-dev': Record<string, string>};
-    lock: {
-        packages: {name: string; version: string}[];
-        'packages-dev': {name: string; version: string}[];
-    };
+    lock: {packages: {name: string; version: string}[]; 'packages-dev': {name: string; version: string}[]};
 };
 type OpcacheResponse = {
     configuration: {
@@ -107,10 +87,7 @@ type OpcacheResponse = {
             'opcache.jit_prof_threshold': number;
             'opcache.jit_max_trace_length': number;
         };
-        version: {
-            version: string;
-            opcache_product_name: 'Zend OPcache';
-        };
+        version: {version: string; opcache_product_name: 'Zend OPcache'};
         blacklist: [];
     };
     status: {
@@ -169,30 +146,17 @@ type OpcacheResponse = {
     };
 };
 
-type CurlBuilderResponse = {
-    command: string;
-};
+type CurlBuilderResponse = {command: string};
 
-type CheckRouteResponse = {
-    result: boolean;
-    action: string[];
-};
+type CheckRouteResponse = {result: boolean; action: string[]};
 
-export type EventListenerType = {
-    event: [string, string] | string;
-};
+export type EventListenerType = {event: [string, string] | string};
 
 export type EventListenersType = Record<string, EventListenerType[]>;
 
-export type EventsResponse = {
-    common: EventListenersType;
-    console: EventListenersType;
-    web: EventListenersType;
-};
+export type EventsResponse = {common: EventListenersType; console: EventListenersType; web: EventListenersType};
 
-type Response<T = any> = {
-    data: T;
-};
+type Response<T = any> = {data: T};
 
 export const inspectorApi = createApi({
     reducerPath: 'api.inspector',
@@ -221,10 +185,7 @@ export const inspectorApi = createApi({
             transformResponse: (result: Response<CommandType[]>) => result.data || [],
         }),
         runCommand: builder.mutation<CommandResponseType, string>({
-            query: (command) => ({
-                url: `command?command=${command}`,
-                method: 'POST',
-            }),
+            query: (command) => ({url: `command?command=${command}`, method: 'POST'}),
             transformResponse: (result: Response<CommandResponseType>) => result.data,
         }),
         getFiles: builder.query<InspectorFile[], string>({
@@ -240,11 +201,7 @@ export const inspectorApi = createApi({
             transformResponse: (result: Response) => result.data || [],
         }),
         putTranslations: builder.mutation<Response, PutTranslationArgumentType>({
-            query: (body) => ({
-                method: 'PUT',
-                url: `translations`,
-                body: body,
-            }),
+            query: (body) => ({method: 'PUT', url: `translations`, body: body}),
             transformResponse: (result: Response) => result.data || [],
         }),
         getTable: builder.query<Response, string | void>({
@@ -252,17 +209,11 @@ export const inspectorApi = createApi({
             transformResponse: (result: Response) => result.data || [],
         }),
         doRequest: builder.mutation<Response, {id: string}>({
-            query: (args) => ({
-                method: 'PUT',
-                url: `request?debugEntryId=${args.id}`,
-            }),
+            query: (args) => ({method: 'PUT', url: `request?debugEntryId=${args.id}`}),
             transformResponse: (result: Response) => result.data || [],
         }),
         postCurlBuild: builder.mutation<CurlBuilderResponse, string>({
-            query: (debugEntryId) => ({
-                method: 'POST',
-                url: `curl/build?debugEntryId=${debugEntryId}`,
-            }),
+            query: (debugEntryId) => ({method: 'POST', url: `curl/build?debugEntryId=${debugEntryId}`}),
             transformResponse: (result: Response<CurlBuilderResponse>) => result.data,
         }),
         getRoutes: builder.query<Response, void>({
@@ -301,17 +252,11 @@ export const inspectorApi = createApi({
             transformResponse: (result: Response<CacheResponseType>) => result.data,
         }),
         deleteCache: builder.mutation<CacheResponseType, string>({
-            query: (key) => ({
-                url: `cache?key=${key}`,
-                method: 'DELETE',
-            }),
+            query: (key) => ({url: `cache?key=${key}`, method: 'DELETE'}),
             transformResponse: (result: Response<CacheResponseType>) => result.data,
         }),
         clearCache: builder.mutation<CacheResponseType, void>({
-            query: () => ({
-                url: `cache/clear`,
-                method: 'POST',
-            }),
+            query: () => ({url: `cache/clear`, method: 'POST'}),
             transformResponse: (result: Response<CacheResponseType>) => result.data,
         }),
         postComposerRequirePackage: builder.mutation<
@@ -321,11 +266,7 @@ export const inspectorApi = createApi({
             query: ({packageName, version, isDev}) => ({
                 url: `composer/require`,
                 method: 'POST',
-                body: {
-                    package: packageName,
-                    version,
-                    isDev,
-                },
+                body: {package: packageName, version, isDev},
             }),
             transformResponse: (result: Response<CommandResponseType>) => result.data,
             invalidatesTags: ['inspector/composer'],

@@ -39,11 +39,7 @@ registerRoute(
     ({url}) => url.origin === 'https://fonts.googleapis.com',
     new StaleWhileRevalidate({
         cacheName: 'google-fonts-stylesheets',
-        plugins: [
-            new CacheableResponsePlugin({
-                statuses: [0, 200],
-            }),
-        ],
+        plugins: [new CacheableResponsePlugin({statuses: [0, 200]})],
     }),
 );
 
@@ -57,9 +53,7 @@ if (import.meta.env.PROD) {
         new StaleWhileRevalidate({
             cacheName: 'javascript-files',
             plugins: [
-                new CacheableResponsePlugin({
-                    statuses: [0, 200],
-                }),
+                new CacheableResponsePlugin({statuses: [0, 200]}),
                 new ExpirationPlugin({purgeOnQuotaError: true, maxEntries: 1000, maxAgeSeconds: 60 * 60 * 24 * 30}),
             ],
         }),
@@ -72,11 +66,7 @@ registerRoute(
     ({url}) => url.origin === 'https://fonts.gstatic.com',
     new StaleWhileRevalidate({
         cacheName: 'google-fonts-webfonts',
-        plugins: [
-            new CacheableResponsePlugin({
-                statuses: [0, 200],
-            }),
-        ],
+        plugins: [new CacheableResponsePlugin({statuses: [0, 200]})],
     }),
 );
 // Set up App Shell-style routing, so that all navigation requests

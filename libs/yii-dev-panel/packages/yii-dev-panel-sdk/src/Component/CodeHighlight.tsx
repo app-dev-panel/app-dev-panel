@@ -53,10 +53,7 @@ export const CodeHighlight = React.memo((props: CodeHighlightProps) => {
                 id: `L${lineNumber}`,
                 ...(highlightLines &&
                     isNumberInRange(lineNumber, highlightLines) && {
-                        style: {
-                            backgroundColor: highlightColor,
-                            display: 'block',
-                        },
+                        style: {backgroundColor: highlightColor, display: 'block'},
                     }),
             })}
             language={language}

@@ -11,9 +11,8 @@ final class ServiceCollector implements SummaryCollectorInterface
     private array $items = [];
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {
@@ -32,7 +31,7 @@ final class ServiceCollector implements SummaryCollectorInterface
         string $status,
         ?object $error,
         float $timeStart,
-        float $timeEnd
+        float $timeEnd,
     ): void {
         if (!$this->isActive()) {
             return;

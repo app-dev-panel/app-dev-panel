@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Command;
 
-use PHPUnit\Framework\TestCase;
-use Yiisoft\Aliases\Aliases;
 use AppDevPanel\Api\Inspector\Command\BashCommand;
 use AppDevPanel\Api\Inspector\CommandResponse;
+use PHPUnit\Framework\TestCase;
+use Yiisoft\Aliases\Aliases;
 
 final class BashCommandTest extends TestCase
 {

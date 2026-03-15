@@ -1,10 +1,10 @@
 import '@yiisoft/yii-dev-panel/wdyr';
 
+import {Config} from '@yiisoft/yii-dev-panel-sdk/Config';
 import App from '@yiisoft/yii-dev-panel/App';
 import '@yiisoft/yii-dev-panel/index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {Config} from '@yiisoft/yii-dev-panel-sdk/Config';
 
 let queryParams: {toolbar?: '0' | string} = {toolbar: '1'};
 try {
@@ -32,13 +32,8 @@ try {
         config: {
             containerId: 'root',
             options: {
-                modules: {
-                    toolbar: queryParams?.toolbar !== '0',
-                },
-                router: {
-                    basename: '',
-                    useHashRouter: Config.appEnv === 'github',
-                },
+                modules: {toolbar: queryParams?.toolbar !== '0'},
+                router: {basename: '', useHashRouter: Config.appEnv === 'github'},
                 backend: {
                     baseUrl: import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8080',
                     favoriteUrls: [],

@@ -1,42 +1,30 @@
+import {changeBaseUrl} from '@yiisoft/yii-dev-panel-sdk/API/Application/ApplicationContext';
 import {ErrorFallback} from '@yiisoft/yii-dev-panel-sdk/Component/ErrorFallback';
 import {RouterOptionsContextProvider} from '@yiisoft/yii-dev-panel-sdk/Component/RouterOptions';
 import {DefaultThemeProvider} from '@yiisoft/yii-dev-panel-sdk/Component/Theme/DefaultTheme';
+import {CrossWindowEventType, dispatchWindowEvent} from '@yiisoft/yii-dev-panel-sdk/Helper/dispatchWindowEvent';
 import '@yiisoft/yii-dev-panel/App.css';
+import {BreadcrumbsContextProvider} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {modules} from '@yiisoft/yii-dev-panel/modules';
 import {createRouter} from '@yiisoft/yii-dev-panel/router';
 import {createStore} from '@yiisoft/yii-dev-panel/store';
+import {useEffect} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {Provider} from 'react-redux';
 import {RouterProvider} from 'react-router-dom';
-import React, {useEffect} from 'react';
 import {PersistGate} from 'redux-persist/integration/react';
-import {CrossWindowEventType, dispatchWindowEvent} from '@yiisoft/yii-dev-panel-sdk/Helper/dispatchWindowEvent';
-import {changeBaseUrl} from '@yiisoft/yii-dev-panel-sdk/API/Application/ApplicationContext';
-import {BreadcrumbsContextProvider} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 type AppProps = {
     config: {
-        modules: {
-            toolbar: boolean;
-        };
-        router: {
-            basename: string;
-            useHashRouter: boolean;
-        };
-        backend: {
-            baseUrl: string;
-            favoriteUrls: string;
-            usePreferredUrl: boolean;
-        };
+        modules: {toolbar: boolean};
+        router: {basename: string; useHashRouter: boolean};
+        backend: {baseUrl: string; favoriteUrls: string; usePreferredUrl: boolean};
     };
 };
 export default function App({config}: AppProps) {
     const router = createRouter(modules, config.router, config.modules);
     const {store, persistor} = createStore({
-        application: {
-            baseUrl: config.backend.baseUrl,
-            favoriteUrls: config.backend.favoriteUrls ?? [],
-        },
+        application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []},
     });
 
     useEffect(() => {

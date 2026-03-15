@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
+use AppDevPanel\Kernel\Collector\HttpClientCollector;
+use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
+use AppDevPanel\Kernel\Collector\TimelineCollector;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
@@ -11,9 +14,6 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use stdClass;
-use AppDevPanel\Kernel\Collector\HttpClientCollector;
-use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
-use AppDevPanel\Kernel\Collector\TimelineCollector;
 
 final class HttpClientInterfaceProxyTest extends TestCase
 {
@@ -23,10 +23,7 @@ final class HttpClientInterfaceProxyTest extends TestCase
         $response = new Response(200, [], 'test');
 
         $client = $this->createMock(ClientInterface::class);
-        $client->expects($this->once())
-            ->method('sendRequest')
-            ->with($request)
-            ->willReturn($response);
+        $client->expects($this->once())->method('sendRequest')->with($request)->willReturn($response);
         $collector = new HttpClientCollector(new TimelineCollector());
         $collector->startup();
 
@@ -40,7 +37,7 @@ final class HttpClientInterfaceProxyTest extends TestCase
 
     public function testProxyDecoratedCall(): void
     {
-        $httpClient = new class () implements ClientInterface {
+        $httpClient = new class() implements ClientInterface {
             public $var = null;
 
             public function getProxiedCall(): string
@@ -53,9 +50,7 @@ final class HttpClientInterfaceProxyTest extends TestCase
                 return $args;
             }
 
-            public function sendRequest(RequestInterface $request): ResponseInterface
-            {
-            }
+            public function sendRequest(RequestInterface $request): ResponseInterface {}
         };
         $collector = new HttpClientCollector(new TimelineCollector());
         $proxy = new HttpClientInterfaceProxy($httpClient, $collector);

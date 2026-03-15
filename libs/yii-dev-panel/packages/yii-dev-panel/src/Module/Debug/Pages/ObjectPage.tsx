@@ -10,10 +10,7 @@ export const ObjectPage = () => {
     const objectId = searchParams.get('id');
     const debugEntryId = searchParams.get('debugEntry') || '';
 
-    const {data, isLoading} = useGetObjectQuery({
-        debugEntryId: debugEntryId,
-        objectId: +(objectId || 0),
-    });
+    const {data, isLoading} = useGetObjectQuery({debugEntryId: debugEntryId, objectId: +(objectId || 0)});
     if (isLoading) {
         return <FullScreenCircularProgress />;
     }

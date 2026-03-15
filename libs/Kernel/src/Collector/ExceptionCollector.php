@@ -14,9 +14,8 @@ final class ExceptionCollector implements SummaryCollectorInterface
     private ?Throwable $exception = null;
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {
@@ -53,13 +52,15 @@ final class ExceptionCollector implements SummaryCollectorInterface
             return [];
         }
         return [
-            'exception' => $this->exception === null ? [] : [
-                'class' => $this->exception::class,
-                'message' => $this->exception->getMessage(),
-                'file' => $this->exception->getFile(),
-                'line' => $this->exception->getLine(),
-                'code' => $this->exception->getCode(),
-            ],
+            'exception' => $this->exception === null
+                ? []
+                : [
+                    'class' => $this->exception::class,
+                    'message' => $this->exception->getMessage(),
+                    'file' => $this->exception->getFile(),
+                    'line' => $this->exception->getLine(),
+                    'code' => $this->exception->getCode(),
+                ],
         ];
     }
 

@@ -39,7 +39,9 @@ $common = [
     },
 ];
 
-if (!(bool) ($params['app-dev-panel/yii-debug']['enabled'] ?? false)) {
+require_once __DIR__ . '/helpers.php';
+
+if (!isAppDevPanelEnabled($params)) {
     return $common;
 }
 

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector\Console;
 
+use AppDevPanel\Kernel\Collector\CollectorTrait;
+use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
+use AppDevPanel\Kernel\Collector\TimelineCollector;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Yiisoft\Yii\Console\Event\ApplicationShutdown;
 use Yiisoft\Yii\Console\Event\ApplicationStartup;
-use AppDevPanel\Kernel\Collector\CollectorTrait;
-use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
-use AppDevPanel\Kernel\Collector\TimelineCollector;
 
 final class ConsoleAppInfoCollector implements SummaryCollectorInterface
 {
@@ -23,9 +23,8 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
     private float $requestProcessingTimeStopped = 0;
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {
@@ -33,7 +32,8 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
             return [];
         }
         return [
-            'applicationProcessingTime' => $this->applicationProcessingTimeStopped - $this->applicationProcessingTimeStarted,
+            'applicationProcessingTime' =>
+                $this->applicationProcessingTimeStopped - $this->applicationProcessingTimeStarted,
             'preloadTime' => $this->applicationProcessingTimeStarted - $this->requestProcessingTimeStarted,
             'applicationEmit' => $this->applicationProcessingTimeStopped - $this->requestProcessingTimeStopped,
             'requestProcessingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted,

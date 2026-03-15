@@ -37,10 +37,10 @@ class PHPUnitJSONReporter implements ResultPrinter
         $path = getenv(self::ENVIRONMENT_VARIABLE_DIRECTORY_NAME) ?: getcwd();
         ksort($this->data);
 
-        file_put_contents(
-            $path . DIRECTORY_SEPARATOR . self::FILENAME,
-            json_encode(array_values($this->data), JSON_THROW_ON_ERROR)
-        );
+        file_put_contents($path . DIRECTORY_SEPARATOR . self::FILENAME, json_encode(
+            array_values($this->data),
+            JSON_THROW_ON_ERROR,
+        ));
     }
 
     public function write(string $buffer): void
@@ -78,17 +78,11 @@ class PHPUnitJSONReporter implements ResultPrinter
         $this->logErroredTest($test, $t);
     }
 
-    public function startTestSuite(TestSuite $suite): void
-    {
-    }
+    public function startTestSuite(TestSuite $suite): void {}
 
-    public function endTestSuite(TestSuite $suite): void
-    {
-    }
+    public function endTestSuite(TestSuite $suite): void {}
 
-    public function startTest(Test $test): void
-    {
-    }
+    public function startTest(Test $test): void {}
 
     public function endTest(Test $test, float $time): void
     {

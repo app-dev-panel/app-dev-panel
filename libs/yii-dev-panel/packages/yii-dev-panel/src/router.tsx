@@ -1,17 +1,14 @@
+import type {HydrationState} from '@remix-run/router';
+import type {FutureConfig as RouterFutureConfig} from '@remix-run/router/dist/router';
 import {ModuleInterface} from '@yiisoft/yii-dev-panel-sdk/Types/Module.types';
 import {Layout} from '@yiisoft/yii-dev-panel/Application/Component/Layout';
 import {NotFoundPage} from '@yiisoft/yii-dev-panel/Application/Pages/NotFoundPage';
 import {createBrowserRouter, createHashRouter, RouteObject} from 'react-router-dom';
-import type {FutureConfig as RouterFutureConfig} from '@remix-run/router/dist/router';
-import type {HydrationState} from '@remix-run/router';
 
 // TODO: move DebugToolbar somewhere else
 export function createRouter(
     modules: ModuleInterface[],
-    routerConfig: {
-        basename: string;
-        useHashRouter: boolean;
-    },
+    routerConfig: {basename: string; useHashRouter: boolean},
     modulesConfig: {toolbar: boolean},
 ) {
     const standaloneModules = modules.filter((module) => module.standaloneModule);
@@ -33,9 +30,7 @@ export function createRouter(
             ),
         },
     ];
-    const opts: DOMRouterOpts = {
-        basename: routerConfig.basename,
-    };
+    const opts: DOMRouterOpts = {basename: routerConfig.basename};
     return routerConfig.useHashRouter ? createHashRouter(routes) : createBrowserRouter(routes, opts);
 }
 

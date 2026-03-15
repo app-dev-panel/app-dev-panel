@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
+use AppDevPanel\Kernel\Collector\LogCollector;
+use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
 use Psr\Log\LogLevel;
 use stdClass;
-use AppDevPanel\Kernel\Collector\LogCollector;
-use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 
 final class LoggerInterfaceProxyTest extends TestCase
 {
@@ -19,14 +19,12 @@ final class LoggerInterfaceProxyTest extends TestCase
     public function testLogMethods(string $method, string $level, string $message, array $context): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger
-            ->expects($this->once())
-            ->method($method);
+        $logger->expects($this->once())->method('log')->with($level, $message, $context);
         $collector = $this->createMock(LogCollector::class);
         $collector
             ->expects($this->once())
             ->method('collect')
-            ->with($level, $message, $context, __FILE__ . ':32');
+            ->with($level, $message, $context, __FILE__ . ':30');
         $proxy = new LoggerInterfaceProxy($logger, $collector);
 
         $proxy->$method($message, $context);
@@ -36,14 +34,12 @@ final class LoggerInterfaceProxyTest extends TestCase
     public function testMethodLog($method, string $level, string $message, array $context): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger
-            ->expects($this->once())
-            ->method('log');
+        $logger->expects($this->once())->method('log');
         $collector = $this->createMock(LogCollector::class);
         $collector
             ->expects($this->once())
             ->method('collect')
-            ->with($level, $message, $context, __FILE__ . ':49');
+            ->with($level, $message, $context, __FILE__ . ':45');
         $proxy = new LoggerInterfaceProxy($logger, $collector);
 
         $proxy->log($level, $message, $context);
@@ -63,7 +59,7 @@ final class LoggerInterfaceProxyTest extends TestCase
 
     public function testProxyDecoratedCall(): void
     {
-        $logger = new class () implements LoggerInterface {
+        $logger = new class() implements LoggerInterface {
             use LoggerTrait;
 
             public $var = null;
@@ -78,9 +74,7 @@ final class LoggerInterfaceProxyTest extends TestCase
                 return $args;
             }
 
-            public function log($level, \Stringable|string $message, array $context = []): void
-            {
-            }
+            public function log($level, \Stringable|string $message, array $context = []): void {}
         };
         $collector = $this->createMock(LogCollector::class);
         $proxy = new LoggerInterfaceProxy($logger, $collector);

@@ -2,17 +2,13 @@ import {Button, Divider, List, ListItem, ListItemSecondaryAction, Tab, Tabs} fro
 import Box from '@mui/material/Box';
 import ListItemText from '@mui/material/ListItemText';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel-sdk/Component/JsonRenderer';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {useGetComposerQuery} from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import {SwitchDialog} from '@yiisoft/yii-dev-panel/Module/Inspector/Component/Composer/SwitchDialog';
 import * as React from 'react';
 import {SyntheticEvent, useMemo, useState} from 'react';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
-type TabPanelProps = {
-    children?: React.ReactNode;
-    index: number;
-    value: number;
-};
+type TabPanelProps = {children?: React.ReactNode; index: number; value: number};
 
 function TabPanel(props: TabPanelProps) {
     const {children, value, index, ...other} = props;
@@ -25,11 +21,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const isPlatform = (packageName: string) => !packageName.includes('/');
-type PackageItemProps = {
-    packageName: string;
-    version: string;
-    onClick: (packageName: string) => void;
-};
+type PackageItemProps = {packageName: string; version: string; onClick: (packageName: string) => void};
 const PackageItem = React.memo(({packageName, version, onClick}: PackageItemProps) => {
     return (
         <ListItem disablePadding sx={{display: 'block'}}>

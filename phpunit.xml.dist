@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         stopOnFailure="false"
+         executionOrder="random"
+         resolveDependencies="true"
+         cacheDirectory=".phpunit.cache">
+
+    <php>
+        <ini name="error_reporting" value="-1"/>
+    </php>
+
+    <testsuites>
+        <testsuite name="Kernel">
+            <directory>libs/Kernel/tests</directory>
+        </testsuite>
+        <testsuite name="API">
+            <directory>libs/API/tests</directory>
+        </testsuite>
+        <testsuite name="Cli">
+            <directory>libs/Cli/tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory>libs/Kernel/src</directory>
+            <directory>libs/API/src</directory>
+            <directory>libs/Cli/src</directory>
+        </include>
+    </source>
+</phpunit>

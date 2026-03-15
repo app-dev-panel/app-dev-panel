@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
+use AppDevPanel\Kernel\ProxyDecoratedCalls;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use AppDevPanel\Kernel\ProxyDecoratedCalls;
 
 final class HttpClientInterfaceProxy implements ClientInterface
 {
@@ -15,14 +15,13 @@ final class HttpClientInterfaceProxy implements ClientInterface
 
     public function __construct(
         private readonly ClientInterface $decorated,
-        private readonly HttpClientCollector $collector
-    ) {
-    }
+        private readonly HttpClientCollector $collector,
+    ) {}
 
     public function sendRequest(RequestInterface $request): ResponseInterface
     {
         /** @psalm-var array{file: string, line: int} $callStack */
-        $callStack = debug_backtrace()[0];
+        $callStack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
 
         $uniqueId = random_bytes(36);
         $startTime = microtime(true);

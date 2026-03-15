@@ -1,21 +1,23 @@
 <?php
 
 declare(strict_types=1);
+
 declare(ticks=1);
 
 namespace AppDevPanel\Cli\Command;
 
+use AppDevPanel\Kernel\DebugServer\Connection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Yiisoft\Yii\Console\ExitCode;
-use AppDevPanel\Kernel\DebugServer\Connection;
 
 final class DebugServerCommand extends Command
 {
     public const COMMAND_NAME = 'dev';
+
     protected static $defaultName = self::COMMAND_NAME;
 
     protected static $defaultDescription = 'Runs PHP built-in web server';
@@ -31,7 +33,7 @@ final class DebugServerCommand extends Command
     {
         $this
             ->setHelp(
-                'In order to access server from remote machines use 0.0.0.0:8000. That is especially useful when running server in a virtual machine.'
+                'In order to access server from remote machines use 0.0.0.0:8000. That is especially useful when running server in a virtual machine.',
             )
             ->addOption('address', 'a', InputOption::VALUE_OPTIONAL, 'Host to serve at', $this->address)
             ->addOption('port', 'p', InputOption::VALUE_OPTIONAL, 'Port to serve at', $this->port)
@@ -49,15 +51,15 @@ final class DebugServerCommand extends Command
             return ExitCode::OK;
         }
 
-        $socket = Connection::create();
-        $socket->bind();
+        try {
+            $socket = Connection::create();
+            $socket->bind();
+        } catch (\RuntimeException $e) {
+            $io->error('Failed to start debug server: ' . $e->getMessage());
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
 
-        $io->success(
-            sprintf(
-                'Listening on "%s".',
-                $socket->getUri(),
-            )
-        );
+        $io->success(sprintf('Listening on "%s".', $socket->getUri()));
 
         if (\function_exists('pcntl_signal')) {
             $io->success('Quit the server with CTRL-C or COMMAND-C.');
@@ -74,7 +76,12 @@ final class DebugServerCommand extends Command
                 break;
             }
 
-            $data = \json_decode($message[1], null, 512, JSON_THROW_ON_ERROR);
+            try {
+                $data = \json_decode($message[1], null, 512, JSON_THROW_ON_ERROR);
+            } catch (\JsonException $e) {
+                $io->warning('Failed to decode message: ' . $e->getMessage());
+                continue;
+            }
             $type = match ($data[0]) {
                 Connection::MESSAGE_TYPE_VAR_DUMPER => 'VarDumper',
                 Connection::MESSAGE_TYPE_LOGGER => 'Logger',

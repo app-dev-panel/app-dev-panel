@@ -3,10 +3,7 @@ import {matchInputType} from '@yiisoft/yii-dev-panel-sdk/Adapter/yii/inputTypeMa
 import {GiiGeneratorAttribute} from '@yiisoft/yii-dev-panel-sdk/Types/Gii';
 import {Controller, useFormContext} from 'react-hook-form';
 
-type FormInputProps = {
-    attributeName: string;
-    attribute: GiiGeneratorAttribute;
-};
+type FormInputProps = {attributeName: string; attribute: GiiGeneratorAttribute};
 
 export function FormInput({attributeName, attribute}: FormInputProps) {
     const form = useFormContext();

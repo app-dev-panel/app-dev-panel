@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Debug\Http;
 
+use AppDevPanel\Api\Debug\Middleware\MiddlewareDispatcherMiddleware;
 use Closure;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-use AppDevPanel\Api\Debug\Middleware\MiddlewareDispatcherMiddleware;
 use Yiisoft\Yii\Http\Application;
 
 final class HttpApplicationWrapper
@@ -14,8 +14,7 @@ final class HttpApplicationWrapper
     public function __construct(
         private MiddlewareDispatcher $middlewareDispatcher,
         private array $middlewareDefinitions,
-    ) {
-    }
+    ) {}
 
     public function wrap(Application $application): Application
     {
@@ -26,20 +25,21 @@ final class HttpApplicationWrapper
             /**
              * @psalm-suppress InaccessibleProperty
              */
-            static function (Application $application) use ($middlewareDispatcher, $middlewareDefinitions)  {
+            static function (Application $application) use ($middlewareDispatcher, $middlewareDefinitions) {
                 $middlewareDispatcher = $middlewareDispatcher->withMiddlewares([
                     ...$middlewareDefinitions,
-                    ['class' => MiddlewareDispatcherMiddleware::class, '$middlewareDispatcher' => $application->dispatcher],
+                    [
+                        'class' => MiddlewareDispatcherMiddleware::class,
+                        '$middlewareDispatcher' => $application->dispatcher,
+                    ],
                 ]);
 
-                return new Application(
-                    $middlewareDispatcher,
-                    $application->eventDispatcher,
-                );
-//                return $application->dispatcher = $middlewareDispatcher;
+                return new Application($middlewareDispatcher, $application->eventDispatcher);
+
+                //                return $application->dispatcher = $middlewareDispatcher;
             },
             null,
-            $application
+            $application,
         );
 
         return $closure($application);

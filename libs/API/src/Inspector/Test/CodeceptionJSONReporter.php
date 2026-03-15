@@ -19,6 +19,7 @@ final class CodeceptionJSONReporter extends Extension
         'output-path' => __DIR__,
     ];
     private array $data = [];
+
     public const FILENAME = 'codeception-report.json';
 
     public function _initialize(): void
@@ -70,7 +71,7 @@ final class CodeceptionJSONReporter extends Extension
     {
         file_put_contents(
             $this->config['output-path'] . DIRECTORY_SEPARATOR . self::FILENAME,
-            json_encode($this->data, JSON_THROW_ON_ERROR)
+            json_encode($this->data, JSON_THROW_ON_ERROR),
         );
     }
 

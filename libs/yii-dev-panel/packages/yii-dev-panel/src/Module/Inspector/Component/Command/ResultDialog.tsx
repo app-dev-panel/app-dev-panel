@@ -22,12 +22,7 @@ export const ResultDialog = ({open, status, content, onRerun, onClose, ...rest}:
                 <Box
                     noValidate
                     component="form"
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        m: 'auto',
-                    }}
+                    sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', m: 'auto'}}
                 >
                     <CodeHighlight
                         showLineNumbers={false}

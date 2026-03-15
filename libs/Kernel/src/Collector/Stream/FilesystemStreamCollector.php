@@ -20,8 +20,7 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
          */
         private readonly array $ignoredPathPatterns = [],
         private readonly array $ignoredClasses = [],
-    ) {
-    }
+    ) {}
 
     /**
      * @var array[]
@@ -74,12 +73,9 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
             return [];
         }
         return [
-            'fs_stream' => array_merge(
-                ...array_map(
-                    fn (string $operation) => [$operation => count($this->operations[$operation])],
-                    array_keys($this->operations)
-                )
-            ),
+            'fs_stream' => array_merge(...array_map(fn(string $operation) => [$operation => count(
+                $this->operations[$operation],
+            )], array_keys($this->operations))),
         ];
     }
 

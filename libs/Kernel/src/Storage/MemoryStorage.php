@@ -15,9 +15,8 @@ final class MemoryStorage implements StorageInterface
     private array $collectors = [];
 
     public function __construct(
-        private readonly DebuggerIdGenerator $idGenerator
-    ) {
-    }
+        private readonly DebuggerIdGenerator $idGenerator,
+    ) {}
 
     public function addCollector(CollectorInterface $collector): void
     {
@@ -63,7 +62,5 @@ final class MemoryStorage implements StorageInterface
     /**
      * @codeCoverageIgnore
      */
-    public function clear(): void
-    {
-    }
+    public function clear(): void {}
 }

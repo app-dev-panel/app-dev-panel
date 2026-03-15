@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Database;
 
+use AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Cache\NullCache;
 use Yiisoft\Db\Cache\SchemaCache;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Sqlite\Connection;
 use Yiisoft\Db\Sqlite\Driver;
-use AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider;
 
 final class DbSchemaProviderTest extends TestCase
 {
@@ -78,80 +78,89 @@ final class DbSchemaProviderTest extends TestCase
     private function generateTables(ConnectionInterface $db): void
     {
         // create tables
-        $db->createCommand()->createTable(
-            'test',
-            [
+        $db
+            ->createCommand()
+            ->createTable('test', [
                 'id' => 'pk',
                 'email' => 'string',
-            ]
-        )->execute();
+            ])
+            ->execute();
 
-        $db->createCommand()->createTable(
-            'test2',
-            [
+        $db
+            ->createCommand()
+            ->createTable('test2', [
                 'id' => 'pk',
                 'name' => 'string',
                 'flag' => 'integer',
-            ],
-        )->execute();
+            ])
+            ->execute();
 
-        $db->createCommand()->createTable(
-            'test3',
-            [
+        $db
+            ->createCommand()
+            ->createTable('test3', [
                 'id' => 'pk',
                 'product' => 'string',
                 'price' => 'float',
                 'status' => 'integer',
-            ],
-        )->execute();
+            ])
+            ->execute();
 
         // insert data
-        $db->createCommand()->batchInsert(
-            'test',
-            [
-                'id',
-                'email',
-            ],
-            [
-                [1, 'test1'],
-                [2, 'test2'],
-                [3, 'test3'],
-            ],
-        )->execute();
+        $db
+            ->createCommand()
+            ->batchInsert(
+                'test',
+                [
+                    'id',
+                    'email',
+                ],
+                [
+                    [1, 'test1'],
+                    [2, 'test2'],
+                    [3, 'test3'],
+                ],
+            )
+            ->execute();
 
-        $db->createCommand()->batchInsert(
-            'test2',
-            [
-                'id',
-                'name',
-                'flag',
-            ],
-            [
-                [1, 'test1', 1],
-                [2, 'test2', 0],
-            ],
-        )->execute();
+        $db
+            ->createCommand()
+            ->batchInsert(
+                'test2',
+                [
+                    'id',
+                    'name',
+                    'flag',
+                ],
+                [
+                    [1, 'test1', 1],
+                    [2, 'test2', 0],
+                ],
+            )
+            ->execute();
 
-        $db->createCommand()->batchInsert(
-            'test3',
-            [
-                'id',
-                'product',
-                'price',
-                'status',
-            ],
-            [
-                [1, 'test1', 1.1, 1],
-                [2, 'test2', 2.2, 0],
-                [3, 'test3', 3.3, 1],
-                [4, 'test4', 4.4, 0],
-                [5, 'test5', 5.5, 1],
-                [6, 'test6', 6.6, 0],
-                [7, 'test7', 7.7, 1],
-                [8, 'test8', 8.8, 0],
-                [9, 'test9', 9.9, 1],
-                [10, 'test10', 10.10, 0],
-            ],
-        )->execute();
+        $db
+            ->createCommand()
+            ->batchInsert(
+                'test3',
+                [
+                    'id',
+                    'product',
+                    'price',
+                    'status',
+                ],
+                [
+                    [1,  'test1',  1.1,   1],
+                    [2,  'test2',  2.2,   0],
+                    [3,  'test3',  3.3,   1],
+                    [4,  'test4',  4.4,   0],
+                    [5,  'test5',  5.5,   1],
+                    [6,  'test6',  6.6,   0],
+                    [7,  'test7',  7.7,   1],
+                    [8,  'test8',  8.8,   0],
+                    [9,  'test9',  9.9,   1],
+                    [10, 'test10', 10.10, 0],
+                ],
+            )
+            ->execute();
     }
 }

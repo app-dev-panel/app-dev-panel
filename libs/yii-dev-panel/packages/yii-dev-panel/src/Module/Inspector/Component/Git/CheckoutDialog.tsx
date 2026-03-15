@@ -37,12 +37,7 @@ export const CheckoutDialog = ({open, currentBranch, branches, onCancel, onCheck
                 <Box
                     noValidate
                     component="form"
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        m: 'auto',
-                    }}
+                    sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', m: 'auto'}}
                 >
                     <FormControl sx={{mt: 2, flexGrow: 0.9}}>
                         <InputLabel htmlFor="max-width">Branch</InputLabel>

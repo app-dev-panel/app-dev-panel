@@ -1,19 +1,9 @@
 import {createApi} from '@reduxjs/toolkit/query/react';
 import {createBaseQuery} from '@yiisoft/yii-dev-panel-sdk/API/createBaseQuery';
 
-type Response<T = any> = {
-    data: T;
-};
-type Remote = {
-    name: string;
-    url: string;
-    branches: string[];
-};
-type Commit = {
-    message: string;
-    sha: string;
-    author: {name: string; email: string};
-};
+type Response<T = any> = {data: T};
+type Remote = {name: string; url: string; branches: string[]};
+type Commit = {message: string; sha: string; author: {name: string; email: string}};
 type SummaryResponse = {
     currentBranch: string;
     branches: string[];
@@ -21,10 +11,7 @@ type SummaryResponse = {
     remotes: Remote[];
     status: string[];
 };
-type LogResponse = {
-    currentBranch: string;
-    commits: Commit[];
-};
+type LogResponse = {currentBranch: string; commits: Commit[]};
 
 export const gitApi = createApi({
     reducerPath: 'api.inspector.git',
@@ -43,20 +30,11 @@ export const gitApi = createApi({
             transformResponse: (result: Response<LogResponse>) => result.data,
         }),
         checkout: builder.mutation<void, {branch: string}>({
-            query: ({branch}) => ({
-                url: `checkout`,
-                method: 'POST',
-                body: {
-                    branch,
-                },
-            }),
+            query: ({branch}) => ({url: `checkout`, method: 'POST', body: {branch}}),
             invalidatesTags: [{type: 'git/summary'}],
         }),
         command: builder.mutation<void, {command: string}>({
-            query: ({command}) => ({
-                url: `command?command=${command}`,
-                method: 'POST',
-            }),
+            query: ({command}) => ({url: `command?command=${command}`, method: 'POST'}),
             invalidatesTags: [{type: 'git/summary'}],
         }),
     }),

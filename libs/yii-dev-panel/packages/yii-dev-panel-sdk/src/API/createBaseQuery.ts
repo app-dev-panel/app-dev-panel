@@ -10,10 +10,7 @@ export const createBaseQuery = (
         const rawBaseQuery = fetchBaseQuery({
             baseUrl: baseUrl.replace(/\/$/, '') + baseUrlAdditional,
             referrerPolicy: 'no-referrer',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
+            headers: {Accept: 'application/json', 'Content-Type': 'application/json'},
         });
         return rawBaseQuery(args, WebApi, extraOptions);
     };

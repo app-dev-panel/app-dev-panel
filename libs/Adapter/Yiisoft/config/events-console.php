@@ -11,7 +11,9 @@ use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 
-if (!(bool)($params['app-dev-panel/yii-debug']['enabled'] ?? false)) {
+require_once __DIR__ . '/helpers.php';
+
+if (!isAppDevPanelEnabled($params)) {
     return [];
 }
 

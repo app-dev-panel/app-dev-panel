@@ -3,13 +3,13 @@ import {Button, CircularProgress, Divider, List, ListItem, ListItemSecondaryActi
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import {CodeHighlight} from '@yiisoft/yii-dev-panel-sdk/Component/CodeHighlight';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {
     useCheckoutMutation,
     useCommandMutation,
     useGetSummaryQuery,
 } from '@yiisoft/yii-dev-panel/Module/Inspector/API/GitApi';
 import {CheckoutDialog} from '@yiisoft/yii-dev-panel/Module/Inspector/Component/Git/CheckoutDialog';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import * as React from 'react';
 import {useCallback} from 'react';
 

@@ -34,26 +34,10 @@ export const DefaultThemeProvider = ({children}: PropsWithChildren) => {
     const routerOptions = useContext(RouterOptionsContext);
 
     const theme = createTheme({
-        palette: {
-            mode: mode,
-            primary: {
-                main: '#00617B',
-            },
-            secondary: {
-                main: '#873C00',
-            },
-        },
+        palette: {mode: mode, primary: {main: '#00617B'}, secondary: {main: '#873C00'}},
         components: {
-            MuiLink: {
-                defaultProps: {
-                    component: LinkBehavior(routerOptions),
-                } as LinkProps,
-            },
-            MuiButtonBase: {
-                defaultProps: {
-                    LinkComponent: LinkBehavior(routerOptions),
-                },
-            },
+            MuiLink: {defaultProps: {component: LinkBehavior(routerOptions)} as LinkProps},
+            MuiButtonBase: {defaultProps: {LinkComponent: LinkBehavior(routerOptions)}},
         },
     });
 

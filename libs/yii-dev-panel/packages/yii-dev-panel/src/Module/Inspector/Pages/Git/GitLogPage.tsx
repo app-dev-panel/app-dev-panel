@@ -2,8 +2,8 @@ import {GetApp, Refresh, Sync} from '@mui/icons-material';
 import {Button, CircularProgress, Divider, List, ListItem, ListItemText} from '@mui/material';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import {useCommandMutation, useGetLogQuery} from '@yiisoft/yii-dev-panel/Module/Inspector/API/GitApi';
 import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
+import {useCommandMutation, useGetLogQuery} from '@yiisoft/yii-dev-panel/Module/Inspector/API/GitApi';
 import {useCallback} from 'react';
 
 export const GitLogPage = () => {

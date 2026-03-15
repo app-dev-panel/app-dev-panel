@@ -7,7 +7,7 @@ import {DataTable} from '@yiisoft/yii-dev-panel-sdk/Component/Grid';
 import {concatClassMethod} from '@yiisoft/yii-dev-panel-sdk/Helper/classMethodConcater';
 import {formatMillisecondsAsDuration} from '@yiisoft/yii-dev-panel-sdk/Helper/formatDate';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel/Module/Debug/Component/JsonRenderer';
-import React, {SyntheticEvent, useMemo, useState} from 'react';
+import {SyntheticEvent, useMemo, useState} from 'react';
 
 type SummaryItemType = {
     class: string;
@@ -84,12 +84,7 @@ const allColumns: GridColDef<AllItemType>[] = [
             );
         },
     },
-    {
-        field: 'time',
-        headerName: 'Time',
-        flex: 0.5,
-        renderCell: ({row}) => formatMillisecondsAsDuration(row.time),
-    },
+    {field: 'time', headerName: 'Time', flex: 0.5, renderCell: ({row}) => formatMillisecondsAsDuration(row.time)},
     {
         field: 'arguments',
         headerName: 'Arguments',
@@ -116,9 +111,7 @@ type ServiceData = {
     timeStart: number;
     timeEnd: number;
 };
-type ServicesPanelProps = {
-    data: ServiceData[];
-};
+type ServicesPanelProps = {data: ServiceData[]};
 
 export const ServicesPanel = ({data}: ServicesPanelProps) => {
     const [value, setValue] = useState<Tabs>('summary');

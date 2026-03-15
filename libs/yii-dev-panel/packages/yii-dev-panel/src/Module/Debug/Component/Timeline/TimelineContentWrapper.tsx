@@ -9,11 +9,7 @@ import {parseObjectId} from '@yiisoft/yii-dev-panel-sdk/Helper/objectString';
 import * as React from 'react';
 import {PropsWithChildren} from 'react';
 
-type TimelineContentWrapperProps = {
-    name: string;
-    file?: string;
-    payload: undefined | string;
-};
+type TimelineContentWrapperProps = {name: string; file?: string; payload: undefined | string};
 
 export const TimelineContentWrapper = React.memo((props: PropsWithChildren<TimelineContentWrapperProps>) => {
     const {name, file, payload, children} = props;

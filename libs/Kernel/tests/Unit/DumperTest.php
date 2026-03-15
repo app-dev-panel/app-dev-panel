@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit;
 
-use DateTimeZone;
-use PHPUnit\Framework\TestCase;
-use stdClass;
 use AppDevPanel\Kernel as D;
 use AppDevPanel\Kernel\Dumper;
 use AppDevPanel\Kernel\Tests\Support\Stub\ThreeProperties;
+use DateTimeZone;
+use PHPUnit\Framework\TestCase;
+use stdClass;
 
 use function socket_create;
 
@@ -25,16 +25,13 @@ final class DumperTest extends TestCase
         $object->var = 'test';
         $objectId = spl_object_id($object);
 
-        $this->assertSame(
-            <<<JSON
+        $this->assertSame(<<<JSON
             {
-                "stdClass#$objectId": {
+                "stdClass#{$objectId}": {
                     "public \$var": "test"
                 }
             }
-            JSON,
-            Dumper::create($object)->asJsonObjectsMap(1, true)
-        );
+            JSON, Dumper::create($object)->asJsonObjectsMap(1, true));
     }
 
     public function testAsJsonObjectsMapNestedObject(): void
@@ -53,24 +50,21 @@ final class DumperTest extends TestCase
         $object->var = $nested1;
         $objectId = spl_object_id($object);
 
-        $this->assertSame(
-            <<<JSON
+        $this->assertSame(<<<JSON
             {
-                "stdClass#$objectId": {
+                "stdClass#{$objectId}": {
                     "public \$name": "root",
-                    "public \$var": "object@stdClass#$nested1Id"
+                    "public \$var": "object@stdClass#{$nested1Id}"
                 },
-                "stdClass#$nested1Id": {
+                "stdClass#{$nested1Id}": {
                     "public \$name": "nested1",
-                    "public \$var": "object@stdClass#$nested2Id"
+                    "public \$var": "object@stdClass#{$nested2Id}"
                 },
-                "stdClass#$nested2Id": {
+                "stdClass#{$nested2Id}": {
                     "public \$name": "nested2"
                 }
             }
-            JSON,
-            Dumper::create($object)->asJsonObjectsMap(1, true)
-        );
+            JSON, Dumper::create($object)->asJsonObjectsMap(1, true));
     }
 
     public function testAsJsonObjectsMapArrayWithObject(): void
@@ -89,24 +83,21 @@ final class DumperTest extends TestCase
         $object->var = $nested1;
         $objectId = spl_object_id($object);
 
-        $this->assertSame(
-            <<<JSON
+        $this->assertSame(<<<JSON
             {
-                "stdClass#$objectId": {
+                "stdClass#{$objectId}": {
                     "public \$name": "root",
-                    "public \$var": "object@stdClass#$nested1Id"
+                    "public \$var": "object@stdClass#{$nested1Id}"
                 },
-                "stdClass#$nested1Id": {
+                "stdClass#{$nested1Id}": {
                     "public \$name": "nested1",
                     "public \$var": "array (1 item) [...]"
                 },
-                "stdClass#$nested2Id": {
+                "stdClass#{$nested2Id}": {
                     "public \$name": "nested2"
                 }
             }
-            JSON,
-            Dumper::create($object)->asJsonObjectsMap(0, true)
-        );
+            JSON, Dumper::create($object)->asJsonObjectsMap(0, true));
     }
 
     /**
@@ -137,37 +128,37 @@ final class DumperTest extends TestCase
             $object1,
             5,
             <<<S
-            {
-                "stdClass#$ids1[0]": {
-                    "public \$id": "lvl0",
-                    "public \$lvl1": "object@stdClass#$ids1[1]"
-                },
-                "stdClass#$ids1[1]": {
-                    "public \$id": "lvl1",
-                    "public \$lvl2": "object@stdClass#$ids1[2]"
-                },
-                "stdClass#$ids1[2]": {
-                    "public \$id": "lvl2",
-                    "public \$lvl3": "object@stdClass#$ids1[3]"
-                },
-                "stdClass#$ids1[3]": {
-                    "public \$id": "lvl3",
-                    "public \$lvl4": "object@stdClass#$ids1[4]"
-                },
-                "stdClass#$ids1[4]": {
-                    "public \$id": "lvl4",
-                    "public \$lvl5": "object@stdClass#$nested1Id"
-                },
-                "stdClass#$nested1Id": {
-                    "public \$id": "nested1",
-                    "public \$nested2": "object@stdClass#$nested2Id"
-                },
-                "stdClass#$nested2Id": {
-                    "public \$id": "nested2",
-                    "public \$nested1": "object@stdClass#$nested1Id"
+                {
+                    "stdClass#{$ids1[0]}": {
+                        "public \$id": "lvl0",
+                        "public \$lvl1": "object@stdClass#{$ids1[1]}"
+                    },
+                    "stdClass#{$ids1[1]}": {
+                        "public \$id": "lvl1",
+                        "public \$lvl2": "object@stdClass#{$ids1[2]}"
+                    },
+                    "stdClass#{$ids1[2]}": {
+                        "public \$id": "lvl2",
+                        "public \$lvl3": "object@stdClass#{$ids1[3]}"
+                    },
+                    "stdClass#{$ids1[3]}": {
+                        "public \$id": "lvl3",
+                        "public \$lvl4": "object@stdClass#{$ids1[4]}"
+                    },
+                    "stdClass#{$ids1[4]}": {
+                        "public \$id": "lvl4",
+                        "public \$lvl5": "object@stdClass#{$nested1Id}"
+                    },
+                    "stdClass#{$nested1Id}": {
+                        "public \$id": "nested1",
+                        "public \$nested2": "object@stdClass#{$nested2Id}"
+                    },
+                    "stdClass#{$nested2Id}": {
+                        "public \$id": "nested2",
+                        "public \$nested1": "object@stdClass#{$nested1Id}"
+                    }
                 }
-            }
-            S,
+                S,
         ];
 
         // array loop must be 1 level deeper to parse loop objects
@@ -176,44 +167,44 @@ final class DumperTest extends TestCase
             $object2,
             6,
             <<<S
-            {
-                "stdClass#$ids2[0]": {
-                    "public \$id": "lvl0",
-                    "public \$lvl1": "object@stdClass#$ids2[1]"
-                },
-                "stdClass#$ids2[1]": {
-                    "public \$id": "lvl1",
-                    "public \$lvl2": "object@stdClass#$ids2[2]"
-                },
-                "stdClass#$ids2[2]": {
-                    "public \$id": "lvl2",
-                    "public \$lvl3": "object@stdClass#$ids2[3]"
-                },
-                "stdClass#$ids2[3]": {
-                    "public \$id": "lvl3",
-                    "public \$lvl4": "object@stdClass#$ids2[4]"
-                },
-                "stdClass#$ids2[4]": {
-                    "public \$id": "lvl4",
-                    "public \$lvl5": "object@stdClass#$ids2[5]"
-                },
-                "stdClass#$ids2[5]": {
-                    "public \$id": "lvl5",
-                    "public \$lvl6": [
-                        "object@stdClass#$nested1Id",
-                        "object@stdClass#$nested2Id"
-                    ]
-                },
-                "stdClass#$nested1Id": {
-                    "public \$id": "nested1",
-                    "public \$nested2": "object@stdClass#$nested2Id"
-                },
-                "stdClass#$nested2Id": {
-                    "public \$id": "nested2",
-                    "public \$nested1": "object@stdClass#$nested1Id"
+                {
+                    "stdClass#{$ids2[0]}": {
+                        "public \$id": "lvl0",
+                        "public \$lvl1": "object@stdClass#{$ids2[1]}"
+                    },
+                    "stdClass#{$ids2[1]}": {
+                        "public \$id": "lvl1",
+                        "public \$lvl2": "object@stdClass#{$ids2[2]}"
+                    },
+                    "stdClass#{$ids2[2]}": {
+                        "public \$id": "lvl2",
+                        "public \$lvl3": "object@stdClass#{$ids2[3]}"
+                    },
+                    "stdClass#{$ids2[3]}": {
+                        "public \$id": "lvl3",
+                        "public \$lvl4": "object@stdClass#{$ids2[4]}"
+                    },
+                    "stdClass#{$ids2[4]}": {
+                        "public \$id": "lvl4",
+                        "public \$lvl5": "object@stdClass#{$ids2[5]}"
+                    },
+                    "stdClass#{$ids2[5]}": {
+                        "public \$id": "lvl5",
+                        "public \$lvl6": [
+                            "object@stdClass#{$nested1Id}",
+                            "object@stdClass#{$nested2Id}"
+                        ]
+                    },
+                    "stdClass#{$nested1Id}": {
+                        "public \$id": "nested1",
+                        "public \$nested2": "object@stdClass#{$nested2Id}"
+                    },
+                    "stdClass#{$nested2Id}": {
+                        "public \$id": "nested2",
+                        "public \$nested1": "object@stdClass#{$nested1Id}"
+                    }
                 }
-            }
-            S,
+                S,
         ];
 
         // nested loop to inner array
@@ -229,24 +220,24 @@ final class DumperTest extends TestCase
             $object3,
             3,
             <<<S
-            {
-                "stdClass#$object3Id": {
-                    "public \$id": "lvl0",
-                    "public \$lv11": {
-                        "id": "lvl1",
-                        "loop": "object@stdClass#$nested1Id"
+                {
+                    "stdClass#{$object3Id}": {
+                        "public \$id": "lvl0",
+                        "public \$lv11": {
+                            "id": "lvl1",
+                            "loop": "object@stdClass#{$nested1Id}"
+                        }
+                    },
+                    "stdClass#{$nested1Id}": {
+                        "public \$id": "nested1",
+                        "public \$nested2": "object@stdClass#{$nested2Id}"
+                    },
+                    "stdClass#{$nested2Id}": {
+                        "public \$id": "nested2",
+                        "public \$nested1": "object@stdClass#{$nested1Id}"
                     }
-                },
-                "stdClass#$nested1Id": {
-                    "public \$id": "nested1",
-                    "public \$nested2": "object@stdClass#$nested2Id"
-                },
-                "stdClass#$nested2Id": {
-                    "public \$id": "nested2",
-                    "public \$nested1": "object@stdClass#$nested1Id"
                 }
-            }
-            S,
+                S,
         ];
     }
 
@@ -285,63 +276,63 @@ final class DumperTest extends TestCase
         $lvl10Id = spl_object_id($var->prop1->prop2->prop1->prop1->prop1->prop1->prop1->prop1->prop1);
 
         $expectedResult = <<<JSON
-        {
-            "stdClass#$lvl1Id": {
-                "public \$id": "lvl1",
-                "public \$prop1": "object@stdClass#$lvl2Id",
-                "public \$prop2": "object@stdClass#$lvl2Id"
-            },
-            "stdClass#$lvl2Id": {
-                "public \$id": "lvl2",
-                "public \$prop1": "object@stdClass#$lvl3Id",
-                "public \$prop2": "object@stdClass#$lvl3Id"
-            },
-            "stdClass#$lvl3Id": {
-                "public \$id": "lvl3",
-                "public \$prop1": "object@stdClass#$lvl4Id",
-                "public \$prop2": "object@stdClass#$lvl4Id"
-            },
-            "stdClass#$lvl4Id": {
-                "public \$id": "lvl4",
-                "public \$prop1": "object@stdClass#$lvl5Id",
-                "public \$prop2": "object@stdClass#$lvl5Id"
-            },
-            "stdClass#$lvl5Id": {
-                "public \$id": "lvl5",
-                "public \$prop1": "object@stdClass#$lvl6Id",
-                "public \$prop2": "object@stdClass#$lvl6Id"
-            },
-            "stdClass#$lvl6Id": {
-                "public \$id": "lvl6",
-                "public \$prop1": "object@stdClass#$lvl7Id",
-                "public \$prop2": "object@stdClass#$lvl7Id"
-            },
-            "stdClass#$lvl7Id": {
-                "public \$id": "lvl7",
-                "public \$prop1": "object@stdClass#$lvl8Id",
-                "public \$prop2": "object@stdClass#$lvl8Id"
-            },
-            "stdClass#$lvl8Id": {
-                "public \$id": "lvl8",
-                "public \$prop1": "object@stdClass#$lvl9Id",
-                "public \$prop2": "object@stdClass#$lvl9Id"
-            },
-            "stdClass#$lvl9Id": {
-                "public \$id": "lvl9",
-                "public \$prop1": "object@stdClass#$lvl10Id",
-                "public \$prop2": "object@stdClass#$lvl10Id"
-            },
-            "stdClass#$lvl10Id": {
-                "public \$id": "lvl10",
-                "public \$loop": [
-                    [
-                        "array (1 item) [...]"
-                    ]
-                ],
-                "public \$head": "object@stdClass#$lvl1Id"
+            {
+                "stdClass#{$lvl1Id}": {
+                    "public \$id": "lvl1",
+                    "public \$prop1": "object@stdClass#{$lvl2Id}",
+                    "public \$prop2": "object@stdClass#{$lvl2Id}"
+                },
+                "stdClass#{$lvl2Id}": {
+                    "public \$id": "lvl2",
+                    "public \$prop1": "object@stdClass#{$lvl3Id}",
+                    "public \$prop2": "object@stdClass#{$lvl3Id}"
+                },
+                "stdClass#{$lvl3Id}": {
+                    "public \$id": "lvl3",
+                    "public \$prop1": "object@stdClass#{$lvl4Id}",
+                    "public \$prop2": "object@stdClass#{$lvl4Id}"
+                },
+                "stdClass#{$lvl4Id}": {
+                    "public \$id": "lvl4",
+                    "public \$prop1": "object@stdClass#{$lvl5Id}",
+                    "public \$prop2": "object@stdClass#{$lvl5Id}"
+                },
+                "stdClass#{$lvl5Id}": {
+                    "public \$id": "lvl5",
+                    "public \$prop1": "object@stdClass#{$lvl6Id}",
+                    "public \$prop2": "object@stdClass#{$lvl6Id}"
+                },
+                "stdClass#{$lvl6Id}": {
+                    "public \$id": "lvl6",
+                    "public \$prop1": "object@stdClass#{$lvl7Id}",
+                    "public \$prop2": "object@stdClass#{$lvl7Id}"
+                },
+                "stdClass#{$lvl7Id}": {
+                    "public \$id": "lvl7",
+                    "public \$prop1": "object@stdClass#{$lvl8Id}",
+                    "public \$prop2": "object@stdClass#{$lvl8Id}"
+                },
+                "stdClass#{$lvl8Id}": {
+                    "public \$id": "lvl8",
+                    "public \$prop1": "object@stdClass#{$lvl9Id}",
+                    "public \$prop2": "object@stdClass#{$lvl9Id}"
+                },
+                "stdClass#{$lvl9Id}": {
+                    "public \$id": "lvl9",
+                    "public \$prop1": "object@stdClass#{$lvl10Id}",
+                    "public \$prop2": "object@stdClass#{$lvl10Id}"
+                },
+                "stdClass#{$lvl10Id}": {
+                    "public \$id": "lvl10",
+                    "public \$loop": [
+                        [
+                            "array (1 item) [...]"
+                        ]
+                    ],
+                    "public \$head": "object@stdClass#{$lvl1Id}"
+                }
             }
-        }
-        JSON;
+            JSON;
 
         $actualResult = Dumper::create($var)->asJsonObjectsMap(2, true);
 
@@ -384,8 +375,8 @@ final class DumperTest extends TestCase
         yield 'flat std class' => [
             $user,
             <<<S
-            {"stdClass#{$objectId}":{"public \$id":1}}
-            S,
+                {"stdClass#{$objectId}":{"public \$id":1}}
+                S,
         ];
 
         $decoratedUser = clone $user;
@@ -396,12 +387,12 @@ final class DumperTest extends TestCase
         yield 'nested std class' => [
             $decoratedUser,
             <<<S
-            {"stdClass#{$decoratedObjectId}":{"public \$id":1,"public \$name":"Name","public \$originalUser":"object@stdClass#{$objectId}"},"stdClass#{$objectId}":{"public \$id":1}}
-            S,
+                {"stdClass#{$decoratedObjectId}":{"public \$id":1,"public \$name":"Name","public \$originalUser":"object@stdClass#{$objectId}"},"stdClass#{$objectId}":{"public \$id":1}}
+                S,
         ];
 
         $closureInsideObject = new stdClass();
-        $closureObject = fn () => true;
+        $closureObject = static fn() => true;
         $closureObjectId = spl_object_id($closureObject);
         $closureInsideObject->closure = $closureObject;
         $closureInsideObjectId = spl_object_id($closureInsideObject);
@@ -409,8 +400,8 @@ final class DumperTest extends TestCase
         yield 'closure inside std class' => [
             $closureInsideObject,
             <<<S
-            {"stdClass#{$closureInsideObjectId}":{"public \$closure":"fn () => true"},"Closure#{$closureObjectId}":"fn () => true"}
-            S,
+                {"stdClass#{$closureInsideObjectId}":{"public \$closure":"static fn() => true"},"Closure#{$closureObjectId}":"static fn() => true"}
+                S,
         ];
     }
 
@@ -438,12 +429,9 @@ final class DumperTest extends TestCase
         $this->assertEqualsWithoutLE($expectedResult, $actualResult);
 
         $map = $dumper->asJsonObjectsMap(2);
-        $this->assertEqualsWithoutLE(
-            <<<S
-            {"stdClass#$object1Id":"{stateless object}","stdClass#$object2Id":"{stateless object}"}
-            S,
-            $map,
-        );
+        $this->assertEqualsWithoutLE(<<<S
+            {"stdClass#{$object1Id}":"{stateless object}","stdClass#{$object2Id}":"{stateless object}"}
+            S, $map);
     }
 
     public function testDepthLimitInObjectMap(): void
@@ -461,16 +449,13 @@ final class DumperTest extends TestCase
 
     public function testObjectProvidesDebugInfoMethod(): void
     {
-        $variable = new class () {
+        $variable = new class() {
             public function __debugInfo(): array
             {
                 return ['test' => 'ok'];
             }
         };
-        $expectedResult = sprintf(
-            '{"class@anonymous#%d":{"public $test":"ok"}}',
-            spl_object_id($variable),
-        );
+        $expectedResult = sprintf('{"class@anonymous#%d":{"public $test":"ok"}}', spl_object_id($variable));
 
         $dumper = Dumper::create($variable);
         $actualResult = $dumper->asJson(2);
@@ -493,7 +478,7 @@ final class DumperTest extends TestCase
         $expectedResult = sprintf(
             '["object@stdClass#%d",["stdClass#%d (...)"]]',
             $statelessObjectId,
-            $statefulObjectId
+            $statefulObjectId,
         );
 
         $dumper = Dumper::create($variable);
@@ -501,12 +486,9 @@ final class DumperTest extends TestCase
         $this->assertEqualsWithoutLE($expectedResult, $actualResult);
 
         $map = $dumper->asJsonObjectsMap(3);
-        $this->assertEqualsWithoutLE(
-            <<<S
+        $this->assertEqualsWithoutLE(<<<S
             {"stdClass#{$statelessObjectId}":"{stateless object}","stdClass#{$statefulObjectId}":{"public \$id":1}}
-            S,
-            $map,
-        );
+            S, $map);
     }
 
     /**
@@ -565,12 +547,12 @@ final class DumperTest extends TestCase
 
         $output = Dumper::create($variable)->asJson(2, true);
         $result = <<<S
-        [
             [
-                "test"
+                [
+                    "test"
+                ]
             ]
-        ]
-        S;
+            S;
         $this->assertEqualsWithoutLE($result, $output);
     }
 
@@ -586,11 +568,11 @@ final class DumperTest extends TestCase
 
         $actualResult = Dumper::create([$object1, $object2], [$object1Class])->asJson(2, true);
         $expectedResult = <<<S
-        [
-            "{$object1Class}#{$object1Id} (...)",
-            "object@{$object2Class}#{$object2Id}"
-        ]
-        S;
+            [
+                "{$object1Class}#{$object1Id} (...)",
+                "object@{$object2Class}#{$object2Id}"
+            ]
+            S;
 
         $this->assertEqualsWithoutLE($expectedResult, $actualResult);
     }
@@ -608,31 +590,31 @@ final class DumperTest extends TestCase
         ];
 
         // @formatter:off
-        $shortFunctionObject = fn () => 1;
+        $shortFunctionObject = static fn() => 1;
         // @formatter:on
         $shortFunctionObjectId = spl_object_id($shortFunctionObject);
 
         yield 'short function' => [
             $shortFunctionObject,
             <<<S
-                {"Closure#{$shortFunctionObjectId}":"fn () => 1"}
+                {"Closure#{$shortFunctionObjectId}":"static fn() => 1"}
                 S,
         ];
 
         // @formatter:off
-        $staticShortFunctionObject = static fn () => 1;
+        $staticShortFunctionObject = static fn() => 1;
         // @formatter:on
         $staticShortFunctionObjectId = spl_object_id($staticShortFunctionObject);
 
         yield 'short static function' => [
             $staticShortFunctionObject,
             <<<S
-                {"Closure#{$staticShortFunctionObjectId}":"static fn () => 1"}
+                {"Closure#{$staticShortFunctionObjectId}":"static fn() => 1"}
                 S,
         ];
 
         // @formatter:off
-        $functionObject = function () {
+        $functionObject = static function () {
             return 1;
         };
         // @formatter:on
@@ -641,7 +623,7 @@ final class DumperTest extends TestCase
         yield 'function' => [
             $functionObject,
             <<<S
-                {"Closure#{$functionObjectId}":"function () {\\n    return 1;\\n}"}
+                {"Closure#{$functionObjectId}":"static function () {\\n    return 1;\\n}"}
                 S,
         ];
 
@@ -708,7 +690,7 @@ final class DumperTest extends TestCase
         ];
 
         // @formatter:off
-        $closureInArrayObject = fn () => new \DateTimeZone('');
+        $closureInArrayObject = static fn() => new \DateTimeZone('');
         // @formatter:on
         $closureInArrayObjectId = spl_object_id($closureInArrayObject);
 
@@ -717,54 +699,54 @@ final class DumperTest extends TestCase
             [$closureInArrayObject],
             // @formatter:on
             <<<S
-                [{"Closure#{$closureInArrayObjectId}":"fn () => new \\\DateTimeZone('')"}]
+                [{"Closure#{$closureInArrayObjectId}":"static fn() => new \\\DateTimeZone('')"}]
                 S,
         ];
 
         // @formatter:off
-        $closureWithUsualClassNameObject = fn (Dumper $date) => new \DateTimeZone('');
+        $closureWithUsualClassNameObject = static fn(Dumper $date) => new \DateTimeZone('');
         // @formatter:on
         $closureWithUsualClassNameObjectId = spl_object_id($closureWithUsualClassNameObject);
 
         yield 'original class name' => [
             $closureWithUsualClassNameObject,
             <<<S
-                {"Closure#{$closureWithUsualClassNameObjectId}":"fn (\\\Yiisoft\\\Yii\\\Debug\\\Dumper \$date) => new \\\DateTimeZone('')"}
+                {"Closure#{$closureWithUsualClassNameObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
                 S,
         ];
 
         // @formatter:off
-        $closureWithAliasedClassNameObject = fn (Dumper $date) => new \DateTimeZone('');
+        $closureWithAliasedClassNameObject = static fn(Dumper $date) => new \DateTimeZone('');
         // @formatter:on
         $closureWithAliasedClassNameObjectId = spl_object_id($closureWithAliasedClassNameObject);
 
         yield 'class alias' => [
             $closureWithAliasedClassNameObject,
             <<<S
-                {"Closure#{$closureWithAliasedClassNameObjectId}":"fn (\\\Yiisoft\\\Yii\\\Debug\\\Dumper \$date) => new \\\DateTimeZone('')"}
+                {"Closure#{$closureWithAliasedClassNameObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
                 S,
         ];
 
         // @formatter:off
-        $closureWithAliasedNamespaceObject = fn (D\Dumper $date) => new \DateTimeZone('');
+        $closureWithAliasedNamespaceObject = static fn(D\Dumper $date) => new \DateTimeZone('');
         // @formatter:on
         $closureWithAliasedNamespaceObjectId = spl_object_id($closureWithAliasedNamespaceObject);
 
         yield 'namespace alias' => [
             $closureWithAliasedNamespaceObject,
             <<<S
-                {"Closure#{$closureWithAliasedNamespaceObjectId}":"fn (\\\Yiisoft\\\Yii\\\Debug\\\Dumper \$date) => new \\\DateTimeZone('')"}
+                {"Closure#{$closureWithAliasedNamespaceObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
                 S,
         ];
         // @formatter:off
-        $closureWithNullCollisionOperatorObject = fn () => $_ENV['var'] ?? null;
+        $closureWithNullCollisionOperatorObject = static fn() => $_ENV['var'] ?? null;
         // @formatter:on
         $closureWithNullCollisionOperatorObjectId = spl_object_id($closureWithNullCollisionOperatorObject);
 
         yield 'closure with null-collision operator' => [
             $closureWithNullCollisionOperatorObject,
             <<<S
-                {"Closure#{$closureWithNullCollisionOperatorObjectId}":"fn () => \$_ENV['var'] ?? null"}
+                {"Closure#{$closureWithNullCollisionOperatorObjectId}":"static fn() => \$_ENV['var'] ?? null"}
                 S,
         ];
         yield 'utf8 supported' => [
@@ -772,10 +754,9 @@ final class DumperTest extends TestCase
             '"🤣"',
         ];
 
-
         $objectWithClosureInProperty = new stdClass();
         // @formatter:off
-        $objectWithClosureInProperty->a = fn () => 1;
+        $objectWithClosureInProperty->a = static fn() => 1;
         // @formatter:on
         $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
         $objectWithClosureInPropertyClosureId = spl_object_id($objectWithClosureInProperty->a);
@@ -783,14 +764,13 @@ final class DumperTest extends TestCase
         yield 'closure in property supported' => [
             $objectWithClosureInProperty,
             <<<S
-                {"stdClass#{$objectWithClosureInPropertyId}":{"public \$a":{"Closure#{$objectWithClosureInPropertyClosureId}":"fn () => 1"}}}
+                {"stdClass#{$objectWithClosureInPropertyId}":{"public \$a":{"Closure#{$objectWithClosureInPropertyClosureId}":"static fn() => 1"}}}
                 S,
         ];
         yield 'binary string' => [
             pack('H*', md5('binary string')),
             '"ɍ��^��\u00191\u0017�]�-f�"',
         ];
-
 
         $fileResource = tmpfile();
         $fileResourceUri = stream_get_meta_data($fileResource)['uri'];
@@ -816,8 +796,8 @@ final class DumperTest extends TestCase
         yield 'socket resource' => [
             $socketResource,
             <<<S
-            {"Socket#{$socketResourceId}":"{stateless object}"}
-            S,
+                {"Socket#{$socketResourceId}":"{stateless object}"}
+                S,
         ];
 
         $opendirResource = opendir(sys_get_temp_dir());

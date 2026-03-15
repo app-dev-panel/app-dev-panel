@@ -14,17 +14,14 @@ final class PackageNotInstalledException extends Exception implements FriendlyEx
         private string $packageName,
         string $message = '',
         int $code = 0,
-        ?Throwable $previous = null
+        ?Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $previous);
     }
 
     public function getName(): string
     {
-        return sprintf(
-            'Package "%s" is not installed.',
-            $this->packageName,
-        );
+        return sprintf('Package "%s" is not installed.', $this->packageName);
     }
 
     public function getSolution(): string

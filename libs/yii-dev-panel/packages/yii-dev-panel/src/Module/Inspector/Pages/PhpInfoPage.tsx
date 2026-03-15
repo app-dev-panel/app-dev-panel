@@ -1,7 +1,7 @@
 import {Box} from '@mui/material';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {useGetPhpInfoQuery} from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import {useEffect, useRef} from 'react';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 export const PhpInfoPage = () => {
     const getPhpInfoQuery = useGetPhpInfoQuery();

@@ -18,8 +18,8 @@ import {
 // import {middlewares as ToolbarApiMiddlewares, reducers as ToolbarApiReducers} from './Module/Toolbar/api';
 import {errorNotificationMiddleware} from '@yiisoft/yii-dev-panel-sdk/API/errorNotificationMiddleware';
 import {TypedUseSelectorHook, useSelector} from 'react-redux';
-import {FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, persistStore} from 'redux-persist';
 import type {PreloadedStateShapeFromReducersMapObject} from 'redux';
+import {FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, persistStore} from 'redux-persist';
 import {initMessageListener} from 'redux-state-sync';
 
 // TODO: get reducers and middlewares from modules.ts
@@ -38,9 +38,7 @@ export const createStore = (preloadedState: PreloadedStateShapeFromReducersMapOb
         reducer: rootReducer,
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware({
-                serializableCheck: {
-                    ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-                },
+                serializableCheck: {ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]},
             })
                 // .concat(consoleLogActionsMiddleware)
                 .concat([

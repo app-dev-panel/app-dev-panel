@@ -10,8 +10,7 @@ final class RouteCollectorWrapper
 {
     public function __construct(
         private array $middlewareDefinitions,
-    ) {
-    }
+    ) {}
 
     public function wrap(RouteCollectorInterface $routeCollector): void
     {

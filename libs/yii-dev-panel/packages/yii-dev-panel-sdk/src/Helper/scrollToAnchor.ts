@@ -7,9 +7,6 @@ export function scrollToAnchor(offset = 450, anchor?: string) {
             return;
         }
 
-        window.scrollTo({
-            top: elementToScroll.offsetTop - offset,
-            behavior: 'smooth',
-        });
+        window.scrollTo({top: elementToScroll.offsetTop - offset, behavior: 'smooth'});
     });
 }

@@ -7,9 +7,7 @@ import React, {useState} from 'react';
 const buttonColor = (exitCode: number): MuiColor => {
     return exitCode === 0 ? 'success' : 'error';
 };
-type CommandItemProps = {
-    data: DebugEntry;
-};
+type CommandItemProps = {data: DebugEntry};
 
 export const CommandItem = ({data}: CommandItemProps) => {
     if (!data.command) {
@@ -28,11 +26,7 @@ export const CommandItem = ({data}: CommandItemProps) => {
                     color={buttonColor(data.command.exitCode)}
                     variant="contained"
                     onClick={handleClick}
-                    sx={{
-                        whiteSpace: 'nowrap',
-                        textTransform: 'none',
-                        borderRadius: 0,
-                    }}
+                    sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
                 >
                     {data.command.name}
                 </Button>

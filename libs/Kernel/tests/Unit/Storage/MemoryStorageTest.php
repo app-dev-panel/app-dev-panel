@@ -33,7 +33,7 @@ final class MemoryStorageTest extends AbstractStorageTestCase
                     'collectors' => [$collector1->getName(), $collector2->getName()],
                 ],
             ],
-            $result
+            $result,
         );
     }
 }

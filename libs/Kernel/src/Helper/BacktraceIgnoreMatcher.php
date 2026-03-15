@@ -35,6 +35,6 @@ final class BacktraceIgnoreMatcher
         if (empty($patterns)) {
             return false;
         }
-        return (new CombinedRegexp($patterns))->matches($string);
+        return new CombinedRegexp($patterns)->matches($string);
     }
 }

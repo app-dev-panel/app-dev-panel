@@ -4,23 +4,8 @@ import React from 'react';
 
 const cacheData = {
     cache: {
-        get: [
-            {
-                key: '123',
-                count: 2,
-            },
-        ],
-        set: [
-            {
-                key: '123',
-                value: {
-                    '1': 2,
-                    '2': 'object@stdClass#6692',
-                },
-                ttl: null,
-                count: 2,
-            },
-        ],
+        get: [{key: '123', count: 2}],
+        set: [{key: '123', value: {'1': 2, '2': 'object@stdClass#6692'}, ttl: null, count: 2}],
     },
 };
 
@@ -36,17 +21,13 @@ export function SharedPage() {
                 url={'http://localhost:3002/external.js'}
                 module={'./LogPanel'}
                 scope={'remote'}
-                props={{
-                    data: logsData,
-                }}
+                props={{data: logsData}}
             />
             <ModuleLoader
                 url={'http://localhost:3002/external.js'}
                 module={'./CachePanel'}
                 scope={'remote'}
-                props={{
-                    data: cacheData,
-                }}
+                props={{data: cacheData}}
             />
         </React.Suspense>
     );

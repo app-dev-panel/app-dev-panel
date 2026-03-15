@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector\Console;
 
+use AppDevPanel\Kernel\Collector\CollectorTrait;
+use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
+use AppDevPanel\Kernel\Collector\TimelineCollector;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleEvent;
@@ -11,9 +14,6 @@ use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Yiisoft\Yii\Console\Output\ConsoleBufferedOutput;
-use AppDevPanel\Kernel\Collector\CollectorTrait;
-use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
-use AppDevPanel\Kernel\Collector\TimelineCollector;
 
 final class CommandCollector implements SummaryCollectorInterface
 {
@@ -23,12 +23,12 @@ final class CommandCollector implements SummaryCollectorInterface
      * Let -1 mean that it was not set during the process.
      */
     private const UNDEFINED_EXIT_CODE = -1;
+
     private array $commands = [];
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {

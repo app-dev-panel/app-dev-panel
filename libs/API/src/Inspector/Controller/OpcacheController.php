@@ -12,8 +12,7 @@ final class OpcacheController
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-    ) {
-    }
+    ) {}
 
     public function index(): ResponseInterface
     {

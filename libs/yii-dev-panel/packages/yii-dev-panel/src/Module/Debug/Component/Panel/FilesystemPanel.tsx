@@ -4,18 +4,11 @@ import TabList from '@mui/lab/TabList';
 import {Alert, AlertTitle, IconButton, List, ListItem, ListItemText, Tab, Tooltip} from '@mui/material';
 import Box from '@mui/material/Box';
 import {parseFilePath} from '@yiisoft/yii-dev-panel-sdk/Helper/filePathParser';
-import React, {SyntheticEvent, useState} from 'react';
+import {SyntheticEvent, useState} from 'react';
 
 type Operation = 'readdir' | 'mkdir' | 'read' | 'unlink';
-type Information = {
-    path: string;
-    args: Record<string, any>;
-};
-type FilesystemPanelProps = {
-    data: {
-        [key in Operation]: Information;
-    }[];
-};
+type Information = {path: string; args: Record<string, any>};
+type FilesystemPanelProps = {data: {[key in Operation]: Information}[]};
 
 export const FilesystemPanel = ({data}: FilesystemPanelProps) => {
     const tabs = Object.keys(data) as Operation[];

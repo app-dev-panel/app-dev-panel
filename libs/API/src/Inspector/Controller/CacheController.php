@@ -16,13 +16,10 @@ class CacheController
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-    ) {
-    }
+    ) {}
 
-    public function view(
-        ServerRequestInterface $request,
-        ContainerInterface $container,
-    ): ResponseInterface {
+    public function view(ServerRequestInterface $request, ContainerInterface $container): ResponseInterface
+    {
         $params = $request->getQueryParams();
         $key = $params['key'] ?? '';
 
@@ -32,7 +29,7 @@ class CacheController
         if (!$container->has(CacheInterface::class)) {
             // TODO: fix message
             throw new RuntimeException(
-                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.'
+                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.',
             );
         }
         $cache = $container->get(CacheInterface::class);
@@ -50,10 +47,8 @@ class CacheController
         return $this->responseFactory->createResponse($response);
     }
 
-    public function delete(
-        ServerRequestInterface $request,
-        ContainerInterface $container,
-    ): ResponseInterface {
+    public function delete(ServerRequestInterface $request, ContainerInterface $container): ResponseInterface
+    {
         $params = $request->getQueryParams();
         $key = $params['key'] ?? '';
 
@@ -63,7 +58,7 @@ class CacheController
         if (!$container->has(CacheInterface::class)) {
             // TODO: fix message
             throw new RuntimeException(
-                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.'
+                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.',
             );
         }
         $cache = $container->get(CacheInterface::class);
@@ -79,13 +74,12 @@ class CacheController
         ]);
     }
 
-    public function clear(
-        ContainerInterface $container,
-    ): ResponseInterface {
+    public function clear(ContainerInterface $container): ResponseInterface
+    {
         if (!$container->has(CacheInterface::class)) {
             // TODO: fix message
             throw new RuntimeException(
-                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.'
+                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.',
             );
         }
         $cache = $container->get(CacheInterface::class);

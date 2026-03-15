@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
 final class HttpClientCollectorTest extends AbstractCollectorTestCase
 {
@@ -28,30 +28,18 @@ final class HttpClientCollectorTest extends AbstractCollectorTestCase
             new Request('POST', 'http://yiiframework.com'),
             startTime: 12.10,
             line: 'file2:555',
-            uniqueId: 'test2'
+            uniqueId: 'test2',
         );
         $collector->collect(
             new Request('GET', 'http://yiiframework.com'),
             startTime: 15.00,
             line: 'file2:666',
-            uniqueId: 'test3'
+            uniqueId: 'test3',
         );
 
-        $collector->collectTotalTime(
-            new Response(200, [], 'test'),
-            endTime: 13.10,
-            uniqueId: 'test1'
-        );
-        $collector->collectTotalTime(
-            new Response(200, [], 'test'),
-            endTime: 12.20,
-            uniqueId: 'test2'
-        );
-        $collector->collectTotalTime(
-            new Response(200, [], 'test'),
-            endTime: 20.00,
-            uniqueId: 'test4'
-        );
+        $collector->collectTotalTime(new Response(200, [], 'test'), endTime: 13.10, uniqueId: 'test1');
+        $collector->collectTotalTime(new Response(200, [], 'test'), endTime: 12.20, uniqueId: 'test2');
+        $collector->collectTotalTime(new Response(200, [], 'test'), endTime: 20.00, uniqueId: 'test4');
     }
 
     protected function getCollector(): CollectorInterface

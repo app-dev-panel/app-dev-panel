@@ -3,22 +3,10 @@ import React, {createContext, PropsWithChildren, useContext, useEffect, useMemo}
 
 const setItems = createAction<Breadcrumb[]>('setItems');
 
-type Breadcrumb =
-    | {
-          title: string;
-          href: any;
-      }
-    | string
-    | null;
-type State = {
-    breadcrumbs: Breadcrumb[];
-    setBreadcrumbs: typeof setItems;
-};
+type Breadcrumb = {title: string; href: any} | string | null;
+type State = {breadcrumbs: Breadcrumb[]; setBreadcrumbs: typeof setItems};
 
-const initialState: State = {
-    breadcrumbs: [],
-    setBreadcrumbs: setItems,
-};
+const initialState: State = {breadcrumbs: [], setBreadcrumbs: setItems};
 export const Reducer = createReducer(initialState, (builder) => {
     builder.addCase(setItems, (state, {payload}) => {
         state.breadcrumbs = payload;

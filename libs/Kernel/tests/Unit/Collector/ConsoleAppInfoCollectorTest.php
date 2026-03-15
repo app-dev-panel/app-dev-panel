@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
+use AppDevPanel\Kernel\Collector\CollectorInterface;
+use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
+use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
 use Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -13,10 +17,6 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Yiisoft\Yii\Console\Event\ApplicationShutdown;
 use Yiisoft\Yii\Console\Event\ApplicationStartup;
-use AppDevPanel\Kernel\Collector\CollectorInterface;
-use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
-use AppDevPanel\Kernel\Collector\TimelineCollector;
-use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
 
 use function sleep;
 use function usleep;

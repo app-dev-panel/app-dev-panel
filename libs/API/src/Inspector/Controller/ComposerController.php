@@ -4,33 +4,27 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Inspector\Command\BashCommand;
+use AppDevPanel\Api\Inspector\CommandResponse;
 use Exception;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use AppDevPanel\Api\Inspector\Command\BashCommand;
-use AppDevPanel\Api\Inspector\CommandResponse;
 
 final class ComposerController
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-    ) {
-    }
+    ) {}
 
     public function index(Aliases $aliases): ResponseInterface
     {
         $composerJsonPath = $aliases->get('@root/composer.json');
         $composerLockPath = $aliases->get('@root/composer.lock');
         if (!file_exists($composerJsonPath)) {
-            throw new Exception(
-                sprintf(
-                    'Could not find composer.json by the path "%s".',
-                    $composerJsonPath,
-                )
-            );
+            throw new Exception(sprintf('Could not find composer.json by the path "%s".', $composerJsonPath));
         }
         $result = [
             'json' => json_decode(file_get_contents($composerJsonPath), true, 512, JSON_THROW_ON_ERROR),
@@ -46,9 +40,7 @@ final class ComposerController
     {
         $package = $request->getQueryParams()['package'] ?? null;
         if ($package === null) {
-            throw new InvalidArgumentException(
-                'Query parameter "package" should not be empty.'
-            );
+            throw new InvalidArgumentException('Query parameter "package" should not be empty.');
         }
         $command = new BashCommand($aliases, ['composer', 'show', $package, '--all', '--format=json']);
         $result = $command->run();
@@ -70,9 +62,7 @@ final class ComposerController
         $version = $parsedBody['version'] ?? null;
         $isDev = $parsedBody['isDev'] ?? false;
         if ($package === null) {
-            throw new InvalidArgumentException(
-                'Query parameter "package" should not be empty.'
-            );
+            throw new InvalidArgumentException('Query parameter "package" should not be empty.');
         }
         $packageWithVersion = sprintf('%s:%s', $package, $version ?? '*');
         $command = new BashCommand($aliases, [
@@ -80,7 +70,7 @@ final class ComposerController
             'require',
             $packageWithVersion,
             '-n',
-            ...$isDev ? ['--dev'] : [],
+            ...($isDev ? ['--dev'] : []),
         ]);
         $result = $command->run();
 

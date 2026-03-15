@@ -6,7 +6,6 @@ import {FormInput} from '@yiisoft/yii-dev-panel/Module/Gii/Component/FormInput';
 import {StepProps} from '@yiisoft/yii-dev-panel/Module/Gii/Component/GeneratorSteps/Step.types';
 import {mapErrorsToForm} from '@yiisoft/yii-dev-panel/Module/Gii/Component/errorMapper';
 import {Context} from '@yiisoft/yii-dev-panel/Module/Gii/Context/Context';
-import * as React from 'react';
 import {useContext, useEffect} from 'react';
 import {FieldValues, FormProvider, useForm} from 'react-hook-form';
 
@@ -29,10 +28,7 @@ export function PreviewStep({generator, onComplete}: StepProps) {
 
     async function previewHandler(data: FieldValues) {
         console.log('preview', data);
-        const response = await previewQuery({
-            generator: generator.id,
-            parameters: data,
-        });
+        const response = await previewQuery({generator: generator.id, parameters: data});
         console.log(response);
         if ('error' in response) {
             mapErrorsToForm(response, form);

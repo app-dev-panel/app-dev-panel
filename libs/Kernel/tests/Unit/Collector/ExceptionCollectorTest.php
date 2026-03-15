@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use Exception;
-use Yiisoft\ErrorHandler\Event\ApplicationError;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
+use Exception;
+use Yiisoft\ErrorHandler\Event\ApplicationError;
 
 final class ExceptionCollectorTest extends AbstractCollectorTestCase
 {

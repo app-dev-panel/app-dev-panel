@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Database\Cycle;
 
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use Cycle\Database\ColumnInterface;
 use Cycle\Database\DatabaseProviderInterface;
-use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 
 class CycleSchemaProvider implements SchemaProviderInterface
 {
-    public function __construct(private DatabaseProviderInterface $databaseProvider)
-    {
-    }
+    public function __construct(
+        private DatabaseProviderInterface $databaseProvider,
+    ) {}
 
     public function getTables(): array
     {

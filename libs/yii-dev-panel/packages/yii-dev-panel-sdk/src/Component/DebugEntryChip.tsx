@@ -4,9 +4,7 @@ import {DebugChip} from '@yiisoft/yii-dev-panel-sdk/Component/DebugChip';
 import {buttonColorConsole, buttonColorHttp} from '@yiisoft/yii-dev-panel-sdk/Helper/buttonColor';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@yiisoft/yii-dev-panel-sdk/Helper/debugEntry';
 
-type DebugChipProps = {
-    entry: DebugEntry;
-};
+type DebugChipProps = {entry: DebugEntry};
 export const DebugEntryChip = ({entry}: DebugChipProps) => {
     if (isDebugEntryAboutConsole(entry)) {
         return (

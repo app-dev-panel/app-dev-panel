@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Debug\Middleware;
 
+use AppDevPanel\Api\Debug\Exception\NotFoundException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -12,13 +13,13 @@ use Yiisoft\DataResponse\DataResponse;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
 use Yiisoft\Http\Status;
 use Yiisoft\Router\CurrentRoute;
-use AppDevPanel\Api\Debug\Exception\NotFoundException;
 
 final class ResponseDataWrapper implements MiddlewareInterface
 {
-    public function __construct(private DataResponseFactoryInterface $responseFactory, private CurrentRoute $currentRoute)
-    {
-    }
+    public function __construct(
+        private DataResponseFactoryInterface $responseFactory,
+        private CurrentRoute $currentRoute,
+    ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {

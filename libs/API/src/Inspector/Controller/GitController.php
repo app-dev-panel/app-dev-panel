@@ -20,8 +20,7 @@ final class GitController
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
         private Aliases $aliases,
-    ) {
-    }
+    ) {}
 
     public function summary(): ResponseInterface
     {
@@ -36,11 +35,11 @@ final class GitController
         $result = [
             'currentBranch' => $branch->getName(),
             'sha' => $branch->getCommitHash(),
-            'remotes' => array_map(fn (string $name) => [
+            'remotes' => array_map(static fn(string $name) => [
                 'name' => $name,
                 'url' => trim($git->run('remote', ['get-url', $name])),
             ], $remoteNames),
-            'branches' => array_map(fn (Branch $branch) => $branch->getName(), $branches),
+            'branches' => array_map(static fn(Branch $branch) => $branch->getName(), $branches),
             'lastCommit' => $this->serializeCommit($branch->getCommit()),
             'status' => explode("\n", $git->run('status')),
         ];
@@ -90,13 +89,11 @@ final class GitController
             throw new InvalidArgumentException('Command should not be empty.');
         }
         if (!in_array($command, $availableCommands, true)) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Unknown command "%s". Available commands: "%s".',
-                    $command,
-                    implode('", "', $availableCommands),
-                )
-            );
+            throw new InvalidArgumentException(sprintf(
+                'Unknown command "%s". Available commands: "%s".',
+                $command,
+                implode('", "', $availableCommands),
+            ));
         }
 
         if ($command === 'pull') {
@@ -121,23 +118,25 @@ final class GitController
             }
         }
 
-        throw new InvalidArgumentException(
-            sprintf(
-                'Could find any repositories up from "%s" directory.',
-                $projectPath,
-            )
-        );
+        throw new InvalidArgumentException(sprintf(
+            'Could find any repositories up from "%s" directory.',
+            $projectPath,
+        ));
     }
 
     private function serializeCommit(?Commit $commit): array
     {
-        return $commit === null ? [] : [
-            'sha' => $commit->getShortHash(),
-            'message' => $commit->getSubjectMessage(),
-            'author' => [
-                'name' => $commit->getAuthorName(),
-                'email' => $commit->getAuthorEmail(),
-            ],
-        ];
+        return (
+            $commit === null
+                ? []
+                : [
+                    'sha' => $commit->getShortHash(),
+                    'message' => $commit->getSubjectMessage(),
+                    'author' => [
+                        'name' => $commit->getAuthorName(),
+                        'email' => $commit->getAuthorEmail(),
+                    ],
+                ]
+        );
     }
 }

@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Command;
 
-use Symfony\Component\Process\Process;
-use Yiisoft\Aliases\Aliases;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
+use Symfony\Component\Process\Process;
+use Yiisoft\Aliases\Aliases;
 
 final class BashCommand implements CommandInterface
 {
     public function __construct(
         private Aliases $aliases,
         private array $command,
-    ) {
-    }
+    ) {}
 
     public static function getTitle(): string
     {
@@ -33,14 +32,11 @@ final class BashCommand implements CommandInterface
 
         $process = new Process($this->command);
 
-        $process
-            ->setWorkingDirectory($projectDirectory)
-            ->setTimeout(null)
-            ->run();
+        $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
 
         $processOutput = rtrim($process->getOutput());
 
-        if (!$process->getExitCode() > 1) {
+        if ($process->getExitCode() > 1) {
             return new CommandResponse(
                 status: CommandResponse::STATUS_FAIL,
                 result: null,
@@ -50,7 +46,7 @@ final class BashCommand implements CommandInterface
 
         return new CommandResponse(
             status: $process->isSuccessful() ? CommandResponse::STATUS_OK : CommandResponse::STATUS_ERROR,
-            result: $processOutput . $process->getErrorOutput()
+            result: $processOutput . $process->getErrorOutput(),
         );
     }
 }

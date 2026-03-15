@@ -9,26 +9,14 @@ import {ResultStep} from '@yiisoft/yii-dev-panel/Module/Gii/Component/GeneratorS
 import {Context} from '@yiisoft/yii-dev-panel/Module/Gii/Context/Context';
 import * as React from 'react';
 import {useContext, useEffect} from 'react';
-import {useDispatch} from 'react-redux';
 
 const steps = [
-    {
-        component: PreviewStep,
-        label: 'Preview',
-    },
-    {
-        component: GenerateStep,
-        label: 'Generate',
-    },
-    {
-        component: ResultStep,
-        label: 'Result',
-    },
+    {component: PreviewStep, label: 'Preview'},
+    {component: GenerateStep, label: 'Generate'},
+    {component: ResultStep, label: 'Result'},
 ];
 
-type GeneratorStepperProps = {
-    generator: GiiGenerator
-};
+type GeneratorStepperProps = {generator: GiiGenerator};
 
 export const GeneratorStepper = ({generator}: GeneratorStepperProps) => {
     const [activeStepIndex, setActiveStepIndex] = React.useState(0);
@@ -49,7 +37,7 @@ export const GeneratorStepper = ({generator}: GeneratorStepperProps) => {
     }, [generator]);
 
     return (
-        <Stepper activeStep={activeStepIndex} orientation='vertical'>
+        <Stepper activeStep={activeStepIndex} orientation="vertical">
             {Object.values(steps).map((step, index) => (
                 <Step key={index}>
                     <StepLabel>{step.label}</StepLabel>

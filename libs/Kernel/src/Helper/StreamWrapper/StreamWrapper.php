@@ -122,16 +122,17 @@ final class StreamWrapper implements StreamWrapperInterface
     {
         $this->filename = realpath($path) ?: $path;
 
-        if ((self::STREAM_OPEN_FOR_INCLUDE & $options) === self::STREAM_OPEN_FOR_INCLUDE && function_exists(
-            'opcache_invalidate'
-        )) {
+        if (
+            (self::STREAM_OPEN_FOR_INCLUDE & $options) === self::STREAM_OPEN_FOR_INCLUDE
+            && function_exists('opcache_invalidate')
+        ) {
             opcache_invalidate($path, false);
         }
         $this->stream = fopen(
             $path,
             $mode,
             ($options & STREAM_USE_PATH) === STREAM_USE_PATH,
-            (self::STREAM_OPEN_FOR_INCLUDE & $options) === self::STREAM_OPEN_FOR_INCLUDE ? null : $this->context
+            (self::STREAM_OPEN_FOR_INCLUDE & $options) === self::STREAM_OPEN_FOR_INCLUDE ? null : $this->context,
         );
 
         if (!is_resource($this->stream)) {
@@ -220,7 +221,7 @@ final class StreamWrapper implements StreamWrapperInterface
             STREAM_META_OWNER_NAME, STREAM_META_OWNER => chown($path, $value),
             STREAM_META_GROUP_NAME, STREAM_META_GROUP => chgrp($path, $value),
             STREAM_META_ACCESS => chmod($path, $value),
-            default => false
+            default => false,
         };
     }
 

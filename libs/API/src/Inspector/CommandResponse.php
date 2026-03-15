@@ -14,8 +14,7 @@ class CommandResponse
         private string $status,
         private mixed $result,
         private array $errors = [],
-    ) {
-    }
+    ) {}
 
     public function getStatus(): string
     {

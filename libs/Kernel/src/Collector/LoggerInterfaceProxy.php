@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
+use AppDevPanel\Kernel\ProxyDecoratedCalls;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Stringable;
-use AppDevPanel\Kernel\ProxyDecoratedCalls;
 
 final class LoggerInterfaceProxy implements LoggerInterface
 {
@@ -15,82 +15,47 @@ final class LoggerInterfaceProxy implements LoggerInterface
 
     public function __construct(
         private readonly LoggerInterface $decorated,
-        private readonly LogCollector $collector
-    ) {
-    }
+        private readonly LogCollector $collector,
+    ) {}
 
     public function emergency(string|Stringable $message, array $context = []): void
     {
-        $callStack = $this->getCallStack();
-
-        $this->collector->collect(
-            LogLevel::EMERGENCY,
-            $message,
-            $context,
-            $callStack['file'] . ':' . $callStack['line']
-        );
-        $this->decorated->emergency($message, $context);
+        $this->log(LogLevel::EMERGENCY, $message, $context);
     }
 
     public function alert(string|Stringable $message, array $context = []): void
     {
-        $callStack = $this->getCallStack();
-
-        $this->collector->collect(LogLevel::ALERT, $message, $context, $callStack['file'] . ':' . $callStack['line']);
-        $this->decorated->alert($message, $context);
+        $this->log(LogLevel::ALERT, $message, $context);
     }
 
     public function critical(string|Stringable $message, array $context = []): void
     {
-        $callStack = $this->getCallStack();
-
-        $this->collector->collect(
-            LogLevel::CRITICAL,
-            $message,
-            $context,
-            $callStack['file'] . ':' . $callStack['line']
-        );
-        $this->decorated->critical($message, $context);
+        $this->log(LogLevel::CRITICAL, $message, $context);
     }
 
     public function error(string|Stringable $message, array $context = []): void
     {
-        $callStack = $this->getCallStack();
-
-        $this->collector->collect(LogLevel::ERROR, $message, $context, $callStack['file'] . ':' . $callStack['line']);
-        $this->decorated->error($message, $context);
+        $this->log(LogLevel::ERROR, $message, $context);
     }
 
     public function warning(string|Stringable $message, array $context = []): void
     {
-        $callStack = $this->getCallStack();
-
-        $this->collector->collect(LogLevel::WARNING, $message, $context, $callStack['file'] . ':' . $callStack['line']);
-        $this->decorated->warning($message, $context);
+        $this->log(LogLevel::WARNING, $message, $context);
     }
 
     public function notice(string|Stringable $message, array $context = []): void
     {
-        $callStack = $this->getCallStack();
-
-        $this->collector->collect(LogLevel::NOTICE, $message, $context, $callStack['file'] . ':' . $callStack['line']);
-        $this->decorated->notice($message, $context);
+        $this->log(LogLevel::NOTICE, $message, $context);
     }
 
     public function info(string|Stringable $message, array $context = []): void
     {
-        $callStack = $this->getCallStack();
-
-        $this->collector->collect(LogLevel::INFO, $message, $context, $callStack['file'] . ':' . $callStack['line']);
-        $this->decorated->info($message, $context);
+        $this->log(LogLevel::INFO, $message, $context);
     }
 
     public function debug(string|Stringable $message, array $context = []): void
     {
-        $callStack = $this->getCallStack();
-
-        $this->collector->collect(LogLevel::DEBUG, $message, $context, $callStack['file'] . ':' . $callStack['line']);
-        $this->decorated->debug($message, $context);
+        $this->log(LogLevel::DEBUG, $message, $context);
     }
 
     public function log(mixed $level, string|Stringable $message, array $context = []): void
@@ -106,7 +71,17 @@ final class LoggerInterfaceProxy implements LoggerInterface
      */
     private function getCallStack(): array
     {
+        $backtrace = debug_backtrace();
+        $lastSelfFrame = $backtrace[1];
+
+        foreach ($backtrace as $frame) {
+            if (($frame['class'] ?? null) !== self::class) {
+                break;
+            }
+            $lastSelfFrame = $frame;
+        }
+
         /** @psalm-var array{file: string, line: int} */
-        return debug_backtrace()[1];
+        return $lastSelfFrame;
     }
 }

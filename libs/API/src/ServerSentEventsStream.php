@@ -14,8 +14,7 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
 
     public function __construct(
         private Closure $stream,
-    ) {
-    }
+    ) {}
 
     public function close(): void
     {

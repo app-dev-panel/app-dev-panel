@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 
 final class HttpStreamCollectorTest extends AbstractCollectorTestCase
 {
@@ -17,19 +17,13 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
      */
     protected function collectTestData(CollectorInterface $collector): void
     {
-        $collector->collect(
-            operation: 'read',
-            path: __FILE__,
-            args: ['arg1' => 'v1', 'arg2' => 'v2'],
-        );
-        $collector->collect(
-            operation: 'read',
-            path: __FILE__,
-            args: ['arg3' => 'v3', 'arg4' => 'v4'],
-        );
+        $collector->collect(operation: 'read', path: __FILE__, args: ['arg1' => 'v1', 'arg2' => 'v2']);
+        $collector->collect(operation: 'read', path: __FILE__, args: ['arg3' => 'v3', 'arg4' => 'v4']);
     }
 
     #[DataProvider('dataSkipCollectOnMatchIgnoreReferences')]
+    #[\PHPUnit\Framework\Attributes\RequiresPhpExtension('sockets')]
+    #[\PHPUnit\Framework\Attributes\Group('network')]
     public function testSkipCollectOnMatchIgnoreReferences(
         string $url,
         callable $before,
@@ -66,8 +60,7 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
 
     public static function dataSkipCollectOnMatchIgnoreReferences(): iterable
     {
-        $httpStreamBefore = function (string $url) {
-        };
+        $httpStreamBefore = static function (string $url) {};
         $httpStreamOperation = static function (string $url) {
             $stream = fopen($url, 'r');
             fread($stream, 4);
@@ -86,7 +79,7 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
             [],
             $httpStreamOperation,
             $httpStreamAfter,
-            function (TestCase $testCase, string $url, array $collected) {
+            static function (TestCase $testCase, string $url, array $collected) {
                 $testCase->assertArrayHasKey('read', $collected);
                 $testCase->assertIsArray($collected['read']);
                 $testCase->assertCount(1, $collected['read']);
@@ -149,10 +142,13 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
         $this->assertCount(1, $collected);
 
         $this->assertCount(2, $collected['read']);
-        $this->assertEquals([
-            ['uri' => __FILE__, 'args' => ['arg1' => 'v1', 'arg2' => 'v2']],
-            ['uri' => __FILE__, 'args' => ['arg3' => 'v3', 'arg4' => 'v4']],
-        ], $collected['read']);
+        $this->assertEquals(
+            [
+                ['uri' => __FILE__, 'args' => ['arg1' => 'v1', 'arg2' => 'v2']],
+                ['uri' => __FILE__, 'args' => ['arg3' => 'v3', 'arg4' => 'v4']],
+            ],
+            $collected['read'],
+        );
     }
 
     protected function checkSummaryData(array $data): void

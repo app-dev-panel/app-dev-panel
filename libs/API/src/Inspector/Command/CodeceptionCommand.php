@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Command;
 
-use Symfony\Component\Process\Process;
-use Yiisoft\Aliases\Aliases;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\Inspector\Test\CodeceptionJSONReporter;
+use Symfony\Component\Process\Process;
+use Yiisoft\Aliases\Aliases;
 
 class CodeceptionCommand implements CommandInterface
 {
     public const COMMAND_NAME = 'test/codeception';
 
-    public function __construct(private Aliases $aliases)
-    {
-    }
+    public function __construct(
+        private Aliases $aliases,
+    ) {}
 
     public static function getTitle(): string
     {
@@ -47,19 +47,16 @@ class CodeceptionCommand implements CommandInterface
 
         $process = new Process($params);
 
-        $process
-            ->setWorkingDirectory($projectDirectory)
-            ->setTimeout(null)
-            ->run();
+        $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
 
         $processOutput = json_decode(
             file_get_contents($debugDirectory . DIRECTORY_SEPARATOR . CodeceptionJSONReporter::FILENAME),
             true,
             512,
-            JSON_THROW_ON_ERROR
+            JSON_THROW_ON_ERROR,
         );
 
-        if (!$process->getExitCode() > 1) {
+        if ($process->getExitCode() > 1) {
             return new CommandResponse(
                 status: CommandResponse::STATUS_FAIL,
                 result: null,
@@ -69,7 +66,7 @@ class CodeceptionCommand implements CommandInterface
 
         return new CommandResponse(
             status: $process->isSuccessful() ? CommandResponse::STATUS_OK : CommandResponse::STATUS_ERROR,
-            result: $processOutput
+            result: $processOutput,
         );
     }
 }

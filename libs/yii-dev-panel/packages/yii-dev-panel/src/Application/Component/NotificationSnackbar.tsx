@@ -28,10 +28,7 @@ export const NotificationSnackbar = React.memo(() => {
                     onClose={handleCloseSnackbar(index)}
                     TransitionComponent={TransitionUp}
                     autoHideDuration={3000}
-                    anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
+                    anchorOrigin={{vertical: 'top', horizontal: 'right'}}
                     sx={{top: {xs: '85px', sm: '70px'}}}
                 >
                     <Alert onClose={handleCloseSnackbar(index)} severity={notification.color} sx={{width: '100%'}}>

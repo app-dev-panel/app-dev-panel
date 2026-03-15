@@ -2,9 +2,7 @@ import {Alert} from '@mui/material';
 import {FullScreenCircularProgress} from '@yiisoft/yii-dev-panel-sdk/Component/FullScreenCircularProgress';
 import React, {Suspense} from 'react';
 
-type UseDynamicScriptProps = {
-    url: string | undefined;
-};
+type UseDynamicScriptProps = {url: string | undefined};
 const useDynamicScript = ({url}: UseDynamicScriptProps) => {
     const [ready, setReady] = React.useState(false);
     const [failed, setFailed] = React.useState(false);
@@ -42,10 +40,7 @@ const useDynamicScript = ({url}: UseDynamicScriptProps) => {
         };
     }, [url]);
 
-    return {
-        ready,
-        failed,
-    };
+    return {ready, failed};
 };
 
 const loadComponent = (scope: string, module: string) => async () => {
@@ -67,17 +62,10 @@ const loadComponent = (scope: string, module: string) => async () => {
     return Module;
 };
 
-type ModuleLoaderProps = {
-    module: string;
-    url: string;
-    scope: string;
-    props: any;
-};
+type ModuleLoaderProps = {module: string; url: string; scope: string; props: any};
 
 const ModuleLoader = ({module, props, scope, url}: ModuleLoaderProps) => {
-    const dynamicScript = useDynamicScript({
-        url: module && url,
-    });
+    const dynamicScript = useDynamicScript({url: module && url});
 
     if (!module) {
         return <Alert severity="error">Module name cannot be empty</Alert>;

@@ -1,13 +1,10 @@
 import {Button, Tooltip} from '@mui/material';
 import {DebugEntry} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Debug';
-import {formatBytes} from '@yiisoft/yii-dev-panel-sdk/Helper/formatBytes';
 import {CollectorsMap} from '@yiisoft/yii-dev-panel-sdk/Helper/collectors';
 import {isDebugEntryAboutWeb} from '@yiisoft/yii-dev-panel-sdk/Helper/debugEntry';
+import {formatBytes} from '@yiisoft/yii-dev-panel-sdk/Helper/formatBytes';
 
-type MemoryItemProps = {
-    data: DebugEntry;
-    iframeUrlHandler: (url: string) => void;
-};
+type MemoryItemProps = {data: DebugEntry; iframeUrlHandler: (url: string) => void};
 
 export const MemoryItem = (props: MemoryItemProps) => {
     const {data, iframeUrlHandler, ...others} = props;
@@ -26,11 +23,7 @@ export const MemoryItem = (props: MemoryItemProps) => {
                 }}
                 color="info"
                 variant="contained"
-                sx={{
-                    whiteSpace: 'nowrap',
-                    textTransform: 'none',
-                    borderRadius: 0,
-                }}
+                sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
             >
                 {formatBytes((data.web || data.console).memory.peakUsage)}
             </Button>

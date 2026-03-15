@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use PHPUnit\Framework\Attributes\DataProvider;
-use Yiisoft\Files\FileHelper;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Yiisoft\Files\FileHelper;
 
 final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
 {
@@ -17,21 +17,9 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
      */
     protected function collectTestData(CollectorInterface $collector): void
     {
-        $collector->collect(
-            operation: 'read',
-            path: __FILE__,
-            args: ['arg1' => 'v1', 'arg2' => 'v2'],
-        );
-        $collector->collect(
-            operation: 'read',
-            path: __FILE__,
-            args: ['arg3' => 'v3', 'arg4' => 'v4'],
-        );
-        $collector->collect(
-            operation: 'mkdir',
-            path: __DIR__,
-            args: ['recursive'],
-        );
+        $collector->collect(operation: 'read', path: __FILE__, args: ['arg1' => 'v1', 'arg2' => 'v2']);
+        $collector->collect(operation: 'read', path: __FILE__, args: ['arg3' => 'v3', 'arg4' => 'v4']);
+        $collector->collect(operation: 'mkdir', path: __DIR__, args: ['recursive']);
     }
 
     #[DataProvider('dataSkipCollectOnMatchIgnoreReferences')]
@@ -71,7 +59,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             }
         };
         $mkdirOperation = static function (string $path) {
-            mkdir($path, 0777, true);
+            mkdir($path, 0o777, true);
         };
         $mkdirAfter = $mkdirBefore;
 
@@ -84,7 +72,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $mkdirAfter,
             [
                 'mkdir' => [
-                    ['path' => $path, 'args' => ['mode' => 0777, 'options' => 9]], // 9 for some reason
+                    ['path' => $path, 'args' => ['mode' => 0o777, 'options' => 9]], // 9 for some reason
                 ],
             ],
         ];
@@ -109,7 +97,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
 
         $renameBefore = static function (string $path) {
             if (!is_dir(dirname($path))) {
-                mkdir(dirname($path), 0777, true);
+                mkdir(dirname($path), 0o777, true);
             }
             if (!is_file($path)) {
                 touch($path);
@@ -138,7 +126,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         yield 'rename ignored by path' => [
             $path,
             $renameBefore,
-            [ basename(__FILE__, '.php') ],
+            [basename(__FILE__, '.php')],
             [],
             $renameOperation,
             $renameAfter,
@@ -156,7 +144,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
 
         $rmdirBefore = static function (string $path): void {
             if (!is_dir($path)) {
-                mkdir($path, 0777, true);
+                mkdir($path, 0o777, true);
             }
         };
         $rmdirOperation = static function (string $path): void {
@@ -202,7 +190,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
 
         $unlinkBefore = static function (string $path) {
             if (!is_dir(dirname($path))) {
-                mkdir(dirname($path), 0777, true);
+                mkdir(dirname($path), 0o777, true);
             }
             if (!is_file($path)) {
                 touch($path);
@@ -249,7 +237,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
 
         $fileStreamBefore = static function (string $path) {
             if (!is_dir(dirname($path))) {
-                mkdir(dirname($path), 0777, true);
+                mkdir(dirname($path), 0o777, true);
             }
             if (!is_file($path)) {
                 touch($path);
@@ -319,25 +307,27 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         $this->assertCount(2, $collected);
 
         $this->assertCount(2, $collected['read']);
-        $this->assertEquals([
-            ['path' => __FILE__, 'args' => ['arg1' => 'v1', 'arg2' => 'v2']],
-            ['path' => __FILE__, 'args' => ['arg3' => 'v3', 'arg4' => 'v4']],
-        ], $collected['read']);
+        $this->assertEquals(
+            [
+                ['path' => __FILE__, 'args' => ['arg1' => 'v1', 'arg2' => 'v2']],
+                ['path' => __FILE__, 'args' => ['arg3' => 'v3', 'arg4' => 'v4']],
+            ],
+            $collected['read'],
+        );
 
         $this->assertCount(1, $collected['mkdir']);
-        $this->assertEquals([
-            ['path' => __DIR__, 'args' => ['recursive']],
-        ], $collected['mkdir']);
+        $this->assertEquals(
+            [
+                ['path' => __DIR__, 'args' => ['recursive']],
+            ],
+            $collected['mkdir'],
+        );
     }
 
     protected function checkSummaryData(array $data): void
     {
         parent::checkSummaryData($data);
         $this->assertArrayHasKey('fs_stream', $data);
-        $this->assertEquals(
-            ['read' => 2, 'mkdir' => 1],
-            $data['fs_stream'],
-            print_r($data, true),
-        );
+        $this->assertEquals(['read' => 2, 'mkdir' => 1], $data['fs_stream'], print_r($data, true));
     }
 }

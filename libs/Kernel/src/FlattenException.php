@@ -271,7 +271,7 @@ final class FlattenException implements Stringable
     {
         $result = [];
         foreach ($args as $key => $value) {
-            if (++$count > 10000) {
+            if (++$count > 10_000) {
                 return ['array', '*SKIPPED over 10000 entries*'];
             }
             if ($value instanceof __PHP_Incomplete_Class) {
@@ -296,7 +296,7 @@ final class FlattenException implements Stringable
             } elseif (is_resource($value)) {
                 $result[$key] = ['resource', get_resource_type($value)];
             } else {
-                $result[$key] = ['string', (string)$value];
+                $result[$key] = ['string', (string) $value];
             }
         }
 

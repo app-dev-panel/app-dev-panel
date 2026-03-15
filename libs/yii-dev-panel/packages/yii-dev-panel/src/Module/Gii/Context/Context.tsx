@@ -3,19 +3,9 @@ import {GiiFile} from '@yiisoft/yii-dev-panel/Module/Gii/Types/FIle.types';
 import {GiiResult} from '@yiisoft/yii-dev-panel/Module/Gii/Types/Result.types';
 import React, {createContext} from 'react';
 
-type State = {
-    files: GiiFile[];
-    operations: any[];
-    parameters: any[];
-    results: GiiResult[];
-};
+type State = {files: GiiFile[]; operations: any[]; parameters: any[]; results: GiiResult[]};
 
-const initialState: State = {
-    files: [],
-    operations: [],
-    parameters: [],
-    results: [],
-};
+const initialState: State = {files: [], operations: [], parameters: [], results: []};
 
 const setFiles = createAction<any>('setFiles');
 const setOperations = createAction<any>('setOperations');

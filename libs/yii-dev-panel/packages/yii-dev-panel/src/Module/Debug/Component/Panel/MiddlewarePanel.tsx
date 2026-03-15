@@ -10,21 +10,11 @@ import Typography from '@mui/material/Typography';
 import {formatMicrotime} from '@yiisoft/yii-dev-panel-sdk/Helper/formatDate';
 import {TimelineContentWrapper} from '@yiisoft/yii-dev-panel/Module/Debug/Component/Timeline/TimelineContentWrapper';
 
-type MiddlewareType = {
-    memory: number;
-    name: string;
-    time: number;
-};
+type MiddlewareType = {memory: number; name: string; time: number};
 type BeforeMiddlewareType = {request: string} & MiddlewareType;
 type AfterMiddlewareType = {response: string} & MiddlewareType;
 
-type ActionHandlerType = {
-    memory: number;
-    name: string;
-    request: string;
-    startTime: number;
-    endTime: number;
-};
+type ActionHandlerType = {memory: number; name: string; request: string; startTime: number; endTime: number};
 type MiddlewarePanelProps = {
     beforeStack: BeforeMiddlewareType[];
     afterStack: AfterMiddlewareType[];

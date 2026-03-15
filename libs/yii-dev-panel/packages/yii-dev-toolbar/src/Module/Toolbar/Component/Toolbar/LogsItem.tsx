@@ -1,13 +1,9 @@
-import {ChatBubble} from '@mui/icons-material';
 import {Badge, Button} from '@mui/material';
 import {DebugEntry} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Debug';
 import {CollectorsMap} from '@yiisoft/yii-dev-panel-sdk/Helper/collectors';
 import {forwardRef} from 'react';
 
-type LogsItemProps = {
-    data: DebugEntry;
-    iframeUrlHandler: (url: string) => void;
-};
+type LogsItemProps = {data: DebugEntry; iframeUrlHandler: (url: string) => void};
 
 export const LogsItem = forwardRef<HTMLButtonElement, LogsItemProps>((props, ref) => {
     const {data, iframeUrlHandler, ...others} = props;
@@ -24,11 +20,7 @@ export const LogsItem = forwardRef<HTMLButtonElement, LogsItemProps>((props, ref
                 }}
                 color="info"
                 variant="contained"
-                sx={{
-                    whiteSpace: 'nowrap',
-                    textTransform: 'none',
-                    borderRadius: 0,
-                }}
+                sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
             >
                 Logs
             </Button>

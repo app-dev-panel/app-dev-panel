@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Storage;
 
-use Yiisoft\Files\FileHelper;
-use Yiisoft\Json\Json;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Dumper;
+use Yiisoft\Files\FileHelper;
+use Yiisoft\Json\Json;
 
 use function array_slice;
 use function count;
@@ -32,9 +32,8 @@ final class FileStorage implements StorageInterface
     public function __construct(
         private readonly string $path,
         private readonly DebuggerIdGenerator $idGenerator,
-        private readonly array $excludedClasses = []
-    ) {
-    }
+        private readonly array $excludedClasses = [],
+    ) {}
 
     public function addCollector(CollectorInterface $collector): void
     {
@@ -50,19 +49,14 @@ final class FileStorage implements StorageInterface
     {
         clearstatcache();
         $data = [];
-        $pattern = sprintf(
-            '%s/**/%s/%s.json',
-            $this->path,
-            $id ?? '**',
-            $type,
-        );
+        $pattern = sprintf('%s/**/%s/%s.json', $this->path, $id ?? '**', $type);
         $dataFiles = glob($pattern, GLOB_NOSORT);
-        uasort($dataFiles, static fn ($a, $b) => filemtime($a) <=> filemtime($b));
+        uasort($dataFiles, static fn($a, $b) => filemtime($a) <=> filemtime($b));
 
         foreach ($dataFiles as $file) {
             $dir = dirname($file);
-            $id = substr($dir, strlen(dirname($file, 2)) + 1);
-            $data[$id] = Json::decode(file_get_contents($file));
+            $entryId = substr($dir, strlen(dirname($file, 2)) + 1);
+            $data[$entryId] = Json::decode(file_get_contents($file));
         }
 
         return $data;
@@ -76,11 +70,29 @@ final class FileStorage implements StorageInterface
             FileHelper::ensureDirectory($basePath);
 
             $dumper = Dumper::create($this->getData(), $this->excludedClasses);
-            file_put_contents($basePath . self::TYPE_DATA . '.json', $dumper->asJson(30));
-            file_put_contents($basePath . self::TYPE_OBJECTS . '.json', $dumper->asJsonObjectsMap(30));
+            $result = file_put_contents($basePath . self::TYPE_DATA . '.json', $dumper->asJson(30));
+            if ($result === false) {
+                throw new \RuntimeException(sprintf(
+                    'Failed to write file "%s".',
+                    $basePath . self::TYPE_DATA . '.json',
+                ));
+            }
+            $result = file_put_contents($basePath . self::TYPE_OBJECTS . '.json', $dumper->asJsonObjectsMap(30));
+            if ($result === false) {
+                throw new \RuntimeException(sprintf(
+                    'Failed to write file "%s".',
+                    $basePath . self::TYPE_OBJECTS . '.json',
+                ));
+            }
 
             $summaryData = Dumper::create($this->collectSummaryData())->asJson();
-            file_put_contents($basePath . self::TYPE_SUMMARY . '.json', $summaryData);
+            $result = file_put_contents($basePath . self::TYPE_SUMMARY . '.json', $summaryData);
+            if ($result === false) {
+                throw new \RuntimeException(sprintf(
+                    'Failed to write file "%s".',
+                    $basePath . self::TYPE_SUMMARY . '.json',
+                ));
+            }
         } finally {
             $this->collectors = [];
             $this->gc();
@@ -89,7 +101,7 @@ final class FileStorage implements StorageInterface
 
     public function getData(): array
     {
-        return array_map(static fn (CollectorInterface $collector) => $collector->getCollected(), $this->collectors);
+        return array_map(static fn(CollectorInterface $collector) => $collector->getCollected(), $this->collectors);
     }
 
     public function clear(): void
@@ -108,9 +120,11 @@ final class FileStorage implements StorageInterface
         ];
 
         foreach ($this->collectors as $collector) {
-            if ($collector instanceof SummaryCollectorInterface) {
-                $summaryData = [...$summaryData, ...$collector->getSummary()];
+            if (!$collector instanceof SummaryCollectorInterface) {
+                continue;
             }
+
+            $summaryData = [...$summaryData, ...$collector->getSummary()];
         }
 
         return $summaryData;
@@ -126,7 +140,7 @@ final class FileStorage implements StorageInterface
             return;
         }
 
-        uasort($summaryFiles, static fn ($a, $b) => filemtime($b) <=> filemtime($a));
+        uasort($summaryFiles, static fn($a, $b) => filemtime($b) <=> filemtime($a));
         $excessFiles = array_slice($summaryFiles, $this->historySize);
         foreach ($excessFiles as $file) {
             $path1 = dirname($file);
