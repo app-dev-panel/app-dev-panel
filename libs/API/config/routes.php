@@ -10,6 +10,7 @@ use Yiisoft\Router\Route;
 use Yiisoft\Validator\ValidatorInterface;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
+use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -63,6 +64,18 @@ return [
             Route::get('/event-stream')
                 ->action([DebugController::class, 'eventStream'])
                 ->name('event-stream'),
+            Route::post('/ingest')
+                ->action([IngestionController::class, 'ingest'])
+                ->name('ingest'),
+            Route::post('/ingest/batch')
+                ->action([IngestionController::class, 'ingestBatch'])
+                ->name('ingest/batch'),
+            Route::post('/ingest/log')
+                ->action([IngestionController::class, 'ingestLog'])
+                ->name('ingest/log'),
+            Route::get('/openapi.json')
+                ->action([IngestionController::class, 'openapi'])
+                ->name('openapi'),
         ),
     Group::create('/inspect/api')
         ->withCors(CorsAllowAll::class)

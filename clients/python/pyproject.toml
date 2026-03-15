@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adp-client"
+version = "1.0.0"
+description = "Python client for App Dev Panel debug data ingestion"
+requires-python = ">=3.10"
+license = {text = "BSD-3-Clause"}
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]

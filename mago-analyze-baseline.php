@@ -175,6 +175,60 @@ message = 'Could not infer a precise return type for function `appdevpanel\api\d
 count = 1
 
 [[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Ingestion\Controller\IngestionController::writetostorage`: expected `string`, but found `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_merge`: expected `array<string('collectors')|string('context')|string('id'), nonnull>`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `AppDevPanel\Api\Ingestion\Controller\IngestionController::writetostorage`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\api\ingestion\controller\ingestioncontroller::writeentry`. Saw type `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `yaml_parse` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
 file = "libs/API/src/Inspector/Command/BashCommand.php"
 code = "possibly-null-operand"
 message = "Left operand in `>` comparison might be `null` (type `int|null`)."
@@ -875,6 +929,84 @@ file = "libs/API/tests/Unit/Debug/Repository/CollectorRepositoryTest.php"
 code = "missing-magic-method"
 message = "Call to documented magic method `method()` on a class that cannot handle it."
 count = 6
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "deprecated-class"
+message = 'Class `Yiisoft\DataResponse\DataResponseFactory` is deprecated and should no longer be used.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Kernel\Storage\FileStorage::read`: expected `null|string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcontains`: expected `iterable<mixed, mixed>`, but found `mixed`.'
+count = 4
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 21
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used for array access on `array<array-key, mixed>`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 11
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "non-existent-method"
+message = 'Method `getdata` does not exist on type `Psr\Http\Message\ResponseInterface`.'
+count = 6
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "possibly-false-argument"
+message = 'Argument #1 of method `yiisoft\json\json::decode` is possibly `false`, but parameter type `string` does not accept it.'
+count = 3
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "possibly-false-argument"
+message = 'Argument #2 of method `phpunit\framework\assert::assertcount` is possibly `false`, but parameter type `Countable|iterable<mixed, mixed>` does not accept it.'
+count = 4
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "possibly-false-iterator"
+message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
+count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/CacheControllerTest.php"

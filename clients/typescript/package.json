@@ -1,0 +1,23 @@
+{
+    "name": "@app-dev-panel/client",
+    "version": "1.0.0",
+    "description": "TypeScript client for App Dev Panel debug data ingestion",
+    "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "scripts": {
+        "build": "tsc",
+        "prepublishOnly": "tsc"
+    },
+    "files": ["dist", "src"],
+    "license": "BSD-3-Clause",
+    "devDependencies": {
+        "typescript": "^5.5"
+    }
+}

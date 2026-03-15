@@ -31,6 +31,24 @@ message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 4
+
+[[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -86,6 +104,24 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/ServerSentEventsStream.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
