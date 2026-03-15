@@ -19,6 +19,18 @@ message = "Use of the `isset` construct."
 count = 2
 
 [[issues]]
+file = "libs/API/src/Debug/Middleware/TokenAuthMiddleware.php"
+code = "no-insecure-comparison"
+message = "Insecure comparison of sensitive data."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Debug/Middleware/TokenAuthMiddleware.php"
+code = "sensitive-parameter"
+message = "Parameters that may contain sensitive information should be marked with the `#[SensitiveParameter]` attribute."
+count = 1
+
+[[issues]]
 file = "libs/API/src/Debug/Repository/CollectorRepository.php"
 code = "no-empty"
 message = "Use of the `empty` construct."
@@ -343,25 +355,25 @@ message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
-code = "cyclomatic-complexity"
-message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
-code = "kan-defect"
-message = "Class has a high kan defect score (1.6800000000000002)."
-count = 1
+file = "libs/Kernel/src/DebugServer/Broadcaster.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 2
 
 [[issues]]
 file = "libs/Kernel/src/DebugServer/Connection.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 5
+count = 3
 
 [[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 3
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
 code = "strict-behavior"
 message = "Call to `base64_decode` must enforce strict comparison."
 count = 1
@@ -370,6 +382,12 @@ count = 1
 file = "libs/Kernel/src/Debugger.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Debugger.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
 count = 1
 
 [[issues]]

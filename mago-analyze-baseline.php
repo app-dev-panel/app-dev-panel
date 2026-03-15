@@ -1232,21 +1232,9 @@ count = 6
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
-count = 13
+count = 6
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
@@ -1334,26 +1322,8 @@ count = 1
 
 [[issues]]
 file = "libs/Cli/src/Command/DebugServerBroadcastCommand.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `AppDevPanel\Kernel\DebugServer\Connection::broadcast`: expected `string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Cli/src/Command/DebugServerBroadcastCommand.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/Cli/src/Command/DebugServerBroadcastCommand.php"
-code = "unused-property"
-message = "Property `$defaultDescription` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Cli/src/Command/DebugServerBroadcastCommand.php"
-code = "unused-property"
-message = "Property `$defaultName` is never used."
 count = 1
 
 [[issues]]
@@ -1373,18 +1343,6 @@ file = "libs/Cli/src/Command/DebugServerCommand.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 2
-
-[[issues]]
-file = "libs/Cli/src/Command/DebugServerCommand.php"
-code = "unused-property"
-message = "Property `$defaultDescription` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Cli/src/Command/DebugServerCommand.php"
-code = "unused-property"
-message = "Property `$defaultName` is never used."
-count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
@@ -1993,27 +1951,39 @@ message = 'Argument #1 of method `guzzlehttp\psr7\message::rewindbody` is possib
 count = 2
 
 [[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
-code = "invalid-yield-value-type"
-message = "Invalid value type yielded; expected `array{0: int(27)|int(43)|int(59), 1: string, 2: int|string, 3?: int}`, but found `list{int(27), false|string}`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
-code = "invalid-yield-value-type"
-message = "Invalid value type yielded; expected `array{0: int(27)|int(43)|int(59), 1: string, 2: int|string, 3?: int}`, but found `list{int(43), int<36, max>|int<min, 34>, string}`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
-code = "invalid-yield-value-type"
-message = "Invalid value type yielded; expected `array{0: int(27)|int(43)|int(59), 1: string, 2: int|string, 3?: int}`, but found `list{int(59), int, string}`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
+file = "libs/Kernel/src/DebugServer/Broadcaster.php"
 code = "possibly-false-argument"
 message = "Argument #1 of function `fclose` is possibly `false`, but parameter type `resource` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/Broadcaster.php"
+code = "possibly-false-argument"
+message = 'Argument #1 of method `AppDevPanel\Kernel\DebugServer\Broadcaster::fwritestream` is possibly `false`, but parameter type `resource` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/Broadcaster.php"
+code = "possibly-false-iterator"
+message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/Broadcaster.php"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #1 of `usleep`: expected `non-negative-int`, but possibly received `int`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/Broadcaster.php"
+code = "possibly-undefined-variable"
+message = "Variable `$errno` might not have been defined on all execution paths leading to this point."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/Broadcaster.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$errstr`."
 count = 1
 
 [[issues]]
@@ -2025,59 +1995,59 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/DebugServer/Connection.php"
 code = "possibly-false-argument"
-message = 'Argument #1 of method `AppDevPanel\Kernel\DebugServer\Connection::fwritestream` is possibly `false`, but parameter type `resource` does not accept it.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
-code = "possibly-false-argument"
 message = 'Argument #1 of method `appdevpanel\kernel\debugserver\connection::__construct` is possibly `false`, but parameter type `Socket` does not accept it.'
 count = 1
 
 [[issues]]
 file = "libs/Kernel/src/DebugServer/Connection.php"
-code = "possibly-false-iterator"
-message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$path`."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
+code = "invalid-yield-value-type"
+message = "Invalid value type yielded; expected `array{0: int(27)|int(43)|int(59), 1: string, 2: int|string, 3?: int}`, but found `list{int(27), false|string}`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
+code = "invalid-yield-value-type"
+message = "Invalid value type yielded; expected `array{0: int(27)|int(43)|int(59), 1: string, 2: int|string, 3?: int}`, but found `list{int(43), int<36, max>|int<min, 34>, string}`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
+code = "invalid-yield-value-type"
+message = "Invalid value type yielded; expected `array{0: int(27)|int(43)|int(59), 1: string, 2: int|string, 3?: int}`, but found `list{int(59), int, string}`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
 code = "possibly-invalid-argument"
 message = "Possible argument type mismatch for argument #1 of `usleep`: expected `non-negative-int`, but possibly received `int`."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
-code = "possibly-undefined-variable"
-message = "Variable `$errno` might not have been defined on all execution paths leading to this point."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
 code = "redundant-cast"
 message = "Redundant cast to `(string)`: the expression already has this type."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
 code = "reference-to-undefined-variable"
 message = "Reference created from a previously undefined variable `$buffer`."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
-code = "reference-to-undefined-variable"
-message = "Reference created from a previously undefined variable `$errstr`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
 code = "reference-to-undefined-variable"
 message = "Reference created from a previously undefined variable `$header`."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/DebugServer/Connection.php"
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
 code = "reference-to-undefined-variable"
 message = "Reference created from a previously undefined variable `$path`."
 count = 1
@@ -3061,7 +3031,7 @@ message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector
 count = 2
 
 [[issues]]
-file = "libs/Kernel/tests/Unit/DebugServer/ConnectionTest.php"
+file = "libs/Kernel/tests/Unit/DebugServer/BroadcasterTest.php"
 code = "redundant-type-comparison"
 message = "Redundant type assertion: `$errors` of type `array<array-key, mixed>` is always not `array<array-key, mixed>`."
 count = 1

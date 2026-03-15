@@ -13,17 +13,17 @@ final class LoggerDecorator implements LoggerInterface
 {
     use LoggerTrait;
 
-    public Connection $connection;
+    public Broadcaster $broadcaster;
 
     public function __construct(
         private LoggerInterface $decorated,
     ) {
-        $this->connection = Connection::create();
+        $this->broadcaster = new Broadcaster();
     }
 
     public function log($level, Stringable|string $message, array $context = []): void
     {
-        $this->connection->broadcast(Connection::MESSAGE_TYPE_LOGGER, VarDumper::create([
+        $this->broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, VarDumper::create([
             'message' => $message,
             'context' => $context,
         ])->asJson(false, 1));

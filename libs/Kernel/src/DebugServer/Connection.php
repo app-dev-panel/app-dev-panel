@@ -6,10 +6,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\DebugServer;
 
-use Generator;
 use RuntimeException;
 use Socket;
-use Throwable;
 
 /**
  * List of socket errors: {@see https://www.ibm.com/docs/en/zos/2.4.0?topic=calls-sockets-return-codes-errnos}
@@ -18,9 +16,6 @@ final class Connection
 {
     public const DEFAULT_TIMEOUT = 10 * 1000; // 10 milliseconds
     public const DEFAULT_BUFFER_SIZE = 1 * 1024; // 1 kilobyte
-
-    private const SOCKET_EAGAIN = 35;
-    private const SOCKET_ECONNREFUSED = 61;
 
     public const TYPE_RESULT = 0x001B;
     public const TYPE_ERROR = 0x002B;
@@ -68,102 +63,9 @@ final class Connection
         }
     }
 
-    /**
-     * @return Generator<int, array{0: self::TYPE_ERROR|self::TYPE_RELEASE|self::TYPE_RESULT, 1: string, 2: int|string, 3?: int}>
-     */
-    public function read(): Generator
+    public function getSocket(): Socket
     {
-        $sndbuf = socket_get_option($this->socket, SOL_SOCKET, SO_SNDBUF);
-        $rcvbuf = socket_get_option($this->socket, SOL_SOCKET, SO_RCVBUF);
-
-        socket_set_option($this->socket, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 2, 'usec' => 0]);
-        socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, 1024 * 10);
-        socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, 1024 * 10);
-
-        $newFrameAwaitRepeat = 0;
-        $maxFrameAwaitRepeats = 10;
-        $maxRepeats = 10;
-
-        while (true) {
-            if (!socket_recv($this->socket, $header, 8, MSG_WAITALL)) {
-                $socket_last_error = socket_last_error($this->socket);
-                $newFrameAwaitRepeat++;
-                if ($newFrameAwaitRepeat === $maxFrameAwaitRepeats) {
-                    $newFrameAwaitRepeat = 0;
-                    yield [self::TYPE_RELEASE, $socket_last_error, socket_strerror($socket_last_error)];
-                }
-                if ($socket_last_error === self::SOCKET_EAGAIN) {
-                    usleep(self::DEFAULT_TIMEOUT);
-                    continue;
-                }
-                $this->close();
-                yield [self::TYPE_ERROR, $socket_last_error, socket_strerror($socket_last_error)];
-                continue;
-            }
-
-            $length = unpack('P', (string) $header);
-            $localBuffer = '';
-            $bytesToRead = $length[1];
-            $bytesRead = 0;
-            $repeat = 0;
-            while ($bytesRead < $bytesToRead) {
-                $bufferLength = socket_recv(
-                    $this->socket,
-                    $buffer,
-                    min($bytesToRead - $bytesRead, self::DEFAULT_BUFFER_SIZE),
-                    MSG_DONTWAIT,
-                );
-                if ($bufferLength === false) {
-                    if ($repeat === $maxRepeats) {
-                        break;
-                    }
-                    $socket_last_error = socket_last_error($this->socket);
-                    if ($socket_last_error === self::SOCKET_EAGAIN) {
-                        $repeat++;
-                        usleep(self::DEFAULT_TIMEOUT * 5);
-                        continue;
-                    }
-                    $this->close();
-                    break;
-                }
-
-                $localBuffer .= $buffer;
-                $bytesRead += $bufferLength;
-            }
-            yield [self::TYPE_RESULT, base64_decode($localBuffer)];
-        }
-    }
-
-    public function broadcast(int $type, string $data): array
-    {
-        $files = glob(sys_get_temp_dir() . '/yii-dev-server-*.sock', GLOB_NOSORT);
-        $uniqueErrors = [];
-        $payload = json_encode([$type, $data], JSON_THROW_ON_ERROR);
-        foreach ($files as $file) {
-            $socket = @fsockopen('udg://' . $file, -1, $errno, $errstr);
-            if ($errno === self::SOCKET_ECONNREFUSED) {
-                @unlink($file);
-                continue;
-            }
-            if ($errno !== 0) {
-                $uniqueErrors[$errno] = $errstr;
-                continue;
-            }
-            try {
-                if (!$this->fwriteStream($socket, $payload)) {
-                    $uniqueErrors[] = error_get_last();
-                    /**
-                     * Connection is closed.
-                     */
-                    continue;
-                }
-            } catch (Throwable $e) {
-                throw $e;
-            } finally {
-                fclose($socket);
-            }
-        }
-        return $uniqueErrors;
+        return $this->socket;
     }
 
     public function getUri(): string
@@ -176,23 +78,5 @@ final class Connection
         @socket_getsockname($this->socket, $path);
         @socket_close($this->socket);
         @unlink($path);
-    }
-
-    /**
-     * @param resource $fp
-     */
-    private function fwriteStream($fp, string $data): int|false
-    {
-        $data = base64_encode($data);
-        $strlen = strlen($data);
-        fwrite($fp, pack('P', $strlen));
-        for ($written = 0; $written < $strlen; $written += $fwrite) {
-            $fwrite = fwrite($fp, substr($data, $written), self::DEFAULT_BUFFER_SIZE);
-            usleep(self::DEFAULT_TIMEOUT * 5);
-            if ($fwrite === false) {
-                return $written;
-            }
-        }
-        return $written;
     }
 }

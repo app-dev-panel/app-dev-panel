@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\DebugServer;
 
-use AppDevPanel\Kernel\DebugServer\Connection;
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
 use AppDevPanel\Kernel\DebugServer\VarDumperHandler;
-use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\VarDumper\HandlerInterface;
 
-#[RequiresPhpExtension('sockets')]
 final class VarDumperHandlerTest extends TestCase
 {
     #[Test]
@@ -20,15 +18,13 @@ final class VarDumperHandlerTest extends TestCase
         $handler = new VarDumperHandler();
 
         $this->assertInstanceOf(HandlerInterface::class, $handler);
-        $handler->connection->close();
     }
 
     #[Test]
-    public function connectionPropertyIsPubliclyAccessible(): void
+    public function broadcasterPropertyIsPubliclyAccessible(): void
     {
         $handler = new VarDumperHandler();
 
-        $this->assertInstanceOf(Connection::class, $handler->connection);
-        $handler->connection->close();
+        $this->assertInstanceOf(Broadcaster::class, $handler->broadcaster);
     }
 }

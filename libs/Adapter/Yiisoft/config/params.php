@@ -37,6 +37,8 @@ return [
         'enabled' => true,
         'devServer' => [
             'enabled' => true,
+            'address' => '0.0.0.0',
+            'port' => 8890,
         ],
         'collectors' => [
             LogCollector::class,

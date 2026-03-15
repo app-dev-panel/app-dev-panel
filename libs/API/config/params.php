@@ -27,6 +27,10 @@ return [
         'enabled' => true,
         'allowedIPs' => ['127.0.0.1', '::1'],
         'allowedHosts' => [],
+        'authToken' => '',
+        'requestReplay' => [
+            'allowedHosts' => ['127.0.0.1', 'localhost'],
+        ],
         'middlewares' => [
             DebugHeaders::class,
         ],

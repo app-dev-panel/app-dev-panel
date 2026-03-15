@@ -10,8 +10,10 @@ export class IFrameWrapper {
 
     constructor(public frame: HTMLIFrameElement) {
         window.addEventListener('message', (e) => {
-            // console.log('from iframe event', e);
-            if ('event' in e.data) {
+            if (e.origin !== window.location.origin) {
+                return;
+            }
+            if (e.data && typeof e.data === 'object' && 'event' in e.data) {
                 switch (e.data.event as CrossWindowEventType) {
                     case 'panel.loaded':
                         this.eventQueue.ready();

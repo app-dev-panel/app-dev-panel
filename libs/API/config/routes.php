@@ -10,6 +10,7 @@ use Yiisoft\Router\Route;
 use Yiisoft\Validator\ValidatorInterface;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
+use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
@@ -44,6 +45,7 @@ return [
                 );
             }
         )
+        ->middleware(TokenAuthMiddleware::class)
         ->middleware(FormatDataResponseAsJson::class)
         ->middleware(ResponseDataWrapper::class)
         ->namePrefix('debug/api/')
@@ -107,6 +109,7 @@ return [
                 );
             }
         )
+        ->middleware(TokenAuthMiddleware::class)
         ->middleware(FormatDataResponseAsJson::class)
         ->middleware(ResponseDataWrapper::class)
         ->middleware(InspectorProxyMiddleware::class)

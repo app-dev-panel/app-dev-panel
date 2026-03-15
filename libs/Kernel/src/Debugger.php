@@ -7,6 +7,8 @@ namespace AppDevPanel\Kernel;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Yiisoft\Strings\WildcardPattern;
 
 final class Debugger
@@ -14,6 +16,7 @@ final class Debugger
     private bool $skipCollect = false;
     private bool $active = false;
     private bool $shutdownRegistered = false;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
         private readonly DebuggerIdGenerator $idGenerator,
@@ -24,7 +27,10 @@ final class Debugger
         private readonly array $collectors,
         private array $ignoredRequests = [],
         private array $ignoredCommands = [],
-    ) {}
+        ?LoggerInterface $logger = null,
+    ) {
+        $this->logger = $logger ?? new NullLogger();
+    }
 
     public function getId(): string
     {
@@ -43,16 +49,28 @@ final class Debugger
 
         $request = $context->getRequest();
         if ($request !== null && $this->isRequestIgnored($request)) {
+            $this->logger->debug('Debugger: skipping ignored request', [
+                'path' => $request->getUri()->getPath(),
+            ]);
             $this->skipCollect = true;
             return;
         }
 
         if ($context->isCommand() && $this->isCommandIgnored($context->getCommandName())) {
+            $this->logger->debug('Debugger: skipping ignored command', [
+                'command' => $context->getCommandName(),
+            ]);
             $this->skipCollect = true;
             return;
         }
 
         $this->idGenerator->reset();
+        $id = $this->idGenerator->getId();
+        $this->logger->debug('Debugger: startup', [
+            'id' => $id,
+            'collectors' => count($this->collectors),
+        ]);
+
         foreach ($this->collectors as $collector) {
             $this->target->addCollector($collector);
             $collector->startup();
@@ -67,6 +85,9 @@ final class Debugger
 
         try {
             if (!$this->skipCollect) {
+                $this->logger->debug('Debugger: flushing', [
+                    'id' => $this->idGenerator->getId(),
+                ]);
                 $this->target->flush();
             }
         } finally {
@@ -74,6 +95,7 @@ final class Debugger
                 $collector->shutdown();
             }
             $this->active = false;
+            $this->logger->debug('Debugger: shutdown complete');
         }
     }
 
@@ -83,6 +105,7 @@ final class Debugger
             return;
         }
 
+        $this->logger->debug('Debugger: stopped without flush');
         foreach ($this->collectors as $collector) {
             $collector->shutdown();
         }

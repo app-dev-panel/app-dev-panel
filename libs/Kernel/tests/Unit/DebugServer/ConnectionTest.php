@@ -7,6 +7,7 @@ namespace AppDevPanel\Kernel\Tests\Unit\DebugServer;
 use AppDevPanel\Kernel\DebugServer\Connection;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
+use Socket;
 
 #[RequiresPhpExtension('sockets')]
 final class ConnectionTest extends TestCase
@@ -37,11 +38,12 @@ final class ConnectionTest extends TestCase
         $this->assertFileDoesNotExist($uri);
     }
 
-    public function testBroadcastWithNoListeners(): void
+    public function testGetSocket(): void
     {
         $connection = Connection::create();
-        $errors = $connection->broadcast(Connection::MESSAGE_TYPE_LOGGER, 'test message');
-        $this->assertIsArray($errors);
+
+        $this->assertInstanceOf(Socket::class, $connection->getSocket());
+
         $connection->close();
     }
 }

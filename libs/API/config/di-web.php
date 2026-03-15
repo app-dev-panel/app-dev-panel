@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 use Cycle\Database\DatabaseProviderInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use AppDevPanel\Api\Debug\Http\HttpApplicationWrapper;
 use AppDevPanel\Api\Debug\Http\RouteCollectorWrapper;
+use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
+use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\Cycle\CycleSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider;
@@ -28,6 +32,13 @@ return [
         $storagePath = $params['app-dev-panel/yii-debug-api']['path'] ?? sys_get_temp_dir() . '/adp-services';
         return new FileServiceRegistry($storagePath);
     },
+    TokenAuthMiddleware::class => static function (
+        ResponseFactoryInterface $responseFactory,
+        StreamFactoryInterface $streamFactory,
+    ) use ($params): TokenAuthMiddleware {
+        $token = (string) ($params['app-dev-panel/yii-debug-api']['authToken'] ?? '');
+        return new TokenAuthMiddleware($responseFactory, $streamFactory, $token);
+    },
     InspectController::class => [
         '__construct()' => [
             'params' => $params,
@@ -36,6 +47,11 @@ return [
     TranslationController::class => [
         '__construct()' => [
             'params' => $params,
+        ],
+    ],
+    RequestController::class => [
+        '__construct()' => [
+            'allowedHosts' => $params['app-dev-panel/yii-debug-api']['requestReplay']['allowedHosts'] ?? [],
         ],
     ],
     SchemaProviderInterface::class => function (ContainerInterface $container) {
