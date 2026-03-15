@@ -39,6 +39,10 @@ Documentation is **optimized for LLM consumption**. Every sentence must carry in
 - Verify interface signatures match code.
 - Verify dependency claims match `composer.json` / `package.json`.
 
+### Language
+- All documentation must be in **English only**.
+- If any doc contains non-English text — rewrite it in English.
+
 ### Format
 - No emojis, badges, images, TOC.
 - Lists use `-`.
