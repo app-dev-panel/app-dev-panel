@@ -20,6 +20,8 @@ data collectors, storage, proxy system, and object serialization.
 | `FileStorage` | JSON file-based storage with garbage collection |
 | `MemoryStorage` | In-memory storage for testing |
 | `CollectorInterface` | Interface all collectors must implement |
+| `CollectorTrait` | Default `startup()`/`shutdown()` implementation |
+| `SummaryCollectorInterface` | Collectors that contribute to entry summary |
 
 ## Directory Structure
 
@@ -29,19 +31,24 @@ src/
 ├── DebuggerIdGenerator.php       # ID generation
 ├── Collector/                    # All collector implementations
 │   ├── CollectorInterface.php
+│   ├── CollectorTrait.php
+│   ├── SummaryCollectorInterface.php
 │   ├── LogCollector.php
 │   ├── EventCollector.php
 │   ├── ServiceCollector.php
-│   ├── RequestCollector.php
 │   ├── ExceptionCollector.php
 │   ├── HttpClientCollector.php
 │   ├── VarDumperCollector.php
 │   ├── TimelineCollector.php
-│   ├── CommandCollector.php
-│   ├── WebAppInfoCollector.php
-│   ├── ConsoleAppInfoCollector.php
-│   ├── FilesystemStreamCollector.php
-│   └── HttpStreamCollector.php
+│   ├── Web/
+│   │   ├── RequestCollector.php
+│   │   └── WebAppInfoCollector.php
+│   ├── Console/
+│   │   ├── CommandCollector.php
+│   │   └── ConsoleAppInfoCollector.php
+│   └── Stream/
+│       ├── FilesystemStreamCollector.php
+│       └── HttpStreamCollector.php
 ├── Proxy/                        # PSR interface proxies
 │   ├── LoggerInterfaceProxy.php
 │   ├── EventDispatcherInterfaceProxy.php
@@ -76,6 +83,18 @@ startup() → [proxies feed collectors during request] → shutdown() → flush 
 1. Create a class implementing `CollectorInterface`
 2. Implement `startup()`, `shutdown()`, `getCollected()` methods
 3. Register the collector in the adapter's configuration
+
+## External Collectors
+
+Some collectors live in framework-specific packages (not in ADP Kernel):
+
+| Collector | Package | Purpose |
+|-----------|---------|---------|
+| `DatabaseCollector` | `yiisoft/db` | SQL query interception |
+| `MiddlewareCollector` | `yiisoft/yii-debug` | PSR-15 middleware stack |
+| `MailerCollector` | `yiisoft/mailer` | Email interception |
+
+The frontend already has panels for these. For framework-agnostic ADP, these need Kernel-native implementations.
 
 ## Proxy System
 

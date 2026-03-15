@@ -30,7 +30,17 @@ The core principle: **common modules must never depend on framework-specific cod
 | **Adapter/Yiisoft** | Kernel, API, Cli, Yii 3 packages | Other adapters |
 | **Frontend** | Nothing (communicates via HTTP) | Any PHP package |
 
-*API currently has Yii dependencies (router, DI, config) that should be abstracted in future refactoring.
+*API currently has 15+ Yii dependencies (router, DI, data-response, middleware-dispatcher, etc.) that should be abstracted.
+
+**Current violations (tracked for refactoring)**:
+
+| Module | Violation | Count | Impact |
+|--------|-----------|-------|--------|
+| Kernel | Imports `Yiisoft\Yii\Http\Event\*`, `Yiisoft\Yii\Console\Event\*` | 8 files | Blocks multi-framework support |
+| Kernel | Depends on `yiisoft/proxy`, `yiisoft/var-dumper`, `yiisoft/json`, `yiisoft/strings` | composer.json | Core cannot be installed without Yii packages |
+| API | Imports `AppDevPanel\Adapter\Yiisoft\*` in InspectController | 1 file | API depends on Adapter (reversed dependency) |
+| API | 15+ `yiisoft/*` packages in composer.json | composer.json | API is not framework-agnostic |
+| Cli | Uses `Yiisoft\Yii\Console\ExitCode` | 3 files | Minor — replaceable with constants |
 
 ### Why
 

@@ -90,8 +90,8 @@ composer test:coverage
 
 ## Code Quality (Mago)
 
-ADP uses [Mago](https://mago.carthage.software/) — a blazing-fast PHP toolchain written in Rust that
-combines a linter, formatter, and static analyzer in one binary.
+ADP uses [Mago](https://mago.carthage.software/) for PHP code quality. Mago combines a linter,
+formatter, and static analyzer in one binary (written in Rust).
 
 ### Available Commands
 

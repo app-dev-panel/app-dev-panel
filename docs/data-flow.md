@@ -50,12 +50,16 @@ Proxy wrappers transparently intercept these calls and feed data to collectors:
 - **VarDumperProxy** captures manual `dump()` calls
 - **ExceptionCollector** registers a custom exception handler
 
-Additional web-specific collectors gather:
+Additional web-specific collectors (in ADP Kernel):
 - **RequestCollector**: Full request/response data (headers, body, status code)
-- **MiddlewareCollector**: Middleware stack that processed the request
-- **RouterCollector**: Matched route information
-- **AssetCollector**: Registered frontend assets
+- **WebAppInfoCollector**: Application timing (startup, request processing, emit) and memory usage
 - **TimelineCollector**: Timing data for profiling
+
+External collectors (provided by framework-specific packages, not in ADP Kernel):
+- **MiddlewareCollector**: Middleware stack (`yiisoft/yii-debug`)
+- **RouterCollector**: Matched route info (`yiisoft/yii-debug`)
+- **DatabaseCollector**: SQL queries (`yiisoft/db`)
+- **MailerCollector**: Sent emails (`yiisoft/mailer`)
 
 ### Phase 3: Shutdown & Storage
 

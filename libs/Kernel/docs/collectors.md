@@ -125,3 +125,16 @@ final class MyCustomCollector implements CollectorInterface
 ```
 
 Register it in the adapter configuration to make it active.
+
+## External Collectors
+
+Some collectors are provided by framework-specific packages and are not part of ADP Kernel:
+
+| Collector | Package | Data |
+|-----------|---------|------|
+| `Yiisoft\Db\Debug\DatabaseCollector` | `yiisoft/db` | SQL queries, bindings, execution time |
+| `Yiisoft\Yii\Debug\Collector\Web\MiddlewareCollector` | `yiisoft/yii-debug` | PSR-15 middleware stack execution |
+| `Yiisoft\Mailer\Debug\MailerCollector` | `yiisoft/mailer` | Sent emails (to, from, subject, body) |
+
+The frontend (DatabasePanel, MiddlewarePanel, MailerPanel) already renders data from these collectors.
+For ADP to be fully framework-agnostic, these collectors need native Kernel implementations.

@@ -177,6 +177,13 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 - `libs/Adapter/Yiisoft/CLAUDE.md` — Yii 3 adapter integration
 - `libs/yii-dev-panel/CLAUDE.md` — Frontend architecture
 
+## Feature Roadmap
+
+See `docs/roadmap.md` for planned features, priorities, and effort estimates.
+
+Key gaps: Kernel-native Database/Mail/Middleware collectors (frontend panels exist but rely on
+Yii-specific external packages), exception grouping, Symfony/Laravel adapters.
+
 ## Coding Conventions
 
 - PHP: PER-CS (PER-2) via Mago, strict types, final classes where possible

@@ -141,6 +141,12 @@ npm run build            # Production build all packages (via Lerna)
 npm run build:dev        # Development build with toolbar bundled
 ```
 
+## Theme Support
+
+`DefaultThemeProvider` in SDK auto-detects system dark/light mode via `prefers-color-scheme` media query and switches MUI theme. No manual toggle exists — follows system preference only.
+
+Custom palette: primary `#00617B`, secondary `#873C00`.
+
 ## PWA Support
 
 Service Worker via Workbox provides offline caching and background sync.
