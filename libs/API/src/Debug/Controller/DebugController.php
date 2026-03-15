@@ -127,7 +127,7 @@ final class DebugController
             return md5(json_encode($read, JSON_THROW_ON_ERROR));
         };
         $hash = $compareFunction();
-        $maxRetries = 10;
+        $maxRetries = 30;
         $retries = 0;
 
         return $responseFactory
@@ -161,7 +161,7 @@ final class DebugController
                     return false;
                 }
 
-                sleep(1);
+                usleep(500_000); // 500ms poll interval
 
                 return true;
             }));
