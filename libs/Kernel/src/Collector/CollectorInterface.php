@@ -10,7 +10,12 @@ namespace AppDevPanel\Kernel\Collector;
 interface CollectorInterface
 {
     /**
-     * @return string Collector's name.
+     * @return string Collector's unique identifier (FQCN).
+     */
+    public function getId(): string;
+
+    /**
+     * @return string Human-readable short name for display in the UI.
      */
     public function getName(): string;
 

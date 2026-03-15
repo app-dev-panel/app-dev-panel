@@ -28,7 +28,7 @@ abstract class AbstractStorageTestCase extends TestCase
 
         $this->assertEquals([], $storage->getData());
         $storage->addCollector($collector);
-        $this->assertEquals([$collector->getName() => $data], $storage->getData());
+        $this->assertEquals([$collector->getId() => $data], $storage->getData());
     }
 
     /**
@@ -81,20 +81,22 @@ abstract class AbstractStorageTestCase extends TestCase
         yield 'stdClass' => [[new stdClass()]];
     }
 
-    protected function createFakeCollector(array $data)
+    protected function createFakeCollector(array $data): CollectorInterface
     {
         $collector = $this->getMockBuilder(CollectorInterface::class)->getMock();
         $collector->method('getCollected')->willReturn($data);
-        $collector->method('getName')->willReturn('Mock_Collector');
+        $collector->method('getId')->willReturn('Mock_Collector');
+        $collector->method('getName')->willReturn('Mock');
 
         return $collector;
     }
 
-    protected function createFakeSummaryCollector(array $data)
+    protected function createFakeSummaryCollector(array $data): SummaryCollectorInterface
     {
         $collector = $this->getMockBuilder(SummaryCollectorInterface::class)->getMock();
         $collector->method('getCollected')->willReturn($data);
-        $collector->method('getName')->willReturn('SummaryMock_Collector');
+        $collector->method('getId')->willReturn('SummaryMock_Collector');
+        $collector->method('getName')->willReturn('Summary Mock');
 
         $collector->method('getSummary')->willReturn(['summary' => 'summary data']);
 

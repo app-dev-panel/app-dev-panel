@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Support;
 
-use AppDevPanel\Adapter\Yiisoft\Collector\CollectorInterface;
+use AppDevPanel\Kernel\Collector\CollectorInterface;
 
 final class StubCollector implements CollectorInterface
 {
@@ -12,9 +12,14 @@ final class StubCollector implements CollectorInterface
         private array $data = [],
     ) {}
 
-    public function getName(): string
+    public function getId(): string
     {
         return 'stub';
+    }
+
+    public function getName(): string
+    {
+        return 'Stub';
     }
 
     public function startup(): void {}

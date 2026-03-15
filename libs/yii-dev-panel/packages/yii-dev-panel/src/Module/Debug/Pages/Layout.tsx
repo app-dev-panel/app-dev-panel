@@ -62,22 +62,6 @@ import {useDispatch} from 'react-redux';
 import {Outlet} from 'react-router';
 import {useSearchParams} from 'react-router-dom';
 
-function parseCollectorName(text: string) {
-    return text
-        .replace('AppDevPanel\\Kernel\\Collector\\Web\\', '')
-        .replace('AppDevPanel\\Kernel\\Collector\\Console\\', '')
-        .replace('AppDevPanel\\Kernel\\Collector\\Stream\\', '')
-        .replace('AppDevPanel\\Kernel\\Collector\\', '')
-        .replace('AppDevPanel\\Adapter\\Yiisoft\\Collector\\Web\\', '')
-        .replace('Yiisoft\\Assets\\Debug\\', '')
-        .replace('Yiisoft\\Db\\Debug\\', '')
-        .replace('Yiisoft\\Mailer\\Debug\\', '')
-        .replace('Yiisoft\\Validator\\Debug\\', '')
-        .replace('Yiisoft\\Yii\\View\\Debug\\', '')
-        .replace('Yiisoft\\Yii\\Queue\\Debug\\', '')
-        .replace('Yiisoft\\Yii\\View\\Renderer\\Debug\\', '');
-}
-
 type CollectorDataProps = {collectorData: any; selectedCollector: string};
 function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
@@ -341,11 +325,11 @@ const Layout = () => {
                 ? []
                 : debugEntry.collectors
                       .map((collector, index) => ({
-                          name: collector,
-                          text: parseCollectorName(collector),
-                          href: `/debug?collector=${collector}&debugEntry=${debugEntry.id}`,
+                          name: collector.id,
+                          text: collector.name,
+                          href: `/debug?collector=${collector.id}&debugEntry=${debugEntry.id}`,
                           icon: index % 2 === 0 ? <InboxIcon /> : <MailIcon />,
-                          badge: getCollectedCountByCollector(collector as CollectorsMap, debugEntry),
+                          badge: getCollectedCountByCollector(collector.id as CollectorsMap, debugEntry),
                       }))
                       .sort((a, b) => {
                           const weightA = weights[a.name] ?? null;

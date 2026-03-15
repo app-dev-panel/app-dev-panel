@@ -853,18 +853,6 @@ message = "Assigning `mixed` type to a variable may lead to unexpected behavior.
 count = 2
 
 [[issues]]
-file = "libs/API/tests/Support/StubCollector.php"
-code = "non-existent-class-like"
-message = 'Class `AppDevPanel\Api\Tests\Support\StubCollector` cannot implement unknown type `CollectorInterface`'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Support/StubCollector.php"
-code = "unused-property"
-message = "Property `$data` is never used."
-count = 1
-
-[[issues]]
 file = "libs/API/tests/Unit/Debug/Controller/DebugControllerTest.php"
 code = "deprecated-class"
 message = 'Class `Yiisoft\DataResponse\DataResponseFactory` is deprecated and should no longer be used.'
@@ -915,12 +903,6 @@ count = 2
 [[issues]]
 file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcontains`: expected `iterable<mixed, mixed>`, but found `mixed`.'
-count = 4
-
-[[issues]]
-file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
-code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
 count = 1
 
@@ -928,7 +910,7 @@ count = 1
 file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
-count = 21
+count = 18
 
 [[issues]]
 file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
@@ -3608,66 +3590,18 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"
-code = "invalid-array-element-key"
-message = "Invalid array key type."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"
 code = "missing-magic-method"
 message = "Call to documented magic method `method()` on a class that cannot handle it."
-count = 5
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Storage\StorageInterface::addcollector`: expected `AppDevPanel\Kernel\Collector\CollectorInterface`, but found `mixed`.'
-count = 4
+count = 7
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 4
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"
 code = "too-few-arguments"
 message = 'Too few arguments provided for method `AppDevPanel\Kernel\Storage\StorageInterface::read`.'
 count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/FileStorageTest.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Storage\FileStorage::addcollector`: expected `AppDevPanel\Kernel\Collector\CollectorInterface`, but found `mixed`.'
-count = 5
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/FileStorageTest.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/MemoryStorageTest.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Storage\StorageInterface::addcollector`: expected `AppDevPanel\Kernel\Collector\CollectorInterface`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/MemoryStorageTest.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/MemoryStorageTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 2

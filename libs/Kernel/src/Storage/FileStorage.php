@@ -37,7 +37,7 @@ final class FileStorage implements StorageInterface
 
     public function addCollector(CollectorInterface $collector): void
     {
-        $this->collectors[$collector->getName()] = $collector;
+        $this->collectors[$collector->getId()] = $collector;
     }
 
     public function setHistorySize(int $historySize): void
@@ -112,7 +112,10 @@ final class FileStorage implements StorageInterface
     {
         $summaryData = [
             'id' => $this->idGenerator->getId(),
-            'collectors' => array_keys($this->collectors),
+            'collectors' => array_map(static fn(CollectorInterface $collector) => [
+                'id' => $collector->getId(),
+                'name' => $collector->getName(),
+            ], array_values($this->collectors)),
         ];
 
         foreach ($this->collectors as $collector) {

@@ -251,10 +251,13 @@ final class IngestionControllerTest extends TestCase
         // Verify summary contains all collector names
         $summaryFiles = glob($this->storagePath . '/**/' . $data['id'] . '/summary.json');
         $summary = Json::decode(file_get_contents($summaryFiles[0]));
-        $this->assertContains('logs', $summary['collectors']);
-        $this->assertContains('http_client', $summary['collectors']);
-        $this->assertContains('exceptions', $summary['collectors']);
-        $this->assertContains('custom_metrics', $summary['collectors']);
+        /** @var list<array{id: string, name: string}> $collectors */
+        $collectors = $summary['collectors'];
+        $collectorIds = array_column($collectors, 'id');
+        $this->assertContains('logs', $collectorIds);
+        $this->assertContains('http_client', $collectorIds);
+        $this->assertContains('exceptions', $collectorIds);
+        $this->assertContains('custom_metrics', $collectorIds);
     }
 
     private function removeDir(string $dir): void

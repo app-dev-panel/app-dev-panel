@@ -11,9 +11,14 @@ final class DummyCollector implements CollectorInterface
 {
     private bool $isActive = false;
 
-    public function getName(): string
+    public function getId(): string
     {
         return self::class;
+    }
+
+    public function getName(): string
+    {
+        return 'Dummy';
     }
 
     public function startup(): void

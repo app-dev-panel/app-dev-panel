@@ -20,7 +20,7 @@ final class MemoryStorage implements StorageInterface
 
     public function addCollector(CollectorInterface $collector): void
     {
-        $this->collectors[$collector->getName()] = $collector;
+        $this->collectors[$collector->getId()] = $collector;
     }
 
     public function read(string $type, ?string $id = null): array
@@ -40,7 +40,10 @@ final class MemoryStorage implements StorageInterface
             if ($type === self::TYPE_SUMMARY) {
                 $result[$this->idGenerator->getId()] = [
                     'id' => $this->idGenerator->getId(),
-                    'collectors' => array_keys($this->collectors),
+                    'collectors' => array_map(static fn(CollectorInterface $collector) => [
+                        'id' => $collector->getId(),
+                        'name' => $collector->getName(),
+                    ], array_values($this->collectors)),
                 ];
             } elseif ($type === self::TYPE_OBJECTS) {
                 $collected = $this->getData();

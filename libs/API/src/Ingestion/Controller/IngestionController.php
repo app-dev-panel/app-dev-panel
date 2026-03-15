@@ -135,7 +135,7 @@ final class IngestionController
         /** @var string $id */
         $id = $entry['debugId'] ?? $idGenerator->getId();
 
-        /** @var array $collectors */
+        /** @var array<string, array> $collectors */
         $collectors = $entry['collectors'];
         /** @var array $context */
         $context = $entry['context'] ?? [];
@@ -144,7 +144,10 @@ final class IngestionController
 
         $summary = array_merge([
             'id' => $id,
-            'collectors' => array_keys($collectors),
+            'collectors' => array_map(static fn(string $key) => [
+                'id' => $key,
+                'name' => $key,
+            ], array_keys($collectors)),
             'context' => $context,
         ], $summaryExtra);
 

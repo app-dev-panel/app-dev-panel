@@ -26,26 +26,13 @@ export type ServiceDescriptor = {
 };
 
 /** Inspector file entry from the File Explorer API. */
-export type InspectorFile = {
-    path: string;
-    type: 'file' | 'directory';
-    size?: number;
-};
+export type InspectorFile = {path: string; type: 'file' | 'directory'; size?: number};
 
 /** Command definition from the Command API. */
-export type CommandType = {
-    name: string;
-    title: string;
-    group: string;
-    description: string;
-};
+export type CommandType = {name: string; title: string; group: string; description: string};
 
 /** Command execution response. */
-export type CommandResponseType = {
-    status: string;
-    result: string;
-    errors: string[];
-};
+export type CommandResponseType = {status: string; result: string; errors: string[]};
 
 /** Git summary from the Git API. */
 export type GitSummary = {
@@ -57,12 +44,7 @@ export type GitSummary = {
 };
 
 /** Git log entry. */
-export type GitCommit = {
-    sha: string;
-    message: string;
-    author: string;
-    date: string;
-};
+export type GitCommit = {sha: string; message: string; author: string; date: string};
 
 /** Route definition from the Routes API. */
 export type RouteDefinition = {
@@ -75,17 +57,10 @@ export type RouteDefinition = {
 };
 
 /** Event listener type from the Events API. */
-export type EventListenerType = {
-    event: string;
-    listeners: string[];
-};
+export type EventListenerType = {event: string; listeners: string[]};
 
 /** Event listeners grouped by context. */
-export type EventListeners = {
-    common: EventListenerType[];
-    web: EventListenerType[];
-    console: EventListenerType[];
-};
+export type EventListeners = {common: EventListenerType[]; web: EventListenerType[]; console: EventListenerType[]};
 
 /** OPcache status from the OPcache API. */
 export type OpcacheStatus = {
@@ -99,12 +74,7 @@ export type OpcacheStatus = {
 };
 
 /** Composer package info from the Composer API. */
-export type ComposerPackage = {
-    name: string;
-    version: string;
-    description: string;
-    type: string;
-};
+export type ComposerPackage = {name: string; version: string; description: string; type: string};
 
 /** SSE event types. */
 export type SSEEventType = 'debug-updated';

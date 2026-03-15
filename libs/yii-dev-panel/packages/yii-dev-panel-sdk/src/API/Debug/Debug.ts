@@ -5,9 +5,11 @@ type Response<T = any> = {data: T};
 
 export type HTTPMethod = 'DELETE' | 'GET' | 'HEAD' | 'PATCH' | 'POST' | 'PUT';
 
+export type CollectorInfo = {id: string; name: string};
+
 export type DebugEntry = {
     id: string;
-    collectors: string[];
+    collectors: CollectorInfo[];
     logger?: {total: number};
     event?: {total: number};
     service?: {total: number};
