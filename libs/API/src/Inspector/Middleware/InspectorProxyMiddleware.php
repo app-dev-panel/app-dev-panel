@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Inspector\Middleware;
 
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
-use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Json\Json;
@@ -48,6 +48,7 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
         private ClientInterface $httpClient,
         private ResponseFactoryInterface $responseFactory,
         private StreamFactoryInterface $streamFactory,
+        private UriFactoryInterface $uriFactory,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -130,7 +131,7 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
         }
 
         try {
-            $proxyRequest = $request->withUri(new Uri($targetUrl))->withoutHeader('Host');
+            $proxyRequest = $request->withUri($this->uriFactory->createUri($targetUrl))->withoutHeader('Host');
 
             return $this->httpClient->sendRequest($proxyRequest);
         } catch (\Throwable $e) {

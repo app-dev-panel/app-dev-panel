@@ -30,6 +30,7 @@ final class InspectorProxyMiddlewareTest extends TestCase
             $httpClient ?? $this->mockHttpClient(new Response(200)),
             $psr17,
             $psr17,
+            $psr17,
         );
     }
 
