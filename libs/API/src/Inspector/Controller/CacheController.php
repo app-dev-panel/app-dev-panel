@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
@@ -15,14 +15,11 @@ use Yiisoft\VarDumper\VarDumper;
 class CacheController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory
-    ) {
-    }
+        private DataResponseFactoryInterface $responseFactory,
+    ) {}
 
-    public function view(
-        ServerRequestInterface $request,
-        ContainerInterface $container
-    ): ResponseInterface {
+    public function view(ServerRequestInterface $request, ContainerInterface $container): ResponseInterface
+    {
         $params = $request->getQueryParams();
         $key = $params['key'] ?? '';
 
@@ -32,14 +29,14 @@ class CacheController
         if (!$container->has(CacheInterface::class)) {
             // TODO: fix message
             throw new RuntimeException(
-                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.'
+                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.',
             );
         }
         $cache = $container->get(CacheInterface::class);
 
         if (!$cache->has($key)) {
             return $this->responseFactory->createResponse([
-                'error' => 'Key does not exist in cache'
+                'error' => 'Key does not exist in cache',
             ], 404);
         }
 
@@ -50,10 +47,8 @@ class CacheController
         return $this->responseFactory->createResponse($response);
     }
 
-    public function delete(
-        ServerRequestInterface $request,
-        ContainerInterface $container
-    ): ResponseInterface {
+    public function delete(ServerRequestInterface $request, ContainerInterface $container): ResponseInterface
+    {
         $params = $request->getQueryParams();
         $key = $params['key'] ?? '';
 
@@ -63,7 +58,7 @@ class CacheController
         if (!$container->has(CacheInterface::class)) {
             // TODO: fix message
             throw new RuntimeException(
-                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.'
+                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.',
             );
         }
         $cache = $container->get(CacheInterface::class);
@@ -75,17 +70,16 @@ class CacheController
         $result = $cache->delete($key);
 
         return $this->responseFactory->createResponse([
-            'result' => $result
+            'result' => $result,
         ]);
     }
 
-    public function clear(
-        ContainerInterface $container
-    ): ResponseInterface {
+    public function clear(ContainerInterface $container): ResponseInterface
+    {
         if (!$container->has(CacheInterface::class)) {
             // TODO: fix message
             throw new RuntimeException(
-                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.'
+                'Psr\\SimpleCache\\CacheInterface does not exist in the application configuration.',
             );
         }
         $cache = $container->get(CacheInterface::class);
@@ -93,7 +87,7 @@ class CacheController
         $result = $cache->clear();
 
         return $this->responseFactory->createResponse([
-            'result' => $result
+            'result' => $result,
         ]);
     }
 }

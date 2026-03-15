@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Shared;
 
-use PHPUnit\Framework\TestCase;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
+use PHPUnit\Framework\TestCase;
 
 abstract class AbstractCollectorTestCase extends TestCase
 {

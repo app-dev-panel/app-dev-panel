@@ -1,24 +1,23 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Inspector\Command\BashCommand;
+use AppDevPanel\Api\Inspector\CommandResponse;
 use Exception;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use AppDevPanel\Api\Inspector\Command\BashCommand;
-use AppDevPanel\Api\Inspector\CommandResponse;
 
 final class ComposerController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory
-    ) {
-    }
+        private DataResponseFactoryInterface $responseFactory,
+    ) {}
 
     public function index(Aliases $aliases): ResponseInterface
     {
@@ -31,7 +30,7 @@ final class ComposerController
             'json' => json_decode(file_get_contents($composerJsonPath), true, 512, JSON_THROW_ON_ERROR),
             'lock' => file_exists($composerLockPath)
                 ? json_decode(file_get_contents($composerLockPath), true, 512, JSON_THROW_ON_ERROR)
-                : null
+                : null,
         ];
 
         return $this->responseFactory->createResponse($result);
@@ -51,7 +50,7 @@ final class ComposerController
             'result' => $result->getStatus() === CommandResponse::STATUS_OK
                 ? json_decode($result->getResult(), true, 512, JSON_THROW_ON_ERROR)
                 : null,
-            'errors' => $result->getErrors()
+            'errors' => $result->getErrors(),
         ]);
     }
 
@@ -71,7 +70,7 @@ final class ComposerController
             'require',
             $packageWithVersion,
             '-n',
-            ...( $isDev ? ['--dev'] : [] )
+            ...($isDev ? ['--dev'] : []),
         ]);
         $result = $command->run();
 
@@ -84,7 +83,7 @@ final class ComposerController
                         ? json_decode($result->getResult(), true, 512, JSON_THROW_ON_ERROR)
                         : $result->getResult()
                 ),
-            'errors' => $result->getErrors()
+            'errors' => $result->getErrors(),
         ]);
     }
 }

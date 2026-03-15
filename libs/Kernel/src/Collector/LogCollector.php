@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
@@ -11,9 +11,8 @@ class LogCollector implements SummaryCollectorInterface
     private array $messages = [];
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {
@@ -34,7 +33,7 @@ class LogCollector implements SummaryCollectorInterface
             'level' => $level,
             'message' => $message,
             'context' => $context,
-            'line' => $line
+            'line' => $line,
         ];
         $this->timelineCollector->collect($this, count($this->messages));
     }
@@ -51,8 +50,8 @@ class LogCollector implements SummaryCollectorInterface
         }
         return [
             'logger' => [
-                'total' => count($this->messages)
-            ]
+                'total' => count($this->messages),
+            ],
         ];
     }
 }

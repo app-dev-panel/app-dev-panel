@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use PHPUnit\Framework\TestCase;
-use stdClass;
 use AppDevPanel\Kernel\Collector\ContainerProxyConfig;
 use AppDevPanel\Kernel\Collector\ServiceMethodProxy;
 use AppDevPanel\Kernel\Collector\ServiceProxy;
+use PHPUnit\Framework\TestCase;
+use stdClass;
 
 final class ServiceProxyTest extends TestCase
 {

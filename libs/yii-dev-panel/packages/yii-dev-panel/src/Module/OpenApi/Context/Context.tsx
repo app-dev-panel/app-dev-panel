@@ -3,15 +3,10 @@ import {useSelector} from 'react-redux';
 
 export const openApiSlice = createSlice({
     name: 'store.openApi',
-    initialState: {
-        entries: {} as Record<string, string>,
-    },
+    initialState: {entries: {} as Record<string, string>},
     reducers: {
         addApiEntry: (state, action) => {
-            state.entries = {
-                ...state.entries,
-                [action.payload]: action.payload,
-            };
+            state.entries = {...state.entries, [action.payload]: action.payload};
         },
         updateApiEntry: (state, action) => {
             state.entries = action.payload;

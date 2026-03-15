@@ -1,15 +1,15 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use PHPUnit\Framework\TestCase;
-use stdClass;
-use Yiisoft\VarDumper\HandlerInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\VarDumperHandlerInterfaceProxy;
+use PHPUnit\Framework\TestCase;
+use stdClass;
+use Yiisoft\VarDumper\HandlerInterface;
 
 final class VarDumperHandlerInterfaceProxyTest extends TestCase
 {
@@ -29,18 +29,18 @@ final class VarDumperHandlerInterfaceProxyTest extends TestCase
             [
                 [
                     'variable' => true,
-                    'line' => __FILE__ . ':28'
-                ]
+                    'line' => __FILE__ . ':28',
+                ],
             ],
-            $collector->getCollected()
+            $collector->getCollected(),
         );
         $this->assertEquals(
             [
                 'var-dumper' => [
-                    'total' => 1
-                ]
+                    'total' => 1,
+                ],
             ],
-            $collector->getSummary()
+            $collector->getSummary(),
         );
 
         $this->assertCount(1, $timeline->getCollected());
@@ -66,9 +66,7 @@ final class VarDumperHandlerInterfaceProxyTest extends TestCase
                 return $args;
             }
 
-            public function handle(mixed $variable, int $depth, bool $highlight = false): void
-            {
-            }
+            public function handle(mixed $variable, int $depth, bool $highlight = false): void {}
         };
         $collector = new VarDumperCollector(new TimelineCollector());
         $proxy = new VarDumperHandlerInterfaceProxy($handler, $collector);

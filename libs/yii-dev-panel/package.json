@@ -38,12 +38,19 @@
     "build": "lerna run build --parallel --verbose",
     "build:dev": "npm run build:dev -w packages/yii-dev-panel; npm run build -w packages/yii-dev-toolbar; npm run copy-toolbar",
     "serve:dev": "npm run serve:dev -w packages/yii-dev-panel",
-    "copy-toolbar": "mkdir packages/yii-dev-panel/dist/toolbar && cp -r packages/yii-dev-toolbar/dist/bundle.* packages/yii-dev-toolbar/dist/assets packages/yii-dev-panel/dist/toolbar"
+    "copy-toolbar": "mkdir packages/yii-dev-panel/dist/toolbar && cp -r packages/yii-dev-toolbar/dist/bundle.* packages/yii-dev-toolbar/dist/assets packages/yii-dev-panel/dist/toolbar",
+    "format": "prettier --write \"packages/*/src/**/*.{ts,tsx,js,jsx,json,css}\"",
+    "format:check": "prettier --check \"packages/*/src/**/*.{ts,tsx,js,jsx,json,css}\"",
+    "lint": "eslint \"packages/*/src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint --fix \"packages/*/src/**/*.{ts,tsx}\"",
+    "check": "npm run format:check && npm run lint"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "devDependencies": {
+    "prettier": "^3.8.1",
+    "prettier-plugin-organize-imports": "^4.0.0",
+    "eslint": "^9.9.0",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
+    "@typescript-eslint/parser": "^8.1.0",
+    "eslint-config-prettier": "^9.1.0"
   }
 }

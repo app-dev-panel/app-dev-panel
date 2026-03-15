@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Event;
 
@@ -15,7 +15,6 @@ final class ProxyMethodCallEvent
         public string $status,
         public ?object $error,
         public float $timeStart,
-        public float $timeEnd
-    ) {
-    }
+        public float $timeEnd,
+    ) {}
 }

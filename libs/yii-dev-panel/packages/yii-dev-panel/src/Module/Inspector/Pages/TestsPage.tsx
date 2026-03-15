@@ -7,10 +7,10 @@ import {GridColDef, GridColumns, GridRenderCellParams, GridValidRowModel} from '
 import {DataTable} from '@yiisoft/yii-dev-panel-sdk/Component/Grid';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel-sdk/Component/JsonRenderer';
 import {parseFilePathWithLineAnchor} from '@yiisoft/yii-dev-panel-sdk/Helper/filePathParser';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {useRunCommandMutation} from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useState} from 'react';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 const CenteredBox = styled(Box)({
     height: '100%',
@@ -70,10 +70,7 @@ const columns: GridColDef[] = [
     },
 ];
 
-type CommandResponseType = {
-    isSuccessful: boolean | undefined;
-    errors: string[];
-};
+type CommandResponseType = {isSuccessful: boolean | undefined; errors: string[]};
 export const TestsPage = () => {
     const [commandQuery, commandQueryInfo] = useRunCommandMutation();
     const [rows, setRows] = useState<any[]>([]);
@@ -104,10 +101,7 @@ export const TestsPage = () => {
                 time: event.time,
             });
         }
-        setCommandResponse({
-            isSuccessful: data.data.status === 'ok',
-            errors: data.data.errors,
-        });
+        setCommandResponse({isSuccessful: data.data.status === 'ok', errors: data.data.errors});
         setRows(resultRows);
     }
 

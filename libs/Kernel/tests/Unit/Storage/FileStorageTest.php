@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Storage;
 
-use Yiisoft\Aliases\Aliases;
-use Yiisoft\Files\FileHelper;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use Yiisoft\Aliases\Aliases;
+use Yiisoft\Files\FileHelper;
 
 final class FileStorageTest extends AbstractStorageTestCase
 {

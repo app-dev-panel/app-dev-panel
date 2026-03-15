@@ -21,9 +21,7 @@ import * as React from 'react';
 import {useDispatch} from 'react-redux';
 
 // TODO: split saving and cancelling
-type SettingsDialogProps = {
-    onClose: () => void;
-};
+type SettingsDialogProps = {onClose: () => void};
 export const SettingsDialog = (props: SettingsDialogProps) => {
     const [selectedEntry, setSelectedEntry] = React.useState('');
     const dispatch = useDispatch();
@@ -74,12 +72,7 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                 <Box
                     noValidate
                     component="form"
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        p: [0.5, 1],
-                        alignItems: 'center',
-                    }}
+                    sx={{display: 'flex', flexDirection: 'row', p: [0.5, 1], alignItems: 'center'}}
                     onSubmit={(e) => {
                         e.preventDefault();
                         onAddHandler();

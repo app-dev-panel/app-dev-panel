@@ -19,7 +19,7 @@ excludes = [
 extensions = ["php"]
 
 [formatter]
-preset = "psr-12"
+preset = "default"
 
 [analyzer]
 baseline = "mago-analyze-baseline.php"

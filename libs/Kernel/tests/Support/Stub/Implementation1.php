@@ -1,9 +1,7 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Support\Stub;
 
-class Implementation1 implements Interface1
-{
-}
+class Implementation1 implements Interface1 {}

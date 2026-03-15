@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel;
 
@@ -195,7 +195,7 @@ final class FlattenException implements Stringable
                 'function' => $entry['function'] ?? null,
                 'file' => $entry['file'] ?? null,
                 'line' => $entry['line'] ?? null,
-                'args' => isset($entry['args']) ? $this->flattenArgs($entry['args']) : []
+                'args' => isset($entry['args']) ? $this->flattenArgs($entry['args']) : [],
             ];
         }
     }

@@ -1,22 +1,21 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Command;
 
-use Symfony\Component\Process\Process;
-use Yiisoft\Aliases\Aliases;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
+use Symfony\Component\Process\Process;
+use Yiisoft\Aliases\Aliases;
 
 class PsalmCommand implements CommandInterface
 {
     public const COMMAND_NAME = 'analyse/psalm';
 
     public function __construct(
-        private Aliases $aliases
-    ) {
-    }
+        private Aliases $aliases,
+    ) {}
 
     public static function getTitle(): string
     {
@@ -37,7 +36,7 @@ class PsalmCommand implements CommandInterface
 
         $params = [
             'vendor/bin/psalm',
-            '--report=' . $outputFilePath
+            '--report=' . $outputFilePath,
         ];
 
         $process = new Process($params);
@@ -50,13 +49,13 @@ class PsalmCommand implements CommandInterface
             return new CommandResponse(
                 status: CommandResponse::STATUS_FAIL,
                 result: null,
-                errors: array_filter([$processOutput, $process->getErrorOutput()])
+                errors: array_filter([$processOutput, $process->getErrorOutput()]),
             );
         }
 
         return new CommandResponse(
             status: $process->isSuccessful() ? CommandResponse::STATUS_OK : CommandResponse::STATUS_ERROR,
-            result: $processOutput
+            result: $processOutput,
         );
     }
 }

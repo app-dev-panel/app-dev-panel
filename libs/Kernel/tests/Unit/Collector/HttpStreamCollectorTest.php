@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 
 final class HttpStreamCollectorTest extends AbstractCollectorTestCase
 {
@@ -30,7 +30,7 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
         array $ignoredUrls,
         callable $operation,
         callable $after,
-        array|callable $assertResult
+        array|callable $assertResult,
     ): void {
         $before($url);
 
@@ -38,7 +38,7 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
             $collector = new HttpStreamCollector(
                 ignoredPathPatterns: $ignoredPathPatterns,
                 ignoredClasses: $ignoredClasses,
-                ignoredUrls: $ignoredUrls
+                ignoredUrls: $ignoredUrls,
             );
             $collector->startup();
 
@@ -94,7 +94,7 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
                 $testCase->assertNotEmpty($readItemArgs['response_headers']);
                 $testCase->assertIsArray($readItemArgs['request_headers']);
                 $testCase->assertEmpty($readItemArgs['request_headers']);
-            }
+            },
         ];
         yield 'file stream ignored by path' => [
             $url,
@@ -104,7 +104,7 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
             [],
             $httpStreamOperation,
             $httpStreamAfter,
-            []
+            [],
         ];
         yield 'file stream ignored by class' => [
             $url,
@@ -114,7 +114,7 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
             [],
             $httpStreamOperation,
             $httpStreamAfter,
-            []
+            [],
         ];
         yield 'file stream ignored by url' => [
             $url,
@@ -124,7 +124,7 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
             ['example'],
             $httpStreamOperation,
             $httpStreamAfter,
-            []
+            [],
         ];
     }
 
@@ -143,9 +143,9 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
         $this->assertEquals(
             [
                 ['uri' => __FILE__, 'args' => ['arg1' => 'v1', 'arg2' => 'v2']],
-                ['uri' => __FILE__, 'args' => ['arg3' => 'v3', 'arg4' => 'v4']]
+                ['uri' => __FILE__, 'args' => ['arg3' => 'v3', 'arg4' => 'v4']],
             ],
-            $collected['read']
+            $collected['read'],
         );
     }
 

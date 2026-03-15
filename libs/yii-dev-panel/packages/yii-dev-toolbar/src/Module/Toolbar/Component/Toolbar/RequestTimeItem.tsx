@@ -1,12 +1,8 @@
 import {Button, Tooltip} from '@mui/material';
 import {DebugEntry} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Debug';
 import {CollectorsMap} from '@yiisoft/yii-dev-panel-sdk/Helper/collectors';
-import {isDebugEntryAboutWeb} from '@yiisoft/yii-dev-panel-sdk/Helper/debugEntry';
 
-type RequestTimeItemProps = {
-    data: DebugEntry;
-    iframeUrlHandler: (url: string) => void;
-};
+type RequestTimeItemProps = {data: DebugEntry; iframeUrlHandler: (url: string) => void};
 export const RequestTimeItem = (props: RequestTimeItemProps) => {
     const {data, iframeUrlHandler, ...others} = props;
 
@@ -21,11 +17,7 @@ export const RequestTimeItem = (props: RequestTimeItemProps) => {
                 }}
                 color="info"
                 variant="contained"
-                sx={{
-                    whiteSpace: 'nowrap',
-                    textTransform: 'none',
-                    borderRadius: 0,
-                }}
+                sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
             >
                 {(data.web || data.console).request.processingTime.toFixed(3)} s
             </Button>

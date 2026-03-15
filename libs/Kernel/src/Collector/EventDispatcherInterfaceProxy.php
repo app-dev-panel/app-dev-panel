@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
-use Psr\EventDispatcher\EventDispatcherInterface;
 use AppDevPanel\Kernel\ProxyDecoratedCalls;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 final class EventDispatcherInterfaceProxy implements EventDispatcherInterface
 {
@@ -13,9 +13,8 @@ final class EventDispatcherInterfaceProxy implements EventDispatcherInterface
 
     public function __construct(
         private readonly EventDispatcherInterface $decorated,
-        private readonly EventCollector $collector
-    ) {
-    }
+        private readonly EventCollector $collector,
+    ) {}
 
     public function dispatch(object $event): object
     {

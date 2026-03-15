@@ -1,16 +1,16 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Cli\Command;
 
+use AppDevPanel\Kernel\Debugger;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Yiisoft\Yii\Console\ExitCode;
-use AppDevPanel\Kernel\Debugger;
-use AppDevPanel\Kernel\Storage\StorageInterface;
 
 #[AsCommand(name: 'debug:reset', description: 'Clear debug data')]
 final class DebugResetCommand extends Command
@@ -19,7 +19,7 @@ final class DebugResetCommand extends Command
 
     public function __construct(
         private readonly StorageInterface $storage,
-        private readonly Debugger $debugger
+        private readonly Debugger $debugger,
     ) {
         parent::__construct();
     }

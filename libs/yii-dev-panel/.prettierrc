@@ -5,5 +5,7 @@
   "tabWidth": 4,
   "trailingComma": "all",
   "printWidth": 120,
-  "bracketSpacing": false
+  "bracketSpacing": false,
+  "objectWrap": "collapse",
+  "plugins": ["prettier-plugin-organize-imports"]
 }

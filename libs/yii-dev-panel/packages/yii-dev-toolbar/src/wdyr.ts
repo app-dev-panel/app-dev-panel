@@ -3,8 +3,5 @@ import * as React from 'react';
 import * as ReactRedux from 'react-redux';
 
 if (import.meta.env.DEV) {
-    whyDidYouRender(React, {
-        trackAllPureComponents: true,
-        trackExtraHooks: [[ReactRedux, 'useSelector']],
-    });
+    whyDidYouRender(React, {trackAllPureComponents: true, trackExtraHooks: [[ReactRedux, 'useSelector']]});
 }

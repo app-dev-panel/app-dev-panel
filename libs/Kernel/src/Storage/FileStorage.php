@@ -1,15 +1,15 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Storage;
 
-use Yiisoft\Files\FileHelper;
-use Yiisoft\Json\Json;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Dumper;
+use Yiisoft\Files\FileHelper;
+use Yiisoft\Json\Json;
 
 use function array_slice;
 use function count;
@@ -32,9 +32,8 @@ final class FileStorage implements StorageInterface
     public function __construct(
         private readonly string $path,
         private readonly DebuggerIdGenerator $idGenerator,
-        private readonly array $excludedClasses = []
-    ) {
-    }
+        private readonly array $excludedClasses = [],
+    ) {}
 
     public function addCollector(CollectorInterface $collector): void
     {
@@ -99,7 +98,7 @@ final class FileStorage implements StorageInterface
     {
         $summaryData = [
             'id' => $this->idGenerator->getId(),
-            'collectors' => array_keys($this->collectors)
+            'collectors' => array_keys($this->collectors),
         ];
 
         foreach ($this->collectors as $collector) {

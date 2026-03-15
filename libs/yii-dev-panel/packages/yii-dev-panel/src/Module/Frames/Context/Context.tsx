@@ -3,15 +3,10 @@ import {useSelector} from 'react-redux';
 
 export const framesSlice = createSlice({
     name: 'store.frames2',
-    initialState: {
-        frames: {} as Record<string, string>,
-    },
+    initialState: {frames: {} as Record<string, string>},
     reducers: {
         addFrame: (state, action) => {
-            state.frames = {
-                ...state.frames,
-                [action.payload]: action.payload,
-            };
+            state.frames = {...state.frames, [action.payload]: action.payload};
         },
         updateFrame: (state, action) => {
             state.frames = action.payload;

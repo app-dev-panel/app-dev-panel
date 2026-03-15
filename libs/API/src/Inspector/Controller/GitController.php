@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
@@ -19,9 +19,8 @@ final class GitController
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-        private Aliases $aliases
-    ) {
-    }
+        private Aliases $aliases,
+    ) {}
 
     public function summary(): ResponseInterface
     {
@@ -38,11 +37,11 @@ final class GitController
             'sha' => $branch->getCommitHash(),
             'remotes' => array_map(static fn(string $name) => [
                 'name' => $name,
-                'url' => trim($git->run('remote', ['get-url', $name]))
+                'url' => trim($git->run('remote', ['get-url', $name])),
             ], $remoteNames),
             'branches' => array_map(static fn(Branch $branch) => $branch->getName(), $branches),
             'lastCommit' => $this->serializeCommit($branch->getCommit()),
-            'status' => explode("\n", $git->run('status'))
+            'status' => explode("\n", $git->run('status')),
         ];
         $response = VarDumper::create($result)->asPrimitives(255);
         return $this->responseFactory->createResponse($response);
@@ -58,7 +57,7 @@ final class GitController
         $result = [
             'currentBranch' => $branch->getName(),
             'sha' => $branch->getCommitHash(),
-            'commits' => array_map($this->serializeCommit(...), $git->getLog(limit: 20)->getCommits())
+            'commits' => array_map($this->serializeCommit(...), $git->getLog(limit: 20)->getCommits()),
         ];
         $response = VarDumper::create($result)->asPrimitives(255);
         return $this->responseFactory->createResponse($response);
@@ -93,7 +92,7 @@ final class GitController
             throw new InvalidArgumentException(sprintf(
                 'Unknown command "%s". Available commands: "%s".',
                 $command,
-                implode('", "', $availableCommands)
+                implode('", "', $availableCommands),
             ));
         }
 
@@ -121,7 +120,7 @@ final class GitController
 
         throw new InvalidArgumentException(sprintf(
             'Could find any repositories up from "%s" directory.',
-            $projectPath
+            $projectPath,
         ));
     }
 
@@ -135,8 +134,8 @@ final class GitController
                     'message' => $commit->getSubjectMessage(),
                     'author' => [
                         'name' => $commit->getAuthorName(),
-                        'email' => $commit->getAuthorEmail()
-                    ]
+                        'email' => $commit->getAuthorEmail(),
+                    ],
                 ]
         );
     }

@@ -1,15 +1,15 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit;
 
-use DateTimeZone;
-use PHPUnit\Framework\TestCase;
-use stdClass;
 use AppDevPanel\Kernel as D;
 use AppDevPanel\Kernel\Dumper;
 use AppDevPanel\Kernel\Tests\Support\Stub\ThreeProperties;
+use DateTimeZone;
+use PHPUnit\Framework\TestCase;
+use stdClass;
 
 use function socket_create;
 
@@ -158,7 +158,7 @@ final class DumperTest extends TestCase
                         "public \$nested1": "object@stdClass#{$nested1Id}"
                     }
                 }
-                S
+                S,
         ];
 
         // array loop must be 1 level deeper to parse loop objects
@@ -204,7 +204,7 @@ final class DumperTest extends TestCase
                         "public \$nested1": "object@stdClass#{$nested1Id}"
                     }
                 }
-                S
+                S,
         ];
 
         // nested loop to inner array
@@ -212,7 +212,7 @@ final class DumperTest extends TestCase
         $object3->id = 'lvl0';
         $object3->lv11 = [
             'id' => 'lvl1',
-            'loop' => $nested1
+            'loop' => $nested1,
         ];
         $object3Id = spl_object_id($object3);
 
@@ -237,7 +237,7 @@ final class DumperTest extends TestCase
                         "public \$nested1": "object@stdClass#{$nested1Id}"
                     }
                 }
-                S
+                S,
         ];
     }
 
@@ -376,7 +376,7 @@ final class DumperTest extends TestCase
             $user,
             <<<S
                 {"stdClass#{$objectId}":{"public \$id":1}}
-                S
+                S,
         ];
 
         $decoratedUser = clone $user;
@@ -388,7 +388,7 @@ final class DumperTest extends TestCase
             $decoratedUser,
             <<<S
                 {"stdClass#{$decoratedObjectId}":{"public \$id":1,"public \$name":"Name","public \$originalUser":"object@stdClass#{$objectId}"},"stdClass#{$objectId}":{"public \$id":1}}
-                S
+                S,
         ];
 
         $closureInsideObject = new stdClass();
@@ -401,7 +401,7 @@ final class DumperTest extends TestCase
             $closureInsideObject,
             <<<S
                 {"stdClass#{$closureInsideObjectId}":{"public \$closure":"fn () => true"},"Closure#{$closureObjectId}":"fn () => true"}
-                S
+                S,
         ];
     }
 
@@ -478,7 +478,7 @@ final class DumperTest extends TestCase
         $expectedResult = sprintf(
             '["object@stdClass#%d",["stdClass#%d (...)"]]',
             $statelessObjectId,
-            $statefulObjectId
+            $statefulObjectId,
         );
 
         $dumper = Dumper::create($variable);
@@ -504,12 +504,12 @@ final class DumperTest extends TestCase
     {
         yield 'singular' => [
             [[['test']]],
-            '[["array (1 item) [...]"]]'
+            '[["array (1 item) [...]"]]',
         ];
 
         yield 'plural' => [
             [[['test', 'test'], ['test']]],
-            '[["array (2 items) [...]","array (1 item) [...]"]]'
+            '[["array (2 items) [...]","array (1 item) [...]"]]',
         ];
     }
 
@@ -523,7 +523,7 @@ final class DumperTest extends TestCase
         $result = sprintf(
             '[["%s#%d (...)"]]',
             str_replace('\\', '\\\\', ThreeProperties::class),
-            spl_object_id($object)
+            spl_object_id($object),
         );
         $this->assertEqualsWithoutLE($result, $output);
     }
@@ -536,7 +536,7 @@ final class DumperTest extends TestCase
         $result = sprintf(
             '{"%s#%d":{"public $first":"first","protected $second":"second","private $third":"third"}}',
             str_replace('\\', '\\\\', ThreeProperties::class),
-            spl_object_id($variable)
+            spl_object_id($variable),
         );
         $this->assertEqualsWithoutLE($result, $output);
     }
@@ -586,7 +586,7 @@ final class DumperTest extends TestCase
             $emptyObject,
             <<<S
                 {"stdClass#{$emptyObjectId}":"{stateless object}"}
-                S
+                S,
         ];
 
         // @formatter:off
@@ -598,7 +598,7 @@ final class DumperTest extends TestCase
             $shortFunctionObject,
             <<<S
                 {"Closure#{$shortFunctionObjectId}":"fn () => 1"}
-                S
+                S,
         ];
 
         // @formatter:off
@@ -610,7 +610,7 @@ final class DumperTest extends TestCase
             $staticShortFunctionObject,
             <<<S
                 {"Closure#{$staticShortFunctionObjectId}":"static fn () => 1"}
-                S
+                S,
         ];
 
         // @formatter:off
@@ -624,7 +624,7 @@ final class DumperTest extends TestCase
             $functionObject,
             <<<S
                 {"Closure#{$functionObjectId}":"function () {\\n    return 1;\\n}"}
-                S
+                S,
         ];
 
         // @formatter:off
@@ -638,55 +638,55 @@ final class DumperTest extends TestCase
             $staticFunctionObject,
             <<<S
                 {"Closure#{$staticFunctionObjectId}":"static function () {\\n    return 1;\\n}"}
-                S
+                S,
         ];
         yield 'string' => [
             'Hello, Yii!',
-            '"Hello, Yii!"'
+            '"Hello, Yii!"',
         ];
         yield 'empty string' => [
             '',
-            '""'
+            '""',
         ];
         yield 'null' => [
             null,
-            'null'
+            'null',
         ];
         yield 'integer' => [
             1,
-            '1'
+            '1',
         ];
         yield 'integer with separator' => [
             1_23_456,
-            '123456'
+            '123456',
         ];
         yield 'boolean' => [
             true,
-            'true'
+            'true',
         ];
         yield 'fileResource' => [
             fopen('php://input', 'rb'),
-            '{"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"Input","mode":"rb","unread_bytes":0,"seekable":true,"uri":"php:\/\/input"}'
+            '{"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"Input","mode":"rb","unread_bytes":0,"seekable":true,"uri":"php:\/\/input"}',
         ];
         yield 'empty array' => [
             [],
-            '[]'
+            '[]',
         ];
         yield 'array of 3 elements, automatic keys' => [
             [
                 'one',
                 'two',
-                'three'
+                'three',
             ],
-            '["one","two","three"]'
+            '["one","two","three"]',
         ];
         yield 'array of 3 elements, custom keys' => [
             [
                 2 => 'one',
                 'two' => 'two',
-                0 => 'three'
+                0 => 'three',
             ],
-            '{"2":"one","two":"two","0":"three"}'
+            '{"2":"one","two":"two","0":"three"}',
         ];
 
         // @formatter:off
@@ -700,7 +700,7 @@ final class DumperTest extends TestCase
             // @formatter:on
             <<<S
                 [{"Closure#{$closureInArrayObjectId}":"fn () => new \\\DateTimeZone('')"}]
-                S
+                S,
         ];
 
         // @formatter:off
@@ -712,7 +712,7 @@ final class DumperTest extends TestCase
             $closureWithUsualClassNameObject,
             <<<S
                 {"Closure#{$closureWithUsualClassNameObjectId}":"fn (\\\Yiisoft\\\Yii\\\Debug\\\Dumper \$date) => new \\\DateTimeZone('')"}
-                S
+                S,
         ];
 
         // @formatter:off
@@ -724,7 +724,7 @@ final class DumperTest extends TestCase
             $closureWithAliasedClassNameObject,
             <<<S
                 {"Closure#{$closureWithAliasedClassNameObjectId}":"fn (\\\Yiisoft\\\Yii\\\Debug\\\Dumper \$date) => new \\\DateTimeZone('')"}
-                S
+                S,
         ];
 
         // @formatter:off
@@ -736,7 +736,7 @@ final class DumperTest extends TestCase
             $closureWithAliasedNamespaceObject,
             <<<S
                 {"Closure#{$closureWithAliasedNamespaceObjectId}":"fn (\\\Yiisoft\\\Yii\\\Debug\\\Dumper \$date) => new \\\DateTimeZone('')"}
-                S
+                S,
         ];
         // @formatter:off
         $closureWithNullCollisionOperatorObject = static fn() => $_ENV['var'] ?? null;
@@ -747,11 +747,11 @@ final class DumperTest extends TestCase
             $closureWithNullCollisionOperatorObject,
             <<<S
                 {"Closure#{$closureWithNullCollisionOperatorObjectId}":"fn () => \$_ENV['var'] ?? null"}
-                S
+                S,
         ];
         yield 'utf8 supported' => [
             '🤣',
-            '"🤣"'
+            '"🤣"',
         ];
 
         $objectWithClosureInProperty = new stdClass();
@@ -765,11 +765,11 @@ final class DumperTest extends TestCase
             $objectWithClosureInProperty,
             <<<S
                 {"stdClass#{$objectWithClosureInPropertyId}":{"public \$a":{"Closure#{$objectWithClosureInPropertyClosureId}":"fn () => 1"}}}
-                S
+                S,
         ];
         yield 'binary string' => [
             pack('H*', md5('binary string')),
-            '"ɍ��^��\u00191\u0017�]�-f�"'
+            '"ɍ��^��\u00191\u0017�]�-f�"',
         ];
 
         $fileResource = tmpfile();
@@ -780,7 +780,7 @@ final class DumperTest extends TestCase
             $fileResource,
             <<<S
                 {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"plainfile","stream_type":"STDIO","mode":"r+b","unread_bytes":0,"seekable":true,"uri":"{$fileResourceUri}"}
-                S
+                S,
         ];
 
         $closedFileResource = tmpfile();
@@ -788,7 +788,7 @@ final class DumperTest extends TestCase
 
         yield 'closed file resource' => [
             $closedFileResource,
-            '"{closed resource}"'
+            '"{closed resource}"',
         ];
 
         $socketResource = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -797,7 +797,7 @@ final class DumperTest extends TestCase
             $socketResource,
             <<<S
                 {"Socket#{$socketResourceId}":"{stateless object}"}
-                S
+                S,
         ];
 
         $opendirResource = opendir(sys_get_temp_dir());
@@ -806,7 +806,7 @@ final class DumperTest extends TestCase
             $opendirResource,
             <<<S
                 {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"plainfile","stream_type":"dir","mode":"r","unread_bytes":0,"seekable":true}
-                S
+                S,
         ];
 
         $curlResource = curl_init('https://example.com');
@@ -816,25 +816,25 @@ final class DumperTest extends TestCase
             $curlResource,
             <<<S
                 {"CurlHandle#{$curlResourceObjectId}":"{stateless object}"}
-                S
+                S,
         ];
         yield 'stdout' => [
             STDOUT,
             <<<S
                 {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":false,"uri":"php:\/\/stdout"}
-                S
+                S,
         ];
         yield 'stderr' => [
             STDERR,
             <<<S
                 {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":false,"uri":"php:\/\/stderr"}
-                S
+                S,
         ];
         yield 'stdin' => [
             STDIN,
             <<<S
                 {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"rb","unread_bytes":0,"seekable":false,"uri":"php:\/\/stdin"}
-                S
+                S,
         ];
     }
 

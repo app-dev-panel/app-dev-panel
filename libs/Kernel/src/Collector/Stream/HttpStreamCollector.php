@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector\Stream;
 
@@ -14,9 +14,8 @@ final class HttpStreamCollector implements SummaryCollectorInterface
     public function __construct(
         private readonly array $ignoredPathPatterns = [],
         private readonly array $ignoredClasses = [],
-        private readonly array $ignoredUrls = []
-    ) {
-    }
+        private readonly array $ignoredUrls = [],
+    ) {}
 
     private array $requests = [];
 
@@ -63,7 +62,7 @@ final class HttpStreamCollector implements SummaryCollectorInterface
 
         $this->requests[$operation][] = [
             'uri' => $path,
-            'args' => $args
+            'args' => $args,
         ];
     }
 
@@ -74,8 +73,8 @@ final class HttpStreamCollector implements SummaryCollectorInterface
         }
         return [
             'http_stream' => array_merge(...array_map(fn(string $operation) => [
-                $operation => is_countable($this->requests[$operation]) ? count($this->requests[$operation]) : 0
-            ], array_keys($this->requests)))
+                $operation => is_countable($this->requests[$operation]) ? count($this->requests[$operation]) : 0,
+            ], array_keys($this->requests))),
         ];
     }
 

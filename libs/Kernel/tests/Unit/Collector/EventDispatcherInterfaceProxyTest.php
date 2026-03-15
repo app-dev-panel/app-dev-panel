@@ -1,15 +1,15 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use PHPUnit\Framework\TestCase;
-use Psr\EventDispatcher\EventDispatcherInterface;
-use stdClass;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use PHPUnit\Framework\TestCase;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use stdClass;
 
 final class EventDispatcherInterfaceProxyTest extends TestCase
 {
@@ -44,9 +44,7 @@ final class EventDispatcherInterfaceProxyTest extends TestCase
                 return $args;
             }
 
-            public function dispatch(object $event)
-            {
-            }
+            public function dispatch(object $event) {}
         };
         $collector = new EventCollector(new TimelineCollector());
         $proxy = new EventDispatcherInterfaceProxy($dispatcher, $collector);

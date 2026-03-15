@@ -6,17 +6,15 @@ import Box from '@mui/material/Box';
 import {CodeHighlight} from '@yiisoft/yii-dev-panel-sdk/Component/CodeHighlight';
 import {FullScreenCircularProgress} from '@yiisoft/yii-dev-panel-sdk/Component/FullScreenCircularProgress';
 import {serializeCallable} from '@yiisoft/yii-dev-panel-sdk/Helper/callableSerializer';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {
     EventListenersType,
     EventsResponse,
     useGetEventsQuery,
 } from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import React, {SyntheticEvent, useEffect, useState} from 'react';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
-type EventListenersProps = {
-    eventListeners: EventListenersType;
-};
+type EventListenersProps = {eventListeners: EventListenersType};
 const EventListeners = React.memo(({eventListeners}: EventListenersProps) => {
     const events = Object.entries(eventListeners);
     return (

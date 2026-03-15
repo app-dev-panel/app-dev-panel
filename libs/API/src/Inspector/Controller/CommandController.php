@@ -1,9 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Inspector\Command\BashCommand;
+use AppDevPanel\Api\Inspector\CommandInterface;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -11,8 +13,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\Config\ConfigInterface;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use AppDevPanel\Api\Inspector\Command\BashCommand;
-use AppDevPanel\Api\Inspector\CommandInterface;
 
 use function array_key_exists;
 use function is_array;
@@ -21,9 +21,8 @@ use function is_string;
 class CommandController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory
-    ) {
-    }
+        private DataResponseFactoryInterface $responseFactory,
+    ) {}
 
     public function index(ConfigInterface $config, Aliases $aliases): ResponseInterface
     {
@@ -40,7 +39,7 @@ class CommandController
                     'name' => $name,
                     'title' => $command::getTitle(),
                     'group' => $groupName,
-                    'description' => $command::getDescription()
+                    'description' => $command::getDescription(),
                 ];
             }
         }
@@ -52,7 +51,7 @@ class CommandController
                 'name' => $commandName,
                 'title' => $scriptName,
                 'group' => 'composer',
-                'description' => implode("\n", $commands)
+                'description' => implode("\n", $commands),
             ];
         }
 
@@ -63,7 +62,7 @@ class CommandController
         ServerRequestInterface $request,
         ContainerInterface $container,
         ConfigInterface $config,
-        Aliases $aliases
+        Aliases $aliases,
     ): ResponseInterface {
         $params = $config->get('params');
         $commandMap = $params['app-dev-panel/yii-debug-api']['inspector']['commandMap'] ?? [];
@@ -89,7 +88,7 @@ class CommandController
         if ($commandName === null) {
             throw new InvalidArgumentException(sprintf('Command must not be null. Available commands: "%s".', implode(
                 '", "',
-                array_keys($commandList)
+                array_keys($commandList),
             )));
         }
 
@@ -97,7 +96,7 @@ class CommandController
             throw new InvalidArgumentException(sprintf(
                 'Unknown command "%s". Available commands: "%s".',
                 $commandName,
-                implode('", "', array_keys($commandList))
+                implode('", "', array_keys($commandList)),
             ));
         }
 
@@ -112,7 +111,7 @@ class CommandController
         return $this->responseFactory->createResponse([
             'status' => $result->getStatus(),
             'result' => $result->getResult(),
-            'error' => $result->getErrors()
+            'error' => $result->getErrors(),
         ]);
     }
 

@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
+use AppDevPanel\Kernel\ProxyDecoratedCalls;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Stringable;
-use AppDevPanel\Kernel\ProxyDecoratedCalls;
 
 final class LoggerInterfaceProxy implements LoggerInterface
 {
@@ -15,9 +15,8 @@ final class LoggerInterfaceProxy implements LoggerInterface
 
     public function __construct(
         private readonly LoggerInterface $decorated,
-        private readonly LogCollector $collector
-    ) {
-    }
+        private readonly LogCollector $collector,
+    ) {}
 
     public function emergency(string|Stringable $message, array $context = []): void
     {
@@ -27,7 +26,7 @@ final class LoggerInterfaceProxy implements LoggerInterface
             LogLevel::EMERGENCY,
             $message,
             $context,
-            $callStack['file'] . ':' . $callStack['line']
+            $callStack['file'] . ':' . $callStack['line'],
         );
         $this->decorated->emergency($message, $context);
     }
@@ -48,7 +47,7 @@ final class LoggerInterfaceProxy implements LoggerInterface
             LogLevel::CRITICAL,
             $message,
             $context,
-            $callStack['file'] . ':' . $callStack['line']
+            $callStack['file'] . ':' . $callStack['line'],
         );
         $this->decorated->critical($message, $context);
     }

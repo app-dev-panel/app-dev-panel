@@ -6,13 +6,13 @@ import {FullScreenCircularProgress} from '@yiisoft/yii-dev-panel-sdk/Component/F
 import {DataTable} from '@yiisoft/yii-dev-panel-sdk/Component/Grid';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel-sdk/Component/JsonRenderer';
 import {regexpQuote} from '@yiisoft/yii-dev-panel-sdk/Helper/regexpQuote';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {useGetConfigurationQuery, useLazyGetObjectQuery} from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import {DataContext} from '@yiisoft/yii-dev-panel/Module/Inspector/Context/DataContext';
 import {LoaderContext, LoaderContextProvider} from '@yiisoft/yii-dev-panel/Module/Inspector/Context/LoaderContext';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useContext, useEffect, useMemo} from 'react';
 import {useSearchParams} from 'react-router-dom';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 const TempComponent = (params: GridRenderCellParams) => {
     const {loader} = useContext(LoaderContext);

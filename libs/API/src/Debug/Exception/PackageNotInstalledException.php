@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Debug\Exception;
 
@@ -14,7 +14,7 @@ final class PackageNotInstalledException extends Exception implements FriendlyEx
         private string $packageName,
         string $message = '',
         int $code = 0,
-        ?Throwable $previous = null
+        ?Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $previous);
     }

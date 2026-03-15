@@ -1,15 +1,15 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector\Web;
 
-use GuzzleHttp\Psr7\Message;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use AppDevPanel\Kernel\Collector\CollectorTrait;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use GuzzleHttp\Psr7\Message;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Yii\Http\Event\AfterRequest;
 use Yiisoft\Yii\Http\Event\BeforeRequest;
 
@@ -28,9 +28,8 @@ final class RequestCollector implements SummaryCollectorInterface
     private ?ResponseInterface $response = null;
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {
@@ -61,7 +60,7 @@ final class RequestCollector implements SummaryCollectorInterface
             'request' => $this->request,
             'requestRaw' => $requestRaw,
             'response' => $this->response,
-            'responseRaw' => $responseRaw
+            'responseRaw' => $responseRaw,
         ];
     }
 
@@ -103,11 +102,11 @@ final class RequestCollector implements SummaryCollectorInterface
                 'query' => $this->requestQuery,
                 'method' => $this->requestMethod,
                 'isAjax' => $this->requestIsAjax,
-                'userIp' => $this->userIp
+                'userIp' => $this->userIp,
             ],
             'response' => [
-                'statusCode' => $this->responseStatusCode
-            ]
+                'statusCode' => $this->responseStatusCode,
+            ],
         ];
     }
 

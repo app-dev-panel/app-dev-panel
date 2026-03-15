@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector\Web;
 
-use Yiisoft\Yii\Console\Event\ApplicationStartup;
 use AppDevPanel\Kernel\Collector\CollectorTrait;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use Yiisoft\Yii\Console\Event\ApplicationStartup;
 use Yiisoft\Yii\Http\Event\AfterEmit;
 use Yiisoft\Yii\Http\Event\AfterRequest;
 use Yiisoft\Yii\Http\Event\BeforeRequest;
@@ -22,9 +22,8 @@ final class WebAppInfoCollector implements SummaryCollectorInterface
     private float $requestProcessingTimeStopped = 0;
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {
@@ -38,7 +37,7 @@ final class WebAppInfoCollector implements SummaryCollectorInterface
             'applicationEmit' => $this->applicationProcessingTimeStopped - $this->requestProcessingTimeStopped,
             'preloadTime' => $this->requestProcessingTimeStarted - $this->applicationProcessingTimeStarted,
             'memoryPeakUsage' => memory_get_peak_usage(),
-            'memoryUsage' => memory_get_usage()
+            'memoryUsage' => memory_get_usage(),
         ];
     }
 
@@ -68,16 +67,16 @@ final class WebAppInfoCollector implements SummaryCollectorInterface
         return [
             'web' => [
                 'php' => [
-                    'version' => PHP_VERSION
+                    'version' => PHP_VERSION,
                 ],
                 'request' => [
                     'startTime' => $this->requestProcessingTimeStarted,
-                    'processingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted
+                    'processingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted,
                 ],
                 'memory' => [
-                    'peakUsage' => memory_get_peak_usage()
-                ]
-            ]
+                    'peakUsage' => memory_get_peak_usage(),
+                ],
+            ],
         ];
     }
 

@@ -1,16 +1,16 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Database;
 
+use AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Cache\NullCache;
 use Yiisoft\Db\Cache\SchemaCache;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Sqlite\Connection;
 use Yiisoft\Db\Sqlite\Driver;
-use AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider;
 
 final class DbSchemaProviderTest extends TestCase
 {
@@ -82,7 +82,7 @@ final class DbSchemaProviderTest extends TestCase
             ->createCommand()
             ->createTable('test', [
                 'id' => 'pk',
-                'email' => 'string'
+                'email' => 'string',
             ])
             ->execute();
 
@@ -91,7 +91,7 @@ final class DbSchemaProviderTest extends TestCase
             ->createTable('test2', [
                 'id' => 'pk',
                 'name' => 'string',
-                'flag' => 'integer'
+                'flag' => 'integer',
             ])
             ->execute();
 
@@ -101,7 +101,7 @@ final class DbSchemaProviderTest extends TestCase
                 'id' => 'pk',
                 'product' => 'string',
                 'price' => 'float',
-                'status' => 'integer'
+                'status' => 'integer',
             ])
             ->execute();
 
@@ -112,13 +112,13 @@ final class DbSchemaProviderTest extends TestCase
                 'test',
                 [
                     'id',
-                    'email'
+                    'email',
                 ],
                 [
                     [1, 'test1'],
                     [2, 'test2'],
-                    [3, 'test3']
-                ]
+                    [3, 'test3'],
+                ],
             )
             ->execute();
 
@@ -129,12 +129,12 @@ final class DbSchemaProviderTest extends TestCase
                 [
                     'id',
                     'name',
-                    'flag'
+                    'flag',
                 ],
                 [
                     [1, 'test1', 1],
-                    [2, 'test2', 0]
-                ]
+                    [2, 'test2', 0],
+                ],
             )
             ->execute();
 
@@ -146,7 +146,7 @@ final class DbSchemaProviderTest extends TestCase
                     'id',
                     'product',
                     'price',
-                    'status'
+                    'status',
                 ],
                 [
                     [1,  'test1',  1.1,   1],
@@ -158,8 +158,8 @@ final class DbSchemaProviderTest extends TestCase
                     [7,  'test7',  7.7,   1],
                     [8,  'test8',  8.8,   0],
                     [9,  'test9',  9.9,   1],
-                    [10, 'test10', 10.10, 0]
-                ]
+                    [10, 'test10', 10.10, 0],
+                ],
             )
             ->execute();
     }

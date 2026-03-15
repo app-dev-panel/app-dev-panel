@@ -1,12 +1,8 @@
 import {createContext, PropsWithChildren} from 'react';
 
-type State = {
-    loader: (objectId: string) => void;
-};
+type State = {loader: (objectId: string) => void};
 
-const initialState: State = {
-    loader: () => null,
-};
+const initialState: State = {loader: () => null};
 
 export const LoaderContext = createContext(initialState);
 export const LoaderContextProvider = ({loader, children}: PropsWithChildren<State>) => {

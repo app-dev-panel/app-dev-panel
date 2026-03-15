@@ -18,7 +18,6 @@ import {
     removeFavoriteUrl,
 } from '@yiisoft/yii-dev-panel-sdk/API/Application/ApplicationContext';
 import {useLazyGetDebugQuery} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Debug';
-import {Config} from '@yiisoft/yii-dev-panel-sdk/Config';
 import {useLazyGetGeneratorsQuery} from '@yiisoft/yii-dev-panel/Module/Gii/API/Gii';
 import {useLazyGetParametersQuery} from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import {useSelector} from '@yiisoft/yii-dev-panel/store';
@@ -34,11 +33,7 @@ export function IndexPage() {
     const baseUrl = useSelector((state) => state.application.baseUrl);
     const [url, setUrl] = useState<string>(String(baseUrl));
     // TODO remove direct access to modules API
-    const initialStatus = {
-        debug: false,
-        inspector: false,
-        gii: false,
-    };
+    const initialStatus = {debug: false, inspector: false, gii: false};
     const [status, setStatus] = useState<typeof initialStatus>(initialStatus);
     const favoriteUrls = useSelector((state) => state.application.favoriteUrls) as string[];
 

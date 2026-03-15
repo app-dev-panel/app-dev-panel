@@ -14,12 +14,8 @@ import React, {SyntheticEvent, useState} from 'react';
 const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={0} square {...props} />)(
     ({theme}) => ({
         border: `1px solid ${theme.palette.divider}`,
-        '&:not(:last-child)': {
-            borderBottom: 0,
-        },
-        '&:before': {
-            display: 'none',
-        },
+        '&:not(:last-child)': {borderBottom: 0},
+        '&:before': {display: 'none'},
     }),
 );
 
@@ -28,12 +24,8 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
 ))(({theme}) => ({
     backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, .05)' : 'rgba(0, 0, 0, .03)',
     flexDirection: 'row-reverse',
-    '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
-        transform: 'rotate(90deg)',
-    },
-    '& .MuiAccordionSummary-content': {
-        marginLeft: theme.spacing(1),
-    },
+    '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {transform: 'rotate(90deg)'},
+    '& .MuiAccordionSummary-content': {marginLeft: theme.spacing(1)},
 }));
 
 const AccordionDetails = styled(MuiAccordionDetails)(({theme}) => ({
@@ -41,9 +33,7 @@ const AccordionDetails = styled(MuiAccordionDetails)(({theme}) => ({
     borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
-type TransactionsPanelProps = {
-    tab: Keys;
-};
+type TransactionsPanelProps = {tab: Keys};
 const TransactionsPanel = ({tab}: TransactionsPanelProps) => {
     return (
         <TabPanel value={tab} sx={{padding: '0'}}>
@@ -55,10 +45,7 @@ const TransactionsPanel = ({tab}: TransactionsPanelProps) => {
         </TabPanel>
     );
 };
-type QueriesPanelProps = {
-    tab: Keys;
-    queries: Query[];
-};
+type QueriesPanelProps = {tab: Keys; queries: Query[]};
 const QueriesPanel = ({tab, queries}: QueriesPanelProps) => {
     const [expanded, setExpanded] = React.useState<number>(-1);
 
@@ -100,10 +87,7 @@ const QueriesPanel = ({tab, queries}: QueriesPanelProps) => {
     );
 };
 
-type QueryAction = {
-    action: 'query.start' | 'query.end';
-    time: number;
-};
+type QueryAction = {action: 'query.start' | 'query.end'; time: number};
 type Query = {
     sql: string;
     rawSql: string;
@@ -114,11 +98,7 @@ type Query = {
     rowsNumber: number;
 };
 type Keys = 'queries' | 'transactions';
-type DatabasePanelProps = {
-    data: {
-        [key in Keys]?: Query[] | any;
-    };
-};
+type DatabasePanelProps = {data: {[key in Keys]?: Query[] | any}};
 
 function getQueryTime(actions: QueryAction[]) {
     const start = actions.find((a) => a.action === 'query.start');

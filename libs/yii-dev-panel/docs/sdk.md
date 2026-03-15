@@ -1,108 +1,136 @@
 # SDK Package
 
 The SDK (`yii-dev-panel-sdk`) is a shared library used by both the main SPA and the toolbar.
-It provides API clients, reusable components, helpers, and type definitions.
+It provides API clients, reusable components, state management, helpers, and type definitions.
 
-## API Clients
+## Package Exports
+
+The SDK is published as an ESM package with path-based exports:
+```typescript
+import {createBaseQuery} from '@yiisoft/yii-dev-panel-sdk/API/createBaseQuery';
+import {JsonRenderer} from '@yiisoft/yii-dev-panel-sdk/Component/JsonRenderer';
+import {formatDate} from '@yiisoft/yii-dev-panel-sdk/Helper/formatDate';
+```
+
+## API Layer
 
 ### createBaseQuery
 
-Factory for RTK Query base queries. Reads the API base URL from Redux state dynamically:
+Factory for RTK Query base queries. Reads `application.baseUrl` from Redux state at request time, enabling dynamic backend connection:
 
 ```typescript
-import { createBaseQuery } from '@yiisoft/yii-dev-panel-sdk/API/createBaseQuery';
-
-const debugApi = createApi({
-    baseQuery: createBaseQuery('/debug/api'),
-    endpoints: (builder) => ({
-        getEntries: builder.query({ query: () => '/' }),
-    }),
-});
+export const createBaseQuery = (baseUrlAdditional: string) => {
+    return async (args, WebApi, extraOptions) => {
+        const baseUrl = (WebApi.getState() as any).application?.baseUrl || '';
+        const rawBaseQuery = fetchBaseQuery({
+            baseUrl: baseUrl.replace(/\/$/, '') + baseUrlAdditional,
+            referrerPolicy: 'no-referrer',
+            headers: {Accept: 'application/json', 'Content-Type': 'application/json'},
+        });
+        return rawBaseQuery(args, WebApi, extraOptions);
+    };
+};
 ```
 
 ### Debug API (`API/Debug/`)
 
-- `Debug.ts` — Debug entry types and interfaces
-- `Context.ts` — Debug context types
-- `api.ts` — RTK Query API slice for debug endpoints
+| File | Purpose |
+|------|---------|
+| `Debug.ts` | `debugApi` RTK Query API with endpoints: getDebug, getCollectorInfo, getObject |
+| `Context.ts` | `debugSlice` Redux slice (current entry, request IDs) + hooks |
+| `api.ts` | Exports `reducers` and `middlewares` for store composition |
+
+**DebugEntry type**: Comprehensive type covering all collector summary data (web, console, request, response, router, middleware, exception, db, logger, event, service, queue, etc.)
 
 ### Application API (`API/Application/`)
 
-- `api.ts` — RTK Query API slice for inspector endpoints
+| File | Purpose |
+|------|---------|
+| `ApplicationContext.tsx` | `ApplicationSlice` Redux slice with application settings |
+| `api.ts` | Exports `reducers` and `middlewares` for store composition |
+
+**ApplicationSlice state**:
+- `baseUrl`: Backend URL (user-configurable)
+- `preferredPageSize`: Default page size for grids
+- `toolbarOpen`: Toolbar visibility
+- `favoriteUrls`: User's bookmarked URLs
+- `autoLatest`: Auto-select latest debug entry
+- `iframeHeight`: Configurable iframe height
 
 ### Middleware
 
-- `errorNotificationMiddleware.ts` — Shows error notifications on API failures
-- `consoleLogActionsMiddleware.ts` — Logs Redux actions to console (dev mode)
+| File | Purpose |
+|------|---------|
+| `errorNotificationMiddleware.ts` | Dispatches notification on any rejected RTK Query action |
+| `consoleLogActionsMiddleware.ts` | Logs all Redux actions to browser console (dev only) |
 
 ## Components
 
-### ServerSentEventsObserver
+### SSE (Server-Sent Events)
 
-Class that manages SSE connection lifecycle:
+| Component | Purpose |
+|-----------|---------|
+| `ServerSentEventsObserver.ts` | Observer pattern class managing EventSource lifecycle (connect, subscribe, unsubscribe, close) |
+| `useServerSentEvents.ts` | React hook wrapping the observer with auto-cleanup |
 
+Usage:
 ```typescript
-import { ServerSentEventsObserver } from '@yiisoft/yii-dev-panel-sdk/Component/ServerSentEventsObserver';
-
-const observer = new ServerSentEventsObserver('/debug/api/event-stream');
-observer.subscribe((event) => {
-    // Handle new debug entries
-});
+useServerSentEvents(backendUrl, (event: MessageEvent<EventTypes>) => {
+    // event.type === 'debug-updated'
+}, true);
 ```
 
-### useServerSentEvents
+### UI Components
 
-React hook wrapper around `ServerSentEventsObserver`:
-
-```typescript
-const { connected, lastEvent } = useServerSentEvents('/debug/api/event-stream');
-```
+| Component | Purpose |
+|-----------|---------|
+| `JsonRenderer.tsx` | JSON display with `@textea/json-viewer` |
+| `CodeHighlight.tsx` | Syntax highlighting via `react-syntax-highlighter` |
+| `MenuPanel.tsx` | Sidebar navigation panel |
+| `Grid.tsx` | MUI DataGrid wrapper with common configuration |
+| `Notifications.tsx` | Toast notification reducer and display |
 
 ## Helpers
 
+30+ utility functions in `Helper/`:
+
 | Helper | Purpose |
 |--------|---------|
-| `formatDate.ts` | Date/time formatting |
-| `formatBytes.ts` | Byte size formatting (KB, MB, etc.) |
+| `formatDate.ts` | Date/time formatting with `date-fns` |
+| `formatBytes.ts` | Byte size formatting (KB, MB, GB) |
 | `objectString.ts` | PHP object string representation |
 | `classMatcher.ts` | PHP class name matching and highlighting |
 | `classMethodConcater.ts` | Format `Class::method` strings |
 | `filePathParser.ts` | Parse and link file paths |
 | `callableSerializer.ts` | Serialize PHP callables for display |
 | `tagMatcher.ts` | Match and highlight DI tags |
-| `buttonColor.ts` | HTTP method → color mapping |
+| `buttonColor.ts` | HTTP method → MUI color mapping |
 | `collectors.ts` | Collector name utilities |
-| `collectorsTotal.ts` | Calculate collector totals |
-| `debugEntry.ts` | Debug entry type utilities |
+| `collectorsTotal.ts` | Calculate collector totals from summary |
+| `debugEntry.ts` | Debug entry type detection (web vs console) |
 | `regexpQuote.ts` | Escape regex special characters |
 | `scrollToAnchor.ts` | Smooth scroll to page anchors |
-| `queue.ts` | Simple queue implementation |
-| `dispatchWindowEvent.ts` | Cross-window event dispatching |
+| `queue.ts` | Simple FIFO queue |
+| `dispatchWindowEvent.ts` | Cross-window event dispatching (postMessage) |
 | `IFrameWrapper.ts` | iFrame communication utilities |
 
 ## Adapters
 
 ### MUI Adapter (`Adapter/mui/`)
-Type extensions for Material-UI components.
+Type extensions for Material-UI components (column definitions, grid props).
 
 ### Yii Adapter (`Adapter/yii/`)
-Input type matcher for Yii-specific form field types.
+Input type matcher — maps Yii attribute types to HTML input types for form generation.
 
 ### Yup Adapter (`Adapter/yup/`)
-Yup validation schema generators for Yii validator rules.
+Yup validation schema generators — converts Yii validator rules to Yup schemas for React Hook Form.
 
 ## Types
 
-### Module Types (`Types/Module.types.ts`)
-```typescript
-interface ModuleInterface {
-    routes: RouteObject[];
-    standaloneModule?: boolean;
-}
-```
-
-### Gii Types (`Types/Gii/`)
-Type definitions for code generation interfaces.
+| File | Purpose |
+|------|---------|
+| `Module.types.ts` | `ModuleInterface` — contract for feature modules |
+| `Gii/index.ts` | `GiiGeneratorAttribute` — Gii generator attribute types |
 
 ## Configuration
 
@@ -114,7 +142,6 @@ export const Config = {
 };
 ```
 
-## Store Slices
-
-Shared Redux slices used across modules. Includes application state
-(base URL, settings) and debug entry state.
+Environment variables:
+- `VITE_BUILD_ID`: Git short hash or CI build ID
+- `VITE_ENV`: `dev`, `github`, or custom environment

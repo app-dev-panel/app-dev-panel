@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Event;
 
+use AppDevPanel\Kernel\Event\ProxyMethodCallEvent;
 use PHPUnit\Framework\TestCase;
 use stdClass;
-use AppDevPanel\Kernel\Event\ProxyMethodCallEvent;
 
 class ProxyMethodCallEventTest extends TestCase
 {

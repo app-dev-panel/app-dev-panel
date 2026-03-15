@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit;
 
+use AppDevPanel\Kernel\FlattenException;
 use Closure;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use AppDevPanel\Kernel\FlattenException;
 
 final class FlattenExceptionTest extends TestCase
 {
@@ -104,7 +104,7 @@ final class FlattenExceptionTest extends TestCase
             '0',
             '',
             INF,
-            NAN
+            NAN,
         ]);
 
         $flattened = new FlattenException($exception);
@@ -126,7 +126,7 @@ final class FlattenExceptionTest extends TestCase
         $this->assertSame($args[0], 'object');
         $this->assertTrue(
             Closure::class === $args[1] || is_subclass_of($args[1], '\\' . Closure::class),
-            'Expect object class name to be Closure or a subclass of Closure.'
+            'Expect object class name to be Closure or a subclass of Closure.',
         );
 
         $this->assertSame(['array', [['integer', 1], ['integer', 2]]], $array[$i++]);

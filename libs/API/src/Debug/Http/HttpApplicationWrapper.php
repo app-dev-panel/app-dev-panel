@@ -1,21 +1,20 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Debug\Http;
 
+use AppDevPanel\Api\Debug\Middleware\MiddlewareDispatcherMiddleware;
 use Closure;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-use AppDevPanel\Api\Debug\Middleware\MiddlewareDispatcherMiddleware;
 use Yiisoft\Yii\Http\Application;
 
 final class HttpApplicationWrapper
 {
     public function __construct(
         private MiddlewareDispatcher $middlewareDispatcher,
-        private array $middlewareDefinitions
-    ) {
-    }
+        private array $middlewareDefinitions,
+    ) {}
 
     public function wrap(Application $application): Application
     {
@@ -31,8 +30,8 @@ final class HttpApplicationWrapper
                     ...$middlewareDefinitions,
                     [
                         'class' => MiddlewareDispatcherMiddleware::class,
-                        '$middlewareDispatcher' => $application->dispatcher
-                    ]
+                        '$middlewareDispatcher' => $application->dispatcher,
+                    ],
                 ]);
 
                 return new Application($middlewareDispatcher, $application->eventDispatcher);
@@ -40,7 +39,7 @@ final class HttpApplicationWrapper
                 //                return $application->dispatcher = $middlewareDispatcher;
             },
             null,
-            $application
+            $application,
         );
 
         return $closure($application);

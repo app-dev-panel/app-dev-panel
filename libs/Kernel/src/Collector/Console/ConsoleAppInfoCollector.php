@@ -1,17 +1,17 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector\Console;
 
+use AppDevPanel\Kernel\Collector\CollectorTrait;
+use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
+use AppDevPanel\Kernel\Collector\TimelineCollector;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Yiisoft\Yii\Console\Event\ApplicationShutdown;
 use Yiisoft\Yii\Console\Event\ApplicationStartup;
-use AppDevPanel\Kernel\Collector\CollectorTrait;
-use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
-use AppDevPanel\Kernel\Collector\TimelineCollector;
 
 final class ConsoleAppInfoCollector implements SummaryCollectorInterface
 {
@@ -23,9 +23,8 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
     private float $requestProcessingTimeStopped = 0;
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {
@@ -39,7 +38,7 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
             'applicationEmit' => $this->applicationProcessingTimeStopped - $this->requestProcessingTimeStopped,
             'requestProcessingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted,
             'memoryPeakUsage' => memory_get_peak_usage(),
-            'memoryUsage' => memory_get_usage()
+            'memoryUsage' => memory_get_usage(),
         ];
     }
 
@@ -77,16 +76,16 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
         return [
             'console' => [
                 'php' => [
-                    'version' => PHP_VERSION
+                    'version' => PHP_VERSION,
                 ],
                 'request' => [
                     'startTime' => $this->requestProcessingTimeStarted,
-                    'processingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted
+                    'processingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted,
                 ],
                 'memory' => [
-                    'peakUsage' => memory_get_peak_usage()
-                ]
-            ]
+                    'peakUsage' => memory_get_peak_usage(),
+                ],
+            ],
         ];
     }
 

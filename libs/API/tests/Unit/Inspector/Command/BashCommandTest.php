@@ -1,20 +1,20 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Command;
 
-use PHPUnit\Framework\TestCase;
-use Yiisoft\Aliases\Aliases;
 use AppDevPanel\Api\Inspector\Command\BashCommand;
 use AppDevPanel\Api\Inspector\CommandResponse;
+use PHPUnit\Framework\TestCase;
+use Yiisoft\Aliases\Aliases;
 
 final class BashCommandTest extends TestCase
 {
     public function testSuccess(): void
     {
         $aliases = new Aliases([
-            '@root' => __DIR__
+            '@root' => __DIR__,
         ]);
         $command = new BashCommand($aliases, ['echo', 'test']);
 
@@ -28,7 +28,7 @@ final class BashCommandTest extends TestCase
     public function testError(): void
     {
         $aliases = new Aliases([
-            '@root' => dirname(__DIR__, 3) . '/Support/Application'
+            '@root' => dirname(__DIR__, 3) . '/Support/Application',
         ]);
         $command = new BashCommand($aliases, ['bash', 'fail.sh', '1']);
 

@@ -1,15 +1,15 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Debug\Middleware;
 
+use AppDevPanel\Kernel\DebuggerIdGenerator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
-use AppDevPanel\Kernel\DebuggerIdGenerator;
 
 /**
  * Adds debug headers to response. Information from these headers may be used to request information about
@@ -19,9 +19,8 @@ final class DebugHeaders implements MiddlewareInterface
 {
     public function __construct(
         private DebuggerIdGenerator $idGenerator,
-        private UrlGeneratorInterface $urlGenerator
-    ) {
-    }
+        private UrlGeneratorInterface $urlGenerator,
+    ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
@@ -11,9 +11,8 @@ final class ServiceCollector implements SummaryCollectorInterface
     private array $items = [];
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {
@@ -32,7 +31,7 @@ final class ServiceCollector implements SummaryCollectorInterface
         string $status,
         ?object $error,
         float $timeStart,
-        float $timeEnd
+        float $timeEnd,
     ): void {
         if (!$this->isActive()) {
             return;
@@ -47,7 +46,7 @@ final class ServiceCollector implements SummaryCollectorInterface
             'status' => $status,
             'error' => $error,
             'timeStart' => $timeStart,
-            'timeEnd' => $timeEnd
+            'timeEnd' => $timeEnd,
         ];
         $this->timelineCollector->collect($this, count($this->items));
     }
@@ -59,8 +58,8 @@ final class ServiceCollector implements SummaryCollectorInterface
         }
         return [
             'service' => [
-                'total' => count($this->items)
-            ]
+                'total' => count($this->items),
+            ],
         ];
     }
 

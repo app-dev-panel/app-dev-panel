@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Helper;
 
+use AppDevPanel\Kernel\Helper\BacktraceIgnoreMatcher;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use stdClass;
-use AppDevPanel\Kernel\Helper\BacktraceIgnoreMatcher;
 
 final class BacktraceIgnoreMatcherTest extends TestCase
 {
@@ -37,7 +37,7 @@ final class BacktraceIgnoreMatcherTest extends TestCase
 
         $this->assertTrue(BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, [preg_quote($file)]));
         $this->assertTrue(BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, [
-            preg_quote(dirname($file) . DIRECTORY_SEPARATOR) . '*'
+            preg_quote(dirname($file) . DIRECTORY_SEPARATOR) . '*',
         ]));
         $this->assertFalse(BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, [preg_quote(__FILE__)]));
     }

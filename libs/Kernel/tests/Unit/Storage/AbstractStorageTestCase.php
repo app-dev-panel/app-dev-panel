@@ -1,17 +1,17 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Storage;
 
-use PHPUnit\Framework\TestCase;
-use stdClass;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Dumper;
 use AppDevPanel\Kernel\Storage\MemoryStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use PHPUnit\Framework\TestCase;
+use stdClass;
 
 use function json_decode;
 

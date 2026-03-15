@@ -1,17 +1,17 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Debug\Middleware;
 
+use AppDevPanel\Adapter\Yiisoft\DebuggerIdGenerator;
+use AppDevPanel\Api\Debug\Middleware\DebugHeaders;
 use HttpSoft\Message\Response;
 use HttpSoft\Message\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
-use AppDevPanel\Api\Debug\Middleware\DebugHeaders;
-use AppDevPanel\Adapter\Yiisoft\DebuggerIdGenerator;
 
 final class DebugHeadersTest extends TestCase
 {
@@ -21,7 +21,7 @@ final class DebugHeadersTest extends TestCase
         $urlGenerator
             ->method('generate')
             ->willReturnCallback(
-                static fn(string $route, array $parameters) => $route . '?' . http_build_query($parameters)
+                static fn(string $route, array $parameters) => $route . '?' . http_build_query($parameters),
             );
         $idGenerator = new DebuggerIdGenerator();
         $expectedId = $idGenerator->getId();

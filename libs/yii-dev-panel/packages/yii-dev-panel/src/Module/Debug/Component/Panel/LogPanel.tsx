@@ -3,19 +3,10 @@ import {Alert, AlertTitle, Link} from '@mui/material';
 import Box from '@mui/material/Box';
 import {parseFilePathWithLineAnchor} from '@yiisoft/yii-dev-panel-sdk/Helper/filePathParser';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel/Module/Debug/Component/JsonRenderer';
-import React from 'react';
 
 type Level = 'error' | 'info' | 'debug';
-type LogEntry = {
-    context: object;
-    level: Level;
-    line: string;
-    message: string;
-    time: number;
-};
-type LogPanelProps = {
-    data: LogEntry[];
-};
+type LogEntry = {context: object; level: Level; line: string; message: string; time: number};
+type LogPanelProps = {data: LogEntry[]};
 
 export const LogPanel = ({data}: LogPanelProps) => {
     if (!data || data.length === 0) {

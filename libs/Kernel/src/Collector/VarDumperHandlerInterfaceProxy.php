@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
-use Yiisoft\VarDumper\HandlerInterface;
 use AppDevPanel\Kernel\ProxyDecoratedCalls;
+use Yiisoft\VarDumper\HandlerInterface;
 
 final class VarDumperHandlerInterfaceProxy implements HandlerInterface
 {
@@ -13,9 +13,8 @@ final class VarDumperHandlerInterfaceProxy implements HandlerInterface
 
     public function __construct(
         private readonly HandlerInterface $decorated,
-        private readonly VarDumperCollector $collector
-    ) {
-    }
+        private readonly VarDumperCollector $collector,
+    ) {}
 
     public function handle(mixed $variable, int $depth, bool $highlight = false): void
     {

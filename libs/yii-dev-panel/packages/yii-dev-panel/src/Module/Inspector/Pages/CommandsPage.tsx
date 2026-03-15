@@ -2,6 +2,7 @@ import {EmojiObjects} from '@mui/icons-material';
 import {Button, CircularProgress, Link, Typography} from '@mui/material';
 import Box from '@mui/material/Box';
 import {InfoBox} from '@yiisoft/yii-dev-panel-sdk/Component/InfoBox';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {
     CommandType,
     useLazyGetCommandsQuery,
@@ -9,16 +10,9 @@ import {
 } from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import {ResultDialog} from '@yiisoft/yii-dev-panel/Module/Inspector/Component/Command/ResultDialog';
 import {useEffect, useState} from 'react';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 type GroupedCommands = Record<string, CommandType[]>;
-type CommandStatusMap = Record<
-    string,
-    {
-        isLoading: boolean;
-        response: null | any;
-    }
->;
+type CommandStatusMap = Record<string, {isLoading: boolean; response: null | any}>;
 export const CommandsPage = () => {
     const [groupedCommands, setGroupedCommands] = useState<GroupedCommands>({});
     const [commandStatus, setCommandStatus] = useState<CommandStatusMap>({});
@@ -40,10 +34,7 @@ export const CommandsPage = () => {
                     } else {
                         groupedCommands[command.group] = [command];
                     }
-                    commandStatus[command.name] = {
-                        isLoading: false,
-                        response: null,
-                    };
+                    commandStatus[command.name] = {isLoading: false, response: null};
                 });
                 setCommandStatus(commandStatus);
                 setGroupedCommands(groupedCommands);

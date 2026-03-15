@@ -1,18 +1,18 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
-declare(ticks = 1);
+declare(ticks=1);
 
 namespace AppDevPanel\Cli\Command;
 
+use AppDevPanel\Kernel\DebugServer\Connection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Yiisoft\Yii\Console\ExitCode;
-use AppDevPanel\Kernel\DebugServer\Connection;
 
 final class DebugServerCommand extends Command
 {
@@ -24,7 +24,7 @@ final class DebugServerCommand extends Command
 
     public function __construct(
         private readonly string $address = '0.0.0.0',
-        private readonly int $port = 8890
+        private readonly int $port = 8890,
     ) {
         parent::__construct();
     }
@@ -33,7 +33,7 @@ final class DebugServerCommand extends Command
     {
         $this
             ->setHelp(
-                'In order to access server from remote machines use 0.0.0.0:8000. That is especially useful when running server in a virtual machine.'
+                'In order to access server from remote machines use 0.0.0.0:8000. That is especially useful when running server in a virtual machine.',
             )
             ->addOption('address', 'a', InputOption::VALUE_OPTIONAL, 'Host to serve at', $this->address)
             ->addOption('port', 'p', InputOption::VALUE_OPTIONAL, 'Port to serve at', $this->port)
@@ -75,7 +75,7 @@ final class DebugServerCommand extends Command
             $type = match ($data[0]) {
                 Connection::MESSAGE_TYPE_VAR_DUMPER => 'VarDumper',
                 Connection::MESSAGE_TYPE_LOGGER => 'Logger',
-                default => 'Plain text'
+                default => 'Plain text',
             };
 
             $io->block($data[1], $type);

@@ -38,6 +38,7 @@ import {CollectorsMap} from '@yiisoft/yii-dev-panel-sdk/Helper/collectors';
 import {getCollectedCountByCollector} from '@yiisoft/yii-dev-panel-sdk/Helper/collectorsTotal';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@yiisoft/yii-dev-panel-sdk/Helper/debugEntry';
 import {formatDate} from '@yiisoft/yii-dev-panel-sdk/Helper/formatDate';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import ModuleLoader from '@yiisoft/yii-dev-panel/Application/Pages/RemoteComponent';
 import {DatabasePanel} from '@yiisoft/yii-dev-panel/Module/Debug/Component/Panel/DatabasePanel';
 import {EventPanel} from '@yiisoft/yii-dev-panel/Module/Debug/Component/Panel/EventPanel';
@@ -60,7 +61,6 @@ import {ErrorBoundary} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
 import {Outlet} from 'react-router';
 import {useSearchParams} from 'react-router-dom';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 function parseCollectorName(text: string) {
     return text
@@ -79,10 +79,7 @@ function parseCollectorName(text: string) {
         .replace('Yiisoft\\Yii\\View\\Renderer\\Debug\\', '');
 }
 
-type CollectorDataProps = {
-    collectorData: any;
-    selectedCollector: string;
-};
+type CollectorDataProps = {collectorData: any; selectedCollector: string};
 function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
     const pages: {[name: string]: (data: any) => JSX.Element} = {
@@ -145,10 +142,7 @@ function HttpRequestError({error}: {error: any}) {
     );
 }
 
-type DebugEntryAutocompleteProps = {
-    data: DebugEntry[] | undefined;
-    onChange: (data: DebugEntry | null) => void;
-};
+type DebugEntryAutocompleteProps = {data: DebugEntry[] | undefined; onChange: (data: DebugEntry | null) => void};
 const DebugEntryAutocomplete = ({data, onChange}: DebugEntryAutocompleteProps) => {
     const debugEntry = useDebugEntry();
 

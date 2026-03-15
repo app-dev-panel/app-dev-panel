@@ -1,9 +1,16 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Debug\Controller;
 
+use AppDevPanel\Api\Debug\Exception\NotFoundException;
+use AppDevPanel\Api\Debug\Exception\PackageNotInstalledException;
+use AppDevPanel\Api\Debug\HtmlViewProviderInterface;
+use AppDevPanel\Api\Debug\ModuleFederationProviderInterface;
+use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\ServerSentEventsStream;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -13,13 +20,6 @@ use Yiisoft\Assets\AssetPublisherInterface;
 use Yiisoft\DataResponse\DataResponse;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
 use Yiisoft\Router\CurrentRoute;
-use AppDevPanel\Api\Debug\Exception\NotFoundException;
-use AppDevPanel\Api\Debug\Exception\PackageNotInstalledException;
-use AppDevPanel\Api\Debug\HtmlViewProviderInterface;
-use AppDevPanel\Api\Debug\ModuleFederationProviderInterface;
-use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
-use AppDevPanel\Api\ServerSentEventsStream;
-use AppDevPanel\Kernel\Storage\StorageInterface;
 use Yiisoft\Yii\View\ViewRenderer;
 
 /**
@@ -29,9 +29,8 @@ final class DebugController
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-        private CollectorRepositoryInterface $collectorRepository
-    ) {
-    }
+        private CollectorRepositoryInterface $collectorRepository,
+    ) {}
 
     /**
      * List of requests processed.
@@ -56,7 +55,7 @@ final class DebugController
     public function view(
         CurrentRoute $currentRoute,
         ServerRequestInterface $serverRequest,
-        ContainerInterface $container
+        ContainerInterface $container,
     ): ResponseInterface {
         $data = $this->collectorRepository->getDetail($currentRoute->getArgument('id'));
 
@@ -64,7 +63,7 @@ final class DebugController
         if ($collectorClass !== null) {
             $data = $data[$collectorClass] ?? throw new NotFoundException(sprintf(
                 "Requested collector doesn't exist: %s.",
-                $collectorClass
+                $collectorClass,
             ));
         }
         if (is_subclass_of($collectorClass, HtmlViewProviderInterface::class)) {
@@ -107,7 +106,7 @@ final class DebugController
     {
         $data = $this->collectorRepository->getObject(
             $currentRoute->getArgument('id'),
-            $currentRoute->getArgument('objectId')
+            $currentRoute->getArgument('objectId'),
         );
 
         if (null === $data) {
@@ -116,14 +115,12 @@ final class DebugController
 
         return $this->responseFactory->createResponse([
             'class' => $data[0],
-            'value' => $data[1]
+            'value' => $data[1],
         ]);
     }
 
-    public function eventStream(
-        StorageInterface $storage,
-        ResponseFactoryInterface $responseFactory
-    ): ResponseInterface {
+    public function eventStream(StorageInterface $storage, ResponseFactoryInterface $responseFactory): ResponseInterface
+    {
         // TODO implement OS signal handling
         $compareFunction = static function () use ($storage) {
             $read = $storage->read(StorageInterface::TYPE_SUMMARY, null);
@@ -142,14 +139,14 @@ final class DebugController
                 $compareFunction,
                 &$hash,
                 &$retries,
-                $maxRetries
+                $maxRetries,
             ) {
                 $newHash = $compareFunction();
 
                 if ($hash !== $newHash) {
                     $response = [
                         'type' => 'debug-updated',
-                        'payload' => []
+                        'payload' => [],
                     ];
 
                     $buffer[] = json_encode($response);
@@ -173,7 +170,7 @@ final class DebugController
     private function createJsPanelResponse(
         ContainerInterface $container,
         string $collectorClass,
-        mixed $data
+        mixed $data,
     ): DataResponse {
         $asset = $collectorClass::getAsset();
         $module = $asset->getModule();
@@ -190,7 +187,7 @@ final class DebugController
             throw new PackageNotInstalledException('yiisoft/assets', sprintf(
                 '"%s" or "%s" is not defined in the dependency container.',
                 AssetManager::class,
-                AssetPublisherInterface::class
+                AssetPublisherInterface::class,
             ));
         }
         /**
@@ -213,14 +210,14 @@ final class DebugController
             'url' => $urls[0],
             'module' => $module,
             'scope' => $scope,
-            'data' => $data
+            'data' => $data,
         ]);
     }
 
     private function createHtmlPanelResponse(
         ContainerInterface $container,
         string $collectorClass,
-        mixed $data
+        mixed $data,
     ): DataResponse {
         if (!class_exists(ViewRenderer::class) || !$container->has(ViewRenderer::class)) {
             /**
@@ -228,7 +225,7 @@ final class DebugController
              */
             throw new PackageNotInstalledException('yiisoft/yii-view', sprintf(
                 '"%s" is not defined in the dependency container.',
-                ViewRenderer::class
+                ViewRenderer::class,
             ));
         }
         $viewRenderer = $container->get(ViewRenderer::class);
@@ -237,7 +234,7 @@ final class DebugController
 
         return $viewRenderer->withViewPath($viewDirectory)->renderPartial($viewPath, [
             'data' => $data,
-            'collectorClass' => $collectorClass
+            'collectorClass' => $collectorClass,
         ]);
     }
 }

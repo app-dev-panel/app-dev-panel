@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
@@ -12,7 +12,7 @@ class ServiceMethodProxy extends ServiceProxy
         string $service,
         object $instance,
         private readonly array $methods,
-        ContainerProxyConfig $config
+        ContainerProxyConfig $config,
     ) {
         parent::__construct($service, $instance, $config);
     }

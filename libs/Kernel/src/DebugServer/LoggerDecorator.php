@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\DebugServer;
 
@@ -16,7 +16,7 @@ final class LoggerDecorator implements LoggerInterface
     public Connection $connection;
 
     public function __construct(
-        private LoggerInterface $decorated
+        private LoggerInterface $decorated,
     ) {
         $this->connection = Connection::create();
     }
@@ -25,7 +25,7 @@ final class LoggerDecorator implements LoggerInterface
     {
         $this->connection->broadcast(Connection::MESSAGE_TYPE_LOGGER, VarDumper::create([
             'message' => $message,
-            'context' => $context
+            'context' => $context,
         ])->asJson(false, 1));
         $this->decorated->log($level, $message, $context);
     }

@@ -1,10 +1,7 @@
 import {createServerSentEventsObserver} from '@yiisoft/yii-dev-panel-sdk/Component/ServerSentEventsObserver';
 import {useEffect, useRef} from 'react';
 
-type DebugUpdatedType = {
-    type: EventTypesEnum.DebugUpdated;
-    payload: {};
-};
+type DebugUpdatedType = {type: EventTypesEnum.DebugUpdated; payload: {}};
 
 export enum EventTypesEnum {
     DebugUpdated = 'debug-updated',

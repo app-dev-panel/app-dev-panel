@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
@@ -20,9 +20,8 @@ final class ContainerProxyConfig
         private ?EventDispatcherInterface $dispatcher = null,
         private ?ServiceCollector $collector = null,
         private ?string $proxyCachePath = null,
-        private int $logLevel = ContainerInterfaceProxy::LOG_NOTHING
-    ) {
-    }
+        private int $logLevel = ContainerInterfaceProxy::LOG_NOTHING,
+    ) {}
 
     public function activate(): self
     {

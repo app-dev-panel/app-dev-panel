@@ -27,9 +27,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
         duration: theme.transitions.duration.leavingScreen,
     }),
     width: `calc(${theme.spacing(7)} + 1px)`,
-    [theme.breakpoints.up('sm')]: {
-        width: `calc(${theme.spacing(8)} + 1px)`,
-    },
+    [theme.breakpoints.up('sm')]: {width: `calc(${theme.spacing(8)} + 1px)`},
 });
 
 const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})(({theme, open}) => ({
@@ -37,73 +35,33 @@ const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})
     flexShrink: 0,
     whiteSpace: 'nowrap',
     boxSizing: 'border-box',
-    ...(open && {
-        classes: 'opened',
-    }),
-    ...(open && {
-        ...openedMixin(theme),
-        '& .MuiDrawer-paper': openedMixin(theme),
-    }),
-    ...(!open && {
-        ...closedMixin(theme),
-        '& .MuiDrawer-paper': closedMixin(theme),
-    }),
+    ...(open && {classes: 'opened'}),
+    ...(open && {...openedMixin(theme), '& .MuiDrawer-paper': openedMixin(theme)}),
+    ...(!open && {...closedMixin(theme), '& .MuiDrawer-paper': closedMixin(theme)}),
 }));
 
-export type LinkProps = {
-    name: string;
-    text: string;
-    icon: React.ReactElement;
-    href: string;
-    badge?: string | number;
-};
+export type LinkProps = {name: string; text: string; icon: React.ReactElement; href: string; badge?: string | number};
 
 const drawerStyles = {
     flex: '0 1 auto',
-    '&.drawer-opened .MuiListItemButton-root .MuiListItemIcon-root': {
-        mr: 1,
-    },
-    '& .MuiListItemButton-root .MuiListItemText-root': {
-        display: 'none',
-    },
-    '&.drawer-opened .MuiListItemButton-root .MuiListItemText-root': {
-        display: 'inline-block',
-    },
-    '& .MuiListItemButton-root .menu-opener': {
-        transition: 'transform 0.3s',
-    },
-    '&.drawer-opened .MuiListItemButton-root .menu-opener': {
-        transform: 'rotate(180deg)',
-    },
+    '&.drawer-opened .MuiListItemButton-root .MuiListItemIcon-root': {mr: 1},
+    '& .MuiListItemButton-root .MuiListItemText-root': {display: 'none'},
+    '&.drawer-opened .MuiListItemButton-root .MuiListItemText-root': {display: 'inline-block'},
+    '& .MuiListItemButton-root .menu-opener': {transition: 'transform 0.3s'},
+    '&.drawer-opened .MuiListItemButton-root .menu-opener': {transform: 'rotate(180deg)'},
     zIndex: 'auto',
 };
 
-type MenuPanelListProps = {
-    onClick: () => void;
-    linkProps: LinkProps[];
-    activeLink?: string;
-};
+type MenuPanelListProps = {onClick: () => void; linkProps: LinkProps[]; activeLink?: string};
 
 const MenuPanelList = React.memo((props: MenuPanelListProps) => {
     const {onClick, linkProps, activeLink} = props;
     return (
         <List>
             <ListItem disablePadding sx={{display: 'block'}}>
-                <ListItemButton
-                    onClick={onClick}
-                    sx={{
-                        minHeight: 36,
-                        justifyContent: 'flex-end',
-                        px: 1,
-                    }}
-                >
+                <ListItemButton onClick={onClick} sx={{minHeight: 36, justifyContent: 'flex-end', px: 1}}>
                     <ListItemIcon
-                        sx={{
-                            minWidth: 0,
-                            margin: 'auto',
-                            transition: 'margin 0.3s',
-                            justifyContent: 'center',
-                        }}
+                        sx={{minWidth: 0, margin: 'auto', transition: 'margin 0.3s', justifyContent: 'center'}}
                     >
                         <ChevronRight className="menu-opener" />
                     </ListItemIcon>
@@ -114,20 +72,10 @@ const MenuPanelList = React.memo((props: MenuPanelListProps) => {
                     <ListItemButton
                         component={Link}
                         href={link.href}
-                        sx={{
-                            minHeight: 36,
-                            justifyContent: 'center',
-                            px: 1,
-                            overflowX: 'hidden',
-                        }}
+                        sx={{minHeight: 36, justifyContent: 'center', px: 1, overflowX: 'hidden'}}
                     >
                         <ListItemIcon
-                            sx={{
-                                minWidth: 0,
-                                mr: 'auto',
-                                transition: 'margin 0.3s',
-                                justifyContent: 'center',
-                            }}
+                            sx={{minWidth: 0, mr: 'auto', transition: 'margin 0.3s', justifyContent: 'center'}}
                         >
                             <Badge color="info" badgeContent={link.badge || undefined}>
                                 <Avatar
@@ -154,11 +102,7 @@ const MenuPanelList = React.memo((props: MenuPanelListProps) => {
     );
 });
 
-type MenuPanelProps = {
-    open?: boolean;
-    links: LinkProps[];
-    activeLink?: string;
-};
+type MenuPanelProps = {open?: boolean; links: LinkProps[]; activeLink?: string};
 const MenuPanel = React.memo((props: PropsWithChildren<MenuPanelProps>) => {
     const {links, children, activeLink} = props;
 
@@ -180,9 +124,7 @@ const MenuPanel = React.memo((props: PropsWithChildren<MenuPanelProps>) => {
                 className={open ? 'drawer-opened' : ''}
                 open={open}
                 container={containerRef.current}
-                PaperProps={{
-                    sx: {position: 'relative', zIndex: 'auto'},
-                }}
+                PaperProps={{sx: {position: 'relative', zIndex: 'auto'}}}
                 sx={drawerStyles}
             >
                 <MenuPanelList onClick={toggleHandler} linkProps={links} activeLink={activeLink} />

@@ -1,4 +1,7 @@
 import ListIcon from '@mui/icons-material/List';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import WebAssetIcon from '@mui/icons-material/WebAsset';
+import WebAssetOffIcon from '@mui/icons-material/WebAssetOff';
 import {ButtonGroup, Paper, Portal, useTheme} from '@mui/material';
 import Box from '@mui/material/Box';
 import SpeedDial from '@mui/material/SpeedDial';
@@ -8,6 +11,7 @@ import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@yiisof
 import {debugApi, DebugEntry, useGetDebugQuery} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Debug';
 import {YiiIcon} from '@yiisoft/yii-dev-panel-sdk/Component/SvgIcon/YiiIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@yiisoft/yii-dev-panel-sdk/Helper/debugEntry';
+import {IFrameWrapper} from '@yiisoft/yii-dev-panel-sdk/Helper/IFrameWrapper';
 import {DebugEntriesListModal} from '@yiisoft/yii-dev-toolbar/Module/Toolbar/Component/DebugEntriesListModal';
 import {CommandItem} from '@yiisoft/yii-dev-toolbar/Module/Toolbar/Component/Toolbar/Console/CommandItem';
 import {DateItem} from '@yiisoft/yii-dev-toolbar/Module/Toolbar/Component/Toolbar/DateItem';
@@ -19,20 +23,13 @@ import {ValidatorItem} from '@yiisoft/yii-dev-toolbar/Module/Toolbar/Component/T
 import {RequestItem} from '@yiisoft/yii-dev-toolbar/Module/Toolbar/Component/Toolbar/Web/RequestItem';
 import {RouterItem} from '@yiisoft/yii-dev-toolbar/Module/Toolbar/Component/Toolbar/Web/RouterItem';
 import {useSelector} from '@yiisoft/yii-dev-toolbar/store';
-import React, {ForwardedRef, forwardRef, useCallback, useEffect, useRef, useState} from 'react';
+import {ForwardedRef, forwardRef, useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {useResizable} from 'react-resizable-layout';
-import {IFrameWrapper} from '@yiisoft/yii-dev-panel-sdk/Helper/IFrameWrapper';
-import WebAssetOffIcon from '@mui/icons-material/WebAssetOff';
-import WebAssetIcon from '@mui/icons-material/WebAsset';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 const serviceWorker = navigator?.serviceWorker;
 
-type DebugIFrameProps = {
-    baseUrlState: string;
-    iframeEnabled: boolean;
-};
+type DebugIFrameProps = {baseUrlState: string; iframeEnabled: boolean};
 
 const DebugIFrame = forwardRef(
     ({baseUrlState, iframeEnabled}: DebugIFrameProps, ref: ForwardedRef<HTMLIFrameElement>) => {
@@ -49,11 +46,7 @@ const DebugIFrame = forwardRef(
     },
 );
 
-type DebugToolbarProps = {
-    activeComponents: {
-        iframe: boolean;
-    };
-};
+type DebugToolbarProps = {activeComponents: {iframe: boolean}};
 export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     useEffect(() => {
         // console.debug('[START] Listen to message');
@@ -219,11 +212,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                             boxSizing: 'border-box',
                         }}
                     >
-                        <Box
-                            sx={{
-                                display: isToolbarOpened ? 'inline-block' : 'none',
-                            }}
-                        >
+                        <Box sx={{display: isToolbarOpened ? 'inline-block' : 'none'}}>
                             <ButtonGroup disableElevation>
                                 {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
                                 {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
@@ -248,19 +237,9 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                                     bottom: 0,
                                     right: 0,
                                     marginX: 1,
-                                    '& .MuiSpeedDial-actions': {
-                                        position: 'absolute',
-                                        bottom: 32,
-                                        marginX: 1,
-                                    },
+                                    '& .MuiSpeedDial-actions': {position: 'absolute', bottom: 32, marginX: 1},
                                 }}
-                                FabProps={{
-                                    onClick: onToolbarClickHandler,
-                                    size: 'small',
-                                    sx: {
-                                        background: 'white',
-                                    },
-                                }}
+                                FabProps={{onClick: onToolbarClickHandler, size: 'small', sx: {background: 'white'}}}
                                 icon={
                                     <YiiIcon
                                         sx={{

@@ -1,16 +1,12 @@
 import {Tab, Tabs} from '@mui/material';
 import Box from '@mui/material/Box';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel-sdk/Component/JsonRenderer';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {useGetOpcacheQuery} from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import * as React from 'react';
 import {SyntheticEvent, useEffect, useState} from 'react';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
-type TabPanelProps = {
-    children?: React.ReactNode;
-    index: number;
-    value: number;
-};
+type TabPanelProps = {children?: React.ReactNode; index: number; value: number};
 
 function TabPanel(props: TabPanelProps) {
     const {children, value, index, ...other} = props;

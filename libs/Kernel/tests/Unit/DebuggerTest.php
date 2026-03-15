@@ -1,18 +1,18 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit;
 
-use Nyholm\Psr7\ServerRequest;
-use PHPUnit\Framework\TestCase;
-use stdClass;
-use Yiisoft\Yii\Console\Event\ApplicationStartup;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\MemoryStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use Nyholm\Psr7\ServerRequest;
+use PHPUnit\Framework\TestCase;
+use stdClass;
+use Yiisoft\Yii\Console\Event\ApplicationStartup;
 use Yiisoft\Yii\Http\Event\BeforeRequest;
 
 final class DebuggerTest extends TestCase
@@ -145,19 +145,19 @@ final class DebuggerTest extends TestCase
     {
         yield [
             ['app:ignored-command'],
-            'app:ignored-command'
+            'app:ignored-command',
         ];
         yield [
             ['app:ignored-command1', 'app:ignored-command2'],
-            'app:ignored-command2'
+            'app:ignored-command2',
         ];
         yield [
             ['app:ignored-command'],
-            null
+            null,
         ];
         yield [
             ['app:ignored-command'],
-            ''
+            '',
         ];
     }
 
@@ -183,11 +183,11 @@ final class DebuggerTest extends TestCase
     {
         yield [
             [],
-            'app:not-ignored-command'
+            'app:not-ignored-command',
         ];
         yield [
             ['app:ignored-command'],
-            'app:not-ignored-command'
+            'app:not-ignored-command',
         ];
     }
 

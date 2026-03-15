@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Storage;
 
@@ -30,10 +30,10 @@ final class MemoryStorageTest extends AbstractStorageTestCase
             [
                 $idGenerator->getId() => [
                     'id' => $idGenerator->getId(),
-                    'collectors' => [$collector1->getName(), $collector2->getName()]
-                ]
+                    'collectors' => [$collector1->getName(), $collector2->getName()],
+                ],
             ],
-            $result
+            $result,
         );
     }
 }

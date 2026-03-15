@@ -5,21 +5,15 @@ import Fade from '@mui/material/Fade';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
 import * as React from 'react';
 
-type ScrollTopButtonProps = {
-    bottomOffset: boolean;
-};
+type ScrollTopButtonProps = {bottomOffset: boolean};
 
 export const ScrollTopButton = React.memo((props: ScrollTopButtonProps) => {
-    const trigger = useScrollTrigger({
-        disableHysteresis: true,
-        threshold: 100,
-    });
+    const trigger = useScrollTrigger({disableHysteresis: true, threshold: 100});
 
     const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-        ((event.target as HTMLDivElement).ownerDocument || document).querySelector('body')?.scrollIntoView({
-            block: 'start',
-            behavior: 'smooth',
-        });
+        ((event.target as HTMLDivElement).ownerDocument || document)
+            .querySelector('body')
+            ?.scrollIntoView({block: 'start', behavior: 'smooth'});
     };
 
     return (

@@ -2,14 +2,8 @@ import {createSlice} from '@reduxjs/toolkit';
 import {DebugEntry} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Debug';
 import {useSelector} from 'react-redux';
 
-type StateType = {
-    entry: DebugEntry | null;
-    currentPageRequestIds: string[];
-};
-const initialState: StateType = {
-    entry: null,
-    currentPageRequestIds: [],
-};
+type StateType = {entry: DebugEntry | null; currentPageRequestIds: string[]};
+const initialState: StateType = {entry: null, currentPageRequestIds: []};
 export const debugSlice = createSlice({
     name: 'store.debug',
     initialState: initialState,

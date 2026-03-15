@@ -58,11 +58,7 @@ const filterDebugEntry = (filters: string[], currentPageRequestIds: string[]) =>
     return result;
 };
 
-export type DebugEntriesListModalProps = {
-    open: boolean;
-    onClick: (entry: DebugEntry) => void;
-    onClose: () => void;
-};
+export type DebugEntriesListModalProps = {open: boolean; onClick: (entry: DebugEntry) => void; onClose: () => void};
 
 export const DebugEntriesListModal = ({onClick, onClose, open}: DebugEntriesListModalProps) => {
     const getDebugQuery = useGetDebugQuery();

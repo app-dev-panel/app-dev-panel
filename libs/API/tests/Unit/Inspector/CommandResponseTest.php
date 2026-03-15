@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Inspector;
 
-use PHPUnit\Framework\TestCase;
 use AppDevPanel\Api\Inspector\CommandResponse;
+use PHPUnit\Framework\TestCase;
 
 final class CommandResponseTest extends TestCase
 {

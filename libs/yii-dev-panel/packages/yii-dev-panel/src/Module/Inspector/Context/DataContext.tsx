@@ -4,21 +4,10 @@ import React, {createContext, PropsWithChildren, useMemo} from 'react';
 const setObjects = createAction<any>('setObjects');
 const insertObject = createAction<{id: string; object: any}>('insertObject');
 
-type ObjectType = {
-    id: string;
-    value: any;
-};
-type State = {
-    objects: ObjectType[];
-    insertObject: any;
-    setObjects: any;
-};
+type ObjectType = {id: string; value: any};
+type State = {objects: ObjectType[]; insertObject: any; setObjects: any};
 
-const initialState: State = {
-    objects: [],
-    insertObject: insertObject,
-    setObjects: setObjects,
-};
+const initialState: State = {objects: [], insertObject: insertObject, setObjects: setObjects};
 export const Reducer = createReducer(initialState, (builder) => {
     builder
         .addCase(setObjects, (state, {payload}) => {

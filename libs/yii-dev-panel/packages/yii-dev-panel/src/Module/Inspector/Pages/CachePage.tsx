@@ -1,6 +1,7 @@
 import {Button, CircularProgress, LinearProgress, Stack} from '@mui/material';
 import {FilterInput} from '@yiisoft/yii-dev-panel-sdk/Component/Form/FilterInput';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel-sdk/Component/JsonRenderer';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {
     useClearCacheMutation,
     useDeleteCacheMutation,
@@ -8,20 +9,15 @@ import {
 } from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import {useCallback} from 'react';
 import {useSearchParams} from 'react-router-dom';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
-type CacheViewProps = {
-    data: any;
-};
+type CacheViewProps = {data: any};
 
 export const CachePage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const searchString = searchParams.get('filter') || '';
     const [clearCacheMutation, clearCacheMutationInfo] = useClearCacheMutation();
     const [deleteCacheMutation, deleteCacheMutationInfo] = useDeleteCacheMutation();
-    const getCacheQuery = useGetCacheQuery(searchString, {
-        skip: searchString === '',
-    });
+    const getCacheQuery = useGetCacheQuery(searchString, {skip: searchString === ''});
 
     const onChangeHandler = useCallback(async (value: string) => {
         setSearchParams({filter: value});

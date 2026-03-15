@@ -4,6 +4,7 @@ import {CodeHighlight} from '@yiisoft/yii-dev-panel-sdk/Component/CodeHighlight'
 import {parseFilePath, parsePathLineAnchor} from '@yiisoft/yii-dev-panel-sdk/Helper/filePathParser';
 import {formatBytes} from '@yiisoft/yii-dev-panel-sdk/Helper/formatBytes';
 import {scrollToAnchor} from '@yiisoft/yii-dev-panel-sdk/Helper/scrollToAnchor';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {
     InspectorFile,
     InspectorFileContent,
@@ -13,12 +14,8 @@ import {
 import {TreeView} from '@yiisoft/yii-dev-panel/Module/Inspector/Component/TreeView/TreeView';
 import {useEffect, useLayoutEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
-type PathBreadcrumbsProps = {
-    onClick: (nodeId: string) => void;
-    path: string;
-};
+type PathBreadcrumbsProps = {onClick: (nodeId: string) => void; path: string};
 
 const PathBreadcrumbs = ({path, onClick}: PathBreadcrumbsProps) => {
     const paths = path.split('/').filter((s) => !!s.length);

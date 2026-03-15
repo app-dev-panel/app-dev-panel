@@ -1,4 +1,13 @@
 import {ContentCut, GitHub, Refresh} from '@mui/icons-material';
+import AdbIcon from '@mui/icons-material/Adb';
+import BuildCircleIcon from '@mui/icons-material/BuildCircle';
+import DataObjectIcon from '@mui/icons-material/DataObject';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import LabelIcon from '@mui/icons-material/Label';
+import LoupeIcon from '@mui/icons-material/Loupe';
+import QueueIcon from '@mui/icons-material/Queue';
+import SettingsIcon from '@mui/icons-material/Settings';
 import {
     Breadcrumbs,
     CssBaseline,
@@ -12,30 +21,21 @@ import {
     ListItemText,
 } from '@mui/material';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Collapse from '@mui/material/Collapse';
 import Container from '@mui/material/Container';
+import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
 import {ErrorFallback} from '@yiisoft/yii-dev-panel-sdk/Component/ErrorFallback';
 import {ScrollTopButton} from '@yiisoft/yii-dev-panel-sdk/Component/ScrollTop';
 import {YiiIcon} from '@yiisoft/yii-dev-panel-sdk/Component/SvgIcon/YiiIcon';
 import {Config} from '@yiisoft/yii-dev-panel-sdk/Config';
 import {NotificationSnackbar} from '@yiisoft/yii-dev-panel/Application/Component/NotificationSnackbar';
+import {useBreadcrumbsContext} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import * as React from 'react';
 import {Fragment} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {Outlet} from 'react-router';
-import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
-import Collapse from '@mui/material/Collapse';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import {useBreadcrumbsContext} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
-import BuildCircleIcon from '@mui/icons-material/BuildCircle';
-import AdbIcon from '@mui/icons-material/Adb';
-import LoupeIcon from '@mui/icons-material/Loupe';
-import SettingsIcon from '@mui/icons-material/Settings';
-import DataObjectIcon from '@mui/icons-material/DataObject';
-import QueueIcon from '@mui/icons-material/Queue';
-import LabelIcon from '@mui/icons-material/Label';
 
 // TODO: replace with context and provider
 const pages = [
@@ -100,23 +100,13 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const DrawerList = (
         <Box
             // onClick={toggleDrawer(false)}
-            sx={{
-                width: 280,
-                display: 'flex',
-                flexDirection: 'column',
-                flexGrow: 1,
-            }}
+            sx={{width: 280, display: 'flex', flexDirection: 'column', flexGrow: 1}}
         >
             <Typography variant="h6">
                 <Link href={'/'} sx={{display: 'inline-block', height: '100%', mx: 2, my: 2}}>
                     <YiiIcon />
                 </Link>
-                <Link
-                    href={'/'}
-                    sx={{
-                        textDecoration: 'none',
-                    }}
-                >
+                <Link href={'/'} sx={{textDecoration: 'none'}}>
                     Yii Dev Panel
                 </Link>
             </Typography>
@@ -204,12 +194,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 {DrawerList}
             </Drawer>
             <NotificationSnackbar />
-            <Container
-                maxWidth="lg"
-                sx={(theme) => ({
-                    [theme.breakpoints.down('md')]: {px: 2},
-                })}
-            >
+            <Container maxWidth="lg" sx={(theme) => ({[theme.breakpoints.down('md')]: {px: 2}})}>
                 <BreadcrumbsWrapper toggleDrawer={toggleDrawer} />
                 <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[window.location.pathname]}>
                     <Outlet />
@@ -221,9 +206,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     );
 });
 
-type MyBreadcrumbsType = {
-    toggleDrawer: (open: boolean) => () => void;
-};
+type MyBreadcrumbsType = {toggleDrawer: (open: boolean) => () => void};
 const BreadcrumbsWrapper = ({toggleDrawer}: MyBreadcrumbsType) => {
     const context = useBreadcrumbsContext();
     const breadcrumbs = context.breadcrumbs.filter(Boolean);

@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
+use AppDevPanel\Kernel\ProxyDecoratedCalls;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use AppDevPanel\Kernel\ProxyDecoratedCalls;
 
 final class HttpClientInterfaceProxy implements ClientInterface
 {
@@ -15,9 +15,8 @@ final class HttpClientInterfaceProxy implements ClientInterface
 
     public function __construct(
         private readonly ClientInterface $decorated,
-        private readonly HttpClientCollector $collector
-    ) {
-    }
+        private readonly HttpClientCollector $collector,
+    ) {}
 
     public function sendRequest(RequestInterface $request): ResponseInterface
     {

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Helper\StreamWrapper;
 
@@ -83,7 +83,7 @@ final class StreamWrapper implements StreamWrapperInterface
         /**
          * @psalm-suppress PossiblyNullArgument
          */
-        return mkdir($path, $mode, ( $options & STREAM_MKDIR_RECURSIVE ) === STREAM_MKDIR_RECURSIVE, $this->context);
+        return mkdir($path, $mode, ($options & STREAM_MKDIR_RECURSIVE) === STREAM_MKDIR_RECURSIVE, $this->context);
     }
 
     public function rename(string $path_from, string $path_to): bool
@@ -123,7 +123,7 @@ final class StreamWrapper implements StreamWrapperInterface
         $this->filename = realpath($path) ?: $path;
 
         if (
-            ( self::STREAM_OPEN_FOR_INCLUDE & $options ) === self::STREAM_OPEN_FOR_INCLUDE
+            (self::STREAM_OPEN_FOR_INCLUDE & $options) === self::STREAM_OPEN_FOR_INCLUDE
             && function_exists('opcache_invalidate')
         ) {
             opcache_invalidate($path, false);
@@ -131,8 +131,8 @@ final class StreamWrapper implements StreamWrapperInterface
         $this->stream = fopen(
             $path,
             $mode,
-            ( $options & STREAM_USE_PATH ) === STREAM_USE_PATH,
-            ( self::STREAM_OPEN_FOR_INCLUDE & $options ) === self::STREAM_OPEN_FOR_INCLUDE ? null : $this->context
+            ($options & STREAM_USE_PATH) === STREAM_USE_PATH,
+            (self::STREAM_OPEN_FOR_INCLUDE & $options) === self::STREAM_OPEN_FOR_INCLUDE ? null : $this->context,
         );
 
         if (!is_resource($this->stream)) {
@@ -171,7 +171,7 @@ final class StreamWrapper implements StreamWrapperInterface
             STREAM_OPTION_BLOCKING => stream_set_blocking($this->stream, $arg1 === STREAM_OPTION_BLOCKING),
             STREAM_OPTION_READ_TIMEOUT => stream_set_timeout($this->stream, $arg1, $arg2),
             STREAM_OPTION_WRITE_BUFFER => stream_set_write_buffer($this->stream, $arg2) === 0,
-            default => false
+            default => false,
         };
     }
 
@@ -202,12 +202,12 @@ final class StreamWrapper implements StreamWrapperInterface
     public function url_stat(string $path, int $flags): array|false
     {
         try {
-            if (( $flags & STREAM_URL_STAT_QUIET ) === STREAM_URL_STAT_QUIET) {
+            if (($flags & STREAM_URL_STAT_QUIET) === STREAM_URL_STAT_QUIET) {
                 return @stat($path);
             }
             return stat($path);
         } catch (Throwable $e) {
-            if (( $flags & STREAM_URL_STAT_QUIET ) === STREAM_URL_STAT_QUIET) {
+            if (($flags & STREAM_URL_STAT_QUIET) === STREAM_URL_STAT_QUIET) {
                 return false;
             }
             trigger_error($e->getMessage(), E_USER_ERROR);
@@ -221,7 +221,7 @@ final class StreamWrapper implements StreamWrapperInterface
             STREAM_META_OWNER_NAME, STREAM_META_OWNER => chown($path, $value),
             STREAM_META_GROUP_NAME, STREAM_META_GROUP => chgrp($path, $value),
             STREAM_META_ACCESS => chmod($path, $value),
-            default => false
+            default => false,
         };
     }
 

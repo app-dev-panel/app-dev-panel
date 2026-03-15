@@ -1,21 +1,20 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Database\Db;
 
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Query\Query;
 use Yiisoft\Db\Schema\ColumnSchemaInterface;
 use Yiisoft\Db\Schema\TableSchemaInterface;
-use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 
 class DbSchemaProvider implements SchemaProviderInterface
 {
     public function __construct(
-        private ConnectionInterface $db
-    ) {
-    }
+        private ConnectionInterface $db,
+    ) {}
 
     public function getTables(): array
     {
@@ -31,7 +30,7 @@ class DbSchemaProvider implements SchemaProviderInterface
                 'columns' => $this->serializeARColumnsSchemas($schema->getColumns()),
                 'records' => new Query($this->db)
                     ->from($schema->getName())
-                    ->count()
+                    ->count(),
             ];
         }
         return $tables;
@@ -55,7 +54,7 @@ class DbSchemaProvider implements SchemaProviderInterface
             'table' => $schema->getName(),
             'primaryKeys' => $schema->getPrimaryKey(),
             'columns' => $this->serializeARColumnsSchemas($schema->getColumns()),
-            'records' => $data
+            'records' => $data,
         ];
     }
 
@@ -73,7 +72,7 @@ class DbSchemaProvider implements SchemaProviderInterface
                 'dbType' => $columnSchema->getDbType(),
                 'defaultValue' => $columnSchema->getDefaultValue(),
                 'comment' => $columnSchema->getComment(),
-                'allowNull' => $columnSchema->isAllowNull()
+                'allowNull' => $columnSchema->isAllowNull(),
             ];
         }
         return $result;

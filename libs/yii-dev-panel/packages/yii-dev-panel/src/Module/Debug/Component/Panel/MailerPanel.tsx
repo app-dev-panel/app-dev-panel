@@ -11,6 +11,7 @@ import {
     ListItemText,
 } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -19,16 +20,10 @@ import DialogTitle from '@mui/material/DialogTitle';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Typography from '@mui/material/Typography';
 import {nl2br} from '@yiisoft/yii-dev-panel-sdk/Helper/nl2br';
-import React, {useCallback, useState} from 'react';
-import Box from '@mui/material/Box';
+import {useCallback, useState} from 'react';
 
 type PreviewType = 'html' | 'raw';
-type PreviewDialogProps = {
-    onClose: () => void;
-    open: boolean;
-    previewType: PreviewType;
-    message: MailMessageType;
-};
+type PreviewDialogProps = {onClose: () => void; open: boolean; previewType: PreviewType; message: MailMessageType};
 const PreviewDialog = ({message, open, onClose, previewType}: PreviewDialogProps) => {
     if (!message) {
         return null;
@@ -71,11 +66,7 @@ type MailMessageType = {
     cc: Record<string, string>;
     bcc: Record<string, string>;
 };
-type MailerPanelProps = {
-    data: {
-        messages: MailMessageType[];
-    };
-};
+type MailerPanelProps = {data: {messages: MailMessageType[]}};
 
 function serializeSender(sender: Record<string, string>): string {
     return Object.entries(sender)

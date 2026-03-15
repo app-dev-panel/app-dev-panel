@@ -2,9 +2,9 @@ import {Button, Typography} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {FullScreenCircularProgress} from '@yiisoft/yii-dev-panel-sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@yiisoft/yii-dev-panel-sdk/Component/Grid';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {useGetTableQuery} from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import {useEffect, useState} from 'react';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 const columns: GridColDef[] = [
     {
@@ -58,11 +58,7 @@ export const DatabasePage = () => {
             const tables = [];
             // @ts-ignore
             for (const table of data) {
-                tables.push({
-                    name: table.table,
-                    columns: table.columns.length,
-                    records: table.records,
-                });
+                tables.push({name: table.table, columns: table.columns.length, records: table.records});
             }
             setTables(tables);
         }

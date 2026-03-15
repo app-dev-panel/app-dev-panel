@@ -2,9 +2,9 @@ import {FilePresent} from '@mui/icons-material';
 import {IconButton, Tooltip} from '@mui/material';
 import {FullScreenCircularProgress} from '@yiisoft/yii-dev-panel-sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel-sdk/Component/JsonRenderer';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {useGetObjectQuery} from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import {useSearchParams} from 'react-router-dom';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 export const ContainerEntryPage = () => {
     const [searchParams] = useSearchParams();

@@ -1,8 +1,6 @@
 import {SvgIcon, SvgIconProps} from '@mui/material';
 
-type YiiIconProps = SvgIconProps & {
-    monochromeColor?: string;
-};
+type YiiIconProps = SvgIconProps & {monochromeColor?: string};
 export function YiiIcon(props: YiiIconProps) {
     return (
         <SvgIcon width="128" height="128" viewBox="0 0 128 128" fill="none" {...props}>

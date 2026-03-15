@@ -1,17 +1,17 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
+use AppDevPanel\Kernel\Collector\LogCollector;
+use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
 use Psr\Log\LogLevel;
 use stdClass;
-use AppDevPanel\Kernel\Collector\LogCollector;
-use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 
 final class LoggerInterfaceProxyTest extends TestCase
 {
@@ -74,9 +74,7 @@ final class LoggerInterfaceProxyTest extends TestCase
                 return $args;
             }
 
-            public function log($level, \Stringable|string $message, array $context = []): void
-            {
-            }
+            public function log($level, \Stringable|string $message, array $context = []): void {}
         };
         $collector = $this->createMock(LogCollector::class);
         $proxy = new LoggerInterfaceProxy($logger, $collector);

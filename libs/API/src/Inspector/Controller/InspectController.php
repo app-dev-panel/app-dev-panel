@@ -1,10 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
 use Alexkart\CurlBuilder\Command;
+use AppDevPanel\Adapter\Yiisoft\Collector\Web\RequestCollector;
+use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Inspector\ApplicationState;
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use FilesystemIterator;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
@@ -28,18 +32,13 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 use Yiisoft\Translator\CategorySource;
 use Yiisoft\VarDumper\VarDumper;
-use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
-use AppDevPanel\Api\Inspector\ApplicationState;
-use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
-use AppDevPanel\Adapter\Yiisoft\Collector\Web\RequestCollector;
 
 class InspectController
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-        private Aliases $aliases
-    ) {
-    }
+        private Aliases $aliases,
+    ) {}
 
     public function config(ContainerInterface $container, ServerRequestInterface $request): ResponseInterface
     {
@@ -68,7 +67,7 @@ class InspectController
         if ($locales === []) {
             throw new RuntimeException(
                 'Unable to determine list of available locales. '
-                . 'Make sure that "$params[\'locale\'][\'locales\']" contains all available locales.'
+                . 'Make sure that "$params[\'locale\'][\'locales\']" contains all available locales.',
             );
         }
         $messages = [];
@@ -83,7 +82,7 @@ class InspectController
                 foreach ($locales as $locale) {
                     $messages[$categoryName][$locale] = array_merge(
                         $messages[$categoryName][$locale] ?? [],
-                        $categorySource->getMessages($locale)
+                        $categorySource->getMessages($locale),
                     );
                 }
             } catch (Throwable) {
@@ -121,15 +120,15 @@ class InspectController
                 $categoryName,
                 implode('", "', array_map(
                     static fn(CategorySource $categorySource) => $categorySource->getName(),
-                    $categorySources
-                ))
+                    $categorySources,
+                )),
             ));
         }
         $messages = $categorySource->getMessages($locale);
         $messages = array_replace_recursive($messages, [
             $translationId => [
-                'message' => $newMessage
-            ]
+                'message' => $newMessage,
+            ],
         ]);
         $categorySource->write($locale, $messages);
 
@@ -162,12 +161,12 @@ class InspectController
             }
             if ($destination === false) {
                 return $this->responseFactory->createResponse([
-                    'message' => sprintf('Cannot find source of class "%s".', $class)
+                    'message' => sprintf('Cannot find source of class "%s".', $class),
                 ], 404);
             }
             return $this->readFile($destination, [
                 'startLine' => $startLine ?? null,
-                'endLine' => $endLine ?? null
+                'endLine' => $endLine ?? null,
             ]);
         }
 
@@ -185,7 +184,7 @@ class InspectController
 
         if ($destination === false) {
             return $this->responseFactory->createResponse([
-                'message' => sprintf('Destination "%s" does not exist', $path)
+                'message' => sprintf('Destination "%s" does not exist', $path),
             ], 404);
         }
 
@@ -195,7 +194,7 @@ class InspectController
 
         $directoryIterator = new RecursiveDirectoryIterator(
             $destination,
-            FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO
+            FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO,
         );
 
         $files = [];
@@ -219,7 +218,7 @@ class InspectController
             }
             $path = $this->removeBasePath($rootPath, $path);
             $files[] = array_merge([
-                'path' => $path
+                'path' => $path,
             ], $this->serializeFileInfo($file));
         }
 
@@ -239,7 +238,7 @@ class InspectController
             static fn(string $class) => !str_starts_with($class, 'Yiisoft\\Yii\\Debug\\'),
             static fn(string $class) => !str_starts_with($class, 'Yiisoft\\ErrorHandler\\ErrorHandler'),
             static fn(string $class) => !str_contains($class, '@anonymous'),
-            static fn(string $class) => !is_subclass_of($class, Throwable::class)
+            static fn(string $class) => !is_subclass_of($class, Throwable::class),
         ];
         foreach ($patterns as $patternFunction) {
             $inspected = array_filter($inspected, $patternFunction);
@@ -278,7 +277,7 @@ class InspectController
 
         return $this->responseFactory->createResponse([
             'object' => $result,
-            'path' => $reflection->getFileName()
+            'path' => $reflection->getFileName(),
         ]);
     }
 
@@ -304,7 +303,7 @@ class InspectController
                 'methods' => $data['methods'],
                 'defaults' => $data['defaults'],
                 'override' => $data['override'],
-                'middlewares' => $data['middlewareDefinitions'] ?? []
+                'middlewares' => $data['middlewareDefinitions'] ?? [],
             ];
         }
         $response = VarDumper::create($routes)->asPrimitives(5);
@@ -315,13 +314,13 @@ class InspectController
     public function checkRoute(
         ServerRequestInterface $request,
         UrlMatcherInterface $matcher,
-        ServerRequestFactoryInterface $serverRequestFactory
+        ServerRequestFactoryInterface $serverRequestFactory,
     ): ResponseInterface {
         $queryParams = $request->getQueryParams();
         $path = $queryParams['route'] ?? null;
         if ($path === null) {
             return $this->responseFactory->createResponse([
-                'message' => 'Path is not specified.'
+                'message' => 'Path is not specified.',
             ], 422);
         }
         $path = trim($path);
@@ -339,7 +338,7 @@ class InspectController
         $result = $matcher->match($request);
         if (!$result->isSuccess()) {
             return $this->responseFactory->createResponse([
-                'result' => false
+                'result' => false,
             ]);
         }
 
@@ -351,7 +350,7 @@ class InspectController
 
         return $this->responseFactory->createResponse([
             'result' => true,
-            'action' => $action
+            'action' => $action,
         ]);
     }
 
@@ -369,7 +368,7 @@ class InspectController
 
     public function request(
         ServerRequestInterface $request,
-        CollectorRepositoryInterface $collectorRepository
+        CollectorRepositoryInterface $collectorRepository,
     ): ResponseInterface {
         $request = $request->getQueryParams();
         $debugEntryId = $request['debugEntryId'] ?? null;
@@ -395,13 +394,13 @@ class InspectController
             'common' => VarDumper::create($config->get('events'))->asPrimitives(),
             // TODO: change events-web to events-web when it will be possible
             'console' => [], //VarDumper::create($config->get('events-web'))->asPrimitives(),
-            'web' => VarDumper::create($config->get('events-web'))->asPrimitives()
+            'web' => VarDumper::create($config->get('events-web'))->asPrimitives(),
         ]);
     }
 
     public function buildCurl(
         ServerRequestInterface $request,
-        CollectorRepositoryInterface $collectorRepository
+        CollectorRepositoryInterface $collectorRepository,
     ): ResponseInterface {
         $request = $request->getQueryParams();
         $debugEntryId = $request['debugEntryId'] ?? null;
@@ -418,12 +417,12 @@ class InspectController
         } catch (Throwable $e) {
             return $this->responseFactory->createResponse([
                 'command' => null,
-                'exception' => (string) $e
+                'exception' => (string) $e,
             ]);
         }
 
         return $this->responseFactory->createResponse([
-            'command' => $output
+            'command' => $output,
         ]);
     }
 
@@ -434,28 +433,28 @@ class InspectController
 
     private function getUserOwner(int $uid): array
     {
-        if ($uid === 0 || !function_exists('posix_getpwuid') || false === ( $info = posix_getpwuid($uid) )) {
+        if ($uid === 0 || !function_exists('posix_getpwuid') || false === ($info = posix_getpwuid($uid))) {
             return [
-                'id' => $uid
+                'id' => $uid,
             ];
         }
         return [
             'uid' => $info['uid'],
             'gid' => $info['gid'],
-            'name' => $info['name']
+            'name' => $info['name'],
         ];
     }
 
     private function getGroupOwner(int $gid): array
     {
-        if ($gid === 0 || !function_exists('posix_getgrgid') || false === ( $info = posix_getgrgid($gid) )) {
+        if ($gid === 0 || !function_exists('posix_getgrgid') || false === ($info = posix_getgrgid($gid))) {
             return [
-                'id' => $gid
+                'id' => $gid,
             ];
         }
         return [
             'gid' => $info['gid'],
-            'name' => $info['name']
+            'name' => $info['name'],
         ];
     }
 
@@ -468,7 +467,7 @@ class InspectController
             'group' => $this->getGroupOwner((int) $file->getGroup()),
             'size' => $file->getSize(),
             'type' => $file->getType(),
-            'permissions' => substr(sprintf('%o', $file->getPerms()), -4)
+            'permissions' => substr(sprintf('%o', $file->getPerms()), -4),
         ];
     }
 
@@ -482,9 +481,9 @@ class InspectController
                 'directory' => $this->removeBasePath($rootPath, dirname($destination)),
                 'content' => file_get_contents($destination),
                 'path' => $this->removeBasePath($rootPath, $destination),
-                'absolutePath' => $destination
+                'absolutePath' => $destination,
             ],
-            $this->serializeFileInfo($file)
+            $this->serializeFileInfo($file),
         ));
     }
 }

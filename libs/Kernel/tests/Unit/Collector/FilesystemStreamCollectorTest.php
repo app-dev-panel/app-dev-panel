@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use PHPUnit\Framework\Attributes\DataProvider;
-use Yiisoft\Files\FileHelper;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Yiisoft\Files\FileHelper;
 
 final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
 {
@@ -30,14 +30,14 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         array $ignoredClasses,
         callable $operation,
         callable $after,
-        array $result
+        array $result,
     ): void {
         $before($path);
 
         try {
             $collector = new FilesystemStreamCollector(
                 ignoredPathPatterns: $ignoredPathPatterns,
-                ignoredClasses: $ignoredClasses
+                ignoredClasses: $ignoredClasses,
             );
             $collector->startup();
 
@@ -72,9 +72,9 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $mkdirAfter,
             [
                 'mkdir' => [
-                    ['path' => $path, 'args' => ['mode' => 0o777, 'options' => 9]] // 9 for some reason
-                ]
-            ]
+                    ['path' => $path, 'args' => ['mode' => 0o777, 'options' => 9]], // 9 for some reason
+                ],
+            ],
         ];
         yield 'mkdir ignored by path' => [
             $path,
@@ -83,7 +83,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             [],
             $mkdirOperation,
             $mkdirAfter,
-            []
+            [],
         ];
         yield 'mkdir ignored by class' => [
             $path,
@@ -92,7 +92,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             [self::class],
             $mkdirOperation,
             $mkdirAfter,
-            []
+            [],
         ];
 
         $renameBefore = static function (string $path) {
@@ -119,9 +119,9 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $renameAfter,
             [
                 'rename' => [
-                    ['path' => $path, 'args' => ['path_to' => $path . '.renamed']]
-                ]
-            ]
+                    ['path' => $path, 'args' => ['path_to' => $path . '.renamed']],
+                ],
+            ],
         ];
         yield 'rename ignored by path' => [
             $path,
@@ -130,7 +130,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             [],
             $renameOperation,
             $renameAfter,
-            []
+            [],
         ];
         yield 'rename ignored by class' => [
             $path,
@@ -139,7 +139,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             [self::class],
             $renameOperation,
             $renameAfter,
-            []
+            [],
         ];
 
         $rmdirBefore = static function (string $path): void {
@@ -165,9 +165,9 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $rmdirAfter,
             [
                 'rmdir' => [
-                    ['path' => $path, 'args' => ['options' => 8]] // 8 for some reason
-                ]
-            ]
+                    ['path' => $path, 'args' => ['options' => 8]], // 8 for some reason
+                ],
+            ],
         ];
         yield 'rmdir ignored by path' => [
             $path,
@@ -176,7 +176,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             [],
             $rmdirOperation,
             $rmdirAfter,
-            []
+            [],
         ];
         yield 'rmdir ignored by class' => [
             $path,
@@ -185,7 +185,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             [self::class],
             $rmdirOperation,
             $rmdirAfter,
-            []
+            [],
         ];
 
         $unlinkBefore = static function (string $path) {
@@ -212,9 +212,9 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $unlinkAfter,
             [
                 'unlink' => [
-                    ['path' => $path, 'args' => []]
-                ]
-            ]
+                    ['path' => $path, 'args' => []],
+                ],
+            ],
         ];
         yield 'unlink ignored by path' => [
             $path,
@@ -223,7 +223,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             [],
             $unlinkOperation,
             $unlinkAfter,
-            []
+            [],
         ];
         yield 'unlink ignored by class' => [
             $path,
@@ -232,7 +232,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             [self::class],
             $unlinkOperation,
             $unlinkAfter,
-            []
+            [],
         ];
 
         $fileStreamBefore = static function (string $path) {
@@ -268,12 +268,12 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $fileStreamAfter,
             [
                 'write' => [
-                    ['path' => $path, 'args' => []]
+                    ['path' => $path, 'args' => []],
                 ],
                 'read' => [
-                    ['path' => $path, 'args' => []]
-                ]
-            ]
+                    ['path' => $path, 'args' => []],
+                ],
+            ],
         ];
         yield 'file stream ignored by path' => [
             $path,
@@ -282,7 +282,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             [],
             $fileStreamOperation,
             $fileStreamAfter,
-            []
+            [],
         ];
         yield 'file stream ignored by class' => [
             $path,
@@ -291,7 +291,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             [self::class],
             $fileStreamOperation,
             $fileStreamAfter,
-            []
+            [],
         ];
     }
 
@@ -310,17 +310,17 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         $this->assertEquals(
             [
                 ['path' => __FILE__, 'args' => ['arg1' => 'v1', 'arg2' => 'v2']],
-                ['path' => __FILE__, 'args' => ['arg3' => 'v3', 'arg4' => 'v4']]
+                ['path' => __FILE__, 'args' => ['arg3' => 'v3', 'arg4' => 'v4']],
             ],
-            $collected['read']
+            $collected['read'],
         );
 
         $this->assertCount(1, $collected['mkdir']);
         $this->assertEquals(
             [
-                ['path' => __DIR__, 'args' => ['recursive']]
+                ['path' => __DIR__, 'args' => ['recursive']],
             ],
-            $collected['mkdir']
+            $collected['mkdir'],
         );
     }
 

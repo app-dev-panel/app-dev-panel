@@ -72,11 +72,7 @@ function FileAction({file, generator}: {file: GiiFile; generator: GiiGenerator})
     };
 
     const handleDiff = async () => {
-        const response = await diffQuery({
-            generator: generator.id,
-            parameters: context.parameters,
-            fileId: file.id,
-        });
+        const response = await diffQuery({generator: generator.id, parameters: context.parameters, fileId: file.id});
         console.log('response', response);
         // @ts-ignore
         setDiff(response.data.diff);
@@ -147,11 +143,7 @@ export function GenerateStep({generator, onComplete}: StepProps) {
 
     async function generateHandler(data: FieldValues) {
         console.log('generate', data, context.parameters);
-        const response = await generateQuery({
-            generator: generator.id,
-            parameters: context.parameters,
-            answers: data,
-        });
+        const response = await generateQuery({generator: generator.id, parameters: context.parameters, answers: data});
         if ('error' in response) {
             console.log(response);
             mapErrorsToForm(response, form);

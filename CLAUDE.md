@@ -82,19 +82,26 @@ composer install                    # Install PHP dependencies
 composer test                       # Run PHPUnit tests
 composer test:coverage              # Run tests with coverage report
 
-# Code quality (Mago)
-composer format:check               # Check code formatting (dry-run)
-composer format:fix                 # Fix code formatting
-composer lint                       # Run linter
-composer analyze                    # Run static analyzer
-composer check                      # Run all checks (format + lint + analyze)
+# Code quality — PHP (Mago, PER-CS / PER-2 preset)
+composer format:check               # Check PHP code formatting (dry-run)
+composer format:fix                 # Fix PHP code formatting
+composer lint                       # Run PHP linter
+composer analyze                    # Run PHP static analyzer
+composer check                      # Run all PHP checks (format + lint + analyze)
 composer fix                        # Fix formatting, then run lint + analyze
 
 # Frontend
 cd libs/yii-dev-panel
 npm install                         # Install JS dependencies
-npm run dev                         # Start Vite dev server
-npm run build                       # Production build
+npm start                           # Start all Vite dev servers (via Lerna)
+npm run build                       # Production build all packages
+
+# Code quality — JS/TS (Prettier 3.8+, ESLint 9)
+npm run format                      # Format JS/TS/CSS/JSON with Prettier
+npm run format:check                # Check formatting (CI)
+npm run lint                        # ESLint check
+npm run lint:fix                    # ESLint auto-fix
+npm run check                       # Run all JS checks (format + lint)
 ```
 
 ## CI/CD
@@ -140,7 +147,8 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 
 ## Coding Conventions
 
-- PHP: PSR-12, strict types, final classes where possible
+- PHP: PER-CS (PER-2) via Mago, strict types, final classes where possible
+- TypeScript: Prettier 3.8+ (single quotes, trailing commas, 120 width, objectWrap: collapse), ESLint 9 with @typescript-eslint
 - TypeScript: strict mode, functional components, Redux Toolkit patterns
 - All collector classes implement `CollectorInterface`
 - New adapters implement proxy wiring for the target framework's PSR interfaces

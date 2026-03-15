@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Storage;
 
@@ -15,9 +15,8 @@ final class MemoryStorage implements StorageInterface
     private array $collectors = [];
 
     public function __construct(
-        private readonly DebuggerIdGenerator $idGenerator
-    ) {
-    }
+        private readonly DebuggerIdGenerator $idGenerator,
+    ) {}
 
     public function addCollector(CollectorInterface $collector): void
     {
@@ -30,14 +29,14 @@ final class MemoryStorage implements StorageInterface
             return [
                 $this->idGenerator->getId() => [
                     'id' => $this->idGenerator->getId(),
-                    'collectors' => array_keys($this->collectors)
-                ]
+                    'collectors' => array_keys($this->collectors),
+                ],
             ];
         }
 
         if ($type === self::TYPE_OBJECTS) {
             return [
-                $this->idGenerator->getId() => array_merge(...array_values($this->getData()))
+                $this->idGenerator->getId() => array_merge(...array_values($this->getData())),
             ];
         }
 
@@ -63,7 +62,5 @@ final class MemoryStorage implements StorageInterface
     /**
      * @codeCoverageIgnore
      */
-    public function clear(): void
-    {
-    }
+    public function clear(): void {}
 }

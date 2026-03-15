@@ -6,9 +6,7 @@ import {serializeCallable} from '@yiisoft/yii-dev-panel-sdk/Helper/callableSeria
 import {NestedMenuItem} from 'mui-nested-menu';
 import React, {useState} from 'react';
 
-type RequestItemProps = {
-    data: DebugEntry;
-};
+type RequestItemProps = {data: DebugEntry};
 export const RequestItem = ({data}: RequestItemProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -22,11 +20,7 @@ export const RequestItem = ({data}: RequestItemProps) => {
                     color={buttonColorHttp(data.response.statusCode)}
                     variant="contained"
                     onClick={handleClick}
-                    sx={{
-                        whiteSpace: 'nowrap',
-                        textTransform: 'none',
-                        borderRadius: 0,
-                    }}
+                    sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
                 >
                     {data.request.method}&nbsp;
                     {data.request.path}&nbsp;
@@ -49,18 +43,8 @@ export const RequestItem = ({data}: RequestItemProps) => {
                 {data.router?.middlewares && (
                     <NestedMenuItem
                         onClick={handleClose}
-                        sx={{
-                            padding: '6px 16px',
-                        }}
-                        leftIcon={
-                            <DynamicFeed
-                                fontSize="small"
-                                sx={{
-                                    color: 'text.secondary',
-                                    mr: 1,
-                                }}
-                            />
-                        }
+                        sx={{padding: '6px 16px'}}
+                        leftIcon={<DynamicFeed fontSize="small" sx={{color: 'text.secondary', mr: 1}} />}
                         label="Middlewares"
                         parentMenuOpen={open}
                     >

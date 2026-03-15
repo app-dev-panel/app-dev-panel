@@ -1,13 +1,9 @@
-import {ChatBubble} from '@mui/icons-material';
 import {Badge, Button} from '@mui/material';
 import {DebugEntry} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Debug';
 import {CollectorsMap} from '@yiisoft/yii-dev-panel-sdk/Helper/collectors';
 import {ForwardedRef, forwardRef} from 'react';
 
-type EventsItemProps = {
-    data: DebugEntry;
-    iframeUrlHandler: (url: string) => void;
-};
+type EventsItemProps = {data: DebugEntry; iframeUrlHandler: (url: string) => void};
 
 const EventsItem = forwardRef((props: EventsItemProps, ref: ForwardedRef<HTMLButtonElement>) => {
     const {data, iframeUrlHandler, ...others} = props;
@@ -24,11 +20,7 @@ const EventsItem = forwardRef((props: EventsItemProps, ref: ForwardedRef<HTMLBut
                 }}
                 color="info"
                 variant="contained"
-                sx={{
-                    whiteSpace: 'nowrap',
-                    textTransform: 'none',
-                    borderRadius: 0,
-                }}
+                sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
             >
                 Events
             </Button>

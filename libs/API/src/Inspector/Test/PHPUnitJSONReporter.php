@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Test;
 
@@ -39,7 +39,7 @@ class PHPUnitJSONReporter implements ResultPrinter
 
         file_put_contents($path . DIRECTORY_SEPARATOR . self::FILENAME, json_encode(
             array_values($this->data),
-            JSON_THROW_ON_ERROR
+            JSON_THROW_ON_ERROR,
         ));
     }
 
@@ -78,17 +78,11 @@ class PHPUnitJSONReporter implements ResultPrinter
         $this->logErroredTest($test, $t);
     }
 
-    public function startTestSuite(TestSuite $suite): void
-    {
-    }
+    public function startTestSuite(TestSuite $suite): void {}
 
-    public function endTestSuite(TestSuite $suite): void
-    {
-    }
+    public function endTestSuite(TestSuite $suite): void {}
 
-    public function startTest(Test $test): void
-    {
-    }
+    public function startTest(Test $test): void {}
 
     public function endTest(Test $test, float $time): void
     {
@@ -105,7 +99,7 @@ class PHPUnitJSONReporter implements ResultPrinter
             'file' => $this->parseFilename($test),
             'test' => $parsedName,
             'status' => 'ok',
-            'stacktrace' => []
+            'stacktrace' => [],
         ];
     }
 
@@ -132,7 +126,7 @@ class PHPUnitJSONReporter implements ResultPrinter
             'file' => $this->parseFilename($test),
             'test' => $parsedName,
             'status' => $t->getMessage(),
-            'stacktrace' => $t->getTrace()
+            'stacktrace' => $t->getTrace(),
         ];
     }
 }

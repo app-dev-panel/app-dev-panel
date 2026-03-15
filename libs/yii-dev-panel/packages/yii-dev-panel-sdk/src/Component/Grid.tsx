@@ -16,12 +16,7 @@ type GridProps = {
 };
 const defaultRowsPerPage = [20, 50, 100];
 const voidCallback = () => null;
-const defaultStyle = {
-    '& .MuiDataGrid-cell': {
-        alignItems: 'flex-start',
-        flexDirection: 'column',
-    },
-};
+const defaultStyle = {'& .MuiDataGrid-cell': {alignItems: 'flex-start', flexDirection: 'column'}};
 
 export function DataTable(props: GridProps) {
     const {

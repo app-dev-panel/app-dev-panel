@@ -1,22 +1,22 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit;
 
+use AppDevPanel\Kernel\Collector\ContainerInterfaceProxy;
+use AppDevPanel\Kernel\DebugServiceProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
-use AppDevPanel\Kernel\Collector\ContainerInterfaceProxy;
-use AppDevPanel\Kernel\DebugServiceProvider;
 
 final class DebugServiceProviderTest extends TestCase
 {
     public function testRegister(): void
     {
         $config = ContainerConfig::create()->withProviders([
-            new DebugServiceProvider()
+            new DebugServiceProvider(),
         ]);
         $container = new Container($config);
 

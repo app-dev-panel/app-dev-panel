@@ -6,13 +6,13 @@ import {ErrorFallback} from '@yiisoft/yii-dev-panel-sdk/Component/ErrorFallback'
 import {FullScreenCircularProgress} from '@yiisoft/yii-dev-panel-sdk/Component/FullScreenCircularProgress';
 import {InfoBox} from '@yiisoft/yii-dev-panel-sdk/Component/InfoBox';
 import {LinkProps, MenuPanel} from '@yiisoft/yii-dev-panel-sdk/Component/MenuPanel';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {GiiGenerator, useGetGeneratorsQuery} from '@yiisoft/yii-dev-panel/Module/Gii/API/Gii';
 import {GeneratorStepper} from '@yiisoft/yii-dev-panel/Module/Gii/Component/GeneratorSteps/GeneratorStepper';
 import {ContextProvider} from '@yiisoft/yii-dev-panel/Module/Gii/Context/Context';
 import {useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {useSearchParams} from 'react-router-dom';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 const Layout = () => {
     const [selectedGenerator, setSelectedGenerator] = useState<GiiGenerator | null>(null);

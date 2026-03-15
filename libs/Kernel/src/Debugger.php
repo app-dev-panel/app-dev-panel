@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel;
 
+use AppDevPanel\Kernel\Collector\CollectorInterface;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Strings\WildcardPattern;
 use Yiisoft\Yii\Console\Event\ApplicationStartup;
-use AppDevPanel\Kernel\Collector\CollectorInterface;
-use AppDevPanel\Kernel\Storage\StorageInterface;
 use Yiisoft\Yii\Http\Event\BeforeRequest;
 
 final class Debugger
@@ -24,7 +24,7 @@ final class Debugger
          */
         private readonly array $collectors,
         private array $ignoredRequests = [],
-        private array $ignoredCommands = []
+        private array $ignoredCommands = [],
     ) {
         register_shutdown_function([$this, 'shutdown']);
     }

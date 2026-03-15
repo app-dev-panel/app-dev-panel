@@ -1,10 +1,10 @@
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {FullScreenCircularProgress} from '@yiisoft/yii-dev-panel-sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@yiisoft/yii-dev-panel-sdk/Component/Grid';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {useGetTableQuery} from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import {useCallback, useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 export const TablePage = () => {
     const {table} = useParams();

@@ -1,15 +1,15 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
+use AppDevPanel\Kernel\ProxyDecoratedCalls;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Yiisoft\Proxy\ProxyManager;
 use Yiisoft\Proxy\ProxyTrait;
-use AppDevPanel\Kernel\ProxyDecoratedCalls;
 
 use function is_callable;
 use function is_object;
@@ -32,7 +32,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
 
     public function __construct(
         protected ContainerInterface $decorated,
-        ContainerProxyConfig $config
+        ContainerProxyConfig $config,
     ) {
         $this->config = $config;
         $this->proxyManager = new ProxyManager($this->config->getProxyCachePath());
@@ -58,7 +58,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
             $this->logProxy(ContainerInterface::class, $this->decorated, 'get', [$id], $instance, $timeStart);
         }
 
-        if (is_object($instance) && ( $proxy = $this->getServiceProxy($id, $instance) )) {
+        if (is_object($instance) && ($proxy = $this->getServiceProxy($id, $instance))) {
             $this->setServiceProxyCache($id, $proxy);
             return $proxy;
         }
@@ -106,7 +106,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
             return $this->getCommonMethodProxy(
                 interface_exists($service) || class_exists($service) ? $service : $instance::class,
                 $instance,
-                $this->config->getDecoratedServiceConfig($service)
+                $this->config->getDecoratedServiceConfig($service),
             );
         }
 
@@ -114,7 +114,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
             return $this->getServiceProxyFromArray($instance, $this->config->getDecoratedServiceConfig($service));
         }
 
-        if (interface_exists($service) && ( $this->config->hasCollector() || $this->config->hasDispatcher() )) {
+        if (interface_exists($service) && ($this->config->hasCollector() || $this->config->hasDispatcher())) {
             return $this->getCommonServiceProxy($service, $instance);
         }
 
@@ -133,7 +133,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
     {
         $methods = [];
         foreach ($callbacks as $method => $callback) {
-            if (!( is_string($method) && is_callable($callback) )) {
+            if (!(is_string($method) && is_callable($callback))) {
                 continue;
             }
 
@@ -144,7 +144,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
             $service,
             $instance,
             $methods,
-            $this->config
+            $this->config,
         ]);
     }
 
@@ -177,7 +177,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
         return $this->proxyManager->createObjectProxy($service, ServiceProxy::class, [
             $service,
             $instance,
-            $this->config
+            $this->config,
         ]);
     }
 

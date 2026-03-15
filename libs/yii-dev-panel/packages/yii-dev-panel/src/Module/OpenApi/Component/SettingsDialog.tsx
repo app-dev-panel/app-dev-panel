@@ -18,14 +18,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import {addApiEntry, deleteApiEntry, useOpenApiEntries} from '@yiisoft/yii-dev-panel/Module/OpenApi/Context/Context';
+import {useSelector} from '@yiisoft/yii-dev-panel/store';
 import * as React from 'react';
 import {useDispatch} from 'react-redux';
-import {useSelector} from '@yiisoft/yii-dev-panel/store';
 
 // TODO: split saving and cancelling
-type SettingsDialogProps = {
-    onClose: () => void;
-};
+type SettingsDialogProps = {onClose: () => void};
 export const SettingsDialog = (props: SettingsDialogProps) => {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
     const [selectedEntry, setSelectedEntry] = React.useState(baseUrl + '/docs/openapi.json');
@@ -77,12 +75,7 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                 <Box
                     noValidate
                     component="form"
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        p: [0.5, 1],
-                        alignItems: 'center',
-                    }}
+                    sx={{display: 'flex', flexDirection: 'row', p: [0.5, 1], alignItems: 'center'}}
                     onSubmit={(e) => {
                         e.preventDefault();
                         onAddHandler();

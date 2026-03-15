@@ -11,9 +11,9 @@ export {DatabasePage} from '@yiisoft/yii-dev-panel/Module/Inspector/Pages/Databa
 export {EventsPage} from '@yiisoft/yii-dev-panel/Module/Inspector/Pages/EventsPage';
 export {FileExplorerPage} from '@yiisoft/yii-dev-panel/Module/Inspector/Pages/FileExplorerPage';
 export * as GitPages from '@yiisoft/yii-dev-panel/Module/Inspector/Pages/Git';
+export {OpcachePage} from '@yiisoft/yii-dev-panel/Module/Inspector/Pages/OpcachePage';
 export {PhpInfoPage} from '@yiisoft/yii-dev-panel/Module/Inspector/Pages/PhpInfoPage';
 export {RoutesPage} from '@yiisoft/yii-dev-panel/Module/Inspector/Pages/RoutesPage';
 export {TablePage} from '@yiisoft/yii-dev-panel/Module/Inspector/Pages/TablePage';
 export {TestsPage} from '@yiisoft/yii-dev-panel/Module/Inspector/Pages/TestsPage';
 export {TranslationsPage} from '@yiisoft/yii-dev-panel/Module/Inspector/Pages/TranslationsPage';
-export {OpcachePage} from '@yiisoft/yii-dev-panel/Module/Inspector/Pages/OpcachePage';

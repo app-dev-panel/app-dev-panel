@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector;
 
@@ -13,9 +13,8 @@ class CommandResponse
     public function __construct(
         private string $status,
         private mixed $result,
-        private array $errors = []
-    ) {
-    }
+        private array $errors = [],
+    ) {}
 
     public function getStatus(): string
     {

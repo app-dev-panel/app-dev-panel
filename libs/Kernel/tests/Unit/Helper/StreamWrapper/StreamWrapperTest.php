@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Helper\StreamWrapper;
 
-use PHPUnit\Framework\TestCase;
 use AppDevPanel\Kernel\Tests\Support\Stub\PhpStreamProxy;
+use PHPUnit\Framework\TestCase;
 
 final class StreamWrapperTest extends TestCase
 {

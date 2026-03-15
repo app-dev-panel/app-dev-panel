@@ -1,17 +1,11 @@
 import {FilePresent} from '@mui/icons-material';
 import {Alert, AlertTitle, Link, Paper} from '@mui/material';
+import Box from '@mui/material/Box';
 import {parseFilePathWithLineAnchor} from '@yiisoft/yii-dev-panel-sdk/Helper/filePathParser';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel/Module/Debug/Component/JsonRenderer';
-import Box from '@mui/material/Box';
-import React from 'react';
 
-type VarDumperEntry = {
-    variable: any;
-    line: string;
-};
-type VarDumperPanelProps = {
-    data: VarDumperEntry[];
-};
+type VarDumperEntry = {variable: any; line: string};
+type VarDumperPanelProps = {data: VarDumperEntry[]};
 
 export const VarDumperPanel = ({data}: VarDumperPanelProps) => {
     if (!data || data.length === 0) {

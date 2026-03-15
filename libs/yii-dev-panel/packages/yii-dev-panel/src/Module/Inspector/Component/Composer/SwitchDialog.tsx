@@ -32,9 +32,7 @@ export const SwitchDialog = ({
     onSwitch,
     ...rest
 }: SwitchDialog) => {
-    const getComposerInspectQuery = useGetComposerInspectQuery(packageName as string, {
-        skip: packageName == null,
-    });
+    const getComposerInspectQuery = useGetComposerInspectQuery(packageName as string, {skip: packageName == null});
     const [selectedVersion, setSelectedVersion] = useState<string | null>(installedVersion);
     const [isDev, setIsDev] = useState<boolean>(isDevPackage);
     const [postComposerRequirePackage, postComposerRequirePackageInfo] = usePostComposerRequirePackageMutation();
@@ -57,12 +55,7 @@ export const SwitchDialog = ({
                 <Box
                     noValidate
                     component="form"
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        m: 'auto',
-                    }}
+                    sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', m: 'auto'}}
                 >
                     <FormControl disabled={postComposerRequirePackageInfo.isLoading} sx={{mt: 2, flexGrow: 0.9}}>
                         <InputLabel htmlFor="max-width">Versions</InputLabel>

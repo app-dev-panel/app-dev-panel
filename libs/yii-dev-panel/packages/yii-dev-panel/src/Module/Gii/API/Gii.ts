@@ -9,29 +9,12 @@ export type GiiGenerator = {
     attributes: Record<string, GiiGeneratorAttribute>;
     [name: string]: any;
 };
-type SummaryResponseType = {
-    generators: GiiGenerator[];
-};
-type PreviewResponseType = {
-    files: any[];
-    operations: any[];
-    errors: {[name: string]: any} | undefined;
-};
+type SummaryResponseType = {generators: GiiGenerator[]};
+type PreviewResponseType = {files: any[]; operations: any[]; errors: {[name: string]: any} | undefined};
 
-type GiiPreviewType = {
-    generator: string;
-    parameters: any;
-};
-type GiiGenerateType = {
-    generator: string;
-    parameters: any;
-    answers: any;
-};
-type GiiDiffType = {
-    generator: string;
-    parameters: any;
-    fileId: string;
-};
+type GiiPreviewType = {generator: string; parameters: any};
+type GiiGenerateType = {generator: string; parameters: any; answers: any};
+type GiiDiffType = {generator: string; parameters: any; fileId: string};
 export const giiApi = createApi({
     reducerPath: 'api.gii',
     baseQuery: createBaseQuery('/gii/api'),

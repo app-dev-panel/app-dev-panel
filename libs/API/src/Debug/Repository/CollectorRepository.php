@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Debug\Repository;
 
@@ -10,9 +10,8 @@ use AppDevPanel\Kernel\Storage\StorageInterface;
 final class CollectorRepository implements CollectorRepositoryInterface
 {
     public function __construct(
-        private StorageInterface $storage
-    ) {
-    }
+        private StorageInterface $storage,
+    ) {}
 
     public function getSummary(?string $id = null): array
     {
@@ -39,7 +38,7 @@ final class CollectorRepository implements CollectorRepositoryInterface
         $dump = $this->loadData(StorageInterface::TYPE_OBJECTS, $id);
 
         foreach ($dump as $name => $value) {
-            if (( $pos = strrpos((string) $name, "#{$objectId}") ) !== false) {
+            if (($pos = strrpos((string) $name, "#{$objectId}")) !== false) {
                 return [substr($name, 0, $pos), $value];
             }
         }

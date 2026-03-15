@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Debug\Middleware;
 
@@ -13,9 +13,8 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 final class MiddlewareDispatcherMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        public MiddlewareDispatcher $middlewareDispatcher
-    ) {
-    }
+        public MiddlewareDispatcher $middlewareDispatcher,
+    ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {

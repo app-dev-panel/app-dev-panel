@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector\Stream;
 
@@ -19,9 +19,8 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
          * - '/ClosureExporter/'
          */
         private readonly array $ignoredPathPatterns = [],
-        private readonly array $ignoredClasses = []
-    ) {
-    }
+        private readonly array $ignoredClasses = [],
+    ) {}
 
     /**
      * @var array[]
@@ -64,7 +63,7 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
 
         $this->operations[$operation][] = [
             'path' => $path,
-            'args' => $args
+            'args' => $args,
         ];
     }
 
@@ -75,8 +74,8 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
         }
         return [
             'fs_stream' => array_merge(...array_map(fn(string $operation) => [$operation => count(
-                $this->operations[$operation]
-            )], array_keys($this->operations)))
+                $this->operations[$operation],
+            )], array_keys($this->operations))),
         ];
     }
 

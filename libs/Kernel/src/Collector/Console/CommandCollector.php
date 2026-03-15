@@ -1,9 +1,12 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector\Console;
 
+use AppDevPanel\Kernel\Collector\CollectorTrait;
+use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
+use AppDevPanel\Kernel\Collector\TimelineCollector;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleEvent;
@@ -11,9 +14,6 @@ use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Yiisoft\Yii\Console\Output\ConsoleBufferedOutput;
-use AppDevPanel\Kernel\Collector\CollectorTrait;
-use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
-use AppDevPanel\Kernel\Collector\TimelineCollector;
 
 final class CommandCollector implements SummaryCollectorInterface
 {
@@ -27,9 +27,8 @@ final class CommandCollector implements SummaryCollectorInterface
     private array $commands = [];
 
     public function __construct(
-        private readonly TimelineCollector $timelineCollector
-    ) {
-    }
+        private readonly TimelineCollector $timelineCollector,
+    ) {}
 
     public function getCollected(): array
     {
@@ -53,7 +52,7 @@ final class CommandCollector implements SummaryCollectorInterface
                 'input' => $this->castInputToString($event->getInput()),
                 'output' => $this->fetchOutput($event->getOutput()),
                 'error' => $event->getError()->getMessage(),
-                'exitCode' => $event->getExitCode()
+                'exitCode' => $event->getExitCode(),
             ];
 
             return;
@@ -65,7 +64,7 @@ final class CommandCollector implements SummaryCollectorInterface
                 'command' => $command,
                 'input' => $this->castInputToString($event->getInput()),
                 'output' => $this->fetchOutput($event->getOutput()),
-                'exitCode' => $event->getExitCode()
+                'exitCode' => $event->getExitCode(),
             ];
             return;
         }
@@ -77,7 +76,7 @@ final class CommandCollector implements SummaryCollectorInterface
             'input' => $this->castInputToString($event->getInput()),
             'output' => $this->fetchOutput($event->getOutput()),
             'arguments' => $definition?->getArguments() ?? [],
-            'options' => $definition?->getOptions() ?? []
+            'options' => $definition?->getOptions() ?? [],
         ];
     }
 
@@ -108,8 +107,8 @@ final class CommandCollector implements SummaryCollectorInterface
                 'name' => $commandEvent['name'],
                 'class' => $commandEvent['command'] instanceof Command ? $commandEvent['command']::class : null,
                 'input' => $commandEvent['input'],
-                'exitCode' => $commandEvent['exitCode'] ?? self::UNDEFINED_EXIT_CODE
-            ]
+                'exitCode' => $commandEvent['exitCode'] ?? self::UNDEFINED_EXIT_CODE,
+            ],
         ];
     }
 
@@ -133,7 +132,7 @@ final class CommandCollector implements SummaryCollectorInterface
         return [
             ConsoleErrorEvent::class,
             ConsoleTerminateEvent::class,
-            ConsoleEvent::class
+            ConsoleEvent::class,
         ];
     }
 }

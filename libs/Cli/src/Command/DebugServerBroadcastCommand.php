@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
-declare(ticks = 1);
+declare(ticks=1);
 
 namespace AppDevPanel\Cli\Command;
 
+use AppDevPanel\Kernel\DebugServer\Connection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -13,7 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\Yii\Console\ExitCode;
-use AppDevPanel\Kernel\DebugServer\Connection;
 
 final class DebugServerBroadcastCommand extends Command
 {

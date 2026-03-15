@@ -10,14 +10,7 @@ export type InfoBoxProps = {
 };
 export const InfoBox = ({text, title, icon, severity}: InfoBoxProps) => {
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                width: '100%',
-            }}
-        >
+        <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%'}}>
             <>
                 {cloneElement(icon, {sx: {my: 3, fontSize: 150}, color: severity})}
                 <Typography component="h5" variant="h5" my={3}>

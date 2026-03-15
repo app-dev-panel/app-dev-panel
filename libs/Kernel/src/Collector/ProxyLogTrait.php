@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
@@ -16,7 +16,7 @@ trait ProxyLogTrait
         string $method,
         array $arguments,
         mixed $result,
-        float $timeStart
+        float $timeStart,
     ): void {
         $error = $this->getCurrentError();
         $this->processLogData($arguments, $result, $error);
@@ -35,15 +35,15 @@ trait ProxyLogTrait
      */
     private function processLogData(array &$arguments, mixed &$result, ?object &$error): void
     {
-        if (!( $this->config->getLogLevel() & ContainerInterfaceProxy::LOG_ARGUMENTS )) {
+        if (!($this->config->getLogLevel() & ContainerInterfaceProxy::LOG_ARGUMENTS)) {
             $arguments = null;
         }
 
-        if (!( $this->config->getLogLevel() & ContainerInterfaceProxy::LOG_RESULT )) {
+        if (!($this->config->getLogLevel() & ContainerInterfaceProxy::LOG_RESULT)) {
             $result = null;
         }
 
-        if (!( $this->config->getLogLevel() & ContainerInterfaceProxy::LOG_ERROR )) {
+        if (!($this->config->getLogLevel() & ContainerInterfaceProxy::LOG_ERROR)) {
             $error = null;
         }
     }
@@ -55,7 +55,7 @@ trait ProxyLogTrait
         ?array $arguments,
         mixed $result,
         ?object $error,
-        float $timeStart
+        float $timeStart,
     ): void {
         $this->config->getCollector()?->collect(
             $service,
@@ -66,7 +66,7 @@ trait ProxyLogTrait
             $this->getCurrentResultStatus(),
             $error,
             $timeStart,
-            microtime(true)
+            microtime(true),
         );
     }
 
@@ -77,7 +77,7 @@ trait ProxyLogTrait
         ?array $arguments,
         mixed $result,
         ?object $error,
-        float $timeStart
+        float $timeStart,
     ): void {
         $this->config
             ->getDispatcher()
@@ -91,8 +91,8 @@ trait ProxyLogTrait
                     $this->getCurrentResultStatus(),
                     $error,
                     $timeStart,
-                    microtime(true)
-                )
+                    microtime(true),
+                ),
             );
     }
 

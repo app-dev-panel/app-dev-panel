@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Debug\Repository;
 
-use PHPUnit\Framework\TestCase;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Kernel\Storage\MemoryStorage;
+use PHPUnit\Framework\TestCase;
 
 final class CollectorRepositoryTest extends TestCase
 {
@@ -21,9 +21,9 @@ final class CollectorRepositoryTest extends TestCase
 
         $this->assertSame(
             [
-                ['total' => 7]
+                ['total' => 7],
             ],
-            $repository->getSummary()
+            $repository->getSummary(),
         );
     }
 
@@ -61,9 +61,9 @@ final class CollectorRepositoryTest extends TestCase
         $this->assertSame(
             [
                 'stdClass',
-                'value'
+                'value',
             ],
-            $object
+            $object,
         );
     }
 }

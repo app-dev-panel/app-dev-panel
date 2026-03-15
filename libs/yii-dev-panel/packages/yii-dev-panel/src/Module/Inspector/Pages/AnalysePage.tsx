@@ -15,11 +15,11 @@ import Typography from '@mui/material/Typography';
 import {GridColDef, GridColumns, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {DataTable} from '@yiisoft/yii-dev-panel-sdk/Component/Grid';
 import {parseFilePathWithLineAnchor} from '@yiisoft/yii-dev-panel-sdk/Helper/filePathParser';
+import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 import {useRunCommandMutation} from '@yiisoft/yii-dev-panel/Module/Inspector/API/Inspector';
 import clipboardCopy from 'clipboard-copy';
 import * as React from 'react';
 import {useState} from 'react';
-import {useBreadcrumbs} from '@yiisoft/yii-dev-panel/Application/Context/BreadcrumbsContext';
 
 const columns: GridColDef[] = [
     {
@@ -74,10 +74,7 @@ function renderGrid(data: any) {
     return <DataTable rows={data as GridValidRowModel[]} columns={columns as GridColumns} />;
 }
 
-type CommandResponseType = {
-    isSuccessful: boolean | undefined;
-    errors: string[];
-};
+type CommandResponseType = {isSuccessful: boolean | undefined; errors: string[]};
 export const AnalysePage = () => {
     const [commandQuery, commandQueryInfo] = useRunCommandMutation();
     const [errorRows, setErrorRows] = useState<any[]>([]);
@@ -125,10 +122,7 @@ export const AnalysePage = () => {
                 resultErrorRows.push(tempObject);
             }
         }
-        setCommandResponse({
-            isSuccessful: data.data.status === 'ok',
-            errors: data.data.errors,
-        });
+        setCommandResponse({isSuccessful: data.data.status === 'ok', errors: data.data.errors});
         setInfoRows(resultInfoRows);
         setErrorRows(resultErrorRows);
     }
