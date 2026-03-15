@@ -2,3 +2,4 @@
 */**/composer.lock
 /.phpunit.cache/
 /coverage.xml
+.claude/worktrees/
