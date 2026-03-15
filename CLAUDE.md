@@ -112,16 +112,38 @@ GitHub Actions runs on every push and PR:
 - **Mago**: Format check, lint, and static analysis
 - **PR Reports**: Coverage report and Mago analysis posted as PR comments
 
-## Development Workflow
+## Mandatory Post-Feature Pipeline
 
-After implementing a feature or fix, you **must** run and pass all checks before completing:
+After implementing any feature or fix, you **must** run the full pipeline. Repeat until all steps pass.
 
+### Step 1: Write Tests
 ```bash
-composer fix                        # Fix formatting + run lint + analyze
-composer test                       # Run all tests
+/test <changed files>
 ```
+Write tests for all new/modified code. Follow test conventions from `.claude/commands/test.md`.
 
-All checks must be green before merging. CI enforces this automatically.
+### Step 2: Run Code Quality
+```bash
+composer fix                        # PHP: fix formatting + lint + analyze
+composer test                       # PHP: run all tests
+cd libs/yii-dev-panel && npm run check  # JS: format check + lint (if frontend changed)
+```
+All checks must be green. Fix any failures before proceeding.
+
+### Step 3: Review Documentation
+```bash
+/review-docs <changed modules>
+```
+Update CLAUDE.md and docs/ for any changed modules. Documentation is LLM-optimized — no filler, only facts.
+
+### Step 4: Review Architecture
+```bash
+/review-arch <changed modules>
+```
+Verify no dependency violations introduced. Modules must follow the dependency graph strictly.
+
+### Step 5: Iterate
+If any step produces changes, go back to Step 2 and re-run checks. Continue until stable.
 
 ### Baselines
 
@@ -134,6 +156,16 @@ New code must not introduce new issues. To regenerate baselines after fixing exi
 composer lint:baseline
 composer analyze:baseline
 ```
+
+## Custom Skills
+
+| Skill | Command | Purpose |
+|-------|---------|---------|
+| Test Writer | `/test <file or class>` | Write tests in consistent style, inline mocks, no test environment |
+| Doc Reviewer | `/review-docs [module]` | Review/update docs for LLM consumption, remove fluff |
+| Arch Reviewer | `/review-arch [module]` | Check dependency rules, abstraction leaks, circular deps |
+
+Skill definitions: `.claude/skills/test/SKILL.md`, `.claude/skills/review-docs/SKILL.md`, `.claude/skills/review-arch/SKILL.md`.
 
 ## Module-Level Documentation
 
