@@ -19,7 +19,7 @@ final class LoggerInterfaceProxyTest extends TestCase
     public function testLogMethods(string $method, string $level, string $message, array $context): void
     {
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->once())->method($method);
+        $logger->expects($this->once())->method('log')->with($level, $message, $context);
         $collector = $this->createMock(LogCollector::class);
         $collector
             ->expects($this->once())
