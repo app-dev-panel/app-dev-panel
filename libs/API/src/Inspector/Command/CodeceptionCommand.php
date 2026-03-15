@@ -56,7 +56,7 @@ class CodeceptionCommand implements CommandInterface
             JSON_THROW_ON_ERROR,
         );
 
-        if (!$process->getExitCode() > 1) {
+        if ($process->getExitCode() > 1) {
             return new CommandResponse(
                 status: CommandResponse::STATUS_FAIL,
                 result: null,

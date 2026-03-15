@@ -45,7 +45,7 @@ class PsalmCommand implements CommandInterface
 
         $processOutput = json_decode(file_get_contents($outputFilePath), true, 512, JSON_THROW_ON_ERROR);
 
-        if (!$process->getExitCode() > 1) {
+        if ($process->getExitCode() > 1) {
             return new CommandResponse(
                 status: CommandResponse::STATUS_FAIL,
                 result: null,
