@@ -19,6 +19,9 @@ final class Connection
     public const DEFAULT_TIMEOUT = 10 * 1000; // 10 milliseconds
     public const DEFAULT_BUFFER_SIZE = 1 * 1024; // 1 kilobyte
 
+    private const SOCKET_EAGAIN = 35;
+    private const SOCKET_ECONNREFUSED = 61;
+
     public const TYPE_RESULT = 0x001B;
     public const TYPE_ERROR = 0x002B;
     public const TYPE_RELEASE = 0x003B;
@@ -89,7 +92,7 @@ final class Connection
                     $newFrameAwaitRepeat = 0;
                     yield [self::TYPE_RELEASE, $socket_last_error, socket_strerror($socket_last_error)];
                 }
-                if ($socket_last_error === 35) {
+                if ($socket_last_error === self::SOCKET_EAGAIN) {
                     usleep(self::DEFAULT_TIMEOUT);
                     continue;
                 }
@@ -102,12 +105,8 @@ final class Connection
             $localBuffer = '';
             $bytesToRead = $length[1];
             $bytesRead = 0;
-            //$value = 2 ** ((int) ($bytesToRead / 2));
-            //socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, $value);
             $repeat = 0;
             while ($bytesRead < $bytesToRead) {
-                //$buffer = socket_read($this->socket,  $bytesToRead - $bytesRead);
-                //$bufferLength = strlen($buffer);
                 $bufferLength = socket_recv(
                     $this->socket,
                     $buffer,
@@ -118,9 +117,8 @@ final class Connection
                     if ($repeat === $maxRepeats) {
                         break;
                     }
-                    //if ($bufferLength === false) {
                     $socket_last_error = socket_last_error($this->socket);
-                    if ($socket_last_error === 35) {
+                    if ($socket_last_error === self::SOCKET_EAGAIN) {
                         $repeat++;
                         usleep(self::DEFAULT_TIMEOUT * 5);
                         continue;
@@ -139,12 +137,11 @@ final class Connection
     public function broadcast(int $type, string $data): array
     {
         $files = glob(sys_get_temp_dir() . '/yii-dev-server-*.sock', GLOB_NOSORT);
-        //echo 'Files: ' . implode(', ', $files) . "\n";
         $uniqueErrors = [];
         $payload = json_encode([$type, $data], JSON_THROW_ON_ERROR);
         foreach ($files as $file) {
             $socket = @fsockopen('udg://' . $file, -1, $errno, $errstr);
-            if ($errno === 61) {
+            if ($errno === self::SOCKET_ECONNREFUSED) {
                 @unlink($file);
                 continue;
             }
@@ -161,10 +158,8 @@ final class Connection
                     continue;
                 }
             } catch (Throwable $e) {
-                //@unlink($file);
                 throw $e;
             } finally {
-                //fflush($socket);
                 fclose($socket);
             }
         }
@@ -193,7 +188,6 @@ final class Connection
         fwrite($fp, pack('P', $strlen));
         for ($written = 0; $written < $strlen; $written += $fwrite) {
             $fwrite = fwrite($fp, substr($data, $written), self::DEFAULT_BUFFER_SIZE);
-            //\fflush($fp);
             usleep(self::DEFAULT_TIMEOUT * 5);
             if ($fwrite === false) {
                 return $written;
