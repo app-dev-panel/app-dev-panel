@@ -60,7 +60,12 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
 
     public static function dataSkipCollectOnMatchIgnoreReferences(): iterable
     {
-        $httpStreamBefore = static function (string $url) {};
+        $httpStreamBefore = static function (string $url) {
+            $host = parse_url($url, PHP_URL_HOST);
+            if ($host !== false && $host !== null && !@dns_get_record($host, DNS_A)) {
+                TestCase::markTestSkipped("Cannot resolve host: $host (no network)");
+            }
+        };
         $httpStreamOperation = static function (string $url) {
             $stream = fopen($url, 'r');
             fread($stream, 4);

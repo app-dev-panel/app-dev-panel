@@ -830,10 +830,11 @@ final class DumperTest extends TestCase
                 {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":false,"uri":"php:\/\/stderr"}
                 S,
         ];
+        $stdinSeekable = stream_get_meta_data(STDIN)['seekable'] ? 'true' : 'false';
         yield 'stdin' => [
             STDIN,
             <<<S
-                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"rb","unread_bytes":0,"seekable":false,"uri":"php:\/\/stdin"}
+                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"rb","unread_bytes":0,"seekable":$stdinSeekable,"uri":"php:\/\/stdin"}
                 S,
         ];
     }
