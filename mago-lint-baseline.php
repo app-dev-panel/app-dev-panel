@@ -235,6 +235,120 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$dataType` is implicitly nullable and relies on a deprecated feature."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$delete` is implicitly nullable and relies on a deprecated feature."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$forRead` is implicitly nullable and relies on a deprecated feature."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$indexMethod` is implicitly nullable and relies on a deprecated feature."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$indexType` is implicitly nullable and relies on a deprecated feature."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$length` is implicitly nullable and relies on a deprecated feature."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$options` is implicitly nullable and relies on a deprecated feature."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$update` is implicitly nullable and relies on a deprecated feature."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$value` is implicitly nullable and relies on a deprecated feature."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$isolationLevel` is implicitly nullable and relies on a deprecated feature."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$sequenceName` is implicitly nullable and relies on a deprecated feature."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
+code = "explicit-nullable-param"
+message = "Parameter `$sql` is implicitly nullable and relies on a deprecated feature."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/DatabaseCollector.php"
+code = "prefer-static-closure"
+message = "This arrow function does not use `$this` and should be declared static."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"
+code = "explicit-nullable-param"
+message = "Parameter `$isolationLevel` is implicitly nullable and relies on a deprecated feature."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerCollector.php"
+code = "prefer-static-closure"
+message = "This arrow function does not use `$this` and should be declared static."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorCollector.php"
+code = "prefer-static-closure"
+message = "This arrow function does not use `$this` and should be declared static."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."

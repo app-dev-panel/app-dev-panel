@@ -1315,6 +1315,426 @@ message = "This condition (type `true`) will always evaluate to true."
 count = 1
 
 [[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `bool|null` for parameter `$forRead` is incompatible with native type `bool`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `int|null` for parameter `$dataType` is incompatible with native type `int`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `int|null` for parameter `$length` is incompatible with native type `int`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `int|null|string` for parameter `$value` is incompatible with native type `int|string`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `null|string` for parameter `$delete` is incompatible with native type `string`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `null|string` for parameter `$indexMethod` is incompatible with native type `string`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `null|string` for parameter `$indexType` is incompatible with native type `string`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `null|string` for parameter `$options` is incompatible with native type `string`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `null|string` for parameter `$update` is incompatible with native type `string`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\adapter\yiisoft\collector\db\commandinterfaceproxy::__construct`: expected `Yiisoft\Db\Command\CommandInterface`, but found `mixed`.'
+count = 39
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 12
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\collector\db\commandinterfaceproxy::insertwithreturningpks`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
+code = "string-member-selector"
+message = "This member selector uses a non-literal string type (`non-empty-string`); its specific value cannot be statically determined."
+count = 42
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `null|string` for parameter `$isolationLevel` is incompatible with native type `string`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `null|string` for parameter `$sequenceName` is incompatible with native type `string`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `null|string` for parameter `$sql` is incompatible with native type `string`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/DatabaseCollector.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/DatabaseCollector.php"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `mixed`."
+count = 14
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/DatabaseCollector.php"
+code = "mixed-operand"
+message = "Left operand in spaceship comparison (`<=>`) has `mixed` type."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/DatabaseCollector.php"
+code = "mixed-operand"
+message = "Right operand in spaceship comparison (`<=>`) has `mixed` type."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"
+code = "docblock-type-mismatch"
+message = "Docblock type `null|string` for parameter `$isolationLevel` is incompatible with native type `string`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"
+code = "string-member-selector"
+message = "This member selector uses a non-literal string type (`non-empty-string`); its specific value cannot be statically determined."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerCollector.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Mailer\MessageInterface)`).'
+count = 12
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerCollector.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `quoted_printable_decode`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerCollector.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Mailer\MessageInterface`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerInterfaceProxy.php"
+code = "non-existent-class-like"
+message = 'Class `AppDevPanel\Adapter\Yiisoft\Collector\Mailer\MailerInterfaceProxy` cannot implement unknown type `MailerInterface`'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerInterfaceProxy.php"
+code = "unused-property"
+message = "Property `$collector` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerInterfaceProxy.php"
+code = "unused-property"
+message = "Property `$decorated` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+code = "less-specific-nested-argument-type"
+message = "Argument type mismatch for argument #2 of `implode`: expected `array<array-key, Stringable|null|scalar>|null`, but provided type `array{0: string, ...}` is less specific."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `spl_object_id`: expected `object`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+code = "non-existent-method"
+message = 'Method `__debuginfo` does not exist on type `Psr\Http\Server\MiddlewareInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Queue\JobStatus)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Queue\QueueInterface)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Queue\JobStatus`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Queue\Message\MessageInterface`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Queue\Middleware\Push\MiddlewarePushInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Queue\QueueInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueDecorator.php"
+code = "non-existent-class-like"
+message = 'Class `AppDevPanel\Adapter\Yiisoft\Collector\Queue\QueueDecorator` cannot implement unknown type `QueueInterface`'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueDecorator.php"
+code = "unused-property"
+message = "Property `$collector` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueDecorator.php"
+code = "unused-property"
+message = "Property `$queue` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueProviderInterfaceProxy.php"
+code = "non-existent-class-like"
+message = 'Class `AppDevPanel\Adapter\Yiisoft\Collector\Queue\QueueProviderInterfaceProxy` cannot implement unknown type `QueueProviderInterface`'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueProviderInterfaceProxy.php"
+code = "unused-property"
+message = "Property `$collector` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueProviderInterfaceProxy.php"
+code = "unused-property"
+message = "Property `$queueProvider` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueWorkerInterfaceProxy.php"
+code = "non-existent-class-like"
+message = 'Class `AppDevPanel\Adapter\Yiisoft\Collector\Queue\QueueWorkerInterfaceProxy` cannot implement unknown type `WorkerInterface`'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueWorkerInterfaceProxy.php"
+code = "unused-property"
+message = "Property `$collector` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueWorkerInterfaceProxy.php"
+code = "unused-property"
+message = "Property `$worker` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterCollector.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 5
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterCollector.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`nonnull`)."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterCollector.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\collector\router\routercollector::getcurrentroute`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterCollector.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\collector\router\routercollector::getroutebycurrentroute`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorCollector.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorCollector.php"
+code = "mixed-operand"
+message = "Casting `mixed` to `bool`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorInterfaceProxy.php"
+code = "invalid-type-cast"
+message = 'Cannot reliably cast type `iterable<int|string, (callable(...mixed): mixed)|Yiisoft\Validator\RuleInterface|iterable<int, (callable(...mixed): mixed)|Yiisoft\Validator\RuleInterface>>` to `array`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/View/WebViewCollector.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\Event\WebView\AfterRender)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/View/WebViewCollector.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\Event\WebView\AfterRender`.'
+count = 1
+
+[[issues]]
 file = "libs/Adapter/Yiisoft/src/DebugServiceProvider.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `appdevpanel\kernel\collector\containerinterfaceproxy::__construct`: expected `AppDevPanel\Kernel\Collector\ContainerProxyConfig`, but found `mixed`.'
