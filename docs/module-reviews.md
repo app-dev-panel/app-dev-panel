@@ -161,27 +161,45 @@
 
 ## 3. CLI Module Review
 
-### Architecture
+### Critical Issues
 
-The CLI module is minimal — it provides console commands for the debug server.
+**1. No error handling for socket operations (DebugServerCommand.php:54-56)**
+- `Connection::create()` and `$socket->bind()` have no try-catch
+- Port already in use or permission denied crashes the server with unhandled exception
 
-### Issues
+**2. DebugServerBroadcastCommand logic flaw (lines 45-57)**
+- Creates socket, registers signal handler, immediately broadcasts and returns
+- Signal handler never gets a chance to run
+- Socket is never explicitly closed on success path (only on SIGINT)
 
-**1. DebugServer commands use Connection directly**
-- Same tight coupling to sockets as the Kernel Connection class
-- No abstraction layer for testing
+**3. Unhandled JsonException (DebugServerCommand.php:74)**
+- `json_decode()` with `JSON_THROW_ON_ERROR` has no try-catch — malformed JSON crashes the server loop
 
-**2. No graceful shutdown handling**
-- Debug server commands don't handle SIGTERM/SIGINT
-- Server processes can leave socket files behind
+### Major Issues
+
+**4. Hardcoded defaults (DebugServerCommand.php:26-27)**
+- Default address `0.0.0.0` and port `8890` are hardcoded
+- Not configurable via DI or config files
+
+**5. Inconsistent command registration patterns**
+- `DebugResetCommand` uses `#[AsCommand]` attribute
+- `DebugServerCommand` and `DebugServerBroadcastCommand` use `protected static $defaultName`
+- Mixing old and new Symfony Console patterns
+
+**6. Test namespace mismatch (ResetCommandTest.php:5)**
+- Namespace is `Unit\Command` instead of `AppDevPanel\Cli\Tests\Unit\Command`
 
 ### Development Plan
 
 | Priority | Task | Impact |
 |----------|------|--------|
-| P1 | Add signal handling (SIGTERM, SIGINT) to server commands | Stability — clean shutdown |
-| P2 | Add health check endpoint to debug server | Monitoring, operational visibility |
-| P2 | Add configurable socket path | Flexibility for deployment |
+| P0 | Add error handling to socket operations | Stability — prevent unhandled crashes |
+| P0 | Fix DebugServerBroadcastCommand socket lifecycle | Correctness — currently broken |
+| P1 | Add try-catch for JSON decode in server loop | Stability — malformed data resilience |
+| P1 | Add signal handling (SIGTERM, SIGINT) to all server commands | Stability — clean shutdown |
+| P2 | Make address/port configurable via DI config | Flexibility for deployment |
+| P2 | Standardize on `#[AsCommand]` attribute pattern | Consistency |
+| P2 | Fix test namespace | Autoloader correctness |
 | P3 | Add logging to debug server operations | Debugging server issues |
 
 ---
@@ -205,12 +223,23 @@ The CLI module is minimal — it provides console commands for the debug server.
 **4. DebugServiceProvider creates circular dependency potential**
 - Wrapping `ContainerInterface` with `ContainerInterfaceProxy` that calls `$container->get(ContainerProxyConfig::class)` during container resolution — potential infinite recursion if misconfigured
 
+**5. Bug: Command name mismatch in ignoredCommands (params.php:90)**
+- `ignoredCommands` contains `'debug/reset'` (with slash)
+- But `DebugResetCommand::COMMAND_NAME` is `'debug:reset'` (with colon)
+- The reset command is never actually ignored — the pattern doesn't match
+
+**6. Duplicated enabled-check across all config files**
+- `if (!(bool)($params['app-dev-panel/yii-debug']['enabled'] ?? false))` is copy-pasted in di.php, di-web.php, di-console.php
+- Should be extracted to a shared helper
+
 ### Development Plan
 
 | Priority | Task | Impact |
 |----------|------|--------|
+| P0 | Fix command name mismatch: `debug/reset` → `debug:reset` | Bug — ignored commands not working |
 | P1 | Complete namespace migration (yii-debug → app-dev-panel) | Consistency |
 | P1 | Add guard against circular dependency in DebugServiceProvider | Stability |
+| P1 | Extract duplicated enabled-check to shared helper | DRY, maintainability |
 | P2 | Lazy-initialize VarDumper handler to avoid early socket creation | Performance |
 | P2 | Document adapter creation guide for Symfony/Laravel | Ecosystem growth |
 | P3 | Add integration tests with real Yii DI container | Test coverage |
