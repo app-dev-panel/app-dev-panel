@@ -6,8 +6,7 @@ namespace AppDevPanel\Kernel;
 
 use __PHP_Incomplete_Class;
 use Closure;
-use ReflectionException;
-use Yiisoft\VarDumper\ClosureExporter;
+use ReflectionFunction;
 
 use function array_key_exists;
 use function is_array;
@@ -17,7 +16,6 @@ final class Dumper
 {
     private array $objects = [];
 
-    private static ?ClosureExporter $closureExporter = null;
     private readonly array $excludedClasses;
 
     private function __construct(
@@ -256,15 +254,17 @@ final class Dumper
         return '{resource}';
     }
 
-    /**
-     * Exports a {@see Closure} instance.
-     *
-     * @param Closure $closure Closure instance.
-     *
-     * @throws ReflectionException
-     */
     private function exportClosure(Closure $closure): string
     {
-        return (self::$closureExporter ??= new ClosureExporter())->export($closure);
+        $reflection = new ReflectionFunction($closure);
+        $file = $reflection->getFileName();
+        $startLine = $reflection->getStartLine();
+        $endLine = $reflection->getEndLine();
+
+        if ($file === false || $startLine === false) {
+            return 'function () { /* unknown source */ }';
+        }
+
+        return sprintf('Closure(%s:%d-%d)', $file, $startLine, $endLine);
     }
 }

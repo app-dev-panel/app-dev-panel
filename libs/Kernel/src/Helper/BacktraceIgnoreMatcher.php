@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Helper;
 
-use Yiisoft\Strings\CombinedRegexp;
-
 /**
  * All backtrace parameters should contain at least 4 elements in the following order:
  * 0 – Called method
@@ -35,6 +33,13 @@ final class BacktraceIgnoreMatcher
         if (empty($patterns)) {
             return false;
         }
-        return new CombinedRegexp($patterns)->matches($string);
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $string) === 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

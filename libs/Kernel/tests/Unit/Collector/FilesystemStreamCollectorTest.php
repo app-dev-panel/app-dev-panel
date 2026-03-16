@@ -8,7 +8,6 @@ use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Yiisoft\Files\FileHelper;
 
 final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
 {
@@ -79,7 +78,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         yield 'mkdir ignored by path' => [
             $path,
             $mkdirBefore,
-            [basename(__FILE__, '.php')],
+            ['/' . basename(__FILE__, '.php') . '/'],
             [],
             $mkdirOperation,
             $mkdirAfter,
@@ -107,7 +106,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             rename($path, $path . '.renamed');
         };
         $renameAfter = static function (string $path) {
-            FileHelper::removeDirectory(dirname($path));
+            self::removeDir(dirname($path));
         };
 
         yield 'rename matched' => [
@@ -126,7 +125,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         yield 'rename ignored by path' => [
             $path,
             $renameBefore,
-            [basename(__FILE__, '.php')],
+            ['/' . basename(__FILE__, '.php') . '/'],
             [],
             $renameOperation,
             $renameAfter,
@@ -172,7 +171,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         yield 'rmdir ignored by path' => [
             $path,
             $rmdirBefore,
-            [basename(__FILE__, '.php')],
+            ['/' . basename(__FILE__, '.php') . '/'],
             [],
             $rmdirOperation,
             $rmdirAfter,
@@ -200,7 +199,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             unlink($path);
         };
         $unlinkAfter = static function (string $path) {
-            FileHelper::removeDirectory(dirname($path));
+            self::removeDir(dirname($path));
         };
 
         yield 'unlink matched' => [
@@ -219,7 +218,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         yield 'unlink ignored by path' => [
             $path,
             $unlinkBefore,
-            [basename(__FILE__, '.php')],
+            ['/' . basename(__FILE__, '.php') . '/'],
             [],
             $unlinkOperation,
             $unlinkAfter,
@@ -256,7 +255,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             fclose($stream);
         };
         $fileStreamAfter = static function (string $path) {
-            FileHelper::removeDirectory(dirname($path));
+            self::removeDir(dirname($path));
         };
 
         yield 'file stream matched' => [
@@ -278,7 +277,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         yield 'file stream ignored by path' => [
             $path,
             $fileStreamBefore,
-            [basename(__FILE__, '.php')],
+            ['/' . basename(__FILE__, '.php') . '/'],
             [],
             $fileStreamOperation,
             $fileStreamAfter,
@@ -293,6 +292,21 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $fileStreamAfter,
             [],
         ];
+    }
+
+    private static function removeDir(string $path): void
+    {
+        if (!is_dir($path)) {
+            return;
+        }
+        $items = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST,
+        );
+        foreach ($items as $item) {
+            $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
+        }
+        @rmdir($path);
     }
 
     protected function getCollector(): CollectorInterface

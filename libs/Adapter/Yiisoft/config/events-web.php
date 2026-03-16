@@ -24,26 +24,26 @@ if (!isAppDevPanelEnabled($params)) {
 return [
     ApplicationStartup::class => [
         static fn (ApplicationStartup $event, Debugger $debugger) => $debugger->startup(StartupContext::generic()),
-        [WebAppInfoCollector::class, 'collect'],
+        static fn (ApplicationStartup $event, WebAppInfoCollector $collector) => $collector->markApplicationStarted(),
     ],
     ApplicationShutdown::class => [
-        [WebAppInfoCollector::class, 'collect'],
+        static fn (ApplicationShutdown $event, WebAppInfoCollector $collector) => $collector->markApplicationFinished(),
     ],
     BeforeRequest::class => [
         static fn (BeforeRequest $event, Debugger $debugger) => $debugger->startup(StartupContext::forRequest($event->getRequest())),
-        [WebAppInfoCollector::class, 'collect'],
-        [RequestCollector::class, 'collect'],
+        static fn (BeforeRequest $event, WebAppInfoCollector $collector) => $collector->markRequestStarted(),
+        static fn (BeforeRequest $event, RequestCollector $collector) => $collector->collectRequest($event->getRequest()),
     ],
     AfterRequest::class => [
-        [WebAppInfoCollector::class, 'collect'],
-        [RequestCollector::class, 'collect'],
+        static fn (AfterRequest $event, WebAppInfoCollector $collector) => $collector->markRequestFinished(),
+        static fn (AfterRequest $event, RequestCollector $collector) => $event->getResponse() !== null ? $collector->collectResponse($event->getResponse()) : null,
     ],
     AfterEmit::class => [
         [ProfilerInterface::class, 'flush'],
-        [WebAppInfoCollector::class, 'collect'],
+        static fn (AfterEmit $event, WebAppInfoCollector $collector) => $collector->markApplicationFinished(),
         [Debugger::class, 'shutdown'],
     ],
     ApplicationError::class => [
-        [ExceptionCollector::class, 'collect'],
+        static fn (ApplicationError $event, ExceptionCollector $collector) => $collector->collect($event->getThrowable()),
     ],
 ];

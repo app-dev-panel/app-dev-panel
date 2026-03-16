@@ -6,8 +6,8 @@ use Psr\Container\ContainerInterface;
 use Yiisoft\VarDumper\Handler\CompositeHandler;
 use Yiisoft\VarDumper\VarDumper;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
-use AppDevPanel\Kernel\Collector\VarDumperHandlerInterfaceProxy;
-use AppDevPanel\Kernel\DebugServer\VarDumperHandler;
+use AppDevPanel\Adapter\Yiisoft\Proxy\VarDumperHandlerInterfaceProxy;
+use AppDevPanel\Adapter\Yiisoft\DebugServer\VarDumperHandler;
 
 /**
  * @var $params array

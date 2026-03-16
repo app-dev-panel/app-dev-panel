@@ -8,10 +8,6 @@ use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Yii\Http\Event\AfterRequest;
-use Yiisoft\Yii\Http\Event\BeforeRequest;
 
 use function sleep;
 use function usleep;
@@ -23,13 +19,11 @@ final class WebAppInfoCollectorTest extends AbstractCollectorTestCase
      */
     protected function collectTestData(CollectorInterface $collector): void
     {
-        $requestMock = $this->createMock(ServerRequestInterface::class);
-        $requestMock->method('getAttribute')->willReturn(microtime(true));
-        $collector->collect(new BeforeRequest($requestMock));
+        $collector->markRequestStarted();
 
         DIRECTORY_SEPARATOR === '\\' ? sleep(1) : usleep(123_000);
 
-        $collector->collect(new AfterRequest($this->createMock(ResponseInterface::class)));
+        $collector->markRequestFinished();
     }
 
     protected function getCollector(): CollectorInterface

@@ -127,6 +127,12 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/API/tests/Unit/Debug/Controller/DebugControllerTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
 file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
 code = "explicit-octal"
 message = "Use explicit octal numeral notation."
@@ -349,6 +355,66 @@ message = "This arrow function does not use `$this` and should be declared stati
 count = 1
 
 [[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -358,48 +424,6 @@ count = 1
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
 code = "no-empty"
 message = "Use of the `empty` construct."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "cyclomatic-complexity"
-message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "no-empty-catch-clause"
-message = "Do not use empty `catch` blocks."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerProxyConfig.php"
-code = "excessive-parameter-list"
-message = "Parameter list is too long."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerProxyConfig.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 4
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerProxyConfig.php"
-code = "too-many-methods"
-message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -415,21 +439,9 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/Collector/ProxyLogTrait.php"
-code = "excessive-parameter-list"
-message = "Parameter list is too long."
-count = 3
-
-[[issues]]
 file = "libs/Kernel/src/Collector/ServiceCollector.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ServiceMethodProxy.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
@@ -460,12 +472,6 @@ count = 2
 file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "too-many-methods"
 message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/VarDumperHandlerInterfaceProxy.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
@@ -519,7 +525,7 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.7600000000000002)."
+message = "Class has a high kan defect score (2.83)."
 count = 1
 
 [[issues]]
@@ -620,6 +626,18 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.9100000000000001)."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "no-empty"
 message = "Use of the `empty` construct."
 count = 1
@@ -628,7 +646,7 @@ count = 1
 file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 2
+count = 5
 
 [[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
@@ -655,12 +673,6 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ContainerInterfaceProxyTest.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
 file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
@@ -670,7 +682,7 @@ count = 1
 file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 1
+count = 4
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
@@ -715,12 +727,6 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/tests/Unit/Helper/BacktraceIgnoreMatcherTest.php"
-code = "require-preg-quote-delimiter"
-message = "Missing delimiter argument in `preg_quote()` call"
-count = 5
-
-[[issues]]
 file = "libs/Kernel/tests/Unit/ProxyDecoratedCallsTest.php"
 code = "braced-string-interpolation"
 message = "Unbraced variable in string interpolation."
@@ -743,3 +749,9 @@ file = "libs/Kernel/tests/Unit/Service/FileServiceRegistryTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Storage/FileStorageTest.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 3

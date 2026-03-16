@@ -8,17 +8,6 @@ use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Dumper;
-use Yiisoft\Files\FileHelper;
-use Yiisoft\Json\Json;
-
-use function array_slice;
-use function count;
-use function dirname;
-use function filemtime;
-use function glob;
-use function strlen;
-use function substr;
-use function uasort;
 
 final class FileStorage implements StorageInterface
 {
@@ -56,7 +45,7 @@ final class FileStorage implements StorageInterface
         foreach ($dataFiles as $file) {
             $dir = dirname($file);
             $entryId = substr($dir, strlen(dirname($file, 2)) + 1);
-            $data[$entryId] = Json::decode(file_get_contents($file));
+            $data[$entryId] = json_decode(file_get_contents($file), true, 512, JSON_THROW_ON_ERROR);
         }
 
         return $data;
@@ -66,9 +55,14 @@ final class FileStorage implements StorageInterface
     {
         $basePath = $this->path . '/' . date('Y-m-d') . '/' . $id . '/';
 
-        FileHelper::ensureDirectory($basePath);
+        if (!is_dir($basePath)) {
+            mkdir($basePath, 0775, true);
+        }
 
-        $this->writeFileExclusive($basePath . self::TYPE_SUMMARY . '.json', Json::encode($summary));
+        $this->writeFileExclusive($basePath . self::TYPE_SUMMARY . '.json', json_encode(
+            $summary,
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE,
+        ));
         $this->writeFileExclusive($basePath . self::TYPE_DATA . '.json', Dumper::create($data)->asJson(30));
         $this->writeFileExclusive(
             $basePath . self::TYPE_OBJECTS . '.json',
@@ -81,7 +75,9 @@ final class FileStorage implements StorageInterface
         $basePath = $this->path . '/' . date('Y-m-d') . '/' . $this->idGenerator->getId() . '/';
 
         try {
-            FileHelper::ensureDirectory($basePath);
+            if (!is_dir($basePath)) {
+                mkdir($basePath, 0775, true);
+            }
 
             $dumper = Dumper::create($this->getData(), $this->excludedClasses);
             $this->writeFileExclusive($basePath . self::TYPE_DATA . '.json', $dumper->asJson(30));
@@ -102,7 +98,7 @@ final class FileStorage implements StorageInterface
 
     public function clear(): void
     {
-        FileHelper::removeDirectory($this->path);
+        self::removeDirectory($this->path);
     }
 
     /**
@@ -175,12 +171,12 @@ final class FileStorage implements StorageInterface
                 $path3 = dirname($file, 3);
                 $resource = substr($path1, strlen($path3));
 
-                FileHelper::removeDirectory($this->path . $resource);
+                self::removeDirectory($this->path . $resource);
 
                 // Clean empty group directories
                 $group = substr($path2, strlen($path3));
-                if (FileHelper::isEmptyDirectory($this->path . $group)) {
-                    FileHelper::removeDirectory($this->path . $group);
+                if (self::isEmptyDirectory($this->path . $group)) {
+                    self::removeDirectory($this->path . $group);
                 }
             }
         } finally {
@@ -188,5 +184,37 @@ final class FileStorage implements StorageInterface
             fclose($lockHandle);
             @unlink($lockFile);
         }
+    }
+
+    private static function removeDirectory(string $path): void
+    {
+        if (!is_dir($path)) {
+            return;
+        }
+
+        $items = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST,
+        );
+
+        foreach ($items as $item) {
+            if ($item->isDir()) {
+                @rmdir($item->getPathname());
+            } else {
+                @unlink($item->getPathname());
+            }
+        }
+
+        @rmdir($path);
+    }
+
+    private static function isEmptyDirectory(string $path): bool
+    {
+        if (!is_dir($path)) {
+            return false;
+        }
+
+        $iterator = new \FilesystemIterator($path);
+        return !$iterator->valid();
     }
 }

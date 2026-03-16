@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 use Yiisoft\Injector\Injector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
-use AppDevPanel\Kernel\Collector\ContainerInterfaceProxy;
+use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;

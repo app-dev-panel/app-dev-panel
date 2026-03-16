@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yiisoft\Tests\Unit;
 
 use AppDevPanel\Adapter\Yiisoft\DebugServiceProvider;
-use AppDevPanel\Kernel\Collector\ContainerInterfaceProxy;
-use AppDevPanel\Kernel\Collector\ContainerProxyConfig;
+use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy;
+use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerProxyConfig;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;

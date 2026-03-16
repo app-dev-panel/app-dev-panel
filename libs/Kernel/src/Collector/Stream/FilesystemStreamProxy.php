@@ -7,7 +7,6 @@ namespace AppDevPanel\Kernel\Collector\Stream;
 use AppDevPanel\Kernel\Helper\BacktraceIgnoreMatcher;
 use AppDevPanel\Kernel\Helper\StreamWrapper\StreamWrapper;
 use AppDevPanel\Kernel\Helper\StreamWrapper\StreamWrapperInterface;
-use Yiisoft\Strings\CombinedRegexp;
 
 use const SEEK_SET;
 
@@ -68,7 +67,6 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
          */
         class_exists(BacktraceIgnoreMatcher::class);
         class_exists(StreamWrapper::class);
-        class_exists(CombinedRegexp::class);
         stream_wrapper_unregister('file');
         stream_wrapper_register('file', self::class, STREAM_IS_URL);
         self::$registered = true;

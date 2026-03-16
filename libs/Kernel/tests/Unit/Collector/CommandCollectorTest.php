@@ -14,7 +14,7 @@ use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\StringInput;
-use Yiisoft\Yii\Console\Output\ConsoleBufferedOutput;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 final class CommandCollectorTest extends AbstractCollectorTestCase
 {
@@ -24,13 +24,11 @@ final class CommandCollectorTest extends AbstractCollectorTestCase
     protected function collectTestData(CollectorInterface $collector): void
     {
         $collector->collect(
-            new ConsoleCommandEvent(new Command('test'), new StringInput('test'), new ConsoleBufferedOutput()),
+            new ConsoleCommandEvent(new Command('test'), new StringInput('test'), new BufferedOutput()),
         );
+        $collector->collect(new ConsoleErrorEvent(new StringInput('test1'), new BufferedOutput(), new Exception()));
         $collector->collect(
-            new ConsoleErrorEvent(new StringInput('test1'), new ConsoleBufferedOutput(), new Exception()),
-        );
-        $collector->collect(
-            new ConsoleTerminateEvent(new Command('test1'), new StringInput('test1'), new ConsoleBufferedOutput(), 0),
+            new ConsoleTerminateEvent(new Command('test1'), new StringInput('test1'), new BufferedOutput(), 0),
         );
     }
 

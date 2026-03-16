@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Kernel\Collector;
+namespace AppDevPanel\Adapter\Yiisoft\Proxy;
 
+use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\ProxyDecoratedCalls;
 use Yiisoft\VarDumper\HandlerInterface;
 

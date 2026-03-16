@@ -69,7 +69,8 @@ final class HttpSubscriber implements EventSubscriberInterface
 
         $this->debugger->startup(StartupContext::forRequest($psrRequest));
 
-        $this->webAppInfoCollector?->collect($event);
+        $this->webAppInfoCollector?->markApplicationStarted();
+        $this->webAppInfoCollector?->markRequestStarted();
         $this->requestCollector?->collectRequest($symfonyRequest);
     }
 
@@ -79,7 +80,7 @@ final class HttpSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $this->webAppInfoCollector?->collect($event);
+        $this->webAppInfoCollector?->markRequestFinished();
         $this->requestCollector?->collectResponse($event->getResponse());
 
         // Add debug ID header to the response
@@ -93,7 +94,7 @@ final class HttpSubscriber implements EventSubscriberInterface
 
     public function onKernelTerminate(TerminateEvent $event): void
     {
-        $this->webAppInfoCollector?->collect($event);
+        $this->webAppInfoCollector?->markApplicationFinished();
         $this->debugger->shutdown();
     }
 }

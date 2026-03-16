@@ -7,10 +7,6 @@ namespace AppDevPanel\Kernel\Collector\Web;
 use AppDevPanel\Kernel\Collector\CollectorTrait;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
-use Yiisoft\Yii\Console\Event\ApplicationStartup;
-use Yiisoft\Yii\Http\Event\AfterEmit;
-use Yiisoft\Yii\Http\Event\AfterRequest;
-use Yiisoft\Yii\Http\Event\BeforeRequest;
 
 final class WebAppInfoCollector implements SummaryCollectorInterface
 {
@@ -41,22 +37,40 @@ final class WebAppInfoCollector implements SummaryCollectorInterface
         ];
     }
 
-    public function collect(object $event): void
+    public function markApplicationStarted(): void
     {
         if (!$this->isActive()) {
             return;
         }
+        $this->applicationProcessingTimeStarted = microtime(true);
+        $this->timelineCollector->collect($this, 'app-start');
+    }
 
-        if ($event instanceof ApplicationStartup) {
-            $this->applicationProcessingTimeStarted = microtime(true);
-        } elseif ($event instanceof BeforeRequest) {
-            $this->requestProcessingTimeStarted = microtime(true);
-        } elseif ($event instanceof AfterRequest) {
-            $this->requestProcessingTimeStopped = microtime(true);
-        } elseif ($event instanceof AfterEmit) {
-            $this->applicationProcessingTimeStopped = microtime(true);
+    public function markRequestStarted(): void
+    {
+        if (!$this->isActive()) {
+            return;
         }
-        $this->timelineCollector->collect($this, spl_object_id($event));
+        $this->requestProcessingTimeStarted = microtime(true);
+        $this->timelineCollector->collect($this, 'request-start');
+    }
+
+    public function markRequestFinished(): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+        $this->requestProcessingTimeStopped = microtime(true);
+        $this->timelineCollector->collect($this, 'request-finish');
+    }
+
+    public function markApplicationFinished(): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+        $this->applicationProcessingTimeStopped = microtime(true);
+        $this->timelineCollector->collect($this, 'app-finish');
     }
 
     public function getSummary(): array

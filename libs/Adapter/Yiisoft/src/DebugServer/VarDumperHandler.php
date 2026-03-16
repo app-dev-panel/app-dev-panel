@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Kernel\DebugServer;
+namespace AppDevPanel\Adapter\Yiisoft\DebugServer;
 
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\Connection;
 use Yiisoft\VarDumper\HandlerInterface;
 use Yiisoft\VarDumper\VarDumper;
 

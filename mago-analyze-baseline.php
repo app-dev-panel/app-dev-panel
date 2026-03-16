@@ -1791,7 +1791,139 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/DebugServiceProvider.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `appdevpanel\kernel\collector\containerinterfaceproxy::__construct`: expected `AppDevPanel\Kernel\Collector\ContainerProxyConfig`, but found `mixed`.'
+message = 'Invalid argument type for argument #2 of `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy::__construct`: expected `AppDevPanel\Adapter\Yiisoft\Proxy\ContainerProxyConfig`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "incompatible-property-visibility"
+message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy` used by `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy`: visibility differs (public vs protected)'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy::getserviceproxyfromcallable`: expected `(callable(...mixed=): mixed)`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy::getserviceproxyfromarray`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy::getcommonmethodproxy`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy::getserviceproxy`. Saw type `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy::getserviceproxyfromcallable`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `yiisoft\proxy\proxymanager::__construct`: expected `non-empty-string|null`, but possibly received `null|string`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "unknown-class-instantiation"
+message = "Cannot determine the concrete class for instantiation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
+code = "property-type-coercion"
+message = "A value of a less specific type `array<array-key, mixed>` is being assigned to property `$$decoratedServices` (array<string, mixed>)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `AppDevPanel\Adapter\Yiisoft\Proxy\ProxyLogTrait::processlogdata`: expected `null|object`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php"
+code = "non-existent-method"
+message = 'Method `getcurrenterror` does not exist on type `AppDevPanel\Adapter\Yiisoft\Proxy\ProxyLogTrait`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php"
+code = "non-existent-method"
+message = 'Method `hascurrenterror` does not exist on type `AppDevPanel\Adapter\Yiisoft\Proxy\ProxyLogTrait`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
+code = "invalid-callable"
+message = "Expression of type `nonnull` cannot be called as a function or method."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
+code = "unsafe-instantiation"
+message = 'Unsafe `new static()`: constructor of `AppDevPanel\Adapter\Yiisoft\Proxy\ServiceMethodProxy` is not final and its signature might change in child classes, potentially leading to runtime errors.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ServiceProxy.php"
+code = "unsafe-instantiation"
+message = 'Unsafe `new static()`: constructor of `AppDevPanel\Adapter\Yiisoft\Proxy\ServiceProxy` is not final and its signature might change in child classes, potentially leading to runtime errors.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
+code = "incompatible-property-visibility"
+message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `appdevpanel\adapter\yiisoft\proxy\vardumperhandlerinterfaceproxy` used by `appdevpanel\adapter\yiisoft\proxy\vardumperhandlerinterfaceproxy`: visibility differs (public vs private protected(set))'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `str_ends_with`: expected `string`, but found `nonnull`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
 
 [[issues]]
@@ -1843,63 +1975,9 @@ message = "Assigning `mixed` type to a variable may lead to unexpected behavior.
 count = 2
 
 [[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "incompatible-property-visibility"
-message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `appdevpanel\kernel\collector\containerinterfaceproxy` used by `appdevpanel\kernel\collector\containerinterfaceproxy`: visibility differs (public vs protected)'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Collector\ContainerInterfaceProxy::getserviceproxyfromcallable`: expected `(callable(...mixed=): mixed)`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `AppDevPanel\Kernel\Collector\ContainerInterfaceProxy::getserviceproxyfromarray`: expected `array<array-key, mixed>`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #3 of `AppDevPanel\Kernel\Collector\ContainerInterfaceProxy::getcommonmethodproxy`: expected `array<array-key, mixed>`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 4
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
+file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\containerinterfaceproxy::getserviceproxy`. Saw type `nonnull`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\containerinterfaceproxy::getserviceproxyfromcallable`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `yiisoft\proxy\proxymanager::__construct`: expected `non-empty-string|null`, but possibly received `null|string`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "unknown-class-instantiation"
-message = "Cannot determine the concrete class for instantiation."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerProxyConfig.php"
-code = "property-type-coercion"
-message = "A value of a less specific type `array<array-key, mixed>` is being assigned to property `$$decoratedServices` (array<string, mixed>)."
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\console\commandcollector::fetchoutput`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
@@ -1943,60 +2021,6 @@ file = "libs/Kernel/src/Collector/LoggerInterfaceProxy.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 3
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ProxyLogTrait.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #3 of `AppDevPanel\Kernel\Collector\ProxyLogTrait::processlogdata`: expected `null|object`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ProxyLogTrait.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ProxyLogTrait.php"
-code = "non-existent-method"
-message = 'Method `getcurrenterror` does not exist on type `AppDevPanel\Kernel\Collector\ProxyLogTrait`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ProxyLogTrait.php"
-code = "non-existent-method"
-message = 'Method `hascurrenterror` does not exist on type `AppDevPanel\Kernel\Collector\ProxyLogTrait`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ServiceMethodProxy.php"
-code = "invalid-callable"
-message = "Expression of type `nonnull` cannot be called as a function or method."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ServiceMethodProxy.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ServiceMethodProxy.php"
-code = "mixed-assignment"
-message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ServiceMethodProxy.php"
-code = "unsafe-instantiation"
-message = 'Unsafe `new static()`: constructor of `AppDevPanel\Kernel\Collector\ServiceMethodProxy` is not final and its signature might change in child classes, potentially leading to runtime errors.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ServiceProxy.php"
-code = "unsafe-instantiation"
-message = 'Unsafe `new static()`: constructor of `AppDevPanel\Kernel\Collector\ServiceProxy` is not final and its signature might change in child classes, potentially leading to runtime errors.'
-count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamCollector.php"
@@ -2176,7 +2200,7 @@ count = 2
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
 code = "unused-statement"
 message = "Expression has no effect as a statement"
-count = 3
+count = 2
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/HttpStreamCollector.php"
@@ -2380,37 +2404,7 @@ count = 2
 file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "unused-statement"
 message = "Expression has no effect as a statement"
-count = 3
-
-[[issues]]
-file = "libs/Kernel/src/Collector/VarDumperHandlerInterfaceProxy.php"
-code = "incompatible-property-visibility"
-message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `appdevpanel\kernel\collector\vardumperhandlerinterfaceproxy` used by `appdevpanel\kernel\collector\vardumperhandlerinterfaceproxy`: visibility differs (public vs private protected(set))'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/VarDumperHandlerInterfaceProxy.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `str_ends_with`: expected `string`, but found `nonnull`."
 count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Collector/VarDumperHandlerInterfaceProxy.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "deprecated-method"
-message = 'Call to deprecated method: `Yiisoft\Yii\Http\Event\AfterRequest::getresponse`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "deprecated-method"
-message = 'Call to deprecated method: `Yiisoft\Yii\Http\Event\BeforeRequest::getrequest`.'
-count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
@@ -2529,7 +2523,7 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Debugger.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `yiisoft\strings\wildcardpattern::__construct`: expected `string`, but found `mixed`.'
+message = "Invalid argument type for argument #1 of `fnmatch`: expected `string`, but found `mixed`."
 count = 2
 
 [[issues]]
@@ -2624,14 +2618,14 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
-code = "less-specific-nested-argument-type"
-message = 'Argument type mismatch for argument #1 of `yiisoft\strings\combinedregexp::__construct`: expected `array<array-key, string>`, but provided type `non-empty-array<array-key, mixed>` is less specific.'
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\kernel\helper\backtraceignorematcher::doesstringmatchpattern`: expected `string`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `appdevpanel\kernel\helper\backtraceignorematcher::doesstringmatchpattern`: expected `string`, but found `mixed`.'
+message = "Invalid argument type for argument #1 of `preg_match`: expected `string`, but found `mixed`."
 count = 1
 
 [[issues]]
@@ -2644,7 +2638,7 @@ count = 1
 file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
@@ -2828,14 +2822,32 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
-code = "possibly-false-argument"
-message = "Argument #1 of function `uasort` is possibly `false`, but parameter type `array<non-negative-int, non-empty-string>` does not accept it."
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
 count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "possibly-false-argument"
-message = 'Argument #1 of method `yiisoft\json\json::decode` is possibly `false`, but parameter type `string` does not accept it.'
+message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `uasort` is possibly `false`, but parameter type `array<non-negative-int, non-empty-string>` does not accept it."
 count = 1
 
 [[issues]]
@@ -3052,60 +3064,18 @@ count = 6
 file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
 code = "non-existent-method"
 message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
-count = 5
+count = 3
 
 [[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ContainerInterfaceProxyTest.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ContainerInterfaceProxyTest.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
-count = 20
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ContainerInterfaceProxyTest.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 7
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ContainerInterfaceProxyTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 5
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ContainerInterfaceProxyTest.php"
-code = "non-documented-method"
-message = 'Ambiguous method call to `getproxiedcall` on class `AppDevPanel\Kernel\Collector\ContainerInterfaceProxy`.'
+file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
+code = "non-existent-method"
+message = 'Method `markapplicationfinished` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
 count = 1
 
 [[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ContainerInterfaceProxyTest.php"
-code = "non-documented-method"
-message = 'Ambiguous method call to `setproxiedcall` on class `AppDevPanel\Kernel\Collector\ContainerInterfaceProxy`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ContainerInterfaceProxyTest.php"
-code = "non-documented-property"
-message = 'Ambiguous property access: $var on class `AppDevPanel\Kernel\Collector\ContainerInterfaceProxy`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ContainerInterfaceProxyTest.php"
-code = "possible-method-access-on-null"
-message = "Attempting to call a method on `null`."
-count = 9
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ContainerInterfaceProxyTest.php"
-code = "possibly-invalid-argument"
-message = '''Possible argument type mismatch for argument #2 of `appdevpanel\kernel\collector\containerproxyconfig::__construct`: expected `array<string, mixed>`, but possibly received `array{0: class-string('Psr\EventDispatcher\EventDispatcherInterface'), 'Psr\Log\LoggerInterface': list{class-string('AppDevPanel\Kernel\Collector\LoggerInterfaceProxy'), class-string('AppDevPanel\Kernel\Collector\LogCollector')}}`.'''
+file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
+code = "non-existent-method"
+message = 'Method `markapplicationstarted` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
 count = 1
 
 [[issues]]
@@ -3178,6 +3148,24 @@ count = 1
 file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
 code = "incompatible-parameter-type"
 message = 'Parameter `$collector` of `AppDevPanel\Kernel\Tests\Unit\Collector\FilesystemStreamCollectorTest::collecttestdata()` expects type `AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector` but parent `AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase::collecttestdata()` expects type `AppDevPanel\Kernel\Collector\CollectorInterface`'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
 count = 1
 
 [[issues]]
@@ -3328,7 +3316,7 @@ count = 1
 file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"
 code = "missing-magic-method"
 message = "Call to documented magic method `method()` on a class that cannot handle it."
-count = 12
+count = 13
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"
@@ -3339,25 +3327,19 @@ count = 3
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"
 code = "non-existent-method"
-message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
-count = 2
+message = 'Method `collectrequest` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"
+code = "non-existent-method"
+message = 'Method `collectresponse` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
+count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/ServiceCollectorTest.php"
 code = "non-existent-method"
 message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ServiceProxyTest.php"
-code = "redundant-type-comparison"
-message = 'Redundant type assertion: `$object` of type `AppDevPanel\Kernel\Collector\ServiceMethodProxy` is always not `object`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ServiceProxyTest.php"
-code = "redundant-type-comparison"
-message = 'Redundant type assertion: `$object` of type `AppDevPanel\Kernel\Collector\ServiceProxy` is always not `object`.'
 count = 1
 
 [[issues]]
@@ -3463,46 +3445,16 @@ message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector
 count = 1
 
 [[issues]]
-file = "libs/Kernel/tests/Unit/Collector/VarDumperHandlerInterfaceProxyTest.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
-count = 3
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/VarDumperHandlerInterfaceProxyTest.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/VarDumperHandlerInterfaceProxyTest.php"
-code = "non-documented-method"
-message = 'Ambiguous method call to `getproxiedcall` on class `AppDevPanel\Kernel\Collector\VarDumperHandlerInterfaceProxy`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/VarDumperHandlerInterfaceProxyTest.php"
-code = "non-documented-method"
-message = 'Ambiguous method call to `setproxiedcall` on class `AppDevPanel\Kernel\Collector\VarDumperHandlerInterfaceProxy`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/VarDumperHandlerInterfaceProxyTest.php"
-code = "non-documented-property"
-message = 'Ambiguous property access: $var on class `AppDevPanel\Kernel\Collector\VarDumperHandlerInterfaceProxy`.'
-count = 1
-
-[[issues]]
 file = "libs/Kernel/tests/Unit/Collector/WebAppInfoCollectorTest.php"
-code = "missing-magic-method"
-message = "Call to documented magic method `method()` on a class that cannot handle it."
+code = "non-existent-method"
+message = 'Method `markrequestfinished` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
 count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/WebAppInfoCollectorTest.php"
 code = "non-existent-method"
-message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
-count = 2
+message = 'Method `markrequeststarted` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
+count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/DebugServer/BroadcasterTest.php"
@@ -3670,4 +3622,22 @@ count = 2
 file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"
 code = "too-few-arguments"
 message = 'Too few arguments provided for method `AppDevPanel\Kernel\Storage\StorageInterface::read`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Storage/FileStorageTest.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Storage/FileStorageTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Storage/FileStorageTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
 count = 1

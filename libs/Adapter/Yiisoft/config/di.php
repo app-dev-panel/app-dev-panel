@@ -9,14 +9,14 @@ use Psr\Log\LoggerInterface;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\VarDumper\ClosureExporter;
 use Yiisoft\VarDumper\UseStatementParser;
-use AppDevPanel\Kernel\Collector\ContainerInterfaceProxy;
-use AppDevPanel\Kernel\Collector\ContainerProxyConfig;
+use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy;
+use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerProxyConfig;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
-use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
+use AppDevPanel\Adapter\Yiisoft\DebugServer\LoggerDecorator;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 

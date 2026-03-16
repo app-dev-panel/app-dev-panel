@@ -16,7 +16,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Yiisoft\Yii\Console\ExitCode;
 
 #[AsCommand(name: 'dev', description: 'Start ADP debug socket server')]
 final class DebugServerCommand extends Command
@@ -52,7 +51,7 @@ final class DebugServerCommand extends Command
 
         $env = $input->getOption('env');
         if ($env === 'test') {
-            return ExitCode::OK;
+            return Command::SUCCESS;
         }
 
         try {
@@ -61,7 +60,7 @@ final class DebugServerCommand extends Command
         } catch (\RuntimeException $e) {
             $this->logger->error('Failed to start debug server.', ['error' => $e->getMessage()]);
             $io->error('Failed to start debug server: ' . $e->getMessage());
-            return ExitCode::UNSPECIFIED_ERROR;
+            return Command::FAILURE;
         }
 
         $this->logger->info('Debug server started.', ['address' => $connection->getUri()]);
@@ -103,6 +102,6 @@ final class DebugServerCommand extends Command
             $io->block($data[1], $type);
         }
 
-        return ExitCode::OK;
+        return Command::SUCCESS;
     }
 }

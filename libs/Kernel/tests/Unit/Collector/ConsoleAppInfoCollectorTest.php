@@ -15,8 +15,6 @@ use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
-use Yiisoft\Yii\Console\Event\ApplicationShutdown;
-use Yiisoft\Yii\Console\Event\ApplicationStartup;
 
 use function sleep;
 use function usleep;
@@ -28,7 +26,7 @@ final class ConsoleAppInfoCollectorTest extends AbstractCollectorTestCase
      */
     protected function collectTestData(CollectorInterface $collector): void
     {
-        $collector->collect(new ApplicationStartup(null));
+        $collector->markApplicationStarted();
 
         $command = $this->createMock(Command::class);
         $input = new ArrayInput([]);
@@ -39,7 +37,7 @@ final class ConsoleAppInfoCollectorTest extends AbstractCollectorTestCase
 
         DIRECTORY_SEPARATOR === '\\' ? sleep(1) : usleep(123_000);
 
-        $collector->collect(new ApplicationShutdown(0));
+        $collector->markApplicationFinished();
     }
 
     protected function getCollector(): CollectorInterface
