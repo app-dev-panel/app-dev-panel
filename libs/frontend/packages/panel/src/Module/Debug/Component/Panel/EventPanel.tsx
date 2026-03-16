@@ -7,7 +7,7 @@ import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
 import {Alert, AlertTitle, Box, Chip, Collapse, Icon, IconButton, TextField, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import {useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 
 type EventType = {event: string; file: string; line: string; name: string; time: number};
 type EventTimelineProps = {events: EventType[]};
@@ -52,8 +52,31 @@ const DetailBox = styled(Box)(({theme}) => ({
 
 export const EventPanel = ({events}: EventTimelineProps) => {
     const [filter, setFilter] = useState('');
+    const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
     const debugEntry = useDebugEntry();
+
+    const badgeCounts = useMemo(() => {
+        const counts = new Map<string, number>();
+        if (!events) return [];
+        for (const event of events) {
+            const shortName = event.name.split('\\').pop() ?? event.name;
+            counts.set(shortName, (counts.get(shortName) ?? 0) + 1);
+        }
+        return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    }, [events]);
+
+    const toggleFilter = useCallback((name: string) => {
+        setActiveFilters((prev) => {
+            const next = new Set(prev);
+            if (next.has(name)) {
+                next.delete(name);
+            } else {
+                next.add(name);
+            }
+            return next;
+        });
+    }, []);
 
     if (!events || events.length === 0) {
         return (
@@ -65,13 +88,23 @@ export const EventPanel = ({events}: EventTimelineProps) => {
         );
     }
 
-    const filtered = filter
-        ? events.filter(
-              (e) =>
-                  e.name.toLowerCase().includes(filter.toLowerCase()) ||
-                  e.file.toLowerCase().includes(filter.toLowerCase()),
-          )
-        : events;
+    const filtered = useMemo(() => {
+        let result = events;
+        if (activeFilters.size > 0) {
+            result = result.filter((e) => {
+                const shortName = e.name.split('\\').pop() ?? e.name;
+                return activeFilters.has(shortName);
+            });
+        }
+        if (filter) {
+            result = result.filter(
+                (e) =>
+                    e.name.toLowerCase().includes(filter.toLowerCase()) ||
+                    e.file.toLowerCase().includes(filter.toLowerCase()),
+            );
+        }
+        return result;
+    }, [events, filter, activeFilters]);
 
     return (
         <Box>
@@ -86,6 +119,37 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                     sx={{ml: 'auto', width: 240}}
                 />
             </Box>
+
+            {badgeCounts.length > 1 && (
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                    {badgeCounts.map(([name, count]) => (
+                        <Chip
+                            key={name}
+                            label={`${name} (${count})`}
+                            size="small"
+                            onClick={() => toggleFilter(name)}
+                            variant={activeFilters.has(name) ? 'filled' : 'outlined'}
+                            color={activeFilters.has(name) ? 'primary' : 'default'}
+                            sx={{
+                                fontSize: '11px',
+                                height: 24,
+                                borderRadius: 1,
+                                fontWeight: activeFilters.has(name) ? 600 : 400,
+                                cursor: 'pointer',
+                            }}
+                        />
+                    ))}
+                    {activeFilters.size > 0 && (
+                        <Chip
+                            label="Clear"
+                            size="small"
+                            onClick={() => setActiveFilters(new Set())}
+                            variant="outlined"
+                            sx={{fontSize: '11px', height: 24, borderRadius: 1}}
+                        />
+                    )}
+                </Box>
+            )}
 
             {filtered.map((event, index) => {
                 const expanded = expandedIndex === index;

@@ -1,4 +1,5 @@
 import {NotificationSnackbar} from '@app-dev-panel/panel/Application/Component/NotificationSnackbar';
+import {changeThemeMode} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {AppNavSidebar} from '@app-dev-panel/sdk/Component/Layout/AppNavSidebar';
 import {ScrollTopButton} from '@app-dev-panel/sdk/Component/ScrollTop';
@@ -11,6 +12,7 @@ import {styled} from '@mui/material/styles';
 import * as React from 'react';
 import {useCallback} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
+import {useDispatch, useSelector} from 'react-redux';
 import {Outlet, useLocation, useNavigate} from 'react-router-dom';
 
 // ---------------------------------------------------------------------------
@@ -135,6 +137,9 @@ const BuildBadge = styled(Typography)(({theme}) => ({
 export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const themeMode = useSelector((state: any) => state?.application?.themeMode) as string | undefined;
+    const currentMode = themeMode || 'system';
 
     const handleNavigate = useCallback(
         (href: string) => {
@@ -153,6 +158,11 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         }
     }, []);
 
+    const handleThemeToggle = useCallback(() => {
+        const next = currentMode === 'dark' ? 'light' : 'dark';
+        dispatch(changeThemeMode(next as 'light' | 'dark'));
+    }, [dispatch, currentMode]);
+
     return (
         <>
             <CssBaseline />
@@ -164,6 +174,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     </Logo>
                     <Spacer />
                     <BuildBadge>v{Config.buildVersion}</BuildBadge>
+                    <IconButton size="small" onClick={handleThemeToggle}>
+                        <Icon sx={{fontSize: 18}}>{currentMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
+                    </IconButton>
                     <IconButton size="small" onClick={handleRefresh}>
                         <Icon sx={{fontSize: 18}}>refresh</Icon>
                     </IconButton>

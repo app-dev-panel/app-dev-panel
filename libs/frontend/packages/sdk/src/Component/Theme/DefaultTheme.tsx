@@ -3,6 +3,7 @@ import {darkSemanticTokens, semanticTokens} from '@app-dev-panel/sdk/Component/T
 import {PaletteMode, ThemeProvider, createTheme, useMediaQuery} from '@mui/material';
 import {LinkProps} from '@mui/material/Link';
 import React, {PropsWithChildren, useContext, useMemo} from 'react';
+import {useSelector} from 'react-redux';
 import {Link as RouterLink, LinkProps as RouterLinkProps, useHref} from 'react-router-dom';
 
 const LinkBehavior = (routerOptions: {openLinksInNewWindow: boolean; baseUrl: string}) =>
@@ -75,7 +76,9 @@ export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNew
 
 export const DefaultThemeProvider = ({children}: PropsWithChildren) => {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-    const mode: PaletteMode = prefersDarkMode ? 'dark' : 'light';
+    const themeMode = useSelector((state: any) => state?.application?.themeMode) as string | undefined;
+    const mode: PaletteMode =
+        themeMode === 'light' || themeMode === 'dark' ? themeMode : prefersDarkMode ? 'dark' : 'light';
     const routerOptions = useContext(RouterOptionsContext);
 
     const theme = useMemo(() => createAdpTheme(mode, routerOptions), [mode, routerOptions]);

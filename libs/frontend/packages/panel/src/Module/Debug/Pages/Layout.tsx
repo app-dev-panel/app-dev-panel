@@ -14,7 +14,7 @@ import {VarDumperPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/
 import {DumpPage} from '@app-dev-panel/panel/Module/Debug/Pages/DumpPage';
 import {useDoRequestMutation, usePostCurlBuildMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {useSelector} from '@app-dev-panel/panel/store';
-import {changeAutoLatest} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
+import {changeAutoLatest, changeThemeMode} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, useLazyGetCollectorInfoQuery, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
@@ -34,7 +34,7 @@ import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectors
 import {isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {EmojiObjects, HelpOutline} from '@mui/icons-material';
-import {Alert, AlertTitle, Box, LinearProgress, Link, Typography} from '@mui/material';
+import {Alert, AlertTitle, Box, Icon, LinearProgress, Link, Menu, MenuItem, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import * as React from 'react';
@@ -306,6 +306,21 @@ const Layout = () => {
         setEntrySelectorAnchor((prev) => (prev ? null : target));
     }, []);
 
+    // Theme toggle
+    const themeMode = useSelector((state) => state.application.themeMode) as string | undefined;
+    const handleThemeToggle = useCallback(() => {
+        const current = themeMode || 'system';
+        const next = current === 'dark' ? 'light' : 'dark';
+        dispatch(changeThemeMode(next));
+    }, [dispatch, themeMode]);
+
+    // More menu
+    const [moreMenuAnchor, setMoreMenuAnchor] = useState<HTMLElement | null>(null);
+    const handleMoreClick = useCallback((e?: React.MouseEvent) => {
+        const target = (e?.currentTarget as HTMLElement) ?? null;
+        setMoreMenuAnchor((prev) => (prev ? null : target));
+    }, []);
+
     // Command palette
     const [paletteOpen, setPaletteOpen] = useState(false);
     const handleSearchClick = useCallback(() => setPaletteOpen(true), []);
@@ -412,6 +427,8 @@ const Layout = () => {
                     onNextEntry={handleNextEntry}
                     onEntryClick={handleEntryClick}
                     onSearchClick={handleSearchClick}
+                    onThemeToggle={handleThemeToggle}
+                    onMoreClick={handleMoreClick}
                 />
                 <EntrySelector
                     anchorEl={entrySelectorAnchor}
@@ -421,6 +438,44 @@ const Layout = () => {
                     currentEntryId={debugEntry?.id}
                     onSelect={changeEntry}
                 />
+                <Menu
+                    anchorEl={moreMenuAnchor}
+                    open={Boolean(moreMenuAnchor)}
+                    onClose={() => setMoreMenuAnchor(null)}
+                    slotProps={{paper: {sx: {minWidth: 200, mt: 0.5}}}}
+                >
+                    <MenuItem
+                        onClick={() => {
+                            repeatRequestHandler();
+                            setMoreMenuAnchor(null);
+                        }}
+                        disabled={!debugEntry || !isDebugEntryAboutWeb(debugEntry)}
+                    >
+                        <Icon sx={{fontSize: 18, mr: 1.5, color: 'text.secondary'}}>replay</Icon>
+                        Repeat Request
+                    </MenuItem>
+                    <MenuItem
+                        onClick={() => {
+                            copyCurlHandler();
+                            setMoreMenuAnchor(null);
+                        }}
+                        disabled={!debugEntry}
+                    >
+                        <Icon sx={{fontSize: 18, mr: 1.5, color: 'text.secondary'}}>content_copy</Icon>
+                        Copy as cURL
+                    </MenuItem>
+                    <MenuItem
+                        onClick={() => {
+                            autoLatestHandler();
+                            setMoreMenuAnchor(null);
+                        }}
+                    >
+                        <Icon sx={{fontSize: 18, mr: 1.5, color: autoLatest ? 'success.main' : 'text.secondary'}}>
+                            {autoLatest ? 'sync' : 'sync_disabled'}
+                        </Icon>
+                        {autoLatest ? 'Auto-refresh On' : 'Auto-refresh Off'}
+                    </MenuItem>
+                </Menu>
                 <MainArea>
                     <MainInner>
                         {sidebarItems.length === 0 ? (

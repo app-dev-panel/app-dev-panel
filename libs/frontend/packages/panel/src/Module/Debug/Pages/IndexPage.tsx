@@ -192,18 +192,38 @@ const PerformanceSection = ({data}: {data: WebAppInfoData}) => {
 
     const formatTime = (seconds: number) => {
         if (seconds === 0) return '0 ms';
+        if (seconds > 1000) return 'N/A';
+        if (seconds < 0) return 'N/A';
         if (seconds < 0.001) return `${(seconds * 1000000).toFixed(0)} µs`;
         if (seconds < 1) return `${(seconds * 1000).toFixed(2)} ms`;
         return `${seconds.toFixed(3)} s`;
     };
 
-    const maxTime = Math.max(totalTime, 0.001);
+    const validTimes = [totalTime, requestTime, preloadTime, emitTime].filter((t) => t > 0 && t <= 1000);
+    const maxTime = validTimes.length > 0 ? Math.max(...validTimes) : 0.001;
+
+    const safeRatio = (value: number, max: number) => (value > 0 && value <= 1000 ? value / max : 0);
 
     const items = [
-        {label: 'Total Time', value: formatTime(totalTime), ratio: 1, color: primitives.blue500},
-        {label: 'Request Processing', value: formatTime(requestTime), ratio: requestTime / maxTime, color: '#42A5F5'},
-        {label: 'Preload Time', value: formatTime(preloadTime), ratio: preloadTime / maxTime, color: '#AB47BC'},
-        {label: 'Emit Time', value: formatTime(emitTime), ratio: emitTime / maxTime, color: '#66BB6A'},
+        {
+            label: 'Total Time',
+            value: formatTime(totalTime),
+            ratio: safeRatio(totalTime, maxTime),
+            color: primitives.blue500,
+        },
+        {
+            label: 'Request Processing',
+            value: formatTime(requestTime),
+            ratio: safeRatio(requestTime, maxTime),
+            color: '#42A5F5',
+        },
+        {
+            label: 'Preload Time',
+            value: formatTime(preloadTime),
+            ratio: safeRatio(preloadTime, maxTime),
+            color: '#AB47BC',
+        },
+        {label: 'Emit Time', value: formatTime(emitTime), ratio: safeRatio(emitTime, maxTime), color: '#66BB6A'},
         {label: 'Peak Memory', value: formatBytes(memPeak), ratio: memPeak > 0 ? 1 : 0, color: '#FFA726'},
         {
             label: 'Memory Usage',

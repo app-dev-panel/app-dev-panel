@@ -5,7 +5,8 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Alert, AlertTitle, Box, Chip, Tab, Tabs, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import {useState} from 'react';
+import {useCallback} from 'react';
+import {useSearchParams} from 'react-router-dom';
 
 type Response = {
     content: string;
@@ -290,8 +291,22 @@ const ParsedTab = ({data}: {data: Response}) => (
 // Main component
 // ---------------------------------------------------------------------------
 
+const tabNames = ['request', 'response', 'raw', 'parsed'] as const;
+
 export const RequestPanel = ({data}: RequestPanelProps) => {
-    const [tab, setTab] = useState(0);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const tabParam = searchParams.get('requestTab') || 'request';
+    const tab = Math.max(0, tabNames.indexOf(tabParam as (typeof tabNames)[number]));
+
+    const handleTabChange = useCallback(
+        (_: unknown, newValue: number) => {
+            setSearchParams((params) => {
+                params.set('requestTab', tabNames[newValue]);
+                return params;
+            });
+        },
+        [setSearchParams],
+    );
 
     if (!data) {
         return (
@@ -353,7 +368,7 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
             <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
                 <Tabs
                     value={tab}
-                    onChange={(_, v) => setTab(v)}
+                    onChange={handleTabChange}
                     sx={{'& .MuiTab-root': {textTransform: 'none', minHeight: 40, fontSize: '13px', fontWeight: 600}}}
                 >
                     <Tab label="Request" />

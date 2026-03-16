@@ -16,7 +16,7 @@ type TopBarProps = {
     onEntryClick?: (e: React.MouseEvent) => void;
     onSearchClick?: () => void;
     onThemeToggle?: () => void;
-    onMoreClick?: () => void;
+    onMoreClick?: (e: React.MouseEvent) => void;
 };
 
 const BarRoot = styled('header')(({theme}) => ({
@@ -96,7 +96,7 @@ export const TopBar = React.memo(
                 <IconButton size="small" onClick={onThemeToggle}>
                     <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
                 </IconButton>
-                <IconButton size="small" onClick={onMoreClick}>
+                <IconButton size="small" onClick={(e) => onMoreClick?.(e)}>
                     <Icon sx={{fontSize: 18}}>more_vert</Icon>
                 </IconButton>
             </BarRoot>

@@ -125,16 +125,23 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
 
     // Calculate time bounds
     const startTimes = data.map((r) => r[0]);
+    const durations = data.map((r) => Number(r[1]) || 0);
     const minTime = Math.min(...startTimes);
-    const maxTime = Math.max(...startTimes);
-    const totalDuration = maxTime - minTime || 1;
+    const maxEndTime = Math.max(...data.map((r, i) => r[0] + durations[i]));
+    const totalDuration = maxEndTime - minTime || 0.001;
 
     // Build tick marks
     const tickCount = 6;
     const ticks: string[] = [];
     for (let i = 0; i <= tickCount; i++) {
         const t = (totalDuration / tickCount) * i;
-        ticks.push(t < 1 ? `${(t * 1000).toFixed(0)}us` : `${t.toFixed(1)}ms`);
+        if (t < 0.001) {
+            ticks.push(`${(t * 1000000).toFixed(0)}µs`);
+        } else if (t < 1) {
+            ticks.push(`${(t * 1000).toFixed(1)}ms`);
+        } else {
+            ticks.push(`${t.toFixed(2)}s`);
+        }
     }
 
     // Unique labels for legend
@@ -169,11 +176,13 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                 const expanded = expandedIndex === index;
                 const durationMs = Number(row[1]) || 0;
                 const durationLabel =
-                    durationMs < 0.001
-                        ? `${(durationMs * 1000000).toFixed(0)}ns`
-                        : durationMs < 1
-                          ? `${(durationMs * 1000).toFixed(0)}us`
-                          : `${durationMs.toFixed(1)}ms`;
+                    durationMs < 0.000001
+                        ? `${(durationMs * 1000000000).toFixed(0)}ns`
+                        : durationMs < 0.001
+                          ? `${(durationMs * 1000000).toFixed(0)}µs`
+                          : durationMs < 1
+                            ? `${(durationMs * 1000).toFixed(1)}ms`
+                            : `${durationMs.toFixed(2)}s`;
 
                 return (
                     <Box key={index}>

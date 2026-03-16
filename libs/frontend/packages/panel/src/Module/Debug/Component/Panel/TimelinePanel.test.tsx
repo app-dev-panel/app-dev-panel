@@ -38,7 +38,7 @@ describe('TimelinePanel', () => {
     it('renders duration labels', () => {
         const data: [number, number, string][] = [[1705319445.0, 2.5, 'App\\Handler']];
         renderWithProviders(<TimelinePanel data={data} />);
-        expect(screen.getByText('2.5ms')).toBeInTheDocument();
+        expect(screen.getAllByText('2.50s').length).toBeGreaterThanOrEqual(1);
     });
 
     it('expands row to show details on click', async () => {

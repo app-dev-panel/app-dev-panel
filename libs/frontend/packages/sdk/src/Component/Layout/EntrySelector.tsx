@@ -1,6 +1,7 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
 import {Box, Chip, Icon, Popover, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
@@ -284,6 +285,32 @@ export const EntrySelector = ({anchorEl, open, onClose, entries, currentEntryId,
                                 <PathLabel>
                                     <HighlightedText text={entry.request.path} indices={pathIndices} />
                                 </PathLabel>
+                                {entry.web?.request?.processingTime != null && (
+                                    <Typography
+                                        component="span"
+                                        sx={{
+                                            fontFamily: primitives.fontFamilyMono,
+                                            fontSize: '10px',
+                                            color: primitives.blue500,
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        {(entry.web.request.processingTime * 1000).toFixed(0)}ms
+                                    </Typography>
+                                )}
+                                {entry.web?.memory?.peakUsage != null && (
+                                    <Typography
+                                        component="span"
+                                        sx={{
+                                            fontFamily: primitives.fontFamilyMono,
+                                            fontSize: '10px',
+                                            color: primitives.green600,
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        {formatBytes(entry.web.memory.peakUsage)}
+                                    </Typography>
+                                )}
                                 <StatusLabel sx={{color: statusColor(entry.response.statusCode)}}>
                                     {entry.response.statusCode}
                                 </StatusLabel>
@@ -299,6 +326,32 @@ export const EntrySelector = ({anchorEl, open, onClose, entries, currentEntryId,
                                 <PathLabel>
                                     <HighlightedText text={commandText} indices={indices} />
                                 </PathLabel>
+                                {entry.console?.request?.processingTime != null && (
+                                    <Typography
+                                        component="span"
+                                        sx={{
+                                            fontFamily: primitives.fontFamilyMono,
+                                            fontSize: '10px',
+                                            color: primitives.blue500,
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        {(entry.console.request.processingTime * 1000).toFixed(0)}ms
+                                    </Typography>
+                                )}
+                                {entry.console?.memory?.peakUsage != null && (
+                                    <Typography
+                                        component="span"
+                                        sx={{
+                                            fontFamily: primitives.fontFamilyMono,
+                                            fontSize: '10px',
+                                            color: primitives.green600,
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        {formatBytes(entry.console.memory.peakUsage)}
+                                    </Typography>
+                                )}
                                 <Chip
                                     label={entry.command?.exitCode === 0 ? 'OK' : `EXIT ${entry.command?.exitCode}`}
                                     size="small"

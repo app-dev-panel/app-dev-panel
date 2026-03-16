@@ -181,6 +181,7 @@ const TraceBlock = ({trace}: {trace: string}) => {
 };
 
 export const ExceptionPanel = ({exceptions}: ExceptionPanelProps) => {
+    const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
     const items = exceptions ?? [];
 
     if (items.length === 0) {
@@ -199,21 +200,26 @@ export const ExceptionPanel = ({exceptions}: ExceptionPanelProps) => {
                 <SectionTitle>{`${items.length} exception${items.length !== 1 ? 's' : ''}`}</SectionTitle>
             </Box>
 
-            {items.map((exception, index) => (
-                <Box key={index}>
-                    <ExceptionRow expanded>
-                        <IndexBadge>{index + 1}</IndexBadge>
-                        <Box sx={{flex: 1, minWidth: 0}}>
-                            <ClassName>{exception.class}</ClassName>
-                            <Message>{exception.message}</Message>
-                        </Box>
-                        <FileLink component="span" sx={{color: 'text.disabled'}}>
-                            {parseFilename(exception.file)}:{exception.line}
-                        </FileLink>
-                    </ExceptionRow>
-                    <ExceptionDetail exception={exception} />
-                </Box>
-            ))}
+            {items.map((exception, index) => {
+                const expanded = expandedIndex === index;
+                return (
+                    <Box key={index}>
+                        <ExceptionRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
+                            <IndexBadge>{index + 1}</IndexBadge>
+                            <Box sx={{flex: 1, minWidth: 0}}>
+                                <ClassName>{exception.class}</ClassName>
+                                <Message>{exception.message}</Message>
+                            </Box>
+                            <FileLink component="span" sx={{color: 'text.disabled'}}>
+                                {parseFilename(exception.file)}:{exception.line}
+                            </FileLink>
+                        </ExceptionRow>
+                        <Collapse in={expanded}>
+                            <ExceptionDetail exception={exception} />
+                        </Collapse>
+                    </Box>
+                );
+            })}
         </Box>
     );
 };
