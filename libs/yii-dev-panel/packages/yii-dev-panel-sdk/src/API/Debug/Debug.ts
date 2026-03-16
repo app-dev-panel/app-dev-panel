@@ -5,9 +5,11 @@ type Response<T = any> = {data: T};
 
 export type HTTPMethod = 'DELETE' | 'GET' | 'HEAD' | 'PATCH' | 'POST' | 'PUT';
 
+export type CollectorInfo = {id: string; name: string};
+
 export type DebugEntry = {
     id: string;
-    collectors: string[];
+    collectors: CollectorInfo[];
     logger?: {total: number};
     event?: {total: number};
     service?: {total: number};
@@ -54,6 +56,10 @@ type GetObjectResponse = {class: string; value: any} | null;
 
 type CollectorResponseType = any;
 
+function normalizeCollectors(collectors: (string | CollectorInfo)[]): CollectorInfo[] {
+    return collectors.map((c) => (typeof c === 'string' ? {id: c, name: c.split('\\').pop() || c} : c));
+}
+
 export const debugApi = createApi({
     reducerPath: 'api.debug',
     tagTypes: ['debug/list'],
@@ -61,7 +67,11 @@ export const debugApi = createApi({
     endpoints: (builder) => ({
         getDebug: builder.query<DebugEntry[], void>({
             query: () => ``,
-            transformResponse: (result: SummaryResponseType) => (result.data as DebugEntry[]) || [],
+            transformResponse: (result: SummaryResponseType) =>
+                ((result.data as DebugEntry[]) || []).map((entry) => ({
+                    ...entry,
+                    collectors: normalizeCollectors(entry.collectors),
+                })),
             providesTags: ['debug/list'],
         }),
         getObject: builder.query<GetObjectResponse, GetObjectProps>({

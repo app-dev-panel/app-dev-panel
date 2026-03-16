@@ -71,7 +71,7 @@ final class LoggerInterfaceProxy implements LoggerInterface
      */
     private function getCallStack(): array
     {
-        $backtrace = debug_backtrace();
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
         $lastSelfFrame = $backtrace[1];
 
         foreach ($backtrace as $frame) {

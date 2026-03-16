@@ -10,6 +10,7 @@ use Yiisoft\Yii\Console\Event\ApplicationStartup;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
+use AppDevPanel\Kernel\StartupContext;
 
 require_once __DIR__ . '/helpers.php';
 
@@ -19,7 +20,7 @@ if (!isAppDevPanelEnabled($params)) {
 
 return [
     ApplicationStartup::class => [
-        [Debugger::class, 'startup'],
+        static fn (ApplicationStartup $event, Debugger $debugger) => $debugger->startup(StartupContext::forCommand($event->commandName)),
         [ConsoleAppInfoCollector::class, 'collect'],
     ],
     ApplicationShutdown::class => [

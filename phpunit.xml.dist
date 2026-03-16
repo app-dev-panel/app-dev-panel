@@ -24,6 +24,9 @@
         <testsuite name="Cli">
             <directory>libs/Cli/tests</directory>
         </testsuite>
+        <testsuite name="E2E">
+            <directory>tests/E2E</directory>
+        </testsuite>
     </testsuites>
 
     <source>

@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\DebugServer;
 
-use AppDevPanel\Kernel\DebugServer\Connection;
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
 use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
-use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
-#[RequiresPhpExtension('sockets')]
 final class LoggerDecoratorTest extends TestCase
 {
     #[Test]
@@ -21,16 +19,14 @@ final class LoggerDecoratorTest extends TestCase
         $decorator = new LoggerDecorator($decorated);
 
         $this->assertInstanceOf(LoggerInterface::class, $decorator);
-        $decorator->connection->close();
     }
 
     #[Test]
-    public function connectionPropertyIsPubliclyAccessible(): void
+    public function broadcasterPropertyIsPubliclyAccessible(): void
     {
         $decorated = $this->createStub(LoggerInterface::class);
         $decorator = new LoggerDecorator($decorated);
 
-        $this->assertInstanceOf(Connection::class, $decorator->connection);
-        $decorator->connection->close();
+        $this->assertInstanceOf(Broadcaster::class, $decorator->broadcaster);
     }
 }

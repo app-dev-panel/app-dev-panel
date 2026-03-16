@@ -23,7 +23,8 @@ abstract class AbstractCollectorTestCase extends TestCase
         }
         $collector->shutdown();
 
-        $this->assertSame($collector::class, $collector->getName());
+        $this->assertSame($collector::class, $collector->getId());
+        $this->assertNotEmpty($collector->getName());
         $this->checkCollectedData($data);
         if ($collector instanceof SummaryCollectorInterface) {
             $this->checkSummaryData($summaryData);

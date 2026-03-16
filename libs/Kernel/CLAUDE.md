@@ -20,6 +20,9 @@ data collectors, storage, proxy system, and object serialization.
 | `FileStorage` | JSON file-based storage with garbage collection |
 | `MemoryStorage` | In-memory storage for testing |
 | `CollectorInterface` | Interface all collectors must implement |
+| `ServiceRegistryInterface` | Registry for external app service descriptors |
+| `FileServiceRegistry` | JSON file-based service registry |
+| `ServiceDescriptor` | Value object: service identity, URL, capabilities, heartbeat |
 
 ## Directory Structure
 
@@ -50,6 +53,10 @@ src/
 │   ├── VarDumperHandlerInterfaceProxy.php
 │   ├── ServiceProxy.php
 │   └── ServiceMethodProxy.php
+├── Service/                      # Service registry for multi-app inspection
+│   ├── ServiceDescriptor.php
+│   ├── ServiceRegistryInterface.php
+│   └── FileServiceRegistry.php
 ├── Storage/
 │   ├── StorageInterface.php
 │   ├── FileStorage.php
@@ -84,10 +91,34 @@ and feed intercepted data to collectors. The application code is completely unaw
 
 `ServiceProxy` / `ServiceMethodProxy` provide generic interception for any service method.
 
-## Storage Types
+## Service Registry
+
+Tracks external application instances that register with ADP for multi-app inspector proxying.
+
+| Class | Purpose |
+|-------|---------|
+| `ServiceDescriptor` | Immutable value object: service name, language, inspector URL, capabilities, timestamps |
+| `ServiceRegistryInterface` | `register()`, `deregister()`, `heartbeat()`, `resolve()`, `all()` |
+| `FileServiceRegistry` | JSON file-based implementation (`.services.json` in storage dir), uses `LOCK_EX` |
+
+`ServiceDescriptor::isOnline()` returns `true` if `lastSeenAt` is within 60 seconds (default timeout).
+
+`ServiceDescriptor::supports(string $capability)` checks if the service declares a given capability, or `*` for all.
+
+## Storage
+
+### Storage Types
 
 | Type | Class | Description |
 |------|-------|-------------|
 | `TYPE_SUMMARY` | Summary metadata | Timestamp, URL, status, collector names |
 | `TYPE_DATA` | Full data | Complete collector payloads |
 | `TYPE_OBJECTS` | Object dumps | Serialized objects for deep inspection |
+
+### Write Sources
+
+Storage receives data from two sources:
+1. **Debugger flush** — PHP collectors write via `StorageInterface` after request/command completion
+2. **Ingestion API** — `IngestionController` writes directly to FileStorage for external (non-PHP) apps
+
+FileStorage uses `LOCK_EX` for atomic writes and `flock` for GC mutual exclusion.

@@ -818,22 +818,25 @@ final class DumperTest extends TestCase
                 {"CurlHandle#{$curlResourceObjectId}":"{stateless object}"}
                 S,
         ];
+        $stdoutSeekable = stream_get_meta_data(STDOUT)['seekable'] ? 'true' : 'false';
         yield 'stdout' => [
             STDOUT,
             <<<S
-                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":false,"uri":"php:\/\/stdout"}
+                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":$stdoutSeekable,"uri":"php:\/\/stdout"}
                 S,
         ];
+        $stderrSeekable = stream_get_meta_data(STDERR)['seekable'] ? 'true' : 'false';
         yield 'stderr' => [
             STDERR,
             <<<S
-                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":false,"uri":"php:\/\/stderr"}
+                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":$stderrSeekable,"uri":"php:\/\/stderr"}
                 S,
         ];
+        $stdinSeekable = stream_get_meta_data(STDIN)['seekable'] ? 'true' : 'false';
         yield 'stdin' => [
             STDIN,
             <<<S
-                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"rb","unread_bytes":0,"seekable":false,"uri":"php:\/\/stdin"}
+                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"rb","unread_bytes":0,"seekable":$stdinSeekable,"uri":"php:\/\/stdin"}
                 S,
         ];
     }

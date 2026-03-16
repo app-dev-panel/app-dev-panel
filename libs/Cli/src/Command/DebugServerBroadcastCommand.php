@@ -6,7 +6,11 @@ declare(ticks=1);
 
 namespace AppDevPanel\Cli\Command;
 
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
 use AppDevPanel\Kernel\DebugServer\Connection;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -15,13 +19,18 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\Yii\Console\ExitCode;
 
+#[AsCommand(name: 'dev:broadcast', description: 'Broadcast test messages to debug server clients')]
 final class DebugServerBroadcastCommand extends Command
 {
     public const COMMAND_NAME = 'dev:broadcast';
 
-    protected static $defaultName = self::COMMAND_NAME;
+    private readonly LoggerInterface $logger;
 
-    protected static $defaultDescription = 'Runs PHP built-in web server';
+    public function __construct(?LoggerInterface $logger = null)
+    {
+        $this->logger = $logger ?? new NullLogger();
+        parent::__construct();
+    }
 
     public function configure(): void
     {
@@ -34,31 +43,26 @@ final class DebugServerBroadcastCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $io->title('Yii3 Debug Server');
-        $io->writeln('https://yiiframework.com' . "\n");
+        $io->title('ADP Debug Server');
 
         $env = $input->getOption('env');
         if ($env === 'test') {
             return ExitCode::OK;
         }
 
-        try {
-            $socket = Connection::create();
-        } catch (\RuntimeException $e) {
-            $io->error('Failed to create socket: ' . $e->getMessage());
-            return ExitCode::UNSPECIFIED_ERROR;
-        }
+        $broadcaster = new Broadcaster();
+        /** @var string $data */
+        $data = $input->getOption('message');
 
-        try {
-            $data = $input->getOption('message');
-            $socket->broadcast(Connection::MESSAGE_TYPE_LOGGER, $data);
-            $socket->broadcast(
-                Connection::MESSAGE_TYPE_VAR_DUMPER,
-                VarDumper::create(['$data' => $data])->asJson(false),
-            );
-        } finally {
-            $socket->close();
-        }
+        $this->logger->info('Starting broadcast.', ['message' => $data]);
+
+        $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, $data);
+        $broadcaster->broadcast(
+            Connection::MESSAGE_TYPE_VAR_DUMPER,
+            VarDumper::create(['$data' => $data])->asJson(false),
+        );
+
+        $this->logger->info('Broadcast complete.', ['message' => $data]);
 
         return ExitCode::OK;
     }

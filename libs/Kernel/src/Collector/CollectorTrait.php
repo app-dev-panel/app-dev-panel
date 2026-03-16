@@ -19,9 +19,17 @@ trait CollectorTrait
         $this->isActive = false;
     }
 
+    public function getId(): string
+    {
+        return static::class;
+    }
+
     public function getName(): string
     {
-        return self::class;
+        $className = new \ReflectionClass(static::class)->getShortName();
+        $name = (string) preg_replace('/Collector$/', '', $className);
+
+        return trim((string) preg_replace('/(?<=[a-z])(?=[A-Z])/', ' ', $name));
     }
 
     protected function reset(): void {}

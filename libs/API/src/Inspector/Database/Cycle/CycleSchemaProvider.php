@@ -33,19 +33,22 @@ class CycleSchemaProvider implements SchemaProviderInterface
         return $tables;
     }
 
-    public function getTable(string $tableName): array
+    public function getTable(string $tableName, int $limit = 1000, int $offset = 0): array
     {
         $database = $this->databaseProvider->database();
         $schema = $database->table($tableName);
 
-        // TODO: add pagination
-        $records = $database->select()->from($tableName)->fetchAll();
+        $totalCount = $database->select()->from($tableName)->count();
+        $records = $database->select()->from($tableName)->limit($limit)->offset($offset)->fetchAll();
 
         return [
             'table' => $schema->getName(),
             'primaryKeys' => $schema->getPrimaryKeys(),
             'columns' => $this->serializeCycleColumnsSchemas($schema->getColumns()),
             'records' => $records,
+            'totalCount' => $totalCount,
+            'limit' => $limit,
+            'offset' => $offset,
         ];
     }
 

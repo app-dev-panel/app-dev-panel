@@ -11,13 +11,23 @@ use Yiisoft\Di\ServiceProviderInterface;
 
 final class DebugServiceProvider implements ServiceProviderInterface
 {
+    private static bool $resolving = false;
+
     public function getDefinitions(): array
     {
         return [
-            ContainerInterface::class => static fn(ContainerInterface $container) => new ContainerInterfaceProxy(
-                $container,
-                $container->get(ContainerProxyConfig::class),
-            ),
+            ContainerInterface::class => static function (ContainerInterface $container): ContainerInterface {
+                if (self::$resolving) {
+                    return $container;
+                }
+
+                self::$resolving = true;
+                try {
+                    return new ContainerInterfaceProxy($container, $container->get(ContainerProxyConfig::class));
+                } finally {
+                    self::$resolving = false;
+                }
+            },
         ];
     }
 

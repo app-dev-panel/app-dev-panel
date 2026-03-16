@@ -121,13 +121,12 @@ final class DebugController
 
     public function eventStream(StorageInterface $storage, ResponseFactoryInterface $responseFactory): ResponseInterface
     {
-        // TODO implement OS signal handling
         $compareFunction = static function () use ($storage) {
             $read = $storage->read(StorageInterface::TYPE_SUMMARY, null);
             return md5(json_encode($read, JSON_THROW_ON_ERROR));
         };
         $hash = $compareFunction();
-        $maxRetries = 10;
+        $maxRetries = 30;
         $retries = 0;
 
         return $responseFactory
@@ -161,7 +160,7 @@ final class DebugController
                     return false;
                 }
 
-                sleep(1);
+                usleep(500_000); // 500ms poll interval
 
                 return true;
             }));

@@ -7,13 +7,11 @@ namespace AppDevPanel\Kernel\Tests\Unit;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\StartupContext;
 use AppDevPanel\Kernel\Storage\MemoryStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
-use stdClass;
-use Yiisoft\Yii\Console\Event\ApplicationStartup;
-use Yiisoft\Yii\Http\Event\BeforeRequest;
 
 final class DebuggerTest extends TestCase
 {
@@ -26,7 +24,7 @@ final class DebuggerTest extends TestCase
         $storage->expects($this->once())->method('addCollector');
 
         $debugger = new Debugger($idGenerator, $storage, [$collector]);
-        $debugger->startup(new stdClass());
+        $debugger->startup(StartupContext::generic());
     }
 
     public function testStartupWithSkipCollect(): void
@@ -38,7 +36,7 @@ final class DebuggerTest extends TestCase
         $storage->expects($this->once())->method('addCollector');
 
         $debugger = new Debugger($idGenerator, $storage, [$collector], ['/test']);
-        $debugger->startup(new BeforeRequest(new ServerRequest('GET', '/debug')));
+        $debugger->startup(StartupContext::forRequest(new ServerRequest('GET', '/debug')));
     }
 
     public function testGetId(): void
@@ -67,7 +65,7 @@ final class DebuggerTest extends TestCase
         $storage->expects($this->never())->method('flush');
 
         $debugger = new Debugger($idGenerator, $storage, [$collector], []);
-        $debugger->startup(new BeforeRequest(new ServerRequest('GET', '/test', ['X-Debug-Ignore' => 'true'])));
+        $debugger->startup(StartupContext::forRequest(new ServerRequest('GET', '/test', ['X-Debug-Ignore' => 'true'])));
         $debugger->shutdown();
     }
 
@@ -90,7 +88,7 @@ final class DebuggerTest extends TestCase
 
         putenv('YII_DEBUG_IGNORE=true');
         $debugger = new Debugger($idGenerator, $storage, [$collector], []);
-        $debugger->startup(new ApplicationStartup('command'));
+        $debugger->startup(StartupContext::forCommand('command'));
         putenv('YII_DEBUG_IGNORE=false');
         $debugger->shutdown();
     }
@@ -104,7 +102,7 @@ final class DebuggerTest extends TestCase
         $storage->expects($this->once())->method('flush');
 
         $debugger = new Debugger($idGenerator, $storage, [$collector]);
-        $debugger->startup(new BeforeRequest(new ServerRequest('GET', '/test')));
+        $debugger->startup(StartupContext::forRequest(new ServerRequest('GET', '/test')));
         $debugger->shutdown();
         $debugger->shutdown();
         $debugger->shutdown();
@@ -119,7 +117,7 @@ final class DebuggerTest extends TestCase
         $storage->expects($this->never())->method('flush');
 
         $debugger = new Debugger($idGenerator, $storage, [$collector], ['/test']);
-        $debugger->startup(new BeforeRequest(new ServerRequest('GET', '/test')));
+        $debugger->startup(StartupContext::forRequest(new ServerRequest('GET', '/test')));
         $debugger->shutdown();
     }
 
@@ -137,7 +135,7 @@ final class DebuggerTest extends TestCase
         $storage->expects($this->never())->method('flush');
 
         $debugger = new Debugger($idGenerator, $storage, [$collector], [], $ignoredCommands);
-        $debugger->startup(new ApplicationStartup($ignoredCommand));
+        $debugger->startup(StartupContext::forCommand($ignoredCommand));
         $debugger->shutdown();
     }
 
@@ -175,7 +173,7 @@ final class DebuggerTest extends TestCase
         $storage->expects($this->once())->method('flush');
 
         $debugger = new Debugger($idGenerator, $storage, [$collector], [], $ignoredCommands);
-        $debugger->startup(new ApplicationStartup($ignoredCommand));
+        $debugger->startup(StartupContext::forCommand($ignoredCommand));
         $debugger->shutdown();
     }
 
@@ -201,8 +199,23 @@ final class DebuggerTest extends TestCase
         $storage->expects($this->never())->method('flush');
 
         $debugger = new Debugger($idGenerator, $storage, [$collector]);
-        $debugger->startup(new BeforeRequest(new ServerRequest('GET', '/test')));
+        $debugger->startup(StartupContext::forRequest(new ServerRequest('GET', '/test')));
         $debugger->stop();
         $debugger->stop();
+    }
+
+    public function testShutdownNotRegisteredWithoutStartup(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $collector = $this->getMockBuilder(CollectorInterface::class)->getMock();
+        $collector->expects($this->never())->method('startup');
+        $collector->expects($this->never())->method('shutdown');
+        $storage = $this->getMockBuilder(StorageInterface::class)->getMock();
+        $storage->expects($this->never())->method('flush');
+
+        // Just constructing should not register shutdown or activate
+        new Debugger($idGenerator, $storage, [$collector]);
+
+        // No assertion needed — mock expectations verify no methods were called
     }
 }

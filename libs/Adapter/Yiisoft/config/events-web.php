@@ -8,6 +8,7 @@ use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
+use AppDevPanel\Kernel\StartupContext;
 use Yiisoft\Yii\Http\Event\AfterEmit;
 use Yiisoft\Yii\Http\Event\AfterRequest;
 use Yiisoft\Yii\Http\Event\ApplicationShutdown;
@@ -22,14 +23,14 @@ if (!isAppDevPanelEnabled($params)) {
 
 return [
     ApplicationStartup::class => [
-        [Debugger::class, 'startup'],
+        static fn (ApplicationStartup $event, Debugger $debugger) => $debugger->startup(StartupContext::generic()),
         [WebAppInfoCollector::class, 'collect'],
     ],
     ApplicationShutdown::class => [
         [WebAppInfoCollector::class, 'collect'],
     ],
     BeforeRequest::class => [
-        [Debugger::class, 'startup'],
+        static fn (BeforeRequest $event, Debugger $debugger) => $debugger->startup(StartupContext::forRequest($event->getRequest())),
         [WebAppInfoCollector::class, 'collect'],
         [RequestCollector::class, 'collect'],
     ],

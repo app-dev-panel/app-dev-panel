@@ -1,0 +1,232 @@
+openapi: "3.1.0"
+info:
+  title: ADP Debug Ingestion API
+  description: |
+    Language-agnostic API for sending debug traces to App Dev Panel.
+    Any application (Python, TypeScript, Go, etc.) can use this API
+    to submit debug data that ADP will store and display.
+  version: "1.0.0"
+  license:
+    name: BSD-3-Clause
+
+servers:
+  - url: http://localhost:8080/debug/api
+    description: Local ADP instance
+
+paths:
+  /ingest:
+    post:
+      operationId: ingestDebugEntry
+      summary: Submit a debug entry
+      description: |
+        Accepts a complete debug entry from an external application.
+        The entry is stored and becomes visible in the ADP frontend.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DebugEntry"
+      responses:
+        "201":
+          description: Debug entry stored successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /ingest/batch:
+    post:
+      operationId: ingestDebugEntryBatch
+      summary: Submit multiple debug entries at once
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - entries
+              properties:
+                entries:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/DebugEntry"
+                  maxItems: 100
+      responses:
+        "201":
+          description: All entries stored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ids:
+                    type: array
+                    items:
+                      type: string
+                  count:
+                    type: integer
+
+  /ingest/log:
+    post:
+      operationId: ingestLog
+      summary: Submit a single log entry (shorthand)
+      description: Convenience endpoint for submitting a single log message.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogEntry"
+      responses:
+        "201":
+          description: Log stored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
+
+  /openapi.json:
+    get:
+      operationId: getOpenApiSpec
+      summary: Get this OpenAPI specification
+      responses:
+        "200":
+          description: OpenAPI JSON spec
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  schemas:
+    DebugEntry:
+      type: object
+      required:
+        - collectors
+      properties:
+        debugId:
+          type: string
+          description: Optional external entry ID. If omitted, one is generated.
+          example: "py-17415234567890ab"
+        context:
+          $ref: "#/components/schemas/DebugContext"
+        collectors:
+          type: object
+          description: |
+            Map of collector name → collected data array.
+            Keys are arbitrary strings; use well-known names for built-in panel support.
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+          example:
+            logs:
+              - { time: 1710000000.123, level: "error", message: "Connection refused", context: {}, line: "db.py:42" }
+            http_client:
+              - { startTime: 1710000000.0, endTime: 1710000001.5, totalTime: 1.5, method: "GET", uri: "https://api.example.com/users", responseStatus: 200 }
+        summary:
+          type: object
+          description: Optional pre-computed summary data merged into the summary record.
+          additionalProperties: true
+          example:
+            logger: { total: 5 }
+            http: { count: 3, totalTime: 1.45 }
+
+    DebugContext:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [web, command, generic]
+          default: generic
+        language:
+          type: string
+          description: Source language/runtime identifier
+          example: python
+        service:
+          type: string
+          description: Service or application name
+          example: my-backend
+        request:
+          $ref: "#/components/schemas/RequestInfo"
+        command:
+          type: string
+          description: Command name (for CLI context)
+          example: "migrate:run"
+        environment:
+          type: object
+          description: Arbitrary environment metadata
+          additionalProperties:
+            type: string
+
+    RequestInfo:
+      type: object
+      properties:
+        method:
+          type: string
+          example: POST
+        uri:
+          type: string
+          example: /api/users
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+        statusCode:
+          type: integer
+          example: 200
+        duration:
+          type: number
+          format: float
+          description: Request duration in seconds
+          example: 0.245
+
+    LogEntry:
+      type: object
+      required:
+        - level
+        - message
+      properties:
+        level:
+          type: string
+          enum: [emergency, alert, critical, error, warning, notice, info, debug]
+        message:
+          type: string
+        context:
+          type: object
+          additionalProperties: true
+          default: {}
+        line:
+          type: string
+          description: "Source location (file:line)"
+          example: "app.py:42"
+        service:
+          type: string
+          description: Source service name
+
+    IngestResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The debug entry ID
+        success:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        success:
+          type: boolean
+          default: false

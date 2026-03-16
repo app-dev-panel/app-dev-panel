@@ -9,15 +9,15 @@ use Yiisoft\VarDumper\VarDumper;
 
 final class VarDumperHandler implements HandlerInterface
 {
-    public Connection $connection;
+    public Broadcaster $broadcaster;
 
     public function __construct()
     {
-        $this->connection = Connection::create();
+        $this->broadcaster = new Broadcaster();
     }
 
     public function handle(mixed $variable, int $depth, bool $highlight = false): void
     {
-        $this->connection->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, VarDumper::create($variable)->asJson(false));
+        $this->broadcaster->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, VarDumper::create($variable)->asJson(false));
     }
 }

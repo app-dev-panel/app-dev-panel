@@ -38,10 +38,13 @@ export default function App({config}: AppProps) {
         dispatchWindowEvent(window.parent, 'panel.loaded', true);
 
         const listener = (event: MessageEvent) => {
-            console.log('Post message event', event, event.data);
+            if (event.origin !== window.location.origin) {
+                return;
+            }
+
             const data = event.data;
 
-            if ('event' in data) {
+            if (data && typeof data === 'object' && 'event' in data) {
                 switch (data.event as CrossWindowEventType) {
                     case 'router.navigate':
                         router.navigate(data.value);

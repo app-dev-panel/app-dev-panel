@@ -36,14 +36,20 @@ class DbSchemaProvider implements SchemaProviderInterface
         return $tables;
     }
 
-    public function getTable(string $tableName): array
+    public function getTable(string $tableName, int $limit = 1000, int $offset = 0): array
     {
         /** @var TableSchemaInterface[] $tableSchemas */
         $schema = $this->db->getSchema()->getTableSchema($tableName);
-        $records = new Query($this->db)->from($schema->getName())->all();
+        $totalCount = new Query($this->db)
+            ->from($schema->getName())
+            ->count();
+        $records = new Query($this->db)
+            ->from($schema->getName())
+            ->limit($limit)
+            ->offset($offset)
+            ->all();
         $data = [];
 
-        // TODO: add pagination
         foreach ($records as $r => $record) {
             foreach ($record as $n => $attribute) {
                 $data[$r][$n] = $attribute;
@@ -55,6 +61,9 @@ class DbSchemaProvider implements SchemaProviderInterface
             'primaryKeys' => $schema->getPrimaryKey(),
             'columns' => $this->serializeARColumnsSchemas($schema->getColumns()),
             'records' => $data,
+            'totalCount' => $totalCount,
+            'limit' => $limit,
+            'offset' => $offset,
         ];
     }
 

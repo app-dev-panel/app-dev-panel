@@ -6,12 +6,9 @@ namespace AppDevPanel\Api\Inspector\Controller;
 
 use Gitonomy\Git\Commit;
 use Gitonomy\Git\Reference\Branch;
-use Gitonomy\Git\Repository;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Throwable;
-use Yiisoft\Aliases\Aliases;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
 use Yiisoft\VarDumper\VarDumper;
 
@@ -19,12 +16,12 @@ final class GitController
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-        private Aliases $aliases,
+        private GitRepositoryProvider $repositoryProvider,
     ) {}
 
     public function summary(): ResponseInterface
     {
-        $git = $this->getGit();
+        $git = $this->repositoryProvider->get();
 
         $references = $git->getReferences();
         $name = trim($git->run('branch', ['--show-current']));
@@ -49,7 +46,7 @@ final class GitController
 
     public function log(): ResponseInterface
     {
-        $git = $this->getGit();
+        $git = $this->repositoryProvider->get();
 
         $references = $git->getReferences(false);
         $name = trim($git->run('branch', ['--show-current']));
@@ -65,13 +62,17 @@ final class GitController
 
     public function checkout(ServerRequestInterface $request): ResponseInterface
     {
-        $git = $this->getGit();
+        $git = $this->repositoryProvider->get();
 
         $parsedBody = \json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $branch = $parsedBody['branch'] ?? null;
 
-        if ($branch === null) {
+        if ($branch === null || $branch === '') {
             throw new InvalidArgumentException('Branch should not be empty.');
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9\/_.\-]+$/', $branch)) {
+            throw new InvalidArgumentException(sprintf('Invalid branch name "%s".', $branch));
         }
 
         $git->getWorkingCopy()->checkout($branch);
@@ -80,7 +81,7 @@ final class GitController
 
     public function command(ServerRequestInterface $request): ResponseInterface
     {
-        $git = $this->getGit();
+        $git = $this->repositoryProvider->get();
         $availableCommands = ['pull', 'fetch'];
 
         $command = $request->getQueryParams()['command'] ?? null;
@@ -102,26 +103,6 @@ final class GitController
             $git->run('fetch', ['--tags']);
         }
         return $this->responseFactory->createResponse([]);
-    }
-
-    private function getGit(): Repository
-    {
-        $projectPath = $this->aliases->get('@root');
-
-        while ($projectPath !== '/') {
-            try {
-                $git = new Repository($projectPath);
-                $git->getWorkingCopy();
-                return $git;
-            } catch (Throwable) {
-                $projectPath = dirname($projectPath);
-            }
-        }
-
-        throw new InvalidArgumentException(sprintf(
-            'Could find any repositories up from "%s" directory.',
-            $projectPath,
-        ));
     }
 
     private function serializeCommit(?Commit $commit): array

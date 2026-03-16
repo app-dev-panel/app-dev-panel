@@ -1,11 +1,29 @@
 import type {HydrationState} from '@remix-run/router';
 import type {FutureConfig as RouterFutureConfig} from '@remix-run/router/dist/router';
+import {ErrorFallback} from '@yiisoft/yii-dev-panel-sdk/Component/ErrorFallback';
 import {ModuleInterface} from '@yiisoft/yii-dev-panel-sdk/Types/Module.types';
 import {Layout} from '@yiisoft/yii-dev-panel/Application/Component/Layout';
 import {NotFoundPage} from '@yiisoft/yii-dev-panel/Application/Pages/NotFoundPage';
-import {createBrowserRouter, createHashRouter, RouteObject} from 'react-router-dom';
+import {createBrowserRouter, createHashRouter, RouteObject, useRouteError} from 'react-router-dom';
 
-// TODO: move DebugToolbar somewhere else
+function RouteErrorBoundary() {
+    const error = useRouteError();
+    return (
+        <ErrorFallback
+            error={error instanceof Error ? error : new Error(String(error))}
+            resetErrorBoundary={() => window.location.reload()}
+        />
+    );
+}
+
+function addErrorBoundary(routes: RouteObject[]): RouteObject[] {
+    return routes.map((route) => ({
+        ...route,
+        errorElement: route.errorElement ?? <RouteErrorBoundary />,
+        children: route.children ? addErrorBoundary(route.children) : undefined,
+    }));
+}
+
 export function createRouter(
     modules: ModuleInterface[],
     routerConfig: {basename: string; useHashRouter: boolean},
@@ -18,9 +36,10 @@ export function createRouter(
         {
             path: '/',
             element: <Layout />,
-            children: ([] satisfies RouteObject[]).concat(...others.map((module) => module.routes)),
+            errorElement: <RouteErrorBoundary />,
+            children: addErrorBoundary(([] satisfies RouteObject[]).concat(...others.map((module) => module.routes))),
         },
-        ...([] satisfies RouteObject[]).concat(...standaloneModules.map((module) => module.routes)),
+        ...addErrorBoundary(([] satisfies RouteObject[]).concat(...standaloneModules.map((module) => module.routes))),
         {
             path: '*',
             element: (

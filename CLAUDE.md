@@ -1,13 +1,24 @@
 # ADP — Application Development Panel
 
-## Project Overview
+## Core Concept
 
-ADP (Application Development Panel) is a **framework-agnostic, language-agnostic** debugging and development panel.
-It collects runtime data (logs, events, requests, exceptions, database queries, etc.) from applications and provides
-a web UI to inspect, analyze, and debug them.
+ADP is a **universal application inspection tool** — framework-agnostic, language-agnostic. It intercepts runtime data from any application and provides a web UI for debugging and inspection.
 
-The project is currently a fork/consolidation from Yii Debug into a single monorepo, with the goal of becoming
-fully framework-independent. The first adapter targets Yii 3; additional adapters (Symfony, Laravel, etc.) will follow.
+Two fundamental modes:
+
+- **Debugger** — Collects data per request or command execution. Every intercepted action (logs, SQL queries, HTTP calls, events, exceptions) is stored permanently. All historical entries remain accessible — 100 API requests means 100 inspectable debug entries. Storage: JSON files per entry (summary + data + objects).
+- **Inspector** — Real-time application viewer. Browse files, configs, cache, routes, translations. Run tests, scripts, composer commands. State exists only for the current view — no history. Inspector operates on live application state. Supports multi-app proxying: external services register via the Service Registry API and inspector requests are proxied to them via `InspectorProxyMiddleware`.
+
+Debugger and Inspector integrate: e.g., "execute SQL query" action next to DB connection logs, "view source file" next to exception traces.
+
+### Data Ingestion
+
+Two ways to feed data into ADP:
+
+1. **PHP Adapters** — Proxies wrap PSR interfaces (Logger, EventDispatcher, HttpClient, Container) inside the target app. Collectors capture data transparently. Works for PHP frameworks (Yii 3 adapter exists, Symfony/Laravel planned).
+2. **Ingestion API** — Language-agnostic HTTP endpoints. External apps (Python, Node.js, Go, etc.) send debug data via REST. Defined by OpenAPI 3.1 spec at `openapi/ingestion.yaml`. Pre-built clients: Python (`clients/python/`), TypeScript (`clients/typescript/`).
+
+Origin: fork/consolidation from Yii Debug into a monorepo, evolving to be fully framework-independent.
 
 ## Tech Stack
 
@@ -24,53 +35,71 @@ fully framework-independent. The first adapter targets Yii 3; additional adapter
 ├── app/                          # Demo/reference PHP application
 ├── libs/
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
-│   ├── API/                      # HTTP API: debug endpoints, inspector endpoints, SSE
+│   ├── API/                      # HTTP API: debug, inspector, ingestion endpoints, SSE
 │   ├── Cli/                      # CLI commands: debug server, reset, broadcast
 │   ├── Adapter/
-│   │   └── Yiisoft/              # Yii 3 framework adapter (first adapter)
+│   │   └── Yiisoft/              # Yii 3 framework adapter
 │   └── yii-dev-panel/            # Frontend monorepo
 │       └── packages/
 │           ├── yii-dev-panel/        # Main SPA (debug panel)
 │           ├── yii-dev-toolbar/      # Embeddable toolbar widget
 │           └── yii-dev-panel-sdk/    # Shared SDK (components, API clients, helpers)
-├── CLAUDE.md                     # This file
-└── docs/                         # Global documentation
+├── clients/
+│   ├── python/                   # Python ingestion client (adp-client)
+│   └── typescript/               # TypeScript ingestion client (@app-dev-panel/client)
+├── openapi/
+│   ├── ingestion.yaml            # OpenAPI 3.1 spec for ingestion endpoints
+│   └── inspector.yaml            # OpenAPI 3.1 spec for inspector contract (external apps)
+├── scripts/
+│   └── generate-clients.sh       # Client code generation from OpenAPI spec
+├── CLAUDE.md
+└── docs/
 ```
 
 ## Architecture
 
-ADP follows a **layered architecture**:
+Layered architecture:
 
-1. **Kernel** — Core engine. Manages debugger lifecycle, data collectors, storage, and proxy system. Framework-independent.
-2. **API** — HTTP layer. Exposes debug data and inspector endpoints via REST + SSE. Framework-independent.
-3. **Adapter** — Framework bridge. Wires Kernel collectors into a specific framework's DI, events, and middleware.
+1. **Kernel** — Core engine. Debugger lifecycle, collectors, storage, proxy system. Framework-independent.
+2. **API** — HTTP layer. Debug, inspector, and ingestion endpoints via REST + SSE. Framework-independent.
+3. **Adapter** — Framework bridge. Wires Kernel collectors into a framework's DI, events, and middleware.
 4. **Frontend** — React SPA. Consumes the API and renders debug/inspector UI.
 
 ```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+                                     ┌───────────────────┐
+                                     │  External Apps    │
+                                     │  (Python/Node/Go) │
+                                     └────────┬──────────┘
+                                              │ Ingestion API
+┌──────────────┐     ┌──────────────┐     ┌───┴──────────┐
 │   Frontend   │────▶│     API      │────▶│    Kernel     │
-│  (React SPA) │ HTTP│  (REST+SSE)  │     │ (Collectors)  │
+│  (React SPA) │ HTTP│  (REST+SSE)  │     │  (Storage)    │
 └──────────────┘     └──────────────┘     └───────┬───────┘
-                                                  │
+                                                  │ Proxies
                                           ┌───────┴───────┐
                                           │    Adapter     │
                                           │  (Yii/Symfony) │
                                           └───────┬───────┘
                                                   │
                                           ┌───────┴───────┐
-                                          │  Target App   │
+                                          │  PHP App      │
                                           │  (User's App) │
                                           └───────────────┘
 ```
 
 ## Data Flow
 
-1. **Target app** runs with an Adapter installed (e.g., Yii adapter)
-2. Adapter registers **proxies** that intercept PSR interfaces (logger, event dispatcher, HTTP client, DI container)
-3. Proxies feed intercepted data to **Collectors** (LogCollector, EventCollector, etc.)
-4. On request completion (or console command end), **Debugger** flushes all collector data to **Storage** (JSON files)
-5. **API** serves stored data via REST endpoints; SSE notifies the frontend of new entries
-6. **Frontend** fetches and renders the data in a web UI
+### PHP Adapter Flow
+1. Target app runs with an Adapter installed
+2. Adapter registers proxies that intercept PSR interfaces (logger, event dispatcher, HTTP client, container)
+3. Proxies feed intercepted data to Collectors
+4. On request/command completion, Debugger flushes collector data to Storage (JSON files)
+5. API serves stored data via REST; SSE notifies frontend of new entries
+
+### Ingestion API Flow (any language)
+1. External app sends HTTP POST with debug data (logs, traces, metrics) to `/debug/api/ingest`
+2. IngestionController validates and writes directly to FileStorage
+3. Data appears in the debugger UI alongside PHP debug entries
 
 ## Key Commands
 

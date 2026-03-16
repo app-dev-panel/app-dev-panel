@@ -30,7 +30,10 @@ final class MemoryStorageTest extends AbstractStorageTestCase
             [
                 $idGenerator->getId() => [
                     'id' => $idGenerator->getId(),
-                    'collectors' => [$collector1->getName(), $collector2->getName()],
+                    'collectors' => [
+                        ['id' => $collector1->getId(), 'name' => $collector1->getName()],
+                        ['id' => $collector2->getId(), 'name' => $collector2->getName()],
+                    ],
                 ],
             ],
             $result,
