@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADP — Variant A: Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #1E1E1E;
+    --bg-secondary: #252526;
+    --bg-tertiary: #2D2D2D;
+    --bg-hover: #3C3C3C;
+    --bg-active: #37373D;
+    --text-primary: #CCCCCC;
+    --text-secondary: #9E9E9E;
+    --text-muted: #6E6E6E;
+    --accent: #0078D4;
+    --accent-light: #1A8CFF;
+    --border: #3C3C3C;
+    --success: #4CAF50;
+    --warning: #FF9800;
+    --error: #F44336;
+    --info: #2196F3;
+    --method-get: #4CAF50;
+    --method-post: #FF9800;
+    --status-2xx: #4CAF50;
+    --status-4xx: #FF9800;
+    --status-5xx: #F44336;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Roboto', sans-serif; background: var(--bg-primary); color: var(--text-primary); height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 13px; }
+
+  /* Context Bar */
+  .context-bar {
+    height: 48px; background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0; z-index: 10;
+  }
+  .method-badge {
+    padding: 2px 8px; border-radius: 3px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;
+    color: #fff; background: var(--method-post);
+  }
+  .method-badge.get { background: var(--method-get); }
+  .status-badge {
+    padding: 2px 8px; border-radius: 3px; font-weight: 500; font-size: 12px;
+    background: rgba(76, 175, 80, 0.15); color: var(--status-2xx); border: 1px solid rgba(76, 175, 80, 0.3);
+  }
+  .url-path { font-family: 'Roboto Mono', monospace; font-size: 13px; color: var(--text-primary); }
+  .meta-item { color: var(--text-secondary); font-size: 12px; }
+  .meta-item .value { color: var(--text-primary); }
+  .spacer { flex: 1; }
+  .nav-btn {
+    width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border); background: transparent;
+    color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: all 0.15s;
+  }
+  .nav-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .compare-btn {
+    padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border); background: transparent;
+    color: var(--text-secondary); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;
+    transition: all 0.15s;
+  }
+  .compare-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .search-trigger {
+    padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-tertiary);
+    color: var(--text-muted); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 6px;
+    min-width: 160px; transition: all 0.15s;
+  }
+  .search-trigger:hover { border-color: var(--accent); }
+  .search-trigger kbd {
+    font-family: 'Roboto Mono', monospace; font-size: 10px; background: var(--bg-hover);
+    padding: 1px 4px; border-radius: 2px; border: 1px solid var(--border);
+  }
+
+  /* Main Layout */
+  .main-layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* Sidebar Rail */
+  .sidebar-rail {
+    width: 48px; background: var(--bg-secondary); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; padding-top: 8px; gap: 4px;
+    flex-shrink: 0; z-index: 5;
+  }
+  .rail-item {
+    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    border-radius: 6px; cursor: pointer; color: var(--text-secondary); position: relative;
+    transition: all 0.15s;
+  }
+  .rail-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .rail-item.active { color: var(--accent); }
+  .rail-item.active::before {
+    content: ''; position: absolute; left: -4px; top: 8px; bottom: 8px; width: 3px;
+    background: var(--accent); border-radius: 0 2px 2px 0;
+  }
+  .rail-item .material-icons { font-size: 22px; }
+
+  /* Content Area */
+  .content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Tab Bar */
+  .tab-bar {
+    height: 40px; background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    display: flex; align-items: stretch; padding: 0 8px; gap: 0; flex-shrink: 0; overflow-x: auto;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-item {
+    padding: 0 16px; display: flex; align-items: center; gap: 6px; cursor: pointer;
+    color: var(--text-secondary); border-bottom: 2px solid transparent; white-space: nowrap;
+    font-size: 13px; transition: all 0.15s;
+  }
+  .tab-item:hover { color: var(--text-primary); background: var(--bg-hover); }
+  .tab-item.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+  .tab-badge {
+    font-size: 10px; padding: 1px 6px; border-radius: 8px; font-weight: 500;
+    background: var(--bg-hover); color: var(--text-secondary);
+  }
+  .tab-badge.warn { background: rgba(255, 152, 0, 0.15); color: var(--warning); }
+  .tab-badge.error { background: rgba(244, 67, 54, 0.15); color: var(--error); }
+
+  /* Main Content */
+  .main-content { flex: 1; overflow-y: auto; padding: 16px 24px; }
+  .main-content::-webkit-scrollbar { width: 8px; }
+  .main-content::-webkit-scrollbar-track { background: transparent; }
+  .main-content::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 4px; }
+
+  /* Toolbar */
+  .content-toolbar {
+    display: flex; align-items: center; gap: 8px; padding: 8px 0; margin-bottom: 12px;
+  }
+  .toolbar-select {
+    padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-tertiary);
+    color: var(--text-primary); font-size: 12px; cursor: pointer;
+  }
+  .toolbar-input {
+    padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-tertiary);
+    color: var(--text-primary); font-size: 12px; width: 200px; outline: none;
+  }
+  .toolbar-input:focus { border-color: var(--accent); }
+  .toolbar-btn {
+    padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: transparent;
+    color: var(--text-secondary); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    transition: all 0.15s;
+  }
+  .toolbar-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .toolbar-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .toolbar-spacer { flex: 1; }
+
+  /* Table */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th {
+    text-align: left; padding: 8px 12px; font-weight: 500; color: var(--text-secondary);
+    border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.5px; position: sticky; top: 0; background: var(--bg-primary);
+  }
+  .data-table td {
+    padding: 8px 12px; border-bottom: 1px solid rgba(60, 60, 60, 0.5); vertical-align: top;
+  }
+  .data-table tr:hover td { background: var(--bg-hover); }
+  .query-type {
+    padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .query-type.select { background: rgba(33, 150, 243, 0.15); color: var(--info); }
+  .query-type.update { background: rgba(255, 152, 0, 0.15); color: var(--warning); }
+  .query-type.insert { background: rgba(76, 175, 80, 0.15); color: var(--success); }
+  .query-code {
+    font-family: 'Roboto Mono', monospace; font-size: 12px; color: var(--text-primary);
+    word-break: break-all;
+  }
+  .query-time { font-family: 'Roboto Mono', monospace; font-size: 12px; text-align: right; }
+  .query-time.slow { color: var(--warning); }
+  .query-rows { text-align: right; color: var(--text-secondary); }
+
+  /* Mini Timeline */
+  .mini-timeline {
+    margin-top: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .mini-timeline-label { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+  .mini-timeline-bar { display: flex; height: 20px; border-radius: 3px; overflow: hidden; gap: 1px; }
+  .mini-timeline-segment { height: 100%; border-radius: 2px; }
+  .mini-timeline-axis {
+    display: flex; justify-content: space-between; margin-top: 4px;
+    font-size: 10px; color: var(--text-muted); font-family: 'Roboto Mono', monospace;
+  }
+
+  /* Status Bar */
+  .status-bar {
+    height: 24px; background: var(--bg-secondary); border-top: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 12px; gap: 12px; flex-shrink: 0;
+    font-size: 11px; color: var(--text-muted);
+  }
+  .sse-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--success);
+    display: inline-block; margin-right: 4px; box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
+  }
+  .status-divider { width: 1px; height: 14px; background: var(--border); }
+
+  /* Summary row */
+  .summary-row {
+    display: flex; align-items: center; gap: 16px; padding: 8px 0;
+    font-size: 12px; color: var(--text-muted);
+  }
+  .summary-row .material-icons { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- Context Bar -->
+<div class="context-bar">
+  <span class="method-badge">POST</span>
+  <span class="status-badge">201</span>
+  <span class="url-path">/api/users</span>
+  <span class="meta-item"><span class="value">145ms</span></span>
+  <span class="meta-item"><span class="value">12.4 MB</span></span>
+  <span class="meta-item">2026-03-15 14:23:07</span>
+  <span class="spacer"></span>
+  <button class="nav-btn" title="Previous entry">&#9664;</button>
+  <button class="nav-btn" title="Next entry">&#9654;</button>
+  <button class="compare-btn"><span class="material-icons" style="font-size:14px">compare_arrows</span> Compare</button>
+  <button class="search-trigger"><span class="material-icons" style="font-size:14px">search</span> Search... <kbd>Ctrl+K</kbd></button>
+</div>
+
+<!-- Main Layout -->
+<div class="main-layout">
+  <!-- Sidebar Rail -->
+  <div class="sidebar-rail">
+    <div class="rail-item active" title="Debug"><span class="material-icons">bug_report</span></div>
+    <div class="rail-item" title="Debug List"><span class="material-icons">list_alt</span></div>
+    <div class="rail-item" title="Inspector"><span class="material-icons">settings</span></div>
+    <div class="rail-item" title="OpenAPI"><span class="material-icons">api</span></div>
+    <div class="rail-item" title="Frames"><span class="material-icons">layers</span></div>
+    <div class="rail-item" title="Gii"><span class="material-icons">auto_fix_high</span></div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content-area">
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <div class="tab-item">Request</div>
+      <div class="tab-item">Response</div>
+      <div class="tab-item">Logs <span class="tab-badge">5</span></div>
+      <div class="tab-item">Events <span class="tab-badge">31</span></div>
+      <div class="tab-item active">DB <span class="tab-badge warn">8</span></div>
+      <div class="tab-item">Exceptions</div>
+      <div class="tab-item">Mail</div>
+      <div class="tab-item">Service</div>
+      <div class="tab-item">Profiling</div>
+      <div class="tab-item">Assets</div>
+      <div class="tab-item">Router</div>
+      <div class="tab-item" style="color: var(--text-muted);">...</div>
+    </div>
+
+    <!-- Main Content: DB Queries Tab -->
+    <div class="main-content">
+      <!-- Toolbar -->
+      <div class="content-toolbar">
+        <span style="font-weight: 500; font-size: 14px;">Database Queries</span>
+        <span class="tab-badge" style="font-size: 11px;">8 queries, 34ms total</span>
+        <span class="toolbar-spacer"></span>
+        <select class="toolbar-select"><option>All types</option></select>
+        <input class="toolbar-input" placeholder="Search queries..." type="text">
+        <button class="toolbar-btn active"><span class="material-icons" style="font-size:14px">density_small</span> Compact</button>
+        <button class="toolbar-btn"><span class="material-icons" style="font-size:14px">density_medium</span></button>
+        <span style="width:1px; height:20px; background:var(--border)"></span>
+        <button class="toolbar-btn"><span class="material-icons" style="font-size:14px">file_download</span> Export</button>
+      </div>
+
+      <!-- Table -->
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th style="width:70px">Type</th>
+            <th>Query</th>
+            <th style="width:80px; text-align:right">Time</th>
+            <th style="width:60px; text-align:right">Rows</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--text-muted)">1</td>
+            <td><span class="query-type select">SELECT</span></td>
+            <td><code class="query-code">SELECT * FROM "user" WHERE "active" = 1 ORDER BY "created_at" DESC LIMIT 25 OFFSET 25</code></td>
+            <td class="query-time slow">12ms</td>
+            <td class="query-rows">25</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted)">2</td>
+            <td><span class="query-type select">SELECT</span></td>
+            <td><code class="query-code">SELECT COUNT(*) FROM "user" WHERE "active" = 1</code></td>
+            <td class="query-time">3ms</td>
+            <td class="query-rows">1</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted)">3</td>
+            <td><span class="query-type select">SELECT</span></td>
+            <td><code class="query-code">SELECT "r"."name" FROM "role" INNER JOIN "user_role" ON "r"."id" = "ur"."role_id" WHERE "ur"."user_id" IN (26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50)</code></td>
+            <td class="query-time">8ms</td>
+            <td class="query-rows">25</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted)">4</td>
+            <td><span class="query-type select">SELECT</span></td>
+            <td><code class="query-code">SELECT "key", "value" FROM "setting" WHERE "scope" = 'pagination'</code></td>
+            <td class="query-time">2ms</td>
+            <td class="query-rows">3</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted)">5</td>
+            <td><span class="query-type select">SELECT</span></td>
+            <td><code class="query-code">SELECT * FROM "cache_item" WHERE "key" = 'user_count_total'</code></td>
+            <td class="query-time">1ms</td>
+            <td class="query-rows">1</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted)">6</td>
+            <td><span class="query-type update">UPDATE</span></td>
+            <td><code class="query-code">UPDATE "request_log" SET "count" = "count" + 1 WHERE "ip" = '192.168.1.100'</code></td>
+            <td class="query-time slow">4ms</td>
+            <td class="query-rows">1</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted)">7</td>
+            <td><span class="query-type select">SELECT</span></td>
+            <td><code class="query-code">SELECT "count" FROM "rate_limit" WHERE "ip" = '192.168.1.100'</code></td>
+            <td class="query-time">2ms</td>
+            <td class="query-rows">1</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-muted)">8</td>
+            <td><span class="query-type insert">INSERT</span></td>
+            <td><code class="query-code">INSERT INTO "audit_log" ("action", "user_id", "timestamp") VALUES ('create_user', 42, '2026-03-15 14:23:07')</code></td>
+            <td class="query-time">2ms</td>
+            <td class="query-rows">1</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Mini Timeline -->
+      <div class="mini-timeline">
+        <div class="mini-timeline-label">Query Timeline</div>
+        <div class="mini-timeline-bar">
+          <div class="mini-timeline-segment" style="width:35%; background: #2196F3;"></div>
+          <div class="mini-timeline-segment" style="width:9%; background: #2196F3; opacity:0.7"></div>
+          <div class="mini-timeline-segment" style="width:24%; background: #2196F3;"></div>
+          <div class="mini-timeline-segment" style="width:6%; background: #2196F3; opacity:0.7"></div>
+          <div class="mini-timeline-segment" style="width:3%; background: #2196F3; opacity:0.5"></div>
+          <div class="mini-timeline-segment" style="width:12%; background: #FF9800;"></div>
+          <div class="mini-timeline-segment" style="width:6%; background: #2196F3; opacity:0.7"></div>
+          <div class="mini-timeline-segment" style="width:6%; background: #4CAF50;"></div>
+        </div>
+        <div class="mini-timeline-axis">
+          <span>0ms</span><span>12ms</span><span>15ms</span><span>23ms</span><span>34ms</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status Bar -->
+<div class="status-bar">
+  <span>POST /api/debug/view/abc123 &rarr; 200 OK (45ms)</span>
+  <span class="spacer"></span>
+  <span><span class="sse-dot"></span>SSE Connected</span>
+  <span class="status-divider"></span>
+  <span>ADP v1.2.0</span>
+  <span class="status-divider"></span>
+  <span class="material-icons" style="font-size:14px; cursor:pointer;">settings</span>
+</div>
+
+</body>
+</html>

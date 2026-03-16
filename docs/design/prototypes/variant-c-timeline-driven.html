@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADP — Variant C: Timeline-Driven</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0F0F0F;
+    --bg-secondary: #1A1A1A;
+    --bg-tertiary: #242424;
+    --bg-hover: #2E2E2E;
+    --text-primary: #E0E0E0;
+    --text-secondary: #9E9E9E;
+    --text-muted: #616161;
+    --accent: #00B0FF;
+    --border: #333333;
+    --success: #4CAF50;
+    --warning: #FFB300;
+    --error: #EF5350;
+    /* Timeline colors */
+    --tl-request: #42A5F5;
+    --tl-middleware: #AB47BC;
+    --tl-router: #66BB6A;
+    --tl-handler: #FFA726;
+    --tl-db: #26C6DA;
+    --tl-http: #EC407A;
+    --tl-event: #FFEE58;
+    --tl-view: #8D6E63;
+    --tl-response: #78909C;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Roboto', sans-serif; background: var(--bg-primary); color: var(--text-primary); height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 13px; }
+
+  /* Context Bar */
+  .context-bar {
+    height: 48px; background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0;
+  }
+  .logo { font-weight: 700; font-size: 14px; color: var(--accent); padding: 4px 8px; border: 1px solid var(--accent); border-radius: 4px; }
+  .entry-info { font-family: 'Roboto Mono', monospace; font-size: 13px; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+  .entry-info .sep { color: var(--text-muted); }
+  .status-ok { color: var(--success); font-weight: 500; }
+  .entry-id { color: var(--text-muted); font-size: 11px; }
+  .timestamp { color: var(--text-secondary); font-size: 12px; }
+  .spacer { flex: 1; }
+  .nav-btn {
+    padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: transparent;
+    color: var(--text-secondary); cursor: pointer; font-size: 12px; transition: all 0.15s;
+  }
+  .nav-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+  /* Main Layout */
+  .main-layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* Icon Rail */
+  .icon-rail {
+    width: 56px; background: var(--bg-secondary); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; padding-top: 8px; gap: 2px; flex-shrink: 0;
+  }
+  .rail-item {
+    width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; cursor: pointer; color: var(--text-muted); position: relative; transition: all 0.15s;
+  }
+  .rail-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .rail-item.active { color: var(--accent); }
+  .rail-item.active::before {
+    content: ''; position: absolute; left: -6px; top: 10px; bottom: 10px; width: 3px;
+    background: var(--accent); border-radius: 0 2px 2px 0;
+  }
+  .rail-item .material-icons { font-size: 22px; }
+
+  /* Timeline Area */
+  .timeline-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Minimap */
+  .minimap {
+    height: 24px; background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 4px 16px; display: flex; align-items: center;
+  }
+  .minimap-track {
+    flex: 1; height: 12px; background: var(--bg-tertiary); border-radius: 3px; position: relative; overflow: hidden;
+  }
+  .minimap-bars {
+    display: flex; height: 100%; align-items: center; gap: 1px; padding: 2px;
+  }
+  .minimap-bar { height: 8px; border-radius: 1px; }
+  .minimap-viewport {
+    position: absolute; top: 0; left: 10%; width: 80%; height: 100%;
+    border: 1px solid var(--accent); background: rgba(0, 176, 255, 0.08); border-radius: 3px;
+    cursor: grab;
+  }
+
+  /* Time Axis */
+  .time-axis {
+    height: 28px; background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-end; padding: 0 16px 4px 136px;
+    font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text-muted);
+  }
+  .time-tick { position: absolute; }
+
+  /* Timeline Content */
+  .timeline-content { flex: 1; overflow-y: auto; padding: 0; min-height: 0; }
+  .timeline-content::-webkit-scrollbar { width: 6px; }
+  .timeline-content::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 3px; }
+
+  .timeline-row {
+    display: flex; align-items: center; height: 32px; padding: 0 16px; border-bottom: 1px solid rgba(51,51,51,0.3);
+    transition: background 0.1s;
+  }
+  .timeline-row:hover { background: var(--bg-hover); }
+  .timeline-row.selected { background: rgba(0, 176, 255, 0.08); }
+
+  .tl-label {
+    width: 120px; flex-shrink: 0; font-size: 12px; text-align: right; padding-right: 12px;
+    color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .tl-label.indent-1 { padding-left: 12px; color: var(--text-muted); }
+  .tl-label.indent-2 { padding-left: 24px; color: var(--text-muted); font-size: 11px; }
+
+  .tl-bar-area { flex: 1; position: relative; height: 20px; }
+  .tl-bar {
+    position: absolute; height: 18px; border-radius: 3px; top: 1px; cursor: pointer;
+    transition: opacity 0.15s, box-shadow 0.15s;
+    display: flex; align-items: center; min-width: 4px;
+  }
+  .tl-bar:hover { opacity: 0.85; box-shadow: 0 0 0 2px rgba(255,255,255,0.2); }
+  .tl-bar.selected { box-shadow: 0 0 0 2px var(--accent); }
+
+  .tl-duration {
+    width: 60px; flex-shrink: 0; text-align: right; font-family: 'Roboto Mono', monospace;
+    font-size: 11px; color: var(--text-muted); padding-left: 8px;
+  }
+
+  /* Log Markers */
+  .tl-log-row { display: flex; align-items: center; height: 24px; padding: 0 16px; border-bottom: 1px solid rgba(51,51,51,0.3); }
+  .tl-log-area { flex: 1; position: relative; height: 18px; }
+  .log-marker {
+    position: absolute; top: 2px; font-size: 12px; transform: translateX(-50%); cursor: pointer;
+  }
+  .log-marker.info { color: var(--text-muted); }
+  .log-marker.warn { color: var(--warning); }
+
+  /* Legend */
+  .timeline-legend {
+    padding: 8px 16px 8px 136px; display: flex; gap: 16px; flex-wrap: wrap;
+    font-size: 11px; color: var(--text-muted); border-bottom: 1px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .legend-swatch { width: 12px; height: 8px; border-radius: 2px; }
+
+  /* Detail Panel */
+  .detail-panel {
+    height: 220px; background: var(--bg-secondary); border-top: 2px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .detail-header {
+    height: 36px; display: flex; align-items: center; padding: 0 16px; gap: 12px;
+    border-bottom: 1px solid var(--border); font-size: 12px;
+  }
+  .detail-header .title { font-weight: 500; color: var(--text-primary); }
+  .detail-header .meta { color: var(--text-muted); font-family: 'Roboto Mono', monospace; font-size: 11px; }
+  .detail-tabs { display: flex; gap: 0; }
+  .detail-tab {
+    padding: 0 12px; height: 36px; display: flex; align-items: center; cursor: pointer;
+    color: var(--text-secondary); font-size: 12px; border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .detail-tab:hover { color: var(--text-primary); }
+  .detail-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .detail-content {
+    flex: 1; padding: 12px 16px; overflow-y: auto; font-family: 'Roboto Mono', monospace; font-size: 12px;
+  }
+  .detail-content .sql-keyword { color: var(--accent); font-weight: 500; }
+  .detail-content .sql-string { color: var(--success); }
+  .detail-meta-row {
+    display: flex; gap: 24px; margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--text-muted);
+  }
+  .detail-meta-row .value { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<!-- Context Bar -->
+<div class="context-bar">
+  <span class="logo">ADP</span>
+  <span class="entry-info">
+    <span>GET /api/users/42</span>
+    <span class="sep">&mdash;</span>
+    <span class="status-ok">200 OK</span>
+    <span class="sep">&mdash;</span>
+    <span>247ms</span>
+  </span>
+  <span class="entry-id">ID: 6f3a9b</span>
+  <span class="timestamp">2026-03-15 14:32:07</span>
+  <span class="spacer"></span>
+  <button class="nav-btn">&#9664; Prev</button>
+  <button class="nav-btn">Next &#9654;</button>
+</div>
+
+<!-- Main Layout -->
+<div class="main-layout">
+  <!-- Icon Rail -->
+  <div class="icon-rail">
+    <div class="rail-item active" title="Debug Timeline"><span class="material-icons">bug_report</span></div>
+    <div class="rail-item" title="Debug List"><span class="material-icons">list_alt</span></div>
+    <div class="rail-item" title="Performance"><span class="material-icons">timer</span></div>
+    <div class="rail-item" title="Profiler"><span class="material-icons">analytics</span></div>
+    <div class="rail-item" title="Database"><span class="material-icons">storage</span></div>
+    <div class="rail-item" title="Events"><span class="material-icons">notifications</span></div>
+    <div class="rail-item" title="HTTP Client"><span class="material-icons">language</span></div>
+    <div class="rail-item" title="Inspector"><span class="material-icons">settings</span></div>
+  </div>
+
+  <!-- Timeline Area -->
+  <div class="timeline-area">
+    <!-- Minimap -->
+    <div class="minimap">
+      <div class="minimap-track">
+        <div class="minimap-bars">
+          <div class="minimap-bar" style="width:100%; background: var(--tl-request); opacity:0.3;"></div>
+        </div>
+        <div class="minimap-viewport"></div>
+      </div>
+    </div>
+
+    <!-- Time Axis -->
+    <div class="time-axis" style="position:relative">
+      <div style="display:flex; width:100%; justify-content:space-between;">
+        <span>0ms</span><span>50ms</span><span>100ms</span><span>150ms</span><span>200ms</span><span>247ms</span>
+      </div>
+    </div>
+
+    <!-- Timeline Content -->
+    <div class="timeline-content">
+      <!-- Request (root) -->
+      <div class="timeline-row">
+        <div class="tl-label">Request</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:0; width:100%; background:var(--tl-request); opacity:0.8;"></div>
+        </div>
+        <div class="tl-duration">247ms</div>
+      </div>
+
+      <!-- Middleware -->
+      <div class="timeline-row">
+        <div class="tl-label indent-1">Middleware</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:1%; width:96%; background:var(--tl-middleware);"></div>
+        </div>
+        <div class="tl-duration">239ms</div>
+      </div>
+
+      <!-- Auth -->
+      <div class="timeline-row">
+        <div class="tl-label indent-2">Auth</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:1%; width:17%; background:var(--tl-middleware); opacity:0.7;"></div>
+        </div>
+        <div class="tl-duration">42ms</div>
+      </div>
+
+      <!-- CORS -->
+      <div class="timeline-row">
+        <div class="tl-label indent-2">CORS</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:10%; width:7%; background:var(--tl-middleware); opacity:0.7;"></div>
+        </div>
+        <div class="tl-duration">18ms</div>
+      </div>
+
+      <!-- Debug -->
+      <div class="timeline-row">
+        <div class="tl-label indent-2">Debug</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:16%; width:80%; background:var(--tl-middleware); opacity:0.5;"></div>
+        </div>
+        <div class="tl-duration">197ms</div>
+      </div>
+
+      <!-- Router -->
+      <div class="timeline-row">
+        <div class="tl-label indent-1">Router</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:18%; width:11%; background:var(--tl-router);"></div>
+        </div>
+        <div class="tl-duration">28ms</div>
+      </div>
+
+      <!-- Handler -->
+      <div class="timeline-row">
+        <div class="tl-label indent-1">Handler</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:27%; width:59%; background:var(--tl-handler);"></div>
+        </div>
+        <div class="tl-duration">145ms</div>
+      </div>
+
+      <!-- DB #1 (selected) -->
+      <div class="timeline-row selected">
+        <div class="tl-label indent-2">DB #1</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar selected" style="left:29%; width:5%; background:var(--tl-db);"></div>
+        </div>
+        <div class="tl-duration">12ms</div>
+      </div>
+
+      <!-- DB #2 -->
+      <div class="timeline-row">
+        <div class="tl-label indent-2">DB #2</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:37%; width:14%; background:var(--tl-db);"></div>
+        </div>
+        <div class="tl-duration">34ms</div>
+      </div>
+
+      <!-- HTTP -->
+      <div class="timeline-row">
+        <div class="tl-label indent-2">HTTP</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:43%; width:21%; background:var(--tl-http);"></div>
+        </div>
+        <div class="tl-duration">52ms</div>
+      </div>
+
+      <!-- Event -->
+      <div class="timeline-row">
+        <div class="tl-label indent-2">Event</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:60%; width:7%; background:var(--tl-event);"></div>
+        </div>
+        <div class="tl-duration">18ms</div>
+      </div>
+
+      <!-- View -->
+      <div class="timeline-row">
+        <div class="tl-label indent-2">View</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:70%; width:11%; background:var(--tl-view);"></div>
+        </div>
+        <div class="tl-duration">28ms</div>
+      </div>
+
+      <!-- Response -->
+      <div class="timeline-row">
+        <div class="tl-label indent-1">Response</div>
+        <div class="tl-bar-area">
+          <div class="tl-bar" style="left:79%; width:21%; background:var(--tl-response);"></div>
+        </div>
+        <div class="tl-duration">51ms</div>
+      </div>
+
+      <!-- Log markers -->
+      <div class="tl-log-row">
+        <div class="tl-label" style="color:var(--text-muted); font-size:11px;">Logs</div>
+        <div class="tl-log-area">
+          <span class="log-marker info" style="left:8%">&#9660;</span>
+          <span class="log-marker info" style="left:22%">&#9660;</span>
+          <span class="log-marker info" style="left:35%">&#9660;</span>
+          <span class="log-marker warn" style="left:55%">&#9650;</span>
+          <span class="log-marker info" style="left:82%">&#9660;</span>
+        </div>
+        <div class="tl-duration"></div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="timeline-legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--tl-request)"></span> Request</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--tl-middleware)"></span> Middleware</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--tl-router)"></span> Router</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--tl-handler)"></span> Handler</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--tl-db)"></span> Database</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--tl-http)"></span> HTTP Client</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--tl-event)"></span> Events</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--tl-view)"></span> View</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--tl-response)"></span> Response</span>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="detail-panel">
+      <div class="detail-header">
+        <span class="title">DB Query #1</span>
+        <span class="meta">Duration: 12ms</span>
+        <span class="meta">Start: 72ms</span>
+        <span class="spacer"></span>
+        <div class="detail-tabs">
+          <div class="detail-tab active">SQL</div>
+          <div class="detail-tab">Parameters</div>
+          <div class="detail-tab">Explain</div>
+          <div class="detail-tab">Stack Trace</div>
+        </div>
+      </div>
+      <div class="detail-content">
+        <div>
+          <span class="sql-keyword">SELECT</span> u.id, u.name, u.email, u.created_at<br>
+          <span class="sql-keyword">FROM</span> users u<br>
+          <span class="sql-keyword">WHERE</span> u.id = <span class="sql-string">:id</span> <span class="sql-keyword">AND</span> u.status = <span class="sql-string">:status</span><br>
+          <span class="sql-keyword">ORDER BY</span> u.created_at <span class="sql-keyword">DESC</span>
+        </div>
+        <div class="detail-meta-row">
+          <span>Connection: <span class="value">default (mysql)</span></span>
+          <span>Rows: <span class="value">1</span></span>
+          <span>Cached: <span class="value">No</span></span>
+          <span>Transaction: <span class="value">None</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
