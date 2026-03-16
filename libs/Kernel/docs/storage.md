@@ -1,34 +1,36 @@
 # Storage
 
-The storage layer is responsible for persisting and retrieving debug data.
+Persists and retrieves debug data.
 
 ## StorageInterface
 
 ```php
 interface StorageInterface
 {
-    public function read(string $type, ?string $id = null): array;
-    public function write(string $type, string $id, array $data): void;
+    public function addCollector(CollectorInterface $collector): void;
+    public function getData(): array;
+    public function read(string $type, ?string $id): array;
+    public function flush(): void;
     public function clear(): void;
 }
 ```
 
-Three data types are stored per debug entry:
+Three data types per debug entry:
 
-| Constant | Content | Typical Size |
-|----------|---------|--------------|
-| `TYPE_SUMMARY` | Lightweight metadata (timestamp, URL, status, collector list) | Small |
-| `TYPE_DATA` | Full collector payloads | Medium-Large |
-| `TYPE_OBJECTS` | Serialized object dumps for deep inspection | Large |
+| Constant | Content |
+|----------|---------|
+| `TYPE_SUMMARY` | Lightweight metadata: ID, collector names, summary from `SummaryCollectorInterface` |
+| `TYPE_DATA` | Full collector payloads serialized via `Dumper::asJson(30)` |
+| `TYPE_OBJECTS` | Object map via `Dumper::asJsonObjectsMap(30)` |
 
 ## FileStorage
 
-Default storage implementation. Writes JSON files organized by date and entry ID.
+Default implementation. Writes JSON files. Uses `json_decode` for reading, `Dumper` for writing.
 
 ### Directory Layout
 
 ```
-{storage_path}/
+{path}/
 └── {YYYY-MM-DD}/
     └── {entry-id}/
         ├── summary.json
@@ -36,38 +38,28 @@ Default storage implementation. Writes JSON files organized by date and entry ID
         └── objects.json
 ```
 
-### Garbage Collection
-
-FileStorage implements automatic cleanup. When writing a new entry, it checks the total
-number of stored entries and removes the oldest ones when the configured `historySize` is exceeded.
-
-### Configuration
+### Constructor
 
 ```php
-'storage' => [
-    'path' => '@runtime/debug',  // Storage directory (uses framework aliases)
-    'historySize' => 50,         // Max entries to keep
-],
+new FileStorage(string $path, DebuggerIdGenerator $idGenerator, array $excludedClasses = [])
 ```
+
+`$excludedClasses` are passed to `Dumper` to skip serialization of certain classes.
+
+### Garbage Collection
+
+On each `flush()`, checks total entry count against `historySize` (default 50, configurable via `setHistorySize()`). Removes oldest entries and cleans up empty date directories.
+
+### Reading
+
+`read(string $type, ?string $id)` uses `glob()` to find matching JSON files across all date directories. Results sorted by file modification time.
 
 ## MemoryStorage
 
-Lightweight in-memory implementation for testing. Data is lost when the process ends.
-
-```php
-$storage = new MemoryStorage();
-// Use in tests where persistence is not needed
-```
+In-memory implementation for testing. Data lost when process ends.
 
 ## Implementing Custom Storage
 
-To implement a custom storage backend (Redis, database, etc.):
-
 1. Implement `StorageInterface`
-2. Register your implementation in the adapter's DI configuration
-3. Handle the three data types (`TYPE_SUMMARY`, `TYPE_DATA`, `TYPE_OBJECTS`)
-
-Example use cases:
-- Redis storage for distributed debugging across multiple servers
-- Database storage for long-term debug data retention
-- S3/cloud storage for serverless environments
+2. Handle the three data types (`TYPE_SUMMARY`, `TYPE_DATA`, `TYPE_OBJECTS`)
+3. Register in the adapter's DI configuration
