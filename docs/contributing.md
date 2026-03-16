@@ -4,7 +4,7 @@
 
 ```bash
 composer install
-cd libs/yii-dev-panel && npm install
+cd libs/frontend && npm install
 ```
 
 ## Development Workflow
@@ -28,7 +28,7 @@ composer test         # Run all PHPUnit tests
 ### Frontend (if changed)
 
 ```bash
-cd libs/yii-dev-panel
+cd libs/frontend
 npm run check         # Format check + lint
 ```
 
@@ -91,8 +91,8 @@ Frontend → API (HTTP only)
 
 ### Frontend
 
-1. Create page component in `packages/yii-dev-panel/src/Module/Inspector/Pages/`
-2. Add RTK Query endpoint in `packages/yii-dev-panel/src/Module/Inspector/API/`
+1. Create page component in `packages/panel/src/Module/Inspector/Pages/`
+2. Add RTK Query endpoint in `packages/panel/src/Module/Inspector/API/`
 3. Add route to inspector module's route config
 
 ## Mago Baselines

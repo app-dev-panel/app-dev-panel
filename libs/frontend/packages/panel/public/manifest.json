@@ -1,6 +1,6 @@
 {
-  "short_name": "Yii Dev Panel",
-  "name": "Yii Dev Panel",
+  "short_name": "App Dev Panel",
+  "name": "App Dev Panel",
   "icons": [
     {
       "src": "favicon.ico",

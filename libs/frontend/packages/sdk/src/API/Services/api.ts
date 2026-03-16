@@ -1,5 +1,5 @@
+import {createBaseQuery} from '@app-dev-panel/sdk/API/createBaseQuery';
 import {createApi} from '@reduxjs/toolkit/query/react';
-import {createBaseQuery} from '@yiisoft/yii-dev-panel-sdk/API/createBaseQuery';
 
 export type ServiceDescriptor = {
     service: string;

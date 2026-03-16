@@ -3,9 +3,9 @@ import {defineConfig} from 'vitest/config';
 export default defineConfig({
     resolve: {
         alias: {
-            '@yiisoft/yii-dev-panel/': new URL('./packages/yii-dev-panel/src/', import.meta.url).pathname,
-            '@yiisoft/yii-dev-panel-sdk/': new URL('./packages/yii-dev-panel-sdk/src/', import.meta.url).pathname,
-            '@yiisoft/yii-dev-toolbar/': new URL('./packages/yii-dev-toolbar/src/', import.meta.url).pathname,
+            '@app-dev-panel/panel/': new URL('./packages/panel/src/', import.meta.url).pathname,
+            '@app-dev-panel/sdk/': new URL('./packages/sdk/src/', import.meta.url).pathname,
+            '@app-dev-panel/toolbar/': new URL('./packages/toolbar/src/', import.meta.url).pathname,
             'react-redux': 'react-redux/dist/react-redux.js',
         },
     },

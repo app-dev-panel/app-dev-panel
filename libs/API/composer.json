@@ -1,15 +1,12 @@
 {
     "name": "app-dev-panel/api",
     "type": "library",
-    "description": "Yii Debug API",
+    "description": "Application Development Panel API",
     "keywords": [
-        "yii-debug-api",
-        "yiisoft",
-        "yii",
+        "app-dev-panel",
         "debug",
         "api"
     ],
-    "homepage": "https://www.yiiframework.com/",
     "license": "BSD-3-Clause",
     "minimum-stability": "dev",
     "prefer-stable": true,

@@ -43,12 +43,7 @@ describe('UnifiedSidebar', () => {
 
     it('highlights active section based on activePath', () => {
         renderWithProviders(
-            <UnifiedSidebar
-                sections={baseSections}
-                activePath="/debug"
-                onNavigate={vi.fn()}
-                onChildClick={vi.fn()}
-            />,
+            <UnifiedSidebar sections={baseSections} activePath="/debug" onNavigate={vi.fn()} onChildClick={vi.fn()} />,
         );
         // The Debug section header should be rendered; Home should not be active.
         // We verify the Debug label is present and its section is rendered.
@@ -60,12 +55,7 @@ describe('UnifiedSidebar', () => {
 
     it('renders children items when section is expanded', () => {
         renderWithProviders(
-            <UnifiedSidebar
-                sections={baseSections}
-                activePath="/debug"
-                onNavigate={vi.fn()}
-                onChildClick={vi.fn()}
-            />,
+            <UnifiedSidebar sections={baseSections} activePath="/debug" onNavigate={vi.fn()} onChildClick={vi.fn()} />,
         );
         expect(screen.getByText('Overview')).toBeInTheDocument();
         expect(screen.getByText('Logs')).toBeInTheDocument();
@@ -77,12 +67,7 @@ describe('UnifiedSidebar', () => {
         const user = userEvent.setup();
         const onNavigate = vi.fn();
         renderWithProviders(
-            <UnifiedSidebar
-                sections={baseSections}
-                activePath="/"
-                onNavigate={onNavigate}
-                onChildClick={vi.fn()}
-            />,
+            <UnifiedSidebar sections={baseSections} activePath="/" onNavigate={onNavigate} onChildClick={vi.fn()} />,
         );
         await user.click(screen.getByText('Home'));
         expect(onNavigate).toHaveBeenCalledWith('/');
