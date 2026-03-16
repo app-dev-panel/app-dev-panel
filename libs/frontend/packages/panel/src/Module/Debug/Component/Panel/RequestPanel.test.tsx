@@ -10,9 +10,9 @@ const makeData = (overrides: Partial<Parameters<typeof RequestPanel>[0]['data']>
     requestIsAjax: false,
     requestMethod: 'GET' as const,
     requestPath: '/api/users',
-    requestQuery: 'page=1',
-    requestRaw: 'GET /api/users?page=1 HTTP/1.1\r\nHost: localhost\r\n\r\n',
-    requestUrl: 'http://localhost/api/users?page=1',
+    requestQuery: 'page=1&limit=10',
+    requestRaw: 'GET /api/users?page=1&limit=10 HTTP/1.1\r\nHost: localhost\r\nAccept: application/json\r\n\r\n',
+    requestUrl: 'http://localhost/api/users?page=1&limit=10',
     response: '{"status": "ok"}',
     responseRaw: 'HTTP/1.1 200 OK\r\nContent-Type: application/json;\r\n\r\n{"users":[]}',
     responseStatusCode: 200,
@@ -56,32 +56,53 @@ describe('RequestPanel', () => {
         expect(screen.getByText('192.168.1.1')).toBeInTheDocument();
     });
 
-    it('renders Request and Response section titles', () => {
+    it('renders tab labels', () => {
         renderWithProviders(<RequestPanel data={makeData()} />);
-        expect(screen.getByText('Request')).toBeInTheDocument();
-        expect(screen.getByText('Response')).toBeInTheDocument();
+        expect(screen.getByRole('tab', {name: 'Request'})).toBeInTheDocument();
+        expect(screen.getByRole('tab', {name: 'Response'})).toBeInTheDocument();
+        expect(screen.getByRole('tab', {name: 'Raw'})).toBeInTheDocument();
+        expect(screen.getByRole('tab', {name: 'Parsed'})).toBeInTheDocument();
     });
 
-    it('renders Raw Request toggle', () => {
+    it('shows request headers table on Request tab', () => {
         renderWithProviders(<RequestPanel data={makeData()} />);
+        expect(screen.getByText('Headers')).toBeInTheDocument();
+        expect(screen.getByText('Host')).toBeInTheDocument();
+        expect(screen.getByText('localhost')).toBeInTheDocument();
+    });
+
+    it('shows query parameters on Request tab', () => {
+        renderWithProviders(<RequestPanel data={makeData()} />);
+        expect(screen.getByText('Query Parameters')).toBeInTheDocument();
+        expect(screen.getByText('page')).toBeInTheDocument();
+        expect(screen.getByText('1')).toBeInTheDocument();
+    });
+
+    it('switches to Response tab and shows response headers', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<RequestPanel data={makeData()} />);
+        await user.click(screen.getByRole('tab', {name: 'Response'}));
+        expect(screen.getByText('Content-Type')).toBeInTheDocument();
+    });
+
+    it('switches to Raw tab and shows raw data', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<RequestPanel data={makeData()} />);
+        await user.click(screen.getByRole('tab', {name: 'Raw'}));
         expect(screen.getByText('Raw Request')).toBeInTheDocument();
-    });
-
-    it('renders Raw Response toggle', () => {
-        renderWithProviders(<RequestPanel data={makeData()} />);
         expect(screen.getByText('Raw Response')).toBeInTheDocument();
     });
 
-    it('expands raw request on click', async () => {
+    it('switches to Parsed tab and shows JSON views', async () => {
         const user = userEvent.setup();
         renderWithProviders(<RequestPanel data={makeData()} />);
-        await user.click(screen.getByText('Raw Request'));
-        // The raw content should now be visible (inside CodeHighlight)
-        expect(screen.getByText('Raw Request')).toBeInTheDocument();
+        await user.click(screen.getByRole('tab', {name: 'Parsed'}));
+        expect(screen.getAllByText('Request').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Response').length).toBeGreaterThan(0);
     });
 
     it('handles missing responseRaw gracefully', () => {
         renderWithProviders(<RequestPanel data={makeData({responseRaw: undefined as any})} />);
-        expect(screen.getByText('Request')).toBeInTheDocument();
+        expect(screen.getByRole('tab', {name: 'Request'})).toBeInTheDocument();
     });
 });

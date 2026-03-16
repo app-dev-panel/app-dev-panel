@@ -230,10 +230,17 @@ const Layout = () => {
     const collectorName = useMemo(() => selectedCollector.split('\\').pop(), [selectedCollector]);
 
     // Build sidebar navigation items from the debug entry's collectors
+    // Collectors whose data is shown in the overview, not as separate panels
+    const hiddenCollectors = useMemo(
+        () => new Set<string>([CollectorsMap.WebAppInfoCollector, CollectorsMap.ConsoleAppInfoCollector]),
+        [],
+    );
+
     const sidebarItems = useMemo(() => {
         if (!debugEntry) return [];
         return [...debugEntry.collectors]
             .filter((c): c is string => typeof c === 'string')
+            .filter((c) => !hiddenCollectors.has(c))
             .sort(compareCollectorWeight)
             .map((collector) => {
                 const count = getCollectedCountByCollector(collector as CollectorsMap, debugEntry);
@@ -443,11 +450,7 @@ const Layout = () => {
                                             {collectorQueryInfo.isSuccess && (
                                                 <ErrorBoundary
                                                     FallbackComponent={ErrorFallback}
-                                                    resetKeys={[
-                                                        window.location.pathname,
-                                                        window.location.search,
-                                                        debugEntry,
-                                                    ]}
+                                                    resetKeys={[selectedCollector, debugEntry]}
                                                 >
                                                     <CollectorData
                                                         selectedCollector={selectedCollector}

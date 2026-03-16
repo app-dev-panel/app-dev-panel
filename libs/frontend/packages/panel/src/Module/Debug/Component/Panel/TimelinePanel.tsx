@@ -167,7 +167,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                 const barWidth = Math.max(1, ((row[1] || 0.001) / totalDuration) * 100);
                 const colorIdx = uniqueLabels.indexOf(shortName);
                 const expanded = expandedIndex === index;
-                const durationMs = row[1];
+                const durationMs = Number(row[1]) || 0;
                 const durationLabel =
                     durationMs < 0.001
                         ? `${(durationMs * 1000000).toFixed(0)}ns`

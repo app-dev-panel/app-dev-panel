@@ -1,5 +1,5 @@
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
-import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {DebugEntry, useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
@@ -7,9 +7,13 @@ import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectors
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
-import {Box, Icon, Typography} from '@mui/material';
+import {Box, Icon, LinearProgress, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
+import {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
+
+// Collectors hidden from the card grid (data shown elsewhere in overview)
+const hiddenCollectors = new Set<string>([CollectorsMap.WebAppInfoCollector, CollectorsMap.ConsoleAppInfoCollector]);
 
 // ---------------------------------------------------------------------------
 // Card icon background/foreground colors per collector
@@ -133,6 +137,106 @@ const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, 
 const SummaryLabel = styled(Typography)(({theme}) => ({fontSize: '12px', color: theme.palette.text.secondary}));
 
 // ---------------------------------------------------------------------------
+// Performance breakdown section (WebAppInfo data)
+// ---------------------------------------------------------------------------
+
+const PerfGrid = styled(Box)(({theme}) => ({
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: theme.spacing(2),
+    marginBottom: theme.spacing(3),
+}));
+
+const PerfCard = styled(Box)(({theme}) => ({
+    padding: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius * 1.5,
+    border: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.paper,
+}));
+
+const PerfLabel = styled(Typography)(({theme}) => ({
+    fontSize: '11px',
+    fontWeight: 600,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.5px',
+    color: theme.palette.text.disabled,
+    marginBottom: theme.spacing(0.5),
+}));
+
+const PerfValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 600, fontSize: '18px'});
+
+const PerfBarTrack = styled(Box)(({theme}) => ({
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: theme.palette.action.hover,
+    marginTop: theme.spacing(1),
+    overflow: 'hidden',
+}));
+
+type WebAppInfoData = {
+    applicationProcessingTime?: number;
+    requestProcessingTime?: number;
+    applicationEmit?: number;
+    preloadTime?: number;
+    memoryPeakUsage?: number;
+    memoryUsage?: number;
+};
+
+const PerformanceSection = ({data}: {data: WebAppInfoData}) => {
+    const totalTime = data.applicationProcessingTime || 0;
+    const requestTime = data.requestProcessingTime || 0;
+    const emitTime = data.applicationEmit || 0;
+    const preloadTime = data.preloadTime || 0;
+    const memPeak = data.memoryPeakUsage || 0;
+    const memUsage = data.memoryUsage || 0;
+
+    const formatTime = (seconds: number) => {
+        if (seconds === 0) return '0 ms';
+        if (seconds < 0.001) return `${(seconds * 1000000).toFixed(0)} µs`;
+        if (seconds < 1) return `${(seconds * 1000).toFixed(2)} ms`;
+        return `${seconds.toFixed(3)} s`;
+    };
+
+    const maxTime = Math.max(totalTime, 0.001);
+
+    const items = [
+        {label: 'Total Time', value: formatTime(totalTime), ratio: 1, color: primitives.blue500},
+        {label: 'Request Processing', value: formatTime(requestTime), ratio: requestTime / maxTime, color: '#42A5F5'},
+        {label: 'Preload Time', value: formatTime(preloadTime), ratio: preloadTime / maxTime, color: '#AB47BC'},
+        {label: 'Emit Time', value: formatTime(emitTime), ratio: emitTime / maxTime, color: '#66BB6A'},
+        {label: 'Peak Memory', value: formatBytes(memPeak), ratio: memPeak > 0 ? 1 : 0, color: '#FFA726'},
+        {
+            label: 'Memory Usage',
+            value: formatBytes(memUsage),
+            ratio: memPeak > 0 ? memUsage / memPeak : 0,
+            color: '#26C6DA',
+        },
+    ];
+
+    return (
+        <PerfGrid>
+            {items.map((item) => (
+                <PerfCard key={item.label}>
+                    <PerfLabel>{item.label}</PerfLabel>
+                    <PerfValue sx={{color: item.color}}>{item.value}</PerfValue>
+                    <PerfBarTrack>
+                        <Box
+                            sx={{
+                                height: '100%',
+                                width: `${Math.max(2, item.ratio * 100)}%`,
+                                backgroundColor: item.color,
+                                borderRadius: 2,
+                                transition: 'width 0.3s ease',
+                            }}
+                        />
+                    </PerfBarTrack>
+                </PerfCard>
+            ))}
+        </PerfGrid>
+    );
+};
+
+// ---------------------------------------------------------------------------
 // Helper: generate sparkline bars (decorative, based on badge count)
 // ---------------------------------------------------------------------------
 
@@ -163,6 +267,7 @@ type CollectorCardData = {
 function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
     return [...entry.collectors]
         .filter((c): c is string => typeof c === 'string')
+        .filter((c) => !hiddenCollectors.has(c))
         .sort(compareCollectorWeight)
         .map((collector) => {
             const count = getCollectedCountByCollector(collector as CollectorsMap, entry);
@@ -200,6 +305,23 @@ function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
 export const IndexPage = () => {
     const entry = useDebugEntry();
     const [, setSearchParams] = useSearchParams();
+    const [getCollectorInfo] = useLazyGetCollectorInfoQuery();
+    const [webAppInfo, setWebAppInfo] = useState<WebAppInfoData | null>(null);
+    const [loadingPerf, setLoadingPerf] = useState(false);
+
+    // Fetch WebAppInfo collector data for performance breakdown
+    useEffect(() => {
+        if (!entry) return;
+        if (!entry.collectors.includes(CollectorsMap.WebAppInfoCollector)) return;
+
+        setLoadingPerf(true);
+        getCollectorInfo({id: entry.id, collector: CollectorsMap.WebAppInfoCollector})
+            .then(({data}) => {
+                if (data) setWebAppInfo(data as WebAppInfoData);
+            })
+            .catch(() => {})
+            .finally(() => setLoadingPerf(false));
+    }, [entry?.id]);
 
     if (!entry) {
         return (
@@ -234,6 +356,7 @@ export const IndexPage = () => {
               ? formatBytes(entry.console.memory.peakUsage)
               : null;
 
+    const phpVersion = isDebugEntryAboutWeb(entry) ? entry.web?.php?.version : entry.console?.php?.version;
     const status = isDebugEntryAboutWeb(entry) ? entry.response?.statusCode : null;
     const method = isDebugEntryAboutWeb(entry) ? entry.request?.method : null;
     const path = isDebugEntryAboutWeb(entry) ? entry.request?.path : null;
@@ -281,6 +404,15 @@ export const IndexPage = () => {
                         </Box>
                     </SummaryItem>
                 )}
+                {phpVersion && (
+                    <SummaryItem>
+                        <Icon sx={{fontSize: 18, color: '#777EB8'}}>code</Icon>
+                        <Box>
+                            <SummaryValue>PHP {phpVersion}</SummaryValue>
+                            <SummaryLabel>Runtime</SummaryLabel>
+                        </Box>
+                    </SummaryItem>
+                )}
                 {isDebugEntryAboutConsole(entry) && entry.command && (
                     <SummaryItem>
                         <Icon sx={{fontSize: 18, color: primitives.blue500}}>terminal</Icon>
@@ -291,6 +423,9 @@ export const IndexPage = () => {
                     </SummaryItem>
                 )}
             </SummaryBar>
+
+            {loadingPerf && <LinearProgress sx={{mb: 2}} />}
+            {webAppInfo && <PerformanceSection data={webAppInfo} />}
 
             <CardsGrid>
                 {cards.map((card) => {

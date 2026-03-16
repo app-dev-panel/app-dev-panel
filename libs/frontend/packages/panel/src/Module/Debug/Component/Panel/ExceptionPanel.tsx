@@ -3,7 +3,7 @@ import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilename, parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
-import {Alert, AlertTitle, Box, Chip, Collapse, Icon, IconButton, Typography} from '@mui/material';
+import {Alert, AlertTitle, Box, Chip, Collapse, Icon, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
 
@@ -151,7 +151,7 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
 };
 
 const TraceBlock = ({trace}: {trace: string}) => {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(true);
 
     return (
         <Box>
@@ -181,7 +181,6 @@ const TraceBlock = ({trace}: {trace: string}) => {
 };
 
 export const ExceptionPanel = ({exceptions}: ExceptionPanelProps) => {
-    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
     const items = exceptions ?? [];
 
     if (items.length === 0) {
@@ -200,29 +199,21 @@ export const ExceptionPanel = ({exceptions}: ExceptionPanelProps) => {
                 <SectionTitle>{`${items.length} exception${items.length !== 1 ? 's' : ''}`}</SectionTitle>
             </Box>
 
-            {items.map((exception, index) => {
-                const expanded = expandedIndex === index;
-                return (
-                    <Box key={index}>
-                        <ExceptionRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
-                            <IndexBadge>{index + 1}</IndexBadge>
-                            <Box sx={{flex: 1, minWidth: 0}}>
-                                <ClassName>{exception.class}</ClassName>
-                                <Message>{exception.message}</Message>
-                            </Box>
-                            <FileLink component="span" sx={{color: 'text.disabled'}}>
-                                {parseFilename(exception.file)}:{exception.line}
-                            </FileLink>
-                            <IconButton size="small" sx={{flexShrink: 0}}>
-                                <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
-                            </IconButton>
-                        </ExceptionRow>
-                        <Collapse in={expanded} unmountOnExit>
-                            <ExceptionDetail exception={exception} />
-                        </Collapse>
-                    </Box>
-                );
-            })}
+            {items.map((exception, index) => (
+                <Box key={index}>
+                    <ExceptionRow expanded>
+                        <IndexBadge>{index + 1}</IndexBadge>
+                        <Box sx={{flex: 1, minWidth: 0}}>
+                            <ClassName>{exception.class}</ClassName>
+                            <Message>{exception.message}</Message>
+                        </Box>
+                        <FileLink component="span" sx={{color: 'text.disabled'}}>
+                            {parseFilename(exception.file)}:{exception.line}
+                        </FileLink>
+                    </ExceptionRow>
+                    <ExceptionDetail exception={exception} />
+                </Box>
+            ))}
         </Box>
     );
 };

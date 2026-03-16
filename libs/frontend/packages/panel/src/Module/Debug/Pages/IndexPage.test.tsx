@@ -56,6 +56,8 @@ describe('IndexPage (Overview Dashboard)', () => {
         expect(screen.getByText('Status')).toBeInTheDocument();
         expect(screen.getByText('Duration')).toBeInTheDocument();
         expect(screen.getByText('Peak Memory')).toBeInTheDocument();
+        expect(screen.getByText('Runtime')).toBeInTheDocument();
+        expect(screen.getByText('PHP 8.4.0')).toBeInTheDocument();
     });
 
     it('renders collector cards with labels', () => {

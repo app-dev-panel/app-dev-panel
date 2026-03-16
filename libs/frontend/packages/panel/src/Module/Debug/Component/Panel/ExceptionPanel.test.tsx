@@ -1,6 +1,5 @@
 import {renderWithProviders} from '@app-dev-panel/sdk/test-utils';
 import {screen} from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import {describe, expect, it} from 'vitest';
 import {ExceptionPanel} from './ExceptionPanel';
 
@@ -45,7 +44,8 @@ describe('ExceptionPanel', () => {
 
     it('renders exception message in row', () => {
         renderWithProviders(<ExceptionPanel exceptions={[makeException({message: 'File not found'})]} />);
-        expect(screen.getByText('File not found')).toBeInTheDocument();
+        // Message appears in both row and detail since always expanded
+        expect(screen.getAllByText('File not found').length).toBeGreaterThanOrEqual(1);
     });
 
     it('renders file location in row', () => {
@@ -61,40 +61,31 @@ describe('ExceptionPanel', () => {
                 exceptions={[makeException(), makeException({class: 'Error2'}), makeException({class: 'Error3'})]}
             />,
         );
-        expect(screen.getByText('1')).toBeInTheDocument();
-        expect(screen.getByText('2')).toBeInTheDocument();
-        expect(screen.getByText('3')).toBeInTheDocument();
+        // Badges may clash with line numbers in code highlight, so use getAllByText
+        expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText('2').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText('3').length).toBeGreaterThanOrEqual(1);
     });
 
-    it('expands exception detail on click', async () => {
-        const user = userEvent.setup();
-        renderWithProviders(<ExceptionPanel exceptions={[makeException({message: 'Click me'})]} />);
-        await user.click(screen.getByText('Click me'));
-        // After expanding, should see the "Open Exception Class" and "Open Source Location" chips
+    it('always shows exception detail (no expand needed)', () => {
+        renderWithProviders(<ExceptionPanel exceptions={[makeException()]} />);
+        // Detail is always visible — chips should be immediately present
         expect(screen.getByText('Open Exception Class')).toBeInTheDocument();
         expect(screen.getByText('Open Source Location')).toBeInTheDocument();
     });
 
-    it('can expand and collapse without errors', async () => {
-        const user = userEvent.setup();
-        renderWithProviders(<ExceptionPanel exceptions={[makeException({message: 'Toggle me'})]} />);
-        await user.click(screen.getAllByText('Toggle me')[0]);
-        expect(screen.getByText('Open Exception Class')).toBeInTheDocument();
-        // Second click triggers collapse — no assertion on DOM removal due to jsdom transition timing
-        await user.click(screen.getAllByText('Toggle me')[0]);
-    });
-
-    it('shows error code chip when code is not 0', async () => {
-        const user = userEvent.setup();
-        renderWithProviders(<ExceptionPanel exceptions={[makeException({code: '500', message: 'expand me'})]} />);
-        await user.click(screen.getByText('expand me'));
+    it('shows error code chip when code is not 0', () => {
+        renderWithProviders(<ExceptionPanel exceptions={[makeException({code: '500'})]} />);
         expect(screen.getByText('Code: 500')).toBeInTheDocument();
     });
 
-    it('hides error code chip when code is 0', async () => {
-        const user = userEvent.setup();
-        renderWithProviders(<ExceptionPanel exceptions={[makeException({code: '0', message: 'expand me 2'})]} />);
-        await user.click(screen.getByText('expand me 2'));
+    it('hides error code chip when code is 0', () => {
+        renderWithProviders(<ExceptionPanel exceptions={[makeException({code: '0'})]} />);
         expect(screen.queryByText('Code: 0')).not.toBeInTheDocument();
+    });
+
+    it('renders stack trace by default (open)', () => {
+        renderWithProviders(<ExceptionPanel exceptions={[makeException()]} />);
+        expect(screen.getByText('Stack Trace')).toBeInTheDocument();
     });
 });
