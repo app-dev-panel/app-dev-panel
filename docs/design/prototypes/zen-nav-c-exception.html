@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADP Zen Nav C — Exception</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root { --bg:#FAFAFA; --card:#FFF; --hover:#F5F5F5; --text:#1A1A1A; --text2:#666; --text3:#999; --accent:#2563EB; --accent-bg:#EFF6FF; --border:#E5E5E5; --blight:#F0F0F0; --ok:#16A34A; --warn:#D97706; --err:#DC2626; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; font-size:14px; }
+  .top-bar { height:48px; background:#fff; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:16px; flex-shrink:0; }
+  .logo { font-weight:700; font-size:15px; color:var(--accent); display:flex; align-items:center; gap:6px; }
+  .logo-d { width:8px; height:8px; background:var(--accent); transform:rotate(45deg); border-radius:1px; }
+  .pill { display:flex; align-items:center; gap:8px; padding:5px 14px; border-radius:20px; border:1px solid var(--border); font-size:13px; cursor:pointer; }
+  .pill:hover { border-color:var(--accent); }
+  .spacer { flex:1; }
+  .ibtn { width:32px; height:32px; border-radius:6px; border:none; background:transparent; color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .ibtn:hover { background:var(--hover); }
+  .search-t { display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text3); cursor:pointer; font-size:13px; }
+  .search-t kbd { font-family:'JetBrains Mono',monospace; font-size:10px; background:#fff; padding:1px 5px; border-radius:3px; border:1px solid var(--border); }
+
+  .content { flex:1; overflow-y:auto; padding:24px 48px 80px; max-width:960px; margin:0 auto; width:100%; }
+
+  /* === BREADCRUMB WITH DROPDOWN === */
+  .breadcrumb-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .breadcrumb { font-size:13px; color:var(--text3); display:flex; align-items:center; gap:6px; position:relative; }
+  .breadcrumb a { color:var(--accent); text-decoration:none; }
+  .bc-dropdown-trigger {
+    display:flex; align-items:center; gap:2px; cursor:pointer; padding:2px 6px; border-radius:4px;
+    color:var(--text); font-weight:500; transition:background .1s;
+  }
+  .bc-dropdown-trigger:hover { background:var(--hover); }
+  .bc-dropdown-trigger .material-icons { font-size:16px; color:var(--text3); }
+
+  .bc-dropdown {
+    position:absolute; top:28px; left:70px; background:#fff; border:1px solid var(--border);
+    border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.12); padding:6px 0; width:260px;
+    z-index:100; animation:dropIn .15s ease-out;
+  }
+  @keyframes dropIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+
+  .dd-item {
+    display:flex; align-items:center; padding:8px 14px; gap:10px; cursor:pointer; font-size:13px;
+    color:var(--text2); transition:background .08s;
+  }
+  .dd-item:hover { background:var(--hover); }
+  .dd-item.active { background:var(--accent-bg); color:var(--accent); font-weight:500; }
+  .dd-item .material-icons { font-size:18px; }
+  .dd-badge { margin-left:auto; font-size:11px; color:var(--text3); font-weight:500; }
+  .dd-badge.err { color:var(--err); font-weight:600; }
+  .dd-shortcut {
+    margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3);
+    background:var(--bg); padding:1px 5px; border-radius:3px; border:1px solid var(--blight);
+  }
+
+  .back-link { font-size:13px; color:var(--text3); cursor:pointer; display:flex; align-items:center; gap:4px; }
+  .back-link:hover { color:var(--accent); }
+  .divider-h { border:none; border-top:1px solid var(--border); margin:12px 0; }
+
+  /* Exception styles */
+  .exc-class { font-size:22px; font-weight:700; color:var(--err); margin-bottom:8px; }
+  .exc-message { font-size:16px; color:var(--text); margin-bottom:20px; line-height:1.5; }
+
+  .exc-meta { display:grid; grid-template-columns:80px 1fr; gap:8px 16px; margin-bottom:24px; font-size:14px; }
+  .meta-key { color:var(--text3); font-weight:500; }
+  .meta-val { font-family:'JetBrains Mono',monospace; font-size:13px; }
+  .meta-val .copy-btn {
+    display:inline-flex; align-items:center; gap:2px; margin-left:8px; color:var(--text3); cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:11px;
+  }
+  .meta-val .copy-btn:hover { color:var(--accent); }
+
+  .section-title { font-size:13px; font-weight:600; color:var(--text2); margin-bottom:12px; }
+  .stack-trace { margin-bottom:24px; }
+  .stack-frame {
+    padding:12px 16px; border-bottom:1px solid var(--blight); display:flex; gap:12px;
+    cursor:pointer; transition:background .1s; border-radius:0;
+  }
+  .stack-frame:first-child { border-radius:8px 8px 0 0; }
+  .stack-frame:last-child { border-radius:0 0 8px 8px; border-bottom:none; }
+  .stack-frame:hover { background:var(--hover); }
+  .stack-frame.active { background:#FEF2F2; border-left:3px solid var(--err); }
+  .frame-num { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text3); min-width:24px; padding-top:2px; }
+  .frame-body { flex:1; }
+  .frame-file { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text); margin-bottom:2px; }
+  .frame-file .line-num { color:var(--accent); }
+  .frame-call { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text2); }
+  .frame-call .class-name { color:var(--accent); }
+
+  .action-bar { display:flex; gap:16px; padding-top:16px; margin-top:8px; border-top:1px solid var(--border); }
+  .action-btn { padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text2); font-size:13px; cursor:pointer; }
+  .action-btn:hover { background:var(--hover); color:var(--text); }
+
+  /* Keyboard hint bar */
+  .kb-hint {
+    position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+    background:#171717; color:#EDEDED; padding:6px 16px; border-radius:8px;
+    font-size:12px; display:flex; align-items:center; gap:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+  }
+  .kb-hint kbd {
+    font-family:'JetBrains Mono',monospace; background:#333; padding:1px 6px; border-radius:3px;
+    border:1px solid #555; font-size:11px; min-width:20px; text-align:center;
+  }
+  .kb-hint .sep { color:#555; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo"><div class="logo-d"></div> ADP</div>
+  <div class="pill">
+    <span style="font-weight:600;color:var(--warn);font-size:11px">POST</span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px">/api/orders</span>
+    <span style="color:var(--border)">&mdash;</span>
+    <span style="color:var(--err);font-weight:500;font-size:12px">500</span>
+    <span style="color:var(--border)">&mdash;</span>
+    <span style="color:var(--text3);font-size:12px">342ms</span>
+    <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+  </div>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">chevron_left</span></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">chevron_right</span></button>
+  <span class="spacer"></span>
+  <button class="search-t"><span class="material-icons" style="font-size:16px">search</span> Search... <kbd>Ctrl+K</kbd></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">light_mode</span></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">more_vert</span></button>
+</div>
+
+<div class="content">
+  <div class="breadcrumb-row">
+    <div class="breadcrumb">
+      <a href="#">Debug</a>
+      <span style="color:var(--text3)">&rsaquo;</span>
+      <span class="bc-dropdown-trigger">
+        Exception <span class="material-icons">expand_more</span>
+      </span>
+
+      <!-- DROPDOWN (shown as open state) -->
+      <div class="bc-dropdown">
+        <div class="dd-item">
+          <span class="material-icons">http</span> Request <span class="dd-shortcut">1</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">description</span> Log <span class="dd-badge">12</span> <span class="dd-shortcut">2</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">storage</span> Database <span class="dd-badge">4</span> <span class="dd-shortcut">3</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">bolt</span> Events <span class="dd-badge">8</span> <span class="dd-shortcut">4</span>
+        </div>
+        <div class="dd-item active">
+          <span class="material-icons">warning</span> Exception <span class="dd-badge err">1</span> <span class="dd-shortcut">5</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">filter_list</span> Middleware <span class="dd-badge">6</span> <span class="dd-shortcut">6</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">inventory_2</span> Service <span class="dd-badge">24</span> <span class="dd-shortcut">7</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">timeline</span> Timeline <span class="dd-shortcut">8</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">memory</span> Memory <span class="dd-shortcut">9</span>
+        </div>
+      </div>
+    </div>
+    <span class="back-link"><span class="material-icons" style="font-size:16px">grid_view</span> Cards view</span>
+  </div>
+
+  <hr class="divider-h">
+
+  <div class="exc-class">RuntimeException</div>
+  <div class="exc-message">Order total exceeds maximum allowed amount</div>
+
+  <div class="exc-meta">
+    <span class="meta-key">Code</span><span class="meta-val">0</span>
+    <span class="meta-key">File</span><span class="meta-val">src/Service/OrderService.php:<span style="color:var(--accent)">142</span> <span class="copy-btn"><span class="material-icons" style="font-size:12px">content_copy</span> Copy path</span></span>
+    <span class="meta-key">Time</span><span class="meta-val">2026-03-15 14:22:12</span>
+  </div>
+
+  <div class="section-title">Stack Trace</div>
+  <hr class="divider-h" style="margin:0 0 0 0">
+  <div class="stack-trace">
+    <div class="stack-frame active">
+      <span class="frame-num">#0</span>
+      <div class="frame-body">
+        <div class="frame-file">src/Service/OrderService.php:<span class="line-num">142</span></div>
+        <div class="frame-call"><span class="class-name">OrderService</span>->validateTotal(amount: <span style="color:var(--warn)">15000.00</span>)</div>
+      </div>
+    </div>
+    <div class="stack-frame">
+      <span class="frame-num">#1</span>
+      <div class="frame-body">
+        <div class="frame-file">src/Service/OrderService.php:<span class="line-num">89</span></div>
+        <div class="frame-call"><span class="class-name">OrderService</span>->create(data: <span style="color:var(--text3)">array(4)</span>)</div>
+      </div>
+    </div>
+    <div class="stack-frame">
+      <span class="frame-num">#2</span>
+      <div class="frame-body">
+        <div class="frame-file">src/Controller/OrderController.php:<span class="line-num">56</span></div>
+        <div class="frame-call"><span class="class-name">OrderController</span>->store(request: <span style="color:var(--text3)">ServerRequest</span>)</div>
+      </div>
+    </div>
+    <div class="stack-frame">
+      <span class="frame-num">#3</span>
+      <div class="frame-body">
+        <div class="frame-file">vendor/yiisoft/router/src/MiddlewareDispatcher.php:<span class="line-num">42</span></div>
+        <div class="frame-call"><span class="class-name">MiddlewareDispatcher</span>->dispatch(request: <span style="color:var(--text3)">ServerRequest</span>)</div>
+      </div>
+    </div>
+    <div class="stack-frame">
+      <span class="frame-num">#4</span>
+      <div class="frame-body">
+        <div class="frame-file">vendor/yiisoft/middleware-dispatcher/src/MiddlewareStack.php:<span class="line-num">38</span></div>
+        <div class="frame-call"><span class="class-name">MiddlewareStack</span>->handleRequest(request: <span style="color:var(--text3)">ServerRequest</span>)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="action-btn">Copy Stack Trace</button>
+    <button class="action-btn">Search Similar Issues</button>
+    <button class="action-btn">Open in IDE</button>
+  </div>
+</div>
+
+<div class="kb-hint">
+  <kbd>1</kbd> Request <span class="sep">|</span>
+  <kbd>2</kbd> Log <span class="sep">|</span>
+  <kbd>3</kbd> DB <span class="sep">|</span>
+  <kbd>4</kbd> Events <span class="sep">|</span>
+  <kbd>5</kbd> Exception <span class="sep">|</span>
+  <kbd>Ctrl+K</kbd> Search
+</div>
+
+</body>
+</html>
