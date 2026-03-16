@@ -45,19 +45,24 @@ packages/
     ├── src/
     │   ├── Config.ts       # Build configuration (VITE_BUILD_ID, VITE_ENV)
     │   ├── API/            # API clients (RTK Query)
-    │   │   ├── createBaseQuery.ts       # Dynamic base URL factory (supports ?service= param)
+    │   │   ├── createBaseQuery.ts       # Dynamic base URL factory
     │   │   ├── errorNotificationMiddleware.ts
     │   │   ├── Debug/      # Debug API (debugApi, debugSlice)
-    │   │   ├── Services/   # Service Registry API (servicesApi)
-    │   │   └── Application/# Application state (ApplicationSlice, activeServiceId)
+    │   │   └── Application/# Application state (ApplicationSlice)
     │   ├── Component/      # Reusable components
+    │   │   ├── Layout/
+    │   │   │   ├── TopBar.tsx               # Global top bar with entry pill
+    │   │   │   ├── UnifiedSidebar.tsx       # Collapsible sidebar with sections
+    │   │   │   ├── EntrySelector.tsx        # Debug entry picker popover
+    │   │   │   ├── CommandPalette.tsx        # Ctrl+K command palette
+    │   │   │   ├── NavItem.tsx              # Sidebar navigation item
+    │   │   │   ├── NavBadge.tsx             # Badge for nav items
+    │   │   │   └── ContentPanel.tsx         # Content area wrapper
     │   │   ├── ServerSentEventsObserver.ts  # SSE connection manager
     │   │   ├── useServerSentEvents.ts       # SSE React hook
     │   │   ├── JsonRenderer.tsx             # JSON display component
     │   │   ├── CodeHighlight.tsx            # Syntax highlighting
-    │   │   ├── MenuPanel.tsx                # Sidebar menu
-    │   │   ├── Grid.tsx                     # Data grid wrapper
-    │   │   └── ServiceSelector.tsx          # Service selector dropdown (multi-app)
+    │   │   └── Grid.tsx                     # Data grid wrapper
     │   ├── Adapter/        # Framework adapters
     │   │   ├── mui/        # MUI type extensions
     │   │   ├── yii/        # Yii-specific input matchers
@@ -79,7 +84,41 @@ interface ModuleInterface {
 }
 ```
 
-Modules are registered in `modules.ts` and composed in `store.ts` (reducers/middlewares) and `router.tsx` (routes). Non-standalone modules are wrapped in the main `Layout` component; standalone modules render independently.
+Modules are registered in `modules.ts` and composed in `store.ts` (reducers/middlewares) and `router.tsx` (routes). Non-standalone modules are wrapped in the main `Layout` component; standalone modules render independently. Currently all modules are non-standalone (Debug was migrated to the unified layout).
+
+## Layout Architecture
+
+All pages share a single unified layout (`Application/Component/Layout.tsx`):
+
+```
+┌─────────────────────────────────────────────┐
+│ TopBar (entry pill, nav arrows, search,     │
+│         theme toggle, more menu)            │
+├────────┬────────────────────────────────────┤
+│Sidebar │ Content Area                       │
+│ Home   │                                    │
+│ Debug  │  <Outlet /> renders page content   │
+│  ├ Ov  │                                    │
+│  ├ Log │  Debug Layout wraps debug routes   │
+│  ├ DB  │  and handles collector data loading │
+│  └ All │                                    │
+│ Insp.  │                                    │
+│  ├ Cfg │                                    │
+│  └ ... │                                    │
+│ Gii    │                                    │
+│ OpenAPI│                                    │
+│ Frames │                                    │
+└────────┴────────────────────────────────────┘
+```
+
+**Main Layout** manages: debug entry state (SSE, fetching, navigation), entry selector, theme toggle, more menu (repeat request, copy cURL, auto-refresh), command palette (Ctrl+K), and the `UnifiedSidebar` with collapsible sections.
+
+**Debug Layout** (`Module/Debug/Pages/Layout.tsx`) is a thin wrapper that handles collector data loading — reads `collector` from URL params, fetches collector info, and renders the appropriate panel component. It has no shell (TopBar, sidebar) of its own.
+
+**UnifiedSidebar** sections:
+- Home, Debug (expandable: Overview + collectors + All Entries), Inspector (expandable: 14 sub-pages), Gii, Open API, Frames
+- Debug sub-items are dynamic (built from current entry's collectors)
+- Inspector sub-items are static (config, events, routes, etc.)
 
 ## State Management
 
@@ -87,7 +126,7 @@ Redux store is created via `createStore()` in `store.ts`:
 
 ```
 Reducers:
-├── application          # baseUrl, pageSize, toolbar, favorites, autoLatest, activeServiceId
+├── application          # baseUrl, pageSize, toolbar, favorites, autoLatest, themeMode
 ├── notifications        # toast alerts
 ├── store.debug          # current debug entry, request IDs
 ├── store.openApi        # API spec entries (name → URL)
@@ -95,8 +134,7 @@ Reducers:
 ├── api.debug            # RTK Query cache (debug endpoints)
 ├── api.inspector        # RTK Query cache (inspector endpoints)
 ├── api.inspector.git    # RTK Query cache (git endpoints)
-├── api.gii              # RTK Query cache (gii endpoints)
-└── api.services         # RTK Query cache (service registry endpoints)
+└── api.gii              # RTK Query cache (gii endpoints)
 ```
 
 Key features:
@@ -106,7 +144,7 @@ Key features:
 
 ## API Communication
 
-**Dynamic base URL**: `createBaseQuery(prefix)` reads `application.baseUrl` from Redux state at request time, enabling connection to any backend instance. When `application.activeServiceId` is set (not `local`), it appends `?service=<id>` to all inspector API requests for multi-app proxying.
+**Dynamic base URL**: `createBaseQuery(prefix)` reads `application.baseUrl` from Redux state at request time, enabling connection to any backend instance.
 
 **RTK Query APIs**:
 | API | Prefix | Endpoints |
@@ -115,7 +153,6 @@ Key features:
 | `inspectorApi` | `/debug/api/inspector/` | getParameters, getConfiguration, getTable, runCommand, doRequest (20+) |
 | `gitApi` | `/debug/api/inspector/git/` | getSummary, getLog, checkout, command |
 | `giiApi` | `/gii/api` | getGenerators, postPreview, postGenerate, postDiff |
-| `servicesApi` | `/debug/api/services/` | getServices, registerService, deregisterService |
 
 **Server-Sent Events (SSE)**:
 - Endpoint: `/debug/api/event-stream`

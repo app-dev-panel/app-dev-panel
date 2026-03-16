@@ -103,10 +103,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const currentMode = themeMode || 'system';
 
     // Fetch debug entries on mount
-    const onRefreshHandler = useCallback(() => {
+    useEffect(() => {
         getDebugQuery();
     }, [getDebugQuery]);
-    useEffect(onRefreshHandler, [onRefreshHandler]);
 
     useEffect(() => {
         setAutoLatest(autoLatestState);
@@ -119,7 +118,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 dispatch(changeEntryAction(getDebugQueryInfo.data[0]));
             }
         }
-    }, [getDebugQueryInfo.isSuccess, getDebugQueryInfo.data]);
+    }, [getDebugQueryInfo.isSuccess, getDebugQueryInfo.data, dispatch, debugEntry]);
 
     // SSE for auto-refresh
     const changeEntry = useCallback(

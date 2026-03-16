@@ -111,7 +111,7 @@ const EmptyCollectorsInfoBox = React.memo(() => (
 
 const Layout = () => {
     const debugEntry = useDebugEntry();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const [selectedCollector, setSelectedCollector] = useState<string>(() => searchParams.get('collector') || '');
     const [collectorData, setCollectorData] = useState<any>(undefined);
     const [collectorInfo, collectorQueryInfo] = useLazyGetCollectorInfoQuery();
@@ -140,7 +140,7 @@ const Layout = () => {
                 setCollectorData(data);
             })
             .catch(clearCollectorAndData);
-    }, [searchParams, debugEntry]);
+    }, [searchParams, debugEntry, collectorInfo, clearCollectorAndData]);
 
     const collectorName = useMemo(() => selectedCollector.split('\\').pop(), [selectedCollector]);
     useBreadcrumbs(() => ['Debug', collectorName]);
