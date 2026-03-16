@@ -27,6 +27,16 @@ describe('EventPanel', () => {
             },
         ];
         renderWithProviders(<EventPanel events={events} />, {preloadedState});
-        expect(screen.getByText('app.startup')).toBeInTheDocument();
+        expect(screen.getAllByText('app.startup').length).toBeGreaterThan(0);
+        expect(screen.getByText('EVENT')).toBeInTheDocument();
+    });
+
+    it('renders section title with count', () => {
+        const events = [
+            {event: '{}', file: '/a.php', line: '/a.php:1', name: 'event.one', time: 1705319445.1},
+            {event: '{}', file: '/b.php', line: '/b.php:2', name: 'event.two', time: 1705319445.2},
+        ];
+        renderWithProviders(<EventPanel events={events} />, {preloadedState});
+        expect(screen.getByText('2 events')).toBeInTheDocument();
     });
 });

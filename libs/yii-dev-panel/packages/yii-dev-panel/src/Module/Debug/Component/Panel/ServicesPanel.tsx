@@ -1,9 +1,8 @@
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Alert, AlertTitle, Tab, Typography} from '@mui/material';
-import Box from '@mui/material/Box';
-import {GridColDef, GridValidRowModel} from '@mui/x-data-grid';
-import {DataTable} from '@yiisoft/yii-dev-panel-sdk/Component/Grid';
+import {Alert, AlertTitle, Box, Chip, Collapse, Icon, IconButton, Tab, TextField, Typography} from '@mui/material';
+import {styled} from '@mui/material/styles';
+import {primitives} from '@yiisoft/yii-dev-panel-sdk/Component/Theme/tokens';
 import {concatClassMethod} from '@yiisoft/yii-dev-panel-sdk/Helper/classMethodConcater';
 import {formatMillisecondsAsDuration} from '@yiisoft/yii-dev-panel-sdk/Helper/formatDate';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel/Module/Debug/Component/JsonRenderer';
@@ -18,88 +17,6 @@ type SummaryItemType = {
     maxTime: number;
 };
 
-type AllItemType = {
-    service: string;
-    class: string;
-    method: string;
-    time: number;
-    success: number;
-    arguments: any[];
-    result: any;
-    error: null | string;
-};
-
-const summaryColumns: GridColDef<SummaryItemType>[] = [
-    {
-        field: 'class',
-        headerName: 'Method',
-        flex: 1,
-        renderCell: ({row}) => {
-            return (
-                <Typography component="span" sx={{wordBreak: 'break-word'}}>
-                    {concatClassMethod(row.class, row.method)}
-                </Typography>
-            );
-        },
-    },
-    {
-        field: 'calls',
-        headerName: 'Calls (Total / Error)',
-        flex: 1,
-        renderCell: ({row}) => {
-            const errors = row.count - row.successCount;
-            return (
-                <>
-                    {row.count} {errors > 0 && <> / {errors}</>}
-                </>
-            );
-        },
-    },
-    {
-        field: 'time',
-        headerName: 'Time (Total / Max / Avg)',
-        flex: 1,
-        renderCell: ({row}) => {
-            const total = row.times.reduce((acc, v) => acc + v, 0);
-            const milliseconds = total / row.times.length;
-            return (
-                <>
-                    {formatMillisecondsAsDuration(total)} / {formatMillisecondsAsDuration(row.maxTime)} /{' '}
-                    {formatMillisecondsAsDuration(milliseconds)}
-                </>
-            );
-        },
-    },
-];
-const allColumns: GridColDef<AllItemType>[] = [
-    {
-        field: 'class',
-        headerName: 'Method',
-        flex: 1,
-        renderCell: ({row}) => {
-            return (
-                <Typography component="span" sx={{wordBreak: 'break-word'}}>
-                    {concatClassMethod(row.class, row.method)}
-                </Typography>
-            );
-        },
-    },
-    {field: 'time', headerName: 'Time', flex: 0.5, renderCell: ({row}) => formatMillisecondsAsDuration(row.time)},
-    {
-        field: 'arguments',
-        headerName: 'Arguments',
-        flex: 3,
-        renderCell: ({row}) => <JsonRenderer value={row.arguments.length === 1 ? row.arguments[0] : row.arguments} />,
-    },
-    {
-        field: 'result',
-        headerName: 'Result',
-        flex: 3,
-        renderCell: ({row}) => <JsonRenderer value={row.error ? row.error : row.result} />,
-    },
-];
-
-type Tabs = 'summary' | 'all';
 type ServiceData = {
     service: string;
     class: string;
@@ -113,6 +30,220 @@ type ServiceData = {
 };
 type ServicesPanelProps = {data: ServiceData[]};
 
+type Tabs = 'summary' | 'all';
+
+const ServiceRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
+    ({theme, expanded}) => ({
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: theme.spacing(1.5),
+        padding: theme.spacing(1, 1.5),
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        cursor: 'pointer',
+        transition: 'background-color 0.1s ease',
+        backgroundColor: expanded ? theme.palette.action.hover : 'transparent',
+        '&:hover': {backgroundColor: theme.palette.action.hover},
+    }),
+);
+
+const MethodCell = styled(Typography)({
+    fontFamily: primitives.fontFamilyMono,
+    fontSize: '12px',
+    flex: 1,
+    wordBreak: 'break-word',
+});
+
+const DetailBox = styled(Box)(({theme}) => ({
+    padding: theme.spacing(1.5, 1.5, 1.5, 6),
+    backgroundColor: theme.palette.action.hover,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    fontSize: '12px',
+}));
+
+const StyledTabList = styled(TabList)(({theme}) => ({
+    minHeight: 36,
+    '& .MuiTab-root': {
+        minHeight: 36,
+        fontSize: '12px',
+        fontWeight: 600,
+        textTransform: 'none',
+        padding: theme.spacing(0.5, 2),
+    },
+}));
+
+const SummaryView = ({summaryRows}: {summaryRows: Record<string, SummaryItemType>}) => {
+    const rows = Object.values(summaryRows);
+    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+    return (
+        <Box>
+            {rows.map((row, index) => {
+                const expanded = expandedIndex === index;
+                const total = row.times.reduce((acc, v) => acc + v, 0);
+                const avg = total / row.times.length;
+                const errors = row.count - row.successCount;
+
+                return (
+                    <Box key={index}>
+                        <ServiceRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
+                            <MethodCell>{concatClassMethod(row.class, row.method)}</MethodCell>
+                            <Chip
+                                label={`${row.count} call${row.count !== 1 ? 's' : ''}`}
+                                size="small"
+                                sx={{fontSize: '10px', height: 20, borderRadius: 1, flexShrink: 0}}
+                                variant="outlined"
+                            />
+                            {errors > 0 && (
+                                <Chip
+                                    label={`${errors} err`}
+                                    size="small"
+                                    sx={{
+                                        fontSize: '10px',
+                                        height: 20,
+                                        borderRadius: 1,
+                                        backgroundColor: primitives.red50,
+                                        color: primitives.red600,
+                                        flexShrink: 0,
+                                    }}
+                                />
+                            )}
+                            <Typography
+                                sx={{
+                                    fontFamily: primitives.fontFamilyMono,
+                                    fontSize: '11px',
+                                    color: 'text.disabled',
+                                    flexShrink: 0,
+                                    width: 80,
+                                    textAlign: 'right',
+                                }}
+                            >
+                                {formatMillisecondsAsDuration(total)}
+                            </Typography>
+                            <IconButton size="small" sx={{flexShrink: 0}}>
+                                <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                            </IconButton>
+                        </ServiceRow>
+                        <Collapse in={expanded}>
+                            <DetailBox>
+                                <Box sx={{display: 'flex', gap: 3, mb: 1}}>
+                                    <Typography variant="caption" sx={{color: 'text.disabled'}}>
+                                        Total: {formatMillisecondsAsDuration(total)}
+                                    </Typography>
+                                    <Typography variant="caption" sx={{color: 'text.disabled'}}>
+                                        Max: {formatMillisecondsAsDuration(row.maxTime)}
+                                    </Typography>
+                                    <Typography variant="caption" sx={{color: 'text.disabled'}}>
+                                        Avg: {formatMillisecondsAsDuration(avg)}
+                                    </Typography>
+                                </Box>
+                            </DetailBox>
+                        </Collapse>
+                    </Box>
+                );
+            })}
+        </Box>
+    );
+};
+
+type AllRow = {
+    class: string;
+    method: string;
+    time: number;
+    success: number;
+    arguments: any[];
+    result: any;
+    error: null | string;
+};
+
+const AllView = ({rows}: {rows: AllRow[]}) => {
+    const [filter, setFilter] = useState('');
+    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+    const filtered = filter
+        ? rows.filter((r) => concatClassMethod(r.class, r.method).toLowerCase().includes(filter.toLowerCase()))
+        : rows;
+
+    return (
+        <Box>
+            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 1, mt: 1}}>
+                <Typography sx={{fontSize: '12px', color: 'text.disabled'}}>{filtered.length} calls</Typography>
+                <TextField
+                    size="small"
+                    placeholder="Filter services..."
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    InputProps={{sx: {fontSize: '13px'}}}
+                    sx={{ml: 'auto', width: 240}}
+                />
+            </Box>
+
+            {filtered.map((row, index) => {
+                const expanded = expandedIndex === index;
+                const isError = !row.success;
+
+                return (
+                    <Box key={index}>
+                        <ServiceRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
+                            <MethodCell>{concatClassMethod(row.class, row.method)}</MethodCell>
+                            <Chip
+                                label={isError ? 'ERROR' : 'OK'}
+                                size="small"
+                                sx={{
+                                    fontWeight: 600,
+                                    fontSize: '10px',
+                                    height: 20,
+                                    minWidth: 40,
+                                    backgroundColor: isError ? primitives.red600 : primitives.green600,
+                                    color: '#fff',
+                                    borderRadius: 1,
+                                    flexShrink: 0,
+                                }}
+                            />
+                            <Typography
+                                sx={{
+                                    fontFamily: primitives.fontFamilyMono,
+                                    fontSize: '11px',
+                                    color: 'text.disabled',
+                                    flexShrink: 0,
+                                    width: 80,
+                                    textAlign: 'right',
+                                }}
+                            >
+                                {formatMillisecondsAsDuration(row.time)}
+                            </Typography>
+                            <IconButton size="small" sx={{flexShrink: 0}}>
+                                <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                            </IconButton>
+                        </ServiceRow>
+                        <Collapse in={expanded}>
+                            <DetailBox>
+                                <Box sx={{mb: 1.5}}>
+                                    <Typography
+                                        sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}
+                                    >
+                                        Arguments
+                                    </Typography>
+                                    <JsonRenderer
+                                        value={row.arguments.length === 1 ? row.arguments[0] : row.arguments}
+                                    />
+                                </Box>
+                                <Box>
+                                    <Typography
+                                        sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}
+                                    >
+                                        {row.error ? 'Error' : 'Result'}
+                                    </Typography>
+                                    <JsonRenderer value={row.error ? row.error : row.result} />
+                                </Box>
+                            </DetailBox>
+                        </Collapse>
+                    </Box>
+                );
+            })}
+        </Box>
+    );
+};
+
 export const ServicesPanel = ({data}: ServicesPanelProps) => {
     const [value, setValue] = useState<Tabs>('summary');
 
@@ -121,22 +252,16 @@ export const ServicesPanel = ({data}: ServicesPanelProps) => {
     };
 
     const allRows = useMemo(() => {
-        if (!Array.isArray(data)) {
-            return [];
-        }
-        return data.map(
-            (el) =>
-                ({
-                    service: el.service,
-                    class: el.class,
-                    method: el.method,
-                    success: Number(el.status === 'success'),
-                    time: el.timeEnd - el.timeStart,
-                    arguments: el.arguments,
-                    result: el.result,
-                    error: el.error,
-                }) satisfies AllItemType,
-        );
+        if (!Array.isArray(data)) return [];
+        return data.map((el) => ({
+            class: el.class,
+            method: el.method,
+            success: Number(el.status === 'success'),
+            time: el.timeEnd - el.timeStart,
+            arguments: el.arguments,
+            result: el.result,
+            error: el.error,
+        }));
     }, [data]);
 
     const summaryRows = useMemo(() => {
@@ -144,12 +269,10 @@ export const ServicesPanel = ({data}: ServicesPanelProps) => {
         for (const el of allRows) {
             const key = el.class + el.method;
             if (key in result) {
-                result[key].count = result[key].count + 1;
-                result[key].successCount = result[key].successCount + el.success;
+                result[key].count += 1;
+                result[key].successCount += el.success;
                 result[key].times = [...result[key].times, el.time];
-                if (el.time > result[key].maxTime) {
-                    result[key].maxTime = el.time;
-                }
+                if (el.time > result[key].maxTime) result[key].maxTime = el.time;
             } else {
                 result[key] = {
                     class: el.class,
@@ -175,28 +298,21 @@ export const ServicesPanel = ({data}: ServicesPanelProps) => {
     }
 
     return (
-        <TabContext value={value}>
-            <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
-                <TabList onChange={handleChange}>
-                    <Tab label={'Summary'} value={'summary'} />
-                    <Tab label={'All'} value={'all'} />
-                </TabList>
-            </Box>
-            <TabPanel value={'summary'} sx={{padding: '0'}}>
-                <DataTable
-                    getRowId={() => Math.random() * 1000}
-                    rows={Object.values(summaryRows) as GridValidRowModel[]}
-                    columns={summaryColumns}
-                />
-            </TabPanel>
-            <TabPanel value={'all'} sx={{padding: '0'}}>
-                <DataTable
-                    sortModel={[{field: 'time', sort: 'desc'}]}
-                    getRowId={() => Math.random() * 1000}
-                    rows={allRows as GridValidRowModel[]}
-                    columns={allColumns}
-                />
-            </TabPanel>
-        </TabContext>
+        <Box>
+            <TabContext value={value}>
+                <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
+                    <StyledTabList onChange={handleChange}>
+                        <Tab label="Summary" value="summary" />
+                        <Tab label="All" value="all" />
+                    </StyledTabList>
+                </Box>
+                <TabPanel value="summary" sx={{padding: 0}}>
+                    <SummaryView summaryRows={summaryRows} />
+                </TabPanel>
+                <TabPanel value="all" sx={{padding: 0}}>
+                    <AllView rows={allRows} />
+                </TabPanel>
+            </TabContext>
+        </Box>
     );
 };

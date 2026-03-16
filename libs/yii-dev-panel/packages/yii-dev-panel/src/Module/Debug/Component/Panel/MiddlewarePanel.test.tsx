@@ -26,7 +26,7 @@ describe('MiddlewarePanel', () => {
         expect(screen.getByText('ActionHandler')).toBeInTheDocument();
     });
 
-    it('renders with empty stacks', () => {
+    it('renders with empty stacks but with handler', () => {
         const props = {
             beforeStack: [],
             afterStack: [],
@@ -34,5 +34,22 @@ describe('MiddlewarePanel', () => {
         };
         renderWithProviders(<MiddlewarePanel {...props} />, {preloadedState});
         expect(screen.getByText('Handler')).toBeInTheDocument();
+    });
+
+    it('shows empty message when all stacks are empty and no handler', () => {
+        const props = {beforeStack: [], afterStack: [], actionHandler: null as any};
+        renderWithProviders(<MiddlewarePanel {...props} />, {preloadedState});
+        expect(screen.getByText(/No middleware data found/)).toBeInTheDocument();
+    });
+
+    it('shows phase badges', () => {
+        const props = {
+            beforeStack: [{memory: 1024, name: 'App\\Middleware\\Test', time: 1705319445.1, request: '{}'}],
+            afterStack: [],
+            actionHandler: {memory: 0, name: 'App\\Handler', request: '{}', startTime: 0, endTime: 0},
+        };
+        renderWithProviders(<MiddlewarePanel {...props} />, {preloadedState});
+        expect(screen.getByText('BEFORE')).toBeInTheDocument();
+        expect(screen.getByText('HANDLER')).toBeInTheDocument();
     });
 });

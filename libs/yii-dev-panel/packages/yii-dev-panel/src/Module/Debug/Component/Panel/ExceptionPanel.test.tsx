@@ -4,7 +4,17 @@ import {describe, expect, it} from 'vitest';
 import {ExceptionPanel} from './ExceptionPanel';
 
 describe('ExceptionPanel', () => {
-    it('renders cascade exceptions text with count', () => {
+    it('shows empty message when no exceptions', () => {
+        renderWithProviders(<ExceptionPanel exceptions={[]} />);
+        expect(screen.getByText(/No exceptions found/)).toBeInTheDocument();
+    });
+
+    it('handles null exceptions gracefully', () => {
+        renderWithProviders(<ExceptionPanel exceptions={null as any} />);
+        expect(screen.getByText(/No exceptions found/)).toBeInTheDocument();
+    });
+
+    it('renders exception rows with class and message', () => {
         const exceptions = [
             {
                 class: 'RuntimeException',
@@ -17,20 +27,16 @@ describe('ExceptionPanel', () => {
             },
         ];
         renderWithProviders(<ExceptionPanel exceptions={exceptions} />);
-        expect(screen.getByText(/cascade exceptions/)).toBeInTheDocument();
-        // The bold element contains the count
-        const bold = screen.getByText(/cascade exceptions/).querySelector('b');
-        expect(bold?.textContent).toBe('1');
+        expect(screen.getAllByText('RuntimeException').length).toBeGreaterThan(0);
+        expect(screen.getByText('Something failed')).toBeInTheDocument();
     });
 
-    it('handles empty exceptions', () => {
-        renderWithProviders(<ExceptionPanel exceptions={[]} />);
-        const bold = screen.getByText(/cascade exceptions/).querySelector('b');
-        expect(bold?.textContent).toBe('0');
-    });
-
-    it('handles null exceptions gracefully', () => {
-        renderWithProviders(<ExceptionPanel exceptions={null as any} />);
-        expect(screen.getByText(/cascade exceptions/)).toBeInTheDocument();
+    it('renders section title with count', () => {
+        const exceptions = [
+            {class: 'Error1', message: 'msg1', line: '1', file: '/a.php', code: '0', trace: [], traceAsString: ''},
+            {class: 'Error2', message: 'msg2', line: '2', file: '/b.php', code: '0', trace: [], traceAsString: ''},
+        ];
+        renderWithProviders(<ExceptionPanel exceptions={exceptions} />);
+        expect(screen.getByText('2 exceptions')).toBeInTheDocument();
     });
 });

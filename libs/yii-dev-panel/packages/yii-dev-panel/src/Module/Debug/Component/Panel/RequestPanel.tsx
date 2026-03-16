@@ -1,8 +1,11 @@
-import {Accordion, AccordionDetails, AccordionSummary, Alert, AlertTitle, Divider, Typography} from '@mui/material';
-import Box from '@mui/material/Box';
+import {Alert, AlertTitle, Box, Chip, Collapse, Icon, Typography} from '@mui/material';
+import {styled} from '@mui/material/styles';
 import {HTTPMethod} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Debug';
 import {CodeHighlight} from '@yiisoft/yii-dev-panel-sdk/Component/CodeHighlight';
+import {SectionTitle} from '@yiisoft/yii-dev-panel-sdk/Component/SectionTitle';
+import {primitives} from '@yiisoft/yii-dev-panel-sdk/Component/Theme/tokens';
 import {JsonRenderer} from '@yiisoft/yii-dev-panel/Module/Debug/Component/JsonRenderer';
+import {useState} from 'react';
 
 type Response = {
     content: string;
@@ -20,43 +23,72 @@ type Response = {
 };
 type RequestPanelProps = {data: Response};
 
-const ResponseAccordion = ({data}: {data: Response}) => {
-    if (typeof data.responseRaw !== 'string') {
-        return null;
-    }
+const statusColor = (code: number): string => {
+    if (code >= 500) return primitives.red600;
+    if (code >= 400) return primitives.amber600;
+    if (code >= 300) return primitives.blue500;
+    return primitives.green600;
+};
 
-    const responseParts = data.responseRaw.split('\r\n\r\n');
-    const headers = responseParts[0];
-    const content = responseParts.splice(1).join('\r\n\r\n');
-    const match = headers.match(/Content-Type: \w+\/(\w+);/);
-    const contentType = Array.isArray(match) ? match[1] : 'plain';
-    const isJson = !!contentType.match(/json/);
+const methodColor = (method: string): string => {
+    switch (method?.toUpperCase()) {
+        case 'GET':
+            return primitives.green600;
+        case 'POST':
+            return primitives.blue500;
+        case 'PUT':
+        case 'PATCH':
+            return primitives.amber600;
+        case 'DELETE':
+            return primitives.red600;
+        default:
+            return primitives.gray400;
+    }
+};
+
+const MetricBox = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1.5),
+    padding: theme.spacing(1.5, 2),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.action.hover,
+}));
+
+const SectionBox = styled(Box)(({theme}) => ({
+    padding: theme.spacing(2),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+}));
+
+const RawToggle = ({label, content, language}: {label: string; content: string; language: string}) => {
+    const [open, setOpen] = useState(false);
+
+    if (!content) return null;
 
     return (
-        <>
-            <Typography component="h2" variant="h6">
-                Response
-            </Typography>
-            <JsonRenderer value={data.response} />
-            {content && (
-                <Accordion defaultExpanded={content.length < 500}>
-                    <AccordionSummary>Content</AccordionSummary>
-                    <AccordionDetails>
-                        {isJson ? (
-                            <JsonRenderer value={JSON.parse(content)} />
-                        ) : (
-                            <CodeHighlight code={content} language={contentType} showLineNumbers={false} />
-                        )}
-                    </AccordionDetails>
-                </Accordion>
-            )}
-            <Accordion defaultExpanded={data.responseRaw.length < 500}>
-                <AccordionSummary>Raw</AccordionSummary>
-                <AccordionDetails>
-                    <CodeHighlight code={data.responseRaw} language={contentType} showLineNumbers={false} />
-                </AccordionDetails>
-            </Accordion>
-        </>
+        <Box sx={{mt: 1.5}}>
+            <Box
+                onClick={() => setOpen(!open)}
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    cursor: 'pointer',
+                    color: 'text.disabled',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    '&:hover': {color: 'text.secondary'},
+                }}
+            >
+                <Icon sx={{fontSize: 16}}>{open ? 'expand_less' : 'expand_more'}</Icon>
+                {label}
+            </Box>
+            <Collapse in={open}>
+                <Box sx={{mt: 1, borderRadius: 1, overflow: 'hidden', border: '1px solid', borderColor: 'divider'}}>
+                    <CodeHighlight code={content} language={language} showLineNumbers={false} />
+                </Box>
+            </Collapse>
+        </Box>
     );
 };
 
@@ -71,29 +103,89 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
         );
     }
 
+    const responseParts = typeof data.responseRaw === 'string' ? data.responseRaw.split('\r\n\r\n') : [];
+    const responseHeaders = responseParts[0] || '';
+    const responseContent = responseParts.slice(1).join('\r\n\r\n');
+    const contentTypeMatch = responseHeaders.match(/Content-Type: \w+\/(\w+);/);
+    const contentType = Array.isArray(contentTypeMatch) ? contentTypeMatch[1] : 'plain';
+    const isJson = /json/.test(contentType);
+
     return (
-        <>
-            <CodeHighlight
-                language={'plain'}
-                code={data.requestMethod + ' ' + data.requestUrl}
-                showLineNumbers={false}
-            />
-            {/*<DebugChip*/}
-            {/*    label={data.requestMethod + ' ' + data.responseStatusCode}*/}
-            {/*    color={buttonColorHttp(data.responseStatusCode)}*/}
-            {/*/>*/}
-            <Typography component="h2" variant="h6">
-                Request
-            </Typography>
-            <JsonRenderer value={data.request} />
-            <Accordion defaultExpanded={data.requestRaw.length < 500}>
-                <AccordionSummary>Raw</AccordionSummary>
-                <AccordionDetails>
-                    <CodeHighlight code={data.requestRaw} language={'plain'} showLineNumbers={false} />
-                </AccordionDetails>
-            </Accordion>
-            <Divider />
-            <ResponseAccordion data={data} />
-        </>
+        <Box>
+            <MetricBox>
+                <Chip
+                    label={data.requestMethod}
+                    size="small"
+                    sx={{
+                        fontWeight: 700,
+                        fontSize: '11px',
+                        height: 22,
+                        backgroundColor: methodColor(data.requestMethod),
+                        color: '#fff',
+                        borderRadius: 1,
+                    }}
+                />
+                <Typography
+                    sx={{fontFamily: primitives.fontFamilyMono, fontSize: '13px', flex: 1, wordBreak: 'break-all'}}
+                >
+                    {data.requestUrl}
+                </Typography>
+                <Chip
+                    label={data.responseStatusCode}
+                    size="small"
+                    sx={{
+                        fontWeight: 700,
+                        fontSize: '11px',
+                        height: 22,
+                        backgroundColor: statusColor(data.responseStatusCode),
+                        color: '#fff',
+                        borderRadius: 1,
+                    }}
+                />
+                {data.requestIsAjax && (
+                    <Chip
+                        label="AJAX"
+                        size="small"
+                        sx={{fontSize: '10px', height: 20, borderRadius: 1}}
+                        variant="outlined"
+                    />
+                )}
+                {data.userIp && (
+                    <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '11px', color: 'text.disabled'}}>
+                        {data.userIp}
+                    </Typography>
+                )}
+            </MetricBox>
+
+            <SectionBox>
+                <SectionTitle>Request</SectionTitle>
+                <JsonRenderer value={data.request} />
+                <RawToggle label="Raw Request" content={data.requestRaw} language="plain" />
+            </SectionBox>
+
+            <SectionBox>
+                <SectionTitle>Response</SectionTitle>
+                <JsonRenderer value={data.response} />
+
+                {responseContent && (
+                    <Box sx={{mt: 1.5}}>
+                        <Typography sx={{fontSize: '12px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                            Content
+                        </Typography>
+                        <Box sx={{borderRadius: 1, overflow: 'hidden', border: '1px solid', borderColor: 'divider'}}>
+                            {isJson ? (
+                                <Box sx={{p: 1.5}}>
+                                    <JsonRenderer value={JSON.parse(responseContent)} />
+                                </Box>
+                            ) : (
+                                <CodeHighlight code={responseContent} language={contentType} showLineNumbers={false} />
+                            )}
+                        </Box>
+                    </Box>
+                )}
+
+                <RawToggle label="Raw Response" content={data.responseRaw} language={contentType} />
+            </SectionBox>
+        </Box>
     );
 };
