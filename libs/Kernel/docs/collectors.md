@@ -33,12 +33,13 @@ interface CollectorInterface
 #### ServiceCollector
 - **Collects**: DI container service resolutions
 - **Data**: Service ID/class, resolution time, arguments, results
-- **Fed by**: `ContainerInterfaceProxy` and `ServiceProxy`
+- **Fed by**: Adapter-provided container proxy (e.g., `ContainerInterfaceProxy` and `ServiceProxy` in Yii adapter)
 
 #### ExceptionCollector
 - **Collects**: Uncaught exceptions and errors
 - **Data**: Exception class, message, stack trace, file, line
-- **Fed by**: Custom exception handler registered during startup
+- **API**: `collect(Throwable $throwable)` — framework-agnostic, accepts any `Throwable`
+- **Fed by**: Adapter exception handler or direct call
 
 #### HttpClientCollector
 - **Collects**: Outgoing HTTP requests made via PSR-18 client
@@ -48,7 +49,7 @@ interface CollectorInterface
 #### VarDumperCollector
 - **Collects**: Manual `dump()` / `dd()` calls
 - **Data**: Dumped variable, call site (file, line), timestamp
-- **Fed by**: `VarDumperHandlerInterfaceProxy`
+- **Fed by**: Adapter-provided VarDumper handler proxy (e.g., `VarDumperHandlerInterfaceProxy` in Yii adapter)
 
 #### TimelineCollector
 - **Collects**: Timing data for profiling
@@ -67,20 +68,25 @@ interface CollectorInterface
 #### RequestCollector
 - **Collects**: HTTP request and response data
 - **Data**: Method, URL, headers, body, query params, status code, response headers, response body
+- **API**: `collectRequest(ServerRequestInterface $request)`, `collectResponse(ResponseInterface $response)` — framework-agnostic PSR-7 methods
 
 #### WebAppInfoCollector
 - **Collects**: Web application metadata
 - **Data**: PHP version, memory usage, execution time, framework version
+- **API**: `markApplicationStarted()`, `markRequestStarted()`, `markRequestFinished()`, `markApplicationFinished()`
 
 ### Console-Specific Collectors
 
 #### CommandCollector
 - **Collects**: Console command execution data
 - **Data**: Command name, arguments, options, exit code, output
+- **API**: `collect(ConsoleEvent|ConsoleErrorEvent|ConsoleTerminateEvent $event)` — accepts Symfony console events
+- **Note**: Uses `method_exists($output, 'fetch')` instead of `instanceof ConsoleBufferedOutput` for framework independence
 
 #### ConsoleAppInfoCollector
 - **Collects**: Console application metadata
 - **Data**: PHP version, memory usage, execution time
+- **API**: `markApplicationStarted()`, `markApplicationFinished()`, `collect(object $event)` — accepts Symfony console events
 
 ## Creating a Custom Collector
 
