@@ -82,7 +82,7 @@ export const LogPanel = ({data}: LogPanelProps) => {
                     placeholder="Filter logs..."
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    slotProps={{input: {sx: {fontSize: '13px'}}}}
+                    InputProps={{sx: {fontSize: '13px'}}}
                     sx={{ml: 'auto', width: 240}}
                 />
             </Box>

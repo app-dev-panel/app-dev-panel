@@ -3,13 +3,21 @@ import {renderWithProviders} from '@yiisoft/yii-dev-panel-sdk/test-utils';
 import {describe, expect, it} from 'vitest';
 import {IndexPage} from './IndexPage';
 
-describe('IndexPage (Overview)', () => {
+describe('IndexPage (Overview Dashboard)', () => {
     const webEntry = {
         id: 'test-123',
-        collectors: ['Yiisoft\\Yii\\Debug\\Collector\\LogCollector'],
+        collectors: [
+            'Yiisoft\\Yii\\Debug\\Collector\\LogCollector',
+            'Yiisoft\\Yii\\Debug\\Collector\\EventCollector',
+            'Yiisoft\\Yii\\Debug\\Collector\\ServiceCollector',
+            'Yiisoft\\Yii\\Debug\\Collector\\ExceptionCollector',
+            'Yiisoft\\Yii\\Debug\\Collector\\TimelineCollector',
+        ],
         logger: {total: 15},
         event: {total: 42},
         service: {total: 8},
+        exception: {},
+        timeline: {total: 3},
         web: {
             php: {version: '8.4.0'},
             request: {startTime: 1705319445, processingTime: 0.025},
@@ -40,42 +48,47 @@ describe('IndexPage (Overview)', () => {
         expect(screen.getByText('No debug entry selected')).toBeInTheDocument();
     });
 
-    it('renders summary metrics for web entry', () => {
-        renderWithProviders(<IndexPage />, {
-            preloadedState: {'store.debug': {entry: webEntry, currentPageRequestIds: []}},
-        });
-        expect(screen.getByText('Summary')).toBeInTheDocument();
-        expect(screen.getByText('Response Time')).toBeInTheDocument();
-        expect(screen.getByText('Peak Memory')).toBeInTheDocument();
-        expect(screen.getByText('Log Entries')).toBeInTheDocument();
-        expect(screen.getByText('Events')).toBeInTheDocument();
-        expect(screen.getByText('Services')).toBeInTheDocument();
-    });
-
-    it('renders request section for web entry', () => {
+    it('renders summary bar with request info', () => {
         renderWithProviders(<IndexPage />, {
             preloadedState: {'store.debug': {entry: webEntry, currentPageRequestIds: []}},
         });
         expect(screen.getByText('Request')).toBeInTheDocument();
-        expect(screen.getByText('GET')).toBeInTheDocument();
-        expect(screen.getByText('127.0.0.1')).toBeInTheDocument();
+        expect(screen.getByText('Status')).toBeInTheDocument();
+        expect(screen.getByText('Duration')).toBeInTheDocument();
+        expect(screen.getByText('Peak Memory')).toBeInTheDocument();
     });
 
-    it('renders route section', () => {
+    it('renders collector cards with labels', () => {
         renderWithProviders(<IndexPage />, {
             preloadedState: {'store.debug': {entry: webEntry, currentPageRequestIds: []}},
         });
-        expect(screen.getByText('Route')).toBeInTheDocument();
-        expect(screen.getByText('api-users')).toBeInTheDocument();
-        expect(screen.getAllByText('/api/users').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText('Log')).toBeInTheDocument();
+        expect(screen.getByText('Events')).toBeInTheDocument();
+        expect(screen.getByText('Service')).toBeInTheDocument();
+        expect(screen.getByText('Timeline')).toBeInTheDocument();
     });
 
-    it('renders environment section', () => {
+    it('renders badge counts on collector cards', () => {
         renderWithProviders(<IndexPage />, {
             preloadedState: {'store.debug': {entry: webEntry, currentPageRequestIds: []}},
         });
-        expect(screen.getByText('Environment')).toBeInTheDocument();
-        expect(screen.getByText('8.4.0')).toBeInTheDocument();
-        expect(screen.getByText('test-123')).toBeInTheDocument();
+        expect(screen.getByText('15')).toBeInTheDocument();
+        expect(screen.getByText('42')).toBeInTheDocument();
+        expect(screen.getByText('8')).toBeInTheDocument();
+    });
+
+    it('renders status code in summary bar', () => {
+        renderWithProviders(<IndexPage />, {
+            preloadedState: {'store.debug': {entry: webEntry, currentPageRequestIds: []}},
+        });
+        expect(screen.getByText('200')).toBeInTheDocument();
+    });
+
+    it('renders card summaries', () => {
+        renderWithProviders(<IndexPage />, {
+            preloadedState: {'store.debug': {entry: webEntry, currentPageRequestIds: []}},
+        });
+        expect(screen.getByText('15 log')).toBeInTheDocument();
+        expect(screen.getByText('42 events')).toBeInTheDocument();
     });
 });

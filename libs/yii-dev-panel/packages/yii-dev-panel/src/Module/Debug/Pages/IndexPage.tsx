@@ -2,116 +2,204 @@ import {Box, Icon, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useDebugEntry} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Context';
 import {DebugEntry} from '@yiisoft/yii-dev-panel-sdk/API/Debug/Debug';
-import {SectionTitle} from '@yiisoft/yii-dev-panel-sdk/Component/SectionTitle';
 import {primitives} from '@yiisoft/yii-dev-panel-sdk/Component/Theme/tokens';
+import {
+    compareCollectorWeight,
+    getCollectorIcon,
+    getCollectorLabel,
+} from '@yiisoft/yii-dev-panel-sdk/Helper/collectorMeta';
+import {CollectorsMap} from '@yiisoft/yii-dev-panel-sdk/Helper/collectors';
+import {getCollectedCountByCollector} from '@yiisoft/yii-dev-panel-sdk/Helper/collectorsTotal';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@yiisoft/yii-dev-panel-sdk/Helper/debugEntry';
 import {formatBytes} from '@yiisoft/yii-dev-panel-sdk/Helper/formatBytes';
-import {formatDate, formatMillisecondsAsDuration} from '@yiisoft/yii-dev-panel-sdk/Helper/formatDate';
+import {formatMillisecondsAsDuration} from '@yiisoft/yii-dev-panel-sdk/Helper/formatDate';
 import {useSearchParams} from 'react-router-dom';
 
-const MetricGrid = styled(Box)(({theme}) => ({
+// ---------------------------------------------------------------------------
+// Card icon background/foreground colors per collector
+// ---------------------------------------------------------------------------
+const iconColors: Record<string, {bg: string; fg: string}> = {
+    [CollectorsMap.RequestCollector]: {bg: '#EFF6FF', fg: '#2563EB'},
+    [CollectorsMap.LogCollector]: {bg: '#FEF3C7', fg: '#D97706'},
+    [CollectorsMap.EventCollector]: {bg: '#F3E8FF', fg: '#9333EA'},
+    [CollectorsMap.DatabaseCollector]: {bg: '#ECFDF5', fg: '#16A34A'},
+    [CollectorsMap.MiddlewareCollector]: {bg: '#FFF7ED', fg: '#EA580C'},
+    [CollectorsMap.ExceptionCollector]: {bg: '#FEF2F2', fg: '#DC2626'},
+    [CollectorsMap.ServiceCollector]: {bg: '#F0F9FF', fg: '#0284C7'},
+    [CollectorsMap.TimelineCollector]: {bg: '#F5F3FF', fg: '#7C3AED'},
+    [CollectorsMap.VarDumperCollector]: {bg: '#F5F5F5', fg: '#666666'},
+    [CollectorsMap.MailerCollector]: {bg: '#FDF4FF', fg: '#A855F7'},
+    [CollectorsMap.FilesystemStreamCollector]: {bg: '#FFF7ED', fg: '#EA580C'},
+};
+const defaultIconColor = {bg: '#F5F5F5', fg: '#666666'};
+
+// ---------------------------------------------------------------------------
+// Styled components
+// ---------------------------------------------------------------------------
+
+const CardsGrid = styled(Box)(({theme}) => ({
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+    gridTemplateColumns: 'repeat(3, 1fr)',
     gap: theme.spacing(2),
+    marginBottom: theme.spacing(3),
 }));
 
-type MetricCardProps = {color?: string};
+type CollectorCardRootProps = {hasError?: boolean};
 
-const MetricCard = styled(Box, {shouldForwardProp: (p) => p !== 'color'})<MetricCardProps>(({theme, color}) => ({
+const CollectorCardRoot = styled(Box, {shouldForwardProp: (p) => p !== 'hasError'})<CollectorCardRootProps>(
+    ({theme, hasError}) => ({
+        background: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: theme.shape.borderRadius * 1.5,
+        padding: theme.spacing(2.5),
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        position: 'relative',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+        ...(hasError && {borderLeft: `3px solid ${theme.palette.error.main}`}),
+        '&:hover': {
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
+            borderColor: theme.palette.primary.main,
+            transform: 'translateY(-1px)',
+        },
+    }),
+);
+
+const CardHeader = styled(Box)({
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing(1.5),
-    padding: theme.spacing(2),
-    borderRadius: theme.shape.borderRadius,
-    border: `1px solid ${theme.palette.divider}`,
-    cursor: 'pointer',
-    transition: 'border-color 0.15s ease',
-    '&:hover': {borderColor: color || theme.palette.primary.main},
-}));
-
-const MetricValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 600, fontSize: '20px'});
-
-const MetricLabel = styled(Typography)(({theme}) => ({
-    fontSize: '12px',
-    color: theme.palette.text.secondary,
-    fontWeight: 500,
-}));
-
-const KVRow = styled(Box)(({theme}) => ({
-    display: 'flex',
     justifyContent: 'space-between',
-    padding: theme.spacing(1, 0),
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    fontSize: '13px',
-    '&:last-child': {borderBottom: 'none'},
+    marginBottom: 12,
+});
+
+const CardTitle = styled(Box)(({theme}) => ({display: 'flex', alignItems: 'center', gap: theme.spacing(1)}));
+
+const CardIconBox = styled(Box)({
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+});
+
+const CardName = styled(Typography)({fontWeight: 600, fontSize: '14px'});
+
+type BadgeProps = {isError?: boolean};
+
+const Badge = styled('span', {shouldForwardProp: (p) => p !== 'isError'})<BadgeProps>(({theme, isError}) => ({
+    padding: '2px 8px',
+    borderRadius: 10,
+    fontSize: '11px',
+    fontWeight: 600,
+    backgroundColor: isError ? theme.palette.error.light : theme.palette.background.default,
+    color: isError ? theme.palette.error.main : theme.palette.text.secondary,
 }));
 
-const KVLabel = styled('span')(({theme}) => ({color: theme.palette.text.disabled, fontWeight: 500}));
+const CardSummary = styled(Typography)(({theme}) => ({
+    fontSize: '13px',
+    color: theme.palette.text.secondary,
+    marginBottom: theme.spacing(1.25),
+}));
 
-const KVValue = styled('span')({fontFamily: primitives.fontFamilyMono, fontSize: '12px'});
+const SparklineContainer = styled(Box)({display: 'flex', alignItems: 'flex-end', gap: 2, height: 16});
 
-type MetricItem = {icon: string; label: string; value: string | number; color: string; collectorKey?: string};
+type SparkBarProps = {isCurrent?: boolean; barColor?: string};
 
-function getMetrics(entry: DebugEntry): MetricItem[] {
-    const metrics: MetricItem[] = [];
+const SparkBar = styled(Box, {shouldForwardProp: (p) => p !== 'isCurrent' && p !== 'barColor'})<SparkBarProps>(
+    ({theme, isCurrent, barColor}) => ({
+        width: 6,
+        borderRadius: '2px 2px 0 0',
+        backgroundColor: barColor || theme.palette.primary.main,
+        opacity: isCurrent ? 1 : 0.4,
+        transition: 'opacity 0.15s',
+    }),
+);
 
-    if (isDebugEntryAboutWeb(entry) && entry.web) {
-        metrics.push({
-            icon: 'timer',
-            label: 'Response Time',
-            value: formatMillisecondsAsDuration(entry.web.request.processingTime),
-            color: primitives.blue500,
-        });
-        metrics.push({
-            icon: 'memory',
-            label: 'Peak Memory',
-            value: formatBytes(entry.web.memory.peakUsage),
-            color: primitives.blue500,
-        });
+// ---------------------------------------------------------------------------
+// Summary section (top metrics bar)
+// ---------------------------------------------------------------------------
+
+const SummaryBar = styled(Box)(({theme}) => ({
+    display: 'flex',
+    gap: theme.spacing(3),
+    marginBottom: theme.spacing(3),
+    padding: theme.spacing(2, 2.5),
+    borderRadius: theme.shape.borderRadius * 1.5,
+    border: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.paper,
+}));
+
+const SummaryItem = styled(Box)({display: 'flex', alignItems: 'center', gap: 8});
+
+const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 600, fontSize: '15px'});
+
+const SummaryLabel = styled(Typography)(({theme}) => ({fontSize: '12px', color: theme.palette.text.secondary}));
+
+// ---------------------------------------------------------------------------
+// Helper: generate sparkline bars (decorative, based on badge count)
+// ---------------------------------------------------------------------------
+
+function generateSparkBars(count: number): number[] {
+    if (count <= 0) return [5, 5, 5, 5, 5, 5, 5, 5];
+    const bars: number[] = [];
+    for (let i = 0; i < 8; i++) {
+        bars.push(Math.max(10, Math.min(100, Math.round(15 + Math.sin(i * 0.8 + count) * 40 + count * 3))));
     }
-    if (isDebugEntryAboutConsole(entry) && entry.console) {
-        metrics.push({
-            icon: 'timer',
-            label: 'Execution Time',
-            value: formatMillisecondsAsDuration(entry.console.request.processingTime),
-            color: primitives.blue500,
-        });
-        metrics.push({
-            icon: 'memory',
-            label: 'Peak Memory',
-            value: formatBytes(entry.console.memory.peakUsage),
-            color: primitives.blue500,
-        });
-    }
-    if (entry.logger) {
-        metrics.push({
-            icon: 'description',
-            label: 'Log Entries',
-            value: entry.logger.total,
-            color: primitives.green600,
-            collectorKey: 'Yiisoft\\Yii\\Debug\\Collector\\LogCollector',
-        });
-    }
-    if (entry.event) {
-        metrics.push({
-            icon: 'bolt',
-            label: 'Events',
-            value: entry.event.total,
-            color: primitives.amber600,
-            collectorKey: 'Yiisoft\\Yii\\Debug\\Collector\\EventCollector',
-        });
-    }
-    if (entry.service) {
-        metrics.push({
-            icon: 'inventory_2',
-            label: 'Services',
-            value: entry.service.total,
-            color: primitives.blue500,
-            collectorKey: 'Yiisoft\\Yii\\Debug\\Collector\\ServiceCollector',
-        });
-    }
-    return metrics;
+    return bars;
 }
+
+// ---------------------------------------------------------------------------
+// Build collector card data from debug entry
+// ---------------------------------------------------------------------------
+
+type CollectorCardData = {
+    key: string;
+    icon: string;
+    label: string;
+    badge: number | undefined;
+    summary: string;
+    isException: boolean;
+    iconBg: string;
+    iconFg: string;
+};
+
+function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
+    return [...entry.collectors]
+        .filter((c): c is string => typeof c === 'string')
+        .sort(compareCollectorWeight)
+        .map((collector) => {
+            const count = getCollectedCountByCollector(collector as CollectorsMap, entry);
+            const isException = collector === CollectorsMap.ExceptionCollector && !!count && count > 0;
+            const colors = iconColors[collector] || defaultIconColor;
+            const label = getCollectorLabel(collector);
+            let summary = count != null ? `${count} ${label.toLowerCase()}` : label;
+
+            // Customize summaries
+            if (collector === CollectorsMap.DatabaseCollector && entry.db) {
+                const queries = Number(entry.db.queries?.total ?? 0);
+                summary = `${queries} queries`;
+            }
+            if (collector === CollectorsMap.ExceptionCollector && isException) {
+                summary = `${count} exception`;
+            }
+
+            return {
+                key: collector,
+                icon: getCollectorIcon(collector),
+                label,
+                badge: count,
+                summary,
+                isException,
+                iconBg: colors.bg,
+                iconFg: colors.fg,
+            };
+        });
+}
+
+// ---------------------------------------------------------------------------
+// IndexPage — card-grid dashboard (variant-d-minimal-zen)
+// ---------------------------------------------------------------------------
 
 export const IndexPage = () => {
     const entry = useDebugEntry();
@@ -125,10 +213,9 @@ export const IndexPage = () => {
         );
     }
 
-    const metrics = getMetrics(entry);
+    const cards = buildCollectorCards(entry);
 
-    const handleMetricClick = (collectorKey?: string) => {
-        if (!collectorKey) return;
+    const handleCardClick = (collectorKey: string) => {
         setSearchParams((params) => {
             params.set('collector', collectorKey);
             params.set('debugEntry', entry.id);
@@ -136,110 +223,112 @@ export const IndexPage = () => {
         });
     };
 
+    // Summary metrics
+    const duration =
+        isDebugEntryAboutWeb(entry) && entry.web?.request?.processingTime
+            ? formatMillisecondsAsDuration(entry.web.request.processingTime)
+            : isDebugEntryAboutConsole(entry) && entry.console?.request?.processingTime
+              ? formatMillisecondsAsDuration(entry.console.request.processingTime)
+              : null;
+
+    const memory =
+        isDebugEntryAboutWeb(entry) && entry.web?.memory?.peakUsage
+            ? formatBytes(entry.web.memory.peakUsage)
+            : isDebugEntryAboutConsole(entry) && entry.console?.memory?.peakUsage
+              ? formatBytes(entry.console.memory.peakUsage)
+              : null;
+
+    const status = isDebugEntryAboutWeb(entry) ? entry.response?.statusCode : null;
+    const method = isDebugEntryAboutWeb(entry) ? entry.request?.method : null;
+    const path = isDebugEntryAboutWeb(entry) ? entry.request?.path : null;
+
     return (
         <Box>
-            <SectionTitle>Summary</SectionTitle>
-            <MetricGrid>
-                {metrics.map((m) => (
-                    <MetricCard key={m.label} color={m.color} onClick={() => handleMetricClick(m.collectorKey)}>
-                        <Icon sx={{fontSize: 24, color: m.color}}>{m.icon}</Icon>
+            <SummaryBar>
+                {method && path && (
+                    <SummaryItem>
+                        <Icon sx={{fontSize: 18, color: primitives.blue500}}>http</Icon>
                         <Box>
-                            <MetricValue>{m.value}</MetricValue>
-                            <MetricLabel>{m.label}</MetricLabel>
+                            <SummaryValue>
+                                {method} {path}
+                            </SummaryValue>
+                            <SummaryLabel>Request</SummaryLabel>
                         </Box>
-                    </MetricCard>
-                ))}
-            </MetricGrid>
+                    </SummaryItem>
+                )}
+                {status != null && (
+                    <SummaryItem>
+                        <Icon sx={{fontSize: 18, color: status >= 400 ? primitives.red600 : primitives.green600}}>
+                            {status >= 400 ? 'error' : 'check_circle'}
+                        </Icon>
+                        <Box>
+                            <SummaryValue>{status}</SummaryValue>
+                            <SummaryLabel>Status</SummaryLabel>
+                        </Box>
+                    </SummaryItem>
+                )}
+                {duration && (
+                    <SummaryItem>
+                        <Icon sx={{fontSize: 18, color: primitives.blue500}}>timer</Icon>
+                        <Box>
+                            <SummaryValue>{duration}</SummaryValue>
+                            <SummaryLabel>Duration</SummaryLabel>
+                        </Box>
+                    </SummaryItem>
+                )}
+                {memory && (
+                    <SummaryItem>
+                        <Icon sx={{fontSize: 18, color: primitives.green600}}>memory</Icon>
+                        <Box>
+                            <SummaryValue>{memory}</SummaryValue>
+                            <SummaryLabel>Peak Memory</SummaryLabel>
+                        </Box>
+                    </SummaryItem>
+                )}
+                {isDebugEntryAboutConsole(entry) && entry.command && (
+                    <SummaryItem>
+                        <Icon sx={{fontSize: 18, color: primitives.blue500}}>terminal</Icon>
+                        <Box>
+                            <SummaryValue>{entry.command.input || entry.command.name}</SummaryValue>
+                            <SummaryLabel>Command (exit: {entry.command.exitCode})</SummaryLabel>
+                        </Box>
+                    </SummaryItem>
+                )}
+            </SummaryBar>
 
-            {isDebugEntryAboutWeb(entry) && entry.request && (
-                <>
-                    <SectionTitle>Request</SectionTitle>
-                    <KVRow>
-                        <KVLabel>Method</KVLabel>
-                        <KVValue>{entry.request.method}</KVValue>
-                    </KVRow>
-                    <KVRow>
-                        <KVLabel>URL</KVLabel>
-                        <KVValue>{entry.request.url || entry.request.path}</KVValue>
-                    </KVRow>
-                    <KVRow>
-                        <KVLabel>Status</KVLabel>
-                        <KVValue>{entry.response?.statusCode}</KVValue>
-                    </KVRow>
-                    <KVRow>
-                        <KVLabel>User IP</KVLabel>
-                        <KVValue>{entry.request.userIp}</KVValue>
-                    </KVRow>
-                    {entry.request.query && (
-                        <KVRow>
-                            <KVLabel>Query</KVLabel>
-                            <KVValue>{entry.request.query}</KVValue>
-                        </KVRow>
-                    )}
-                </>
-            )}
-
-            {isDebugEntryAboutConsole(entry) && entry.command && (
-                <>
-                    <SectionTitle>Command</SectionTitle>
-                    <KVRow>
-                        <KVLabel>Name</KVLabel>
-                        <KVValue>{entry.command.name || entry.command.input}</KVValue>
-                    </KVRow>
-                    <KVRow>
-                        <KVLabel>Exit Code</KVLabel>
-                        <KVValue>{entry.command.exitCode}</KVValue>
-                    </KVRow>
-                    <KVRow>
-                        <KVLabel>Class</KVLabel>
-                        <KVValue>{entry.command.class}</KVValue>
-                    </KVRow>
-                </>
-            )}
-
-            {entry.router && (
-                <>
-                    <SectionTitle>Route</SectionTitle>
-                    <KVRow>
-                        <KVLabel>Pattern</KVLabel>
-                        <KVValue>{entry.router.pattern}</KVValue>
-                    </KVRow>
-                    <KVRow>
-                        <KVLabel>Name</KVLabel>
-                        <KVValue>{entry.router.name}</KVValue>
-                    </KVRow>
-                    <KVRow>
-                        <KVLabel>Action</KVLabel>
-                        <KVValue>
-                            {Array.isArray(entry.router.action) ? entry.router.action.join(', ') : entry.router.action}
-                        </KVValue>
-                    </KVRow>
-                    <KVRow>
-                        <KVLabel>Match Time</KVLabel>
-                        <KVValue>{formatMillisecondsAsDuration(entry.router.matchTime)}</KVValue>
-                    </KVRow>
-                </>
-            )}
-
-            <SectionTitle>Environment</SectionTitle>
-            <KVRow>
-                <KVLabel>PHP Version</KVLabel>
-                <KVValue>{entry.web?.php?.version || entry.console?.php?.version || 'N/A'}</KVValue>
-            </KVRow>
-            {isDebugEntryAboutWeb(entry) && entry.web?.request?.startTime && (
-                <KVRow>
-                    <KVLabel>Time</KVLabel>
-                    <KVValue>{formatDate(entry.web.request.startTime)}</KVValue>
-                </KVRow>
-            )}
-            <KVRow>
-                <KVLabel>Entry ID</KVLabel>
-                <KVValue>{entry.id}</KVValue>
-            </KVRow>
-            <KVRow>
-                <KVLabel>Collectors</KVLabel>
-                <KVValue>{entry.collectors.filter((c) => typeof c === 'string').length}</KVValue>
-            </KVRow>
+            <CardsGrid>
+                {cards.map((card) => {
+                    const sparkBars = generateSparkBars(card.badge ?? 0);
+                    return (
+                        <CollectorCardRoot
+                            key={card.key}
+                            hasError={card.isException}
+                            onClick={() => handleCardClick(card.key)}
+                        >
+                            <CardHeader>
+                                <CardTitle>
+                                    <CardIconBox sx={{backgroundColor: card.iconBg}}>
+                                        <Icon sx={{fontSize: 16, color: card.iconFg}}>{card.icon}</Icon>
+                                    </CardIconBox>
+                                    <CardName>{card.label}</CardName>
+                                </CardTitle>
+                                {card.badge != null && <Badge isError={card.isException}>{card.badge}</Badge>}
+                            </CardHeader>
+                            <CardSummary>{card.summary}</CardSummary>
+                            <SparklineContainer>
+                                {sparkBars.map((height, i) => (
+                                    <SparkBar
+                                        key={i}
+                                        sx={{height: `${height}%`}}
+                                        isCurrent={i === sparkBars.length - 1}
+                                        barColor={card.isException ? primitives.red600 : undefined}
+                                    />
+                                ))}
+                            </SparklineContainer>
+                        </CollectorCardRoot>
+                    );
+                })}
+            </CardsGrid>
         </Box>
     );
 };
