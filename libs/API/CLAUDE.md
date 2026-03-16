@@ -6,8 +6,16 @@ HTTP layer for ADP. Exposes debug data and application inspection via REST endpo
 
 - Composer: `app-dev-panel/api`
 - Namespace: `AppDevPanel\Api\`
-- PHP: 8.4+
-- Dependencies: `app-dev-panel/kernel`
+- PHP: 8.1+
+- Dependencies: `app-dev-panel/kernel`, plus Yii-specific packages (see below)
+
+### Yii-specific dependencies (pending removal for framework-agnostic API)
+
+`yiisoft/aliases`, `yiisoft/config`, `yiisoft/data-response`, `yiisoft/di`, `yiisoft/friendly-exception`, `yiisoft/http`, `yiisoft/middleware-dispatcher`, `yiisoft/translator`, `yiisoft/var-dumper`, `yiisoft/yii-middleware`
+
+### Framework-independent dependencies
+
+`alexkart/curl-builder`, `gitonomy/gitlib`, `guzzlehttp/guzzle`, `guzzlehttp/psr7`, `httpsoft/http-message`, `psr/container`, `psr/http-factory`, `psr/http-message`, `psr/http-server-handler`, `psr/http-server-middleware`, `psr/simple-cache`, `symfony/process`, `zircote/swagger-php`
 
 ## Directory Structure
 
@@ -15,26 +23,26 @@ HTTP layer for ADP. Exposes debug data and application inspection via REST endpo
 src/
 ├── Debug/
 │   ├── Controller/
-│   │   └── DebugController.php          # Debug data endpoints
+│   │   └── DebugController.php
 │   ├── Middleware/
-│   │   ├── ResponseDataWrapper.php      # Wraps responses in standard format
-│   │   ├── DebugHeaders.php             # Adds X-Debug-Id, X-Debug-Link headers
+│   │   ├── ResponseDataWrapper.php
+│   │   ├── DebugHeaders.php
 │   │   └── MiddlewareDispatcherMiddleware.php
 │   └── Repository/
 │       ├── CollectorRepositoryInterface.php
-│       └── CollectorRepository.php      # Reads debug data from storage
+│       └── CollectorRepository.php
 ├── Inspector/
 │   ├── Controller/
-│   │   ├── InspectController.php        # Application introspection
-│   │   ├── GitController.php            # Git operations
-│   │   ├── CommandController.php        # Command execution
-│   │   ├── ComposerController.php       # Composer management
-│   │   ├── CacheController.php          # Cache inspection
-│   │   └── OpcacheController.php        # OPcache status
+│   │   ├── InspectController.php        # Uses Kernel RequestCollector
+│   │   ├── GitController.php
+│   │   ├── CommandController.php
+│   │   ├── ComposerController.php
+│   │   ├── CacheController.php
+│   │   └── OpcacheController.php
 │   ├── Database/
 │   │   ├── SchemaProviderInterface.php
-│   │   ├── CycleSchemaProvider.php      # Cycle ORM schema
-│   │   └── DbSchemaProvider.php         # Yii DB schema
+│   │   ├── CycleSchemaProvider.php
+│   │   └── DbSchemaProvider.php
 │   ├── Command/
 │   │   ├── CommandInterface.php
 │   │   ├── BashCommand.php
@@ -42,13 +50,17 @@ src/
 │   │   ├── CodeceptionCommand.php
 │   │   └── PsalmCommand.php
 │   └── ApplicationState.php
-├── ServerSentEventsStream.php           # SSE implementation
-└── ModuleFederationAssetBundle.php      # Remote panel support
+├── ServerSentEventsStream.php
+└── ModuleFederationAssetBundle.php
 config/
-├── routes.php                           # All route definitions
-├── di-web.php                           # DI configuration
-└── params.php                           # Default parameters
+├── routes.php
+├── di-web.php
+└── params.php
 ```
+
+## Key Change: InspectController
+
+`InspectController` imports `AppDevPanel\Kernel\Collector\Web\RequestCollector` (from Kernel) instead of the Adapter-level collector. The `request()` and `buildCurl()` methods use `RequestCollector::class` as the key to read debug entry data from `CollectorRepositoryInterface`.
 
 ## API Endpoints
 
@@ -123,16 +135,16 @@ config/
 
 ## Middleware Chain
 
-All API requests pass through:
+```
+Request -> IpFilter -> CorsAllowAll -> ResponseDataWrapper -> DebugHeaders -> Controller
+```
 
-1. **IpFilter** — Validates request IP against `allowedIPs` (default: `127.0.0.1`, `::1`)
-2. **CorsAllowAll** — Adds permissive CORS headers
-3. **ResponseDataWrapper** — Wraps all responses in `{id, data, error, success, status}`
-4. **DebugHeaders** — Adds `X-Debug-Id` and `X-Debug-Link` response headers
+1. **IpFilter** -- validates request IP against `allowedIPs` (default: `127.0.0.1`, `::1`)
+2. **CorsAllowAll** -- adds permissive CORS headers
+3. **ResponseDataWrapper** -- wraps responses in `{id, data, error, success, status}`
+4. **DebugHeaders** -- adds `X-Debug-Id` and `X-Debug-Link` response headers
 
 ## Response Format
-
-All API responses are wrapped:
 
 ```json
 {
@@ -146,11 +158,9 @@ All API responses are wrapped:
 
 ## SSE (Server-Sent Events)
 
-The `/debug/api/event-stream` endpoint polls storage every second, computing an MD5 hash
-of the summary data. When a new debug entry is written, the hash changes and an event is emitted:
+`/debug/api/event-stream` polls storage every second, computes MD5 hash of summary data.
+When hash changes, emits:
 
 ```
 data: {"type": "debug-updated", "payload": []}
 ```
-
-The frontend listens for this event and refreshes the debug entry list.
