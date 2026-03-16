@@ -1,140 +1,131 @@
 # Collectors
 
-Collectors are the primary data-gathering mechanism in ADP. Each collector is responsible for
-capturing a specific type of runtime data during application execution.
+Collectors capture specific types of runtime data during application execution.
 
 ## Collector Interface
-
-Every collector implements `CollectorInterface`:
 
 ```php
 interface CollectorInterface
 {
-    public function startup(): void;           // Called when debugger starts
-    public function shutdown(): void;          // Called when debugger stops
-    public function getCollected(): array;     // Return collected data
+    public function getName(): string;
+    public function startup(): void;
+    public function shutdown(): void;
+    public function getCollected(): array;
 }
 ```
 
-## Available Collectors
+`CollectorTrait` provides default `startup()`/`shutdown()` and `isActive()` tracking.
 
-### Core Collectors (Framework-Independent)
+`SummaryCollectorInterface` adds `getSummary(): array` for lightweight entry metadata.
 
-#### LogCollector
-- **Collects**: All PSR-3 log entries
-- **Data**: Log level, message, context, timestamp
-- **Fed by**: `LoggerInterfaceProxy`
+## Core Collectors
 
-#### EventCollector
-- **Collects**: All PSR-14 dispatched events
-- **Data**: Event class name, event object data, listener information
-- **Fed by**: `EventDispatcherInterfaceProxy`
+### LogCollector
+- Fed by: `LoggerInterfaceProxy`
+- Data: log level, message, context, timestamp
 
-#### ServiceCollector
-- **Collects**: DI container service resolutions
-- **Data**: Service ID/class, resolution time, arguments, results
-- **Fed by**: `ContainerInterfaceProxy` and `ServiceProxy`
+### EventCollector
+- Fed by: `EventDispatcherInterfaceProxy`
+- Data: event class name, event object, file, line, time
+- Configurable `earlyAcceptedEvents` via `withEarlyAcceptedEvents(array)` -- collects specified event classes even before collector is active
 
-#### ExceptionCollector
-- **Collects**: Uncaught exceptions and errors
-- **Data**: Exception class, message, stack trace, file, line
-- **Fed by**: Custom exception handler registered during startup
+### ServiceCollector
+- Fed by: `ContainerInterfaceProxy` and `ServiceProxy`
+- Data: service ID/class, resolution time, arguments, results
 
-#### HttpClientCollector
-- **Collects**: Outgoing HTTP requests made via PSR-18 client
-- **Data**: Request method, URL, headers, body, response status, response body, timing
-- **Fed by**: `HttpClientInterfaceProxy`
+### ExceptionCollector
+- Direct: `collectException(Throwable)`
+- Legacy: `collect(object)` -- checks `getThrowable()`, `getError()`, or direct `Throwable`
+- Data: exception class, message, file, line, code, stack trace
+- Walks previous exceptions chain
 
-#### VarDumperCollector
-- **Collects**: Manual `dump()` / `dd()` calls
-- **Data**: Dumped variable, call site (file, line), timestamp
-- **Fed by**: `VarDumperHandlerInterfaceProxy`
+### HttpClientCollector
+- Fed by: `HttpClientInterfaceProxy`
+- Data: request method, URL, headers, body, response status, body, timing
 
-#### TimelineCollector
-- **Collects**: Timing data for profiling
-- **Data**: Event name, start time, duration, category
+### VarDumperCollector
+- Fed by: `VarDumperHandlerInterfaceProxy`
+- Data: dumped variable, call site, timestamp
 
-#### FilesystemStreamCollector
-- **Collects**: Filesystem stream operations (fopen, fread, fwrite, etc.)
-- **Data**: Operation type, path, bytes read/written
+### TimelineCollector
+- Timing data for profiling
+- Other collectors call `$this->timelineCollector->collect($this, $id)` to record timeline entries
 
-#### HttpStreamCollector
-- **Collects**: HTTP stream wrapper operations
-- **Data**: URL, method, response data
+## Web-Specific Collectors
 
-### Web-Specific Collectors
+### RequestCollector
+- Direct: `collectRequest(ServerRequestInterface)`, `collectResponse(ResponseInterface)`
+- Legacy: `collect(object)` -- introspects `getRequest()`/`getResponse()` on event
+- Data: URL, path, query, method, isAjax, userIp, statusCode, raw request/response strings (via `GuzzleHttp\Psr7\Message`)
 
-#### RequestCollector
-- **Collects**: HTTP request and response data
-- **Data**: Method, URL, headers, body, query params, status code, response headers, response body
+### WebAppInfoCollector
+- Direct: `collectTiming(string $eventType)` with constants:
+  - `EVENT_APPLICATION_STARTUP`
+  - `EVENT_BEFORE_REQUEST`
+  - `EVENT_AFTER_REQUEST`
+  - `EVENT_AFTER_EMIT`
+- Legacy: `collect(object)` -- maps class name suffix to constant
+- Data: applicationProcessingTime, requestProcessingTime, preloadTime, memoryPeakUsage, memoryUsage
 
-#### WebAppInfoCollector
-- **Collects**: Web application metadata
-- **Data**: PHP version, memory usage, execution time, framework version
+## Console-Specific Collectors
 
-### Console-Specific Collectors
+### CommandCollector
+- Input: Symfony Console events (`ConsoleEvent`, `ConsoleErrorEvent`, `ConsoleTerminateEvent`)
+- Uses `Symfony\Component\Console\Output\BufferedOutput` and any output with `fetch()` method
+- Data: command name, input, output, exit code, arguments, options, error message
 
-#### CommandCollector
-- **Collects**: Console command execution data
-- **Data**: Command name, arguments, options, exit code, output
+### ConsoleAppInfoCollector
+- Direct: `collectTiming(string $eventType)` with constants:
+  - `EVENT_APPLICATION_STARTUP`
+  - `EVENT_APPLICATION_SHUTDOWN`
+- Legacy: `collect(object)` -- maps Symfony Console events and class name suffix
+- Data: applicationProcessingTime, requestProcessingTime, preloadTime, memoryPeakUsage, memoryUsage
 
-#### ConsoleAppInfoCollector
-- **Collects**: Console application metadata
-- **Data**: PHP version, memory usage, execution time
+## Stream Collectors
+
+### FilesystemStreamCollector / FilesystemStreamProxy
+- Filesystem stream operations (fopen, fread, fwrite, etc.)
+
+### HttpStreamCollector / HttpStreamProxy
+- HTTP stream wrapper operations
+
+## External Collectors
+
+| Collector | Package | Data |
+|-----------|---------|------|
+| `Yiisoft\Db\Debug\DatabaseCollector` | `yiisoft/db` | SQL queries, bindings, execution time |
+| `Yiisoft\Yii\Debug\Collector\Web\MiddlewareCollector` | `yiisoft/yii-debug` | PSR-15 middleware stack execution |
+| `Yiisoft\Mailer\Debug\MailerCollector` | `yiisoft/mailer` | Sent emails |
+
+The frontend has panels for these. Kernel-native implementations needed for framework-agnostic ADP.
 
 ## Creating a Custom Collector
 
 ```php
-<?php
-
-declare(strict_types=1);
-
-namespace MyApp\Debug;
-
-use AppDevPanel\Kernel\Collector\CollectorInterface;
-
-final class MyCustomCollector implements CollectorInterface
+final class MyCollector implements CollectorInterface
 {
+    use CollectorTrait;
+
     private array $data = [];
-
-    public function startup(): void
-    {
-        $this->data = [];
-    }
-
-    public function shutdown(): void
-    {
-        // Finalize data if needed
-    }
 
     public function getCollected(): array
     {
         return $this->data;
     }
 
-    // Public method called by a proxy or directly
     public function collect(string $key, mixed $value): void
     {
-        $this->data[] = [
-            'key' => $key,
-            'value' => $value,
-            'time' => microtime(true),
-        ];
+        if (!$this->isActive()) {
+            return;
+        }
+        $this->data[] = ['key' => $key, 'value' => $value, 'time' => microtime(true)];
+    }
+
+    private function reset(): void
+    {
+        $this->data = [];
     }
 }
 ```
 
-Register it in the adapter configuration to make it active.
-
-## External Collectors
-
-Some collectors are provided by framework-specific packages and are not part of ADP Kernel:
-
-| Collector | Package | Data |
-|-----------|---------|------|
-| `Yiisoft\Db\Debug\DatabaseCollector` | `yiisoft/db` | SQL queries, bindings, execution time |
-| `Yiisoft\Yii\Debug\Collector\Web\MiddlewareCollector` | `yiisoft/yii-debug` | PSR-15 middleware stack execution |
-| `Yiisoft\Mailer\Debug\MailerCollector` | `yiisoft/mailer` | Sent emails (to, from, subject, body) |
-
-The frontend (DatabasePanel, MiddlewarePanel, MailerPanel) already renders data from these collectors.
-For ADP to be fully framework-agnostic, these collectors need native Kernel implementations.
+Register in the adapter's configuration.
