@@ -1,0 +1,82 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
+
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
+
+final class Configuration implements ConfigurationInterface
+{
+    public function getConfigTreeBuilder(): TreeBuilder
+    {
+        $treeBuilder = new TreeBuilder('app_dev_panel');
+        $rootNode = $treeBuilder->getRootNode();
+
+        $rootNode
+            ->children()
+                ->booleanNode('enabled')
+                    ->defaultTrue()
+                    ->info('Enable or disable the debug panel')
+                ->end()
+                ->arrayNode('storage')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('path')
+                            ->defaultValue('%kernel.project_dir%/var/debug')
+                            ->info('Directory for debug data storage')
+                        ->end()
+                        ->integerNode('history_size')
+                            ->defaultValue(50)
+                            ->info('Maximum number of debug entries to keep')
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('collectors')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('request')->defaultTrue()->end()
+                        ->booleanNode('exception')->defaultTrue()->end()
+                        ->booleanNode('log')->defaultTrue()->end()
+                        ->booleanNode('event')->defaultTrue()->end()
+                        ->booleanNode('service')->defaultTrue()->end()
+                        ->booleanNode('http_client')->defaultTrue()->end()
+                        ->booleanNode('timeline')->defaultTrue()->end()
+                        ->booleanNode('var_dumper')->defaultTrue()->end()
+                        ->booleanNode('filesystem_stream')->defaultTrue()->end()
+                        ->booleanNode('http_stream')->defaultTrue()->end()
+                        ->booleanNode('command')->defaultTrue()->end()
+                        ->booleanNode('doctrine')->defaultTrue()->end()
+                        ->booleanNode('twig')->defaultTrue()->end()
+                        ->booleanNode('security')->defaultTrue()->end()
+                        ->booleanNode('cache')->defaultTrue()->end()
+                        ->booleanNode('mailer')->defaultTrue()->end()
+                        ->booleanNode('messenger')->defaultTrue()->end()
+                    ->end()
+                ->end()
+                ->arrayNode('ignored_requests')
+                    ->scalarPrototype()->end()
+                    ->defaultValue(['/_wdt/*', '/_profiler/*', '/debug/api/*'])
+                    ->info('URL patterns to ignore (wildcard)')
+                ->end()
+                ->arrayNode('ignored_commands')
+                    ->scalarPrototype()->end()
+                    ->defaultValue(['completion', 'help', 'list', 'debug:*'])
+                    ->info('Command name patterns to ignore (wildcard)')
+                ->end()
+                ->arrayNode('dumper')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->arrayNode('excluded_classes')
+                            ->scalarPrototype()->end()
+                            ->defaultValue([])
+                            ->info('Classes to exclude from object dumps')
+                        ->end()
+                    ->end()
+                ->end()
+            ->end();
+
+        return $treeBuilder;
+    }
+}

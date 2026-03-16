@@ -1,0 +1,59 @@
+{
+    "name": "app-dev-panel/symfony-playground",
+    "type": "project",
+    "description": "Symfony playground app demonstrating ADP integration",
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "app-dev-panel/adapter-symfony": "*",
+        "app-dev-panel/api": "*",
+        "nyholm/psr7": "^1.8",
+        "nyholm/psr7-server": "^1.1",
+        "symfony/console": "^7.0",
+        "symfony/dotenv": "^7.0",
+        "symfony/framework-bundle": "^7.0",
+        "symfony/runtime": "^7.0",
+        "symfony/yaml": "^7.0"
+    },
+    "require-dev": {
+        "symfony/maker-bundle": "^1.0"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../libs/Adapter/Symfony"
+        },
+        {
+            "type": "path",
+            "url": "../../libs/API"
+        },
+        {
+            "type": "path",
+            "url": "../../libs/Kernel"
+        },
+        {
+            "type": "path",
+            "url": "../../libs/Cli"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "scripts": {
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd"
+        },
+        "post-install-cmd": ["@auto-scripts"],
+        "post-update-cmd": ["@auto-scripts"]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "symfony/runtime": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
