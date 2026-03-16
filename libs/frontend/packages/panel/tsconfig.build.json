@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "./build",
+    "noEmit": false,
+    "declaration": true,
+    "sourceMap": true,
+    "composite": true
+  },
+  "include": ["src"],
+  "references": [
+    {"path": "../sdk/tsconfig.build.json"},
+    {"path": "../toolbar/tsconfig.build.json"}
+  ]
+}

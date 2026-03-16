@@ -19,7 +19,7 @@ cd app-dev-panel
 composer install
 
 # Frontend dependencies
-cd libs/yii-dev-panel
+cd libs/app-dev-panel
 npm install
 ```
 
@@ -30,15 +30,15 @@ npm install
 cd app
 php -S 0.0.0.0:8080 -t public
 
-# Start the frontend dev server (from libs/yii-dev-panel)
-cd libs/yii-dev-panel
+# Start the frontend dev server (from libs/app-dev-panel)
+cd libs/app-dev-panel
 npm run dev
 ```
 
 ### 3. Using Docker
 
 ```bash
-cd libs/yii-dev-panel
+cd libs/app-dev-panel
 docker-compose up
 ```
 
@@ -75,7 +75,7 @@ See `libs/Adapter/Yiisoft/` for a reference implementation.
 | `libs/API/` | REST API + SSE endpoints |
 | `libs/Cli/` | CLI commands |
 | `libs/Adapter/Yiisoft/` | Yii 3 framework adapter |
-| `libs/yii-dev-panel/` | Frontend (React SPA + toolbar + SDK) |
+| `libs/app-dev-panel/` | Frontend (React SPA + toolbar + SDK) |
 | `docs/` | Global documentation |
 
 ## Running Tests
@@ -145,5 +145,5 @@ GitHub Actions automatically runs on every PR:
 ## Frontend Tests
 
 ```bash
-cd libs/yii-dev-panel && npm test
+cd libs/app-dev-panel && npm test
 ```

@@ -8,7 +8,7 @@
         "--executable-path",
         "/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome"
       ],
-      "cwd": "/home/user/app-dev-panel/libs/yii-dev-panel"
+      "cwd": "/home/user/app-dev-panel/libs/frontend"
     }
   }
 }

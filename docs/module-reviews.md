@@ -237,12 +237,12 @@
 
 ---
 
-## 5. Frontend (yii-dev-panel) Module Review
+## 5. Frontend (app-dev-panel) Module Review
 
 ### Architecture Issues
 
 **1. Monorepo without shared type definitions**
-- Three packages (yii-dev-panel, yii-dev-panel-sdk, yii-dev-toolbar) share types informally
+- Three packages (app-dev-panel, app-dev-panel-sdk, app-dev-toolbar) share types informally
 - No shared type package or generated API types from backend
 
 **2. RTK Query API definitions are manually maintained**

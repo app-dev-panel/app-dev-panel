@@ -24,7 +24,7 @@ Before any coverage improvements, all 277 existing tests must pass.
 ### 1.2 Fix Missing Dependency Tests
 **Files**: `ConsoleAppInfoCollectorTest.php`, `CommandCollectorTest.php`
 **Problem**: `Class "Yiisoft\Yii\Console\Event\ApplicationStartup" not found` and `Class "Symfony\Contracts\EventDispatcher\Event" not found`.
-**Fix**: Add `yiisoft/yii-console` and `symfony/event-dispatcher-contracts` to `require-dev`, or mock these classes.
+**Fix**: Add `app-dev-panel/cli` and `symfony/event-dispatcher-contracts` to `require-dev`, or mock these classes.
 
 ### 1.3 Fix Container Proxy Tests
 **Files**: `ContainerInterfaceProxyTest.php`

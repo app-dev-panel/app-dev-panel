@@ -116,7 +116,7 @@ Replaces current `Layout`. Full page structure.
 </AppShell>
 ```
 
-**Location**: `packages/yii-dev-panel/src/Application/Component/AppShell.tsx`
+**Location**: `packages/app-dev-panel/src/Application/Component/AppShell.tsx`
 
 ### 2. `TopBar` — Application header
 
@@ -128,14 +128,14 @@ Replaces current `Layout`. Full page structure.
 - ThemeToggle (light/dark)
 - MoreMenu
 
-**Location**: `packages/yii-dev-panel-sdk/src/Component/Layout/TopBar.tsx`
+**Location**: `packages/app-dev-panel-sdk/src/Component/Layout/TopBar.tsx`
 
 ### 3. `RequestPill` — Debug entry summary chip
 
 Displays: `[METHOD] /path — [STATUS] — [DURATION]`
 Clickable → opens entry selector dropdown.
 
-**Location**: `packages/yii-dev-panel-sdk/src/Component/Layout/RequestPill.tsx`
+**Location**: `packages/app-dev-panel-sdk/src/Component/Layout/RequestPill.tsx`
 
 ### 4. `CollectorSidebar` — Floating navigation panel
 
@@ -146,7 +146,7 @@ Active item: accent bg + left accent bar.
 
 Items come from `debugEntry.collectors` array (dynamic, API-driven).
 
-**Location**: `packages/yii-dev-panel-sdk/src/Component/Layout/CollectorSidebar.tsx`
+**Location**: `packages/app-dev-panel-sdk/src/Component/Layout/CollectorSidebar.tsx`
 
 #### Sub-components:
 - `NavItem` — Single sidebar navigation item (icon, label, badge, active state)
@@ -156,25 +156,25 @@ Items come from `debugEntry.collectors` array (dynamic, API-driven).
 
 Floating `Paper` card, flex-grow, scrollable. Renders `<Outlet />`.
 
-**Location**: `packages/yii-dev-panel-sdk/src/Component/Layout/ContentPanel.tsx`
+**Location**: `packages/app-dev-panel-sdk/src/Component/Layout/ContentPanel.tsx`
 
 ### 6. `SectionTitle` — Content section header
 
 Uppercase, small, muted label with bottom divider. Used for "Request Headers", "Query Parameters" etc.
 
-**Location**: `packages/yii-dev-panel-sdk/src/Component/SectionTitle.tsx`
+**Location**: `packages/app-dev-panel-sdk/src/Component/SectionTitle.tsx`
 
 ### 7. `KeyValueTable` — Two-column data display
 
 Left column: muted label. Right column: monospace value. Thin row dividers.
 
-**Location**: `packages/yii-dev-panel-sdk/src/Component/KeyValueTable.tsx`
+**Location**: `packages/app-dev-panel-sdk/src/Component/KeyValueTable.tsx`
 
 ### 8. `SearchTrigger` — Search bar button
 
 Displays search icon + "Search..." + kbd shortcut hint. Opens command palette on click.
 
-**Location**: `packages/yii-dev-panel-sdk/src/Component/Layout/SearchTrigger.tsx`
+**Location**: `packages/app-dev-panel-sdk/src/Component/Layout/SearchTrigger.tsx`
 
 ## Collector → Icon Mapping
 
@@ -193,7 +193,7 @@ Displays search icon + "Search..." + kbd shortcut hint. Opens command palette on
 | MailerCollector | `mail` | Mailer |
 | FilesystemCollector | `folder` | Filesystem |
 
-Map is defined in `packages/yii-dev-panel-sdk/src/Helper/collectorMeta.ts`.
+Map is defined in `packages/app-dev-panel-sdk/src/Helper/collectorMeta.ts`.
 
 ## Reuse from Existing Codebase
 
@@ -213,7 +213,7 @@ Map is defined in `packages/yii-dev-panel-sdk/src/Helper/collectorMeta.ts`.
 
 ## Storybook Setup
 
-Install Storybook 8 in `libs/yii-dev-panel/`:
+Install Storybook 8 in `libs/app-dev-panel/`:
 ```bash
 npx storybook@latest init --type react --builder vite
 ```

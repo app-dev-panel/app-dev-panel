@@ -4,7 +4,7 @@
 
 - **0 test files** exist across all 3 frontend packages
 - **No test runner** configured (no vitest.config.ts)
-- **~100+ source files** (TSX/TS) across yii-dev-panel, yii-dev-panel-sdk, yii-dev-toolbar
+- **~100+ source files** (TSX/TS) across app-dev-panel, app-dev-panel-sdk, app-dev-toolbar
 - **9 Storybook stories** exist for layout components (SDK)
 - **Design spec** at `docs/design/SPEC.md` — Variant A "Command Center" approved
 - **Design tokens** implemented in `Theme/tokens.ts` and `Theme/DefaultTheme.tsx`
@@ -27,12 +27,12 @@
 ### Phase 1: Test Infrastructure Setup
 
 1. Install vitest + @testing-library/react + jsdom in workspace root
-2. Create `vitest.config.ts` for each package (yii-dev-panel-sdk, yii-dev-panel, yii-dev-toolbar)
+2. Create `vitest.config.ts` for each package (app-dev-panel-sdk, app-dev-panel, app-dev-toolbar)
 3. Create test setup file with MUI theme provider, Redux store mock, React Router memory wrapper
 4. Add `npm run test` script to root `package.json` (via lerna)
 5. Create test utilities: `renderWithProviders()`, mock RTK Query hooks, mock SSE
 
-### Phase 2: SDK Package Tests (`yii-dev-panel-sdk`)
+### Phase 2: SDK Package Tests (`app-dev-panel-sdk`)
 
 Priority: Pure functions and helpers first (no React rendering), then components.
 
@@ -69,7 +69,7 @@ Priority: Pure functions and helpers first (no React rendering), then components
 29. `Component/Theme/tokens.ts` — token values validation
 30. `Component/Theme/DefaultTheme.tsx` — createAdpTheme produces valid MUI theme
 
-### Phase 3: Main App Tests (`yii-dev-panel`)
+### Phase 3: Main App Tests (`app-dev-panel`)
 
 #### Debug Module
 31. `Module/Debug/Pages/Layout.tsx` — main layout orchestration: sidebar building, collector selection, entry navigation, SSE subscription
@@ -96,7 +96,7 @@ Priority: Pure functions and helpers first (no React rendering), then components
 48. `Application/Pages/NotFoundPage.tsx` — 404 page
 49. `Application/router.tsx` — route definitions
 
-### Phase 4: Toolbar Tests (`yii-dev-toolbar`)
+### Phase 4: Toolbar Tests (`app-dev-toolbar`)
 
 50. `Module/Toolbar/Pages/Toolbar.tsx` — toolbar rendering
 51. `Module/Toolbar/Component/Toolbar/DebugToolbar.tsx` — toolbar items

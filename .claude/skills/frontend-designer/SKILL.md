@@ -97,35 +97,35 @@ Add custom palette entries for HTTP methods, log levels, status codes as needed.
 6. **Redux Toolkit** for state. RTK Query for API calls.
 7. **Dynamic base URL**: Use `createBaseQuery(prefix)` from SDK.
 8. **Module system**: New pages belong to a module implementing `ModuleInterface`.
-9. **Shared components** in `yii-dev-panel-sdk/src/Component/`. Page-specific in module dir.
+9. **Shared components** in `sdk/src/Component/`. Page-specific in module dir.
 10. **Prettier**: Single quotes, trailing commas, 120 width, 4-space indent, `objectWrap: "collapse"`.
 11. **ESLint**: `@typescript-eslint/recommended` + Prettier.
-12. **Path aliases**: `@yiisoft/yii-dev-panel/*`, `@yiisoft/yii-dev-panel-sdk/*`, `@yiisoft/yii-dev-toolbar/*`.
+12. **Path aliases**: `@app-dev-panel/panel/*`, `@app-dev-panel/sdk/*`, `@app-dev-panel/toolbar/*`.
 13. **No emojis** in code or UI.
 
 ## Before Implementing
 
 1. Read the design prototype in `docs/design/prototypes/` for the target design.
 2. Read existing components in the target module — match patterns.
-3. Read `yii-dev-panel-sdk/src/Component/` — reuse before creating.
-4. Read the MUI theme in `yii-dev-panel-sdk/src/Component/Theme/DefaultTheme.tsx`.
+3. Read `sdk/src/Component/` — reuse before creating.
+4. Read the MUI theme in `sdk/src/Component/Theme/DefaultTheme.tsx`.
 5. Read `docs/design/SPEC.md` if it exists — follow the specification.
 
 ## File Placement
 
 | What | Where |
 |------|-------|
-| Design tokens & theme | `packages/yii-dev-panel-sdk/src/Component/Theme/` |
-| Shared layout components | `packages/yii-dev-panel-sdk/src/Component/Layout/` |
-| Page component | `packages/yii-dev-panel/src/Module/<Module>/Pages/` |
-| Module-specific component | `packages/yii-dev-panel/src/Module/<Module>/Component/` |
-| Shared/reusable component | `packages/yii-dev-panel-sdk/src/Component/` |
-| RTK Query API slice | `packages/yii-dev-panel-sdk/src/API/<Domain>/` |
-| Redux slice | `packages/yii-dev-panel-sdk/src/API/<Domain>/` |
-| Type definitions | `packages/yii-dev-panel-sdk/src/Types/` |
-| Helper functions | `packages/yii-dev-panel-sdk/src/Helper/` |
-| Storybook stories | `packages/yii-dev-panel/src/**/*.stories.tsx` (co-located) |
-| Storybook config | `packages/yii-dev-panel/.storybook/` |
+| Design tokens & theme | `packages/sdk/src/Component/Theme/` |
+| Shared layout components | `packages/sdk/src/Component/Layout/` |
+| Page component | `packages/panel/src/Module/<Module>/Pages/` |
+| Module-specific component | `packages/panel/src/Module/<Module>/Component/` |
+| Shared/reusable component | `packages/sdk/src/Component/` |
+| RTK Query API slice | `packages/sdk/src/API/<Domain>/` |
+| Redux slice | `packages/sdk/src/API/<Domain>/` |
+| Type definitions | `packages/sdk/src/Types/` |
+| Helper functions | `packages/sdk/src/Helper/` |
+| Storybook stories | `packages/panel/src/**/*.stories.tsx` (co-located) |
+| Storybook config | `packages/panel/.storybook/` |
 
 ## Component Patterns
 
@@ -218,9 +218,9 @@ export const MyModule: ModuleInterface = {
 
 ## After Implementing
 
-1. Run `npm run format` in `libs/yii-dev-panel/`.
-2. Run `npm run lint:fix` in `libs/yii-dev-panel/`.
-3. Run `npm run build` in `libs/yii-dev-panel/`.
+1. Run `npm run format` in `libs/frontend/`.
+2. Run `npm run lint:fix` in `libs/frontend/`.
+3. Run `npm run build` in `libs/frontend/`.
 4. If Storybook configured: `npx storybook build` to verify stories compile.
 5. Verify module registration in `modules.ts` if applicable.
 

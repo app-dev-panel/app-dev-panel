@@ -10,7 +10,7 @@ the **API** knows nothing about specific frameworks, and **Adapters** bridge the
 ┌─────────────────────────────────────────────────────────────┐
 │                        Frontend                             │
 │  ┌─────────────────┐  ┌──────────────┐  ┌───────────────┐  │
-│  │  yii-dev-panel   │  │ yii-dev-     │  │ yii-dev-panel │  │
+│  │  app-dev-panel   │  │ yii-dev-     │  │ app-dev-panel │  │
 │  │  (Main SPA)      │  │ toolbar      │  │ -sdk          │  │
 │  └────────┬─────────┘  └──────┬───────┘  └───────────────┘  │
 │           │ HTTP               │ HTTP                        │
@@ -113,7 +113,7 @@ Console commands for debug server operations:
 - `dev:broadcast` (`DebugServerBroadcastCommand`): Sends test messages via `Broadcaster`.
 - Both use `#[AsCommand]` attribute and optional PSR-3 logging.
 
-### Frontend (`libs/yii-dev-panel/`)
+### Frontend (`libs/app-dev-panel/`)
 
 React SPA that consumes the API.
 
