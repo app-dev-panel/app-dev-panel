@@ -91,7 +91,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
 
     const [openItems, setOpenItems] = React.useState(new Map());
 
-    const handleToggleChildren = (object: Object) => () => {
+    const handleToggleChildren = (object: object) => () => {
         setOpenItems((prevMap) => {
             const newMap = new Map(prevMap);
             newMap.set(object, !(prevMap.has(object) && prevMap.get(object)));

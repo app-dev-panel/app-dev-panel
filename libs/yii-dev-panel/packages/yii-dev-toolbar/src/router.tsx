@@ -15,9 +15,9 @@ export function createRouter(modules: ModuleInterface[], routerConfig: {basename
 }
 
 // from react-router
-interface DOMRouterOpts {
+type DOMRouterOpts = {
     basename?: string;
     future?: Partial<Omit<RouterFutureConfig, 'v7_prependBasename'>>;
     hydrationData?: HydrationState;
     window?: Window;
-}
+};
