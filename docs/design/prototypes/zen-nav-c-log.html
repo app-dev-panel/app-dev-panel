@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADP Zen Nav C — Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root { --bg:#FAFAFA; --card:#FFF; --hover:#F5F5F5; --text:#1A1A1A; --text2:#666; --text3:#999; --accent:#2563EB; --accent-bg:#EFF6FF; --border:#E5E5E5; --blight:#F0F0F0; --ok:#16A34A; --warn:#D97706; --err:#DC2626; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; font-size:14px; }
+  .top-bar { height:48px; background:#fff; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:16px; flex-shrink:0; }
+  .logo { font-weight:700; font-size:15px; color:var(--accent); display:flex; align-items:center; gap:6px; }
+  .logo-d { width:8px; height:8px; background:var(--accent); transform:rotate(45deg); border-radius:1px; }
+  .pill { display:flex; align-items:center; gap:8px; padding:5px 14px; border-radius:20px; border:1px solid var(--border); font-size:13px; cursor:pointer; }
+  .pill:hover { border-color:var(--accent); }
+  .spacer { flex:1; }
+  .ibtn { width:32px; height:32px; border-radius:6px; border:none; background:transparent; color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .ibtn:hover { background:var(--hover); }
+  .search-t { display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text3); cursor:pointer; font-size:13px; }
+  .search-t kbd { font-family:'JetBrains Mono',monospace; font-size:10px; background:#fff; padding:1px 5px; border-radius:3px; border:1px solid var(--border); }
+
+  .content { flex:1; overflow-y:auto; padding:24px 48px 80px; max-width:960px; margin:0 auto; width:100%; }
+
+  /* === BREADCRUMB WITH DROPDOWN === */
+  .breadcrumb-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .breadcrumb { font-size:13px; color:var(--text3); display:flex; align-items:center; gap:6px; position:relative; }
+  .breadcrumb a { color:var(--accent); text-decoration:none; }
+  .bc-dropdown-trigger {
+    display:flex; align-items:center; gap:2px; cursor:pointer; padding:2px 6px; border-radius:4px;
+    color:var(--text); font-weight:500; transition:background .1s;
+  }
+  .bc-dropdown-trigger:hover { background:var(--hover); }
+  .bc-dropdown-trigger .material-icons { font-size:16px; color:var(--text3); }
+
+  .bc-dropdown {
+    position:absolute; top:28px; left:70px; background:#fff; border:1px solid var(--border);
+    border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.12); padding:6px 0; width:260px;
+    z-index:100; animation:dropIn .15s ease-out;
+  }
+  @keyframes dropIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+
+  .dd-item {
+    display:flex; align-items:center; padding:8px 14px; gap:10px; cursor:pointer; font-size:13px;
+    color:var(--text2); transition:background .08s;
+  }
+  .dd-item:hover { background:var(--hover); }
+  .dd-item.active { background:var(--accent-bg); color:var(--accent); font-weight:500; }
+  .dd-item .material-icons { font-size:18px; }
+  .dd-badge { margin-left:auto; font-size:11px; color:var(--text3); font-weight:500; }
+  .dd-badge.err { color:var(--err); font-weight:600; }
+  .dd-shortcut {
+    margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3);
+    background:var(--bg); padding:1px 5px; border-radius:3px; border:1px solid var(--blight);
+  }
+
+  .back-link { font-size:13px; color:var(--text3); cursor:pointer; display:flex; align-items:center; gap:4px; }
+  .back-link:hover { color:var(--accent); }
+  .divider-h { border:none; border-top:1px solid var(--border); margin:12px 0; }
+
+  /* Log styles */
+  .log-header { display:flex; align-items:baseline; gap:16px; margin-bottom:8px; }
+  .log-count { font-size:16px; font-weight:600; }
+  .log-filters { display:flex; gap:8px; margin-left:auto; }
+  .filter-input {
+    padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:#fff;
+    font-size:13px; color:var(--text); outline:none; width:180px;
+  }
+  .filter-input:focus { border-color:var(--accent); }
+  .filter-select {
+    padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:#fff;
+    font-size:13px; color:var(--text); cursor:pointer;
+  }
+
+  .log-list { display:flex; flex-direction:column; }
+  .log-entry {
+    padding:12px 0; border-bottom:1px solid var(--blight); display:flex; align-items:flex-start; gap:12px;
+    cursor:pointer; transition:background .1s;
+  }
+  .log-entry:hover { background:var(--hover); margin:0 -16px; padding-left:16px; padding-right:16px; border-radius:8px; }
+  .log-entry.expanded { background:#F8F8F8; margin:0 -16px; padding:12px 16px; border-radius:8px; }
+  .log-time { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text3); white-space:nowrap; min-width:100px; padding-top:2px; }
+  .log-level {
+    font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.3px;
+    min-width:56px; padding-top:2px;
+  }
+  .log-level.error { color:var(--err); }
+  .log-level.warning { color:var(--warn); }
+  .log-level.info { color:var(--accent); }
+  .log-level.debug { color:var(--text3); }
+  .log-msg { flex:1; font-size:14px; line-height:1.5; }
+  .log-msg.error-msg { color:var(--err); }
+
+  .log-detail {
+    margin:8px 0 0 168px; padding:12px 16px; background:#fff; border-radius:8px;
+    border:1px solid var(--blight); font-size:13px;
+  }
+  .log-detail-row { display:flex; gap:12px; margin-bottom:6px; }
+  .log-detail-key { color:var(--text3); min-width:80px; font-weight:500; }
+  .log-detail-val { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text); word-break:break-all; }
+
+  /* Keyboard hint bar */
+  .kb-hint {
+    position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+    background:#171717; color:#EDEDED; padding:6px 16px; border-radius:8px;
+    font-size:12px; display:flex; align-items:center; gap:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+  }
+  .kb-hint kbd {
+    font-family:'JetBrains Mono',monospace; background:#333; padding:1px 6px; border-radius:3px;
+    border:1px solid #555; font-size:11px; min-width:20px; text-align:center;
+  }
+  .kb-hint .sep { color:#555; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo"><div class="logo-d"></div> ADP</div>
+  <div class="pill">
+    <span style="font-weight:600;color:var(--ok);font-size:11px">GET</span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px">/api/users</span>
+    <span style="color:var(--border)">&mdash;</span>
+    <span style="color:var(--ok);font-weight:500;font-size:12px">200</span>
+    <span style="color:var(--border)">&mdash;</span>
+    <span style="color:var(--text3);font-size:12px">143ms</span>
+    <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+  </div>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">chevron_left</span></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">chevron_right</span></button>
+  <span class="spacer"></span>
+  <button class="search-t"><span class="material-icons" style="font-size:16px">search</span> Search... <kbd>Ctrl+K</kbd></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">light_mode</span></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">more_vert</span></button>
+</div>
+
+<div class="content">
+  <div class="breadcrumb-row">
+    <div class="breadcrumb">
+      <a href="#">Debug</a>
+      <span style="color:var(--text3)">&rsaquo;</span>
+      <span class="bc-dropdown-trigger">
+        Log <span class="material-icons">expand_more</span>
+      </span>
+
+      <!-- DROPDOWN (shown as open state) -->
+      <div class="bc-dropdown">
+        <div class="dd-item">
+          <span class="material-icons">http</span> Request <span class="dd-shortcut">1</span>
+        </div>
+        <div class="dd-item active">
+          <span class="material-icons">description</span> Log <span class="dd-badge">12</span> <span class="dd-shortcut">2</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">storage</span> Database <span class="dd-badge">4</span> <span class="dd-shortcut">3</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">bolt</span> Events <span class="dd-badge">8</span> <span class="dd-shortcut">4</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">warning</span> Exception <span class="dd-badge err">1</span> <span class="dd-shortcut">5</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">filter_list</span> Middleware <span class="dd-badge">6</span> <span class="dd-shortcut">6</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">inventory_2</span> Service <span class="dd-badge">24</span> <span class="dd-shortcut">7</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">timeline</span> Timeline <span class="dd-shortcut">8</span>
+        </div>
+        <div class="dd-item">
+          <span class="material-icons">memory</span> Memory <span class="dd-shortcut">9</span>
+        </div>
+      </div>
+    </div>
+    <span class="back-link"><span class="material-icons" style="font-size:16px">grid_view</span> Cards view</span>
+  </div>
+
+  <hr class="divider-h">
+
+  <div class="log-header">
+    <span class="log-count">12 log messages</span>
+    <div class="log-filters">
+      <select class="filter-select">
+        <option>All levels</option>
+        <option>Error</option>
+        <option>Warning</option>
+        <option>Info</option>
+        <option>Debug</option>
+      </select>
+      <input class="filter-input" placeholder="Search logs..." type="text">
+    </div>
+  </div>
+
+  <div style="height:16px"></div>
+
+  <div class="log-list">
+    <!-- Error log expanded -->
+    <div class="log-entry expanded">
+      <span class="log-time">14:23:01.003</span>
+      <span class="log-level error">ERROR</span>
+      <div style="flex:1">
+        <div class="log-msg error-msg">Failed to fetch user avatar</div>
+        <div class="log-detail">
+          <div class="log-detail-row"><span class="log-detail-key">Category</span><span class="log-detail-val">app</span></div>
+          <div class="log-detail-row"><span class="log-detail-key">Context</span><span class="log-detail-val">{"user_id": 42, "error": "Connection timed out", "retry_count": 3}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:01.001</span>
+      <span class="log-level error">ERROR</span>
+      <span class="log-msg error-msg">PDOException: SQLSTATE[HY000] Connection refused</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.998</span>
+      <span class="log-level error">ERROR</span>
+      <span class="log-msg error-msg">Request validation failed for /api/users</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.950</span>
+      <span class="log-level warning">WARN</span>
+      <span class="log-msg">Deprecated: Method getUserName() is deprecated, use getUsername()</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.940</span>
+      <span class="log-level warning">WARN</span>
+      <span class="log-msg">Slow query detected: 45ms (threshold: 20ms)</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.930</span>
+      <span class="log-level warning">WARN</span>
+      <span class="log-msg">Cache miss for key "users:list:page1"</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.920</span>
+      <span class="log-level warning">WARN</span>
+      <span class="log-msg">Rate limit approaching: 85/100 requests</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.900</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-msg">Resolving UserController::index</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.880</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-msg">Database query: SELECT * FROM users LIMIT 25</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.870</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-msg">Cache lookup: users:list:page1</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.850</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-msg">Matched route: api/users</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.840</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-msg">Request started: GET /api/users</span>
+    </div>
+  </div>
+</div>
+
+<div class="kb-hint">
+  <kbd>1</kbd> Request <span class="sep">|</span>
+  <kbd>2</kbd> Log <span class="sep">|</span>
+  <kbd>3</kbd> DB <span class="sep">|</span>
+  <kbd>4</kbd> Events <span class="sep">|</span>
+  <kbd>5</kbd> Exception <span class="sep">|</span>
+  <kbd>Ctrl+K</kbd> Search
+</div>
+
+</body>
+</html>

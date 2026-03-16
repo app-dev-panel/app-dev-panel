@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "sourceMap": true
+  },
+  "include": ["src"],
+  "references": [
+    {"path": "../sdk/tsconfig.build.json"},
+    {"path": "../toolbar/tsconfig.build.json"}
+  ]
+}

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADP Zen Nav A — Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root { --bg:#FAFAFA; --card:#FFF; --hover:#F5F5F5; --text:#1A1A1A; --text2:#666; --text3:#999; --accent:#2563EB; --accent-bg:#EFF6FF; --border:#E5E5E5; --blight:#F0F0F0; --ok:#16A34A; --warn:#D97706; --err:#DC2626; --shadow:0 1px 3px rgba(0,0,0,.06); }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; font-size:14px; }
+  .top-bar { height:48px; background:#fff; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:16px; flex-shrink:0; }
+  .logo { font-weight:700; font-size:15px; color:var(--accent); display:flex; align-items:center; gap:6px; }
+  .logo-d { width:8px; height:8px; background:var(--accent); transform:rotate(45deg); border-radius:1px; }
+  .pill { display:flex; align-items:center; gap:8px; padding:5px 14px; border-radius:20px; border:1px solid var(--border); font-size:13px; cursor:pointer; }
+  .pill:hover { border-color:var(--accent); }
+  .spacer { flex:1; }
+  .ibtn { width:32px; height:32px; border-radius:6px; border:none; background:transparent; color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .ibtn:hover { background:var(--hover); }
+  .search-t { display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text3); cursor:pointer; font-size:13px; }
+  .search-t kbd { font-family:'JetBrains Mono',monospace; font-size:10px; background:#fff; padding:1px 5px; border-radius:3px; border:1px solid var(--border); }
+
+  .content { flex:1; overflow-y:auto; padding:24px 48px; max-width:960px; margin:0 auto; width:100%; }
+  .breadcrumb { font-size:13px; color:var(--text3); display:flex; align-items:center; gap:8px; }
+  .breadcrumb a { color:var(--accent); text-decoration:none; }
+  .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .back-link { font-size:13px; color:var(--text3); cursor:pointer; display:flex; align-items:center; gap:4px; }
+  .back-link:hover { color:var(--accent); }
+
+  /* === PILL TABS === */
+  .pill-tabs {
+    display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px; padding-bottom:16px;
+    border-bottom:1px solid var(--border);
+  }
+  .pill-tab {
+    padding:6px 14px; border-radius:20px; border:1px solid var(--border);
+    background:var(--card); font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;
+    transition:all .15s; color:var(--text2);
+  }
+  .pill-tab:hover { border-color:var(--accent); color:var(--text); background:var(--accent-bg); }
+  .pill-tab.active {
+    background:var(--accent); border-color:var(--accent); color:#fff; font-weight:500;
+  }
+  .pill-tab .badge {
+    font-size:10px; font-weight:600; padding:1px 6px; border-radius:8px;
+    background:rgba(0,0,0,.08); color:inherit;
+  }
+  .pill-tab.active .badge { background:rgba(255,255,255,.25); }
+  .pill-tab .badge.err { background:rgba(220,38,38,.12); color:var(--err); }
+  .pill-tab.active .badge.err { background:rgba(255,255,255,.25); color:#fff; }
+
+  /* === LOG CONTENT === */
+  .log-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .log-header h2 { font-size:16px; font-weight:600; }
+  .filter-select {
+    padding:5px 10px; border-radius:6px; border:1px solid var(--border); background:var(--card);
+    font-size:13px; color:var(--text2); cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .search-input {
+    padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:var(--card);
+    font-size:13px; color:var(--text); font-family:'Inter',sans-serif; flex:1; max-width:240px;
+  }
+  .search-input::placeholder { color:var(--text3); }
+
+  .log-entry {
+    border:1px solid var(--border); border-radius:8px; background:var(--card); margin-bottom:6px;
+    padding:10px 14px; cursor:pointer; transition:all .15s;
+  }
+  .log-entry:hover { border-color:var(--accent); box-shadow:var(--shadow); }
+  .log-entry-row { display:flex; align-items:center; gap:10px; }
+  .log-time { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text3); min-width:90px; }
+  .log-level {
+    font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; min-width:52px;
+    text-align:center; text-transform:uppercase; letter-spacing:.3px;
+  }
+  .log-level.error { background:rgba(220,38,38,.1); color:var(--err); }
+  .log-level.warn { background:rgba(217,119,6,.1); color:var(--warn); }
+  .log-level.info { background:rgba(37,99,235,.08); color:var(--accent); }
+  .log-level.debug { background:var(--blight); color:var(--text3); }
+  .log-message { font-size:13px; color:var(--text); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .log-entry.expanded { border-color:var(--err); }
+  .log-context {
+    margin-top:10px; padding:10px 14px; background:var(--bg); border-radius:6px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text2);
+    border-left:3px solid var(--err);
+  }
+  .log-context-label { font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; font-family:'Inter',sans-serif; }
+
+  /* Label */
+  .nav-label {
+    position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+    background:var(--accent); color:#fff; padding:8px 20px; border-radius:20px;
+    font-size:13px; font-weight:500; box-shadow:0 4px 12px rgba(37,99,235,.3);
+    display:flex; align-items:center; gap:8px;
+  }
+  .nav-label .material-icons { font-size:16px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo"><div class="logo-d"></div> ADP</div>
+  <div class="pill">
+    <span style="font-weight:600;color:var(--ok);font-size:11px">GET</span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px">/api/users</span>
+    <span style="color:var(--border)">&mdash;</span>
+    <span style="color:var(--ok);font-weight:500;font-size:12px">200</span>
+    <span style="color:var(--border)">&mdash;</span>
+    <span style="color:var(--text3);font-size:12px">143ms</span>
+    <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+  </div>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">chevron_left</span></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">chevron_right</span></button>
+  <span class="spacer"></span>
+  <button class="search-t"><span class="material-icons" style="font-size:16px">search</span> Search... <kbd>Ctrl+K</kbd></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">light_mode</span></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">more_vert</span></button>
+</div>
+
+<div class="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="#">Debug</a> <span style="color:var(--text3)">&rsaquo;</span> Log</div>
+    <span class="back-link"><span class="material-icons" style="font-size:16px">grid_view</span> Cards view</span>
+  </div>
+
+  <!-- PILL TABS -->
+  <div class="pill-tabs">
+    <div class="pill-tab">Request</div>
+    <div class="pill-tab active">Log <span class="badge">12</span></div>
+    <div class="pill-tab">Database <span class="badge">4</span></div>
+    <div class="pill-tab">Events <span class="badge">8</span></div>
+    <div class="pill-tab">Exception <span class="badge err">1</span></div>
+    <div class="pill-tab">Middleware <span class="badge">6</span></div>
+    <div class="pill-tab">Service <span class="badge">24</span></div>
+    <div class="pill-tab">Timeline</div>
+    <div class="pill-tab">Memory</div>
+  </div>
+
+  <!-- Log Header -->
+  <div class="log-header">
+    <h2>12 log messages</h2>
+    <select class="filter-select">
+      <option>All Levels</option>
+      <option>ERROR</option>
+      <option>WARN</option>
+      <option>INFO</option>
+      <option>DEBUG</option>
+    </select>
+    <input type="text" class="search-input" placeholder="Filter messages...">
+  </div>
+
+  <!-- Log Entries -->
+  <div class="log-entry expanded">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:01.003</span>
+      <span class="log-level error">ERROR</span>
+      <span class="log-message">Failed to fetch user avatar</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_less</span>
+    </div>
+    <div class="log-context">
+      <div class="log-context-label">Context</div>
+      {<br>
+      &nbsp;&nbsp;"user_id": 42,<br>
+      &nbsp;&nbsp;"error": "Connection timed out"<br>
+      }
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:01.001</span>
+      <span class="log-level error">ERROR</span>
+      <span class="log-message">PDOException: SQLSTATE[HY000] Connection refused</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:00.998</span>
+      <span class="log-level error">ERROR</span>
+      <span class="log-message">Request validation failed for /api/users</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:00.950</span>
+      <span class="log-level warn">WARN</span>
+      <span class="log-message">Deprecated: Method getUserName() is deprecated</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:00.940</span>
+      <span class="log-level warn">WARN</span>
+      <span class="log-message">Slow query detected: 45ms (threshold: 20ms)</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:00.930</span>
+      <span class="log-level warn">WARN</span>
+      <span class="log-message">Cache miss for key users:list:page1</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:00.920</span>
+      <span class="log-level warn">WARN</span>
+      <span class="log-message">Rate limit approaching: 85/100 requests</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:00.900</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-message">Resolving UserController::index</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:00.880</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-message">Database query: SELECT * FROM users LIMIT 25</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:00.870</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-message">Cache lookup: users:list:page1</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:00.850</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-message">Matched route: api/users</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+    </div>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-entry-row">
+      <span class="log-time">14:23:00.840</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-message">Request started: GET /api/users</span>
+      <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+    </div>
+  </div>
+</div>
+
+<div class="nav-label">
+  <span class="material-icons">info</span>
+  Variant A: Pill tabs — Log collector with level filtering
+</div>
+
+</body>
+</html>

@@ -43,6 +43,31 @@ final class ResponseDataWrapper implements MiddlewareInterface
             $data['success'] = false;
             $data['error'] = $exception->getMessage();
             $status = Status::NOT_FOUND;
+        } catch (\Throwable $exception) {
+            $data['success'] = false;
+            $data['error'] = $exception->getMessage();
+            $data['data'] = [
+                'class' => $exception::class,
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'trace' => array_slice(
+                    array_map(
+                        static fn(array $frame): string => sprintf(
+                            '%s%s%s() at %s:%d',
+                            $frame['class'] ?? '',
+                            $frame['type'] ?? '',
+                            $frame['function'] ?? '',
+                            $frame['file'] ?? 'unknown',
+                            $frame['line'] ?? 0,
+                        ),
+                        $exception->getTrace(),
+                    ),
+                    0,
+                    20,
+                ),
+            ];
+            $status = Status::INTERNAL_SERVER_ERROR;
         }
 
         return $this->responseFactory->createResponse($data, $status);

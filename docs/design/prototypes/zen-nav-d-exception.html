@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADP Zen Nav D — Exception</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root { --bg:#FAFAFA; --card:#FFF; --hover:#F5F5F5; --text:#1A1A1A; --text2:#666; --text3:#999; --accent:#2563EB; --accent-bg:#EFF6FF; --border:#E5E5E5; --blight:#F0F0F0; --ok:#16A34A; --warn:#D97706; --err:#DC2626; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; font-size:14px; }
+  .top-bar { height:48px; background:#fff; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:16px; flex-shrink:0; }
+  .logo { font-weight:700; font-size:15px; color:var(--accent); display:flex; align-items:center; gap:6px; }
+  .logo-d { width:8px; height:8px; background:var(--accent); transform:rotate(45deg); border-radius:1px; }
+  .pill { display:flex; align-items:center; gap:8px; padding:5px 14px; border-radius:20px; border:1px solid var(--border); font-size:13px; cursor:pointer; }
+  .pill:hover { border-color:var(--accent); }
+  .spacer { flex:1; }
+  .ibtn { width:32px; height:32px; border-radius:6px; border:none; background:transparent; color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .ibtn:hover { background:var(--hover); }
+  .search-t { display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text3); cursor:pointer; font-size:13px; }
+  .search-t kbd { font-family:'JetBrains Mono',monospace; font-size:10px; background:#fff; padding:1px 5px; border-radius:3px; border:1px solid var(--border); }
+
+  .content { flex:1; overflow-y:auto; padding:24px 48px; max-width:960px; margin:0 auto; width:100%; }
+  .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .breadcrumb { font-size:13px; color:var(--text3); }
+  .breadcrumb a { color:var(--accent); text-decoration:none; }
+  .back-link { font-size:13px; color:var(--text3); cursor:pointer; display:flex; align-items:center; gap:4px; }
+  .back-link:hover { color:var(--accent); }
+
+  /* === PILL TABS WITH KEYBOARD HINTS === */
+  .pill-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+  .pill-tab { padding:5px 12px; border-radius:20px; border:1px solid var(--border); background:var(--card); font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all .15s; color:var(--text2); position:relative; }
+  .pill-tab:hover { border-color:var(--accent); color:var(--text); background:var(--accent-bg); }
+  .pill-tab.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:500; }
+  .pill-tab .badge { font-size:10px; font-weight:600; padding:1px 6px; border-radius:8px; background:rgba(0,0,0,.06); color:inherit; }
+  .pill-tab.active .badge { background:rgba(255,255,255,.25); }
+  .pill-tab .badge.err { background:rgba(220,38,38,.12); color:var(--err); }
+  .pill-tab.active .badge.err { background:rgba(255,255,255,.25); color:#fff; }
+  .pill-tab .key-hint { font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:600; width:16px; height:16px; border-radius:4px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.06); color:var(--text3); flex-shrink:0; }
+  .pill-tab:hover .key-hint { background:rgba(37,99,235,.12); color:var(--accent); }
+  .pill-tab.active .key-hint { background:rgba(255,255,255,.2); color:#fff; }
+
+  /* === EXCEPTION STYLES === */
+  .exc-class { font-size:22px; font-weight:700; color:var(--err); margin-bottom:8px; }
+  .exc-message { font-size:16px; color:var(--text); line-height:1.5; margin-bottom:16px; padding:12px 16px; border-radius:8px; background:rgba(220,38,38,.05); border:1px solid rgba(220,38,38,.15); }
+  .exc-meta { display:flex; gap:20px; font-size:13px; color:var(--text3); margin-bottom:24px; flex-wrap:wrap; }
+  .exc-meta span { display:flex; align-items:center; gap:4px; }
+  .exc-meta .label { font-weight:500; color:var(--text2); }
+
+  .section-title { font-size:12px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; margin:20px 0 10px; }
+
+  .stack-trace { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--card); }
+  .stack-frame { display:flex; align-items:flex-start; gap:12px; padding:10px 16px; border-bottom:1px solid var(--blight); cursor:pointer; transition:background .15s; }
+  .stack-frame:last-child { border-bottom:none; }
+  .stack-frame:hover { background:var(--hover); }
+  .stack-frame.active { background:rgba(220,38,38,.04); border-left:3px solid var(--err); padding-left:13px; }
+  .frame-num { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3); font-weight:600; min-width:20px; padding-top:2px; }
+  .frame-info { flex:1; min-width:0; }
+  .frame-file { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text); word-break:break-all; }
+  .frame-file .line-num { color:var(--accent); font-weight:600; }
+  .frame-method { font-size:12px; color:var(--text2); margin-top:2px; }
+  .frame-method .class-name { color:var(--text); font-weight:500; }
+
+  .action-bar { display:flex; gap:12px; padding-top:20px; margin-top:16px; border-top:1px solid var(--border); }
+  .action-btn { padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text2); font-size:13px; cursor:pointer; font-family:'Inter',sans-serif; }
+  .action-btn:hover { background:var(--hover); color:var(--text); }
+
+  .nav-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:var(--accent); color:#fff; padding:8px 20px; border-radius:20px; font-size:13px; font-weight:500; box-shadow:0 4px 12px rgba(37,99,235,.3); display:flex; align-items:center; gap:8px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo"><div class="logo-d"></div> ADP</div>
+  <div class="pill">
+    <span style="font-weight:600;color:var(--warn);font-size:11px">POST</span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px">/api/orders</span>
+    <span style="color:var(--border)">&mdash;</span>
+    <span style="color:var(--err);font-weight:500;font-size:12px">500</span>
+    <span style="color:var(--border)">&mdash;</span>
+    <span style="color:var(--text3);font-size:12px">342ms</span>
+    <span class="material-icons" style="font-size:16px;color:var(--text3)">expand_more</span>
+  </div>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">chevron_left</span></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">chevron_right</span></button>
+  <span class="spacer"></span>
+  <button class="search-t"><span class="material-icons" style="font-size:16px">search</span> Search... <kbd>Ctrl+K</kbd></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">light_mode</span></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">more_vert</span></button>
+</div>
+
+<div class="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="#">Debug</a> <span style="color:var(--text3)">&rsaquo;</span> Exception</div>
+    <span class="back-link"><span class="material-icons" style="font-size:16px">grid_view</span> Cards view</span>
+  </div>
+
+  <!-- PILL TABS WITH KEY HINTS -->
+  <div class="pill-tabs">
+    <div class="pill-tab"><span class="key-hint">1</span> Request</div>
+    <div class="pill-tab"><span class="key-hint">2</span> Log <span class="badge">12</span></div>
+    <div class="pill-tab"><span class="key-hint">3</span> Database <span class="badge">4</span></div>
+    <div class="pill-tab"><span class="key-hint">4</span> Events <span class="badge">8</span></div>
+    <div class="pill-tab active"><span class="key-hint">5</span> Exception <span class="badge err">1</span></div>
+    <div class="pill-tab"><span class="key-hint">6</span> Middleware <span class="badge">6</span></div>
+    <div class="pill-tab"><span class="key-hint">7</span> Service <span class="badge">24</span></div>
+    <div class="pill-tab"><span class="key-hint">8</span> Timeline</div>
+    <div class="pill-tab"><span class="key-hint">9</span> Memory</div>
+  </div>
+
+  <!-- Exception Content -->
+  <div class="exc-class">RuntimeException</div>
+  <div class="exc-message">Order total exceeds maximum allowed amount</div>
+
+  <div class="exc-meta">
+    <span><span class="label">Code</span> 0</span>
+    <span><span class="label">File</span> <span style="font-family:'JetBrains Mono',monospace;font-size:12px">src/Service/OrderService.php:142</span></span>
+    <span><span class="label">Time</span> 2026-03-15 14:22:12</span>
+  </div>
+
+  <div class="section-title">Stack Trace (5 frames)</div>
+  <div class="stack-trace">
+    <div class="stack-frame active">
+      <span class="frame-num">#0</span>
+      <div class="frame-info">
+        <div class="frame-file">src/Service/OrderService.php:<span class="line-num">142</span></div>
+        <div class="frame-method"><span class="class-name">App\Service\OrderService</span>::validateTotal()</div>
+      </div>
+    </div>
+    <div class="stack-frame">
+      <span class="frame-num">#1</span>
+      <div class="frame-info">
+        <div class="frame-file">src/Service/OrderService.php:<span class="line-num">87</span></div>
+        <div class="frame-method"><span class="class-name">App\Service\OrderService</span>::createOrder()</div>
+      </div>
+    </div>
+    <div class="stack-frame">
+      <span class="frame-num">#2</span>
+      <div class="frame-info">
+        <div class="frame-file">src/Controller/OrderController.php:<span class="line-num">54</span></div>
+        <div class="frame-method"><span class="class-name">App\Controller\OrderController</span>::store()</div>
+      </div>
+    </div>
+    <div class="stack-frame">
+      <span class="frame-num">#3</span>
+      <div class="frame-info">
+        <div class="frame-file">vendor/framework/src/Router.php:<span class="line-num">218</span></div>
+        <div class="frame-method"><span class="class-name">Framework\Router</span>::dispatch()</div>
+      </div>
+    </div>
+    <div class="stack-frame">
+      <span class="frame-num">#4</span>
+      <div class="frame-info">
+        <div class="frame-file">public/index.php:<span class="line-num">12</span></div>
+        <div class="frame-method"><span class="class-name">Framework\Application</span>::run()</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="action-btn">Copy Stack Trace</button>
+    <button class="action-btn">Search Similar Issues</button>
+    <button class="action-btn">Open in IDE</button>
+  </div>
+</div>
+
+<div class="nav-label">
+  <span class="material-icons" style="font-size:16px">info</span>
+  Variant D: Pills + keyboard shortcuts (1-9) — click or press number to switch
+</div>
+
+</body>
+</html>

@@ -57,7 +57,7 @@ libs/Kernel/CLAUDE.md, libs/Kernel/docs/*.md
 libs/API/CLAUDE.md, libs/API/docs/*.md
 libs/Cli/CLAUDE.md, libs/Cli/docs/*.md
 libs/Adapter/Yiisoft/CLAUDE.md, libs/Adapter/Yiisoft/docs/*.md
-libs/yii-dev-panel/CLAUDE.md, libs/yii-dev-panel/docs/*.md
+libs/frontend/CLAUDE.md, libs/frontend/docs/*.md
 ```
 
 ## After Review

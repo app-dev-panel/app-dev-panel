@@ -1,0 +1,92 @@
+{
+  "name": "@app-dev-panel/sdk",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [
+    "debug",
+    "gii",
+    "app-dev-panel",
+    "sdk"
+  ],
+  "author": "Dmitrii Derepko <xepozzd@gmail.com> (https://github.com/xepozz)",
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/app-dev-panel/app-dev-panel",
+    "directory": "packages/sdk"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json",
+    "./*": "./dist/*"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*",
+        "./src/*",
+        "./dist/index.d.ts",
+        "./src/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "README.md",
+    "package.json"
+  ],
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@hookform/resolvers": "^3.3.4",
+    "@mui/icons-material": "^5.15.15",
+    "@mui/lab": "^5.0.0-alpha.108",
+    "@mui/material": "^5.15.15",
+    "@mui/x-data-grid": "^5.17.26",
+    "@mui/x-tree-view": "^7.1.1",
+    "@reduxjs/toolkit": "^1.9.7",
+    "@textea/json-viewer": "^3.4.1",
+    "@types/swagger-ui-react": "^4.18.3",
+    "clipboard-copy": "^4.0.1",
+    "date-fns": "^3.6.0",
+    "immupdate": "^1.3.1",
+    "mui-nested-menu": "^3.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-error-boundary": "^3.1.4",
+    "react-hook-form": "^7.51.2",
+    "react-redux": "^8.1.3",
+    "react-router": "^6.3.0",
+    "react-router-dom": "^6.22.3",
+    "react-syntax-highlighter": "^15.5.0",
+    "redux-persist": "^6.0.0",
+    "redux-state-sync": "^3.1.4",
+    "swagger-ui-react": "^5.17.14",
+    "yup": "^1.2.0"
+  },
+  "devDependencies": {
+    "@testing-library/user-event": "^14.5.2",
+    "@types/jest": "^29.5.12",
+    "@types/react": "^18.2.74",
+    "@types/react-dom": "^18.2.24",
+    "@types/react-syntax-highlighter": "^15.5.11",
+    "@types/redux-state-sync": "^3.1.10",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
+    "@typescript-eslint/parser": "^8.1.0",
+    "@welldone-software/why-did-you-render": "^8.0.3",
+    "eslint": "^9.9.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "prettier-plugin-organize-imports": "^4.0.0",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "rm -rf dist; npm run build:esm",
+    "build:esm": "tsc --build tsconfig.build.esm.json"
+  }
+}

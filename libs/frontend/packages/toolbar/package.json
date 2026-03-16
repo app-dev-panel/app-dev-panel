@@ -1,0 +1,64 @@
+{
+  "name": "@app-dev-panel/toolbar",
+  "version": "0.0.1",
+  "main": "src/index.tsx",
+  "homepage": ".",
+  "keywords": [
+    "debug",
+    "gii",
+    "app-dev-panel",
+    "toolbar"
+  ],
+  "author": "Dmitrii Derepko <xepozzd@gmail.com> (https://github.com/xepozz)",
+  "license": "BSD-3-Clause",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/app-dev-panel/app-dev-panel",
+    "directory": "packages/toolbar"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@welldone-software/why-did-you-render": "^8.0.3",
+    "@app-dev-panel/sdk": "^0.0.1",
+    "react-dev-utils": "^12.0.1",
+    "react-resizable-layout": "^0.7.2",
+    "redux-state-sync": "^3.1.4"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.74",
+    "@types/react-dom": "^18.2.24",
+    "@types/redux-state-sync": "^3.1.10",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
+    "@typescript-eslint/parser": "^8.1.0",
+    "eslint": "^9.9.0",
+    "eslint-config-prettier": "^9.1.0",
+    "gulp": "^5.0.0",
+    "gulp-concat": "^2.6.1",
+    "prettier": "^3.2.5",
+    "prettier-plugin-organize-imports": "^4.0.0",
+    "typescript": "^5.5.4",
+    "web-vitals": "^4.2.3"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "tsc --build tsconfig.build.json && VITE_ENV=${VITE_ENV:-github} vite build",
+    "test": "vite test",
+    "serve": "vite preview --host",
+    "prettier": "prettier -l src"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

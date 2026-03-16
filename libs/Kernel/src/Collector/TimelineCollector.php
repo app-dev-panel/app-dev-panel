@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
-final class TimelineCollector implements CollectorInterface
+final class TimelineCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
 
@@ -16,6 +16,18 @@ final class TimelineCollector implements CollectorInterface
             return [];
         }
         return $this->events;
+    }
+
+    public function getSummary(): array
+    {
+        if (!$this->isActive()) {
+            return [];
+        }
+        return [
+            'timeline' => [
+                'total' => count($this->events),
+            ],
+        ];
     }
 
     public function collect(CollectorInterface $collector, string|int $reference, mixed ...$data): void
