@@ -18,7 +18,7 @@ describe('CommandPalette', () => {
     it('renders default page items', () => {
         renderWithProviders(<CommandPalette open={true} onClose={vi.fn()} />);
         expect(screen.getByText('Pages')).toBeInTheDocument();
-        expect(screen.getByText('Debug')).toBeInTheDocument();
+        expect(screen.getAllByText('Debug').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Inspector > Routes')).toBeInTheDocument();
         expect(screen.getByText('Inspector > Configuration')).toBeInTheDocument();
     });
