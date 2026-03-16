@@ -15,6 +15,7 @@ const PillRoot = styled('button')(({theme}) => ({
     cursor: 'pointer',
     fontSize: '13px',
     fontFamily: theme.typography.fontFamily,
+    color: theme.palette.text.primary,
     '&:hover': {borderColor: theme.palette.primary.main},
 }));
 
@@ -43,15 +44,23 @@ const methodColor = (method: string): string => {
 
 const Separator = styled('span')(({theme}) => ({color: theme.palette.divider}));
 
+const MethodLabel = styled('span')({fontWeight: 600, fontSize: '11px'});
+
+const PathLabel = styled('span')({fontFamily: primitives.fontFamilyMono, fontSize: '12px'});
+
+const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px'});
+
+const DurationLabel = styled('span')({color: primitives.gray400, fontSize: '12px'});
+
 export const RequestPill = ({method, path, status, duration, onClick}: RequestPillProps) => {
     return (
         <PillRoot onClick={onClick}>
-            <span style={{fontWeight: 600, color: methodColor(method), fontSize: '11px'}}>{method}</span>
-            <span style={{fontFamily: primitives.fontFamilyMono, fontSize: '12px'}}>{path}</span>
+            <MethodLabel sx={{color: methodColor(method)}}>{method}</MethodLabel>
+            <PathLabel>{path}</PathLabel>
             <Separator>&mdash;</Separator>
-            <span style={{color: statusColor(status), fontWeight: 500, fontSize: '12px'}}>{status}</span>
+            <StatusLabel sx={{color: statusColor(status)}}>{status}</StatusLabel>
             <Separator>&mdash;</Separator>
-            <span style={{color: primitives.gray400, fontSize: '12px'}}>{duration}</span>
+            <DurationLabel>{duration}</DurationLabel>
             <Icon sx={{fontSize: 16, color: 'text.disabled'}}>expand_more</Icon>
         </PillRoot>
     );

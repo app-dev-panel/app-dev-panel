@@ -74,7 +74,7 @@ export const TopBar = React.memo(
                 <Logo>
                     <Diamond /> ADP
                 </Logo>
-                {method && path && status && duration && (
+                {method && path && status != null && duration && (
                     <>
                         <RequestPill
                             method={method}
