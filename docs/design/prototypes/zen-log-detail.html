@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADP Zen — Log Detail</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAFA; --bg-card: #FFFFFF; --bg-hover: #F5F5F5; --bg-expanded: #F8F8F8;
+    --text: #1A1A1A; --text-2: #666666; --text-3: #999999;
+    --accent: #2563EB; --accent-bg: #EFF6FF;
+    --border: #E5E5E5; --border-light: #F0F0F0;
+    --success: #16A34A; --warning: #D97706; --error: #DC2626; --info: #2563EB;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06); --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; font-size:14px; }
+
+  .top-bar {
+    height:48px; background:#fff; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; padding:0 20px; gap:16px; flex-shrink:0;
+  }
+  .logo { font-weight:700; font-size:15px; color:var(--accent); display:flex; align-items:center; gap:6px; }
+  .logo-d { width:8px; height:8px; background:var(--accent); transform:rotate(45deg); border-radius:1px; }
+  .pill {
+    display:flex; align-items:center; gap:8px; padding:5px 14px; border-radius:20px;
+    border:1px solid var(--border); font-size:13px; cursor:pointer;
+  }
+  .pill:hover { border-color:var(--accent); }
+  .pill-m { font-weight:600; color:var(--success); font-size:11px; letter-spacing:.5px; }
+  .pill-p { font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .pill-s { color:var(--success); font-weight:500; font-size:12px; }
+  .pill-t { color:var(--text-3); font-size:12px; }
+  .spacer { flex:1; }
+  .ibtn {
+    width:32px; height:32px; border-radius:6px; border:none; background:transparent;
+    color:var(--text-2); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .ibtn:hover { background:var(--bg-hover); color:var(--text); }
+  .search-t {
+    display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px;
+    border:1px solid var(--border); background:var(--bg); color:var(--text-3); cursor:pointer; font-size:13px;
+  }
+  .search-t:hover { border-color:var(--accent); }
+  .search-t kbd {
+    font-family:'JetBrains Mono',monospace; font-size:10px; background:#fff;
+    padding:1px 5px; border-radius:3px; border:1px solid var(--border);
+  }
+
+  .content { flex:1; overflow-y:auto; padding:32px 48px; max-width:960px; margin:0 auto; width:100%; }
+  .breadcrumb { font-size:13px; color:var(--text-3); margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+  .breadcrumb a { color:var(--accent); text-decoration:none; }
+  .breadcrumb a:hover { text-decoration:underline; }
+  .back-link { font-size:13px; color:var(--text-3); cursor:pointer; display:flex; align-items:center; gap:4px; }
+  .back-link:hover { color:var(--accent); }
+  .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+  .divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
+
+  .log-header { display:flex; align-items:baseline; gap:16px; margin-bottom:8px; }
+  .log-count { font-size:16px; font-weight:600; }
+  .log-filters { display:flex; gap:8px; margin-left:auto; }
+  .filter-input {
+    padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:#fff;
+    font-size:13px; color:var(--text); outline:none; width:180px;
+  }
+  .filter-input:focus { border-color:var(--accent); }
+  .filter-select {
+    padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:#fff;
+    font-size:13px; color:var(--text); cursor:pointer;
+  }
+
+  .log-list { display:flex; flex-direction:column; }
+  .log-entry {
+    padding:12px 0; border-bottom:1px solid var(--border-light); display:flex; align-items:flex-start; gap:12px;
+    cursor:pointer; transition:background .1s;
+  }
+  .log-entry:hover { background:var(--bg-hover); margin:0 -16px; padding-left:16px; padding-right:16px; border-radius:8px; }
+  .log-entry.expanded { background:var(--bg-expanded); margin:0 -16px; padding:12px 16px; border-radius:8px; }
+  .log-time { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-3); white-space:nowrap; min-width:100px; padding-top:2px; }
+  .log-level {
+    font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.3px;
+    min-width:56px; padding-top:2px;
+  }
+  .log-level.error { color:var(--error); }
+  .log-level.warning { color:var(--warning); }
+  .log-level.info { color:var(--info); }
+  .log-level.debug { color:var(--text-3); }
+  .log-msg { flex:1; font-size:14px; line-height:1.5; }
+  .log-msg.error-msg { color:var(--error); }
+
+  .log-detail {
+    margin:8px 0 0 168px; padding:12px 16px; background:#fff; border-radius:8px;
+    border:1px solid var(--border-light); font-size:13px;
+  }
+  .log-detail-row { display:flex; gap:12px; margin-bottom:6px; }
+  .log-detail-key { color:var(--text-3); min-width:80px; font-weight:500; }
+  .log-detail-val { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text); word-break:break-all; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo"><div class="logo-d"></div> ADP</div>
+  <div class="pill">
+    <span class="pill-m">GET</span>
+    <span class="pill-p">/api/users</span>
+    <span style="color:var(--border)">&mdash;</span>
+    <span class="pill-s">200</span>
+    <span style="color:var(--border)">&mdash;</span>
+    <span class="pill-t">143ms</span>
+    <span class="material-icons" style="font-size:16px; color:var(--text-3)">expand_more</span>
+  </div>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">chevron_left</span></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">chevron_right</span></button>
+  <span class="spacer"></span>
+  <button class="search-t"><span class="material-icons" style="font-size:16px">search</span> Search... <kbd>Ctrl+K</kbd></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">light_mode</span></button>
+  <button class="ibtn"><span class="material-icons" style="font-size:18px">more_vert</span></button>
+</div>
+
+<div class="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="#">Debug</a> <span style="color:var(--text-3)">&rsaquo;</span> Log</div>
+    <span class="back-link"><span class="material-icons" style="font-size:16px">arrow_back</span> Back to cards</span>
+  </div>
+
+  <hr class="divider">
+
+  <div class="log-header">
+    <span class="log-count">12 log messages</span>
+    <div class="log-filters">
+      <select class="filter-select">
+        <option>All levels</option>
+        <option>Error</option>
+        <option>Warning</option>
+        <option>Info</option>
+        <option>Debug</option>
+      </select>
+      <input class="filter-input" placeholder="Search logs..." type="text">
+    </div>
+  </div>
+
+  <div style="height:16px"></div>
+
+  <div class="log-list">
+    <!-- Error log expanded -->
+    <div class="log-entry expanded">
+      <span class="log-time">14:23:01.003</span>
+      <span class="log-level error">ERROR</span>
+      <div style="flex:1">
+        <div class="log-msg error-msg">Failed to fetch user avatar</div>
+        <div class="log-detail">
+          <div class="log-detail-row"><span class="log-detail-key">Category</span><span class="log-detail-val">app</span></div>
+          <div class="log-detail-row"><span class="log-detail-key">Context</span><span class="log-detail-val">{"user_id": 42, "error": "Connection timed out", "retry_count": 3}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:01.001</span>
+      <span class="log-level error">ERROR</span>
+      <span class="log-msg error-msg">PDOException: SQLSTATE[HY000] Connection refused</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.998</span>
+      <span class="log-level error">ERROR</span>
+      <span class="log-msg error-msg">Request validation failed for /api/users</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.950</span>
+      <span class="log-level warning">WARN</span>
+      <span class="log-msg">Deprecated: Method getUserName() is deprecated, use getUsername()</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.940</span>
+      <span class="log-level warning">WARN</span>
+      <span class="log-msg">Slow query detected: 45ms (threshold: 20ms)</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.930</span>
+      <span class="log-level warning">WARN</span>
+      <span class="log-msg">Cache miss for key "users:list:page1"</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.920</span>
+      <span class="log-level warning">WARN</span>
+      <span class="log-msg">Rate limit approaching: 85/100 requests</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.900</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-msg">Resolving UserController::index</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.880</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-msg">Database query: SELECT * FROM users LIMIT 25</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.870</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-msg">Cache lookup: users:list:page1</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.850</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-msg">Matched route: api/users</span>
+    </div>
+
+    <div class="log-entry">
+      <span class="log-time">14:23:00.840</span>
+      <span class="log-level info">INFO</span>
+      <span class="log-msg">Request started: GET /api/users</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

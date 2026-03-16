@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADP Zen — Embedded Toolbar</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root { --bg:#fff; --text:#1A1A1A; --text2:#666; --text3:#999; --accent:#2563EB; --border:#E5E5E5; --ok:#16A34A; --warn:#D97706; --err:#DC2626; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; font-size:14px; }
+
+  /* Fake app content */
+  .app-content { flex:1; display:flex; flex-direction:column; }
+  .app-nav { height:56px; background:#1A1A2E; display:flex; align-items:center; padding:0 24px; gap:24px; }
+  .app-nav-brand { color:#fff; font-weight:700; font-size:18px; }
+  .app-nav-link { color:rgba(255,255,255,.7); font-size:14px; cursor:pointer; }
+  .app-nav-link:hover { color:#fff; }
+  .app-body { flex:1; padding:32px; background:#F8F9FC; display:flex; gap:24px; }
+  .app-sidebar { width:240px; flex-shrink:0; }
+  .app-sidebar-item { padding:10px 16px; border-radius:8px; font-size:14px; color:var(--text2); cursor:pointer; margin-bottom:2px; }
+  .app-sidebar-item:hover { background:rgba(0,0,0,.04); }
+  .app-sidebar-item.active { background:var(--accent); color:#fff; }
+  .app-main { flex:1; }
+  .app-card { background:#fff; border-radius:12px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,.06); margin-bottom:16px; }
+  .app-card h2 { font-size:18px; margin-bottom:12px; }
+  .app-card p { color:var(--text2); line-height:1.6; }
+  .app-table { width:100%; border-collapse:collapse; margin-top:12px; }
+  .app-table th { text-align:left; padding:8px 0; color:var(--text3); font-size:12px; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--border); }
+  .app-table td { padding:8px 0; border-bottom:1px solid #F0F0F0; font-size:14px; }
+
+  /* ADP Toolbar */
+  .adp-toolbar {
+    height:28px; background:#FAFAFA; border-top:1px solid var(--border);
+    display:flex; align-items:center; padding:0 12px; gap:14px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; flex-shrink:0;
+    z-index:9999; position:relative;
+  }
+  .adp-logo { font-family:'Inter',sans-serif; font-weight:700; color:var(--accent); font-size:11px; cursor:pointer; }
+  .adp-logo:hover { text-decoration:underline; }
+  .adp-method { font-weight:600; color:var(--ok); font-size:11px; }
+  .adp-status { font-weight:500; }
+  .adp-status.ok { color:var(--ok); }
+  .adp-status.err { color:var(--err); }
+  .adp-val { color:var(--text2); }
+  .adp-val.err-count { color:var(--err); font-weight:600; }
+  .adp-spacer { flex:1; }
+  .adp-btn {
+    width:20px; height:20px; border:none; background:transparent; color:var(--text3);
+    cursor:pointer; display:flex; align-items:center; justify-content:center; border-radius:3px;
+  }
+  .adp-btn:hover { background:rgba(0,0,0,.06); color:var(--text); }
+
+  /* Tooltip */
+  .tooltip-container { position:relative; cursor:pointer; }
+  .tooltip {
+    display:none; position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+    background:#171717; color:#EDEDED; border-radius:8px; padding:12px 16px; min-width:200px;
+    box-shadow:0 4px 12px rgba(0,0,0,.2); font-size:12px; z-index:10000;
+  }
+  .tooltip::after {
+    content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+    border:5px solid transparent; border-top-color:#171717;
+  }
+  .tooltip-container:hover .tooltip { display:block; }
+  .tooltip-title { font-family:'Inter',sans-serif; font-weight:600; margin-bottom:8px; font-size:12px; }
+  .tooltip-row { display:flex; justify-content:space-between; gap:16px; padding:2px 0; }
+  .tooltip-key { color:#9E9E9E; }
+  .tooltip-val { font-weight:500; }
+
+  /* Expanded panel */
+  .adp-panel {
+    background:#FAFAFA; border-top:1px solid var(--border); padding:16px 20px;
+    flex-shrink:0; z-index:9999;
+  }
+  .adp-panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .adp-panel-title { font-size:14px; font-weight:500; }
+  .adp-panel-link { font-size:12px; color:var(--accent); cursor:pointer; text-decoration:none; }
+  .adp-panel-link:hover { text-decoration:underline; }
+  .adp-panel-cards { display:flex; gap:12px; margin-bottom:12px; }
+  .adp-mini-card {
+    flex:1; background:#fff; border-radius:8px; padding:10px 14px;
+    border:1px solid var(--border); font-size:13px;
+  }
+  .adp-mini-card .label { color:var(--text3); font-size:11px; margin-bottom:2px; }
+  .adp-mini-card .value { font-weight:600; font-family:'JetBrains Mono',monospace; font-size:14px; }
+  .adp-mini-card .sub { font-size:11px; color:var(--text3); margin-top:2px; }
+
+  .adp-panel-headers { display:grid; grid-template-columns:1fr 1fr; gap:16px; font-size:12px; }
+  .adp-panel-headers .col-title { font-weight:600; color:var(--text2); margin-bottom:6px; }
+  .adp-panel-headers .hdr { display:flex; gap:8px; padding:2px 0; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text2); }
+  .adp-panel-headers .hdr-name { color:var(--text3); min-width:120px; }
+
+  /* Error toolbar variant */
+  .adp-toolbar.error { border-left:3px solid var(--err); border-right:3px solid var(--err); }
+</style>
+</head>
+<body>
+
+<!-- Fake application -->
+<div class="app-content">
+  <div class="app-nav">
+    <span class="app-nav-brand">MyApp</span>
+    <span class="app-nav-link">Dashboard</span>
+    <span class="app-nav-link">Users</span>
+    <span class="app-nav-link">Products</span>
+    <span class="app-nav-link">Orders</span>
+  </div>
+  <div class="app-body">
+    <div class="app-sidebar">
+      <div class="app-sidebar-item active">All Users</div>
+      <div class="app-sidebar-item">Active</div>
+      <div class="app-sidebar-item">Inactive</div>
+      <div class="app-sidebar-item">Admins</div>
+    </div>
+    <div class="app-main">
+      <div class="app-card">
+        <h2>Users</h2>
+        <p>Showing 25 of 1,247 users</p>
+        <table class="app-table">
+          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Alice Johnson</td><td>alice@example.com</td><td>Admin</td><td style="color:var(--ok)">Active</td></tr>
+            <tr><td>2</td><td>Bob Smith</td><td>bob@example.com</td><td>User</td><td style="color:var(--ok)">Active</td></tr>
+            <tr><td>3</td><td>Carol Williams</td><td>carol@example.com</td><td>Moderator</td><td style="color:var(--ok)">Active</td></tr>
+            <tr><td>4</td><td>Dave Brown</td><td>dave@example.com</td><td>User</td><td style="color:var(--text3)">Inactive</td></tr>
+            <tr><td>5</td><td>Eve Davis</td><td>eve@example.com</td><td>User</td><td style="color:var(--ok)">Active</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADP Expanded Panel -->
+<div class="adp-panel">
+  <div class="adp-panel-header">
+    <span class="adp-panel-title">GET /api/users</span>
+    <a class="adp-panel-link">Open in Debug Panel &#9654;</a>
+  </div>
+  <div class="adp-panel-cards">
+    <div class="adp-mini-card"><div class="label">Status</div><div class="value" style="color:var(--ok)">200 OK</div><div class="sub">HTTP/1.1</div></div>
+    <div class="adp-mini-card"><div class="label">Duration</div><div class="value">143ms</div><div class="sub" style="display:flex;align-items:flex-end;gap:1px;height:16px;margin-top:4px"><span style="width:4px;height:20%;background:var(--accent);border-radius:1px;opacity:.4"></span><span style="width:4px;height:40%;background:var(--accent);border-radius:1px;opacity:.4"></span><span style="width:4px;height:60%;background:var(--accent);border-radius:1px;opacity:.4"></span><span style="width:4px;height:90%;background:var(--accent);border-radius:1px;opacity:.4"></span><span style="width:4px;height:100%;background:var(--accent);border-radius:1px"></span><span style="width:4px;height:70%;background:var(--accent);border-radius:1px;opacity:.4"></span><span style="width:4px;height:50%;background:var(--accent);border-radius:1px;opacity:.4"></span><span style="width:4px;height:30%;background:var(--accent);border-radius:1px;opacity:.4"></span></div></div>
+    <div class="adp-mini-card"><div class="label">Memory</div><div class="value">4.2 MB</div><div class="sub">peak memory</div></div>
+    <div class="adp-mini-card"><div class="label">Queries</div><div class="value">4</div><div class="sub">18.3ms SQL</div></div>
+    <div class="adp-mini-card"><div class="label">Logs</div><div class="value">12</div><div class="sub">3 err, 4 warn</div></div>
+  </div>
+  <div class="adp-panel-headers">
+    <div>
+      <div class="col-title">Request Headers</div>
+      <div class="hdr"><span class="hdr-name">Accept:</span> application/json</div>
+      <div class="hdr"><span class="hdr-name">Host:</span> localhost:8080</div>
+      <div class="hdr"><span class="hdr-name">Authorization:</span> Bearer eyJ...</div>
+    </div>
+    <div>
+      <div class="col-title">Response Headers</div>
+      <div class="hdr"><span class="hdr-name">Content-Type:</span> application/json</div>
+      <div class="hdr"><span class="hdr-name">X-Debug-Id:</span> abc123</div>
+      <div class="hdr"><span class="hdr-name">X-Request-Duration:</span> 143ms</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADP Toolbar -->
+<div class="adp-toolbar">
+  <span class="adp-logo" title="Open Debug Panel">&#9670; ADP</span>
+  <span class="adp-method">GET</span>
+  <span class="adp-status ok">200</span>
+
+  <span class="tooltip-container">
+    <span class="adp-val">143ms</span>
+    <div class="tooltip">
+      <div class="tooltip-title">Duration: 143ms</div>
+      <div class="tooltip-row"><span class="tooltip-key">Bootstrap</span><span class="tooltip-val">12ms</span></div>
+      <div class="tooltip-row"><span class="tooltip-key">Routing</span><span class="tooltip-val">8ms</span></div>
+      <div class="tooltip-row"><span class="tooltip-key">Middleware</span><span class="tooltip-val">23ms</span></div>
+      <div class="tooltip-row"><span class="tooltip-key">Controller</span><span class="tooltip-val">82ms</span></div>
+      <div class="tooltip-row"><span class="tooltip-key">Response</span><span class="tooltip-val">18ms</span></div>
+    </div>
+  </span>
+
+  <span class="adp-val">4.2MB</span>
+
+  <span class="tooltip-container">
+    <span class="adp-val">4q</span>
+    <div class="tooltip">
+      <div class="tooltip-title">4 Database Queries (18.3ms)</div>
+      <div class="tooltip-row"><span class="tooltip-key">SELECT...FROM users</span><span class="tooltip-val">8.2ms</span></div>
+      <div class="tooltip-row"><span class="tooltip-key">SELECT COUNT(*)</span><span class="tooltip-val">5.1ms</span></div>
+      <div class="tooltip-row"><span class="tooltip-key">SELECT...FROM roles</span><span class="tooltip-val">3.5ms</span></div>
+      <div class="tooltip-row"><span class="tooltip-key">SELECT...FROM cache</span><span class="tooltip-val">1.5ms</span></div>
+    </div>
+  </span>
+
+  <span class="adp-val">12 log</span>
+  <span class="adp-val err-count">1 err</span>
+
+  <span class="adp-spacer"></span>
+  <button class="adp-btn" title="Collapse"><span class="material-icons" style="font-size:14px">expand_more</span></button>
+  <button class="adp-btn" title="Close"><span class="material-icons" style="font-size:14px">close</span></button>
+</div>
+
+</body>
+</html>
