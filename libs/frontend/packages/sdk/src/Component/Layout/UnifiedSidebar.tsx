@@ -34,9 +34,6 @@ const SidebarRoot = styled(Paper)(({theme}) => ({
     flexShrink: 0,
     alignSelf: 'flex-start',
     overflowY: 'auto',
-    position: 'sticky',
-    top: componentTokens.topBar.height + componentTokens.mainGap,
-    maxHeight: `calc(100vh - ${componentTokens.topBar.height + componentTokens.mainGap * 2}px)`,
 }));
 
 const ChildList = styled('div')(({theme}) => ({
