@@ -11,12 +11,13 @@ type TopBarProps = {
     status?: number;
     duration?: string;
     mode?: PaletteMode;
+    autoRefresh?: boolean;
     onPrevEntry?: () => void;
     onNextEntry?: () => void;
     onEntryClick?: (e: React.MouseEvent) => void;
     onSearchClick?: () => void;
     onThemeToggle?: () => void;
-    onMoreClick?: (e: React.MouseEvent) => void;
+    onAutoRefreshToggle?: () => void;
 };
 
 const BarRoot = styled('header')(({theme}) => ({
@@ -59,12 +60,13 @@ export const TopBar = React.memo(
         status,
         duration,
         mode,
+        autoRefresh,
         onPrevEntry,
         onNextEntry,
         onEntryClick,
         onSearchClick,
         onThemeToggle,
-        onMoreClick,
+        onAutoRefreshToggle,
     }: TopBarProps) => {
         const theme = useTheme();
         const resolvedMode = mode ?? theme.palette.mode;
@@ -93,11 +95,17 @@ export const TopBar = React.memo(
                 )}
                 <Spacer />
                 <SearchTrigger onClick={onSearchClick} />
+                <IconButton
+                    size="small"
+                    onClick={onAutoRefreshToggle}
+                    title={autoRefresh ? 'Auto-refresh on' : 'Auto-refresh off'}
+                >
+                    <Icon sx={{fontSize: 18, color: autoRefresh ? 'success.main' : undefined}}>
+                        {autoRefresh ? 'sync' : 'sync_disabled'}
+                    </Icon>
+                </IconButton>
                 <IconButton size="small" onClick={onThemeToggle}>
                     <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
-                </IconButton>
-                <IconButton size="small" onClick={(e) => onMoreClick?.(e)}>
-                    <Icon sx={{fontSize: 18}}>more_vert</Icon>
                 </IconButton>
             </BarRoot>
         );

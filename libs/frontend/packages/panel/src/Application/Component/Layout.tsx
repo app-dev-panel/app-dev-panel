@@ -1,5 +1,5 @@
 import {NotificationSnackbar} from '@app-dev-panel/panel/Application/Component/NotificationSnackbar';
-import {useDoRequestMutation, usePostCurlBuildMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+
 import {useSelector} from '@app-dev-panel/panel/store';
 import {changeAutoLatest, changeThemeMode} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
@@ -17,11 +17,9 @@ import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
 import {isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
-import {Icon, Menu, MenuItem} from '@mui/material';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import {styled} from '@mui/material/styles';
-import clipboardCopy from 'clipboard-copy';
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
@@ -172,13 +170,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         dispatch(changeThemeMode(next as 'light' | 'dark'));
     }, [dispatch, currentMode]);
 
-    // More menu
-    const [moreMenuAnchor, setMoreMenuAnchor] = useState<HTMLElement | null>(null);
-    const handleMoreClick = useCallback((e?: React.MouseEvent) => {
-        const target = (e?.currentTarget as HTMLElement) ?? null;
-        setMoreMenuAnchor((prev) => (prev ? null : target));
-    }, []);
-
     // Command palette
     const [paletteOpen, setPaletteOpen] = useState(false);
     const handleSearchClick = useCallback(() => setPaletteOpen(true), []);
@@ -194,30 +185,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         document.addEventListener('keydown', handler);
         return () => document.removeEventListener('keydown', handler);
     }, []);
-
-    // Actions
-    const [doRequest] = useDoRequestMutation();
-    const [postCurlBuildInfo] = usePostCurlBuildMutation();
-
-    const repeatRequestHandler = useCallback(async () => {
-        if (!debugEntry) return;
-        try {
-            await doRequest({id: debugEntry.id});
-        } catch (e) {
-            console.error(e);
-        }
-        getDebugQuery();
-    }, [debugEntry, doRequest, getDebugQuery]);
-
-    const copyCurlHandler = useCallback(async () => {
-        if (!debugEntry) return;
-        const result = await postCurlBuildInfo(debugEntry.id);
-        if ('error' in result) {
-            console.error(result.error);
-            return;
-        }
-        clipboardCopy(result.data.command);
-    }, [debugEntry, postCurlBuildInfo]);
 
     const autoLatestHandler = useCallback(() => {
         setAutoLatest((prev) => {
@@ -327,12 +294,13 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     path={topBarPath}
                     status={topBarStatus}
                     duration={topBarDuration}
+                    autoRefresh={autoLatest}
                     onPrevEntry={handlePrevEntry}
                     onNextEntry={handleNextEntry}
                     onEntryClick={handleEntryClick}
                     onSearchClick={handleSearchClick}
                     onThemeToggle={handleThemeToggle}
-                    onMoreClick={handleMoreClick}
+                    onAutoRefreshToggle={autoLatestHandler}
                 />
                 <EntrySelector
                     anchorEl={entrySelectorAnchor}
@@ -342,44 +310,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     currentEntryId={debugEntry?.id}
                     onSelect={changeEntry}
                 />
-                <Menu
-                    anchorEl={moreMenuAnchor}
-                    open={Boolean(moreMenuAnchor)}
-                    onClose={() => setMoreMenuAnchor(null)}
-                    slotProps={{paper: {sx: {minWidth: 200, mt: 0.5}}}}
-                >
-                    <MenuItem
-                        onClick={() => {
-                            repeatRequestHandler();
-                            setMoreMenuAnchor(null);
-                        }}
-                        disabled={!debugEntry || !isDebugEntryAboutWeb(debugEntry)}
-                    >
-                        <Icon sx={{fontSize: 18, mr: 1.5, color: 'text.secondary'}}>replay</Icon>
-                        Repeat Request
-                    </MenuItem>
-                    <MenuItem
-                        onClick={() => {
-                            copyCurlHandler();
-                            setMoreMenuAnchor(null);
-                        }}
-                        disabled={!debugEntry}
-                    >
-                        <Icon sx={{fontSize: 18, mr: 1.5, color: 'text.secondary'}}>content_copy</Icon>
-                        Copy as cURL
-                    </MenuItem>
-                    <MenuItem
-                        onClick={() => {
-                            autoLatestHandler();
-                            setMoreMenuAnchor(null);
-                        }}
-                    >
-                        <Icon sx={{fontSize: 18, mr: 1.5, color: autoLatest ? 'success.main' : 'text.secondary'}}>
-                            {autoLatest ? 'sync' : 'sync_disabled'}
-                        </Icon>
-                        {autoLatest ? 'Auto-refresh On' : 'Auto-refresh Off'}
-                    </MenuItem>
-                </Menu>
 
                 <MainArea>
                     <MainInner>
