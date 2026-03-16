@@ -55,12 +55,12 @@ const MailRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expan
     }),
 );
 
-const IndexBadge = styled(Box)(() => ({
+const IndexBadge = styled(Box)(({theme}) => ({
     width: 24,
     height: 24,
     borderRadius: '50%',
-    backgroundColor: primitives.blue500,
-    color: '#fff',
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.common.white,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

@@ -163,8 +163,8 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                                     fontSize: '10px',
                                     height: 20,
                                     minWidth: 50,
-                                    backgroundColor: primitives.blue500,
-                                    color: '#fff',
+                                    backgroundColor: 'primary.main',
+                                    color: 'common.white',
                                     borderRadius: 1,
                                 }}
                             />

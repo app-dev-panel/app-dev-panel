@@ -128,7 +128,7 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
                                     height: 18,
                                     minWidth: 50,
                                     backgroundColor: 'primary.main',
-                                    color: '#fff',
+                                    color: 'common.white',
                                     borderRadius: 1,
                                     flexShrink: 0,
                                     mt: '2px',

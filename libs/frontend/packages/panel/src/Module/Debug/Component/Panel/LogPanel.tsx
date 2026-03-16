@@ -108,7 +108,7 @@ export const LogPanel = ({data}: LogPanelProps) => {
                                     height: 20,
                                     minWidth: 60,
                                     backgroundColor: color,
-                                    color: '#fff',
+                                    color: 'common.white',
                                     borderRadius: 1,
                                 }}
                             />

@@ -195,7 +195,7 @@ const AllView = ({rows}: {rows: AllRow[]}) => {
                                     height: 20,
                                     minWidth: 40,
                                     backgroundColor: isError ? 'error.main' : 'success.main',
-                                    color: '#fff',
+                                    color: 'common.white',
                                     borderRadius: 1,
                                     flexShrink: 0,
                                 }}

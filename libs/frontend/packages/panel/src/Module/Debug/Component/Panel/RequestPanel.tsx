@@ -352,7 +352,7 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
                         fontSize: '11px',
                         height: 22,
                         backgroundColor: methodColor(data.requestMethod, theme),
-                        color: '#fff',
+                        color: theme.palette.common.white,
                         borderRadius: 1,
                     }}
                 />
@@ -369,7 +369,7 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
                         fontSize: '11px',
                         height: 22,
                         backgroundColor: statusColor(data.responseStatusCode, theme),
-                        color: '#fff',
+                        color: theme.palette.common.white,
                         borderRadius: 1,
                     }}
                 />

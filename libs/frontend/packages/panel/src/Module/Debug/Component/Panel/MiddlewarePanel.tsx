@@ -6,7 +6,7 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
 import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import {useState} from 'react';
 
 type MiddlewareType = {memory: number; name: string; time: number};
@@ -21,10 +21,10 @@ type MiddlewarePanelProps = {
 
 type Phase = 'before' | 'handler' | 'after';
 
-const phaseConfig: Record<Phase, {label: string; color: string}> = {
-    before: {label: 'BEFORE', color: primitives.blue500},
-    handler: {label: 'HANDLER', color: primitives.green600},
-    after: {label: 'AFTER', color: primitives.amber600},
+const phaseConfig: Record<Phase, {label: string; paletteKey: 'primary' | 'success' | 'warning'}> = {
+    before: {label: 'BEFORE', paletteKey: 'primary'},
+    handler: {label: 'HANDLER', paletteKey: 'success'},
+    after: {label: 'AFTER', paletteKey: 'warning'},
 };
 
 const MiddlewareRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
@@ -64,6 +64,7 @@ export const MiddlewarePanel = (props: MiddlewarePanelProps) => {
     const {beforeStack, afterStack, actionHandler} = props;
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
     const debugEntry = useDebugEntry();
+    const theme = useTheme();
 
     const rows: RowData[] = [];
 
@@ -117,8 +118,8 @@ export const MiddlewarePanel = (props: MiddlewarePanelProps) => {
                                     fontSize: '10px',
                                     height: 20,
                                     minWidth: 55,
-                                    backgroundColor: config.color,
-                                    color: '#fff',
+                                    backgroundColor: theme.palette[config.paletteKey].main,
+                                    color: theme.palette.common.white,
                                     borderRadius: 1,
                                 }}
                             />

@@ -38,7 +38,7 @@ const IndexBadge = styled(Box)(({theme}) => ({
     height: 24,
     borderRadius: '50%',
     backgroundColor: theme.palette.error.main,
-    color: '#fff',
+    color: theme.palette.common.white,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

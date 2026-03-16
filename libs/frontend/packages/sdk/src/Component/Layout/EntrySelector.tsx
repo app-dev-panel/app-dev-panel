@@ -212,7 +212,7 @@ const ToolbarButton = styled('button', {shouldForwardProp: (p) => p !== 'active'
         cursor: 'pointer',
         fontSize: '12px',
         fontWeight: 600,
-        color: active ? '#fff' : theme.palette.text.secondary,
+        color: active ? theme.palette.common.white : theme.palette.text.secondary,
         padding: theme.spacing(0.75, 1.5),
         borderRadius: theme.shape.borderRadius / 2,
         whiteSpace: 'nowrap',
@@ -221,7 +221,7 @@ const ToolbarButton = styled('button', {shouldForwardProp: (p) => p !== 'active'
         gap: theme.spacing(0.5),
         '&:hover': {
             backgroundColor: active ? theme.palette.primary.dark : theme.palette.action.hover,
-            color: active ? '#fff' : theme.palette.text.primary,
+            color: active ? theme.palette.common.white : theme.palette.text.primary,
         },
     }),
 );
