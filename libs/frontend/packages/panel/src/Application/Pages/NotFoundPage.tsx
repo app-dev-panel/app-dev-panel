@@ -1,14 +1,11 @@
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
-import {YiiIcon} from '@app-dev-panel/sdk/Component/SvgIcon/YiiIcon';
-import {Link, Typography} from '@mui/material';
+import {Icon, Link, Typography} from '@mui/material';
 import {useLocation, useMatches, useNavigate} from 'react-router-dom';
 
 export const NotFoundPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const matches = useMatches();
-    console.log('location', location);
-    console.log('matches', matches);
 
     return (
         <InfoBox
@@ -23,7 +20,7 @@ export const NotFoundPage = () => {
                     </Typography>
                 </>
             }
-            icon={<YiiIcon monochromeColor={'#e65151'} />}
+            icon={<Icon sx={{fontSize: 80, color: 'error.main'}}>search_off</Icon>}
             severity={'error'}
         />
     );

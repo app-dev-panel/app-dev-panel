@@ -2,6 +2,7 @@ import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/Breadcrum
 import {useGetTableQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Button, Typography} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {useEffect, useState} from 'react';
@@ -71,7 +72,7 @@ export const DatabasePage = () => {
     }
     return (
         <>
-            <h2>Database</h2>
+            <PageHeader title="Database" icon="storage" description="Browse database tables and records" />
             <DataTable
                 rows={tables as GridValidRowModel[]}
                 getRowId={(row) => row.name}

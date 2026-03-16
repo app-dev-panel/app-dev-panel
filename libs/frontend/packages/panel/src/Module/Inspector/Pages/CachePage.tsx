@@ -6,6 +6,7 @@ import {
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {FilterInput} from '@app-dev-panel/sdk/Component/Form/FilterInput';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Button, CircularProgress, LinearProgress, Stack} from '@mui/material';
 import {useCallback} from 'react';
 import {useSearchParams} from 'react-router-dom';
@@ -40,7 +41,7 @@ export const CachePage = () => {
 
     return (
         <>
-            <h2>{'Cache'}</h2>
+            <PageHeader title="Cache" icon="cached" description="View and manage application cache" />
             <Stack direction="row" justifyContent="space-between">
                 <FilterInput value={searchString} onChange={onChangeHandler} />
                 <Button

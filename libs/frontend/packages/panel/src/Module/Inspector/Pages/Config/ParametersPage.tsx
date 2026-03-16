@@ -4,7 +4,9 @@ import {FilterInput} from '@app-dev-panel/sdk/Component/Form/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
+import {Box} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {useCallback, useMemo} from 'react';
 import {useSearchParams} from 'react-router-dom';
@@ -49,10 +51,11 @@ export const ParametersPage = () => {
 
     return (
         <>
+            <PageHeader title="Parameters" icon="tune" description="Application configuration parameters" />
             <FilterInput value={searchString} onChange={onChangeHandler} />
-            <div style={{width: '100%'}}>
+            <Box sx={{width: '100%'}}>
                 <DataTable rows={filteredRows as GridValidRowModel[]} getRowId={(row) => row[0]} columns={columns} />
-            </div>
+            </Box>
         </>
     );
 };

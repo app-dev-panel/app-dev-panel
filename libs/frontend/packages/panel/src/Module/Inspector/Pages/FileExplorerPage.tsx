@@ -7,6 +7,7 @@ import {
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {TreeView} from '@app-dev-panel/panel/Module/Inspector/Component/TreeView/TreeView';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {parseFilePath, parsePathLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {scrollToAnchor} from '@app-dev-panel/sdk/Helper/scrollToAnchor';
@@ -122,7 +123,7 @@ export const FileExplorerPage = () => {
         <>
             {file && (
                 <>
-                    <h2>
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 2}}>
                         <Button
                             onClick={() => {
                                 setFile(null);
@@ -131,8 +132,8 @@ export const FileExplorerPage = () => {
                         >
                             <Undo /> Back
                         </Button>
-                        {file.path}
-                    </h2>
+                        <PageHeader title={file.path} icon="description" />
+                    </Box>
                     <CodeHighlight
                         language={file.extension}
                         code={file.content}

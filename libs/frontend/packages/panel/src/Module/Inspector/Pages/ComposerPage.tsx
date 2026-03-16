@@ -2,9 +2,7 @@ import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/Breadcrum
 import {useGetComposerQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {SwitchDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Composer/SwitchDialog';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
-import {Button, Divider, List, ListItem, ListItemSecondaryAction, Tab, Tabs} from '@mui/material';
-import Box from '@mui/material/Box';
-import ListItemText from '@mui/material/ListItemText';
+import {Box, Button, Divider, List, ListItem, ListItemSecondaryAction, ListItemText, Tab, Tabs} from '@mui/material';
 import * as React from 'react';
 import {SyntheticEvent, useMemo, useState} from 'react';
 

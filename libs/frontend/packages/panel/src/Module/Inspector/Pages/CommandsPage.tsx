@@ -6,9 +6,9 @@ import {
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {ResultDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Command/ResultDialog';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {EmojiObjects} from '@mui/icons-material';
-import {Button, CircularProgress, Link, Typography} from '@mui/material';
-import Box from '@mui/material/Box';
+import {Box, Button, CircularProgress, Link, Typography} from '@mui/material';
 import {useEffect, useState} from 'react';
 
 type GroupedCommands = Record<string, CommandType[]>;
@@ -61,7 +61,7 @@ export const CommandsPage = () => {
                     <>
                         <Typography>
                             Add a command to the "app-dev-panel/api" section into "params.php" on the backend to be able
-                            to run the command from the Yii Dev Panel.
+                            to run the command from ADP.
                         </Typography>
                         <Typography>
                             You may inspect the section with{' '}
@@ -85,12 +85,14 @@ export const CommandsPage = () => {
     console.log(runCommandQueryInfo.data?.result);
     return (
         <>
+            <PageHeader title="Commands" icon="terminal" description="Run application commands" />
             {commandEntries.map(([groupName, commands], index) => (
                 <Box key={index}>
-                    <h2>{groupName}</h2>
+                    <Typography sx={{fontWeight: 600, fontSize: '16px', mb: 1.5, mt: 2}}>{groupName}</Typography>
                     {commands.map((command, index) => (
                         <Button
                             key={index}
+                            variant="outlined"
                             onClick={() => runCommand(command)}
                             disabled={commandStatus[command.name].isLoading}
                             endIcon={

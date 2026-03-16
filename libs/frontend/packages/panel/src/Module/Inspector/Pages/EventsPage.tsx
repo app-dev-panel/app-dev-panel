@@ -6,12 +6,12 @@ import {
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {OpenInNew} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Button, IconButton, List, ListItem, Tab, Tooltip, Typography} from '@mui/material';
-import Box from '@mui/material/Box';
+import {Box, Button, IconButton, List, ListItem, Tab, Tooltip, Typography} from '@mui/material';
 import React, {SyntheticEvent, useEffect, useState} from 'react';
 
 type EventListenersProps = {eventListeners: EventListenersType};
@@ -92,6 +92,7 @@ export const EventsPage = () => {
 
     return (
         <>
+            <PageHeader title="Events" icon="bolt" description="View registered event listeners" />
             {!events && <NoEventListenersFound />}
             {events && (
                 <TabContext value={tabValue}>

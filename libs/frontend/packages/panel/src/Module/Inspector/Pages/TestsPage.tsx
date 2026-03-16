@@ -2,12 +2,12 @@ import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/Breadcrum
 import {useRunCommandMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {Check, ContentCopy, Error, FilePresent} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import {Button, CircularProgress, IconButton, styled, Tooltip} from '@mui/material';
-import Box from '@mui/material/Box';
+import {Box, Button, CircularProgress, IconButton, styled, Tooltip} from '@mui/material';
 import {GridColDef, GridColumns, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useState} from 'react';
@@ -111,7 +111,7 @@ export const TestsPage = () => {
 
     return (
         <>
-            <h2>{'Tests'}</h2>
+            <PageHeader title="Tests" icon="science" description="Run and inspect test results" />
             <Box display="flex" alignItems="center">
                 <Button
                     onClick={runCodeceptionHandler}

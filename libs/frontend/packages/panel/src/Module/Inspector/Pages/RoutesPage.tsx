@@ -3,11 +3,12 @@ import {useGetRoutesQuery, useLazyGetCheckRouteQuery} from '@app-dev-panel/panel
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {concatClassMethod} from '@app-dev-panel/sdk/Helper/classMethodConcater';
 import {ContentCopy, OpenInNew} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
-import {Alert, AlertTitle, FormHelperText, IconButton, InputBase, Paper, Tooltip, Typography} from '@mui/material';
+import {Alert, AlertTitle, Box, FormHelperText, IconButton, InputBase, Paper, Tooltip, Typography} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import clipboardCopy from 'clipboard-copy';
 import {useEffect, useState} from 'react';
@@ -62,7 +63,7 @@ const columns: GridColDef[] = [
             const methodName = value[1] as string;
 
             return (
-                <div style={{wordBreak: 'break-all'}}>
+                <Box sx={{wordBreak: 'break-all'}}>
                     <Tooltip title="Copy">
                         <IconButton
                             size="small"
@@ -80,7 +81,7 @@ const columns: GridColDef[] = [
                     <Typography component="span" sx={{wordBreak: 'break-word'}}>
                         {concatClassMethod(className.split('\\').pop() as string, methodName)}
                     </Typography>
-                </div>
+                </Box>
             );
         },
     },
@@ -163,7 +164,7 @@ export const RoutesPage = () => {
 
     return (
         <>
-            <h2>{'Check route'}</h2>
+            <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
             <Paper
                 component="form"
                 onSubmit={onSubmitHandler}
@@ -194,7 +195,6 @@ export const RoutesPage = () => {
                     )}
                 </Alert>
             )}
-            <h2>{'Routes'}</h2>
             <DataTable rows={routes as GridValidRowModel[]} getRowId={(row) => row.id} columns={columns} />
         </>
     );

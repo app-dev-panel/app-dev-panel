@@ -6,10 +6,19 @@ import {
 } from '@app-dev-panel/panel/Module/Inspector/API/GitApi';
 import {CheckoutDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Git/CheckoutDialog';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {GetApp, Refresh, Sync} from '@mui/icons-material';
-import {Button, CircularProgress, Divider, List, ListItem, ListItemSecondaryAction, ListItemText} from '@mui/material';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Divider,
+    List,
+    ListItem,
+    ListItemSecondaryAction,
+    ListItemText,
+    Typography,
+} from '@mui/material';
 import * as React from 'react';
 import {useCallback} from 'react';
 
@@ -34,7 +43,7 @@ export const GitPage = () => {
 
     return (
         <>
-            <h2>{'Git'}</h2>
+            <PageHeader title="Git" icon="code" description="Repository status and operations" />
             {getSummaryQuery.isSuccess && (
                 <>
                     <Box>

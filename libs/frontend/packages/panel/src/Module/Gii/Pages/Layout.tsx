@@ -6,6 +6,7 @@ import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {LinkProps, MenuPanel} from '@app-dev-panel/sdk/Component/MenuPanel';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {HelpOutline} from '@mui/icons-material';
 import InboxIcon from '@mui/icons-material/Inbox';
 import MailIcon from '@mui/icons-material/Mail';
@@ -45,6 +46,7 @@ const Layout = () => {
 
     return (
         <>
+            <PageHeader title="Code Generator" icon="build_circle" description="Generate code from templates" />
             {links.length === 0 ? (
                 <InfoBox
                     title="Gii generators are empty"
@@ -83,6 +85,5 @@ const Layout = () => {
         </>
     );
 };
-Layout.whyDidYouRender = true;
 
 export {Layout};

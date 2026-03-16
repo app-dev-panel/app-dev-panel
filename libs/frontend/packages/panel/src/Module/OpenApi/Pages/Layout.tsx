@@ -2,6 +2,7 @@ import {SettingsDialog} from '@app-dev-panel/panel/Module/OpenApi/Component/Sett
 import {useOpenApiEntries} from '@app-dev-panel/panel/Module/OpenApi/Context/Context';
 import '@app-dev-panel/panel/Module/OpenApi/Pages/dark.css';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {EmojiObjects, Settings} from '@mui/icons-material';
 import {TabContext} from '@mui/lab';
 import {IconButton, Stack, Tab, Tabs, Typography} from '@mui/material';
@@ -40,6 +41,7 @@ export const Layout = () => {
 
     return (
         <>
+            <PageHeader title="Open API" icon="data_object" description="API documentation viewer" />
             <TabContext value={tab}>
                 <Stack>
                     <Stack direction="row" justifyContent="space-between">

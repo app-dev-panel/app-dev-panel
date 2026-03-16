@@ -1,9 +1,8 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useCommandMutation, useGetLogQuery} from '@app-dev-panel/panel/Module/Inspector/API/GitApi';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {GetApp, Refresh, Sync} from '@mui/icons-material';
-import {Button, CircularProgress, Divider, List, ListItem, ListItemText} from '@mui/material';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import {Box, Button, CircularProgress, Divider, List, ListItem, ListItemText, Typography} from '@mui/material';
 import {useCallback} from 'react';
 
 export const GitLogPage = () => {
@@ -18,7 +17,7 @@ export const GitLogPage = () => {
 
     return (
         <>
-            <h2>{'Git log'}</h2>
+            <PageHeader title="Git Log" icon="history" description="Commit history and branch operations" />
             {getLogQuery.isSuccess && (
                 <>
                     <Box>

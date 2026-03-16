@@ -1,6 +1,7 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useRunCommandMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {Check, ContentCopy, Error, FilePresent} from '@mui/icons-material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -8,14 +9,14 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
+    Box,
     Button,
     CircularProgress,
     IconButton,
     Link,
     Tooltip,
+    Typography,
 } from '@mui/material';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import {GridColDef, GridColumns, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import clipboardCopy from 'clipboard-copy';
 import * as React from 'react';
@@ -137,7 +138,7 @@ export const AnalysePage = () => {
 
     return (
         <>
-            <h2>{'Psalm'}</h2>
+            <PageHeader title="Psalm" icon="analytics" description="Static analysis results" />
             <Box display="flex" alignItems="center">
                 <Button
                     onClick={runPsalmHandler}

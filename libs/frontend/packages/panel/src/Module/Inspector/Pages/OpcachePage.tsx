@@ -1,8 +1,7 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetOpcacheQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
-import {Tab, Tabs} from '@mui/material';
-import Box from '@mui/material/Box';
+import {Box, Tab, Tabs} from '@mui/material';
 import * as React from 'react';
 import {SyntheticEvent, useEffect, useState} from 'react';
 

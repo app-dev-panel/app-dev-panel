@@ -2,6 +2,7 @@ import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/Breadcrum
 import {useGetTableQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {useCallback, useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
@@ -49,7 +50,7 @@ export const TablePage = () => {
 
     return (
         <>
-            <h2>Tables</h2>
+            <PageHeader title="Tables" icon="table_chart" description="Database table viewer" />
             <DataTable rows={records as GridValidRowModel[]} getRowId={getRowIdCallback} columns={columns} />
         </>
     );

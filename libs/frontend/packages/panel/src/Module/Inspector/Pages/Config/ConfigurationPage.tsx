@@ -4,8 +4,7 @@ import * as Pages from '@app-dev-panel/panel/Module/Inspector/Pages';
 import {ContainerPage} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/ContainerPage';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Tab} from '@mui/material';
-import Box from '@mui/material/Box';
+import {Box, Tab} from '@mui/material';
 import {SyntheticEvent, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 
