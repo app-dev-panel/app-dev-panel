@@ -36,6 +36,9 @@ const defaultMeta: CollectorMeta = {label: 'Unknown', icon: 'extension', weight:
  * Falls back to parsing the short class name if no explicit mapping exists.
  */
 export const getCollectorMeta = (collectorClass: string): CollectorMeta => {
+    if (typeof collectorClass !== 'string') {
+        return defaultMeta;
+    }
     if (collectorClass in collectorMetaMap) {
         return collectorMetaMap[collectorClass];
     }
