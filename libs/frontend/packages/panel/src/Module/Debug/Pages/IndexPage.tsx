@@ -209,7 +209,7 @@ const PerformanceSection = ({data}: {data: WebAppInfoData}) => {
             label: 'Total Time',
             value: formatTime(totalTime),
             ratio: safeRatio(totalTime, maxTime),
-            color: primitives.blue500,
+            color: 'primary.main',
         },
         {
             label: 'Request Processing',
@@ -387,7 +387,7 @@ export const IndexPage = () => {
             <SummaryBar>
                 {method && path && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: primitives.blue500}}>http</Icon>
+                        <Icon sx={{fontSize: 18, color: 'primary.main'}}>http</Icon>
                         <Box>
                             <SummaryValue>
                                 {method} {path}
@@ -409,7 +409,7 @@ export const IndexPage = () => {
                 )}
                 {duration && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: primitives.blue500}}>timer</Icon>
+                        <Icon sx={{fontSize: 18, color: 'primary.main'}}>timer</Icon>
                         <Box>
                             <SummaryValue>{duration}</SummaryValue>
                             <SummaryLabel>Duration</SummaryLabel>
@@ -418,7 +418,7 @@ export const IndexPage = () => {
                 )}
                 {memory && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: primitives.green600}}>memory</Icon>
+                        <Icon sx={{fontSize: 18, color: 'success.main'}}>memory</Icon>
                         <Box>
                             <SummaryValue>{memory}</SummaryValue>
                             <SummaryLabel>Peak Memory</SummaryLabel>
@@ -436,7 +436,7 @@ export const IndexPage = () => {
                 )}
                 {isDebugEntryAboutConsole(entry) && entry.command && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: primitives.blue500}}>terminal</Icon>
+                        <Icon sx={{fontSize: 18, color: 'primary.main'}}>terminal</Icon>
                         <Box>
                             <SummaryValue>{entry.command.input || entry.command.name}</SummaryValue>
                             <SummaryLabel>Command (exit: {entry.command.exitCode})</SummaryLabel>
