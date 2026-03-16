@@ -6,5 +6,5 @@ export const DebugModule: ModuleInterface = {
     routes: routes,
     reducers: reducers,
     middlewares: middlewares,
-    standaloneModule: true,
+    standaloneModule: false,
 };

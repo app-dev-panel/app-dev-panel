@@ -12,60 +12,22 @@ import {ServicesPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/S
 import {TimelinePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelinePanel';
 import {VarDumperPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/VarDumperPanel';
 import {DumpPage} from '@app-dev-panel/panel/Module/Debug/Pages/DumpPage';
-import {useDoRequestMutation, usePostCurlBuildMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {useSelector} from '@app-dev-panel/panel/store';
-import {changeAutoLatest, changeThemeMode} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
-import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
-import {DebugEntry, useLazyGetCollectorInfoQuery, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
+import {useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
-import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
-import {CollectorSidebar} from '@app-dev-panel/sdk/Component/Layout/CollectorSidebar';
-import {CommandPalette} from '@app-dev-panel/sdk/Component/Layout/CommandPalette';
-import {ContentPanel} from '@app-dev-panel/sdk/Component/Layout/ContentPanel';
-import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
-import {TopBar} from '@app-dev-panel/sdk/Component/Layout/TopBar';
-import {ScrollTopButton} from '@app-dev-panel/sdk/Component/ScrollTop';
-import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {EventTypesEnum, useServerSentEvents} from '@app-dev-panel/sdk/Component/useServerSentEvents';
-import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
-import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
-import {isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
-import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
-import {EmojiObjects, HelpOutline} from '@mui/icons-material';
-import {Alert, AlertTitle, Box, Icon, LinearProgress, Link, Menu, MenuItem, Typography} from '@mui/material';
-import {styled} from '@mui/material/styles';
-import clipboardCopy from 'clipboard-copy';
+import {HelpOutline} from '@mui/icons-material';
+import {Alert, AlertTitle, Box, LinearProgress} from '@mui/material';
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
-import {useDispatch} from 'react-redux';
 import {Outlet} from 'react-router';
 import {useSearchParams} from 'react-router-dom';
 
 // ---------------------------------------------------------------------------
-// Styled layout containers
-// ---------------------------------------------------------------------------
-
-const MainArea = styled(Box)({
-    flex: 1,
-    overflow: 'hidden',
-    display: 'flex',
-    justifyContent: 'center',
-    padding: componentTokens.mainGap,
-    gap: componentTokens.mainGap,
-});
-
-const MainInner = styled(Box)({
-    display: 'flex',
-    width: '100%',
-    maxWidth: componentTokens.mainMaxWidth,
-    gap: componentTokens.mainGap,
-});
-
-// ---------------------------------------------------------------------------
-// Collector data renderer (preserved from original)
+// Collector data renderer
 // ---------------------------------------------------------------------------
 
 type CollectorDataProps = {collectorData: any; selectedCollector: string};
@@ -144,49 +106,20 @@ const EmptyCollectorsInfoBox = React.memo(() => (
 ));
 
 // ---------------------------------------------------------------------------
-// Main Layout — new floating sidebar + centered layout
+// Debug Layout — collector data resolver (shell provided by main Layout)
 // ---------------------------------------------------------------------------
 
 const Layout = () => {
-    const dispatch = useDispatch();
-    const [autoLatest, setAutoLatest] = useState<boolean>(false);
     const debugEntry = useDebugEntry();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [getDebugQuery, getDebugQueryInfo] = useLazyGetDebugQuery();
     const [selectedCollector, setSelectedCollector] = useState<string>(() => searchParams.get('collector') || '');
     const [collectorData, setCollectorData] = useState<any>(undefined);
     const [collectorInfo, collectorQueryInfo] = useLazyGetCollectorInfoQuery();
-    const [postCurlBuildInfo, postCurlBuildQueryInfo] = usePostCurlBuildMutation();
-    const autoLatestState = useSelector((state) => state.application.autoLatest);
-    const backendUrl = useSelector((state) => state.application.baseUrl) as string;
 
-    const onRefreshHandler = useCallback(() => {
-        getDebugQuery();
-    }, [getDebugQuery]);
-    useEffect(onRefreshHandler, [onRefreshHandler]);
-
-    useEffect(() => {
-        setAutoLatest(autoLatestState);
-    }, [autoLatestState]);
-
-    useEffect(() => {
-        if (getDebugQueryInfo.isSuccess && getDebugQueryInfo.data && getDebugQueryInfo.data.length) {
-            if (!searchParams.has('debugEntry')) {
-                changeEntry(getDebugQueryInfo.data[0]);
-                return;
-            }
-            const entry = getDebugQueryInfo.data.find((entry) => entry.id === searchParams.get('debugEntry'));
-            if (!entry) {
-                changeEntry(getDebugQueryInfo.data[0]);
-            }
-        }
-    }, [getDebugQueryInfo.isSuccess, getDebugQueryInfo.data]);
-
-    const clearCollectorAndData = () => {
-        searchParams.delete('collector');
+    const clearCollectorAndData = useCallback(() => {
         setSelectedCollector('');
         setCollectorData(null);
-    };
+    }, []);
 
     useEffect(() => {
         const collector = searchParams.get('collector') || '';
@@ -201,7 +134,6 @@ const Layout = () => {
             .then(({data, isError}) => {
                 if (isError) {
                     clearCollectorAndData();
-                    changeEntry(null);
                     return;
                 }
                 setSelectedCollector(collector);
@@ -210,322 +142,35 @@ const Layout = () => {
             .catch(clearCollectorAndData);
     }, [searchParams, debugEntry]);
 
-    useEffect(() => {
-        if (debugEntry) {
-            setSearchParams((params) => {
-                params.set('debugEntry', debugEntry.id);
-                return params;
-            });
-        } else {
-            setSearchParams({});
-        }
-    }, [debugEntry, setSearchParams]);
-
-    const changeEntry = useCallback(
-        (entry: DebugEntry | null) => {
-            dispatch(changeEntryAction(entry ? entry : null));
-        },
-        [dispatch],
-    );
     const collectorName = useMemo(() => selectedCollector.split('\\').pop(), [selectedCollector]);
-
-    // Build sidebar navigation items from the debug entry's collectors
-    // Collectors whose data is shown in the overview, not as separate panels
-    const hiddenCollectors = useMemo(
-        () => new Set<string>([CollectorsMap.WebAppInfoCollector, CollectorsMap.ConsoleAppInfoCollector]),
-        [],
-    );
-
-    const sidebarItems = useMemo(() => {
-        if (!debugEntry) return [];
-        return [...debugEntry.collectors]
-            .filter((c): c is string => typeof c === 'string')
-            .filter((c) => !hiddenCollectors.has(c))
-            .sort(compareCollectorWeight)
-            .map((collector) => {
-                const count = getCollectedCountByCollector(collector as CollectorsMap, debugEntry);
-                const isException = collector === CollectorsMap.ExceptionCollector && count && count > 0;
-                return {
-                    key: collector,
-                    icon: getCollectorIcon(collector),
-                    label: getCollectorLabel(collector),
-                    badge: count,
-                    badgeVariant: (isException ? 'error' : 'default') as 'error' | 'default',
-                };
-            });
-    }, [debugEntry]);
-
-    const handleCollectorClick = useCallback(
-        (key: string) => {
-            if (!debugEntry) return;
-            setSearchParams((params) => {
-                params.set('collector', key);
-                params.set('debugEntry', debugEntry.id);
-                return params;
-            });
-        },
-        [debugEntry, setSearchParams],
-    );
-
-    const handleOverviewClick = useCallback(() => {
-        setSearchParams((params) => {
-            params.delete('collector');
-            return params;
-        });
-    }, [setSearchParams]);
-
-    // TopBar request info
-    const topBarMethod = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.request?.method : undefined;
-    const topBarPath = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.request?.path : undefined;
-    const topBarStatus = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.response?.statusCode : undefined;
-    const topBarDuration =
-        debugEntry && isDebugEntryAboutWeb(debugEntry) && debugEntry.web?.request?.processingTime
-            ? formatMillisecondsAsDuration(debugEntry.web.request.processingTime)
-            : undefined;
-
-    // Navigate between entries
-    const entries = getDebugQueryInfo.data ?? [];
-    const currentIndex = debugEntry ? entries.findIndex((e) => e.id === debugEntry.id) : -1;
-
-    const handlePrevEntry = useCallback(() => {
-        if (currentIndex > 0) {
-            changeEntry(entries[currentIndex - 1]);
-        }
-    }, [currentIndex, entries]);
-
-    const handleNextEntry = useCallback(() => {
-        if (currentIndex < entries.length - 1) {
-            changeEntry(entries[currentIndex + 1]);
-        }
-    }, [currentIndex, entries]);
-
-    // Entry selector popover
-    const [entrySelectorAnchor, setEntrySelectorAnchor] = useState<HTMLElement | null>(null);
-    const handleEntryClick = useCallback((e?: React.MouseEvent) => {
-        const target = (e?.currentTarget as HTMLElement) ?? null;
-        setEntrySelectorAnchor((prev) => (prev ? null : target));
-    }, []);
-
-    // Theme toggle
-    const themeMode = useSelector((state) => state.application.themeMode) as string | undefined;
-    const handleThemeToggle = useCallback(() => {
-        const current = themeMode || 'system';
-        const next = current === 'dark' ? 'light' : 'dark';
-        dispatch(changeThemeMode(next));
-    }, [dispatch, themeMode]);
-
-    // More menu
-    const [moreMenuAnchor, setMoreMenuAnchor] = useState<HTMLElement | null>(null);
-    const handleMoreClick = useCallback((e?: React.MouseEvent) => {
-        const target = (e?.currentTarget as HTMLElement) ?? null;
-        setMoreMenuAnchor((prev) => (prev ? null : target));
-    }, []);
-
-    // Command palette
-    const [paletteOpen, setPaletteOpen] = useState(false);
-    const handleSearchClick = useCallback(() => setPaletteOpen(true), []);
-    const handlePaletteClose = useCallback(() => setPaletteOpen(false), []);
-
-    // Ctrl+K shortcut
-    useEffect(() => {
-        const handler = (e: KeyboardEvent) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                setPaletteOpen((prev) => !prev);
-            }
-        };
-        document.addEventListener('keydown', handler);
-        return () => document.removeEventListener('keydown', handler);
-    }, []);
-
-    const [doRequest, doRequestInfo] = useDoRequestMutation();
-    const repeatRequestHandler = useCallback(async () => {
-        if (!debugEntry) return;
-        try {
-            await doRequest({id: debugEntry.id});
-        } catch (e) {
-            console.error(e);
-        }
-        getDebugQuery();
-    }, [debugEntry]);
-    const copyCurlHandler = useCallback(async () => {
-        if (!debugEntry) return;
-        const result = await postCurlBuildInfo(debugEntry.id);
-        if ('error' in result) {
-            console.error(result.error);
-            return;
-        }
-        console.log(result.data.command);
-        clipboardCopy(result.data.command);
-    }, [debugEntry]);
-    const onEntryChangeHandler = useCallback(changeEntry, [changeEntry]);
-
-    const onUpdatesHandler = useCallback(async (event: MessageEvent) => {
-        let data;
-        try {
-            data = JSON.parse(event.data);
-        } catch {
-            return;
-        }
-        if (data.type && data.type === EventTypesEnum.DebugUpdated) {
-            const result = await getDebugQuery();
-            if ('data' in result && result.data.length > 0) {
-                changeEntry(result.data[0]);
-            }
-        }
-    }, []);
-    useServerSentEvents(backendUrl, onUpdatesHandler, autoLatest);
-
-    const autoLatestHandler = () => {
-        setAutoLatest((prev) => {
-            dispatch(changeAutoLatest(!prev));
-            return !prev;
-        });
-    };
-
     useBreadcrumbs(() => ['Debug', collectorName]);
 
-    if (getDebugQueryInfo.isLoading) {
-        return <FullScreenCircularProgress />;
+    if (!debugEntry) {
+        return <Outlet />;
     }
 
-    if (getDebugQueryInfo.data && getDebugQueryInfo.data.length === 0) {
+    if (debugEntry.collectors.length === 0) {
+        return <EmptyCollectorsInfoBox />;
+    }
+
+    if (selectedCollector) {
         return (
-            <InfoBox
-                title="No debug entries found"
-                text={
-                    <>
-                        <Typography>Make sure you have enabled debugger and run your application.</Typography>
-                        <Typography>
-                            Check the "app-dev-panel/kernel" in the "params.php" on the backend or with{' '}
-                            <Link href="/inspector/config/parameters?filter=app-dev-panel/kernel">Inspector</Link>.
-                        </Typography>
-                        <Typography>
-                            See more information on the link{' '}
-                            <Link href="https://github.com/app-dev-panel/app-dev-panel">
-                                https://github.com/app-dev-panel/app-dev-panel
-                            </Link>
-                            .
-                        </Typography>
-                    </>
-                }
-                severity="info"
-                icon={<EmojiObjects />}
-            />
+            <>
+                {collectorQueryInfo.isFetching && <LinearProgress />}
+                {collectorQueryInfo.isError && (
+                    <HttpRequestError
+                        error={(collectorQueryInfo.error as any)?.error || (collectorQueryInfo.error as any)}
+                    />
+                )}
+                {collectorQueryInfo.isSuccess && (
+                    <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[selectedCollector, debugEntry]}>
+                        <CollectorData selectedCollector={selectedCollector} collectorData={collectorData} />
+                    </ErrorBoundary>
+                )}
+            </>
         );
     }
 
-    return (
-        <>
-            <Box sx={{display: 'flex', flexDirection: 'column', height: '100vh'}}>
-                <TopBar
-                    method={topBarMethod}
-                    path={topBarPath}
-                    status={topBarStatus}
-                    duration={topBarDuration}
-                    onPrevEntry={handlePrevEntry}
-                    onNextEntry={handleNextEntry}
-                    onEntryClick={handleEntryClick}
-                    onSearchClick={handleSearchClick}
-                    onThemeToggle={handleThemeToggle}
-                    onMoreClick={handleMoreClick}
-                />
-                <EntrySelector
-                    anchorEl={entrySelectorAnchor}
-                    open={Boolean(entrySelectorAnchor)}
-                    onClose={() => setEntrySelectorAnchor(null)}
-                    entries={entries}
-                    currentEntryId={debugEntry?.id}
-                    onSelect={changeEntry}
-                />
-                <Menu
-                    anchorEl={moreMenuAnchor}
-                    open={Boolean(moreMenuAnchor)}
-                    onClose={() => setMoreMenuAnchor(null)}
-                    slotProps={{paper: {sx: {minWidth: 200, mt: 0.5}}}}
-                >
-                    <MenuItem
-                        onClick={() => {
-                            repeatRequestHandler();
-                            setMoreMenuAnchor(null);
-                        }}
-                        disabled={!debugEntry || !isDebugEntryAboutWeb(debugEntry)}
-                    >
-                        <Icon sx={{fontSize: 18, mr: 1.5, color: 'text.secondary'}}>replay</Icon>
-                        Repeat Request
-                    </MenuItem>
-                    <MenuItem
-                        onClick={() => {
-                            copyCurlHandler();
-                            setMoreMenuAnchor(null);
-                        }}
-                        disabled={!debugEntry}
-                    >
-                        <Icon sx={{fontSize: 18, mr: 1.5, color: 'text.secondary'}}>content_copy</Icon>
-                        Copy as cURL
-                    </MenuItem>
-                    <MenuItem
-                        onClick={() => {
-                            autoLatestHandler();
-                            setMoreMenuAnchor(null);
-                        }}
-                    >
-                        <Icon sx={{fontSize: 18, mr: 1.5, color: autoLatest ? 'success.main' : 'text.secondary'}}>
-                            {autoLatest ? 'sync' : 'sync_disabled'}
-                        </Icon>
-                        {autoLatest ? 'Auto-refresh On' : 'Auto-refresh Off'}
-                    </MenuItem>
-                </Menu>
-                <MainArea>
-                    <MainInner>
-                        {sidebarItems.length === 0 ? (
-                            <ContentPanel>
-                                <EmptyCollectorsInfoBox />
-                            </ContentPanel>
-                        ) : (
-                            <>
-                                <CollectorSidebar
-                                    items={sidebarItems}
-                                    activeKey={selectedCollector}
-                                    onItemClick={handleCollectorClick}
-                                    onOverviewClick={handleOverviewClick}
-                                />
-                                <ContentPanel>
-                                    {selectedCollector ? (
-                                        <>
-                                            {collectorQueryInfo.isFetching && <LinearProgress />}
-                                            {collectorQueryInfo.isError && (
-                                                <HttpRequestError
-                                                    error={
-                                                        (collectorQueryInfo.error as any)?.error ||
-                                                        (collectorQueryInfo.error as any)
-                                                    }
-                                                />
-                                            )}
-                                            {collectorQueryInfo.isSuccess && (
-                                                <ErrorBoundary
-                                                    FallbackComponent={ErrorFallback}
-                                                    resetKeys={[selectedCollector, debugEntry]}
-                                                >
-                                                    <CollectorData
-                                                        selectedCollector={selectedCollector}
-                                                        collectorData={collectorData}
-                                                    />
-                                                </ErrorBoundary>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <Outlet />
-                                    )}
-                                </ContentPanel>
-                            </>
-                        )}
-                    </MainInner>
-                </MainArea>
-            </Box>
-            <ScrollTopButton bottomOffset={false} />
-            <CommandPalette open={paletteOpen} onClose={handlePaletteClose} />
-        </>
-    );
+    return <Outlet />;
 };
 export {Layout};

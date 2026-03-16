@@ -1,102 +1,61 @@
 import {NotificationSnackbar} from '@app-dev-panel/panel/Application/Component/NotificationSnackbar';
-import {changeThemeMode} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
+import {useDoRequestMutation, usePostCurlBuildMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {useSelector} from '@app-dev-panel/panel/store';
+import {changeAutoLatest, changeThemeMode} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
+import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
+import {DebugEntry, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
-import {AppNavSidebar} from '@app-dev-panel/sdk/Component/Layout/AppNavSidebar';
+import {CommandPalette} from '@app-dev-panel/sdk/Component/Layout/CommandPalette';
+import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
+import {TopBar} from '@app-dev-panel/sdk/Component/Layout/TopBar';
+import {UnifiedSidebar} from '@app-dev-panel/sdk/Component/Layout/UnifiedSidebar';
 import {ScrollTopButton} from '@app-dev-panel/sdk/Component/ScrollTop';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {Config} from '@app-dev-panel/sdk/Config';
-import {Icon, IconButton, Typography} from '@mui/material';
+import {EventTypesEnum, useServerSentEvents} from '@app-dev-panel/sdk/Component/useServerSentEvents';
+import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
+import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
+import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
+import {isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
+import {Icon, Menu, MenuItem} from '@mui/material';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import {styled} from '@mui/material/styles';
+import clipboardCopy from 'clipboard-copy';
 import * as React from 'react';
-import {useCallback} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
-import {useDispatch, useSelector} from 'react-redux';
-import {Outlet, useLocation, useNavigate} from 'react-router-dom';
+import {useDispatch} from 'react-redux';
+import {Outlet, useLocation, useNavigate, useSearchParams} from 'react-router-dom';
 
 // ---------------------------------------------------------------------------
-// Navigation structure
+// Collectors hidden from sidebar (shown in overview instead)
 // ---------------------------------------------------------------------------
+const hiddenCollectors = new Set<string>([CollectorsMap.WebAppInfoCollector, CollectorsMap.ConsoleAppInfoCollector]);
 
-const navSections = [
-    {
-        items: [
-            {key: 'home', icon: 'home', label: 'Home', href: '/'},
-            {key: 'debug', icon: 'bug_report', label: 'Debug', href: '/debug'},
-        ],
-    },
-    {
-        title: 'Config',
-        items: [
-            {key: 'config', icon: 'settings', label: 'Configuration', href: '/inspector/config'},
-            {key: 'events', icon: 'bolt', label: 'Events', href: '/inspector/events'},
-            {key: 'routes', icon: 'alt_route', label: 'Routes', href: '/inspector/routes'},
-        ],
-    },
-    {
-        title: 'Inspector',
-        items: [
-            {key: 'tests', icon: 'science', label: 'Tests', href: '/inspector/tests'},
-            {key: 'analyse', icon: 'analytics', label: 'Analyse', href: '/inspector/analyse'},
-            {key: 'files', icon: 'folder_open', label: 'File Explorer', href: '/inspector/files'},
-            {key: 'translations', icon: 'translate', label: 'Translations', href: '/inspector/translations'},
-            {key: 'commands', icon: 'terminal', label: 'Commands', href: '/inspector/commands'},
-            {key: 'database', icon: 'storage', label: 'Database', href: '/inspector/database'},
-            {key: 'cache', icon: 'cached', label: 'Cache', href: '/inspector/cache'},
-            {key: 'git', icon: 'code', label: 'Git', href: '/inspector/git'},
-            {key: 'phpinfo', icon: 'info', label: 'PHP Info', href: '/inspector/phpinfo'},
-            {key: 'composer', icon: 'inventory_2', label: 'Composer', href: '/inspector/composer'},
-            {key: 'opcache', icon: 'speed', label: 'Opcache', href: '/inspector/opcache'},
-        ],
-    },
-    {
-        title: 'Tools',
-        items: [
-            {key: 'gii', icon: 'build_circle', label: 'Gii', href: '/gii'},
-            {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api'},
-            {key: 'frames', icon: 'web', label: 'Frames', href: '/frames'},
-        ],
-    },
+// ---------------------------------------------------------------------------
+// Static inspector sub-items
+// ---------------------------------------------------------------------------
+const inspectorChildren = [
+    {key: '/inspector/config', icon: 'settings', label: 'Configuration'},
+    {key: '/inspector/events', icon: 'bolt', label: 'Events'},
+    {key: '/inspector/routes', icon: 'alt_route', label: 'Routes'},
+    {key: '/inspector/tests', icon: 'science', label: 'Tests'},
+    {key: '/inspector/analyse', icon: 'analytics', label: 'Analyse'},
+    {key: '/inspector/files', icon: 'folder_open', label: 'File Explorer'},
+    {key: '/inspector/translations', icon: 'translate', label: 'Translations'},
+    {key: '/inspector/commands', icon: 'terminal', label: 'Commands'},
+    {key: '/inspector/database', icon: 'storage', label: 'Database'},
+    {key: '/inspector/cache', icon: 'cached', label: 'Cache'},
+    {key: '/inspector/git', icon: 'code', label: 'Git'},
+    {key: '/inspector/phpinfo', icon: 'info', label: 'PHP Info'},
+    {key: '/inspector/composer', icon: 'inventory_2', label: 'Composer'},
+    {key: '/inspector/opcache', icon: 'speed', label: 'Opcache'},
 ];
 
 // ---------------------------------------------------------------------------
 // Styled components
 // ---------------------------------------------------------------------------
-
-const BarRoot = styled('header')(({theme}) => ({
-    height: componentTokens.topBar.height,
-    backgroundColor: theme.palette.background.paper,
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    display: 'flex',
-    alignItems: 'center',
-    padding: theme.spacing(0, 2.5),
-    gap: theme.spacing(2),
-    flexShrink: 0,
-    position: 'sticky',
-    top: 0,
-    zIndex: theme.zIndex.appBar,
-}));
-
-const Logo = styled('div')(({theme}) => ({
-    fontWeight: 700,
-    fontSize: 15,
-    color: theme.palette.primary.main,
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(0.75),
-    cursor: 'pointer',
-}));
-
-const Diamond = styled('div')(({theme}) => ({
-    width: 8,
-    height: 8,
-    backgroundColor: theme.palette.primary.main,
-    transform: 'rotate(45deg)',
-    borderRadius: 1,
-}));
-
-const Spacer = styled('span')({flex: 1});
 
 const MainArea = styled(Box)({
     flex: 1,
@@ -124,12 +83,6 @@ const ContentArea = styled(Box)(({theme}) => ({
     overflowY: 'auto',
 }));
 
-const BuildBadge = styled(Typography)(({theme}) => ({
-    fontSize: '10px',
-    fontFamily: "'JetBrains Mono', monospace",
-    color: theme.palette.text.disabled,
-}));
-
 // ---------------------------------------------------------------------------
 // Layout component
 // ---------------------------------------------------------------------------
@@ -138,8 +91,203 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const themeMode = useSelector((state: any) => state?.application?.themeMode) as string | undefined;
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Debug entry state
+    const debugEntry = useDebugEntry();
+    const [getDebugQuery, getDebugQueryInfo] = useLazyGetDebugQuery();
+    const backendUrl = useSelector((state) => state.application.baseUrl) as string;
+    const autoLatestState = useSelector((state) => state.application.autoLatest);
+    const [autoLatest, setAutoLatest] = useState<boolean>(false);
+    const themeMode = useSelector((state) => state.application.themeMode) as string | undefined;
     const currentMode = themeMode || 'system';
+
+    // Fetch debug entries on mount
+    const onRefreshHandler = useCallback(() => {
+        getDebugQuery();
+    }, [getDebugQuery]);
+    useEffect(onRefreshHandler, [onRefreshHandler]);
+
+    useEffect(() => {
+        setAutoLatest(autoLatestState);
+    }, [autoLatestState]);
+
+    // Auto-select first entry when data loads
+    useEffect(() => {
+        if (getDebugQueryInfo.isSuccess && getDebugQueryInfo.data && getDebugQueryInfo.data.length) {
+            if (!debugEntry) {
+                dispatch(changeEntryAction(getDebugQueryInfo.data[0]));
+            }
+        }
+    }, [getDebugQueryInfo.isSuccess, getDebugQueryInfo.data]);
+
+    // SSE for auto-refresh
+    const changeEntry = useCallback(
+        (entry: DebugEntry | null) => {
+            dispatch(changeEntryAction(entry));
+        },
+        [dispatch],
+    );
+
+    const onUpdatesHandler = useCallback(
+        async (event: MessageEvent) => {
+            let data;
+            try {
+                data = JSON.parse(event.data);
+            } catch {
+                return;
+            }
+            if (data.type && data.type === EventTypesEnum.DebugUpdated) {
+                const result = await getDebugQuery();
+                if ('data' in result && result.data.length > 0) {
+                    changeEntry(result.data[0]);
+                }
+            }
+        },
+        [getDebugQuery, changeEntry],
+    );
+    useServerSentEvents(backendUrl, onUpdatesHandler, autoLatest);
+
+    // Entry navigation
+    const entries = getDebugQueryInfo.data ?? [];
+    const currentIndex = debugEntry ? entries.findIndex((e) => e.id === debugEntry.id) : -1;
+
+    const handlePrevEntry = useCallback(() => {
+        if (currentIndex > 0) changeEntry(entries[currentIndex - 1]);
+    }, [currentIndex, entries, changeEntry]);
+
+    const handleNextEntry = useCallback(() => {
+        if (currentIndex < entries.length - 1) changeEntry(entries[currentIndex + 1]);
+    }, [currentIndex, entries, changeEntry]);
+
+    // Entry selector popover
+    const [entrySelectorAnchor, setEntrySelectorAnchor] = useState<HTMLElement | null>(null);
+    const handleEntryClick = useCallback((e?: React.MouseEvent) => {
+        const target = (e?.currentTarget as HTMLElement) ?? null;
+        setEntrySelectorAnchor((prev) => (prev ? null : target));
+    }, []);
+
+    // Theme toggle
+    const handleThemeToggle = useCallback(() => {
+        const next = currentMode === 'dark' ? 'light' : 'dark';
+        dispatch(changeThemeMode(next as 'light' | 'dark'));
+    }, [dispatch, currentMode]);
+
+    // More menu
+    const [moreMenuAnchor, setMoreMenuAnchor] = useState<HTMLElement | null>(null);
+    const handleMoreClick = useCallback((e?: React.MouseEvent) => {
+        const target = (e?.currentTarget as HTMLElement) ?? null;
+        setMoreMenuAnchor((prev) => (prev ? null : target));
+    }, []);
+
+    // Command palette
+    const [paletteOpen, setPaletteOpen] = useState(false);
+    const handleSearchClick = useCallback(() => setPaletteOpen(true), []);
+    const handlePaletteClose = useCallback(() => setPaletteOpen(false), []);
+
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                setPaletteOpen((prev) => !prev);
+            }
+        };
+        document.addEventListener('keydown', handler);
+        return () => document.removeEventListener('keydown', handler);
+    }, []);
+
+    // Actions
+    const [doRequest] = useDoRequestMutation();
+    const [postCurlBuildInfo] = usePostCurlBuildMutation();
+
+    const repeatRequestHandler = useCallback(async () => {
+        if (!debugEntry) return;
+        try {
+            await doRequest({id: debugEntry.id});
+        } catch (e) {
+            console.error(e);
+        }
+        getDebugQuery();
+    }, [debugEntry, doRequest, getDebugQuery]);
+
+    const copyCurlHandler = useCallback(async () => {
+        if (!debugEntry) return;
+        const result = await postCurlBuildInfo(debugEntry.id);
+        if ('error' in result) {
+            console.error(result.error);
+            return;
+        }
+        clipboardCopy(result.data.command);
+    }, [debugEntry, postCurlBuildInfo]);
+
+    const autoLatestHandler = useCallback(() => {
+        setAutoLatest((prev) => {
+            dispatch(changeAutoLatest(!prev));
+            return !prev;
+        });
+    }, [dispatch]);
+
+    // TopBar debug info
+    const topBarMethod = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.request?.method : undefined;
+    const topBarPath = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.request?.path : undefined;
+    const topBarStatus = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.response?.statusCode : undefined;
+    const topBarDuration =
+        debugEntry && isDebugEntryAboutWeb(debugEntry) && debugEntry.web?.request?.processingTime
+            ? formatMillisecondsAsDuration(debugEntry.web.request.processingTime)
+            : undefined;
+
+    // Build sidebar sections
+    const selectedCollector = searchParams.get('collector') || '';
+
+    const debugChildren = useMemo(() => {
+        const entriesList = [{key: '__entries__', icon: 'list', label: 'All Entries'}];
+        if (!debugEntry) return entriesList;
+        const overview = [{key: '__overview__', icon: 'grid_view', label: 'Overview'}];
+        const collectors = [...debugEntry.collectors]
+            .filter((c): c is string => typeof c === 'string')
+            .filter((c) => !hiddenCollectors.has(c))
+            .sort(compareCollectorWeight)
+            .map((collector) => {
+                const count = getCollectedCountByCollector(collector as CollectorsMap, debugEntry);
+                const isException = collector === CollectorsMap.ExceptionCollector && !!count && count > 0;
+                return {
+                    key: collector,
+                    icon: getCollectorIcon(collector),
+                    label: getCollectorLabel(collector),
+                    badge: count,
+                    badgeVariant: (isException ? 'error' : 'default') as 'error' | 'default',
+                };
+            });
+        return [...overview, ...collectors, ...entriesList];
+    }, [debugEntry]);
+
+    const sidebarSections = useMemo(
+        () => [
+            {key: 'home', icon: 'home', label: 'Home', href: '/'},
+            {key: 'debug', icon: 'bug_report', label: 'Debug', href: '/debug', children: debugChildren},
+            {key: 'inspector', icon: 'search', label: 'Inspector', href: '/inspector', children: inspectorChildren},
+            {key: 'gii', icon: 'build_circle', label: 'Gii', href: '/gii'},
+            {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api'},
+            {key: 'frames', icon: 'web', label: 'Frames', href: '/frames'},
+        ],
+        [debugChildren],
+    );
+
+    // Determine active child key
+    const activeChildKey = useMemo(() => {
+        if (location.pathname === '/debug/list') {
+            return '__entries__';
+        }
+        if (location.pathname.startsWith('/debug')) {
+            return selectedCollector || '__overview__';
+        }
+        if (location.pathname.startsWith('/inspector')) {
+            // Find matching inspector child
+            const match = inspectorChildren.find((c) => location.pathname.startsWith(c.key));
+            return match?.key;
+        }
+        return undefined;
+    }, [location.pathname, selectedCollector]);
 
     const handleNavigate = useCallback(
         (href: string) => {
@@ -148,49 +296,100 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         [navigate],
     );
 
-    const handleLogoClick = useCallback(() => {
-        navigate('/');
-    }, [navigate]);
-
-    const handleRefresh = useCallback(() => {
-        if ('location' in window) {
-            window.location.reload();
-        }
-    }, []);
-
-    const handleThemeToggle = useCallback(() => {
-        const next = currentMode === 'dark' ? 'light' : 'dark';
-        dispatch(changeThemeMode(next as 'light' | 'dark'));
-    }, [dispatch, currentMode]);
+    const handleChildClick = useCallback(
+        (sectionKey: string, childKey: string) => {
+            if (sectionKey === 'debug') {
+                if (childKey === '__overview__') {
+                    navigate('/debug');
+                    return;
+                }
+                if (childKey === '__entries__') {
+                    navigate('/debug/list');
+                    return;
+                }
+                // Navigate to debug page with collector
+                if (debugEntry) {
+                    navigate(`/debug?collector=${encodeURIComponent(childKey)}&debugEntry=${debugEntry.id}`);
+                }
+            } else if (sectionKey === 'inspector') {
+                navigate(childKey);
+            }
+        },
+        [navigate, debugEntry],
+    );
 
     return (
         <>
             <CssBaseline />
             <NotificationSnackbar />
             <Box sx={{display: 'flex', flexDirection: 'column', height: '100vh'}}>
-                <BarRoot>
-                    <Logo onClick={handleLogoClick}>
-                        <Diamond /> ADP
-                    </Logo>
-                    <Spacer />
-                    <BuildBadge>v{Config.buildVersion}</BuildBadge>
-                    <IconButton size="small" onClick={handleThemeToggle}>
-                        <Icon sx={{fontSize: 18}}>{currentMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
-                    </IconButton>
-                    <IconButton size="small" onClick={handleRefresh}>
-                        <Icon sx={{fontSize: 18}}>refresh</Icon>
-                    </IconButton>
-                    <IconButton size="small" href="https://github.com/app-dev-panel/app-dev-panel" target="_blank">
-                        <Icon sx={{fontSize: 18}}>open_in_new</Icon>
-                    </IconButton>
-                </BarRoot>
+                <TopBar
+                    method={topBarMethod}
+                    path={topBarPath}
+                    status={topBarStatus}
+                    duration={topBarDuration}
+                    onPrevEntry={handlePrevEntry}
+                    onNextEntry={handleNextEntry}
+                    onEntryClick={handleEntryClick}
+                    onSearchClick={handleSearchClick}
+                    onThemeToggle={handleThemeToggle}
+                    onMoreClick={handleMoreClick}
+                />
+                <EntrySelector
+                    anchorEl={entrySelectorAnchor}
+                    open={Boolean(entrySelectorAnchor)}
+                    onClose={() => setEntrySelectorAnchor(null)}
+                    entries={entries}
+                    currentEntryId={debugEntry?.id}
+                    onSelect={changeEntry}
+                />
+                <Menu
+                    anchorEl={moreMenuAnchor}
+                    open={Boolean(moreMenuAnchor)}
+                    onClose={() => setMoreMenuAnchor(null)}
+                    slotProps={{paper: {sx: {minWidth: 200, mt: 0.5}}}}
+                >
+                    <MenuItem
+                        onClick={() => {
+                            repeatRequestHandler();
+                            setMoreMenuAnchor(null);
+                        }}
+                        disabled={!debugEntry || !isDebugEntryAboutWeb(debugEntry)}
+                    >
+                        <Icon sx={{fontSize: 18, mr: 1.5, color: 'text.secondary'}}>replay</Icon>
+                        Repeat Request
+                    </MenuItem>
+                    <MenuItem
+                        onClick={() => {
+                            copyCurlHandler();
+                            setMoreMenuAnchor(null);
+                        }}
+                        disabled={!debugEntry}
+                    >
+                        <Icon sx={{fontSize: 18, mr: 1.5, color: 'text.secondary'}}>content_copy</Icon>
+                        Copy as cURL
+                    </MenuItem>
+                    <MenuItem
+                        onClick={() => {
+                            autoLatestHandler();
+                            setMoreMenuAnchor(null);
+                        }}
+                    >
+                        <Icon sx={{fontSize: 18, mr: 1.5, color: autoLatest ? 'success.main' : 'text.secondary'}}>
+                            {autoLatest ? 'sync' : 'sync_disabled'}
+                        </Icon>
+                        {autoLatest ? 'Auto-refresh On' : 'Auto-refresh Off'}
+                    </MenuItem>
+                </Menu>
 
                 <MainArea>
                     <MainInner>
-                        <AppNavSidebar
-                            sections={navSections}
+                        <UnifiedSidebar
+                            sections={sidebarSections}
                             activePath={location.pathname}
+                            activeChildKey={activeChildKey}
                             onNavigate={handleNavigate}
+                            onChildClick={handleChildClick}
                         />
                         <ContentArea>
                             <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[location.pathname]}>
@@ -202,6 +401,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             </Box>
             {children}
             <ScrollTopButton bottomOffset={!!children} />
+            <CommandPalette open={paletteOpen} onClose={handlePaletteClose} />
         </>
     );
 });
