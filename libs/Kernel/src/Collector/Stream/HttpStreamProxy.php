@@ -7,6 +7,7 @@ namespace AppDevPanel\Kernel\Collector\Stream;
 use AppDevPanel\Kernel\Helper\BacktraceIgnoreMatcher;
 use AppDevPanel\Kernel\Helper\StreamWrapper\StreamWrapper;
 use AppDevPanel\Kernel\Helper\StreamWrapper\StreamWrapperInterface;
+use Yiisoft\Strings\CombinedRegexp;
 
 use function stream_get_wrappers;
 
@@ -70,6 +71,7 @@ final class HttpStreamProxy implements StreamWrapperInterface
          */
         class_exists(BacktraceIgnoreMatcher::class);
         class_exists(StreamWrapper::class);
+        class_exists(CombinedRegexp::class);
         stream_wrapper_unregister('http');
         stream_wrapper_register('http', self::class, STREAM_IS_URL);
 

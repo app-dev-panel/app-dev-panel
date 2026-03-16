@@ -2200,7 +2200,7 @@ count = 2
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
 code = "unused-statement"
 message = "Expression has no effect as a statement"
-count = 2
+count = 3
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/HttpStreamCollector.php"
@@ -2404,7 +2404,7 @@ count = 2
 file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "unused-statement"
 message = "Expression has no effect as a statement"
-count = 2
+count = 3
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
@@ -2523,7 +2523,7 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Debugger.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `fnmatch`: expected `string`, but found `mixed`."
+message = 'Invalid argument type for argument #1 of `yiisoft\strings\wildcardpattern::__construct`: expected `string`, but found `mixed`.'
 count = 2
 
 [[issues]]
@@ -2618,14 +2618,14 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `appdevpanel\kernel\helper\backtraceignorematcher::doesstringmatchpattern`: expected `string`, but found `mixed`.'
+code = "less-specific-nested-argument-type"
+message = 'Argument type mismatch for argument #1 of `yiisoft\strings\combinedregexp::__construct`: expected `array<array-key, string>`, but provided type `non-empty-array<array-key, mixed>` is less specific.'
 count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `preg_match`: expected `string`, but found `mixed`."
+message = 'Invalid argument type for argument #1 of `appdevpanel\kernel\helper\backtraceignorematcher::doesstringmatchpattern`: expected `string`, but found `mixed`.'
 count = 1
 
 [[issues]]
@@ -2638,7 +2638,7 @@ count = 1
 file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
+count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
@@ -2822,32 +2822,14 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
-code = "invalid-method-access"
-message = "Attempting to access a method on a non-object type (`string`)."
-count = 3
-
-[[issues]]
-file = "libs/Kernel/src/Storage/FileStorage.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Storage/FileStorage.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Storage/FileStorage.php"
-code = "possibly-false-argument"
-message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "possibly-false-argument"
 message = "Argument #1 of function `uasort` is possibly `false`, but parameter type `array<non-negative-int, non-empty-string>` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "possibly-false-argument"
+message = 'Argument #1 of method `yiisoft\json\json::decode` is possibly `false`, but parameter type `string` does not accept it.'
 count = 1
 
 [[issues]]
@@ -3148,24 +3130,6 @@ count = 1
 file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
 code = "incompatible-parameter-type"
 message = 'Parameter `$collector` of `AppDevPanel\Kernel\Tests\Unit\Collector\FilesystemStreamCollectorTest::collecttestdata()` expects type `AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector` but parent `AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase::collecttestdata()` expects type `AppDevPanel\Kernel\Collector\CollectorInterface`'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
-code = "invalid-method-access"
-message = "Attempting to access a method on a non-object type (`string`)."
-count = 3
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
 count = 1
 
 [[issues]]
@@ -3622,22 +3586,4 @@ count = 2
 file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"
 code = "too-few-arguments"
 message = 'Too few arguments provided for method `AppDevPanel\Kernel\Storage\StorageInterface::read`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/FileStorageTest.php"
-code = "invalid-method-access"
-message = "Attempting to access a method on a non-object type (`string`)."
-count = 3
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/FileStorageTest.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/FileStorageTest.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
 count = 1

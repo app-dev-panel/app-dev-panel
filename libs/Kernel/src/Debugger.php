@@ -9,6 +9,7 @@ use AppDevPanel\Kernel\Storage\StorageInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Yiisoft\Strings\WildcardPattern;
 
 final class Debugger
 {
@@ -118,7 +119,7 @@ final class Debugger
         }
         $path = $request->getUri()->getPath();
         foreach ($this->ignoredRequests as $pattern) {
-            if (fnmatch($pattern, $path)) {
+            if (new WildcardPattern($pattern)->match($path)) {
                 return true;
             }
         }
@@ -134,7 +135,7 @@ final class Debugger
             return true;
         }
         foreach ($this->ignoredCommands as $pattern) {
-            if (fnmatch($pattern, $command)) {
+            if (new WildcardPattern($pattern)->match($command)) {
                 return true;
             }
         }
@@ -142,7 +143,9 @@ final class Debugger
     }
 
     /**
-     * @param array $ignoredRequests Patterns for ignored request URLs (fnmatch syntax).
+     * @param array $ignoredRequests Patterns for ignored request URLs.
+     *
+     * @see WildcardPattern
      */
     public function withIgnoredRequests(array $ignoredRequests): self
     {
@@ -152,7 +155,9 @@ final class Debugger
     }
 
     /**
-     * @param array $ignoredCommands Patterns for ignored command names (fnmatch syntax).
+     * @param array $ignoredCommands Patterns for ignored commands names.
+     *
+     * @see WildcardPattern
      */
     public function withIgnoredCommands(array $ignoredCommands): self
     {

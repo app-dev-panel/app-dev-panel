@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Service;
 
+use Yiisoft\Json\Json;
+
 final class FileServiceRegistry implements ServiceRegistryInterface
 {
     private readonly string $filePath;
@@ -73,7 +75,7 @@ final class FileServiceRegistry implements ServiceRegistryInterface
         }
 
         /** @var array<string, array<string, mixed>> */
-        return json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+        return Json::decode($content);
     }
 
     private function save(array $services): void
@@ -83,10 +85,6 @@ final class FileServiceRegistry implements ServiceRegistryInterface
             mkdir($dir, 0775, true);
         }
 
-        file_put_contents(
-            $this->filePath,
-            json_encode($services, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
-            LOCK_EX,
-        );
+        file_put_contents($this->filePath, Json::encode($services), LOCK_EX);
     }
 }

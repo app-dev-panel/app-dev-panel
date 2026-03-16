@@ -9,7 +9,6 @@ use AppDevPanel\Kernel\Dumper;
 use AppDevPanel\Kernel\Tests\Support\Stub\ThreeProperties;
 use DateTimeZone;
 use PHPUnit\Framework\TestCase;
-use ReflectionFunction;
 use stdClass;
 
 use function socket_create;
@@ -397,12 +396,11 @@ final class DumperTest extends TestCase
         $closureObjectId = spl_object_id($closureObject);
         $closureInsideObject->closure = $closureObject;
         $closureInsideObjectId = spl_object_id($closureInsideObject);
-        $closureStr = self::closureStringJson($closureObject);
 
         yield 'closure inside std class' => [
             $closureInsideObject,
             <<<S
-                {"stdClass#{$closureInsideObjectId}":{"public \$closure":"{$closureStr}"},"Closure#{$closureObjectId}":"{$closureStr}"}
+                {"stdClass#{$closureInsideObjectId}":{"public \$closure":"static fn() => true"},"Closure#{$closureObjectId}":"static fn() => true"}
                 S,
         ];
     }
@@ -595,12 +593,11 @@ final class DumperTest extends TestCase
         $shortFunctionObject = static fn() => 1;
         // @formatter:on
         $shortFunctionObjectId = spl_object_id($shortFunctionObject);
-        $shortFunctionStr = self::closureStringJson($shortFunctionObject);
 
         yield 'short function' => [
             $shortFunctionObject,
             <<<S
-                {"Closure#{$shortFunctionObjectId}":"{$shortFunctionStr}"}
+                {"Closure#{$shortFunctionObjectId}":"static fn() => 1"}
                 S,
         ];
 
@@ -608,12 +605,11 @@ final class DumperTest extends TestCase
         $staticShortFunctionObject = static fn() => 1;
         // @formatter:on
         $staticShortFunctionObjectId = spl_object_id($staticShortFunctionObject);
-        $staticShortFunctionStr = self::closureStringJson($staticShortFunctionObject);
 
         yield 'short static function' => [
             $staticShortFunctionObject,
             <<<S
-                {"Closure#{$staticShortFunctionObjectId}":"{$staticShortFunctionStr}"}
+                {"Closure#{$staticShortFunctionObjectId}":"static fn() => 1"}
                 S,
         ];
 
@@ -623,12 +619,11 @@ final class DumperTest extends TestCase
         };
         // @formatter:on
         $functionObjectId = spl_object_id($functionObject);
-        $functionStr = self::closureStringJson($functionObject);
 
         yield 'function' => [
             $functionObject,
             <<<S
-                {"Closure#{$functionObjectId}":"{$functionStr}"}
+                {"Closure#{$functionObjectId}":"static function () {\\n    return 1;\\n}"}
                 S,
         ];
 
@@ -638,12 +633,11 @@ final class DumperTest extends TestCase
         };
         // @formatter:on
         $staticFunctionObjectId = spl_object_id($staticFunctionObject);
-        $staticFunctionStr = self::closureStringJson($staticFunctionObject);
 
         yield 'static function' => [
             $staticFunctionObject,
             <<<S
-                {"Closure#{$staticFunctionObjectId}":"{$staticFunctionStr}"}
+                {"Closure#{$staticFunctionObjectId}":"static function () {\\n    return 1;\\n}"}
                 S,
         ];
         yield 'string' => [
@@ -699,14 +693,13 @@ final class DumperTest extends TestCase
         $closureInArrayObject = static fn() => new \DateTimeZone('');
         // @formatter:on
         $closureInArrayObjectId = spl_object_id($closureInArrayObject);
-        $closureInArrayStr = self::closureStringJson($closureInArrayObject);
 
         yield 'closure in array' => [
             // @formatter:off
             [$closureInArrayObject],
             // @formatter:on
             <<<S
-                [{"Closure#{$closureInArrayObjectId}":"{$closureInArrayStr}"}]
+                [{"Closure#{$closureInArrayObjectId}":"static fn() => new \\\DateTimeZone('')"}]
                 S,
         ];
 
@@ -714,12 +707,11 @@ final class DumperTest extends TestCase
         $closureWithUsualClassNameObject = static fn(Dumper $date) => new \DateTimeZone('');
         // @formatter:on
         $closureWithUsualClassNameObjectId = spl_object_id($closureWithUsualClassNameObject);
-        $closureWithUsualClassNameStr = self::closureStringJson($closureWithUsualClassNameObject);
 
         yield 'original class name' => [
             $closureWithUsualClassNameObject,
             <<<S
-                {"Closure#{$closureWithUsualClassNameObjectId}":"{$closureWithUsualClassNameStr}"}
+                {"Closure#{$closureWithUsualClassNameObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
                 S,
         ];
 
@@ -727,12 +719,11 @@ final class DumperTest extends TestCase
         $closureWithAliasedClassNameObject = static fn(Dumper $date) => new \DateTimeZone('');
         // @formatter:on
         $closureWithAliasedClassNameObjectId = spl_object_id($closureWithAliasedClassNameObject);
-        $closureWithAliasedClassNameStr = self::closureStringJson($closureWithAliasedClassNameObject);
 
         yield 'class alias' => [
             $closureWithAliasedClassNameObject,
             <<<S
-                {"Closure#{$closureWithAliasedClassNameObjectId}":"{$closureWithAliasedClassNameStr}"}
+                {"Closure#{$closureWithAliasedClassNameObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
                 S,
         ];
 
@@ -740,24 +731,22 @@ final class DumperTest extends TestCase
         $closureWithAliasedNamespaceObject = static fn(D\Dumper $date) => new \DateTimeZone('');
         // @formatter:on
         $closureWithAliasedNamespaceObjectId = spl_object_id($closureWithAliasedNamespaceObject);
-        $closureWithAliasedNamespaceStr = self::closureStringJson($closureWithAliasedNamespaceObject);
 
         yield 'namespace alias' => [
             $closureWithAliasedNamespaceObject,
             <<<S
-                {"Closure#{$closureWithAliasedNamespaceObjectId}":"{$closureWithAliasedNamespaceStr}"}
+                {"Closure#{$closureWithAliasedNamespaceObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
                 S,
         ];
         // @formatter:off
         $closureWithNullCollisionOperatorObject = static fn() => $_ENV['var'] ?? null;
         // @formatter:on
         $closureWithNullCollisionOperatorObjectId = spl_object_id($closureWithNullCollisionOperatorObject);
-        $closureWithNullCollisionOperatorStr = self::closureStringJson($closureWithNullCollisionOperatorObject);
 
         yield 'closure with null-collision operator' => [
             $closureWithNullCollisionOperatorObject,
             <<<S
-                {"Closure#{$closureWithNullCollisionOperatorObjectId}":"{$closureWithNullCollisionOperatorStr}"}
+                {"Closure#{$closureWithNullCollisionOperatorObjectId}":"static fn() => \$_ENV['var'] ?? null"}
                 S,
         ];
         yield 'utf8 supported' => [
@@ -771,12 +760,11 @@ final class DumperTest extends TestCase
         // @formatter:on
         $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
         $objectWithClosureInPropertyClosureId = spl_object_id($objectWithClosureInProperty->a);
-        $objectWithClosureInPropertyStr = self::closureStringJson($objectWithClosureInProperty->a);
 
         yield 'closure in property supported' => [
             $objectWithClosureInProperty,
             <<<S
-                {"stdClass#{$objectWithClosureInPropertyId}":{"public \$a":{"Closure#{$objectWithClosureInPropertyClosureId}":"{$objectWithClosureInPropertyStr}"}}}
+                {"stdClass#{$objectWithClosureInPropertyId}":{"public \$a":{"Closure#{$objectWithClosureInPropertyClosureId}":"static fn() => 1"}}}
                 S,
         ];
         yield 'binary string' => [
@@ -861,20 +849,5 @@ final class DumperTest extends TestCase
         $expected = str_replace(["\r\n", '\r\n'], ["\n", '\n'], $expected);
         $actual = str_replace(["\r\n", '\r\n'], ["\n", '\n'], $actual);
         $this->assertEquals($expected, $actual, $message);
-    }
-
-    private static function closureString(\Closure $closure): string
-    {
-        $r = new ReflectionFunction($closure);
-        $file = $r->getFileName();
-        $start = $r->getStartLine();
-        $end = $r->getEndLine();
-
-        return sprintf('Closure(%s:%d-%d)', $file, $start, $end);
-    }
-
-    private static function closureStringJson(\Closure $closure): string
-    {
-        return addcslashes(self::closureString($closure), '/');
     }
 }

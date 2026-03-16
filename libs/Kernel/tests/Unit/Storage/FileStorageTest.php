@@ -7,6 +7,8 @@ namespace AppDevPanel\Kernel\Tests\Unit\Storage;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use Yiisoft\Aliases\Aliases;
+use Yiisoft\Files\FileHelper;
 
 final class FileStorageTest extends AbstractStorageTestCase
 {
@@ -15,7 +17,7 @@ final class FileStorageTest extends AbstractStorageTestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        self::removeDirectory($this->path);
+        FileHelper::removeDirectory($this->path);
     }
 
     /**
@@ -77,21 +79,6 @@ final class FileStorageTest extends AbstractStorageTestCase
 
     public function getStorage(DebuggerIdGenerator $idGenerator): FileStorage
     {
-        return new FileStorage($this->path, $idGenerator);
-    }
-
-    private static function removeDirectory(string $path): void
-    {
-        if (!is_dir($path)) {
-            return;
-        }
-        $items = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST,
-        );
-        foreach ($items as $item) {
-            $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
-        }
-        @rmdir($path);
+        return new FileStorage(new Aliases()->get($this->path), $idGenerator);
     }
 }

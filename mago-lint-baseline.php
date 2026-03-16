@@ -525,7 +525,7 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.83)."
+message = "Class has a high kan defect score (2.7600000000000002)."
 count = 1
 
 [[issues]]
@@ -626,18 +626,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
-code = "explicit-octal"
-message = "Use explicit octal numeral notation."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Storage/FileStorage.php"
-code = "kan-defect"
-message = "Class has a high kan defect score (1.9100000000000001)."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "no-empty"
 message = "Use of the `empty` construct."
 count = 1
@@ -646,7 +634,7 @@ count = 1
 file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 5
+count = 2
 
 [[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
@@ -682,7 +670,7 @@ count = 1
 file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 4
+count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
@@ -727,6 +715,12 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/Kernel/tests/Unit/Helper/BacktraceIgnoreMatcherTest.php"
+code = "require-preg-quote-delimiter"
+message = "Missing delimiter argument in `preg_quote()` call"
+count = 5
+
+[[issues]]
 file = "libs/Kernel/tests/Unit/ProxyDecoratedCallsTest.php"
 code = "braced-string-interpolation"
 message = "Unbraced variable in string interpolation."
@@ -749,9 +743,3 @@ file = "libs/Kernel/tests/Unit/Service/FileServiceRegistryTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/FileStorageTest.php"
-code = "no-error-control-operator"
-message = "Unsafe use of error control operator `@`."
-count = 3
