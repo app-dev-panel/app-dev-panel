@@ -210,7 +210,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         if (!debugEntry) return entriesList;
         const overview = [{key: '__overview__', icon: 'grid_view', label: 'Overview'}];
         const collectors = [...debugEntry.collectors]
-            .filter((c): c is string => typeof c === 'string')
+            .map((c) => (typeof c === 'string' ? c : c.id))
             .filter((c) => !hiddenCollectors.has(c))
             .sort(compareCollectorWeight)
             .map((collector) => {

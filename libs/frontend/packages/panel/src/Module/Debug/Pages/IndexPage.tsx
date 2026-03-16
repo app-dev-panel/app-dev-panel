@@ -286,7 +286,7 @@ type CollectorCardData = {
 
 function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
     return [...entry.collectors]
-        .filter((c): c is string => typeof c === 'string')
+        .map((c) => (typeof c === 'string' ? c : c.id))
         .filter((c) => !hiddenCollectors.has(c))
         .sort(compareCollectorWeight)
         .map((collector) => {
@@ -333,7 +333,8 @@ export const IndexPage = () => {
     // Fetch WebAppInfo collector data for performance breakdown
     useEffect(() => {
         if (!entry) return;
-        if (!entry.collectors.includes(CollectorsMap.WebAppInfoCollector)) return;
+        if (!entry.collectors.some((c) => (typeof c === 'string' ? c : c.id) === CollectorsMap.WebAppInfoCollector))
+            return;
 
         setLoadingPerf(true);
         getCollectorInfo({id: entry.id, collector: CollectorsMap.WebAppInfoCollector})
