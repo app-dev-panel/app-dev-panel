@@ -7,7 +7,6 @@ namespace AppDevPanel\Kernel\DebugServer;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
 use Stringable;
-use Yiisoft\VarDumper\VarDumper;
 
 final class LoggerDecorator implements LoggerInterface
 {
@@ -23,10 +22,11 @@ final class LoggerDecorator implements LoggerInterface
 
     public function log($level, Stringable|string $message, array $context = []): void
     {
-        $this->connection->broadcast(Connection::MESSAGE_TYPE_LOGGER, VarDumper::create([
-            'message' => $message,
-            'context' => $context,
-        ])->asJson(false, 1));
+        $json = json_encode(
+            ['message' => $message, 'context' => $context],
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE,
+        );
+        $this->connection->broadcast(Connection::MESSAGE_TYPE_LOGGER, $json);
         $this->decorated->log($level, $message, $context);
     }
 }

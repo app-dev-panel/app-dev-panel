@@ -21,7 +21,7 @@ count = 1
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `end`: expected `array<array-key, ('T.end() extends mixed)>|object`, but found `mixed`."
+message = "Invalid argument type for argument #1 of `end`: expected `array<array-key, ('T.end() extends mixed)>|object`, but found `truthy-mixed`."
 count = 1
 
 [[issues]]
@@ -34,12 +34,6 @@ count = 2
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
 count = 1
 
 [[issues]]
@@ -128,44 +122,14 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Debug/Http/HttpApplicationWrapper.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Yiisoft\Yii\Http\Application)`).'
-count = 2
-
-[[issues]]
-file = "libs/API/src/Debug/Http/HttpApplicationWrapper.php"
 code = "less-specific-nested-argument-type"
-message = '''Argument type mismatch for argument #1 of `Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher::withmiddlewares`: expected `array<array-key, (callable(...mixed): mixed)>|array<array-key, array<array-key, mixed>>|array<array-key, string>`, but provided type `list{array{'$middlewareDispatcher': null, 'class': class-string('AppDevPanel\Api\Debug\Middleware\MiddlewareDispatcherMiddleware')}, ...<mixed>}` is less specific.'''
+message = '''Argument type mismatch for argument #1 of `Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher::withmiddlewares`: expected `array<array-key, (callable(...mixed): mixed)>|array<array-key, array<array-key, mixed>>|array<array-key, string>`, but provided type `list{array{'$middlewareDispatcher': Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher, 'class': class-string('AppDevPanel\Api\Debug\Middleware\MiddlewareDispatcherMiddleware')}, ...<mixed>}` is less specific.'''
 count = 1
 
 [[issues]]
 file = "libs/API/src/Debug/Http/HttpApplicationWrapper.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\api\debug\http\httpapplicationwrapper::wrap`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Http/HttpApplicationWrapper.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Http/HttpApplicationWrapper.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Yii\Http\Application` not found.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Http/HttpApplicationWrapper.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Yii\Http\Application`.'
-count = 3
-
-[[issues]]
-file = "libs/API/src/Debug/Http/HttpApplicationWrapper.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #3 of `closure::bind`: expected `class-string|null|object`, but possibly received `unknown-ref(Yiisoft\Yii\Http\Application)`.'
 count = 1
 
 [[issues]]
@@ -193,12 +157,6 @@ message = "Could not infer a precise return type for function `49901457864236340
 count = 1
 
 [[issues]]
-file = "libs/API/src/Debug/Provider/DebugApiProvider.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Yii\Http\Application`.'
-count = 2
-
-[[issues]]
 file = "libs/API/src/Debug/Repository/CollectorRepository.php"
 code = "less-specific-argument"
 message = "Argument type mismatch for argument #1 of `substr`: expected `string`, but provided type `array-key` is less specific."
@@ -217,6 +175,12 @@ message = 'Could not infer a precise return type for function `appdevpanel\api\d
 count = 1
 
 [[issues]]
+file = "libs/API/src/Inspector/Command/BashCommand.php"
+code = "possibly-null-operand"
+message = "Left operand in `>` comparison might be `null` (type `int|null`)."
+count = 1
+
+[[issues]]
 file = "libs/API/src/Inspector/Command/CodeceptionCommand.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
@@ -226,6 +190,12 @@ count = 1
 file = "libs/API/src/Inspector/Command/CodeceptionCommand.php"
 code = "possibly-false-argument"
 message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Command/CodeceptionCommand.php"
+code = "possibly-null-operand"
+message = "Left operand in `>` comparison might be `null` (type `int|null`)."
 count = 1
 
 [[issues]]
@@ -241,6 +211,12 @@ message = "Argument #1 of function `json_decode` is possibly `false`, but parame
 count = 1
 
 [[issues]]
+file = "libs/API/src/Inspector/Command/PHPUnitCommand.php"
+code = "possibly-null-operand"
+message = "Left operand in `>` comparison might be `null` (type `int|null`)."
+count = 1
+
+[[issues]]
 file = "libs/API/src/Inspector/Command/PsalmCommand.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
@@ -250,6 +226,12 @@ count = 1
 file = "libs/API/src/Inspector/Command/PsalmCommand.php"
 code = "possibly-false-argument"
 message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Command/PsalmCommand.php"
+code = "possibly-null-operand"
+message = "Left operand in `>` comparison might be `null` (type `int|null`)."
 count = 1
 
 [[issues]]
@@ -650,81 +632,27 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "invalid-iterator"
-message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
-count = 2
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Db\Connection\ConnectionInterface)`).'
-count = 3
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Db\Schema\ColumnSchemaInterface)`).'
-count = 7
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Db\Schema\TableSchemaInterface)`).'
-count = 4
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider::serializearcolumnsschemas`: expected `array<array-key, unknown-ref(Yiisoft\Db\Schema\ColumnSchemaInterface)>`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "mixed-array-index"
-message = "Invalid index type `mixed` used for array access on `array<array-key, non-empty-array<mixed, mixed>>`."
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider::serializearcolumnsschemas`: expected `array<array-key, Yiisoft\Db\Schema\ColumnSchemaInterface>`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "mixed-array-index"
-message = "Invalid index type `mixed` used for array access on `non-empty-array<mixed, mixed>`."
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Yiisoft\Db\Query\Query::from`: expected `Yiisoft\Db\Expression\ExpressionInterface|array<array-key, mixed>|string`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 7
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 9
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Db\Query\Query` not found.'
-count = 2
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Db\Connection\ConnectionInterface`.'
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Db\Schema\ColumnSchemaInterface`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Db\Schema\TableSchemaInterface`.'
-count = 2
+code = "possible-method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 4
 
 [[issues]]
 file = "libs/API/src/Inspector/Test/CodeceptionJSONReporter.php"
@@ -830,38 +758,8 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Debug/Middleware/DebugHeadersTest.php"
-code = "impossible-assignment"
-message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Debug/Middleware/DebugHeadersTest.php"
 code = "missing-magic-method"
 message = "Call to documented magic method `method()` on a class that cannot handle it."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Debug/Middleware/DebugHeadersTest.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Debug/Middleware/DebugHeadersTest.php"
-code = "mixed-operand"
-message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Debug/Middleware/DebugHeadersTest.php"
-code = "no-value"
-message = 'Argument #1 passed to method `appdevpanel\api\debug\middleware\debugheaders::__construct` has type `never`, meaning it cannot produce a value.'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Debug/Middleware/DebugHeadersTest.php"
-code = "non-existent-class"
-message = 'Class `AppDevPanel\Adapter\Yiisoft\DebuggerIdGenerator` not found.'
 count = 1
 
 [[issues]]
@@ -878,21 +776,9 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Debug/Repository/CollectorRepositoryTest.php"
-code = "non-existent-method"
-message = 'Method `write` does not exist on type `AppDevPanel\Kernel\Storage\MemoryStorage`.'
-count = 4
-
-[[issues]]
-file = "libs/API/tests/Unit/Debug/Repository/CollectorRepositoryTest.php"
-code = "too-few-arguments"
-message = 'Too few arguments provided for method `appdevpanel\kernel\storage\memorystorage::__construct`.'
-count = 4
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Db\Connection\ConnectionInterface)`).'
-count = 7
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 6
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
@@ -907,63 +793,33 @@ message = "Unsafe array access on type `mixed`."
 count = 20
 
 [[issues]]
-file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 12
+file = "libs/API/tests/Unit/ServerSentEventsStreamTest.php"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `mixed`."
+count = 6
 
 [[issues]]
-file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Cache\NullCache` not found.'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Db\Cache\SchemaCache` not found.'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Db\Sqlite\Connection` not found.'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Db\Sqlite\Driver` not found.'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Db\Connection\ConnectionInterface`.'
+file = "libs/API/tests/Unit/ServerSentEventsStreamTest.php"
+code = "redundant-comparison"
+message = "Redundant `<` comparison: left-hand side is always less than right-hand side."
 count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/ServerSentEventsStreamTest.php"
+code = "redundant-comparison"
+message = "Redundant `===` comparison: left-hand side is always identical to right-hand side."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/ServerSentEventsStreamTest.php"
+code = "redundant-condition"
+message = "This condition (type `true`) will always evaluate to true."
+count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/DebugServiceProvider.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `appdevpanel\kernel\collector\containerinterfaceproxy::__construct`: expected `AppDevPanel\Kernel\Collector\ContainerProxyConfig`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Cli/src/Command/DebugResetCommand.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 1
-
-[[issues]]
-file = "libs/Cli/src/Command/DebugResetCommand.php"
-code = "non-existent-class-like"
-message = 'Class, interface, enum, or trait `Yiisoft\Yii\Console\ExitCode` not found.'
 count = 1
 
 [[issues]]
@@ -976,18 +832,6 @@ count = 1
 file = "libs/Cli/src/Command/DebugServerBroadcastCommand.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/Cli/src/Command/DebugServerBroadcastCommand.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 2
-
-[[issues]]
-file = "libs/Cli/src/Command/DebugServerBroadcastCommand.php"
-code = "non-existent-class-like"
-message = 'Class, interface, enum, or trait `Yiisoft\Yii\Console\ExitCode` not found.'
 count = 2
 
 [[issues]]
@@ -1018,18 +862,6 @@ count = 3
 file = "libs/Cli/src/Command/DebugServerCommand.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/Cli/src/Command/DebugServerCommand.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 2
-
-[[issues]]
-file = "libs/Cli/src/Command/DebugServerCommand.php"
-code = "non-existent-class-like"
-message = 'Class, interface, enum, or trait `Yiisoft\Yii\Console\ExitCode` not found.'
 count = 2
 
 [[issues]]
@@ -1072,30 +904,6 @@ count = 2
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\console\commandcollector::fetchoutput`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Console\Output\ConsoleBufferedOutput` does not exist.'
-count = 3
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
-code = "non-existent-method"
-message = 'Method `fetch` does not exist on type `Symfony\Component\Console\Output\OutputInterface`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Console/ConsoleAppInfoCollector.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Console\Event\ApplicationShutdown` does not exist.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Console/ConsoleAppInfoCollector.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Console\Event\ApplicationStartup` does not exist.'
 count = 1
 
 [[issues]]
@@ -1142,8 +950,8 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `yiisoft\proxy\proxymanager::__construct`: expected `non-empty-string|null`, but possibly received `null|string`.'
+code = "redundant-cast"
+message = "Redundant cast to `(bool)`: the expression already has this type."
 count = 1
 
 [[issues]]
@@ -1159,18 +967,6 @@ message = "A value of a less specific type `array<array-key, mixed>` is being as
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/Collector/EventCollector.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Console\Event\ApplicationStartup` does not exist.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/EventCollector.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Http\Event\ApplicationStartup` does not exist.'
-count = 2
-
-[[issues]]
 file = "libs/Kernel/src/Collector/EventDispatcherInterfaceProxy.php"
 code = "incompatible-property-visibility"
 message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `appdevpanel\kernel\collector\eventdispatcherinterfaceproxy` used by `appdevpanel\kernel\collector\eventdispatcherinterfaceproxy`: visibility differs (public vs private protected(set))'
@@ -1178,32 +974,14 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/ExceptionCollector.php"
-code = "invalid-class-string-expression"
-message = 'Expression of type `unknown-ref(Yiisoft\ErrorHandler\Event\ApplicationError)` cannot be used as a class name.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ExceptionCollector.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\ErrorHandler\Event\ApplicationError)`).'
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/ExceptionCollector.php"
 code = "mixed-property-type-coercion"
 message = "A value with a less specific type `mixed` is being assigned to property `$$exception` (Throwable|null)."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ExceptionCollector.php"
-code = "no-value"
-message = 'Argument #2 passed to method `AppDevPanel\Kernel\Collector\TimelineCollector::collect` has type `never`, meaning it cannot produce a value.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ExceptionCollector.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\ErrorHandler\Event\ApplicationError`.'
 count = 1
 
 [[issues]]
@@ -1235,6 +1013,12 @@ file = "libs/Kernel/src/Collector/LoggerInterfaceProxy.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Collector\LogCollector::collect`: expected `string`, but found `mixed`.'
 count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/LoggerInterfaceProxy.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
 
 [[issues]]
 file = "libs/Kernel/src/Collector/ProxyLogTrait.php"
@@ -1468,7 +1252,7 @@ count = 2
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
 code = "unused-statement"
 message = "Expression has no effect as a statement"
-count = 3
+count = 2
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/HttpStreamCollector.php"
@@ -1672,7 +1456,7 @@ count = 2
 file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "unused-statement"
 message = "Expression has no effect as a statement"
-count = 3
+count = 2
 
 [[issues]]
 file = "libs/Kernel/src/Collector/VarDumperHandlerInterfaceProxy.php"
@@ -1694,63 +1478,9 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `strtolower`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 8
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`nonnull`)."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "mixed-property-type-coercion"
-message = "A value with a less specific type `mixed` is being assigned to property `$$requestMethod` (string)."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "mixed-property-type-coercion"
-message = "A value with a less specific type `mixed` is being assigned to property `$$requestPath` (string)."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "mixed-property-type-coercion"
-message = "A value with a less specific type `mixed` is being assigned to property `$$requestQuery` (string)."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "mixed-property-type-coercion"
-message = 'A value with a less specific type `mixed` is being assigned to property `$$request` (Psr\Http\Message\ServerRequestInterface|null).'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "mixed-property-type-coercion"
-message = "A value with a less specific type `mixed` is being assigned to property `$$responseStatusCode` (int)."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "mixed-property-type-coercion"
-message = 'A value with a less specific type `mixed` is being assigned to property `$$response` (Psr\Http\Message\ResponseInterface|null).'
-count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
@@ -1760,57 +1490,9 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Http\Event\AfterRequest` does not exist.'
-count = 3
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Http\Event\BeforeRequest` does not exist.'
-count = 3
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "non-existent-method"
-message = 'Method `getrequest` does not exist on type `Yiisoft\Yii\Http\Event\BeforeRequest`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
-code = "non-existent-method"
-message = 'Method `getresponse` does not exist on type `Yiisoft\Yii\Http\Event\AfterRequest`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
 code = "possibly-null-argument"
 message = 'Argument #1 of method `guzzlehttp\psr7\message::rewindbody` is possibly `null`, but parameter type `Psr\Http\Message\MessageInterface` does not accept it.'
 count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/WebAppInfoCollector.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Console\Event\ApplicationStartup` does not exist.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/WebAppInfoCollector.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Http\Event\AfterEmit` does not exist.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/WebAppInfoCollector.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Http\Event\AfterRequest` does not exist.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Web/WebAppInfoCollector.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Http\Event\BeforeRequest` does not exist.'
-count = 1
 
 [[issues]]
 file = "libs/Kernel/src/DebugServer/Connection.php"
@@ -1905,43 +1587,31 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Debugger.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Debugger::isrequestignored`: expected `Psr\Http\Message\ServerRequestInterface`, but found `mixed`.'
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Debugger::iscommandignored`: expected `null|string`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Debugger.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `yiisoft\strings\wildcardpattern::__construct`: expected `string`, but found `mixed`.'
+message = "Invalid argument type for argument #1 of `fnmatch`: expected `string`, but found `mixed`."
 count = 2
 
 [[issues]]
 file = "libs/Kernel/src/Debugger.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Debugger.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Console\Event\ApplicationStartup` does not exist.'
 count = 3
-
-[[issues]]
-file = "libs/Kernel/src/Debugger.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Yii\Http\Event\BeforeRequest` does not exist.'
-count = 4
-
-[[issues]]
-file = "libs/Kernel/src/Debugger.php"
-code = "non-existent-method"
-message = 'Method `getrequest` does not exist on type `Yiisoft\Yii\Http\Event\BeforeRequest`.'
-count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
 code = "falsable-return-statement"
 message = '''Function `appdevpanel\kernel\dumper::asjsoninternal` is declared to return `string` but possibly returns 'false' (inferred as `false|non-empty-string`).'''
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Dumper.php"
+code = "invalid-argument"
+message = "Invalid argument type for argument #2 of `substr`: expected `int`, but found `string`."
 count = 1
 
 [[issues]]
@@ -2000,6 +1670,18 @@ count = 7
 
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
+code = "possibly-false-operand"
+message = "Left operand in arithmetic operation might be `false` (type `false|int`)."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Dumper.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$match`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Dumper.php"
 code = "template-constraint-violation"
 message = "Argument type mismatch for template `V`."
 count = 1
@@ -2024,12 +1706,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
-code = "less-specific-nested-argument-type"
-message = 'Argument type mismatch for argument #1 of `yiisoft\strings\combinedregexp::__construct`: expected `array<array-key, string>`, but provided type `non-empty-array<array-key, mixed>` is less specific.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #1 of `appdevpanel\kernel\helper\backtraceignorematcher::doesstringmatchpattern`: expected `string`, but found `mixed`.'
 count = 1
@@ -2044,6 +1720,12 @@ count = 1
 file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
 count = 1
 
 [[issues]]
@@ -2197,6 +1879,84 @@ message = "Redundant type assertion: `$this->stream` of type `open-resource` is 
 count = 1
 
 [[issues]]
+file = "libs/Kernel/src/Proxy/AbstractObjectProxy.php"
+code = "ambiguous-object-property-access"
+message = "Cannot statically verify property access on a generic `object` type."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/AbstractObjectProxy.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/AbstractObjectProxy.php"
+code = "string-member-selector"
+message = "This member selector uses a non-literal string type (`string`); its specific value cannot be statically determined."
+count = 4
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/AbstractObjectProxy.php"
+code = "unsafe-instantiation"
+message = 'Unsafe `new static()`: constructor of `AppDevPanel\Kernel\Proxy\AbstractObjectProxy` is not final and its signature might change in child classes, potentially leading to runtime errors.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "non-existent-method"
+message = "Method `getname` does not exist on type `ReflectionIntersectionType`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "non-existent-method"
+message = "Method `getname` does not exist on type `ReflectionUnionType`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "possible-method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #1 of `reflectionclass::__construct`: expected `('T.reflectionclass extends object)|class-string<'T.reflectionclass extends object>`, but possibly received `string`."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "possibly-null-argument"
+message = 'Argument #1 of method `AppDevPanel\Kernel\Proxy\ProxyFactory::rendertype` is possibly `null`, but parameter type `ReflectionType` does not accept it.'
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "too-few-arguments"
+message = 'Too few arguments provided for method `appdevpanel\kernel\proxy\abstractobjectproxy::__construct`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "unknown-class-instantiation"
+message = "Cannot determine the concrete class for instantiation."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "unsafe-instantiation"
+message = 'Unsafe `new $class_name`: constructor of `AppDevPanel\Kernel\Proxy\AbstractObjectProxy` is not final and its signature might change in child classes, potentially leading to runtime errors.'
+count = 1
+
+[[issues]]
 file = "libs/Kernel/src/ProxyDecoratedCalls.php"
 code = "ambiguous-object-property-access"
 message = "Cannot statically verify property access on a generic `object` type."
@@ -2210,14 +1970,32 @@ count = 3
 
 [[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
-code = "possibly-false-argument"
-message = "Argument #1 of function `uasort` is possibly `false`, but parameter type `array<non-negative-int, non-empty-string>` does not accept it."
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
 count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "possibly-false-argument"
-message = 'Argument #1 of method `yiisoft\json\json::decode` is possibly `false`, but parameter type `string` does not accept it.'
+message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `uasort` is possibly `false`, but parameter type `array<non-negative-int, non-empty-string>` does not accept it."
 count = 1
 
 [[issues]]
@@ -2414,30 +2192,6 @@ count = 4
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/CommandCollectorTest.php"
-code = "no-value"
-message = 'Argument #2 passed to method `symfony\component\console\event\consoleerrorevent::__construct` has type `never`, meaning it cannot produce a value.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/CommandCollectorTest.php"
-code = "no-value"
-message = 'Argument #3 passed to method `symfony\component\console\event\consoleevent::__construct` has type `never`, meaning it cannot produce a value.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/CommandCollectorTest.php"
-code = "no-value"
-message = 'Argument #3 passed to method `symfony\component\console\event\consoleterminateevent::__construct` has type `never`, meaning it cannot produce a value.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/CommandCollectorTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Yii\Console\Output\ConsoleBufferedOutput` not found.'
-count = 3
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/CommandCollectorTest.php"
 code = "non-existent-method"
 message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
 count = 3
@@ -2453,24 +2207,6 @@ file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
 count = 6
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
-code = "no-value"
-message = 'Argument #1 passed to method `AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector::collect` has type `never`, meaning it cannot produce a value.'
-count = 2
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Yii\Console\Event\ApplicationShutdown` not found.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Yii\Console\Event\ApplicationStartup` not found.'
-count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
@@ -2591,18 +2327,6 @@ file = "libs/Kernel/tests/Unit/Collector/ExceptionCollectorTest.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 4
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ExceptionCollectorTest.php"
-code = "no-value"
-message = 'Argument #1 passed to method `AppDevPanel\Kernel\Collector\ExceptionCollector::collect` has type `never`, meaning it cannot produce a value.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ExceptionCollectorTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\ErrorHandler\Event\ApplicationError` not found.'
-count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/ExceptionCollectorTest.php"
@@ -2759,24 +2483,6 @@ file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
 count = 3
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"
-code = "no-value"
-message = 'Argument #1 passed to method `AppDevPanel\Kernel\Collector\Web\RequestCollector::collect` has type `never`, meaning it cannot produce a value.'
-count = 2
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Yii\Http\Event\AfterRequest` not found.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Yii\Http\Event\BeforeRequest` not found.'
-count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"
@@ -2942,57 +2648,9 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/WebAppInfoCollectorTest.php"
-code = "no-value"
-message = 'Argument #1 passed to method `AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector::collect` has type `never`, meaning it cannot produce a value.'
-count = 2
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/WebAppInfoCollectorTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Yii\Http\Event\AfterRequest` not found.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/WebAppInfoCollectorTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Yii\Http\Event\BeforeRequest` not found.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/WebAppInfoCollectorTest.php"
 code = "non-existent-method"
 message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
 count = 2
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/DebugServiceProviderTest.php"
-code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\DebugServiceProvider` not found.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/DebuggerTest.php"
-code = "no-value"
-message = 'Argument #1 passed to method `AppDevPanel\Kernel\Debugger::startup` has type `never`, meaning it cannot produce a value.'
-count = 8
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/DebuggerTest.php"
-code = "non-existent-class"
-message = 'Class `Nyholm\Psr7\ServerRequest` not found.'
-count = 5
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/DebuggerTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Yii\Console\Event\ApplicationStartup` not found.'
-count = 3
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/DebuggerTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Yii\Http\Event\BeforeRequest` not found.'
-count = 5
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/DumperTest.php"

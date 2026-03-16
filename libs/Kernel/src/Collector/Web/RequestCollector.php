@@ -10,8 +10,6 @@ use AppDevPanel\Kernel\Collector\TimelineCollector;
 use GuzzleHttp\Psr7\Message;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Yii\Http\Event\AfterRequest;
-use Yiisoft\Yii\Http\Event\BeforeRequest;
 
 final class RequestCollector implements SummaryCollectorInterface
 {
@@ -64,30 +62,61 @@ final class RequestCollector implements SummaryCollectorInterface
         ];
     }
 
+    /**
+     * Collect request data from a PSR-7 request.
+     */
+    public function collectRequest(ServerRequestInterface $request): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+
+        $this->request = $request;
+        $this->requestUrl = (string) $request->getUri();
+        $this->requestPath = $request->getUri()->getPath();
+        $this->requestQuery = $request->getUri()->getQuery();
+        $this->requestMethod = $request->getMethod();
+        $this->requestIsAjax = strtolower($request->getHeaderLine('X-Requested-With')) === 'xmlhttprequest';
+        $this->userIp = $request->getServerParams()['REMOTE_ADDR'] ?? null;
+        $this->timelineCollector->collect($this, 0);
+    }
+
+    /**
+     * Collect response data from a PSR-7 response.
+     */
+    public function collectResponse(ResponseInterface $response): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+
+        $this->response = $response;
+        $this->responseStatusCode = $response->getStatusCode();
+        $this->timelineCollector->collect($this, 1);
+    }
+
+    /**
+     * Generic event-based collection for backward compatibility.
+     * Adapters should prefer collectRequest() and collectResponse().
+     */
     public function collect(object $event): void
     {
         if (!$this->isActive()) {
             return;
         }
 
-        if ($event instanceof BeforeRequest) {
+        if (method_exists($event, 'getRequest')) {
             $request = $event->getRequest();
-
-            $this->request = $request;
-            $this->requestUrl = (string) $request->getUri();
-            $this->requestPath = $request->getUri()->getPath();
-            $this->requestQuery = $request->getUri()->getQuery();
-            $this->requestMethod = $request->getMethod();
-            $this->requestIsAjax = strtolower($request->getHeaderLine('X-Requested-With')) === 'xmlhttprequest';
-            $this->userIp = $request->getServerParams()['REMOTE_ADDR'] ?? null;
+            if ($request instanceof ServerRequestInterface) {
+                $this->collectRequest($request);
+            }
         }
-        if ($event instanceof AfterRequest) {
+        if (method_exists($event, 'getResponse')) {
             $response = $event->getResponse();
-
-            $this->response = $response;
-            $this->responseStatusCode = $response !== null ? $response->getStatusCode() : 500;
+            if ($response instanceof ResponseInterface) {
+                $this->collectResponse($response);
+            }
         }
-        $this->timelineCollector->collect($this, spl_object_id($event));
     }
 
     public function getSummary(): array

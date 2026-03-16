@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
-use Yiisoft\Proxy\ObjectProxy;
+use AppDevPanel\Kernel\Proxy\AbstractObjectProxy;
+use AppDevPanel\Kernel\Proxy\ErrorHandlingTrait;
 
-class ServiceProxy extends ObjectProxy
+class ServiceProxy extends AbstractObjectProxy
 {
     use ProxyLogTrait;
+    use ErrorHandlingTrait;
 
     public function __construct(
         private readonly string $service,
@@ -25,11 +27,8 @@ class ServiceProxy extends ObjectProxy
         return $result;
     }
 
-    protected function getNewStaticInstance(object $instance): ObjectProxy
+    protected function getNewStaticInstance(object $instance): static
     {
-        /**
-         * @psalm-suppress UnsafeInstantiation Constructor should be consistent to `getNewStaticInstance()`.
-         */
         return new static($this->service, $instance, $this->config);
     }
 

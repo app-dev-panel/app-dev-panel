@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Inspector\Controller;
 
 use Alexkart\CurlBuilder\Command;
-use AppDevPanel\Adapter\Yiisoft\Collector\Web\RequestCollector;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Inspector\ApplicationState;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use FilesystemIterator;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
@@ -238,6 +238,7 @@ class InspectController
         $patterns = [
             static fn(string $class) => !str_starts_with($class, 'ComposerAutoloaderInit'),
             static fn(string $class) => !str_starts_with($class, 'Composer\\'),
+            static fn(string $class) => !str_starts_with($class, 'AppDevPanel\\'),
             static fn(string $class) => !str_starts_with($class, 'Yiisoft\\Yii\\Debug\\'),
             static fn(string $class) => !str_starts_with($class, 'Yiisoft\\ErrorHandler\\ErrorHandler'),
             static fn(string $class) => !str_contains($class, '@anonymous'),

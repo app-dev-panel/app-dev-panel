@@ -8,8 +8,10 @@ use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Dumper;
-use Yiisoft\Files\FileHelper;
-use Yiisoft\Json\Json;
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RuntimeException;
 
 use function array_slice;
 use function count;
@@ -56,7 +58,7 @@ final class FileStorage implements StorageInterface
         foreach ($dataFiles as $file) {
             $dir = dirname($file);
             $entryId = substr($dir, strlen(dirname($file, 2)) + 1);
-            $data[$entryId] = Json::decode(file_get_contents($file));
+            $data[$entryId] = json_decode(file_get_contents($file), true, 512, JSON_THROW_ON_ERROR);
         }
 
         return $data;
@@ -67,19 +69,19 @@ final class FileStorage implements StorageInterface
         $basePath = $this->path . '/' . date('Y-m-d') . '/' . $this->idGenerator->getId() . '/';
 
         try {
-            FileHelper::ensureDirectory($basePath);
+            self::ensureDirectory($basePath);
 
             $dumper = Dumper::create($this->getData(), $this->excludedClasses);
             $result = file_put_contents($basePath . self::TYPE_DATA . '.json', $dumper->asJson(30));
             if ($result === false) {
-                throw new \RuntimeException(sprintf(
+                throw new RuntimeException(sprintf(
                     'Failed to write file "%s".',
                     $basePath . self::TYPE_DATA . '.json',
                 ));
             }
             $result = file_put_contents($basePath . self::TYPE_OBJECTS . '.json', $dumper->asJsonObjectsMap(30));
             if ($result === false) {
-                throw new \RuntimeException(sprintf(
+                throw new RuntimeException(sprintf(
                     'Failed to write file "%s".',
                     $basePath . self::TYPE_OBJECTS . '.json',
                 ));
@@ -88,7 +90,7 @@ final class FileStorage implements StorageInterface
             $summaryData = Dumper::create($this->collectSummaryData())->asJson();
             $result = file_put_contents($basePath . self::TYPE_SUMMARY . '.json', $summaryData);
             if ($result === false) {
-                throw new \RuntimeException(sprintf(
+                throw new RuntimeException(sprintf(
                     'Failed to write file "%s".',
                     $basePath . self::TYPE_SUMMARY . '.json',
                 ));
@@ -106,7 +108,7 @@ final class FileStorage implements StorageInterface
 
     public function clear(): void
     {
-        FileHelper::removeDirectory($this->path);
+        self::removeDirectory($this->path);
     }
 
     /**
@@ -148,13 +150,51 @@ final class FileStorage implements StorageInterface
             $path3 = dirname($file, 3);
             $resource = substr($path1, strlen($path3));
 
-            FileHelper::removeDirectory($this->path . $resource);
+            self::removeDirectory($this->path . $resource);
 
             // Clean empty group directories
             $group = substr($path2, strlen($path3));
-            if (FileHelper::isEmptyDirectory($this->path . $group)) {
-                FileHelper::removeDirectory($this->path . $group);
+            if (self::isEmptyDirectory($this->path . $group)) {
+                self::removeDirectory($this->path . $group);
             }
         }
+    }
+
+    private static function ensureDirectory(string $path): void
+    {
+        if (!is_dir($path) && !mkdir($path, 0775, true) && !is_dir($path)) {
+            throw new RuntimeException(sprintf('Directory "%s" could not be created.', $path));
+        }
+    }
+
+    private static function removeDirectory(string $path): void
+    {
+        if (!is_dir($path)) {
+            return;
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST,
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isDir()) {
+                rmdir($file->getPathname());
+            } else {
+                unlink($file->getPathname());
+            }
+        }
+
+        rmdir($path);
+    }
+
+    private static function isEmptyDirectory(string $path): bool
+    {
+        if (!is_dir($path)) {
+            return false;
+        }
+
+        return !new FilesystemIterator($path)->valid();
     }
 }

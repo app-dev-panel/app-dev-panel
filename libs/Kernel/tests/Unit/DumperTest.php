@@ -711,7 +711,7 @@ final class DumperTest extends TestCase
         yield 'original class name' => [
             $closureWithUsualClassNameObject,
             <<<S
-                {"Closure#{$closureWithUsualClassNameObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
+                {"Closure#{$closureWithUsualClassNameObjectId}":"static fn(Dumper \$date) => new \\\\DateTimeZone('')"}
                 S,
         ];
 
@@ -723,7 +723,7 @@ final class DumperTest extends TestCase
         yield 'class alias' => [
             $closureWithAliasedClassNameObject,
             <<<S
-                {"Closure#{$closureWithAliasedClassNameObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
+                {"Closure#{$closureWithAliasedClassNameObjectId}":"static fn(Dumper \$date) => new \\\\DateTimeZone('')"}
                 S,
         ];
 
@@ -735,7 +735,7 @@ final class DumperTest extends TestCase
         yield 'namespace alias' => [
             $closureWithAliasedNamespaceObject,
             <<<S
-                {"Closure#{$closureWithAliasedNamespaceObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
+                {"Closure#{$closureWithAliasedNamespaceObjectId}":"static fn(D\\\\Dumper \$date) => new \\\\DateTimeZone('')"}
                 S,
         ];
         // @formatter:off
@@ -830,10 +830,13 @@ final class DumperTest extends TestCase
                 {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":false,"uri":"php:\/\/stderr"}
                 S,
         ];
+        $stdinMeta = stream_get_meta_data(STDIN);
+        $stdinSeekable = $stdinMeta['seekable'] ? 'true' : 'false';
+
         yield 'stdin' => [
             STDIN,
             <<<S
-                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"rb","unread_bytes":0,"seekable":false,"uri":"php:\/\/stdin"}
+                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"rb","unread_bytes":0,"seekable":{$stdinSeekable},"uri":"php:\/\/stdin"}
                 S,
         ];
     }

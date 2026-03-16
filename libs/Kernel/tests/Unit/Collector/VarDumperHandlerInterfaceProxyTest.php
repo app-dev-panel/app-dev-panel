@@ -7,15 +7,15 @@ namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\VarDumperHandlerInterfaceProxy;
+use AppDevPanel\Kernel\DumpHandlerInterface;
 use PHPUnit\Framework\TestCase;
 use stdClass;
-use Yiisoft\VarDumper\HandlerInterface;
 
 final class VarDumperHandlerInterfaceProxyTest extends TestCase
 {
     public function testMethodHandle(): void
     {
-        $handler = $this->createMock(HandlerInterface::class);
+        $handler = $this->createMock(DumpHandlerInterface::class);
         $handler->expects($this->once())->method('handle');
         $timeline = new TimelineCollector();
         $timeline->startup();
@@ -53,7 +53,7 @@ final class VarDumperHandlerInterfaceProxyTest extends TestCase
 
     public function testProxyDecoratedCall(): void
     {
-        $handler = new class() implements HandlerInterface {
+        $handler = new class() implements DumpHandlerInterface {
             public $var = null;
 
             public function getProxiedCall(): string

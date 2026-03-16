@@ -10,12 +10,13 @@ use AppDevPanel\Kernel\Collector\TimelineCollector;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
-use Yiisoft\Yii\Console\Event\ApplicationShutdown;
-use Yiisoft\Yii\Console\Event\ApplicationStartup;
 
 final class ConsoleAppInfoCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
+
+    public const EVENT_APPLICATION_STARTUP = 'console.app.startup';
+    public const EVENT_APPLICATION_SHUTDOWN = 'console.app.shutdown';
 
     private float $applicationProcessingTimeStarted = 0;
     private float $applicationProcessingTimeStopped = 0;
@@ -42,26 +43,43 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
         ];
     }
 
+    /**
+     * Collect timing data based on a string event type or Symfony Console event.
+     */
+    public function collectTiming(string $eventType): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+
+        match ($eventType) {
+            self::EVENT_APPLICATION_STARTUP => $this->applicationProcessingTimeStarted = microtime(true),
+            self::EVENT_APPLICATION_SHUTDOWN => $this->applicationProcessingTimeStopped = microtime(true),
+            default => null,
+        };
+        $this->timelineCollector->collect($this, crc32($eventType));
+    }
+
     public function collect(object $event): void
     {
         if (!$this->isActive()) {
             return;
         }
 
-        if ($event instanceof ApplicationStartup) {
-            $this->applicationProcessingTimeStarted = microtime(true);
-        } elseif ($event instanceof ConsoleCommandEvent) {
+        $className = $event::class;
+
+        // Map known Symfony Console events
+        if ($event instanceof ConsoleCommandEvent) {
             $this->requestProcessingTimeStarted = microtime(true);
         } elseif ($event instanceof ConsoleErrorEvent) {
-            /**
-             * If we receive this event, then {@see ConsoleCommandEvent} hasn't received and won't.
-             * So {@see requestProcessingTimeStarted} equals to 0 now and better to set it at least with application startup time.
-             */
             $this->requestProcessingTimeStarted = $this->applicationProcessingTimeStarted;
             $this->requestProcessingTimeStopped = microtime(true);
         } elseif ($event instanceof ConsoleTerminateEvent) {
             $this->requestProcessingTimeStopped = microtime(true);
-        } elseif ($event instanceof ApplicationShutdown) {
+        } elseif (str_ends_with($className, 'ApplicationStartup')) {
+            // Framework-agnostic: match by class name suffix
+            $this->applicationProcessingTimeStarted = microtime(true);
+        } elseif (str_ends_with($className, 'ApplicationShutdown')) {
             $this->applicationProcessingTimeStopped = microtime(true);
         }
 

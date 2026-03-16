@@ -12,7 +12,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Yiisoft\Yii\Console\ExitCode;
 
 final class DebugServerCommand extends Command
 {
@@ -48,7 +47,7 @@ final class DebugServerCommand extends Command
 
         $env = $input->getOption('env');
         if ($env === 'test') {
-            return ExitCode::OK;
+            return Command::SUCCESS;
         }
 
         try {
@@ -56,7 +55,7 @@ final class DebugServerCommand extends Command
             $socket->bind();
         } catch (\RuntimeException $e) {
             $io->error('Failed to start debug server: ' . $e->getMessage());
-            return ExitCode::UNSPECIFIED_ERROR;
+            return Command::FAILURE;
         }
 
         $io->success(sprintf('Listening on "%s".', $socket->getUri()));
@@ -91,6 +90,6 @@ final class DebugServerCommand extends Command
             $io->block($data[1], $type);
         }
 
-        return ExitCode::OK;
+        return Command::SUCCESS;
     }
 }

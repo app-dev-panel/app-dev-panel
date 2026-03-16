@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AppDevPanel\Kernel\Collector;
 
 use Throwable;
-use Yiisoft\ErrorHandler\Event\ApplicationError;
 
 final class ExceptionCollector implements SummaryCollectorInterface
 {
@@ -36,13 +35,40 @@ final class ExceptionCollector implements SummaryCollectorInterface
         return array_map([$this, 'serializeException'], $exceptions);
     }
 
-    public function collect(ApplicationError $error): void
+    /**
+     * Collect an exception directly.
+     */
+    public function collectException(Throwable $exception): void
     {
         if (!$this->isActive()) {
             return;
         }
 
-        $this->exception = $error->getThrowable();
+        $this->exception = $exception;
+        $this->timelineCollector->collect($this, $exception::class);
+    }
+
+    /**
+     * Collect from an event object that wraps a Throwable.
+     * Supports any event with getThrowable() or getError() method.
+     */
+    public function collect(object $error): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+
+        if ($error instanceof Throwable) {
+            $this->exception = $error;
+        } elseif (method_exists($error, 'getThrowable')) {
+            $this->exception = $error->getThrowable();
+        } elseif (method_exists($error, 'getError')) {
+            $throwable = $error->getError();
+            if ($throwable instanceof Throwable) {
+                $this->exception = $throwable;
+            }
+        }
+
         $this->timelineCollector->collect($this, $error::class);
     }
 

@@ -12,8 +12,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Yiisoft\VarDumper\VarDumper;
-use Yiisoft\Yii\Console\ExitCode;
 
 final class DebugServerBroadcastCommand extends Command
 {
@@ -39,27 +37,26 @@ final class DebugServerBroadcastCommand extends Command
 
         $env = $input->getOption('env');
         if ($env === 'test') {
-            return ExitCode::OK;
+            return Command::SUCCESS;
         }
 
         try {
             $socket = Connection::create();
         } catch (\RuntimeException $e) {
             $io->error('Failed to create socket: ' . $e->getMessage());
-            return ExitCode::UNSPECIFIED_ERROR;
+            return Command::FAILURE;
         }
 
         try {
             $data = $input->getOption('message');
             $socket->broadcast(Connection::MESSAGE_TYPE_LOGGER, $data);
-            $socket->broadcast(
-                Connection::MESSAGE_TYPE_VAR_DUMPER,
-                VarDumper::create(['$data' => $data])->asJson(false),
-            );
+            $socket->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, json_encode([
+                '$data' => $data,
+            ], JSON_THROW_ON_ERROR));
         } finally {
             $socket->close();
         }
 
-        return ExitCode::OK;
+        return Command::SUCCESS;
     }
 }

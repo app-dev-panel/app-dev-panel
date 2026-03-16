@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
+use AppDevPanel\Kernel\DumpHandlerInterface;
 use AppDevPanel\Kernel\ProxyDecoratedCalls;
-use Yiisoft\VarDumper\HandlerInterface;
 
-final class VarDumperHandlerInterfaceProxy implements HandlerInterface
+final class VarDumperHandlerInterfaceProxy implements DumpHandlerInterface
 {
     use ProxyDecoratedCalls;
 
     public function __construct(
-        private readonly HandlerInterface $decorated,
+        private readonly DumpHandlerInterface $decorated,
         private readonly VarDumperCollector $collector,
     ) {}
 

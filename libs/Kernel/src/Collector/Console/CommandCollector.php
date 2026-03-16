@@ -12,8 +12,8 @@ use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Yiisoft\Yii\Console\Output\ConsoleBufferedOutput;
 
 final class CommandCollector implements SummaryCollectorInterface
 {
@@ -119,7 +119,14 @@ final class CommandCollector implements SummaryCollectorInterface
 
     private function fetchOutput(OutputInterface $output): ?string
     {
-        return $output instanceof ConsoleBufferedOutput ? $output->fetch() : null;
+        // Support Symfony's BufferedOutput and any output with fetch() method (e.g. Yii's ConsoleBufferedOutput)
+        if ($output instanceof BufferedOutput) {
+            return $output->fetch();
+        }
+        if (method_exists($output, 'fetch')) {
+            return $output->fetch();
+        }
+        return null;
     }
 
     private function castInputToString(InputInterface $input): ?string

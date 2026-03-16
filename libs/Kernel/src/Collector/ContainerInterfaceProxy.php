@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
+use AppDevPanel\Kernel\Proxy\ErrorHandlingTrait;
+use AppDevPanel\Kernel\Proxy\ProxyFactory;
 use AppDevPanel\Kernel\ProxyDecoratedCalls;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Yiisoft\Proxy\ProxyManager;
-use Yiisoft\Proxy\ProxyTrait;
 
 use function is_callable;
 use function is_object;
@@ -19,14 +19,14 @@ final class ContainerInterfaceProxy implements ContainerInterface
 {
     use ProxyDecoratedCalls;
     use ProxyLogTrait;
-    use ProxyTrait;
+    use ErrorHandlingTrait;
 
     public const LOG_NOTHING = 0;
     public const LOG_ARGUMENTS = 1;
     public const LOG_RESULT = 2;
     public const LOG_ERROR = 4;
 
-    private ProxyManager $proxyManager;
+    private ProxyFactory $proxyFactory;
 
     private array $serviceProxy = [];
 
@@ -35,7 +35,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
         ContainerProxyConfig $config,
     ) {
         $this->config = $config;
-        $this->proxyManager = new ProxyManager($this->config->getProxyCachePath());
+        $this->proxyFactory = new ProxyFactory();
     }
 
     public function withDecoratedServices(array $decoratedServices): self
@@ -140,7 +140,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
             $methods[$method] = $callback;
         }
 
-        return $this->proxyManager->createObjectProxy($service, ServiceMethodProxy::class, [
+        return $this->proxyFactory->createObjectProxy($service, ServiceMethodProxy::class, [
             $service,
             $instance,
             $methods,
@@ -174,7 +174,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
      */
     private function getCommonServiceProxy(string $service, object $instance): object
     {
-        return $this->proxyManager->createObjectProxy($service, ServiceProxy::class, [
+        return $this->proxyFactory->createObjectProxy($service, ServiceProxy::class, [
             $service,
             $instance,
             $this->config,

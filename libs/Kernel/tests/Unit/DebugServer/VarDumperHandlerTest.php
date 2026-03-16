@@ -6,10 +6,10 @@ namespace AppDevPanel\Kernel\Tests\Unit\DebugServer;
 
 use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\DebugServer\VarDumperHandler;
+use AppDevPanel\Kernel\DumpHandlerInterface;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Yiisoft\VarDumper\HandlerInterface;
 
 #[RequiresPhpExtension('sockets')]
 final class VarDumperHandlerTest extends TestCase
@@ -19,7 +19,7 @@ final class VarDumperHandlerTest extends TestCase
     {
         $handler = new VarDumperHandler();
 
-        $this->assertInstanceOf(HandlerInterface::class, $handler);
+        $this->assertInstanceOf(DumpHandlerInterface::class, $handler);
         $handler->connection->close();
     }
 

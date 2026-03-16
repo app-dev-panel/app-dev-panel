@@ -8,9 +8,15 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/API/src/Debug/Repository/CollectorRepository.php"
@@ -68,12 +74,6 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "no-empty-catch-clause"
-message = "Do not use empty `catch` blocks."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
 count = 1
@@ -92,6 +92,12 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/ServerSentEventsStream.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/ServerSentEventsStreamTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
@@ -249,7 +255,13 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Debugger.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2)."
+message = "Class has a high kan defect score (2.2800000000000002)."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Debugger.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -261,7 +273,7 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.7600000000000002)."
+message = "Class has a high kan defect score (3.3200000000000003)."
 count = 1
 
 [[issues]]
@@ -331,9 +343,63 @@ message = "Interface has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/Kernel/src/Proxy/AbstractObjectProxy.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.6800000000000002)."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "no-eval"
+message = "Unsafe use of `eval` construct."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Proxy/ProxyFactory.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.77)."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "no-empty"
 message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
 
 [[issues]]

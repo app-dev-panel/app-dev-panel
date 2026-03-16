@@ -7,7 +7,7 @@ namespace AppDevPanel\Kernel;
 use __PHP_Incomplete_Class;
 use Closure;
 use ReflectionException;
-use Yiisoft\VarDumper\ClosureExporter;
+use ReflectionFunction;
 
 use function array_key_exists;
 use function is_array;
@@ -17,7 +17,6 @@ final class Dumper
 {
     private array $objects = [];
 
-    private static ?ClosureExporter $closureExporter = null;
     private readonly array $excludedClasses;
 
     private function __construct(
@@ -265,6 +264,59 @@ final class Dumper
      */
     private function exportClosure(Closure $closure): string
     {
-        return (self::$closureExporter ??= new ClosureExporter())->export($closure);
+        $reflection = new ReflectionFunction($closure);
+        $fileName = $reflection->getFileName();
+        $startLine = $reflection->getStartLine();
+        $endLine = $reflection->getEndLine();
+
+        if ($fileName === false || $startLine === false) {
+            return 'function () { /* native code */ }';
+        }
+
+        $lines = file($fileName);
+        if ($lines === false) {
+            return sprintf('function () { /* %s:%d */ }', $fileName, $startLine);
+        }
+
+        $source = implode('', array_slice($lines, $startLine - 1, $endLine - $startLine + 1));
+
+        // Extract just the closure from the source line (removing variable assignment, trailing semicolons, etc.)
+        if (preg_match('/(static\s+)?(?=fn\b|function\s*\()/', $source, $match, PREG_OFFSET_CAPTURE)) {
+            $source = substr($source, $match[0][1]);
+        }
+
+        // Remove trailing semicolons, commas, and closing parentheses that belong to the outer context
+        $source = rtrim(trim($source));
+        $source = rtrim($source, ';,');
+        $source = trim($source);
+
+        // Normalize indentation for multi-line closures
+        if ($startLine !== $endLine) {
+            $closureLines = explode("\n", $source);
+            if (count($closureLines) > 1) {
+                // Find minimum indentation (excluding first line and empty lines)
+                $minIndent = PHP_INT_MAX;
+                for ($i = 1, $count = count($closureLines); $i < $count; $i++) {
+                    $line = $closureLines[$i];
+                    if (trim($line) === '') {
+                        continue;
+                    }
+                    $indent = strlen($line) - strlen(ltrim($line));
+                    $minIndent = min($minIndent, $indent);
+                }
+                if ($minIndent > 0 && $minIndent < PHP_INT_MAX) {
+                    for ($i = 1, $count = count($closureLines); $i < $count; $i++) {
+                        if (strlen($closureLines[$i]) < $minIndent) {
+                            continue;
+                        }
+                        $closureLines[$i] = substr($closureLines[$i], $minIndent);
+                    }
+                }
+                // Re-indent with 4 spaces relative to first line
+                $source = implode("\n", $closureLines);
+            }
+        }
+
+        return $source;
     }
 }

@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace AppDevPanel\Kernel\Collector;
 
 use ReflectionClass;
-use Yiisoft\Yii\Console\Event\ApplicationStartup as ConsoleApplicationStartup;
-use Yiisoft\Yii\Http\Event\ApplicationStartup as HttpApplicationStartup;
 
 final class EventCollector implements SummaryCollectorInterface
 {
@@ -14,9 +12,27 @@ final class EventCollector implements SummaryCollectorInterface
 
     private array $events = [];
 
+    /**
+     * List of event class names that should be collected even before the collector is active.
+     * The Adapter should configure this with its application startup event classes.
+     *
+     * @var string[]
+     */
+    private array $earlyAcceptedEvents = [];
+
     public function __construct(
         private readonly TimelineCollector $timelineCollector,
     ) {}
+
+    /**
+     * @param string[] $eventClasses Event class names to accept before collector is active.
+     */
+    public function withEarlyAcceptedEvents(array $eventClasses): self
+    {
+        $new = clone $this;
+        $new->earlyAcceptedEvents = $eventClasses;
+        return $new;
+    }
 
     public function getCollected(): array
     {
@@ -28,11 +44,7 @@ final class EventCollector implements SummaryCollectorInterface
 
     public function collect(object $event, string $line): void
     {
-        if (
-            !$event instanceof HttpApplicationStartup
-            && !$event instanceof ConsoleApplicationStartup
-            && !$this->isActive()
-        ) {
+        if (!in_array($event::class, $this->earlyAcceptedEvents, true) && !$this->isActive()) {
             return;
         }
 

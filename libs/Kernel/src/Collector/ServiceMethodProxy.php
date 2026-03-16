@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
-use Yiisoft\Proxy\ObjectProxy;
-
 class ServiceMethodProxy extends ServiceProxy
 {
     public function __construct(
@@ -31,11 +29,8 @@ class ServiceMethodProxy extends ServiceProxy
         return $result;
     }
 
-    protected function getNewStaticInstance(object $instance): ObjectProxy
+    protected function getNewStaticInstance(object $instance): static
     {
-        /**
-         * @psalm-suppress UnsafeInstantiation Constructor should be consistent to `getNewStaticInstance()`.
-         */
         return new static($this->getService(), $instance, $this->methods, $this->getConfig());
     }
 }

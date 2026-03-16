@@ -7,14 +7,15 @@ namespace AppDevPanel\Kernel\Collector\Web;
 use AppDevPanel\Kernel\Collector\CollectorTrait;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
-use Yiisoft\Yii\Console\Event\ApplicationStartup;
-use Yiisoft\Yii\Http\Event\AfterEmit;
-use Yiisoft\Yii\Http\Event\AfterRequest;
-use Yiisoft\Yii\Http\Event\BeforeRequest;
 
 final class WebAppInfoCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
+
+    public const EVENT_APPLICATION_STARTUP = 'app.startup';
+    public const EVENT_BEFORE_REQUEST = 'request.before';
+    public const EVENT_AFTER_REQUEST = 'request.after';
+    public const EVENT_AFTER_EMIT = 'response.emit';
 
     private float $applicationProcessingTimeStarted = 0;
     private float $applicationProcessingTimeStopped = 0;
@@ -41,22 +42,49 @@ final class WebAppInfoCollector implements SummaryCollectorInterface
         ];
     }
 
+    /**
+     * Collect timing data based on event type.
+     *
+     * @param string $eventType One of the EVENT_* constants.
+     */
+    public function collectTiming(string $eventType): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+
+        match ($eventType) {
+            self::EVENT_APPLICATION_STARTUP => $this->applicationProcessingTimeStarted = microtime(true),
+            self::EVENT_BEFORE_REQUEST => $this->requestProcessingTimeStarted = microtime(true),
+            self::EVENT_AFTER_REQUEST => $this->requestProcessingTimeStopped = microtime(true),
+            self::EVENT_AFTER_EMIT => $this->applicationProcessingTimeStopped = microtime(true),
+            default => null,
+        };
+        $this->timelineCollector->collect($this, crc32($eventType));
+    }
+
+    /**
+     * Generic event-based collection for backward compatibility.
+     */
     public function collect(object $event): void
     {
         if (!$this->isActive()) {
             return;
         }
 
-        if ($event instanceof ApplicationStartup) {
-            $this->applicationProcessingTimeStarted = microtime(true);
-        } elseif ($event instanceof BeforeRequest) {
-            $this->requestProcessingTimeStarted = microtime(true);
-        } elseif ($event instanceof AfterRequest) {
-            $this->requestProcessingTimeStopped = microtime(true);
-        } elseif ($event instanceof AfterEmit) {
-            $this->applicationProcessingTimeStopped = microtime(true);
+        // Map known event classes to timing types via class name suffix
+        $className = $event::class;
+        $eventType = match (true) {
+            str_ends_with($className, 'ApplicationStartup') => self::EVENT_APPLICATION_STARTUP,
+            str_ends_with($className, 'BeforeRequest') => self::EVENT_BEFORE_REQUEST,
+            str_ends_with($className, 'AfterRequest') => self::EVENT_AFTER_REQUEST,
+            str_ends_with($className, 'AfterEmit') => self::EVENT_AFTER_EMIT,
+            default => null,
+        };
+
+        if ($eventType !== null) {
+            $this->collectTiming($eventType);
         }
-        $this->timelineCollector->collect($this, spl_object_id($event));
     }
 
     public function getSummary(): array

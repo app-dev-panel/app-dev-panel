@@ -10,7 +10,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Yiisoft\Yii\Console\ExitCode;
 
 #[AsCommand(name: 'debug:reset', description: 'Clear debug data')]
 final class DebugResetCommand extends Command
@@ -34,6 +33,6 @@ final class DebugResetCommand extends Command
         $this->debugger->stop();
         $this->storage->clear();
 
-        return ExitCode::OK;
+        return Command::SUCCESS;
     }
 }
