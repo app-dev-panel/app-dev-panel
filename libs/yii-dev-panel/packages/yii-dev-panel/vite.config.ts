@@ -10,7 +10,7 @@ export default defineConfig(() => ({
         open: false,
         port: 3000,
         fs: {
-            allow: ['.'],
+            allow: ['../..'],
         },
     },
     resolve: {

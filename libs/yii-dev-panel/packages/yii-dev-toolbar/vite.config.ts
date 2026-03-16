@@ -8,7 +8,7 @@ export default defineConfig(async () => ({
         open: false,
         port: 3001,
         fs: {
-            allow: ['.'],
+            allow: ['../..'],
         },
     },
     resolve: {
