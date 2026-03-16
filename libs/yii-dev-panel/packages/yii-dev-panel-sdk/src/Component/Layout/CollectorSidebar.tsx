@@ -25,7 +25,7 @@ const SidebarRoot = styled(Paper)(({theme}) => ({
     display: 'flex',
     flexDirection: 'column',
     padding: theme.spacing(1.5, 1),
-    gap: 2,
+    gap: theme.spacing(0.25),
     flexShrink: 0,
     alignSelf: 'flex-start',
     overflowY: 'auto',

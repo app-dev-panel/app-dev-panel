@@ -1,16 +1,22 @@
+import react from '@vitejs/plugin-react';
+import {resolve} from 'path';
 import {defineConfig} from 'vitest/config';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-    plugins: [tsconfigPaths()],
-    test: {
-        environment: 'jsdom',
-        globals: true,
-        include: ['packages/*/src/**/*.test.{ts,tsx}'],
-        coverage: {
-            provider: 'v8',
-            include: ['packages/*/src/**/*.{ts,tsx}'],
-            exclude: ['**/*.test.*', '**/*.d.ts', '**/index.ts'],
+    plugins: [react()],
+    resolve: {
+        alias: {
+            '@yiisoft/yii-dev-panel-sdk': resolve(__dirname, 'packages/yii-dev-panel-sdk/src'),
+            '@yiisoft/yii-dev-panel': resolve(__dirname, 'packages/yii-dev-panel/src'),
+            '@yiisoft/yii-dev-toolbar': resolve(__dirname, 'packages/yii-dev-toolbar/src'),
         },
+    },
+    test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: ['./vitest.setup.ts'],
+        include: ['packages/*/src/**/*.test.{ts,tsx}'],
+        css: false,
+        onConsoleLog: () => false,
     },
 });
