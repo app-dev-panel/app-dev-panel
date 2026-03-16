@@ -16,7 +16,7 @@ use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
-use AppDevPanel\Kernel\Collector\ExceptionCollector;
+use AppDevPanel\Adapter\Symfony\Collector\SymfonyExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
@@ -93,7 +93,8 @@ final class AppDevPanelExtension extends Extension
         }
 
         if ($collectors['exception']) {
-            $container->register(ExceptionCollector::class, ExceptionCollector::class)
+            $container->register(SymfonyExceptionCollector::class, SymfonyExceptionCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }
@@ -201,7 +202,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(Debugger::class),
                 new Reference(SymfonyRequestCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(WebAppInfoCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
-                new Reference(ExceptionCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+                new Reference(SymfonyExceptionCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
@@ -211,7 +212,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(Debugger::class),
                 new Reference(CommandCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(ConsoleAppInfoCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
-                new Reference(ExceptionCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+                new Reference(SymfonyExceptionCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);

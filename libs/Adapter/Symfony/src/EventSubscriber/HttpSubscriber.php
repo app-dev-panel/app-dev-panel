@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
 use AppDevPanel\Adapter\Symfony\Collector\SymfonyRequestCollector;
-use AppDevPanel\Kernel\Collector\ExceptionCollector;
+use AppDevPanel\Adapter\Symfony\Collector\SymfonyExceptionCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
@@ -32,7 +32,7 @@ final class HttpSubscriber implements EventSubscriberInterface
         private readonly Debugger $debugger,
         private readonly ?SymfonyRequestCollector $requestCollector = null,
         private readonly ?WebAppInfoCollector $webAppInfoCollector = null,
-        private readonly ?ExceptionCollector $exceptionCollector = null,
+        private readonly ?SymfonyExceptionCollector $exceptionCollector = null,
     ) {}
 
     public static function getSubscribedEvents(): array

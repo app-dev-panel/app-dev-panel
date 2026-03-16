@@ -24,6 +24,9 @@
         <testsuite name="Cli">
             <directory>libs/Cli/tests</directory>
         </testsuite>
+        <testsuite name="Adapter-Symfony">
+            <directory>libs/Adapter/Symfony/tests</directory>
+        </testsuite>
         <testsuite name="E2E">
             <directory>tests/E2E</directory>
         </testsuite>
@@ -34,6 +37,7 @@
             <directory>libs/Kernel/src</directory>
             <directory>libs/API/src</directory>
             <directory>libs/Cli/src</directory>
+            <directory>libs/Adapter/Symfony/src</directory>
         </include>
     </source>
 </phpunit>
