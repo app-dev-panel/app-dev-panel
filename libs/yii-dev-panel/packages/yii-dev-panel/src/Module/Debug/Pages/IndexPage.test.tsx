@@ -7,11 +7,11 @@ describe('IndexPage (Overview Dashboard)', () => {
     const webEntry = {
         id: 'test-123',
         collectors: [
-            'Yiisoft\\Yii\\Debug\\Collector\\LogCollector',
-            'Yiisoft\\Yii\\Debug\\Collector\\EventCollector',
-            'Yiisoft\\Yii\\Debug\\Collector\\ServiceCollector',
-            'Yiisoft\\Yii\\Debug\\Collector\\ExceptionCollector',
-            'Yiisoft\\Yii\\Debug\\Collector\\TimelineCollector',
+            'AppDevPanel\\Kernel\\Collector\\LogCollector',
+            'AppDevPanel\\Kernel\\Collector\\EventCollector',
+            'AppDevPanel\\Kernel\\Collector\\ServiceCollector',
+            'AppDevPanel\\Kernel\\Collector\\ExceptionCollector',
+            'AppDevPanel\\Kernel\\Collector\\TimelineCollector',
         ],
         logger: {total: 15},
         event: {total: 42},

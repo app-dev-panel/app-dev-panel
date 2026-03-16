@@ -207,7 +207,7 @@ Map is defined in `packages/yii-dev-panel-sdk/src/Helper/collectorMeta.ts`.
 | `CodeHighlight.tsx` | **Keep**, use in code display areas |
 | `JsonRenderer.tsx` | **Keep**, use for JSON data |
 | `InfoBox.tsx` | **Keep**, update styling to match new theme |
-| Debug Panel components | **Keep** all (LogPanel, DatabasePanel, etc.) — they render inside ContentPanel |
+| Debug Panel components | **Redesigned** all 11 panels to zen-minimal style (expandable rows, tokens, badges) |
 | RTK Query APIs | **Keep** all — no API changes needed |
 | Redux store | **Keep** structure — add sidebar state if needed |
 

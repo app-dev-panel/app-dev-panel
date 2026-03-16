@@ -102,6 +102,61 @@ Backend collects data → SSE notifies frontend ("debug-updated")
 - `useDebugEntry()`: hook to access the currently selected debug entry
 - `useCurrentPageRequestIds()`: hook to access request IDs on the current page
 
+### Collector Panel Components
+
+Located in `src/Module/Debug/Component/Panel/`. Each panel renders data from a specific backend collector. All panels follow the zen-minimal design pattern:
+
+- **Styled components** with design tokens from `@yiisoft/yii-dev-panel-sdk/Component/Theme/tokens`
+- **Expandable rows** using MUI `Collapse` with expand/collapse icons
+- **Consistent layout**: `SectionTitle` headers, mono-font for code/time, color-coded badges
+- **Filter inputs** where applicable (LogPanel, EventPanel, DatabasePanel, ServicesPanel)
+- **Empty state** via `Alert` with descriptive message
+
+| Component | File | Data Source | Features |
+|-----------|------|-------------|----------|
+| `LogPanel` | `LogPanel.tsx` | `LogCollector` | Level badges (color-coded), filter, expandable context/file links |
+| `ExceptionPanel` | `ExceptionPanel.tsx` | `ExceptionCollector` | Red index badges, inline code preview, collapsible stack trace, file links |
+| `EventPanel` | `EventPanel.tsx` | `EventCollector` | EVENT badges, filter, object examine links, file links |
+| `RequestPanel` | `RequestPanel.tsx` | `RequestCollector` | Method/status color chips, sectioned request/response, collapsible raw views |
+| `DatabasePanel` | `DatabasePanel.tsx` | `DatabaseCollector` | SQL type badges, duration color-coding, row counts, filter, tabs (queries/transactions) |
+| `TimelinePanel` | `TimelinePanel.tsx` | `TimelineCollector` | Waterfall bars, legend, time axis ticks, expandable details |
+| `MiddlewarePanel` | `MiddlewarePanel.tsx` | `MiddlewareCollector` | Phase badges (BEFORE/HANDLER/AFTER), memory display, object links |
+| `ServicesPanel` | `ServicesPanel.tsx` | `ServiceCollector` | Summary/All tabs, expandable rows, error badges, time metrics |
+| `FilesystemPanel` | `FilesystemPanel.tsx` | `FilesystemCollector` | Operation tabs with counts, file links, collapsible args |
+| `MailerPanel` | `MailerPanel.tsx` | `MailerCollector` | Mail list, field details (from/to/cc/bcc), HTML/raw preview dialog |
+| `VarDumperPanel` | `VarDumperPanel.tsx` | `VarDumperCollector` | Type-aware preview, expandable JSON, inline file links |
+
+#### Panel Design Pattern
+
+```tsx
+// Common structure for all panels:
+export const XxxPanel = ({data}: XxxPanelProps) => {
+    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+    if (!data || data.length === 0) {
+        return <Alert severity="info"><AlertTitle>No items found</AlertTitle></Alert>;
+    }
+
+    return (
+        <Box>
+            <SectionTitle>{`${data.length} items`}</SectionTitle>
+            {data.map((item, index) => (
+                <Box key={index}>
+                    <StyledRow expanded={expandedIndex === index} onClick={...}>
+                        {/* Badge | Content | Metadata | ExpandIcon */}
+                    </StyledRow>
+                    <Collapse in={expandedIndex === index}>
+                        <DetailBox>{/* Expanded content */}</DetailBox>
+                    </Collapse>
+                </Box>
+            ))}
+        </Box>
+    );
+};
+```
+
+Shared styled components across panels: expandable `Row`, `DetailBox`, `TimeCell`, `NameCell`, badges via `Chip`.
+
 ## Inspector Module
 
 **Path prefix**: `/inspector`

@@ -32,7 +32,7 @@ const ExceptionRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{
     }),
 );
 
-const IndexBadge = styled(Box)(({theme}) => ({
+const IndexBadge = styled(Box)(() => ({
     width: 24,
     height: 24,
     borderRadius: '50%',
@@ -79,7 +79,7 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
             const response = await lazyGetFilesQuery(parseFilePath(exception.file));
             setFile(response.data as any);
         })();
-    }, [exception.file]);
+    }, [exception.file, lazyGetFilesQuery]);
 
     const lineNumber = +exception.line;
 

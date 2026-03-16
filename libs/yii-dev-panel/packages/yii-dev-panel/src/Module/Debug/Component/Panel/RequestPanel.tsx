@@ -109,6 +109,14 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
     const contentTypeMatch = responseHeaders.match(/Content-Type: \w+\/(\w+);/);
     const contentType = Array.isArray(contentTypeMatch) ? contentTypeMatch[1] : 'plain';
     const isJson = /json/.test(contentType);
+    let parsedContent: unknown = responseContent;
+    if (isJson && responseContent) {
+        try {
+            parsedContent = JSON.parse(responseContent);
+        } catch {
+            /* keep as string */
+        }
+    }
 
     return (
         <Box>
@@ -175,7 +183,7 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
                         <Box sx={{borderRadius: 1, overflow: 'hidden', border: '1px solid', borderColor: 'divider'}}>
                             {isJson ? (
                                 <Box sx={{p: 1.5}}>
-                                    <JsonRenderer value={JSON.parse(responseContent)} />
+                                    <JsonRenderer value={parsedContent} />
                                 </Box>
                             ) : (
                                 <CodeHighlight code={responseContent} language={contentType} showLineNumbers={false} />

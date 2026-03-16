@@ -11,14 +11,6 @@ type Operation = 'readdir' | 'mkdir' | 'read' | 'unlink';
 type Information = {path: string; args: Record<string, any>};
 type FilesystemPanelProps = {data: {[key in Operation]: Information}[]};
 
-const operationColor: Record<string, string> = {
-    read: primitives.blue500,
-    readdir: primitives.blue500,
-    mkdir: primitives.green600,
-    unlink: primitives.red600,
-    write: primitives.amber600,
-};
-
 const FileRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
     ({theme, expanded}) => ({
         display: 'flex',
@@ -60,7 +52,6 @@ const StyledTabList = styled(TabList)(({theme}) => ({
 
 const OperationView = ({items, operation}: {items: Information[]; operation: string}) => {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-    const color = operationColor[operation] || primitives.gray400;
 
     if (!items || items.length === 0) {
         return (
@@ -121,14 +112,14 @@ const OperationView = ({items, operation}: {items: Information[]; operation: str
 };
 
 export const FilesystemPanel = ({data}: FilesystemPanelProps) => {
-    const tabs = Object.keys(data) as Operation[];
+    const tabs = data ? (Object.keys(data) as Operation[]) : [];
     const [value, setValue] = useState<Operation>(tabs[0]);
 
     const handleChange = (event: SyntheticEvent, newValue: Operation) => {
         setValue(newValue);
     };
 
-    if (!data || data.length === 0) {
+    if (!data || tabs.length === 0) {
         return (
             <Box m={2}>
                 <Alert severity="info">

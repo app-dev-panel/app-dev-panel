@@ -26,10 +26,6 @@ function getQueryTime(actions: QueryAction[]) {
     return end && start ? end.time - start.time : 0;
 }
 
-function getQueryDurationLabel(ms: number): string {
-    return formatMillisecondsAsDuration(ms);
-}
-
 function durationColor(ms: number): string {
     if (ms > 100) return primitives.red600;
     if (ms > 30) return primitives.amber600;
@@ -150,7 +146,7 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
                                     {query.rowsNumber} row{query.rowsNumber !== 1 ? 's' : ''}
                                 </Typography>
                             )}
-                            <DurationCell sx={{color}}>{getQueryDurationLabel(ms)}</DurationCell>
+                            <DurationCell sx={{color}}>{formatMillisecondsAsDuration(ms)}</DurationCell>
                             <IconButton size="small" sx={{flexShrink: 0}}>
                                 <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
                             </IconButton>
