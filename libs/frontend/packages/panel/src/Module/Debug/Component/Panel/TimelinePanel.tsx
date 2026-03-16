@@ -1,13 +1,19 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
-import {Alert, AlertTitle, Box, Collapse, Tooltip, Typography} from '@mui/material';
+import {Box, Collapse, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useState} from 'react';
 
+// Data format from PHP: [microtime, reference, collectorClass, additionalData?]
+// row[0] = microtime(true) — start timestamp
+// row[1] = reference — object ID or count (NOT a duration)
+// row[2] = collector class name
+// row[3] = additional data (optional)
 type Item = [number, number, string] | [number, number, string, string];
 type TimelinePanelProps = {data: Item[]};
 
@@ -114,27 +120,20 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
     if (!data || !Array.isArray(data) || data.length === 0) {
-        return (
-            <Box m={2}>
-                <Alert severity="info">
-                    <AlertTitle>No timeline items found during the process</AlertTitle>
-                </Alert>
-            </Box>
-        );
+        return <EmptyState icon="timeline" title="No timeline items found" />;
     }
 
-    // Calculate time bounds
-    const startTimes = data.map((r) => r[0]);
-    const durations = data.map((r) => Number(r[1]) || 0);
-    const minTime = Math.min(...startTimes);
-    const maxEndTime = Math.max(...data.map((r, i) => r[0] + durations[i]));
-    const totalDuration = maxEndTime - minTime || 0.001;
+    // Events are point-in-time: row[0] is microtime, row[1] is a reference (not duration)
+    const timestamps = data.map((r) => r[0]);
+    const minTime = Math.min(...timestamps);
+    const maxTime = Math.max(...timestamps);
+    const totalSpan = maxTime - minTime || 0.001;
 
-    // Build tick marks
+    // Build tick marks based on the time span
     const tickCount = 6;
     const ticks: string[] = [];
     for (let i = 0; i <= tickCount; i++) {
-        const t = (totalDuration / tickCount) * i;
+        const t = (totalSpan / tickCount) * i;
         if (t < 0.001) {
             ticks.push(`${(t * 1000000).toFixed(0)}µs`);
         } else if (t < 1) {
@@ -170,19 +169,18 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
 
             {data.map((row, index) => {
                 const shortName = row[2].split('\\').pop() ?? row[2];
-                const offset = ((row[0] - minTime) / totalDuration) * 100;
-                const barWidth = Math.max(1, ((row[1] || 0.001) / totalDuration) * 100);
+                const relativeTime = row[0] - minTime;
+                const offset = (relativeTime / totalSpan) * 100;
                 const colorIdx = uniqueLabels.indexOf(shortName);
                 const expanded = expandedIndex === index;
-                const durationMs = Number(row[1]) || 0;
-                const durationLabel =
-                    durationMs < 0.000001
-                        ? `${(durationMs * 1000000000).toFixed(0)}ns`
-                        : durationMs < 0.001
-                          ? `${(durationMs * 1000000).toFixed(0)}µs`
-                          : durationMs < 1
-                            ? `${(durationMs * 1000).toFixed(1)}ms`
-                            : `${durationMs.toFixed(2)}s`;
+
+                // Format relative time offset
+                const offsetLabel =
+                    relativeTime < 0.001
+                        ? `${(relativeTime * 1000000).toFixed(0)}µs`
+                        : relativeTime < 1
+                          ? `${(relativeTime * 1000).toFixed(1)}ms`
+                          : `${relativeTime.toFixed(3)}s`;
 
                 return (
                     <Box key={index}>
@@ -194,12 +192,13 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                 <Bar
                                     sx={{
                                         left: `${offset}%`,
-                                        width: `${barWidth}%`,
+                                        width: 6,
+                                        minWidth: 6,
                                         backgroundColor: getBarColor(colorIdx),
                                     }}
                                 />
                             </BarArea>
-                            <Duration>{durationLabel}</Duration>
+                            <Duration>{offsetLabel}</Duration>
                         </Row>
                         <Collapse in={expanded}>
                             <DetailBox>
@@ -208,8 +207,13 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                         Time: {formatMicrotime(row[0])}
                                     </Typography>
                                     <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                        Duration: {durationLabel}
+                                        Offset: +{offsetLabel}
                                     </Typography>
+                                    {row[1] != null && (
+                                        <Typography variant="caption" sx={{color: 'text.disabled'}}>
+                                            Ref: {String(row[1])}
+                                        </Typography>
+                                    )}
                                 </Box>
                                 <Typography
                                     variant="caption"

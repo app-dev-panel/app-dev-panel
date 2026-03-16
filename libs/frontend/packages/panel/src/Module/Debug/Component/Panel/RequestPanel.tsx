@@ -3,21 +3,10 @@ import {useDoRequestMutation, usePostCurlBuildMutation} from '@app-dev-panel/pan
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {HTTPMethod, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {
-    Alert,
-    AlertTitle,
-    Box,
-    Chip,
-    Icon,
-    IconButton,
-    Tab,
-    Tabs,
-    type Theme,
-    Tooltip,
-    Typography,
-} from '@mui/material';
+import {Box, Chip, Icon, IconButton, Tab, Tabs, type Theme, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback} from 'react';
@@ -349,13 +338,7 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
     }, [debugEntry, postCurlBuildInfo]);
 
     if (!data) {
-        return (
-            <Box m={2}>
-                <Alert severity="info">
-                    <AlertTitle>Request is not associated with HTTP request</AlertTitle>
-                </Alert>
-            </Box>
-        );
+        return <EmptyState icon="http" title="Request is not associated with HTTP request" />;
     }
 
     return (

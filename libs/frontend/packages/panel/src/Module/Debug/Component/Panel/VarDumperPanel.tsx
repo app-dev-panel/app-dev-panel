@@ -1,8 +1,9 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
-import {Alert, AlertTitle, Box, Collapse, Icon, IconButton, Typography} from '@mui/material';
+import {Box, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useState} from 'react';
 
@@ -60,13 +61,7 @@ export const VarDumperPanel = ({data}: VarDumperPanelProps) => {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
     if (!data || data.length === 0) {
-        return (
-            <Box m={2}>
-                <Alert severity="info">
-                    <AlertTitle>No dumped variables found during the process</AlertTitle>
-                </Alert>
-            </Box>
-        );
+        return <EmptyState icon="data_object" title="No dumped variables found" />;
     }
 
     return (

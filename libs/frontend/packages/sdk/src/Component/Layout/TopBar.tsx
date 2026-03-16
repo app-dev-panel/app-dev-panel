@@ -51,8 +51,6 @@ const Diamond = styled('div')(({theme}) => ({
     borderRadius: 1,
 }));
 
-const Spacer = styled('span')({flex: 1});
-
 export const TopBar = React.memo(
     ({
         method,
@@ -76,24 +74,25 @@ export const TopBar = React.memo(
                 <Logo>
                     <Diamond /> ADP
                 </Logo>
-                {method && path && status != null && duration && (
-                    <>
-                        <RequestPill
-                            method={method}
-                            path={path}
-                            status={status}
-                            duration={duration}
-                            onClick={onEntryClick}
-                        />
-                        <IconButton size="small" onClick={onPrevEntry}>
-                            <Icon sx={{fontSize: 18}}>chevron_left</Icon>
-                        </IconButton>
-                        <IconButton size="small" onClick={onNextEntry}>
-                            <Icon sx={{fontSize: 18}}>chevron_right</Icon>
-                        </IconButton>
-                    </>
-                )}
-                <Spacer />
+                <IconButton size="small" onClick={onPrevEntry} disabled={!method}>
+                    <Icon sx={{fontSize: 18}}>chevron_left</Icon>
+                </IconButton>
+                <IconButton size="small" onClick={onNextEntry} disabled={!method}>
+                    <Icon sx={{fontSize: 18}}>chevron_right</Icon>
+                </IconButton>
+                <div style={{flex: 1, display: 'flex', justifyContent: 'center'}}>
+                    {method && path && status != null && duration && (
+                        <div style={{maxWidth: 500, width: '100%'}}>
+                            <RequestPill
+                                method={method}
+                                path={path}
+                                status={status}
+                                duration={duration}
+                                onClick={onEntryClick}
+                            />
+                        </div>
+                    )}
+                </div>
                 <SearchTrigger onClick={onSearchClick} />
                 <IconButton
                     size="small"

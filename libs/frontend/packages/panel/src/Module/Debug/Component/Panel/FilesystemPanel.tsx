@@ -1,9 +1,10 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Alert, AlertTitle, Box, Chip, Collapse, Icon, IconButton, Tab, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, Tab, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {SyntheticEvent, useState} from 'react';
 
@@ -54,13 +55,7 @@ const OperationView = ({items, operation}: {items: Information[]; operation: str
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
     if (!items || items.length === 0) {
-        return (
-            <Box m={2}>
-                <Alert severity="info">
-                    <AlertTitle>No {operation} operations found</AlertTitle>
-                </Alert>
-            </Box>
-        );
+        return <EmptyState icon="folder_open" title={`No ${operation} operations found`} />;
     }
 
     return (
@@ -120,13 +115,7 @@ export const FilesystemPanel = ({data}: FilesystemPanelProps) => {
     };
 
     if (!data || tabs.length === 0) {
-        return (
-            <Box m={2}>
-                <Alert severity="info">
-                    <AlertTitle>No operations with file system found during the process</AlertTitle>
-                </Alert>
-            </Box>
-        );
+        return <EmptyState icon="folder_open" title="No filesystem operations found" />;
     }
 
     return (

@@ -1,20 +1,10 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
-import {
-    Alert,
-    AlertTitle,
-    Box,
-    Chip,
-    Collapse,
-    Icon,
-    IconButton,
-    TextField,
-    type Theme,
-    Typography,
-} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, TextField, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useState} from 'react';
 
@@ -77,13 +67,7 @@ export const LogPanel = ({data}: LogPanelProps) => {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
     if (!data || data.length === 0) {
-        return (
-            <Box m={2}>
-                <Alert severity="info">
-                    <AlertTitle>No logs found during the process</AlertTitle>
-                </Alert>
-            </Box>
-        );
+        return <EmptyState icon="description" title="No logs found" />;
     }
 
     const filtered = filter

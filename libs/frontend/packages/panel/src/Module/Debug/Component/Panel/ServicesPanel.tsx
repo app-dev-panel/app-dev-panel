@@ -1,10 +1,11 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {concatClassMethod} from '@app-dev-panel/sdk/Helper/classMethodConcater';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Alert, AlertTitle, Box, Chip, Collapse, Icon, IconButton, Tab, TextField, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, Tab, TextField, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {SyntheticEvent, useMemo, useState} from 'react';
 
@@ -288,13 +289,7 @@ export const ServicesPanel = ({data}: ServicesPanelProps) => {
     }, [allRows]);
 
     if (!data || data.length === 0) {
-        return (
-            <Box m={2}>
-                <Alert severity="info">
-                    <AlertTitle>No spied services found during the process</AlertTitle>
-                </Alert>
-            </Box>
-        );
+        return <EmptyState icon="miscellaneous_services" title="No spied services found" />;
     }
 
     return (

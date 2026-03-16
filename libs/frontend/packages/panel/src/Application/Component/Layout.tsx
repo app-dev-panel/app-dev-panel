@@ -227,6 +227,19 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         return [...overview, ...collectors, ...entriesList];
     }, [debugEntry]);
 
+    // Build extra items for CommandPalette from current debug entry's collectors
+    const paletteCollectorItems = useMemo(() => {
+        if (!debugEntry) return [];
+        return debugChildren
+            .filter((c) => c.key !== '__entries__' && c.key !== '__overview__')
+            .map((c) => ({
+                icon: c.icon,
+                label: `Debug > ${c.label}`,
+                path: `/debug?collector=${encodeURIComponent(c.key)}&debugEntry=${debugEntry.id}`,
+                section: 'Collectors',
+            }));
+    }, [debugChildren, debugEntry]);
+
     const sidebarSections = useMemo(
         () => [
             {key: 'home', icon: 'home', label: 'Home', href: '/'},
@@ -331,7 +344,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             </Box>
             {children}
             <ScrollTopButton bottomOffset={!!children} />
-            <CommandPalette open={paletteOpen} onClose={handlePaletteClose} />
+            <CommandPalette open={paletteOpen} onClose={handlePaletteClose} extraItems={paletteCollectorItems} />
         </>
     );
 });

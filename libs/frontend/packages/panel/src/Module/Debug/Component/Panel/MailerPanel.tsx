@@ -1,9 +1,8 @@
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {nl2br} from '@app-dev-panel/sdk/Helper/nl2br';
 import {
-    Alert,
-    AlertTitle,
     Box,
     Button,
     Chip,
@@ -137,13 +136,7 @@ export const MailerPanel = ({data}: MailerPanelProps) => {
     };
 
     if (!data || data.messages.length === 0) {
-        return (
-            <Box m={2}>
-                <Alert severity="info">
-                    <AlertTitle>No dumped mails found during the process</AlertTitle>
-                </Alert>
-            </Box>
-        );
+        return <EmptyState icon="mail" title="No dumped mails found" />;
     }
 
     return (

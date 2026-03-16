@@ -1,9 +1,10 @@
 import {InspectorFileContent, useLazyGetFilesQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilename, parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
-import {Alert, AlertTitle, Box, Chip, Collapse, Icon, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, Typography} from '@mui/material';
 import {alpha, styled, useTheme} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
 
@@ -191,13 +192,7 @@ export const ExceptionPanel = ({exceptions}: ExceptionPanelProps) => {
     const items = exceptions ?? [];
 
     if (items.length === 0) {
-        return (
-            <Box m={2}>
-                <Alert severity="info">
-                    <AlertTitle>No exceptions found during the process</AlertTitle>
-                </Alert>
-            </Box>
-        );
+        return <EmptyState icon="bug_report" title="No exceptions found" />;
     }
 
     return (

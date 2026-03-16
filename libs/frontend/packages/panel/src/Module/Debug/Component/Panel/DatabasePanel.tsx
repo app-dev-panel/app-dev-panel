@@ -1,21 +1,10 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {
-    Alert,
-    AlertTitle,
-    Box,
-    Chip,
-    Collapse,
-    Icon,
-    IconButton,
-    Tab,
-    TextField,
-    type Theme,
-    Typography,
-} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, Tab, TextField, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {SyntheticEvent, useState} from 'react';
 
@@ -99,13 +88,7 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
     if (!queries || queries.length === 0) {
-        return (
-            <Box m={2}>
-                <Alert severity="info">
-                    <AlertTitle>No queries found during the process</AlertTitle>
-                </Alert>
-            </Box>
-        );
+        return <EmptyState icon="storage" title="No queries found" />;
     }
 
     const filtered = filter ? queries.filter((q) => q.sql.toLowerCase().includes(filter.toLowerCase())) : queries;
@@ -208,13 +191,7 @@ export const DatabasePanel = ({data}: DatabasePanelProps) => {
     };
 
     if (!data || (data.queries?.length === 0 && data.transactions?.length === 0)) {
-        return (
-            <Box m={2}>
-                <Alert severity="info">
-                    <AlertTitle>No queries found during the process</AlertTitle>
-                </Alert>
-            </Box>
-        );
+        return <EmptyState icon="storage" title="No queries found" />;
     }
 
     return (
@@ -232,11 +209,7 @@ export const DatabasePanel = ({data}: DatabasePanelProps) => {
                         {tab === 'queries' ? (
                             <QueriesView queries={data[tab]} />
                         ) : tab === 'transactions' ? (
-                            <Box m={2}>
-                                <Alert severity="warning">
-                                    <AlertTitle>Not supported yet</AlertTitle>
-                                </Alert>
-                            </Box>
+                            <EmptyState icon="construction" title="Not supported yet" />
                         ) : null}
                     </TabPanel>
                 ))}
