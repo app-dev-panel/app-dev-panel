@@ -1,4 +1,3 @@
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {styled} from '@mui/material/styles';
 
 type NavBadgeProps = {count: number | string; variant?: 'default' | 'error'};
@@ -14,10 +13,10 @@ const BadgeRoot = styled('span', {shouldForwardProp: (prop) => prop !== 'variant
         alignItems: 'center',
         justifyContent: 'center',
         padding: '0 5px',
-        fontFamily: primitives.fontFamily,
+        fontFamily: theme.typography.fontFamily,
         ...(variant === 'error'
             ? {backgroundColor: theme.palette.error.light, color: theme.palette.error.main}
-            : {backgroundColor: primitives.gray300, color: theme.palette.text.secondary}),
+            : {backgroundColor: theme.palette.action.selected, color: theme.palette.text.secondary}),
     }),
 );
 

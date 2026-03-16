@@ -107,11 +107,11 @@ const ItemRow = styled(Box, {shouldForwardProp: (p) => p !== 'selected'})<ItemRo
 
 const ItemLabel = styled(Typography)({flex: 1, fontSize: '14px'});
 
-const ItemShortcut = styled(Typography)({
+const ItemShortcut = styled(Typography)(({theme}) => ({
     fontFamily: primitives.fontFamilyMono,
     fontSize: '12px',
-    color: primitives.gray400,
-});
+    color: theme.palette.text.disabled,
+}));
 
 const defaultPages: PaletteItem[] = [
     {icon: 'grid_view', label: 'Debug', path: '/debug', shortcut: '/debug', section: 'Pages'},

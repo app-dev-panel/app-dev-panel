@@ -3,8 +3,20 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Alert, AlertTitle, Box, Chip, Collapse, Icon, IconButton, Tab, TextField, Typography} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {
+    Alert,
+    AlertTitle,
+    Box,
+    Chip,
+    Collapse,
+    Icon,
+    IconButton,
+    Tab,
+    TextField,
+    type Theme,
+    Typography,
+} from '@mui/material';
+import {styled, useTheme} from '@mui/material/styles';
 import {SyntheticEvent, useState} from 'react';
 
 type QueryAction = {action: 'query.start' | 'query.end'; time: number};
@@ -26,10 +38,10 @@ function getQueryTime(actions: QueryAction[]) {
     return end && start ? end.time - start.time : 0;
 }
 
-function durationColor(ms: number): string {
-    if (ms > 100) return primitives.red600;
-    if (ms > 30) return primitives.amber600;
-    return primitives.green600;
+function durationColor(ms: number, theme: Theme): string {
+    if (ms > 100) return theme.palette.error.main;
+    if (ms > 30) return theme.palette.warning.main;
+    return theme.palette.success.main;
 }
 
 const QueryRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
@@ -82,6 +94,7 @@ const StyledTabList = styled(TabList)(({theme}) => ({
 }));
 
 const QueriesView = ({queries}: {queries: Query[]}) => {
+    const theme = useTheme();
     const [filter, setFilter] = useState('');
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
@@ -118,7 +131,7 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
             {filtered.map((query, index) => {
                 const expanded = expandedIndex === index;
                 const ms = getQueryTime(query.actions);
-                const color = durationColor(ms);
+                const color = durationColor(ms, theme);
 
                 return (
                     <Box key={index}>
@@ -131,7 +144,7 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
                                     fontSize: '9px',
                                     height: 18,
                                     minWidth: 50,
-                                    backgroundColor: primitives.blue500,
+                                    backgroundColor: 'primary.main',
                                     color: '#fff',
                                     borderRadius: 1,
                                     flexShrink: 0,

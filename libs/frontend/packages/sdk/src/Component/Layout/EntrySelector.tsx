@@ -3,8 +3,8 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
-import {Box, Chip, Icon, Popover, Typography} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {Box, Chip, Icon, Popover, type Theme, Typography} from '@mui/material';
+import {styled, useTheme} from '@mui/material/styles';
 import React, {useEffect, useRef, useState} from 'react';
 
 // ---------------------------------------------------------------------------
@@ -71,7 +71,12 @@ export const HighlightedText = ({text, indices}: {text: string; indices: number[
                     isHighlighted ? (
                         <mark
                             key={`${i}-m`}
-                            style={{backgroundColor: 'transparent', color: primitives.blue500, fontWeight: 600}}
+                            style={{
+                                backgroundColor: 'transparent',
+                                color: 'inherit',
+                                fontWeight: 600,
+                                textDecoration: 'underline',
+                            }}
                         >
                             {current}
                         </mark>
@@ -88,7 +93,15 @@ export const HighlightedText = ({text, indices}: {text: string; indices: number[
     if (current) {
         parts.push(
             isHighlighted ? (
-                <mark key="end-m" style={{backgroundColor: 'transparent', color: primitives.blue500, fontWeight: 600}}>
+                <mark
+                    key="end-m"
+                    style={{
+                        backgroundColor: 'transparent',
+                        color: 'inherit',
+                        fontWeight: 600,
+                        textDecoration: 'underline',
+                    }}
+                >
                     {current}
                 </mark>
             ) : (
@@ -142,27 +155,27 @@ const PathLabel = styled('span')({
 
 const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px'});
 
-const TimeLabel = styled('span')({fontSize: '11px', color: primitives.gray400});
+const TimeLabel = styled('span')(({theme}) => ({fontSize: '11px', color: theme.palette.text.disabled}));
 
-const statusColor = (status: number): string => {
-    if (status >= 500) return primitives.red600;
-    if (status >= 400) return primitives.amber600;
-    return primitives.green600;
+const statusColor = (status: number, theme: Theme): string => {
+    if (status >= 500) return theme.palette.error.main;
+    if (status >= 400) return theme.palette.warning.main;
+    return theme.palette.success.main;
 };
 
-const methodColor = (method: string): string => {
+const methodColor = (method: string, theme: Theme): string => {
     switch (method.toUpperCase()) {
         case 'GET':
-            return primitives.green600;
+            return theme.palette.success.main;
         case 'POST':
-            return primitives.blue500;
+            return theme.palette.primary.main;
         case 'PUT':
         case 'PATCH':
-            return primitives.amber600;
+            return theme.palette.warning.main;
         case 'DELETE':
-            return primitives.red600;
+            return theme.palette.error.main;
         default:
-            return primitives.gray600;
+            return theme.palette.text.secondary;
     }
 };
 
@@ -171,7 +184,7 @@ const FilterInput = styled('input')(({theme}) => ({
     border: 'none',
     outline: 'none',
     fontSize: '13px',
-    fontFamily: primitives.fontFamily,
+    fontFamily: theme.typography.fontFamily,
     backgroundColor: 'transparent',
     color: theme.palette.text.primary,
     padding: theme.spacing(1.25, 2),
@@ -206,6 +219,7 @@ function getSearchText(entry: DebugEntry): string {
 // ---------------------------------------------------------------------------
 
 export const EntrySelector = ({anchorEl, open, onClose, entries, currentEntryId, onSelect}: EntrySelectorProps) => {
+    const theme = useTheme();
     const [filter, setFilter] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -279,7 +293,7 @@ export const EntrySelector = ({anchorEl, open, onClose, entries, currentEntryId,
 
                         return (
                             <EntryRow key={entry.id} active={active} onClick={() => handleSelect(entry)}>
-                                <MethodLabel sx={{color: methodColor(entry.request.method)}}>
+                                <MethodLabel sx={{color: methodColor(entry.request.method, theme)}}>
                                     <HighlightedText text={entry.request.method} indices={methodIndices} />
                                 </MethodLabel>
                                 <PathLabel>
@@ -291,7 +305,7 @@ export const EntrySelector = ({anchorEl, open, onClose, entries, currentEntryId,
                                         sx={{
                                             fontFamily: primitives.fontFamilyMono,
                                             fontSize: '10px',
-                                            color: primitives.blue500,
+                                            color: 'primary.main',
                                             flexShrink: 0,
                                         }}
                                     >
@@ -304,14 +318,14 @@ export const EntrySelector = ({anchorEl, open, onClose, entries, currentEntryId,
                                         sx={{
                                             fontFamily: primitives.fontFamilyMono,
                                             fontSize: '10px',
-                                            color: primitives.green600,
+                                            color: 'success.main',
                                             flexShrink: 0,
                                         }}
                                     >
                                         {formatBytes(entry.web.memory.peakUsage)}
                                     </Typography>
                                 )}
-                                <StatusLabel sx={{color: statusColor(entry.response.statusCode)}}>
+                                <StatusLabel sx={{color: statusColor(entry.response.statusCode, theme)}}>
                                     {entry.response.statusCode}
                                 </StatusLabel>
                                 <TimeLabel>{formatDate(entry.web.request.startTime)}</TimeLabel>
@@ -332,7 +346,7 @@ export const EntrySelector = ({anchorEl, open, onClose, entries, currentEntryId,
                                         sx={{
                                             fontFamily: primitives.fontFamilyMono,
                                             fontSize: '10px',
-                                            color: primitives.blue500,
+                                            color: 'primary.main',
                                             flexShrink: 0,
                                         }}
                                     >
@@ -345,7 +359,7 @@ export const EntrySelector = ({anchorEl, open, onClose, entries, currentEntryId,
                                         sx={{
                                             fontFamily: primitives.fontFamilyMono,
                                             fontSize: '10px',
-                                            color: primitives.green600,
+                                            color: 'success.main',
                                             flexShrink: 0,
                                         }}
                                     >

@@ -1,6 +1,6 @@
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {Icon} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {Icon, type Theme} from '@mui/material';
+import {styled, useTheme} from '@mui/material/styles';
 import React from 'react';
 
 type RequestPillProps = {
@@ -26,26 +26,26 @@ const PillRoot = styled('button')(({theme}) => ({
     '&:hover': {borderColor: theme.palette.primary.main},
 }));
 
-const statusColor = (status: number): string => {
-    if (status >= 500) return primitives.red600;
-    if (status >= 400) return primitives.amber600;
-    if (status >= 300) return primitives.amber600;
-    return primitives.green600;
+const statusColor = (status: number, theme: Theme): string => {
+    if (status >= 500) return theme.palette.error.main;
+    if (status >= 400) return theme.palette.warning.main;
+    if (status >= 300) return theme.palette.warning.main;
+    return theme.palette.success.main;
 };
 
-const methodColor = (method: string): string => {
+const methodColor = (method: string, theme: Theme): string => {
     switch (method.toUpperCase()) {
         case 'GET':
-            return primitives.green600;
+            return theme.palette.success.main;
         case 'POST':
-            return primitives.blue500;
+            return theme.palette.primary.main;
         case 'PUT':
         case 'PATCH':
-            return primitives.amber600;
+            return theme.palette.warning.main;
         case 'DELETE':
-            return primitives.red600;
+            return theme.palette.error.main;
         default:
-            return primitives.gray600;
+            return theme.palette.text.secondary;
     }
 };
 
@@ -57,15 +57,16 @@ const PathLabel = styled('span')({fontFamily: primitives.fontFamilyMono, fontSiz
 
 const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px'});
 
-const DurationLabel = styled('span')({color: primitives.gray400, fontSize: '12px'});
+const DurationLabel = styled('span')(({theme}) => ({color: theme.palette.text.disabled, fontSize: '12px'}));
 
 export const RequestPill = ({method, path, status, duration, onClick}: RequestPillProps) => {
+    const theme = useTheme();
     return (
         <PillRoot onClick={onClick}>
-            <MethodLabel sx={{color: methodColor(method)}}>{method}</MethodLabel>
+            <MethodLabel sx={{color: methodColor(method, theme)}}>{method}</MethodLabel>
             <PathLabel>{path}</PathLabel>
             <Separator>&mdash;</Separator>
-            <StatusLabel sx={{color: statusColor(status)}}>{status}</StatusLabel>
+            <StatusLabel sx={{color: statusColor(status, theme)}}>{status}</StatusLabel>
             <Separator>&mdash;</Separator>
             <DurationLabel>{duration}</DurationLabel>
             <Icon sx={{fontSize: 16, color: 'text.disabled'}}>expand_more</Icon>

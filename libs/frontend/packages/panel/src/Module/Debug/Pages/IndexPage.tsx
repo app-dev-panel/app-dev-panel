@@ -8,7 +8,7 @@ import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {Box, Icon, LinearProgress, Typography} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
@@ -323,6 +323,7 @@ function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
 // ---------------------------------------------------------------------------
 
 export const IndexPage = () => {
+    const theme = useTheme();
     const entry = useDebugEntry();
     const [, setSearchParams] = useSearchParams();
     const [getCollectorInfo] = useLazyGetCollectorInfoQuery();
@@ -397,7 +398,7 @@ export const IndexPage = () => {
                 )}
                 {status != null && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: status >= 400 ? primitives.red600 : primitives.green600}}>
+                        <Icon sx={{fontSize: 18, color: status >= 400 ? 'error.main' : 'success.main'}}>
                             {status >= 400 ? 'error' : 'check_circle'}
                         </Icon>
                         <Box>
@@ -472,7 +473,7 @@ export const IndexPage = () => {
                                         key={i}
                                         sx={{height: `${height}%`}}
                                         isCurrent={i === sparkBars.length - 1}
-                                        barColor={card.isException ? primitives.red600 : undefined}
+                                        barColor={card.isException ? theme.palette.error.main : undefined}
                                     />
                                 ))}
                             </SparklineContainer>

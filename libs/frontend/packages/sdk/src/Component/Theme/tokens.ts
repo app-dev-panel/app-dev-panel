@@ -52,8 +52,8 @@ export const primitives = {
 export const semanticTokens = {
     palette: {
         primary: {main: primitives.blue500, light: primitives.blue50, dark: primitives.blue700},
-        success: {main: primitives.green600},
-        warning: {main: primitives.amber600},
+        success: {main: primitives.green600, light: '#DCFCE7'},
+        warning: {main: primitives.amber600, light: '#FEF3C7'},
         error: {main: primitives.red600, light: primitives.red50},
         background: {default: primitives.gray50, paper: primitives.white},
         text: {primary: primitives.gray900, secondary: primitives.gray600, disabled: primitives.gray400},
@@ -84,8 +84,8 @@ export const semanticTokens = {
 export const darkSemanticTokens = {
     palette: {
         primary: {main: '#60A5FA', light: '#1E3A5F', dark: '#3B82F6'},
-        success: {main: '#4ADE80'},
-        warning: {main: '#FBBF24'},
+        success: {main: '#4ADE80', light: '#14532D'},
+        warning: {main: '#FBBF24', light: '#713F12'},
         error: {main: '#F87171', light: '#7F1D1D'},
         background: {default: '#0F172A', paper: '#1E293B'},
         text: {primary: '#F1F5F9', secondary: '#94A3B8', disabled: '#64748B'},

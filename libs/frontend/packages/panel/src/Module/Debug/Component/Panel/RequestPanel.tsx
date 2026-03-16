@@ -5,8 +5,20 @@ import {HTTPMethod, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Deb
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {Alert, AlertTitle, Box, Chip, Icon, IconButton, Tab, Tabs, Tooltip, Typography} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {
+    Alert,
+    AlertTitle,
+    Box,
+    Chip,
+    Icon,
+    IconButton,
+    Tab,
+    Tabs,
+    type Theme,
+    Tooltip,
+    Typography,
+} from '@mui/material';
+import {styled, useTheme} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback} from 'react';
 import {useSearchParams} from 'react-router-dom';
@@ -27,26 +39,26 @@ type Response = {
 };
 type RequestPanelProps = {data: Response};
 
-const statusColor = (code: number): string => {
-    if (code >= 500) return primitives.red600;
-    if (code >= 400) return primitives.amber600;
-    if (code >= 300) return primitives.blue500;
-    return primitives.green600;
+const statusColor = (code: number, theme: Theme): string => {
+    if (code >= 500) return theme.palette.error.main;
+    if (code >= 400) return theme.palette.warning.main;
+    if (code >= 300) return theme.palette.primary.main;
+    return theme.palette.success.main;
 };
 
-const methodColor = (method: string): string => {
+const methodColor = (method: string, theme: Theme): string => {
     switch (method?.toUpperCase()) {
         case 'GET':
-            return primitives.green600;
+            return theme.palette.success.main;
         case 'POST':
-            return primitives.blue500;
+            return theme.palette.primary.main;
         case 'PUT':
         case 'PATCH':
-            return primitives.amber600;
+            return theme.palette.warning.main;
         case 'DELETE':
-            return primitives.red600;
+            return theme.palette.error.main;
         default:
-            return primitives.gray400;
+            return theme.palette.text.disabled;
     }
 };
 
@@ -297,6 +309,7 @@ const ParsedTab = ({data}: {data: Response}) => (
 const tabNames = ['request', 'response', 'raw', 'parsed'] as const;
 
 export const RequestPanel = ({data}: RequestPanelProps) => {
+    const theme = useTheme();
     const [searchParams, setSearchParams] = useSearchParams();
     const tabParam = searchParams.get('requestTab') || 'request';
     const tab = Math.max(0, tabNames.indexOf(tabParam as (typeof tabNames)[number]));
@@ -355,7 +368,7 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
                         fontWeight: 700,
                         fontSize: '11px',
                         height: 22,
-                        backgroundColor: methodColor(data.requestMethod),
+                        backgroundColor: methodColor(data.requestMethod, theme),
                         color: '#fff',
                         borderRadius: 1,
                     }}
@@ -372,7 +385,7 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
                         fontWeight: 700,
                         fontSize: '11px',
                         height: 22,
-                        backgroundColor: statusColor(data.responseStatusCode),
+                        backgroundColor: statusColor(data.responseStatusCode, theme),
                         color: '#fff',
                         borderRadius: 1,
                     }}

@@ -4,7 +4,7 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilename, parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {Alert, AlertTitle, Box, Chip, Collapse, Icon, Typography} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {alpha, styled, useTheme} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
 
 type ExceptionData = {
@@ -32,11 +32,11 @@ const ExceptionRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{
     }),
 );
 
-const IndexBadge = styled(Box)(() => ({
+const IndexBadge = styled(Box)(({theme}) => ({
     width: 24,
     height: 24,
     borderRadius: '50%',
-    backgroundColor: primitives.red600,
+    backgroundColor: theme.palette.error.main,
     color: '#fff',
     display: 'flex',
     alignItems: 'center',
@@ -47,15 +47,20 @@ const IndexBadge = styled(Box)(() => ({
     marginTop: 2,
 }));
 
-const ClassName = styled(Typography)({
+const ClassName = styled(Typography)(({theme}) => ({
     fontFamily: primitives.fontFamilyMono,
     fontSize: '13px',
     fontWeight: 600,
-    color: primitives.red600,
+    color: theme.palette.error.main,
     wordBreak: 'break-word',
-});
+}));
 
-const Message = styled(Typography)({fontSize: '13px', flex: 1, wordBreak: 'break-word', color: primitives.gray600});
+const Message = styled(Typography)(({theme}) => ({
+    fontSize: '13px',
+    flex: 1,
+    wordBreak: 'break-word',
+    color: theme.palette.text.secondary,
+}));
 
 const FileLink = styled(Typography)({
     fontFamily: primitives.fontFamilyMono,
@@ -71,6 +76,7 @@ const DetailBox = styled(Box)(({theme}) => ({
 }));
 
 const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
+    const theme = useTheme();
     const [lazyGetFilesQuery] = useLazyGetFilesQuery();
     const [file, setFile] = useState<InspectorFileContent | null>(null);
 
@@ -93,8 +99,8 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
                         fontFamily: primitives.fontFamilyMono,
                         fontSize: '11px',
                         fontWeight: 600,
-                        backgroundColor: primitives.red50,
-                        color: primitives.red600,
+                        backgroundColor: 'error.light',
+                        color: 'error.main',
                         borderRadius: 1,
                         height: 22,
                     }}
@@ -103,7 +109,7 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
                     <Chip
                         label={`Code: ${exception.code}`}
                         size="small"
-                        sx={{fontSize: '11px', backgroundColor: primitives.gray300, borderRadius: 1, height: 22}}
+                        sx={{fontSize: '11px', backgroundColor: 'action.selected', borderRadius: 1, height: 22}}
                     />
                 )}
             </Box>
@@ -139,7 +145,7 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
                         language={file.extension}
                         code={file.content}
                         highlightLines={[lineNumber]}
-                        highlightColor={'#ffcccc'}
+                        highlightColor={alpha(theme.palette.error.main, 0.15)}
                         wrappedLines={[lineNumber - 5, lineNumber + 5]}
                     />
                 </Box>

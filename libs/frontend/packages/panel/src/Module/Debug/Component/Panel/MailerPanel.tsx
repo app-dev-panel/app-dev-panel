@@ -84,13 +84,13 @@ const FieldRow = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
-const FieldLabel = styled(Typography)({
+const FieldLabel = styled(Typography)(({theme}) => ({
     fontSize: '12px',
     fontWeight: 600,
-    color: primitives.gray400,
+    color: theme.palette.text.disabled,
     width: 60,
     flexShrink: 0,
-});
+}));
 
 const FieldValue = styled(Typography)({fontSize: '12px', wordBreak: 'break-word'});
 

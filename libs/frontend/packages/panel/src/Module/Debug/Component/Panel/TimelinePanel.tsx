@@ -79,15 +79,15 @@ const Bar = styled(Box)({
     '&:hover': {opacity: 0.85, boxShadow: '0 0 0 2px rgba(255,255,255,0.2)'},
 });
 
-const Duration = styled(Typography)({
+const Duration = styled(Typography)(({theme}) => ({
     width: 60,
     flexShrink: 0,
     textAlign: 'right',
     fontFamily: primitives.fontFamilyMono,
     fontSize: '11px',
-    color: primitives.gray400,
+    color: theme.palette.text.disabled,
     paddingLeft: 8,
-});
+}));
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(1.5, 2, 1.5, 23),

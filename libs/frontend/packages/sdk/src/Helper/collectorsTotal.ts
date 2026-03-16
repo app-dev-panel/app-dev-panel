@@ -38,7 +38,7 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
         case CollectorsMap.ConsoleAppInfoCollector:
             return 0;
         case CollectorsMap.TimelineCollector:
-            return Number(data.timeline?.total);
+            return data.timeline?.total != null ? Number(data.timeline.total) : undefined;
         default:
             return undefined;
     }

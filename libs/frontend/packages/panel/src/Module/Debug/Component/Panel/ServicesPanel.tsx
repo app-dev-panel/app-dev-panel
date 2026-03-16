@@ -101,8 +101,8 @@ const SummaryView = ({summaryRows}: {summaryRows: Record<string, SummaryItemType
                                         fontSize: '10px',
                                         height: 20,
                                         borderRadius: 1,
-                                        backgroundColor: primitives.red50,
-                                        color: primitives.red600,
+                                        backgroundColor: 'error.light',
+                                        color: 'error.main',
                                         flexShrink: 0,
                                     }}
                                 />
@@ -193,7 +193,7 @@ const AllView = ({rows}: {rows: AllRow[]}) => {
                                     fontSize: '10px',
                                     height: 20,
                                     minWidth: 40,
-                                    backgroundColor: isError ? primitives.red600 : primitives.green600,
+                                    backgroundColor: isError ? 'error.main' : 'success.main',
                                     color: '#fff',
                                     borderRadius: 1,
                                     flexShrink: 0,

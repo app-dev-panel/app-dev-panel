@@ -3,23 +3,43 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
-import {Alert, AlertTitle, Box, Chip, Collapse, Icon, IconButton, TextField, Typography} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {
+    Alert,
+    AlertTitle,
+    Box,
+    Chip,
+    Collapse,
+    Icon,
+    IconButton,
+    TextField,
+    type Theme,
+    Typography,
+} from '@mui/material';
+import {styled, useTheme} from '@mui/material/styles';
 import {useState} from 'react';
 
 type Level = 'emergency' | 'alert' | 'critical' | 'error' | 'warning' | 'notice' | 'info' | 'debug';
 type LogEntry = {context: object; level: Level; line: string; message: string; time: number};
 type LogPanelProps = {data: LogEntry[]};
 
-const levelColor: Record<string, string> = {
-    emergency: primitives.red600,
-    alert: primitives.red600,
-    critical: primitives.red600,
-    error: primitives.red600,
-    warning: primitives.amber600,
-    notice: primitives.blue500,
-    info: primitives.green600,
-    debug: primitives.gray400,
+const levelColor = (level: string, theme: Theme): string => {
+    switch (level) {
+        case 'emergency':
+        case 'alert':
+        case 'critical':
+        case 'error':
+            return theme.palette.error.main;
+        case 'warning':
+            return theme.palette.warning.main;
+        case 'notice':
+            return theme.palette.primary.main;
+        case 'info':
+            return theme.palette.success.main;
+        case 'debug':
+            return theme.palette.text.disabled;
+        default:
+            return theme.palette.text.disabled;
+    }
 };
 
 const LogRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(({theme, expanded}) => ({
@@ -52,6 +72,7 @@ const DetailBox = styled(Box)(({theme}) => ({
 }));
 
 export const LogPanel = ({data}: LogPanelProps) => {
+    const theme = useTheme();
     const [filter, setFilter] = useState('');
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
@@ -89,7 +110,7 @@ export const LogPanel = ({data}: LogPanelProps) => {
 
             {filtered.map((entry, index) => {
                 const expanded = expandedIndex === index;
-                const color = levelColor[entry.level] || primitives.gray400;
+                const color = levelColor(entry.level, theme);
                 return (
                     <Box key={index}>
                         <LogRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
