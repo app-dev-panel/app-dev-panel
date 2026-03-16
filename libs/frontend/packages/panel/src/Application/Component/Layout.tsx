@@ -309,6 +309,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     entries={entries}
                     currentEntryId={debugEntry?.id}
                     onSelect={changeEntry}
+                    onAllClick={() => navigate('/debug/list')}
                 />
 
                 <MainArea>

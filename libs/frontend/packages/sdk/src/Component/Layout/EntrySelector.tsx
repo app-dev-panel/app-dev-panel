@@ -123,6 +123,7 @@ type EntrySelectorProps = {
     entries: DebugEntry[];
     currentEntryId?: string;
     onSelect: (entry: DebugEntry) => void;
+    onAllClick?: () => void;
 };
 
 type MatchedEntry = {entry: DebugEntry; indices: number[]; searchText: string};
@@ -179,8 +180,14 @@ const methodColor = (method: string, theme: Theme): string => {
     }
 };
 
+const FilterRow = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    borderBottom: `1px solid ${theme.palette.divider}`,
+}));
+
 const FilterInput = styled('input')(({theme}) => ({
-    width: '100%',
+    flex: 1,
     border: 'none',
     outline: 'none',
     fontSize: '13px',
@@ -188,8 +195,21 @@ const FilterInput = styled('input')(({theme}) => ({
     backgroundColor: 'transparent',
     color: theme.palette.text.primary,
     padding: theme.spacing(1.25, 2),
-    borderBottom: `1px solid ${theme.palette.divider}`,
     '&::placeholder': {color: theme.palette.text.disabled},
+}));
+
+const AllButton = styled('button')(({theme}) => ({
+    border: 'none',
+    background: 'none',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: 600,
+    color: theme.palette.text.secondary,
+    padding: theme.spacing(0.75, 1.5),
+    marginRight: theme.spacing(1),
+    borderRadius: theme.shape.borderRadius / 2,
+    whiteSpace: 'nowrap',
+    '&:hover': {backgroundColor: theme.palette.action.hover, color: theme.palette.text.primary},
 }));
 
 const CountLabel = styled(Typography)(({theme}) => ({
@@ -218,7 +238,15 @@ function getSearchText(entry: DebugEntry): string {
 // Component
 // ---------------------------------------------------------------------------
 
-export const EntrySelector = ({anchorEl, open, onClose, entries, currentEntryId, onSelect}: EntrySelectorProps) => {
+export const EntrySelector = ({
+    anchorEl,
+    open,
+    onClose,
+    entries,
+    currentEntryId,
+    onSelect,
+    onAllClick,
+}: EntrySelectorProps) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
@@ -271,12 +299,24 @@ export const EntrySelector = ({anchorEl, open, onClose, entries, currentEntryId,
             transformOrigin={{vertical: 'top', horizontal: 'left'}}
             slotProps={{paper: {sx: {width: 520, maxHeight: 440, mt: 0.5, borderRadius: 1.5}}}}
         >
-            <FilterInput
-                ref={inputRef}
-                placeholder="Search by URL, method, or command..."
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-            />
+            <FilterRow>
+                <FilterInput
+                    ref={inputRef}
+                    placeholder="Search by URL, method, or command..."
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                />
+                {onAllClick && (
+                    <AllButton
+                        onClick={() => {
+                            onAllClick();
+                            handleClose();
+                        }}
+                    >
+                        All
+                    </AllButton>
+                )}
+            </FilterRow>
             <Box sx={{overflowY: 'auto', maxHeight: 360}}>
                 {matched.length === 0 && (
                     <Box sx={{textAlign: 'center', py: 3, color: 'text.disabled'}}>
