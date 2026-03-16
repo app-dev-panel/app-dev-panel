@@ -20,7 +20,7 @@ const PillRoot = styled('button')(({theme}) => ({
 
 const statusColor = (status: number): string => {
     if (status >= 500) return primitives.red600;
-    if (status >= 400) return primitives.red600;
+    if (status >= 400) return primitives.amber600;
     if (status >= 300) return primitives.amber600;
     return primitives.green600;
 };

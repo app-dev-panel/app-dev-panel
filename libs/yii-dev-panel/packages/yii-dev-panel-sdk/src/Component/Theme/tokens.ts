@@ -78,6 +78,22 @@ export const semanticTokens = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// 2b. Dark-mode semantic overrides
+// ---------------------------------------------------------------------------
+
+export const darkSemanticTokens = {
+    palette: {
+        primary: {main: '#60A5FA', light: '#1E3A5F', dark: '#3B82F6'},
+        success: {main: '#4ADE80'},
+        warning: {main: '#FBBF24'},
+        error: {main: '#F87171', light: '#7F1D1D'},
+        background: {default: '#0F172A', paper: '#1E293B'},
+        text: {primary: '#F1F5F9', secondary: '#94A3B8', disabled: '#64748B'},
+        divider: '#334155',
+    },
+} as const;
+
+// ---------------------------------------------------------------------------
 // 3. Component tokens
 // ---------------------------------------------------------------------------
 

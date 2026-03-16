@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {componentTokens, primitives, semanticTokens} from './tokens';
+import {componentTokens, darkSemanticTokens, primitives, semanticTokens} from './tokens';
 
 describe('primitives', () => {
     it('has correct primary blue', () => {
@@ -46,6 +46,21 @@ describe('semanticTokens', () => {
 
     it('has 8px border radius', () => {
         expect(semanticTokens.shape.borderRadius).toBe(8);
+    });
+});
+
+describe('darkSemanticTokens', () => {
+    it('has dark background colors', () => {
+        expect(darkSemanticTokens.palette.background.default).toBe('#0F172A');
+        expect(darkSemanticTokens.palette.background.paper).toBe('#1E293B');
+    });
+
+    it('has light text for dark mode', () => {
+        expect(darkSemanticTokens.palette.text.primary).toBe('#F1F5F9');
+    });
+
+    it('has dark divider color', () => {
+        expect(darkSemanticTokens.palette.divider).toBe('#334155');
     });
 });
 

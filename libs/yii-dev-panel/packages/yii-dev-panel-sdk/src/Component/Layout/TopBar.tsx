@@ -1,15 +1,16 @@
-import {Icon, IconButton} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {Icon, IconButton, type PaletteMode} from '@mui/material';
+import {styled, useTheme} from '@mui/material/styles';
 import {RequestPill} from '@yiisoft/yii-dev-panel-sdk/Component/Layout/RequestPill';
 import {SearchTrigger} from '@yiisoft/yii-dev-panel-sdk/Component/Layout/SearchTrigger';
 import {componentTokens} from '@yiisoft/yii-dev-panel-sdk/Component/Theme/tokens';
-import React, {PropsWithChildren} from 'react';
+import React from 'react';
 
 type TopBarProps = {
     method?: string;
     path?: string;
     status?: number;
     duration?: string;
+    mode?: PaletteMode;
     onPrevEntry?: () => void;
     onNextEntry?: () => void;
     onEntryClick?: () => void;
@@ -27,6 +28,9 @@ const BarRoot = styled('header')(({theme}) => ({
     padding: theme.spacing(0, 2.5),
     gap: theme.spacing(2),
     flexShrink: 0,
+    position: 'sticky',
+    top: 0,
+    zIndex: theme.zIndex.appBar,
 }));
 
 const Logo = styled('div')(({theme}) => ({
@@ -54,13 +58,17 @@ export const TopBar = React.memo(
         path,
         status,
         duration,
+        mode,
         onPrevEntry,
         onNextEntry,
         onEntryClick,
         onSearchClick,
         onThemeToggle,
         onMoreClick,
-    }: PropsWithChildren<TopBarProps>) => {
+    }: TopBarProps) => {
+        const theme = useTheme();
+        const resolvedMode = mode ?? theme.palette.mode;
+
         return (
             <BarRoot>
                 <Logo>
@@ -86,7 +94,7 @@ export const TopBar = React.memo(
                 <Spacer />
                 <SearchTrigger onClick={onSearchClick} />
                 <IconButton size="small" onClick={onThemeToggle}>
-                    <Icon sx={{fontSize: 18}}>light_mode</Icon>
+                    <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
                 </IconButton>
                 <IconButton size="small" onClick={onMoreClick}>
                     <Icon sx={{fontSize: 18}}>more_vert</Icon>

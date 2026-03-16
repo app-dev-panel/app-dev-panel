@@ -1,7 +1,7 @@
 import {PaletteMode, ThemeProvider, createTheme, useMediaQuery} from '@mui/material';
 import {LinkProps} from '@mui/material/Link';
 import {RouterOptionsContext} from '@yiisoft/yii-dev-panel-sdk/Component/RouterOptions';
-import {semanticTokens} from '@yiisoft/yii-dev-panel-sdk/Component/Theme/tokens';
+import {darkSemanticTokens, semanticTokens} from '@yiisoft/yii-dev-panel-sdk/Component/Theme/tokens';
 import React, {PropsWithChildren, useContext, useMemo} from 'react';
 import {Link as RouterLink, LinkProps as RouterLinkProps, useHref} from 'react-router-dom';
 
@@ -29,6 +29,8 @@ const LinkBehavior = (routerOptions: {openLinksInNewWindow: boolean; baseUrl: st
 
 export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNewWindow: boolean; baseUrl: string}) => {
     const linkComponent = LinkBehavior(routerOptions);
+    const palette =
+        mode === 'dark' ? {...semanticTokens.palette, ...darkSemanticTokens.palette} : semanticTokens.palette;
 
     // Build MUI shadows array (25 entries required)
     const shadows: [string, ...string[]] = ['none', ...Array(24).fill(semanticTokens.shadows.sm)] as [
@@ -39,7 +41,7 @@ export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNew
     shadows[3] = semanticTokens.shadows.md;
 
     return createTheme({
-        palette: {mode, ...semanticTokens.palette},
+        palette: {mode, ...palette},
         typography: {
             fontFamily: semanticTokens.typography.fontFamily,
             h4: semanticTokens.typography.h4,
@@ -59,14 +61,12 @@ export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNew
             MuiButtonBase: {defaultProps: {LinkComponent: linkComponent}},
             MuiCssBaseline: {
                 styleOverrides: {
-                    body: {backgroundColor: semanticTokens.palette.background.default},
+                    body: {backgroundColor: palette.background.default},
                     '@font-face': [{fontFamily: 'Inter'}, {fontFamily: 'JetBrains Mono'}],
                 },
             },
             MuiPaper: {
-                styleOverrides: {
-                    outlined: {borderColor: semanticTokens.palette.divider, boxShadow: semanticTokens.shadows.sm},
-                },
+                styleOverrides: {outlined: {borderColor: palette.divider, boxShadow: semanticTokens.shadows.sm}},
             },
             MuiButton: {styleOverrides: {root: {textTransform: 'none', fontWeight: 500}}},
         },
@@ -83,4 +83,4 @@ export const DefaultThemeProvider = ({children}: PropsWithChildren) => {
     return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
 };
 
-export {primitives, semanticTokens} from '@yiisoft/yii-dev-panel-sdk/Component/Theme/tokens';
+export {darkSemanticTokens, primitives, semanticTokens} from '@yiisoft/yii-dev-panel-sdk/Component/Theme/tokens';

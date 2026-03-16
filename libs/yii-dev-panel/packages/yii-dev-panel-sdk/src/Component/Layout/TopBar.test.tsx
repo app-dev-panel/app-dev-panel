@@ -27,6 +27,16 @@ describe('TopBar', () => {
         expect(screen.queryByText('GET')).not.toBeInTheDocument();
     });
 
+    it('shows light_mode icon by default', () => {
+        renderWithProviders(<TopBar />);
+        expect(screen.getByText('light_mode')).toBeInTheDocument();
+    });
+
+    it('shows dark_mode icon when mode is dark', () => {
+        renderWithProviders(<TopBar mode="dark" />);
+        expect(screen.getByText('dark_mode')).toBeInTheDocument();
+    });
+
     it('calls navigation handlers', async () => {
         const user = userEvent.setup();
         const onPrev = vi.fn();

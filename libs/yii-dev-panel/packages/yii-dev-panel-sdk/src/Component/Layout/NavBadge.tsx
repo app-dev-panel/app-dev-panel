@@ -17,7 +17,7 @@ const BadgeRoot = styled('span', {shouldForwardProp: (prop) => prop !== 'variant
         fontFamily: primitives.fontFamily,
         ...(variant === 'error'
             ? {backgroundColor: theme.palette.error.light, color: theme.palette.error.main}
-            : {backgroundColor: theme.palette.divider, color: theme.palette.text.secondary}),
+            : {backgroundColor: primitives.gray300, color: theme.palette.text.secondary}),
     }),
 );
 
