@@ -1,8 +1,15 @@
 import {Icon} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {primitives} from '@yiisoft/yii-dev-panel-sdk/Component/Theme/tokens';
+import React from 'react';
 
-type RequestPillProps = {method: string; path: string; status: number; duration: string; onClick?: () => void};
+type RequestPillProps = {
+    method: string;
+    path: string;
+    status: number;
+    duration: string;
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+};
 
 const PillRoot = styled('button')(({theme}) => ({
     display: 'flex',

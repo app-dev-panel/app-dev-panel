@@ -5,6 +5,7 @@ import '@fontsource/inter/700.css';
 import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/500.css';
 import '@fontsource/material-icons';
+import '@yiisoft/yii-dev-panel-sdk/Component/Theme/material-icons.css';
 import {Config} from '@yiisoft/yii-dev-panel-sdk/Config';
 import reportWebVitals from '@yiisoft/yii-dev-toolbar/reportWebVitals';
 

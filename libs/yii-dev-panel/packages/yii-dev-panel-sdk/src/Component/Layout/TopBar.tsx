@@ -13,7 +13,7 @@ type TopBarProps = {
     mode?: PaletteMode;
     onPrevEntry?: () => void;
     onNextEntry?: () => void;
-    onEntryClick?: () => void;
+    onEntryClick?: (e: React.MouseEvent) => void;
     onSearchClick?: () => void;
     onThemeToggle?: () => void;
     onMoreClick?: () => void;
