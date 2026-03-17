@@ -12,11 +12,15 @@ composer install
 ## Run
 
 ```bash
-# Start Symfony dev server
+# Start PHP built-in server
 php -S 127.0.0.1:8080 -t public
+```
 
-# Or use Symfony CLI
-symfony serve
+## Console
+
+```bash
+# Run Symfony console commands
+php bin/console
 ```
 
 ## Demo Endpoints
