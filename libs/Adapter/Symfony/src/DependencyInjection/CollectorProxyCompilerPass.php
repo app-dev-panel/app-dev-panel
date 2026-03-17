@@ -10,6 +10,7 @@ use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
+use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
@@ -36,6 +37,7 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
         $this->decorateLogger($container);
         $this->decorateEventDispatcher($container);
         $this->decorateHttpClient($container);
+        $this->collectContainerParameters($container);
     }
 
     private function registerDebugger(ContainerBuilder $container): void
@@ -118,5 +120,35 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
                 new Reference(HttpClientInterfaceProxy::class . '.inner'),
                 new Reference(HttpClientCollector::class),
             ]);
+    }
+
+    /**
+     * Collects all Symfony container parameters and passes them to InspectController
+     * and SymfonyConfigProvider so the inspector can display them.
+     */
+    private function collectContainerParameters(ContainerBuilder $container): void
+    {
+        $parameterBag = $container->getParameterBag();
+        $params = [];
+
+        foreach ($parameterBag->all() as $key => $value) {
+            // Skip internal ADP parameters
+            if (str_starts_with($key, 'app_dev_panel.')) {
+                continue;
+            }
+
+            $params[$key] = $value;
+        }
+
+        ksort($params);
+
+        // Update SymfonyConfigProvider's parameter
+        $container->setParameter('app_dev_panel.container_parameters', $params);
+
+        // Pass params as 3rd argument to InspectController
+        if ($container->has(InspectController::class)) {
+            $definition = $container->getDefinition(InspectController::class);
+            $definition->setArgument(2, $params);
+        }
     }
 }

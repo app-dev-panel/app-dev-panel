@@ -7,6 +7,7 @@ namespace AppDevPanel\Adapter\Symfony\Tests\Unit\DependencyInjection;
 use AppDevPanel\Adapter\Symfony\DependencyInjection\AppDevPanelExtension;
 use AppDevPanel\Adapter\Symfony\DependencyInjection\CollectorProxyCompilerPass;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy;
+use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
@@ -129,6 +130,64 @@ final class CollectorProxyCompilerPassTest extends TestCase
 
         // LogCollector not registered, so proxy should not be applied
         $this->assertFalse($container->hasDefinition(LoggerInterfaceProxy::class));
+    }
+
+    public function testCollectsContainerParametersIntoInspectController(): void
+    {
+        $container = $this->createLoadedContainer();
+
+        // Simulate Symfony kernel parameters
+        $container->setParameter('kernel.project_dir', '/app');
+        $container->setParameter('kernel.environment', 'dev');
+        $container->setParameter('kernel.debug', true);
+        $container->setParameter('locale', 'en');
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        // InspectController should have params as 3rd argument
+        $def = $container->getDefinition(InspectController::class);
+        $params = $def->getArgument(2);
+
+        $this->assertIsArray($params);
+        $this->assertArrayHasKey('kernel.project_dir', $params);
+        $this->assertSame('/app', $params['kernel.project_dir']);
+        $this->assertArrayHasKey('locale', $params);
+        $this->assertSame('en', $params['locale']);
+    }
+
+    public function testContainerParametersExcludesAdpInternalParams(): void
+    {
+        $container = $this->createLoadedContainer();
+
+        $container->setParameter('kernel.project_dir', '/app');
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $def = $container->getDefinition(InspectController::class);
+        $params = $def->getArgument(2);
+
+        // app_dev_panel.* parameters should be excluded
+        foreach (array_keys($params) as $key) {
+            $this->assertStringStartsNotWith('app_dev_panel.', (string) $key);
+        }
+    }
+
+    public function testContainerParametersPassedToConfigProvider(): void
+    {
+        $container = $this->createLoadedContainer();
+
+        $container->setParameter('kernel.project_dir', '/app');
+        $container->setParameter('database_url', 'sqlite:///var/data.db');
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $resolvedParams = $container->getParameter('app_dev_panel.container_parameters');
+        $this->assertIsArray($resolvedParams);
+        $this->assertArrayHasKey('kernel.project_dir', $resolvedParams);
+        $this->assertArrayHasKey('database_url', $resolvedParams);
     }
 
     private function createLoadedContainer(array $collectorOverrides = []): ContainerBuilder

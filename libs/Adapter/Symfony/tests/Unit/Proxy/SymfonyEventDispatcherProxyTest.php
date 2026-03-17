@@ -59,7 +59,6 @@ final class SymfonyEventDispatcherProxyTest extends TestCase
 
         $proxy = new SymfonyEventDispatcherProxy($inner, $collector);
 
-        // addListener is a Symfony-specific method forwarded via __call
         $called = false;
         $proxy->addListener('test.event', static function () use (&$called): void {
             $called = true;
@@ -71,5 +70,79 @@ final class SymfonyEventDispatcherProxyTest extends TestCase
         $proxy->dispatch(new \stdClass(), 'test.event');
 
         $this->assertTrue($called);
+    }
+
+    public function testGetListenersForwardsToDecorated(): void
+    {
+        $timeline = new TimelineCollector();
+        $collector = new EventCollector($timeline);
+        $inner = new EventDispatcher();
+
+        $proxy = new SymfonyEventDispatcherProxy($inner, $collector);
+
+        $listener = static function (): void {};
+        $proxy->addListener('my.event', $listener);
+
+        $listeners = $proxy->getListeners('my.event');
+        $this->assertCount(1, $listeners);
+
+        $allListeners = $proxy->getListeners();
+        $this->assertArrayHasKey('my.event', $allListeners);
+    }
+
+    public function testHasListenersForwardsToDecorated(): void
+    {
+        $timeline = new TimelineCollector();
+        $collector = new EventCollector($timeline);
+        $inner = new EventDispatcher();
+
+        $proxy = new SymfonyEventDispatcherProxy($inner, $collector);
+
+        $this->assertFalse($proxy->hasListeners('my.event'));
+
+        $proxy->addListener('my.event', static function (): void {});
+
+        $this->assertTrue($proxy->hasListeners('my.event'));
+    }
+
+    public function testRemoveListenerForwardsToDecorated(): void
+    {
+        $timeline = new TimelineCollector();
+        $collector = new EventCollector($timeline);
+        $inner = new EventDispatcher();
+
+        $proxy = new SymfonyEventDispatcherProxy($inner, $collector);
+
+        $listener = static function (): void {};
+        $proxy->addListener('my.event', $listener);
+        $this->assertTrue($proxy->hasListeners('my.event'));
+
+        $proxy->removeListener('my.event', $listener);
+        $this->assertFalse($proxy->hasListeners('my.event'));
+    }
+
+    public function testGetListenerPriorityForwardsToDecorated(): void
+    {
+        $timeline = new TimelineCollector();
+        $collector = new EventCollector($timeline);
+        $inner = new EventDispatcher();
+
+        $proxy = new SymfonyEventDispatcherProxy($inner, $collector);
+
+        $listener = static function (): void {};
+        $proxy->addListener('my.event', $listener, 42);
+
+        $this->assertSame(42, $proxy->getListenerPriority('my.event', $listener));
+    }
+
+    public function testImplementsSymfonyComponentEventDispatcherInterface(): void
+    {
+        $timeline = new TimelineCollector();
+        $collector = new EventCollector($timeline);
+        $inner = new EventDispatcher();
+
+        $proxy = new SymfonyEventDispatcherProxy($inner, $collector);
+
+        $this->assertInstanceOf(\Symfony\Component\EventDispatcher\EventDispatcherInterface::class, $proxy);
     }
 }
