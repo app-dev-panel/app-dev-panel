@@ -137,6 +137,40 @@ final class ConsoleProcessIntegrationTest extends TestCase
         $this->assertSame(0, $commandData[$terminateEventKey]['exitCode']);
     }
 
+    public function testConsoleCommandCollectsLogs(): void
+    {
+        $result = $this->runConsole('app:test-logging');
+
+        $this->assertSame(0, $result['exitCode'], "app:test-logging failed:\n" . $result['stderr']);
+
+        $entries = $this->findDebugEntries();
+        $this->assertNotEmpty($entries, 'app:test-logging should produce debug data');
+
+        $entry = $this->readEntry($entries[0]);
+        $data = $entry['data'];
+
+        $logKey = 'AppDevPanel\Kernel\Collector\LogCollector';
+        $this->assertArrayHasKey($logKey, $data, 'Data should contain LogCollector entries');
+
+        $logs = $data[$logKey];
+        $this->assertNotEmpty($logs, 'Logs should be collected during console command');
+
+        // Verify the 3 test log messages are captured
+        $messages = array_column($logs, 'message');
+        $this->assertContains('Test log message from console command', $messages);
+        $this->assertContains('This is a warning log', $messages);
+        $this->assertContains('This is an error log', $messages);
+
+        // Verify log levels
+        $logsByMessage = [];
+        foreach ($logs as $log) {
+            $logsByMessage[$log['message']] = $log;
+        }
+        $this->assertSame('info', $logsByMessage['Test log message from console command']['level']);
+        $this->assertSame('warning', $logsByMessage['This is a warning log']['level']);
+        $this->assertSame('error', $logsByMessage['This is an error log']['level']);
+    }
+
     public function testIgnoredCommandProducesNoDebugData(): void
     {
         // 'list' is in the default ignored_commands
