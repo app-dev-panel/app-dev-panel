@@ -40,9 +40,9 @@ describe('EventPanel', () => {
         expect(screen.getByText('2 events')).toBeInTheDocument();
     });
 
-    it('renders EVENT badge for each row', () => {
+    it('renders event name for each row', () => {
         renderWithProviders(<EventPanel events={[makeEvent()]} />, {preloadedState});
-        expect(screen.getByText('EVENT')).toBeInTheDocument();
+        expect(screen.getAllByText('UserCreated').length).toBeGreaterThan(0);
     });
 
     it('renders short class name from namespace', () => {
