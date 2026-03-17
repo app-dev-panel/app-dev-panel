@@ -33,6 +33,8 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
             return Number(data.http_stream?.length);
         case CollectorsMap.MailerCollector:
             return Number(data.mailer?.total);
+        case CollectorsMap.CacheCollector:
+            return Number(data.cache?.totalOperations);
         case CollectorsMap.FilesystemStreamCollector:
             return Object.values(data.fs_stream ?? []).reduce((acc, value) => acc + value, 0);
         case CollectorsMap.ConsoleAppInfoCollector:

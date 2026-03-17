@@ -17,6 +17,13 @@ export enum CollectorsMap {
     // Adapter collectors
     MiddlewareCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Web\\MiddlewareCollector',
 
+    // Symfony adapter collectors
+    CacheCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\CacheCollector',
+    DoctrineCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\DoctrineCollector',
+    TwigCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\TwigCollector',
+    SecurityCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\SecurityCollector',
+    MessengerCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\MessengerCollector',
+
     // External package collectors (not yet migrated, kept for future adapters)
     AssetCollector = 'Yiisoft\\Assets\\Debug\\AssetCollector',
     ValidatorCollector = 'Yiisoft\\Validator\\Debug\\ValidatorCollector',
