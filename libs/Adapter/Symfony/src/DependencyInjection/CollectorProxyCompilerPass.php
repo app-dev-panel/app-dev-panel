@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
+use AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy;
 use AppDevPanel\Kernel\Collector\EventCollector;
-use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
@@ -13,12 +13,10 @@ use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -60,15 +58,17 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
 
     private function decorateLogger(ContainerBuilder $container): void
     {
-        if (!$container->has(LoggerInterface::class) || !$container->has(LogCollector::class)) {
+        if (!$container->has(LogCollector::class)) {
             return;
         }
 
-        $container->register('app_dev_panel.logger.inner', LoggerInterface::class)
-            ->setDecoratedService(LoggerInterface::class, null, -10);
+        // Symfony registers the logger as Psr\Log\LoggerInterface (via MonologBundle alias)
+        if (!$container->has(LoggerInterface::class)) {
+            return;
+        }
 
         $container->register(LoggerInterfaceProxy::class, LoggerInterfaceProxy::class)
-            ->setDecoratedService(LoggerInterface::class, null, -9)
+            ->setDecoratedService(LoggerInterface::class)
             ->setArguments([
                 new Reference(LoggerInterfaceProxy::class . '.inner'),
                 new Reference(LogCollector::class),
@@ -77,14 +77,22 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
 
     private function decorateEventDispatcher(ContainerBuilder $container): void
     {
-        if (!$container->has(EventDispatcherInterface::class) || !$container->has(EventCollector::class)) {
+        if (!$container->has(EventCollector::class)) {
             return;
         }
 
-        $container->register(EventDispatcherInterfaceProxy::class, EventDispatcherInterfaceProxy::class)
-            ->setDecoratedService(EventDispatcherInterface::class, null, -10)
+        // Symfony registers the event dispatcher as 'event_dispatcher' service.
+        // We decorate it with SymfonyEventDispatcherProxy which implements
+        // Symfony\Contracts\EventDispatcher\EventDispatcherInterface (extends PSR-14)
+        // and correctly forwards the $eventName parameter.
+        if (!$container->has('event_dispatcher')) {
+            return;
+        }
+
+        $container->register(SymfonyEventDispatcherProxy::class, SymfonyEventDispatcherProxy::class)
+            ->setDecoratedService('event_dispatcher')
             ->setArguments([
-                new Reference(EventDispatcherInterfaceProxy::class . '.inner'),
+                new Reference(SymfonyEventDispatcherProxy::class . '.inner'),
                 new Reference(EventCollector::class),
             ]);
     }
@@ -96,7 +104,7 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
         }
 
         $container->register(HttpClientInterfaceProxy::class, HttpClientInterfaceProxy::class)
-            ->setDecoratedService(ClientInterface::class, null, -10)
+            ->setDecoratedService(ClientInterface::class)
             ->setArguments([
                 new Reference(HttpClientInterfaceProxy::class . '.inner'),
                 new Reference(HttpClientCollector::class),

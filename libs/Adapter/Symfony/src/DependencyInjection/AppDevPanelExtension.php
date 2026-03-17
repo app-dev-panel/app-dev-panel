@@ -9,7 +9,6 @@ use AppDevPanel\Adapter\Symfony\Collector\DoctrineCollector;
 use AppDevPanel\Adapter\Symfony\Collector\MailerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SymfonyRequestCollector;
 use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
@@ -49,8 +48,9 @@ use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SymfonyExceptionCollector;
+use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
+use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
@@ -122,7 +122,7 @@ final class AppDevPanelExtension extends Extension
         $collectors = $config['collectors'];
 
         if ($collectors['request']) {
-            $container->register(SymfonyRequestCollector::class, SymfonyRequestCollector::class)
+            $container->register(RequestCollector::class, RequestCollector::class)
                 ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector')
@@ -136,7 +136,7 @@ final class AppDevPanelExtension extends Extension
         }
 
         if ($collectors['exception']) {
-            $container->register(SymfonyExceptionCollector::class, SymfonyExceptionCollector::class)
+            $container->register(ExceptionCollector::class, ExceptionCollector::class)
                 ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
@@ -254,9 +254,9 @@ final class AppDevPanelExtension extends Extension
         $container->register(HttpSubscriber::class, HttpSubscriber::class)
             ->setArguments([
                 new Reference(Debugger::class),
-                new Reference(SymfonyRequestCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+                new Reference(RequestCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(WebAppInfoCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
-                new Reference(SymfonyExceptionCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+                new Reference(ExceptionCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
@@ -266,7 +266,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(Debugger::class),
                 new Reference(CommandCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(ConsoleAppInfoCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
-                new Reference(SymfonyExceptionCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+                new Reference(ExceptionCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);

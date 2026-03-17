@@ -6,7 +6,7 @@ namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SymfonyExceptionCollector;
+use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
 use Symfony\Component\Console\ConsoleEvents;
@@ -28,7 +28,7 @@ final class ConsoleSubscriber implements EventSubscriberInterface
         private readonly Debugger $debugger,
         private readonly ?CommandCollector $commandCollector = null,
         private readonly ?ConsoleAppInfoCollector $consoleAppInfoCollector = null,
-        private readonly ?SymfonyExceptionCollector $exceptionCollector = null,
+        private readonly ?ExceptionCollector $exceptionCollector = null,
     ) {}
 
     public static function getSubscribedEvents(): array

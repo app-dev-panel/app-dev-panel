@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\Tests\Unit\EventSubscriber;
 
-use AppDevPanel\Adapter\Symfony\Collector\SymfonyExceptionCollector;
+use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Debugger;
@@ -56,7 +56,7 @@ final class ConsoleSubscriberTest extends TestCase
         $idGenerator = new DebuggerIdGenerator();
         $storage = new MemoryStorage($idGenerator);
         $timeline = new TimelineCollector();
-        $exceptionCollector = new SymfonyExceptionCollector($timeline);
+        $exceptionCollector = new ExceptionCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$exceptionCollector, $timeline]);
         $debugger->startup(StartupContext::forCommand('test'));
 

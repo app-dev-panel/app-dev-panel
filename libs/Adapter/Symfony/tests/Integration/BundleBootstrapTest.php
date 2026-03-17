@@ -10,8 +10,8 @@ use AppDevPanel\Adapter\Symfony\Collector\DoctrineCollector;
 use AppDevPanel\Adapter\Symfony\Collector\MailerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SymfonyExceptionCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SymfonyRequestCollector;
+use AppDevPanel\Kernel\Collector\ExceptionCollector;
+use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
@@ -86,9 +86,9 @@ final class BundleBootstrapTest extends TestCase
 
         $expectedCollectors = [
             TimelineCollector::class,
-            SymfonyRequestCollector::class,
+            RequestCollector::class,
             WebAppInfoCollector::class,
-            SymfonyExceptionCollector::class,
+            ExceptionCollector::class,
             LogCollector::class,
             EventCollector::class,
             ServiceCollector::class,
@@ -132,7 +132,7 @@ final class BundleBootstrapTest extends TestCase
 
         $debugger = $container->get(Debugger::class);
         $httpSubscriber = $container->get(HttpSubscriber::class);
-        $requestCollector = $container->get(SymfonyRequestCollector::class);
+        $requestCollector = $container->get(RequestCollector::class);
 
         $kernel = $this->createMock(\Symfony\Component\HttpKernel\HttpKernelInterface::class);
         $request = \Symfony\Component\HttpFoundation\Request::create('/integration-test', 'GET');
@@ -241,7 +241,7 @@ final class BundleBootstrapTest extends TestCase
 
         // Core collectors still available
         $this->assertInstanceOf(LogCollector::class, $container->get(LogCollector::class));
-        $this->assertInstanceOf(SymfonyRequestCollector::class, $container->get(SymfonyRequestCollector::class));
+        $this->assertInstanceOf(RequestCollector::class, $container->get(RequestCollector::class));
 
         // Debugger still boots
         $this->assertInstanceOf(Debugger::class, $container->get(Debugger::class));
@@ -281,7 +281,7 @@ final class BundleBootstrapTest extends TestCase
         $container = $this->buildContainer();
 
         $httpSubscriber = $container->get(HttpSubscriber::class);
-        $exceptionCollector = $container->get(SymfonyExceptionCollector::class);
+        $exceptionCollector = $container->get(ExceptionCollector::class);
 
         $kernel = $this->createMock(\Symfony\Component\HttpKernel\HttpKernelInterface::class);
         $request = \Symfony\Component\HttpFoundation\Request::create('/boom', 'GET');

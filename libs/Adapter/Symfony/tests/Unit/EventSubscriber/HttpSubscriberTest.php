@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\Tests\Unit\EventSubscriber;
 
-use AppDevPanel\Adapter\Symfony\Collector\SymfonyExceptionCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SymfonyRequestCollector;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
+use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\StartupContext;
 use AppDevPanel\Kernel\Storage\MemoryStorage;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -63,7 +64,7 @@ final class HttpSubscriberTest extends TestCase
         $idGenerator = new DebuggerIdGenerator();
         $storage = new MemoryStorage($idGenerator);
         $timeline = new TimelineCollector();
-        $requestCollector = new SymfonyRequestCollector($timeline);
+        $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
         $subscriber = new HttpSubscriber($debugger, $requestCollector);
@@ -83,7 +84,7 @@ final class HttpSubscriberTest extends TestCase
         $idGenerator = new DebuggerIdGenerator();
         $storage = new MemoryStorage($idGenerator);
         $timeline = new TimelineCollector();
-        $requestCollector = new SymfonyRequestCollector($timeline);
+        $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
         $subscriber = new HttpSubscriber($debugger, $requestCollector);
@@ -104,7 +105,7 @@ final class HttpSubscriberTest extends TestCase
         $idGenerator = new DebuggerIdGenerator();
         $storage = new MemoryStorage($idGenerator);
         $timeline = new TimelineCollector();
-        $requestCollector = new SymfonyRequestCollector($timeline);
+        $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
         $subscriber = new HttpSubscriber($debugger, $requestCollector);
@@ -134,7 +135,7 @@ final class HttpSubscriberTest extends TestCase
         $idGenerator = new DebuggerIdGenerator();
         $storage = new MemoryStorage($idGenerator);
         $timeline = new TimelineCollector();
-        $requestCollector = new SymfonyRequestCollector($timeline);
+        $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
         $subscriber = new HttpSubscriber($debugger, $requestCollector);
@@ -153,11 +154,11 @@ final class HttpSubscriberTest extends TestCase
     public function testOnKernelExceptionCollectsException(): void
     {
         $timeline = new TimelineCollector();
-        $exceptionCollector = new SymfonyExceptionCollector($timeline);
+        $exceptionCollector = new ExceptionCollector($timeline);
         $idGenerator = new DebuggerIdGenerator();
         $storage = new MemoryStorage($idGenerator);
         $debugger = new Debugger($idGenerator, $storage, [$exceptionCollector, $timeline]);
-        $debugger->startup(\AppDevPanel\Kernel\StartupContext::generic());
+        $debugger->startup(StartupContext::generic());
 
         $subscriber = new HttpSubscriber($debugger, exceptionCollector: $exceptionCollector);
 
@@ -180,7 +181,7 @@ final class HttpSubscriberTest extends TestCase
         $storage = $this->createMock(\AppDevPanel\Kernel\Storage\StorageInterface::class);
         $storage->expects($this->once())->method('flush');
         $debugger = new Debugger($idGenerator, $storage, []);
-        $debugger->startup(\AppDevPanel\Kernel\StartupContext::generic());
+        $debugger->startup(StartupContext::generic());
 
         $subscriber = new HttpSubscriber($debugger);
 
@@ -197,7 +198,7 @@ final class HttpSubscriberTest extends TestCase
         $idGenerator = new DebuggerIdGenerator();
         $storage = new MemoryStorage($idGenerator);
         $timeline = new TimelineCollector();
-        $requestCollector = new SymfonyRequestCollector($timeline);
+        $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
         $subscriber = new HttpSubscriber($debugger, $requestCollector);
@@ -223,7 +224,7 @@ final class HttpSubscriberTest extends TestCase
         $idGenerator = new DebuggerIdGenerator();
         $storage = new MemoryStorage($idGenerator);
         $debugger = new Debugger($idGenerator, $storage, []);
-        $debugger->startup(\AppDevPanel\Kernel\StartupContext::generic());
+        $debugger->startup(StartupContext::generic());
 
         // Subscriber with no optional collectors — should not throw
         $subscriber = new HttpSubscriber($debugger);

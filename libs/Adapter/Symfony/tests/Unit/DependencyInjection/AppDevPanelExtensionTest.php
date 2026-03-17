@@ -9,8 +9,8 @@ use AppDevPanel\Adapter\Symfony\Collector\DoctrineCollector;
 use AppDevPanel\Adapter\Symfony\Collector\MailerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SymfonyExceptionCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SymfonyRequestCollector;
+use AppDevPanel\Kernel\Collector\ExceptionCollector;
+use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
 use AppDevPanel\Adapter\Symfony\DependencyInjection\AppDevPanelExtension;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
@@ -61,9 +61,9 @@ final class AppDevPanelExtensionTest extends TestCase
 
         $expectedCollectors = [
             TimelineCollector::class,
-            SymfonyRequestCollector::class,
+            RequestCollector::class,
             WebAppInfoCollector::class,
-            SymfonyExceptionCollector::class,
+            ExceptionCollector::class,
             LogCollector::class,
             EventCollector::class,
             ServiceCollector::class,
@@ -122,7 +122,7 @@ final class AppDevPanelExtensionTest extends TestCase
 
         // Core collectors still registered
         $this->assertTrue($container->hasDefinition(LogCollector::class));
-        $this->assertTrue($container->hasDefinition(SymfonyRequestCollector::class));
+        $this->assertTrue($container->hasDefinition(RequestCollector::class));
     }
 
     public function testCollectorsAreTagged(): void
@@ -136,7 +136,7 @@ final class AppDevPanelExtensionTest extends TestCase
         $this->assertNotEmpty($taggedCollectors);
         $this->assertArrayHasKey(TimelineCollector::class, $taggedCollectors);
         $this->assertArrayHasKey(LogCollector::class, $taggedCollectors);
-        $this->assertArrayHasKey(SymfonyRequestCollector::class, $taggedCollectors);
+        $this->assertArrayHasKey(RequestCollector::class, $taggedCollectors);
     }
 
     public function testEventSubscribersAreTagged(): void
