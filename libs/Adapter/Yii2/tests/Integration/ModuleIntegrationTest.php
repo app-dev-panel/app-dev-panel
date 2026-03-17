@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
+use AppDevPanel\Adapter\Yii2\Collector\AssetBundleCollector;
 use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
+use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Api\ApiApplication;
@@ -71,6 +73,8 @@ final class ModuleIntegrationTest extends TestCase
             LogCollector::class,
             EventCollector::class,
             DbCollector::class,
+            MailerCollector::class,
+            AssetBundleCollector::class,
         ];
 
         foreach ($expectedClasses as $expected) {

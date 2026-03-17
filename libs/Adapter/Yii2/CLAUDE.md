@@ -21,8 +21,11 @@ src/
 │   ├── WebListener.php                        # beforeRequest/afterRequest → Debugger lifecycle
 │   └── ConsoleListener.php                    # Console beforeRequest/afterRequest → Debugger lifecycle
 ├── Collector/
-│   ├── DbCollector.php                        # SQL queries via yii\db events
-│   └── Yii2LogCollector.php                   # Yii 2 Logger messages
+│   ├── DbCollector.php                        # SQL queries via yii\db events with timing
+│   ├── DebugLogTarget.php                     # Real-time log target feeding LogCollector
+│   ├── MailerCollector.php                    # Mail messages via BaseMailer events
+│   ├── AssetBundleCollector.php               # Asset bundles via View events
+│   └── Yii2LogCollector.php                   # Yii 2 Logger messages (legacy batch)
 ├── Inspector/
 │   ├── Yii2ConfigProvider.php                 # Components, params, modules for inspector
 │   ├── Yii2DbSchemaProvider.php               # Database schema via yii\db\Schema
@@ -57,6 +60,8 @@ It registers the `debug-panel` module if enabled (auto-enables in YII_DEBUG mode
             'event' => true,
             'db' => true,
             'yii_log' => true,
+            'mailer' => true,
+            'assets' => true,
         ],
         'ignoredRequests' => ['/debug/api/*', '/inspect/api/*'],
         'ignoredCommands' => ['help', 'list'],
@@ -100,7 +105,25 @@ Yii 2 uses its own `yii\web\Request` / `yii\web\Response` objects.
 
 `Module::registerDbProfiling()` hooks into:
 - `yii\db\Connection::EVENT_AFTER_OPEN` → `DbCollector::logConnection()`
-- `yii\db\Command::EVENT_AFTER_EXECUTE` → `DbCollector::logQuery()`
+- `yii\db\Command::EVENT_BEFORE_EXECUTE` → `DbCollector::beginQuery()` (starts timer)
+- `yii\db\Command::EVENT_AFTER_EXECUTE` → `DbCollector::logQuery()` (stops timer, records query with timing, params, SQL type)
+
+### 6a. Real-time Log Capture
+
+`Module::registerDebugLogTarget()` registers `DebugLogTarget` as a Yii log target:
+- Feeds `LogCollector` in real-time as messages are flushed (not at shutdown)
+- Maps Yii log levels to PSR-3 levels
+- `exportInterval = 1` ensures immediate capture
+
+### 6b. Mailer Profiling
+
+`Module::registerMailerProfiling()` hooks into:
+- `yii\mail\BaseMailer::EVENT_AFTER_SEND` → `MailerCollector::logMessage()` (captures from, to, cc, bcc, subject, success)
+
+### 6c. Asset Bundle Profiling
+
+`Module::registerAssetProfiling()` hooks into (web only):
+- `yii\web\View::EVENT_END_PAGE` → `AssetBundleCollector::collectBundles()` (reads View::$assetBundles)
 
 ### 7. Inspector Integration
 
@@ -139,8 +162,11 @@ Yii 2 uses its own `yii\web\Request` / `yii\web\Response` objects.
 
 | Collector | Fed By | Data |
 |---|---|---|
-| `DbCollector` | `yii\db\Command::EVENT_AFTER_EXECUTE` | SQL queries, params, row count |
-| `Yii2LogCollector` | `Yii::getLogger()` messages at shutdown | Log messages with levels and categories |
+| `DbCollector` | `Command::EVENT_BEFORE/AFTER_EXECUTE` | SQL queries, params, row count, execution time, SQL type, backtrace |
+| `DebugLogTarget` | Yii log target (real-time) | Feeds `LogCollector` with Yii log messages as they are flushed |
+| `MailerCollector` | `BaseMailer::EVENT_AFTER_SEND` | From, to, cc, bcc, subject, success status |
+| `AssetBundleCollector` | `View::EVENT_END_PAGE` | Asset bundles: class, source/base paths, CSS/JS files, dependencies |
+| `Yii2LogCollector` | `Yii::getLogger()` at shutdown (legacy) | Log messages with levels and categories |
 
 ## Architecture Comparison: Symfony vs Yii 2
 

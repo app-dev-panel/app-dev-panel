@@ -26,9 +26,9 @@ These collectors come from `app-dev-panel/kernel` and work identically across al
 
 ### DbCollector
 
-Captures SQL queries executed through Yii 2's database layer.
+Captures SQL queries executed through Yii 2's database layer with accurate timing.
 
-**Fed by**: `yii\db\Command::EVENT_AFTER_EXECUTE` event hook
+**Fed by**: Paired `yii\db\Command::EVENT_BEFORE_EXECUTE` / `EVENT_AFTER_EXECUTE` event hooks
 
 **Data schema**:
 ```json
@@ -39,6 +39,7 @@ Captures SQL queries executed through Yii 2's database layer.
             "params": [],
             "rowCount": 1,
             "time": 0.003,
+            "type": "SELECT",
             "backtrace": "/app/controllers/UserController.php:42"
         }
     ],
@@ -48,13 +49,87 @@ Captures SQL queries executed through Yii 2's database layer.
 }
 ```
 
+**SQL types detected**: SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, TRUNCATE, TRANSACTION, COMMIT, ROLLBACK, SHOW, EXPLAIN, OTHER
+
 **Summary**: `{db: {queryCount: 15, totalTime: 45.0}}`
 
-### Yii2LogCollector
+### DebugLogTarget
 
-Captures Yii 2's native log messages (from `Yii::getLogger()`).
+Real-time log target that feeds Yii 2 log messages to the Kernel's `LogCollector`.
 
-Yii 2 buffers all log messages in memory. This collector reads them at shutdown, capturing the complete log output including messages that PSR-3 LogCollector wouldn't see.
+Unlike `Yii2LogCollector` which reads logs at shutdown (and misses early-flushed messages), `DebugLogTarget` is registered as a Yii log target and captures messages in real-time as they are flushed by the logger.
+
+**Fed by**: `yii\log\Target::export()` — called automatically by Yii's logger
+
+**Level mapping**:
+
+| Yii Level | PSR-3 Level |
+|---|---|
+| `Logger::LEVEL_ERROR` | `error` |
+| `Logger::LEVEL_WARNING` | `warning` |
+| `Logger::LEVEL_INFO` | `info` |
+| `Logger::LEVEL_TRACE` | `debug` |
+| `Logger::LEVEL_PROFILE*` | `debug` |
+
+**Integration**: Messages flow into `LogCollector` → `TimelineCollector`, visible alongside PSR-3 logs.
+
+### MailerCollector
+
+Captures mail messages sent via Yii 2's mailer component.
+
+**Fed by**: `yii\mail\BaseMailer::EVENT_AFTER_SEND`
+
+**Data schema**:
+```json
+{
+    "messages": [
+        {
+            "from": ["sender@example.com"],
+            "to": ["recipient@example.com"],
+            "cc": [],
+            "bcc": [],
+            "subject": "Welcome Email",
+            "isSuccessful": true
+        }
+    ],
+    "messageCount": 3
+}
+```
+
+**Summary**: `{mailer: {messageCount: 3}}`
+
+### AssetBundleCollector
+
+Captures registered asset bundles from Yii 2's View component (web requests only).
+
+**Fed by**: `yii\web\View::EVENT_END_PAGE`
+
+**Data schema**:
+```json
+{
+    "bundles": {
+        "yii\\web\\JqueryAsset": {
+            "class": "yii\\web\\JqueryAsset",
+            "sourcePath": "@bower/jquery/dist",
+            "basePath": "/var/www/assets/abc123",
+            "baseUrl": "/assets/abc123",
+            "css": [],
+            "js": ["jquery.js"],
+            "depends": [],
+            "options": {}
+        }
+    },
+    "bundleCount": 5
+}
+```
+
+**Summary**: `{assets: {bundleCount: 5}}`
+
+### Yii2LogCollector (Legacy)
+
+Captures Yii 2's native log messages from `Yii::getLogger()` at shutdown time.
+
+**Note**: Prefer `DebugLogTarget` for real-time capture. This collector is kept for backward compatibility and captures profiling messages that `DebugLogTarget` filters out.
 
 **Fed by**: `Yii::getLogger()->messages` at shutdown
 

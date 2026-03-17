@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2;
 
+use AppDevPanel\Adapter\Yii2\Collector\AssetBundleCollector;
 use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
+use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
+use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Collector\Yii2LogCollector;
 use AppDevPanel\Adapter\Yii2\Controller\AdpApiController;
 use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
@@ -92,6 +95,8 @@ class Module extends \yii\base\Module implements BootstrapInterface
         'command' => true,
         'db' => true,
         'yii_log' => true,
+        'mailer' => true,
+        'assets' => true,
     ];
 
     /**
@@ -294,6 +299,14 @@ class Module extends \yii\base\Module implements BootstrapInterface
         if ($collectors['yii_log'] ?? true) {
             $this->collectorInstances[] = new Yii2LogCollector($timeline);
         }
+
+        if ($collectors['mailer'] ?? true) {
+            $this->collectorInstances[] = new MailerCollector($timeline);
+        }
+
+        if ($collectors['assets'] ?? true) {
+            $this->collectorInstances[] = new AssetBundleCollector($timeline);
+        }
     }
 
     private function buildDebugger(): void
@@ -344,6 +357,22 @@ class Module extends \yii\base\Module implements BootstrapInterface
         if ($this->getCollector(DbCollector::class) !== null) {
             $this->registerDbProfiling();
         }
+
+        // Register mailer profiling if MailerCollector is active
+        if ($this->getCollector(MailerCollector::class) !== null) {
+            $this->registerMailerProfiling();
+        }
+
+        // Register asset bundle profiling (web only) if AssetBundleCollector is active
+        if ($app instanceof WebApplication && $this->getCollector(AssetBundleCollector::class) !== null) {
+            $this->registerAssetProfiling();
+        }
+
+        // Register real-time log target if LogCollector is active
+        $logCollector = $this->getCollector(LogCollector::class);
+        if ($logCollector instanceof LogCollector) {
+            $this->registerDebugLogTarget($logCollector);
+        }
     }
 
     private function registerDbProfiling(): void
@@ -359,15 +388,65 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $dbCollector->logConnection();
         });
 
+        // Start timer before query execution
+        Event::on(\yii\db\Command::class, \yii\db\Command::EVENT_BEFORE_EXECUTE, static function () use ($dbCollector): void {
+            $dbCollector->beginQuery();
+        });
+
+        // Stop timer and record query after execution
         Event::on(\yii\db\Command::class, \yii\db\Command::EVENT_AFTER_EXECUTE, static function (\yii\db\Event $event) use ($dbCollector): void {
             /** @var \yii\db\Command $command */
             $command = $event->sender;
             $dbCollector->logQuery(
                 $command->getRawSql(),
-                [],
+                $command->params,
                 $command->pdoStatement?->rowCount() ?? 0,
             );
         });
+    }
+
+    private function registerMailerProfiling(): void
+    {
+        /** @var MailerCollector|null $mailerCollector */
+        $mailerCollector = $this->getCollector(MailerCollector::class);
+        if ($mailerCollector === null) {
+            return;
+        }
+
+        Event::on(\yii\mail\BaseMailer::class, \yii\mail\BaseMailer::EVENT_AFTER_SEND, static function (\yii\mail\MailEvent $event) use ($mailerCollector): void {
+            $message = $event->message;
+            $mailerCollector->logMessage(
+                $message->getFrom(),
+                $message->getTo(),
+                $message->getCc(),
+                $message->getBcc(),
+                $message->getSubject() ?? '',
+                $event->isSuccessful,
+            );
+        });
+    }
+
+    private function registerAssetProfiling(): void
+    {
+        /** @var AssetBundleCollector|null $assetCollector */
+        $assetCollector = $this->getCollector(AssetBundleCollector::class);
+        if ($assetCollector === null) {
+            return;
+        }
+
+        Event::on(\yii\web\View::class, \yii\web\View::EVENT_END_PAGE, static function (\yii\base\Event $event) use ($assetCollector): void {
+            /** @var \yii\web\View $view */
+            $view = $event->sender;
+            if (property_exists($view, 'assetBundles') && is_array($view->assetBundles)) {
+                $assetCollector->collectBundles($view->assetBundles);
+            }
+        });
+    }
+
+    private function registerDebugLogTarget(LogCollector $logCollector): void
+    {
+        $target = new DebugLogTarget($logCollector);
+        \Yii::getLogger()->targets['adp-debug'] = $target;
     }
 
     private function registerRoutes(Application $app): void

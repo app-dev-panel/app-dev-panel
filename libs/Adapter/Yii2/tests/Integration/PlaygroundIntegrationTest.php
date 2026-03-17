@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
+use AppDevPanel\Adapter\Yii2\Collector\AssetBundleCollector;
 use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
+use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
@@ -81,10 +83,12 @@ final class PlaygroundIntegrationTest extends TestCase
         $webAppInfoCollector?->markApplicationStarted();
         $webAppInfoCollector?->markRequestStarted();
 
-        // Simulate DB queries
+        // Simulate DB queries with timing
         /** @var DbCollector|null $dbCollector */
         $dbCollector = $module->getCollector(DbCollector::class);
+        $dbCollector?->beginQuery();
         $dbCollector?->logQuery('SELECT * FROM users LIMIT 10', [], 3);
+        $dbCollector?->beginQuery();
         $dbCollector?->logQuery('SELECT COUNT(*) FROM users', [], 1);
 
         // Simulate response
@@ -129,6 +133,7 @@ final class PlaygroundIntegrationTest extends TestCase
 
         /** @var DbCollector|null $dbCollector */
         $dbCollector = $module->getCollector(DbCollector::class);
+        $dbCollector?->beginQuery();
         $dbCollector?->logQuery('INSERT INTO submissions (data) VALUES (?)', ['test'], 1);
 
         $debugger->shutdown();
@@ -309,6 +314,8 @@ final class PlaygroundIntegrationTest extends TestCase
                 'command' => true,
                 'db' => true,
                 'yii_log' => false, // Disable Yii2LogCollector — requires real Yii logger
+                'mailer' => true,
+                'assets' => true,
             ],
         ]);
 

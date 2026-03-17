@@ -10,16 +10,17 @@ use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 
 /**
- * Captures SQL queries executed via Yii 2's DB layer.
+ * Captures SQL queries executed via Yii 2's DB layer with accurate timing.
  *
- * Fed by event hooks on yii\db\Command::EVENT_AFTER_EXECUTE,
- * registered in the Module's registerDbProfiling() method.
+ * Uses paired EVENT_BEFORE_EXECUTE / EVENT_AFTER_EXECUTE hooks to measure
+ * actual query execution time. Also captures SQL type, parameters, row count,
+ * and caller backtrace.
  */
 final class DbCollector implements CollectorInterface, SummaryCollectorInterface
 {
     use CollectorTrait;
 
-    /** @var array<int, array{sql: string, params: array, rowCount: int, time: float, backtrace: string}> */
+    /** @var array<int, array{sql: string, params: array, rowCount: int, time: float, type: string, backtrace: string}> */
     private array $queries = [];
     private int $connectionCount = 0;
     private float $totalTime = 0.0;
@@ -37,10 +38,30 @@ final class DbCollector implements CollectorInterface, SummaryCollectorInterface
         $this->connectionCount++;
     }
 
+    /**
+     * Called before query execution to start the timer.
+     */
+    public function beginQuery(): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+        $this->queryStartTime = microtime(true);
+    }
+
+    /**
+     * Called after query execution to record the query with timing.
+     */
     public function logQuery(string $sql, array $params = [], int $rowCount = 0): void
     {
         if (!$this->isActive()) {
             return;
+        }
+
+        $time = 0.0;
+        if ($this->queryStartTime !== null) {
+            $time = microtime(true) - $this->queryStartTime;
+            $this->queryStartTime = null;
         }
 
         $callStack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
@@ -52,14 +73,12 @@ final class DbCollector implements CollectorInterface, SummaryCollectorInterface
             }
         }
 
-        // Estimate timing from profiling data if available
-        $time = 0.0;
-
         $this->queries[] = [
             'sql' => $sql,
             'params' => $params,
             'rowCount' => $rowCount,
             'time' => $time,
+            'type' => self::detectSqlType($sql),
             'backtrace' => $backtrace,
         ];
 
@@ -100,5 +119,28 @@ final class DbCollector implements CollectorInterface, SummaryCollectorInterface
         $this->connectionCount = 0;
         $this->totalTime = 0.0;
         $this->queryStartTime = null;
+    }
+
+    private static function detectSqlType(string $sql): string
+    {
+        $normalized = ltrim($sql);
+        $firstWord = strtoupper(strtok($normalized, " \t\n\r"));
+
+        return match ($firstWord) {
+            'SELECT' => 'SELECT',
+            'INSERT' => 'INSERT',
+            'UPDATE' => 'UPDATE',
+            'DELETE' => 'DELETE',
+            'CREATE' => 'CREATE',
+            'ALTER' => 'ALTER',
+            'DROP' => 'DROP',
+            'TRUNCATE' => 'TRUNCATE',
+            'BEGIN', 'START' => 'TRANSACTION',
+            'COMMIT' => 'COMMIT',
+            'ROLLBACK' => 'ROLLBACK',
+            'SHOW' => 'SHOW',
+            'DESCRIBE', 'DESC', 'EXPLAIN' => 'EXPLAIN',
+            default => 'OTHER',
+        };
     }
 }
