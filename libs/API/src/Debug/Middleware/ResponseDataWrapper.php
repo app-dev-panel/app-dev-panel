@@ -52,17 +52,14 @@ final class ResponseDataWrapper implements MiddlewareInterface
                 'file' => $exception->getFile(),
                 'line' => $exception->getLine(),
                 'trace' => array_slice(
-                    array_map(
-                        static fn(array $frame): string => sprintf(
-                            '%s%s%s() at %s:%d',
-                            $frame['class'] ?? '',
-                            $frame['type'] ?? '',
-                            $frame['function'] ?? '',
-                            $frame['file'] ?? 'unknown',
-                            $frame['line'] ?? 0,
-                        ),
-                        $exception->getTrace(),
-                    ),
+                    array_map(static fn(array $frame): string => sprintf(
+                        '%s%s%s() at %s:%d',
+                        $frame['class'] ?? '',
+                        $frame['type'] ?? '',
+                        $frame['function'] ?? '',
+                        $frame['file'] ?? 'unknown',
+                        $frame['line'] ?? 0,
+                    ), $exception->getTrace()),
                     0,
                     20,
                 ),
