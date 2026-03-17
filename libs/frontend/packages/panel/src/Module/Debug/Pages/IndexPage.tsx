@@ -39,7 +39,7 @@ const defaultIconColor = {bg: '#F5F5F5', fg: '#666666'};
 
 const CardsGrid = styled(Box)(({theme}) => ({
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
     gap: theme.spacing(2),
     marginBottom: theme.spacing(3),
 }));
@@ -122,6 +122,7 @@ const SparkBar = styled(Box, {shouldForwardProp: (p) => p !== 'isCurrent' && p !
 
 const SummaryBar = styled(Box)(({theme}) => ({
     display: 'flex',
+    flexWrap: 'wrap',
     gap: theme.spacing(3),
     marginBottom: theme.spacing(3),
     padding: theme.spacing(2, 2.5),
@@ -142,7 +143,7 @@ const SummaryLabel = styled(Typography)(({theme}) => ({fontSize: '12px', color: 
 
 const PerfGrid = styled(Box)(({theme}) => ({
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
     gap: theme.spacing(2),
     marginBottom: theme.spacing(3),
 }));
