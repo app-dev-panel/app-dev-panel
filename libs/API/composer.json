@@ -25,7 +25,7 @@
         "psr/http-server-middleware": "^1.0",
         "psr/log": "^3.0",
         "psr/simple-cache": "^2.0|^3.0",
-        "symfony/process": "^5.4|^6.0|^7.0",
+        "symfony/process": "^5.4|^6.0|^7.0|^8.0",
         "yiisoft/var-dumper": "^1.4",
         "zircote/swagger-php": "^4.0"
     },

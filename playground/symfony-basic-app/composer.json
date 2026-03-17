@@ -24,6 +24,10 @@
         },
         {
             "type": "path",
+            "url": "../../libs/API"
+        },
+        {
+            "type": "path",
             "url": "../../libs/Kernel"
         },
         {
