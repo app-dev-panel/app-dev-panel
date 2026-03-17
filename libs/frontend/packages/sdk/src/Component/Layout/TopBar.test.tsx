@@ -7,7 +7,7 @@ import {TopBar} from './TopBar';
 describe('TopBar', () => {
     it('renders logo', () => {
         renderWithProviders(<TopBar />);
-        expect(screen.getByText('ADP')).toBeInTheDocument();
+        expect(screen.getByText('App Dev Panel')).toBeInTheDocument();
     });
 
     it('renders search trigger', () => {

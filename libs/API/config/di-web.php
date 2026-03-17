@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use Cycle\Database\DatabaseProviderInterface;
+use GuzzleHttp\Client;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
@@ -27,6 +29,7 @@ use AppDevPanel\Kernel\Storage\StorageInterface;
  */
 
 return [
+    ClientInterface::class => static fn (): ClientInterface => new Client(['timeout' => 10]),
     CollectorRepositoryInterface::class => static fn (StorageInterface $storage) => new CollectorRepository($storage),
     ServiceRegistryInterface::class => static function (ContainerInterface $container) use ($params) {
         $storagePath = $params['app-dev-panel/yii-debug-api']['path'] ?? sys_get_temp_dir() . '/adp-services';

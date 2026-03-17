@@ -1,6 +1,6 @@
-# Yii Development Panel
+# Application Development Panel
 
-Yii Development Panel – it is an application that aggregates a few different modules to help you develop and debug applications written with Yii 3.
+Application Development Panel – it is an application that aggregates a few different modules to help you develop and debug applications.
 
 ## Installation
 
@@ -83,7 +83,7 @@ npm i @app-dev-panel/panel
 
 The application use HTTP API to work with the modules.
 
-There are a few ways to use the Yii Dev Panel:
+There are a few ways to use the App Dev Panel:
 
 ### Asset / Standalone application
 
@@ -97,12 +97,12 @@ Online-mode or as standalone application.
 Open https://app-dev-panel.github.io/app-dev-panel
 
 1. Online-mode
-    1. There is an app. Specify the PHP app URL and use Yii dev panel.
+    1. There is an app. Specify the PHP app URL and use App Dev Panel.
 2. Standalone app
     1. Click "Install" button in the URL to install PWA application
     2. Run the application from the Applications
     3. Make sure your API works by clicking on "check mark"
-    4. Use Yii dev panel
+    4. Use App Dev Panel
 
 Both options also work with mobile phones.
 

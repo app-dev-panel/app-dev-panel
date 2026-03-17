@@ -50,14 +50,22 @@ packages/
     │   │   ├── Debug/      # Debug API (debugApi, debugSlice)
     │   │   └── Application/# Application state (ApplicationSlice)
     │   ├── Component/      # Reusable components
+    │   │   ├── Theme/
+    │   │   │   ├── tokens.ts              # Design tokens (primitives, semantic, dark)
+    │   │   │   └── DefaultTheme.tsx       # MUI theme factory (createAppTheme)
     │   │   ├── Layout/
     │   │   │   ├── TopBar.tsx               # Global top bar with entry pill
     │   │   │   ├── UnifiedSidebar.tsx       # Collapsible sidebar with sections
-    │   │   │   ├── EntrySelector.tsx        # Debug entry picker popover
-    │   │   │   ├── CommandPalette.tsx        # Ctrl+K command palette
+    │   │   │   ├── EntrySelector.tsx        # Debug entry picker + filter config
+    │   │   │   ├── EntryFilterConfig.tsx    # Filter builder for debug entries
+    │   │   │   ├── CommandPalette.tsx        # Ctrl+K command palette (syncs sidebar)
+    │   │   │   ├── RequestPill.tsx           # Compact request summary pill
+    │   │   │   ├── SearchTrigger.tsx         # Search icon button (opens palette)
     │   │   │   ├── NavItem.tsx              # Sidebar navigation item
     │   │   │   ├── NavBadge.tsx             # Badge for nav items
     │   │   │   └── ContentPanel.tsx         # Content area wrapper
+    │   │   ├── EmptyState.tsx              # Generic empty state (icon + title + desc)
+    │   │   ├── SectionTitle.tsx            # Section heading component
     │   │   ├── ServerSentEventsObserver.ts  # SSE connection manager
     │   │   ├── useServerSentEvents.ts       # SSE React hook
     │   │   ├── JsonRenderer.tsx             # JSON display component
@@ -119,6 +127,25 @@ All pages share a single unified layout (`Application/Component/Layout.tsx`):
 - Home, Debug (expandable: Overview + collectors + All Entries), Inspector (expandable: 14 sub-pages), Gii, Open API, Frames
 - Debug sub-items are dynamic (built from current entry's collectors)
 - Inspector sub-items are static (config, events, routes, etc.)
+
+## Theming
+
+Theme is built in `sdk/src/Component/Theme/` using a three-layer token architecture:
+
+1. **Primitive tokens** (`tokens.ts: primitives`) — Raw hex values, font families, radii. Never used directly in components.
+2. **Semantic tokens** (`tokens.ts: semanticTokens`) — Light-mode palette mapped from primitives. Used in `createTheme()`.
+3. **Dark semantic tokens** (`tokens.ts: darkSemanticTokens`) — Dark-mode overrides. Merged when `themeMode === 'dark'`.
+4. **Component tokens** (`tokens.ts: componentTokens`) — MUI `styleOverrides` and `defaultProps`.
+
+`DefaultTheme.tsx` exports `createAppTheme(mode)` which composes these layers into a full MUI theme.
+
+**Convention**: Components must use `theme.palette.*`, `theme.spacing()`, and `sx` shorthand strings (`'primary.main'`, `'common.white'`) — never `primitives.*` or hardcoded hex values. This ensures dark mode works correctly.
+
+**Dark mode palette** (key values):
+- `background.default: '#0F172A'`, `background.paper: '#1E293B'`
+- `text.primary: '#F1F5F9'`, `text.secondary: '#94A3B8'`, `text.disabled: '#64748B'`
+- `error.main: '#F87171'`, `error.light: '#7F1D1D'`
+- `divider: '#334155'`
 
 ## State Management
 

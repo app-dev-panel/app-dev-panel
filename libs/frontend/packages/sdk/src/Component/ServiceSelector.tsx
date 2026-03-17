@@ -1,6 +1,6 @@
+import {changeSelectedService} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
+import {ServiceDescriptor, useGetServicesQuery} from '@app-dev-panel/sdk/API/Services/api';
 import {Chip, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, Typography} from '@mui/material';
-import {changeSelectedService} from '@yiisoft/yii-dev-panel-sdk/API/Application/ApplicationContext';
-import {ServiceDescriptor, useGetServicesQuery} from '@yiisoft/yii-dev-panel-sdk/API/Services/api';
 import {useCallback} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 

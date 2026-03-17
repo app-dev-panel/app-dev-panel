@@ -1,4 +1,4 @@
-# Yii Development Panel | Toolbar
+# Application Development Panel | Toolbar
 
 The toolbar application. It is used to display the toolbar on the page. It can be used separately from the `app` application.
 

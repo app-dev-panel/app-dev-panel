@@ -179,10 +179,10 @@ export const ListPage = () => {
                             </MethodLabel>
                             <PathLabel>{entry.request.path}</PathLabel>
                             {duration != null && (
-                                <MetaLabel sx={{color: primitives.blue500}}>{(duration * 1000).toFixed(0)}ms</MetaLabel>
+                                <MetaLabel sx={{color: 'primary.main'}}>{(duration * 1000).toFixed(0)}ms</MetaLabel>
                             )}
                             {memory != null && (
-                                <MetaLabel sx={{color: primitives.green600}}>{formatBytes(memory)}</MetaLabel>
+                                <MetaLabel sx={{color: 'success.main'}}>{formatBytes(memory)}</MetaLabel>
                             )}
                             {entry.logger?.total != null && entry.logger.total > 0 && (
                                 <StatCell>
@@ -234,10 +234,10 @@ export const ListPage = () => {
                             <Icon sx={{fontSize: 16, color: 'text.disabled', flexShrink: 0}}>terminal</Icon>
                             <PathLabel>{entry.command?.input ?? 'Unknown command'}</PathLabel>
                             {duration != null && (
-                                <MetaLabel sx={{color: primitives.blue500}}>{(duration * 1000).toFixed(0)}ms</MetaLabel>
+                                <MetaLabel sx={{color: 'primary.main'}}>{(duration * 1000).toFixed(0)}ms</MetaLabel>
                             )}
                             {memory != null && (
-                                <MetaLabel sx={{color: primitives.green600}}>{formatBytes(memory)}</MetaLabel>
+                                <MetaLabel sx={{color: 'success.main'}}>{formatBytes(memory)}</MetaLabel>
                             )}
                             {entry.logger?.total != null && entry.logger.total > 0 && (
                                 <StatCell>

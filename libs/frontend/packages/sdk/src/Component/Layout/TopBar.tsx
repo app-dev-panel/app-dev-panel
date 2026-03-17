@@ -72,17 +72,17 @@ export const TopBar = React.memo(
         return (
             <BarRoot>
                 <Logo>
-                    <Diamond /> ADP
+                    <Diamond /> App Dev Panel
                 </Logo>
-                <IconButton size="small" onClick={onPrevEntry} disabled={!method}>
-                    <Icon sx={{fontSize: 18}}>chevron_left</Icon>
-                </IconButton>
-                <IconButton size="small" onClick={onNextEntry} disabled={!method}>
-                    <Icon sx={{fontSize: 18}}>chevron_right</Icon>
-                </IconButton>
-                <div style={{flex: 1, display: 'flex', justifyContent: 'center'}}>
-                    {method && path && status != null && duration && (
-                        <div style={{maxWidth: 500, width: '100%'}}>
+                <div style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4}}>
+                    <IconButton size="small" onClick={onPrevEntry} disabled={!method}>
+                        <Icon sx={{fontSize: 18}}>chevron_left</Icon>
+                    </IconButton>
+                    <IconButton size="small" onClick={onNextEntry} disabled={!method}>
+                        <Icon sx={{fontSize: 18}}>chevron_right</Icon>
+                    </IconButton>
+                    <div style={{maxWidth: 600, width: '100%'}}>
+                        {method && path && status != null && duration ? (
                             <RequestPill
                                 method={method}
                                 path={path}
@@ -90,19 +90,21 @@ export const TopBar = React.memo(
                                 duration={duration}
                                 onClick={onEntryClick}
                             />
-                        </div>
-                    )}
+                        ) : (
+                            <div style={{height: 32}} />
+                        )}
+                    </div>
+                    <IconButton
+                        size="small"
+                        onClick={onAutoRefreshToggle}
+                        title={autoRefresh ? 'Auto-refresh on' : 'Auto-refresh off'}
+                    >
+                        <Icon sx={{fontSize: 18, color: autoRefresh ? 'success.main' : undefined}}>
+                            {autoRefresh ? 'sync' : 'sync_disabled'}
+                        </Icon>
+                    </IconButton>
                 </div>
                 <SearchTrigger onClick={onSearchClick} />
-                <IconButton
-                    size="small"
-                    onClick={onAutoRefreshToggle}
-                    title={autoRefresh ? 'Auto-refresh on' : 'Auto-refresh off'}
-                >
-                    <Icon sx={{fontSize: 18, color: autoRefresh ? 'success.main' : undefined}}>
-                        {autoRefresh ? 'sync' : 'sync_disabled'}
-                    </Icon>
-                </IconButton>
                 <IconButton size="small" onClick={onThemeToggle}>
                     <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
                 </IconButton>

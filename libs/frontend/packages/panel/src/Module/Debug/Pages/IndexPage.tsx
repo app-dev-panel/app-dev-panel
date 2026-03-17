@@ -209,7 +209,7 @@ const PerformanceSection = ({data}: {data: WebAppInfoData}) => {
             label: 'Total Time',
             value: formatTime(totalTime),
             ratio: safeRatio(totalTime, maxTime),
-            color: primitives.blue500,
+            color: 'primary.main',
         },
         {
             label: 'Request Processing',
@@ -286,7 +286,7 @@ type CollectorCardData = {
 
 function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
     return [...entry.collectors]
-        .filter((c): c is string => typeof c === 'string')
+        .map((c) => (typeof c === 'string' ? c : c.id))
         .filter((c) => !hiddenCollectors.has(c))
         .sort(compareCollectorWeight)
         .map((collector) => {
@@ -333,7 +333,8 @@ export const IndexPage = () => {
     // Fetch WebAppInfo collector data for performance breakdown
     useEffect(() => {
         if (!entry) return;
-        if (!entry.collectors.includes(CollectorsMap.WebAppInfoCollector)) return;
+        if (!entry.collectors.some((c) => (typeof c === 'string' ? c : c.id) === CollectorsMap.WebAppInfoCollector))
+            return;
 
         setLoadingPerf(true);
         getCollectorInfo({id: entry.id, collector: CollectorsMap.WebAppInfoCollector})
@@ -387,7 +388,7 @@ export const IndexPage = () => {
             <SummaryBar>
                 {method && path && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: primitives.blue500}}>http</Icon>
+                        <Icon sx={{fontSize: 18, color: 'primary.main'}}>http</Icon>
                         <Box>
                             <SummaryValue>
                                 {method} {path}
@@ -409,7 +410,7 @@ export const IndexPage = () => {
                 )}
                 {duration && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: primitives.blue500}}>timer</Icon>
+                        <Icon sx={{fontSize: 18, color: 'primary.main'}}>timer</Icon>
                         <Box>
                             <SummaryValue>{duration}</SummaryValue>
                             <SummaryLabel>Duration</SummaryLabel>
@@ -418,7 +419,7 @@ export const IndexPage = () => {
                 )}
                 {memory && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: primitives.green600}}>memory</Icon>
+                        <Icon sx={{fontSize: 18, color: 'success.main'}}>memory</Icon>
                         <Box>
                             <SummaryValue>{memory}</SummaryValue>
                             <SummaryLabel>Peak Memory</SummaryLabel>
@@ -436,7 +437,7 @@ export const IndexPage = () => {
                 )}
                 {isDebugEntryAboutConsole(entry) && entry.command && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: primitives.blue500}}>terminal</Icon>
+                        <Icon sx={{fontSize: 18, color: 'primary.main'}}>terminal</Icon>
                         <Box>
                             <SummaryValue>{entry.command.input || entry.command.name}</SummaryValue>
                             <SummaryLabel>Command (exit: {entry.command.exitCode})</SummaryLabel>

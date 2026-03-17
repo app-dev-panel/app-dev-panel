@@ -13,12 +13,12 @@ const makeData = (ops: Record<string, {path: string; args: Record<string, any>}[
 describe('FilesystemPanel', () => {
     it('shows empty message when no data', () => {
         renderWithProviders(<FilesystemPanel data={[] as any} />);
-        expect(screen.getByText(/No operations with file system/)).toBeInTheDocument();
+        expect(screen.getByText(/No filesystem operations found/)).toBeInTheDocument();
     });
 
     it('shows empty message when data is null', () => {
         renderWithProviders(<FilesystemPanel data={null as any} />);
-        expect(screen.getByText(/No operations with file system/)).toBeInTheDocument();
+        expect(screen.getByText(/No filesystem operations found/)).toBeInTheDocument();
     });
 
     it('renders tabs for each operation type', () => {

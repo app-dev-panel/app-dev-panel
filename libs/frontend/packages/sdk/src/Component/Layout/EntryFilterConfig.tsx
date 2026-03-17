@@ -9,17 +9,9 @@ import {styled} from '@mui/material/styles';
 export type FilterField = 'url' | 'status' | 'type';
 export type FilterOperator = 'contains' | 'starts_with' | 'ends_with' | 'greater_than' | 'equals';
 
-export type FilterCondition = {
-    id: string;
-    field: FilterField;
-    operator: FilterOperator;
-    value: string;
-};
+export type FilterCondition = {id: string; field: FilterField; operator: FilterOperator; value: string};
 
-export type EntryFilterState = {
-    enabled: boolean;
-    conditions: FilterCondition[];
-};
+export type EntryFilterState = {enabled: boolean; conditions: FilterCondition[]};
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -99,11 +91,7 @@ const SmallSelect = styled(Select)(({theme}) => ({
 }));
 
 const SmallTextField = styled(TextField)(({theme}) => ({
-    '& .MuiInputBase-input': {
-        fontSize: '12px',
-        fontFamily: primitives.fontFamilyMono,
-        padding: theme.spacing(0.5, 1),
-    },
+    '& .MuiInputBase-input': {fontSize: '12px', fontFamily: primitives.fontFamilyMono, padding: theme.spacing(0.5, 1)},
     '& .MuiOutlinedInput-notchedOutline': {borderColor: theme.palette.divider},
 }));
 

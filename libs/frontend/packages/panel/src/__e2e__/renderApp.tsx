@@ -1,5 +1,5 @@
+import App from '@app-dev-panel/panel/App';
 import {cleanup, render} from '@testing-library/react';
-import App from '@yiisoft/yii-dev-panel/App';
 import {afterEach} from 'vitest';
 
 afterEach(() => {
