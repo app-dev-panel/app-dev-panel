@@ -5,3 +5,4 @@
 .env.local
 .env.*.local
 composer.lock
+/config/reference.php
