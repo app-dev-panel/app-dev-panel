@@ -15,6 +15,12 @@ use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
 use AppDevPanel\Adapter\Symfony\DependencyInjection\AppDevPanelExtension;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
+use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
+use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
+use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
+use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Controller\RoutingController;
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
@@ -169,5 +175,45 @@ final class AppDevPanelExtensionTest extends TestCase
         $extension = new AppDevPanelExtension();
 
         $this->assertSame('app_dev_panel', $extension->getAlias());
+    }
+
+    public function testLoadRegistersInspectorAdapters(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new AppDevPanelExtension();
+
+        $extension->load([['enabled' => true]], $container);
+
+        $this->assertTrue($container->hasDefinition(SymfonyRouteCollectionAdapter::class));
+        $this->assertTrue($container->hasDefinition(SymfonyUrlMatcherAdapter::class));
+        $this->assertTrue($container->hasDefinition(SymfonyConfigProvider::class));
+        $this->assertTrue($container->hasDefinition(RoutingController::class));
+        $this->assertTrue($container->hasDefinition(DatabaseController::class));
+        $this->assertTrue($container->hasDefinition(SchemaProviderInterface::class));
+        $this->assertTrue($container->hasAlias('config'));
+    }
+
+    public function testLoadDoesNotOverrideExistingSchemaProvider(): void
+    {
+        $container = new ContainerBuilder();
+        $container->register(SchemaProviderInterface::class, SchemaProviderInterface::class);
+        $extension = new AppDevPanelExtension();
+
+        $extension->load([['enabled' => true]], $container);
+
+        $definition = $container->getDefinition(SchemaProviderInterface::class);
+        $this->assertSame(SchemaProviderInterface::class, $definition->getClass());
+    }
+
+    public function testRoutingControllerReceivesAdapters(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new AppDevPanelExtension();
+
+        $extension->load([['enabled' => true]], $container);
+
+        $definition = $container->getDefinition(RoutingController::class);
+        $arguments = $definition->getArguments();
+        $this->assertCount(3, $arguments);
     }
 }

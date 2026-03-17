@@ -15,6 +15,12 @@ use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
+use AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider;
+use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
+use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
+use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
+use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
@@ -274,6 +280,8 @@ final class AppDevPanelExtension extends Extension
 
         $container->setParameter('app_dev_panel.api.allowed_ips', $config['api']['allowed_ips'] ?? ['127.0.0.1', '::1']);
         $container->setParameter('app_dev_panel.api.auth_token', $config['api']['auth_token'] ?? '');
+        $container->setParameter('app_dev_panel.container_parameters', []);
+        $container->setParameter('app_dev_panel.bundle_config', []);
 
         // PSR-17 factories (use GuzzleHttp\Psr7\HttpFactory as default)
         if (!$container->has(ResponseFactoryInterface::class)) {
@@ -398,6 +406,31 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([new Reference(JsonResponseFactoryInterface::class)])
             ->setPublic(true);
 
+        // Database inspector (NullSchemaProvider when no DB is configured)
+        if (!$container->has(SchemaProviderInterface::class)) {
+            $container->register(SchemaProviderInterface::class, NullSchemaProvider::class)
+                ->setPublic(false);
+        }
+
+        $container->register(DatabaseController::class, DatabaseController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(SchemaProviderInterface::class),
+            ])
+            ->setPublic(true);
+
+        // Symfony config provider for inspector
+        $container->register(SymfonyConfigProvider::class, SymfonyConfigProvider::class)
+            ->setArguments([
+                new Reference('service_container'),
+                '%app_dev_panel.container_parameters%',
+                '%app_dev_panel.bundle_config%',
+            ])
+            ->setPublic(false);
+
+        // Register as 'config' alias so InspectController can find it
+        $container->setAlias('config', SymfonyConfigProvider::class)->setPublic(true);
+
         $container->register(InspectController::class, InspectController::class)
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
@@ -428,8 +461,21 @@ final class AppDevPanelExtension extends Extension
             ])
             ->setPublic(true);
 
+        // Symfony route inspection adapters (null-safe when 'router' service is absent)
+        $container->register(SymfonyRouteCollectionAdapter::class, SymfonyRouteCollectionAdapter::class)
+            ->setArguments([new Reference('router', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE)])
+            ->setPublic(false);
+
+        $container->register(SymfonyUrlMatcherAdapter::class, SymfonyUrlMatcherAdapter::class)
+            ->setArguments([new Reference('router', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE)])
+            ->setPublic(false);
+
         $container->register(RoutingController::class, RoutingController::class)
-            ->setArguments([new Reference(JsonResponseFactoryInterface::class)])
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(SymfonyRouteCollectionAdapter::class, ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
+                new Reference(SymfonyUrlMatcherAdapter::class, ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
+            ])
             ->setPublic(true);
 
         $container->register(RequestController::class, RequestController::class)
