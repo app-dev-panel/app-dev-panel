@@ -37,11 +37,12 @@
         }
     },
     "scripts": {
-        "auto-scripts": {
-            "cache:clear": "symfony-cmd"
-        },
-        "post-install-cmd": ["@auto-scripts"],
-        "post-update-cmd": ["@auto-scripts"]
+        "post-install-cmd": ["php bin/console cache:clear --no-warmup || true"],
+        "post-update-cmd": ["php bin/console cache:clear --no-warmup || true"],
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "php -S 127.0.0.1:8080 -t public"
+        ]
     },
     "config": {
         "sort-packages": true,
