@@ -51,6 +51,12 @@ final class HttpSubscriber implements EventSubscriberInterface
             return;
         }
 
+        // Don't debug ADP's own API requests
+        $path = $event->getRequest()->getPathInfo();
+        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+            return;
+        }
+
         $symfonyRequest = $event->getRequest();
 
         $psr17Factory = new Psr17Factory();
@@ -80,6 +86,11 @@ final class HttpSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $path = $event->getRequest()->getPathInfo();
+        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+            return;
+        }
+
         $this->webAppInfoCollector?->markRequestFinished();
         $this->requestCollector?->collectResponse($event->getResponse());
 
@@ -89,11 +100,21 @@ final class HttpSubscriber implements EventSubscriberInterface
 
     public function onKernelException(ExceptionEvent $event): void
     {
+        $path = $event->getRequest()->getPathInfo();
+        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+            return;
+        }
+
         $this->exceptionCollector?->collect($event->getThrowable());
     }
 
     public function onKernelTerminate(TerminateEvent $event): void
     {
+        $path = $event->getRequest()->getPathInfo();
+        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+            return;
+        }
+
         $this->webAppInfoCollector?->markApplicationFinished();
         $this->debugger->shutdown();
     }

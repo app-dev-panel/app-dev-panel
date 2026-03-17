@@ -13,6 +13,7 @@ use AppDevPanel\Adapter\Symfony\Collector\SymfonyRequestCollector;
 use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
+use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
@@ -240,6 +241,10 @@ final class AppDevPanelExtension extends Extension
 
     private function registerEventSubscribers(ContainerBuilder $container): void
     {
+        $container->register(CorsSubscriber::class, CorsSubscriber::class)
+            ->addTag('kernel.event_subscriber')
+            ->setPublic(false);
+
         $container->register(HttpSubscriber::class, HttpSubscriber::class)
             ->setArguments([
                 new Reference(Debugger::class),
