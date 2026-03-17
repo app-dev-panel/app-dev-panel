@@ -10,7 +10,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Json\Json;
 
 final class TokenAuthMiddleware implements MiddlewareInterface
 {
@@ -32,10 +31,10 @@ final class TokenAuthMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $body = Json::encode([
+        $body = json_encode([
             'error' => 'Invalid or missing authentication token.',
             'success' => false,
-        ]);
+        ], JSON_THROW_ON_ERROR);
 
         return $this->responseFactory
             ->createResponse(401)

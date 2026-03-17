@@ -6,15 +6,15 @@ namespace AppDevPanel\Api\Inspector\Command;
 
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
+use AppDevPanel\Api\PathResolverInterface;
 use Symfony\Component\Process\Process;
-use Yiisoft\Aliases\Aliases;
 
 class PsalmCommand implements CommandInterface
 {
     public const COMMAND_NAME = 'analyse/psalm';
 
     public function __construct(
-        private Aliases $aliases,
+        private readonly PathResolverInterface $pathResolver,
     ) {}
 
     public static function getTitle(): string
@@ -29,8 +29,8 @@ class PsalmCommand implements CommandInterface
 
     public function run(): CommandResponse
     {
-        $projectDirectory = $this->aliases->get('@root');
-        $debugDirectory = $this->aliases->get('@runtime/debug');
+        $projectDirectory = $this->pathResolver->getRootPath();
+        $debugDirectory = $this->pathResolver->getRuntimePath() . '/debug';
 
         $outputFilePath = $debugDirectory . DIRECTORY_SEPARATOR . 'psalm-report.json';
 

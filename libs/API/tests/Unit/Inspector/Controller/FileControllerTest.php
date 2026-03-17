@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Controller;
 
 use AppDevPanel\Api\Inspector\Controller\FileController;
-use Yiisoft\Aliases\Aliases;
+use AppDevPanel\Api\PathResolverInterface;
 
 final class FileControllerTest extends ControllerTestCase
 {
@@ -27,8 +27,11 @@ final class FileControllerTest extends ControllerTestCase
 
     private function createController(): FileController
     {
-        $aliases = new Aliases(['@root' => $this->fixtureDir]);
-        return new FileController($this->createResponseFactory(), $aliases);
+        $pathResolver = $this->createMock(PathResolverInterface::class);
+        $pathResolver->method('getRootPath')->willReturn($this->fixtureDir);
+        $pathResolver->method('getRuntimePath')->willReturn($this->fixtureDir . '/runtime');
+
+        return new FileController($this->createResponseFactory(), $pathResolver);
     }
 
     public function testListRootDirectory(): void

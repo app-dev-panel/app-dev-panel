@@ -8,48 +8,37 @@ use AppDevPanel\Api\Inspector\Command\BashCommand;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
+use AppDevPanel\Api\PathResolverInterface;
 use InvalidArgumentException;
-use Yiisoft\Aliases\Aliases;
-use Yiisoft\Config\ConfigInterface;
 
 final class CommandControllerTest extends ControllerTestCase
 {
-    private function createController(): CommandController
+    private function pathResolver(): PathResolverInterface
     {
-        return new CommandController($this->createResponseFactory());
+        $pathResolver = $this->createMock(PathResolverInterface::class);
+        $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
+        $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
+        return $pathResolver;
     }
 
-    private function aliases(): Aliases
+    private function createController(array $commandMap = [], array $containerServices = []): CommandController
     {
-        return new Aliases(['@root' => dirname(__DIR__, 6)]);
-    }
-
-    private function configWithCommands(array $commandMap = []): ConfigInterface
-    {
-        $config = $this->createMock(ConfigInterface::class);
-        $config
-            ->method('get')
-            ->with('params')
-            ->willReturn([
-                'app-dev-panel/yii-debug-api' => [
-                    'inspector' => [
-                        'commandMap' => $commandMap,
-                    ],
-                ],
-            ]);
-        return $config;
+        return new CommandController(
+            $this->createResponseFactory(),
+            $this->pathResolver(),
+            $this->container($containerServices),
+            $commandMap,
+        );
     }
 
     public function testIndexWithCommands(): void
     {
-        $config = $this->configWithCommands([
+        $controller = $this->createController([
             'testing' => [
                 'phpunit' => BashCommand::class,
             ],
         ]);
-
-        $controller = $this->createController();
-        $response = $controller->index($config, $this->aliases());
+        $response = $controller->index($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
@@ -58,14 +47,12 @@ final class CommandControllerTest extends ControllerTestCase
 
     public function testIndexWithNonCommandClass(): void
     {
-        $config = $this->configWithCommands([
+        $controller = $this->createController([
             'testing' => [
                 'invalid' => \stdClass::class,
             ],
         ]);
-
-        $controller = $this->createController();
-        $response = $controller->index($config, $this->aliases());
+        $response = $controller->index($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
@@ -77,10 +64,8 @@ final class CommandControllerTest extends ControllerTestCase
 
     public function testIndexIncludesComposerScripts(): void
     {
-        $config = $this->configWithCommands();
-
         $controller = $this->createController();
-        $response = $controller->index($config, $this->aliases());
+        $response = $controller->index($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
@@ -91,26 +76,20 @@ final class CommandControllerTest extends ControllerTestCase
 
     public function testRunNullCommand(): void
     {
-        $config = $this->configWithCommands();
-        $container = $this->container();
-
         $controller = $this->createController();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('must not be null');
-        $controller->run($this->get(), $container, $config, $this->aliases());
+        $controller->run($this->get());
     }
 
     public function testRunUnknownCommand(): void
     {
-        $config = $this->configWithCommands();
-        $container = $this->container();
-
         $controller = $this->createController();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unknown command');
-        $controller->run($this->get(['command' => 'nonexistent']), $container, $config, $this->aliases());
+        $controller->run($this->get(['command' => 'nonexistent']));
     }
 
     public function testRunRegisteredCommand(): void
@@ -120,16 +99,12 @@ final class CommandControllerTest extends ControllerTestCase
         $command = $this->createMock(CommandInterface::class);
         $command->method('run')->willReturn($commandResult);
 
-        $config = $this->configWithCommands([
+        $controller = $this->createController([
             'testing' => [
                 'my-cmd' => BashCommand::class,
             ],
-        ]);
-
-        $container = $this->container([BashCommand::class => $command]);
-
-        $controller = $this->createController();
-        $response = $controller->run($this->get(['command' => 'my-cmd']), $container, $config, $this->aliases());
+        ], [BashCommand::class => $command]);
+        $response = $controller->run($this->get(['command' => 'my-cmd']));
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);

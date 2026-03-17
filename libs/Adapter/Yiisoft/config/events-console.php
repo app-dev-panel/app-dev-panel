@@ -21,10 +21,10 @@ if (!isAppDevPanelEnabled($params)) {
 return [
     ApplicationStartup::class => [
         static fn (ApplicationStartup $event, Debugger $debugger) => $debugger->startup(StartupContext::forCommand($event->commandName)),
-        [ConsoleAppInfoCollector::class, 'collect'],
+        static fn (ApplicationStartup $event, ConsoleAppInfoCollector $collector) => $collector->markApplicationStarted(),
     ],
     ApplicationShutdown::class => [
-        [ConsoleAppInfoCollector::class, 'collect'],
+        static fn (ApplicationShutdown $event, ConsoleAppInfoCollector $collector) => $collector->markApplicationFinished(),
         [Debugger::class, 'shutdown'],
     ],
     ConsoleCommandEvent::class => [

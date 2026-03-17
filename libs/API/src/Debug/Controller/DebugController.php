@@ -5,22 +5,13 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Debug\Controller;
 
 use AppDevPanel\Api\Debug\Exception\NotFoundException;
-use AppDevPanel\Api\Debug\Exception\PackageNotInstalledException;
-use AppDevPanel\Api\Debug\HtmlViewProviderInterface;
-use AppDevPanel\Api\Debug\ModuleFederationProviderInterface;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\ServerSentEventsStream;
 use AppDevPanel\Kernel\Storage\StorageInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Assets\AssetManager;
-use Yiisoft\Assets\AssetPublisherInterface;
-use Yiisoft\DataResponse\DataResponse;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Yii\View\ViewRenderer;
 
 /**
  * Debug controller provides endpoints that expose information about requests processed that debugger collected.
@@ -28,99 +19,93 @@ use Yiisoft\Yii\View\ViewRenderer;
 final class DebugController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
-        private CollectorRepositoryInterface $collectorRepository,
+        private readonly JsonResponseFactoryInterface $responseFactory,
+        private readonly CollectorRepositoryInterface $collectorRepository,
+        private readonly StorageInterface $storage,
+        private readonly ResponseFactoryInterface $psrResponseFactory,
     ) {}
 
     /**
      * List of requests processed.
      */
-    public function index(): ResponseInterface
+    public function index(ServerRequestInterface $request): ResponseInterface
     {
-        return $this->responseFactory->createResponse($this->collectorRepository->getSummary());
+        return $this->responseFactory->createJsonResponse($this->collectorRepository->getSummary());
     }
 
     /**
      * Summary about a processed request identified by ID specified.
      */
-    public function summary(CurrentRoute $currentRoute): ResponseInterface
+    public function summary(ServerRequestInterface $request): ResponseInterface
     {
-        $data = $this->collectorRepository->getSummary($currentRoute->getArgument('id'));
-        return $this->responseFactory->createResponse($data);
+        $id = $request->getAttribute('id');
+        $data = $this->collectorRepository->getSummary($id);
+        return $this->responseFactory->createJsonResponse($data);
     }
 
     /**
      * Detail information about a processed request identified by ID.
      */
-    public function view(
-        CurrentRoute $currentRoute,
-        ServerRequestInterface $serverRequest,
-        ContainerInterface $container,
-    ): ResponseInterface {
-        $data = $this->collectorRepository->getDetail($currentRoute->getArgument('id'));
+    public function view(ServerRequestInterface $request): ResponseInterface
+    {
+        $id = $request->getAttribute('id');
+        $data = $this->collectorRepository->getDetail($id);
 
-        $collectorClass = $serverRequest->getQueryParams()['collector'] ?? null;
+        $collectorClass = $request->getQueryParams()['collector'] ?? null;
         if ($collectorClass !== null) {
             $data = $data[$collectorClass] ?? throw new NotFoundException(sprintf(
                 "Requested collector doesn't exist: %s.",
                 $collectorClass,
             ));
         }
-        if (is_subclass_of($collectorClass, HtmlViewProviderInterface::class)) {
-            return $this->createHtmlPanelResponse($container, $collectorClass, $data);
-        }
-        if (is_subclass_of($collectorClass, ModuleFederationProviderInterface::class)) {
-            return $this->createJsPanelResponse($container, $collectorClass, $data);
-        }
 
-        return $this->responseFactory->createResponse($data);
+        return $this->responseFactory->createJsonResponse($data);
     }
 
     /**
      * Dump information about a processed request identified by ID.
      *
      * @throws NotFoundException
-     * @return ResponseInterface response.
      */
-    public function dump(CurrentRoute $currentRoute): ResponseInterface
+    public function dump(ServerRequestInterface $request): ResponseInterface
     {
-        $data = $this->collectorRepository->getDumpObject($currentRoute->getArgument('id'));
+        $id = $request->getAttribute('id');
+        $data = $this->collectorRepository->getDumpObject($id);
 
-        if ($currentRoute->getArgument('collector') !== null) {
-            if (isset($data[$currentRoute->getArgument('collector')])) {
-                $data = $data[$currentRoute->getArgument('collector')];
+        $collector = $request->getQueryParams()['collector'] ?? null;
+        if ($collector !== null) {
+            if (isset($data[$collector])) {
+                $data = $data[$collector];
             } else {
                 throw new NotFoundException('Requested collector doesn\'t exists.');
             }
         }
 
-        return $this->responseFactory->createResponse($data);
+        return $this->responseFactory->createJsonResponse($data);
     }
 
     /**
      * Object information about a processed request identified by ID.
-     *
-     * @return ResponseInterface response.
      */
-    public function object(CurrentRoute $currentRoute): ResponseInterface
+    public function object(ServerRequestInterface $request): ResponseInterface
     {
-        $data = $this->collectorRepository->getObject(
-            $currentRoute->getArgument('id'),
-            $currentRoute->getArgument('objectId'),
-        );
+        $id = $request->getAttribute('id');
+        $objectId = $request->getAttribute('objectId');
+        $data = $this->collectorRepository->getObject($id, $objectId);
 
         if (null === $data) {
             throw new NotFoundException('Requested objectId doesn\'t exists.');
         }
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'class' => $data[0],
             'value' => $data[1],
         ]);
     }
 
-    public function eventStream(StorageInterface $storage, ResponseFactoryInterface $responseFactory): ResponseInterface
+    public function eventStream(ServerRequestInterface $request): ResponseInterface
     {
+        $storage = $this->storage;
         $compareFunction = static function () use ($storage) {
             $read = $storage->read(StorageInterface::TYPE_SUMMARY, null);
             return md5(json_encode($read, JSON_THROW_ON_ERROR));
@@ -129,7 +114,7 @@ final class DebugController
         $maxRetries = 30;
         $retries = 0;
 
-        return $responseFactory
+        return $this->psrResponseFactory
             ->createResponse()
             ->withHeader('Content-Type', 'text/event-stream')
             ->withHeader('Cache-Control', 'no-cache')
@@ -152,7 +137,6 @@ final class DebugController
                     $hash = $newHash;
                 }
 
-                // break the loop if the client aborted the connection (closed the page)
                 if (connection_aborted()) {
                     return false;
                 }
@@ -160,90 +144,9 @@ final class DebugController
                     return false;
                 }
 
-                usleep(500_000); // 500ms poll interval
+                usleep(500_000);
 
                 return true;
             }));
-    }
-
-    private function createJsPanelResponse(
-        ContainerInterface $container,
-        string $collectorClass,
-        mixed $data,
-    ): DataResponse {
-        $asset = $collectorClass::getAsset();
-        $module = $asset->getModule();
-        $scope = $asset->getScope();
-        /**
-         * @psalm-suppress UndefinedClass
-         */
-        if (
-            !class_exists(AssetManager::class)
-            || !class_exists(AssetPublisherInterface::class)
-            || !$container->has(AssetManager::class)
-            || !$container->has(AssetPublisherInterface::class)
-        ) {
-            throw new PackageNotInstalledException('yiisoft/assets', sprintf(
-                '"%s" or "%s" is not defined in the dependency container.',
-                AssetManager::class,
-                AssetPublisherInterface::class,
-            ));
-        }
-        /**
-         * @psalm-suppress UndefinedClass
-         */
-        $assetManager = $container->get(AssetManager::class);
-        $assetManager->register($asset::class);
-        /**
-         * @psalm-suppress UndefinedClass
-         */
-        $assetPublisher = $container->get(AssetPublisherInterface::class);
-        $assetPublisher->publish($asset);
-
-        $js = $assetManager->getJsFiles();
-
-        if (empty($js)) {
-            return $this->responseFactory->createResponse([
-                '__isPanelRemote__' => true,
-                'url' => null,
-                'module' => $module,
-                'scope' => $scope,
-                'data' => $data,
-            ]);
-        }
-
-        $urls = end($js);
-
-        return $this->responseFactory->createResponse([
-            '__isPanelRemote__' => true,
-            'url' => is_array($urls) && isset($urls[0]) ? $urls[0] : null,
-            'module' => $module,
-            'scope' => $scope,
-            'data' => $data,
-        ]);
-    }
-
-    private function createHtmlPanelResponse(
-        ContainerInterface $container,
-        string $collectorClass,
-        mixed $data,
-    ): DataResponse {
-        if (!class_exists(ViewRenderer::class) || !$container->has(ViewRenderer::class)) {
-            /**
-             * @psalm-suppress UndefinedClass
-             */
-            throw new PackageNotInstalledException('yiisoft/yii-view', sprintf(
-                '"%s" is not defined in the dependency container.',
-                ViewRenderer::class,
-            ));
-        }
-        $viewRenderer = $container->get(ViewRenderer::class);
-        $viewDirectory = dirname($collectorClass::getView());
-        $viewPath = basename($collectorClass::getView());
-
-        return $viewRenderer->withViewPath($viewDirectory)->renderPartial($viewPath, [
-            'data' => $data,
-            'collectorClass' => $collectorClass,
-        ]);
     }
 }

@@ -4,28 +4,27 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\PathResolverInterface;
 use FilesystemIterator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RecursiveDirectoryIterator;
 use ReflectionClass;
 use SplFileInfo;
-use Yiisoft\Aliases\Aliases;
-use Yiisoft\DataResponse\DataResponse;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
 
 final class FileController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
-        private Aliases $aliases,
+        private readonly JsonResponseFactoryInterface $responseFactory,
+        private readonly PathResolverInterface $pathResolver,
     ) {}
 
     public function files(ServerRequestInterface $request): ResponseInterface
     {
-        $request = $request->getQueryParams();
-        $class = $request['class'] ?? '';
-        $method = $request['method'] ?? '';
+        $queryParams = $request->getQueryParams();
+        $class = $queryParams['class'] ?? '';
+        $method = $queryParams['method'] ?? '';
 
         if (!empty($class) && class_exists($class)) {
             $reflection = new ReflectionClass($class);
@@ -36,7 +35,7 @@ final class FileController
                 $endLine = $reflectionMethod->getEndLine();
             }
             if ($destination === false) {
-                return $this->responseFactory->createResponse([
+                return $this->responseFactory->createJsonResponse([
                     'message' => sprintf('Cannot find source of class "%s".', $class),
                 ], 404);
             }
@@ -46,9 +45,9 @@ final class FileController
             ]);
         }
 
-        $path = $request['path'] ?? '';
+        $path = $queryParams['path'] ?? '';
 
-        $rootPath = realpath($this->aliases->get('@root'));
+        $rootPath = realpath($this->pathResolver->getRootPath());
 
         $destination = $this->removeBasePath($rootPath, $path);
 
@@ -59,13 +58,13 @@ final class FileController
         $destination = realpath($rootPath . $destination);
 
         if ($destination === false) {
-            return $this->responseFactory->createResponse([
+            return $this->responseFactory->createJsonResponse([
                 'message' => sprintf('Destination "%s" does not exist', $path),
             ], 404);
         }
 
         if (!str_starts_with($destination, $rootPath)) {
-            return $this->responseFactory->createResponse([
+            return $this->responseFactory->createJsonResponse([
                 'message' => 'Access denied: path is outside the project root.',
             ], 403);
         }
@@ -92,9 +91,6 @@ final class FileController
                 }
                 $path .= '/';
             }
-            /**
-             * Check if path is inside the application directory
-             */
             if (!str_starts_with($path, $rootPath)) {
                 continue;
             }
@@ -104,7 +100,7 @@ final class FileController
             ], $this->serializeFileInfo($file));
         }
 
-        return $this->responseFactory->createResponse($files);
+        return $this->responseFactory->createJsonResponse($files);
     }
 
     private function removeBasePath(string $rootPath, string $path): string|array|null
@@ -152,11 +148,11 @@ final class FileController
         ];
     }
 
-    private function readFile(string $destination, array $extra = []): DataResponse
+    private function readFile(string $destination, array $extra = []): ResponseInterface
     {
-        $rootPath = $this->aliases->get('@root');
+        $rootPath = $this->pathResolver->getRootPath();
         $file = new SplFileInfo($destination);
-        return $this->responseFactory->createResponse(array_merge(
+        return $this->responseFactory->createJsonResponse(array_merge(
             $extra,
             [
                 'directory' => $this->removeBasePath($rootPath, dirname($destination)),

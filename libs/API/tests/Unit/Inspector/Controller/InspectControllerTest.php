@@ -6,41 +6,54 @@ namespace AppDevPanel\Api\Tests\Unit\Inspector\Controller;
 
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use InvalidArgumentException;
-use Yiisoft\Config\ConfigInterface;
+use Psr\Container\ContainerInterface;
 
 final class InspectControllerTest extends ControllerTestCase
 {
-    private function createController(array $params = []): InspectController
+    private function createController(array $params = [], ?ContainerInterface $container = null): InspectController
     {
-        return new InspectController($this->createResponseFactory(), $params);
+        return new InspectController($this->createResponseFactory(), $container ?? $this->container(), $params);
     }
 
     public function testConfig(): void
     {
         $configData = ['key1' => 'value1', 'key2' => 'value2'];
 
-        $config = $this->createMock(ConfigInterface::class);
-        $config->expects($this->once())->method('get')->with('di')->willReturn($configData);
+        $config = new class($configData) {
+            public function __construct(
+                private readonly array $data,
+            ) {}
 
-        $container = $this->container([ConfigInterface::class => $config]);
+            public function get(string $group): array
+            {
+                return $this->data;
+            }
+        };
 
-        $controller = $this->createController();
-        $response = $controller->config($container, $this->get());
+        $container = $this->container(['config' => $config]);
+
+        $controller = $this->createController([], $container);
+        $response = $controller->config($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
     }
 
     public function testConfigWithGroup(): void
     {
-        $configData = ['param' => 'value'];
+        $config = new class() {
+            public function get(string $group): array
+            {
+                return match ($group) {
+                    'params' => ['param' => 'value'],
+                    default => [],
+                };
+            }
+        };
 
-        $config = $this->createMock(ConfigInterface::class);
-        $config->expects($this->once())->method('get')->with('params')->willReturn($configData);
+        $container = $this->container(['config' => $config]);
 
-        $container = $this->container([ConfigInterface::class => $config]);
-
-        $controller = $this->createController();
-        $response = $controller->config($container, $this->get(['group' => 'params']));
+        $controller = $this->createController([], $container);
+        $response = $controller->config($this->get(['group' => 'params']));
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -49,7 +62,7 @@ final class InspectControllerTest extends ControllerTestCase
     {
         $params = ['locale' => ['en'], 'debug' => true];
         $controller = $this->createController($params);
-        $response = $controller->params();
+        $response = $controller->params($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
@@ -60,7 +73,7 @@ final class InspectControllerTest extends ControllerTestCase
     {
         $params = ['z_param' => 1, 'a_param' => 2];
         $controller = $this->createController($params);
-        $response = $controller->params();
+        $response = $controller->params($this->get());
 
         $data = $this->responseData($response);
         $keys = array_keys($data);
@@ -71,7 +84,7 @@ final class InspectControllerTest extends ControllerTestCase
     public function testClasses(): void
     {
         $controller = $this->createController();
-        $response = $controller->classes();
+        $response = $controller->classes($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
@@ -88,8 +101,8 @@ final class InspectControllerTest extends ControllerTestCase
 
         $container = $this->container([\AppDevPanel\Api\Inspector\CommandResponse::class => $service]);
 
-        $controller = $this->createController();
-        $response = $controller->object($container, $this->get([
+        $controller = $this->createController([], $container);
+        $response = $controller->object($this->get([
             'classname' => \AppDevPanel\Api\Inspector\CommandResponse::class,
         ]));
 
@@ -101,70 +114,58 @@ final class InspectControllerTest extends ControllerTestCase
 
     public function testObjectRequiresClassname(): void
     {
-        $container = $this->container();
-
         $controller = $this->createController();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('classname');
-        $controller->object($container, $this->get());
+        $controller->object($this->get());
     }
 
     public function testObjectEmptyClassname(): void
     {
-        $container = $this->container();
-
         $controller = $this->createController();
 
         $this->expectException(InvalidArgumentException::class);
-        $controller->object($container, $this->get(['classname' => '']));
+        $controller->object($this->get(['classname' => '']));
     }
 
     public function testObjectClassNotExists(): void
     {
-        $container = $this->container();
-
         $controller = $this->createController();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('does not exist');
-        $controller->object($container, $this->get(['classname' => 'NonExistent\\FakeClass']));
+        $controller->object($this->get(['classname' => 'NonExistent\\FakeClass']));
     }
 
     public function testObjectInternalClass(): void
     {
-        $container = $this->container();
-
         $controller = $this->createController();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('internal classes');
-        $controller->object($container, $this->get(['classname' => \DateTime::class]));
+        $controller->object($this->get(['classname' => \DateTime::class]));
     }
 
     public function testObjectThrowableClass(): void
     {
-        $container = $this->container();
-
         $controller = $this->createController();
 
         // NotFoundException is a non-internal Throwable from this project
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('exceptions');
-        $controller->object($container, $this->get([
+        $controller->object($this->get([
             'classname' => \AppDevPanel\Api\Debug\Exception\NotFoundException::class,
         ]));
     }
 
     public function testObjectNotInContainer(): void
     {
-        $container = $this->container();
-
         $controller = $this->createController();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('not registered');
-        $controller->object($container, $this->get([
+        $controller->object($this->get([
             'classname' => \AppDevPanel\Api\Inspector\CommandResponse::class,
         ]));
     }
@@ -172,7 +173,7 @@ final class InspectControllerTest extends ControllerTestCase
     public function testPhpinfo(): void
     {
         $controller = $this->createController();
-        $response = $controller->phpinfo();
+        $response = $controller->phpinfo($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
@@ -182,18 +183,21 @@ final class InspectControllerTest extends ControllerTestCase
 
     public function testEventListeners(): void
     {
-        $config = $this->createMock(ConfigInterface::class);
-        $config
-            ->method('get')
-            ->willReturnCallback(static fn(string $group) => match ($group) {
-                'events' => ['App\\Event' => [['handler']]],
-                'events-web' => ['App\\WebEvent' => [['webHandler']]],
-            });
+        $config = new class() {
+            public function get(string $group): array
+            {
+                return match ($group) {
+                    'events' => ['App\\Event' => [['handler']]],
+                    'events-web' => ['App\\WebEvent' => [['webHandler']]],
+                    default => [],
+                };
+            }
+        };
 
-        $container = $this->container([ConfigInterface::class => $config]);
+        $container = $this->container(['config' => $config]);
 
-        $controller = $this->createController();
-        $response = $controller->eventListeners($container);
+        $controller = $this->createController([], $container);
+        $response = $controller->eventListeners($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);

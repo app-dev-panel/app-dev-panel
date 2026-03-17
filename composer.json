@@ -32,17 +32,24 @@
   ],
   "require": {
     "php": "^8.4",
-    "app-dev-panel/kernel": "*",
+    "app-dev-panel/adapter-symfony": "*",
     "app-dev-panel/adapter-yiisoft": "*",
     "app-dev-panel/api": "*",
+    "app-dev-panel/kernel": "*",
     "yiisoft/router-fastroute": "^4.0"
   },
   "require-dev": {
     "carthage-software/mago": "^1.0",
     "nyholm/psr7": "^1.8",
+    "nyholm/psr7-server": "^1.1",
     "php-webdriver/webdriver": "^1.16",
     "phpunit/phpunit": "^11.0",
+    "symfony/config": "^7.0",
+    "symfony/console": "^7.0",
+    "symfony/dependency-injection": "^7.0",
     "symfony/event-dispatcher-contracts": "^3.6",
+    "symfony/framework-bundle": "^7.0",
+    "symfony/http-kernel": "^7.0",
     "symfony/var-dumper": "^7.0",
     "yiisoft/cache": "^3.2",
     "yiisoft/db-sqlite": "^1.2",
@@ -104,6 +111,7 @@
       "AppDevPanel\\Kernel\\Tests\\": "libs/Kernel/tests",
       "AppDevPanel\\Api\\Tests\\": "libs/API/tests",
       "AppDevPanel\\Cli\\Tests\\": "libs/Cli/tests",
+      "AppDevPanel\\Adapter\\Symfony\\Tests\\": "libs/Adapter/Symfony/tests",
       "AppDevPanel\\Tests\\": "tests"
     }
   },

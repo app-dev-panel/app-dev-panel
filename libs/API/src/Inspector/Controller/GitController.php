@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use Gitonomy\Git\Commit;
 use Gitonomy\Git\Reference\Branch;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
 use Yiisoft\VarDumper\VarDumper;
 
 final class GitController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
-        private GitRepositoryProvider $repositoryProvider,
+        private readonly JsonResponseFactoryInterface $responseFactory,
+        private readonly GitRepositoryProvider $repositoryProvider,
     ) {}
 
-    public function summary(): ResponseInterface
+    public function summary(ServerRequestInterface $request): ResponseInterface
     {
         $git = $this->repositoryProvider->get();
 
@@ -41,10 +41,10 @@ final class GitController
             'status' => explode("\n", $git->run('status')),
         ];
         $response = VarDumper::create($result)->asPrimitives(255);
-        return $this->responseFactory->createResponse($response);
+        return $this->responseFactory->createJsonResponse($response);
     }
 
-    public function log(): ResponseInterface
+    public function log(ServerRequestInterface $request): ResponseInterface
     {
         $git = $this->repositoryProvider->get();
 
@@ -57,14 +57,14 @@ final class GitController
             'commits' => array_map($this->serializeCommit(...), $git->getLog(limit: 20)->getCommits()),
         ];
         $response = VarDumper::create($result)->asPrimitives(255);
-        return $this->responseFactory->createResponse($response);
+        return $this->responseFactory->createJsonResponse($response);
     }
 
     public function checkout(ServerRequestInterface $request): ResponseInterface
     {
         $git = $this->repositoryProvider->get();
 
-        $parsedBody = \json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $parsedBody = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $branch = $parsedBody['branch'] ?? null;
 
         if ($branch === null || $branch === '') {
@@ -76,7 +76,7 @@ final class GitController
         }
 
         $git->getWorkingCopy()->checkout($branch);
-        return $this->responseFactory->createResponse([]);
+        return $this->responseFactory->createJsonResponse([]);
     }
 
     public function command(ServerRequestInterface $request): ResponseInterface
@@ -102,7 +102,7 @@ final class GitController
         } elseif ($command === 'fetch') {
             $git->run('fetch', ['--tags']);
         }
-        return $this->responseFactory->createResponse([]);
+        return $this->responseFactory->createJsonResponse([]);
     }
 
     private function serializeCommit(?Commit $commit): array

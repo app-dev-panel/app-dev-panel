@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AppDevPanel\Kernel\Collector;
 
 use Throwable;
-use Yiisoft\ErrorHandler\Event\ApplicationError;
 
 final class ExceptionCollector implements SummaryCollectorInterface
 {
@@ -36,14 +35,14 @@ final class ExceptionCollector implements SummaryCollectorInterface
         return array_map([$this, 'serializeException'], $exceptions);
     }
 
-    public function collect(ApplicationError $error): void
+    public function collect(Throwable $throwable): void
     {
         if (!$this->isActive()) {
             return;
         }
 
-        $this->exception = $error->getThrowable();
-        $this->timelineCollector->collect($this, $error::class);
+        $this->exception = $throwable;
+        $this->timelineCollector->collect($this, $throwable::class);
     }
 
     public function getSummary(): array

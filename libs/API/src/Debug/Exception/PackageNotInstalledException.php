@@ -6,12 +6,11 @@ namespace AppDevPanel\Api\Debug\Exception;
 
 use Exception;
 use Throwable;
-use Yiisoft\FriendlyException\FriendlyExceptionInterface;
 
-final class PackageNotInstalledException extends Exception implements FriendlyExceptionInterface
+final class PackageNotInstalledException extends Exception
 {
     public function __construct(
-        private string $packageName,
+        private readonly string $packageName,
         string $message = '',
         int $code = 0,
         ?Throwable $previous = null,
@@ -30,7 +29,6 @@ final class PackageNotInstalledException extends Exception implements FriendlyEx
             Probably you forgot to install the package.
 
             Run `composer require {$this->packageName}` and configure the package in your application.
-            Visit [app-dev-panel/yii-debug-api](https://github.com/{$this->packageName}) for more details.
             MARKDOWN;
     }
 }

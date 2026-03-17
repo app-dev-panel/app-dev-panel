@@ -14,7 +14,9 @@ Application Code → PSR Interface → Proxy → Original Service
 A proxy wraps an existing service, delegates all calls to it, and simultaneously feeds
 the call data (arguments, return values, timing) to a collector.
 
-## Available Proxies
+## Proxies in Kernel
+
+Kernel provides framework-independent PSR proxies, colocated with their collectors in `src/Collector/`:
 
 ### LoggerInterfaceProxy (PSR-3)
 
@@ -52,57 +54,33 @@ $response = $httpClient->sendRequest($request);
 
 **Feeds**: `HttpClientCollector`
 
-### ContainerInterfaceProxy (PSR-11)
+## Proxies in Adapters
 
-Wraps `Psr\Container\ContainerInterface`. Intercepts service resolution.
+The following proxies are framework-specific and live in adapter packages:
 
-```php
-$service = $container->get(MyService::class);
-// Proxy records which service was resolved
-```
+### Yii Adapter (`libs/Adapter/Yiisoft/src/Proxy/`)
 
-**Feeds**: `ServiceCollector`
+- **ContainerInterfaceProxy** (PSR-11) — Wraps `Psr\Container\ContainerInterface`, feeds `ServiceCollector`
+- **ContainerProxyConfig** — Configuration for container proxy (tracked services, log levels)
+- **ServiceProxy** / **ServiceMethodProxy** — Generic interception for any service method
+- **VarDumperHandlerInterfaceProxy** — Wraps Yii VarDumper handler, feeds `VarDumperCollector`
+- **ProxyLogTrait** — Shared logging logic for Yii-specific proxies
 
-### VarDumperHandlerInterfaceProxy
+## Shared Infrastructure
 
-Wraps the VarDumper handler. Intercepts `dump()` calls.
+### ProxyDecoratedCalls Trait
 
-**Feeds**: `VarDumperCollector`
-
-### ServiceProxy / ServiceMethodProxy
-
-Generic proxy for any service. Configured via the adapter to intercept specific
-service methods:
-
-```php
-// Configuration: track specific methods on a service
-'trackedServices' => [
-    MyService::class => ['methodA', 'methodB'],
-],
-```
-
-This records arguments, return values, exceptions, and execution time for
-the specified methods.
-
-## Configuration
-
-Proxy logging levels can be configured:
-
-```php
-'logLevel' => [
-    'arguments' => true,   // Log method arguments
-    'result' => true,      // Log return values
-    'error' => true,       // Log exceptions
-],
-```
+Located in `src/ProxyDecoratedCalls.php`. Provides `__call`, `__get`, `__set` delegation
+to the decorated service. Used by both Kernel and adapter proxies.
 
 ## Creating a Proxy for a New Framework
 
 When creating an adapter for a new framework, you need to:
 
-1. Register proxy classes as service decorators in the framework's DI container
-2. Ensure proxies are injected *in place of* the original services
-3. The proxy receives the original service via constructor injection
+1. Register Kernel's PSR proxies (Logger, EventDispatcher, HttpClient) as service decorators in the framework's DI container
+2. Create framework-specific proxies as needed (e.g., container proxy, ORM proxy) in the adapter package
+3. Ensure proxies are injected *in place of* the original services
+4. The proxy receives the original service via constructor injection
 
-The Kernel provides all proxy implementations. The adapter only needs to wire them
-into the DI container correctly.
+Kernel provides the PSR proxies and shared traits. The adapter wires them into the DI container
+and adds any framework-specific proxies.

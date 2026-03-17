@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yiisoft;
 
-use AppDevPanel\Kernel\Collector\ContainerInterfaceProxy;
-use AppDevPanel\Kernel\Collector\ContainerProxyConfig;
+use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy;
+use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerProxyConfig;
 use Psr\Container\ContainerInterface;
 use Yiisoft\Di\ServiceProviderInterface;
 

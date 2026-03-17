@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace AppDevPanel\Kernel\Collector;
 
 use ReflectionClass;
-use Yiisoft\Yii\Console\Event\ApplicationStartup as ConsoleApplicationStartup;
-use Yiisoft\Yii\Http\Event\ApplicationStartup as HttpApplicationStartup;
 
 final class EventCollector implements SummaryCollectorInterface
 {
@@ -28,11 +26,7 @@ final class EventCollector implements SummaryCollectorInterface
 
     public function collect(object $event, string $line): void
     {
-        if (
-            !$event instanceof HttpApplicationStartup
-            && !$event instanceof ConsoleApplicationStartup
-            && !$this->isActive()
-        ) {
+        if (!$this->isActive()) {
             return;
         }
 

@@ -1,7 +1,29 @@
 # Kernel Module
 
 Core engine of ADP. Framework-independent. Manages the debugger lifecycle,
-data collectors, storage, proxy system, and object serialization.
+data collectors, storage, PSR proxy system, and object serialization.
+
+## Dependencies
+
+Kernel depends on PSR interfaces and these core infrastructure helpers:
+
+- `yiisoft/strings` — String manipulation utilities (core infra, framework-agnostic)
+- `yiisoft/json` — JSON encode/decode with error handling (core infra, framework-agnostic)
+- `yiisoft/var-dumper` — Variable dumping/serialization (core infra, framework-agnostic)
+- `symfony/console` — Console event types for `CommandCollector`
+- `symfony/var-dumper` — Variable dumper integration
+- `guzzlehttp/psr7` — PSR-7 HTTP message implementation
+
+**Core infra policy**: `yiisoft/var-dumper`, `yiisoft/strings`, and `yiisoft/json` are pure
+utility libraries with no framework coupling. They are considered core infrastructure and
+may be used freely in Kernel and any module. Despite the `yiisoft/` vendor prefix, these
+are not Yii framework dependencies.
+
+Note: `yiisoft/proxy` was removed from Kernel. Container proxying (`ContainerInterfaceProxy`,
+`ServiceProxy`, `ServiceMethodProxy`, `ContainerProxyConfig`, `ProxyLogTrait`) and
+`VarDumperHandlerInterfaceProxy` now live in the Yii adapter (`libs/Adapter/Yiisoft`).
+`LoggerDecorator` and `VarDumperHandler` remain in Kernel (`DebugServer/`) since they
+only depend on `yiisoft/var-dumper` (core infra).
 
 ## Package
 
@@ -30,29 +52,35 @@ data collectors, storage, proxy system, and object serialization.
 src/
 ├── Debugger.php                  # Main debugger class
 ├── DebuggerIdGenerator.php       # ID generation
-├── Collector/                    # All collector implementations
+├── Dumper.php                    # Object serialization with depth/circular-ref control
+├── FlattenException.php          # Serializable exception representation
+├── ProxyDecoratedCalls.php       # Trait for proxy delegation (__call, __get, __set)
+├── StartupContext.php            # Debugger startup context
+├── Collector/                    # Collectors and colocated PSR proxies
 │   ├── CollectorInterface.php
+│   ├── CollectorTrait.php
+│   ├── SummaryCollectorInterface.php
 │   ├── LogCollector.php
+│   ├── LoggerInterfaceProxy.php          # PSR-3 proxy (feeds LogCollector)
 │   ├── EventCollector.php
+│   ├── EventDispatcherInterfaceProxy.php # PSR-14 proxy (feeds EventCollector)
 │   ├── ServiceCollector.php
-│   ├── RequestCollector.php
 │   ├── ExceptionCollector.php
 │   ├── HttpClientCollector.php
+│   ├── HttpClientInterfaceProxy.php      # PSR-18 proxy (feeds HttpClientCollector)
 │   ├── VarDumperCollector.php
 │   ├── TimelineCollector.php
-│   ├── CommandCollector.php
-│   ├── WebAppInfoCollector.php
-│   ├── ConsoleAppInfoCollector.php
-│   ├── FilesystemStreamCollector.php
-│   └── HttpStreamCollector.php
-├── Proxy/                        # PSR interface proxies
-│   ├── LoggerInterfaceProxy.php
-│   ├── EventDispatcherInterfaceProxy.php
-│   ├── HttpClientInterfaceProxy.php
-│   ├── ContainerInterfaceProxy.php
-│   ├── VarDumperHandlerInterfaceProxy.php
-│   ├── ServiceProxy.php
-│   └── ServiceMethodProxy.php
+│   ├── Web/
+│   │   ├── RequestCollector.php
+│   │   └── WebAppInfoCollector.php
+│   ├── Console/
+│   │   ├── CommandCollector.php
+│   │   └── ConsoleAppInfoCollector.php
+│   └── Stream/
+│       ├── FilesystemStreamCollector.php
+│       ├── FilesystemStreamProxy.php
+│       ├── HttpStreamCollector.php
+│       └── HttpStreamProxy.php
 ├── Service/                      # Service registry for multi-app inspection
 │   ├── ServiceDescriptor.php
 │   ├── ServiceRegistryInterface.php
@@ -62,9 +90,16 @@ src/
 │   ├── FileStorage.php
 │   └── MemoryStorage.php
 ├── Event/                        # Debugger lifecycle events
-├── Helper/                       # Utilities (Dumper, etc.)
+│   └── ProxyMethodCallEvent.php
+├── Helper/                       # Utilities
+│   ├── BacktraceIgnoreMatcher.php
+│   └── StreamWrapper/
 └── DebugServer/                  # UDP socket server for real-time streaming
-    └── Connection.php
+    ├── Broadcaster.php
+    ├── Connection.php
+    ├── LoggerDecorator.php       # PSR-3 logger decorator that broadcasts via UDP
+    ├── SocketReader.php
+    └── VarDumperHandler.php      # VarDumper handler that broadcasts via UDP
 ```
 
 ## Debugger Lifecycle
@@ -86,10 +121,21 @@ startup() → [proxies feed collectors during request] → shutdown() → flush 
 
 ## Proxy System
 
-Proxies wrap PSR interfaces (PSR-3 Logger, PSR-14 EventDispatcher, PSR-18 HttpClient, PSR-11 Container)
-and feed intercepted data to collectors. The application code is completely unaware of the interception.
+Kernel provides PSR interface proxies that are colocated with their corresponding collectors
+in `src/Collector/`. These proxies wrap PSR interfaces and feed intercepted data to collectors.
+The application code is completely unaware of the interception.
 
-`ServiceProxy` / `ServiceMethodProxy` provide generic interception for any service method.
+**Proxies in Kernel** (framework-independent PSR proxies):
+- `LoggerInterfaceProxy` (PSR-3) — feeds `LogCollector`
+- `EventDispatcherInterfaceProxy` (PSR-14) — feeds `EventCollector`
+- `HttpClientInterfaceProxy` (PSR-18) — feeds `HttpClientCollector`
+
+**Proxies moved to Yii adapter** (`libs/Adapter/Yiisoft/src/Proxy/`):
+- `ContainerInterfaceProxy` (PSR-11), `ContainerProxyConfig`, `ProxyLogTrait`
+- `ServiceProxy`, `ServiceMethodProxy` (generic service interception)
+- `VarDumperHandlerInterfaceProxy`
+
+The `ProxyDecoratedCalls` trait remains in Kernel as shared infrastructure for all proxies.
 
 ## Service Registry
 

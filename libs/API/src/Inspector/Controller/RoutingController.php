@@ -4,25 +4,31 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use Yiisoft\Http\Method;
-use Yiisoft\Router\RouteCollectionInterface;
-use Yiisoft\Router\UrlMatcherInterface;
 use Yiisoft\VarDumper\VarDumper;
 
 final class RoutingController
 {
+    private const HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
+
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
+        private readonly JsonResponseFactoryInterface $responseFactory,
+        private readonly ?object $routeCollection = null,
+        private readonly ?object $urlMatcher = null,
     ) {}
 
-    public function routes(RouteCollectionInterface $routeCollection): ResponseInterface
+    public function routes(ServerRequestInterface $request): ResponseInterface
     {
+        if ($this->routeCollection === null) {
+            return $this->responseFactory->createJsonResponse([
+                'error' => 'Route inspection requires framework integration.',
+            ], 501);
+        }
+
         $routes = [];
-        foreach ($routeCollection->getRoutes() as $route) {
+        foreach ($this->routeCollection->getRoutes() as $route) {
             $data = $route->__debugInfo();
             $routes[] = [
                 'name' => $data['name'],
@@ -36,18 +42,21 @@ final class RoutingController
         }
         $response = VarDumper::create($routes)->asPrimitives(5);
 
-        return $this->responseFactory->createResponse($response);
+        return $this->responseFactory->createJsonResponse($response);
     }
 
-    public function checkRoute(
-        ServerRequestInterface $request,
-        UrlMatcherInterface $matcher,
-        ServerRequestFactoryInterface $serverRequestFactory,
-    ): ResponseInterface {
+    public function checkRoute(ServerRequestInterface $request): ResponseInterface
+    {
+        if ($this->urlMatcher === null) {
+            return $this->responseFactory->createJsonResponse([
+                'error' => 'Route checking requires framework integration.',
+            ], 501);
+        }
+
         $queryParams = $request->getQueryParams();
         $path = $queryParams['route'] ?? null;
         if ($path === null) {
-            return $this->responseFactory->createResponse([
+            return $this->responseFactory->createJsonResponse([
                 'message' => 'Path is not specified.',
             ], 422);
         }
@@ -56,16 +65,17 @@ final class RoutingController
         $method = 'GET';
         if (str_contains($path, ' ')) {
             [$possibleMethod, $restPath] = explode(' ', $path, 2);
-            if (in_array($possibleMethod, Method::ALL, true)) {
+            if (in_array($possibleMethod, self::HTTP_METHODS, true)) {
                 $method = $possibleMethod;
                 $path = $restPath;
             }
         }
-        $request = $serverRequestFactory->createServerRequest($method, $path);
 
-        $result = $matcher->match($request);
+        $serverRequestFactory = new \GuzzleHttp\Psr7\ServerRequest($method, $path);
+        $result = $this->urlMatcher->match($serverRequestFactory);
+
         if (!$result->isSuccess()) {
-            return $this->responseFactory->createResponse([
+            return $this->responseFactory->createJsonResponse([
                 'result' => false,
             ]);
         }
@@ -77,7 +87,7 @@ final class RoutingController
         $middlewareDefinitions = $property->getValue($route);
         $action = end($middlewareDefinitions);
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'result' => true,
             'action' => $action,
         ]);

@@ -10,8 +10,6 @@ use AppDevPanel\Kernel\Collector\TimelineCollector;
 use GuzzleHttp\Psr7\Message;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Yii\Http\Event\AfterRequest;
-use Yiisoft\Yii\Http\Event\BeforeRequest;
 
 final class RequestCollector implements SummaryCollectorInterface
 {
@@ -64,30 +62,31 @@ final class RequestCollector implements SummaryCollectorInterface
         ];
     }
 
-    public function collect(object $event): void
+    public function collectRequest(ServerRequestInterface $request): void
     {
         if (!$this->isActive()) {
             return;
         }
 
-        if ($event instanceof BeforeRequest) {
-            $request = $event->getRequest();
+        $this->request = $request;
+        $this->requestUrl = (string) $request->getUri();
+        $this->requestPath = $request->getUri()->getPath();
+        $this->requestQuery = $request->getUri()->getQuery();
+        $this->requestMethod = $request->getMethod();
+        $this->requestIsAjax = strtolower($request->getHeaderLine('X-Requested-With')) === 'xmlhttprequest';
+        $this->userIp = $request->getServerParams()['REMOTE_ADDR'] ?? null;
+        $this->timelineCollector->collect($this, 'request');
+    }
 
-            $this->request = $request;
-            $this->requestUrl = (string) $request->getUri();
-            $this->requestPath = $request->getUri()->getPath();
-            $this->requestQuery = $request->getUri()->getQuery();
-            $this->requestMethod = $request->getMethod();
-            $this->requestIsAjax = strtolower($request->getHeaderLine('X-Requested-With')) === 'xmlhttprequest';
-            $this->userIp = $request->getServerParams()['REMOTE_ADDR'] ?? null;
+    public function collectResponse(ResponseInterface $response): void
+    {
+        if (!$this->isActive()) {
+            return;
         }
-        if ($event instanceof AfterRequest) {
-            $response = $event->getResponse();
 
-            $this->response = $response;
-            $this->responseStatusCode = $response !== null ? $response->getStatusCode() : 500;
-        }
-        $this->timelineCollector->collect($this, spl_object_id($event));
+        $this->response = $response;
+        $this->responseStatusCode = $response->getStatusCode();
+        $this->timelineCollector->collect($this, 'response');
     }
 
     public function getSummary(): array
@@ -115,6 +114,8 @@ final class RequestCollector implements SummaryCollectorInterface
         $this->request = null;
         $this->response = null;
         $this->requestUrl = '';
+        $this->requestPath = '';
+        $this->requestQuery = '';
         $this->requestMethod = '';
         $this->requestIsAjax = false;
         $this->userIp = null;

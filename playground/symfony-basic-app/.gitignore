@@ -1,0 +1,8 @@
+/vendor/
+/var/cache/
+/var/log/
+/var/debug/
+.env.local
+.env.*.local
+composer.lock
+/config/reference.php

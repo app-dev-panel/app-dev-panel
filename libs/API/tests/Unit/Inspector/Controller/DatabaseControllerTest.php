@@ -9,9 +9,12 @@ use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 
 final class DatabaseControllerTest extends ControllerTestCase
 {
-    private function createController(): DatabaseController
+    private function createController(?SchemaProviderInterface $schemaProvider = null): DatabaseController
     {
-        return new DatabaseController($this->createResponseFactory());
+        return new DatabaseController(
+            $this->createResponseFactory(),
+            $schemaProvider ?? $this->createMock(SchemaProviderInterface::class),
+        );
     }
 
     public function testGetTables(): void
@@ -24,8 +27,8 @@ final class DatabaseControllerTest extends ControllerTestCase
         $provider = $this->createMock(SchemaProviderInterface::class);
         $provider->expects($this->once())->method('getTables')->willReturn($tables);
 
-        $controller = $this->createController();
-        $response = $controller->getTables($provider);
+        $controller = $this->createController($provider);
+        $response = $controller->getTables($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
@@ -48,8 +51,10 @@ final class DatabaseControllerTest extends ControllerTestCase
         $provider = $this->createMock(SchemaProviderInterface::class);
         $provider->expects($this->once())->method('getTable')->with('users', 1000, 0)->willReturn($tableData);
 
-        $controller = $this->createController();
-        $response = $controller->getTable($provider, $this->route(['name' => 'users']), $this->get());
+        $controller = $this->createController($provider);
+        $request = $this->get();
+        $request = $request->withAttribute('name', 'users');
+        $response = $controller->getTable($request);
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -69,12 +74,10 @@ final class DatabaseControllerTest extends ControllerTestCase
                 'offset' => 100,
             ]);
 
-        $controller = $this->createController();
-        $response = $controller->getTable(
-            $provider,
-            $this->route(['name' => 'orders']),
-            $this->get(['limit' => '50', 'offset' => '100']),
-        );
+        $controller = $this->createController($provider);
+        $request = $this->get(['limit' => '50', 'offset' => '100']);
+        $request = $request->withAttribute('name', 'orders');
+        $response = $controller->getTable($request);
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -92,8 +95,10 @@ final class DatabaseControllerTest extends ControllerTestCase
                 'totalCount' => 0,
             ]);
 
-        $controller = $this->createController();
-        $controller->getTable($provider, $this->route(['name' => 'big']), $this->get(['limit' => '999999']));
+        $controller = $this->createController($provider);
+        $request = $this->get(['limit' => '999999']);
+        $request = $request->withAttribute('name', 'big');
+        $controller->getTable($request);
     }
 
     public function testGetTableNegativeOffsetClampedToZero(): void
@@ -109,7 +114,9 @@ final class DatabaseControllerTest extends ControllerTestCase
                 'totalCount' => 0,
             ]);
 
-        $controller = $this->createController();
-        $controller->getTable($provider, $this->route(['name' => 't']), $this->get(['offset' => '-5']));
+        $controller = $this->createController($provider);
+        $request = $this->get(['offset' => '-5']);
+        $request = $request->withAttribute('name', 't');
+        $controller->getTable($request);
     }
 }

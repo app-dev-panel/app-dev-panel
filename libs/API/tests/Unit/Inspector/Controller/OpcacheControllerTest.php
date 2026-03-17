@@ -11,7 +11,7 @@ final class OpcacheControllerTest extends ControllerTestCase
     public function testIndexWhenOpcacheAvailable(): void
     {
         $controller = new OpcacheController($this->createResponseFactory());
-        $response = $controller->index();
+        $response = $controller->index($this->get());
 
         // opcache may or may not be available in the test environment
         $this->assertContains($response->getStatusCode(), [200, 422]);

@@ -12,8 +12,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-use Yiisoft\Yii\Http\Event\AfterRequest;
-use Yiisoft\Yii\Http\Event\BeforeRequest;
 
 final class RequestCollectorTest extends AbstractCollectorTestCase
 {
@@ -37,13 +35,14 @@ final class RequestCollectorTest extends AbstractCollectorTestCase
         $requestMock->method('getHeaderLine')->willReturn('');
         $requestMock->method('getUri')->willReturn($uriMock);
         $requestMock->method('getBody')->willReturn($bodyMock);
+        $requestMock->method('getServerParams')->willReturn([]);
 
         $responseMock->method('getStatusCode')->willReturn(200);
         $responseMock->method('getHeaders')->willReturn([]);
         $responseMock->method('getBody')->willReturn($bodyMock);
 
-        $collector->collect(new BeforeRequest($requestMock));
-        $collector->collect(new AfterRequest($responseMock));
+        $collector->collectRequest($requestMock);
+        $collector->collectResponse($responseMock);
     }
 
     protected function getCollector(): CollectorInterface

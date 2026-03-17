@@ -4,33 +4,34 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Command\BashCommand;
 use AppDevPanel\Api\Inspector\CommandInterface;
+use AppDevPanel\Api\PathResolverInterface;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Aliases\Aliases;
-use Yiisoft\Config\ConfigInterface;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
 
 use function array_key_exists;
-use function is_array;
 use function is_string;
 
 class CommandController
 {
+    /**
+     * @param array<string, array<string, class-string>> $commandMap
+     */
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
+        private readonly JsonResponseFactoryInterface $responseFactory,
+        private readonly PathResolverInterface $pathResolver,
+        private readonly ContainerInterface $container,
+        private readonly array $commandMap = [],
     ) {}
 
-    public function index(ConfigInterface $config, Aliases $aliases): ResponseInterface
+    public function index(ServerRequestInterface $request): ResponseInterface
     {
-        $params = $config->get('params');
-        $configCommandMap = $params['app-dev-panel/yii-debug-api']['inspector']['commandMap'] ?? [];
-
         $result = [];
-        foreach ($configCommandMap as $groupName => $commands) {
+        foreach ($this->commandMap as $groupName => $commands) {
             foreach ($commands as $name => $command) {
                 if (!is_subclass_of($command, CommandInterface::class)) {
                     continue;
@@ -44,7 +45,7 @@ class CommandController
             }
         }
 
-        $composerScripts = $this->getComposerScripts($aliases);
+        $composerScripts = $this->getComposerScripts();
         foreach ($composerScripts as $scriptName => $commands) {
             $commandName = "composer/{$scriptName}";
             $result[] = [
@@ -55,20 +56,13 @@ class CommandController
             ];
         }
 
-        return $this->responseFactory->createResponse($result);
+        return $this->responseFactory->createJsonResponse($result);
     }
 
-    public function run(
-        ServerRequestInterface $request,
-        ContainerInterface $container,
-        ConfigInterface $config,
-        Aliases $aliases,
-    ): ResponseInterface {
-        $params = $config->get('params');
-        $commandMap = $params['app-dev-panel/yii-debug-api']['inspector']['commandMap'] ?? [];
-
+    public function run(ServerRequestInterface $request): ResponseInterface
+    {
         $commandList = [];
-        foreach ($commandMap as $commands) {
+        foreach ($this->commandMap as $commands) {
             foreach ($commands as $name => $command) {
                 if (!is_subclass_of($command, CommandInterface::class)) {
                     continue;
@@ -76,14 +70,14 @@ class CommandController
                 $commandList[$name] = $command;
             }
         }
-        $composerScripts = $this->getComposerScripts($aliases);
+        $composerScripts = $this->getComposerScripts();
         foreach ($composerScripts as $scriptName => $commands) {
             $commandName = "composer/{$scriptName}";
             $commandList[$commandName] = ['composer', $scriptName];
         }
 
-        $request = $request->getQueryParams();
-        $commandName = $request['command'] ?? null;
+        $queryParams = $request->getQueryParams();
+        $commandName = $queryParams['command'] ?? null;
 
         if ($commandName === null) {
             throw new InvalidArgumentException(sprintf('Command must not be null. Available commands: "%s".', implode(
@@ -101,24 +95,24 @@ class CommandController
         }
 
         $commandClass = $commandList[$commandName];
-        if (is_string($commandClass) && $container->has($commandClass)) {
-            $command = $container->get($commandClass);
+        if (is_string($commandClass) && $this->container->has($commandClass)) {
+            $command = $this->container->get($commandClass);
         } else {
-            $command = new BashCommand($aliases, (array) $commandClass);
+            $command = new BashCommand($this->pathResolver, (array) $commandClass);
         }
         $result = $command->run();
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'status' => $result->getStatus(),
             'result' => $result->getResult(),
             'error' => $result->getErrors(),
         ]);
     }
 
-    private function getComposerScripts(Aliases $aliases): array
+    private function getComposerScripts(): array
     {
         $result = [];
-        $composerJsonPath = $aliases->get('@root/composer.json');
+        $composerJsonPath = $this->pathResolver->getRootPath() . '/composer.json';
         if (file_exists($composerJsonPath)) {
             $composerJsonCommands = json_decode(file_get_contents($composerJsonPath), true, 512, JSON_THROW_ON_ERROR);
             if (is_array($composerJsonCommands) && isset($composerJsonCommands['scripts'])) {

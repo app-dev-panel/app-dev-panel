@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Controller;
 
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
+use AppDevPanel\Api\PathResolverInterface;
 use Exception;
 use InvalidArgumentException;
-use Yiisoft\Aliases\Aliases;
 
 final class ComposerControllerTest extends ControllerTestCase
 {
@@ -28,12 +28,11 @@ final class ComposerControllerTest extends ControllerTestCase
 
     private function createController(): ComposerController
     {
-        return new ComposerController($this->createResponseFactory());
-    }
+        $pathResolver = $this->createMock(PathResolverInterface::class);
+        $pathResolver->method('getRootPath')->willReturn($this->fixtureDir);
+        $pathResolver->method('getRuntimePath')->willReturn($this->fixtureDir . '/runtime');
 
-    private function aliases(): Aliases
-    {
-        return new Aliases(['@root' => $this->fixtureDir]);
+        return new ComposerController($this->createResponseFactory(), $pathResolver);
     }
 
     public function testIndexWithJsonAndLock(): void
@@ -47,7 +46,7 @@ final class ComposerControllerTest extends ControllerTestCase
         ]));
 
         $controller = $this->createController();
-        $response = $controller->index($this->aliases());
+        $response = $controller->index($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
@@ -63,7 +62,7 @@ final class ComposerControllerTest extends ControllerTestCase
         ]));
 
         $controller = $this->createController();
-        $response = $controller->index($this->aliases());
+        $response = $controller->index($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
@@ -76,7 +75,7 @@ final class ComposerControllerTest extends ControllerTestCase
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('composer.json');
-        $controller->index($this->aliases());
+        $controller->index($this->get());
     }
 
     public function testInspectMissingPackage(): void
@@ -85,7 +84,7 @@ final class ComposerControllerTest extends ControllerTestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('package');
-        $controller->inspect($this->get(), $this->aliases());
+        $controller->inspect($this->get());
     }
 
     public function testRequireMissingPackage(): void
@@ -94,6 +93,6 @@ final class ComposerControllerTest extends ControllerTestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('package');
-        $controller->require($this->post([]), $this->aliases());
+        $controller->require($this->post([]));
     }
 }

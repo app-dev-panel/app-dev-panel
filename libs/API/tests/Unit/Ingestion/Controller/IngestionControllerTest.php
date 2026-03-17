@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Ingestion\Controller;
 
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\FileStorage;
+use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
-use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\ServerRequest;
 use Nyholm\Psr7\Stream;
 use PHPUnit\Framework\TestCase;
-use Yiisoft\DataResponse\DataResponseFactory;
-use Yiisoft\Json\Json;
 
 final class IngestionControllerTest extends TestCase
 {
@@ -32,17 +31,29 @@ final class IngestionControllerTest extends TestCase
 
     private function createController(): IngestionController
     {
-        $psr17 = new Psr17Factory();
-        $responseFactory = new DataResponseFactory($psr17, $psr17);
+        $responseFactory = $this->createJsonResponseFactory();
         $storage = new FileStorage($this->storagePath, new DebuggerIdGenerator());
 
         return new IngestionController($responseFactory, $storage);
     }
 
+    private function createJsonResponseFactory(): JsonResponseFactoryInterface
+    {
+        $factory = $this->createMock(JsonResponseFactoryInterface::class);
+        $factory
+            ->method('createJsonResponse')
+            ->willReturnCallback(function (mixed $data, int $status = 200): Response {
+                return new Response($status, ['Content-Type' => 'application/json'], json_encode($data));
+            });
+        return $factory;
+    }
+
     private function post(array $body): ServerRequest
     {
         $request = new ServerRequest('POST', '/test');
-        return $request->withHeader('Content-Type', 'application/json')->withBody(Stream::create(Json::encode($body)));
+        return $request
+            ->withHeader('Content-Type', 'application/json')
+            ->withBody(Stream::create(json_encode($body, JSON_THROW_ON_ERROR)));
     }
 
     public function testIngestMinimal(): void
@@ -57,7 +68,7 @@ final class IngestionControllerTest extends TestCase
         ]));
 
         $this->assertSame(201, $response->getStatusCode());
-        $data = $response->getData();
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $this->assertTrue($data['success']);
         $this->assertNotEmpty($data['id']);
 
@@ -97,13 +108,13 @@ final class IngestionControllerTest extends TestCase
         ]));
 
         $this->assertSame(201, $response->getStatusCode());
-        $data = $response->getData();
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $this->assertSame('external-123', $data['id']);
 
         // Verify summary has context
         $summaryFiles = glob($this->storagePath . '/**/external-123/summary.json');
         $this->assertCount(1, $summaryFiles);
-        $summary = Json::decode(file_get_contents($summaryFiles[0]));
+        $summary = json_decode(file_get_contents($summaryFiles[0]), true, 512, JSON_THROW_ON_ERROR);
         $this->assertSame('web', $summary['context']['type']);
         $this->assertSame('python', $summary['context']['language']);
     }
@@ -129,7 +140,7 @@ final class IngestionControllerTest extends TestCase
         ]));
 
         $this->assertSame(201, $response->getStatusCode());
-        $data = $response->getData();
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $this->assertSame(3, $data['count']);
         $this->assertCount(3, $data['ids']);
 
@@ -172,13 +183,13 @@ final class IngestionControllerTest extends TestCase
         ]));
 
         $this->assertSame(201, $response->getStatusCode());
-        $data = $response->getData();
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $this->assertTrue($data['success']);
 
         // Verify data was stored
         $dataFiles = glob($this->storagePath . '/**/**/data.json');
         $this->assertCount(1, $dataFiles);
-        $stored = Json::decode(file_get_contents($dataFiles[0]));
+        $stored = json_decode(file_get_contents($dataFiles[0]), true, 512, JSON_THROW_ON_ERROR);
         $this->assertArrayHasKey('logs', $stored);
         $this->assertSame('error', $stored['logs'][0]['level']);
         $this->assertSame('Connection refused', $stored['logs'][0]['message']);
@@ -205,7 +216,7 @@ final class IngestionControllerTest extends TestCase
             ],
         ]));
 
-        $data = $response->getData();
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $id = $data['id'];
 
         // Now read it back via storage
@@ -246,11 +257,11 @@ final class IngestionControllerTest extends TestCase
         ]));
 
         $this->assertSame(201, $response->getStatusCode());
-        $data = $response->getData();
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
         // Verify summary contains all collector names
         $summaryFiles = glob($this->storagePath . '/**/' . $data['id'] . '/summary.json');
-        $summary = Json::decode(file_get_contents($summaryFiles[0]));
+        $summary = json_decode(file_get_contents($summaryFiles[0]), true, 512, JSON_THROW_ON_ERROR);
         /** @var list<array{id: string, name: string}> $collectors */
         $collectors = $summary['collectors'];
         $collectorIds = array_column($collectors, 'id');
