@@ -6,31 +6,24 @@ namespace AppDevPanel\Api\Tests\Unit\Debug\Middleware;
 
 use AppDevPanel\Api\Debug\Middleware\DebugHeaders;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
-use HttpSoft\Message\Response;
-use HttpSoft\Message\ServerRequest;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Router\UrlGeneratorInterface;
 
 final class DebugHeadersTest extends TestCase
 {
     public function testHeaders(): void
     {
-        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
-        $urlGenerator
-            ->method('generate')
-            ->willReturnCallback(
-                static fn(string $route, array $parameters) => $route . '?' . http_build_query($parameters),
-            );
         $idGenerator = new DebuggerIdGenerator();
         $expectedId = $idGenerator->getId();
 
-        $middleware = new DebugHeaders($idGenerator, $urlGenerator);
-        $response = $middleware->process(new ServerRequest(), $this->createRequestHandler());
+        $middleware = new DebugHeaders($idGenerator);
+        $response = $middleware->process(new ServerRequest('GET', '/test'), $this->createRequestHandler());
 
         $this->assertSame($expectedId, $response->getHeaderLine('X-Debug-Id'));
-        $this->assertSame('debug/api/view?id=' . $expectedId, $response->getHeaderLine('X-Debug-Link'));
+        $this->assertSame('/debug/api/view/' . $expectedId, $response->getHeaderLine('X-Debug-Link'));
     }
 
     protected function createRequestHandler(): RequestHandlerInterface
@@ -38,7 +31,7 @@ final class DebugHeadersTest extends TestCase
         return new class() implements RequestHandlerInterface {
             public function handle($request): ResponseInterface
             {
-                return new Response(200);
+                return new Response();
             }
         };
     }

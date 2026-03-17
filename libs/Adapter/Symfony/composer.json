@@ -5,9 +5,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.4",
+        "app-dev-panel/api": "*",
         "app-dev-panel/kernel": "*",
         "app-dev-panel/cli": "*",
+        "guzzlehttp/guzzle": "^7.5",
+        "guzzlehttp/psr7": "^2.4",
         "nyholm/psr7": "^1.8",
+        "nyholm/psr7-server": "^1.0",
         "psr/container": "^2.0",
         "psr/event-dispatcher": "^1.0",
         "psr/http-client": "^1.0",
@@ -32,6 +36,10 @@
         {
             "type": "path",
             "url": "../../Kernel"
+        },
+        {
+            "type": "path",
+            "url": "../../API"
         },
         {
             "type": "path",

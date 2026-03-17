@@ -315,6 +315,9 @@ final class BundleBootstrapTest extends TestCase
 
         $container = new ContainerBuilder();
 
+        // Set parameters required by API services (normally provided by Symfony Kernel)
+        $container->setParameter('kernel.project_dir', $this->storagePath);
+
         $bundle = new AppDevPanelBundle();
         $bundle->build($container);
 

@@ -6,17 +6,15 @@ namespace AppDevPanel\Api\Tests\Unit\Inspector\Command;
 
 use AppDevPanel\Api\Inspector\Command\BashCommand;
 use AppDevPanel\Api\Inspector\CommandResponse;
+use AppDevPanel\Api\PathResolverInterface;
 use PHPUnit\Framework\TestCase;
-use Yiisoft\Aliases\Aliases;
 
 final class BashCommandTest extends TestCase
 {
     public function testSuccess(): void
     {
-        $aliases = new Aliases([
-            '@root' => __DIR__,
-        ]);
-        $command = new BashCommand($aliases, ['echo', 'test']);
+        $pathResolver = $this->createPathResolver(__DIR__);
+        $command = new BashCommand($pathResolver, ['echo', 'test']);
 
         $response = $command->run();
 
@@ -27,10 +25,8 @@ final class BashCommandTest extends TestCase
 
     public function testError(): void
     {
-        $aliases = new Aliases([
-            '@root' => dirname(__DIR__, 3) . '/Support/Application',
-        ]);
-        $command = new BashCommand($aliases, ['bash', 'fail.sh', '1']);
+        $pathResolver = $this->createPathResolver(dirname(__DIR__, 3) . '/Support/Application');
+        $command = new BashCommand($pathResolver, ['bash', 'fail.sh', '1']);
 
         $response = $command->run();
 
@@ -41,10 +37,8 @@ final class BashCommandTest extends TestCase
 
     public function testFail(): void
     {
-        $aliases = new Aliases([
-            '@root' => dirname(__DIR__, 3) . '/Support/Application',
-        ]);
-        $command = new BashCommand($aliases, ['bash', 'fail.sh', '2']);
+        $pathResolver = $this->createPathResolver(dirname(__DIR__, 3) . '/Support/Application');
+        $command = new BashCommand($pathResolver, ['bash', 'fail.sh', '2']);
 
         $response = $command->run();
 
@@ -61,5 +55,13 @@ final class BashCommandTest extends TestCase
     public function testGetDescription(): void
     {
         $this->assertSame('Runs any commands from the project root.', BashCommand::getDescription());
+    }
+
+    private function createPathResolver(string $rootPath): PathResolverInterface
+    {
+        $pathResolver = $this->createMock(PathResolverInterface::class);
+        $pathResolver->method('getRootPath')->willReturn($rootPath);
+        $pathResolver->method('getRuntimePath')->willReturn($rootPath . '/runtime');
+        return $pathResolver;
     }
 }

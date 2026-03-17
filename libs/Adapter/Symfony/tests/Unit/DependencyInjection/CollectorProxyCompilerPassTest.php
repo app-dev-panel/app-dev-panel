@@ -80,15 +80,19 @@ final class CollectorProxyCompilerPassTest extends TestCase
     {
         $container = $this->createLoadedContainer();
 
-        // Don't register LoggerInterface, EventDispatcher, or HttpClient
+        // Don't register LoggerInterface or EventDispatcher.
+        // Note: ClientInterface is registered by registerApiServices(), so
+        // HttpClientInterfaceProxy will be created. We only check Logger and EventDispatcher.
 
         $pass = new CollectorProxyCompilerPass();
         $pass->process($container);
 
-        // Proxies should not be registered
+        // Logger and EventDispatcher proxies should not be registered (no underlying service)
         $this->assertFalse($container->hasDefinition(LoggerInterfaceProxy::class));
         $this->assertFalse($container->hasDefinition(EventDispatcherInterfaceProxy::class));
-        $this->assertFalse($container->hasDefinition(HttpClientInterfaceProxy::class));
+
+        // HttpClient proxy IS registered because registerApiServices() provides ClientInterface
+        $this->assertTrue($container->hasDefinition(HttpClientInterfaceProxy::class));
     }
 
     public function testSkipsWhenNotEnabled(): void

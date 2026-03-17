@@ -2,10 +2,12 @@
     "name": "app-dev-panel/adapter-yiisoft",
     "type": "library",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "ext-mbstring": "*",
+        "app-dev-panel/api": "*",
         "app-dev-panel/kernel": "*",
         "app-dev-panel/cli": "*",
+        "guzzlehttp/guzzle": "^7.5",
         "guzzlehttp/psr7": "^2.4",
         "jetbrains/phpstorm-attributes": "^1.0",
         "psr/container": "^2.0",
@@ -48,6 +50,10 @@
         },
         {
             "type": "path",
+            "url": "../../API"
+        },
+        {
+            "type": "path",
             "url": "../../Cli"
         }
     ],
@@ -70,7 +76,7 @@
             "bootstrap": "bootstrap.php",
             "di": "di.php",
             "di-console": "di-console.php",
-            "di-web": "di-web.php",
+            "di-web": ["di-web.php", "di-api.php"],
             "di-providers": "di-providers.php",
             "events-web": "events-web.php",
             "events-console": "events-console.php"

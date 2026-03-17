@@ -4,25 +4,26 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Command\BashCommand;
 use AppDevPanel\Api\Inspector\CommandResponse;
+use AppDevPanel\Api\PathResolverInterface;
 use Exception;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Aliases\Aliases;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
 
 final class ComposerController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
+        private readonly JsonResponseFactoryInterface $responseFactory,
+        private readonly PathResolverInterface $pathResolver,
     ) {}
 
-    public function index(Aliases $aliases): ResponseInterface
+    public function index(ServerRequestInterface $request): ResponseInterface
     {
-        $composerJsonPath = $aliases->get('@root/composer.json');
-        $composerLockPath = $aliases->get('@root/composer.lock');
+        $composerJsonPath = $this->pathResolver->getRootPath() . '/composer.json';
+        $composerLockPath = $this->pathResolver->getRootPath() . '/composer.lock';
         if (!file_exists($composerJsonPath)) {
             throw new Exception(sprintf('Could not find composer.json by the path "%s".', $composerJsonPath));
         }
@@ -33,19 +34,19 @@ final class ComposerController
                 : null,
         ];
 
-        return $this->responseFactory->createResponse($result);
+        return $this->responseFactory->createJsonResponse($result);
     }
 
-    public function inspect(ServerRequestInterface $request, Aliases $aliases): ResponseInterface
+    public function inspect(ServerRequestInterface $request): ResponseInterface
     {
         $package = $request->getQueryParams()['package'] ?? null;
         if ($package === null) {
             throw new InvalidArgumentException('Query parameter "package" should not be empty.');
         }
-        $command = new BashCommand($aliases, ['composer', 'show', $package, '--all', '--format=json']);
+        $command = new BashCommand($this->pathResolver, ['composer', 'show', $package, '--all', '--format=json']);
         $result = $command->run();
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'status' => $result->getStatus(),
             'result' => $result->getStatus() === CommandResponse::STATUS_OK
                 ? json_decode($result->getResult(), true, 512, JSON_THROW_ON_ERROR)
@@ -54,10 +55,9 @@ final class ComposerController
         ]);
     }
 
-    public function require(ServerRequestInterface $request, Aliases $aliases): ResponseInterface
+    public function require(ServerRequestInterface $request): ResponseInterface
     {
-        // Request factory may be unable to parse JSON so don't rely on getParsedBody().
-        $parsedBody = \json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $parsedBody = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $package = $parsedBody['package'] ?? null;
         $version = $parsedBody['version'] ?? null;
         $isDev = $parsedBody['isDev'] ?? false;
@@ -65,7 +65,7 @@ final class ComposerController
             throw new InvalidArgumentException('Query parameter "package" should not be empty.');
         }
         $packageWithVersion = sprintf('%s:%s', $package, $version ?? '*');
-        $command = new BashCommand($aliases, [
+        $command = new BashCommand($this->pathResolver, [
             'composer',
             'require',
             $packageWithVersion,
@@ -74,7 +74,7 @@ final class ComposerController
         ]);
         $result = $command->run();
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'status' => $result->getStatus(),
             'result' => !is_string($result->getResult())
                 ? null

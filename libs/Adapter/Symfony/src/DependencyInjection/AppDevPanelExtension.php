@@ -11,8 +11,34 @@ use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
 use AppDevPanel\Adapter\Symfony\Collector\SymfonyRequestCollector;
 use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
+use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
+use AppDevPanel\Api\ApiApplication;
+use AppDevPanel\Api\Debug\Controller\DebugController;
+use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
+use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
+use AppDevPanel\Api\Debug\Repository\CollectorRepository;
+use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Http\JsonResponseFactory;
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
+use AppDevPanel\Api\Inspector\Controller\CommandController;
+use AppDevPanel\Api\Inspector\Controller\ComposerController;
+use AppDevPanel\Api\Inspector\Controller\FileController;
+use AppDevPanel\Api\Inspector\Controller\GitController;
+use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
+use AppDevPanel\Api\Inspector\Controller\InspectController;
+use AppDevPanel\Api\Inspector\Controller\OpcacheController;
+use AppDevPanel\Api\Inspector\Controller\RequestController;
+use AppDevPanel\Api\Inspector\Controller\RoutingController;
+use AppDevPanel\Api\Inspector\Controller\ServiceController;
+use AppDevPanel\Api\Inspector\Controller\TranslationController;
+use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Middleware\IpFilterMiddleware;
+use AppDevPanel\Api\PathResolver;
+use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
@@ -27,8 +53,16 @@ use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\Service\FileServiceRegistry;
+use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\HttpFactory;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -55,6 +89,7 @@ final class AppDevPanelExtension extends Extension
         $this->registerCoreServices($container, $config);
         $this->registerCollectors($container, $config);
         $this->registerEventSubscribers($container);
+        $this->registerApiServices($container, $config);
     }
 
     private function registerCoreServices(ContainerBuilder $container, array $config): void
@@ -224,6 +259,195 @@ final class AppDevPanelExtension extends Extension
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
+    }
+
+    private function registerApiServices(ContainerBuilder $container, array $config): void
+    {
+        if (!($config['api']['enabled'] ?? true)) {
+            return;
+        }
+
+        $container->setParameter('app_dev_panel.api.allowed_ips', $config['api']['allowed_ips'] ?? ['127.0.0.1', '::1']);
+        $container->setParameter('app_dev_panel.api.auth_token', $config['api']['auth_token'] ?? '');
+
+        // PSR-17 factories (use GuzzleHttp\Psr7\HttpFactory as default)
+        if (!$container->has(ResponseFactoryInterface::class)) {
+            $container->register(ResponseFactoryInterface::class, HttpFactory::class)->setPublic(false);
+        }
+        if (!$container->has(StreamFactoryInterface::class)) {
+            $container->register(StreamFactoryInterface::class, HttpFactory::class)->setPublic(false);
+        }
+        if (!$container->has(UriFactoryInterface::class)) {
+            $container->register(UriFactoryInterface::class, HttpFactory::class)->setPublic(false);
+        }
+        if (!$container->has(ClientInterface::class)) {
+            $container->register(ClientInterface::class, Client::class)
+                ->setArguments([['timeout' => 10]])
+                ->setPublic(false);
+        }
+
+        // Path resolver
+        $container->register(PathResolverInterface::class, PathResolver::class)
+            ->setArguments(['%kernel.project_dir%', '%kernel.project_dir%/var'])
+            ->setPublic(false);
+
+        // JSON response factory
+        $container->register(JsonResponseFactoryInterface::class, JsonResponseFactory::class)
+            ->setArguments([
+                new Reference(ResponseFactoryInterface::class),
+                new Reference(StreamFactoryInterface::class),
+            ])
+            ->setPublic(false);
+
+        // Service registry
+        $container->register(ServiceRegistryInterface::class, FileServiceRegistry::class)
+            ->setArguments(['%app_dev_panel.storage.path%/services'])
+            ->setPublic(false);
+
+        // Collector repository
+        $container->register(CollectorRepositoryInterface::class, CollectorRepository::class)
+            ->setArguments([new Reference(StorageInterface::class)])
+            ->setPublic(false);
+
+        // Middleware
+        $container->register(IpFilterMiddleware::class, IpFilterMiddleware::class)
+            ->setArguments([
+                new Reference(ResponseFactoryInterface::class),
+                new Reference(StreamFactoryInterface::class),
+                '%app_dev_panel.api.allowed_ips%',
+            ])
+            ->setPublic(false);
+
+        $container->register(TokenAuthMiddleware::class, TokenAuthMiddleware::class)
+            ->setArguments([
+                new Reference(ResponseFactoryInterface::class),
+                new Reference(StreamFactoryInterface::class),
+                '%app_dev_panel.api.auth_token%',
+            ])
+            ->setPublic(false);
+
+        $container->register(ResponseDataWrapper::class, ResponseDataWrapper::class)
+            ->setArguments([new Reference(JsonResponseFactoryInterface::class)])
+            ->setPublic(false);
+
+        $container->register(InspectorProxyMiddleware::class, InspectorProxyMiddleware::class)
+            ->setArguments([
+                new Reference(ServiceRegistryInterface::class),
+                new Reference(ClientInterface::class),
+                new Reference(ResponseFactoryInterface::class),
+                new Reference(StreamFactoryInterface::class),
+                new Reference(UriFactoryInterface::class),
+            ])
+            ->setPublic(false);
+
+        // Controllers
+        $container->register(DebugController::class, DebugController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(CollectorRepositoryInterface::class),
+                new Reference(StorageInterface::class),
+                new Reference(ResponseFactoryInterface::class),
+            ])
+            ->setPublic(true);
+
+        $container->register(IngestionController::class, IngestionController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(StorageInterface::class),
+            ])
+            ->setPublic(true);
+
+        $container->register(ServiceController::class, ServiceController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(ServiceRegistryInterface::class),
+            ])
+            ->setPublic(true);
+
+        $container->register(FileController::class, FileController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(PathResolverInterface::class),
+            ])
+            ->setPublic(true);
+
+        $container->register(GitRepositoryProvider::class, GitRepositoryProvider::class)
+            ->setArguments([new Reference(PathResolverInterface::class)])
+            ->setPublic(false);
+
+        $container->register(GitController::class, GitController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(GitRepositoryProvider::class),
+            ])
+            ->setPublic(true);
+
+        $container->register(ComposerController::class, ComposerController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(PathResolverInterface::class),
+            ])
+            ->setPublic(true);
+
+        $container->register(OpcacheController::class, OpcacheController::class)
+            ->setArguments([new Reference(JsonResponseFactoryInterface::class)])
+            ->setPublic(true);
+
+        $container->register(InspectController::class, InspectController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference('service_container'),
+            ])
+            ->setPublic(true);
+
+        $container->register(InspectorCacheController::class, InspectorCacheController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference('service_container'),
+            ])
+            ->setPublic(true);
+
+        $container->register(TranslationController::class, TranslationController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference('logger', ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+                new Reference('service_container'),
+            ])
+            ->setPublic(true);
+
+        $container->register(CommandController::class, CommandController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(PathResolverInterface::class),
+                new Reference('service_container'),
+            ])
+            ->setPublic(true);
+
+        $container->register(RoutingController::class, RoutingController::class)
+            ->setArguments([new Reference(JsonResponseFactoryInterface::class)])
+            ->setPublic(true);
+
+        $container->register(RequestController::class, RequestController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(CollectorRepositoryInterface::class),
+            ])
+            ->setPublic(true);
+
+        // ApiApplication
+        $container->register(ApiApplication::class, ApiApplication::class)
+            ->setArguments([
+                new Reference('service_container'),
+                new Reference(ResponseFactoryInterface::class),
+                new Reference(StreamFactoryInterface::class),
+            ])
+            ->setPublic(true);
+
+        // Bridge controller
+        $container->register(AdpApiController::class, AdpApiController::class)
+            ->setArguments([new Reference(ApiApplication::class)])
+            ->addTag('controller.service_arguments')
+            ->setPublic(true);
     }
 
     public function getAlias(): string

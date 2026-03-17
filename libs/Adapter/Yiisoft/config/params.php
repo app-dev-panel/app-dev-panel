@@ -91,6 +91,12 @@ return [
             'serve',
             'debug:reset',
         ],
+        'api' => [
+            'enabled' => true,
+            'allowedIps' => ['127.0.0.1', '::1'],
+            'authToken' => '',
+            'commandMap' => [],
+        ],
     ],
     'yiisoft/yii-console' => [
         'commands' => [

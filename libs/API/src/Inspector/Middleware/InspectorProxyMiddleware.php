@@ -13,7 +13,6 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Json\Json;
 
 final class InspectorProxyMiddleware implements MiddlewareInterface
 {
@@ -44,11 +43,11 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
     ];
 
     public function __construct(
-        private ServiceRegistryInterface $registry,
-        private ClientInterface $httpClient,
-        private ResponseFactoryInterface $responseFactory,
-        private StreamFactoryInterface $streamFactory,
-        private UriFactoryInterface $uriFactory,
+        private readonly ServiceRegistryInterface $registry,
+        private readonly ClientInterface $httpClient,
+        private readonly ResponseFactoryInterface $responseFactory,
+        private readonly StreamFactoryInterface $streamFactory,
+        private readonly UriFactoryInterface $uriFactory,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -101,7 +100,6 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
 
     private function resolveCapability(string $path): ?string
     {
-        // Try exact match first, then prefix match
         foreach (self::CAPABILITY_MAP as $pattern => $capability) {
             if (
                 $path === $pattern
@@ -151,10 +149,10 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
 
     private function errorResponse(int $status, string $message): ResponseInterface
     {
-        $body = Json::encode([
+        $body = json_encode([
             'error' => $message,
             'success' => false,
-        ]);
+        ], JSON_THROW_ON_ERROR);
 
         $response = $this->responseFactory->createResponse($status);
 

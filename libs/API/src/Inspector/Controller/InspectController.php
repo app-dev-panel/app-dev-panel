@@ -4,47 +4,52 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
 use Throwable;
-use Yiisoft\Config\ConfigInterface;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
 use Yiisoft\VarDumper\VarDumper;
 
 final class InspectController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
-        private readonly array $params,
+        private readonly JsonResponseFactoryInterface $responseFactory,
+        private readonly ContainerInterface $container,
+        private readonly array $params = [],
     ) {}
 
-    public function config(ContainerInterface $container, ServerRequestInterface $request): ResponseInterface
+    public function config(ServerRequestInterface $request): ResponseInterface
     {
-        $config = $container->get(ConfigInterface::class);
+        $queryParams = $request->getQueryParams();
+        $group = $queryParams['group'] ?? 'di';
 
-        $request = $request->getQueryParams();
-        $group = $request['group'] ?? 'di';
+        if (!$this->container->has('config')) {
+            return $this->responseFactory->createJsonResponse([
+                'error' => 'Config inspection requires framework integration.',
+            ], 501);
+        }
 
+        $config = $this->container->get('config');
         $data = $config->get($group);
         ksort($data);
 
         $response = VarDumper::create($data)->asPrimitives(255);
 
-        return $this->responseFactory->createResponse($response);
+        return $this->responseFactory->createJsonResponse($response);
     }
 
-    public function params(): ResponseInterface
+    public function params(ServerRequestInterface $request): ResponseInterface
     {
         $params = $this->params;
         ksort($params);
 
-        return $this->responseFactory->createResponse($params);
+        return $this->responseFactory->createJsonResponse($params);
     }
 
-    public function classes(): ResponseInterface
+    public function classes(ServerRequestInterface $request): ResponseInterface
     {
         $classes = [];
 
@@ -53,7 +58,6 @@ final class InspectController
             static fn(string $class) => !str_starts_with($class, 'ComposerAutoloaderInit'),
             static fn(string $class) => !str_starts_with($class, 'Composer\\'),
             static fn(string $class) => !str_starts_with($class, 'AppDevPanel\\'),
-            static fn(string $class) => !str_starts_with($class, 'Yiisoft\\ErrorHandler\\ErrorHandler'),
             static fn(string $class) => !str_contains($class, '@anonymous'),
             static fn(string $class) => !is_subclass_of($class, Throwable::class),
         ];
@@ -72,10 +76,10 @@ final class InspectController
         }
         sort($classes);
 
-        return $this->responseFactory->createResponse($classes);
+        return $this->responseFactory->createJsonResponse($classes);
     }
 
-    public function object(ContainerInterface $container, ServerRequestInterface $request): ResponseInterface
+    public function object(ServerRequestInterface $request): ResponseInterface
     {
         $queryParams = $request->getQueryParams();
         $className = $queryParams['classname'] ?? null;
@@ -97,37 +101,43 @@ final class InspectController
             throw new InvalidArgumentException('Inspector cannot initialize exceptions.');
         }
 
-        if (!$container->has($className)) {
+        if (!$this->container->has($className)) {
             throw new InvalidArgumentException(sprintf(
                 'Class "%s" is not registered in the DI container.',
                 $className,
             ));
         }
 
-        $variable = $container->get($className);
+        $variable = $this->container->get($className);
         $result = VarDumper::create($variable)->asPrimitives(3);
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'object' => $result,
             'path' => $reflection->getFileName(),
         ]);
     }
 
-    public function phpinfo(): ResponseInterface
+    public function phpinfo(ServerRequestInterface $request): ResponseInterface
     {
         ob_start();
         phpinfo();
         $phpinfo = ob_get_contents();
         ob_get_clean();
 
-        return $this->responseFactory->createResponse($phpinfo);
+        return $this->responseFactory->createJsonResponse($phpinfo);
     }
 
-    public function eventListeners(ContainerInterface $container): ResponseInterface
+    public function eventListeners(ServerRequestInterface $request): ResponseInterface
     {
-        $config = $container->get(ConfigInterface::class);
+        if (!$this->container->has('config')) {
+            return $this->responseFactory->createJsonResponse([
+                'error' => 'Event listener inspection requires framework integration.',
+            ], 501);
+        }
 
-        return $this->responseFactory->createResponse([
+        $config = $this->container->get('config');
+
+        return $this->responseFactory->createJsonResponse([
             'common' => VarDumper::create($config->get('events'))->asPrimitives(),
             'console' => [],
             'web' => VarDumper::create($config->get('events-web'))->asPrimitives(),

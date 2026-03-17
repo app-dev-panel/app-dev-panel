@@ -3,8 +3,14 @@
     "type": "library",
     "minimum-stability": "dev",
     "require": {
-        "php": "^8.2",
-        "app-dev-panel/kernel": "*"
+        "php": "^8.4",
+        "app-dev-panel/kernel": "*",
+        "app-dev-panel/api": "*",
+        "guzzlehttp/guzzle": "^7.5",
+        "guzzlehttp/psr7": "^2.4",
+        "psr/log": "^3.0",
+        "symfony/console": "^6.4|^7.0|^8.0",
+        "symfony/process": "^6.4|^7.0|^8.0"
     },
     "require-dev": {
     },
@@ -12,6 +18,10 @@
         {
             "type": "path",
             "url": "../Kernel"
+        },
+        {
+            "type": "path",
+            "url": "../API"
         }
     ],
     "autoload": {

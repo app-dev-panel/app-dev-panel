@@ -125,7 +125,7 @@ final class ServiceControllerTest extends ControllerTestCase
     public function testList(): void
     {
         $controller = $this->createControllerWithService('svc-alpha');
-        $response = $controller->list();
+        $response = $controller->list($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
@@ -138,7 +138,7 @@ final class ServiceControllerTest extends ControllerTestCase
     public function testListEmpty(): void
     {
         $controller = $this->createController();
-        $response = $controller->list();
+        $response = $controller->list($this->get());
 
         $data = $this->responseData($response);
         $this->assertSame([], $data);
@@ -147,16 +147,17 @@ final class ServiceControllerTest extends ControllerTestCase
     public function testDeregister(): void
     {
         $controller = $this->createControllerWithService('to-remove');
-        $route = $this->route(['service' => 'to-remove']);
+        $request = $this->get();
+        $request = $request->withAttribute('service', 'to-remove');
 
-        $response = $controller->deregister($this->get(), $route);
+        $response = $controller->deregister($request);
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
         $this->assertTrue($data['deregistered']);
 
         // Verify it's gone
-        $listResponse = $controller->list();
+        $listResponse = $controller->list($this->get());
         $listData = $this->responseData($listResponse);
         $this->assertSame([], $listData);
     }
@@ -164,18 +165,22 @@ final class ServiceControllerTest extends ControllerTestCase
     public function testDeregisterEmptyService(): void
     {
         $controller = $this->createController();
+        $request = $this->get();
+        $request = $request->withAttribute('service', '');
 
         $this->expectException(InvalidArgumentException::class);
-        $controller->deregister($this->get(), $this->route(['service' => '']));
+        $controller->deregister($request);
     }
 
     public function testDeregisterLocalReserved(): void
     {
         $controller = $this->createController();
+        $request = $this->get();
+        $request = $request->withAttribute('service', 'local');
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('local');
-        $controller->deregister($this->get(), $this->route(['service' => 'local']));
+        $controller->deregister($request);
     }
 
     private function removeDir(string $dir): void

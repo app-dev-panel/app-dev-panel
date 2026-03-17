@@ -4,26 +4,24 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Kernel\Service\ServiceDescriptor;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use Yiisoft\Json\Json;
-use Yiisoft\Router\CurrentRoute;
 
 final class ServiceController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
-        private ServiceRegistryInterface $registry,
+        private readonly JsonResponseFactoryInterface $responseFactory,
+        private readonly ServiceRegistryInterface $registry,
     ) {}
 
     public function register(ServerRequestInterface $request): ResponseInterface
     {
         /** @var array<string, mixed> $body */
-        $body = Json::decode($request->getBody()->getContents());
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($body['service']) || !is_string($body['service']) || $body['service'] === '') {
             throw new InvalidArgumentException('Field "service" is required and must be a non-empty string.');
@@ -51,7 +49,7 @@ final class ServiceController
 
         $this->registry->register($descriptor);
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'service' => $descriptor->service,
             'registered' => true,
         ]);
@@ -60,7 +58,7 @@ final class ServiceController
     public function heartbeat(ServerRequestInterface $request): ResponseInterface
     {
         /** @var array<string, mixed> $body */
-        $body = Json::decode($request->getBody()->getContents());
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($body['service']) || !is_string($body['service'])) {
             throw new InvalidArgumentException('Field "service" is required.');
@@ -73,13 +71,13 @@ final class ServiceController
 
         $this->registry->heartbeat($body['service']);
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'service' => $body['service'],
             'acknowledged' => true,
         ]);
     }
 
-    public function list(): ResponseInterface
+    public function list(ServerRequestInterface $request): ResponseInterface
     {
         $services = $this->registry->all();
 
@@ -90,13 +88,13 @@ final class ServiceController
             ];
         }, $services);
 
-        return $this->responseFactory->createResponse(array_values($result));
+        return $this->responseFactory->createJsonResponse(array_values($result));
     }
 
-    public function deregister(ServerRequestInterface $request, CurrentRoute $route): ResponseInterface
+    public function deregister(ServerRequestInterface $request): ResponseInterface
     {
         /** @var string $service */
-        $service = $route->getArgument('service', '');
+        $service = $request->getAttribute('service', '');
 
         if ($service === '') {
             throw new InvalidArgumentException('Service name is required.');
@@ -108,7 +106,7 @@ final class ServiceController
 
         $this->registry->deregister($service);
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'service' => $service,
             'deregistered' => true,
         ]);

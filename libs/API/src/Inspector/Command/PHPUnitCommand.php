@@ -7,15 +7,15 @@ namespace AppDevPanel\Api\Inspector\Command;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\Inspector\Test\PHPUnitJSONReporter;
+use AppDevPanel\Api\PathResolverInterface;
 use Symfony\Component\Process\Process;
-use Yiisoft\Aliases\Aliases;
 
 class PHPUnitCommand implements CommandInterface
 {
     public const COMMAND_NAME = 'test/phpunit';
 
     public function __construct(
-        private Aliases $aliases,
+        private readonly PathResolverInterface $pathResolver,
     ) {}
 
     public static function getTitle(): string
@@ -30,8 +30,8 @@ class PHPUnitCommand implements CommandInterface
 
     public function run(): CommandResponse
     {
-        $projectDirectory = $this->aliases->get('@root');
-        $debugDirectory = $this->aliases->get('@runtime/debug');
+        $projectDirectory = $this->pathResolver->getRootPath();
+        $debugDirectory = $this->pathResolver->getRuntimePath() . '/debug';
 
         $extension = PHPUnitJSONReporter::class;
         $params = [

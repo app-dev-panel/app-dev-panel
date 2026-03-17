@@ -1,6 +1,36 @@
 variant = "loose"
 
 [[issues]]
+file = "libs/API/src/ApiApplication.php"
+code = "less-specific-nested-return-statement"
+message = '''Returned type `non-empty-list<mixed>` is less specific than the declared return type `array<array-key, Psr\Http\Server\MiddlewareInterface>` for function `appdevpanel\api\apiapplication::buildpipeline` due to nested 'mixed'.'''
+count = 1
+
+[[issues]]
+file = "libs/API/src/ApiApplication.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/API/src/ApiApplication.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "libs/API/src/ApiApplication.php"
+code = "mixed-return-statement"
+message = "Could not infer a precise return type for function `class@anonymous:5562770940335764069-4589:5423::handle`. Saw type `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/ApiApplication.php"
+code = "string-member-selector"
+message = "This member selector uses a non-literal string type (`string`); its specific value cannot be statically determined."
+count = 1
+
+[[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "impossible-condition"
 message = "This condition (type `false`) will always evaluate to false."
@@ -9,26 +39,32 @@ count = 1
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `basename`: expected `string`, but found `mixed`."
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getdetail`: expected `string`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `dirname`: expected `string`, but found `mixed`."
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getdumpobject`: expected `string`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `end`: expected `array<array-key, ('T.end() extends mixed)>|object`, but found `truthy-mixed`."
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getobject`: expected `string`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `is_subclass_of`: expected `class-string|object`, but found `mixed`."
-count = 2
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getsummary`: expected `null|string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Debug/Controller/DebugController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getobject`: expected `string`, but found `mixed`.'
+count = 1
 
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
@@ -46,73 +82,19 @@ count = 1
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-array-index"
 message = "Invalid index type `nonnull` used for array access on `array<array-key, mixed>`."
-count = 2
+count = 3
 
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 10
+count = 7
 
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-assignment"
 message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 7
-
-[[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\api\debug\controller\debugcontroller::createhtmlpanelresponse`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #2 of `AppDevPanel\Api\Debug\Controller\DebugController::createhtmlpanelresponse`: expected `string`, but possibly received `AppDevPanel\Api\Debug\HtmlViewProviderInterface|class-string<AppDevPanel\Api\Debug\HtmlViewProviderInterface>`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #2 of `AppDevPanel\Api\Debug\Controller\DebugController::createjspanelresponse`: expected `string`, but possibly received `AppDevPanel\Api\Debug\ModuleFederationProviderInterface|class-string<AppDevPanel\Api\Debug\ModuleFederationProviderInterface>`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "possibly-null-argument"
-message = 'Argument #1 of method `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getdetail` is possibly `null`, but parameter type `string` does not accept it.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "possibly-null-argument"
-message = 'Argument #1 of method `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getdumpobject` is possibly `null`, but parameter type `string` does not accept it.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "possibly-null-argument"
-message = 'Argument #1 of method `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getobject` is possibly `null`, but parameter type `string` does not accept it.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "possibly-null-argument"
-message = 'Argument #2 of method `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getobject` is possibly `null`, but parameter type `string` does not accept it.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "possibly-null-array-index"
-message = "Possibly using `null` as an array index to access elementof variable $data."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
@@ -121,39 +103,39 @@ message = "Redundant `>` comparison: left-hand side is never greater than right-
 count = 1
 
 [[issues]]
-file = "libs/API/src/Debug/Http/HttpApplicationWrapper.php"
-code = "less-specific-nested-argument-type"
-message = '''Argument type mismatch for argument #1 of `Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher::withmiddlewares`: expected `array<array-key, (callable(...mixed): mixed)>|array<array-key, array<array-key, mixed>>|array<array-key, string>`, but provided type `list{array{'$middlewareDispatcher': Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher, 'class': class-string('AppDevPanel\Api\Debug\Middleware\MiddlewareDispatcherMiddleware')}, ...<mixed>}` is less specific.'''
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Http/HttpApplicationWrapper.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\api\debug\http\httpapplicationwrapper::wrap`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Http/RouteCollectorWrapper.php"
+file = "libs/API/src/Debug/Middleware/ResponseDataWrapper.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Yiisoft\Router\RouteCollectorInterface::prependmiddleware`: expected `(callable(...mixed=): mixed)|array<array-key, mixed>|string`, but found `mixed`.'
+message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
 count = 1
 
 [[issues]]
-file = "libs/API/src/Debug/Provider/DebugApiProvider.php"
+file = "libs/API/src/Debug/Middleware/ResponseDataWrapper.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #3 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Debug/Middleware/ResponseDataWrapper.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #4 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Debug/Middleware/ResponseDataWrapper.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #5 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Debug/Middleware/ResponseDataWrapper.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #6 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Debug/Middleware/ResponseDataWrapper.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/API/src/Debug/Provider/DebugApiProvider.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 2
-
-[[issues]]
-file = "libs/API/src/Debug/Provider/DebugApiProvider.php"
-code = "mixed-return-statement"
-message = "Could not infer a precise return type for function `4990145786423634076:1317`. Saw type `mixed`."
 count = 1
 
 [[issues]]
@@ -248,9 +230,27 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CacheController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Psr\SimpleCache\CacheInterface::delete`: expected `string`, but found `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/CacheController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Psr\SimpleCache\CacheInterface::get`: expected `string`, but found `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/CacheController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Psr\SimpleCache\CacheInterface::has`: expected `string`, but found `nonnull`.'
+count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/CacheController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 7
+count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CacheController.php"
@@ -260,21 +260,15 @@ count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CacheController.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 5
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/CommandController.php"
-code = "invalid-iterator"
-message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
-count = 2
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\api\inspector\controller\cachecontroller::getcache`. Saw type `mixed`.'
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "invalid-iterator"
 message = "The expression provided to `foreach` is not iterable. It resolved to type `nonnull`, which is not iterable."
-count = 3
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
@@ -284,21 +278,9 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
-code = "invalid-type-cast"
-message = 'Object of type `AppDevPanel\Api\Inspector\CommandInterface` cast to `array`. Property visibility (public, protected, private) affects the resulting array.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `array_key_exists`: expected `bool|float|int|null|string`, but found `nonnull`."
 count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/CommandController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `is_subclass_of`: expected `class-string|object`, but found `mixed`."
-count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
@@ -315,32 +297,26 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "mixed-array-index"
-message = 'Invalid index type `mixed` used for array access on `array<array-key, AppDevPanel\Api\Inspector\CommandInterface|class-string<AppDevPanel\Api\Inspector\CommandInterface>>`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/CommandController.php"
-code = "mixed-array-index"
 message = "Invalid index type `mixed` used for array access on `array<array-key, array<array-key, mixed>>`."
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "mixed-array-index"
-message = '''Invalid index type `nonnull` used for array access on `array<array-key, AppDevPanel\Api\Inspector\CommandInterface|class-string<AppDevPanel\Api\Inspector\CommandInterface>|list{string('composer'), array-key}|list{string('composer'), array-key}>`.'''
+message = '''Invalid index type `nonnull` used for array access on `array<string, class-string<AppDevPanel\Api\Inspector\CommandInterface>|list{string('composer'), array-key}|list{string('composer'), array-key}>`.'''
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 15
+count = 8
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "mixed-assignment"
 message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
-count = 3
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
@@ -398,8 +374,14 @@ count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/DatabaseController.php"
-code = "possibly-null-argument"
-message = 'Argument #1 of method `AppDevPanel\Api\Inspector\Database\SchemaProviderInterface::gettable` is possibly `null`, but parameter type `string` does not accept it.'
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Database\SchemaProviderInterface::gettable`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/DatabaseController.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
 
 [[issues]]
@@ -608,8 +590,26 @@ count = 5
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/RoutingController.php"
+code = "ambiguous-object-method-access"
+message = "Cannot statically verify method call on a generic `object` type."
+count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RoutingController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `ReflectionProperty::getvalue`: expected `null|object`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RoutingController.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `end`: expected `array<array-key, ('T.end() extends mixed)>|object`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RoutingController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `reflectionobject::__construct`: expected `object`, but found `mixed`."
 count = 1
 
 [[issues]]
@@ -628,12 +628,30 @@ count = 6
 file = "libs/API/src/Inspector/Controller/RoutingController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 5
+count = 8
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RoutingController.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 3
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RoutingController.php"
+code = "unknown-iterator-type"
+message = "Cannot determine the type of the expression provided to `foreach`."
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/ServiceController.php"
 code = "invalid-type-cast"
 message = "Casting `mixed` to `array`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "ambiguous-object-method-access"
+message = "Cannot statically verify method call on a generic `object` type."
 count = 1
 
 [[issues]]
@@ -644,20 +662,38 @@ count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Yiisoft\Translator\CategorySource::getmessages`: expected `string`, but found `nonnull`.'
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "less-specific-nested-argument-type"
+message = "Argument type mismatch for argument #2 of `implode`: expected `array<array-key, Stringable|null|scalar>|null`, but provided type `array<array-key, mixed>|list<mixed>` is less specific."
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Yiisoft\Translator\CategorySource::write`: expected `string`, but found `nonnull`.'
+message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `nonnull`."
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
+message = "Invalid argument type for argument #1 of `array_replace_recursive`: expected `array<array-key, mixed>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_map`: expected `array<('K.array_map() extends array-key), object>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_merge`: expected `array<array-key, mixed>`, but found `mixed`."
 count = 1
 
 [[issues]]
@@ -674,21 +710,33 @@ count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
-count = 1
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used for array access on `array<array-key, array<string, array<array-key, mixed>>>`."
+count = 4
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
+count = 10
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "mixed-assignment"
 message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
 count = 4
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 3
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`nonnull`)."
+count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
@@ -829,6 +877,30 @@ message = "Property `$prettifier` is never used."
 count = 1
 
 [[issues]]
+file = "libs/API/src/Middleware/IpFilterMiddleware.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Router/Route.php"
+code = "less-specific-return-statement"
+message = 'Returned type `array<array-key, string>` is less specific than the declared return type `array<string, string>|null` for function `appdevpanel\api\router\route::match`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Router/Route.php"
+code = "possibly-null-operand"
+message = "Possibly null middle operand used in string concatenation (type `null|string`)."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Router/Route.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$matches`."
+count = 1
+
+[[issues]]
 file = "libs/API/src/ServerSentEventsStream.php"
 code = "docblock-type-mismatch"
 message = "Docblock return type `resource` is incompatible with native return type `void`."
@@ -854,27 +926,33 @@ count = 2
 
 [[issues]]
 file = "libs/API/tests/Unit/Debug/Controller/DebugControllerTest.php"
-code = "deprecated-class"
-message = 'Class `Yiisoft\DataResponse\DataResponseFactory` is deprecated and should no longer be used.'
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
 count = 1
 
 [[issues]]
-file = "libs/API/tests/Unit/Debug/Middleware/DebugHeadersTest.php"
+file = "libs/API/tests/Unit/Debug/Controller/DebugControllerTest.php"
+code = "possibly-false-argument"
+message = 'Argument #3 of method `guzzlehttp\psr7\response::__construct` is possibly `false`, but parameter type `Psr\Http\Message\StreamInterface|null|resource|string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Debug/Middleware/ResponseDataWrapperTest.php"
 code = "missing-magic-method"
 message = "Call to documented magic method `method()` on a class that cannot handle it."
 count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Debug/Middleware/ResponseDataWrapperTest.php"
-code = "deprecated-class"
-message = 'Class `Yiisoft\DataResponse\DataResponseFactory` is deprecated and should no longer be used.'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Debug/Provider/DebugApiProviderTest.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
+count = 3
+
+[[issues]]
+file = "libs/API/tests/Unit/Debug/Middleware/ResponseDataWrapperTest.php"
+code = "possibly-false-argument"
+message = 'Argument #3 of method `guzzlehttp\psr7\response::__construct` is possibly `false`, but parameter type `Psr\Http\Message\StreamInterface|null|resource|string` does not accept it.'
+count = 3
 
 [[issues]]
 file = "libs/API/tests/Unit/Debug/Repository/CollectorRepositoryTest.php"
@@ -884,8 +962,8 @@ count = 6
 
 [[issues]]
 file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
-code = "deprecated-class"
-message = 'Class `Yiisoft\DataResponse\DataResponseFactory` is deprecated and should no longer be used.'
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
 count = 1
 
 [[issues]]
@@ -932,14 +1010,8 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
-code = "non-existent-method"
-message = 'Method `getdata` does not exist on type `Psr\Http\Message\ResponseInterface`.'
-count = 6
-
-[[issues]]
-file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
 code = "possibly-false-argument"
-message = 'Argument #1 of method `yiisoft\json\json::decode` is possibly `false`, but parameter type `string` does not accept it.'
+message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
 count = 3
 
 [[issues]]
@@ -950,15 +1022,27 @@ count = 4
 
 [[issues]]
 file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "possibly-false-argument"
+message = 'Argument #3 of method `guzzlehttp\psr7\response::__construct` is possibly `false`, but parameter type `Psr\Http\Message\StreamInterface|null|resource|string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
 code = "possibly-false-iterator"
 message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
 count = 1
 
 [[issues]]
+file = "libs/API/tests/Unit/Inspector/Command/BashCommandTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
+
+[[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/CacheControllerTest.php"
 code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
-count = 2
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::container`: expected `array<string, object>`, but provided type `array<array-key, mixed>` is less specific.'
+count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/CacheControllerTest.php"
@@ -981,14 +1065,20 @@ count = 2
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/CommandControllerTest.php"
 code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
-count = 4
+message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::container`: expected `array<string, object>`, but provided type `array<array-key, mixed>` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/CommandControllerTest.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #4 of `appdevpanel\api\inspector\controller\commandcontroller::__construct`: expected `array<string, array<string, class-string>>`, but provided type `array<array-key, mixed>` is less specific.'
+count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/CommandControllerTest.php"
 code = "missing-magic-method"
 message = "Call to documented magic method `method()` on a class that cannot handle it."
-count = 2
+count = 3
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/CommandControllerTest.php"
@@ -1016,8 +1106,8 @@ count = 4
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/ComposerControllerTest.php"
-code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
 count = 2
 
 [[issues]]
@@ -1040,20 +1130,14 @@ count = 2
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/ControllerTestCase.php"
-code = "deprecated-class"
-message = 'Class `Yiisoft\DataResponse\DataResponseFactory` is deprecated and should no longer be used.'
-count = 1
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 3
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/ControllerTestCase.php"
-code = "missing-magic-method"
-message = "Call to documented magic method `method()` on a class that cannot handle it."
-count = 2
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
-code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
+code = "possibly-false-argument"
+message = 'Argument #3 of method `guzzlehttp\psr7\response::__construct` is possibly `false`, but parameter type `Psr\Http\Message\StreamInterface|null|resource|string` does not accept it.'
 count = 1
 
 [[issues]]
@@ -1076,15 +1160,15 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
-code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
-count = 7
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
 code = "less-specific-nested-argument-type"
 message = "Argument type mismatch for argument #1 of `array_column`: expected `array<array-key, array<string('baseName'), ('V.array_column() extends mixed)>|object>|list<array<string('baseName'), ('V.array_column() extends mixed)>|object>`, but provided type `array<array-key, mixed>` is less specific."
 count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
@@ -1130,24 +1214,6 @@ count = 16
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
-code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
-count = 6
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
-code = "match-not-exhaustive"
-message = "Non-exhaustive `match` expression: subject of type `string` is not fully handled."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
-code = "missing-magic-method"
-message = "Call to documented magic method `method()` on a class that cannot handle it."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
 count = 1
@@ -1184,12 +1250,6 @@ count = 6
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/RequestControllerTest.php"
-code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/RequestControllerTest.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
 count = 1
@@ -1220,12 +1280,6 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/RoutingControllerTest.php"
-code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
-count = 3
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/RoutingControllerTest.php"
 code = "missing-magic-method"
 message = "Call to documented magic method `method()` on a class that cannot handle it."
 count = 5
@@ -1244,12 +1298,6 @@ count = 3
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
-code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
-count = 6
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
 count = 6
@@ -1264,12 +1312,6 @@ count = 6
 file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
 code = "possibly-false-iterator"
 message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::responsedata`: expected `Yiisoft\DataResponse\DataResponse`, but provided type `Psr\Http\Message\ResponseInterface` is less specific.'
 count = 1
 
 [[issues]]
@@ -1949,6 +1991,96 @@ file = "libs/Cli/src/Command/DebugServerCommand.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 2
+
+[[issues]]
+file = "libs/Cli/src/Command/ServeCommand.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `is_dir`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Command/ServeCommand.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `mkdir`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Command/ServeCommand.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Cli/src/Command/ServeCommand.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 2
+
+[[issues]]
+file = "libs/Cli/src/Command/ServeCommand.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #3 of `sprintf`: expected `Stringable|null|scalar`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Command/ServeCommand.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "libs/Cli/src/Command/ServeCommand.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/Cli/src/Server/server-router.php"
+code = "invalid-argument"
+message = "Invalid type for the first value."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Server/server-router.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `appdevpanel\api\inspector\controller\gitcontroller::__construct`: expected `AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Server/server-router.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Server/server-router.php"
+code = "possibly-false-argument"
+message = 'Argument #1 of method `appdevpanel\api\pathresolver::__construct` is possibly `false`, but parameter type `string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Server/server-router.php"
+code = "possibly-null-argument"
+message = "Argument #1 of function `str_starts_with` is possibly `null`, but parameter type `string` does not accept it."
+count = 5
+
+[[issues]]
+file = "libs/Cli/src/Server/server-router.php"
+code = "possibly-null-operand"
+message = "Possibly null right operand used in string concatenation (type `null|string`)."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Server/server-router.php"
+code = "redundant-comparison"
+message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Server/server-router.php"
+code = "redundant-logical-operation"
+message = "Redundant `&&` operation: left operand is evaluated and right operand is always truthy."
+count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"

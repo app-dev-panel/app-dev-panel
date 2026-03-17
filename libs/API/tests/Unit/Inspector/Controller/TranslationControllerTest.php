@@ -6,6 +6,7 @@ namespace AppDevPanel\Api\Tests\Unit\Inspector\Controller;
 
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use InvalidArgumentException;
+use Psr\Container\ContainerInterface;
 use Psr\Log\NullLogger;
 use RuntimeException;
 use Yiisoft\Translator\CategorySource;
@@ -24,8 +25,11 @@ final class TranslationControllerTest extends ControllerTestCase
             'tag@translation.categorySource' => [$source],
         ]);
 
-        $controller = $this->createController(['locale' => ['locales' => ['en' => 'English', 'ru' => 'Russian']]]);
-        $response = $controller->getTranslations($container);
+        $controller = $this->createController(['locale' => ['locales' => [
+            'en' => 'English',
+            'ru' => 'Russian',
+        ]]], $container);
+        $response = $controller->getTranslations($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
@@ -38,11 +42,11 @@ final class TranslationControllerTest extends ControllerTestCase
             'tag@translation.categorySource' => [],
         ]);
 
-        $controller = $this->createController(['locale' => ['locales' => []]]);
+        $controller = $this->createController(['locale' => ['locales' => []]], $container);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Unable to determine list of available locales');
-        $controller->getTranslations($container);
+        $controller->getTranslations($this->get());
     }
 
     public function testPutTranslation(): void
@@ -58,8 +62,8 @@ final class TranslationControllerTest extends ControllerTestCase
             'tag@translation.categorySource' => [$source],
         ]);
 
-        $controller = $this->createController(['locale' => ['locales' => ['en' => 'English']]]);
-        $response = $controller->putTranslation($container, $this->put([
+        $controller = $this->createController(['locale' => ['locales' => ['en' => 'English']]], $container);
+        $response = $controller->putTranslation($this->put([
             'category' => 'app',
             'locale' => 'en',
             'translation' => 'hello',
@@ -75,11 +79,11 @@ final class TranslationControllerTest extends ControllerTestCase
             'tag@translation.categorySource' => [],
         ]);
 
-        $controller = $this->createController(['locale' => ['locales' => ['en' => 'English']]]);
+        $controller = $this->createController(['locale' => ['locales' => ['en' => 'English']]], $container);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid locale');
-        $controller->putTranslation($container, $this->put([
+        $controller->putTranslation($this->put([
             'category' => 'app',
             'locale' => '../../etc',
             'translation' => 'hello',
@@ -95,11 +99,11 @@ final class TranslationControllerTest extends ControllerTestCase
             'tag@translation.categorySource' => [$source],
         ]);
 
-        $controller = $this->createController(['locale' => ['locales' => ['en' => 'English']]]);
+        $controller = $this->createController(['locale' => ['locales' => ['en' => 'English']]], $container);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid category name');
-        $controller->putTranslation($container, $this->put([
+        $controller->putTranslation($this->put([
             'category' => 'nonexistent',
             'locale' => 'en',
             'translation' => 'hello',
@@ -107,9 +111,14 @@ final class TranslationControllerTest extends ControllerTestCase
         ]));
     }
 
-    private function createController(array $params): TranslationController
+    private function createController(array $params, ?ContainerInterface $container = null): TranslationController
     {
-        return new TranslationController($this->createResponseFactory(), new NullLogger(), $params);
+        return new TranslationController(
+            $this->createResponseFactory(),
+            new NullLogger(),
+            $container ?? $this->container(),
+            $params,
+        );
     }
 
     private function createCategorySource(string $name, MessageReaderInterface $reader): CategorySource

@@ -4,30 +4,32 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Controller;
 
-use Nyholm\Psr7\Factory\Psr17Factory;
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use GuzzleHttp\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use Nyholm\Psr7\Stream;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use ReflectionProperty;
-use Yiisoft\DataResponse\DataResponse;
-use Yiisoft\DataResponse\DataResponseFactory;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use Yiisoft\Router\CurrentRoute;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Base test case for controller tests.
- * Provides helpers for building requests, routes, containers, and reading response data.
+ * Provides helpers for building requests, containers, and reading response data.
  */
 abstract class ControllerTestCase extends TestCase
 {
-    private ?DataResponseFactoryInterface $responseFactory = null;
+    private ?JsonResponseFactoryInterface $responseFactory = null;
 
-    protected function createResponseFactory(): DataResponseFactoryInterface
+    protected function createResponseFactory(): JsonResponseFactoryInterface
     {
         if ($this->responseFactory === null) {
-            $psr17 = new Psr17Factory();
-            $this->responseFactory = new DataResponseFactory($psr17, $psr17);
+            $factory = $this->createMock(JsonResponseFactoryInterface::class);
+            $factory
+                ->method('createJsonResponse')
+                ->willReturnCallback(function (mixed $data, int $status = 200): ResponseInterface {
+                    return new Response($status, ['Content-Type' => 'application/json'], json_encode($data));
+                });
+            $this->responseFactory = $factory;
         }
         return $this->responseFactory;
     }
@@ -72,17 +74,6 @@ abstract class ControllerTestCase extends TestCase
     }
 
     /**
-     * Create a CurrentRoute with pre-set arguments (bypasses final class limitation).
-     */
-    protected function route(array $arguments): CurrentRoute
-    {
-        $currentRoute = new CurrentRoute();
-        $property = new ReflectionProperty(CurrentRoute::class, 'arguments');
-        $property->setValue($currentRoute, $arguments);
-        return $currentRoute;
-    }
-
-    /**
      * Create a mock container that returns given services by class name.
      *
      * @param array<string, object> $services Map of class/id => instance
@@ -103,10 +94,10 @@ abstract class ControllerTestCase extends TestCase
     }
 
     /**
-     * Extract the data payload from a DataResponse.
+     * Extract the data payload from a response.
      */
-    protected function responseData(DataResponse $response): mixed
+    protected function responseData(ResponseInterface $response): mixed
     {
-        return $response->getData();
+        return json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
     }
 }
