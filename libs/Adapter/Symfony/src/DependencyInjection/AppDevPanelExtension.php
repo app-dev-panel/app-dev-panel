@@ -322,14 +322,14 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([new Reference(StorageInterface::class)])
             ->setPublic(false);
 
-        // Middleware
+        // Middleware — must be public so ApiApplication::buildPipeline() can fetch them via container->has/get
         $container->register(IpFilterMiddleware::class, IpFilterMiddleware::class)
             ->setArguments([
                 new Reference(ResponseFactoryInterface::class),
                 new Reference(StreamFactoryInterface::class),
                 '%app_dev_panel.api.allowed_ips%',
             ])
-            ->setPublic(false);
+            ->setPublic(true);
 
         $container->register(TokenAuthMiddleware::class, TokenAuthMiddleware::class)
             ->setArguments([
@@ -337,11 +337,11 @@ final class AppDevPanelExtension extends Extension
                 new Reference(StreamFactoryInterface::class),
                 '%app_dev_panel.api.auth_token%',
             ])
-            ->setPublic(false);
+            ->setPublic(true);
 
         $container->register(ResponseDataWrapper::class, ResponseDataWrapper::class)
             ->setArguments([new Reference(JsonResponseFactoryInterface::class)])
-            ->setPublic(false);
+            ->setPublic(true);
 
         $container->register(InspectorProxyMiddleware::class, InspectorProxyMiddleware::class)
             ->setArguments([
@@ -351,7 +351,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(StreamFactoryInterface::class),
                 new Reference(UriFactoryInterface::class),
             ])
-            ->setPublic(false);
+            ->setPublic(true);
 
         // Controllers
         $container->register(DebugController::class, DebugController::class)
