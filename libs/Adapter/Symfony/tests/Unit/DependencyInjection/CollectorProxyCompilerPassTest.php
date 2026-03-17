@@ -105,6 +105,19 @@ final class CollectorProxyCompilerPassTest extends TestCase
         $this->assertFalse($container->hasDefinition(Debugger::class));
     }
 
+    public function testDecoratesLoggerViaSymfonyServiceId(): void
+    {
+        $container = $this->createLoadedContainer();
+
+        // Register logger as 'logger' (Symfony canonical), not Psr\Log\LoggerInterface
+        $container->register('logger', \Psr\Log\NullLogger::class);
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $this->assertTrue($container->hasDefinition(LoggerInterfaceProxy::class));
+    }
+
     public function testSkipsLoggerDecorationWhenCollectorDisabled(): void
     {
         $container = $this->createLoadedContainer(['log' => false]);

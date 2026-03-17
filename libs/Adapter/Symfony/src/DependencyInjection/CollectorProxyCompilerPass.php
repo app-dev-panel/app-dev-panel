@@ -62,13 +62,22 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
             return;
         }
 
-        // Symfony registers the logger as Psr\Log\LoggerInterface (via MonologBundle alias)
-        if (!$container->has(LoggerInterface::class)) {
+        // Symfony registers the logger as 'logger' service ID.
+        // MonologBundle may also alias Psr\Log\LoggerInterface → monolog.logger.
+        // We decorate whichever is available: prefer 'logger' (Symfony canonical),
+        // fall back to Psr\Log\LoggerInterface (MonologBundle alias).
+        $serviceId = match (true) {
+            $container->has('logger') => 'logger',
+            $container->has(LoggerInterface::class) => LoggerInterface::class,
+            default => null,
+        };
+
+        if ($serviceId === null) {
             return;
         }
 
         $container->register(LoggerInterfaceProxy::class, LoggerInterfaceProxy::class)
-            ->setDecoratedService(LoggerInterface::class)
+            ->setDecoratedService($serviceId)
             ->setArguments([
                 new Reference(LoggerInterfaceProxy::class . '.inner'),
                 new Reference(LogCollector::class),
