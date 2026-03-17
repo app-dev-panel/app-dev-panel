@@ -145,4 +145,50 @@ final class SymfonyEventDispatcherProxyTest extends TestCase
 
         $this->assertInstanceOf(\Symfony\Component\EventDispatcher\EventDispatcherInterface::class, $proxy);
     }
+
+    public function testAddSubscriberForwardsToDecorated(): void
+    {
+        $timeline = new TimelineCollector();
+        $collector = new EventCollector($timeline);
+        $inner = new EventDispatcher();
+
+        $proxy = new SymfonyEventDispatcherProxy($inner, $collector);
+
+        $subscriber = new class implements \Symfony\Component\EventDispatcher\EventSubscriberInterface {
+            public static function getSubscribedEvents(): array
+            {
+                return ['test.event' => 'onTestEvent'];
+            }
+
+            public function onTestEvent(): void {}
+        };
+
+        $proxy->addSubscriber($subscriber);
+
+        $this->assertTrue($proxy->hasListeners('test.event'));
+    }
+
+    public function testRemoveSubscriberForwardsToDecorated(): void
+    {
+        $timeline = new TimelineCollector();
+        $collector = new EventCollector($timeline);
+        $inner = new EventDispatcher();
+
+        $proxy = new SymfonyEventDispatcherProxy($inner, $collector);
+
+        $subscriber = new class implements \Symfony\Component\EventDispatcher\EventSubscriberInterface {
+            public static function getSubscribedEvents(): array
+            {
+                return ['test.event' => 'onTestEvent'];
+            }
+
+            public function onTestEvent(): void {}
+        };
+
+        $proxy->addSubscriber($subscriber);
+        $this->assertTrue($proxy->hasListeners('test.event'));
+
+        $proxy->removeSubscriber($subscriber);
+        $this->assertFalse($proxy->hasListeners('test.event'));
+    }
 }

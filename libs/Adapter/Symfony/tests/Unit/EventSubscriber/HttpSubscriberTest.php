@@ -238,4 +238,119 @@ final class HttpSubscriberTest extends TestCase
         // Lifecycle completed without error
         $this->assertTrue(true);
     }
+
+    public function testOnKernelRequestSkipsDebugApiPath(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $requestCollector = new RequestCollector($timeline);
+        $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
+
+        $subscriber = new HttpSubscriber($debugger, $requestCollector);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/debug/api/summary');
+        $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $subscriber->onKernelRequest($event);
+
+        // RequestCollector should NOT have any data for ADP API paths
+        $this->assertSame([], $requestCollector->getCollected());
+    }
+
+    public function testOnKernelRequestSkipsInspectApiPath(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $requestCollector = new RequestCollector($timeline);
+        $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
+
+        $subscriber = new HttpSubscriber($debugger, $requestCollector);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/inspect/api/table');
+        $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $subscriber->onKernelRequest($event);
+
+        $this->assertSame([], $requestCollector->getCollected());
+    }
+
+    public function testOnKernelResponseSkipsDebugApiPath(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $debugger = new Debugger($idGenerator, $storage, []);
+
+        $subscriber = new HttpSubscriber($debugger);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/debug/api/data');
+        $response = new Response();
+        $event = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
+
+        $subscriber->onKernelResponse($event);
+
+        $this->assertFalse($response->headers->has('X-Debug-Id'));
+    }
+
+    public function testOnKernelExceptionSkipsDebugApiPath(): void
+    {
+        $timeline = new TimelineCollector();
+        $exceptionCollector = new ExceptionCollector($timeline);
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $debugger = new Debugger($idGenerator, $storage, [$exceptionCollector, $timeline]);
+        $debugger->startup(StartupContext::generic());
+
+        $subscriber = new HttpSubscriber($debugger, exceptionCollector: $exceptionCollector);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/debug/api/data');
+        $event = new ExceptionEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, new \RuntimeException('test'));
+
+        $subscriber->onKernelException($event);
+
+        $this->assertEmpty($exceptionCollector->getCollected());
+    }
+
+    public function testOnKernelTerminateSkipsDebugApiPath(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->createMock(\AppDevPanel\Kernel\Storage\StorageInterface::class);
+        $storage->expects($this->never())->method('flush');
+        $debugger = new Debugger($idGenerator, $storage, []);
+        $debugger->startup(StartupContext::generic());
+
+        $subscriber = new HttpSubscriber($debugger);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/inspect/api/table');
+        $response = new Response();
+        $event = new TerminateEvent($kernel, $request, $response);
+
+        $subscriber->onKernelTerminate($event);
+    }
+
+    public function testOnKernelRequestCollectsWebAppInfo(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $webAppInfo = new WebAppInfoCollector($timeline);
+        $debugger = new Debugger($idGenerator, $storage, [$webAppInfo, $timeline]);
+
+        $subscriber = new HttpSubscriber($debugger, webAppInfoCollector: $webAppInfo);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/test');
+        $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $subscriber->onKernelRequest($event);
+
+        $data = $webAppInfo->getCollected();
+        $this->assertArrayHasKey('applicationProcessingTime', $data);
+    }
 }

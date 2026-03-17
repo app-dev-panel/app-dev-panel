@@ -118,4 +118,65 @@ final class SymfonyConfigProviderTest extends TestCase
 
         $this->assertSame($provider->get('events'), $provider->get('events-web'));
     }
+
+    public function testGetEventsWithInvokableListener(): void
+    {
+        $dispatcher = new EventDispatcher();
+        $listener = new class {
+            public function __invoke(): void {}
+        };
+        $dispatcher->addListener('app.event', $listener);
+
+        $container = new Container();
+        $container->set('event_dispatcher', $dispatcher);
+
+        $provider = new SymfonyConfigProvider($container);
+        $result = $provider->get('events');
+
+        $this->assertArrayHasKey('app.event', $result);
+        $this->assertStringContainsString('::__invoke', $result['app.event'][0]);
+    }
+
+    public function testGetEventsWithClosureListener(): void
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener('app.event', \Closure::fromCallable(static function (): void {}));
+
+        $container = new Container();
+        $container->set('event_dispatcher', $dispatcher);
+
+        $provider = new SymfonyConfigProvider($container);
+        $result = $provider->get('events');
+
+        $this->assertArrayHasKey('app.event', $result);
+        $this->assertNotEmpty($result['app.event'][0]);
+    }
+
+    public function testGetEventsWhenDispatcherIsNotEventDispatcherInterface(): void
+    {
+        $container = new Container();
+        $container->set('event_dispatcher', new \stdClass());
+
+        $provider = new SymfonyConfigProvider($container);
+        $result = $provider->get('events');
+
+        $this->assertSame([], $result);
+    }
+
+    public function testGetEventsListenersSorted(): void
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener('z.event', static function (): void {});
+        $dispatcher->addListener('a.event', static function (): void {});
+
+        $container = new Container();
+        $container->set('event_dispatcher', $dispatcher);
+
+        $provider = new SymfonyConfigProvider($container);
+        $result = $provider->get('events');
+
+        $keys = array_keys($result);
+        $this->assertSame('a.event', $keys[0]);
+        $this->assertSame('z.event', $keys[1]);
+    }
 }
