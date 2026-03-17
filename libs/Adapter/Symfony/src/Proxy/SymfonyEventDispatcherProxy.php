@@ -38,7 +38,11 @@ final class SymfonyEventDispatcherProxy implements EventDispatcherInterface
         return $this->decorated->dispatch($event, $eventName);
     }
 
-    public function addListener(string $eventName, callable $listener, int $priority = 0): void
+    /**
+     * @param callable|array $listener Symfony passes lazy subscriber arrays [$service, 'method']
+     *                                  that aren't callable until the container resolves them
+     */
+    public function addListener(string $eventName, callable|array $listener, int $priority = 0): void
     {
         $this->decorated->addListener($eventName, $listener, $priority);
     }
