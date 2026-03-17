@@ -87,6 +87,7 @@ final class AppDevPanelExtension extends Extension
                 ->addTag('app_dev_panel.collector.web');
 
             $container->register(WebAppInfoCollector::class, WebAppInfoCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector')
                 ->addTag('app_dev_panel.collector.web');
@@ -101,30 +102,35 @@ final class AppDevPanelExtension extends Extension
 
         if ($collectors['log']) {
             $container->register(LogCollector::class, LogCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }
 
         if ($collectors['event']) {
             $container->register(EventCollector::class, EventCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }
 
         if ($collectors['service']) {
             $container->register(ServiceCollector::class, ServiceCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }
 
         if ($collectors['http_client']) {
             $container->register(HttpClientCollector::class, HttpClientCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }
 
         if ($collectors['var_dumper']) {
             $container->register(VarDumperCollector::class, VarDumperCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }
@@ -143,11 +149,13 @@ final class AppDevPanelExtension extends Extension
 
         if ($collectors['command']) {
             $container->register(CommandCollector::class, CommandCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector')
                 ->addTag('app_dev_panel.collector.console');
 
             $container->register(ConsoleAppInfoCollector::class, ConsoleAppInfoCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector')
                 ->addTag('app_dev_panel.collector.console');
