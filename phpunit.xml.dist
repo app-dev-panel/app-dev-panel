@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
+         bootstrap="tests/bootstrap.php"
          colors="true"
          failOnRisky="true"
          failOnWarning="true"
@@ -27,6 +27,9 @@
         <testsuite name="Adapter-Symfony">
             <directory>libs/Adapter/Symfony/tests</directory>
         </testsuite>
+        <testsuite name="Adapter-Yii2">
+            <directory>libs/Adapter/Yii2/tests</directory>
+        </testsuite>
         <testsuite name="E2E">
             <directory>tests/E2E</directory>
         </testsuite>
@@ -38,6 +41,7 @@
             <directory>libs/API/src</directory>
             <directory>libs/Cli/src</directory>
             <directory>libs/Adapter/Symfony/src</directory>
+            <directory>libs/Adapter/Yii2/src</directory>
         </include>
     </source>
 </phpunit>

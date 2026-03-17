@@ -58,7 +58,7 @@ use yii\web\Application as WebApplication;
  * Registers collectors, proxies, event listeners, and API routes.
  * Equivalent to Symfony's AppDevPanelBundle + AppDevPanelExtension.
  */
-final class Module extends \yii\base\Module implements BootstrapInterface
+class Module extends \yii\base\Module implements BootstrapInterface
 {
     /**
      * @var bool Master switch to enable/disable the debug panel.

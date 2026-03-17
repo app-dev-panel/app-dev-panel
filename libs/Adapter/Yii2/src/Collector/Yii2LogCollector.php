@@ -82,9 +82,7 @@ final class Yii2LogCollector implements CollectorInterface
             ];
 
             if (in_array($levelName, ['error', 'warning', 'info'], true)) {
-                $this->timeline->addEvent('yii-log', "[$levelName] $category", [
-                    'message' => mb_substr($messageText, 0, 100),
-                ]);
+                $this->timeline->collect($this, count($this->messages));
             }
         }
     }

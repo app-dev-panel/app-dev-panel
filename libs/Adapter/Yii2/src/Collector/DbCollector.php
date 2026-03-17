@@ -65,13 +65,14 @@ final class DbCollector implements CollectorInterface, SummaryCollectorInterface
 
         $this->totalTime += $time;
 
-        $this->timeline->addEvent('db', 'SQL Query', [
-            'sql' => mb_substr($sql, 0, 100),
-        ]);
+        $this->timeline->collect($this, count($this->queries));
     }
 
     public function getCollected(): array
     {
+        if (!$this->isActive()) {
+            return [];
+        }
         return [
             'queries' => $this->queries,
             'queryCount' => count($this->queries),
@@ -82,6 +83,9 @@ final class DbCollector implements CollectorInterface, SummaryCollectorInterface
 
     public function getSummary(): array
     {
+        if (!$this->isActive()) {
+            return [];
+        }
         return [
             'db' => [
                 'queryCount' => count($this->queries),

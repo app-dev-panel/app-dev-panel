@@ -33,6 +33,7 @@
   "require": {
     "php": "^8.4",
     "app-dev-panel/adapter-symfony": "*",
+    "app-dev-panel/adapter-yii2": "*",
     "app-dev-panel/adapter-yiisoft": "*",
     "app-dev-panel/api": "*",
     "app-dev-panel/kernel": "*",
@@ -51,6 +52,7 @@
     "symfony/framework-bundle": "^7.0",
     "symfony/http-kernel": "^7.0",
     "symfony/var-dumper": "^7.0",
+    "yiisoft/yii2": "^2.0.50",
     "yiisoft/cache": "^3.2",
     "yiisoft/db-sqlite": "^1.2",
     "yiisoft/error-handler": "^4.3",
@@ -112,6 +114,7 @@
       "AppDevPanel\\Api\\Tests\\": "libs/API/tests",
       "AppDevPanel\\Cli\\Tests\\": "libs/Cli/tests",
       "AppDevPanel\\Adapter\\Symfony\\Tests\\": "libs/Adapter/Symfony/tests",
+      "AppDevPanel\\Adapter\\Yii2\\Tests\\": "libs/Adapter/Yii2/tests",
       "AppDevPanel\\Tests\\": "tests"
     }
   },
@@ -129,7 +132,8 @@
     "sort-packages": true,
     "allow-plugins": {
       "yiisoft/config": false,
-      "carthage-software/mago": true
+      "carthage-software/mago": true,
+      "yiisoft/yii2-composer": true
     }
   },
   "minimum-stability": "dev",
