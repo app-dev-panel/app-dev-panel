@@ -2,10 +2,8 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Yiisoft\DebugServer;
+namespace AppDevPanel\Kernel\DebugServer;
 
-use AppDevPanel\Kernel\DebugServer\Broadcaster;
-use AppDevPanel\Kernel\DebugServer\Connection;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
 use Stringable;

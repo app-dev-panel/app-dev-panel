@@ -5,19 +5,25 @@ data collectors, storage, PSR proxy system, and object serialization.
 
 ## Dependencies
 
-Kernel depends on PSR interfaces and these framework-independent helpers:
+Kernel depends on PSR interfaces and these core infrastructure helpers:
 
-- `yiisoft/strings` — String manipulation utilities
-- `yiisoft/json` — JSON encode/decode with error handling
-- `yiisoft/var-dumper` — Variable dumping/serialization
+- `yiisoft/strings` — String manipulation utilities (core infra, framework-agnostic)
+- `yiisoft/json` — JSON encode/decode with error handling (core infra, framework-agnostic)
+- `yiisoft/var-dumper` — Variable dumping/serialization (core infra, framework-agnostic)
 - `symfony/console` — Console event types for `CommandCollector`
 - `symfony/var-dumper` — Variable dumper integration
 - `guzzlehttp/psr7` — PSR-7 HTTP message implementation
 
+**Core infra policy**: `yiisoft/var-dumper`, `yiisoft/strings`, and `yiisoft/json` are pure
+utility libraries with no framework coupling. They are considered core infrastructure and
+may be used freely in Kernel and any module. Despite the `yiisoft/` vendor prefix, these
+are not Yii framework dependencies.
+
 Note: `yiisoft/proxy` was removed from Kernel. Container proxying (`ContainerInterfaceProxy`,
 `ServiceProxy`, `ServiceMethodProxy`, `ContainerProxyConfig`, `ProxyLogTrait`) and
-framework-specific helpers (`VarDumperHandlerInterfaceProxy`, `VarDumperHandler`, `LoggerDecorator`)
-now live in the Yii adapter (`libs/Adapter/Yiisoft`).
+`VarDumperHandlerInterfaceProxy` now live in the Yii adapter (`libs/Adapter/Yiisoft`).
+`LoggerDecorator` and `VarDumperHandler` remain in Kernel (`DebugServer/`) since they
+only depend on `yiisoft/var-dumper` (core infra).
 
 ## Package
 
@@ -91,7 +97,9 @@ src/
 └── DebugServer/                  # UDP socket server for real-time streaming
     ├── Broadcaster.php
     ├── Connection.php
-    └── SocketReader.php
+    ├── LoggerDecorator.php       # PSR-3 logger decorator that broadcasts via UDP
+    ├── SocketReader.php
+    └── VarDumperHandler.php      # VarDumper handler that broadcasts via UDP
 ```
 
 ## Debugger Lifecycle

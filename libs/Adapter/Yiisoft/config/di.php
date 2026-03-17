@@ -16,7 +16,7 @@ use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
-use AppDevPanel\Adapter\Yiisoft\DebugServer\LoggerDecorator;
+use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 
