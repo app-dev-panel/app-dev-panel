@@ -193,7 +193,7 @@ final class ModuleIntegrationTest extends TestCase
         }
 
         // Manually call the parts of bootstrap that don't require a real Application
-        $this->invokePrivateMethod($module, 'registerServices');
+        $this->invokePrivateMethod($module, 'registerServices', [\Yii::$app]);
         $this->invokePrivateMethod($module, 'registerCollectors');
         $this->invokePrivateMethod($module, 'buildDebugger');
 

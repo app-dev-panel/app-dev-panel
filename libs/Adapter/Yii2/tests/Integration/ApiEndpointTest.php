@@ -502,7 +502,11 @@ final class ApiEndpointTest extends TestCase
         foreach (['registerServices', 'registerCollectors', 'buildDebugger'] as $method) {
             $ref = $reflection->getMethod($method);
             $ref->setAccessible(true);
-            $ref->invoke($module);
+            if ($method === 'registerServices') {
+                $ref->invoke($module, \Yii::$app);
+            } else {
+                $ref->invoke($module);
+            }
         }
 
         $this->module = $module;

@@ -27,8 +27,10 @@ src/
 │   ├── AssetBundleCollector.php               # Asset bundles via View events
 │   └── Yii2LogCollector.php                   # Yii 2 Logger messages (legacy batch)
 ├── Inspector/
-│   ├── Yii2ConfigProvider.php                 # Components, params, modules for inspector
+│   ├── Yii2ConfigProvider.php                 # Components, params, modules, events for inspector
 │   ├── Yii2DbSchemaProvider.php               # Database schema via yii\db\Schema
+│   ├── Yii2RouteCollection.php                # Wraps UrlManager rules for route inspector
+│   ├── Yii2RouteAdapter.php                   # Wraps single UrlRule with __debugInfo()
 │   └── NullSchemaProvider.php                 # Fallback when no database configured
 └── Controller/
     └── AdpApiController.php                   # Yii 2 controller bridging to ADP ApiApplication
@@ -73,7 +75,7 @@ It registers the `debug-panel` module if enabled (auto-enables in YII_DEBUG mode
 ### 3. Module Bootstrap (`Module::bootstrap()`)
 
 Executes in order:
-1. `registerServices()` — Core DI: `StorageInterface`, `DebuggerIdGenerator`, PSR-17 factories, API services, inspector providers
+1. `registerServices($app)` — Core DI: `StorageInterface`, `DebuggerIdGenerator`, PSR-17 factories, API services, inspector providers, all inspector controllers
 2. `registerCollectors()` — Creates all enabled collector instances
 3. `buildDebugger()` — Builds `Debugger` with all collectors + storage
 4. `registerEventListeners()` — Attaches web/console event listeners
@@ -127,16 +129,27 @@ Yii 2 uses its own `yii\web\Request` / `yii\web\Response` objects.
 
 ### 7. Inspector Integration
 
-`Yii2ConfigProvider` registered as `config` service alias:
+All inspector controllers are explicitly registered in `Module::registerServices()`.
+This follows the same pattern as Yiisoft and Symfony adapters (no auto-wiring for controllers).
+
+**Registered controllers:**
+`FileController`, `RoutingController`, `InspectController`, `DatabaseController`,
+`GitController`, `ServiceController`, `CacheController`, `CommandController`,
+`ComposerController`, `RequestController`, `TranslationController`, `OpcacheController`.
+
+**`Yii2ConfigProvider`** registered as `config` service alias:
 
 | Group | Source |
 |---|---|
 | `params` / `parameters` | `$app->params` |
 | `di` / `services` | `$app->getComponents()` |
-| `events` | `$app->getBehaviors()` |
+| `events` / `events-web` | `Event::$_events` (class-level via reflection) + `$app->_events` (instance-level) + `$app->getBehaviors()` |
 | `modules` | `$app->getModules()` |
 
-`Yii2DbSchemaProvider` uses `yii\db\Schema` for database inspection.
+**`Yii2RouteCollection`** wraps `UrlManager->rules` for route inspector.
+Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: name, pattern, methods, defaults, route.
+
+**`Yii2DbSchemaProvider`** uses `yii\db\Schema` for database inspection.
 
 ## Collectors
 

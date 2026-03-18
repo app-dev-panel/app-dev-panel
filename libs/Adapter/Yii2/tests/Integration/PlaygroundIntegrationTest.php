@@ -323,7 +323,7 @@ final class PlaygroundIntegrationTest extends TestCase
 
         $registerServices = $reflection->getMethod('registerServices');
         $registerServices->setAccessible(true);
-        $registerServices->invoke($module);
+        $registerServices->invoke($module, \Yii::$app);
 
         $registerCollectors = $reflection->getMethod('registerCollectors');
         $registerCollectors->setAccessible(true);
