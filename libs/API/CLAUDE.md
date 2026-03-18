@@ -40,9 +40,8 @@ src/
 │   ├── Middleware/
 │   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services
 │   ├── Database/
-│   │   ├── SchemaProviderInterface.php
-│   │   ├── CycleSchemaProvider.php      # Cycle ORM schema
-│   │   └── DbSchemaProvider.php         # Yii DB schema
+│   │   ├── SchemaProviderInterface.php  # Interface for database schema inspection
+│   │   └── NullSchemaProvider.php       # Default no-op fallback
 │   ├── Command/
 │   │   ├── CommandInterface.php
 │   │   ├── BashCommand.php

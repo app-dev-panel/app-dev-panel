@@ -107,9 +107,9 @@
 **10. `ModuleFederationAssetBundle` — empty/stub class (ModuleFederationAssetBundle.php)**
 - Likely placeholder that was never implemented
 
-**11. DoS: Missing database pagination (DbSchemaProvider.php, CycleSchemaProvider.php)**
-- `$records = new Query($this->db)->from($schema->getName())->all()` reads ALL records into memory
-- No LIMIT parameter, no pagination support
+**11. DoS: Missing database pagination (SchemaProvider implementations)**
+- Some `SchemaProviderInterface` implementations read ALL records into memory
+- `getTable()` has `$limit`/`$offset` params, but `getTables()` counts may be expensive on large schemas
 
 **~~12. Null dereference in createJsPanelResponse~~ [DONE]**
 

@@ -95,11 +95,12 @@ API has the biggest gap: 33 source files but only 8 test files.
 | `HttpApplicationWrapper.php` | PSR-15 application wrapper | Test middleware pipeline execution |
 | `MiddlewareDispatcherMiddleware.php` | Debug middleware | Test data collection during request processing |
 
-### 3.4 Database Providers (2 files)
+### 3.4 Database Providers
 | File | Class | Test Strategy |
 |------|-------|---------------|
-| `CycleSchemaProvider.php` | Cycle ORM schema | Mock Cycle ORM registry, test schema extraction |
-| `DbSchemaProvider.php` | Already has test | Extend existing `DbSchemaProviderTest` |
+| `NullSchemaProvider.php` (API) | No-op fallback | Test returns empty arrays |
+
+Note: `DbSchemaProvider` moved to `libs/Adapter/Yiisoft/src/Inspector/`, `CycleSchemaProvider` moved to `libs/Adapter/Cycle/src/Inspector/`. Tests belong in their respective adapter packages.
 
 ### 3.5 Test Reporters (2 files)
 | File | Class | Test Strategy |

@@ -9,7 +9,10 @@ declare(strict_types=1);
 
 use AppDevPanel\Adapter\Yiisoft\Api\AliasPathResolver;
 use AppDevPanel\Adapter\Yiisoft\Api\YiiApiMiddleware;
+use AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider;
 use AppDevPanel\Api\ApiApplication;
+use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
@@ -21,6 +24,7 @@ use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
+use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
@@ -85,6 +89,22 @@ return [
             $params['app-dev-panel/yii-debug']['path'] ?? '@runtime/debug',
         ) . '/services',
     ),
+
+    // Schema provider (database inspection)
+    SchemaProviderInterface::class => static function (ContainerInterface $container): SchemaProviderInterface {
+        try {
+            $db = $container->get(\Yiisoft\Db\Connection\ConnectionInterface::class);
+            return new DbSchemaProvider($db);
+        } catch (\Throwable) {
+            return new NullSchemaProvider();
+        }
+    },
+
+    // Database controller
+    DatabaseController::class => static fn (
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        SchemaProviderInterface $schemaProvider,
+    ) => new DatabaseController($jsonResponseFactory, $schemaProvider),
 
     // Collector repository
     CollectorRepositoryInterface::class => static fn (StorageInterface $storage) => new CollectorRepository($storage),

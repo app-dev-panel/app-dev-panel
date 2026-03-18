@@ -7,16 +7,19 @@ Provides console commands for managing the ADP debug system.
 - Composer: `app-dev-panel/cli`
 - Namespace: `AppDevPanel\Cli\`
 - PHP: 8.4+
-- Dependencies: `app-dev-panel/kernel`, Symfony Console
+- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/api`, Symfony Console
 
 ## Directory Structure
 
 ```
 src/
-└── Command/
-    ├── DebugServerCommand.php          # Start debug socket server
-    ├── DebugResetCommand.php           # Clear debug data
-    └── DebugServerBroadcastCommand.php # Broadcast test messages
+├── Command/
+│   ├── DebugServerCommand.php          # Start debug socket server
+│   ├── DebugResetCommand.php           # Clear debug data
+│   ├── DebugServerBroadcastCommand.php # Broadcast test messages
+│   └── ServeCommand.php                # Start HTTP debug server (PHP built-in)
+└── Server/
+    └── server-router.php               # Router for built-in PHP server (bootstraps API)
 tests/
 └── Unit/
     └── Command/

@@ -739,78 +739,6 @@ message = "Attempting to access a method on a non-object type (`nonnull`)."
 count = 2
 
 [[issues]]
-file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
-code = "invalid-iterator"
-message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Cycle\Database\ColumnInterface)`).'
-count = 6
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Cycle\Database\DatabaseProviderInterface)`).'
-count = 2
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Database\Cycle\CycleSchemaProvider::serializecyclecolumnsschemas`: expected `array<array-key, unknown-ref(Cycle\Database\ColumnInterface)>`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 8
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 20
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Cycle\Database\ColumnInterface`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Cycle/CycleSchemaProvider.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Cycle\Database\DatabaseProviderInterface`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider::serializearcolumnsschemas`: expected `array<array-key, Yiisoft\Db\Schema\ColumnSchemaInterface>`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Yiisoft\Db\Query\Query::from`: expected `Yiisoft\Db\Expression\ExpressionInterface|array<array-key, mixed>|string`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Database/Db/DbSchemaProvider.php"
-code = "possible-method-access-on-null"
-message = "Attempting to call a method on `null`."
-count = 5
-
-[[issues]]
 file = "libs/API/src/Inspector/Test/CodeceptionJSONReporter.php"
 code = "non-existent-class-like"
 message = 'Class `AppDevPanel\Api\Inspector\Test\CodeceptionJSONReporter` cannot extend unknown type `Extension`'
@@ -1334,6 +1262,54 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 3
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Translator\CategorySource` not found.'
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Translator\CategorySource`.'
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Translator\MessageReaderInterface`.'
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Translator\MessageWriterInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Yiisoft\Translator\MessageReaderInterface` does not exist.'
+count = 4
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Yiisoft\Translator\MessageWriterInterface` does not exist.'
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
 code = "possibly-invalid-argument"
 message = '''Possible argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::container`: expected `array<string, object>`, but possibly received `array{'tag@translation.categorySource': array{}}`.'''
 count = 2
@@ -1341,20 +1317,26 @@ count = 2
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
 code = "possibly-invalid-argument"
-message = '''Possible argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::container`: expected `array<string, object>`, but possibly received `array{'tag@translation.categorySource': list{Yiisoft\Translator\CategorySource}}`.'''
+message = '''Possible argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::container`: expected `array<string, object>`, but possibly received `array{'tag@translation.categorySource': list{unknown-ref(Yiisoft\Translator\CategorySource)}}`.'''
 count = 3
 
 [[issues]]
-file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
-count = 4
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #2 of `AppDevPanel\Api\Tests\Unit\Inspector\Controller\TranslationControllerTest::createcategorysource`: expected `unknown-ref(Yiisoft\Translator\MessageReaderInterface)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Yiisoft\Translator\MessageReaderInterface`.'
+count = 2
 
 [[issues]]
-file = "libs/API/tests/Unit/Inspector/Database/DbSchemaProviderTest.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
-count = 20
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #2 of `AppDevPanel\Api\Tests\Unit\Inspector\Controller\TranslationControllerTest::createcategorysourcewithwriter`: expected `unknown-ref(Yiisoft\Translator\MessageReaderInterface)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Yiisoft\Translator\MessageReaderInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #3 of `AppDevPanel\Api\Tests\Unit\Inspector\Controller\TranslationControllerTest::createcategorysourcewithwriter`: expected `unknown-ref(Yiisoft\Translator\MessageWriterInterface)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Yiisoft\Translator\MessageWriterInterface`.'
+count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Middleware/InspectorProxyMiddlewareTest.php"
@@ -1802,6 +1784,12 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorCollector.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Validator\Result)`).'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorCollector.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
 count = 1
@@ -1813,9 +1801,27 @@ message = "Casting `mixed` to `bool`."
 count = 1
 
 [[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorCollector.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Validator\Result`.'
+count = 1
+
+[[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorInterfaceProxy.php"
-code = "invalid-type-cast"
-message = 'Cannot reliably cast type `iterable<int|string, (callable(...mixed): mixed)|Yiisoft\Validator\RuleInterface|iterable<int, (callable(...mixed): mixed)|Yiisoft\Validator\RuleInterface>>` to `array`.'
+code = "non-existent-class-like"
+message = 'Class `AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy` cannot implement unknown type `ValidatorInterface`'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorInterfaceProxy.php"
+code = "unused-property"
+message = "Property `$collector` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorInterfaceProxy.php"
+code = "unused-property"
+message = "Property `$validator` is never used."
 count = 1
 
 [[issues]]
@@ -1835,6 +1841,30 @@ file = "libs/Adapter/Yiisoft/src/DebugServiceProvider.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy::__construct`: expected `AppDevPanel\Adapter\Yiisoft\Proxy\ContainerProxyConfig`, but found `mixed`.'
 count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider::serializearcolumnsschemas`: expected `array<array-key, Yiisoft\Db\Schema\ColumnSchemaInterface>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Yiisoft\Db\Query\Query::from`: expected `Yiisoft\Db\Expression\ExpressionInterface|array<array-key, mixed>|string`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
+code = "possible-method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 5
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"

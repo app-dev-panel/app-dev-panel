@@ -16,7 +16,7 @@ The core principle: **common modules must never depend on framework-specific cod
 │                                                                │
 │   Frontend ──▶ API (via HTTP only)                             │
 │                                                                │
-│   Cli ──▶ Kernel                                               │
+│   Cli ──▶ API ──▶ Kernel                                        │
 └────────────────────────────────────────────────────────────────┘
 ```
 
@@ -26,11 +26,14 @@ The core principle: **common modules must never depend on framework-specific cod
 |--------|--------------|-----------------|
 | **Kernel** | PSR interfaces only | API, Cli, Adapter, any framework |
 | **API** | Kernel, PSR interfaces | Adapter, any framework* |
-| **Cli** | Kernel, Symfony Console | API, Adapter, any framework |
+| **Cli** | Kernel, API, Symfony Console | Adapter, any framework |
 | **Adapter/Yiisoft** | Kernel, API, Cli, Yii 3 packages | Other adapters |
+| **Adapter/Cycle** | API, Cycle ORM packages | Other adapters |
+| **Adapter/Symfony** | Kernel, API, Cli, Symfony packages | Other adapters |
+| **Adapter/Yii2** | Kernel, API, Cli, Yii 2 packages | Other adapters |
 | **Frontend** | Nothing (communicates via HTTP) | Any PHP package |
 
-*API currently has Yii dependencies (router, DI, config) that should be abstracted in future refactoring.
+*API uses `yiisoft/var-dumper` (core infra, framework-agnostic). No framework-specific dependencies remain.
 
 ### Why
 
@@ -46,7 +49,7 @@ Storage and serialization must remain behind abstractions:
 |---------|-------------|-----------------|
 | Debug data storage | `StorageInterface` | `FileStorage`, `MemoryStorage` |
 | Object serialization | `Dumper` class | JSON-based (built-in) |
-| Database inspection | `SchemaProviderInterface` | `CycleSchemaProvider`, `DbSchemaProvider` |
+| Database inspection | `SchemaProviderInterface` | `NullSchemaProvider` (API), `DbSchemaProvider` (Yiisoft), `CycleSchemaProvider` (Cycle), `DoctrineSchemaProvider` (Symfony), `Yii2DbSchemaProvider` (Yii2) |
 | Command execution | `CommandInterface` | `BashCommand`, `PHPUnitCommand`, etc. |
 
 New storage backends (Redis, database, etc.) must implement `StorageInterface` without
@@ -71,9 +74,10 @@ modifying existing code. Serialization format changes must not break the API con
 
 ### Cli
 
-- Depends only on Kernel for `Debugger`, `StorageInterface`, and `Connection`.
+- Depends on Kernel for `Debugger`, `StorageInterface`, and `Connection`.
+- Depends on API for bootstrapping the debug server (serves API endpoints).
 - Uses Symfony Console for command infrastructure (acceptable — it's a standalone library).
-- Must not depend on API or any adapter.
+- Must not depend on any adapter.
 
 ### Adapter/Yiisoft
 
