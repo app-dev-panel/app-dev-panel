@@ -40,7 +40,7 @@ final class HttpStreamCollector implements SummaryCollectorInterface
         // https://github.com/php/php-src/issues/10509
         //stream_context_set_default([
         //    'http' => [
-        //        'proxy' => 'yii-debug-http://127.0.0.1',
+        //        'proxy' => 'app-dev-panel-http://127.0.0.1',
         //    ],
         //]);
     }

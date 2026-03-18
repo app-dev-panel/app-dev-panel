@@ -114,7 +114,7 @@ Maps framework lifecycle events to debugger lifecycle:
 ## Configuration (`params.php`)
 
 ```php
-'app-dev-panel/yii-debug' => [
+'app-dev-panel/yiisoft' => [
     'enabled' => true,                    // Enable/disable debugger
     'collectors' => [...],                // Active collectors
     'trackedServices' => [...],           // Services to proxy with ServiceProxy

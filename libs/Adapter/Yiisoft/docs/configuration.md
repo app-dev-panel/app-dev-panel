@@ -3,12 +3,12 @@
 ## Overview
 
 The Yii adapter uses Yii 3's config plugin system for zero-config installation.
-All settings are in `params.php` under the `app-dev-panel/yii-debug` key.
+All settings are in `params.php` under the `app-dev-panel/yiisoft` key.
 
 ## Full Configuration Reference
 
 ```php
-'app-dev-panel/yii-debug' => [
+'app-dev-panel/yiisoft' => [
     // Master switch to enable/disable the entire debugger
     'enabled' => true,
 
@@ -71,7 +71,7 @@ All settings are in `params.php` under the `app-dev-panel/yii-debug` key.
 ## API Configuration
 
 ```php
-'app-dev-panel/yii-debug-api' => [
+'app-dev-panel/yiisoft-api' => [
     'enabled' => true,
     'allowedIPs' => ['127.0.0.1', '::1'],
     'allowedHosts' => [],
@@ -112,7 +112,7 @@ In your application's `params.php`, merge your overrides:
 
 ```php
 return [
-    'app-dev-panel/yii-debug' => [
+    'app-dev-panel/yiisoft' => [
         'storage' => [
             'historySize' => 100,  // Keep more entries
         ],

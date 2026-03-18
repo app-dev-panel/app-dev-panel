@@ -15,7 +15,7 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
         /**
          * Collection of regexps to ignore files sources to sniff.
          * Examples:
-         * - '/' . preg_quote('yii-debug/src/Dumper', '/') . '/'
+         * - '/' . preg_quote('app-dev-panel/src/Dumper', '/') . '/'
          * - '/ClosureExporter/'
          */
         private readonly array $ignoredPathPatterns = [],

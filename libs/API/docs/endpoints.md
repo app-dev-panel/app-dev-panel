@@ -6,7 +6,7 @@ All API endpoints are protected by `IpFilter` middleware. By default, only `127.
 are allowed. Configure `allowedIPs` in params to change this:
 
 ```php
-'app-dev-panel/yii-debug-api' => [
+'app-dev-panel/yiisoft-api' => [
     'allowedIPs' => ['127.0.0.1', '::1', '192.168.1.0/24'],
     'allowedHosts' => [],
 ],

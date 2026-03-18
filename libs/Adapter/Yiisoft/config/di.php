@@ -26,7 +26,7 @@ use AppDevPanel\Kernel\Storage\StorageInterface;
 
 $common = [
     StorageInterface::class => static function (ContainerInterface $container, Aliases $aliases) use ($params) {
-        $params = $params['app-dev-panel/yii-debug'];
+        $params = $params['app-dev-panel/yiisoft'];
         $debuggerIdGenerator = $container->get(DebuggerIdGenerator::class);
         $excludedClasses = $params['dumper.excludedClasses'];
         $fileStorage = new FileStorage($aliases->get($params['path']), $debuggerIdGenerator, $excludedClasses);
@@ -47,7 +47,7 @@ if (!isAppDevPanelEnabled($params)) {
 
 return array_merge([
     ContainerProxyConfig::class => static function (ContainerInterface $container) use ($params) {
-        $params = $params['app-dev-panel/yii-debug'];
+        $params = $params['app-dev-panel/yiisoft'];
         $collector = $container->get(ServiceCollector::class);
         $dispatcher = $container->get(EventDispatcherInterface::class);
         $isDebuggerEnabled = (bool) ($params['enabled'] ?? false);

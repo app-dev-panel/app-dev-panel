@@ -11,5 +11,5 @@ if (!isAppDevPanelEnabled($params)) {
 }
 
 return [
-    'app-dev-panel/yii-debug/' . DebugServiceProvider::class => DebugServiceProvider::class,
+    'app-dev-panel/yiisoft/' . DebugServiceProvider::class => DebugServiceProvider::class,
 ];

@@ -24,8 +24,7 @@ src/
 │   ├── DbCollector.php                        # SQL queries via yii\db events with timing
 │   ├── DebugLogTarget.php                     # Real-time log target feeding LogCollector
 │   ├── MailerCollector.php                    # Mail messages via BaseMailer events
-│   ├── AssetBundleCollector.php               # Asset bundles via View events
-│   └── Yii2LogCollector.php                   # Yii 2 Logger messages (legacy batch)
+│   └── AssetBundleCollector.php               # Asset bundles via View events
 ├── Inspector/
 │   ├── Yii2ConfigProvider.php                 # Components, params, modules, events for inspector
 │   ├── Yii2DbSchemaProvider.php               # Database schema via yii\db\Schema
@@ -61,7 +60,6 @@ It registers the `debug-panel` module if enabled (auto-enables in YII_DEBUG mode
             'log' => true,
             'event' => true,
             'db' => true,
-            'yii_log' => true,
             'mailer' => true,
             'assets' => true,
         ],
@@ -179,7 +177,6 @@ Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: n
 | `DebugLogTarget` | Yii log target (real-time) | Feeds `LogCollector` with Yii log messages as they are flushed |
 | `MailerCollector` | `BaseMailer::EVENT_AFTER_SEND` | From, to, cc, bcc, subject, success status |
 | `AssetBundleCollector` | `View::EVENT_END_PAGE` | Asset bundles: class, source/base paths, CSS/JS files, dependencies |
-| `Yii2LogCollector` | `Yii::getLogger()` at shutdown (legacy) | Log messages with levels and categories |
 
 ## Architecture Comparison: Symfony vs Yii 2
 

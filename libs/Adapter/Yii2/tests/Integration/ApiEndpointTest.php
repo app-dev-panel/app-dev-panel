@@ -491,7 +491,6 @@ final class ApiEndpointTest extends TestCase
                 'http_stream' => true,
                 'command' => true,
                 'db' => true,
-                'yii_log' => false,
                 'mailer' => true,
                 'assets' => true,
             ],

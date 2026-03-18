@@ -33,7 +33,7 @@ use AppDevPanel\Cli\Command\DebugServerCommand;
  */
 
 return [
-    'app-dev-panel/yii-debug' => [
+    'app-dev-panel/yiisoft' => [
         'enabled' => true,
         'devServer' => [
             'enabled' => true,

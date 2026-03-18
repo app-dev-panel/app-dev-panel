@@ -16,11 +16,11 @@ return [
         '__construct()' => [
             'collectors' => ReferencesArray::from(
                 array_merge(
-                    $params['app-dev-panel/yii-debug']['collectors'],
-                    $params['app-dev-panel/yii-debug']['collectors.web'] ?? [],
+                    $params['app-dev-panel/yiisoft']['collectors'],
+                    $params['app-dev-panel/yiisoft']['collectors.web'] ?? [],
                 )
             ),
-            'ignoredRequests' => $params['app-dev-panel/yii-debug']['ignoredRequests'],
+            'ignoredRequests' => $params['app-dev-panel/yiisoft']['ignoredRequests'],
         ],
     ],
 ];

@@ -42,7 +42,7 @@ Browser Request
 │                                                       │
 │  ┌── Controller Action ──────────────────────┐       │
 │  │ DB queries  → DbCollector (via events)    │       │
-│  │ Yii logs    → Yii2LogCollector (at flush) │       │
+│  │ Yii logs    → DebugLogTarget (real-time)   │       │
 │  │ Exceptions  → ErrorHandler catches        │       │
 │  └───────────────────────────────────────────┘       │
 │                                                       │
@@ -78,7 +78,7 @@ php yii <command>
 │                                                       │
 │  ┌── Command Action ─────────────────────────┐       │
 │  │ DB queries  → DbCollector (via events)    │       │
-│  │ Yii logs    → Yii2LogCollector (at flush) │       │
+│  │ Yii logs    → DebugLogTarget (real-time)   │       │
 │  └───────────────────────────────────────────┘       │
 │                                                       │
 │  EVENT_AFTER_REQUEST                                 │

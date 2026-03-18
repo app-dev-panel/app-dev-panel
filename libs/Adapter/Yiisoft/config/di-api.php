@@ -57,7 +57,7 @@ if (!isAppDevPanelEnabled($params)) {
     return [];
 }
 
-$apiConfig = $params['app-dev-panel/yii-debug']['api'] ?? [];
+$apiConfig = $params['app-dev-panel/yiisoft']['api'] ?? [];
 if (!($apiConfig['enabled'] ?? true)) {
     return [];
 }
@@ -86,7 +86,7 @@ return [
     // Service registry
     ServiceRegistryInterface::class => static fn (ContainerInterface $container) => new FileServiceRegistry(
         $container->get(Aliases::class)->get(
-            $params['app-dev-panel/yii-debug']['path'] ?? '@runtime/debug',
+            $params['app-dev-panel/yiisoft']['path'] ?? '@runtime/debug',
         ) . '/services',
     ),
 
@@ -193,7 +193,7 @@ return [
         PathResolverInterface $pathResolver,
         ContainerInterface $container,
     ) use ($params): CommandController {
-        $commandMap = $params['app-dev-panel/yii-debug']['api']['commandMap'] ?? [];
+        $commandMap = $params['app-dev-panel/yiisoft']['api']['commandMap'] ?? [];
         return new CommandController($jsonResponseFactory, $pathResolver, $container, $commandMap);
     },
 

@@ -57,7 +57,7 @@ Captures SQL queries executed through Yii 2's database layer with accurate timin
 
 Real-time log target that feeds Yii 2 log messages to the Kernel's `LogCollector`.
 
-Unlike `Yii2LogCollector` which reads logs at shutdown (and misses early-flushed messages), `DebugLogTarget` is registered as a Yii log target and captures messages in real-time as they are flushed by the logger.
+`DebugLogTarget` is registered as a Yii log target and captures messages in real-time as they are flushed by the logger.
 
 **Fed by**: `yii\log\Target::export()` — called automatically by Yii's logger
 
@@ -125,27 +125,3 @@ Captures registered asset bundles from Yii 2's View component (web requests only
 
 **Summary**: `{assets: {bundleCount: 5}}`
 
-### Yii2LogCollector (Legacy)
-
-Captures Yii 2's native log messages from `Yii::getLogger()` at shutdown time.
-
-**Note**: Prefer `DebugLogTarget` for real-time capture. This collector is kept for backward compatibility and captures profiling messages that `DebugLogTarget` filters out.
-
-**Fed by**: `Yii::getLogger()->messages` at shutdown
-
-**Data schema**:
-```json
-{
-    "messages": [
-        {
-            "level": "info",
-            "message": "Application request processed",
-            "category": "application",
-            "timestamp": 1710000000.123
-        }
-    ],
-    "count": 42
-}
-```
-
-**Log levels**: `error`, `warning`, `info`, `trace`, `profile`, `profile_begin`, `profile_end`

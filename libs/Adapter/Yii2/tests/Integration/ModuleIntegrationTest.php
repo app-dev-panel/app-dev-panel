@@ -123,7 +123,6 @@ final class ModuleIntegrationTest extends TestCase
     {
         $module = $this->createModule([
             'db' => false,
-            'yii_log' => false,
         ]);
 
         $collectorClasses = array_map(static fn ($c) => $c::class, $module->getCollectorInstances());
