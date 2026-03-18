@@ -9,7 +9,7 @@ return [
     'name' => 'ADP Yii 2 Playground',
     'basePath' => dirname(__DIR__) . '/src',
     'runtimePath' => dirname(__DIR__) . '/runtime',
-    'bootstrap' => ['log'],
+    'bootstrap' => ['debug-panel', 'log'],
     'controllerNamespace' => 'App\\controllers',
     'params' => $params,
 
