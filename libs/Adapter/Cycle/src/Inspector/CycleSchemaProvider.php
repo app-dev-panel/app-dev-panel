@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Api\Inspector\Database\Cycle;
+namespace AppDevPanel\Adapter\Cycle\Inspector;
 
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use Cycle\Database\ColumnInterface;
@@ -65,7 +65,7 @@ class CycleSchemaProvider implements SchemaProviderInterface
                 'type' => $columnSchema->getInternalType(),
                 'dbType' => $columnSchema->getType(),
                 'defaultValue' => $columnSchema->getDefaultValue(),
-                'comment' => null, // unsupported for now
+                'comment' => null,
                 'allowNull' => $columnSchema->isNullable(),
             ];
         }

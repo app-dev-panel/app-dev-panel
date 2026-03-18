@@ -107,9 +107,9 @@
 **10. `ModuleFederationAssetBundle` — empty/stub class (ModuleFederationAssetBundle.php)**
 - Likely placeholder that was never implemented
 
-**11. DoS: Missing database pagination (DbSchemaProvider.php, CycleSchemaProvider.php)**
-- `$records = new Query($this->db)->from($schema->getName())->all()` reads ALL records into memory
-- No LIMIT parameter, no pagination support
+**11. DoS: Missing database pagination (SchemaProvider implementations)**
+- Some `SchemaProviderInterface` implementations read ALL records into memory
+- `getTable()` has `$limit`/`$offset` params, but `getTables()` counts may be expensive on large schemas
 
 **~~12. Null dereference in createJsPanelResponse~~ [DONE]**
 
@@ -209,8 +209,8 @@
 - If the debug server isn't running, this silently fails
 
 **2. Configuration coupling to params key**
-- All config uses `'app-dev-panel/yii-debug'` prefix but still references `'yii-debug'` in some places
-- Namespace migration is incomplete
+- ~~All config uses `'app-dev-panel/yii-debug'` prefix but still references `'yii-debug'` in some places~~
+- ~~Namespace migration is incomplete~~ [DONE — renamed to `app-dev-panel/yiisoft`]
 
 **3. Event mapping is fragile**
 - Events depend on specific Yii event class names
@@ -228,7 +228,7 @@
 | Priority | Task | Status | Impact |
 |----------|------|--------|--------|
 | ~~P0~~ | ~~Fix command name mismatch: `debug/reset` → `debug:reset`~~ | **Done** | ~~Bug — ignored commands not working~~ |
-| P1 | Complete namespace migration (yii-debug → app-dev-panel) | Open | Consistency |
+| ~~P1~~ | ~~Complete namespace migration (yii-debug → app-dev-panel/yiisoft)~~ | **Done** | ~~Consistency~~ |
 | P1 | Add guard against circular dependency in DebugServiceProvider | Open | Stability |
 | ~~P1~~ | ~~Extract duplicated enabled-check to shared helper~~ | **Done** | ~~DRY, maintainability~~ |
 | P2 | Lazy-initialize VarDumper handler to avoid early socket creation | Open | Performance |

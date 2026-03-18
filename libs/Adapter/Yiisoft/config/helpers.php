@@ -9,5 +9,5 @@ declare(strict_types=1);
  */
 function isAppDevPanelEnabled(array $params): bool
 {
-    return (bool) ($params['app-dev-panel/yii-debug']['enabled'] ?? false);
+    return (bool) ($params['app-dev-panel/yiisoft']['enabled'] ?? false);
 }

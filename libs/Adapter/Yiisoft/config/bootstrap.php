@@ -26,7 +26,7 @@ return [
 
         $decorated = VarDumper::getDefaultHandler();
 
-        if ($params['app-dev-panel/yii-debug']['devServer']['enabled'] ?? false) {
+        if ($params['app-dev-panel/yiisoft']['devServer']['enabled'] ?? false) {
             $decorated = new CompositeHandler([$decorated, new VarDumperHandler()]);
         }
 

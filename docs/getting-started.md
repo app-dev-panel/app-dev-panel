@@ -26,9 +26,9 @@ npm install
 ### 2. Start the Demo Application
 
 ```bash
-# Start the PHP backend (from project root)
-cd app
-php -S 0.0.0.0:8080 -t public
+# Start the PHP backend (Yii 3 reference app)
+cd playground/yiisoft-app
+PHP_CLI_SERVER_WORKERS=3 php -S 0.0.0.0:8080 -t public
 
 # Start the frontend dev server (from libs/app-dev-panel)
 cd libs/app-dev-panel
@@ -56,6 +56,22 @@ composer require app-dev-panel/kernel app-dev-panel/api app-dev-panel/adapter-yi
 
 3. Access the debug panel at `http://your-app/debug/api/` (API) or via the frontend SPA.
 
+### Symfony
+
+```bash
+composer require app-dev-panel/kernel app-dev-panel/api app-dev-panel/adapter-symfony
+```
+
+Register the bundle in `config/bundles.php` and configure in `config/packages/app_dev_panel.yaml`.
+
+### Yii 2
+
+```bash
+composer require app-dev-panel/kernel app-dev-panel/api app-dev-panel/adapter-yii2
+```
+
+The adapter auto-registers via `BootstrapInterface`. Configure in application config `modules` section.
+
 ### Other Frameworks
 
 To integrate ADP with a different framework, you need to create an adapter that:
@@ -63,14 +79,25 @@ To integrate ADP with a different framework, you need to create an adapter that:
 1. Registers Kernel proxy classes as service decorators in your DI container
 2. Hooks into application lifecycle events (startup/shutdown)
 3. Configures which collectors are active
+4. Explicitly registers all inspector controllers in DI (see existing adapters)
 
-See `libs/Adapter/Yiisoft/` for a reference implementation.
+See `libs/Adapter/Yiisoft/`, `libs/Adapter/Symfony/`, `libs/Adapter/Yii2/` for reference implementations.
+
+## PHP Built-in Server
+
+When using PHP's built-in server (`php -S`), always set `PHP_CLI_SERVER_WORKERS=3` (or higher).
+ADP's frontend makes concurrent API requests (SSE + data fetching); the default single-worker
+mode cannot handle them in parallel, causing timeouts.
+
+```bash
+PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
+```
 
 ## Project Structure
 
 | Directory | Description |
 |-----------|-------------|
-| `app/` | Demo PHP application |
+| `playground/` | Demo apps (Yii 3, Symfony, Yii 2) |
 | `libs/Kernel/` | Core debugging engine |
 | `libs/API/` | REST API + SSE endpoints |
 | `libs/Cli/` | CLI commands |

@@ -4,9 +4,14 @@ import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 export const getCollectedCountByCollector = (collector: CollectorsMap, data: DebugEntry): number | undefined => {
     switch (collector) {
         case CollectorsMap.AssetCollector:
-            return Number(data.asset?.bundles?.total);
+        case CollectorsMap.Yii2AssetBundleCollector:
+            return Number(data.asset?.bundles?.total) || Number(data.assets?.bundleCount);
         case CollectorsMap.DatabaseCollector:
-            return Number(data.db?.queries?.total) + Number(data.db?.transactions?.total);
+        case CollectorsMap.Yii2DbCollector:
+            return (
+                (Number(data.db?.queries?.total) || Number(data.db?.queryCount) || 0) +
+                Number(data.db?.transactions?.total || 0)
+            );
         case CollectorsMap.ExceptionCollector:
             return Object.values(data.exception ?? []).length > 0 ? 1 : 0;
         case CollectorsMap.EventCollector:
@@ -32,7 +37,8 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
         case CollectorsMap.HttpStreamCollector:
             return Number(data.http_stream?.length);
         case CollectorsMap.MailerCollector:
-            return Number(data.mailer?.total);
+        case CollectorsMap.Yii2MailerCollector:
+            return Number(data.mailer?.total) || Number(data.mailer?.messageCount);
         case CollectorsMap.CacheCollector:
             return Number(data.cache?.totalOperations);
         case CollectorsMap.FilesystemStreamCollector:

@@ -36,10 +36,12 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
     const pages: {[name: string]: (data: any) => JSX.Element} = {
         [CollectorsMap.MailerCollector]: (data: any) => <MailerPanel data={data} />,
+        [CollectorsMap.Yii2MailerCollector]: (data: any) => <MailerPanel data={data} />,
         [CollectorsMap.ServiceCollector]: (data: any) => <ServicesPanel data={data} />,
         [CollectorsMap.TimelineCollector]: (data: any) => <TimelinePanel data={data} />,
         [CollectorsMap.LogCollector]: (data: any) => <LogPanel data={data} />,
         [CollectorsMap.DatabaseCollector]: (data: any) => <DatabasePanel data={data} />,
+        [CollectorsMap.Yii2DbCollector]: (data: any) => <DatabasePanel data={data} />,
         [CollectorsMap.FilesystemStreamCollector]: (data: any) => <FilesystemPanel data={data} />,
         [CollectorsMap.RequestCollector]: (data: any) => <RequestPanel data={data} />,
         [CollectorsMap.MiddlewareCollector]: (data: any) => <MiddlewarePanel {...data} />,

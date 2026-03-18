@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Api\Inspector\Database\Db;
+namespace AppDevPanel\Adapter\Yiisoft\Inspector;
 
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;

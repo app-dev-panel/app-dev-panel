@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Api\Tests\Unit\Inspector\Database;
+namespace AppDevPanel\Adapter\Yiisoft\Tests\Unit\Inspector;
 
-use AppDevPanel\Api\Inspector\Database\Db\DbSchemaProvider;
+use AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Cache\NullCache;
 use Yiisoft\Db\Cache\SchemaCache;

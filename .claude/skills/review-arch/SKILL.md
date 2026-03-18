@@ -17,7 +17,7 @@ If no argument — review all modules.
 Adapter ──▶ API ──▶ Kernel
    │                   ▲
    └───────────────────┘
-Cli ──▶ Kernel
+Cli ──▶ API ──▶ Kernel
 Frontend ──▶ API (HTTP only)
 ```
 
@@ -25,8 +25,11 @@ Frontend ──▶ API (HTTP only)
 |--------|--------------|------------------|
 | Kernel | PSR interfaces, generic PHP libs | API, Cli, Adapter, any framework |
 | API | Kernel, PSR interfaces | Adapter, Cli |
-| Cli | Kernel, Symfony Console | API, Adapter |
+| Cli | Kernel, API, Symfony Console | Adapter |
 | Adapter/Yiisoft | Kernel, API, Cli, Yii 3 | Other adapters |
+| Adapter/Cycle | API, Cycle ORM packages | Other adapters |
+| Adapter/Symfony | Kernel, API, Cli, Symfony packages | Other adapters |
+| Adapter/Yii2 | Kernel, API, Cli, Yii 2 packages | Other adapters |
 | Frontend | Nothing (HTTP only) | Any PHP package |
 
 ## Checks
@@ -44,8 +47,7 @@ grep -rn "use AppDevPanel\\\\Adapter\\\\" libs/Kernel/src/
 grep -rn "use AppDevPanel\\\\Cli\\\\" libs/API/src/
 grep -rn "use AppDevPanel\\\\Adapter\\\\" libs/API/src/
 
-# Cli must NOT import from API/Adapter
-grep -rn "use AppDevPanel\\\\Api\\\\" libs/Cli/src/
+# Cli must NOT import from Adapter
 grep -rn "use AppDevPanel\\\\Adapter\\\\" libs/Cli/src/
 ```
 

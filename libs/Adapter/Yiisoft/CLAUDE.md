@@ -1,7 +1,6 @@
 # Yii 3 Adapter
 
-Bridges the ADP Kernel and API into the Yii 3 framework. This is the first (reference) adapter
-implementation. Future adapters for Symfony, Laravel, etc. should follow a similar pattern.
+Bridges ADP Kernel and API into Yii 3. Reference adapter. Includes Yii-specific collectors (DB, mailer, queue, router, validator, view) and database inspector via `Yiisoft\Db`.
 
 ## Package
 
@@ -18,12 +17,49 @@ config/
 ├── di.php                # Common DI definitions (storage, proxies, collectors)
 ├── di-web.php            # Web-specific DI (RequestCollector, WebAppInfoCollector)
 ├── di-console.php        # Console-specific DI (CommandCollector, ConsoleAppInfoCollector)
+├── di-api.php            # API bridge DI (controllers, middleware, inspector)
 ├── di-providers.php      # Service provider registration
 ├── events-web.php        # Web event → debugger lifecycle mapping
 ├── events-console.php    # Console event → debugger lifecycle mapping
 └── params.php            # Master configuration for all settings
 src/
-└── DebugServiceProvider.php  # Wraps container with ContainerInterfaceProxy
+├── Api/
+│   ├── AliasPathResolver.php            # PathResolverInterface via Yii Aliases
+│   └── YiiApiMiddleware.php             # PSR-15 middleware bridging to ApiApplication
+├── Collector/
+│   ├── Db/                              # Database query interception
+│   │   ├── DatabaseCollector.php
+│   │   ├── CommandInterfaceProxy.php
+│   │   ├── ConnectionInterfaceProxy.php
+│   │   └── TransactionInterfaceDecorator.php
+│   ├── Mailer/
+│   │   ├── MailerCollector.php
+│   │   └── MailerInterfaceProxy.php
+│   ├── Middleware/
+│   │   └── MiddlewareCollector.php
+│   ├── Queue/
+│   │   ├── QueueCollector.php
+│   │   ├── QueueDecorator.php
+│   │   ├── QueueProviderInterfaceProxy.php
+│   │   └── QueueWorkerInterfaceProxy.php
+│   ├── Router/
+│   │   ├── RouterCollector.php
+│   │   └── UrlMatcherInterfaceProxy.php
+│   ├── Validator/
+│   │   ├── ValidatorCollector.php
+│   │   └── ValidatorInterfaceProxy.php
+│   └── View/
+│       └── WebViewCollector.php
+├── Inspector/
+│   └── DbSchemaProvider.php             # Database schema via Yiisoft DB
+├── Proxy/
+│   ├── ContainerInterfaceProxy.php      # PSR-11 container proxy
+│   ├── ContainerProxyConfig.php
+│   ├── ProxyLogTrait.php
+│   ├── ServiceProxy.php
+│   ├── ServiceMethodProxy.php
+│   └── VarDumperHandlerInterfaceProxy.php
+└── DebugServiceProvider.php             # Wraps container with ContainerInterfaceProxy
 ```
 
 ## How It Works
@@ -78,7 +114,7 @@ Maps framework lifecycle events to debugger lifecycle:
 ## Configuration (`params.php`)
 
 ```php
-'app-dev-panel/yii-debug' => [
+'app-dev-panel/yiisoft' => [
     'enabled' => true,                    // Enable/disable debugger
     'collectors' => [...],                // Active collectors
     'trackedServices' => [...],           // Services to proxy with ServiceProxy

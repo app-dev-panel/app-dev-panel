@@ -291,9 +291,18 @@ type CollectorCardData = {
 };
 
 function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
+    const isWeb = isDebugEntryAboutWeb(entry);
+    const isConsole = isDebugEntryAboutConsole(entry);
+
     return [...entry.collectors]
         .map((c) => (typeof c === 'string' ? c : c.id))
         .filter((c) => !hiddenCollectors.has(c))
+        .filter((c) => {
+            // Show only one of Request/Command based on entry type
+            if (c === CollectorsMap.CommandCollector && isWeb) return false;
+            if (c === CollectorsMap.RequestCollector && isConsole) return false;
+            return true;
+        })
         .sort(compareCollectorWeight)
         .map((collector) => {
             const count = getCollectedCountByCollector(collector as CollectorsMap, entry);

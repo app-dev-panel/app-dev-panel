@@ -1,0 +1,50 @@
+{
+    "name": "app-dev-panel/yii2-playground",
+    "type": "project",
+    "description": "Yii 2 playground app demonstrating ADP integration",
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "app-dev-panel/adapter-yii2": "*",
+        "nyholm/psr7": "^1.8",
+        "nyholm/psr7-server": "^1.1",
+        "yiisoft/yii2": "^2.0.50"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../libs/Adapter/Yii2"
+        },
+        {
+            "type": "path",
+            "url": "../../libs/API"
+        },
+        {
+            "type": "path",
+            "url": "../../libs/Kernel"
+        },
+        {
+            "type": "path",
+            "url": "../../libs/Cli"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "scripts": {
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

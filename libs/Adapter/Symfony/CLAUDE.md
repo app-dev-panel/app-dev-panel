@@ -227,7 +227,7 @@ app_dev_panel:
 | Request collector | Kernel's `RequestCollector` (native PSR-7) | Kernel's `RequestCollector` (converted from HttpFoundation) |
 | PSR-7 bridge | Native (Yii uses PSR-7) | `nyholm/psr7-server` conversion for request + response |
 | Inspector config | Application config service | `SymfonyConfigProvider` as `config` alias |
-| Database inspector | `DbSchemaProvider` (Yiisoft DB) | `DoctrineSchemaProvider` (DBAL) or `NullSchemaProvider` |
+| Database inspector | `DbSchemaProvider` in Yiisoft adapter | `DoctrineSchemaProvider` (DBAL) or `NullSchemaProvider` |
 
 ## Creating a New Adapter
 

@@ -21,13 +21,19 @@ fully framework-independent. The first adapter targets Yii 3; additional adapter
 
 ```
 /
-├── app/                          # Demo/reference PHP application
+├── playground/                    # Demo/reference applications per framework
+│   ├── yiisoft-app/              # Yii 3 (Yiisoft) reference application
+│   ├── symfony-basic-app/        # Symfony 7 minimal demo
+│   └── yii2-basic-app/          # Yii 2 minimal demo
 ├── libs/
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
 │   ├── API/                      # HTTP API: debug endpoints, inspector endpoints, SSE
 │   ├── Cli/                      # CLI commands: debug server, reset, broadcast
 │   ├── Adapter/
-│   │   └── Yiisoft/              # Yii 3 framework adapter (first adapter)
+│   │   ├── Yiisoft/              # Yii 3 framework adapter
+│   │   ├── Symfony/              # Symfony framework adapter
+│   │   ├── Yii2/                 # Yii 2 framework adapter
+│   │   └── Cycle/                # Cycle ORM adapter (database schema only)
 │   └── frontend/                 # Frontend monorepo
 │       └── packages/
 │           ├── panel/                # Main SPA (debug panel)
@@ -176,6 +182,8 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 - `libs/API/CLAUDE.md` — HTTP API endpoints and middleware
 - `libs/Cli/CLAUDE.md` — CLI commands
 - `libs/Adapter/Yiisoft/CLAUDE.md` — Yii 3 adapter integration
+- `libs/Adapter/Symfony/CLAUDE.md` — Symfony adapter integration
+- `libs/Adapter/Yii2/CLAUDE.md` — Yii 2 adapter integration
 - `libs/frontend/CLAUDE.md` — Frontend architecture
 
 ## Coding Conventions

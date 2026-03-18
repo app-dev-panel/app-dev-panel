@@ -9,7 +9,7 @@ import {styled, useTheme} from '@mui/material/styles';
 import {useState} from 'react';
 
 type Level = 'emergency' | 'alert' | 'critical' | 'error' | 'warning' | 'notice' | 'info' | 'debug';
-type LogEntry = {context: object; level: Level; line: string; message: string; time: number};
+type LogEntry = {context: object; level: Level; line: string; message: unknown; time: number};
 type LogPanelProps = {data: LogEntry[]};
 
 const levelColor = (level: string, theme: Theme): string => {
@@ -54,6 +54,8 @@ const TimeCell = styled(Typography)({
 
 const MessageCell = styled(Typography)({fontSize: '13px', flex: 1, wordBreak: 'break-word'});
 
+const formatMessage = (message: unknown): string => (typeof message === 'string' ? message : JSON.stringify(message));
+
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(1.5, 1.5, 1.5, 15),
     backgroundColor: theme.palette.action.hover,
@@ -73,7 +75,7 @@ export const LogPanel = ({data}: LogPanelProps) => {
     const filtered = filter
         ? data.filter(
               (e) =>
-                  e.message.toLowerCase().includes(filter.toLowerCase()) ||
+                  formatMessage(e.message).toLowerCase().includes(filter.toLowerCase()) ||
                   e.level.toLowerCase().includes(filter.toLowerCase()),
           )
         : data;
@@ -112,7 +114,7 @@ export const LogPanel = ({data}: LogPanelProps) => {
                                     borderRadius: 1,
                                 }}
                             />
-                            <MessageCell>{entry.message}</MessageCell>
+                            <MessageCell>{formatMessage(entry.message)}</MessageCell>
                             <IconButton size="small" sx={{flexShrink: 0}}>
                                 <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
                             </IconButton>

@@ -388,7 +388,7 @@ Same lifecycle as web requests, with these differences:
 ## Adapter Configuration
 
 ```php
-'app-dev-panel/yii-debug' => [
+'app-dev-panel/yiisoft' => [
     'enabled' => true,
     'collectors' => [LogCollector::class, EventCollector::class, ...],
     'trackedServices' => [MyService::class => CustomProxy::class],
