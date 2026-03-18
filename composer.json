@@ -52,13 +52,14 @@
     "symfony/framework-bundle": "^7.0",
     "symfony/http-kernel": "^7.0",
     "symfony/var-dumper": "^7.0",
-    "yiisoft/yii2": "^2.0.50",
     "yiisoft/cache": "^3.2",
     "yiisoft/db-sqlite": "^1.2",
     "yiisoft/error-handler": "^4.3",
     "yiisoft/event-dispatcher": "^1.1",
+    "yiisoft/translator": "^3.0",
     "yiisoft/yii-console": "^2.4",
-    "yiisoft/yii-http": "^1.1"
+    "yiisoft/yii-http": "^1.1",
+    "yiisoft/yii2": "^2.0.50"
   },
   "scripts-aliases": {
     "lint": [

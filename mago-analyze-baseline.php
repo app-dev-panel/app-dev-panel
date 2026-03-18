@@ -1262,54 +1262,6 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 3
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 2
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "non-existent-class"
-message = 'Class `Yiisoft\Translator\CategorySource` not found.'
-count = 2
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Translator\CategorySource`.'
-count = 2
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Translator\MessageReaderInterface`.'
-count = 2
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Translator\MessageWriterInterface`.'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Translator\MessageReaderInterface` does not exist.'
-count = 4
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Yiisoft\Translator\MessageWriterInterface` does not exist.'
-count = 2
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
 code = "possibly-invalid-argument"
 message = '''Possible argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::container`: expected `array<string, object>`, but possibly received `array{'tag@translation.categorySource': array{}}`.'''
 count = 2
@@ -1317,26 +1269,8 @@ count = 2
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
 code = "possibly-invalid-argument"
-message = '''Possible argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::container`: expected `array<string, object>`, but possibly received `array{'tag@translation.categorySource': list{unknown-ref(Yiisoft\Translator\CategorySource)}}`.'''
+message = '''Possible argument type mismatch for argument #1 of `appdevpanel\api\tests\unit\inspector\controller\controllertestcase::container`: expected `array<string, object>`, but possibly received `array{'tag@translation.categorySource': list{Yiisoft\Translator\CategorySource}}`.'''
 count = 3
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #2 of `AppDevPanel\Api\Tests\Unit\Inspector\Controller\TranslationControllerTest::createcategorysource`: expected `unknown-ref(Yiisoft\Translator\MessageReaderInterface)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Yiisoft\Translator\MessageReaderInterface`.'
-count = 2
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #2 of `AppDevPanel\Api\Tests\Unit\Inspector\Controller\TranslationControllerTest::createcategorysourcewithwriter`: expected `unknown-ref(Yiisoft\Translator\MessageReaderInterface)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Yiisoft\Translator\MessageReaderInterface`.'
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/TranslationControllerTest.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #3 of `AppDevPanel\Api\Tests\Unit\Inspector\Controller\TranslationControllerTest::createcategorysourcewithwriter`: expected `unknown-ref(Yiisoft\Translator\MessageWriterInterface)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Yiisoft\Translator\MessageWriterInterface`.'
-count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Middleware/InspectorProxyMiddlewareTest.php"
