@@ -28,7 +28,8 @@ fully framework-independent. The first adapter targets Yii 3; additional adapter
 ├── libs/
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
 │   ├── API/                      # HTTP API: debug endpoints, inspector endpoints, SSE
-│   ├── Cli/                      # CLI commands: debug server, reset, broadcast
+│   ├── Cli/                      # CLI commands: debug server, reset, broadcast, query
+│   ├── Testing/                  # Test scenarios: definitions, runner, CLI command
 │   ├── Adapter/
 │   │   ├── Yiisoft/              # Yii 3 framework adapter
 │   │   ├── Symfony/              # Symfony framework adapter
@@ -119,6 +120,12 @@ make all                            # Run everything: checks + tests
 make ci                             # Full CI pipeline: all checks + all tests
 make check-ci                       # CI checks only
 make test-ci                        # CI tests only
+
+# Testing scenarios (requires running playground servers)
+make scenarios             # Run test scenarios against all playgrounds
+make scenarios-yiisoft     # Run scenarios against Yiisoft (port 8101)
+make scenarios-symfony     # Run scenarios against Symfony (port 8102)
+make scenarios-yii2        # Run scenarios against Yii2 (port 8103)
 
 # Frontend dev (still via npm)
 cd libs/frontend
@@ -266,6 +273,7 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 - `libs/Kernel/CLAUDE.md` — Core engine internals
 - `libs/API/CLAUDE.md` — HTTP API endpoints and middleware
 - `libs/Cli/CLAUDE.md` — CLI commands
+- `libs/Testing/CLAUDE.md` — Test scenarios and runner
 - `libs/Adapter/Yiisoft/CLAUDE.md` — Yii 3 adapter integration
 - `libs/Adapter/Symfony/CLAUDE.md` — Symfony adapter integration
 - `libs/Adapter/Yii2/CLAUDE.md` — Yii 2 adapter integration

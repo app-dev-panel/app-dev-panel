@@ -8,7 +8,8 @@
         mago-playgrounds mago-playground-yiisoft mago-playground-symfony mago-playground-yii2 \
         mago-playgrounds-fix mago-playground-yiisoft-fix mago-playground-symfony-fix mago-playground-yii2-fix \
         check check-ci fix \
-        install install-php install-frontend install-playgrounds
+        install install-php install-frontend install-playgrounds \
+        scenarios scenarios-yiisoft scenarios-symfony scenarios-yii2
 
 # --- Port allocation ---
 # Frontend dev server
@@ -73,6 +74,12 @@ help: ## Show this help
 	@echo "  make install-php           Install PHP dependencies (root)"
 	@echo "  make install-frontend      Install frontend dependencies"
 	@echo "  make install-playgrounds   Install playground dependencies"
+	@echo ""
+	@echo "$(YELLOW)Testing Scenarios:$(RESET)"
+	@echo "  make scenarios             Run test scenarios against all playgrounds"
+	@echo "  make scenarios-yiisoft     Run scenarios against Yiisoft playground"
+	@echo "  make scenarios-symfony     Run scenarios against Symfony playground"
+	@echo "  make scenarios-yii2        Run scenarios against Yii2 playground"
 	@echo ""
 	@echo "$(YELLOW)Ports:$(RESET)"
 	@echo "  Frontend:  $(FRONTEND_PORT)"
@@ -240,6 +247,27 @@ fix: ## Fix all code (core + playgrounds + frontend)
 	@$(MAKE) frontend-fix
 	@echo ""
 	@echo "$(GREEN)All code fixed!$(RESET)"
+
+# ============================================================================
+# Testing Scenarios
+# ============================================================================
+
+scenarios-yiisoft: ## Run test scenarios against Yiisoft playground
+	@echo "$(CYAN)[Scenarios: Yiisoft] Running test scenarios on port $(YIISOFT_PORT)...$(RESET)"
+	php vendor/bin/adp debug:scenarios http://127.0.0.1:$(YIISOFT_PORT)
+
+scenarios-symfony: ## Run test scenarios against Symfony playground
+	@echo "$(CYAN)[Scenarios: Symfony] Running test scenarios on port $(SYMFONY_PORT)...$(RESET)"
+	php vendor/bin/adp debug:scenarios http://127.0.0.1:$(SYMFONY_PORT)
+
+scenarios-yii2: ## Run test scenarios against Yii2 playground
+	@echo "$(CYAN)[Scenarios: Yii2] Running test scenarios on port $(YII2_PORT)...$(RESET)"
+	php vendor/bin/adp debug:scenarios http://127.0.0.1:$(YII2_PORT)
+
+scenarios: ## Run test scenarios against all playgrounds (requires running servers)
+	@echo "$(CYAN)Running test scenarios against all playgrounds...$(RESET)"
+	@$(MAKE) -j3 --output-sync=target scenarios-yiisoft scenarios-symfony scenarios-yii2
+	@echo "$(GREEN)All test scenarios passed!$(RESET)"
 
 # ============================================================================
 # Full pipeline

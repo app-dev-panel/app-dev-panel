@@ -7,7 +7,7 @@ Central test scenario definitions and runner for verifying ADP collectors across
 - Composer: `app-dev-panel/testing`
 - Namespace: `AppDevPanel\Testing\`
 - PHP: 8.4+
-- Dependencies: `guzzlehttp/guzzle`, `guzzlehttp/psr7`
+- Dependencies: `guzzlehttp/guzzle`, `guzzlehttp/psr7`, `symfony/console`
 
 ## Architecture
 
