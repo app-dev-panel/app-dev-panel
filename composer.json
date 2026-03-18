@@ -28,6 +28,10 @@
     {
       "type": "path",
       "url": "libs/Cli"
+    },
+    {
+      "type": "path",
+      "url": "libs/Testing"
     }
   ],
   "require": {
