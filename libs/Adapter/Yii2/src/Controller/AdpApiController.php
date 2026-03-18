@@ -115,14 +115,12 @@ final class AdpApiController extends Controller
 
         $body = $psrResponse->getBody();
 
+        // Yii 2's Response::sendContent() calls the stream callable and iterates
+        // the return value with foreach. Must return a Generator, not echo directly.
         $yiiResponse->format = Response::FORMAT_RAW;
-        $yiiResponse->stream = static function () use ($body): void {
+        $yiiResponse->stream = static function () use ($body): \Generator {
             while (!$body->eof()) {
-                echo $body->read(8192);
-                if (ob_get_level() > 0) {
-                    ob_flush();
-                }
-                flush();
+                yield $body->read(8192);
             }
         };
 

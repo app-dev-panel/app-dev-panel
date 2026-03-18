@@ -28,6 +28,11 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
     [CollectorsMap.TwigCollector]: {label: 'Twig', icon: 'code', weight: 15},
     [CollectorsMap.SecurityCollector]: {label: 'Security', icon: 'shield', weight: 15},
     [CollectorsMap.MessengerCollector]: {label: 'Messenger', icon: 'send', weight: 15},
+    // Yii 2 adapter collectors (reuse same icons/weights as their generic equivalents)
+    [CollectorsMap.Yii2DbCollector]: {label: 'Database', icon: 'storage', weight: 3},
+    [CollectorsMap.Yii2MailerCollector]: {label: 'Mailer', icon: 'mail', weight: 10},
+    [CollectorsMap.Yii2AssetBundleCollector]: {label: 'Assets', icon: 'web_asset', weight: 15},
+
     [CollectorsMap.ConsoleAppInfoCollector]: {label: 'Console', icon: 'terminal', weight: 17},
     [CollectorsMap.WebAppInfoCollector]: {label: 'Web Info', icon: 'language', weight: 18},
     [CollectorsMap.CommandCollector]: {label: 'Command', icon: 'terminal', weight: 19},

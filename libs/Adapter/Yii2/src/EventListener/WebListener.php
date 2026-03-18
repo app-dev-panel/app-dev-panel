@@ -80,6 +80,12 @@ final class WebListener
         $app->getResponse()->getHeaders()->set('X-Debug-Id', $this->debugger->getId());
 
         $this->webAppInfoCollector?->markApplicationFinished();
+
+        // Force-flush Yii's Logger so buffered messages reach DebugLogTarget before storage flush.
+        // Yii's Logger has flushInterval=1000 by default, so with ~14 messages per request
+        // the buffer never auto-flushes. Without this, LogCollector gets 0 messages.
+        \Yii::getLogger()->flush(true);
+
         $this->debugger->shutdown();
     }
 

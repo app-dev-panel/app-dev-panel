@@ -24,6 +24,11 @@ export enum CollectorsMap {
     SecurityCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\SecurityCollector',
     MessengerCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\MessengerCollector',
 
+    // Yii 2 adapter collectors
+    Yii2DbCollector = 'AppDevPanel\\Adapter\\Yii2\\Collector\\DbCollector',
+    Yii2MailerCollector = 'AppDevPanel\\Adapter\\Yii2\\Collector\\MailerCollector',
+    Yii2AssetBundleCollector = 'AppDevPanel\\Adapter\\Yii2\\Collector\\AssetBundleCollector',
+
     // External package collectors (not yet migrated, kept for future adapters)
     AssetCollector = 'Yiisoft\\Assets\\Debug\\AssetCollector',
     ValidatorCollector = 'Yiisoft\\Validator\\Debug\\ValidatorCollector',

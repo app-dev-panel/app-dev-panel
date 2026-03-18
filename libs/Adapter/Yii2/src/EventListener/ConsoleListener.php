@@ -63,6 +63,10 @@ final class ConsoleListener
 
         $this->consoleAppInfoCollector?->collect($event);
         $this->commandCollector?->collect($event);
+
+        // Force-flush Yii's Logger so buffered messages reach DebugLogTarget before storage flush.
+        \Yii::getLogger()->flush(true);
+
         $this->debugger->shutdown();
     }
 }

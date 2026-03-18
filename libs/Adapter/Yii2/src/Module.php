@@ -9,7 +9,6 @@ use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
 use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
 use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
-use AppDevPanel\Adapter\Yii2\Collector\Yii2LogCollector;
 use AppDevPanel\Adapter\Yii2\Controller\AdpApiController;
 use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
 use AppDevPanel\Adapter\Yii2\EventListener\WebListener;
@@ -98,7 +97,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         'http_stream' => true,
         'command' => true,
         'db' => true,
-        'yii_log' => true,
+        'yii_log' => false, // Deprecated: use global LogCollector + DebugLogTarget instead
         'mailer' => true,
         'assets' => true,
     ];
@@ -325,10 +324,6 @@ class Module extends \yii\base\Module implements BootstrapInterface
         // Yii2-specific collectors
         if ($collectors['db'] ?? true) {
             $this->collectorInstances[] = new DbCollector($timeline);
-        }
-
-        if ($collectors['yii_log'] ?? true) {
-            $this->collectorInstances[] = new Yii2LogCollector($timeline);
         }
 
         if ($collectors['mailer'] ?? true) {
