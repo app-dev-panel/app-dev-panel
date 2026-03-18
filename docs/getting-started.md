@@ -26,8 +26,8 @@ npm install
 ### 2. Start the Demo Application
 
 ```bash
-# Start the PHP backend (from project root)
-cd app
+# Start the PHP backend (Yii 3 reference app)
+cd playground/yiisoft-app
 PHP_CLI_SERVER_WORKERS=3 php -S 0.0.0.0:8080 -t public
 
 # Start the frontend dev server (from libs/app-dev-panel)
@@ -97,7 +97,7 @@ PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 
 | Directory | Description |
 |-----------|-------------|
-| `app/` | Demo PHP application |
+| `playground/` | Demo apps (Yii 3, Symfony, Yii 2) |
 | `libs/Kernel/` | Core debugging engine |
 | `libs/API/` | REST API + SSE endpoints |
 | `libs/Cli/` | CLI commands |

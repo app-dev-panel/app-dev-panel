@@ -10,7 +10,7 @@ paths = [
 ]
 includes = ["vendor"]
 excludes = [
-    "app/**",
+    "playground/**",
     "libs/yii-dev-panel/**",
     "var/**",
     "cache/**",

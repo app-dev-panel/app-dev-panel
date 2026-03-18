@@ -21,7 +21,10 @@ fully framework-independent. The first adapter targets Yii 3; additional adapter
 
 ```
 /
-├── app/                          # Demo/reference PHP application
+├── playground/                    # Demo/reference applications per framework
+│   ├── yiisoft-app/              # Yii 3 (Yiisoft) reference application
+│   ├── symfony-basic-app/        # Symfony 7 minimal demo
+│   └── yii2-basic-app/          # Yii 2 minimal demo
 ├── libs/
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
 │   ├── API/                      # HTTP API: debug endpoints, inspector endpoints, SSE
