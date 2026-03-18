@@ -17,11 +17,14 @@ use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2DbSchemaProvider;
 use AppDevPanel\Api\ApiApplication;
+use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
@@ -210,6 +213,28 @@ class Module extends \yii\base\Module implements BootstrapInterface
         \Yii::$container->setSingleton(ServiceRegistryInterface::class, static fn () => new FileServiceRegistry($storagePath . '/services'));
         \Yii::$container->setSingleton(CollectorRepositoryInterface::class, static fn () => new CollectorRepository(
             \Yii::$container->get(StorageInterface::class),
+        ));
+
+        // Middleware: ResponseDataWrapper (wraps JSON responses, catches NotFoundException → 404)
+        \Yii::$container->setSingleton(ResponseDataWrapper::class, static fn () => new ResponseDataWrapper(
+            \Yii::$container->get(JsonResponseFactoryInterface::class),
+        ));
+
+        // Middleware: IpFilterMiddleware
+        $allowedIps = $this->allowedIps;
+        \Yii::$container->setSingleton(IpFilterMiddleware::class, static fn () => new IpFilterMiddleware(
+            \Yii::$container->get(ResponseFactoryInterface::class),
+            \Yii::$container->get(StreamFactoryInterface::class),
+            $allowedIps,
+        ));
+
+        // Middleware: InspectorProxyMiddleware (proxies /inspect/api to external services)
+        \Yii::$container->setSingleton(InspectorProxyMiddleware::class, static fn () => new InspectorProxyMiddleware(
+            \Yii::$container->get(ServiceRegistryInterface::class),
+            \Yii::$container->get(ClientInterface::class),
+            \Yii::$container->get(ResponseFactoryInterface::class),
+            \Yii::$container->get(StreamFactoryInterface::class),
+            \Yii::$container->get(UriFactoryInterface::class),
         ));
 
         // Schema provider

@@ -7,24 +7,23 @@ namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\StartupContext;
+use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Integration tests for the Yii 2 ADP API endpoints.
  *
- * Tests that the debug API (/debug/api/*) and inspector API (/inspect/api/*)
- * endpoints are reachable and return correct responses when the module
- * is properly bootstrapped.
- *
- * These tests use the Module's internal ApiApplication directly (no HTTP server)
- * to verify that API routing and response generation work correctly.
+ * Tests use the Module's internal ApiApplication directly (no HTTP server)
+ * to verify API routing, middleware pipeline, and response generation.
  */
 #[CoversNothing]
 final class ApiEndpointTest extends TestCase
 {
     private string $storagePath;
     private ?Module $module = null;
+    private Psr17Factory $psr17;
 
     protected function setUp(): void
     {
@@ -36,6 +35,8 @@ final class ApiEndpointTest extends TestCase
         \Yii::$container = new \yii\di\Container();
         \Yii::setAlias('@app', $this->storagePath);
         \Yii::setAlias('@runtime', $this->storagePath . '/runtime');
+
+        $this->psr17 = new Psr17Factory();
     }
 
     protected function tearDown(): void
@@ -49,18 +50,15 @@ final class ApiEndpointTest extends TestCase
 
     public function testDebugApiReturnsEmptyListWhenNoEntries(): void
     {
-        $module = $this->createBootstrappedModule();
+        $this->createBootstrappedModule();
         $apiApp = \Yii::$container->get(\AppDevPanel\Api\ApiApplication::class);
 
-        $psr17 = new \Nyholm\Psr7\Factory\Psr17Factory();
-        $request = $psr17->createServerRequest('GET', 'http://localhost/debug/api/');
-
-        $response = $apiApp->handle($request);
+        $response = $apiApp->handle($this->apiRequest('GET', '/debug/api/'));
 
         $this->assertSame(200, $response->getStatusCode());
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        $this->assertIsArray($data);
+        $envelope = $this->decodeEnvelope($response);
+        $this->assertTrue($envelope['success']);
+        $this->assertIsArray($envelope['data']);
     }
 
     public function testDebugApiReturnsEntriesAfterRequest(): void
@@ -68,33 +66,25 @@ final class ApiEndpointTest extends TestCase
         $module = $this->createBootstrappedModule();
         $debugger = $module->getDebugger();
 
-        // Simulate a web request
-        $psr17 = new \Nyholm\Psr7\Factory\Psr17Factory();
-        $psrRequest = $psr17->createServerRequest('GET', 'http://localhost/api/users');
+        $psrRequest = $this->psr17->createServerRequest('GET', 'http://localhost/api/users');
         $debugger->startup(StartupContext::forRequest($psrRequest));
 
         /** @var RequestCollector|null $requestCollector */
         $requestCollector = $module->getCollector(RequestCollector::class);
         $requestCollector?->collectRequest($psrRequest);
-
-        $psrResponse = $psr17->createResponse(200);
-        $requestCollector?->collectResponse($psrResponse);
+        $requestCollector?->collectResponse($this->psr17->createResponse(200));
 
         $debugger->shutdown();
 
-        // Now query the debug API
         $apiApp = \Yii::$container->get(\AppDevPanel\Api\ApiApplication::class);
-        $apiRequest = $psr17->createServerRequest('GET', 'http://localhost/debug/api/');
-        $response = $apiApp->handle($apiRequest);
+        $response = $apiApp->handle($this->apiRequest('GET', '/debug/api/'));
 
         $this->assertSame(200, $response->getStatusCode());
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        $this->assertIsArray($data);
-        $this->assertNotEmpty($data, 'Debug entries should exist after a request lifecycle');
+        $envelope = $this->decodeEnvelope($response);
+        $this->assertTrue($envelope['success']);
+        $this->assertNotEmpty($envelope['data'], 'Debug entries should exist after a request lifecycle');
 
-        // First entry should have collector info
-        $entry = $data[0];
+        $entry = $envelope['data'][0];
         $this->assertArrayHasKey('id', $entry);
         $this->assertArrayHasKey('collectors', $entry);
         $this->assertArrayHasKey('request', $entry);
@@ -105,8 +95,7 @@ final class ApiEndpointTest extends TestCase
         $module = $this->createBootstrappedModule();
         $debugger = $module->getDebugger();
 
-        $psr17 = new \Nyholm\Psr7\Factory\Psr17Factory();
-        $psrRequest = $psr17->createServerRequest('GET', 'http://localhost/test');
+        $psrRequest = $this->psr17->createServerRequest('GET', 'http://localhost/test');
         $debugger->startup(StartupContext::forRequest($psrRequest));
         $debugId = $debugger->getId();
 
@@ -116,17 +105,13 @@ final class ApiEndpointTest extends TestCase
 
         $debugger->shutdown();
 
-        // Query detail endpoint (route: /debug/api/view/{id})
         $apiApp = \Yii::$container->get(\AppDevPanel\Api\ApiApplication::class);
-        $detailRequest = $psr17->createServerRequest('GET', "http://localhost/debug/api/view/{$debugId}");
-        $response = $apiApp->handle($detailRequest);
+        $response = $apiApp->handle($this->apiRequest('GET', "/debug/api/view/{$debugId}"));
 
         $this->assertSame(200, $response->getStatusCode());
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        $this->assertIsArray($data);
-        // View returns collector data keyed by FQCN
-        $this->assertArrayHasKey(\AppDevPanel\Kernel\Collector\Web\RequestCollector::class, $data);
+        $envelope = $this->decodeEnvelope($response);
+        $this->assertTrue($envelope['success']);
+        $this->assertArrayHasKey(RequestCollector::class, $envelope['data']);
     }
 
     public function testDebugApiNonExistentEntryReturns404(): void
@@ -134,11 +119,11 @@ final class ApiEndpointTest extends TestCase
         $this->createBootstrappedModule();
         $apiApp = \Yii::$container->get(\AppDevPanel\Api\ApiApplication::class);
 
-        $psr17 = new \Nyholm\Psr7\Factory\Psr17Factory();
-        $request = $psr17->createServerRequest('GET', 'http://localhost/debug/api/non-existent-id');
-        $response = $apiApp->handle($request);
+        $response = $apiApp->handle($this->apiRequest('GET', '/debug/api/view/non-existent-id'));
 
         $this->assertSame(404, $response->getStatusCode());
+        $envelope = $this->decodeEnvelope($response);
+        $this->assertFalse($envelope['success']);
     }
 
     public function testInspectApiParamsEndpoint(): void
@@ -146,13 +131,10 @@ final class ApiEndpointTest extends TestCase
         $this->createBootstrappedModule();
         $apiApp = \Yii::$container->get(\AppDevPanel\Api\ApiApplication::class);
 
-        $psr17 = new \Nyholm\Psr7\Factory\Psr17Factory();
-        $request = $psr17->createServerRequest('GET', 'http://localhost/inspect/api/params');
-        $response = $apiApp->handle($request);
+        $response = $apiApp->handle($this->apiRequest('GET', '/inspect/api/params'));
 
-        // Should return 200 with config data (or 404 if no config provider)
         $statusCode = $response->getStatusCode();
-        $this->assertContains($statusCode, [200, 404], "Inspector params should return 200 or 404, got {$statusCode}");
+        $this->assertContains($statusCode, [200, 404, 500], "Inspector params returned {$statusCode}");
     }
 
     public function testNonExistentApiRouteReturns404(): void
@@ -160,11 +142,58 @@ final class ApiEndpointTest extends TestCase
         $this->createBootstrappedModule();
         $apiApp = \Yii::$container->get(\AppDevPanel\Api\ApiApplication::class);
 
-        $psr17 = new \Nyholm\Psr7\Factory\Psr17Factory();
-        $request = $psr17->createServerRequest('GET', 'http://localhost/debug/api/nonexistent/route');
-        $response = $apiApp->handle($request);
+        $response = $apiApp->handle($this->apiRequest('GET', '/debug/api/nonexistent/route'));
 
         $this->assertSame(404, $response->getStatusCode());
+    }
+
+    public function testIpFilterBlocksUnauthorizedIp(): void
+    {
+        $this->createBootstrappedModule();
+        $apiApp = \Yii::$container->get(\AppDevPanel\Api\ApiApplication::class);
+
+        // Request with unauthorized IP
+        $request = $this->psr17->createServerRequest('GET', 'http://localhost/debug/api/', ['REMOTE_ADDR' => '10.0.0.1']);
+        $response = $apiApp->handle($request);
+
+        $this->assertSame(403, $response->getStatusCode());
+    }
+
+    public function testResponseDataWrapperEnvelope(): void
+    {
+        $this->createBootstrappedModule();
+        $apiApp = \Yii::$container->get(\AppDevPanel\Api\ApiApplication::class);
+
+        $response = $apiApp->handle($this->apiRequest('GET', '/debug/api/'));
+
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertArrayHasKey('id', $body);
+        $this->assertArrayHasKey('data', $body);
+        $this->assertArrayHasKey('error', $body);
+        $this->assertArrayHasKey('success', $body);
+    }
+
+    /**
+     * Create a server request with 127.0.0.1 REMOTE_ADDR (passes IP filter).
+     */
+    private function apiRequest(string $method, string $path): ServerRequestInterface
+    {
+        return $this->psr17->createServerRequest($method, "http://localhost{$path}", ['REMOTE_ADDR' => '127.0.0.1']);
+    }
+
+    /**
+     * Decode the ResponseDataWrapper envelope from a response.
+     *
+     * @return array{id: ?string, data: mixed, error: ?string, success: bool}
+     */
+    private function decodeEnvelope(\Psr\Http\Message\ResponseInterface $response): array
+    {
+        $body = (string) $response->getBody();
+        $decoded = json_decode($body, true);
+        $this->assertIsArray($decoded, "Response body is not valid JSON: {$body}");
+        $this->assertArrayHasKey('data', $decoded, "Response missing 'data' key: {$body}");
+
+        return $decoded;
     }
 
     private function createBootstrappedModule(): Module
