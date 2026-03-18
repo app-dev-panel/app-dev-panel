@@ -68,7 +68,7 @@ final class DebugLogTargetTest extends TestCase
         $this->assertSame('debug', $collected[4]['level']);
     }
 
-    public function testNonStringMessageIsConverted(): void
+    public function testNonStringMessageIsPassedAsIs(): void
     {
         $timeline = new TimelineCollector();
         $timeline->startup();
@@ -85,8 +85,7 @@ final class DebugLogTargetTest extends TestCase
 
         $collected = $logCollector->getCollected();
         $this->assertCount(1, $collected);
-        $this->assertStringContainsString('key', $collected[0]['message']);
-        $this->assertStringContainsString('value', $collected[0]['message']);
+        $this->assertSame(['key' => 'value'], $collected[0]['message']);
     }
 
     public function testExportIntervalIsOne(): void

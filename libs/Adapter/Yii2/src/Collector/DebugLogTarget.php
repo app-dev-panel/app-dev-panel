@@ -42,11 +42,10 @@ final class DebugLogTarget extends Target
             [$text, $level, $category, $timestamp] = $message;
 
             $levelName = self::mapLevel($level);
-            $messageText = is_string($text) ? $text : print_r($text, true);
 
             $this->logCollector->collect(
                 $levelName,
-                $messageText,
+                $text,
                 ['category' => $category],
                 '', // line - Yii2 doesn't provide caller file:line per message
             );
