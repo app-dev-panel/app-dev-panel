@@ -36,7 +36,8 @@ src/
 docs/
 ├── integration-flow.md                        # Boot sequence and lifecycle mapping
 ├── collectors.md                              # All collectors with data schemas
-└── configuration.md                           # Configuration reference
+├── configuration.md                           # Configuration reference
+└── interception-analysis.md                   # Yii 2 interception strategy and status
 ```
 
 ## How It Works
@@ -59,12 +60,19 @@ It registers the `debug-panel` module if enabled (auto-enables in YII_DEBUG mode
             'exception' => true,
             'log' => true,
             'event' => true,
+            'service' => true,
+            'http_client' => true,
+            'timeline' => true,
+            'var_dumper' => true,
+            'filesystem_stream' => true,
+            'http_stream' => true,
+            'command' => true,
             'db' => true,
             'mailer' => true,
             'assets' => true,
         ],
         'ignoredRequests' => ['/debug/api/*', '/inspect/api/*'],
-        'ignoredCommands' => ['help', 'list'],
+        'ignoredCommands' => ['help', 'list', 'cache/*', 'asset/*'],
         'allowedIps' => ['127.0.0.1', '::1'],
     ],
 ],

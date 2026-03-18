@@ -7,7 +7,6 @@
 | Request/Response | WebListener via `EVENT_BEFORE/AFTER_REQUEST` | OK |
 | DB Queries | Paired `EVENT_BEFORE/AFTER_EXECUTE` with timing | **Implemented** — SQL type detection, params, backtrace |
 | Logs | `DebugLogTarget` feeds `LogCollector` in real-time | **Implemented** — replaces batch-read approach |
-| Logs (legacy) | `Yii2LogCollector` reads `Yii::getLogger()` at shutdown | Kept for profiling messages |
 | Exceptions | Error handler `.exception` property check | Works |
 | Console | ConsoleListener via `EVENT_BEFORE/AFTER_REQUEST` | OK |
 | Mail | `MailerCollector` via `BaseMailer::EVENT_AFTER_SEND` | **Implemented** |
@@ -17,7 +16,7 @@
 
 ### What yii2-debug Does (Reference)
 
-yii2-debug uses Panels with Yii2-specific approach. ADP has a superior architecture with PSR proxies and the Dumper. Key ADP Kernel patterns leveraged:
+ADP Kernel patterns leveraged:
 
 1. **LoggerInterfaceProxy** — PSR-3 decorator, captures caller file:line
 2. **EventDispatcherInterfaceProxy** — PSR-14 decorator

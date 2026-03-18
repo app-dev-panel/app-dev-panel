@@ -2,8 +2,6 @@
 
 ## Module Configuration
 
-Configure the ADP module in your Yii 2 application config:
-
 ```php
 // config/web.php or config/main.php
 return [
@@ -34,6 +32,8 @@ return [
                 'http_stream' => true,    // HttpStreamCollector
                 'command' => true,        // CommandCollector
                 'db' => true,             // DbCollector (Yii 2 DB layer)
+                'mailer' => true,         // MailerCollector (Yii 2 mailer)
+                'assets' => true,         // AssetBundleCollector (Yii 2 view)
             ],
 
             // URL patterns to skip (wildcard)

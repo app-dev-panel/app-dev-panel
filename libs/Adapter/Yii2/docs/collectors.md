@@ -1,10 +1,6 @@
 # Collectors
 
-All collectors available in the Yii 2 adapter.
-
 ## Kernel Collectors (Framework-Agnostic)
-
-These collectors come from `app-dev-panel/kernel` and work identically across all adapters.
 
 | Collector | ID | Data Schema |
 |---|---|---|
@@ -26,7 +22,7 @@ These collectors come from `app-dev-panel/kernel` and work identically across al
 
 ### DbCollector
 
-Captures SQL queries executed through Yii 2's database layer with accurate timing.
+SQL queries via Yii 2 `yii\db\Command` events with accurate timing.
 
 **Fed by**: Paired `yii\db\Command::EVENT_BEFORE_EXECUTE` / `EVENT_AFTER_EXECUTE` event hooks
 
@@ -55,9 +51,7 @@ Captures SQL queries executed through Yii 2's database layer with accurate timin
 
 ### DebugLogTarget
 
-Real-time log target that feeds Yii 2 log messages to the Kernel's `LogCollector`.
-
-`DebugLogTarget` is registered as a Yii log target and captures messages in real-time as they are flushed by the logger.
+Yii log target feeding `LogCollector` in real-time as messages are flushed.
 
 **Fed by**: `yii\log\Target::export()` — called automatically by Yii's logger
 
@@ -75,7 +69,7 @@ Real-time log target that feeds Yii 2 log messages to the Kernel's `LogCollector
 
 ### MailerCollector
 
-Captures mail messages sent via Yii 2's mailer component.
+Mail messages via `yii\mail\BaseMailer` events.
 
 **Fed by**: `yii\mail\BaseMailer::EVENT_AFTER_SEND`
 
@@ -100,7 +94,7 @@ Captures mail messages sent via Yii 2's mailer component.
 
 ### AssetBundleCollector
 
-Captures registered asset bundles from Yii 2's View component (web requests only).
+Asset bundles from `yii\web\View` (web requests only).
 
 **Fed by**: `yii\web\View::EVENT_END_PAGE`
 
