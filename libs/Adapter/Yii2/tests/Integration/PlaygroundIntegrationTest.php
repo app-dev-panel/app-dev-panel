@@ -313,7 +313,6 @@ final class PlaygroundIntegrationTest extends TestCase
                 'http_stream' => true,
                 'command' => true,
                 'db' => true,
-                'yii_log' => false, // Disable Yii2LogCollector — requires real Yii logger
                 'mailer' => true,
                 'assets' => true,
             ],

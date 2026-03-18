@@ -97,7 +97,6 @@ class Module extends \yii\base\Module implements BootstrapInterface
         'http_stream' => true,
         'command' => true,
         'db' => true,
-        'yii_log' => false, // Deprecated: use global LogCollector + DebugLogTarget instead
         'mailer' => true,
         'assets' => true,
     ];

@@ -12,8 +12,7 @@ use yii\log\Target;
  * Real-time log target that feeds Yii 2 log messages to ADP's LogCollector.
  *
  * Registered as a log target in Yii::getLogger()->targets[].
- * Unlike Yii2LogCollector (which reads logger messages at shutdown),
- * this target captures messages in real-time as they are flushed by the logger,
+ * Captures messages in real-time as they are flushed by the logger,
  * preventing loss of messages that were flushed early.
  */
 final class DebugLogTarget extends Target

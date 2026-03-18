@@ -67,7 +67,6 @@ return [
                 'http_stream' => true,
                 'command' => true,
                 'db' => true,
-                'yii_log' => true,
             ],
             'ignoredRequests' => [
                 '/debug/api/*',

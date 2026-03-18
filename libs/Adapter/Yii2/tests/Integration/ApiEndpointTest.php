@@ -106,7 +106,7 @@ final class ApiEndpointTest extends TestCase
         $this->assertContains(DbCollector::class, $collectorIds);
         $this->assertContains(MailerCollector::class, $collectorIds);
 
-        // Yii2LogCollector should NOT be registered (removed in favor of global LogCollector)
+        // Yii2LogCollector class is deleted — only the global LogCollector is used
         $this->assertNotContains('AppDevPanel\\Adapter\\Yii2\\Collector\\Yii2LogCollector', $collectorIds);
 
         // Each collector entry should have id and name
