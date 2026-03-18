@@ -107,6 +107,42 @@
       <path value="$PROJECT_DIR$/vendor/psr/http-message" />
       <path value="$PROJECT_DIR$/vendor/psr/container" />
       <path value="$PROJECT_DIR$/vendor/psr/http-client" />
+      <path value="$PROJECT_DIR$/vendor/nikic/fast-route" />
+      <path value="$PROJECT_DIR$/vendor/cebe/markdown" />
+      <path value="$PROJECT_DIR$/vendor/nyholm/psr7" />
+      <path value="$PROJECT_DIR$/vendor/carthage-software/mago" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/router" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/error-handler" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/router-fastroute" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/yii-console" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/network-utilities" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/yii-middleware" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/db-sqlite" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/cache" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/security" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/yii-http" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/cookies" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/session" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/validator" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/db" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/event-dispatcher" />
+      <path value="$PROJECT_DIR$/vendor/app-dev-panel/kernel" />
+      <path value="$PROJECT_DIR$/vendor/app-dev-panel/cli" />
+      <path value="$PROJECT_DIR$/vendor/php-webdriver/webdriver" />
+      <path value="$PROJECT_DIR$/vendor/app-dev-panel/adapter-symfony" />
+      <path value="$PROJECT_DIR$/vendor/symfony/routing" />
+      <path value="$PROJECT_DIR$/vendor/symfony/cache-contracts" />
+      <path value="$PROJECT_DIR$/vendor/symfony/config" />
+      <path value="$PROJECT_DIR$/vendor/symfony/dependency-injection" />
+      <path value="$PROJECT_DIR$/vendor/symfony/var-exporter" />
+      <path value="$PROJECT_DIR$/vendor/symfony/cache" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php85" />
+      <path value="$PROJECT_DIR$/vendor/symfony/error-handler" />
+      <path value="$PROJECT_DIR$/vendor/symfony/http-kernel" />
+      <path value="$PROJECT_DIR$/vendor/symfony/framework-bundle" />
+      <path value="$PROJECT_DIR$/vendor/symfony/http-foundation" />
+      <path value="$PROJECT_DIR$/vendor/psr/cache" />
+      <path value="$PROJECT_DIR$/vendor/nyholm/psr7-server" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.4" />

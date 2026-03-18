@@ -6,7 +6,11 @@
         <option value="$PROJECT_DIR$/yii-debug/tests" />
         <option value="$PROJECT_DIR$/libs/Adapter/Yiisoft/tests" />
         <option value="$PROJECT_DIR$/playground/yiisoft-app/vendor/nikic/fast-route/test" />
+        <option value="$PROJECT_DIR$/libs/Adapter/Symfony/tests" />
         <option value="$PROJECT_DIR$/libs/API/tests" />
+        <option value="$PROJECT_DIR$/libs/Kernel/tests" />
+        <option value="$PROJECT_DIR$/libs/Cli/tests" />
+        <option value="$PROJECT_DIR$/tests" />
       </list>
     </option>
   </component>
