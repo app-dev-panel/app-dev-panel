@@ -6,6 +6,7 @@ namespace AppDevPanel\Adapter\Yii2;
 
 use AppDevPanel\Adapter\Yii2\Collector\AssetBundleCollector;
 use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
+use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
 use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Collector\Yii2LogCollector;
@@ -222,20 +223,25 @@ class Module extends \yii\base\Module implements BootstrapInterface
         \Yii::$container->setSingleton(Yii2ConfigProvider::class, static fn () => new Yii2ConfigProvider(\Yii::$app));
         \Yii::$container->set('config', Yii2ConfigProvider::class);
 
-        // API Application
-        \Yii::$container->setSingleton(ApiApplication::class, static function () {
-            return new ApiApplication(
-                new class implements \Psr\Container\ContainerInterface {
-                    public function get(string $id): mixed
-                    {
-                        return \Yii::$container->get($id);
-                    }
+        // PSR-11 Container bridge — wraps Yii 2 container as PSR ContainerInterface.
+        // Must be registered so that inspector controllers (resolved via DI) can receive it.
+        $containerBridge = new class implements \Psr\Container\ContainerInterface {
+            public function get(string $id): mixed
+            {
+                return \Yii::$container->get($id);
+            }
 
-                    public function has(string $id): bool
-                    {
-                        return \Yii::$container->has($id);
-                    }
-                },
+            public function has(string $id): bool
+            {
+                return \Yii::$container->has($id);
+            }
+        };
+        \Yii::$container->setSingleton(\Psr\Container\ContainerInterface::class, static fn () => $containerBridge);
+
+        // API Application
+        \Yii::$container->setSingleton(ApiApplication::class, static function () use ($containerBridge) {
+            return new ApiApplication(
+                $containerBridge,
                 \Yii::$container->get(ResponseFactoryInterface::class),
                 \Yii::$container->get(StreamFactoryInterface::class),
             );
@@ -383,26 +389,17 @@ class Module extends \yii\base\Module implements BootstrapInterface
             return;
         }
 
-        // Hook into Yii2's DB events
+        // Hook into Yii2's DB connection event
         Event::on(\yii\db\Connection::class, \yii\db\Connection::EVENT_AFTER_OPEN, static function () use ($dbCollector): void {
             $dbCollector->logConnection();
         });
 
-        // Start timer before query execution
-        Event::on(\yii\db\Command::class, \yii\db\Command::EVENT_BEFORE_EXECUTE, static function () use ($dbCollector): void {
-            $dbCollector->beginQuery();
-        });
-
-        // Stop timer and record query after execution
-        Event::on(\yii\db\Command::class, \yii\db\Command::EVENT_AFTER_EXECUTE, static function (\yii\db\Event $event) use ($dbCollector): void {
-            /** @var \yii\db\Command $command */
-            $command = $event->sender;
-            $dbCollector->logQuery(
-                $command->getRawSql(),
-                $command->params,
-                $command->pdoStatement?->rowCount() ?? 0,
-            );
-        });
+        // Capture DB queries via Logger profiling messages.
+        // Yii 2's Command uses Yii::beginProfile()/endProfile() for query timing,
+        // which writes to the Logger. We register a log target that intercepts these
+        // profiling messages and feeds them to DbCollector.
+        $target = new DbProfilingTarget($dbCollector);
+        \Yii::$app->log->targets['adp-db-profiling'] = $target;
     }
 
     private function registerMailerProfiling(): void
@@ -446,7 +443,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     private function registerDebugLogTarget(LogCollector $logCollector): void
     {
         $target = new DebugLogTarget($logCollector);
-        \Yii::getLogger()->targets['adp-debug'] = $target;
+        \Yii::$app->log->targets['adp-debug'] = $target;
     }
 
     private function registerRoutes(Application $app): void
