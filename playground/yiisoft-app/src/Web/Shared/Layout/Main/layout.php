@@ -24,8 +24,7 @@ $this->addJsFiles($assetManager->getJsFiles());
 $this->addJsStrings($assetManager->getJsStrings());
 $this->addJsVars($assetManager->getJsVars());
 
-$this->beginPage()
-?>
+$this->beginPage() ?>
 <!DOCTYPE html>
 <html lang="<?= Html::encode($applicationParams->locale) ?>">
 <head>

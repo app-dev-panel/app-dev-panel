@@ -90,7 +90,8 @@
   },
   "scripts": {
     "test": "@test:unit",
-    "test:unit": "phpunit --testdox",
+    "test:unit": "phpunit --testdox --exclude-group e2e --testsuite Kernel,API,Cli,Adapter-Symfony,Adapter-Yii2",
+    "test:e2e": "phpunit --testdox --testsuite E2E",
     "test:coverage": "phpunit --coverage-clover=coverage.xml --coverage-text",
     "lint": "mago lint",
     "analyze": "mago analyze",

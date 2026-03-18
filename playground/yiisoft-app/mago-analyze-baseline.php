@@ -1,0 +1,361 @@
+variant = "loose"
+
+[[issues]]
+file = "config/common/bootstrap.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Container\ContainerInterface`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/application.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 3
+
+[[issues]]
+file = "config/common/di/error-handler.php"
+code = "invalid-return-statement"
+message = "Invalid return type for function `10610436458813642739:228`: expected `null|string`, but found `array<array-key, string>|string`."
+count = 1
+
+[[issues]]
+file = "config/common/di/error-handler.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #3 of `str_replace`: expected `array<array-key, string>|string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "config/common/di/logger.php"
+code = "non-existent-method"
+message = 'Method `from` does not exist on type `Yiisoft\Definitions\ReferencesArray`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/router.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Config\Config)`).'
+count = 1
+
+[[issues]]
+file = "config/common/di/router.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Router\RouteCollector` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/router.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Config\Config`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/router.php"
+code = "non-existent-method"
+message = 'Method `to` does not exist on type `Yiisoft\Definitions\DynamicReference`.'
+count = 1
+
+[[issues]]
+file = "config/common/params.php"
+code = "non-existent-method"
+message = 'Method `to` does not exist on type `Yiisoft\Definitions\Reference`.'
+count = 6
+
+[[issues]]
+file = "config/common/routes.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 3
+
+[[issues]]
+file = "config/common/routes.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Yiisoft\Router\Group`.'
+count = 1
+
+[[issues]]
+file = "config/common/routes.php"
+code = "non-existent-method"
+message = 'Method `get` does not exist on type `Yiisoft\Router\Route`.'
+count = 1
+
+[[issues]]
+file = "config/web/di/application.php"
+code = "non-existent-method"
+message = 'Method `to` does not exist on type `Yiisoft\Definitions\DynamicReference`.'
+count = 1
+
+[[issues]]
+file = "config/web/di/application.php"
+code = "non-existent-method"
+message = 'Method `to` does not exist on type `Yiisoft\Definitions\Reference`.'
+count = 3
+
+[[issues]]
+file = "public/index.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 1
+
+[[issues]]
+file = "public/index.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\ErrorHandler\ErrorHandler` not found.'
+count = 1
+
+[[issues]]
+file = "public/index.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\ErrorHandler\Renderer\HtmlRenderer` not found.'
+count = 1
+
+[[issues]]
+file = "public/index.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Log\Logger` not found.'
+count = 1
+
+[[issues]]
+file = "public/index.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Log\Target\File\FileTarget` not found.'
+count = 1
+
+[[issues]]
+file = "public/index.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Yii\Runner\Http\HttpApplicationRunner` not found.'
+count = 1
+
+[[issues]]
+file = "public/index.php"
+code = "non-existent-class-like"
+message = 'Class, interface, enum, or trait `Psr\Log\LogLevel` not found.'
+count = 3
+
+[[issues]]
+file = "src/Console/HelloCommand.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Console\Attribute\AsCommand` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Console/HelloCommand.php"
+code = "non-existent-class-like"
+message = 'Class `App\Console\HelloCommand` cannot extend unknown type `Command`'
+count = 1
+
+[[issues]]
+file = "src/Console/HelloCommand.php"
+code = "unused-method"
+message = "Method `execute()` is never used."
+count = 1
+
+[[issues]]
+file = "src/Environment.php"
+code = "impossible-condition"
+message = "This condition (type `false`) will always evaluate to false."
+count = 1
+
+[[issues]]
+file = "src/Environment.php"
+code = "less-specific-nested-argument-type"
+message = "Argument type mismatch for argument #2 of `implode`: expected `array<array-key, Stringable|null|scalar>|null`, but provided type `list{mixed, mixed, mixed}` is less specific."
+count = 1
+
+[[issues]]
+file = "src/Environment.php"
+code = "redundant-comparison"
+message = "Redundant `===` comparison: left-hand side is never identical to right-hand side."
+count = 1
+
+[[issues]]
+file = "src/Environment.php"
+code = "unused-method"
+message = "Method `setinteger()` is never used."
+count = 1
+
+[[issues]]
+file = "src/Environment.php"
+code = "unused-method"
+message = "Method `setstring()` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/HomePage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/HomePage/Action.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\homepage\action::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/HomePage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/HomePage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Yii\View\Renderer\ViewRenderer`.'
+count = 1
+
+[[issues]]
+file = "src/Web/HomePage/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/HomePage/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/NotFoundHandler.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\NotFound\NotFoundHandler` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/NotFoundHandler.php"
+code = "unused-property"
+message = "Property `$currentRoute` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/NotFoundHandler.php"
+code = "unused-property"
+message = "Property `$urlGenerator` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/NotFoundHandler.php"
+code = "unused-property"
+message = "Property `$viewRenderer` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Router\CurrentRoute)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Router\UrlGeneratorInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/template.php"
+code = "mixed-argument"
+message = "The first value for `echo` is too general."
+count = 2
+
+[[issues]]
+file = "src/Web/NotFound/template.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Router\CurrentRoute`.'
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Router\UrlGeneratorInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/NotFound/template.php"
+code = "non-existent-method"
+message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/MainAsset.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\Shared\Layout\Main\MainAsset` cannot extend unknown type `AssetBundle`'
+count = 1
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Aliases\Aliases)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Assets\AssetManager)`).'
+count = 6
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 11
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "mixed-argument"
+message = "The first value for `echo` is too general."
+count = 5
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Aliases\Aliases`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Assets\AssetManager`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Router\CurrentRoute`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Router\UrlGeneratorInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "non-existent-method"
+message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
+count = 4

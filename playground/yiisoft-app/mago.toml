@@ -1,0 +1,47 @@
+[source]
+paths = [
+    "src",
+    "config",
+    "public",
+]
+excludes = [
+    "vendor/**",
+    "runtime/**",
+    "assets/**",
+]
+extensions = ["php"]
+
+[formatter]
+preset = "default"
+
+[analyzer]
+baseline = "mago-analyze-baseline.php"
+
+[linter]
+baseline = "mago-lint-baseline.php"
+
+[linter.rules]
+# Disable noisy rules (aligned with core config)
+literal-named-argument = { enabled = false }
+tagged-todo = { enabled = false }
+halstead = { enabled = false }
+no-else-clause = { enabled = false }
+no-boolean-flag-parameter = { enabled = false }
+prefer-arrow-function = { enabled = false }
+no-redundant-math = { enabled = false }
+no-shorthand-ternary = { enabled = false }
+no-multi-assignments = { enabled = false }
+single-class-per-file = { enabled = false }
+no-nested-ternary = { enabled = false }
+
+# Downgrade to warnings
+too-many-methods = { level = "warning" }
+excessive-parameter-list = { level = "warning" }
+cyclomatic-complexity = { level = "warning", threshold = 15 }
+kan-defect = { level = "warning" }
+no-error-control-operator = { level = "warning" }
+no-empty = { level = "warning" }
+no-isset = { level = "warning" }
+no-empty-catch-clause = { level = "warning" }
+require-preg-quote-delimiter = { level = "warning" }
+strict-behavior = { level = "warning" }
