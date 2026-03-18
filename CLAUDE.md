@@ -144,6 +144,42 @@ GitHub Actions runs on every push and PR:
 - **Mago**: Format check, lint, and static analysis
 - **PR Reports**: Coverage report and Mago analysis posted as PR comments
 
+## Test Coverage Summary
+
+### PHP (PHPUnit) — `make test-php`
+
+| Suite | Library | Tests | Skipped | Time | Line Coverage |
+|-------|---------|------:|--------:|-----:|--------------:|
+| Kernel | `libs/Kernel` | 276 | 7 | 1m 21s | **85.2%** (1073/1259) |
+| API | `libs/API` | 174 | 0 | 0.1s | **76.2%** (754/990) |
+| Adapter-Symfony | `libs/Adapter/Symfony` | 150 | 9 | 0.2s | **98.9%** (905/915) |
+| Adapter-Yii2 | `libs/Adapter/Yii2` | 95 | 0 | 0.1s | **57.3%** (373/651) |
+| Cli | `libs/Cli` | 6 | 0 | 0.02s | **41.1%** (30/73) |
+| **Total** | **all libs** | **701** | **16** | **~1m 22s** | **66.7%** (3135/4702) |
+
+E2E suite (54 tests) requires Chrome + ChromeDriver and runs separately via `make test-frontend-e2e`.
+
+### Frontend (Vitest) — `make test-frontend`
+
+| Package | Tests | Suites | Time |
+|---------|------:|-------:|-----:|
+| `packages/sdk` | 209 | 25 | ~51s |
+| `packages/panel` | 119 | 16 | ~51s |
+| **Total** | **328** | **41** | **~51s** |
+
+Browser e2e tests (4 suites) run separately via `make test-frontend-e2e`.
+
+### Running Coverage Locally
+
+```bash
+# PHP coverage (requires PCOV extension)
+php vendor/bin/phpunit --coverage-text          # Text summary
+php vendor/bin/phpunit --coverage-html=coverage  # HTML report in coverage/
+
+# Frontend coverage
+cd libs/frontend && npx vitest run --coverage    # Vitest with c8/istanbul
+```
+
 ## Mandatory Post-Feature Pipeline
 
 After implementing any feature or fix, you **must** run the full pipeline. Repeat until all steps pass.
