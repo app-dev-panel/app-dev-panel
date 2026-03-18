@@ -6,11 +6,12 @@
       <sourceFolder url="file://$MODULE_DIR$/libs/API/tests" isTestSource="true" packagePrefix="AppDevPanel\Api\Tests\" />
       <sourceFolder url="file://$MODULE_DIR$/yii-debug/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/libs/Adapter/Yiisoft/tests" isTestSource="true" packagePrefix="AppDevPanel\Adapter\Yiisoft\Tests\" />
-      <sourceFolder url="file://$MODULE_DIR$/app/vendor/nikic/fast-route/test" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/app/vendor" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/libs/API/src" isTestSource="false" packagePrefix="AppDevPanel\Api\" />
       <sourceFolder url="file://$MODULE_DIR$/libs/Adapter/Yiisoft/src" isTestSource="false" packagePrefix="AppDevPanel\Adapter\Yiisoft\" />
-      <sourceFolder url="file://$MODULE_DIR$/libs/Kernel/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/libs/Kernel/tests" isTestSource="true" packagePrefix="AppDevPanel\Kernel\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/libs/Adapter/Symfony/tests" isTestSource="true" packagePrefix="AppDevPanel\Adapter\Symfony\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/libs/Cli/tests" isTestSource="true" packagePrefix="AppDevPanel\Cli\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" packagePrefix="AppDevPanel\Tests\" />
       <excludeFolder url="file://$MODULE_DIR$/libs/yii-dev-panel/packages/yii-dev-panel-sdk" />
       <excludeFolder url="file://$MODULE_DIR$/libs/yii-dev-panel/packages/yii-dev-toolbar" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
@@ -115,6 +116,21 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/yiisoft/var-dumper" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/yiisoft/yii-debug" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/zircote/swagger-php" />
+      <excludeFolder url="file://$MODULE_DIR$/playground/symfony-basic-app/var" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/app-dev-panel/adapter-symfony" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/nyholm/psr7-server" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/psr/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/cache-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/config" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/dependency-injection" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/error-handler" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/framework-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/http-foundation" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/http-kernel" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-php85" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/routing" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/var-exporter" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
