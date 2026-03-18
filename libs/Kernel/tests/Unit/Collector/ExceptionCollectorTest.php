@@ -9,7 +9,6 @@ use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
 use Exception;
-use Yiisoft\ErrorHandler\Event\ApplicationError;
 
 final class ExceptionCollectorTest extends AbstractCollectorTestCase
 {
@@ -19,7 +18,7 @@ final class ExceptionCollectorTest extends AbstractCollectorTestCase
     protected function collectTestData(CollectorInterface $collector): void
     {
         $exception = new Exception('test', 777, new Exception('previous', 666));
-        $collector->collect(new ApplicationError($exception));
+        $collector->collect($exception);
     }
 
     protected function getCollector(): CollectorInterface

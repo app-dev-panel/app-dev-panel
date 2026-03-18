@@ -67,7 +67,7 @@ final class GitControllerTest extends ControllerTestCase
     public function testSummary(): void
     {
         $controller = $this->createController();
-        $response = $controller->summary();
+        $response = $controller->summary($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -75,7 +75,7 @@ final class GitControllerTest extends ControllerTestCase
     public function testLog(): void
     {
         $controller = $this->createController();
-        $response = $controller->log();
+        $response = $controller->log($this->get());
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -134,6 +134,6 @@ final class GitControllerTest extends ControllerTestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('repositories');
-        $controller->summary();
+        $controller->summary($this->get());
     }
 }

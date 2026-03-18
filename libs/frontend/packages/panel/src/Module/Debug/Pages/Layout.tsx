@@ -1,5 +1,6 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import ModuleLoader from '@app-dev-panel/panel/Application/Pages/RemoteComponent';
+import {CachePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CachePanel';
 import {DatabasePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DatabasePanel';
 import {EventPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EventPanel';
 import {ExceptionPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ExceptionPanel';
@@ -45,6 +46,7 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.EventCollector]: (data: any) => <EventPanel events={data} />,
         [CollectorsMap.ExceptionCollector]: (data: any) => <ExceptionPanel exceptions={data} />,
         [CollectorsMap.VarDumperCollector]: (data: any) => <VarDumperPanel data={data} />,
+        [CollectorsMap.CacheCollector]: (data: any) => <CachePanel data={data} />,
         default: (data: any) => {
             if (typeof data === 'object' && data.__isPanelRemote__) {
                 return (

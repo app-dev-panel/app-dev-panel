@@ -6,7 +6,6 @@ namespace AppDevPanel\Api\Tests\Unit\Debug\Exception;
 
 use AppDevPanel\Api\Debug\Exception\PackageNotInstalledException;
 use PHPUnit\Framework\TestCase;
-use Yiisoft\FriendlyException\FriendlyExceptionInterface;
 
 final class PackageNotInstalledExceptionTest extends TestCase
 {
@@ -25,10 +24,10 @@ final class PackageNotInstalledExceptionTest extends TestCase
         $this->assertStringContainsString('vendor/package', $solution);
     }
 
-    public function testImplementsFriendlyException(): void
+    public function testIsException(): void
     {
         $exception = new PackageNotInstalledException('vendor/package');
-        $this->assertInstanceOf(FriendlyExceptionInterface::class, $exception);
+        $this->assertInstanceOf(\Exception::class, $exception);
     }
 
     public function testCustomMessage(): void

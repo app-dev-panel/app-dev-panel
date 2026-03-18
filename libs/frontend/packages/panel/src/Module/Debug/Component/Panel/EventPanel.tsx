@@ -16,7 +16,7 @@ type EventTimelineProps = {events: EventType[]};
 const EventRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
     ({theme, expanded}) => ({
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         gap: theme.spacing(1.5),
         padding: theme.spacing(1, 1.5),
         borderBottom: `1px solid ${theme.palette.divider}`,
@@ -32,7 +32,6 @@ const TimeCell = styled(Typography)({
     fontSize: '11px',
     flexShrink: 0,
     width: 110,
-    paddingTop: 2,
 });
 
 const NameCell = styled(Typography)({fontSize: '13px', fontWeight: 500, flex: 1, wordBreak: 'break-word'});
@@ -45,7 +44,7 @@ const FileCell = styled(Typography)({
 }) as typeof Typography;
 
 const DetailBox = styled(Box)(({theme}) => ({
-    padding: theme.spacing(1.5, 1.5, 1.5, 15),
+    padding: theme.spacing(1.5, 1.5, 1.5, 15.5),
     backgroundColor: theme.palette.action.hover,
     borderBottom: `1px solid ${theme.palette.divider}`,
     fontSize: '12px',
@@ -155,19 +154,6 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                     <Box key={index}>
                         <EventRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
                             <TimeCell sx={{color: 'text.disabled'}}>{formatMicrotime(event.time)}</TimeCell>
-                            <Chip
-                                label="EVENT"
-                                size="small"
-                                sx={{
-                                    fontWeight: 600,
-                                    fontSize: '10px',
-                                    height: 20,
-                                    minWidth: 50,
-                                    backgroundColor: 'primary.main',
-                                    color: 'common.white',
-                                    borderRadius: 1,
-                                }}
-                            />
                             <NameCell>
                                 <Tooltip title={event.name}>
                                     <span>{shortName}</span>

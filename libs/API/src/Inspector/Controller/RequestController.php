@@ -6,13 +6,13 @@ namespace AppDevPanel\Api\Inspector\Controller;
 
 use Alexkart\CurlBuilder\Command;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
 use Yiisoft\VarDumper\VarDumper;
 
 final class RequestController
@@ -23,18 +23,17 @@ final class RequestController
      * @param string[] $allowedHosts Hosts allowed for request replay. Empty array = all hosts allowed.
      */
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
+        private readonly JsonResponseFactoryInterface $responseFactory,
+        private readonly CollectorRepositoryInterface $collectorRepository,
         private readonly array $allowedHosts = [],
     ) {}
 
-    public function request(
-        ServerRequestInterface $request,
-        CollectorRepositoryInterface $collectorRepository,
-    ): ResponseInterface {
+    public function request(ServerRequestInterface $request): ResponseInterface
+    {
         $queryParams = $request->getQueryParams();
         $debugEntryId = $queryParams['debugEntryId'] ?? null;
 
-        $data = $collectorRepository->getDetail($debugEntryId);
+        $data = $this->collectorRepository->getDetail($debugEntryId);
         $rawRequest = $data[self::REQUEST_COLLECTOR]['requestRaw'];
 
         $parsedRequest = Message::parseRequest($rawRequest);
@@ -46,17 +45,15 @@ final class RequestController
 
         $result = VarDumper::create($response)->asPrimitives();
 
-        return $this->responseFactory->createResponse($result);
+        return $this->responseFactory->createJsonResponse($result);
     }
 
-    public function buildCurl(
-        ServerRequestInterface $request,
-        CollectorRepositoryInterface $collectorRepository,
-    ): ResponseInterface {
+    public function buildCurl(ServerRequestInterface $request): ResponseInterface
+    {
         $queryParams = $request->getQueryParams();
         $debugEntryId = $queryParams['debugEntryId'] ?? null;
 
-        $data = $collectorRepository->getDetail($debugEntryId);
+        $data = $this->collectorRepository->getDetail($debugEntryId);
         $rawRequest = $data[self::REQUEST_COLLECTOR]['requestRaw'];
 
         $parsedRequest = Message::parseRequest($rawRequest);
@@ -66,13 +63,13 @@ final class RequestController
                 ->setRequest($parsedRequest)
                 ->build();
         } catch (Throwable $e) {
-            return $this->responseFactory->createResponse([
+            return $this->responseFactory->createJsonResponse([
                 'command' => null,
                 'exception' => (string) $e,
             ]);
         }
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'command' => $output,
         ]);
     }

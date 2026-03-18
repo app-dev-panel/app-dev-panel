@@ -10,8 +10,6 @@ use AppDevPanel\Kernel\Collector\TimelineCollector;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
-use Yiisoft\Yii\Console\Event\ApplicationShutdown;
-use Yiisoft\Yii\Console\Event\ApplicationStartup;
 
 final class ConsoleAppInfoCollector implements SummaryCollectorInterface
 {
@@ -42,27 +40,37 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
         ];
     }
 
+    public function markApplicationStarted(): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+        $this->applicationProcessingTimeStarted = microtime(true);
+        $this->timelineCollector->collect($this, 'app-start');
+    }
+
+    public function markApplicationFinished(): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+        $this->applicationProcessingTimeStopped = microtime(true);
+        $this->timelineCollector->collect($this, 'app-finish');
+    }
+
     public function collect(object $event): void
     {
         if (!$this->isActive()) {
             return;
         }
 
-        if ($event instanceof ApplicationStartup) {
-            $this->applicationProcessingTimeStarted = microtime(true);
-        } elseif ($event instanceof ConsoleCommandEvent) {
+        if ($event instanceof ConsoleCommandEvent) {
             $this->requestProcessingTimeStarted = microtime(true);
         } elseif ($event instanceof ConsoleErrorEvent) {
-            /**
-             * If we receive this event, then {@see ConsoleCommandEvent} hasn't received and won't.
-             * So {@see requestProcessingTimeStarted} equals to 0 now and better to set it at least with application startup time.
-             */
             $this->requestProcessingTimeStarted = $this->applicationProcessingTimeStarted;
             $this->requestProcessingTimeStopped = microtime(true);
         } elseif ($event instanceof ConsoleTerminateEvent) {
             $this->requestProcessingTimeStopped = microtime(true);
-        } elseif ($event instanceof ApplicationShutdown) {
-            $this->applicationProcessingTimeStopped = microtime(true);
         }
 
         $this->timelineCollector->collect($this, spl_object_id($event));

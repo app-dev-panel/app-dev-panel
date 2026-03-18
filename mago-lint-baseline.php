@@ -1,22 +1,16 @@
 variant = "loose"
 
 [[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "cyclomatic-complexity"
-message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "no-empty"
-message = "Use of the `empty` construct."
+file = "libs/API/src/ApiConfig.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
 count = 1
 
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 2
+count = 1
 
 [[issues]]
 file = "libs/API/src/Debug/Middleware/TokenAuthMiddleware.php"
@@ -92,6 +86,12 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "no-debug-symbols"
 message = "Do not commit debug functions."
 count = 1
@@ -101,6 +101,12 @@ file = "libs/API/src/Inspector/Controller/ServiceController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
 count = 3
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
@@ -121,15 +127,51 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/API/src/Middleware/MiddlewarePipeline.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
 file = "libs/API/src/ServerSentEventsStream.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/API/tests/Unit/Debug/Controller/DebugControllerTest.php"
+code = "no-redundant-use"
+message = "Unused import: `ResponseInterface`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Debug/Controller/DebugControllerTest.php"
+code = "prefer-static-closure"
+message = "This closure does not use `$this` and should be declared static."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Debug/Controller/DebugControllerTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Debug/Middleware/ResponseDataWrapperTest.php"
+code = "prefer-static-closure"
+message = "This closure does not use `$this` and should be declared static."
+count = 1
+
+[[issues]]
 file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
 code = "explicit-octal"
 message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
+code = "prefer-static-closure"
+message = "This closure does not use `$this` and should be declared static."
 count = 1
 
 [[issues]]
@@ -169,6 +211,12 @@ message = "Use of the `isset` construct."
 count = 2
 
 [[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/ControllerTestCase.php"
+code = "prefer-static-closure"
+message = "This closure does not use `$this` and should be declared static."
+count = 1
+
+[[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
 code = "readable-literal"
 message = "Numeric literal could use underscore separators for readability."
@@ -196,12 +244,6 @@ count = 1
 file = "libs/API/tests/Unit/Inspector/Controller/InspectControllerTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/RoutingControllerTest.php"
-code = "no-redundant-use"
-message = "Unused import: `ServerRequestFactoryInterface`."
 count = 1
 
 [[issues]]
@@ -349,6 +391,78 @@ message = "This arrow function does not use `$this` and should be declared stati
 count = 1
 
 [[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Command/ServeCommand.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Command/ServeCommand.php"
+code = "prefer-static-closure"
+message = "This closure does not use `$this` and should be declared static."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -358,48 +472,6 @@ count = 1
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
 code = "no-empty"
 message = "Use of the `empty` construct."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "cyclomatic-complexity"
-message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "no-empty-catch-clause"
-message = "Do not use empty `catch` blocks."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerInterfaceProxy.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerProxyConfig.php"
-code = "excessive-parameter-list"
-message = "Parameter list is too long."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerProxyConfig.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 4
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ContainerProxyConfig.php"
-code = "too-many-methods"
-message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -415,21 +487,9 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/Collector/ProxyLogTrait.php"
-code = "excessive-parameter-list"
-message = "Parameter list is too long."
-count = 3
-
-[[issues]]
 file = "libs/Kernel/src/Collector/ServiceCollector.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ServiceMethodProxy.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
@@ -460,12 +520,6 @@ count = 2
 file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "too-many-methods"
 message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/VarDumperHandlerInterfaceProxy.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
@@ -650,12 +704,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Support/Stub/PhpStreamProxy.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ContainerInterfaceProxyTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1

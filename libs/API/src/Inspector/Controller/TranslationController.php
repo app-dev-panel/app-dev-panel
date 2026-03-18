@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -11,25 +12,29 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Throwable;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use Yiisoft\Translator\CategorySource;
 use Yiisoft\VarDumper\VarDumper;
 
 final class TranslationController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
-        private LoggerInterface $logger,
-        private readonly array $params,
+        private readonly JsonResponseFactoryInterface $responseFactory,
+        private readonly LoggerInterface $logger,
+        private readonly ContainerInterface $container,
+        private readonly array $params = [],
     ) {}
 
-    public function getTranslations(ContainerInterface $container): ResponseInterface
+    public function getTranslations(ServerRequestInterface $request): ResponseInterface
     {
-        /** @var CategorySource[] $categorySources */
-        $categorySources = $container->get('tag@translation.categorySource');
+        if (!$this->container->has('tag@translation.categorySource')) {
+            return $this->responseFactory->createJsonResponse([
+                'error' => 'Translation inspection requires framework integration.',
+            ], 501);
+        }
+
+        $categorySources = $this->container->get('tag@translation.categorySource');
 
         /** @var string[] $locales */
-        $locales = array_keys($this->params['locale']['locales']);
+        $locales = array_keys($this->params['locale']['locales'] ?? []);
         if ($locales === []) {
             throw new RuntimeException(
                 'Unable to determine list of available locales. '
@@ -57,17 +62,20 @@ final class TranslationController
         }
 
         $response = VarDumper::create($messages)->asPrimitives(255);
-        return $this->responseFactory->createResponse($response);
+        return $this->responseFactory->createJsonResponse($response);
     }
 
-    public function putTranslation(ContainerInterface $container, ServerRequestInterface $request): ResponseInterface
+    public function putTranslation(ServerRequestInterface $request): ResponseInterface
     {
-        /**
-         * @var CategorySource[] $categorySources
-         */
-        $categorySources = $container->get('tag@translation.categorySource');
+        if (!$this->container->has('tag@translation.categorySource')) {
+            return $this->responseFactory->createJsonResponse([
+                'error' => 'Translation inspection requires framework integration.',
+            ], 501);
+        }
 
-        $body = \json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $categorySources = $this->container->get('tag@translation.categorySource');
+
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $categoryName = $body['category'] ?? '';
         $locale = $body['locale'] ?? '';
         $translationId = $body['translation'] ?? '';
@@ -89,10 +97,7 @@ final class TranslationController
             throw new InvalidArgumentException(sprintf(
                 'Invalid category name "%s". Only the following categories are available: "%s"',
                 $categoryName,
-                implode('", "', array_map(
-                    static fn(CategorySource $categorySource) => $categorySource->getName(),
-                    $categorySources,
-                )),
+                implode('", "', array_map(static fn(object $cs) => $cs->getName(), $categorySources)),
             ));
         }
         $messages = $categorySource->getMessages($locale);
@@ -105,6 +110,6 @@ final class TranslationController
 
         $result = [$locale => $messages];
         $response = VarDumper::create($result)->asPrimitives(255);
-        return $this->responseFactory->createResponse($response);
+        return $this->responseFactory->createJsonResponse($response);
     }
 }

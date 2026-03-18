@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 use Yiisoft\Injector\Injector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
-use AppDevPanel\Kernel\Collector\ContainerInterfaceProxy;
+use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -90,6 +90,12 @@ return [
             'list',
             'serve',
             'debug:reset',
+        ],
+        'api' => [
+            'enabled' => true,
+            'allowedIps' => ['127.0.0.1', '::1'],
+            'authToken' => '',
+            'commandMap' => [],
         ],
     ],
     'yiisoft/yii-console' => [

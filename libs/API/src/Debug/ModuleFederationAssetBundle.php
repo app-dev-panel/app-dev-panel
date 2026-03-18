@@ -4,13 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Debug;
 
-if (!class_exists(\Yiisoft\Assets\AssetBundle::class)) {
-    class AssetBundle {}
-} else {
-    class_alias(\Yiisoft\Assets\AssetBundle::class, AssetBundle::class);
-}
-
-abstract class ModuleFederationAssetBundle extends AssetBundle
+abstract class ModuleFederationAssetBundle
 {
     /**
      * The module name is defined into the webpack module federation config file.

@@ -7,11 +7,13 @@ namespace AppDevPanel\Api\Tests\Unit\Debug\Controller;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Exception\NotFoundException;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Kernel\Storage\StorageInterface;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\ServerRequest;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
-use ReflectionProperty;
-use Yiisoft\DataResponse\DataResponseFactory;
-use Yiisoft\Router\CurrentRoute;
+use Psr\Http\Message\ResponseInterface;
 
 final class DebugControllerTest extends TestCase
 {
@@ -25,8 +27,9 @@ final class DebugControllerTest extends TestCase
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository->expects($this->once())->method('getSummary')->willReturn($summaryData);
 
-        $controller = new DebugController($this->createResponseFactory(), $repository);
-        $response = $controller->index();
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/debug/api');
+        $response = $controller->index($request);
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -38,10 +41,9 @@ final class DebugControllerTest extends TestCase
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository->expects($this->once())->method('getSummary')->with('123')->willReturn($summaryData);
 
-        $currentRoute = $this->createCurrentRoute(['id' => '123']);
-
-        $controller = new DebugController($this->createResponseFactory(), $repository);
-        $response = $controller->summary($currentRoute);
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')->withAttribute('id', '123');
+        $response = $controller->summary($request);
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -56,12 +58,9 @@ final class DebugControllerTest extends TestCase
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository->expects($this->once())->method('getDetail')->with('123')->willReturn($detailData);
 
-        $currentRoute = $this->createCurrentRoute(['id' => '123']);
-        $request = new \Nyholm\Psr7\ServerRequest('GET', '/test');
-        $container = $this->createMock(\Psr\Container\ContainerInterface::class);
-
-        $controller = new DebugController($this->createResponseFactory(), $repository);
-        $response = $controller->view($currentRoute, $request, $container);
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')->withAttribute('id', '123');
+        $response = $controller->view($request);
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -76,15 +75,11 @@ final class DebugControllerTest extends TestCase
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository->expects($this->once())->method('getDetail')->with('123')->willReturn($detailData);
 
-        $currentRoute = $this->createCurrentRoute(['id' => '123']);
-        $request = new \Nyholm\Psr7\ServerRequest(
-            'GET',
-            '/test?collector=AppDevPanel%5CKernel%5CCollector%5CLogCollector',
-        );
-        $container = $this->createMock(\Psr\Container\ContainerInterface::class);
-
-        $controller = new DebugController($this->createResponseFactory(), $repository);
-        $response = $controller->view($currentRoute, $request, $container);
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')
+            ->withAttribute('id', '123')
+            ->withQueryParams(['collector' => 'AppDevPanel\Kernel\Collector\LogCollector']);
+        $response = $controller->view($request);
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -98,14 +93,13 @@ final class DebugControllerTest extends TestCase
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository->expects($this->once())->method('getDetail')->with('123')->willReturn($detailData);
 
-        $currentRoute = $this->createCurrentRoute(['id' => '123']);
-        $request = new \Nyholm\Psr7\ServerRequest('GET', '/test?collector=NonExistent');
-        $container = $this->createMock(\Psr\Container\ContainerInterface::class);
-
-        $controller = new DebugController($this->createResponseFactory(), $repository);
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')
+            ->withAttribute('id', '123')
+            ->withQueryParams(['collector' => 'NonExistent']);
 
         $this->expectException(NotFoundException::class);
-        $controller->view($currentRoute, $request, $container);
+        $controller->view($request);
     }
 
     public function testDump(): void
@@ -115,10 +109,9 @@ final class DebugControllerTest extends TestCase
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository->expects($this->once())->method('getDumpObject')->with('123')->willReturn($dumpData);
 
-        $currentRoute = $this->createCurrentRoute(['id' => '123']);
-
-        $controller = new DebugController($this->createResponseFactory(), $repository);
-        $response = $controller->dump($currentRoute);
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')->withAttribute('id', '123');
+        $response = $controller->dump($request);
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -130,10 +123,11 @@ final class DebugControllerTest extends TestCase
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository->expects($this->once())->method('getDumpObject')->with('123')->willReturn($dumpData);
 
-        $currentRoute = $this->createCurrentRoute(['id' => '123', 'collector' => 'collector1']);
-
-        $controller = new DebugController($this->createResponseFactory(), $repository);
-        $response = $controller->dump($currentRoute);
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')
+            ->withAttribute('id', '123')
+            ->withQueryParams(['collector' => 'collector1']);
+        $response = $controller->dump($request);
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -145,12 +139,13 @@ final class DebugControllerTest extends TestCase
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository->expects($this->once())->method('getDumpObject')->with('123')->willReturn($dumpData);
 
-        $currentRoute = $this->createCurrentRoute(['id' => '123', 'collector' => 'nonexistent']);
-
-        $controller = new DebugController($this->createResponseFactory(), $repository);
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')
+            ->withAttribute('id', '123')
+            ->withQueryParams(['collector' => 'nonexistent']);
 
         $this->expectException(NotFoundException::class);
-        $controller->dump($currentRoute);
+        $controller->dump($request);
     }
 
     public function testObject(): void
@@ -160,10 +155,11 @@ final class DebugControllerTest extends TestCase
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository->expects($this->once())->method('getObject')->with('123', '456')->willReturn($objectData);
 
-        $currentRoute = $this->createCurrentRoute(['id' => '123', 'objectId' => '456']);
-
-        $controller = new DebugController($this->createResponseFactory(), $repository);
-        $response = $controller->object($currentRoute);
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')
+            ->withAttribute('id', '123')
+            ->withAttribute('objectId', '456');
+        $response = $controller->object($request);
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -173,25 +169,32 @@ final class DebugControllerTest extends TestCase
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository->expects($this->once())->method('getObject')->with('123', '999')->willReturn(null);
 
-        $currentRoute = $this->createCurrentRoute(['id' => '123', 'objectId' => '999']);
-
-        $controller = new DebugController($this->createResponseFactory(), $repository);
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')
+            ->withAttribute('id', '123')
+            ->withAttribute('objectId', '999');
 
         $this->expectException(NotFoundException::class);
-        $controller->object($currentRoute);
+        $controller->object($request);
     }
 
-    private function createResponseFactory(): DataResponseFactory
+    private function createJsonResponseFactory(): JsonResponseFactoryInterface
     {
+        $factory = $this->createMock(JsonResponseFactoryInterface::class);
+        $factory
+            ->method('createJsonResponse')
+            ->willReturnCallback(function (mixed $data, int $status = 200): Response {
+                return new Response($status, ['Content-Type' => 'application/json'], json_encode($data));
+            });
+        return $factory;
+    }
+
+    private function createController(?CollectorRepositoryInterface $repository = null): DebugController
+    {
+        $repository ??= $this->createMock(CollectorRepositoryInterface::class);
+        $storage = $this->createMock(StorageInterface::class);
         $psr17 = new Psr17Factory();
-        return new DataResponseFactory($psr17, $psr17);
-    }
 
-    private function createCurrentRoute(array $arguments): CurrentRoute
-    {
-        $currentRoute = new CurrentRoute();
-        $property = new ReflectionProperty(CurrentRoute::class, 'arguments');
-        $property->setValue($currentRoute, $arguments);
-        return $currentRoute;
+        return new DebugController($this->createJsonResponseFactory(), $repository, $storage, $psr17);
     }
 }

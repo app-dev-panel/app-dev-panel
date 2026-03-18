@@ -1,0 +1,34 @@
+# ADP (Application Development Panel) configuration
+app_dev_panel:
+    enabled: true
+    storage:
+        path: '%kernel.project_dir%/var/debug'
+        history_size: 50
+    collectors:
+        request: true
+        exception: true
+        log: true
+        event: true
+        service: true
+        http_client: true
+        timeline: true
+        var_dumper: true
+        filesystem_stream: true
+        http_stream: true
+        command: true
+        doctrine: false       # Enable when doctrine/dbal is installed
+        twig: false           # Enable when twig/twig is installed
+        security: false       # Enable when symfony/security-bundle is installed
+        cache: true
+        mailer: false         # Enable when symfony/mailer is installed
+        messenger: false      # Enable when symfony/messenger is installed
+    ignored_requests:
+        - '/_wdt/*'
+        - '/_profiler/*'
+        - '/debug/api/*'
+    ignored_commands:
+        - 'completion'
+        - 'help'
+        - 'list'
+        - 'debug:*'
+        - 'cache:*'

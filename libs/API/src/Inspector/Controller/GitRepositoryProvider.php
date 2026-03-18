@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\PathResolverInterface;
 use Gitonomy\Git\Repository;
 use InvalidArgumentException;
 use Throwable;
-use Yiisoft\Aliases\Aliases;
 
 class GitRepositoryProvider
 {
     public function __construct(
-        private Aliases $aliases,
+        private readonly PathResolverInterface $pathResolver,
     ) {}
 
     public function get(): Repository
     {
-        $projectPath = $this->aliases->get('@root');
+        $projectPath = $this->pathResolver->getRootPath();
 
         while ($projectPath !== '/') {
             try {

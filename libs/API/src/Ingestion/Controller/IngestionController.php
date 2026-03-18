@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Ingestion\Controller;
 
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\DataResponse\DataResponseFactoryInterface;
-use Yiisoft\Json\Json;
 
 final class IngestionController
 {
     public function __construct(
-        private DataResponseFactoryInterface $responseFactory,
-        private StorageInterface $storage,
+        private readonly JsonResponseFactoryInterface $responseFactory,
+        private readonly StorageInterface $storage,
     ) {}
 
     /**
@@ -24,7 +23,7 @@ final class IngestionController
      */
     public function ingest(ServerRequestInterface $request): ResponseInterface
     {
-        $body = Json::decode($request->getBody()->getContents());
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($body['collectors']) || !is_array($body['collectors'])) {
             throw new InvalidArgumentException('Field "collectors" is required and must be an object.');
@@ -32,7 +31,7 @@ final class IngestionController
 
         $id = $this->writeEntry($body);
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'id' => $id,
             'success' => true,
         ], 201);
@@ -43,7 +42,7 @@ final class IngestionController
      */
     public function ingestBatch(ServerRequestInterface $request): ResponseInterface
     {
-        $body = Json::decode($request->getBody()->getContents());
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($body['entries']) || !is_array($body['entries'])) {
             throw new InvalidArgumentException('Field "entries" is required and must be an array.');
@@ -61,7 +60,7 @@ final class IngestionController
             $ids[] = $this->writeEntry($entry);
         }
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'ids' => $ids,
             'count' => count($ids),
         ], 201);
@@ -72,7 +71,7 @@ final class IngestionController
      */
     public function ingestLog(ServerRequestInterface $request): ResponseInterface
     {
-        $body = Json::decode($request->getBody()->getContents());
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
         if (!isset($body['level'], $body['message'])) {
             throw new InvalidArgumentException('Fields "level" and "message" are required.');
@@ -101,7 +100,7 @@ final class IngestionController
 
         $id = $this->writeEntry($entry);
 
-        return $this->responseFactory->createResponse([
+        return $this->responseFactory->createJsonResponse([
             'id' => $id,
             'success' => true,
         ], 201);
@@ -110,7 +109,7 @@ final class IngestionController
     /**
      * Serve the OpenAPI specification.
      */
-    public function openapi(): ResponseInterface
+    public function openapi(ServerRequestInterface $request): ResponseInterface
     {
         $specPath = dirname(__DIR__, 4) . '/openapi/ingestion.yaml';
         if (!file_exists($specPath)) {
@@ -118,17 +117,11 @@ final class IngestionController
         }
 
         $yaml = file_get_contents($specPath);
-
-        // Convert YAML to JSON for easier consumption
-        // Simple YAML parsing for this spec structure
         $json = json_encode(yaml_parse($yaml), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-        return $this->responseFactory->createResponse($json);
+        return $this->responseFactory->createJsonResponse($json);
     }
 
-    /**
-     * Write a single debug entry to storage.
-     */
     private function writeEntry(array $entry): string
     {
         $idGenerator = new DebuggerIdGenerator();

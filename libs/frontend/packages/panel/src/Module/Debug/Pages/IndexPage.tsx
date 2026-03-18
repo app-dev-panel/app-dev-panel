@@ -30,6 +30,11 @@ const iconColors: Record<string, {bg: string; fg: string}> = {
     [CollectorsMap.VarDumperCollector]: {bg: '#F5F5F5', fg: '#666666'},
     [CollectorsMap.MailerCollector]: {bg: '#FDF4FF', fg: '#A855F7'},
     [CollectorsMap.FilesystemStreamCollector]: {bg: '#FFF7ED', fg: '#EA580C'},
+    [CollectorsMap.CacheCollector]: {bg: '#ECFDF5', fg: '#059669'},
+    [CollectorsMap.DoctrineCollector]: {bg: '#EFF6FF', fg: '#2563EB'},
+    [CollectorsMap.TwigCollector]: {bg: '#FEF3C7', fg: '#B45309'},
+    [CollectorsMap.SecurityCollector]: {bg: '#FEF2F2', fg: '#DC2626'},
+    [CollectorsMap.MessengerCollector]: {bg: '#F0F9FF', fg: '#0284C7'},
 };
 const defaultIconColor = {bg: '#F5F5F5', fg: '#666666'};
 
@@ -39,7 +44,7 @@ const defaultIconColor = {bg: '#F5F5F5', fg: '#666666'};
 
 const CardsGrid = styled(Box)(({theme}) => ({
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
     gap: theme.spacing(2),
     marginBottom: theme.spacing(3),
 }));
@@ -122,6 +127,7 @@ const SparkBar = styled(Box, {shouldForwardProp: (p) => p !== 'isCurrent' && p !
 
 const SummaryBar = styled(Box)(({theme}) => ({
     display: 'flex',
+    flexWrap: 'wrap',
     gap: theme.spacing(3),
     marginBottom: theme.spacing(3),
     padding: theme.spacing(2, 2.5),
@@ -142,7 +148,7 @@ const SummaryLabel = styled(Typography)(({theme}) => ({fontSize: '12px', color: 
 
 const PerfGrid = styled(Box)(({theme}) => ({
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
     gap: theme.spacing(2),
     marginBottom: theme.spacing(3),
 }));

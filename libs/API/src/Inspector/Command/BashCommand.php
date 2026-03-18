@@ -6,14 +6,14 @@ namespace AppDevPanel\Api\Inspector\Command;
 
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
+use AppDevPanel\Api\PathResolverInterface;
 use Symfony\Component\Process\Process;
-use Yiisoft\Aliases\Aliases;
 
 final class BashCommand implements CommandInterface
 {
     public function __construct(
-        private Aliases $aliases,
-        private array $command,
+        private readonly PathResolverInterface $pathResolver,
+        private readonly array $command,
     ) {}
 
     public static function getTitle(): string
@@ -28,7 +28,7 @@ final class BashCommand implements CommandInterface
 
     public function run(): CommandResponse
     {
-        $projectDirectory = $this->aliases->get('@root');
+        $projectDirectory = $this->pathResolver->getRootPath();
 
         $process = new Process($this->command);
 

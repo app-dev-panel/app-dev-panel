@@ -16,8 +16,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Yiisoft\VarDumper\VarDumper;
-use Yiisoft\Yii\Console\ExitCode;
 
 #[AsCommand(name: 'dev:broadcast', description: 'Broadcast test messages to debug server clients')]
 final class DebugServerBroadcastCommand extends Command
@@ -47,7 +45,7 @@ final class DebugServerBroadcastCommand extends Command
 
         $env = $input->getOption('env');
         if ($env === 'test') {
-            return ExitCode::OK;
+            return Command::SUCCESS;
         }
 
         $broadcaster = new Broadcaster();
@@ -57,13 +55,12 @@ final class DebugServerBroadcastCommand extends Command
         $this->logger->info('Starting broadcast.', ['message' => $data]);
 
         $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, $data);
-        $broadcaster->broadcast(
-            Connection::MESSAGE_TYPE_VAR_DUMPER,
-            VarDumper::create(['$data' => $data])->asJson(false),
-        );
+        $broadcaster->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, json_encode([
+            '$data' => $data,
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
 
         $this->logger->info('Broadcast complete.', ['message' => $data]);
 
-        return ExitCode::OK;
+        return Command::SUCCESS;
     }
 }

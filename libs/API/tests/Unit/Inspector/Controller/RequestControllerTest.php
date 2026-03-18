@@ -25,8 +25,8 @@ final class RequestControllerTest extends ControllerTestCase
                 self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
             ]);
 
-        $controller = new RequestController($this->createResponseFactory());
-        $response = $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']), $repository);
+        $controller = new RequestController($this->createResponseFactory(), $repository);
+        $response = $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']));
 
         $data = $this->responseData($response);
         $this->assertArrayHasKey('command', $data);
@@ -45,10 +45,10 @@ final class RequestControllerTest extends ControllerTestCase
                 self::REQUEST_COLLECTOR => ['requestRaw' => 'not a valid http request'],
             ]);
 
-        $controller = new RequestController($this->createResponseFactory());
+        $controller = new RequestController($this->createResponseFactory(), $repository);
 
         $this->expectException(\InvalidArgumentException::class);
-        $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']), $repository);
+        $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']));
     }
 
     public function testRequestHostValidationPasses(): void
@@ -64,11 +64,11 @@ final class RequestControllerTest extends ControllerTestCase
             ]);
 
         // Empty allowedHosts means all hosts allowed — should not throw
-        $controller = new RequestController($this->createResponseFactory(), []);
+        $controller = new RequestController($this->createResponseFactory(), $repository, []);
 
         // We can't actually send the HTTP request in tests, but we can test buildCurl
         // which exercises the same data flow without network call
-        $response = $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']), $repository);
+        $response = $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']));
         $this->assertSame(200, $response->getStatusCode());
     }
 
@@ -84,10 +84,10 @@ final class RequestControllerTest extends ControllerTestCase
                 self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
             ]);
 
-        $controller = new RequestController($this->createResponseFactory(), ['localhost', '127.0.0.1']);
+        $controller = new RequestController($this->createResponseFactory(), $repository, ['localhost', '127.0.0.1']);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('evil.com');
-        $controller->request($this->get(['debugEntryId' => 'entry-1']), $repository);
+        $controller->request($this->get(['debugEntryId' => 'entry-1']));
     }
 }
