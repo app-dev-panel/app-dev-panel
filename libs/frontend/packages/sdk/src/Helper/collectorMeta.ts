@@ -35,7 +35,7 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
 
     [CollectorsMap.ConsoleAppInfoCollector]: {label: 'Console', icon: 'terminal', weight: 17},
     [CollectorsMap.WebAppInfoCollector]: {label: 'Web Info', icon: 'language', weight: 18},
-    [CollectorsMap.CommandCollector]: {label: 'Command', icon: 'terminal', weight: 19},
+    [CollectorsMap.CommandCollector]: {label: 'Command', icon: 'terminal', weight: 1},
     [CollectorsMap.WebViewCollector]: {label: 'View', icon: 'visibility', weight: 20},
 };
 

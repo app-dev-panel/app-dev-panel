@@ -12,8 +12,8 @@ composer install
 ## Run
 
 ```bash
-# Start PHP built-in server
-php -S 127.0.0.1:8080 -t public
+# Start PHP built-in server (multiple workers required for ADP SSE)
+PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 ```
 
 ## Console

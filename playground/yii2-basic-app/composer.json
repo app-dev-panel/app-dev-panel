@@ -36,7 +36,7 @@
     "scripts": {
         "serve": [
             "Composer\\Config::disableProcessTimeout",
-            "php -S 127.0.0.1:8080 -t public"
+            "PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public"
         ]
     },
     "config": {
