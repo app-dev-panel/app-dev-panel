@@ -10,8 +10,11 @@ permissions:
   contents: read
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # PHP Unit Tests (core libs)
+  # ---------------------------------------------------------------------------
   tests:
-    name: Tests (PHP ${{ matrix.php }}, ${{ matrix.os }})
+    name: PHP Tests (PHP ${{ matrix.php }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -62,8 +65,36 @@ jobs:
           path: coverage.xml
           retention-days: 7
 
+  # ---------------------------------------------------------------------------
+  # Frontend Tests (Vitest unit + component tests)
+  # ---------------------------------------------------------------------------
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21'
+          cache: 'npm'
+          cache-dependency-path: libs/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: libs/frontend
+        run: npm ci
+
+      - name: Run unit tests
+        working-directory: libs/frontend
+        run: npm test
+
+  # ---------------------------------------------------------------------------
+  # Mago — Core libs (format, lint, analyze)
+  # ---------------------------------------------------------------------------
   mago:
-    name: Mago (${{ matrix.check }})
+    name: "Mago: Core (${{ matrix.check }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -100,3 +131,68 @@ jobs:
       - name: Run analyzer
         if: matrix.check == 'analyze'
         run: mago analyze --reporting-format=github
+
+  # ---------------------------------------------------------------------------
+  # Mago — Playgrounds (format, lint, analyze for each playground)
+  # ---------------------------------------------------------------------------
+  mago-playgrounds:
+    name: "Mago: ${{ matrix.playground }} (${{ matrix.check }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        playground:
+          - { name: "Yiisoft", path: "playground/yiisoft-app" }
+          - { name: "Symfony", path: "playground/symfony-basic-app" }
+          - { name: "Yii2",    path: "playground/yii2-basic-app" }
+        check: [format, lint, analyze]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Mago
+        uses: nhedger/setup-mago@v1
+
+      - name: Run format check
+        if: matrix.check == 'format'
+        working-directory: ${{ matrix.playground.path }}
+        run: mago fmt --check
+
+      - name: Run linter
+        if: matrix.check == 'lint'
+        working-directory: ${{ matrix.playground.path }}
+        run: mago lint --reporting-format=github
+
+      - name: Run analyzer
+        if: matrix.check == 'analyze'
+        working-directory: ${{ matrix.playground.path }}
+        run: mago analyze --reporting-format=github
+
+  # ---------------------------------------------------------------------------
+  # Frontend Code Quality (Prettier + ESLint)
+  # ---------------------------------------------------------------------------
+  frontend-quality:
+    name: "Frontend: Quality"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21'
+          cache: 'npm'
+          cache-dependency-path: libs/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: libs/frontend
+        run: npm ci
+
+      - name: Check formatting (Prettier)
+        working-directory: libs/frontend
+        run: npm run format:check
+
+      - name: Lint (ESLint)
+        working-directory: libs/frontend
+        run: npm run lint

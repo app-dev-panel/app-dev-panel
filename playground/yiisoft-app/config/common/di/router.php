@@ -14,9 +14,9 @@ return [
     RouteCollectionInterface::class => [
         'class' => RouteCollection::class,
         '__construct()' => [
-            'collector' => DynamicReference::to(
-                static fn() => (new RouteCollector())->addRoute(...$config->get('routes')),
-            ),
+            'collector' => DynamicReference::to(static fn() => new RouteCollector()->addRoute(...$config->get(
+                'routes',
+            ))),
         ],
     ],
 ];

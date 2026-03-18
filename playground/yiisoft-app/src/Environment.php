@@ -58,7 +58,7 @@ final class Environment
     /**
      * @return non-empty-string|null
      */
-    public static function appHostPath(): string|null
+    public static function appHostPath(): ?string
     {
         /** @var non-empty-string|null */
         return self::$values['APP_HOST_PATH'];
@@ -99,7 +99,7 @@ final class Environment
         $value = self::getRawValue($key);
         self::$values[$key] = $value === null
             ? $default
-            : (filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default);
+            : filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default;
     }
 
     private static function setInteger(string $key, int $default): void
@@ -114,7 +114,7 @@ final class Environment
         self::$values[$key] = $value ?? $default;
     }
 
-    private static function setNonEmptyStringOrNull(string $key, string|null $default): void
+    private static function setNonEmptyStringOrNull(string $key, ?string $default): void
     {
         $value = self::getRawValue($key);
         self::$values[$key] = $value === null || $value === '' ? $default : $value;

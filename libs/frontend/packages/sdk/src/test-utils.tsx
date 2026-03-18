@@ -9,11 +9,16 @@ import {debugSlice} from './API/Debug/Context';
 import {debugApi} from './API/Debug/Debug';
 import {createAdpTheme} from './Component/Theme/DefaultTheme';
 
-// Stub for inspector API used by ExceptionPreview
+// Stub for inspector API used by ExceptionPanel (useLazyGetFilesQuery, useLazyGetClassQuery)
 const stubInspectorApi = createApi({
     reducerPath: 'api.inspector',
-    baseQuery: () => ({data: null}),
-    endpoints: () => ({}),
+    baseQuery: () => ({data: []}),
+    endpoints: (builder) => ({
+        getFiles: builder.query<unknown[], string>({query: (path) => `files?path=${path}`}),
+        getClass: builder.query<unknown[], {className: string; methodName: string}>({
+            query: ({className, methodName = ''}) => `files?class=${className}&method=${methodName}`,
+        }),
+    }),
 });
 
 const stubInspectorGitApi = createApi({

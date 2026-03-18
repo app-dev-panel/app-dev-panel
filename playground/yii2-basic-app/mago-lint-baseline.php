@@ -1,0 +1,2 @@
+variant = "loose"
+issues = []

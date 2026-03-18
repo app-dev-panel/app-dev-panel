@@ -12,7 +12,7 @@ use Yiisoft\ErrorHandler\Renderer\HtmlRenderer;
 return [
     HtmlRenderer::class => [
         '__construct()' => [
-            'traceLink' => static function (string $file, int|null $line) use ($params): string|null {
+            'traceLink' => static function (string $file, ?int $line) use ($params): ?string {
                 if (!isset($params['traceLink'])) {
                     return null;
                 }
@@ -23,11 +23,7 @@ return [
                         /** @var string $file */
                         $file = preg_replace('~^(/app/)~', rtrim($hostPath, '\\/') . '/', $file);
                     }
-                    return str_replace(
-                        ['{file}', '{line}'],
-                        [$file, (string) $line],
-                        $params['traceLink'],
-                    );
+                    return str_replace(['{file}', '{line}'], [$file, (string) $line], $params['traceLink']);
                 } catch (Throwable) {
                     return null;
                 }

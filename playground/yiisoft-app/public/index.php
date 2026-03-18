@@ -43,17 +43,12 @@ $runner = new HttpApplicationRunner(
     debug: Environment::appDebug(),
     checkEvents: Environment::appDebug(),
     environment: Environment::appEnv(),
-    temporaryErrorHandler: new ErrorHandler(
-        new Logger(
-            [
-                (new FileTarget($root . '/runtime/logs/app-container-building.log'))->setLevels([
-                    LogLevel::EMERGENCY,
-                    LogLevel::ERROR,
-                    LogLevel::WARNING,
-                ]),
-            ],
-        ),
-        new HtmlRenderer(),
-    ),
+    temporaryErrorHandler: new ErrorHandler(new Logger([
+        new FileTarget($root . '/runtime/logs/app-container-building.log')->setLevels([
+            LogLevel::EMERGENCY,
+            LogLevel::ERROR,
+            LogLevel::WARNING,
+        ]),
+    ]), new HtmlRenderer()),
 );
 $runner->run();

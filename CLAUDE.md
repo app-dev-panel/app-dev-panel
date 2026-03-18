@@ -80,34 +80,60 @@ ADP follows a **layered architecture**:
 
 ## Key Commands
 
+The project uses a **top-level Makefile** as the single entry point for all tasks. Run `make help` for a full list.
+
 ```bash
 # Install
-composer install                    # Install PHP dependencies
+make install                        # Install ALL deps (PHP + frontend + playgrounds)
+make install-php                    # Install PHP dependencies only
+make install-frontend               # Install frontend dependencies only
+make install-playgrounds            # Install playground dependencies only
 
 # Tests
-composer test                       # Run PHPUnit tests
-composer test:coverage              # Run tests with coverage report
+make test                           # Run ALL tests in parallel (PHP + frontend)
+make test-php                       # Run PHP unit tests (PHPUnit)
+make test-frontend                  # Run frontend unit tests (Vitest)
+make test-frontend-e2e              # Run frontend browser tests (Vitest + Playwright)
 
-# Code quality — PHP (Mago, PER-CS / PER-2 preset)
-composer format:check               # Check PHP code formatting (dry-run)
-composer format:fix                 # Fix PHP code formatting
-composer lint                       # Run PHP linter
-composer analyze                    # Run PHP static analyzer
-composer check                      # Run all PHP checks (format + lint + analyze)
-composer fix                        # Fix formatting, then run lint + analyze
+# Code quality — PHP (Mago)
+make mago                           # Run all Mago checks on core (format + lint + analyze)
+make mago-fix                       # Fix core formatting, then lint + analyze
+make mago-format                    # Check core code formatting
+make mago-lint                      # Run core linter
+make mago-analyze                   # Run core static analyzer
 
-# Frontend
+# Code quality — Playgrounds
+make mago-playgrounds               # Run Mago checks on all playgrounds (parallel)
+make mago-playgrounds-fix           # Fix formatting in all playgrounds (parallel)
+
+# Code quality — Frontend
+make frontend-check                 # Run frontend checks (Prettier + ESLint)
+make frontend-fix                   # Fix frontend code quality issues
+
+# Combined
+make check                          # Run ALL code quality checks (core + playgrounds + frontend)
+make fix                            # Fix all code (core + playgrounds + frontend)
+make all                            # Run everything: checks + tests
+
+# CI
+make ci                             # Full CI pipeline: all checks + all tests
+make check-ci                       # CI checks only
+make test-ci                        # CI tests only
+
+# Frontend dev (still via npm)
 cd libs/frontend
-npm install                         # Install JS dependencies
 npm start                           # Start all Vite dev servers (via Lerna)
 npm run build                       # Production build all packages
+```
 
-# Code quality — JS/TS (Prettier 3.8+, ESLint 9)
-npm run format                      # Format JS/TS/CSS/JSON with Prettier
-npm run format:check                # Check formatting (CI)
-npm run lint                        # ESLint check
-npm run lint:fix                    # ESLint auto-fix
-npm run check                       # Run all JS checks (format + lint)
+### Legacy composer/npm commands
+
+The Makefile wraps these — use them directly only when needed:
+
+```bash
+composer test                       # PHPUnit (same as make test-php)
+composer fix                        # PHP fix (same as make mago-fix)
+cd libs/frontend && npm run check   # Frontend check (same as make frontend-check)
 ```
 
 ## CI/CD
@@ -117,6 +143,52 @@ GitHub Actions runs on every push and PR:
 - **Tests**: Matrix of PHP 8.4/8.5 on Linux and Windows
 - **Mago**: Format check, lint, and static analysis
 - **PR Reports**: Coverage report and Mago analysis posted as PR comments
+
+## Test Coverage Summary
+
+### PHP (PHPUnit) — `make test-php`
+
+| Suite | Library | Tests | Skipped | Time | Line Coverage |
+|-------|---------|------:|--------:|-----:|--------------:|
+| Kernel | `libs/Kernel` | 276 | 7 | 1m 21s | **85.2%** (1073/1259) |
+| API | `libs/API` | 174 | 0 | 0.1s | **76.2%** (754/990) |
+| Adapter-Symfony | `libs/Adapter/Symfony` | 150 | 9 | 0.2s | **98.9%** (905/915) |
+| Adapter-Yii2 | `libs/Adapter/Yii2` | 95 | 0 | 0.1s | **57.3%** (373/651) |
+| Cli | `libs/Cli` | 6 | 0 | 0.02s | **41.1%** (30/73) |
+| **Total** | **all libs** | **701** | **16** | **~1m 22s** | **66.7%** (3135/4702) |
+
+E2E suite (54 tests) requires Chrome + ChromeDriver and runs separately via `make test-frontend-e2e`.
+
+### Frontend (Vitest) — `make test-frontend`
+
+| Package | Tests | Suites | Time |
+|---------|------:|-------:|-----:|
+| `packages/sdk` | 209 | 25 | ~51s |
+| `packages/panel` | 119 | 16 | ~51s |
+| **Total** | **328** | **41** | **~51s** |
+
+Browser e2e tests (4 suites) run separately via `make test-frontend-e2e`.
+
+### Playgrounds — `make mago-playgrounds`
+
+Playgrounds are demo/reference apps — they have **no unit tests**. Quality is ensured via Mago only.
+
+| Playground | Format | Lint | Analyze | Baseline (suppressed) |
+|------------|:------:|:----:|:-------:|----------------------:|
+| `yiisoft-app` | pass | pass (3 baselined) | pass (96 baselined) | 99 |
+| `symfony-basic-app` | pass | pass | pass (11 baselined) | 11 |
+| `yii2-basic-app` | pass | pass | pass (10 baselined) | 10 |
+
+### Running Coverage Locally
+
+```bash
+# PHP coverage (requires PCOV extension)
+php vendor/bin/phpunit --coverage-text          # Text summary
+php vendor/bin/phpunit --coverage-html=coverage  # HTML report in coverage/
+
+# Frontend coverage
+cd libs/frontend && npx vitest run --coverage    # Vitest with c8/istanbul
+```
 
 ## Mandatory Post-Feature Pipeline
 
@@ -130,9 +202,16 @@ Write tests for all new/modified code. Follow test conventions from `.claude/com
 
 ### Step 2: Run Code Quality
 ```bash
-composer fix                        # PHP: fix formatting + lint + analyze
-composer test                       # PHP: run all tests
-cd libs/frontend && npm run check  # JS: format check + lint (if frontend changed)
+make fix                            # Fix all code (PHP core + playgrounds + frontend)
+make test                           # Run all tests (PHP + frontend, parallel)
+```
+Or granularly:
+```bash
+make mago-fix                       # PHP core only
+make mago-playgrounds-fix           # Playgrounds only
+make frontend-fix                   # Frontend only
+make test-php                       # PHP tests only
+make test-frontend                  # Frontend tests only
 ```
 All checks must be green. Fix any failures before proceeding.
 
@@ -150,6 +229,12 @@ Verify no dependency violations introduced. Modules must follow the dependency g
 
 ### Step 5: Iterate
 If any step produces changes, go back to Step 2 and re-run checks. Continue until stable.
+
+### Step 6: Final Verification
+```bash
+make all                            # Run everything: all checks + all tests
+```
+This must pass cleanly before pushing. Equivalent to `make check && make test`.
 
 ### Baselines
 
