@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d93fa498f7d9d4268d40b58e55b34faa",
+    "content-hash": "11aea0ed2ba3e3c7ed60d7e86ab208b4",
     "packages": [
         {
             "name": "alexkart/curl-builder",
@@ -55,7 +55,7 @@
         },
         {
             "name": "app-dev-panel/adapter-symfony",
-            "version": "dev-claude/uii2-adapter-implementation-CYfez",
+            "version": "dev-claude/add-testing-scenarios-topFa",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Symfony",
@@ -111,7 +111,7 @@
         },
         {
             "name": "app-dev-panel/adapter-yii2",
-            "version": "dev-claude/uii2-adapter-implementation-CYfez",
+            "version": "dev-claude/add-testing-scenarios-topFa",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Yii2",
@@ -160,7 +160,7 @@
         },
         {
             "name": "app-dev-panel/adapter-yiisoft",
-            "version": "dev-claude/uii2-adapter-implementation-CYfez",
+            "version": "dev-claude/add-testing-scenarios-topFa",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Yiisoft",
@@ -251,7 +251,7 @@
         },
         {
             "name": "app-dev-panel/api",
-            "version": "dev-claude/uii2-adapter-implementation-CYfez",
+            "version": "dev-claude/add-testing-scenarios-topFa",
             "dist": {
                 "type": "path",
                 "url": "libs/API",
@@ -310,7 +310,7 @@
         },
         {
             "name": "app-dev-panel/cli",
-            "version": "dev-claude/uii2-adapter-implementation-CYfez",
+            "version": "dev-claude/add-testing-scenarios-topFa",
             "dist": {
                 "type": "path",
                 "url": "libs/Cli",
@@ -348,7 +348,7 @@
         },
         {
             "name": "app-dev-panel/kernel",
-            "version": "dev-claude/uii2-adapter-implementation-CYfez",
+            "version": "dev-claude/add-testing-scenarios-topFa",
             "dist": {
                 "type": "path",
                 "url": "libs/Kernel",
@@ -387,6 +387,31 @@
                 ]
             },
             "description": "Add Devp Panel Kernel",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "app-dev-panel/testing",
+            "version": "dev-claude/add-testing-scenarios-topFa",
+            "dist": {
+                "type": "path",
+                "url": "libs/Testing",
+                "reference": "2500ba663a7e733a54bfa9ddf401b75bc1d611a0"
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.5",
+                "guzzlehttp/psr7": "^2.4",
+                "php": "^8.4",
+                "symfony/console": "^6.4|^7.0|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "AppDevPanel\\Testing\\": "src"
+                }
+            },
+            "description": "Testing scenarios for ADP: verify that all collectors work correctly across adapters and playgrounds",
             "transport-options": {
                 "relative": true
             }

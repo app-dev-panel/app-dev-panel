@@ -9,7 +9,7 @@ Central test scenario definitions and runner for verifying ADP collectors across
 - PHP: 8.4+
 - Dependencies: `guzzlehttp/guzzle`, `guzzlehttp/psr7`, `symfony/console`
 
-## Architecture
+## Directory Structure
 
 ```
 libs/Testing/src/
@@ -25,6 +25,14 @@ libs/Testing/src/
 │   └── ScenarioResult.php       # Result of running one scenario
 └── Command/
     └── DebugScenariosCommand.php # CLI command to run scenarios
+libs/Testing/tests/
+└── E2E/
+    ├── ScenarioTestCase.php       # Base PHPUnit test case for HTTP E2E
+    ├── CoreScenariosTest.php      # Core collector tests (logs, events, dump, timeline)
+    ├── WebScenariosTest.php       # Web context tests (request, app info)
+    ├── ErrorScenariosTest.php     # Exception tests (runtime, chained)
+    ├── AdvancedScenariosTest.php  # Multi-collector, heavy, http-client, filesystem
+    └── DebugApiTest.php           # Debug API endpoint contract tests
 ```
 
 ## How It Works
@@ -60,21 +68,36 @@ All playgrounds must implement these endpoints under `/test/scenarios/`:
 | `/test/scenarios/http-client` | http-client:basic | HttpClientCollector |
 | `/test/scenarios/filesystem` | filesystem:basic | FilesystemStreamCollector |
 
-## CLI Usage
+## Running Scenarios
+
+Two ways to run: CLI command or PHPUnit E2E tests. Both require a running playground server.
+
+### CLI Command
 
 ```bash
-# List all scenarios
-debug:scenarios --list http://localhost:8080
+debug:scenarios http://localhost:8080              # All scenarios
+debug:scenarios http://localhost:8080 --tag=core   # By tag
+debug:scenarios http://localhost:8080 -s logs:basic # Single scenario
+debug:scenarios http://localhost:8080 --list       # List without running
+debug:scenarios http://localhost:8080 -v           # Verbose assertions
+```
 
-# Run all scenarios against a playground
-debug:scenarios http://localhost:8080
+### PHPUnit E2E Tests
 
-# Run specific tag group
-debug:scenarios http://localhost:8080 --tag=core
+```bash
+# Run all scenario tests against a playground
+PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Scenarios
 
-# Run single scenario
-debug:scenarios http://localhost:8080 --scenario=logs:basic
+# Run specific group
+PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Scenarios --group core
 
-# Verbose output (show all assertions)
-debug:scenarios http://localhost:8080 -v
+# Available groups: core, web, error, advanced, api
+```
+
+### Makefile Targets
+
+```bash
+make scenarios                  # CLI scenarios against all playgrounds
+make test-scenarios             # PHPUnit E2E against all playgrounds
+make test-scenarios-symfony     # PHPUnit E2E against Symfony only
 ```

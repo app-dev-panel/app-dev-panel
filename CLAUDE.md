@@ -122,10 +122,14 @@ make check-ci                       # CI checks only
 make test-ci                        # CI tests only
 
 # Testing scenarios (requires running playground servers)
-make scenarios             # Run test scenarios against all playgrounds
-make scenarios-yiisoft     # Run scenarios against Yiisoft (port 8101)
-make scenarios-symfony     # Run scenarios against Symfony (port 8102)
-make scenarios-yii2        # Run scenarios against Yii2 (port 8103)
+make scenarios             # Run CLI scenarios against all playgrounds
+make scenarios-yiisoft     # CLI scenarios against Yiisoft (port 8101)
+make scenarios-symfony     # CLI scenarios against Symfony (port 8102)
+make scenarios-yii2        # CLI scenarios against Yii2 (port 8103)
+make test-scenarios        # PHPUnit E2E scenarios against all playgrounds
+make test-scenarios-yiisoft  # PHPUnit E2E against Yiisoft
+make test-scenarios-symfony  # PHPUnit E2E against Symfony
+make test-scenarios-yii2     # PHPUnit E2E against Yii2
 
 # Frontend dev (still via npm)
 cd libs/frontend
