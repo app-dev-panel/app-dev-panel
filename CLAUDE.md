@@ -169,6 +169,16 @@ E2E suite (54 tests) requires Chrome + ChromeDriver and runs separately via `mak
 
 Browser e2e tests (4 suites) run separately via `make test-frontend-e2e`.
 
+### Playgrounds — `make mago-playgrounds`
+
+Playgrounds are demo/reference apps — they have **no unit tests**. Quality is ensured via Mago only.
+
+| Playground | Format | Lint | Analyze | Baseline (suppressed) |
+|------------|:------:|:----:|:-------:|----------------------:|
+| `yiisoft-app` | pass | pass (3 baselined) | pass (96 baselined) | 99 |
+| `symfony-basic-app` | pass | pass | pass (11 baselined) | 11 |
+| `yii2-basic-app` | pass | pass | pass (10 baselined) | 10 |
+
 ### Running Coverage Locally
 
 ```bash
