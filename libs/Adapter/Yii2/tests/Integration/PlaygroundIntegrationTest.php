@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
-use AppDevPanel\Adapter\Yii2\Collector\AssetBundleCollector;
-use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
-use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Module;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
@@ -84,12 +82,12 @@ final class PlaygroundIntegrationTest extends TestCase
         $webAppInfoCollector?->markRequestStarted();
 
         // Simulate DB queries with timing
-        /** @var DbCollector|null $dbCollector */
-        $dbCollector = $module->getCollector(DbCollector::class);
-        $dbCollector?->beginQuery();
-        $dbCollector?->logQuery('SELECT * FROM users LIMIT 10', [], 3);
-        $dbCollector?->beginQuery();
-        $dbCollector?->logQuery('SELECT COUNT(*) FROM users', [], 1);
+        /** @var DatabaseCollector|null $dbCollector */
+        $dbCollector = $module->getCollector(DatabaseCollector::class);
+        $startTime = microtime(true);
+        $dbCollector?->logQuery('SELECT * FROM users LIMIT 10', 'SELECT * FROM users LIMIT 10', [], '', $startTime, microtime(true), 3);
+        $startTime = microtime(true);
+        $dbCollector?->logQuery('SELECT COUNT(*) FROM users', 'SELECT COUNT(*) FROM users', [], '', $startTime, microtime(true), 1);
 
         // Simulate response
         $psrResponse = $psr17->createResponse(200);
@@ -131,10 +129,10 @@ final class PlaygroundIntegrationTest extends TestCase
         $psrResponse = $psr17->createResponse(201);
         $requestCollector?->collectResponse($psrResponse);
 
-        /** @var DbCollector|null $dbCollector */
-        $dbCollector = $module->getCollector(DbCollector::class);
-        $dbCollector?->beginQuery();
-        $dbCollector?->logQuery('INSERT INTO submissions (data) VALUES (?)', ['test'], 1);
+        /** @var DatabaseCollector|null $dbCollector */
+        $dbCollector = $module->getCollector(DatabaseCollector::class);
+        $startTime = microtime(true);
+        $dbCollector?->logQuery('INSERT INTO submissions (data) VALUES (?)', 'INSERT INTO submissions (data) VALUES (?)', ['test'], '', $startTime, microtime(true), 1);
 
         $debugger->shutdown();
 
@@ -153,9 +151,9 @@ final class PlaygroundIntegrationTest extends TestCase
         $this->assertSame('POST', $requestData['requestMethod']);
         $this->assertSame(201, $requestData['responseStatusCode']);
 
-        // Verify DbCollector data
-        $this->assertArrayHasKey(DbCollector::class, $entry);
-        $dbData = $entry[DbCollector::class];
+        // Verify DatabaseCollector data
+        $this->assertArrayHasKey(DatabaseCollector::class, $entry);
+        $dbData = $entry[DatabaseCollector::class];
         $this->assertCount(1, $dbData['queries']);
         $this->assertStringContainsString('INSERT INTO submissions', $dbData['queries'][0]['sql']);
     }

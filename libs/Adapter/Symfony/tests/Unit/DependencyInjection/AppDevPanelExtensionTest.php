@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\Tests\Unit\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Collector\CacheCollector;
-use AppDevPanel\Adapter\Symfony\Collector\DoctrineCollector;
-use AppDevPanel\Adapter\Symfony\Collector\MailerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
 use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
@@ -19,7 +17,9 @@ use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
@@ -69,7 +69,7 @@ final class AppDevPanelExtensionTest extends TestCase
             ServiceCollector::class,
             HttpClientCollector::class,
             VarDumperCollector::class,
-            DoctrineCollector::class,
+            DatabaseCollector::class,
             TwigCollector::class,
             SecurityCollector::class,
             CacheCollector::class,
@@ -114,7 +114,7 @@ final class AppDevPanelExtensionTest extends TestCase
             ],
         ], $container);
 
-        $this->assertFalse($container->hasDefinition(DoctrineCollector::class));
+        $this->assertFalse($container->hasDefinition(DatabaseCollector::class));
         $this->assertFalse($container->hasDefinition(TwigCollector::class));
         $this->assertFalse($container->hasDefinition(SecurityCollector::class));
         $this->assertFalse($container->hasDefinition(MailerCollector::class));

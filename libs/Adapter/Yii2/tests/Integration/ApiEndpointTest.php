@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
-use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
-use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
@@ -103,7 +103,7 @@ final class ApiEndpointTest extends TestCase
         $this->assertContains(RequestCollector::class, $collectorIds);
         $this->assertContains(LogCollector::class, $collectorIds);
         $this->assertContains(ExceptionCollector::class, $collectorIds);
-        $this->assertContains(DbCollector::class, $collectorIds);
+        $this->assertContains(DatabaseCollector::class, $collectorIds);
         $this->assertContains(MailerCollector::class, $collectorIds);
 
         // Yii2LogCollector class is deleted — only the global LogCollector is used
@@ -133,7 +133,7 @@ final class ApiEndpointTest extends TestCase
         // Should contain data keyed by collector FQCN
         $this->assertArrayHasKey(RequestCollector::class, $envelope['data']);
         $this->assertArrayHasKey(LogCollector::class, $envelope['data']);
-        $this->assertArrayHasKey(DbCollector::class, $envelope['data']);
+        $this->assertArrayHasKey(DatabaseCollector::class, $envelope['data']);
     }
 
     public function testViewRequestCollectorReturnsRequestDetails(): void
@@ -197,18 +197,17 @@ final class ApiEndpointTest extends TestCase
         $debugger->startup(StartupContext::forRequest($psrRequest));
         $debugId = $debugger->getId();
 
-        /** @var DbCollector $dbCollector */
-        $dbCollector = $module->getCollector(DbCollector::class);
-        $dbCollector->logConnection();
-        $dbCollector->beginQuery();
-        $dbCollector->logQuery('SELECT * FROM users WHERE active = ?', [1], 5);
-        $dbCollector->beginQuery();
-        $dbCollector->logQuery('SELECT COUNT(*) FROM users', [], 1);
+        /** @var DatabaseCollector $dbCollector */
+        $dbCollector = $module->getCollector(DatabaseCollector::class);
+        $startTime = microtime(true);
+        $dbCollector->logQuery('SELECT * FROM users WHERE active = ?', 'SELECT * FROM users WHERE active = ?', [1], '', $startTime, microtime(true), 5);
+        $startTime = microtime(true);
+        $dbCollector->logQuery('SELECT COUNT(*) FROM users', 'SELECT COUNT(*) FROM users', [], '', $startTime, microtime(true), 1);
 
         $debugger->shutdown();
 
         $envelope = $this->decodeEnvelope($this->apiGet(
-            "/debug/api/view/{$debugId}?collector=" . urlencode(DbCollector::class),
+            "/debug/api/view/{$debugId}?collector=" . urlencode(DatabaseCollector::class),
         ));
         $this->assertTrue($envelope['success']);
 
@@ -268,16 +267,19 @@ final class ApiEndpointTest extends TestCase
         /** @var MailerCollector $mailerCollector */
         $mailerCollector = $module->getCollector(MailerCollector::class);
 
-        $mockMessage = $this->createMock(\yii\mail\MessageInterface::class);
-        $mockMessage->method('getFrom')->willReturn(['noreply@example.com' => 'No Reply']);
-        $mockMessage->method('getTo')->willReturn(['user@example.com' => 'User']);
-        $mockMessage->method('getCc')->willReturn(null);
-        $mockMessage->method('getBcc')->willReturn(null);
-        $mockMessage->method('getReplyTo')->willReturn(null);
-        $mockMessage->method('getSubject')->willReturn('Welcome!');
-        $mockMessage->method('getCharset')->willReturn('utf-8');
-
-        $mailerCollector->logMessage($mockMessage);
+        $mailerCollector->collectMessage([
+            'from' => ['noreply@example.com' => 'No Reply'],
+            'to' => ['user@example.com' => 'User'],
+            'cc' => [],
+            'bcc' => [],
+            'replyTo' => [],
+            'subject' => 'Welcome!',
+            'textBody' => null,
+            'htmlBody' => null,
+            'raw' => '',
+            'charset' => 'utf-8',
+            'date' => date('r'),
+        ]);
 
         $debugger->shutdown();
 
@@ -310,10 +312,10 @@ final class ApiEndpointTest extends TestCase
         $logCollector->collect('info', 'msg1', [], '');
         $logCollector->collect('info', 'msg2', [], '');
 
-        /** @var DbCollector $dbCollector */
-        $dbCollector = $module->getCollector(DbCollector::class);
-        $dbCollector->beginQuery();
-        $dbCollector->logQuery('SELECT 1', [], 1);
+        /** @var DatabaseCollector $dbCollector */
+        $dbCollector = $module->getCollector(DatabaseCollector::class);
+        $startTime = microtime(true);
+        $dbCollector->logQuery('SELECT 1', 'SELECT 1', [], '', $startTime, microtime(true), 1);
 
         $debugger->shutdown();
 

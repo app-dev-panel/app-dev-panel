@@ -6,14 +6,14 @@ namespace AppDevPanel\Adapter\Symfony\Tests\Integration;
 
 use AppDevPanel\Adapter\Symfony\AppDevPanelBundle;
 use AppDevPanel\Adapter\Symfony\Collector\CacheCollector;
-use AppDevPanel\Adapter\Symfony\Collector\DoctrineCollector;
-use AppDevPanel\Adapter\Symfony\Collector\MailerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
 use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -98,7 +98,7 @@ final class BundleBootstrapTest extends TestCase
             HttpStreamCollector::class,
             CommandCollector::class,
             ConsoleAppInfoCollector::class,
-            DoctrineCollector::class,
+            DatabaseCollector::class,
             TwigCollector::class,
             SecurityCollector::class,
             CacheCollector::class,
@@ -243,7 +243,7 @@ final class BundleBootstrapTest extends TestCase
         ]);
 
         // Disabled collectors should not exist
-        $this->assertFalse($container->has(DoctrineCollector::class));
+        $this->assertFalse($container->has(DatabaseCollector::class));
         $this->assertFalse($container->has(TwigCollector::class));
         $this->assertFalse($container->has(SecurityCollector::class));
         $this->assertFalse($container->has(CacheCollector::class));

@@ -48,7 +48,7 @@ app_dev_panel:
         command: true              # CommandCollector (console commands)
 
         # Symfony-specific collectors
-        doctrine: true             # DoctrineCollector (requires doctrine/dbal)
+        doctrine: true             # DatabaseCollector (requires doctrine/dbal)
         twig: true                 # TwigCollector (requires twig/twig)
         security: true             # SecurityCollector (requires symfony/security-bundle)
         cache: true                # CacheCollector

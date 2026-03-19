@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2;
 
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
-use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
 use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
-use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Controller\AdpApiController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugQueryController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugResetController;
@@ -464,7 +464,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         // Yii2-specific collectors
         if ($collectors['db'] ?? true) {
-            $this->collectorInstances[] = new DbCollector($timeline);
+            $this->collectorInstances[] = new DatabaseCollector($timeline);
         }
 
         if ($collectors['mailer'] ?? true) {
@@ -539,8 +539,8 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $this->decorateHttpClient($httpClientCollector);
         }
 
-        // Register DB profiling if DbCollector is active
-        if ($this->getCollector(DbCollector::class) !== null) {
+        // Register DB profiling if DatabaseCollector is active
+        if ($this->getCollector(DatabaseCollector::class) !== null) {
             $this->registerDbProfiling();
         }
 
@@ -636,23 +636,16 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
     private function registerDbProfiling(): void
     {
-        /** @var DbCollector|null $dbCollector */
-        $dbCollector = $this->getCollector(DbCollector::class);
+        /** @var DatabaseCollector|null $dbCollector */
+        $dbCollector = $this->getCollector(DatabaseCollector::class);
         if ($dbCollector === null) {
             return;
         }
 
-        // Hook into Yii2's DB connection event
-        Event::on(\yii\db\Connection::class, \yii\db\Connection::EVENT_AFTER_OPEN, static function () use (
-            $dbCollector,
-        ): void {
-            $dbCollector->logConnection();
-        });
-
         // Capture DB queries via Logger profiling messages.
         // Yii 2's Command uses Yii::beginProfile()/endProfile() for query timing,
         // which writes to the Logger. We register a log target that intercepts these
-        // profiling messages and feeds them to DbCollector.
+        // profiling messages and feeds them to DatabaseCollector.
         $target = new DbProfilingTarget($dbCollector);
         \Yii::$app->log->targets['adp-db-profiling'] = $target;
     }
@@ -669,9 +662,53 @@ class Module extends \yii\base\Module implements BootstrapInterface
             \yii\mail\BaseMailer::class,
             \yii\mail\BaseMailer::EVENT_AFTER_SEND,
             static function (\yii\mail\MailEvent $event) use ($mailerCollector): void {
-                $mailerCollector->logMessage($event->message);
+                $message = $event->message;
+                $normalized = [
+                    'from' => self::normalizeAddresses($message->getFrom()),
+                    'to' => self::normalizeAddresses($message->getTo()),
+                    'cc' => self::normalizeAddresses($message->getCc()),
+                    'bcc' => self::normalizeAddresses($message->getBcc()),
+                    'replyTo' => self::normalizeAddresses($message->getReplyTo()),
+                    'subject' => $message->getSubject() ?? '',
+                    'textBody' => method_exists($message, 'getTextBody') ? $message->getTextBody() : null,
+                    'htmlBody' => method_exists($message, 'getHtmlBody') ? $message->getHtmlBody() : null,
+                    'raw' => method_exists($message, 'toString') ? (string) $message->toString() : '',
+                    'charset' => $message->getCharset() ?? 'utf-8',
+                    'date' => date('r'),
+                ];
+                $mailerCollector->collectMessage($normalized);
             },
         );
+    }
+
+    /**
+     * Normalize mail addresses from Yii 2 format to a simple associative array.
+     *
+     * @return array<string, string>
+     */
+    private static function normalizeAddresses(mixed $addresses): array
+    {
+        if ($addresses === null) {
+            return [];
+        }
+
+        if (is_string($addresses)) {
+            return [$addresses => ''];
+        }
+
+        if (is_array($addresses)) {
+            $result = [];
+            foreach ($addresses as $key => $value) {
+                if (is_int($key)) {
+                    $result[(string) $value] = '';
+                } else {
+                    $result[$key] = (string) $value;
+                }
+            }
+            return $result;
+        }
+
+        return [(string) $addresses => ''];
     }
 
     private function registerAssetProfiling(): void

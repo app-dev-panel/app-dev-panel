@@ -21,10 +21,8 @@ src/
 │   ├── WebListener.php                        # beforeRequest/afterRequest → Debugger lifecycle
 │   └── ConsoleListener.php                    # Console beforeRequest/afterRequest → Debugger lifecycle
 ├── Collector/
-│   ├── DbCollector.php                        # SQL queries via yii\db events with timing
-│   ├── DebugLogTarget.php                     # Real-time log target feeding LogCollector
-│   ├── MailerCollector.php                    # Mail messages via BaseMailer events
-│   └── AssetBundleCollector.php               # Asset bundles via View events
+│   ├── DbProfilingTarget.php                  # Yii 2 log target feeding Kernel DatabaseCollector
+│   └── DebugLogTarget.php                     # Real-time log target feeding LogCollector
 ├── Inspector/
 │   ├── Yii2ConfigProvider.php                 # Components, params, modules, events for inspector
 │   ├── Yii2DbSchemaProvider.php               # Database schema via yii\db\Schema
@@ -111,10 +109,9 @@ Yii 2 uses its own `yii\web\Request` / `yii\web\Response` objects.
 
 ### 6. DB Profiling
 
-`Module::registerDbProfiling()` hooks into:
-- `yii\db\Connection::EVENT_AFTER_OPEN` → `DbCollector::logConnection()`
-- `yii\db\Command::EVENT_BEFORE_EXECUTE` → `DbCollector::beginQuery()` (starts timer)
-- `yii\db\Command::EVENT_AFTER_EXECUTE` → `DbCollector::logQuery()` (stops timer, records query with timing, params, SQL type)
+`Module::registerDbProfiling()` registers a `DbProfilingTarget` Yii log target that intercepts
+Yii 2's `beginProfile()`/`endProfile()` messages for DB commands. The target tracks query start
+times internally and calls `DatabaseCollector::logQuery()` (from Kernel) on profile end.
 
 ### 6a. Real-time Log Capture
 
@@ -126,7 +123,7 @@ Yii 2 uses its own `yii\web\Request` / `yii\web\Response` objects.
 ### 6b. Mailer Profiling
 
 `Module::registerMailerProfiling()` hooks into:
-- `yii\mail\BaseMailer::EVENT_AFTER_SEND` → `MailerCollector::logMessage()` (captures from, to, cc, bcc, subject, success)
+- `yii\mail\BaseMailer::EVENT_AFTER_SEND` → normalizes Yii 2 `MessageInterface` to array → `MailerCollector::collectMessage()` (Kernel)
 
 ### 6c. Asset Bundle Profiling
 
@@ -177,14 +174,20 @@ Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: n
 | `WebAppInfoCollector` | `WebListener` | Web app metadata |
 | `ConsoleAppInfoCollector` | `ConsoleListener` | Console app metadata |
 
-### Yii 2-Specific Collectors
+### Yii 2-Specific Collectors and Helpers
+
+| Class | Fed By | Data |
+|---|---|---|
+| `DbProfilingTarget` | Yii Logger profiling messages | Feeds Kernel `DatabaseCollector::logQuery()` with SQL, timing |
+| `DebugLogTarget` | Yii log target (real-time) | Feeds `LogCollector` with Yii log messages as they are flushed |
+
+### Kernel Collectors Used Directly (with Yii 2 event wiring)
 
 | Collector | Fed By | Data |
 |---|---|---|
-| `DbCollector` | `Command::EVENT_BEFORE/AFTER_EXECUTE` | SQL queries, params, row count, execution time, SQL type, backtrace |
-| `DebugLogTarget` | Yii log target (real-time) | Feeds `LogCollector` with Yii log messages as they are flushed |
-| `MailerCollector` | `BaseMailer::EVENT_AFTER_SEND` | From, to, cc, bcc, subject, success status |
-| `AssetBundleCollector` | `View::EVENT_END_PAGE` | Asset bundles: class, source/base paths, CSS/JS files, dependencies |
+| `DatabaseCollector` | `DbProfilingTarget` (Yii Logger) | SQL queries, params, row count, execution time |
+| `MailerCollector` | `BaseMailer::EVENT_AFTER_SEND` (normalized in Module) | From, to, cc, bcc, subject, body, charset |
+| `AssetBundleCollector` | `View::EVENT_END_PAGE` (normalized in Module) | Asset bundles: class, source/base paths, CSS/JS files, dependencies |
 
 ## Architecture Comparison: Symfony vs Yii 2
 

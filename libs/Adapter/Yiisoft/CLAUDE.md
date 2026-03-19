@@ -27,13 +27,11 @@ src/
 │   ├── AliasPathResolver.php            # PathResolverInterface via Yii Aliases
 │   └── YiiApiMiddleware.php             # PSR-15 middleware bridging to ApiApplication
 ├── Collector/
-│   ├── Db/                              # Database query interception
-│   │   ├── DatabaseCollector.php
+│   ├── Db/                              # Database query interception (uses core DatabaseCollector)
 │   │   ├── CommandInterfaceProxy.php
 │   │   ├── ConnectionInterfaceProxy.php
 │   │   └── TransactionInterfaceDecorator.php
-│   ├── Mailer/
-│   │   ├── MailerCollector.php
+│   ├── Mailer/                          # Mail interception (uses core MailerCollector)
 │   │   └── MailerInterfaceProxy.php
 │   ├── Middleware/
 │   │   └── MiddlewareCollector.php

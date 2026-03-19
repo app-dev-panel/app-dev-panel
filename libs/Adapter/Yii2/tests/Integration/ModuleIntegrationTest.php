@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
-use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
-use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Api\ApiApplication;
@@ -72,7 +72,7 @@ final class ModuleIntegrationTest extends TestCase
             ExceptionCollector::class,
             LogCollector::class,
             EventCollector::class,
-            DbCollector::class,
+            DatabaseCollector::class,
             MailerCollector::class,
             AssetBundleCollector::class,
         ];
@@ -110,8 +110,8 @@ final class ModuleIntegrationTest extends TestCase
     {
         $module = $this->createModule();
 
-        $dbCollector = $module->getCollector(DbCollector::class);
-        $this->assertInstanceOf(DbCollector::class, $dbCollector);
+        $dbCollector = $module->getCollector(DatabaseCollector::class);
+        $this->assertInstanceOf(DatabaseCollector::class, $dbCollector);
 
         $timelineCollector = $module->getCollector(TimelineCollector::class);
         $this->assertInstanceOf(TimelineCollector::class, $timelineCollector);
@@ -127,7 +127,7 @@ final class ModuleIntegrationTest extends TestCase
 
         $collectorClasses = array_map(static fn($c) => $c::class, $module->getCollectorInstances());
 
-        $this->assertNotContains(DbCollector::class, $collectorClasses);
+        $this->assertNotContains(DatabaseCollector::class, $collectorClasses);
         $this->assertContains(LogCollector::class, $collectorClasses);
         $this->assertContains(RequestCollector::class, $collectorClasses);
     }
@@ -156,9 +156,10 @@ final class ModuleIntegrationTest extends TestCase
         $this->assertNotEmpty($debugId);
 
         // Collect some data
-        /** @var DbCollector $dbCollector */
-        $dbCollector = $module->getCollector(DbCollector::class);
-        $dbCollector->logQuery('SELECT 1', [], 1);
+        /** @var DatabaseCollector $dbCollector */
+        $dbCollector = $module->getCollector(DatabaseCollector::class);
+        $startTime = microtime(true);
+        $dbCollector->logQuery('SELECT 1', 'SELECT 1', [], '', $startTime, microtime(true), 1);
 
         // Shutdown — flush to storage
         $debugger->shutdown();

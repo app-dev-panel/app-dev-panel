@@ -50,7 +50,7 @@
    ├── Event dispatches → SymfonyEventDispatcherProxy → EventCollector
    ├── HTTP client calls → HttpClientInterfaceProxy → HttpClientCollector
    ├── Cache calls → CacheCollector (via decorated adapter)
-   ├── Doctrine queries → DoctrineCollector (via middleware/logger)
+   ├── Doctrine queries → DatabaseCollector (via middleware/logger)
    ├── Twig renders → TwigCollector (via profiler extension)
    └── dump() calls → VarDumperCollector (via handler proxy)
    ↓

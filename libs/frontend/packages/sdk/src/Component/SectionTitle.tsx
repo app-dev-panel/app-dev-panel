@@ -7,7 +7,7 @@ type SectionTitleProps = {children: string | string[]; action?: React.ReactNode}
 const StyledTitle = styled(Typography)(({theme}) => ({
     fontSize: theme.typography.overline.fontSize,
     fontWeight: theme.typography.overline.fontWeight,
-    letterSpacing: theme.typography.overline.letterSpacing,
+    letterSpacing: '0.05em',
     textTransform: 'uppercase',
     color: theme.palette.text.disabled,
     paddingBottom: theme.spacing(0.75),
