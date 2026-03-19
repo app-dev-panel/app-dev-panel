@@ -9,6 +9,7 @@ type ApplicationContext = {
     iframeHeight: number;
     selectedService: string;
     themeMode: 'light' | 'dark' | 'system';
+    showInactiveCollectors: boolean;
 };
 export const ApplicationSlice = createSlice({
     name: 'application',
@@ -21,6 +22,7 @@ export const ApplicationSlice = createSlice({
         iframeHeight: 400,
         selectedService: 'local',
         themeMode: 'system',
+        showInactiveCollectors: false,
     } as ApplicationContext,
     reducers: {
         changeBaseUrl(state, action: PayloadAction<string>) {
@@ -53,6 +55,9 @@ export const ApplicationSlice = createSlice({
         changeThemeMode: (state, action: PayloadAction<'light' | 'dark' | 'system'>) => {
             state.themeMode = action.payload;
         },
+        changeShowInactiveCollectors: (state, action: PayloadAction<boolean>) => {
+            state.showInactiveCollectors = action.payload;
+        },
     },
 });
 
@@ -66,4 +71,5 @@ export const {
     setIFrameHeight,
     changeSelectedService,
     changeThemeMode,
+    changeShowInactiveCollectors,
 } = ApplicationSlice.actions;
