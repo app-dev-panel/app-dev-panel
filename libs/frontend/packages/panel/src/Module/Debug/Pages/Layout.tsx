@@ -5,6 +5,7 @@ import {DatabasePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/D
 import {EventPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EventPanel';
 import {ExceptionPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ExceptionPanel';
 import {FilesystemPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/FilesystemPanel';
+import {HttpClientPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/HttpClientPanel';
 import {LogPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/LogPanel';
 import {MailerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MailerPanel';
 import {MiddlewarePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MiddlewarePanel';
@@ -43,6 +44,7 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.DatabaseCollector]: (data: any) => <DatabasePanel data={data} />,
         [CollectorsMap.Yii2DbCollector]: (data: any) => <DatabasePanel data={data} />,
         [CollectorsMap.FilesystemStreamCollector]: (data: any) => <FilesystemPanel data={data} />,
+        [CollectorsMap.HttpClientCollector]: (data: any) => <HttpClientPanel data={data} />,
         [CollectorsMap.RequestCollector]: (data: any) => <RequestPanel data={data} />,
         [CollectorsMap.MiddlewareCollector]: (data: any) => <MiddlewarePanel {...data} />,
         [CollectorsMap.EventCollector]: (data: any) => <EventPanel events={data} />,
