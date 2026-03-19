@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Testing\Command;
 
+use AppDevPanel\Testing\Fixture\FixtureRegistry;
 use AppDevPanel\Testing\Runner\FixtureResult;
 use AppDevPanel\Testing\Runner\FixtureRunner;
-use AppDevPanel\Testing\Fixture\FixtureRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -30,7 +30,12 @@ final class DebugFixturesCommand extends Command
     {
         $this
             ->addArgument('base-url', InputArgument::REQUIRED, 'Playground base URL (e.g., http://localhost:8080)')
-            ->addOption('tag', 't', InputOption::VALUE_OPTIONAL, 'Run only fixtures with this tag (core, web, error, advanced)')
+            ->addOption(
+                'tag',
+                't',
+                InputOption::VALUE_OPTIONAL,
+                'Run only fixtures with this tag (core, web, error, advanced)',
+            )
             ->addOption('fixture', 's', InputOption::VALUE_OPTIONAL, 'Run a single fixture by name')
             ->addOption('retry-delay', null, InputOption::VALUE_OPTIONAL, 'Delay between retries in ms', '200')
             ->addOption('max-retries', null, InputOption::VALUE_OPTIONAL, 'Max retries for debug data fetch', '10')
@@ -40,13 +45,13 @@ final class DebugFixturesCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $baseUrl = $input->getArgument('base-url');
+        $baseUrl = (string) $input->getArgument('base-url');
 
         if ($input->getOption('list')) {
-            return $this->listScenarios($io);
+            return $this->listFixtures($io);
         }
 
-        $fixtures = $this->resolveScenarios($input, $io);
+        $fixtures = $this->resolveFixtures($input, $io);
         if ($fixtures === null) {
             return Command::FAILURE;
         }
@@ -55,7 +60,7 @@ final class DebugFixturesCommand extends Command
             return Command::SUCCESS;
         }
 
-        $io->title(sprintf('ADP Test Scenarios — %s', $baseUrl));
+        $io->title(sprintf('ADP Test Fixtures — %s', $baseUrl));
         $io->text(sprintf('Running %d fixture(s)...', count($fixtures)));
         $io->newLine();
 
@@ -70,9 +75,9 @@ final class DebugFixturesCommand extends Command
         return $this->renderResults($io, $output, $results);
     }
 
-    private function listScenarios(SymfonyStyle $io): int
+    private function listFixtures(SymfonyStyle $io): int
     {
-        $io->title('Available Test Scenarios');
+        $io->title('Available Test Fixtures');
 
         foreach (FixtureRegistry::tags() as $tag) {
             $fixtures = FixtureRegistry::byTag($tag);
@@ -90,26 +95,30 @@ final class DebugFixturesCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function resolveScenarios(InputInterface $input, SymfonyStyle $io): ?array
+    private function resolveFixtures(InputInterface $input, SymfonyStyle $io): ?array
     {
         $fixtureName = $input->getOption('fixture');
         $tag = $input->getOption('tag');
 
-        if ($fixtureName !== null) {
+        if (is_string($fixtureName)) {
             $all = FixtureRegistry::all();
             foreach ($all as $fixture) {
                 if ($fixture->name === $fixtureName) {
                     return [$fixture];
                 }
             }
-            $io->error(sprintf('Fixture "%s" not found.', $fixtureName));
+            $io->error(sprintf('Fixture "%s" not found.', (string) $fixtureName));
             return null;
         }
 
-        if ($tag !== null) {
+        if (is_string($tag)) {
             $fixtures = FixtureRegistry::byTag($tag);
             if ($fixtures === []) {
-                $io->error(sprintf('No fixtures found for tag "%s". Available tags: %s', $tag, implode(', ', FixtureRegistry::tags())));
+                $io->error(sprintf(
+                    'No fixtures found for tag "%s". Available tags: %s',
+                    (string) $tag,
+                    implode(', ', FixtureRegistry::tags()),
+                ));
                 return null;
             }
             return $fixtures;

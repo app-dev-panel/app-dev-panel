@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Testing\Tests\E2E;
 
-use AppDevPanel\Testing\Runner\FixtureRunner;
 use AppDevPanel\Testing\Fixture\Fixture;
+use AppDevPanel\Testing\Runner\FixtureRunner;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
  * Requires a running server at PLAYGROUND_URL env (default: http://127.0.0.1:8080).
  *
  * Usage:
- *   PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Scenarios
+ *   PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Fixtures
  */
 abstract class FixtureTestCase extends TestCase
 {
@@ -52,7 +52,7 @@ abstract class FixtureTestCase extends TestCase
         $result = self::$runner->run($fixture);
 
         if ($result->error !== null) {
-            self::markTestSkipped(sprintf('Fixture skipped: %s', $result->error));
+            self::fail(sprintf("Fixture '%s' error: %s", $fixture->name, $result->error));
         }
 
         $failures = [];

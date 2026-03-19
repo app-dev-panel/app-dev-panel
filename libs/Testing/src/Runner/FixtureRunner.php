@@ -101,15 +101,15 @@ final class FixtureRunner
 
     private function findLatestDebugId(): ?string
     {
-        // Poll for new entry with retries
         for ($i = 0; $i < $this->maxRetries; $i++) {
             $response = $this->client->get('/debug/api/');
+            /** @var array<string, mixed> $body */
             $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
 
             $entries = $body['data'] ?? $body;
             if (is_array($entries) && $entries !== []) {
                 $latest = reset($entries);
-                if (isset($latest['id'])) {
+                if (is_array($latest) && is_string($latest['id'] ?? null)) {
                     return $latest['id'];
                 }
             }
@@ -120,15 +120,19 @@ final class FixtureRunner
         return null;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     private function fetchDebugData(string $debugId): ?array
     {
         for ($i = 0; $i < $this->maxRetries; $i++) {
             $response = $this->client->get(sprintf('/debug/api/view/%s', $debugId));
 
             if ($response->getStatusCode() === 200) {
+                /** @var array<string, mixed> $body */
                 $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-
-                return $body['data'] ?? $body;
+                /** @var array<string, mixed> */
+                return is_array($body['data'] ?? null) ? $body['data'] : $body;
             }
 
             usleep($this->retryDelayMs * 1000);
@@ -138,6 +142,8 @@ final class FixtureRunner
     }
 
     /**
+     * @param array<string, mixed> $debugData
+     *
      * @return list<AssertionResult>
      */
     private function evaluateExpectations(Fixture $fixture, array $debugData): array
@@ -145,14 +151,13 @@ final class FixtureRunner
         $allAssertions = [];
 
         foreach ($fixture->expectations as $collectorName => $expectations) {
-            // Find the collector in the debug data by matching the collector name
             $collectorData = $this->findCollectorData($debugData, $collectorName);
 
             if ($collectorData === null) {
                 $allAssertions[] = AssertionResult::fail(sprintf(
                     '[%s] collector not found in debug data. Available: %s',
                     $collectorName,
-                    implode(', ', array_keys($debugData)),
+                    implode(', ', array_map('strval', array_keys($debugData))),
                 ));
                 continue;
             }
@@ -165,12 +170,14 @@ final class FixtureRunner
     }
 
     /**
-     * Find collector data by name. The debug data keys are FQCN, so we match by the collector's getName() output.
+     * @param array<string, mixed> $debugData
+     *
+     * @return array<array-key, mixed>|null
      */
     private function findCollectorData(array $debugData, string $collectorName): ?array
     {
         // Direct key match
-        if (isset($debugData[$collectorName])) {
+        if (array_key_exists($collectorName, $debugData)) {
             $value = $debugData[$collectorName];
 
             return is_array($value) ? $value : null;
@@ -209,7 +216,7 @@ final class FixtureRunner
         $className = $nameMap[$collectorName] ?? null;
         if ($className !== null) {
             foreach ($debugData as $key => $value) {
-                if (str_contains($key, $className) && is_array($value)) {
+                if (is_string($key) && str_contains($key, $className) && is_array($value)) {
                     return $value;
                 }
             }
@@ -217,7 +224,7 @@ final class FixtureRunner
 
         // Fallback: partial match on collector name
         foreach ($debugData as $key => $value) {
-            if (is_array($value) && str_contains(strtolower($key), strtolower($collectorName))) {
+            if (is_string($key) && is_array($value) && str_contains(strtolower($key), strtolower($collectorName))) {
                 return $value;
             }
         }

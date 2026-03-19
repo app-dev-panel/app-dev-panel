@@ -62,70 +62,50 @@ final class FixtureRegistry
     {
         return [
             // === Logging ===
-            new Fixture(
-                name: 'logs:basic',
-                endpoint: '/test/fixtures/logs',
-                expectations: [
-                    'logger' => [
-                        Expectation::notEmpty(),
-                        Expectation::countGte(3),
-                        Expectation::fieldEquals('0.level', 'info'),
-                        Expectation::fieldContains('0.message', 'Test log: info'),
-                        Expectation::fieldEquals('1.level', 'warning'),
-                        Expectation::fieldEquals('2.level', 'error'),
-                    ],
+            new Fixture(name: 'logs:basic', endpoint: '/test/fixtures/logs', expectations: [
+                'logger' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(3),
+                    Expectation::fieldEquals('0.level', 'info'),
+                    Expectation::fieldContains('0.message', 'Test log: info'),
+                    Expectation::fieldEquals('1.level', 'warning'),
+                    Expectation::fieldEquals('2.level', 'error'),
                 ],
-            ),
+            ]),
 
             // === Logging with context ===
-            new Fixture(
-                name: 'logs:context',
-                endpoint: '/test/fixtures/logs-context',
-                expectations: [
-                    'logger' => [
-                        Expectation::notEmpty(),
-                        Expectation::countGte(1),
-                        Expectation::fieldEquals('0.level', 'info'),
-                        Expectation::fieldContains('0.message', 'User action'),
-                    ],
+            new Fixture(name: 'logs:context', endpoint: '/test/fixtures/logs-context', expectations: [
+                'logger' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(1),
+                    Expectation::fieldEquals('0.level', 'info'),
+                    Expectation::fieldContains('0.message', 'User action'),
                 ],
-            ),
+            ]),
 
             // === Events ===
-            new Fixture(
-                name: 'events:basic',
-                endpoint: '/test/fixtures/events',
-                expectations: [
-                    'event' => [
-                        Expectation::notEmpty(),
-                        Expectation::countGte(1),
-                    ],
+            new Fixture(name: 'events:basic', endpoint: '/test/fixtures/events', expectations: [
+                'event' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(1),
                 ],
-            ),
+            ]),
 
             // === VarDumper ===
-            new Fixture(
-                name: 'var-dumper:basic',
-                endpoint: '/test/fixtures/dump',
-                expectations: [
-                    'var-dumper' => [
-                        Expectation::notEmpty(),
-                        Expectation::countGte(1),
-                    ],
+            new Fixture(name: 'var-dumper:basic', endpoint: '/test/fixtures/dump', expectations: [
+                'var-dumper' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(1),
                 ],
-            ),
+            ]),
 
             // === Timeline ===
-            new Fixture(
-                name: 'timeline:basic',
-                endpoint: '/test/fixtures/timeline',
-                expectations: [
-                    'timeline' => [
-                        Expectation::notEmpty(),
-                        Expectation::countGte(1),
-                    ],
+            new Fixture(name: 'timeline:basic', endpoint: '/test/fixtures/timeline', expectations: [
+                'timeline' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(1),
                 ],
-            ),
+            ]),
         ];
     }
 
@@ -138,26 +118,18 @@ final class FixtureRegistry
     {
         return [
             // === Request collector ===
-            new Fixture(
-                name: 'request:basic',
-                endpoint: '/test/fixtures/request-info',
-                expectations: [
-                    'request' => [
-                        Expectation::notEmpty(),
-                    ],
+            new Fixture(name: 'request:basic', endpoint: '/test/fixtures/request-info', expectations: [
+                'request' => [
+                    Expectation::notEmpty(),
                 ],
-            ),
+            ]),
 
             // === Web app info (timing, memory) ===
-            new Fixture(
-                name: 'web:app-info',
-                endpoint: '/test/fixtures/request-info',
-                expectations: [
-                    'web' => [
-                        Expectation::notEmpty(),
-                    ],
+            new Fixture(name: 'web:app-info', endpoint: '/test/fixtures/request-info', expectations: [
+                'web' => [
+                    Expectation::notEmpty(),
                 ],
-            ),
+            ]),
         ];
     }
 
@@ -170,32 +142,24 @@ final class FixtureRegistry
     {
         return [
             // === Exception collector ===
-            new Fixture(
-                name: 'exception:runtime',
-                endpoint: '/test/fixtures/exception',
-                expectations: [
-                    'exception' => [
-                        Expectation::notEmpty(),
-                        Expectation::countGte(1),
-                        Expectation::fieldEquals('0.class', 'RuntimeException'),
-                        Expectation::fieldContains('0.message', 'ADP test fixture exception'),
-                    ],
+            new Fixture(name: 'exception:runtime', endpoint: '/test/fixtures/exception', expectations: [
+                'exception' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(1),
+                    Expectation::fieldEquals('0.class', 'RuntimeException'),
+                    Expectation::fieldContains('0.message', 'ADP test fixture exception'),
                 ],
-            ),
+            ]),
 
             // === Exception with previous ===
-            new Fixture(
-                name: 'exception:chained',
-                endpoint: '/test/fixtures/exception-chained',
-                expectations: [
-                    'exception' => [
-                        Expectation::notEmpty(),
-                        Expectation::countGte(2),
-                        Expectation::fieldContains('0.message', 'Wrapper exception'),
-                        Expectation::fieldContains('1.message', 'Original cause'),
-                    ],
+            new Fixture(name: 'exception:chained', endpoint: '/test/fixtures/exception-chained', expectations: [
+                'exception' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(2),
+                    Expectation::fieldContains('0.message', 'Wrapper exception'),
+                    Expectation::fieldContains('1.message', 'Original cause'),
                 ],
-            ),
+            ]),
         ];
     }
 
@@ -208,58 +172,42 @@ final class FixtureRegistry
     {
         return [
             // === Multiple collectors in one request ===
-            new Fixture(
-                name: 'multi:logs-and-events',
-                endpoint: '/test/fixtures/multi',
-                expectations: [
-                    'logger' => [
-                        Expectation::notEmpty(),
-                        Expectation::countGte(2),
-                    ],
-                    'event' => [
-                        Expectation::notEmpty(),
-                        Expectation::countGte(1),
-                    ],
-                    'timeline' => [
-                        Expectation::notEmpty(),
-                    ],
+            new Fixture(name: 'multi:logs-and-events', endpoint: '/test/fixtures/multi', expectations: [
+                'logger' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(2),
                 ],
-            ),
+                'event' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(1),
+                ],
+                'timeline' => [
+                    Expectation::notEmpty(),
+                ],
+            ]),
 
             // === Heavy logging — many entries ===
-            new Fixture(
-                name: 'logs:heavy',
-                endpoint: '/test/fixtures/logs-heavy',
-                expectations: [
-                    'logger' => [
-                        Expectation::notEmpty(),
-                        Expectation::countGte(50),
-                    ],
+            new Fixture(name: 'logs:heavy', endpoint: '/test/fixtures/logs-heavy', expectations: [
+                'logger' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(50),
                 ],
-            ),
+            ]),
 
             // === HTTP client (GET, POST JSON, PUT, DELETE, OPTIONS, POST multipart) ===
-            new Fixture(
-                name: 'http-client:basic',
-                endpoint: '/test/fixtures/http-client',
-                expectations: [
-                    'http' => [
-                        Expectation::notEmpty(),
-                        Expectation::countGte(6),
-                    ],
+            new Fixture(name: 'http-client:basic', endpoint: '/test/fixtures/http-client', expectations: [
+                'http' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(6),
                 ],
-            ),
+            ]),
 
             // === Filesystem stream ===
-            new Fixture(
-                name: 'filesystem:basic',
-                endpoint: '/test/fixtures/filesystem',
-                expectations: [
-                    'fs_stream' => [
-                        Expectation::notEmpty(),
-                    ],
+            new Fixture(name: 'filesystem:basic', endpoint: '/test/fixtures/filesystem', expectations: [
+                'fs_stream' => [
+                    Expectation::notEmpty(),
                 ],
-            ),
+            ]),
         ];
     }
 }

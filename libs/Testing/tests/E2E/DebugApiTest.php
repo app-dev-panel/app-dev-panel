@@ -128,7 +128,11 @@ final class DebugApiTest extends TestCase
             self::markTestSkipped('LogCollector not found in debug data');
         }
 
-        $filteredResponse = self::$client->get(sprintf('/debug/api/view/%s?collector=%s', $latestId, urlencode($logCollectorKey)));
+        $filteredResponse = self::$client->get(sprintf(
+            '/debug/api/view/%s?collector=%s',
+            $latestId,
+            urlencode($logCollectorKey),
+        ));
         self::assertSame(200, $filteredResponse->getStatusCode());
 
         $filteredBody = json_decode((string) $filteredResponse->getBody(), true, 512, JSON_THROW_ON_ERROR);

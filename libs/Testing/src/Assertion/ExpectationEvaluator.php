@@ -33,12 +33,21 @@ final class ExpectationEvaluator
         return match ($expectation->type) {
             'exists' => $this->assertExists($collectorName),
             'not_empty' => $this->assertNotEmpty($collectorName, $data),
-            'count_gte' => $this->assertCountGte($collectorName, $data, $expectation->value),
+            'count_gte' => $this->assertCountGte($collectorName, $data, (int) $expectation->value),
             'field_equals' => $this->assertFieldEquals($collectorName, $data, $expectation->path, $expectation->value),
-            'field_contains' => $this->assertFieldContains($collectorName, $data, $expectation->path, $expectation->value),
+            'field_contains' => $this->assertFieldContains(
+                $collectorName,
+                $data,
+                $expectation->path,
+                (string) $expectation->value,
+            ),
             'summary_has_key' => AssertionResult::pass(sprintf('[%s] summary check (deferred)', $collectorName)),
             'summary_gte' => AssertionResult::pass(sprintf('[%s] summary check (deferred)', $collectorName)),
-            default => AssertionResult::fail(sprintf('[%s] Unknown assertion type: %s', $collectorName, $expectation->type)),
+            default => AssertionResult::fail(sprintf(
+                '[%s] Unknown assertion type: %s',
+                $collectorName,
+                $expectation->type,
+            )),
         };
     }
 
@@ -67,8 +76,12 @@ final class ExpectationEvaluator
         return AssertionResult::pass(sprintf('[%s] has %d entries (>= %d)', $collectorName, $count, $min));
     }
 
-    private function assertFieldEquals(string $collectorName, array $data, ?string $path, mixed $expected): AssertionResult
-    {
+    private function assertFieldEquals(
+        string $collectorName,
+        array $data,
+        ?string $path,
+        mixed $expected,
+    ): AssertionResult {
         if ($path === null) {
             return AssertionResult::fail(sprintf('[%s] field_equals requires a path', $collectorName));
         }
@@ -88,11 +101,20 @@ final class ExpectationEvaluator
             ));
         }
 
-        return AssertionResult::pass(sprintf('[%s] field "%s" equals %s', $collectorName, $path, json_encode($expected, JSON_THROW_ON_ERROR)));
+        return AssertionResult::pass(sprintf(
+            '[%s] field "%s" equals %s',
+            $collectorName,
+            $path,
+            json_encode($expected, JSON_THROW_ON_ERROR),
+        ));
     }
 
-    private function assertFieldContains(string $collectorName, array $data, ?string $path, string $substring): AssertionResult
-    {
+    private function assertFieldContains(
+        string $collectorName,
+        array $data,
+        ?string $path,
+        string $substring,
+    ): AssertionResult {
         if ($path === null) {
             return AssertionResult::fail(sprintf('[%s] field_contains requires a path', $collectorName));
         }

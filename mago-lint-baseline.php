@@ -451,6 +451,18 @@ message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
+file = "libs/Cli/src/Command/DebugQueryCommand.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Command/DebugQueryCommand.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.27)."
+count = 1
+
+[[issues]]
 file = "libs/Cli/src/Command/ServeCommand.php"
 code = "explicit-octal"
 message = "Use explicit octal numeral notation."
@@ -790,4 +802,64 @@ count = 1
 file = "libs/Kernel/tests/Unit/Service/FileServiceRegistryTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Command/DebugFixturesCommand.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Command/DebugFixturesCommand.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.4400000000000004)."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Command/DebugFixturesCommand.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 2
+
+[[issues]]
+file = "libs/Testing/src/Fixture/Fixture.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureResult.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureRunner.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureRunner.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.9800000000000002)."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/DebugApiTest.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/FixtureTestCase.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
 count = 1
