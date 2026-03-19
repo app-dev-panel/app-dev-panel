@@ -164,9 +164,14 @@ const PathLabel = styled('span')({
     whiteSpace: 'nowrap',
 });
 
-const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px'});
+const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px', flexShrink: 0});
 
-const TimeLabel = styled('span')(({theme}) => ({fontSize: '11px', color: theme.palette.text.disabled}));
+const TimeLabel = styled('span')(({theme}) => ({
+    fontSize: '11px',
+    color: theme.palette.text.disabled,
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
+}));
 
 const statusColor = (status: number, theme: Theme): string => {
     if (status >= 500) return theme.palette.error.main;
@@ -447,7 +452,8 @@ export const EntrySelector = ({
             slotProps={{
                 paper: {
                     sx: {
-                        width: 520,
+                        width: anchorEl ? anchorEl.offsetWidth : 520,
+                        minWidth: 420,
                         maxHeight: 440,
                         mt: 0.5,
                         borderRadius: 1.5,
