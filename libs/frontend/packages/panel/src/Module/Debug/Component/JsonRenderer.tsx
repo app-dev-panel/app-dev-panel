@@ -2,8 +2,8 @@ import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {useLazyGetObjectQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {JsonRendererProps, JsonRenderer as OriginalJsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {parseObjectId, toObjectReference} from '@app-dev-panel/sdk/Helper/objectString';
-import {DataObject} from '@mui/icons-material';
-import {IconButton, Tooltip, Typography} from '@mui/material';
+import {OpenInNew, Sync} from '@mui/icons-material';
+import {Box, IconButton, Tooltip, Typography} from '@mui/material';
 import {DataType} from '@textea/json-viewer';
 import {deepUpdate} from 'immupdate';
 import * as React from 'react';
@@ -29,25 +29,46 @@ export const JsonRenderer = React.memo((props: JsonRendererProps) => {
             is: (value: any) => typeof value === 'string' && !!value.match(/object@[\w\\]+#\d/),
             Component: (props) => {
                 return (
-                    <Typography sx={{display: 'inline', wordBreak: 'break-word'}}>
-                        {toObjectReference(props.value)}
+                    <Box
+                        component="span"
+                        sx={(theme) => ({
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 0.25,
+                            backgroundColor: theme.palette.action.selected,
+                            borderRadius: 1,
+                            px: 0.75,
+                            py: 0.25,
+                            border: `1px solid ${theme.palette.divider}`,
+                        })}
+                    >
+                        <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{fontFamily: (theme) => theme.typography.caption.fontFamily, wordBreak: 'break-word'}}
+                        >
+                            {toObjectReference(props.value)}
+                        </Typography>
                         <Tooltip title="Load object state">
                             <IconButton
+                                size="small"
                                 key={props.path.join(',')}
-                                onClick={(e) => objectLoader(props.value, props.path)}
+                                onClick={() => objectLoader(props.value, props.path)}
+                                sx={{p: 0.25}}
                             >
-                                <DataObject />
+                                <Sync sx={{fontSize: 16}} />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title="Examine an object">
+                        <Tooltip title="Examine object">
                             <IconButton
                                 size="small"
                                 href={`/debug/object?debugEntry=${debugEntry!.id}&id=${parseObjectId(props.value)}`}
+                                sx={{p: 0.25}}
                             >
-                                <DataObject color="secondary" fontSize="small" />
+                                <OpenInNew sx={{fontSize: 16, color: 'primary.main'}} />
                             </IconButton>
                         </Tooltip>
-                    </Typography>
+                    </Box>
                 );
             },
         },
