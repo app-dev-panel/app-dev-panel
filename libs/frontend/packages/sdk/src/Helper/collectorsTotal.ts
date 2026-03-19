@@ -3,8 +3,7 @@ import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 
 export const getCollectedCountByCollector = (collector: CollectorsMap, data: DebugEntry): number | undefined => {
     switch (collector) {
-        case CollectorsMap.AssetCollector:
-        case CollectorsMap.Yii2AssetBundleCollector:
+        case CollectorsMap.AssetBundleCollector:
             return Number(data.asset?.bundles?.total) || Number(data.assets?.bundleCount);
         case CollectorsMap.DatabaseCollector:
         case CollectorsMap.Yii2DbCollector:

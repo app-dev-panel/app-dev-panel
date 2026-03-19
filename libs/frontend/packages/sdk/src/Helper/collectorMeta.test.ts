@@ -24,7 +24,7 @@ describe('getCollectorMeta', () => {
             CollectorsMap.HttpClientCollector,
             CollectorsMap.HttpStreamCollector,
             CollectorsMap.QueueCollector,
-            CollectorsMap.AssetCollector,
+            CollectorsMap.AssetBundleCollector,
             CollectorsMap.ValidatorCollector,
             CollectorsMap.ConsoleAppInfoCollector,
             CollectorsMap.WebAppInfoCollector,

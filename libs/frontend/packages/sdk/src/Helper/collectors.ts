@@ -32,8 +32,10 @@ export enum CollectorsMap {
     MessengerCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\MessengerCollector',
     SymfonyMailerCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\MailerCollector',
 
+    // Core asset bundle collector
+    AssetBundleCollector = 'AppDevPanel\\Kernel\\Collector\\AssetBundleCollector',
+
     // Yii 2 adapter collectors
     Yii2DbCollector = 'AppDevPanel\\Adapter\\Yii2\\Collector\\DbCollector',
     Yii2MailerCollector = 'AppDevPanel\\Adapter\\Yii2\\Collector\\MailerCollector',
-    Yii2AssetBundleCollector = 'AppDevPanel\\Adapter\\Yii2\\Collector\\AssetBundleCollector',
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
-use AppDevPanel\Adapter\Yii2\Collector\AssetBundleCollector;
+use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
 use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;

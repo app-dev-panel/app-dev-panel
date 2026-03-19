@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2;
 
-use AppDevPanel\Adapter\Yii2\Collector\AssetBundleCollector;
+use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
 use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
@@ -687,9 +687,29 @@ class Module extends \yii\base\Module implements BootstrapInterface
         ): void {
             /** @var \yii\web\View $view */
             $view = $event->sender;
-            if (property_exists($view, 'assetBundles') && is_array($view->assetBundles)) {
-                $assetCollector->collectBundles($view->assetBundles);
+            if (!property_exists($view, 'assetBundles') || !is_array($view->assetBundles)) {
+                return;
             }
+
+            $normalized = [];
+            foreach ($view->assetBundles as $name => $bundle) {
+                $normalized[$name] = [
+                    'class' => $bundle::class,
+                    'sourcePath' => $bundle->sourcePath,
+                    'basePath' => $bundle->basePath,
+                    'baseUrl' => $bundle->baseUrl,
+                    'css' => $bundle->css,
+                    'js' => $bundle->js,
+                    'depends' => $bundle->depends,
+                    'options' => array_filter([
+                        'cssOptions' => $bundle->cssOptions,
+                        'jsOptions' => $bundle->jsOptions,
+                        'publishOptions' => $bundle->publishOptions,
+                    ]),
+                ];
+            }
+
+            $assetCollector->collectBundles($normalized);
         });
     }
 

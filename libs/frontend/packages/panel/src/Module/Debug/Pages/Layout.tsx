@@ -70,7 +70,7 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.RouterCollector]: (data: any) => <RouterPanel data={data} />,
         [CollectorsMap.ValidatorCollector]: (data: any) => <ValidatorPanel data={data} />,
         [CollectorsMap.WebViewCollector]: (data: any) => <WebViewPanel data={data} />,
-        [CollectorsMap.Yii2AssetBundleCollector]: (data: any) => <AssetBundlePanel data={data} />,
+        [CollectorsMap.AssetBundleCollector]: (data: any) => <AssetBundlePanel data={data} />,
         default: (data: any) => {
             if (typeof data === 'object' && data.__isPanelRemote__) {
                 return (
