@@ -2,8 +2,8 @@ import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {useLazyGetObjectQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {JsonRendererProps, JsonRenderer as OriginalJsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {parseObjectId, toObjectReference} from '@app-dev-panel/sdk/Helper/objectString';
-import {FileDownload, Search} from '@mui/icons-material';
-import {IconButton, Tooltip, Typography} from '@mui/material';
+import {FileDownload} from '@mui/icons-material';
+import {IconButton, Link, Tooltip, Typography} from '@mui/material';
 import {DataType} from '@textea/json-viewer';
 import {deepUpdate} from 'immupdate';
 import * as React from 'react';
@@ -32,19 +32,16 @@ export const JsonRenderer = React.memo((props: JsonRendererProps) => {
                     <Typography
                         component="span"
                         variant="body2"
-                        sx={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 0.25,
-                            wordBreak: 'break-word',
-                            color: 'primary.main',
-                            textDecoration: 'underline',
-                            textDecorationStyle: 'dashed',
-                            textUnderlineOffset: '3px',
-                            textDecorationColor: 'divider',
-                        }}
+                        sx={{display: 'inline-flex', alignItems: 'center', gap: 0.25, wordBreak: 'break-word'}}
                     >
-                        {toObjectReference(props.value)}
+                        <Link
+                            href={`/debug/object?debugEntry=${debugEntry!.id}&id=${parseObjectId(props.value)}`}
+                            underline="hover"
+                            color="primary"
+                            sx={{cursor: 'pointer'}}
+                        >
+                            {toObjectReference(props.value)}
+                        </Link>
                         <Tooltip title="Load object state">
                             <IconButton
                                 size="small"
@@ -53,15 +50,6 @@ export const JsonRenderer = React.memo((props: JsonRendererProps) => {
                                 sx={{p: 0.25, color: 'text.secondary'}}
                             >
                                 <FileDownload sx={{fontSize: 14}} />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Examine object">
-                            <IconButton
-                                size="small"
-                                href={`/debug/object?debugEntry=${debugEntry!.id}&id=${parseObjectId(props.value)}`}
-                                sx={{p: 0.25, color: 'text.secondary'}}
-                            >
-                                <Search sx={{fontSize: 14}} />
                             </IconButton>
                         </Tooltip>
                     </Typography>
