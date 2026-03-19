@@ -7,7 +7,7 @@ Bridges ADP Kernel and API into Yii 3. Reference adapter. Includes Yii-specific 
 - Composer: `app-dev-panel/adapter-yiisoft`
 - Namespace: `AppDevPanel\Adapter\Yiisoft\`
 - PHP: 8.4+
-- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/api`, Yiisoft packages
+- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/api`, `app-dev-panel/cli`, Yiisoft packages
 
 ## Directory Structure
 
@@ -97,19 +97,37 @@ Maps framework lifecycle events to debugger lifecycle:
 **Web events:**
 | Framework Event | Debugger Action |
 |----------------|-----------------|
-| `ApplicationStartup` | `Debugger::startup()` |
-| `BeforeRequest` | Collectors receive request data |
-| `AfterRequest` | Collectors receive response data |
-| `AfterEmit` | `Debugger::shutdown()` |
+| `ApplicationStartup` | `Debugger::startup()`, `WebAppInfoCollector::markApplicationStarted()` |
+| `BeforeRequest` | `Debugger::startup()` (with request context), `WebAppInfoCollector::markRequestStarted()`, `RequestCollector::collectRequest()` |
+| `AfterRequest` | `WebAppInfoCollector::markRequestFinished()`, `RequestCollector::collectResponse()` |
+| `ApplicationShutdown` | `WebAppInfoCollector::markApplicationFinished()` |
+| `AfterEmit` | `Profiler::flush()`, `WebAppInfoCollector::markApplicationFinished()`, `Debugger::shutdown()` |
 | `ApplicationError` | `ExceptionCollector` captures error |
 
 **Console events:**
 | Framework Event | Debugger Action |
 |----------------|-----------------|
-| `ApplicationStartup` | `Debugger::startup()` |
-| `ConsoleCommandEvent` | `CommandCollector` captures command |
-| `ConsoleTerminateEvent` | `Debugger::shutdown()` |
-| `ConsoleErrorEvent` | `ExceptionCollector` captures error |
+| `ApplicationStartup` | `Debugger::startup()`, `ConsoleAppInfoCollector::markApplicationStarted()` |
+| `ApplicationShutdown` | `ConsoleAppInfoCollector::markApplicationFinished()`, `Debugger::shutdown()` |
+| `ConsoleCommandEvent` | `ConsoleAppInfoCollector::collect()`, `CommandCollector::collect()` |
+| `ConsoleErrorEvent` | `ConsoleAppInfoCollector::collect()`, `CommandCollector::collect()` |
+| `ConsoleTerminateEvent` | `ConsoleAppInfoCollector::collect()`, `CommandCollector::collect()` |
+
+## Middleware
+
+The adapter provides two middleware classes that must be added to the application's middleware stack:
+
+| Middleware | Purpose |
+|-----------|---------|
+| `DebugHeaders` (from `AppDevPanel\Api`) | Adds `X-Debug-Id` response header linking each response to its debug entry |
+| `YiiApiMiddleware` | Routes requests matching `/debug/api/*` to the ADP API application, bypassing normal app routing |
+
+**Required middleware stack order** (in `config/web/di/application.php`):
+```
+DebugHeaders → ErrorCatcher → YiiApiMiddleware → SessionMiddleware → CsrfTokenMiddleware → FormatDataResponse → RequestCatcherMiddleware → Router
+```
+
+`DebugHeaders` must be outermost (before `ErrorCatcher`) to attach the debug ID even on error responses. `YiiApiMiddleware` must be before `Router` to intercept API requests early.
 
 ## Configuration (`params.php`)
 

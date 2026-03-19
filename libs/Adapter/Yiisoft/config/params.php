@@ -24,6 +24,7 @@ use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
+use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
 use AppDevPanel\Cli\Command\DebugServerBroadcastCommand;
 use AppDevPanel\Cli\Command\DebugServerCommand;
@@ -100,6 +101,7 @@ return [
     ],
     'yiisoft/yii-console' => [
         'commands' => [
+            'debug:query' => DebugQueryCommand::class,
             DebugResetCommand::COMMAND_NAME => DebugResetCommand::class,
             DebugServerCommand::COMMAND_NAME => DebugServerCommand::class,
             DebugServerBroadcastCommand::COMMAND_NAME => DebugServerBroadcastCommand::class,

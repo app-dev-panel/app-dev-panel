@@ -3,8 +3,13 @@
 declare(strict_types=1);
 
 use Yiisoft\Definitions\ReferencesArray;
+use AppDevPanel\Api\Debug\Repository\CollectorRepository;
+use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugServerCommand;
+use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 
 require_once __DIR__ . '/helpers.php';
 
@@ -24,6 +29,12 @@ return [
             'ignoredCommands' => $params['app-dev-panel/yiisoft']['ignoredCommands'],
         ],
     ],
+    ConsoleAppInfoCollector::class => [
+        '__construct()' => [
+            'adapterName' => 'Yii3',
+        ],
+    ],
+    CollectorRepositoryInterface::class => static fn (StorageInterface $storage) => new CollectorRepository($storage),
     DebugServerCommand::class => [
         '__construct()' => [
             'address' => $params['app-dev-panel/yiisoft']['devServer']['address'],

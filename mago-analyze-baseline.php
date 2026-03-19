@@ -1933,6 +1933,18 @@ message = "Assigning `mixed` type to a variable may lead to unexpected behavior.
 count = 1
 
 [[issues]]
+file = "libs/Cli/src/Command/DebugQueryCommand.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "libs/Cli/src/Command/DebugQueryCommand.php"
+code = "mixed-operand"
+message = "Casting `mixed` to `bool`."
+count = 2
+
+[[issues]]
 file = "libs/Cli/src/Command/DebugServerBroadcastCommand.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
@@ -3682,4 +3694,172 @@ count = 2
 file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"
 code = "too-few-arguments"
 message = 'Too few arguments provided for method `AppDevPanel\Kernel\Storage\StorageInterface::read`.'
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "libs/Testing/src/Command/DebugFixturesCommand.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/Testing/src/Command/DebugFixturesCommand.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Testing\Runner\FixtureRunner::runall`: expected `list<AppDevPanel\Testing\Fixture\Fixture>`, but possibly received `non-empty-array<array-key, mixed>`.'
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Command/DebugFixturesCommand.php"
+code = "redundant-cast"
+message = "Redundant cast to `(string)`: the expression already has this type."
+count = 2
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureResult.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureResult.php"
+code = "mixed-property-access"
+message = "Attempting to access a property on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureResult.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #3 of `appdevpanel\testing\runner\fixtureresult::__construct`: expected `list<AppDevPanel\Testing\Assertion\AssertionResult>`, but possibly received `array<array-key, mixed>`.'
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureRunner.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureRunner.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureRunner.php"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #1 of `usleep`: expected `non-negative-int`, but possibly received `int`."
+count = 2
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureRunner.php"
+code = "redundant-logical-operation"
+message = "Redundant `&&` operation: left operand is always truthy and right operand is evaluated."
+count = 2
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureRunner.php"
+code = "redundant-type-comparison"
+message = "Redundant type assertion: `$key` of type `string` is always not `string`."
+count = 4
+
+[[issues]]
+file = "libs/Testing/tests/E2E/DebugApiTest.php"
+code = "less-specific-argument"
+message = "Argument type mismatch for argument #1 of `urlencode`: expected `string`, but provided type `array-key` is less specific."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/DebugApiTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/DebugApiTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `reset`: expected `array<('K.reset() extends mixed), ('V.reset() extends mixed)>|object`, but found `mixed`."
+count = 3
+
+[[issues]]
+file = "libs/Testing/tests/E2E/DebugApiTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 4
+
+[[issues]]
+file = "libs/Testing/tests/E2E/DebugApiTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/DebugApiTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 17
+
+[[issues]]
+file = "libs/Testing/tests/E2E/FixtureTestCase.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #3 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "redundant-cast"
+message = "Redundant cast to `(string)`: the expression already has this type."
+count = 4
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "redundant-condition"
+message = "Redundant ternary operator: condition is always truthy."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "redundant-type-comparison"
+message = "Redundant type assertion: `$body` of type `array<string, mixed>` is always not `array<array-key, mixed>`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "redundant-type-comparison"
+message = "Redundant type assertion: `$entry` of type `array<string, mixed>` is always not `array<array-key, mixed>`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "redundant-type-comparison"
+message = "Redundant type assertion: `$key` of type `string` is always not `string`."
 count = 1

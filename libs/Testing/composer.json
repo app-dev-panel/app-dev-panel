@@ -1,0 +1,17 @@
+{
+    "name": "app-dev-panel/testing",
+    "type": "library",
+    "description": "Testing fixtures for ADP: verify that all collectors work correctly across adapters and playgrounds",
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^8.4",
+        "guzzlehttp/guzzle": "^7.5",
+        "guzzlehttp/psr7": "^2.4",
+        "symfony/console": "^6.4|^7.0|^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AppDevPanel\\Testing\\": "src"
+        }
+    }
+}

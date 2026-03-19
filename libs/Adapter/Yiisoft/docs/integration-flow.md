@@ -67,28 +67,30 @@ the proxy transparently.
 ### Web Request
 
 ```
-┌─────────────────────┐     ┌──────────────────────┐
-│ Yii Framework Event │     │ ADP Action           │
-├─────────────────────┤     ├──────────────────────┤
-│ ApplicationStartup  │ ──▶ │ Debugger::startup()  │
-│ BeforeRequest       │ ──▶ │ Capture request data  │
-│ AfterRequest        │ ──▶ │ Capture response data  │
-│ AfterEmit           │ ──▶ │ Debugger::shutdown()  │
-│ ApplicationError    │ ──▶ │ ExceptionCollector    │
-└─────────────────────┘     └──────────────────────┘
+┌──────────────────────┐     ┌─────────────────────────────────────────────┐
+│ Yii Framework Event  │     │ ADP Action                                  │
+├──────────────────────┤     ├─────────────────────────────────────────────┤
+│ ApplicationStartup   │ ──▶ │ Debugger::startup(), markApplicationStarted │
+│ BeforeRequest        │ ──▶ │ Debugger::startup(request), markRequestStarted, collectRequest │
+│ AfterRequest         │ ──▶ │ markRequestFinished, collectResponse        │
+│ ApplicationShutdown  │ ──▶ │ markApplicationFinished                     │
+│ AfterEmit            │ ──▶ │ Profiler::flush(), Debugger::shutdown()     │
+│ ApplicationError     │ ──▶ │ ExceptionCollector                          │
+└──────────────────────┘     └─────────────────────────────────────────────┘
 ```
 
 ### Console Command
 
 ```
-┌─────────────────────┐     ┌──────────────────────┐
-│ Yii Framework Event │     │ ADP Action           │
-├─────────────────────┤     ├──────────────────────┤
-│ ApplicationStartup  │ ──▶ │ Debugger::startup()  │
-│ ConsoleCommandEvent │ ──▶ │ CommandCollector      │
-│ ConsoleTerminate    │ ──▶ │ Debugger::shutdown()  │
-│ ConsoleErrorEvent   │ ──▶ │ ExceptionCollector    │
-└─────────────────────┘     └──────────────────────┘
+┌──────────────────────┐     ┌─────────────────────────────────────────────┐
+│ Yii Framework Event  │     │ ADP Action                                  │
+├──────────────────────┤     ├─────────────────────────────────────────────┤
+│ ApplicationStartup   │ ──▶ │ Debugger::startup(), markApplicationStarted │
+│ ApplicationShutdown  │ ──▶ │ markApplicationFinished, Debugger::shutdown  │
+│ ConsoleCommandEvent  │ ──▶ │ ConsoleAppInfoCollector, CommandCollector    │
+│ ConsoleErrorEvent    │ ──▶ │ ConsoleAppInfoCollector, CommandCollector    │
+│ ConsoleTerminateEvent│ ──▶ │ ConsoleAppInfoCollector, CommandCollector    │
+└──────────────────────┘     └─────────────────────────────────────────────┘
 ```
 
 ## Adapter as Reference

@@ -19,6 +19,7 @@ final class WebAppInfoCollector implements SummaryCollectorInterface
 
     public function __construct(
         private readonly TimelineCollector $timelineCollector,
+        private readonly string $adapterName = '',
     ) {}
 
     public function getCollected(): array
@@ -34,6 +35,7 @@ final class WebAppInfoCollector implements SummaryCollectorInterface
             'preloadTime' => $this->requestProcessingTimeStarted - $this->applicationProcessingTimeStarted,
             'memoryPeakUsage' => memory_get_peak_usage(),
             'memoryUsage' => memory_get_usage(),
+            'adapter' => $this->adapterName,
         ];
     }
 
@@ -80,6 +82,7 @@ final class WebAppInfoCollector implements SummaryCollectorInterface
         }
         return [
             'web' => [
+                'adapter' => $this->adapterName,
                 'php' => [
                     'version' => PHP_VERSION,
                 ],

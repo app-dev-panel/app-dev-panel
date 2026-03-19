@@ -10,6 +10,8 @@ use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
 use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Controller\AdpApiController;
+use AppDevPanel\Adapter\Yii2\Controller\DebugQueryController;
+use AppDevPanel\Adapter\Yii2\Controller\DebugResetController;
 use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
 use AppDevPanel\Adapter\Yii2\EventListener\WebListener;
 use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
@@ -46,6 +48,7 @@ use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
+use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
@@ -159,6 +162,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         $this->buildDebugger();
         $this->registerEventListeners($app);
         $this->registerRoutes($app);
+        $this->registerConsoleCommands($app);
     }
 
     public function getDebugger(): Debugger
@@ -363,7 +367,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         if ($collectors['request'] ?? true) {
             $this->collectorInstances[] = new RequestCollector($timeline);
-            $this->collectorInstances[] = new WebAppInfoCollector($timeline);
+            $this->collectorInstances[] = new WebAppInfoCollector($timeline, 'Yii2');
         }
 
         if ($collectors['exception'] ?? true) {
@@ -387,7 +391,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
         }
 
         if ($collectors['var_dumper'] ?? true) {
-            $this->collectorInstances[] = new VarDumperCollector($timeline);
+            $varDumperCollector = new VarDumperCollector($timeline);
+            $this->collectorInstances[] = $varDumperCollector;
+            \Yii::$container->setSingleton(VarDumperCollector::class, $varDumperCollector);
         }
 
         if ($collectors['filesystem_stream'] ?? true) {
@@ -400,7 +406,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         if ($collectors['command'] ?? true) {
             $this->collectorInstances[] = new CommandCollector($timeline);
-            $this->collectorInstances[] = new ConsoleAppInfoCollector($timeline);
+            $this->collectorInstances[] = new ConsoleAppInfoCollector($timeline, 'Yii2');
         }
 
         // Yii2-specific collectors
@@ -443,10 +449,10 @@ class Module extends \yii\base\Module implements BootstrapInterface
             Event::on(WebApplication::class, WebApplication::EVENT_BEFORE_REQUEST, [$listener, 'onBeforeRequest']);
             Event::on(WebApplication::class, WebApplication::EVENT_AFTER_REQUEST, [$listener, 'onAfterRequest']);
 
-            // Register error handler hook for exceptions
-            $app->on('afterAction', static function () use ($listener): void {
-                $listener->onAfterAction();
-            });
+            // Hook into exception handling: Yii2's ErrorHandler calls exit(1) after rendering,
+            // so EVENT_AFTER_REQUEST never fires. We wrap handleException to capture the exception
+            // and flush debug data before exit.
+            $this->hookErrorHandler($app, $listener);
         }
 
         if ($app instanceof ConsoleApplication) {
@@ -459,6 +465,17 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
             Event::on(ConsoleApplication::class, ConsoleApplication::EVENT_BEFORE_REQUEST, [$listener, 'onBeforeRequest']);
             Event::on(ConsoleApplication::class, ConsoleApplication::EVENT_AFTER_REQUEST, [$listener, 'onAfterRequest']);
+        }
+
+        // Register event profiling if EventCollector is active
+        if ($this->getCollector(EventCollector::class) !== null) {
+            $this->registerEventProfiling();
+        }
+
+        // Decorate PSR-18 HTTP client with proxy if HttpClientCollector is active
+        $httpClientCollector = $this->getCollector(HttpClientCollector::class);
+        if ($httpClientCollector instanceof HttpClientCollector) {
+            $this->decorateHttpClient($httpClientCollector);
         }
 
         // Register DB profiling if DbCollector is active
@@ -481,6 +498,79 @@ class Module extends \yii\base\Module implements BootstrapInterface
         if ($logCollector instanceof LogCollector) {
             $this->registerDebugLogTarget($logCollector);
         }
+    }
+
+    private function hookErrorHandler(WebApplication $app, WebListener $listener): void
+    {
+        $exceptionCollector = $this->getCollector(ExceptionCollector::class);
+        if (!$exceptionCollector instanceof ExceptionCollector) {
+            return;
+        }
+
+        // Yii2's ErrorHandler clears $this->exception after rendering.
+        // We intercept by setting a custom exception handler that feeds
+        // ExceptionCollector BEFORE Yii2's handler processes (and clears) it.
+        $previousHandler = set_exception_handler(null);
+        restore_exception_handler();
+
+        $debugger = $this->debugger;
+        set_exception_handler(static function (\Throwable $exception) use ($exceptionCollector, $debugger, $previousHandler): void {
+            // Feed the collector before Yii2's handler clears the exception
+            $exceptionCollector->collect($exception);
+
+            // Add X-Debug-Id header before Yii2 renders error response
+            if (!headers_sent()) {
+                header('X-Debug-Id: ' . $debugger->getId());
+            }
+
+            // Delegate to Yii2's error handler
+            if ($previousHandler !== null) {
+                ($previousHandler)($exception);
+            }
+        });
+    }
+
+    private function registerConsoleCommands(Application $app): void
+    {
+        if (!$app instanceof ConsoleApplication) {
+            return;
+        }
+
+        $collectorRepository = \Yii::$container->get(CollectorRepositoryInterface::class);
+        $app->controllerMap['debug-query'] = new DebugQueryController('debug-query', $app, $collectorRepository);
+
+        $storage = \Yii::$container->get(StorageInterface::class);
+        $debugger = \Yii::$container->get(Debugger::class);
+        $app->controllerMap['debug-reset'] = new DebugResetController('debug-reset', $app, $storage, $debugger);
+    }
+
+    private function decorateHttpClient(HttpClientCollector $collector): void
+    {
+        if (!\Yii::$container->has(ClientInterface::class)) {
+            return;
+        }
+
+        $originalClient = \Yii::$container->get(ClientInterface::class);
+        $proxy = new HttpClientInterfaceProxy($originalClient, $collector);
+        \Yii::$container->setSingleton(ClientInterface::class, $proxy);
+    }
+
+    private function registerEventProfiling(): void
+    {
+        /** @var EventCollector|null $eventCollector */
+        $eventCollector = $this->getCollector(EventCollector::class);
+        if ($eventCollector === null) {
+            return;
+        }
+
+        // Yii 2 wildcard event listener (requires >= 2.0.14).
+        // Captures ALL class-level and instance-level events.
+        Event::on('*', '*', static function (\yii\base\Event $event) use ($eventCollector): void {
+            $senderClass = is_object($event->sender) ? $event->sender::class : (string) $event->sender;
+
+            // Wrap Yii2 Event into a simple DTO for EventCollector (expects object $event)
+            $eventCollector->collect($event, $senderClass . '::' . $event->name);
+        });
     }
 
     private function registerDbProfiling(): void

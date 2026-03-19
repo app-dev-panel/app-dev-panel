@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Yiisoft\Definitions\ReferencesArray;
+use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 
 require_once __DIR__ . '/helpers.php';
@@ -21,6 +22,11 @@ return [
                 )
             ),
             'ignoredRequests' => $params['app-dev-panel/yiisoft']['ignoredRequests'],
+        ],
+    ],
+    WebAppInfoCollector::class => [
+        '__construct()' => [
+            'adapterName' => 'Yii3',
         ],
     ],
 ];

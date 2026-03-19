@@ -7,6 +7,8 @@ paths = [
     "libs/Cli/src",
     "libs/Cli/tests",
     "libs/Adapter/Yiisoft/src",
+    "libs/Testing/src",
+    "libs/Testing/tests",
 ]
 includes = ["vendor"]
 excludes = [

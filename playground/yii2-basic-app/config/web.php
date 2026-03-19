@@ -23,6 +23,7 @@ return [
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
+            'silentExitOnException' => true,
         ],
         'urlManager' => [
             'enablePrettyUrl' => true,
@@ -31,6 +32,20 @@ return [
                 'GET /' => 'site/index',
                 'GET /api/users' => 'site/users',
                 'GET /api/error' => 'site/error-demo',
+                'GET /test/fixtures/logs' => 'test-fixtures/logs',
+                'GET /test/fixtures/logs-context' => 'test-fixtures/logs-context',
+                'GET /test/fixtures/events' => 'test-fixtures/events',
+                'GET /test/fixtures/dump' => 'test-fixtures/dump',
+                'GET /test/fixtures/timeline' => 'test-fixtures/timeline',
+                'GET /test/fixtures/request-info' => 'test-fixtures/request-info',
+                'GET /test/fixtures/exception' => 'test-fixtures/exception',
+                'GET /test/fixtures/exception-chained' => 'test-fixtures/exception-chained',
+                'GET /test/fixtures/multi' => 'test-fixtures/multi',
+                'GET /test/fixtures/logs-heavy' => 'test-fixtures/logs-heavy',
+                'GET /test/fixtures/http-client' => 'test-fixtures/http-client',
+                'GET /test/fixtures/filesystem' => 'test-fixtures/filesystem',
+                '/test/fixtures/reset' => 'test-fixtures/reset',
+                '/test/fixtures/reset-cli' => 'test-fixtures/reset-cli',
             ],
         ],
         'log' => [

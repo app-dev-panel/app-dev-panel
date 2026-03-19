@@ -28,6 +28,10 @@
     {
       "type": "path",
       "url": "libs/Cli"
+    },
+    {
+      "type": "path",
+      "url": "libs/Testing"
     }
   ],
   "require": {
@@ -37,6 +41,7 @@
     "app-dev-panel/adapter-yiisoft": "*",
     "app-dev-panel/api": "*",
     "app-dev-panel/kernel": "*",
+    "app-dev-panel/testing": "*",
     "yiisoft/router-fastroute": "^4.0"
   },
   "require-dev": {
@@ -117,6 +122,7 @@
       "AppDevPanel\\Cli\\Tests\\": "libs/Cli/tests",
       "AppDevPanel\\Adapter\\Symfony\\Tests\\": "libs/Adapter/Symfony/tests",
       "AppDevPanel\\Adapter\\Yii2\\Tests\\": "libs/Adapter/Yii2/tests",
+      "AppDevPanel\\Testing\\Tests\\": "libs/Testing/tests",
       "AppDevPanel\\Tests\\": "tests"
     }
   },

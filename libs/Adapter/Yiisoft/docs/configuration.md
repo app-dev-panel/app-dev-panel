@@ -1,9 +1,6 @@
 # Yii Adapter Configuration
 
-## Overview
-
-The Yii adapter uses Yii 3's config plugin system for zero-config installation.
-All settings are in `params.php` under the `app-dev-panel/yiisoft` key.
+All settings are in `params.php` under the `app-dev-panel/yiisoft` key. The adapter uses Yii 3's config plugin system for zero-config installation.
 
 ## Full Configuration Reference
 
