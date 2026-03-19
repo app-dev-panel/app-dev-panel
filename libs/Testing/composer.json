@@ -1,7 +1,7 @@
 {
     "name": "app-dev-panel/testing",
     "type": "library",
-    "description": "Testing scenarios for ADP: verify that all collectors work correctly across adapters and playgrounds",
+    "description": "Testing fixtures for ADP: verify that all collectors work correctly across adapters and playgrounds",
     "minimum-stability": "dev",
     "require": {
         "php": "^8.4",

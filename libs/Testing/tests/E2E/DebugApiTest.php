@@ -12,9 +12,9 @@ use PHPUnit\Framework\TestCase;
  * E2E tests that verify the debug API endpoints work correctly.
  * Tests the API contract independent of specific collectors.
  *
- * Run: PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Scenarios --group api
+ * Run: PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Fixtures --group api
  */
-#[Group('scenarios')]
+#[Group('fixtures')]
 #[Group('api')]
 final class DebugApiTest extends TestCase
 {
@@ -56,7 +56,7 @@ final class DebugApiTest extends TestCase
     public function testDebugApiListAfterRequest(): void
     {
         // Generate a debug entry by hitting the app
-        self::$client->get('/test/scenarios/logs');
+        self::$client->get('/test/fixtures/logs');
 
         // Wait briefly for async storage write
         usleep(500_000);
@@ -74,7 +74,7 @@ final class DebugApiTest extends TestCase
     public function testDebugApiViewReturnsEntryData(): void
     {
         // Generate a debug entry
-        self::$client->get('/test/scenarios/request-info');
+        self::$client->get('/test/fixtures/request-info');
         usleep(500_000);
 
         // Get latest entry
@@ -98,7 +98,7 @@ final class DebugApiTest extends TestCase
     public function testDebugApiViewWithCollectorFilter(): void
     {
         // Generate a debug entry with logs
-        self::$client->get('/test/scenarios/logs');
+        self::$client->get('/test/fixtures/logs');
         usleep(500_000);
 
         // Get latest entry
@@ -146,7 +146,7 @@ final class DebugApiTest extends TestCase
     public function testDebugApiSummary(): void
     {
         // Generate a debug entry
-        self::$client->get('/test/scenarios/request-info');
+        self::$client->get('/test/fixtures/request-info');
         usleep(500_000);
 
         // Get latest

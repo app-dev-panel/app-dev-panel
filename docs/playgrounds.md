@@ -9,7 +9,7 @@ A playground is a minimal, working application for a specific PHP framework with
 - Installs the corresponding ADP adapter (`adapter-yiisoft`, `adapter-symfony`, `adapter-yii2`)
 - Configures collectors, storage, and API routes
 - Exposes demo endpoints that generate debug data (logs, exceptions, events)
-- Exposes `/test/scenarios/*` endpoints for automated testing
+- Exposes `/test/fixtures/*` endpoints for automated testing
 - Serves the ADP debug API at `/debug/api/*` and inspector API at `/inspect/api/*`
 
 Playgrounds have **no unit tests**. Quality is enforced via Mago only.
@@ -31,7 +31,7 @@ playground/
 | Symfony | 8102 | `SYMFONY_PORT` |
 | Yii2 | 8103 | `YII2_PORT` |
 
-Override: `make scenarios-symfony SYMFONY_PORT=9000`
+Override: `make fixtures-symfony SYMFONY_PORT=9000`
 
 ## Common URLs
 
@@ -44,7 +44,7 @@ All playgrounds expose:
 | `/debug/api/view/{id}` | Full debug entry data |
 | `/debug/api/summary/{id}` | Entry summary |
 | `/inspect/api/*` | Inspector endpoints (config, schema, services) |
-| `/test/scenarios/*` | Test scenario endpoints (see Testing section) |
+| `/test/fixtures/*` | Test fixture endpoints (see Testing section) |
 
 ## Starting Servers
 
@@ -60,13 +60,13 @@ cd playground/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8103 -
 
 `PHP_CLI_SERVER_WORKERS=3` is required for SSE (one worker handles the SSE stream, others handle API requests).
 
-## Running Test Scenarios
+## Running Test Fixtures
 
 ```bash
-make scenarios              # All playgrounds in parallel
-make scenarios-yiisoft      # Yiisoft only
-make scenarios-symfony      # Symfony only
-make scenarios-yii2         # Yii2 only
+make fixtures              # All playgrounds in parallel
+make fixtures-yiisoft      # Yiisoft only
+make fixtures-symfony      # Symfony only
+make fixtures-yii2         # Yii2 only
 ```
 
 ---
@@ -102,7 +102,7 @@ The adapter registers automatically via `yiisoft/config` plugin system. No manua
 
 | File | Purpose |
 |------|---------|
-| `config/common/routes.php` | App routes + test scenario routes |
+| `config/common/routes.php` | App routes + test fixture routes |
 | `config/common/di/logger.php` | PSR-3 logger (FileTarget + StreamTarget) |
 | `config/common/di/router.php` | Route collection builder |
 | `config/web/di/application.php` | Middleware stack |
@@ -122,7 +122,7 @@ The adapter registers automatically via `yiisoft/config` plugin system. No manua
 | Method | Path | Handler |
 |--------|------|---------|
 | GET | `/` | `Web\HomePage\Action` |
-| GET | `/test/scenarios/*` | `Web\TestScenarios\*Action` |
+| GET | `/test/fixtures/*` | `Web\TestFixtures\*Action` |
 
 ### Controller Structure
 
@@ -131,7 +131,7 @@ Yiisoft uses PSR-15 request handler classes (one class per action):
 ```
 src/Web/
 ├── HomePage/Action.php
-└── TestScenarios/
+└── TestFixtures/
     ├── LogsAction.php
     ├── EventsAction.php
     ├── ExceptionAction.php
@@ -225,7 +225,7 @@ return static function (RoutingConfigurator $routes): void {
 | GET | `/` | `HomeController::index()` |
 | GET | `/api/users` | `HomeController::users()` |
 | GET | `/api/error` | `HomeController::error()` |
-| GET | `/test/scenarios/*` | `TestScenariosController::*()` |
+| GET | `/test/fixtures/*` | `TestFixturesController::*()` |
 
 ### Controller Structure
 
@@ -234,8 +234,8 @@ Standard Symfony controllers with route attributes:
 ```
 src/Controller/
 ├── HomeController.php
-├── TestScenariosController.php
-└── TestScenarioEvent.php
+├── TestFixtures/
+└──     (13 action classes)
 ```
 
 ---
@@ -312,7 +312,7 @@ return [
 | GET | `/` | `SiteController::actionIndex()` |
 | GET | `/api/users` | `SiteController::actionUsers()` |
 | GET | `/api/error` | `SiteController::actionErrorDemo()` |
-| GET | `/test/scenarios/*` | `TestScenariosController::action*()` |
+| GET | `/test/fixtures/*` | `TestFixturesController::action*()` |
 
 ### Controller Structure
 
@@ -321,7 +321,7 @@ Standard Yii2 controllers with action methods:
 ```
 src/controllers/
 ├── SiteController.php
-└── TestScenariosController.php
+└── TestFixtures/
 ```
 
 ---
@@ -334,7 +334,7 @@ To add a playground for a new framework:
 2. Install the corresponding ADP adapter
 3. Configure collectors, storage, and API routes per the adapter docs
 4. Add demo endpoints (`/`, `/api/users`, `/api/error`)
-5. Implement `/test/scenarios/*` endpoints matching `ScenarioRegistry` (see `libs/Testing/CLAUDE.md`)
+5. Implement `/test/fixtures/*` endpoints matching `FixtureRegistry` (see `libs/Testing/CLAUDE.md`)
 6. Add `composer serve` script
-7. Add Makefile targets: `mago-playground-<name>`, `scenarios-<name>`
+7. Add Makefile targets: `mago-playground-<name>`, `fixtures-<name>`
 8. Add port allocation in Makefile variables

@@ -9,8 +9,8 @@
         mago-playgrounds-fix mago-playground-yiisoft-fix mago-playground-symfony-fix mago-playground-yii2-fix \
         check check-ci fix \
         install install-php install-frontend install-playgrounds \
-        scenarios scenarios-yiisoft scenarios-symfony scenarios-yii2 \
-        test-scenarios test-scenarios-yiisoft test-scenarios-symfony test-scenarios-yii2
+        fixtures fixtures-yiisoft fixtures-symfony fixtures-yii2 \
+        test-fixtures test-fixtures-yiisoft test-fixtures-symfony test-fixtures-yii2
 
 # --- Port allocation ---
 # Frontend dev server
@@ -76,17 +76,17 @@ help: ## Show this help
 	@echo "  make install-frontend      Install frontend dependencies"
 	@echo "  make install-playgrounds   Install playground dependencies"
 	@echo ""
-	@echo "$(YELLOW)Testing Scenarios:$(RESET)"
-	@echo "  make scenarios             Run test scenarios against all playgrounds"
-	@echo "  make scenarios-yiisoft     Run scenarios against Yiisoft playground"
-	@echo "  make scenarios-symfony     Run scenarios against Symfony playground"
-	@echo "  make scenarios-yii2        Run scenarios against Yii2 playground"
+	@echo "$(YELLOW)Testing Fixtures:$(RESET)"
+	@echo "  make fixtures             Run test fixtures against all playgrounds"
+	@echo "  make fixtures-yiisoft     Run fixtures against Yiisoft playground"
+	@echo "  make fixtures-symfony     Run fixtures against Symfony playground"
+	@echo "  make fixtures-yii2        Run fixtures against Yii2 playground"
 	@echo ""
-	@echo "$(YELLOW)E2E Scenario Tests (PHPUnit):$(RESET)"
-	@echo "  make test-scenarios        Run PHPUnit E2E scenarios against all playgrounds"
-	@echo "  make test-scenarios-yiisoft   PHPUnit E2E against Yiisoft playground"
-	@echo "  make test-scenarios-symfony   PHPUnit E2E against Symfony playground"
-	@echo "  make test-scenarios-yii2      PHPUnit E2E against Yii2 playground"
+	@echo "$(YELLOW)E2E Fixture Tests (PHPUnit):$(RESET)"
+	@echo "  make test-fixtures        Run PHPUnit E2E fixtures against all playgrounds"
+	@echo "  make test-fixtures-yiisoft   PHPUnit E2E against Yiisoft playground"
+	@echo "  make test-fixtures-symfony   PHPUnit E2E against Symfony playground"
+	@echo "  make test-fixtures-yii2      PHPUnit E2E against Yii2 playground"
 	@echo ""
 	@echo "$(YELLOW)Ports:$(RESET)"
 	@echo "  Frontend:  $(FRONTEND_PORT)"
@@ -256,42 +256,42 @@ fix: ## Fix all code (core + playgrounds + frontend)
 	@echo "$(GREEN)All code fixed!$(RESET)"
 
 # ============================================================================
-# Testing Scenarios
+# Testing Fixtures
 # ============================================================================
 
-scenarios-yiisoft: ## Run test scenarios against Yiisoft playground
-	@echo "$(CYAN)[Scenarios: Yiisoft] Running test scenarios on port $(YIISOFT_PORT)...$(RESET)"
-	php vendor/bin/adp debug:scenarios http://127.0.0.1:$(YIISOFT_PORT)
+fixtures-yiisoft: ## Run test fixtures against Yiisoft playground
+	@echo "$(CYAN)[Scenarios: Yiisoft] Running test fixtures on port $(YIISOFT_PORT)...$(RESET)"
+	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(YIISOFT_PORT)
 
-scenarios-symfony: ## Run test scenarios against Symfony playground
-	@echo "$(CYAN)[Scenarios: Symfony] Running test scenarios on port $(SYMFONY_PORT)...$(RESET)"
-	php vendor/bin/adp debug:scenarios http://127.0.0.1:$(SYMFONY_PORT)
+fixtures-symfony: ## Run test fixtures against Symfony playground
+	@echo "$(CYAN)[Scenarios: Symfony] Running test fixtures on port $(SYMFONY_PORT)...$(RESET)"
+	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(SYMFONY_PORT)
 
-scenarios-yii2: ## Run test scenarios against Yii2 playground
-	@echo "$(CYAN)[Scenarios: Yii2] Running test scenarios on port $(YII2_PORT)...$(RESET)"
-	php vendor/bin/adp debug:scenarios http://127.0.0.1:$(YII2_PORT)
+fixtures-yii2: ## Run test fixtures against Yii2 playground
+	@echo "$(CYAN)[Scenarios: Yii2] Running test fixtures on port $(YII2_PORT)...$(RESET)"
+	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(YII2_PORT)
 
-scenarios: ## Run test scenarios against all playgrounds (requires running servers)
-	@echo "$(CYAN)Running test scenarios against all playgrounds...$(RESET)"
-	@$(MAKE) -j3 --output-sync=target scenarios-yiisoft scenarios-symfony scenarios-yii2
-	@echo "$(GREEN)All test scenarios passed!$(RESET)"
+fixtures: ## Run test fixtures against all playgrounds (requires running servers)
+	@echo "$(CYAN)Running test fixtures against all playgrounds...$(RESET)"
+	@$(MAKE) -j3 --output-sync=target fixtures-yiisoft fixtures-symfony fixtures-yii2
+	@echo "$(GREEN)All test fixtures passed!$(RESET)"
 
-test-scenarios-yiisoft: ## Run PHPUnit E2E scenarios against Yiisoft playground
-	@echo "$(CYAN)[E2E Scenarios: Yiisoft] Running PHPUnit E2E tests on port $(YIISOFT_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YIISOFT_PORT) php vendor/bin/phpunit --testsuite Scenarios --testdox
+test-fixtures-yiisoft: ## Run PHPUnit E2E fixtures against Yiisoft playground
+	@echo "$(CYAN)[E2E Fixtures: Yiisoft] Running PHPUnit E2E tests on port $(YIISOFT_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(YIISOFT_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox
 
-test-scenarios-symfony: ## Run PHPUnit E2E scenarios against Symfony playground
-	@echo "$(CYAN)[E2E Scenarios: Symfony] Running PHPUnit E2E tests on port $(SYMFONY_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Scenarios --testdox
+test-fixtures-symfony: ## Run PHPUnit E2E fixtures against Symfony playground
+	@echo "$(CYAN)[E2E Fixtures: Symfony] Running PHPUnit E2E tests on port $(SYMFONY_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox
 
-test-scenarios-yii2: ## Run PHPUnit E2E scenarios against Yii2 playground
-	@echo "$(CYAN)[E2E Scenarios: Yii2] Running PHPUnit E2E tests on port $(YII2_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) php vendor/bin/phpunit --testsuite Scenarios --testdox
+test-fixtures-yii2: ## Run PHPUnit E2E fixtures against Yii2 playground
+	@echo "$(CYAN)[E2E Fixtures: Yii2] Running PHPUnit E2E tests on port $(YII2_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox
 
-test-scenarios: ## Run PHPUnit E2E scenarios against all playgrounds (requires running servers)
-	@echo "$(CYAN)Running PHPUnit E2E scenarios against all playgrounds...$(RESET)"
-	@$(MAKE) -j3 --output-sync=target test-scenarios-yiisoft test-scenarios-symfony test-scenarios-yii2
-	@echo "$(GREEN)All E2E scenario tests passed!$(RESET)"
+test-fixtures: ## Run PHPUnit E2E fixtures against all playgrounds (requires running servers)
+	@echo "$(CYAN)Running PHPUnit E2E fixtures against all playgrounds...$(RESET)"
+	@$(MAKE) -j3 --output-sync=target test-fixtures-yiisoft test-fixtures-symfony test-fixtures-yii2
+	@echo "$(GREEN)All E2E fixture tests passed!$(RESET)"
 
 # ============================================================================
 # Full pipeline

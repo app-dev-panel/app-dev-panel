@@ -33,7 +33,7 @@
         <testsuite name="E2E">
             <directory>tests/E2E</directory>
         </testsuite>
-        <testsuite name="Scenarios">
+        <testsuite name="Fixtures">
             <directory>libs/Testing/tests/E2E</directory>
         </testsuite>
     </testsuites>

@@ -1,6 +1,6 @@
 # Testing Module
 
-Central test scenario definitions and runner for verifying ADP collectors across all adapters and playgrounds.
+Central test fixture definitions and runner for verifying ADP collectors across all adapters and playgrounds.
 
 ## Package
 
@@ -13,83 +13,83 @@ Central test scenario definitions and runner for verifying ADP collectors across
 
 ```
 libs/Testing/src/
-├── Scenario/
-│   ├── Scenario.php             # Single test scenario definition
+├── Fixture/
+│   ├── Fixture.php             # Single test fixture definition
 │   ├── Expectation.php          # Assertion about collector data
-│   └── ScenarioRegistry.php     # Central registry of ALL scenarios
+│   └── FixtureRegistry.php     # Central registry of ALL fixtures
 ├── Assertion/
 │   ├── AssertionResult.php      # Pass/fail result
 │   └── ExpectationEvaluator.php # Evaluates expectations against data
 ├── Runner/
-│   ├── ScenarioRunner.php       # HTTP-based scenario executor
-│   └── ScenarioResult.php       # Result of running one scenario
+│   ├── FixtureRunner.php       # HTTP-based fixture executor
+│   └── FixtureResult.php       # Result of running one fixture
 └── Command/
-    └── DebugScenariosCommand.php # CLI command to run scenarios
+    └── DebugFixturesCommand.php # CLI command to run fixtures
 libs/Testing/tests/
 └── E2E/
-    ├── ScenarioTestCase.php       # Base PHPUnit test case for HTTP E2E
-    ├── CoreScenariosTest.php      # Core collector tests (logs, events, dump, timeline)
-    ├── WebScenariosTest.php       # Web context tests (request, app info)
-    ├── ErrorScenariosTest.php     # Exception tests (runtime, chained)
-    ├── AdvancedScenariosTest.php  # Multi-collector, heavy, http-client, filesystem
+    ├── FixtureTestCase.php       # Base PHPUnit test case for HTTP E2E
+    ├── CoreFixturesTest.php      # Core collector tests (logs, events, dump, timeline)
+    ├── WebFixturesTest.php       # Web context tests (request, app info)
+    ├── ErrorFixturesTest.php     # Exception tests (runtime, chained)
+    ├── AdvancedFixturesTest.php  # Multi-collector, heavy, http-client, filesystem
     └── DebugApiTest.php           # Debug API endpoint contract tests
 ```
 
 ## How It Works
 
-1. **ScenarioRegistry** defines all test scenarios in ONE place
-2. Each **Scenario** specifies: endpoint path, HTTP method, expected collector data
-3. Each playground implements the endpoint contract under `/test/scenarios/*`
-4. **ScenarioRunner** hits the endpoint, then queries `/debug/api/view/{id}` to verify
+1. **FixtureRegistry** defines all test fixtures in ONE place
+2. Each **Fixture** specifies: endpoint path, HTTP method, expected collector data
+3. Each playground implements the endpoint contract under `/test/fixtures/*`
+4. **FixtureRunner** hits the endpoint, then queries `/debug/api/view/{id}` to verify
 5. **ExpectationEvaluator** checks actual collector data against expectations
 
-## Adding a New Scenario
+## Adding a New Fixture
 
-1. Add a new `Scenario` to `ScenarioRegistry` with expectations
+1. Add a new `Fixture` to `FixtureRegistry` with expectations
 2. Add the endpoint to each playground controller (Symfony, Yii2, Yiisoft)
-3. Run `debug:scenarios` to verify
+3. Run `debug:fixtures` to verify
 
 ## Endpoint Contract
 
-All playgrounds must implement these endpoints under `/test/scenarios/`:
+All playgrounds must implement these endpoints under `/test/fixtures/`:
 
-| Endpoint | Scenario | Collectors Tested |
+| Endpoint | Fixture | Collectors Tested |
 |----------|----------|-------------------|
-| `/test/scenarios/logs` | logs:basic | LogCollector |
-| `/test/scenarios/logs-context` | logs:context | LogCollector |
-| `/test/scenarios/events` | events:basic | EventCollector |
-| `/test/scenarios/dump` | var-dumper:basic | VarDumperCollector |
-| `/test/scenarios/timeline` | timeline:basic | TimelineCollector |
-| `/test/scenarios/request-info` | request:basic | RequestCollector, WebAppInfoCollector |
-| `/test/scenarios/exception` | exception:runtime | ExceptionCollector |
-| `/test/scenarios/exception-chained` | exception:chained | ExceptionCollector |
-| `/test/scenarios/multi` | multi:logs-and-events | LogCollector, EventCollector, TimelineCollector |
-| `/test/scenarios/logs-heavy` | logs:heavy | LogCollector |
-| `/test/scenarios/http-client` | http-client:basic | HttpClientCollector |
-| `/test/scenarios/filesystem` | filesystem:basic | FilesystemStreamCollector |
+| `/test/fixtures/logs` | logs:basic | LogCollector |
+| `/test/fixtures/logs-context` | logs:context | LogCollector |
+| `/test/fixtures/events` | events:basic | EventCollector |
+| `/test/fixtures/dump` | var-dumper:basic | VarDumperCollector |
+| `/test/fixtures/timeline` | timeline:basic | TimelineCollector |
+| `/test/fixtures/request-info` | request:basic | RequestCollector, WebAppInfoCollector |
+| `/test/fixtures/exception` | exception:runtime | ExceptionCollector |
+| `/test/fixtures/exception-chained` | exception:chained | ExceptionCollector |
+| `/test/fixtures/multi` | multi:logs-and-events | LogCollector, EventCollector, TimelineCollector |
+| `/test/fixtures/logs-heavy` | logs:heavy | LogCollector |
+| `/test/fixtures/http-client` | http-client:basic | HttpClientCollector |
+| `/test/fixtures/filesystem` | filesystem:basic | FilesystemStreamCollector |
 
-## Running Scenarios
+## Running Fixtures
 
 Two ways to run: CLI command or PHPUnit E2E tests. Both require a running playground server.
 
 ### CLI Command
 
 ```bash
-debug:scenarios http://localhost:8080              # All scenarios
-debug:scenarios http://localhost:8080 --tag=core   # By tag
-debug:scenarios http://localhost:8080 -s logs:basic # Single scenario
-debug:scenarios http://localhost:8080 --list       # List without running
-debug:scenarios http://localhost:8080 -v           # Verbose assertions
+debug:fixtures http://localhost:8080              # All fixtures
+debug:fixtures http://localhost:8080 --tag=core   # By tag
+debug:fixtures http://localhost:8080 -s logs:basic # Single fixture
+debug:fixtures http://localhost:8080 --list       # List without running
+debug:fixtures http://localhost:8080 -v           # Verbose assertions
 ```
 
 ### PHPUnit E2E Tests
 
 ```bash
-# Run all scenario tests against a playground
-PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Scenarios
+# Run all fixture tests against a playground
+PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Fixtures
 
 # Run specific group
-PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Scenarios --group core
+PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Fixtures --group core
 
 # Available groups: core, web, error, advanced, api
 ```
@@ -97,7 +97,7 @@ PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Scenario
 ### Makefile Targets
 
 ```bash
-make scenarios                  # CLI scenarios against all playgrounds
-make test-scenarios             # PHPUnit E2E against all playgrounds
-make test-scenarios-symfony     # PHPUnit E2E against Symfony only
+make fixtures                  # CLI fixtures against all playgrounds
+make test-fixtures             # PHPUnit E2E against all playgrounds
+make test-fixtures-symfony     # PHPUnit E2E against Symfony only
 ```

@@ -29,7 +29,7 @@ fully framework-independent. The first adapter targets Yii 3; additional adapter
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
 │   ├── API/                      # HTTP API: debug endpoints, inspector endpoints, SSE
 │   ├── Cli/                      # CLI commands: debug server, reset, broadcast, query
-│   ├── Testing/                  # Test scenarios: definitions, runner, CLI command
+│   ├── Testing/                  # Test fixtures: definitions, runner, CLI command
 │   ├── Adapter/
 │   │   ├── Yiisoft/              # Yii 3 framework adapter
 │   │   ├── Symfony/              # Symfony framework adapter
@@ -121,15 +121,15 @@ make ci                             # Full CI pipeline: all checks + all tests
 make check-ci                       # CI checks only
 make test-ci                        # CI tests only
 
-# Testing scenarios (requires running playground servers)
-make scenarios             # Run CLI scenarios against all playgrounds
-make scenarios-yiisoft     # CLI scenarios against Yiisoft (port 8101)
-make scenarios-symfony     # CLI scenarios against Symfony (port 8102)
-make scenarios-yii2        # CLI scenarios against Yii2 (port 8103)
-make test-scenarios        # PHPUnit E2E scenarios against all playgrounds
-make test-scenarios-yiisoft  # PHPUnit E2E against Yiisoft
-make test-scenarios-symfony  # PHPUnit E2E against Symfony
-make test-scenarios-yii2     # PHPUnit E2E against Yii2
+# Testing fixtures (requires running playground servers)
+make fixtures             # Run CLI fixtures against all playgrounds
+make fixtures-yiisoft     # CLI fixtures against Yiisoft (port 8101)
+make fixtures-symfony     # CLI fixtures against Symfony (port 8102)
+make fixtures-yii2        # CLI fixtures against Yii2 (port 8103)
+make test-fixtures        # PHPUnit E2E scenarios against all playgrounds
+make test-fixtures-yiisoft  # PHPUnit E2E against Yiisoft
+make test-fixtures-symfony  # PHPUnit E2E against Symfony
+make test-fixtures-yii2     # PHPUnit E2E against Yii2
 
 # Frontend dev (still via npm)
 cd libs/frontend
@@ -277,7 +277,7 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 - `libs/Kernel/CLAUDE.md` — Core engine internals
 - `libs/API/CLAUDE.md` — HTTP API endpoints and middleware
 - `libs/Cli/CLAUDE.md` — CLI commands
-- `libs/Testing/CLAUDE.md` — Test scenarios and runner
+- `libs/Testing/CLAUDE.md` — Test fixtures and runner
 - `libs/Adapter/Yiisoft/CLAUDE.md` — Yii 3 adapter integration
 - `libs/Adapter/Symfony/CLAUDE.md` — Symfony adapter integration
 - `libs/Adapter/Yii2/CLAUDE.md` — Yii 2 adapter integration

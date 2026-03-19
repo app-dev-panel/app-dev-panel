@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Testing\Assertion;
 
-use AppDevPanel\Testing\Scenario\Expectation;
+use AppDevPanel\Testing\Fixture\Expectation;
 
 /**
  * Evaluates expectations against actual collector data.
