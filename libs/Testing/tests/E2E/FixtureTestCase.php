@@ -40,10 +40,10 @@ abstract class FixtureTestCase extends TestCase
             curl_close($ch);
 
             if ($result === false || $httpCode === 0) {
-                self::markTestSkipped(sprintf('Playground server not reachable at %s', self::$baseUrl));
+                self::fail(sprintf('Playground server is not running. Start it and re-run. URL: %s', self::$baseUrl));
             }
         } catch (\Throwable) {
-            self::markTestSkipped(sprintf('Playground server not reachable at %s', self::$baseUrl));
+            self::fail(sprintf('Playground server is not running. Start it and re-run. URL: %s', self::$baseUrl));
         }
     }
 

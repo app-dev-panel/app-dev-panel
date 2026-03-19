@@ -36,10 +36,10 @@ final class DebugApiTest extends TestCase
         try {
             $response = self::$client->get('/');
             if ($response->getStatusCode() === 0) {
-                self::markTestSkipped(sprintf('Server not reachable at %s', self::$baseUrl));
+                self::fail(sprintf('Playground server is not running. Start it and re-run. URL: %s', self::$baseUrl));
             }
         } catch (\Throwable) {
-            self::markTestSkipped(sprintf('Server not reachable at %s', self::$baseUrl));
+            self::fail(sprintf('Playground server is not running. Start it and re-run. URL: %s', self::$baseUrl));
         }
     }
 
