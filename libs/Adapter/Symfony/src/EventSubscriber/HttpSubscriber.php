@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
+use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
+use Symfony\Component\VarDumper\VarDumper;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -33,11 +35,14 @@ final class HttpSubscriber implements EventSubscriberInterface
 {
     private ?Psr17Factory $psr17Factory = null;
 
+    private bool $varDumperHandlerRegistered = false;
+
     public function __construct(
         private readonly Debugger $debugger,
         private readonly ?RequestCollector $requestCollector = null,
         private readonly ?WebAppInfoCollector $webAppInfoCollector = null,
         private readonly ?ExceptionCollector $exceptionCollector = null,
+        private readonly ?VarDumperCollector $varDumperCollector = null,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -64,6 +69,8 @@ final class HttpSubscriber implements EventSubscriberInterface
 
         $symfonyRequest = $event->getRequest();
         $psrRequest = $this->convertSymfonyRequestToPsr7($symfonyRequest);
+
+        $this->registerVarDumperHandler();
 
         $this->debugger->startup(StartupContext::forRequest($psrRequest));
 
@@ -113,6 +120,29 @@ final class HttpSubscriber implements EventSubscriberInterface
 
         $this->webAppInfoCollector?->markApplicationFinished();
         $this->debugger->shutdown();
+    }
+
+    private function registerVarDumperHandler(): void
+    {
+        if ($this->varDumperHandlerRegistered || $this->varDumperCollector === null) {
+            return;
+        }
+
+        $collector = $this->varDumperCollector;
+        $previousHandler = VarDumper::setHandler(static function (mixed $var, ?string $label = null) use ($collector): void {
+            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+            $line = '';
+            foreach ($trace as $frame) {
+                if (isset($frame['file']) && !str_contains($frame['file'], 'vendor/')) {
+                    $line = $frame['file'] . ':' . ($frame['line'] ?? 0);
+                    break;
+                }
+            }
+
+            $collector->collect($var, $label ?? $line);
+        });
+
+        $this->varDumperHandlerRegistered = true;
     }
 
     private function getPsr17Factory(): Psr17Factory

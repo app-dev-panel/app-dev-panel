@@ -61,6 +61,23 @@ final readonly class Expectation
     }
 
     /**
+     * At least one array entry must have field at path equal to value.
+     * E.g., anyFieldEquals('level', 'info') matches if any entry has level=info.
+     */
+    public static function anyFieldEquals(string $path, mixed $value): self
+    {
+        return new self('any_field_equals', $path, $value);
+    }
+
+    /**
+     * At least one array entry must have field at path containing substring.
+     */
+    public static function anyFieldContains(string $path, string $substring): self
+    {
+        return new self('any_field_contains', $path, $substring);
+    }
+
+    /**
      * Summary data must contain the given key.
      */
     public static function summaryHasKey(string $key): self

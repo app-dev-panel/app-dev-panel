@@ -41,6 +41,18 @@ final class ExpectationEvaluator
                 $expectation->path,
                 (string) $expectation->value,
             ),
+            'any_field_equals' => $this->assertAnyFieldEquals(
+                $collectorName,
+                $data,
+                $expectation->path,
+                $expectation->value,
+            ),
+            'any_field_contains' => $this->assertAnyFieldContains(
+                $collectorName,
+                $data,
+                $expectation->path,
+                (string) $expectation->value,
+            ),
             'summary_has_key' => AssertionResult::pass(sprintf('[%s] summary check (deferred)', $collectorName)),
             'summary_gte' => AssertionResult::pass(sprintf('[%s] summary check (deferred)', $collectorName)),
             default => AssertionResult::fail(sprintf(
@@ -135,6 +147,70 @@ final class ExpectationEvaluator
         }
 
         return AssertionResult::pass(sprintf('[%s] field "%s" contains "%s"', $collectorName, $path, $substring));
+    }
+
+    private function assertAnyFieldEquals(
+        string $collectorName,
+        array $data,
+        ?string $path,
+        mixed $expected,
+    ): AssertionResult {
+        if ($path === null) {
+            return AssertionResult::fail(sprintf('[%s] any_field_equals requires a path', $collectorName));
+        }
+
+        foreach ($data as $entry) {
+            if (is_array($entry)) {
+                $actual = $this->getByPath($entry, $path);
+                if ($actual === $expected) {
+                    return AssertionResult::pass(sprintf(
+                        '[%s] found entry with "%s" = %s',
+                        $collectorName,
+                        $path,
+                        json_encode($expected, JSON_THROW_ON_ERROR),
+                    ));
+                }
+            }
+        }
+
+        return AssertionResult::fail(sprintf(
+            '[%s] no entry has "%s" = %s',
+            $collectorName,
+            $path,
+            json_encode($expected, JSON_THROW_ON_ERROR),
+        ));
+    }
+
+    private function assertAnyFieldContains(
+        string $collectorName,
+        array $data,
+        ?string $path,
+        string $substring,
+    ): AssertionResult {
+        if ($path === null) {
+            return AssertionResult::fail(sprintf('[%s] any_field_contains requires a path', $collectorName));
+        }
+
+        foreach ($data as $entry) {
+            if (is_array($entry)) {
+                $actual = $this->getByPath($entry, $path);
+                if (is_string($actual) && str_contains($actual, $substring)) {
+                    return AssertionResult::pass(sprintf(
+                        '[%s] found entry with "%s" containing "%s"',
+                        $collectorName,
+                        $path,
+                        $substring,
+                    ));
+                }
+            }
+        }
+
+        return AssertionResult::fail(sprintf(
+            '[%s] no entry has "%s" containing "%s"',
+            $collectorName,
+            $path,
+            $substring,
+        ));
     }
 
     private function getByPath(array $data, string $path): mixed

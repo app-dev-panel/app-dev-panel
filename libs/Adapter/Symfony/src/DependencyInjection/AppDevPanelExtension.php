@@ -261,6 +261,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(RequestCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(WebAppInfoCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(ExceptionCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+                new Reference(VarDumperCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);

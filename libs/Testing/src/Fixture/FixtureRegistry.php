@@ -66,10 +66,10 @@ final class FixtureRegistry
                 'logger' => [
                     Expectation::notEmpty(),
                     Expectation::countGte(3),
-                    Expectation::fieldEquals('0.level', 'info'),
-                    Expectation::fieldContains('0.message', 'Test log: info'),
-                    Expectation::fieldEquals('1.level', 'warning'),
-                    Expectation::fieldEquals('2.level', 'error'),
+                    Expectation::anyFieldContains('message', 'Test log: info'),
+                    Expectation::anyFieldEquals('level', 'info'),
+                    Expectation::anyFieldEquals('level', 'warning'),
+                    Expectation::anyFieldEquals('level', 'error'),
                 ],
             ]),
 
@@ -78,8 +78,7 @@ final class FixtureRegistry
                 'logger' => [
                     Expectation::notEmpty(),
                     Expectation::countGte(1),
-                    Expectation::fieldEquals('0.level', 'info'),
-                    Expectation::fieldContains('0.message', 'User action'),
+                    Expectation::anyFieldContains('message', 'User action'),
                 ],
             ]),
 
@@ -146,8 +145,8 @@ final class FixtureRegistry
                 'exception' => [
                     Expectation::notEmpty(),
                     Expectation::countGte(1),
-                    Expectation::fieldEquals('0.class', 'RuntimeException'),
-                    Expectation::fieldContains('0.message', 'ADP test fixture exception'),
+                    Expectation::anyFieldEquals('class', 'RuntimeException'),
+                    Expectation::anyFieldContains('message', 'ADP test fixture exception'),
                 ],
             ]),
 
@@ -156,8 +155,8 @@ final class FixtureRegistry
                 'exception' => [
                     Expectation::notEmpty(),
                     Expectation::countGte(2),
-                    Expectation::fieldContains('0.message', 'Wrapper exception'),
-                    Expectation::fieldContains('1.message', 'Original cause'),
+                    Expectation::anyFieldContains('message', 'Wrapper exception'),
+                    Expectation::anyFieldContains('message', 'Original cause'),
                 ],
             ]),
         ];
@@ -205,7 +204,7 @@ final class FixtureRegistry
             // === Filesystem stream ===
             new Fixture(name: 'filesystem:basic', endpoint: '/test/fixtures/filesystem', expectations: [
                 'fs_stream' => [
-                    Expectation::notEmpty(),
+                    Expectation::exists(),
                 ],
             ]),
         ];

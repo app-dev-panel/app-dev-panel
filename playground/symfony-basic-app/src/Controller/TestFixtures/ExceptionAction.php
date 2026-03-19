@@ -12,6 +12,6 @@ final class ExceptionAction
 {
     public function __invoke(): never
     {
-        throw new \RuntimeException('ADP test scenario exception');
+        throw new \RuntimeException('ADP test fixture exception');
     }
 }
