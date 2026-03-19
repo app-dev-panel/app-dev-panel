@@ -5,7 +5,7 @@
     "scripts": {
         "serve": [
             "Composer\\Config::disableProcessTimeout",
-            "@php ./yii serve"
+            "@php ./yii serve -p 8101"
         ]
     },
     "require": {
