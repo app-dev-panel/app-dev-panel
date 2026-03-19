@@ -125,7 +125,7 @@ final class DebugApiTest extends TestCase
         }
 
         if ($logCollectorKey === null) {
-            self::markTestSkipped('LogCollector not found in debug data');
+            self::fail('LogCollector not found in debug data');
         }
 
         $filteredResponse = self::$client->get(sprintf(
