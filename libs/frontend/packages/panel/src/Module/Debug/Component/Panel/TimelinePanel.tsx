@@ -7,7 +7,7 @@ import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
 import {Box, Collapse, TextField, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
 // Data format from PHP: [microtime, reference, collectorClass, additionalData?]
 // row[0] = microtime(true) — start timestamp
@@ -133,6 +133,7 @@ const Swatch = styled(Box)({width: 12, height: 8, borderRadius: 2});
 export const TimelinePanel = ({data}: TimelinePanelProps) => {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
     const [filter, setFilter] = useState('');
+    const deferredFilter = useDeferredValue(filter);
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
 
     const toggleFilter = useCallback((name: string) => {
@@ -162,11 +163,12 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                 return activeFilters.has(shortName);
             });
         }
-        if (filter) {
-            result = result.filter((r) => r[2].toLowerCase().includes(filter.toLowerCase()));
+        if (deferredFilter) {
+            const lower = deferredFilter.toLowerCase();
+            result = result.filter((r) => r[2].toLowerCase().includes(lower));
         }
         return result;
-    }, [data, filter, activeFilters]);
+    }, [data, deferredFilter, activeFilters]);
 
     // Events are point-in-time: row[0] is microtime, row[1] is a reference (not duration)
     // Use full data range for consistent axis regardless of filters

@@ -8,7 +8,7 @@ import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
 import {Box, Chip, Collapse, Icon, IconButton, TextField, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
 type EventType = {event: string; file: string; line: string; name: string; time: number};
 type EventTimelineProps = {events: EventType[]};
@@ -52,6 +52,7 @@ const DetailBox = styled(Box)(({theme}) => ({
 
 export const EventPanel = ({events}: EventTimelineProps) => {
     const [filter, setFilter] = useState('');
+    const deferredFilter = useDeferredValue(filter);
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
     const debugEntry = useDebugEntry();
@@ -90,15 +91,12 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                 return activeFilters.has(shortName);
             });
         }
-        if (filter) {
-            result = result.filter(
-                (e) =>
-                    e.name.toLowerCase().includes(filter.toLowerCase()) ||
-                    e.file.toLowerCase().includes(filter.toLowerCase()),
-            );
+        if (deferredFilter) {
+            const lower = deferredFilter.toLowerCase();
+            result = result.filter((e) => e.name.toLowerCase().includes(lower) || e.file.toLowerCase().includes(lower));
         }
         return result;
-    }, [events, filter, activeFilters]);
+    }, [events, deferredFilter, activeFilters]);
 
     return (
         <Box>
