@@ -1,14 +1,19 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
+import {useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
-import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
+import {TabContext, TabPanel} from '@mui/lab';
+import TabList from '@mui/lab/TabList';
+import {Box, Chip, Collapse, Icon, IconButton, Tab, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {useCallback, useDeferredValue, useMemo, useState} from 'react';
+import {type SyntheticEvent, useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
 
 type HttpClientEntry = {
     startTime: number;
@@ -128,6 +133,119 @@ const HeaderTable = styled('table')(({theme}) => ({
     },
     '& tr:last-child th, & tr:last-child td': {borderBottom: 'none'},
 }));
+
+const StyledTabList = styled(TabList)(({theme}) => ({
+    minHeight: 36,
+    '& .MuiTab-root': {
+        minHeight: 36,
+        fontSize: '12px',
+        fontWeight: 600,
+        textTransform: 'none',
+        padding: theme.spacing(0.5, 2),
+    },
+}));
+
+// ---------------------------------------------------------------------------
+// HTTP Stream types & view
+// ---------------------------------------------------------------------------
+
+type HttpStreamEntry = {uri: string; args: Record<string, any>};
+type HttpStreamData = Record<string, HttpStreamEntry[]>;
+
+const StreamOperationRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
+    ({theme, expanded}) => ({
+        display: 'flex',
+        alignItems: 'center',
+        gap: theme.spacing(1.5),
+        padding: theme.spacing(1, 1.5),
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        cursor: 'pointer',
+        transition: 'background-color 0.1s ease',
+        backgroundColor: expanded ? theme.palette.action.hover : 'transparent',
+        '&:hover': {backgroundColor: theme.palette.action.hover},
+    }),
+);
+
+const StreamUriCell = styled(Typography)({
+    fontFamily: primitives.fontFamilyMono,
+    fontSize: '12px',
+    flex: 1,
+    wordBreak: 'break-all',
+});
+
+const HttpStreamView = ({data}: {data: HttpStreamData}) => {
+    const operations = Object.keys(data);
+    const totalCount = operations.reduce((sum, op) => sum + (data[op]?.length ?? 0), 0);
+    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+    if (totalCount === 0) {
+        return <EmptyState icon="stream" title="No HTTP stream operations found" />;
+    }
+
+    let globalIndex = 0;
+    return (
+        <Box>
+            <SectionTitle>{[`${totalCount} stream operations`]}</SectionTitle>
+            {operations.map((operation) => {
+                const items = data[operation] ?? [];
+                if (items.length === 0) return null;
+                return (
+                    <Box key={operation}>
+                        <Box sx={{px: 1.5, py: 1, backgroundColor: 'action.hover'}}>
+                            <Typography sx={{fontSize: '12px', fontWeight: 600, color: 'text.secondary'}}>
+                                {operation}
+                                <Chip
+                                    label={items.length}
+                                    size="small"
+                                    sx={{ml: 1, fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
+                                />
+                            </Typography>
+                        </Box>
+                        {items.map((item) => {
+                            const idx = globalIndex++;
+                            const expanded = expandedIndex === idx;
+                            const hasArgs = item.args && Object.keys(item.args).length > 0;
+                            return (
+                                <Box key={idx}>
+                                    <StreamOperationRow
+                                        expanded={expanded}
+                                        onClick={() => setExpandedIndex(expanded ? null : idx)}
+                                    >
+                                        <StreamUriCell>{item.uri}</StreamUriCell>
+                                        {hasArgs && (
+                                            <IconButton size="small" sx={{flexShrink: 0}}>
+                                                <Icon sx={{fontSize: 16}}>
+                                                    {expanded ? 'expand_less' : 'expand_more'}
+                                                </Icon>
+                                            </IconButton>
+                                        )}
+                                    </StreamOperationRow>
+                                    {hasArgs && (
+                                        <Collapse in={expanded}>
+                                            <DetailBox>
+                                                <Typography
+                                                    sx={{
+                                                        fontSize: '11px',
+                                                        fontWeight: 600,
+                                                        color: 'text.disabled',
+                                                        mb: 0.5,
+                                                    }}
+                                                >
+                                                    Arguments
+                                                </Typography>
+                                                <JsonRenderer value={item.args} />
+                                            </DetailBox>
+                                        </Collapse>
+                                    )}
+                                </Box>
+                            );
+                        })}
+                    </Box>
+                );
+            })}
+        </Box>
+    );
+};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -383,7 +501,83 @@ function statusGroup(code: number): string {
 // Main component
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Client tab content (extracted from original HttpClientPanel)
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Top-level tabs: "Client" and "Stream"
+// ---------------------------------------------------------------------------
+
+const TopLevelTabList = styled(TabList)(({theme}) => ({
+    minHeight: 40,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    marginBottom: theme.spacing(2),
+    '& .MuiTab-root': {
+        minHeight: 40,
+        fontSize: '13px',
+        fontWeight: 600,
+        textTransform: 'none',
+        padding: theme.spacing(0.5, 2),
+    },
+}));
+
 export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
+    const debugEntry = useDebugEntry();
+    const [activeTab, setActiveTab] = useState('client');
+    const [fetchCollector, fetchResult] = useLazyGetCollectorInfoQuery();
+    const [streamData, setStreamData] = useState<HttpStreamData | null>(null);
+
+    useEffect(() => {
+        if (!debugEntry) return;
+        fetchCollector({id: debugEntry.id, collector: CollectorsMap.HttpStreamCollector})
+            .then(({data: result, isError}) => {
+                if (!isError && result) {
+                    setStreamData(result as HttpStreamData);
+                } else {
+                    setStreamData(null);
+                }
+            })
+            .catch(() => setStreamData(null));
+    }, [debugEntry, fetchCollector]);
+
+    const clientCount = data?.length ?? 0;
+    const streamCount = useMemo(() => {
+        if (!streamData) return 0;
+        return Object.values(streamData).reduce((sum, entries) => sum + (entries?.length ?? 0), 0);
+    }, [streamData]);
+
+    const handleTabChange = useCallback((_: SyntheticEvent, value: string) => {
+        setActiveTab(value);
+    }, []);
+
+    return (
+        <TabContext value={activeTab}>
+            <TopLevelTabList onChange={handleTabChange}>
+                <Tab label={`Client (${clientCount})`} value="client" />
+                <Tab label={`Stream (${streamCount})`} value="stream" />
+            </TopLevelTabList>
+            <TabPanel value="client" sx={{p: 0}}>
+                <HttpClientTabContent data={data} />
+            </TabPanel>
+            <TabPanel value="stream" sx={{p: 0}}>
+                {fetchResult.isFetching ? (
+                    <EmptyState icon="hourglass_empty" title="Loading stream data..." />
+                ) : streamData ? (
+                    <HttpStreamView data={streamData} />
+                ) : (
+                    <EmptyState
+                        icon="stream"
+                        title="No HTTP stream data"
+                        description="No stream operations were captured"
+                    />
+                )}
+            </TabPanel>
+        </TabContext>
+    );
+};
+
+const HttpClientTabContent = ({data}: HttpClientPanelProps) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);

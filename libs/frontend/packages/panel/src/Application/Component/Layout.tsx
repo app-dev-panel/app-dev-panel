@@ -29,7 +29,11 @@ import {Outlet, useLocation, useNavigate, useSearchParams} from 'react-router-do
 // ---------------------------------------------------------------------------
 // Collectors hidden from sidebar (shown in overview instead)
 // ---------------------------------------------------------------------------
-const hiddenCollectors = new Set<string>([CollectorsMap.WebAppInfoCollector, CollectorsMap.ConsoleAppInfoCollector]);
+const hiddenCollectors = new Set<string>([
+    CollectorsMap.WebAppInfoCollector,
+    CollectorsMap.ConsoleAppInfoCollector,
+    CollectorsMap.HttpStreamCollector,
+]);
 
 // ---------------------------------------------------------------------------
 // Static inspector sub-items
