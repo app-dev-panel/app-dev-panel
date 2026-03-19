@@ -34,6 +34,7 @@ final class TestFixturesController extends Controller
             'logs-heavy' => \App\actions\testFixtures\LogsHeavyAction::class,
             'http-client' => \App\actions\testFixtures\HttpClientAction::class,
             'filesystem' => \App\actions\testFixtures\FilesystemAction::class,
+            'reset' => \App\actions\testFixtures\ResetAction::class,
         ];
     }
 }

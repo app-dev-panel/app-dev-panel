@@ -23,5 +23,6 @@ return [
         Route::get('/logs-heavy')->action(Web\TestFixtures\LogsHeavyAction::class)->name('test-logs-heavy'),
         Route::get('/http-client')->action(Web\TestFixtures\HttpClientAction::class)->name('test-http-client'),
         Route::get('/filesystem')->action(Web\TestFixtures\FilesystemAction::class)->name('test-filesystem'),
+        Route::methods(['GET', 'POST'], '/reset')->action(Web\TestFixtures\ResetAction::class)->name('test-reset'),
     ),
 ];

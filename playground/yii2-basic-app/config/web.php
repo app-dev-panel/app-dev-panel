@@ -43,6 +43,7 @@ return [
                 'GET /test/fixtures/logs-heavy' => 'test-fixtures/logs-heavy',
                 'GET /test/fixtures/http-client' => 'test-fixtures/http-client',
                 'GET /test/fixtures/filesystem' => 'test-fixtures/filesystem',
+                '/test/fixtures/reset' => 'test-fixtures/reset',
             ],
         ],
         'log' => [
