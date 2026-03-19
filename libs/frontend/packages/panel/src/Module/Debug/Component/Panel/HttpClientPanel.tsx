@@ -7,7 +7,7 @@ import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathPar
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {Box, Chip, Collapse, Icon, IconButton, TextField, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 
 type HttpClientEntry = {
     startTime: number;
@@ -367,13 +367,61 @@ const RequestDetail = ({entry}: {entry: HttpClientEntry}) => {
 };
 
 // ---------------------------------------------------------------------------
+// Helpers: status group
+// ---------------------------------------------------------------------------
+
+function statusGroup(code: number): string {
+    if (code >= 500) return '5xx';
+    if (code >= 400) return '4xx';
+    if (code >= 300) return '3xx';
+    if (code >= 200) return '2xx';
+    return '1xx';
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
 export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
+    const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+    const toggleFilter = useCallback((name: string) => {
+        setActiveFilters((prev) => {
+            const next = new Set(prev);
+            if (next.has(name)) {
+                next.delete(name);
+            } else {
+                next.add(name);
+            }
+            return next;
+        });
+    }, []);
+
+    const badgeCounts = useMemo(() => {
+        if (!data) return [];
+        const counts = new Map<string, number>();
+        for (const entry of data) {
+            const method = entry.method.toUpperCase();
+            counts.set(method, (counts.get(method) ?? 0) + 1);
+        }
+        return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    }, [data]);
+
+    const statusBadgeCounts = useMemo(() => {
+        if (!data) return [];
+        const counts = new Map<string, number>();
+        for (const entry of data) {
+            const group = statusGroup(entry.responseStatus);
+            counts.set(group, (counts.get(group) ?? 0) + 1);
+        }
+        const order = ['2xx', '3xx', '4xx', '5xx', '1xx'];
+        return [...counts.entries()].sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]));
+    }, [data]);
+
+    const totalTime = useMemo(() => (data ? data.reduce((sum, e) => sum + e.totalTime, 0) : 0), [data]);
 
     if (!data || data.length === 0) {
         return (
@@ -385,19 +433,48 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
         );
     }
 
-    const filtered = filter
-        ? data.filter(
-              (e) =>
-                  e.uri.toLowerCase().includes(filter.toLowerCase()) ||
-                  e.method.toLowerCase().includes(filter.toLowerCase()) ||
-                  String(e.responseStatus).includes(filter),
-          )
-        : data;
+    const filtered = useMemo(() => {
+        let result = data;
+        if (activeFilters.size > 0) {
+            result = result.filter((e) => {
+                const method = e.method.toUpperCase();
+                const group = statusGroup(e.responseStatus);
+                return activeFilters.has(method) || activeFilters.has(group);
+            });
+        }
+        if (filter) {
+            result = result.filter(
+                (e) =>
+                    e.uri.toLowerCase().includes(filter.toLowerCase()) ||
+                    e.method.toLowerCase().includes(filter.toLowerCase()) ||
+                    String(e.responseStatus).includes(filter),
+            );
+        }
+        return result;
+    }, [data, filter, activeFilters]);
+
+    const statusBadgeColor = (group: string): 'success' | 'primary' | 'warning' | 'error' | 'default' => {
+        switch (group) {
+            case '2xx':
+                return 'success';
+            case '3xx':
+                return 'primary';
+            case '4xx':
+                return 'warning';
+            case '5xx':
+                return 'error';
+            default:
+                return 'default';
+        }
+    };
 
     return (
         <Box>
             <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
                 <SectionTitle>{`${filtered.length} http requests`}</SectionTitle>
+                <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'text.disabled'}}>
+                    {formatDuration(totalTime)} total
+                </Typography>
                 <TextField
                     size="small"
                     placeholder="Filter requests..."
@@ -407,6 +484,54 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
                     sx={{ml: 'auto', width: 240}}
                 />
             </Box>
+
+            {(badgeCounts.length > 1 || statusBadgeCounts.length > 1) && (
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                    {statusBadgeCounts.map(([group, count]) => (
+                        <Chip
+                            key={group}
+                            label={`${group} (${count})`}
+                            size="small"
+                            onClick={() => toggleFilter(group)}
+                            variant={activeFilters.has(group) ? 'filled' : 'outlined'}
+                            color={activeFilters.has(group) ? statusBadgeColor(group) : 'default'}
+                            sx={{
+                                fontSize: '11px',
+                                height: 24,
+                                borderRadius: 1,
+                                fontWeight: activeFilters.has(group) ? 600 : 400,
+                                cursor: 'pointer',
+                            }}
+                        />
+                    ))}
+                    {badgeCounts.map(([method, count]) => (
+                        <Chip
+                            key={method}
+                            label={`${method} (${count})`}
+                            size="small"
+                            onClick={() => toggleFilter(method)}
+                            variant={activeFilters.has(method) ? 'filled' : 'outlined'}
+                            color={activeFilters.has(method) ? 'primary' : 'default'}
+                            sx={{
+                                fontSize: '11px',
+                                height: 24,
+                                borderRadius: 1,
+                                fontWeight: activeFilters.has(method) ? 600 : 400,
+                                cursor: 'pointer',
+                            }}
+                        />
+                    ))}
+                    {activeFilters.size > 0 && (
+                        <Chip
+                            label="Clear"
+                            size="small"
+                            onClick={() => setActiveFilters(new Set())}
+                            variant="outlined"
+                            sx={{fontSize: '11px', height: 24, borderRadius: 1}}
+                        />
+                    )}
+                </Box>
+            )}
 
             {filtered.map((entry, index) => {
                 const expanded = expandedIndex === index;

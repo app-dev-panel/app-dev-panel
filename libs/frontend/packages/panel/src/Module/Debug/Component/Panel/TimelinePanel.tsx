@@ -5,9 +5,9 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Collapse, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Collapse, TextField, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import {useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 
 // Data format from PHP: [microtime, reference, collectorClass, additionalData?]
 // row[0] = microtime(true) — start timestamp
@@ -118,12 +118,53 @@ const Swatch = styled(Box)({width: 12, height: 8, borderRadius: 2});
 
 export const TimelinePanel = ({data}: TimelinePanelProps) => {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+    const [filter, setFilter] = useState('');
+    const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
+
+    const toggleFilter = useCallback((name: string) => {
+        setActiveFilters((prev) => {
+            const next = new Set(prev);
+            if (next.has(name)) {
+                next.delete(name);
+            } else {
+                next.add(name);
+            }
+            return next;
+        });
+    }, []);
 
     if (!data || !Array.isArray(data) || data.length === 0) {
         return <EmptyState icon="timeline" title="No timeline items found" />;
     }
 
+    // Unique labels for legend & badge counts
+    const uniqueLabels = [...new Set(data.map((r) => r[2].split('\\').pop() ?? r[2]))];
+
+    const badgeCounts = useMemo(() => {
+        const counts = new Map<string, number>();
+        for (const row of data) {
+            const shortName = row[2].split('\\').pop() ?? row[2];
+            counts.set(shortName, (counts.get(shortName) ?? 0) + 1);
+        }
+        return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    }, [data]);
+
+    const filtered = useMemo(() => {
+        let result = data;
+        if (activeFilters.size > 0) {
+            result = result.filter((r) => {
+                const shortName = r[2].split('\\').pop() ?? r[2];
+                return activeFilters.has(shortName);
+            });
+        }
+        if (filter) {
+            result = result.filter((r) => r[2].toLowerCase().includes(filter.toLowerCase()));
+        }
+        return result;
+    }, [data, filter, activeFilters]);
+
     // Events are point-in-time: row[0] is microtime, row[1] is a reference (not duration)
+    // Use full data range for consistent axis regardless of filters
     const timestamps = data.map((r) => r[0]);
     const minTime = Math.min(...timestamps);
     const maxTime = Math.max(...timestamps);
@@ -143,14 +184,50 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
         }
     }
 
-    // Unique labels for legend
-    const uniqueLabels = [...new Set(data.map((r) => r[2].split('\\').pop() ?? r[2]))];
-
     return (
         <Box>
             <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                <SectionTitle>{`${data.length} timeline events`}</SectionTitle>
+                <SectionTitle>{`${filtered.length} timeline events`}</SectionTitle>
+                <TextField
+                    size="small"
+                    placeholder="Filter timeline..."
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    InputProps={{sx: {fontSize: '13px'}}}
+                    sx={{ml: 'auto', width: 240}}
+                />
             </Box>
+
+            {badgeCounts.length > 1 && (
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                    {badgeCounts.map(([name, count]) => (
+                        <Chip
+                            key={name}
+                            label={`${name} (${count})`}
+                            size="small"
+                            onClick={() => toggleFilter(name)}
+                            variant={activeFilters.has(name) ? 'filled' : 'outlined'}
+                            color={activeFilters.has(name) ? 'primary' : 'default'}
+                            sx={{
+                                fontSize: '11px',
+                                height: 24,
+                                borderRadius: 1,
+                                fontWeight: activeFilters.has(name) ? 600 : 400,
+                                cursor: 'pointer',
+                            }}
+                        />
+                    ))}
+                    {activeFilters.size > 0 && (
+                        <Chip
+                            label="Clear"
+                            size="small"
+                            onClick={() => setActiveFilters(new Set())}
+                            variant="outlined"
+                            sx={{fontSize: '11px', height: 24, borderRadius: 1}}
+                        />
+                    )}
+                </Box>
+            )}
 
             <LegendBar>
                 {uniqueLabels.slice(0, 10).map((label, i) => (
@@ -167,7 +244,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                 ))}
             </TimeAxis>
 
-            {data.map((row, index) => {
+            {filtered.map((row, index) => {
                 const shortName = row[2].split('\\').pop() ?? row[2];
                 const relativeTime = row[0] - minTime;
                 const offset = (relativeTime / totalSpan) * 100;
