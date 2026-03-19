@@ -1,10 +1,10 @@
 # ADP Feature Matrix: Adapters, Playgrounds & Frontend
 
-Analysis date: 2026-03-19
+Analysis date: 2026-03-19 (updated)
 
 ## 1. Core Kernel Collectors
 
-All 14 Kernel collectors are supported by all three adapters (Yiisoft, Symfony, Yii2) and all three playgrounds.
+All 15 Kernel collectors are supported by all three adapters (Yiisoft, Symfony, Yii2) and all three playgrounds.
 
 | # | Collector | Frontend Panel | Has Sidebar Meta |
 |---|-----------|----------------|:----------------:|
@@ -17,40 +17,41 @@ All 14 Kernel collectors are supported by all three adapters (Yiisoft, Symfony, 
 | 7 | `VarDumperCollector` | `VarDumperPanel` | ✅ |
 | 8 | `EnvironmentCollector` | `EnvironmentPanel` | ✅ |
 | 9 | `FilesystemStreamCollector` | `FilesystemPanel` | ✅ |
-| 10 | `HttpStreamCollector` | **DumpPage fallback** | ❌ |
+| 10 | `HttpStreamCollector` | **No panel** (hidden from sidebar) | ✅ |
 | 11 | `RequestCollector` (web) | `RequestPanel` | ✅ |
 | 12 | `WebAppInfoCollector` (web) | meta only (IndexPage) | ✅ |
 | 13 | `CommandCollector` (console) | meta only | ✅ |
 | 14 | `ConsoleAppInfoCollector` (console) | meta only | ✅ |
+| 15 | `AssetBundleCollector` | `AssetBundlePanel` | ✅ |
 
 ## 2. Adapter-Specific Collectors
 
-| Collector | Yiisoft | Symfony | Yii2 | Frontend Panel |
-|-----------|:-------:|:-------:|:----:|----------------|
-| Database (Yiisoft DB) | ✅ `DatabaseCollector` | — | — | `DatabasePanel` (via old namespace) |
-| Database (Doctrine) | — | ✅ `DoctrineCollector` | — | **DumpPage fallback** |
-| Database (Yii2) | — | — | ✅ `DbCollector` | `DatabasePanel` |
-| Middleware | ✅ `MiddlewareCollector` | — | — | `MiddlewarePanel` |
-| Mailer (Yiisoft) | ✅ `MailerCollector` | — | — | `MailerPanel` (via old namespace) |
-| Mailer (Symfony) | — | ✅ `MailerCollector` | — | **DumpPage fallback** |
-| Mailer (Yii2) | — | — | ✅ `MailerCollector` | `MailerPanel` |
-| Queue | ✅ `QueueCollector` | — | — | **DumpPage fallback** |
-| Router | ✅ `RouterCollector` | — | — | **DumpPage fallback** |
-| Validator | ✅ `ValidatorCollector` | — | — | **DumpPage fallback** |
-| WebView | ✅ `WebViewCollector` | — | — | **DumpPage fallback** |
-| Twig templates | — | ✅ `TwigCollector` | — | **DumpPage fallback** |
-| Security | — | ✅ `SecurityCollector` | — | **DumpPage fallback** |
-| Cache | — | ✅ `CacheCollector` | — | `CachePanel` |
-| Messenger | — | ✅ `MessengerCollector` | — | **DumpPage fallback** |
-| Asset Bundles | — | — | ✅ `AssetBundleCollector` | **DumpPage fallback** |
+| Collector | Yiisoft | Symfony | Yii2 | Frontend Panel | Data Format OK |
+|-----------|:-------:|:-------:|:----:|----------------|:--------------:|
+| Database (Yiisoft DB) | ✅ `DatabaseCollector` | — | — | `DatabasePanel` | ✅ reference |
+| Database (Doctrine) | — | ✅ `DoctrineCollector` | — | `DatabasePanel` | ❌ needs normalization |
+| Database (Yii2) | — | — | ✅ `DbCollector` | `DatabasePanel` | ❌ needs normalization |
+| Middleware | ✅ `MiddlewareCollector` | — | — | `MiddlewarePanel` | ✅ |
+| Mailer (Yiisoft) | ✅ `MailerCollector` | — | — | `MailerPanel` | ✅ reference |
+| Mailer (Symfony) | — | ✅ `MailerCollector` | — | `MailerPanel` | ❌ needs enrichment |
+| Mailer (Yii2) | — | — | ✅ `MailerCollector` | `MailerPanel` | ❌ needs enrichment |
+| Queue | ✅ `QueueCollector` | — | — | `QueuePanel` | ✅ |
+| Router | ✅ `RouterCollector` | — | — | `RouterPanel` | ✅ |
+| Validator | ✅ `ValidatorCollector` | — | — | `ValidatorPanel` | ✅ |
+| WebView | ✅ `WebViewCollector` | — | — | `WebViewPanel` | ✅ |
+| Twig templates | — | ✅ `TwigCollector` | — | `TwigPanel` | ✅ |
+| Security | — | ✅ `SecurityCollector` | — | `SecurityPanel` | ✅ |
+| Cache | — | ✅ `CacheCollector` | — | `CachePanel` | ✅ |
+| Messenger | — | ✅ `MessengerCollector` | — | `MessengerPanel` | ✅ |
+| Asset Bundles | — | — | via core `AssetBundleCollector` | `AssetBundlePanel` | ✅ |
 
 ### Totals
 
 | Adapter | Kernel | Adapter-Specific | Total | With Panel | Without Panel |
 |---------|:------:|:----------------:|:-----:|:----------:|:-------------:|
-| Yiisoft | 14 | 7 | **21** | 16 | 5 |
-| Symfony | 14 | 6 | **20** | 15 | 5 |
-| Yii2 | 14 | 3 | **17** | 16 | 1 |
+| Yiisoft | 15 | 7 | **22** | 21 | 1 (HttpStream) |
+| Symfony | 15 | 6 | **21** | 20 | 1 (HttpStream) |
+| Yii2 | 15 | 2 | **17** | 16 | 1 (HttpStream) |
 | Cycle | 0 | 0 | **0** | — | — |
 
 ## 3. Proxy/Interception
@@ -71,6 +72,7 @@ All 14 Kernel collectors are supported by all three adapters (Yiisoft, Symfony, 
 | Cache | — | decorated `CacheAdapter` | — |
 | Messenger | — | Messenger middleware | — |
 | Security | — | direct event collection | — |
+| Assets | — | — | `View::EVENT_END_PAGE` → core `AssetBundleCollector` |
 
 ## 4. Inspector Features
 
@@ -103,35 +105,25 @@ All 14 Kernel collectors are supported by all three adapters (Yiisoft, Symfony, 
 | Storage path | @runtime/debug | var/debug/ | @runtime/debug/ |
 | History size | 50 | 50 | 50 |
 
-## 6. Known Gaps
+## 6. Known Gaps (Updated)
 
-### Frontend namespace mismatch (Yiisoft adapter)
+### Data format mismatches (4 remaining)
 
-`collectors.ts` maps Yiisoft-specific collectors under old namespaces:
-- `Yiisoft\Db\Debug\DatabaseCollector` → actual: `AppDevPanel\Adapter\Yiisoft\Collector\Db\DatabaseCollector`
-- `Yiisoft\Mailer\Debug\MailerCollector` → actual: `AppDevPanel\Adapter\Yiisoft\Collector\Mailer\MailerCollector`
-- `Yiisoft\Queue\Debug\QueueCollector` → actual: `AppDevPanel\Adapter\Yiisoft\Collector\Queue\QueueCollector`
-- `Yiisoft\Validator\Debug\ValidatorCollector` → actual: `AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorCollector`
-- `Yiisoft\Yii\View\Renderer\Debug\WebViewCollector` → actual: `AppDevPanel\Adapter\Yiisoft\Collector\View\WebViewCollector`
-- `Yiisoft\Assets\Debug\AssetCollector` → no equivalent in new adapter
+| Collector | Issue | Impact |
+|-----------|-------|--------|
+| `DoctrineCollector` | Output schema differs from `DatabasePanel` expectations (no `rawSql`, `actions[]`, `status`, `transactions`) | Panel may render incorrectly |
+| `Yii2\DbCollector` | Output schema differs (no `rawSql`, `actions[]`, `status`; `rowCount` vs `rowsNumber`) | Panel may render incorrectly |
+| Symfony `MailerCollector` | Missing `textBody`, `htmlBody`, `replyTo`, `cc`, `bcc`, `raw`, `charset`, `date` | Limited mail display |
+| Yii2 `MailerCollector` | Missing `textBody`, `htmlBody`, `replyTo`, `raw`, `charset`, `date` | Limited mail display |
 
-If collector IDs changed during migration, these panels won't render correctly.
+### Missing panel (1)
 
-### Collectors without dedicated frontend panels (12)
+`HttpStreamCollector` — hidden from sidebar, data accessible via HttpClientPanel sub-view. Low priority.
 
-**Kernel:** `HttpStreamCollector`
+### Playground gaps
 
-**Yiisoft:** `QueueCollector`, `RouterCollector`, `ValidatorCollector`, `WebViewCollector`
-
-**Symfony:** `DoctrineCollector`, `TwigCollector`, `SecurityCollector`, `MailerCollector`, `MessengerCollector`
-
-**Yii2:** `AssetBundleCollector`
-
-All fall back to `DumpPage` (raw JSON viewer).
-
-### Symfony MailerCollector not mapped
-
-`MailerPanel` is only mapped to old Yiisoft namespace and Yii2 mailer. Symfony's `AppDevPanel\Adapter\Symfony\Collector\MailerCollector` falls back to DumpPage despite having the same data structure.
+- Symfony playground: framework-specific collectors disabled (missing dependencies)
+- Yiisoft playground: missing test fixtures for Queue, Router, Validator, WebView
 
 ### Feature parity gaps between adapters
 
@@ -146,4 +138,4 @@ All fall back to `DumpPage` (raw JSON viewer).
 | Cache debugging | ❌ | ✅ | ❌ |
 | Message bus debugging | ❌ | ✅ Messenger | ❌ |
 | Container proxy | ✅ | ❌ | ❌ |
-| Asset bundle debugging | ❌ | ❌ | ✅ |
+| Asset bundle debugging | ✅ (via core) | ✅ (via core) | ✅ (via core) |

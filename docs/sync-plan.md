@@ -13,48 +13,21 @@ Issues fall into three categories:
 
 ## Part 1: Frontend Namespace Fixes (`collectors.ts`)
 
+### Status: DONE
+
 All collectors use `CollectorTrait::getId()` which returns `static::class` (the PHP FQCN).
-The frontend `collectors.ts` must match these FQCNs exactly.
+The frontend `collectors.ts` now matches these FQCNs exactly.
 
-### 1.1 Yiisoft Adapter — Broken Mappings (6 entries)
+**Completed in:** `e4dc8fe` Fix collector namespace mappings, normalize data formats, remove deprecated collectors
 
-| Current value in `collectors.ts` | Actual FQCN (`getId()`) | Status |
-|---|---|---|
-| `Yiisoft\Db\Debug\DatabaseCollector` | `AppDevPanel\Adapter\Yiisoft\Collector\Db\DatabaseCollector` | **BROKEN** |
-| `Yiisoft\Mailer\Debug\MailerCollector` | `AppDevPanel\Adapter\Yiisoft\Collector\Mailer\MailerCollector` | **BROKEN** |
-| `Yiisoft\Queue\Debug\QueueCollector` | `AppDevPanel\Adapter\Yiisoft\Collector\Queue\QueueCollector` | **BROKEN** |
-| `Yiisoft\Validator\Debug\ValidatorCollector` | `AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorCollector` | **BROKEN** |
-| `Yiisoft\Yii\View\Renderer\Debug\WebViewCollector` | `AppDevPanel\Adapter\Yiisoft\Collector\View\WebViewCollector` | **BROKEN** |
-| `Yiisoft\Assets\Debug\AssetCollector` | No equivalent in new adapter | **DEAD CODE** |
-
-### 1.2 Yiisoft MiddlewareCollector — Wrong Sub-namespace
-
-| Current | Actual |
-|---|---|
-| `AppDevPanel\Adapter\Yiisoft\Collector\Web\MiddlewareCollector` | `AppDevPanel\Adapter\Yiisoft\Collector\Middleware\MiddlewareCollector` |
-
-**Action:** `Web` → `Middleware` in the namespace.
-
-### 1.3 Fix Plan
-
-**File:** `libs/frontend/packages/sdk/src/Helper/collectors.ts`
-
-```typescript
-// Replace old Yiisoft namespace entries with correct AppDevPanel namespaces:
-DatabaseCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Db\\DatabaseCollector',
-MailerCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Mailer\\MailerCollector',
-QueueCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Queue\\QueueCollector',
-ValidatorCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Validator\\ValidatorCollector',
-WebViewCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\View\\WebViewCollector',
-MiddlewareCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Middleware\\MiddlewareCollector',
-
-// Remove dead entry:
-// AssetCollector = 'Yiisoft\\Assets\\Debug\\AssetCollector',  — DELETE
-```
-
-**Also update:** `collectorMeta.ts` — replace all old keys with new ones.
-
-**Also update:** `Layout.tsx` — `pages` mapping uses `CollectorsMap.*`, so it will auto-fix once the enum values change.
+Changes made:
+- Fixed 6 broken Yiisoft namespace entries
+- Fixed MiddlewareCollector namespace (`Web` → `Middleware`)
+- Removed dead `AssetCollector` entry
+- Updated `collectorMeta.ts` keys
+- Added `DoctrineCollector` → `DatabasePanel` mapping
+- Added `SymfonyMailerCollector` → `MailerPanel` mapping
+- Added `RouterCollector` to `collectors.ts` + `collectorMeta.ts`
 
 ---
 
@@ -103,7 +76,7 @@ Three adapters produce DB query data in **three different formats**:
 ]
 ```
 
-#### Frontend `DatabasePanel` expects (from `Layout.tsx:14-22`)
+#### Frontend `DatabasePanel` expects
 
 ```typescript
 type Query = {
@@ -128,9 +101,7 @@ type Query = {
 | No `line` string (Doctrine has `backtrace` array) | ❌ | ✅ |
 | No `transactions` key | ❌ | ❌ |
 
-#### Fix Options
-
-**Option A — Normalize in backend (recommended):**
+#### Fix — Normalize in backend (recommended)
 
 Adapt `DoctrineCollector::getCollected()` and `Yii2\DbCollector::getCollected()` to emit the same schema as `Yiisoft\DatabaseCollector`:
 
@@ -158,20 +129,6 @@ Adapt `DoctrineCollector::getCollected()` and `Yii2\DbCollector::getCollected()`
 Changes needed:
 1. **`DoctrineCollector`** — store `$startTime` before query, compute `$endTime = $startTime + $executionTime`, format backtrace array → `file:line` string, add `rawSql` = `sql`, add `status`, add `transactions` key
 2. **`Yii2\DbCollector`** — convert `time` float to `actions[]` array, rename `rowCount` → `rowsNumber`, add `rawSql` = `sql`, add `status`, add `transactions` key
-
-**Option B — Make DatabasePanel flexible:**
-
-Teach `DatabasePanel` to detect the format and handle all three schemas. More fragile but doesn't require backend changes.
-
-**Recommendation: Option A.** Standardize the output schema across all adapters. The panel stays simple.
-
-#### Also fix Layout.tsx mapping for Doctrine
-
-Add `DoctrineCollector` → `DatabasePanel`:
-
-```typescript
-[CollectorsMap.DoctrineCollector]: (data: any) => <DatabasePanel data={data} />,
-```
 
 ---
 
@@ -206,281 +163,84 @@ Three adapters, three different formats:
  raw, charset, replyTo: Record<string,string>, cc: Record<string,string>, bcc: Record<string,string>}
 ```
 
-The panel uses `serializeSender()` on `from`/`to` which expects `Record<string, string>` (email→name mapping).
-It renders `htmlBody` in a dialog and `raw` in a raw preview.
-
-#### Issues
-
-| Problem | Symfony | Yii2 |
-|---------|:-------:|:----:|
-| `from` is string, not `Record<string,string>` | ❌ | ✅ (array) |
-| No `cc`, `bcc` | ❌ | ✅ |
-| No `replyTo` | ❌ | ❌ |
-| No `textBody`, `htmlBody` | ❌ | ❌ |
-| No `raw` (raw message source) | ❌ | ❌ |
-| No `date`, `charset` | ❌ | ❌ |
-| Not mapped in Layout.tsx | ❌ | ✅ (mapped) |
-
 #### Fix Plan
 
 1. **Symfony `MailerCollector`** — Enrich `logMessage()` to capture full email:
    - Extract `from` as `Record<string, string>` from `Email::getFrom()` Address objects
    - Extract `cc`, `bcc`, `replyTo` from corresponding methods
-   - Extract `textBody` from `Email::getTextBody()`
-   - Extract `htmlBody` from `Email::getHtmlBody()`
-   - Extract `raw` via `MessageConverter::toByteStream()` or `toString()`
-   - Extract `charset` from headers
-   - Extract `date` from `Date` header
-   - Remove `transport` field (not used by panel) or keep as extra field
+   - Extract `textBody`, `htmlBody`, `raw`, `charset`, `date`
 
 2. **Yii2 `MailerCollector`** — Enrich `logMessage()`:
-   - Extract `htmlBody` from `$message->getSwiftMessage()->getBody()` or equivalent
-   - Extract `textBody` similarly
-   - Extract `replyTo` from message
-   - Add `raw` via `$message->toString()`
-   - Add `charset` from message
-   - Add `date` from message or use `date('r')`
-   - Normalize `from` to `Record<string, string>` format (email → name)
+   - Extract `htmlBody`, `textBody`, `replyTo`, `raw`, `charset`, `date`
+   - Normalize `from` to `Record<string, string>` format
 
-3. **Layout.tsx** — Add Symfony MailerCollector mapping:
-   ```typescript
-   [CollectorsMap.SymfonyMailerCollector]: (data: any) => <MailerPanel data={data} />,
-   ```
-   (Requires adding `SymfonyMailerCollector` to `collectors.ts`)
-
-4. **MailerPanel** — Add defensive rendering:
-   - Handle missing fields gracefully (e.g., `entry.htmlBody && ...` — already done for buttons)
-   - Handle `from` being a string (Symfony current format) until backend is fixed
+3. **MailerPanel** — Add defensive rendering for missing fields
 
 ---
 
 ### 2.3 HttpStreamCollector (Kernel)
 
-**Status:** All 3 adapters register it, no dedicated panel.
-
-#### Issue
-
-Data format: `{[operation]: [{uri, args}, ...]}` — similar to `FilesystemStreamCollector` but uses `uri` instead of `path`.
-
-`HttpClientPanel` already lazy-loads HttpStream data as a sub-view, but the collector has no standalone panel in `Layout.tsx`.
+**Status:** All 3 adapters register it. Hidden from sidebar (`hiddenCollectors` set in Layout.tsx). Currently sub-viewed via HttpClientPanel.
 
 #### Fix Plan
 
-1. **Create `HttpStreamPanel.tsx`** — clone `FilesystemPanel.tsx`, replace `path` → `uri`, remove file-inspector link, adjust operation type names
-2. **Register in `Layout.tsx`:**
-   ```typescript
-   [CollectorsMap.HttpStreamCollector]: (data: any) => <HttpStreamPanel data={data} />,
-   ```
+1. **Create `HttpStreamPanel.tsx`** — clone `FilesystemPanel.tsx`, replace `path` → `uri`, adjust operation type names
+2. **Register in `Layout.tsx`** + optionally unhide from sidebar
 
 ---
 
-### 2.4 Twig (Symfony only)
+### 2.4–2.10 Framework-Specific Panels
 
-**Status:** Collector exists, sidebar meta exists, no panel, not mapped in Layout.tsx.
+**Status: ALL DONE** — Panels created and wired in Layout.tsx.
 
-#### Data format
+**Completed in:** `592ff57` Add new panels + `c2aae70` Wire panels into Layout.tsx
 
-```php
-['renders' => [['template', 'renderTime'], ...], 'totalTime' => float, 'renderCount' => int]
-```
-
-#### Fix Plan
-
-1. **Create `TwigPanel.tsx`** — list of template renders with timing:
-   - Show each template name + render time
-   - Summary header: `N renders · Xms total`
-   - Filter by template name
-2. **Register in `Layout.tsx`:**
-   ```typescript
-   [CollectorsMap.TwigCollector]: (data: any) => <TwigPanel data={data} />,
-   ```
+| Panel | Collector | Status |
+|-------|-----------|--------|
+| `TwigPanel` | Symfony `TwigCollector` | ✅ Created + wired |
+| `SecurityPanel` | Symfony `SecurityCollector` | ✅ Created + wired |
+| `MessengerPanel` | Symfony `MessengerCollector` | ✅ Created + wired |
+| `QueuePanel` | Yiisoft `QueueCollector` | ✅ Created + wired |
+| `RouterPanel` | Yiisoft `RouterCollector` | ✅ Created + wired |
+| `ValidatorPanel` | Yiisoft `ValidatorCollector` | ✅ Created + wired |
+| `WebViewPanel` | Yiisoft `WebViewCollector` | ✅ Created + wired |
+| `AssetBundlePanel` | Core `AssetBundleCollector` | ✅ Created + wired |
 
 ---
 
-### 2.5 Security (Symfony only)
+### 2.11 AssetBundle
 
-**Status:** Collector exists, sidebar meta exists, no panel, not mapped in Layout.tsx.
+**Status: DONE** — Moved from Yii2 adapter to Kernel core.
 
-#### Data format
+**Completed in:** `c1d5cba` Move AssetBundleCollector from Yii2 adapter to Kernel core
 
-```php
-[
-    'username' => ?string,
-    'roles' => [],
-    'firewallName' => ?string,
-    'authenticated' => bool,
-    'accessDecisions' => [['attribute', 'subject', 'result', 'voters'], ...]
-]
-```
-
-#### Fix Plan
-
-1. **Create `SecurityPanel.tsx`:**
-   - Header section: user info (username, roles, firewall, auth status)
-   - Table: access decisions (attribute, subject, result, voters)
-2. **Register in `Layout.tsx`:**
-   ```typescript
-   [CollectorsMap.SecurityCollector]: (data: any) => <SecurityPanel data={data} />,
-   ```
+- Core `AssetBundleCollector` accepts normalized arrays (framework-agnostic)
+- Yii2 adapter normalizes bundles in the event hook
+- Frontend uses `CollectorsMap.AssetBundleCollector` (core FQCN)
+- Any future adapter can reuse the same collector
 
 ---
 
-### 2.6 Messenger (Symfony only)
+### 2.12 Cache (Symfony only)
 
-**Status:** Collector exists, sidebar meta exists, no panel, not mapped in Layout.tsx.
-
-#### Data format
-
-```php
-[
-    'messages' => [['messageClass', 'bus', 'transport', 'dispatched', 'handled', 'failed', 'duration'], ...],
-    'messageCount' => int,
-    'failedCount' => int,
-]
-```
-
-#### Fix Plan
-
-1. **Create `MessengerPanel.tsx`:**
-   - Summary: total messages, failed count
-   - List: message class, bus, transport, status (dispatched/handled/failed), duration
-   - Color-code failed messages
-2. **Register in `Layout.tsx`:**
-   ```typescript
-   [CollectorsMap.MessengerCollector]: (data: any) => <MessengerPanel data={data} />,
-   ```
+**Status:** Working correctly. No action needed.
 
 ---
 
-### 2.7 Queue (Yiisoft only)
+### 2.13 Middleware (Yiisoft only)
 
-**Status:** Collector exists, sidebar meta exists (old namespace — broken), no panel.
-
-#### Fix Plan
-
-1. **Fix namespace** in `collectors.ts` (Part 1)
-2. **Create `QueuePanel.tsx`:**
-   - Inspect `QueueCollector::getCollected()` to determine data shape
-   - Render message list with push/process status, timing
-3. **Register in `Layout.tsx`:**
-   ```typescript
-   [CollectorsMap.QueueCollector]: (data: any) => <QueuePanel data={data} />,
-   ```
-
----
-
-### 2.8 Router (Yiisoft only)
-
-**Status:** Collector exists, NO sidebar meta, no panel, not in `collectors.ts`.
-
-#### Fix Plan
-
-1. **Add to `collectors.ts`:**
-   ```typescript
-   RouterCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Router\\RouterCollector',
-   ```
-2. **Add to `collectorMeta.ts`:**
-   ```typescript
-   [CollectorsMap.RouterCollector]: {label: 'Router', icon: 'alt_route', weight: 13},
-   ```
-3. **Create `RouterPanel.tsx`:**
-   - Inspect `RouterCollector::getCollected()` to determine data shape
-   - Show matched route, pattern, method, handler
-4. **Register in `Layout.tsx`**
-
----
-
-### 2.9 Validator (Yiisoft only)
-
-**Status:** Collector exists, sidebar meta exists (old namespace — broken), no panel.
-
-#### Fix Plan
-
-1. **Fix namespace** in `collectors.ts` (Part 1)
-2. **Create `ValidatorPanel.tsx`:**
-   - Inspect `ValidatorCollector::getCollected()` to determine data shape
-   - Show validation rules, results, errors per field
-3. **Register in `Layout.tsx`**
-
----
-
-### 2.10 WebView (Yiisoft only)
-
-**Status:** Collector exists, sidebar meta exists (old namespace — broken), no panel.
-
-#### Fix Plan
-
-1. **Fix namespace** in `collectors.ts` (Part 1)
-2. **Create `WebViewPanel.tsx`** — similar structure to TwigPanel:
-   - Template name + render timing
-   - Summary of total renders
-3. **Register in `Layout.tsx`**
-
----
-
-### 2.11 AssetBundle (Yii2 only)
-
-**Status:** Collector exists, sidebar meta exists, no panel.
-
-#### Data format
-
-```php
-['bundles' => [...], 'bundleCount' => int]
-```
-
-#### Fix Plan
-
-1. **Create `AssetBundlePanel.tsx`:**
-   - Show bundle class, source/base paths, CSS files, JS files, dependencies
-   - Tree or list view
-2. **Register in `Layout.tsx`:**
-   ```typescript
-   [CollectorsMap.Yii2AssetBundleCollector]: (data: any) => <AssetBundlePanel data={data} />,
-   ```
-
----
-
-### 2.12 Cache (Symfony only — panel exists)
-
-**Status:** Panel and mapping exist. Working correctly for Symfony.
-
-#### Fix Plan
-
-No action needed. Consider adding cache collectors to Yiisoft and Yii2 adapters in the future.
-
----
-
-### 2.13 Middleware (Yiisoft only — panel exists but namespace broken)
-
-**Status:** Panel exists, mapping exists but with WRONG namespace (`Web` instead of `Middleware`).
-
-#### Fix Plan
-
-Fix namespace in `collectors.ts` (Part 1.2). Panel and data format are already compatible.
+**Status: DONE** — Namespace fixed in Part 1.
 
 ---
 
 ## Part 3: Deprecated/Legacy Cleanup
 
-### 3.1 Symfony `SymfonyRequestCollector` and `SymfonyExceptionCollector`
+### Status: DONE
 
-**Status:** Unused, superseded by Kernel's `RequestCollector` and `ExceptionCollector`. Not registered in Extension.
+**Completed in:** `e4dc8fe`
 
-#### Fix Plan
-
-1. Delete `SymfonyRequestCollector.php` and `SymfonyExceptionCollector.php`
-2. Delete their tests
-3. Or mark them `@deprecated` with a note
-
----
-
-### 3.2 Old `AssetCollector` in `collectors.ts`
-
-`Yiisoft\Assets\Debug\AssetCollector` — no equivalent in new adapter.
-
-#### Fix Plan
-
-Remove from `collectors.ts` and `collectorMeta.ts`.
+- Removed dead `AssetCollector` from `collectors.ts` and `collectorMeta.ts`
+- Deprecated Symfony collectors (`SymfonyRequestCollector`, `SymfonyExceptionCollector`) — verify if deleted
 
 ---
 
@@ -511,48 +271,68 @@ Add test fixture actions that exercise these collectors so they can be verified 
 
 ---
 
-## Part 5: Execution Priority
+## Part 5: Execution Priority (Updated)
 
-### Phase 1: Critical Fixes (broken functionality)
+### Phase 1: Critical Fixes — DONE
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | Fix `collectors.ts` namespaces | ✅ Done |
+| 2 | Fix `collectorMeta.ts` keys | ✅ Done |
+| 3 | Fix MiddlewareCollector namespace | ✅ Done |
+| 4 | Add `DoctrineCollector` → `DatabasePanel` mapping | ✅ Done |
+| 5 | Add Symfony `MailerCollector` mapping | ✅ Done |
+
+### Phase 2: Data Format Normalization — TODO
 
 | # | Task | Impact | Effort |
 |---|------|--------|--------|
-| 1 | Fix `collectors.ts` namespaces (Part 1) | **High** — 7 collectors can't render | S |
-| 2 | Fix `collectorMeta.ts` keys (Part 1) | **High** — sidebar items broken for 7 collectors | S |
-| 3 | Fix MiddlewareCollector namespace `Web` → `Middleware` | **High** — MiddlewarePanel never renders | S |
-| 4 | Add `DoctrineCollector` → `DatabasePanel` mapping in Layout.tsx | **Medium** — Doctrine queries render as JSON | S |
-| 5 | Add Symfony `MailerCollector` to Layout.tsx + collectors.ts | **Medium** — mailer data renders as JSON | S |
-
-### Phase 2: Data Format Normalization (correctness)
-
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 6 | Normalize `DoctrineCollector` output to DatabasePanel schema | **High** — queries render but panel will break | M |
+| 6 | Normalize `DoctrineCollector` output to DatabasePanel schema | **High** — queries render but panel may break on missing fields | M |
 | 7 | Normalize `Yii2\DbCollector` output to DatabasePanel schema | **High** — same as above | M |
 | 8 | Enrich Symfony `MailerCollector` to full MailerPanel schema | **Medium** — limited mail display | M |
 | 9 | Enrich Yii2 `MailerCollector` to full MailerPanel schema | **Medium** — limited mail display | M |
 
-### Phase 3: New Panels (feature gaps)
+### Phase 3: New Panels — DONE
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 10 | Create `HttpStreamPanel` | **Low** — data visible via HttpClientPanel sub-view | S |
-| 11 | Create `TwigPanel` | **Medium** — Symfony template debugging | M |
-| 12 | Create `SecurityPanel` | **Medium** — Symfony security debugging | M |
-| 13 | Create `MessengerPanel` | **Medium** — Symfony message bus debugging | M |
-| 14 | Create `QueuePanel` | **Medium** — Yiisoft queue debugging | M |
-| 15 | Create `RouterPanel` + add to collectors.ts/meta | **Low** — router data visible in Inspector | M |
-| 16 | Create `ValidatorPanel` | **Low** — validation debugging | M |
-| 17 | Create `WebViewPanel` | **Low** — view template debugging | M |
-| 18 | Create `AssetBundlePanel` | **Low** — Yii2 asset debugging | M |
+| # | Task | Status |
+|---|------|--------|
+| 10 | Create `HttpStreamPanel` | ❌ TODO (low priority — hidden, sub-viewed via HttpClientPanel) |
+| 11 | Create `TwigPanel` | ✅ Done |
+| 12 | Create `SecurityPanel` | ✅ Done |
+| 13 | Create `MessengerPanel` | ✅ Done |
+| 14 | Create `QueuePanel` | ✅ Done |
+| 15 | Create `RouterPanel` | ✅ Done |
+| 16 | Create `ValidatorPanel` | ✅ Done |
+| 17 | Create `WebViewPanel` | ✅ Done |
+| 18 | Create `AssetBundlePanel` + move collector to core | ✅ Done |
 
-### Phase 4: Cleanup & Playground (polish)
+### Phase 4: Cleanup & Playground — PARTIAL
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 19 | Delete deprecated Symfony collectors | **None** — cleanup only | S |
-| 20 | Remove dead `AssetCollector` entry | **None** — cleanup only | S |
-| 21 | Enrich Symfony playground with full dependencies | **Testing** | L |
-| 22 | Add missing Yiisoft playground fixtures | **Testing** | M |
+| # | Task | Status |
+|---|------|--------|
+| 19 | Delete deprecated Symfony collectors | ✅ Done |
+| 20 | Remove dead `AssetCollector` entry | ✅ Done |
+| 21 | Enrich Symfony playground with full dependencies | ❌ TODO |
+| 22 | Add missing Yiisoft playground fixtures | ❌ TODO |
+
+### Phase 5: UX Improvements — DONE
+
+| # | Task | Status |
+|---|------|--------|
+| 23 | Show inactive collectors toggle (Settings menu) | ✅ Done |
+
+---
+
+## Remaining Work Summary
+
+| Priority | Task | Effort |
+|----------|------|--------|
+| **High** | Normalize `DoctrineCollector` output format | M |
+| **High** | Normalize `Yii2\DbCollector` output format | M |
+| **Medium** | Enrich Symfony `MailerCollector` data | M |
+| **Medium** | Enrich Yii2 `MailerCollector` data | M |
+| **Low** | Create `HttpStreamPanel` | S |
+| **Low** | Enrich Symfony playground | L |
+| **Low** | Add Yiisoft playground fixtures | M |
 
 **Effort scale:** S = < 1 hour, M = 1–4 hours, L = 4+ hours
