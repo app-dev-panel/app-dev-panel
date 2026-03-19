@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Web\NotFound\NotFoundHandler;
+use AppDevPanel\Adapter\Yiisoft\Api\YiiApiMiddleware;
+use AppDevPanel\Api\Debug\Middleware\DebugHeaders;
 use Yiisoft\Csrf\CsrfTokenMiddleware;
 use Yiisoft\DataResponse\Middleware\FormatDataResponse;
 use Yiisoft\Definitions\DynamicReference;
@@ -27,7 +29,9 @@ return [
                 'class' => MiddlewareDispatcher::class,
                 'withMiddlewares()' => [
                     [
+                        DebugHeaders::class,
                         ErrorCatcher::class,
+                        YiiApiMiddleware::class,
                         SessionMiddleware::class,
                         CsrfTokenMiddleware::class,
                         FormatDataResponse::class,

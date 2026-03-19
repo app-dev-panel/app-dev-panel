@@ -359,13 +359,13 @@ final class ScenarioTest extends FixtureTestCase
     private static function clearDebugStorage(): void
     {
         // Clear via direct storage call
-        $response = self::$client->post('/test/fixtures/reset');
+        $response = self::$client->get('/test/fixtures/reset');
         if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
             usleep(200_000);
         }
 
         // Also clear via CLI command (debug:reset) executed server-side
-        $cliResponse = self::$client->post('/test/fixtures/reset-cli');
+        $cliResponse = self::$client->get('/test/fixtures/reset-cli');
         if ($cliResponse->getStatusCode() >= 200 && $cliResponse->getStatusCode() < 300) {
             /** @var array<string, mixed> $body */
             $body = json_decode((string) $cliResponse->getBody(), true, 512, JSON_THROW_ON_ERROR);

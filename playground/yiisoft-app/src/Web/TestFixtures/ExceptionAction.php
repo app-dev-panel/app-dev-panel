@@ -12,6 +12,6 @@ final readonly class ExceptionAction implements RequestHandlerInterface
 {
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        throw new \RuntimeException('ADP test scenario exception');
+        throw new \RuntimeException('ADP test fixture exception');
     }
 }
