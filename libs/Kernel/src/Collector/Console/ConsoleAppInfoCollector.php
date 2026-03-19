@@ -22,6 +22,7 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
 
     public function __construct(
         private readonly TimelineCollector $timelineCollector,
+        private readonly string $adapterName = '',
     ) {}
 
     public function getCollected(): array
@@ -37,6 +38,7 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
             'requestProcessingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted,
             'memoryPeakUsage' => memory_get_peak_usage(),
             'memoryUsage' => memory_get_usage(),
+            'adapter' => $this->adapterName,
         ];
     }
 
@@ -83,6 +85,7 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
         }
         return [
             'console' => [
+                'adapter' => $this->adapterName,
                 'php' => [
                     'version' => PHP_VERSION,
                 ],

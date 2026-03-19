@@ -130,7 +130,7 @@ final class AppDevPanelExtension extends Extension
                 ->addTag('app_dev_panel.collector.web');
 
             $container->register(WebAppInfoCollector::class, WebAppInfoCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
+                ->setArguments([new Reference(TimelineCollector::class), 'Symfony'])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector')
                 ->addTag('app_dev_panel.collector.web');
@@ -198,7 +198,7 @@ final class AppDevPanelExtension extends Extension
                 ->addTag('app_dev_panel.collector.console');
 
             $container->register(ConsoleAppInfoCollector::class, ConsoleAppInfoCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
+                ->setArguments([new Reference(TimelineCollector::class), 'Symfony'])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector')
                 ->addTag('app_dev_panel.collector.console');

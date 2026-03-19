@@ -363,7 +363,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         if ($collectors['request'] ?? true) {
             $this->collectorInstances[] = new RequestCollector($timeline);
-            $this->collectorInstances[] = new WebAppInfoCollector($timeline);
+            $this->collectorInstances[] = new WebAppInfoCollector($timeline, 'Yii2');
         }
 
         if ($collectors['exception'] ?? true) {
@@ -400,7 +400,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         if ($collectors['command'] ?? true) {
             $this->collectorInstances[] = new CommandCollector($timeline);
-            $this->collectorInstances[] = new ConsoleAppInfoCollector($timeline);
+            $this->collectorInstances[] = new ConsoleAppInfoCollector($timeline, 'Yii2');
         }
 
         // Yii2-specific collectors

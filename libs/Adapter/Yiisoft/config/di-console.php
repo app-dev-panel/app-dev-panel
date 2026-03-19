@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Yiisoft\Definitions\ReferencesArray;
 use AppDevPanel\Cli\Command\DebugServerCommand;
+use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 
 require_once __DIR__ . '/helpers.php';
@@ -22,6 +23,11 @@ return [
                 )
             ),
             'ignoredCommands' => $params['app-dev-panel/yiisoft']['ignoredCommands'],
+        ],
+    ],
+    ConsoleAppInfoCollector::class => [
+        '__construct()' => [
+            'adapterName' => 'Yii3',
         ],
     ],
     DebugServerCommand::class => [

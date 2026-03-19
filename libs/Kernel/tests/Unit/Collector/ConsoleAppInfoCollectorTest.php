@@ -67,4 +67,44 @@ final class ConsoleAppInfoCollectorTest extends AbstractCollectorTestCase
 
         $this->assertEquals(PHP_VERSION, $data['console']['php']['version']);
     }
+
+    public function testAdapterName(): void
+    {
+        $collector = new ConsoleAppInfoCollector(new TimelineCollector(), 'Yii3');
+        $collector->startup();
+        $collector->markApplicationStarted();
+
+        $input = new ArrayInput([]);
+        $output = new NullOutput();
+        $collector->collect(new ConsoleCommandEvent(null, $input, $output));
+        $collector->collect(new ConsoleTerminateEvent($this->createMock(Command::class), $input, $output, 0));
+
+        $collector->markApplicationFinished();
+
+        $collected = $collector->getCollected();
+        $this->assertSame('Yii3', $collected['adapter']);
+
+        $summary = $collector->getSummary();
+        $this->assertSame('Yii3', $summary['console']['adapter']);
+    }
+
+    public function testAdapterNameDefaultsToEmpty(): void
+    {
+        $collector = new ConsoleAppInfoCollector(new TimelineCollector());
+        $collector->startup();
+        $collector->markApplicationStarted();
+
+        $input = new ArrayInput([]);
+        $output = new NullOutput();
+        $collector->collect(new ConsoleCommandEvent(null, $input, $output));
+        $collector->collect(new ConsoleTerminateEvent($this->createMock(Command::class), $input, $output, 0));
+
+        $collector->markApplicationFinished();
+
+        $collected = $collector->getCollected();
+        $this->assertSame('', $collected['adapter']);
+
+        $summary = $collector->getSummary();
+        $this->assertSame('', $summary['console']['adapter']);
+    }
 }

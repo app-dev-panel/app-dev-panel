@@ -36,5 +36,34 @@ final class WebAppInfoCollectorTest extends AbstractCollectorTestCase
         parent::checkCollectedData($data);
 
         $this->assertGreaterThan(0.122, $data['requestProcessingTime']);
+        $this->assertSame('', $data['adapter']);
+    }
+
+    public function testAdapterName(): void
+    {
+        $collector = new WebAppInfoCollector(new TimelineCollector(), 'Symfony');
+        $collector->startup();
+        $collector->markRequestStarted();
+        $collector->markRequestFinished();
+
+        $collected = $collector->getCollected();
+        $this->assertSame('Symfony', $collected['adapter']);
+
+        $summary = $collector->getSummary();
+        $this->assertSame('Symfony', $summary['web']['adapter']);
+    }
+
+    public function testAdapterNameDefaultsToEmpty(): void
+    {
+        $collector = new WebAppInfoCollector(new TimelineCollector());
+        $collector->startup();
+        $collector->markRequestStarted();
+        $collector->markRequestFinished();
+
+        $collected = $collector->getCollected();
+        $this->assertSame('', $collected['adapter']);
+
+        $summary = $collector->getSummary();
+        $this->assertSame('', $summary['web']['adapter']);
     }
 }
