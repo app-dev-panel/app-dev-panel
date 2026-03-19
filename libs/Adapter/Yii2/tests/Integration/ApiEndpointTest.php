@@ -213,16 +213,18 @@ final class ApiEndpointTest extends TestCase
         $this->assertTrue($envelope['success']);
 
         $data = $envelope['data'];
-        $this->assertSame(2, $data['queryCount']);
-        $this->assertSame(1, $data['connectionCount']);
-        $this->assertGreaterThanOrEqual(0, $data['totalTime']);
+        $this->assertArrayHasKey('queries', $data);
+        $this->assertArrayHasKey('transactions', $data);
 
         $queries = $data['queries'];
         $this->assertCount(2, $queries);
         $this->assertStringContainsString('SELECT * FROM users', $queries[0]['sql']);
-        $this->assertSame('SELECT', $queries[0]['type']);
-        $this->assertSame(5, $queries[0]['rowCount']);
-        $this->assertGreaterThan(0, $queries[0]['time']);
+        $this->assertSame($queries[0]['sql'], $queries[0]['rawSql']);
+        $this->assertSame('success', $queries[0]['status']);
+        $this->assertSame(5, $queries[0]['rowsNumber']);
+        $this->assertCount(2, $queries[0]['actions']);
+        $this->assertSame('query.start', $queries[0]['actions'][0]['action']);
+        $this->assertSame('query.end', $queries[0]['actions'][1]['action']);
 
         $this->assertStringContainsString('SELECT COUNT', $queries[1]['sql']);
     }
@@ -265,7 +267,17 @@ final class ApiEndpointTest extends TestCase
 
         /** @var MailerCollector $mailerCollector */
         $mailerCollector = $module->getCollector(MailerCollector::class);
-        $mailerCollector->logMessage('noreply@example.com', ['user@example.com'], [], [], 'Welcome!', true);
+
+        $mockMessage = $this->createMock(\yii\mail\MessageInterface::class);
+        $mockMessage->method('getFrom')->willReturn(['noreply@example.com' => 'No Reply']);
+        $mockMessage->method('getTo')->willReturn(['user@example.com' => 'User']);
+        $mockMessage->method('getCc')->willReturn(null);
+        $mockMessage->method('getBcc')->willReturn(null);
+        $mockMessage->method('getReplyTo')->willReturn(null);
+        $mockMessage->method('getSubject')->willReturn('Welcome!');
+        $mockMessage->method('getCharset')->willReturn('utf-8');
+
+        $mailerCollector->logMessage($mockMessage);
 
         $debugger->shutdown();
 
@@ -275,11 +287,9 @@ final class ApiEndpointTest extends TestCase
         $this->assertTrue($envelope['success']);
 
         $data = $envelope['data'];
-        $this->assertSame(1, $data['messageCount']);
         $this->assertCount(1, $data['messages']);
         $this->assertSame('Welcome!', $data['messages'][0]['subject']);
-        $this->assertSame(['noreply@example.com'], $data['messages'][0]['from']);
-        $this->assertTrue($data['messages'][0]['isSuccessful']);
+        $this->assertSame(['noreply@example.com' => 'No Reply'], $data['messages'][0]['from']);
     }
 
     // -----------------------------------------------------------------------
@@ -319,7 +329,7 @@ final class ApiEndpointTest extends TestCase
 
         // DB summary
         $this->assertArrayHasKey('db', $summary);
-        $this->assertSame(1, $summary['db']['queryCount']);
+        $this->assertSame(1, $summary['db']['queries']['total']);
     }
 
     // -----------------------------------------------------------------------

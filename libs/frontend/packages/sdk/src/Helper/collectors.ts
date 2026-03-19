@@ -15,8 +15,14 @@ export enum CollectorsMap {
     VarDumperCollector = 'AppDevPanel\\Kernel\\Collector\\VarDumperCollector',
     EnvironmentCollector = 'AppDevPanel\\Kernel\\Collector\\EnvironmentCollector',
 
-    // Adapter collectors
-    MiddlewareCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Web\\MiddlewareCollector',
+    // Yiisoft adapter collectors
+    MiddlewareCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Middleware\\MiddlewareCollector',
+    DatabaseCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Db\\DatabaseCollector',
+    MailerCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Mailer\\MailerCollector',
+    QueueCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Queue\\QueueCollector',
+    ValidatorCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Validator\\ValidatorCollector',
+    WebViewCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\View\\WebViewCollector',
+    RouterCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Router\\RouterCollector',
 
     // Symfony adapter collectors
     CacheCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\CacheCollector',
@@ -24,17 +30,10 @@ export enum CollectorsMap {
     TwigCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\TwigCollector',
     SecurityCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\SecurityCollector',
     MessengerCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\MessengerCollector',
+    SymfonyMailerCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\MailerCollector',
 
     // Yii 2 adapter collectors
     Yii2DbCollector = 'AppDevPanel\\Adapter\\Yii2\\Collector\\DbCollector',
     Yii2MailerCollector = 'AppDevPanel\\Adapter\\Yii2\\Collector\\MailerCollector',
     Yii2AssetBundleCollector = 'AppDevPanel\\Adapter\\Yii2\\Collector\\AssetBundleCollector',
-
-    // External package collectors (not yet migrated, kept for future adapters)
-    AssetCollector = 'Yiisoft\\Assets\\Debug\\AssetCollector',
-    ValidatorCollector = 'Yiisoft\\Validator\\Debug\\ValidatorCollector',
-    DatabaseCollector = 'Yiisoft\\Db\\Debug\\DatabaseCollector',
-    QueueCollector = 'Yiisoft\\Queue\\Debug\\QueueCollector',
-    MailerCollector = 'Yiisoft\\Mailer\\Debug\\MailerCollector',
-    WebViewCollector = 'Yiisoft\\Yii\\View\\Renderer\\Debug\\WebViewCollector',
 }

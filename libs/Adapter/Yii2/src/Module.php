@@ -669,15 +669,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             \yii\mail\BaseMailer::class,
             \yii\mail\BaseMailer::EVENT_AFTER_SEND,
             static function (\yii\mail\MailEvent $event) use ($mailerCollector): void {
-                $message = $event->message;
-                $mailerCollector->logMessage(
-                    $message->getFrom(),
-                    $message->getTo(),
-                    $message->getCc(),
-                    $message->getBcc(),
-                    $message->getSubject() ?? '',
-                    $event->isSuccessful,
-                );
+                $mailerCollector->logMessage($event->message);
             },
         );
     }

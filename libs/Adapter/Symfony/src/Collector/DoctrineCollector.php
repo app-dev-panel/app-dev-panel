@@ -22,7 +22,7 @@ final class DoctrineCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
 
-    /** @var array<int, array{sql: string, params: array, types: array, executionTime: float, backtrace: array}> */
+    /** @var array<int, array{sql: string, rawSql: string, params: array, line: string, status: string, actions: array}> */
     private array $queries = [];
     private float $totalTime = 0.0;
 
@@ -39,12 +39,19 @@ final class DoctrineCollector implements SummaryCollectorInterface
             return;
         }
 
+        $endTime = microtime(true);
+        $startTime = $endTime - $executionTime;
+
         $this->queries[] = [
             'sql' => $sql,
-            'params' => $params,
-            'types' => $types,
-            'executionTime' => $executionTime,
-            'backtrace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10),
+            'rawSql' => $sql,
+            'params' => $this->normalizeParams($params),
+            'line' => $this->extractCallerLine(),
+            'status' => 'success',
+            'actions' => [
+                ['action' => 'query.start', 'time' => $startTime],
+                ['action' => 'query.end', 'time' => $endTime],
+            ],
         ];
         $this->totalTime += $executionTime;
 
@@ -59,8 +66,7 @@ final class DoctrineCollector implements SummaryCollectorInterface
 
         return [
             'queries' => $this->queries,
-            'totalTime' => $this->totalTime,
-            'queryCount' => count($this->queries),
+            'transactions' => [],
         ];
     }
 
@@ -82,5 +88,33 @@ final class DoctrineCollector implements SummaryCollectorInterface
     {
         $this->queries = [];
         $this->totalTime = 0.0;
+    }
+
+    private function extractCallerLine(): string
+    {
+        $callStack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
+        foreach ($callStack as $frame) {
+            if (
+                isset($frame['file'])
+                && !str_contains($frame['file'], '/vendor/')
+                && !str_contains($frame['file'], '/Collector/DoctrineCollector.php')
+            ) {
+                return $frame['file'] . ':' . ($frame['line'] ?? 0);
+            }
+        }
+        return '';
+    }
+
+    /**
+     * @param array<mixed> $params
+     * @return array<string, int|string>
+     */
+    private function normalizeParams(array $params): array
+    {
+        $result = [];
+        foreach ($params as $key => $value) {
+            $result[(string) $key] = is_scalar($value) ? $value : (string) $value;
+        }
+        return $result;
     }
 }

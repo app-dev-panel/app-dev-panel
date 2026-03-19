@@ -20,7 +20,7 @@ final class DbCollector implements CollectorInterface, SummaryCollectorInterface
 {
     use CollectorTrait;
 
-    /** @var array<int, array{sql: string, params: array, rowCount: int, time: float, type: string, backtrace: string}> */
+    /** @var array<int, array{sql: string, rawSql: string, params: array, line: string, status: string, actions: array, rowsNumber: int}> */
     private array $queries = [];
     private int $connectionCount = 0;
     private float $totalTime = 0.0;
@@ -58,28 +58,22 @@ final class DbCollector implements CollectorInterface, SummaryCollectorInterface
             return;
         }
 
-        $time = 0.0;
-        if ($this->queryStartTime !== null) {
-            $time = microtime(true) - $this->queryStartTime;
-            $this->queryStartTime = null;
-        }
-
-        $callStack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
-        $backtrace = '';
-        foreach ($callStack as $frame) {
-            if (isset($frame['file']) && !str_contains($frame['file'], '/vendor/')) {
-                $backtrace = $frame['file'] . ':' . ($frame['line'] ?? 0);
-                break;
-            }
-        }
+        $endTime = microtime(true);
+        $startTime = $this->queryStartTime ?? $endTime;
+        $time = $endTime - $startTime;
+        $this->queryStartTime = null;
 
         $this->queries[] = [
             'sql' => $sql,
+            'rawSql' => $sql,
             'params' => $params,
-            'rowCount' => $rowCount,
-            'time' => $time,
-            'type' => self::detectSqlType($sql),
-            'backtrace' => $backtrace,
+            'line' => $this->extractCallerLine(),
+            'status' => 'success',
+            'actions' => [
+                ['action' => 'query.start', 'time' => $startTime],
+                ['action' => 'query.end', 'time' => $endTime],
+            ],
+            'rowsNumber' => $rowCount,
         ];
 
         $this->totalTime += $time;
@@ -94,9 +88,7 @@ final class DbCollector implements CollectorInterface, SummaryCollectorInterface
         }
         return [
             'queries' => $this->queries,
-            'queryCount' => count($this->queries),
-            'connectionCount' => $this->connectionCount,
-            'totalTime' => $this->totalTime,
+            'transactions' => [],
         ];
     }
 
@@ -107,8 +99,14 @@ final class DbCollector implements CollectorInterface, SummaryCollectorInterface
         }
         return [
             'db' => [
-                'queryCount' => count($this->queries),
-                'totalTime' => round($this->totalTime * 1000, 2),
+                'queries' => [
+                    'error' => 0,
+                    'total' => count($this->queries),
+                ],
+                'transactions' => [
+                    'error' => 0,
+                    'total' => 0,
+                ],
             ],
         ];
     }
@@ -121,26 +119,18 @@ final class DbCollector implements CollectorInterface, SummaryCollectorInterface
         $this->queryStartTime = null;
     }
 
-    private static function detectSqlType(string $sql): string
+    private function extractCallerLine(): string
     {
-        $normalized = ltrim($sql);
-        $firstWord = strtoupper(strtok($normalized, " \t\n\r"));
-
-        return match ($firstWord) {
-            'SELECT' => 'SELECT',
-            'INSERT' => 'INSERT',
-            'UPDATE' => 'UPDATE',
-            'DELETE' => 'DELETE',
-            'CREATE' => 'CREATE',
-            'ALTER' => 'ALTER',
-            'DROP' => 'DROP',
-            'TRUNCATE' => 'TRUNCATE',
-            'BEGIN', 'START' => 'TRANSACTION',
-            'COMMIT' => 'COMMIT',
-            'ROLLBACK' => 'ROLLBACK',
-            'SHOW' => 'SHOW',
-            'DESCRIBE', 'DESC', 'EXPLAIN' => 'EXPLAIN',
-            default => 'OTHER',
-        };
+        $callStack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
+        foreach ($callStack as $frame) {
+            if (
+                isset($frame['file'])
+                && !str_contains($frame['file'], '/vendor/')
+                && !str_contains($frame['file'], '/Collector/DbCollector.php')
+            ) {
+                return $frame['file'] . ':' . ($frame['line'] ?? 0);
+            }
+        }
+        return '';
     }
 }

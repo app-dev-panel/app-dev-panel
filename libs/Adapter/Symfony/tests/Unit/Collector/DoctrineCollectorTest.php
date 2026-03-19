@@ -29,16 +29,21 @@ final class DoctrineCollectorTest extends AbstractCollectorTestCase
     {
         parent::checkCollectedData($data);
 
-        $this->assertSame(2, $data['queryCount']);
-        $this->assertSame(0.018, $data['totalTime']);
+        $this->assertArrayHasKey('queries', $data);
+        $this->assertArrayHasKey('transactions', $data);
         $this->assertCount(2, $data['queries']);
+        $this->assertSame([], $data['transactions']);
 
         $query = $data['queries'][0];
         $this->assertSame('SELECT * FROM users WHERE id = ?', $query['sql']);
-        $this->assertSame([1], $query['params']);
-        $this->assertSame(['integer'], $query['types']);
-        $this->assertSame(0.015, $query['executionTime']);
-        $this->assertNotEmpty($query['backtrace']);
+        $this->assertSame('SELECT * FROM users WHERE id = ?', $query['rawSql']);
+        $this->assertSame(['0' => 1], $query['params']);
+        $this->assertSame('success', $query['status']);
+        $this->assertArrayHasKey('line', $query);
+        $this->assertCount(2, $query['actions']);
+        $this->assertSame('query.start', $query['actions'][0]['action']);
+        $this->assertSame('query.end', $query['actions'][1]['action']);
+        $this->assertGreaterThanOrEqual($query['actions'][0]['time'], $query['actions'][1]['time']);
     }
 
     protected function checkSummaryData(array $data): void

@@ -29,32 +29,28 @@ final class DbCollectorTest extends AbstractCollectorTestCase
     protected function checkCollectedData(array $data): void
     {
         $this->assertArrayHasKey('queries', $data);
-        $this->assertArrayHasKey('queryCount', $data);
-        $this->assertArrayHasKey('connectionCount', $data);
-        $this->assertArrayHasKey('totalTime', $data);
-
-        $this->assertSame(2, $data['queryCount']);
-        $this->assertSame(1, $data['connectionCount']);
+        $this->assertArrayHasKey('transactions', $data);
         $this->assertCount(2, $data['queries']);
+        $this->assertSame([], $data['transactions']);
 
         $firstQuery = $data['queries'][0];
         $this->assertSame('SELECT * FROM users WHERE id = 1', $firstQuery['sql']);
+        $this->assertSame('SELECT * FROM users WHERE id = 1', $firstQuery['rawSql']);
         $this->assertSame([], $firstQuery['params']);
-        $this->assertSame(1, $firstQuery['rowCount']);
-        $this->assertArrayHasKey('time', $firstQuery);
-        $this->assertArrayHasKey('type', $firstQuery);
-        $this->assertArrayHasKey('backtrace', $firstQuery);
-        $this->assertSame('SELECT', $firstQuery['type']);
-
-        $secondQuery = $data['queries'][1];
-        $this->assertSame('INSERT', $secondQuery['type']);
+        $this->assertSame(1, $firstQuery['rowsNumber']);
+        $this->assertSame('success', $firstQuery['status']);
+        $this->assertArrayHasKey('line', $firstQuery);
+        $this->assertCount(2, $firstQuery['actions']);
+        $this->assertSame('query.start', $firstQuery['actions'][0]['action']);
+        $this->assertSame('query.end', $firstQuery['actions'][1]['action']);
     }
 
     protected function checkSummaryData(array $data): void
     {
         $this->assertArrayHasKey('db', $data);
-        $this->assertArrayHasKey('queryCount', $data['db']);
-        $this->assertSame(2, $data['db']['queryCount']);
+        $this->assertArrayHasKey('queries', $data['db']);
+        $this->assertSame(2, $data['db']['queries']['total']);
+        $this->assertSame(0, $data['db']['queries']['error']);
     }
 
     public function testLogQueryIgnoredWhenInactive(): void
@@ -86,14 +82,13 @@ final class DbCollectorTest extends AbstractCollectorTestCase
         $collector->logConnection();
         $collector->logQuery('SELECT 1', [], 1);
 
-        $this->assertSame(1, $collector->getCollected()['queryCount']);
+        $this->assertCount(1, $collector->getCollected()['queries']);
 
         $collector->shutdown();
 
         // After shutdown + re-startup, data should be clean
         $collector->startup();
-        $this->assertSame(0, $collector->getCollected()['queryCount']);
-        $this->assertSame(0, $collector->getCollected()['connectionCount']);
+        $this->assertCount(0, $collector->getCollected()['queries']);
     }
 
     public function testBacktraceFiltersVendor(): void
@@ -105,8 +100,8 @@ final class DbCollectorTest extends AbstractCollectorTestCase
 
         $queries = $collector->getCollected()['queries'];
         $this->assertCount(1, $queries);
-        // Backtrace should point to this test file (non-vendor)
-        $this->assertStringContainsString('DbCollectorTest.php', $queries[0]['backtrace']);
+        // Line should point to this test file (non-vendor)
+        $this->assertStringContainsString('DbCollectorTest.php', $queries[0]['line']);
     }
 
     public function testTimingWithBeginQuery(): void
@@ -120,44 +115,22 @@ final class DbCollectorTest extends AbstractCollectorTestCase
         $collector->logQuery('SELECT 1', [], 1);
 
         $queries = $collector->getCollected()['queries'];
-        $this->assertGreaterThan(0.0, $queries[0]['time']);
-        $this->assertGreaterThan(0.0, $collector->getCollected()['totalTime']);
+        $startTime = $queries[0]['actions'][0]['time'];
+        $endTime = $queries[0]['actions'][1]['time'];
+        $this->assertGreaterThan(0.0, $endTime - $startTime);
     }
 
-    public function testTimingWithoutBeginQueryIsZero(): void
+    public function testTimingWithoutBeginQuery(): void
     {
         $collector = new DbCollector(new TimelineCollector());
         $collector->startup();
 
-        // No beginQuery call — time should be 0
+        // No beginQuery call — start and end time should be very close
         $collector->logQuery('SELECT 1', [], 1);
 
         $queries = $collector->getCollected()['queries'];
-        $this->assertSame(0.0, $queries[0]['time']);
-    }
-
-    public function testSqlTypeDetection(): void
-    {
-        $collector = new DbCollector(new TimelineCollector());
-        $collector->startup();
-
-        $collector->logQuery('SELECT * FROM users', [], 0);
-        $collector->logQuery('INSERT INTO users (name) VALUES (?)', ['test'], 1);
-        $collector->logQuery('UPDATE users SET name = ?', ['test'], 1);
-        $collector->logQuery('DELETE FROM users WHERE id = 1', [], 1);
-        $collector->logQuery('CREATE TABLE test (id INT)', [], 0);
-        $collector->logQuery('BEGIN', [], 0);
-        $collector->logQuery('COMMIT', [], 0);
-        $collector->logQuery('SHOW TABLES', [], 0);
-
-        $queries = $collector->getCollected()['queries'];
-        $this->assertSame('SELECT', $queries[0]['type']);
-        $this->assertSame('INSERT', $queries[1]['type']);
-        $this->assertSame('UPDATE', $queries[2]['type']);
-        $this->assertSame('DELETE', $queries[3]['type']);
-        $this->assertSame('CREATE', $queries[4]['type']);
-        $this->assertSame('TRANSACTION', $queries[5]['type']);
-        $this->assertSame('COMMIT', $queries[6]['type']);
-        $this->assertSame('SHOW', $queries[7]['type']);
+        $startTime = $queries[0]['actions'][0]['time'];
+        $endTime = $queries[0]['actions'][1]['time'];
+        $this->assertLessThan(0.001, $endTime - $startTime);
     }
 }

@@ -156,7 +156,7 @@ final class PlaygroundIntegrationTest extends TestCase
         // Verify DbCollector data
         $this->assertArrayHasKey(DbCollector::class, $entry);
         $dbData = $entry[DbCollector::class];
-        $this->assertSame(1, $dbData['queryCount']);
+        $this->assertCount(1, $dbData['queries']);
         $this->assertStringContainsString('INSERT INTO submissions', $dbData['queries'][0]['sql']);
     }
 
