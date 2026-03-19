@@ -5,6 +5,7 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
+import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
@@ -114,12 +115,14 @@ export const LogPanel = ({data}: LogPanelProps) => {
             result = result.filter((e) => activeLevels.has(e.level));
         }
 
-        // Filter by text search
+        // Filter by text search (layout-aware)
         if (deferredFilter) {
-            const lower = deferredFilter.toLowerCase();
-            result = result.filter(
-                (e) => formatMessage(e.message).toLowerCase().includes(lower) || e.level.toLowerCase().includes(lower),
-            );
+            const variants = searchVariants(deferredFilter.toLowerCase());
+            result = result.filter((e) => {
+                const message = formatMessage(e.message).toLowerCase();
+                const level = e.level.toLowerCase();
+                return variants.some((v) => message.includes(v) || level.includes(v));
+            });
         }
 
         return result;

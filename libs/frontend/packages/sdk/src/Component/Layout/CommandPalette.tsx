@@ -1,4 +1,5 @@
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {Box, Icon, Modal, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useCallback, useEffect, useRef, useState} from 'react';
@@ -206,11 +207,12 @@ export const CommandPalette = ({open, onClose, extraItems = []}: CommandPaletteP
     const allItems = [...extraItems, ...defaultPages];
 
     const filtered = query
-        ? allItems.filter(
-              (item) =>
-                  item.label.toLowerCase().includes(query.toLowerCase()) ||
-                  (item.shortcut && item.shortcut.toLowerCase().includes(query.toLowerCase())),
-          )
+        ? allItems.filter((item) => {
+              const variants = searchVariants(query.toLowerCase());
+              const label = item.label.toLowerCase();
+              const shortcut = item.shortcut?.toLowerCase();
+              return variants.some((v) => label.includes(v) || (shortcut && shortcut.includes(v)));
+          })
         : allItems;
 
     const sections = [...new Set(filtered.map((i) => i.section))];

@@ -8,6 +8,7 @@ import {FilterInput} from '@app-dev-panel/sdk/Component/Form/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {useCallback, useContext, useMemo, useState} from 'react';
@@ -59,8 +60,8 @@ export const TranslationsPage = () => {
     }, [data]);
 
     const filteredRows = useMemo(() => {
-        const regExp = new RegExp(regexpQuote(searchString || ''), 'i');
-        return rows.filter((object) => object[0].match(regExp));
+        const patterns = searchVariants(searchString || '').map((v) => new RegExp(regexpQuote(v), 'i'));
+        return rows.filter((object) => patterns.some((re) => object[0].match(re)));
     }, [rows, searchString]);
 
     const onChangeHandler = useCallback(async (value: string) => {

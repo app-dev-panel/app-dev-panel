@@ -64,6 +64,7 @@ packages/
     │   │   │   ├── NavItem.tsx              # Sidebar navigation item
     │   │   │   ├── NavBadge.tsx             # Badge for nav items
     │   │   │   └── ContentPanel.tsx         # Content area wrapper
+    │   │   ├── SearchFilter.tsx             # Reusable search filter (hook + component)
     │   │   ├── EmptyState.tsx              # Generic empty state (icon + title + desc)
     │   │   ├── SectionTitle.tsx            # Section heading component
     │   │   ├── ServerSentEventsObserver.ts  # SSE connection manager
@@ -76,6 +77,8 @@ packages/
     │   │   ├── yii/        # Yii-specific input matchers
     │   │   └── yup/        # Yup validation adapters
     │   ├── Helper/         # Utility functions (30+ helpers)
+    │   │   ├── fuzzyMatch.ts              # Fuzzy matching algorithm (score + indices)
+    │   │   ├── layoutTranslit.ts          # QWERTY ↔ ЙЦУКЕН transliteration
     │   └── Types/          # TypeScript type definitions
     └── package.json
 ```
@@ -127,6 +130,60 @@ All pages share a single unified layout (`Application/Component/Layout.tsx`):
 - Home, Debug (expandable: Overview + collectors + All Entries), Inspector (expandable: 14 sub-pages), Gii, Open API, Frames
 - Debug sub-items are dynamic (built from current entry's collectors)
 - Inspector sub-items are static (config, events, routes, etc.)
+
+## Search & Filtering
+
+All search/filter functionality is layout-aware: queries typed on the wrong keyboard layout (QWERTY ↔ ЙЦУКЕН) are auto-transliterated so results still match.
+
+### Core Building Blocks
+
+| File | Purpose |
+|------|---------|
+| `Helper/fuzzyMatch.ts` | Fuzzy matching algorithm. Returns `{score, indices}` — lower score = better match. Penalizes gaps and late starts, bonuses exact substrings. |
+| `Helper/layoutTranslit.ts` | `translit(str)` converts between keyboard layouts. `searchVariants(query)` returns `[original, transliterated]` for dual matching. |
+| `Component/SearchFilter.tsx` | Reusable `useSearchFilter<T>` hook + `SearchFilter<T>` component. |
+
+### useSearchFilter Hook
+
+Filters an array of items using layout-aware search. Supports two modes:
+
+- **`'includes'`** (default) — case-insensitive substring match. Returns all items whose search text contains the query.
+- **`'fuzzy'`** — fuzzy character matching with scoring. Results sorted by score (best match first). Returns match `indices` for highlighting.
+
+`getSearchText` accepts `string | string[]` for multi-field search.
+
+```tsx
+const results = useSearchFilter({
+    items: logs,
+    query: filter,
+    getSearchText: (log) => [log.message, log.level],
+    mode: 'fuzzy',
+});
+// results: SearchMatch<T>[] = [{item, score, indices}, ...]
+```
+
+### SearchFilter Component
+
+Self-contained filter input. Manages own query state with `useDeferredValue` for smooth typing. Calls `onChange(results, query)` on every change.
+
+```tsx
+<SearchFilter
+    items={logs}
+    getSearchText={(log) => log.message}
+    mode="fuzzy"
+    placeholder="Filter logs..."
+    onChange={(results, query) => setFiltered(results)}
+/>
+```
+
+### Where Search is Used
+
+| Location | Component | Mode | Search Fields |
+|----------|-----------|------|---------------|
+| Command Palette | `CommandPalette.tsx` | includes | label, shortcut |
+| Entry Selector | `EntrySelector.tsx` | fuzzy | method + path, command input |
+| Log Panel | `LogPanel.tsx` | includes | message, level |
+| Entry Filter Config | `EntryFilterConfig.tsx` | condition-based | url, status, type |
 
 ## Theming
 

@@ -1,4 +1,5 @@
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {styled} from '@mui/material/styles';
 import React, {useMemo, useState} from 'react';
 import {FilterInput} from './FilterInput';
@@ -21,10 +22,17 @@ const LabelTd = styled(Td)(({theme}) => ({color: theme.palette.text.disabled, fo
 const ValueTd = styled(Td)({fontFamily: primitives.fontFamilyMono, fontSize: '12px', wordBreak: 'break-all'});
 
 const matchesFilter = (row: KeyValueRow, filter: string): boolean => {
-    const lowerFilter = filter.toLowerCase();
-    if (row.key.toLowerCase().includes(lowerFilter)) return true;
-    if (typeof row.value === 'string') return row.value.toLowerCase().includes(lowerFilter);
-    if (typeof row.value === 'number') return String(row.value).includes(lowerFilter);
+    const variants = searchVariants(filter.toLowerCase());
+    const key = row.key.toLowerCase();
+    if (variants.some((v) => key.includes(v))) return true;
+    if (typeof row.value === 'string') {
+        const val = row.value.toLowerCase();
+        return variants.some((v) => val.includes(v));
+    }
+    if (typeof row.value === 'number') {
+        const val = String(row.value);
+        return variants.some((v) => val.includes(v));
+    }
     return false;
 };
 
