@@ -65,9 +65,7 @@ Provided by `app-dev-panel/kernel`, reused by all adapters. The Symfony adapter 
 - **Fed by**: `ConsoleSubscriber` on all console events
 - **Data**: `{phpVersion, framework, startTime, memoryUsage}`
 
-## Symfony-Specific Collectors
-
-### DatabaseCollector (Doctrine)
+### DatabaseCollector
 - **ID**: `AppDevPanel\Kernel\Collector\DatabaseCollector`
 - **Depends on**: `TimelineCollector`
 - **Fed by**: Doctrine DBAL middleware or SQL logger calling `logQuery()`
@@ -79,6 +77,15 @@ Provided by `app-dev-panel/kernel`, reused by all adapters. The Symfony adapter 
   }
   ```
 - **Summary**: `{db: {queries: {error, total}, transactions: {error, total}}}`
+
+### MailerCollector
+- **ID**: `AppDevPanel\Kernel\Collector\MailerCollector`
+- **Depends on**: `TimelineCollector`
+- **Fed by**: Mailer MessageEvent listener normalizes Symfony Email objects and calls `collectMessage()`
+- **Data**: `{messages: [{from, to, cc, bcc, replyTo, subject, textBody, htmlBody, raw, charset, date}]}`
+- **Summary**: `{mailer: {total}}`
+
+## Symfony-Specific Collectors
 
 ### TwigCollector
 - **ID**: `AppDevPanel\Adapter\Symfony\Collector\TwigCollector`
@@ -105,13 +112,6 @@ Provided by `app-dev-panel/kernel`, reused by all adapters. The Symfony adapter 
 - **Fed by**: Decorated cache adapter calling `logCacheOperation()`
 - **Data**: `{operations: [{pool, operation, key, hit, duration}], hits, misses, totalOperations}`
 - **Summary**: `{cache: {hits, misses, totalOperations}}`
-
-### MailerCollector
-- **ID**: `AppDevPanel\Kernel\Collector\MailerCollector`
-- **Depends on**: `TimelineCollector`
-- **Fed by**: Mailer MessageEvent listener normalizes Symfony Email objects and calls `collectMessage()`
-- **Data**: `{messages: [{from, to, cc, bcc, replyTo, subject, textBody, htmlBody, raw, charset, date}]}`
-- **Summary**: `{mailer: {total}}`
 
 ### MessengerCollector
 - **ID**: `AppDevPanel\Adapter\Symfony\Collector\MessengerCollector`
