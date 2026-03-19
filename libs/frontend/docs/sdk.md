@@ -90,6 +90,37 @@ useServerSentEvents(backendUrl, (event: MessageEvent<EventTypes>) => {
 | `Grid.tsx` | MUI DataGrid wrapper with common configuration |
 | `Notifications.tsx` | Toast notification reducer and display |
 
+### Search & Filter
+
+| Component | Purpose |
+|-----------|---------|
+| `SearchFilter.tsx` | `useSearchFilter<T>` hook + `SearchFilter<T>` component — reusable layout-aware search |
+
+**`useSearchFilter<T>`** hook — filters items with layout-aware search (QWERTY ↔ ЙЦУКЕН auto-transliteration):
+- `mode: 'includes'` (default): case-insensitive substring match
+- `mode: 'fuzzy'`: fuzzy character matching with score-based sorting, returns match indices for highlighting
+- `getSearchText`: accepts `string | string[]` for multi-field search
+
+```typescript
+const results = useSearchFilter({
+    items: logs,
+    query: filter,
+    getSearchText: (log) => [log.message, log.level],
+    mode: 'fuzzy',
+});
+// SearchMatch<T>[] = [{item, score, indices}, ...]
+```
+
+**`SearchFilter<T>`** component — self-contained filter input with `useDeferredValue`:
+```tsx
+<SearchFilter
+    items={logs}
+    getSearchText={(log) => log.message}
+    placeholder="Filter logs..."
+    onChange={(results, query) => setFiltered(results)}
+/>
+```
+
 ## Helpers
 
 30+ utility functions in `Helper/`:
@@ -108,6 +139,8 @@ useServerSentEvents(backendUrl, (event: MessageEvent<EventTypes>) => {
 | `collectors.ts` | Collector name utilities |
 | `collectorsTotal.ts` | Calculate collector totals from summary |
 | `debugEntry.ts` | Debug entry type detection (web vs console) |
+| `fuzzyMatch.ts` | Fuzzy matching algorithm — returns `{score, indices}`, lower score = better match |
+| `layoutTranslit.ts` | QWERTY ↔ ЙЦУКЕН transliteration, `searchVariants()` for layout-aware search |
 | `regexpQuote.ts` | Escape regex special characters |
 | `scrollToAnchor.ts` | Smooth scroll to page anchors |
 | `queue.ts` | Simple FIFO queue |
