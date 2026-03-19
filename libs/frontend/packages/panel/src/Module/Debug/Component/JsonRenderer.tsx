@@ -2,8 +2,8 @@ import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {useLazyGetObjectQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {JsonRendererProps, JsonRenderer as OriginalJsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {parseObjectId, toObjectReference} from '@app-dev-panel/sdk/Helper/objectString';
-import {OpenInNew, Sync} from '@mui/icons-material';
-import {Box, IconButton, Tooltip, Typography} from '@mui/material';
+import {FileDownload, Search} from '@mui/icons-material';
+import {IconButton, Tooltip, Typography} from '@mui/material';
 import {DataType} from '@textea/json-viewer';
 import {deepUpdate} from 'immupdate';
 import * as React from 'react';
@@ -29,46 +29,42 @@ export const JsonRenderer = React.memo((props: JsonRendererProps) => {
             is: (value: any) => typeof value === 'string' && !!value.match(/object@[\w\\]+#\d/),
             Component: (props) => {
                 return (
-                    <Box
+                    <Typography
                         component="span"
-                        sx={(theme) => ({
+                        variant="body2"
+                        sx={{
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: 0.25,
-                            backgroundColor: theme.palette.action.selected,
-                            borderRadius: 1,
-                            px: 0.75,
-                            py: 0.25,
-                            border: `1px solid ${theme.palette.divider}`,
-                        })}
+                            wordBreak: 'break-word',
+                            color: 'primary.main',
+                            textDecoration: 'underline',
+                            textDecorationStyle: 'dashed',
+                            textUnderlineOffset: '3px',
+                            textDecorationColor: 'divider',
+                        }}
                     >
-                        <Typography
-                            component="span"
-                            variant="body2"
-                            sx={{fontFamily: (theme) => theme.typography.caption.fontFamily, wordBreak: 'break-word'}}
-                        >
-                            {toObjectReference(props.value)}
-                        </Typography>
+                        {toObjectReference(props.value)}
                         <Tooltip title="Load object state">
                             <IconButton
                                 size="small"
                                 key={props.path.join(',')}
                                 onClick={() => objectLoader(props.value, props.path)}
-                                sx={{p: 0.25}}
+                                sx={{p: 0.25, color: 'text.secondary'}}
                             >
-                                <Sync sx={{fontSize: 16}} />
+                                <FileDownload sx={{fontSize: 14}} />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Examine object">
                             <IconButton
                                 size="small"
                                 href={`/debug/object?debugEntry=${debugEntry!.id}&id=${parseObjectId(props.value)}`}
-                                sx={{p: 0.25}}
+                                sx={{p: 0.25, color: 'text.secondary'}}
                             >
-                                <OpenInNew sx={{fontSize: 16, color: 'primary.main'}} />
+                                <Search sx={{fontSize: 14}} />
                             </IconButton>
                         </Tooltip>
-                    </Box>
+                    </Typography>
                 );
             },
         },
