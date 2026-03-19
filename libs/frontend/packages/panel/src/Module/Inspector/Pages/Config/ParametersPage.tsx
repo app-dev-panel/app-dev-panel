@@ -5,6 +5,7 @@ import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
@@ -200,11 +201,13 @@ export const ParametersPage = () => {
 
     const filtered = useMemo(() => {
         if (!searchString.trim()) return groups;
-        const re = new RegExp(regexpQuote(searchString), 'i');
+        const patterns = searchVariants(searchString).map((v) => new RegExp(regexpQuote(v), 'i'));
         return groups
             .map((group) => {
-                const nameMatch = re.test(group.name);
-                const matchedParams = group.params.filter((p) => re.test(p.key) || re.test(JSON.stringify(p.value)));
+                const nameMatch = patterns.some((re) => re.test(group.name));
+                const matchedParams = group.params.filter((p) =>
+                    patterns.some((re) => re.test(p.key) || re.test(JSON.stringify(p.value))),
+                );
                 if (nameMatch) return group;
                 if (matchedParams.length > 0) return {...group, params: matchedParams};
                 return null;

@@ -10,6 +10,7 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
+import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {Box, Chip, Icon, Popover, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
@@ -376,18 +377,25 @@ export const EntrySelector = ({
     // Apply custom filter first, then fuzzy search
     const filteredEntries = React.useMemo(() => applyFilter(entries, filterState), [entries, filterState]);
 
-    // Fuzzy-filter and sort entries
+    // Fuzzy-filter and sort entries (with layout-aware search)
     const matched: MatchedEntry[] = React.useMemo(() => {
         if (!filter.trim()) {
             return filteredEntries.map((entry) => ({entry, indices: [], searchText: getSearchText(entry)}));
         }
 
+        const variants = searchVariants(filter);
         const results: (MatchedEntry & {score: number})[] = [];
         for (const entry of filteredEntries) {
             const searchText = getSearchText(entry);
-            const match = fuzzyMatch(searchText, filter);
-            if (match) {
-                results.push({entry, indices: match.indices, searchText, score: match.score});
+            let bestMatch: FuzzyMatch | null = null;
+            for (const variant of variants) {
+                const match = fuzzyMatch(searchText, variant);
+                if (match && (bestMatch === null || match.score < bestMatch.score)) {
+                    bestMatch = match;
+                }
+            }
+            if (bestMatch) {
+                results.push({entry, indices: bestMatch.indices, searchText, score: bestMatch.score});
             }
         }
 

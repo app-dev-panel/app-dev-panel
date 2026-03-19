@@ -6,6 +6,7 @@ import {FilterInput} from '@app-dev-panel/sdk/Component/Form/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {ContentCopy, DataObject} from '@mui/icons-material';
 import {Button, IconButton, Tooltip} from '@mui/material';
@@ -85,8 +86,8 @@ export const DefinitionsPage = () => {
     }, [isLoading]);
 
     const filteredRows = useMemo(() => {
-        const regExp = new RegExp(regexpQuote(searchString || ''), 'i');
-        return objects.filter((object) => object.id.match(regExp));
+        const patterns = searchVariants(searchString || '').map((v) => new RegExp(regexpQuote(v), 'i'));
+        return objects.filter((object) => patterns.some((re) => object.id.match(re)));
     }, [objects, searchString]);
 
     const onChangeHandler = useCallback(async (value: string) => {
