@@ -27,7 +27,7 @@ const BarRoot = styled('header')(({theme}) => ({
     display: 'flex',
     alignItems: 'center',
     padding: theme.spacing(0, 2.5),
-    gap: theme.spacing(2),
+    gap: theme.spacing(1),
     flexShrink: 0,
     position: 'sticky',
     top: 0,
@@ -41,6 +41,7 @@ const Logo = styled('div')(({theme}) => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(0.75),
+    flexShrink: 0,
 }));
 
 const Diamond = styled('div')(({theme}) => ({
@@ -50,6 +51,17 @@ const Diamond = styled('div')(({theme}) => ({
     transform: 'rotate(45deg)',
     borderRadius: 1,
 }));
+
+const CenterGroup = styled('div')({
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    minWidth: 0,
+});
+
+const PillContainer = styled('div')({maxWidth: 700, width: '100%', minWidth: 0});
 
 export const TopBar = React.memo(
     ({
@@ -74,34 +86,36 @@ export const TopBar = React.memo(
                 <Logo>
                     <Diamond /> App Dev Panel
                 </Logo>
-                <IconButton size="small" onClick={onPrevEntry} disabled={!method}>
-                    <Icon sx={{fontSize: 18}}>chevron_left</Icon>
-                </IconButton>
-                <IconButton size="small" onClick={onNextEntry} disabled={!method}>
-                    <Icon sx={{fontSize: 18}}>chevron_right</Icon>
-                </IconButton>
-                <div style={{flex: 1, minWidth: 0}}>
-                    {method && path && status != null && duration ? (
-                        <RequestPill
-                            method={method}
-                            path={path}
-                            status={status}
-                            duration={duration}
-                            onClick={onEntryClick}
-                        />
-                    ) : (
-                        <div style={{height: 32}} />
-                    )}
-                </div>
-                <IconButton
-                    size="small"
-                    onClick={onAutoRefreshToggle}
-                    title={autoRefresh ? 'Auto-refresh on' : 'Auto-refresh off'}
-                >
-                    <Icon sx={{fontSize: 18, color: autoRefresh ? 'success.main' : undefined}}>
-                        {autoRefresh ? 'sync' : 'sync_disabled'}
-                    </Icon>
-                </IconButton>
+                <CenterGroup>
+                    <IconButton size="small" onClick={onPrevEntry} disabled={!method}>
+                        <Icon sx={{fontSize: 18}}>chevron_left</Icon>
+                    </IconButton>
+                    <IconButton size="small" onClick={onNextEntry} disabled={!method}>
+                        <Icon sx={{fontSize: 18}}>chevron_right</Icon>
+                    </IconButton>
+                    <PillContainer>
+                        {method && path && status != null && duration ? (
+                            <RequestPill
+                                method={method}
+                                path={path}
+                                status={status}
+                                duration={duration}
+                                onClick={onEntryClick}
+                            />
+                        ) : (
+                            <div style={{height: 32}} />
+                        )}
+                    </PillContainer>
+                    <IconButton
+                        size="small"
+                        onClick={onAutoRefreshToggle}
+                        title={autoRefresh ? 'Auto-refresh on' : 'Auto-refresh off'}
+                    >
+                        <Icon sx={{fontSize: 18, color: autoRefresh ? 'success.main' : undefined}}>
+                            {autoRefresh ? 'sync' : 'sync_disabled'}
+                        </Icon>
+                    </IconButton>
+                </CenterGroup>
                 <SearchTrigger onClick={onSearchClick} />
                 <IconButton size="small" onClick={onThemeToggle}>
                     <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>

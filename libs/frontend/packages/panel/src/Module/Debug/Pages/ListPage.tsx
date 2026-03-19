@@ -1,5 +1,6 @@
 import {changeEntryAction} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
@@ -13,7 +14,6 @@ import {
     CircularProgress,
     Icon,
     IconButton,
-    TextField,
     Tooltip,
     Typography,
     type Theme,
@@ -151,22 +151,18 @@ export const ListPage = () => {
 
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                <SectionTitle>{`${filtered.length} debug entries`}</SectionTitle>
-                <TextField
-                    size="small"
-                    placeholder="Filter by URL, method, or ID..."
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    InputProps={{sx: {fontSize: '13px'}}}
-                    sx={{ml: 'auto', width: 260}}
-                />
-                <Tooltip title={isFetching ? 'Refreshing...' : 'Refresh'}>
-                    <IconButton size="small" onClick={() => refetch()} disabled={isFetching}>
-                        <Icon sx={{fontSize: 18}}>{isFetching ? 'hourglass_empty' : 'refresh'}</Icon>
-                    </IconButton>
-                </Tooltip>
-            </Box>
+            <SectionTitle
+                action={
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        <FilterInput value={filter} onChange={setFilter} placeholder="Filter entries..." />
+                        <Tooltip title={isFetching ? 'Refreshing...' : 'Refresh'}>
+                            <IconButton size="small" onClick={() => refetch()} disabled={isFetching}>
+                                <Icon sx={{fontSize: 18}}>{isFetching ? 'hourglass_empty' : 'refresh'}</Icon>
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                }
+            >{`${filtered.length} debug entries`}</SectionTitle>
 
             {filtered.map((entry) => {
                 if (isDebugEntryAboutWeb(entry)) {
