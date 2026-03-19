@@ -403,7 +403,22 @@ export const EntrySelector = ({
             onClose={handleClose}
             anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
             transformOrigin={{vertical: 'top', horizontal: 'left'}}
-            slotProps={{paper: {sx: {width: 520, maxHeight: 440, mt: 0.5, borderRadius: 1.5}}}}
+            slotProps={{
+                paper: {
+                    sx: {
+                        width: 520,
+                        maxHeight: 440,
+                        mt: 0.5,
+                        borderRadius: 1.5,
+                        border: 1,
+                        borderColor: 'divider',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
+                        backdropFilter: 'blur(12px)',
+                        backgroundColor: (t) =>
+                            t.palette.mode === 'dark' ? 'rgba(30, 41, 59, 0.92)' : 'rgba(255, 255, 255, 0.92)',
+                    },
+                },
+            }}
         >
             <FilterRow>
                 <FilterInput
