@@ -10,55 +10,14 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
+import {fuzzyMatch} from '@app-dev-panel/sdk/Helper/fuzzyMatch';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {Box, Chip, Icon, Popover, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 
-// ---------------------------------------------------------------------------
-// Fuzzy search utilities
-// ---------------------------------------------------------------------------
-
-type FuzzyMatch = {score: number; indices: number[]};
-
-/**
- * Fuzzy-match `query` against `text`.
- * Returns null if no match, or {score, indices} where indices are
- * the character positions in `text` that matched.
- * Score: lower is better. Consecutive matches and early matches score best.
- */
-export function fuzzyMatch(text: string, query: string): FuzzyMatch | null {
-    const textLower = text.toLowerCase();
-    const queryLower = query.toLowerCase();
-
-    if (queryLower.length === 0) return {score: 0, indices: []};
-
-    const indices: number[] = [];
-    let qi = 0;
-
-    for (let ti = 0; ti < textLower.length && qi < queryLower.length; ti++) {
-        if (textLower[ti] === queryLower[qi]) {
-            indices.push(ti);
-            qi++;
-        }
-    }
-
-    if (qi < queryLower.length) return null; // not all query chars matched
-
-    // Score: penalize gaps between matched characters and late starts
-    let score = indices[0]; // penalize late start
-    for (let i = 1; i < indices.length; i++) {
-        const gap = indices[i] - indices[i - 1] - 1;
-        score += gap * 2; // penalize gaps
-    }
-
-    // Bonus for exact substring match
-    if (textLower.includes(queryLower)) {
-        score -= queryLower.length * 3;
-    }
-
-    return {score, indices};
-}
+// Re-export fuzzyMatch from helper for backwards compatibility
+export {fuzzyMatch, type FuzzyMatch} from '@app-dev-panel/sdk/Helper/fuzzyMatch';
 
 /**
  * Renders text with fuzzy-matched characters highlighted.
