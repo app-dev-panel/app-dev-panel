@@ -5,9 +5,9 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Collapse, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Collapse, TextField, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import {useState} from 'react';
+import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
 // Data format from PHP: [microtime, reference, collectorClass, additionalData?]
 // row[0] = microtime(true) — start timestamp
@@ -102,28 +102,48 @@ const DetailBox = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
-const LegendBar = styled(Box)(({theme}) => ({
-    display: 'flex',
-    gap: theme.spacing(2),
-    flexWrap: 'wrap',
-    paddingLeft: 180,
-    paddingBottom: theme.spacing(1.5),
-    fontSize: '11px',
-    color: theme.palette.text.disabled,
-}));
-
-const LegendItem = styled(Box)({display: 'flex', alignItems: 'center', gap: 4});
-
-const Swatch = styled(Box)({width: 12, height: 8, borderRadius: 2});
-
 export const TimelinePanel = ({data}: TimelinePanelProps) => {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+    const [filter, setFilter] = useState('');
+    const deferredFilter = useDeferredValue(filter);
+    const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
+
+    const toggleFilter = useCallback((name: string) => {
+        setActiveFilters((prev) => {
+            const next = new Set(prev);
+            if (next.has(name)) {
+                next.delete(name);
+            } else {
+                next.add(name);
+            }
+            return next;
+        });
+    }, []);
 
     if (!data || !Array.isArray(data) || data.length === 0) {
         return <EmptyState icon="timeline" title="No timeline items found" />;
     }
 
+    // Unique labels for legend
+    const uniqueLabels = [...new Set(data.map((r) => r[2].split('\\').pop() ?? r[2]))];
+
+    const filtered = useMemo(() => {
+        let result = data;
+        if (activeFilters.size > 0) {
+            result = result.filter((r) => {
+                const shortName = r[2].split('\\').pop() ?? r[2];
+                return activeFilters.has(shortName);
+            });
+        }
+        if (deferredFilter) {
+            const lower = deferredFilter.toLowerCase();
+            result = result.filter((r) => r[2].toLowerCase().includes(lower));
+        }
+        return result;
+    }, [data, deferredFilter, activeFilters]);
+
     // Events are point-in-time: row[0] is microtime, row[1] is a reference (not duration)
+    // Use full data range for consistent axis regardless of filters
     const timestamps = data.map((r) => r[0]);
     const minTime = Math.min(...timestamps);
     const maxTime = Math.max(...timestamps);
@@ -143,23 +163,53 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
         }
     }
 
-    // Unique labels for legend
-    const uniqueLabels = [...new Set(data.map((r) => r[2].split('\\').pop() ?? r[2]))];
-
     return (
         <Box>
             <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                <SectionTitle>{`${data.length} timeline events`}</SectionTitle>
+                <SectionTitle>{`${filtered.length} timeline events`}</SectionTitle>
+                <TextField
+                    size="small"
+                    placeholder="Filter timeline..."
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    InputProps={{sx: {fontSize: '13px'}}}
+                    sx={{ml: 'auto', width: 240}}
+                />
             </Box>
 
-            <LegendBar>
-                {uniqueLabels.slice(0, 10).map((label, i) => (
-                    <LegendItem key={label}>
-                        <Swatch sx={{backgroundColor: getBarColor(i)}} />
-                        <span>{label}</span>
-                    </LegendItem>
-                ))}
-            </LegendBar>
+            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                {uniqueLabels.map((label, i) => {
+                    const isActive = activeFilters.has(label);
+                    const color = getBarColor(i);
+                    return (
+                        <Chip
+                            key={label}
+                            label={label}
+                            size="small"
+                            onClick={() => uniqueLabels.length > 1 && toggleFilter(label)}
+                            sx={{
+                                fontSize: '11px',
+                                height: 24,
+                                borderRadius: 1,
+                                fontWeight: 600,
+                                cursor: uniqueLabels.length > 1 ? 'pointer' : 'default',
+                                backgroundColor: isActive ? color : 'transparent',
+                                color: isActive ? 'common.white' : color,
+                                border: `1px solid ${color}`,
+                            }}
+                        />
+                    );
+                })}
+                {activeFilters.size > 0 && (
+                    <Chip
+                        label="Clear"
+                        size="small"
+                        onClick={() => setActiveFilters(new Set())}
+                        variant="outlined"
+                        sx={{fontSize: '11px', height: 24, borderRadius: 1}}
+                    />
+                )}
+            </Box>
 
             <TimeAxis>
                 {ticks.map((tick, i) => (
@@ -167,7 +217,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                 ))}
             </TimeAxis>
 
-            {data.map((row, index) => {
+            {filtered.map((row, index) => {
                 const shortName = row[2].split('\\').pop() ?? row[2];
                 const relativeTime = row[0] - minTime;
                 const offset = (relativeTime / totalSpan) * 100;

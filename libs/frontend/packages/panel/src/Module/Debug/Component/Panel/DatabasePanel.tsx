@@ -6,7 +6,7 @@ import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
 import {Box, Chip, Collapse, Icon, IconButton, Tab, TextField, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {SyntheticEvent, useState} from 'react';
+import {SyntheticEvent, useDeferredValue, useState} from 'react';
 
 type QueryAction = {action: 'query.start' | 'query.end'; time: number};
 type Query = {
@@ -85,13 +85,16 @@ const StyledTabList = styled(TabList)(({theme}) => ({
 const QueriesView = ({queries}: {queries: Query[]}) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
+    const deferredFilter = useDeferredValue(filter);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
     if (!queries || queries.length === 0) {
         return <EmptyState icon="storage" title="No queries found" />;
     }
 
-    const filtered = filter ? queries.filter((q) => q.sql.toLowerCase().includes(filter.toLowerCase())) : queries;
+    const filtered = deferredFilter
+        ? queries.filter((q) => q.sql.toLowerCase().includes(deferredFilter.toLowerCase()))
+        : queries;
 
     const totalTime = queries.reduce((sum, q) => sum + getQueryTime(q.actions), 0);
 

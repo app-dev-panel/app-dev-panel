@@ -3,7 +3,7 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, Icon, LinearProgress, TextField, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {useMemo, useState} from 'react';
+import {useDeferredValue, useMemo, useState} from 'react';
 
 type CacheOperation = {pool: string; operation: string; key: string; hit: boolean; duration: number};
 
@@ -180,6 +180,7 @@ const PoolBreakdown = ({operations}: {operations: CacheOperation[]}) => {
 export const CachePanel = ({data}: CachePanelProps) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
+    const deferredFilter = useDeferredValue(filter);
 
     if (!data || data.totalOperations === 0) {
         return (
@@ -195,13 +196,15 @@ export const CachePanel = ({data}: CachePanelProps) => {
     const hitRate = hits + misses > 0 ? Math.round((hits / (hits + misses)) * 100) : 0;
     const totalDuration = operations.reduce((sum, op) => sum + op.duration, 0);
 
-    const filtered = filter
-        ? operations.filter(
-              (op) =>
-                  op.key.toLowerCase().includes(filter.toLowerCase()) ||
-                  op.operation.toLowerCase().includes(filter.toLowerCase()) ||
-                  op.pool.toLowerCase().includes(filter.toLowerCase()),
-          )
+    const filtered = deferredFilter
+        ? operations.filter((op) => {
+              const lower = deferredFilter.toLowerCase();
+              return (
+                  op.key.toLowerCase().includes(lower) ||
+                  op.operation.toLowerCase().includes(lower) ||
+                  op.pool.toLowerCase().includes(lower)
+              );
+          })
         : operations;
 
     return (

@@ -6,7 +6,7 @@ import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathPar
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {Box, Chip, Collapse, Icon, IconButton, TextField, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {useState} from 'react';
+import {useDeferredValue, useState} from 'react';
 
 type Level = 'emergency' | 'alert' | 'critical' | 'error' | 'warning' | 'notice' | 'info' | 'debug';
 type LogEntry = {context: object; level: Level; line: string; message: unknown; time: number};
@@ -66,18 +66,18 @@ const DetailBox = styled(Box)(({theme}) => ({
 export const LogPanel = ({data}: LogPanelProps) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
+    const deferredFilter = useDeferredValue(filter);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
     if (!data || data.length === 0) {
         return <EmptyState icon="description" title="No logs found" />;
     }
 
-    const filtered = filter
-        ? data.filter(
-              (e) =>
-                  formatMessage(e.message).toLowerCase().includes(filter.toLowerCase()) ||
-                  e.level.toLowerCase().includes(filter.toLowerCase()),
-          )
+    const filtered = deferredFilter
+        ? data.filter((e) => {
+              const lower = deferredFilter.toLowerCase();
+              return formatMessage(e.message).toLowerCase().includes(lower) || e.level.toLowerCase().includes(lower);
+          })
         : data;
 
     return (

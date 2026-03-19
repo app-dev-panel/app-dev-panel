@@ -7,7 +7,7 @@ import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
 import {Box, Chip, Collapse, Icon, IconButton, Tab, TextField, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import {SyntheticEvent, useMemo, useState} from 'react';
+import {SyntheticEvent, useDeferredValue, useMemo, useState} from 'react';
 
 type SummaryItemType = {
     class: string;
@@ -158,10 +158,11 @@ type AllRow = {
 
 const AllView = ({rows}: {rows: AllRow[]}) => {
     const [filter, setFilter] = useState('');
+    const deferredFilter = useDeferredValue(filter);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-    const filtered = filter
-        ? rows.filter((r) => concatClassMethod(r.class, r.method).toLowerCase().includes(filter.toLowerCase()))
+    const filtered = deferredFilter
+        ? rows.filter((r) => concatClassMethod(r.class, r.method).toLowerCase().includes(deferredFilter.toLowerCase()))
         : rows;
 
     return (
