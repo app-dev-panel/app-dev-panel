@@ -474,9 +474,9 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
 
     return (
         <Box>
-            <SectionTitle
-                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter requests..." />}
-            >{`${filtered.length} http requests · ${formatDuration(totalTime)} total`}</SectionTitle>
+            <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter requests..." />}>
+                {[`${filtered.length} http requests`, `${formatDuration(totalTime)} total`]}
+            </SectionTitle>
 
             {(badgeCounts.length > 1 || statusBadgeCounts.length > 1) && (
                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
