@@ -23,6 +23,7 @@ return [
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
+            'silentExitOnException' => true,
         ],
         'urlManager' => [
             'enablePrettyUrl' => true,

@@ -4,14 +4,21 @@ declare(strict_types=1);
 
 namespace App\actions\testFixtures;
 
+use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use yii\base\Action;
-use yii\helpers\VarDumper;
 
 final class DumpAction extends Action
 {
     public function run(): array
     {
-        VarDumper::dump(['fixture' => 'var-dumper:basic', 'nested' => ['key' => 'value']], 10, false);
+        /** @var VarDumperCollector|null $collector */
+        $collector = \Yii::$container->has(VarDumperCollector::class)
+            ? \Yii::$container->get(VarDumperCollector::class)
+            : null;
+
+        $data = ['fixture' => 'var-dumper:basic', 'nested' => ['key' => 'value']];
+
+        $collector?->collect($data, __FILE__ . ':' . __LINE__);
 
         return ['fixture' => 'var-dumper:basic', 'status' => 'ok'];
     }

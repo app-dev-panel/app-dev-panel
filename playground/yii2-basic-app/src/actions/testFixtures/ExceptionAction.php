@@ -10,6 +10,6 @@ final class ExceptionAction extends Action
 {
     public function run(): never
     {
-        throw new \RuntimeException('ADP test scenario exception');
+        throw new \RuntimeException('ADP test fixture exception');
     }
 }

@@ -390,7 +390,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
         }
 
         if ($collectors['var_dumper'] ?? true) {
-            $this->collectorInstances[] = new VarDumperCollector($timeline);
+            $varDumperCollector = new VarDumperCollector($timeline);
+            $this->collectorInstances[] = $varDumperCollector;
+            \Yii::$container->setSingleton(VarDumperCollector::class, $varDumperCollector);
         }
 
         if ($collectors['filesystem_stream'] ?? true) {
@@ -446,10 +448,10 @@ class Module extends \yii\base\Module implements BootstrapInterface
             Event::on(WebApplication::class, WebApplication::EVENT_BEFORE_REQUEST, [$listener, 'onBeforeRequest']);
             Event::on(WebApplication::class, WebApplication::EVENT_AFTER_REQUEST, [$listener, 'onAfterRequest']);
 
-            // Register error handler hook for exceptions
-            $app->on('afterAction', static function () use ($listener): void {
-                $listener->onAfterAction();
-            });
+            // Hook into exception handling: Yii2's ErrorHandler calls exit(1) after rendering,
+            // so EVENT_AFTER_REQUEST never fires. We wrap handleException to capture the exception
+            // and flush debug data before exit.
+            $this->hookErrorHandler($app, $listener);
         }
 
         if ($app instanceof ConsoleApplication) {
@@ -484,6 +486,36 @@ class Module extends \yii\base\Module implements BootstrapInterface
         if ($logCollector instanceof LogCollector) {
             $this->registerDebugLogTarget($logCollector);
         }
+    }
+
+    private function hookErrorHandler(WebApplication $app, WebListener $listener): void
+    {
+        $exceptionCollector = $this->getCollector(ExceptionCollector::class);
+        if (!$exceptionCollector instanceof ExceptionCollector) {
+            return;
+        }
+
+        // Yii2's ErrorHandler clears $this->exception after rendering.
+        // We intercept by setting a custom exception handler that feeds
+        // ExceptionCollector BEFORE Yii2's handler processes (and clears) it.
+        $previousHandler = set_exception_handler(null);
+        restore_exception_handler();
+
+        $debugger = $this->debugger;
+        set_exception_handler(static function (\Throwable $exception) use ($exceptionCollector, $debugger, $previousHandler): void {
+            // Feed the collector before Yii2's handler clears the exception
+            $exceptionCollector->collect($exception);
+
+            // Add X-Debug-Id header before Yii2 renders error response
+            if (!headers_sent()) {
+                header('X-Debug-Id: ' . $debugger->getId());
+            }
+
+            // Delegate to Yii2's error handler
+            if ($previousHandler !== null) {
+                ($previousHandler)($exception);
+            }
+        });
     }
 
     private function registerConsoleCommands(Application $app): void
