@@ -80,18 +80,20 @@ final class Yii2DbSchemaProviderTest extends TestCase
 
         $selectCommand = $this->createMock(Command::class);
         $selectCommand->method('bindValues')->willReturnSelf();
-        $selectCommand->method('queryAll')->willReturn([
-            ['id' => 1, 'name' => 'Alice'],
-            ['id' => 2, 'name' => 'Bob'],
-            ['id' => 3, 'name' => 'Charlie'],
-        ]);
+        $selectCommand
+            ->method('queryAll')
+            ->willReturn([
+                ['id' => 1, 'name' => 'Alice'],
+                ['id' => 2, 'name' => 'Bob'],
+                ['id' => 3, 'name' => 'Charlie'],
+            ]);
 
         $connection = $this->createMock(Connection::class);
         $connection->method('getSchema')->willReturn($schema);
         $connection->method('quoteTableName')->willReturn('`users`');
-        $connection->method('createCommand')->willReturnCallback(
-            static fn (string $sql) => str_contains($sql, 'COUNT') ? $countCommand : $selectCommand,
-        );
+        $connection->method('createCommand')->willReturnCallback(static fn(string $sql) => str_contains($sql, 'COUNT')
+            ? $countCommand
+            : $selectCommand);
 
         $provider = new Yii2DbSchemaProvider($connection);
         $result = $provider->getTable('users', 10, 0);

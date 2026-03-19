@@ -42,11 +42,7 @@ final class WebListenerTest extends TestCase
         $timeline = new TimelineCollector();
         $requestCollector = new RequestCollector($timeline);
 
-        $debugger = new Debugger(
-            $idGenerator,
-            $storage,
-            [$timeline, $requestCollector],
-        );
+        $debugger = new Debugger($idGenerator, $storage, [$timeline, $requestCollector]);
 
         $listener = new WebListener($debugger, $requestCollector);
 
@@ -91,18 +87,14 @@ final class WebListenerTest extends TestCase
         $webAppInfoCollector = new WebAppInfoCollector($timeline);
         $exceptionCollector = new ExceptionCollector($timeline);
 
-        $debugger = new Debugger(
-            $idGenerator,
-            $storage,
-            [$timeline, $requestCollector, $webAppInfoCollector, $exceptionCollector],
-        );
-
-        $listener = new WebListener(
-            $debugger,
+        $debugger = new Debugger($idGenerator, $storage, [
+            $timeline,
             $requestCollector,
             $webAppInfoCollector,
             $exceptionCollector,
-        );
+        ]);
+
+        $listener = new WebListener($debugger, $requestCollector, $webAppInfoCollector, $exceptionCollector);
 
         $app = $this->createWebApp('/api/data');
         $beforeEvent = new Event(['sender' => $app]);
@@ -141,11 +133,7 @@ final class WebListenerTest extends TestCase
         $timeline = new TimelineCollector();
         $requestCollector = new RequestCollector($timeline);
 
-        $debugger = new Debugger(
-            $idGenerator,
-            $storage,
-            [$timeline, $requestCollector],
-        );
+        $debugger = new Debugger($idGenerator, $storage, [$timeline, $requestCollector]);
 
         $listener = new WebListener($debugger, $requestCollector);
 

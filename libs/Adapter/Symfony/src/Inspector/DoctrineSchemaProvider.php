@@ -80,7 +80,10 @@ final class DoctrineSchemaProvider implements SchemaProviderInterface
                 'name' => $column->getName(),
                 'size' => $column->getLength(),
                 'type' => $column->getType()::class,
-                'dbType' => $column->getType()->getSQLDeclaration($column->toArray(), $this->connection->getDatabasePlatform()),
+                'dbType' => $column->getType()->getSQLDeclaration(
+                    $column->toArray(),
+                    $this->connection->getDatabasePlatform(),
+                ),
                 'defaultValue' => $column->getDefault(),
                 'comment' => $column->getComment(),
                 'allowNull' => !$column->getNotnull(),

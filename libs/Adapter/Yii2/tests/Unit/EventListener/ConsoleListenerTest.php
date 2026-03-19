@@ -89,11 +89,7 @@ final class ConsoleListenerTest extends TestCase
         $storage = new MemoryStorage($idGenerator);
         $timeline = new TimelineCollector();
 
-        $debugger = new Debugger(
-            $idGenerator,
-            $storage,
-            [$timeline],
-        );
+        $debugger = new Debugger($idGenerator, $storage, [$timeline]);
 
         $listener = new ConsoleListener($debugger);
 

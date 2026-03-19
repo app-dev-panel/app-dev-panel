@@ -31,9 +31,7 @@ final class AdpApiController
 
         // Override with actual Symfony request data for accuracy
         $uri = $psr17Factory->createUri($request->getUri());
-        $psrRequest = $psrRequest
-            ->withUri($uri)
-            ->withMethod($request->getMethod());
+        $psrRequest = $psrRequest->withUri($uri)->withMethod($request->getMethod());
 
         // Copy headers from Symfony request
         foreach ($request->headers->all() as $name => $values) {
@@ -63,10 +61,7 @@ final class AdpApiController
         }
 
         // Convert PSR-7 response to Symfony response
-        $symfonyResponse = new Response(
-            (string) $psrResponse->getBody(),
-            $psrResponse->getStatusCode(),
-        );
+        $symfonyResponse = new Response((string) $psrResponse->getBody(), $psrResponse->getStatusCode());
 
         foreach ($psrResponse->getHeaders() as $name => $values) {
             $symfonyResponse->headers->set($name, $values);

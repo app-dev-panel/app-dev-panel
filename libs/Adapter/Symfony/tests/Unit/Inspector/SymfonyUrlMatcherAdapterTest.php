@@ -17,7 +17,8 @@ final class SymfonyUrlMatcherAdapterTest extends TestCase
     public function testMatchReturnsSuccessResult(): void
     {
         $router = $this->createMock(RouterInterface::class);
-        $router->method('match')
+        $router
+            ->method('match')
             ->with('/')
             ->willReturn(['_controller' => 'App\\HomeController::index', '_route' => 'home']);
 
@@ -31,8 +32,7 @@ final class SymfonyUrlMatcherAdapterTest extends TestCase
     public function testMatchReturnsFailureOnResourceNotFound(): void
     {
         $router = $this->createMock(RouterInterface::class);
-        $router->method('match')
-            ->willThrowException(new ResourceNotFoundException());
+        $router->method('match')->willThrowException(new ResourceNotFoundException());
 
         $adapter = new SymfonyUrlMatcherAdapter($router);
         $result = $adapter->match(new ServerRequest('GET', '/nonexistent'));
@@ -43,8 +43,7 @@ final class SymfonyUrlMatcherAdapterTest extends TestCase
     public function testMatchReturnsFailureOnMethodNotAllowed(): void
     {
         $router = $this->createMock(RouterInterface::class);
-        $router->method('match')
-            ->willThrowException(new MethodNotAllowedException(['POST']));
+        $router->method('match')->willThrowException(new MethodNotAllowedException(['POST']));
 
         $adapter = new SymfonyUrlMatcherAdapter($router);
         $result = $adapter->match(new ServerRequest('GET', '/api/users'));
@@ -55,8 +54,7 @@ final class SymfonyUrlMatcherAdapterTest extends TestCase
     public function testMatchWithoutController(): void
     {
         $router = $this->createMock(RouterInterface::class);
-        $router->method('match')
-            ->willReturn(['_route' => 'redirect']);
+        $router->method('match')->willReturn(['_route' => 'redirect']);
 
         $adapter = new SymfonyUrlMatcherAdapter($router);
         $result = $adapter->match(new ServerRequest('GET', '/old'));

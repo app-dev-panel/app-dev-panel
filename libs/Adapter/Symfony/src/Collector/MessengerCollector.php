@@ -64,7 +64,7 @@ final class MessengerCollector implements SummaryCollectorInterface
         return [
             'messages' => $this->messages,
             'messageCount' => count($this->messages),
-            'failedCount' => count(array_filter($this->messages, static fn (array $m) => $m['failed'])),
+            'failedCount' => count(array_filter($this->messages, static fn(array $m) => $m['failed'])),
         ];
     }
 
@@ -77,7 +77,7 @@ final class MessengerCollector implements SummaryCollectorInterface
         return [
             'messenger' => [
                 'messageCount' => count($this->messages),
-                'failedCount' => count(array_filter($this->messages, static fn (array $m) => $m['failed'])),
+                'failedCount' => count(array_filter($this->messages, static fn(array $m) => $m['failed'])),
             ],
         ];
     }

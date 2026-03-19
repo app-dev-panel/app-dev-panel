@@ -48,9 +48,9 @@ final class Yii2DbSchemaProvider implements SchemaProviderInterface
 
             $recordCount = 0;
             try {
-                $recordCount = (int) $this->connection->createCommand(
-                    'SELECT COUNT(*) FROM ' . $this->connection->quoteTableName($tableName),
-                )->queryScalar();
+                $recordCount = (int) $this->connection
+                    ->createCommand('SELECT COUNT(*) FROM ' . $this->connection->quoteTableName($tableName))
+                    ->queryScalar();
             } catch (\Throwable) {
                 // Ignore count errors
             }
@@ -99,7 +99,8 @@ final class Yii2DbSchemaProvider implements SchemaProviderInterface
         $quotedName = $this->connection->quoteTableName($tableName);
         $totalCount = (int) $this->connection->createCommand("SELECT COUNT(*) FROM {$quotedName}")->queryScalar();
 
-        $records = $this->connection->createCommand("SELECT * FROM {$quotedName} LIMIT :limit OFFSET :offset")
+        $records = $this->connection
+            ->createCommand("SELECT * FROM {$quotedName} LIMIT :limit OFFSET :offset")
             ->bindValues([':limit' => $limit, ':offset' => $offset])
             ->queryAll();
 

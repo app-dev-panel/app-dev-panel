@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy;
+use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
-use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
@@ -47,7 +47,8 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
             $collectorRefs[] = new Reference($id);
         }
 
-        $container->register(Debugger::class, Debugger::class)
+        $container
+            ->register(Debugger::class, Debugger::class)
             ->setArguments([
                 new Reference(DebuggerIdGenerator::class),
                 new Reference(StorageInterface::class),
@@ -78,7 +79,8 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
             return;
         }
 
-        $container->register(LoggerInterfaceProxy::class, LoggerInterfaceProxy::class)
+        $container
+            ->register(LoggerInterfaceProxy::class, LoggerInterfaceProxy::class)
             ->setDecoratedService($serviceId)
             ->setArguments([
                 new Reference(LoggerInterfaceProxy::class . '.inner'),
@@ -100,7 +102,8 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
             return;
         }
 
-        $container->register(SymfonyEventDispatcherProxy::class, SymfonyEventDispatcherProxy::class)
+        $container
+            ->register(SymfonyEventDispatcherProxy::class, SymfonyEventDispatcherProxy::class)
             ->setDecoratedService('event_dispatcher')
             ->setArguments([
                 new Reference(SymfonyEventDispatcherProxy::class . '.inner'),
@@ -114,7 +117,8 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
             return;
         }
 
-        $container->register(HttpClientInterfaceProxy::class, HttpClientInterfaceProxy::class)
+        $container
+            ->register(HttpClientInterfaceProxy::class, HttpClientInterfaceProxy::class)
             ->setDecoratedService(ClientInterface::class)
             ->setArguments([
                 new Reference(HttpClientInterfaceProxy::class . '.inner'),

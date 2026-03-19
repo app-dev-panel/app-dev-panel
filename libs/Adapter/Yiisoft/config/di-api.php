@@ -11,8 +11,6 @@ use AppDevPanel\Adapter\Yiisoft\Api\AliasPathResolver;
 use AppDevPanel\Adapter\Yiisoft\Api\YiiApiMiddleware;
 use AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider;
 use AppDevPanel\Api\ApiApplication;
-use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
-use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
@@ -34,6 +32,8 @@ use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
+use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\PathResolverInterface;
@@ -67,27 +67,26 @@ $authToken = $apiConfig['authToken'] ?? '';
 
 return [
     // PSR-17 factories
-    ResponseFactoryInterface::class => static fn () => new HttpFactory(),
-    StreamFactoryInterface::class => static fn () => new HttpFactory(),
-    UriFactoryInterface::class => static fn () => new HttpFactory(),
+    ResponseFactoryInterface::class => static fn() => new HttpFactory(),
+    StreamFactoryInterface::class => static fn() => new HttpFactory(),
+    UriFactoryInterface::class => static fn() => new HttpFactory(),
 
     // PSR-18 HTTP client
-    ClientInterface::class => static fn () => new Client(['timeout' => 10]),
+    ClientInterface::class => static fn() => new Client(['timeout' => 10]),
 
     // Path resolver
-    PathResolverInterface::class => static fn (Aliases $aliases) => new AliasPathResolver($aliases),
+    PathResolverInterface::class => static fn(Aliases $aliases) => new AliasPathResolver($aliases),
 
     // JSON response factory
-    JsonResponseFactoryInterface::class => static fn (
+    JsonResponseFactoryInterface::class => static fn(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
     ) => new JsonResponseFactory($responseFactory, $streamFactory),
 
     // Service registry
-    ServiceRegistryInterface::class => static fn (ContainerInterface $container) => new FileServiceRegistry(
-        $container->get(Aliases::class)->get(
-            $params['app-dev-panel/yiisoft']['path'] ?? '@runtime/debug',
-        ) . '/services',
+    ServiceRegistryInterface::class => static fn(ContainerInterface $container) => new FileServiceRegistry(
+        $container->get(Aliases::class)->get($params['app-dev-panel/yiisoft']['path'] ?? '@runtime/debug')
+            . '/services',
     ),
 
     // Schema provider (database inspection)
@@ -101,30 +100,29 @@ return [
     },
 
     // Database controller
-    DatabaseController::class => static fn (
+    DatabaseController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         SchemaProviderInterface $schemaProvider,
     ) => new DatabaseController($jsonResponseFactory, $schemaProvider),
 
     // Collector repository
-    CollectorRepositoryInterface::class => static fn (StorageInterface $storage) => new CollectorRepository($storage),
+    CollectorRepositoryInterface::class => static fn(StorageInterface $storage) => new CollectorRepository($storage),
 
     // Middleware
-    IpFilterMiddleware::class => static fn (
+    IpFilterMiddleware::class => static fn(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
     ) => new IpFilterMiddleware($responseFactory, $streamFactory, $allowedIps),
 
-    TokenAuthMiddleware::class => static fn (
+    TokenAuthMiddleware::class => static fn(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
     ) => new TokenAuthMiddleware($responseFactory, $streamFactory, $authToken),
 
-    ResponseDataWrapper::class => static fn (
-        JsonResponseFactoryInterface $jsonResponseFactory,
-    ) => new ResponseDataWrapper($jsonResponseFactory),
+    ResponseDataWrapper::class =>
+        static fn(JsonResponseFactoryInterface $jsonResponseFactory) => new ResponseDataWrapper($jsonResponseFactory),
 
-    InspectorProxyMiddleware::class => static fn (
+    InspectorProxyMiddleware::class => static fn(
         ServiceRegistryInterface $serviceRegistry,
         ClientInterface $httpClient,
         ResponseFactoryInterface $responseFactory,
@@ -133,57 +131,57 @@ return [
     ) => new InspectorProxyMiddleware($serviceRegistry, $httpClient, $responseFactory, $streamFactory, $uriFactory),
 
     // Controllers
-    DebugController::class => static fn (
+    DebugController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         CollectorRepositoryInterface $collectorRepository,
         StorageInterface $storage,
         ResponseFactoryInterface $responseFactory,
     ) => new DebugController($jsonResponseFactory, $collectorRepository, $storage, $responseFactory),
 
-    IngestionController::class => static fn (
+    IngestionController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         StorageInterface $storage,
     ) => new IngestionController($jsonResponseFactory, $storage),
 
-    ServiceController::class => static fn (
+    ServiceController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         ServiceRegistryInterface $serviceRegistry,
     ) => new ServiceController($jsonResponseFactory, $serviceRegistry),
 
-    FileController::class => static fn (
+    FileController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         PathResolverInterface $pathResolver,
     ) => new FileController($jsonResponseFactory, $pathResolver),
 
-    GitRepositoryProvider::class => static fn (
-        PathResolverInterface $pathResolver,
-    ) => new GitRepositoryProvider($pathResolver),
+    GitRepositoryProvider::class => static fn(PathResolverInterface $pathResolver) => new GitRepositoryProvider(
+        $pathResolver,
+    ),
 
-    GitController::class => static fn (
+    GitController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         GitRepositoryProvider $gitRepositoryProvider,
     ) => new GitController($jsonResponseFactory, $gitRepositoryProvider),
 
-    ComposerController::class => static fn (
+    ComposerController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         PathResolverInterface $pathResolver,
     ) => new ComposerController($jsonResponseFactory, $pathResolver),
 
-    OpcacheController::class => static fn (
-        JsonResponseFactoryInterface $jsonResponseFactory,
-    ) => new OpcacheController($jsonResponseFactory),
+    OpcacheController::class => static fn(JsonResponseFactoryInterface $jsonResponseFactory) => new OpcacheController(
+        $jsonResponseFactory,
+    ),
 
-    InspectController::class => static fn (
+    InspectController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         ContainerInterface $container,
     ) => new InspectController($jsonResponseFactory, $container),
 
-    CacheController::class => static fn (
+    CacheController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         ContainerInterface $container,
     ) => new CacheController($jsonResponseFactory, $container),
 
-    TranslationController::class => static fn (
+    TranslationController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         ContainerInterface $container,
     ) => new TranslationController($jsonResponseFactory, null, $container),
@@ -197,24 +195,22 @@ return [
         return new CommandController($jsonResponseFactory, $pathResolver, $container, $commandMap);
     },
 
-    RoutingController::class => static fn (
-        JsonResponseFactoryInterface $jsonResponseFactory,
-    ) => new RoutingController($jsonResponseFactory),
+    RoutingController::class => static fn(JsonResponseFactoryInterface $jsonResponseFactory) => new RoutingController(
+        $jsonResponseFactory,
+    ),
 
-    RequestController::class => static fn (
+    RequestController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         CollectorRepositoryInterface $collectorRepository,
     ) => new RequestController($jsonResponseFactory, $collectorRepository),
 
     // ApiApplication
-    ApiApplication::class => static fn (
+    ApiApplication::class => static fn(
         ContainerInterface $container,
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,
     ) => new ApiApplication($container, $responseFactory, $streamFactory),
 
     // Bridge middleware
-    YiiApiMiddleware::class => static fn (
-        ApiApplication $apiApplication,
-    ) => new YiiApiMiddleware($apiApplication),
+    YiiApiMiddleware::class => static fn(ApiApplication $apiApplication) => new YiiApiMiddleware($apiApplication),
 ];

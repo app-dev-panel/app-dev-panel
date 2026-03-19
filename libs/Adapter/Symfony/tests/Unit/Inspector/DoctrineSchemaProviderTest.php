@@ -41,9 +41,13 @@ final class DoctrineSchemaProviderTest extends TestCase
         $nameColumn = new Column('name', new StringType());
         $nameColumn->setLength(255);
 
-        $table = new Table('users', [$idColumn, $nameColumn], [
-            new Index('primary', ['id'], false, true),
-        ]);
+        $table = new Table(
+            'users',
+            [$idColumn, $nameColumn],
+            [
+                new Index('primary', ['id'], false, true),
+            ],
+        );
 
         $schemaManager = $this->createMock(AbstractSchemaManager::class);
         $schemaManager->method('listTables')->willReturn([$table]);
@@ -73,9 +77,13 @@ final class DoctrineSchemaProviderTest extends TestCase
         $idColumn = new Column('id', new IntegerType());
         $nameColumn = new Column('name', new StringType());
 
-        $table = new Table('users', [$idColumn, $nameColumn], [
-            new Index('primary', ['id'], false, true),
-        ]);
+        $table = new Table(
+            'users',
+            [$idColumn, $nameColumn],
+            [
+                new Index('primary', ['id'], false, true),
+            ],
+        );
 
         $schemaManager = $this->createMock(AbstractSchemaManager::class);
         $schemaManager->method('introspectTable')->with('users')->willReturn($table);

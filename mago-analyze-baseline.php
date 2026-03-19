@@ -3730,7 +3730,7 @@ count = 1
 file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 4
+count = 8
 
 [[issues]]
 file = "libs/Testing/src/Command/DebugFixturesCommand.php"

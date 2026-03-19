@@ -63,7 +63,7 @@ final class ModuleIntegrationTest extends TestCase
         $collectors = $module->getCollectorInstances();
         $this->assertNotEmpty($collectors);
 
-        $collectorClasses = array_map(static fn ($c) => $c::class, $collectors);
+        $collectorClasses = array_map(static fn($c) => $c::class, $collectors);
 
         $expectedClasses = [
             TimelineCollector::class,
@@ -125,7 +125,7 @@ final class ModuleIntegrationTest extends TestCase
             'db' => false,
         ]);
 
-        $collectorClasses = array_map(static fn ($c) => $c::class, $module->getCollectorInstances());
+        $collectorClasses = array_map(static fn($c) => $c::class, $module->getCollectorInstances());
 
         $this->assertNotContains(DbCollector::class, $collectorClasses);
         $this->assertContains(LogCollector::class, $collectorClasses);

@@ -81,9 +81,7 @@ final class LoggerProxyIntegrationTest extends TestCase
         $response = new Response('OK', 200);
 
         // 1. Start debugger via kernel.request
-        $httpSubscriber->onKernelRequest(
-            new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST),
-        );
+        $httpSubscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
 
         // 2. Application code logs some messages
         $logger->info('User logged in', ['user_id' => 42]);
@@ -95,7 +93,10 @@ final class LoggerProxyIntegrationTest extends TestCase
         $this->assertNotEmpty($collected, 'LogCollector should have captured log entries');
 
         // Filter out any internal debugger logs (e.g. "Debugger: startup")
-        $appLogs = array_values(array_filter($collected, static fn (array $entry) => !str_starts_with((string) $entry['message'], 'Debugger:')));
+        $appLogs = array_values(array_filter(
+            $collected,
+            static fn(array $entry) => !str_starts_with((string) $entry['message'], 'Debugger:'),
+        ));
 
         $this->assertCount(3, $appLogs, 'Should have 3 application log entries');
         $this->assertSame('info', $appLogs[0]['level']);
@@ -109,9 +110,7 @@ final class LoggerProxyIntegrationTest extends TestCase
         $httpSubscriber->onKernelResponse(
             new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response),
         );
-        $httpSubscriber->onKernelTerminate(
-            new TerminateEvent($kernel, $request, $response),
-        );
+        $httpSubscriber->onKernelTerminate(new TerminateEvent($kernel, $request, $response));
 
         // 5. Check storage contains the log data
         $storage = $container->get(StorageInterface::class);
@@ -136,9 +135,7 @@ final class LoggerProxyIntegrationTest extends TestCase
         $response = new Response('OK', 200);
 
         // 1. Start debugger
-        $httpSubscriber->onKernelRequest(
-            new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST),
-        );
+        $httpSubscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
 
         // 2. Dispatch some events
         $dispatcher->dispatch(new \stdClass(), 'app.user_registered');
@@ -153,9 +150,7 @@ final class LoggerProxyIntegrationTest extends TestCase
         $httpSubscriber->onKernelResponse(
             new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response),
         );
-        $httpSubscriber->onKernelTerminate(
-            new TerminateEvent($kernel, $request, $response),
-        );
+        $httpSubscriber->onKernelTerminate(new TerminateEvent($kernel, $request, $response));
 
         // 5. Check storage
         $storage = $container->get(StorageInterface::class);
@@ -200,14 +195,15 @@ final class LoggerProxyIntegrationTest extends TestCase
 
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = Request::create('/test-logger-service-id', 'GET');
-        $httpSubscriber->onKernelRequest(
-            new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST),
-        );
+        $httpSubscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
 
         $logger->info('Log via logger service ID');
 
         $collected = $logCollector->getCollected();
-        $appLogs = array_values(array_filter($collected, static fn (array $entry) => !str_starts_with((string) $entry['message'], 'Debugger:')));
+        $appLogs = array_values(array_filter(
+            $collected,
+            static fn(array $entry) => !str_starts_with((string) $entry['message'], 'Debugger:'),
+        ));
 
         $this->assertCount(1, $appLogs, 'Logger proxy should intercept via "logger" service ID');
         $this->assertSame('Log via logger service ID', $appLogs[0]['message']);
@@ -223,9 +219,7 @@ final class LoggerProxyIntegrationTest extends TestCase
         // Start debugger so collectors are active
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = Request::create('/test', 'GET');
-        $httpSubscriber->onKernelRequest(
-            new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST),
-        );
+        $httpSubscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
 
         // The proxy wraps our TestLogger. Calling log should reach it.
         // If decoration is broken, the proxy would wrap an abstract interface — instant crash.
