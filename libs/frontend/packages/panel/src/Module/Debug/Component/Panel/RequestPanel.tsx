@@ -135,7 +135,7 @@ const useHeadersFilter = (headers: Array<{name: string; value: string}>) => {
         return headers.filter((h) => h.name.toLowerCase().includes(lower) || h.value.toLowerCase().includes(lower));
     }, [headers, filter]);
 
-    const filterAction = headers.length > 3 ? <FilterInput value={filter} onChange={setFilter} /> : null;
+    const filterAction = <FilterInput value={filter} onChange={setFilter} />;
 
     return {filteredHeaders, filterAction};
 };

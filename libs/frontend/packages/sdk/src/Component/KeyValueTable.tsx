@@ -36,7 +36,7 @@ export const useKeyValueFilter = (rows: KeyValueRow[]) => {
         return rows.filter((row) => matchesFilter(row, filter));
     }, [rows, filter]);
 
-    const filterAction = rows.length > 3 ? <FilterInput value={filter} onChange={setFilter} /> : null;
+    const filterAction = <FilterInput value={filter} onChange={setFilter} />;
 
     return {filteredRows, filterAction};
 };
