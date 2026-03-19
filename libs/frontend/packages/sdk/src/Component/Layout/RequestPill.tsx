@@ -23,6 +23,7 @@ const PillRoot = styled('button')(({theme}) => ({
     fontSize: '13px',
     fontFamily: theme.typography.fontFamily,
     color: theme.palette.text.primary,
+    width: '100%',
     '&:hover': {borderColor: theme.palette.primary.main},
 }));
 
@@ -53,7 +54,15 @@ const Separator = styled('span')(({theme}) => ({color: theme.palette.divider}));
 
 const MethodLabel = styled('span')({fontWeight: 600, fontSize: '11px'});
 
-const PathLabel = styled('span')({fontFamily: primitives.fontFamilyMono, fontSize: '12px'});
+const PathLabel = styled('span')({
+    fontFamily: primitives.fontFamilyMono,
+    fontSize: '12px',
+    flex: 1,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    textAlign: 'left',
+});
 
 const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px'});
 

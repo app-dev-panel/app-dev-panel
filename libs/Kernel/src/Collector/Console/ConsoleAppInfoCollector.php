@@ -86,9 +86,6 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
         return [
             'console' => [
                 'adapter' => $this->adapterName,
-                'php' => [
-                    'version' => PHP_VERSION,
-                ],
                 'request' => [
                     'startTime' => $this->requestProcessingTimeStarted,
                     'processingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted,

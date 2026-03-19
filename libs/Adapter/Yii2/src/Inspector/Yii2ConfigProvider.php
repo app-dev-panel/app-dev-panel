@@ -85,10 +85,9 @@ final class Yii2ConfigProvider
         foreach ($classEvents as $eventName => $handlers) {
             foreach ($handlers as $className => $classHandlers) {
                 $key = $className . '::' . $eventName;
-                $events[$key] = array_map(
-                    static fn (array $handler): string => self::describeHandler($handler[0]),
-                    $classHandlers,
-                );
+                $events[$key] = array_map(static fn(array $handler): string => self::describeHandler(
+                    $handler[0],
+                ), $classHandlers);
             }
         }
 
@@ -96,17 +95,18 @@ final class Yii2ConfigProvider
         $instanceEvents = $this->getInstanceEvents($this->app);
         foreach ($instanceEvents as $eventName => $handlers) {
             $key = $this->app::class . '::' . $eventName . ' (instance)';
-            $events[$key] = array_map(
-                static fn (array $handler): string => self::describeHandler($handler[0]),
-                $handlers,
-            );
+            $events[$key] = array_map(static fn(array $handler): string => self::describeHandler(
+                $handler[0],
+            ), $handlers);
         }
 
         // 3. Behaviors attached to the application.
         $behaviors = $this->app->getBehaviors();
         foreach ($behaviors as $name => $behavior) {
             $events['behavior:' . $name] = [
-                $behavior instanceof Behavior ? $behavior::class : (is_object($behavior) ? $behavior::class : (string) $behavior),
+                $behavior instanceof Behavior
+                    ? $behavior::class
+                    : (is_object($behavior) ? $behavior::class : (string) $behavior),
             ];
         }
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\Tests\Unit\EventSubscriber;
 
-use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
+use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;

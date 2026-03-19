@@ -23,10 +23,17 @@ final class SymfonyRequestCollectorTest extends AbstractCollectorTestCase
      */
     protected function collectTestData(CollectorInterface $collector): void
     {
-        $request = Request::create('/api/users', 'GET', [], [], [], [
-            'REMOTE_ADDR' => '127.0.0.1',
-            'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest',
-        ]);
+        $request = Request::create(
+            '/api/users',
+            'GET',
+            [],
+            [],
+            [],
+            [
+                'REMOTE_ADDR' => '127.0.0.1',
+                'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest',
+            ],
+        );
         $request->attributes->set('_route', 'api_users');
         $request->attributes->set('_controller', 'App\\Controller\\UserController::list');
 

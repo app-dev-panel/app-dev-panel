@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
+use AppDevPanel\Adapter\Yiisoft\Proxy\VarDumperHandlerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\VarDumperCollector;
+use AppDevPanel\Kernel\DebugServer\VarDumperHandler;
 use Psr\Container\ContainerInterface;
 use Yiisoft\VarDumper\Handler\CompositeHandler;
 use Yiisoft\VarDumper\VarDumper;
-use AppDevPanel\Kernel\Collector\VarDumperCollector;
-use AppDevPanel\Adapter\Yiisoft\Proxy\VarDumperHandlerInterfaceProxy;
-use AppDevPanel\Kernel\DebugServer\VarDumperHandler;
 
 /**
  * @var $params array
@@ -31,10 +31,7 @@ return [
         }
 
         VarDumper::setDefaultHandler(
-            new VarDumperHandlerInterfaceProxy(
-                $decorated,
-                $container->get(VarDumperCollector::class),
-            ),
+            new VarDumperHandlerInterfaceProxy($decorated, $container->get(VarDumperCollector::class)),
         );
     },
 ];

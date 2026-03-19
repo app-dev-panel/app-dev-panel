@@ -19,14 +19,7 @@ final class MailerCollectorTest extends AbstractCollectorTestCase
     protected function collectTestData(CollectorInterface $collector): void
     {
         /** @var MailerCollector $collector */
-        $collector->logMessage(
-            'sender@example.com',
-            ['recipient@example.com'],
-            null,
-            null,
-            'Test Subject',
-            true,
-        );
+        $collector->logMessage('sender@example.com', ['recipient@example.com'], null, null, 'Test Subject', true);
         $collector->logMessage(
             ['noreply@app.com' => 'App'],
             ['user@example.com'],

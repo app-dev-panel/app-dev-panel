@@ -13,6 +13,7 @@ export enum CollectorsMap {
     CommandCollector = 'AppDevPanel\\Kernel\\Collector\\Console\\CommandCollector',
     RequestCollector = 'AppDevPanel\\Kernel\\Collector\\Web\\RequestCollector',
     VarDumperCollector = 'AppDevPanel\\Kernel\\Collector\\VarDumperCollector',
+    EnvironmentCollector = 'AppDevPanel\\Kernel\\Collector\\EnvironmentCollector',
 
     // Adapter collectors
     MiddlewareCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Web\\MiddlewareCollector',

@@ -43,12 +43,7 @@ final class DebugLogTarget extends Target
 
             $levelName = self::mapLevel($level);
 
-            $this->logCollector->collect(
-                $levelName,
-                $text,
-                ['category' => $category],
-                '', // line - Yii2 doesn't provide caller file:line per message
-            );
+            $this->logCollector->collect($levelName, $text, ['category' => $category], ''); // line - Yii2 doesn't provide caller file:line per message
         }
     }
 

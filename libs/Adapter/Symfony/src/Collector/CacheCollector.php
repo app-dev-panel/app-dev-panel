@@ -31,8 +31,13 @@ final class CacheCollector implements SummaryCollectorInterface
         private readonly TimelineCollector $timelineCollector,
     ) {}
 
-    public function logCacheOperation(string $pool, string $operation, string $key, bool $hit = false, float $duration = 0.0): void
-    {
+    public function logCacheOperation(
+        string $pool,
+        string $operation,
+        string $key,
+        bool $hit = false,
+        float $duration = 0.0,
+    ): void {
         if (!$this->isActive()) {
             return;
         }

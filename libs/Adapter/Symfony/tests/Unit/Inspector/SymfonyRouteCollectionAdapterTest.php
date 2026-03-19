@@ -16,8 +16,14 @@ final class SymfonyRouteCollectionAdapterTest extends TestCase
     public function testGetRoutesReturnsAdaptedRoutes(): void
     {
         $collection = new RouteCollection();
-        $collection->add('home', new Route('/', defaults: ['_controller' => 'App\\HomeController::index'], methods: ['GET']));
-        $collection->add('api_users', new Route('/api/users', defaults: ['_controller' => 'App\\ApiController::users'], methods: ['GET', 'POST']));
+        $collection->add(
+            'home',
+            new Route('/', defaults: ['_controller' => 'App\\HomeController::index'], methods: ['GET']),
+        );
+        $collection->add(
+            'api_users',
+            new Route('/api/users', defaults: ['_controller' => 'App\\ApiController::users'], methods: ['GET', 'POST']),
+        );
 
         $router = $this->createStub(RouterInterface::class);
         $router->method('getRouteCollection')->willReturn($collection);

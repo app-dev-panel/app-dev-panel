@@ -210,7 +210,9 @@ final class HttpSubscriberTest extends TestCase
 
         // 2. Response
         $response = new Response('{"data":true}', 200);
-        $subscriber->onKernelResponse(new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response));
+        $subscriber->onKernelResponse(
+            new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response),
+        );
 
         // 3. Terminate
         $subscriber->onKernelTerminate(new TerminateEvent($kernel, $request, $response));
@@ -309,7 +311,12 @@ final class HttpSubscriberTest extends TestCase
         $kernel = $this->createMock(HttpKernelInterface::class);
 
         $request = Request::create('/debug/api/data');
-        $event = new ExceptionEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, new \RuntimeException('test'));
+        $event = new ExceptionEvent(
+            $kernel,
+            $request,
+            HttpKernelInterface::MAIN_REQUEST,
+            new \RuntimeException('test'),
+        );
 
         $subscriber->onKernelException($event);
 

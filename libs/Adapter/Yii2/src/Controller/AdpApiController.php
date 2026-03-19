@@ -26,7 +26,8 @@ final class AdpApiController extends Controller
     {
         // Add CORS headers
         $response = \Yii::$app->getResponse();
-        $response->getHeaders()
+        $response
+            ->getHeaders()
             ->set('Access-Control-Allow-Origin', '*')
             ->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
             ->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Debug-Token, X-Requested-With')
@@ -59,11 +60,7 @@ final class AdpApiController extends Controller
         $factory = new Psr17Factory();
 
         $uri = $factory->createUri($yiiRequest->getAbsoluteUrl());
-        $psrRequest = $factory->createServerRequest(
-            $yiiRequest->getMethod(),
-            $uri,
-            $_SERVER,
-        );
+        $psrRequest = $factory->createServerRequest($yiiRequest->getMethod(), $uri, $_SERVER);
 
         // Copy headers
         foreach ($yiiRequest->getHeaders() as $name => $values) {

@@ -7,7 +7,7 @@ import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathPar
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {useDeferredValue, useState} from 'react';
+import {useDeferredValue, useMemo, useState} from 'react';
 
 type Level = 'emergency' | 'alert' | 'critical' | 'error' | 'warning' | 'notice' | 'info' | 'debug';
 type LogEntry = {context: object; level: Level; line: string; message: unknown; time: number};
@@ -32,6 +32,8 @@ const levelColor = (level: string, theme: Theme): string => {
             return theme.palette.text.disabled;
     }
 };
+
+const SEVERITY_ORDER: Level[] = ['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'];
 
 const LogRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(({theme, expanded}) => ({
     display: 'flex',
@@ -64,28 +66,108 @@ const DetailBox = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
+// (severity badge chips are rendered inline via MUI Chip)
+
 export const LogPanel = ({data}: LogPanelProps) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+    const [activeLevels, setActiveLevels] = useState<Set<Level>>(new Set());
 
     if (!data || data.length === 0) {
         return <EmptyState icon="description" title="No logs found" />;
     }
 
-    const filtered = deferredFilter
-        ? data.filter((e) => {
-              const lower = deferredFilter.toLowerCase();
-              return formatMessage(e.message).toLowerCase().includes(lower) || e.level.toLowerCase().includes(lower);
-          })
-        : data;
+    // Count entries per severity level
+    const levelCounts = useMemo(() => {
+        const counts = new Map<Level, number>();
+        for (const entry of data) {
+            counts.set(entry.level, (counts.get(entry.level) || 0) + 1);
+        }
+        return counts;
+    }, [data]);
+
+    const presentLevels = useMemo(
+        () => SEVERITY_ORDER.filter((level) => (levelCounts.get(level) || 0) > 0),
+        [levelCounts],
+    );
+
+    const toggleLevel = (level: Level) => {
+        setActiveLevels((prev) => {
+            const next = new Set(prev);
+            if (next.has(level)) {
+                next.delete(level);
+            } else {
+                next.add(level);
+            }
+            return next;
+        });
+        setExpandedIndex(null);
+    };
+
+    const filtered = useMemo(() => {
+        let result = data;
+
+        // Filter by active severity levels
+        if (activeLevels.size > 0) {
+            result = result.filter((e) => activeLevels.has(e.level));
+        }
+
+        // Filter by text search
+        if (deferredFilter) {
+            const lower = deferredFilter.toLowerCase();
+            result = result.filter(
+                (e) => formatMessage(e.message).toLowerCase().includes(lower) || e.level.toLowerCase().includes(lower),
+            );
+        }
+
+        return result;
+    }, [data, activeLevels, deferredFilter]);
 
     return (
         <Box>
             <SectionTitle
                 action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter logs..." />}
             >{`${filtered.length} log entries`}</SectionTitle>
+
+            {presentLevels.length > 1 && (
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                    {presentLevels.map((level) => {
+                        const color = levelColor(level, theme);
+                        const isActive = activeLevels.has(level);
+                        return (
+                            <Chip
+                                key={level}
+                                label={`${level.toUpperCase()} (${levelCounts.get(level)})`}
+                                size="small"
+                                onClick={() => toggleLevel(level)}
+                                variant={isActive ? 'filled' : 'outlined'}
+                                sx={{
+                                    fontSize: '11px',
+                                    height: 24,
+                                    borderRadius: 1,
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    borderColor: color,
+                                    ...(isActive
+                                        ? {backgroundColor: color, color: theme.palette.common.white}
+                                        : {color}),
+                                }}
+                            />
+                        );
+                    })}
+                    {activeLevels.size > 0 && (
+                        <Chip
+                            label="Clear"
+                            size="small"
+                            onClick={() => setActiveLevels(new Set())}
+                            variant="outlined"
+                            sx={{fontSize: '11px', height: 24, borderRadius: 1}}
+                        />
+                    )}
+                </Box>
+            )}
 
             {filtered.map((entry, index) => {
                 const expanded = expandedIndex === index;

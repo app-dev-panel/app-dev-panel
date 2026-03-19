@@ -3142,13 +3142,13 @@ count = 3
 file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
-count = 7
+count = 5
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
-count = 6
+count = 3
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
@@ -3166,6 +3166,36 @@ count = 1
 file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
 code = "non-existent-method"
 message = 'Method `markapplicationstarted` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/EnvironmentCollectorTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/EnvironmentCollectorTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `sort`: expected `array<array-key, ('T.sort() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/EnvironmentCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 17
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/EnvironmentCollectorTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/EnvironmentCollectorTest.php"
+code = "non-existent-method"
+message = 'Method `collectfromrequest` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
 count = 1
 
 [[issues]]
@@ -3700,7 +3730,7 @@ count = 1
 file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 4
+count = 8
 
 [[issues]]
 file = "libs/Testing/src/Command/DebugFixturesCommand.php"

@@ -21,12 +21,9 @@ export type DebugEntry = {
     http?: {count: number; totalTime: number};
     fs_stream?: {read?: number; write?: number; mkdir?: number};
     http_stream?: [];
-    web?: {php: {version: string}; request: {startTime: number; processingTime: number}; memory: {peakUsage: number}};
-    console?: {
-        php: {version: string};
-        request: {startTime: number; processingTime: number};
-        memory: {peakUsage: number};
-    };
+    environment?: {php: {version: string; sapi: string}; os: string};
+    web?: {adapter?: string; request: {startTime: number; processingTime: number}; memory: {peakUsage: number}};
+    console?: {adapter?: string; request: {startTime: number; processingTime: number}; memory: {peakUsage: number}};
     request?: {url: string; path: string; query: string; method: HTTPMethod; isAjax: boolean; userIp: string};
     command?: {exitCode: number; class: string; input: string; name: string};
     response?: {statusCode: number};

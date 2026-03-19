@@ -23,9 +23,9 @@ final class DebugLogTargetTest extends TestCase
 
         // Simulate Yii logger flushing messages to the target
         $target->messages = [
-            ['Test error message', Logger::LEVEL_ERROR, 'app', microtime(true)],
-            ['Test warning message', Logger::LEVEL_WARNING, 'app\models', microtime(true)],
-            ['Test info message', Logger::LEVEL_INFO, 'app\controllers', microtime(true)],
+            ['Test error message',   Logger::LEVEL_ERROR,   'app',             microtime(true)],
+            ['Test warning message', Logger::LEVEL_WARNING, 'app\models',      microtime(true)],
+            ['Test info message',    Logger::LEVEL_INFO,    'app\controllers', microtime(true)],
         ];
 
         $target->export();
@@ -51,10 +51,10 @@ final class DebugLogTargetTest extends TestCase
         $target = new DebugLogTarget($logCollector);
 
         $target->messages = [
-            ['Error', Logger::LEVEL_ERROR, 'test', microtime(true)],
+            ['Error',   Logger::LEVEL_ERROR,   'test', microtime(true)],
             ['Warning', Logger::LEVEL_WARNING, 'test', microtime(true)],
-            ['Info', Logger::LEVEL_INFO, 'test', microtime(true)],
-            ['Trace', Logger::LEVEL_TRACE, 'test', microtime(true)],
+            ['Info',    Logger::LEVEL_INFO,    'test', microtime(true)],
+            ['Trace',   Logger::LEVEL_TRACE,   'test', microtime(true)],
             ['Profile', Logger::LEVEL_PROFILE, 'test', microtime(true)],
         ];
 

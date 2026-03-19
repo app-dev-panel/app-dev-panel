@@ -139,7 +139,10 @@ type MatchedEntry = {entry: DebugEntry; indices: number[]; searchText: string};
 // Styled components
 // ---------------------------------------------------------------------------
 
-const EntryRow = styled(Box, {shouldForwardProp: (p) => p !== 'active'})<{active?: boolean}>(({theme, active}) => ({
+const EntryRow = styled(Box, {shouldForwardProp: (p) => p !== 'active' && p !== 'highlighted'})<{
+    active?: boolean;
+    highlighted?: boolean;
+}>(({theme, active, highlighted}) => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(1.25),
@@ -147,7 +150,7 @@ const EntryRow = styled(Box, {shouldForwardProp: (p) => p !== 'active'})<{active
     cursor: 'pointer',
     fontFamily: primitives.fontFamilyMono,
     fontSize: '13px',
-    backgroundColor: active ? theme.palette.primary.light : 'transparent',
+    backgroundColor: highlighted ? theme.palette.action.selected : active ? theme.palette.primary.light : 'transparent',
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
@@ -161,9 +164,14 @@ const PathLabel = styled('span')({
     whiteSpace: 'nowrap',
 });
 
-const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px'});
+const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px', flexShrink: 0});
 
-const TimeLabel = styled('span')(({theme}) => ({fontSize: '11px', color: theme.palette.text.disabled}));
+const TimeLabel = styled('span')(({theme}) => ({
+    fontSize: '11px',
+    color: theme.palette.text.disabled,
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
+}));
 
 const statusColor = (status: number, theme: Theme): string => {
     if (status >= 500) return theme.palette.error.main;
@@ -336,13 +344,16 @@ export const EntrySelector = ({
     const theme = useTheme();
     const [filter, setFilter] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
+    const listRef = useRef<HTMLDivElement>(null);
     const [filterState, setFilterState] = useState<EntryFilterState>(loadFilterState);
     const [filterConfigAnchor, setFilterConfigAnchor] = useState<HTMLElement | null>(null);
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
     // Auto-focus input when popover opens
     useEffect(() => {
         if (open) {
             setFilter('');
+            setHighlightedIndex(-1);
             // Small delay to let Popover render
             const timer = setTimeout(() => inputRef.current?.focus(), 50);
             return () => clearTimeout(timer);
@@ -384,15 +395,50 @@ export const EntrySelector = ({
         return results;
     }, [filteredEntries, filter]);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         onClose();
         setFilter('');
-    };
+    }, [onClose]);
 
-    const handleSelect = (entry: DebugEntry) => {
-        onSelect(entry);
-        handleClose();
-    };
+    const handleSelect = useCallback(
+        (entry: DebugEntry) => {
+            onSelect(entry);
+            handleClose();
+        },
+        [onSelect, handleClose],
+    );
+
+    // Reset highlight when matched list changes
+    useEffect(() => {
+        setHighlightedIndex(-1);
+    }, [matched.length]);
+
+    // Scroll highlighted row into view
+    useEffect(() => {
+        if (highlightedIndex < 0 || !listRef.current) return;
+        const rows = listRef.current.querySelectorAll('[data-entry-row]');
+        rows[highlightedIndex]?.scrollIntoView({block: 'nearest'});
+    }, [highlightedIndex]);
+
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setHighlightedIndex((prev) => (prev < matched.length - 1 ? prev + 1 : prev));
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (highlightedIndex >= 0 && highlightedIndex < matched.length) {
+                    handleSelect(matched[highlightedIndex].entry);
+                }
+            } else if (e.key === 'Escape') {
+                handleClose();
+            }
+        },
+        [matched, highlightedIndex, handleSelect, handleClose],
+    );
 
     const hasConditions = filterState.conditions.length > 0;
 
@@ -406,7 +452,8 @@ export const EntrySelector = ({
             slotProps={{
                 paper: {
                     sx: {
-                        width: 520,
+                        width: anchorEl ? anchorEl.offsetWidth : 520,
+                        minWidth: 420,
                         maxHeight: 440,
                         mt: 0.5,
                         borderRadius: 1.5,
@@ -426,6 +473,7 @@ export const EntrySelector = ({
                     placeholder="Search by URL, method, or command..."
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
+                    onKeyDown={handleKeyDown}
                 />
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mr: 1}}>
                     {hasConditions && (
@@ -458,14 +506,15 @@ export const EntrySelector = ({
                 filterState={filterState}
                 onChange={setFilterState}
             />
-            <Box sx={{overflowY: 'auto', maxHeight: 360}}>
+            <Box ref={listRef} sx={{overflowY: 'auto', maxHeight: 360}}>
                 {matched.length === 0 && (
                     <Box sx={{textAlign: 'center', py: 3, color: 'text.disabled'}}>
                         <Typography variant="body2">No entries match "{filter}"</Typography>
                     </Box>
                 )}
-                {matched.map(({entry, indices, searchText}) => {
+                {matched.map(({entry, indices, searchText}, idx) => {
                     const active = entry.id === currentEntryId;
+                    const isHighlighted = idx === highlightedIndex;
                     if (isDebugEntryAboutWeb(entry)) {
                         // Split indices: method part vs path part
                         const methodLen = entry.request.method.length;
@@ -473,7 +522,13 @@ export const EntrySelector = ({
                         const pathIndices = indices.filter((i) => i > methodLen).map((i) => i - methodLen - 1);
 
                         return (
-                            <EntryRow key={entry.id} active={active} onClick={() => handleSelect(entry)}>
+                            <EntryRow
+                                key={entry.id}
+                                data-entry-row
+                                active={active}
+                                highlighted={isHighlighted}
+                                onClick={() => handleSelect(entry)}
+                            >
                                 <MethodLabel sx={{color: methodColor(entry.request.method, theme)}}>
                                     <HighlightedText text={entry.request.method} indices={methodIndices} />
                                 </MethodLabel>
@@ -516,7 +571,13 @@ export const EntrySelector = ({
                     if (isDebugEntryAboutConsole(entry)) {
                         const commandText = entry.command?.input ?? 'Unknown';
                         return (
-                            <EntryRow key={entry.id} active={active} onClick={() => handleSelect(entry)}>
+                            <EntryRow
+                                key={entry.id}
+                                data-entry-row
+                                active={active}
+                                highlighted={isHighlighted}
+                                onClick={() => handleSelect(entry)}
+                            >
                                 <Icon sx={{fontSize: 14, color: 'text.disabled'}}>terminal</Icon>
                                 <PathLabel>
                                     <HighlightedText text={commandText} indices={indices} />
@@ -558,7 +619,13 @@ export const EntrySelector = ({
                         );
                     }
                     return (
-                        <EntryRow key={entry.id} active={active} onClick={() => handleSelect(entry)}>
+                        <EntryRow
+                            key={entry.id}
+                            data-entry-row
+                            active={active}
+                            highlighted={isHighlighted}
+                            onClick={() => handleSelect(entry)}
+                        >
                             <PathLabel>
                                 <HighlightedText text={entry.id} indices={indices} />
                             </PathLabel>

@@ -23,6 +23,7 @@ use PHPUnit\Framework\TestCase;
 final class ConsoleProcessIntegrationTest extends TestCase
 {
     private const string PLAYGROUND_DIR = __DIR__ . '/../../../../../playground/symfony-basic-app';
+
     private string $debugStoragePath;
 
     protected function setUp(): void
@@ -34,7 +35,9 @@ final class ConsoleProcessIntegrationTest extends TestCase
 
         $vendorPath = realpath(self::PLAYGROUND_DIR . '/vendor/autoload.php');
         if ($vendorPath === false) {
-            $this->markTestSkipped('Playground vendor not installed. Run: cd playground/symfony-basic-app && composer install');
+            $this->markTestSkipped(
+                'Playground vendor not installed. Run: cd playground/symfony-basic-app && composer install',
+            );
         }
 
         $this->debugStoragePath = realpath(self::PLAYGROUND_DIR) . '/var/debug';

@@ -25,14 +25,8 @@ final class MailerCollector implements CollectorInterface, SummaryCollectorInter
         private readonly TimelineCollector $timeline,
     ) {}
 
-    public function logMessage(
-        mixed $from,
-        mixed $to,
-        mixed $cc,
-        mixed $bcc,
-        string $subject,
-        bool $isSuccessful,
-    ): void {
+    public function logMessage(mixed $from, mixed $to, mixed $cc, mixed $bcc, string $subject, bool $isSuccessful): void
+    {
         if (!$this->isActive()) {
             return;
         }

@@ -141,9 +141,9 @@ final class ApiEndpointTest extends TestCase
         $module = $this->createBootstrappedModule();
         $debugId = $this->simulateWebRequest($module, 'POST', '/api/submit', 201);
 
-        $envelope = $this->decodeEnvelope(
-            $this->apiGet("/debug/api/view/{$debugId}?collector=" . urlencode(RequestCollector::class)),
-        );
+        $envelope = $this->decodeEnvelope($this->apiGet(
+            "/debug/api/view/{$debugId}?collector=" . urlencode(RequestCollector::class),
+        ));
         $this->assertTrue($envelope['success']);
 
         $data = $envelope['data'];
@@ -170,9 +170,9 @@ final class ApiEndpointTest extends TestCase
 
         $debugger->shutdown();
 
-        $envelope = $this->decodeEnvelope(
-            $this->apiGet("/debug/api/view/{$debugId}?collector=" . urlencode(LogCollector::class)),
-        );
+        $envelope = $this->decodeEnvelope($this->apiGet(
+            "/debug/api/view/{$debugId}?collector=" . urlencode(LogCollector::class),
+        ));
         $this->assertTrue($envelope['success']);
 
         $logs = $envelope['data'];
@@ -207,9 +207,9 @@ final class ApiEndpointTest extends TestCase
 
         $debugger->shutdown();
 
-        $envelope = $this->decodeEnvelope(
-            $this->apiGet("/debug/api/view/{$debugId}?collector=" . urlencode(DbCollector::class)),
-        );
+        $envelope = $this->decodeEnvelope($this->apiGet(
+            "/debug/api/view/{$debugId}?collector=" . urlencode(DbCollector::class),
+        ));
         $this->assertTrue($envelope['success']);
 
         $data = $envelope['data'];
@@ -242,9 +242,9 @@ final class ApiEndpointTest extends TestCase
 
         $debugger->shutdown();
 
-        $envelope = $this->decodeEnvelope(
-            $this->apiGet("/debug/api/view/{$debugId}?collector=" . urlencode(ExceptionCollector::class)),
-        );
+        $envelope = $this->decodeEnvelope($this->apiGet(
+            "/debug/api/view/{$debugId}?collector=" . urlencode(ExceptionCollector::class),
+        ));
         $this->assertTrue($envelope['success']);
 
         $exceptions = $envelope['data'];
@@ -265,20 +265,13 @@ final class ApiEndpointTest extends TestCase
 
         /** @var MailerCollector $mailerCollector */
         $mailerCollector = $module->getCollector(MailerCollector::class);
-        $mailerCollector->logMessage(
-            'noreply@example.com',
-            ['user@example.com'],
-            [],
-            [],
-            'Welcome!',
-            true,
-        );
+        $mailerCollector->logMessage('noreply@example.com', ['user@example.com'], [], [], 'Welcome!', true);
 
         $debugger->shutdown();
 
-        $envelope = $this->decodeEnvelope(
-            $this->apiGet("/debug/api/view/{$debugId}?collector=" . urlencode(MailerCollector::class)),
-        );
+        $envelope = $this->decodeEnvelope($this->apiGet(
+            "/debug/api/view/{$debugId}?collector=" . urlencode(MailerCollector::class),
+        ));
         $this->assertTrue($envelope['success']);
 
         $data = $envelope['data'];
@@ -373,7 +366,9 @@ final class ApiEndpointTest extends TestCase
         $this->createBootstrappedModule();
         $apiApp = \Yii::$container->get(\AppDevPanel\Api\ApiApplication::class);
 
-        $request = $this->psr17->createServerRequest('GET', 'http://localhost/debug/api/', ['REMOTE_ADDR' => '10.0.0.1']);
+        $request = $this->psr17->createServerRequest('GET', 'http://localhost/debug/api/', [
+            'REMOTE_ADDR' => '10.0.0.1',
+        ]);
         $response = $apiApp->handle($request);
 
         $this->assertSame(403, $response->getStatusCode());

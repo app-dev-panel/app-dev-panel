@@ -22,6 +22,8 @@ use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Http\JsonResponseFactory;
+use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -35,8 +37,6 @@ use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
-use AppDevPanel\Api\Http\JsonResponseFactory;
-use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
@@ -215,53 +215,73 @@ class Module extends \yii\base\Module implements BootstrapInterface
         \Yii::$container->setSingleton(UriFactoryInterface::class, $httpFactory);
 
         if (!\Yii::$container->has(ClientInterface::class)) {
-            \Yii::$container->setSingleton(ClientInterface::class, static fn () => new Client(['timeout' => 10]));
+            \Yii::$container->setSingleton(ClientInterface::class, static fn() => new Client(['timeout' => 10]));
         }
 
         $basePath = \Yii::getAlias('@app');
         $runtimePath = \Yii::getAlias('@runtime');
 
-        \Yii::$container->setSingleton(PathResolverInterface::class, static fn () => new PathResolver($basePath, $runtimePath));
-        \Yii::$container->setSingleton(JsonResponseFactoryInterface::class, static fn () => new JsonResponseFactory(
-            \Yii::$container->get(ResponseFactoryInterface::class),
-            \Yii::$container->get(StreamFactoryInterface::class),
-        ));
-        \Yii::$container->setSingleton(ServiceRegistryInterface::class, static fn () => new FileServiceRegistry($storagePath . '/services'));
-        \Yii::$container->setSingleton(CollectorRepositoryInterface::class, static fn () => new CollectorRepository(
-            \Yii::$container->get(StorageInterface::class),
-        ));
+        \Yii::$container->setSingleton(
+            PathResolverInterface::class,
+            static fn() => new PathResolver($basePath, $runtimePath),
+        );
+        \Yii::$container->setSingleton(
+            JsonResponseFactoryInterface::class,
+            static fn() => new JsonResponseFactory(
+                \Yii::$container->get(ResponseFactoryInterface::class),
+                \Yii::$container->get(StreamFactoryInterface::class),
+            ),
+        );
+        \Yii::$container->setSingleton(
+            ServiceRegistryInterface::class,
+            static fn() => new FileServiceRegistry($storagePath . '/services'),
+        );
+        \Yii::$container->setSingleton(
+            CollectorRepositoryInterface::class,
+            static fn() => new CollectorRepository(\Yii::$container->get(StorageInterface::class)),
+        );
 
         // Middleware: ResponseDataWrapper (wraps JSON responses, catches NotFoundException → 404)
-        \Yii::$container->setSingleton(ResponseDataWrapper::class, static fn () => new ResponseDataWrapper(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-        ));
+        \Yii::$container->setSingleton(
+            ResponseDataWrapper::class,
+            static fn() => new ResponseDataWrapper(\Yii::$container->get(JsonResponseFactoryInterface::class)),
+        );
 
         // Middleware: IpFilterMiddleware
         $allowedIps = $this->allowedIps;
-        \Yii::$container->setSingleton(IpFilterMiddleware::class, static fn () => new IpFilterMiddleware(
-            \Yii::$container->get(ResponseFactoryInterface::class),
-            \Yii::$container->get(StreamFactoryInterface::class),
-            $allowedIps,
-        ));
+        \Yii::$container->setSingleton(
+            IpFilterMiddleware::class,
+            static fn() => new IpFilterMiddleware(
+                \Yii::$container->get(ResponseFactoryInterface::class),
+                \Yii::$container->get(StreamFactoryInterface::class),
+                $allowedIps,
+            ),
+        );
 
         // Middleware: InspectorProxyMiddleware (proxies /inspect/api to external services)
-        \Yii::$container->setSingleton(InspectorProxyMiddleware::class, static fn () => new InspectorProxyMiddleware(
-            \Yii::$container->get(ServiceRegistryInterface::class),
-            \Yii::$container->get(ClientInterface::class),
-            \Yii::$container->get(ResponseFactoryInterface::class),
-            \Yii::$container->get(StreamFactoryInterface::class),
-            \Yii::$container->get(UriFactoryInterface::class),
-        ));
+        \Yii::$container->setSingleton(
+            InspectorProxyMiddleware::class,
+            static fn() => new InspectorProxyMiddleware(
+                \Yii::$container->get(ServiceRegistryInterface::class),
+                \Yii::$container->get(ClientInterface::class),
+                \Yii::$container->get(ResponseFactoryInterface::class),
+                \Yii::$container->get(StreamFactoryInterface::class),
+                \Yii::$container->get(UriFactoryInterface::class),
+            ),
+        );
 
         // Schema provider
         if (isset(\Yii::$app->db)) {
-            \Yii::$container->setSingleton(SchemaProviderInterface::class, static fn () => new Yii2DbSchemaProvider(\Yii::$app->db));
+            \Yii::$container->setSingleton(
+                SchemaProviderInterface::class,
+                static fn() => new Yii2DbSchemaProvider(\Yii::$app->db),
+            );
         } else {
             \Yii::$container->setSingleton(SchemaProviderInterface::class, NullSchemaProvider::class);
         }
 
         // Config provider
-        \Yii::$container->setSingleton(Yii2ConfigProvider::class, static fn () => new Yii2ConfigProvider(\Yii::$app));
+        \Yii::$container->setSingleton(Yii2ConfigProvider::class, static fn() => new Yii2ConfigProvider(\Yii::$app));
         \Yii::$container->set('config', Yii2ConfigProvider::class);
 
         // PSR-11 Container bridge — wraps Yii 2 container as PSR ContainerInterface.
@@ -277,7 +297,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 return \Yii::$container->has($id);
             }
         };
-        \Yii::$container->setSingleton(\Psr\Container\ContainerInterface::class, static fn () => $containerBridge);
+        \Yii::$container->setSingleton(\Psr\Container\ContainerInterface::class, static fn() => $containerBridge);
 
         // API Application
         \Yii::$container->setSingleton(ApiApplication::class, static function () use ($containerBridge) {
@@ -290,72 +310,105 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         // Inspector controllers — explicit registration to avoid auto-wiring issues.
         // Each adapter must register these (same pattern as Yiisoft/Symfony adapters).
-        \Yii::$container->setSingleton(FileController::class, static fn () => new FileController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-            \Yii::$container->get(PathResolverInterface::class),
-        ));
+        \Yii::$container->setSingleton(
+            FileController::class,
+            static fn() => new FileController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(PathResolverInterface::class),
+            ),
+        );
 
-        $routeCollection = ($app instanceof WebApplication) ? new Yii2RouteCollection($app->getUrlManager()) : null;
-        \Yii::$container->setSingleton(RoutingController::class, static fn () => new RoutingController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-            $routeCollection,
-        ));
+        $routeCollection = $app instanceof WebApplication ? new Yii2RouteCollection($app->getUrlManager()) : null;
+        \Yii::$container->setSingleton(
+            RoutingController::class,
+            static fn() => new RoutingController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                $routeCollection,
+            ),
+        );
 
         $appParams = $app?->params ?? [];
-        \Yii::$container->setSingleton(InspectController::class, static fn () => new InspectController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-            $containerBridge,
-            $appParams,
-        ));
+        \Yii::$container->setSingleton(
+            InspectController::class,
+            static fn() => new InspectController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                $containerBridge,
+                $appParams,
+            ),
+        );
 
-        \Yii::$container->setSingleton(DatabaseController::class, static fn () => new DatabaseController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-            \Yii::$container->get(SchemaProviderInterface::class),
-        ));
+        \Yii::$container->setSingleton(
+            DatabaseController::class,
+            static fn() => new DatabaseController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(SchemaProviderInterface::class),
+            ),
+        );
 
-        \Yii::$container->setSingleton(GitRepositoryProvider::class, static fn () => new GitRepositoryProvider(
-            \Yii::$container->get(PathResolverInterface::class),
-        ));
-        \Yii::$container->setSingleton(GitController::class, static fn () => new GitController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-            \Yii::$container->get(GitRepositoryProvider::class),
-        ));
+        \Yii::$container->setSingleton(
+            GitRepositoryProvider::class,
+            static fn() => new GitRepositoryProvider(\Yii::$container->get(PathResolverInterface::class)),
+        );
+        \Yii::$container->setSingleton(
+            GitController::class,
+            static fn() => new GitController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(GitRepositoryProvider::class),
+            ),
+        );
 
-        \Yii::$container->setSingleton(ServiceController::class, static fn () => new ServiceController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-            \Yii::$container->get(ServiceRegistryInterface::class),
-        ));
+        \Yii::$container->setSingleton(
+            ServiceController::class,
+            static fn() => new ServiceController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(ServiceRegistryInterface::class),
+            ),
+        );
 
-        \Yii::$container->setSingleton(CacheController::class, static fn () => new CacheController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-            $containerBridge,
-        ));
+        \Yii::$container->setSingleton(
+            CacheController::class,
+            static fn() => new CacheController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                $containerBridge,
+            ),
+        );
 
-        \Yii::$container->setSingleton(CommandController::class, static fn () => new CommandController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-            \Yii::$container->get(PathResolverInterface::class),
-            $containerBridge,
-        ));
+        \Yii::$container->setSingleton(
+            CommandController::class,
+            static fn() => new CommandController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(PathResolverInterface::class),
+                $containerBridge,
+            ),
+        );
 
-        \Yii::$container->setSingleton(ComposerController::class, static fn () => new ComposerController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-            \Yii::$container->get(PathResolverInterface::class),
-        ));
+        \Yii::$container->setSingleton(
+            ComposerController::class,
+            static fn() => new ComposerController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(PathResolverInterface::class),
+            ),
+        );
 
-        \Yii::$container->setSingleton(RequestController::class, static fn () => new RequestController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-            \Yii::$container->get(ClientInterface::class),
-            \Yii::$container->get(ResponseFactoryInterface::class),
-            \Yii::$container->get(StreamFactoryInterface::class),
-        ));
+        \Yii::$container->setSingleton(
+            RequestController::class,
+            static fn() => new RequestController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(ClientInterface::class),
+                \Yii::$container->get(ResponseFactoryInterface::class),
+                \Yii::$container->get(StreamFactoryInterface::class),
+            ),
+        );
 
-        \Yii::$container->setSingleton(TranslationController::class, static fn () => new TranslationController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-        ));
+        \Yii::$container->setSingleton(
+            TranslationController::class,
+            static fn() => new TranslationController(\Yii::$container->get(JsonResponseFactoryInterface::class)),
+        );
 
-        \Yii::$container->setSingleton(OpcacheController::class, static fn () => new OpcacheController(
-            \Yii::$container->get(JsonResponseFactoryInterface::class),
-        ));
+        \Yii::$container->setSingleton(
+            OpcacheController::class,
+            static fn() => new OpcacheController(\Yii::$container->get(JsonResponseFactoryInterface::class)),
+        );
     }
 
     private function registerCollectors(): void
@@ -463,8 +516,16 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 $this->getCollector(ExceptionCollector::class),
             );
 
-            Event::on(ConsoleApplication::class, ConsoleApplication::EVENT_BEFORE_REQUEST, [$listener, 'onBeforeRequest']);
-            Event::on(ConsoleApplication::class, ConsoleApplication::EVENT_AFTER_REQUEST, [$listener, 'onAfterRequest']);
+            Event::on(
+                ConsoleApplication::class,
+                ConsoleApplication::EVENT_BEFORE_REQUEST,
+                [$listener, 'onBeforeRequest'],
+            );
+            Event::on(
+                ConsoleApplication::class,
+                ConsoleApplication::EVENT_AFTER_REQUEST,
+                [$listener, 'onAfterRequest'],
+            );
         }
 
         // Register event profiling if EventCollector is active
@@ -582,7 +643,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
         }
 
         // Hook into Yii2's DB connection event
-        Event::on(\yii\db\Connection::class, \yii\db\Connection::EVENT_AFTER_OPEN, static function () use ($dbCollector): void {
+        Event::on(\yii\db\Connection::class, \yii\db\Connection::EVENT_AFTER_OPEN, static function () use (
+            $dbCollector,
+        ): void {
             $dbCollector->logConnection();
         });
 
@@ -602,17 +665,21 @@ class Module extends \yii\base\Module implements BootstrapInterface
             return;
         }
 
-        Event::on(\yii\mail\BaseMailer::class, \yii\mail\BaseMailer::EVENT_AFTER_SEND, static function (\yii\mail\MailEvent $event) use ($mailerCollector): void {
-            $message = $event->message;
-            $mailerCollector->logMessage(
-                $message->getFrom(),
-                $message->getTo(),
-                $message->getCc(),
-                $message->getBcc(),
-                $message->getSubject() ?? '',
-                $event->isSuccessful,
-            );
-        });
+        Event::on(
+            \yii\mail\BaseMailer::class,
+            \yii\mail\BaseMailer::EVENT_AFTER_SEND,
+            static function (\yii\mail\MailEvent $event) use ($mailerCollector): void {
+                $message = $event->message;
+                $mailerCollector->logMessage(
+                    $message->getFrom(),
+                    $message->getTo(),
+                    $message->getCc(),
+                    $message->getBcc(),
+                    $message->getSubject() ?? '',
+                    $event->isSuccessful,
+                );
+            },
+        );
     }
 
     private function registerAssetProfiling(): void
@@ -623,7 +690,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
             return;
         }
 
-        Event::on(\yii\web\View::class, \yii\web\View::EVENT_END_PAGE, static function (\yii\base\Event $event) use ($assetCollector): void {
+        Event::on(\yii\web\View::class, \yii\web\View::EVENT_END_PAGE, static function (\yii\base\Event $event) use (
+            $assetCollector,
+        ): void {
             /** @var \yii\web\View $view */
             $view = $event->sender;
             if (property_exists($view, 'assetBundles') && is_array($view->assetBundles)) {

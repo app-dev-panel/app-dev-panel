@@ -1,11 +1,12 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetParametersQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
-import {Box, Chip, Collapse, Icon, IconButton, TextField, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useMemo, useState} from 'react';
@@ -229,15 +230,10 @@ export const ParametersPage = () => {
     return (
         <Box>
             <SearchRow>
-                <TextField
-                    size="small"
-                    placeholder="Search configuration..."
+                <FilterInput
                     value={searchString}
-                    onChange={onChangeHandler}
-                    InputProps={{
-                        startAdornment: <Icon sx={{fontSize: 18, color: 'text.disabled', mr: 1}}>search</Icon>,
-                    }}
-                    sx={{flex: 1}}
+                    onChange={(v) => onChangeHandler({target: {value: v}} as React.ChangeEvent<HTMLInputElement>)}
+                    placeholder="Search configuration..."
                 />
                 <Typography sx={{fontSize: '12px', color: 'text.disabled', whiteSpace: 'nowrap'}}>
                     {searchString ? `${filtered.length} groups` : `${totalParams} params`}

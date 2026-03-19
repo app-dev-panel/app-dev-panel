@@ -110,11 +110,7 @@ final class WebListener
         $factory = $this->getPsr17Factory();
 
         $uri = $factory->createUri($yiiRequest->getAbsoluteUrl());
-        $psrRequest = $factory->createServerRequest(
-            $yiiRequest->getMethod(),
-            $uri,
-            $_SERVER,
-        );
+        $psrRequest = $factory->createServerRequest($yiiRequest->getMethod(), $uri, $_SERVER);
 
         // Copy headers
         foreach ($yiiRequest->getHeaders() as $name => $values) {

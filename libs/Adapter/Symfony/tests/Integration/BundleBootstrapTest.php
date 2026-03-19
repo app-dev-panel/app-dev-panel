@@ -10,14 +10,13 @@ use AppDevPanel\Adapter\Symfony\Collector\DoctrineCollector;
 use AppDevPanel\Adapter\Symfony\Collector\MailerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
-use AppDevPanel\Kernel\Collector\ExceptionCollector;
-use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
+use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
@@ -25,6 +24,7 @@ use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
+use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
@@ -139,9 +139,11 @@ final class BundleBootstrapTest extends TestCase
         $response = new \Symfony\Component\HttpFoundation\Response('OK', 200);
 
         // 1. kernel.request
-        $httpSubscriber->onKernelRequest(
-            new \Symfony\Component\HttpKernel\Event\RequestEvent($kernel, $request, \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST),
-        );
+        $httpSubscriber->onKernelRequest(new \Symfony\Component\HttpKernel\Event\RequestEvent(
+            $kernel,
+            $request,
+            \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST,
+        ));
 
         $debugId = $debugger->getId();
         $this->assertNotEmpty($debugId);
@@ -151,16 +153,23 @@ final class BundleBootstrapTest extends TestCase
 
         // 2. kernel.response
         $httpSubscriber->onKernelResponse(
-            new \Symfony\Component\HttpKernel\Event\ResponseEvent($kernel, $request, \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST, $response),
+            new \Symfony\Component\HttpKernel\Event\ResponseEvent(
+                $kernel,
+                $request,
+                \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST,
+                $response,
+            ),
         );
 
         $this->assertSame($debugId, $response->headers->get('X-Debug-Id'));
         $this->assertSame(200, $requestCollector->getCollected()['responseStatusCode']);
 
         // 3. kernel.terminate — flushes to FileStorage
-        $httpSubscriber->onKernelTerminate(
-            new \Symfony\Component\HttpKernel\Event\TerminateEvent($kernel, $request, $response),
-        );
+        $httpSubscriber->onKernelTerminate(new \Symfony\Component\HttpKernel\Event\TerminateEvent(
+            $kernel,
+            $request,
+            $response,
+        ));
 
         // Verify data was persisted to disk
         $storage = $container->get(StorageInterface::class);
@@ -187,9 +196,11 @@ final class BundleBootstrapTest extends TestCase
         $output = new \Symfony\Component\Console\Output\NullOutput();
 
         // 1. console.command
-        $consoleSubscriber->onConsoleCommand(
-            new \Symfony\Component\Console\Event\ConsoleCommandEvent($command, $input, $output),
-        );
+        $consoleSubscriber->onConsoleCommand(new \Symfony\Component\Console\Event\ConsoleCommandEvent(
+            $command,
+            $input,
+            $output,
+        ));
 
         $debugId = $debugger->getId();
         $this->assertNotEmpty($debugId);
@@ -262,13 +273,17 @@ final class BundleBootstrapTest extends TestCase
         $request = \Symfony\Component\HttpFoundation\Request::create('/health/check', 'GET');
         $response = new \Symfony\Component\HttpFoundation\Response('OK', 200);
 
-        $httpSubscriber->onKernelRequest(
-            new \Symfony\Component\HttpKernel\Event\RequestEvent($kernel, $request, \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST),
-        );
+        $httpSubscriber->onKernelRequest(new \Symfony\Component\HttpKernel\Event\RequestEvent(
+            $kernel,
+            $request,
+            \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST,
+        ));
 
-        $httpSubscriber->onKernelTerminate(
-            new \Symfony\Component\HttpKernel\Event\TerminateEvent($kernel, $request, $response),
-        );
+        $httpSubscriber->onKernelTerminate(new \Symfony\Component\HttpKernel\Event\TerminateEvent(
+            $kernel,
+            $request,
+            $response,
+        ));
 
         // Ignored request should not produce storage entries
         $storage = $container->get(StorageInterface::class);
@@ -287,14 +302,21 @@ final class BundleBootstrapTest extends TestCase
         $request = \Symfony\Component\HttpFoundation\Request::create('/boom', 'GET');
 
         // Start the lifecycle
-        $httpSubscriber->onKernelRequest(
-            new \Symfony\Component\HttpKernel\Event\RequestEvent($kernel, $request, \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST),
-        );
+        $httpSubscriber->onKernelRequest(new \Symfony\Component\HttpKernel\Event\RequestEvent(
+            $kernel,
+            $request,
+            \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST,
+        ));
 
         // Trigger exception
         $exception = new \RuntimeException('Integration test error');
         $httpSubscriber->onKernelException(
-            new \Symfony\Component\HttpKernel\Event\ExceptionEvent($kernel, $request, \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST, $exception),
+            new \Symfony\Component\HttpKernel\Event\ExceptionEvent(
+                $kernel,
+                $request,
+                \Symfony\Component\HttpKernel\HttpKernelInterface::MAIN_REQUEST,
+                $exception,
+            ),
         );
 
         $data = $exceptionCollector->getCollected();

@@ -56,16 +56,19 @@ final class ModuleRouteRegistrationTest extends TestCase
     public function testRegisterRoutesAddsApiUrlRules(): void
     {
         $urlManager = $this->createMock(UrlManager::class);
-        $urlManager->expects($this->once())
+        $urlManager
+            ->expects($this->once())
             ->method('addRules')
             ->with(
                 $this->callback(static function (array $rules): bool {
                     // Should register rules for debug/api and inspect/api
                     $patterns = array_column($rules, 'pattern');
-                    return in_array('debug/api/<path:.*>', $patterns, true)
+                    return (
+                        in_array('debug/api/<path:.*>', $patterns, true)
                         && in_array('debug/api', $patterns, true)
                         && in_array('inspect/api/<path:.*>', $patterns, true)
-                        && in_array('inspect/api', $patterns, true);
+                        && in_array('inspect/api', $patterns, true)
+                    );
                 }),
                 false,
             );
