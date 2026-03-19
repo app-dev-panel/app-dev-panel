@@ -32,7 +32,8 @@ libs/Testing/tests/
     ├── WebFixturesTest.php       # Web context tests (request, app info)
     ├── ErrorFixturesTest.php     # Exception tests (runtime, chained)
     ├── AdvancedFixturesTest.php  # Multi-collector, heavy, http-client, filesystem
-    └── DebugApiTest.php           # Debug API endpoint contract tests
+    ├── DebugApiTest.php           # Debug API endpoint contract tests
+    └── ScenarioTest.php           # Full pipeline E2E: reset, fire all fixtures, verify API
 ```
 
 ## How It Works
@@ -67,6 +68,13 @@ All playgrounds must implement these endpoints under `/test/fixtures/`:
 | `/test/fixtures/logs-heavy` | logs:heavy | LogCollector |
 | `/test/fixtures/http-client` | http-client:basic | HttpClientCollector |
 | `/test/fixtures/filesystem` | filesystem:basic | FilesystemStreamCollector |
+| `/test/fixtures/request-info` | web:app-info | WebAppInfoCollector |
+| `/test/fixtures/reset` | (setup) | Clears debug storage directly |
+| `/test/fixtures/reset-cli` | (setup) | Clears debug storage via `debug:reset` CLI command |
+
+The reset endpoints (`/test/fixtures/reset` and `/test/fixtures/reset-cli`) accept both GET and POST. `ScenarioTest` uses GET to clear storage before running the full fixture suite.
+
+Yiisoft playground applies `FormatDataResponseAsJson` middleware to the entire `/test/fixtures` route group so all fixture responses return JSON.
 
 ## Running Fixtures
 
@@ -91,7 +99,7 @@ PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Fixtures
 # Run specific group
 PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Fixtures --group core
 
-# Available groups: core, web, error, advanced, api
+# Available groups: core, web, error, advanced, api, scenario
 ```
 
 ### Makefile Targets

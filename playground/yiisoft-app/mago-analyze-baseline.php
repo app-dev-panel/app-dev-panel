@@ -64,19 +64,25 @@ count = 6
 file = "config/common/routes.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 3
+count = 33
 
 [[issues]]
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `create` does not exist on type `Yiisoft\Router\Group`.'
-count = 1
+count = 2
 
 [[issues]]
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Yiisoft\Router\Route`.'
-count = 1
+count = 13
+
+[[issues]]
+file = "config/common/routes.php"
+code = "non-existent-method"
+message = 'Method `methods` does not exist on type `Yiisoft\Router\Route`.'
+count = 2
 
 [[issues]]
 file = "config/web/di/application.php"
@@ -359,3 +365,213 @@ file = "src/Web/Shared/Layout/Main/layout.php"
 code = "non-existent-method"
 message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
 count = 4
+
+[[issues]]
+file = "src/Web/TestFixtures/DumpAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\DumpAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/DumpAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/EventsAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\EventsAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/EventsAction.php"
+code = "unused-property"
+message = "Property `$dispatcher` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/EventsAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ExceptionAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\ExceptionAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ExceptionChainedAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\ExceptionChainedAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/FilesystemAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\FilesystemAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/FilesystemAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/HttpClientAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\HttpClientAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/HttpClientAction.php"
+code = "unused-property"
+message = "Property `$httpClient` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/HttpClientAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/LogsAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\LogsAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/LogsAction.php"
+code = "unused-property"
+message = "Property `$logger` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/LogsAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/LogsContextAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\LogsContextAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/LogsContextAction.php"
+code = "unused-property"
+message = "Property `$logger` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/LogsContextAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/LogsHeavyAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\LogsHeavyAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/LogsHeavyAction.php"
+code = "unused-property"
+message = "Property `$logger` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/LogsHeavyAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/MultiAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\MultiAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/MultiAction.php"
+code = "unused-property"
+message = "Property `$dispatcher` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/MultiAction.php"
+code = "unused-property"
+message = "Property `$logger` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/MultiAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/RequestInfoAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\RequestInfoAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/RequestInfoAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ResetAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\ResetAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ResetAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ResetAction.php"
+code = "unused-property"
+message = "Property `$storage` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ResetCliAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\ResetCliAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ResetCliAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/TimelineAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\TimelineAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/TimelineAction.php"
+code = "unused-property"
+message = "Property `$logger` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/TimelineAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1

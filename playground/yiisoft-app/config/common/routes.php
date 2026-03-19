@@ -16,9 +16,7 @@ return [
             Route::get('/events')->action(Web\TestFixtures\EventsAction::class)->name('test-events'),
             Route::get('/dump')->action(Web\TestFixtures\DumpAction::class)->name('test-dump'),
             Route::get('/timeline')->action(Web\TestFixtures\TimelineAction::class)->name('test-timeline'),
-            Route::get('/request-info')->action(Web\TestFixtures\RequestInfoAction::class)->name(
-                'test-request-info',
-            ),
+            Route::get('/request-info')->action(Web\TestFixtures\RequestInfoAction::class)->name('test-request-info'),
             Route::get('/exception')->action(Web\TestFixtures\ExceptionAction::class)->name('test-exception'),
             Route::get('/exception-chained')->action(Web\TestFixtures\ExceptionChainedAction::class)->name(
                 'test-exception-chained',
@@ -27,12 +25,12 @@ return [
             Route::get('/logs-heavy')->action(Web\TestFixtures\LogsHeavyAction::class)->name('test-logs-heavy'),
             Route::get('/http-client')->action(Web\TestFixtures\HttpClientAction::class)->name('test-http-client'),
             Route::get('/filesystem')->action(Web\TestFixtures\FilesystemAction::class)->name('test-filesystem'),
-            Route::methods(['GET', 'POST'], '/reset')->action(Web\TestFixtures\ResetAction::class)->name(
-                'test-reset',
-            ),
-            Route::methods(['GET', 'POST'], '/reset-cli')->action(Web\TestFixtures\ResetCliAction::class)->name(
-                'test-reset-cli',
-            ),
+            Route::methods(['GET', 'POST'], '/reset')
+                ->action(Web\TestFixtures\ResetAction::class)
+                ->name('test-reset'),
+            Route::methods(['GET', 'POST'], '/reset-cli')
+                ->action(Web\TestFixtures\ResetCliAction::class)
+                ->name('test-reset-cli'),
         )
         ->prependMiddleware(FormatDataResponseAsJson::class),
 ];
