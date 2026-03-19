@@ -3809,3 +3809,57 @@ file = "libs/Testing/tests/E2E/FixtureTestCase.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #3 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "redundant-cast"
+message = "Redundant cast to `(string)`: the expression already has this type."
+count = 4
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "redundant-condition"
+message = "Redundant ternary operator: condition is always truthy."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "redundant-type-comparison"
+message = "Redundant type assertion: `$body` of type `array<string, mixed>` is always not `array<array-key, mixed>`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "redundant-type-comparison"
+message = "Redundant type assertion: `$entry` of type `array<string, mixed>` is always not `array<array-key, mixed>`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "redundant-type-comparison"
+message = "Redundant type assertion: `$key` of type `string` is always not `string`."
+count = 1

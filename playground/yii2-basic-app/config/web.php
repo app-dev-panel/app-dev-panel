@@ -44,6 +44,7 @@ return [
                 'GET /test/fixtures/http-client' => 'test-fixtures/http-client',
                 'GET /test/fixtures/filesystem' => 'test-fixtures/filesystem',
                 '/test/fixtures/reset' => 'test-fixtures/reset',
+                '/test/fixtures/reset-cli' => 'test-fixtures/reset-cli',
             ],
         ],
         'log' => [

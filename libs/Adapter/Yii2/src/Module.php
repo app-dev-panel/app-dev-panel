@@ -11,6 +11,7 @@ use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
 use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Controller\AdpApiController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugQueryController;
+use AppDevPanel\Adapter\Yii2\Controller\DebugResetController;
 use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
 use AppDevPanel\Adapter\Yii2\EventListener\WebListener;
 use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
@@ -493,6 +494,10 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         $collectorRepository = \Yii::$container->get(CollectorRepositoryInterface::class);
         $app->controllerMap['debug-query'] = new DebugQueryController('debug-query', $app, $collectorRepository);
+
+        $storage = \Yii::$container->get(StorageInterface::class);
+        $debugger = \Yii::$container->get(Debugger::class);
+        $app->controllerMap['debug-reset'] = new DebugResetController('debug-reset', $app, $storage, $debugger);
     }
 
     private function registerDbProfiling(): void

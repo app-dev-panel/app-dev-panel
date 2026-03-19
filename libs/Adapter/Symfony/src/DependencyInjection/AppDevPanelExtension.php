@@ -22,6 +22,8 @@ use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\ApiApplication;
+use AppDevPanel\Cli\Command\DebugQueryCommand;
+use AppDevPanel\Cli\Command\DebugResetCommand;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
@@ -98,6 +100,7 @@ final class AppDevPanelExtension extends Extension
         $this->registerCollectors($container, $config);
         $this->registerEventSubscribers($container);
         $this->registerApiServices($container, $config);
+        $this->registerCliCommands($container);
     }
 
     private function registerCoreServices(ContainerBuilder $container, array $config): void
@@ -506,6 +509,24 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([new Reference(ApiApplication::class)])
             ->addTag('controller.service_arguments')
             ->setPublic(true);
+    }
+
+    private function registerCliCommands(ContainerBuilder $container): void
+    {
+        $container->register(DebugResetCommand::class, DebugResetCommand::class)
+            ->setArguments([
+                new Reference(StorageInterface::class),
+                new Reference(Debugger::class),
+            ])
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container->register(DebugQueryCommand::class, DebugQueryCommand::class)
+            ->setArguments([
+                new Reference(CollectorRepositoryInterface::class),
+            ])
+            ->addTag('console.command')
+            ->setPublic(false);
     }
 
     public function getAlias(): string

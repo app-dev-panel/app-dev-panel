@@ -35,6 +35,7 @@ final class TestFixturesController extends Controller
             'http-client' => \App\actions\testFixtures\HttpClientAction::class,
             'filesystem' => \App\actions\testFixtures\FilesystemAction::class,
             'reset' => \App\actions\testFixtures\ResetAction::class,
+            'reset-cli' => \App\actions\testFixtures\ResetCliAction::class,
         ];
     }
 }

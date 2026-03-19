@@ -24,5 +24,8 @@ return [
         Route::get('/http-client')->action(Web\TestFixtures\HttpClientAction::class)->name('test-http-client'),
         Route::get('/filesystem')->action(Web\TestFixtures\FilesystemAction::class)->name('test-filesystem'),
         Route::methods(['GET', 'POST'], '/reset')->action(Web\TestFixtures\ResetAction::class)->name('test-reset'),
+        Route::methods(['GET', 'POST'], '/reset-cli')->action(Web\TestFixtures\ResetCliAction::class)->name(
+            'test-reset-cli',
+        ),
     ),
 ];

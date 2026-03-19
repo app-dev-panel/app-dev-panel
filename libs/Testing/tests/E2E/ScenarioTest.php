@@ -38,6 +38,9 @@ final class ScenarioTest extends FixtureTestCase
     /** @var list<array<string, mixed>> all summary entries */
     private static array $summaryEntries = [];
 
+    /** @var array<string, mixed> result of CLI reset */
+    private static array $cliResetResult = [];
+
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
@@ -61,6 +64,21 @@ final class ScenarioTest extends FixtureTestCase
     // =========================================================================
     // Pipeline verification tests
     // =========================================================================
+
+    public function testCliResetCommandSucceeded(): void
+    {
+        self::assertNotEmpty(self::$cliResetResult, 'CLI reset endpoint did not return a response');
+        self::assertSame(
+            'ok',
+            self::$cliResetResult['status'] ?? null,
+            sprintf(
+                'CLI debug:reset failed (exit code: %s, error: %s)',
+                self::$cliResetResult['exitCode'] ?? 'unknown',
+                self::$cliResetResult['error'] ?? self::$cliResetResult['output'] ?? 'unknown',
+            ),
+        );
+        self::assertSame(0, self::$cliResetResult['exitCode'] ?? -1);
+    }
 
     public function testStorageWasCleared(): void
     {
@@ -340,10 +358,18 @@ final class ScenarioTest extends FixtureTestCase
 
     private static function clearDebugStorage(): void
     {
-        // Hit the reset endpoint if available, otherwise just proceed
-        // (fixtures work on the latest entry, so old data doesn't break anything)
+        // Clear via direct storage call
         $response = self::$client->post('/test/fixtures/reset');
         if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
+            usleep(200_000);
+        }
+
+        // Also clear via CLI command (debug:reset) executed server-side
+        $cliResponse = self::$client->post('/test/fixtures/reset-cli');
+        if ($cliResponse->getStatusCode() >= 200 && $cliResponse->getStatusCode() < 300) {
+            /** @var array<string, mixed> $body */
+            $body = json_decode((string) $cliResponse->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            self::$cliResetResult = is_array($body) ? $body : [];
             usleep(200_000);
         }
     }
