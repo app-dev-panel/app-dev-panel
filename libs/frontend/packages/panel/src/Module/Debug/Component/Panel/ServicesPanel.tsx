@@ -1,11 +1,13 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
+import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {concatClassMethod} from '@app-dev-panel/sdk/Helper/classMethodConcater';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Box, Chip, Collapse, Icon, IconButton, Tab, TextField, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, Tab, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {SyntheticEvent, useDeferredValue, useMemo, useState} from 'react';
 
@@ -167,17 +169,9 @@ const AllView = ({rows}: {rows: AllRow[]}) => {
 
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 1, mt: 1}}>
-                <Typography sx={{fontSize: '12px', color: 'text.disabled'}}>{filtered.length} calls</Typography>
-                <TextField
-                    size="small"
-                    placeholder="Filter services..."
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    InputProps={{sx: {fontSize: '13px'}}}
-                    sx={{ml: 'auto', width: 240}}
-                />
-            </Box>
+            <SectionTitle
+                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter services..." />}
+            >{`${filtered.length} calls`}</SectionTitle>
 
             {filtered.map((row, index) => {
                 const expanded = expandedIndex === index;
