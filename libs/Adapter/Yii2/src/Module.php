@@ -151,6 +151,16 @@ class Module extends \yii\base\Module implements BootstrapInterface
     /** @var CollectorInterface[] */
     private array $collectorInstances = [];
 
+    public function init(): void
+    {
+        parent::init();
+
+        // Register namespace alias so Yii 2 can resolve the controller path.
+        // Without this, getControllerPath() converts controllerNamespace to
+        // @AppDevPanel/Adapter/Yii2/Controller which doesn't exist as an alias.
+        \Yii::setAlias('@AppDevPanel/Adapter/Yii2', __DIR__);
+    }
+
     public function bootstrap($app): void
     {
         if (!$this->enabled) {

@@ -46,6 +46,11 @@ describe('getCollectedCountByCollector', () => {
         expect(getCollectedCountByCollector(CollectorsMap.MailerCollector, entry)).toBe(2);
     });
 
+    it('returns undefined for mailer when no mailer data', () => {
+        const entry = makeEntry();
+        expect(getCollectedCountByCollector(CollectorsMap.MailerCollector, entry)).toBeUndefined();
+    });
+
     it('returns timeline count', () => {
         const entry = makeEntry({timeline: {total: 4}});
         expect(getCollectedCountByCollector(CollectorsMap.TimelineCollector, entry)).toBe(4);

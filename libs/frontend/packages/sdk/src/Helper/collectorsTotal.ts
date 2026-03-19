@@ -35,7 +35,7 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
         case CollectorsMap.HttpStreamCollector:
             return Number(data.http_stream?.length);
         case CollectorsMap.MailerCollector:
-            return Number(data.mailer?.total) || Number(data.mailer?.messageCount);
+            return data.mailer?.total != null ? Number(data.mailer.total) : undefined;
         case CollectorsMap.CacheCollector:
             return Number(data.cache?.totalOperations);
         case CollectorsMap.FilesystemStreamCollector:

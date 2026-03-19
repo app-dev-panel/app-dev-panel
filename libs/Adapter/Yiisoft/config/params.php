@@ -87,8 +87,8 @@ return [
                 | ContainerInterfaceProxy::LOG_ERROR,
         'path' => '@runtime/debug',
         'ignoredRequests' => [
-            // Paths to ignore the debugger, e.g.:
-            //'/assets/*',
+            '/debug/api/*',
+            '/inspect/api/*',
         ],
         'ignoredCommands' => [
             'completion',
