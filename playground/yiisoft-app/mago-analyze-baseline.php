@@ -64,7 +64,7 @@ count = 6
 file = "config/common/routes.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 33
+count = 37
 
 [[issues]]
 file = "config/common/routes.php"
@@ -76,7 +76,7 @@ count = 2
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Yiisoft\Router\Route`.'
-count = 13
+count = 15
 
 [[issues]]
 file = "config/common/routes.php"
@@ -367,6 +367,24 @@ message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
 count = 4
 
 [[issues]]
+file = "src/Web/TestFixtures/DatabaseAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\DatabaseAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/DatabaseAction.php"
+code = "unused-property"
+message = "Property `$databaseCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/DatabaseAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
 file = "src/Web/TestFixtures/DumpAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\DumpAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -488,6 +506,24 @@ count = 1
 
 [[issues]]
 file = "src/Web/TestFixtures/LogsHeavyAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/MailerAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\MailerAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/MailerAction.php"
+code = "unused-property"
+message = "Property `$mailerCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/MailerAction.php"
 code = "unused-property"
 message = "Property `$responseFactory` is never used."
 count = 1

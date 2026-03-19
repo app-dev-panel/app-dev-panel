@@ -11,6 +11,23 @@ use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Yii\View\Renderer\CsrfViewInjection;
 
 return [
+    'app-dev-panel/yiisoft' => [
+        'collectors' => [
+            \AppDevPanel\Kernel\Collector\EnvironmentCollector::class,
+            \AppDevPanel\Kernel\Collector\LogCollector::class,
+            \AppDevPanel\Kernel\Collector\EventCollector::class,
+            \AppDevPanel\Kernel\Collector\ServiceCollector::class,
+            \AppDevPanel\Kernel\Collector\HttpClientCollector::class,
+            \AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector::class,
+            \AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector::class,
+            \AppDevPanel\Kernel\Collector\ExceptionCollector::class,
+            \AppDevPanel\Kernel\Collector\VarDumperCollector::class,
+            \AppDevPanel\Kernel\Collector\TimelineCollector::class,
+            \AppDevPanel\Kernel\Collector\DatabaseCollector::class,
+            \AppDevPanel\Kernel\Collector\MailerCollector::class,
+        ],
+    ],
+
     'application' => require __DIR__ . '/application.php',
 
     'yiisoft/aliases' => [
