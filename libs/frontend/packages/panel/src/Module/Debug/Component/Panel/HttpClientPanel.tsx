@@ -1,6 +1,7 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
@@ -366,64 +367,6 @@ const RequestDetail = ({entry}: {entry: HttpClientEntry}) => {
 };
 
 // ---------------------------------------------------------------------------
-// Summary bar
-// ---------------------------------------------------------------------------
-
-const SummaryBar = ({data}: {data: HttpClientEntry[]}) => {
-    const theme = useTheme();
-    const totalTime = data.reduce((sum, e) => sum + e.totalTime, 0);
-    const successCount = data.filter((e) => e.responseStatus >= 200 && e.responseStatus < 300).length;
-    const errorCount = data.filter((e) => e.responseStatus >= 400).length;
-
-    return (
-        <Box
-            sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-                px: 2,
-                py: 1,
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                backgroundColor: theme.palette.action.hover,
-            }}
-        >
-            <Typography sx={{fontSize: '13px', fontWeight: 600}}>
-                {data.length} {data.length === 1 ? 'request' : 'requests'}
-            </Typography>
-            <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'text.disabled'}}>
-                {formatDuration(totalTime)} total
-            </Typography>
-            {successCount > 0 && (
-                <Chip
-                    label={`${successCount} OK`}
-                    size="small"
-                    sx={{
-                        fontSize: '10px',
-                        height: 20,
-                        borderRadius: 1,
-                        backgroundColor: theme.palette.success.main,
-                        color: 'common.white',
-                    }}
-                />
-            )}
-            {errorCount > 0 && (
-                <Chip
-                    label={`${errorCount} failed`}
-                    size="small"
-                    sx={{
-                        fontSize: '10px',
-                        height: 20,
-                        borderRadius: 1,
-                        backgroundColor: theme.palette.error.main,
-                        color: 'common.white',
-                    }}
-                />
-            )}
-        </Box>
-    );
-};
-
-// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
@@ -453,30 +396,16 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
 
     return (
         <Box>
-            <SummaryBar data={data} />
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    px: 2,
-                    py: 1,
-                    borderBottom: `1px solid ${theme.palette.divider}`,
-                }}
-            >
+            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
+                <SectionTitle>{`${filtered.length} http requests`}</SectionTitle>
                 <TextField
                     size="small"
-                    placeholder="Filter by URL, method, or status..."
+                    placeholder="Filter requests..."
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
                     InputProps={{sx: {fontSize: '13px'}}}
-                    sx={{flex: 1, maxWidth: 400}}
+                    sx={{ml: 'auto', width: 240}}
                 />
-                {filter && (
-                    <Typography sx={{fontSize: '12px', color: 'text.disabled'}}>
-                        {filtered.length} of {data.length}
-                    </Typography>
-                )}
             </Box>
 
             {filtered.map((entry, index) => {
