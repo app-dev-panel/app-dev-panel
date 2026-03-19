@@ -41,7 +41,7 @@ Browser Request
 │     └─ RequestCollector::collectRequest()            │
 │                                                       │
 │  ┌── Controller Action ──────────────────────┐       │
-│  │ DB queries  → DbCollector (via events)    │       │
+│  │ DB queries  → DatabaseCollector (via DbProfilingTarget) │       │
 │  │ Yii logs    → DebugLogTarget (real-time)   │       │
 │  │ Exceptions  → ErrorHandler catches        │       │
 │  └───────────────────────────────────────────┘       │
@@ -77,7 +77,7 @@ php yii <command>
 │     └─ CommandCollector::collect()                   │
 │                                                       │
 │  ┌── Command Action ─────────────────────────┐       │
-│  │ DB queries  → DbCollector (via events)    │       │
+│  │ DB queries  → DatabaseCollector (via DbProfilingTarget) │       │
 │  │ Yii logs    → DebugLogTarget (real-time)   │       │
 │  └───────────────────────────────────────────┘       │
 │                                                       │

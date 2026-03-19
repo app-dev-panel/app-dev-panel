@@ -31,9 +31,9 @@ return [
                 'filesystem_stream' => true, // FilesystemStreamCollector
                 'http_stream' => true,    // HttpStreamCollector
                 'command' => true,        // CommandCollector
-                'db' => true,             // DbCollector (Yii 2 DB layer)
-                'mailer' => true,         // MailerCollector (Yii 2 mailer)
-                'assets' => true,         // AssetBundleCollector (Yii 2 view)
+                'db' => true,             // DatabaseCollector (Kernel, fed by DbProfilingTarget)
+                'mailer' => true,         // MailerCollector (Kernel, fed by BaseMailer events)
+                'assets' => true,         // AssetBundleCollector (Kernel, fed by View events)
             ],
 
             // URL patterns to skip (wildcard)
