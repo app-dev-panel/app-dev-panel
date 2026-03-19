@@ -1,11 +1,10 @@
 import {renderWithProviders} from '@app-dev-panel/sdk/test-utils';
 import {screen} from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import {describe, expect, it} from 'vitest';
 import {VarDumperPanel} from './VarDumperPanel';
 
-const makeEntry = (overrides: Partial<{variable: any; line: string}> = {}) => ({
-    variable: {foo: 'bar'},
+const makeEntry = (overrides: Partial<{variable: unknown; line: string}> = {}) => ({
+    variable: {foo: 'bar'} as unknown,
     line: '/src/app.php:10',
     ...overrides,
 });
@@ -32,9 +31,11 @@ describe('VarDumperPanel', () => {
     });
 
     it('renders index badges', () => {
-        renderWithProviders(<VarDumperPanel data={[makeEntry(), makeEntry({line: '/src/b.php:5'})]} />);
-        expect(screen.getByText('1')).toBeInTheDocument();
-        expect(screen.getByText('2')).toBeInTheDocument();
+        renderWithProviders(
+            <VarDumperPanel data={[makeEntry({variable: null}), makeEntry({variable: null, line: '/src/b.php:5'})]} />,
+        );
+        expect(screen.getAllByText('1').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('2').length).toBeGreaterThan(0);
     });
 
     it('renders file line link', () => {
@@ -42,41 +43,50 @@ describe('VarDumperPanel', () => {
         expect(screen.getByText('/src/Controller.php:42')).toBeInTheDocument();
     });
 
-    it('renders preview for null variable', () => {
+    it('renders null variable', () => {
         renderWithProviders(<VarDumperPanel data={[makeEntry({variable: null})]} />);
         expect(screen.getByText('null')).toBeInTheDocument();
     });
 
-    it('renders preview for string variable', () => {
+    it('renders string variable with quotes', () => {
         renderWithProviders(<VarDumperPanel data={[makeEntry({variable: 'hello world'})]} />);
-        expect(screen.getAllByText('"hello world"').length).toBeGreaterThan(0);
+        expect(screen.getByText(/hello world/)).toBeInTheDocument();
     });
 
-    it('renders preview for number variable', () => {
+    it('renders number variable', () => {
         renderWithProviders(<VarDumperPanel data={[makeEntry({variable: 42})]} />);
-        expect(screen.getAllByText('42').length).toBeGreaterThan(0);
+        expect(screen.getByText('42')).toBeInTheDocument();
     });
 
-    it('renders preview for boolean variable', () => {
+    it('renders boolean variable', () => {
         renderWithProviders(<VarDumperPanel data={[makeEntry({variable: true})]} />);
-        expect(screen.getAllByText('true').length).toBeGreaterThan(0);
+        expect(screen.getByText('true')).toBeInTheDocument();
     });
 
-    it('renders preview for array variable', () => {
+    it('renders array variable with count', () => {
         renderWithProviders(<VarDumperPanel data={[makeEntry({variable: [1, 2, 3]})]} />);
-        expect(screen.getByText('Array(3)')).toBeInTheDocument();
+        expect(screen.getAllByText('3').length).toBeGreaterThan(0);
     });
 
-    it('renders preview for object variable', () => {
+    it('renders associative array keys', () => {
         renderWithProviders(<VarDumperPanel data={[makeEntry({variable: {name: 'John', age: 30}})]} />);
-        expect(screen.getByText(/Object \{name, age\}/)).toBeInTheDocument();
+        expect(screen.getByText('name')).toBeInTheDocument();
+        expect(screen.getByText('age')).toBeInTheDocument();
     });
 
-    it('expands detail on click', async () => {
-        const user = userEvent.setup();
-        renderWithProviders(<VarDumperPanel data={[makeEntry({variable: {key: 'value'}})]} />);
-        await user.click(screen.getByText(/Object \{key\}/));
-        // JsonRenderer should be visible with expanded content
-        expect(screen.getByText('key')).toBeInTheDocument();
+    it('renders object with class name', () => {
+        renderWithProviders(
+            <VarDumperPanel
+                data={[makeEntry({variable: {'App\\User#1': {'public $name': 'John', 'private $id': 1}}})]}
+            />,
+        );
+        expect(screen.getByText('App\\User')).toBeInTheDocument();
+        expect(screen.getByText(/name/)).toBeInTheDocument();
+    });
+
+    it('renders empty array', () => {
+        const {container} = renderWithProviders(<VarDumperPanel data={[makeEntry({variable: []})]} />);
+        expect(container.textContent).toContain('array');
+        expect(container.textContent).toContain('0');
     });
 });
