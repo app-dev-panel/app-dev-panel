@@ -473,8 +473,9 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
 
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                <SectionTitle>{`${filtered.length} http requests / ${formatDuration(totalTime)} total`}</SectionTitle>
+            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2, '& > p': {mt: 0}}}>
+                <SectionTitle>{`${filtered.length} http requests`}</SectionTitle>
+                <SectionTitle>{`${formatDuration(totalTime)} total`}</SectionTitle>
                 <TextField
                     size="small"
                     placeholder="Filter requests..."
