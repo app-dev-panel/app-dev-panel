@@ -6,10 +6,22 @@ import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {Box, Chip, Icon, IconButton, Tab, Tabs, type Theme, Tooltip, Typography} from '@mui/material';
+import {
+    Box,
+    Chip,
+    Icon,
+    IconButton,
+    InputAdornment,
+    Tab,
+    Tabs,
+    TextField,
+    type Theme,
+    Tooltip,
+    Typography,
+} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
-import {useCallback} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
 type Response = {
@@ -126,20 +138,53 @@ function parseQueryParams(queryString: string): Array<{name: string; value: stri
 }
 
 const HeadersTable = ({headers}: {headers: Array<{name: string; value: string}>}) => {
+    const [filter, setFilter] = useState('');
+
+    const filteredHeaders = useMemo(() => {
+        if (!filter) return headers;
+        const lower = filter.toLowerCase();
+        return headers.filter((h) => h.name.toLowerCase().includes(lower) || h.value.toLowerCase().includes(lower));
+    }, [headers, filter]);
+
     if (headers.length === 0) return null;
     return (
-        <Box sx={{borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden'}}>
-            <HeaderTable>
-                <tbody>
-                    {headers.map((h, i) => (
-                        <tr key={i}>
-                            <th>{h.name}</th>
-                            <td>{h.value}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </HeaderTable>
-        </Box>
+        <>
+            {headers.length > 3 && (
+                <TextField
+                    size="small"
+                    placeholder="Filter..."
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    slotProps={{
+                        input: {
+                            startAdornment: (
+                                <InputAdornment position="start" sx={{color: 'text.disabled', fontSize: '14px'}}>
+                                    /
+                                </InputAdornment>
+                            ),
+                        },
+                    }}
+                    sx={{
+                        mb: 1,
+                        maxWidth: 260,
+                        '& .MuiOutlinedInput-root': {fontSize: '12px', height: 30},
+                        '& .MuiInputAdornment-root': {mr: 0},
+                    }}
+                />
+            )}
+            <Box sx={{borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden'}}>
+                <HeaderTable>
+                    <tbody>
+                        {filteredHeaders.map((h, i) => (
+                            <tr key={i}>
+                                <th>{h.name}</th>
+                                <td>{h.value}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </HeaderTable>
+            </Box>
+        </>
     );
 };
 
