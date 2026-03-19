@@ -1,7 +1,11 @@
 import {NotificationSnackbar} from '@app-dev-panel/panel/Application/Component/NotificationSnackbar';
 
 import {useSelector} from '@app-dev-panel/panel/store';
-import {changeAutoLatest, changeShowInactiveCollectors, changeThemeMode} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
+import {
+    changeAutoLatest,
+    changeShowInactiveCollectors,
+    changeThemeMode,
+} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';

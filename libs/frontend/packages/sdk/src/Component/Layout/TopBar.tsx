@@ -180,14 +180,7 @@ export const TopBar = React.memo(
                         </IconButton>
                     </DialogTitle>
                     <DialogContent>
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                justifyContent: 'space-between',
-                                py: 1,
-                            }}
-                        >
+                        <Box sx={{display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', py: 1}}>
                             <Box>
                                 <Typography variant="body1">Show inactive collectors</Typography>
                                 <Typography variant="body2" color="text.secondary">
