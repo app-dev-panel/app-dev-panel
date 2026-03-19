@@ -283,14 +283,16 @@ Add test fixture actions that exercise these collectors so they can be verified 
 | 4 | Add `DoctrineCollector` → `DatabasePanel` mapping | ✅ Done |
 | 5 | Add Symfony `MailerCollector` mapping | ✅ Done |
 
-### Phase 2: Data Format Normalization — TODO
+### Phase 2: Data Format Normalization — DONE
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 6 | Normalize `DoctrineCollector` output to DatabasePanel schema | **High** — queries render but panel may break on missing fields | M |
-| 7 | Normalize `Yii2\DbCollector` output to DatabasePanel schema | **High** — same as above | M |
-| 8 | Enrich Symfony `MailerCollector` to full MailerPanel schema | **Medium** — limited mail display | M |
-| 9 | Enrich Yii2 `MailerCollector` to full MailerPanel schema | **Medium** — limited mail display | M |
+Resolved by moving collectors to Kernel core (Phase 6). All adapters now produce the same format via shared core collectors.
+
+| # | Task | Status |
+|---|------|--------|
+| 6 | Normalize `DoctrineCollector` output | ✅ Done — replaced with core `DatabaseCollector` |
+| 7 | Normalize `Yii2\DbCollector` output | ✅ Done — replaced with core `DatabaseCollector` |
+| 8 | Enrich Symfony `MailerCollector` | ✅ Done — replaced with core `MailerCollector` |
+| 9 | Enrich Yii2 `MailerCollector` | ✅ Done — replaced with core `MailerCollector` |
 
 ### Phase 3: New Panels — DONE
 
@@ -312,8 +314,8 @@ Add test fixture actions that exercise these collectors so they can be verified 
 |---|------|--------|
 | 19 | Delete deprecated Symfony collectors | ✅ Done |
 | 20 | Remove dead `AssetCollector` entry | ✅ Done |
-| 21 | Enrich Symfony playground with full dependencies | ❌ TODO |
-| 22 | Add missing Yiisoft playground fixtures | ❌ TODO |
+| 21 | Enrich Symfony playground with full dependencies | In progress |
+| 22 | Add missing Yiisoft playground fixtures | In progress |
 
 ### Phase 5: UX Improvements — DONE
 
@@ -321,18 +323,24 @@ Add test fixture actions that exercise these collectors so they can be verified 
 |---|------|--------|
 | 23 | Show inactive collectors toggle (Settings menu) | ✅ Done |
 
+### Phase 6: Core Collector Consolidation — DONE
+
+| # | Task | Status |
+|---|------|--------|
+| 24 | Move DatabaseCollector to Kernel core | ✅ Done |
+| 25 | Move MailerCollector to Kernel core | ✅ Done |
+| 26 | Move AssetBundleCollector to Kernel core | ✅ Done (earlier) |
+| 27 | Delete adapter-specific DB collectors (Doctrine, DbCollector, Yiisoft DB) | ✅ Done |
+| 28 | Delete adapter-specific Mailer collectors (all 3) | ✅ Done |
+| 29 | Normalize all data formats to single schema | ✅ Done |
+
 ---
 
 ## Remaining Work Summary
 
 | Priority | Task | Effort |
 |----------|------|--------|
-| **High** | Normalize `DoctrineCollector` output format | M |
-| **High** | Normalize `Yii2\DbCollector` output format | M |
-| **Medium** | Enrich Symfony `MailerCollector` data | M |
-| **Medium** | Enrich Yii2 `MailerCollector` data | M |
 | **Low** | Create `HttpStreamPanel` | S |
-| **Low** | Enrich Symfony playground | L |
-| **Low** | Add Yiisoft playground fixtures | M |
+| **Low** | Add Yiisoft playground fixtures for Queue/Router/Validator/WebView | M |
 
 **Effort scale:** S = < 1 hour, M = 1–4 hours, L = 4+ hours
