@@ -13,7 +13,11 @@ import {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
 // Collectors hidden from the card grid (data shown elsewhere in overview)
-const hiddenCollectors = new Set<string>([CollectorsMap.WebAppInfoCollector, CollectorsMap.ConsoleAppInfoCollector]);
+const hiddenCollectors = new Set<string>([
+    CollectorsMap.WebAppInfoCollector,
+    CollectorsMap.ConsoleAppInfoCollector,
+    CollectorsMap.EnvironmentCollector,
+]);
 
 // ---------------------------------------------------------------------------
 // Card icon background/foreground colors per collector
@@ -393,7 +397,9 @@ export const IndexPage = () => {
               ? formatBytes(entry.console.memory.peakUsage)
               : null;
 
-    const phpVersion = isDebugEntryAboutWeb(entry) ? entry.web?.php?.version : entry.console?.php?.version;
+    const phpVersion = entry.environment?.php?.version;
+    const phpSapi = entry.environment?.php?.sapi;
+    const adapter = isDebugEntryAboutWeb(entry) ? entry.web?.adapter : entry.console?.adapter;
     const status = isDebugEntryAboutWeb(entry) ? entry.response?.statusCode : null;
     const method = isDebugEntryAboutWeb(entry) ? entry.request?.method : null;
     const path = isDebugEntryAboutWeb(entry) ? entry.request?.path : null;
@@ -446,7 +452,7 @@ export const IndexPage = () => {
                         <Icon sx={{fontSize: 18, color: '#777EB8'}}>code</Icon>
                         <Box>
                             <SummaryValue>PHP {phpVersion}</SummaryValue>
-                            <SummaryLabel>Runtime</SummaryLabel>
+                            <SummaryLabel>{[phpSapi, adapter].filter(Boolean).join(' / ') || 'Runtime'}</SummaryLabel>
                         </Box>
                     </SummaryItem>
                 )}
