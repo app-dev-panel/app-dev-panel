@@ -424,17 +424,8 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
 
     const totalTime = useMemo(() => (data ? data.reduce((sum, e) => sum + e.totalTime, 0) : 0), [data]);
 
-    if (!data || data.length === 0) {
-        return (
-            <EmptyState
-                icon="cloud"
-                title="No HTTP client requests found"
-                description="No outgoing HTTP requests were captured during this request"
-            />
-        );
-    }
-
     const filtered = useMemo(() => {
+        if (!data) return [];
         let result = data;
         if (activeFilters.size > 0) {
             result = result.filter((e) => {
@@ -455,6 +446,16 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
         return result;
     }, [data, deferredFilter, activeFilters]);
 
+    if (!data || data.length === 0) {
+        return (
+            <EmptyState
+                icon="cloud"
+                title="No HTTP client requests found"
+                description="No outgoing HTTP requests were captured during this request"
+            />
+        );
+    }
+
     const statusBadgeBg = (group: string): string => {
         switch (group) {
             case '2xx':
@@ -473,8 +474,7 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
     return (
         <Box>
             <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                <SectionTitle>{`${filtered.length} http requests`}</SectionTitle>
-                <SectionTitle>{`${formatDuration(totalTime)} total`}</SectionTitle>
+                <SectionTitle>{`${filtered.length} http requests / ${formatDuration(totalTime)} total`}</SectionTitle>
                 <TextField
                     size="small"
                     placeholder="Filter requests..."
