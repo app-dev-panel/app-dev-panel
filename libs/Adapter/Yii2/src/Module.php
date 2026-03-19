@@ -48,6 +48,7 @@ use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
+use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
@@ -466,6 +467,17 @@ class Module extends \yii\base\Module implements BootstrapInterface
             Event::on(ConsoleApplication::class, ConsoleApplication::EVENT_AFTER_REQUEST, [$listener, 'onAfterRequest']);
         }
 
+        // Register event profiling if EventCollector is active
+        if ($this->getCollector(EventCollector::class) !== null) {
+            $this->registerEventProfiling();
+        }
+
+        // Decorate PSR-18 HTTP client with proxy if HttpClientCollector is active
+        $httpClientCollector = $this->getCollector(HttpClientCollector::class);
+        if ($httpClientCollector instanceof HttpClientCollector) {
+            $this->decorateHttpClient($httpClientCollector);
+        }
+
         // Register DB profiling if DbCollector is active
         if ($this->getCollector(DbCollector::class) !== null) {
             $this->registerDbProfiling();
@@ -530,6 +542,35 @@ class Module extends \yii\base\Module implements BootstrapInterface
         $storage = \Yii::$container->get(StorageInterface::class);
         $debugger = \Yii::$container->get(Debugger::class);
         $app->controllerMap['debug-reset'] = new DebugResetController('debug-reset', $app, $storage, $debugger);
+    }
+
+    private function decorateHttpClient(HttpClientCollector $collector): void
+    {
+        if (!\Yii::$container->has(ClientInterface::class)) {
+            return;
+        }
+
+        $originalClient = \Yii::$container->get(ClientInterface::class);
+        $proxy = new HttpClientInterfaceProxy($originalClient, $collector);
+        \Yii::$container->setSingleton(ClientInterface::class, $proxy);
+    }
+
+    private function registerEventProfiling(): void
+    {
+        /** @var EventCollector|null $eventCollector */
+        $eventCollector = $this->getCollector(EventCollector::class);
+        if ($eventCollector === null) {
+            return;
+        }
+
+        // Yii 2 wildcard event listener (requires >= 2.0.14).
+        // Captures ALL class-level and instance-level events.
+        Event::on('*', '*', static function (\yii\base\Event $event) use ($eventCollector): void {
+            $senderClass = is_object($event->sender) ? $event->sender::class : (string) $event->sender;
+
+            // Wrap Yii2 Event into a simple DTO for EventCollector (expects object $event)
+            $eventCollector->collect($event, $senderClass . '::' . $event->name);
+        });
     }
 
     private function registerDbProfiling(): void
