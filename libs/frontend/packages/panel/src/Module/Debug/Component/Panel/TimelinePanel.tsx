@@ -5,7 +5,7 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Collapse, TextField, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Collapse, TextField, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
@@ -102,34 +102,6 @@ const DetailBox = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
-const LegendBar = styled(Box)(({theme}) => ({
-    display: 'flex',
-    gap: theme.spacing(2),
-    flexWrap: 'wrap',
-    paddingLeft: 180,
-    paddingBottom: theme.spacing(1.5),
-    fontSize: '11px',
-    color: theme.palette.text.disabled,
-}));
-
-const LegendItem = styled(Box, {shouldForwardProp: (p) => p !== 'active' && p !== 'clickable'})<{
-    active?: boolean;
-    clickable?: boolean;
-}>(({theme, active, clickable}) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: 4,
-    cursor: clickable ? 'pointer' : 'default',
-    padding: theme.spacing(0.25, 0.75),
-    borderRadius: theme.shape.borderRadius,
-    border: `1px solid ${active ? theme.palette.primary.main : 'transparent'}`,
-    backgroundColor: active ? theme.palette.action.selected : 'transparent',
-    transition: 'all 0.15s ease',
-    '&:hover': clickable ? {backgroundColor: theme.palette.action.hover, borderColor: theme.palette.divider} : {},
-}));
-
-const Swatch = styled(Box)({width: 12, height: 8, borderRadius: 2});
-
 export const TimelinePanel = ({data}: TimelinePanelProps) => {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
     const [filter, setFilter] = useState('');
@@ -205,24 +177,39 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                 />
             </Box>
 
-            <LegendBar>
-                {uniqueLabels.map((label, i) => (
-                    <LegendItem
-                        key={label}
-                        active={activeFilters.has(label)}
-                        clickable={uniqueLabels.length > 1}
-                        onClick={() => uniqueLabels.length > 1 && toggleFilter(label)}
-                    >
-                        <Swatch sx={{backgroundColor: getBarColor(i)}} />
-                        <span>{label}</span>
-                    </LegendItem>
-                ))}
+            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                {uniqueLabels.map((label, i) => {
+                    const isActive = activeFilters.has(label);
+                    const color = getBarColor(i);
+                    return (
+                        <Chip
+                            key={label}
+                            label={label}
+                            size="small"
+                            onClick={() => uniqueLabels.length > 1 && toggleFilter(label)}
+                            sx={{
+                                fontSize: '11px',
+                                height: 24,
+                                borderRadius: 1,
+                                fontWeight: 600,
+                                cursor: uniqueLabels.length > 1 ? 'pointer' : 'default',
+                                backgroundColor: isActive ? color : 'transparent',
+                                color: isActive ? 'common.white' : color,
+                                border: `1px solid ${color}`,
+                            }}
+                        />
+                    );
+                })}
                 {activeFilters.size > 0 && (
-                    <LegendItem clickable onClick={() => setActiveFilters(new Set())} sx={{color: 'text.secondary'}}>
-                        <span>Clear</span>
-                    </LegendItem>
+                    <Chip
+                        label="Clear"
+                        size="small"
+                        onClick={() => setActiveFilters(new Set())}
+                        variant="outlined"
+                        sx={{fontSize: '11px', height: 24, borderRadius: 1}}
+                    />
                 )}
-            </LegendBar>
+            </Box>
 
             <TimeAxis>
                 {ticks.map((tick, i) => (
