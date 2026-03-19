@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-use Yiisoft\ErrorHandler\Event\ApplicationError;
-use Yiisoft\Profiler\ProfilerInterface;
+use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
+use Yiisoft\ErrorHandler\Event\ApplicationError;
+use Yiisoft\Profiler\ProfilerInterface;
 use Yiisoft\Yii\Http\Event\AfterEmit;
 use Yiisoft\Yii\Http\Event\AfterRequest;
 use Yiisoft\Yii\Http\Event\ApplicationShutdown;
@@ -23,27 +24,38 @@ if (!isAppDevPanelEnabled($params)) {
 
 return [
     ApplicationStartup::class => [
-        static fn (ApplicationStartup $event, Debugger $debugger) => $debugger->startup(StartupContext::generic()),
-        static fn (ApplicationStartup $event, WebAppInfoCollector $collector) => $collector->markApplicationStarted(),
+        static fn(ApplicationStartup $event, Debugger $debugger) => $debugger->startup(StartupContext::generic()),
+        static fn(ApplicationStartup $event, WebAppInfoCollector $collector) => $collector->markApplicationStarted(),
     ],
     ApplicationShutdown::class => [
-        static fn (ApplicationShutdown $event, WebAppInfoCollector $collector) => $collector->markApplicationFinished(),
+        static fn(ApplicationShutdown $event, WebAppInfoCollector $collector) => $collector->markApplicationFinished(),
     ],
     BeforeRequest::class => [
-        static fn (BeforeRequest $event, Debugger $debugger) => $debugger->startup(StartupContext::forRequest($event->getRequest())),
-        static fn (BeforeRequest $event, WebAppInfoCollector $collector) => $collector->markRequestStarted(),
-        static fn (BeforeRequest $event, RequestCollector $collector) => $collector->collectRequest($event->getRequest()),
+        static fn(BeforeRequest $event, Debugger $debugger) => $debugger->startup(
+            StartupContext::forRequest($event->getRequest()),
+        ),
+        static fn(BeforeRequest $event, WebAppInfoCollector $collector) => $collector->markRequestStarted(),
+        static fn(BeforeRequest $event, RequestCollector $collector) => $collector->collectRequest(
+            $event->getRequest(),
+        ),
+        static fn(BeforeRequest $event, EnvironmentCollector $collector) => $collector->collectFromRequest(
+            $event->getRequest(),
+        ),
     ],
     AfterRequest::class => [
-        static fn (AfterRequest $event, WebAppInfoCollector $collector) => $collector->markRequestFinished(),
-        static fn (AfterRequest $event, RequestCollector $collector) => $event->getResponse() !== null ? $collector->collectResponse($event->getResponse()) : null,
+        static fn(AfterRequest $event, WebAppInfoCollector $collector) => $collector->markRequestFinished(),
+        static fn(AfterRequest $event, RequestCollector $collector) => $event->getResponse() !== null
+            ? $collector->collectResponse($event->getResponse())
+            : null,
     ],
     AfterEmit::class => [
         [ProfilerInterface::class, 'flush'],
-        static fn (AfterEmit $event, WebAppInfoCollector $collector) => $collector->markApplicationFinished(),
+        static fn(AfterEmit $event, WebAppInfoCollector $collector) => $collector->markApplicationFinished(),
         [Debugger::class, 'shutdown'],
     ],
     ApplicationError::class => [
-        static fn (ApplicationError $event, ExceptionCollector $collector) => $collector->collect($event->getThrowable()),
+        static fn(ApplicationError $event, ExceptionCollector $collector) => $collector->collect(
+            $event->getThrowable(),
+        ),
     ],
 ];

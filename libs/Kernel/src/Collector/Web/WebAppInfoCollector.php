@@ -83,9 +83,6 @@ final class WebAppInfoCollector implements SummaryCollectorInterface
         return [
             'web' => [
                 'adapter' => $this->adapterName,
-                'php' => [
-                    'version' => PHP_VERSION,
-                ],
                 'request' => [
                     'startTime' => $this->requestProcessingTimeStarted,
                     'processingTime' => $this->requestProcessingTimeStopped - $this->requestProcessingTimeStarted,

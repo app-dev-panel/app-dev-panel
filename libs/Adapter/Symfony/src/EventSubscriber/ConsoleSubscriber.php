@@ -6,6 +6,7 @@ namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
+use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
@@ -29,6 +30,7 @@ final class ConsoleSubscriber implements EventSubscriberInterface
         private readonly ?CommandCollector $commandCollector = null,
         private readonly ?ConsoleAppInfoCollector $consoleAppInfoCollector = null,
         private readonly ?ExceptionCollector $exceptionCollector = null,
+        private readonly ?EnvironmentCollector $environmentCollector = null,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -48,6 +50,7 @@ final class ConsoleSubscriber implements EventSubscriberInterface
 
         $this->consoleAppInfoCollector?->collect($event);
         $this->commandCollector?->collect($event);
+        $this->environmentCollector?->collectFromGlobals();
     }
 
     public function onConsoleError(ConsoleErrorEvent $event): void

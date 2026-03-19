@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
+use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -43,6 +44,7 @@ final class HttpSubscriber implements EventSubscriberInterface
         private readonly ?WebAppInfoCollector $webAppInfoCollector = null,
         private readonly ?ExceptionCollector $exceptionCollector = null,
         private readonly ?VarDumperCollector $varDumperCollector = null,
+        private readonly ?EnvironmentCollector $environmentCollector = null,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -77,6 +79,7 @@ final class HttpSubscriber implements EventSubscriberInterface
         $this->webAppInfoCollector?->markApplicationStarted();
         $this->webAppInfoCollector?->markRequestStarted();
         $this->requestCollector?->collectRequest($psrRequest);
+        $this->environmentCollector?->collectFromRequest($psrRequest);
     }
 
     public function onKernelResponse(ResponseEvent $event): void
@@ -153,8 +156,12 @@ final class HttpSubscriber implements EventSubscriberInterface
     private function convertSymfonyRequestToPsr7(\Symfony\Component\HttpFoundation\Request $symfonyRequest): \Psr\Http\Message\ServerRequestInterface
     {
         $psr17Factory = $this->getPsr17Factory();
-        $psrRequest = (new ServerRequestCreator($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory))
-            ->fromGlobals();
+        $psrRequest = new ServerRequestCreator(
+            $psr17Factory,
+            $psr17Factory,
+            $psr17Factory,
+            $psr17Factory,
+        )->fromGlobals();
 
         // Override URI from the Symfony request to ensure accuracy
         $uri = $psr17Factory->createUri($symfonyRequest->getUri());

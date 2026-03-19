@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use Psr\Container\ContainerInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
-use Psr\Http\Client\ClientInterface;
-use Psr\Log\LoggerInterface;
-use Yiisoft\Injector\Injector;
+use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy;
+use AppDevPanel\Cli\Command\DebugQueryCommand;
+use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Cli\Command\DebugServerBroadcastCommand;
+use AppDevPanel\Cli\Command\DebugServerCommand;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
-use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -24,10 +24,11 @@ use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
-use AppDevPanel\Cli\Command\DebugQueryCommand;
-use AppDevPanel\Cli\Command\DebugResetCommand;
-use AppDevPanel\Cli\Command\DebugServerBroadcastCommand;
-use AppDevPanel\Cli\Command\DebugServerCommand;
+use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Http\Client\ClientInterface;
+use Psr\Log\LoggerInterface;
+use Yiisoft\Injector\Injector;
 
 /**
  * @var $params array
@@ -42,6 +43,7 @@ return [
             'port' => 8890,
         ],
         'collectors' => [
+            EnvironmentCollector::class,
             LogCollector::class,
             EventCollector::class,
             ServiceCollector::class,
@@ -61,7 +63,7 @@ return [
             CommandCollector::class,
         ],
         'trackedServices' => [
-            Injector::class => fn (ContainerInterface $container) => new Injector($container),
+            Injector::class => fn(ContainerInterface $container) => new Injector($container),
             LoggerInterface::class => [LoggerInterfaceProxy::class, LogCollector::class],
             EventDispatcherInterface::class => [EventDispatcherInterfaceProxy::class, EventCollector::class],
             ClientInterface::class => [HttpClientInterfaceProxy::class, HttpClientCollector::class],
@@ -79,7 +81,10 @@ return [
             'Doctrine\\Inflector\\Rules\\Substitution',
             'Doctrine\\Inflector\\Rules\\Transformation',
         ],
-        'logLevel' => ContainerInterfaceProxy::LOG_ARGUMENTS | ContainerInterfaceProxy::LOG_RESULT | ContainerInterfaceProxy::LOG_ERROR,
+        'logLevel' =>
+            ContainerInterfaceProxy::LOG_ARGUMENTS
+                | ContainerInterfaceProxy::LOG_RESULT
+                | ContainerInterfaceProxy::LOG_ERROR,
         'path' => '@runtime/debug',
         'ignoredRequests' => [
             // Paths to ignore the debugger, e.g.:
