@@ -2,8 +2,8 @@ import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {useLazyGetObjectQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {JsonRendererProps, JsonRenderer as OriginalJsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {parseObjectId, toObjectReference} from '@app-dev-panel/sdk/Helper/objectString';
-import {DataObject} from '@mui/icons-material';
-import {IconButton, Tooltip, Typography} from '@mui/material';
+import {FileDownload} from '@mui/icons-material';
+import {IconButton, Link, Tooltip, Typography} from '@mui/material';
 import {DataType} from '@textea/json-viewer';
 import {deepUpdate} from 'immupdate';
 import * as React from 'react';
@@ -29,22 +29,27 @@ export const JsonRenderer = React.memo((props: JsonRendererProps) => {
             is: (value: any) => typeof value === 'string' && !!value.match(/object@[\w\\]+#\d/),
             Component: (props) => {
                 return (
-                    <Typography sx={{display: 'inline', wordBreak: 'break-word'}}>
-                        {toObjectReference(props.value)}
+                    <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{display: 'inline-flex', alignItems: 'center', gap: 0.25, wordBreak: 'break-word'}}
+                    >
+                        <Link
+                            href={`/debug/object?debugEntry=${debugEntry!.id}&id=${parseObjectId(props.value)}`}
+                            underline="hover"
+                            color="primary"
+                            sx={{cursor: 'pointer'}}
+                        >
+                            {toObjectReference(props.value)}
+                        </Link>
                         <Tooltip title="Load object state">
                             <IconButton
-                                key={props.path.join(',')}
-                                onClick={(e) => objectLoader(props.value, props.path)}
-                            >
-                                <DataObject />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Examine an object">
-                            <IconButton
                                 size="small"
-                                href={`/debug/object?debugEntry=${debugEntry!.id}&id=${parseObjectId(props.value)}`}
+                                key={props.path.join(',')}
+                                onClick={() => objectLoader(props.value, props.path)}
+                                sx={{p: 0.25, color: 'text.secondary'}}
                             >
-                                <DataObject color="secondary" fontSize="small" />
+                                <FileDownload sx={{fontSize: 14}} />
                             </IconButton>
                         </Tooltip>
                     </Typography>

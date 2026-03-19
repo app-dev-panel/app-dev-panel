@@ -15,7 +15,7 @@ import {EventTypesEnum, useServerSentEvents} from '@app-dev-panel/sdk/Component/
 import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
-import {isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -209,9 +209,16 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         const entriesList = [{key: '__entries__', icon: 'list', label: 'All Entries'}];
         if (!debugEntry) return entriesList;
         const overview = [{key: '__overview__', icon: 'grid_view', label: 'Overview'}];
+        const isWeb = isDebugEntryAboutWeb(debugEntry);
+        const isConsole = isDebugEntryAboutConsole(debugEntry);
         const collectors = [...debugEntry.collectors]
             .map((c) => (typeof c === 'string' ? c : c.id))
             .filter((c) => !hiddenCollectors.has(c))
+            .filter((c) => {
+                if (isWeb && c === CollectorsMap.CommandCollector) return false;
+                if (isConsole && c === CollectorsMap.RequestCollector) return false;
+                return true;
+            })
             .sort(compareCollectorWeight)
             .map((collector) => {
                 const count = getCollectedCountByCollector(collector as CollectorsMap, debugEntry);

@@ -1,11 +1,12 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
-import {Box, Chip, Collapse, Icon, IconButton, TextField, type Theme, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
@@ -473,18 +474,9 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
 
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2, '& > p': {mt: 0}}}>
-                <SectionTitle>{`${filtered.length} http requests`}</SectionTitle>
-                <SectionTitle>{`${formatDuration(totalTime)} total`}</SectionTitle>
-                <TextField
-                    size="small"
-                    placeholder="Filter requests..."
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    InputProps={{sx: {fontSize: '13px'}}}
-                    sx={{ml: 'auto', width: 240}}
-                />
-            </Box>
+            <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter requests..." />}>
+                {[`${filtered.length} http requests`, `${formatDuration(totalTime)} total`]}
+            </SectionTitle>
 
             {(badgeCounts.length > 1 || statusBadgeCounts.length > 1) && (
                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>

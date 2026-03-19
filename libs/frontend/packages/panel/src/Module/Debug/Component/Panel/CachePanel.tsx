@@ -1,7 +1,8 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {Box, Chip, Icon, LinearProgress, TextField, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Icon, LinearProgress, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
 
@@ -262,17 +263,9 @@ export const CachePanel = ({data}: CachePanelProps) => {
             <PoolBreakdown operations={operations} />
 
             {/* Operations table */}
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                <SectionTitle>{`${filtered.length} operations`}</SectionTitle>
-                <TextField
-                    size="small"
-                    placeholder="Filter by key, operation, pool..."
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    InputProps={{sx: {fontSize: '13px'}}}
-                    sx={{ml: 'auto', width: 280}}
-                />
-            </Box>
+            <SectionTitle
+                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter operations..." />}
+            >{`${filtered.length} operations`}</SectionTitle>
 
             {filtered.map((op, index) => {
                 const isHit = op.operation === 'get' && op.hit;

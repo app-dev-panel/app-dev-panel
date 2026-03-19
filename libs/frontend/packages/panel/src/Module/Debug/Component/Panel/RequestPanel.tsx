@@ -4,12 +4,13 @@ import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {HTTPMethod, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, Icon, IconButton, Tab, Tabs, type Theme, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
-import {useCallback} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
 type Response = {
@@ -125,6 +126,20 @@ function parseQueryParams(queryString: string): Array<{name: string; value: stri
     return params;
 }
 
+const useHeadersFilter = (headers: Array<{name: string; value: string}>) => {
+    const [filter, setFilter] = useState('');
+
+    const filteredHeaders = useMemo(() => {
+        if (!filter) return headers;
+        const lower = filter.toLowerCase();
+        return headers.filter((h) => h.name.toLowerCase().includes(lower) || h.value.toLowerCase().includes(lower));
+    }, [headers, filter]);
+
+    const filterAction = <FilterInput value={filter} onChange={setFilter} />;
+
+    return {filteredHeaders, filterAction};
+};
+
 const HeadersTable = ({headers}: {headers: Array<{name: string; value: string}>}) => {
     if (headers.length === 0) return null;
     return (
@@ -153,20 +168,23 @@ const RequestTab = ({data}: {data: Response}) => {
     const requestHeadersRaw = requestParts[0] || '';
     const requestBody = requestParts.slice(1).join('\r\n\r\n');
     const requestHeaders = parseHeaders(requestHeadersRaw);
+    const {filteredHeaders: filteredRequestHeaders, filterAction: requestFilterAction} =
+        useHeadersFilter(requestHeaders);
+    const {filteredHeaders: filteredQueryParams, filterAction: queryFilterAction} = useHeadersFilter(queryParams);
 
     return (
         <TabPanel>
             {requestHeaders.length > 0 && (
                 <>
-                    <SectionTitle>Headers</SectionTitle>
-                    <HeadersTable headers={requestHeaders} />
+                    <SectionTitle action={requestFilterAction}>Headers</SectionTitle>
+                    <HeadersTable headers={filteredRequestHeaders} />
                 </>
             )}
 
             {queryParams.length > 0 && (
                 <>
-                    <SectionTitle>Query Parameters</SectionTitle>
-                    <HeadersTable headers={queryParams} />
+                    <SectionTitle action={queryFilterAction}>Query Parameters</SectionTitle>
+                    <HeadersTable headers={filteredQueryParams} />
                 </>
             )}
 
@@ -198,6 +216,8 @@ const ResponseTab = ({data}: {data: Response}) => {
     const responseHeadersRaw = responseParts[0] || '';
     const responseBody = responseParts.slice(1).join('\r\n\r\n');
     const responseHeaders = parseHeaders(responseHeadersRaw);
+    const {filteredHeaders: filteredResponseHeaders, filterAction: responseFilterAction} =
+        useHeadersFilter(responseHeaders);
 
     const contentTypeMatch = responseHeadersRaw.match(/Content-Type:\s*\w+\/(\w+)/);
     const contentType = Array.isArray(contentTypeMatch) ? contentTypeMatch[1] : 'plain';
@@ -216,8 +236,8 @@ const ResponseTab = ({data}: {data: Response}) => {
         <TabPanel>
             {responseHeaders.length > 0 && (
                 <>
-                    <SectionTitle>Headers</SectionTitle>
-                    <HeadersTable headers={responseHeaders} />
+                    <SectionTitle action={responseFilterAction}>Headers</SectionTitle>
+                    <HeadersTable headers={filteredResponseHeaders} />
                 </>
             )}
 

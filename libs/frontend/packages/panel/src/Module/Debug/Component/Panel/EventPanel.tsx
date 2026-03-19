@@ -1,31 +1,49 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilename, parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Chip, Collapse, Icon, IconButton, TextField, Tooltip, Typography} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
+import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
 type EventType = {event: string; file: string; line: string; name: string; time: number};
 type EventTimelineProps = {events: EventType[]};
 
-const EventRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
-    ({theme, expanded}) => ({
-        display: 'flex',
-        alignItems: 'center',
-        gap: theme.spacing(1.5),
-        padding: theme.spacing(1, 1.5),
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        cursor: 'pointer',
-        transition: 'background-color 0.1s ease',
-        backgroundColor: expanded ? theme.palette.action.hover : 'transparent',
-        '&:hover': {backgroundColor: theme.palette.action.hover},
-    }),
-);
+const EVENT_PALETTE = [
+    {paletteKey: 'primary', shade: 'main'} as const,
+    {paletteKey: 'success', shade: 'main'} as const,
+    {paletteKey: 'warning', shade: 'main'} as const,
+    {paletteKey: 'error', shade: 'main'} as const,
+];
+
+const getEventColorIndex = (name: string): number => {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = (hash * 31 + name.charCodeAt(i)) | 0;
+    }
+    return Math.abs(hash) % EVENT_PALETTE.length;
+};
+
+const EventRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded' && p !== 'accentColor'})<{
+    expanded?: boolean;
+    accentColor?: string;
+}>(({theme, expanded, accentColor}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1.5),
+    padding: theme.spacing(1, 1.5),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    borderLeft: `3px solid ${accentColor ?? 'transparent'}`,
+    cursor: 'pointer',
+    transition: 'background-color 0.1s ease',
+    backgroundColor: expanded ? theme.palette.action.hover : 'transparent',
+    '&:hover': {backgroundColor: theme.palette.action.hover},
+}));
 
 const TimeCell = styled(Typography)({
     fontFamily: primitives.fontFamilyMono,
@@ -50,12 +68,24 @@ const DetailBox = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
+const DeltaChip = styled(Typography)(({theme}) => ({
+    fontFamily: primitives.fontFamilyMono,
+    fontSize: '10px',
+    color: theme.palette.text.disabled,
+    backgroundColor: theme.palette.action.selected,
+    padding: '1px 6px',
+    borderRadius: 4,
+    flexShrink: 0,
+    lineHeight: '16px',
+}));
+
 export const EventPanel = ({events}: EventTimelineProps) => {
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
     const debugEntry = useDebugEntry();
+    const theme = useTheme();
 
     const badgeCounts = useMemo(() => {
         const counts = new Map<string, number>();
@@ -79,6 +109,15 @@ export const EventPanel = ({events}: EventTimelineProps) => {
         });
     }, []);
 
+    const getColor = useCallback(
+        (shortName: string): string => {
+            const idx = getEventColorIndex(shortName);
+            const entry = EVENT_PALETTE[idx];
+            return (theme.palette[entry.paletteKey] as Record<string, string>)[entry.shade];
+        },
+        [theme],
+    );
+
     if (!events || events.length === 0) {
         return <EmptyState icon="bolt" title="No dispatched events found" />;
     }
@@ -98,39 +137,44 @@ export const EventPanel = ({events}: EventTimelineProps) => {
         return result;
     }, [events, deferredFilter, activeFilters]);
 
+    const formatDelta = (ms: number): string => {
+        if (ms < 1) return `+${(ms * 1000).toFixed(0)}µs`;
+        if (ms < 1000) return `+${ms.toFixed(1)}ms`;
+        return `+${(ms / 1000).toFixed(2)}s`;
+    };
+
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                <SectionTitle>{`${filtered.length} event${filtered.length !== 1 ? 's' : ''}`}</SectionTitle>
-                <TextField
-                    size="small"
-                    placeholder="Filter events..."
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    InputProps={{sx: {fontSize: '13px'}}}
-                    sx={{ml: 'auto', width: 240}}
-                />
-            </Box>
+            <SectionTitle
+                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter events..." />}
+            >{`${filtered.length} event${filtered.length !== 1 ? 's' : ''}`}</SectionTitle>
 
             {badgeCounts.length > 1 && (
                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
-                    {badgeCounts.map(([name, count]) => (
-                        <Chip
-                            key={name}
-                            label={`${name} (${count})`}
-                            size="small"
-                            onClick={() => toggleFilter(name)}
-                            variant={activeFilters.has(name) ? 'filled' : 'outlined'}
-                            color={activeFilters.has(name) ? 'primary' : 'default'}
-                            sx={{
-                                fontSize: '11px',
-                                height: 24,
-                                borderRadius: 1,
-                                fontWeight: activeFilters.has(name) ? 600 : 400,
-                                cursor: 'pointer',
-                            }}
-                        />
-                    ))}
+                    {badgeCounts.map(([name, count]) => {
+                        const color = getColor(name);
+                        const isActive = activeFilters.has(name);
+                        return (
+                            <Chip
+                                key={name}
+                                label={`${name} (${count})`}
+                                size="small"
+                                onClick={() => toggleFilter(name)}
+                                variant={isActive ? 'filled' : 'outlined'}
+                                sx={{
+                                    fontSize: '11px',
+                                    height: 24,
+                                    borderRadius: 1,
+                                    fontWeight: isActive ? 600 : 400,
+                                    cursor: 'pointer',
+                                    borderColor: color,
+                                    ...(isActive
+                                        ? {backgroundColor: color, color: theme.palette.common.white}
+                                        : {color}),
+                                }}
+                            />
+                        );
+                    })}
                     {activeFilters.size > 0 && (
                         <Chip
                             label="Clear"
@@ -147,16 +191,31 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                 const expanded = expandedIndex === index;
                 const shortName = event.name.split('\\').pop() ?? event.name;
                 const objectId = parseObjectId(event.event || '');
+                const color = getColor(shortName);
+                const prevEvent = index > 0 ? filtered[index - 1] : null;
+                const deltaMs = prevEvent ? (event.time - prevEvent.time) * 1000 : null;
 
                 return (
                     <Box key={index}>
-                        <EventRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
+                        <EventRow
+                            expanded={expanded}
+                            accentColor={color}
+                            onClick={() => setExpandedIndex(expanded ? null : index)}
+                        >
                             <TimeCell sx={{color: 'text.disabled'}}>{formatMicrotime(event.time)}</TimeCell>
+                            <Box
+                                sx={{width: 8, height: 8, borderRadius: '50%', backgroundColor: color, flexShrink: 0}}
+                            />
                             <NameCell>
                                 <Tooltip title={event.name}>
                                     <span>{shortName}</span>
                                 </Tooltip>
                             </NameCell>
+                            {deltaMs !== null && deltaMs >= 0 && (
+                                <Tooltip title="Time since previous event">
+                                    <DeltaChip component="span">{formatDelta(deltaMs)}</DeltaChip>
+                                </Tooltip>
+                            )}
                             <FileCell component="span" sx={{color: 'text.disabled'}}>
                                 {parseFilename(event.line)}
                             </FileCell>

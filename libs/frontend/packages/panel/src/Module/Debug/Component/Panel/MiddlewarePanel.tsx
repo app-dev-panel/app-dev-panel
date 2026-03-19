@@ -96,9 +96,7 @@ export const MiddlewarePanel = (props: MiddlewarePanelProps) => {
 
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                <SectionTitle>{`${rows.length} middleware steps`}</SectionTitle>
-            </Box>
+            <SectionTitle>{`${rows.length} middleware steps`}</SectionTitle>
 
             {rows.map((row, index) => {
                 const expanded = expandedIndex === index;

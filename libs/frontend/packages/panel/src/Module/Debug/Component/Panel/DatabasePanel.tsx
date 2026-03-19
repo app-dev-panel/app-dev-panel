@@ -1,10 +1,12 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
+import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Box, Chip, Collapse, Icon, IconButton, Tab, TextField, type Theme, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, Tab, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {SyntheticEvent, useDeferredValue, useState} from 'react';
 
@@ -100,19 +102,9 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
 
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 1, mt: 1}}>
-                <Typography sx={{fontSize: '12px', color: 'text.disabled'}}>
-                    {filtered.length} queries &middot; {formatMillisecondsAsDuration(totalTime)} total
-                </Typography>
-                <TextField
-                    size="small"
-                    placeholder="Filter SQL..."
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    InputProps={{sx: {fontSize: '13px'}}}
-                    sx={{ml: 'auto', width: 240}}
-                />
-            </Box>
+            <SectionTitle
+                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter SQL..." />}
+            >{`${filtered.length} queries · ${formatMillisecondsAsDuration(totalTime)} total`}</SectionTitle>
 
             {filtered.map((query, index) => {
                 const expanded = expandedIndex === index;
