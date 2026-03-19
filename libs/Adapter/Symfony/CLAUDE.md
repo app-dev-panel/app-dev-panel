@@ -27,11 +27,9 @@ src/
 ├── Proxy/
 │   └── SymfonyEventDispatcherProxy.php             # Wraps event_dispatcher, implements Component interface
 ├── Collector/
-│   ├── (removed — now uses Kernel's DatabaseCollector)
 │   ├── TwigCollector.php                           # Template renders, timing (requires twig/twig)
 │   ├── SecurityCollector.php                       # User, roles, firewall
 │   ├── CacheCollector.php                          # Cache hits/misses, operations
-│   ├── (removed — now uses Kernel's MailerCollector)
 │   ├── MessengerCollector.php                      # Message bus operations
 │   ├── SymfonyRequestCollector.php                 # Legacy: Symfony HttpFoundation collector (unused)
 │   └── SymfonyExceptionCollector.php               # Legacy: Symfony exception collector (unused)
