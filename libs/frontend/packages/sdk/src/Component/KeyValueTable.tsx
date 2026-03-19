@@ -1,7 +1,7 @@
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {InputAdornment, TextField} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import React, {useMemo, useState} from 'react';
+import {FilterInput} from './FilterInput';
 
 type KeyValueRow = {key: string; value: string | number | React.ReactNode};
 
@@ -28,7 +28,7 @@ const matchesFilter = (row: KeyValueRow, filter: string): boolean => {
     return false;
 };
 
-export const KeyValueTable = ({rows, labelWidth = 160, filterable = false}: KeyValueTableProps) => {
+export const useKeyValueFilter = (rows: KeyValueRow[]) => {
     const [filter, setFilter] = useState('');
 
     const filteredRows = useMemo(() => {
@@ -36,31 +36,17 @@ export const KeyValueTable = ({rows, labelWidth = 160, filterable = false}: KeyV
         return rows.filter((row) => matchesFilter(row, filter));
     }, [rows, filter]);
 
+    const filterAction = rows.length > 3 ? <FilterInput value={filter} onChange={setFilter} /> : null;
+
+    return {filteredRows, filterAction};
+};
+
+export const KeyValueTable = ({rows, labelWidth = 160, filterable = false}: KeyValueTableProps) => {
+    const {filteredRows, filterAction} = useKeyValueFilter(rows);
+
     return (
         <>
-            {filterable && rows.length > 3 && (
-                <TextField
-                    size="small"
-                    placeholder="Filter..."
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    slotProps={{
-                        input: {
-                            startAdornment: (
-                                <InputAdornment position="start" sx={{color: 'text.disabled', fontSize: '14px'}}>
-                                    /
-                                </InputAdornment>
-                            ),
-                        },
-                    }}
-                    sx={{
-                        mb: 1,
-                        maxWidth: 260,
-                        '& .MuiOutlinedInput-root': {fontSize: '12px', height: 30},
-                        '& .MuiInputAdornment-root': {mr: 0},
-                    }}
-                />
-            )}
+            {filterable && filterAction}
             <Table>
                 <tbody>
                     {filteredRows.map((row) => (
