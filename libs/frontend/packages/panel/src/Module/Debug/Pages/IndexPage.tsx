@@ -17,6 +17,8 @@ const hiddenCollectors = new Set<string>([
     CollectorsMap.WebAppInfoCollector,
     CollectorsMap.ConsoleAppInfoCollector,
     CollectorsMap.EnvironmentCollector,
+    CollectorsMap.RequestCollector,
+    CollectorsMap.CommandCollector,
 ]);
 
 // ---------------------------------------------------------------------------
@@ -56,6 +58,9 @@ const SummaryBar = styled(Box)(({theme}) => ({
     borderRadius: theme.shape.borderRadius * 1.5,
     border: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
+    cursor: 'pointer',
+    transition: 'border-color 0.15s',
+    '&:hover': {borderColor: theme.palette.primary.main},
 }));
 
 const SummaryItem = styled(Box)({display: 'flex', alignItems: 'center', gap: 8});
@@ -428,14 +433,8 @@ export const IndexPage = () => {
     }
 
     const cards = buildCollectorCards(entry);
-    // Primary panels (Request/Command) always show as active cards even without a badge count
-    const primaryCollectors = new Set([CollectorsMap.RequestCollector, CollectorsMap.CommandCollector]);
-    const activeCards = cards.filter(
-        (c) => primaryCollectors.has(c.key as CollectorsMap) || (c.badge != null && c.badge > 0),
-    );
-    const emptyCards = cards.filter(
-        (c) => !primaryCollectors.has(c.key as CollectorsMap) && (c.badge == null || c.badge === 0),
-    );
+    const activeCards = cards.filter((c) => c.badge != null && c.badge > 0);
+    const emptyCards = cards.filter((c) => c.badge == null || c.badge === 0);
 
     const handleCardClick = (collectorKey: string) => {
         setSearchParams((params) => {
@@ -474,8 +473,15 @@ export const IndexPage = () => {
 
     return (
         <Box>
-            {/* Request summary */}
-            <SummaryBar>
+            {/* Request summary — click opens Request or Command panel */}
+            <SummaryBar
+                onClick={() => {
+                    const collector = isDebugEntryAboutConsole(entry)
+                        ? CollectorsMap.CommandCollector
+                        : CollectorsMap.RequestCollector;
+                    handleCardClick(collector);
+                }}
+            >
                 {method && path && (
                     <SummaryItem>
                         <Icon sx={{fontSize: 16, color: 'primary.main'}}>http</Icon>
