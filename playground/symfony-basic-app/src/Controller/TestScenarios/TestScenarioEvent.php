@@ -2,11 +2,8 @@
 
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\TestScenarios;
 
-/**
- * Simple event class for ADP test scenarios.
- */
 final readonly class TestScenarioEvent
 {
     public function __construct(
