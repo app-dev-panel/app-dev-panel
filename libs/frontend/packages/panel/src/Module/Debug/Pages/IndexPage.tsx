@@ -13,11 +13,7 @@ import {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
 // Collectors hidden from the card grid (data shown elsewhere in overview)
-const hiddenCollectors = new Set<string>([
-    CollectorsMap.WebAppInfoCollector,
-    CollectorsMap.ConsoleAppInfoCollector,
-    CollectorsMap.EnvironmentCollector,
-]);
+const hiddenCollectors = new Set<string>([CollectorsMap.WebAppInfoCollector, CollectorsMap.ConsoleAppInfoCollector]);
 
 // ---------------------------------------------------------------------------
 // Card icon background/foreground colors per collector
@@ -39,6 +35,7 @@ const iconColors: Record<string, {bg: string; fg: string}> = {
     [CollectorsMap.TwigCollector]: {bg: '#FEF3C7', fg: '#B45309'},
     [CollectorsMap.SecurityCollector]: {bg: '#FEF2F2', fg: '#DC2626'},
     [CollectorsMap.MessengerCollector]: {bg: '#F0F9FF', fg: '#0284C7'},
+    [CollectorsMap.EnvironmentCollector]: {bg: '#E8F5E9', fg: '#2E7D32'},
 };
 const defaultIconColor = {bg: '#F5F5F5', fg: '#666666'};
 
