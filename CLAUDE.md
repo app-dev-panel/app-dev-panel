@@ -188,7 +188,7 @@ Playgrounds are demo/reference apps — they have **no unit tests**. Quality is 
 |------------|:------:|:----:|:-------:|----------------------:|
 | `yiisoft-app` | pass | pass (3 baselined) | pass (96 baselined) | 99 |
 | `symfony-basic-app` | pass | pass | pass (11 baselined) | 11 |
-| `yii2-basic-app` | pass | pass | pass (10 baselined) | 10 |
+| `yii2-basic-app` | pass | pass | pass (9 baselined) | 9 |
 
 ### Running Coverage Locally
 
