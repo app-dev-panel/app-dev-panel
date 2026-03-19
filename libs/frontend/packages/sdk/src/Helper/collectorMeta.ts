@@ -32,7 +32,7 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
     [CollectorsMap.Yii2MailerCollector]: {label: 'Mailer', icon: 'mail', weight: 10},
     [CollectorsMap.Yii2AssetBundleCollector]: {label: 'Assets', icon: 'web_asset', weight: 15},
 
-    [CollectorsMap.EnvironmentCollector]: {label: 'Environment', icon: 'settings_system_daydream', weight: 16},
+    [CollectorsMap.EnvironmentCollector]: {label: 'Environment', icon: 'dns', weight: 0},
     [CollectorsMap.ConsoleAppInfoCollector]: {label: 'Console', icon: 'terminal', weight: 17},
     [CollectorsMap.WebAppInfoCollector]: {label: 'Web Info', icon: 'language', weight: 18},
     [CollectorsMap.CommandCollector]: {label: 'Command', icon: 'terminal', weight: 1},
