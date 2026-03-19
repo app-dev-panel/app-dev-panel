@@ -13,7 +13,11 @@ import {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
 // Collectors hidden from the card grid (data shown elsewhere in overview)
-const hiddenCollectors = new Set<string>([CollectorsMap.WebAppInfoCollector, CollectorsMap.ConsoleAppInfoCollector]);
+const hiddenCollectors = new Set<string>([
+    CollectorsMap.WebAppInfoCollector,
+    CollectorsMap.ConsoleAppInfoCollector,
+    CollectorsMap.EnvironmentCollector,
+]);
 
 // ---------------------------------------------------------------------------
 // Card icon background/foreground colors per collector
@@ -40,98 +44,15 @@ const iconColors: Record<string, {bg: string; fg: string}> = {
 const defaultIconColor = {bg: '#F5F5F5', fg: '#666666'};
 
 // ---------------------------------------------------------------------------
-// Styled components
-// ---------------------------------------------------------------------------
-
-const CardsGrid = styled(Box)(({theme}) => ({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-    gap: theme.spacing(2),
-    marginBottom: theme.spacing(3),
-}));
-
-type CollectorCardRootProps = {hasError?: boolean};
-
-const CollectorCardRoot = styled(Box, {shouldForwardProp: (p) => p !== 'hasError'})<CollectorCardRootProps>(
-    ({theme, hasError}) => ({
-        background: theme.palette.background.paper,
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: theme.shape.borderRadius * 1.5,
-        padding: theme.spacing(2.5),
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-        position: 'relative',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
-        ...(hasError && {borderLeft: `3px solid ${theme.palette.error.main}`}),
-        '&:hover': {
-            boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
-            borderColor: theme.palette.primary.main,
-            transform: 'translateY(-1px)',
-        },
-    }),
-);
-
-const CardHeader = styled(Box)({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-});
-
-const CardTitle = styled(Box)(({theme}) => ({display: 'flex', alignItems: 'center', gap: theme.spacing(1)}));
-
-const CardIconBox = styled(Box)({
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-});
-
-const CardName = styled(Typography)({fontWeight: 600, fontSize: '14px'});
-
-type BadgeProps = {isError?: boolean};
-
-const Badge = styled('span', {shouldForwardProp: (p) => p !== 'isError'})<BadgeProps>(({theme, isError}) => ({
-    padding: '2px 8px',
-    borderRadius: 10,
-    fontSize: '11px',
-    fontWeight: 600,
-    backgroundColor: isError ? theme.palette.error.light : theme.palette.background.default,
-    color: isError ? theme.palette.error.main : theme.palette.text.secondary,
-}));
-
-const CardSummary = styled(Typography)(({theme}) => ({
-    fontSize: '13px',
-    color: theme.palette.text.secondary,
-    marginBottom: theme.spacing(1.25),
-}));
-
-const SparklineContainer = styled(Box)({display: 'flex', alignItems: 'flex-end', gap: 2, height: 16});
-
-type SparkBarProps = {isCurrent?: boolean; barColor?: string};
-
-const SparkBar = styled(Box, {shouldForwardProp: (p) => p !== 'isCurrent' && p !== 'barColor'})<SparkBarProps>(
-    ({theme, isCurrent, barColor}) => ({
-        width: 6,
-        borderRadius: '2px 2px 0 0',
-        backgroundColor: barColor || theme.palette.primary.main,
-        opacity: isCurrent ? 1 : 0.4,
-        transition: 'opacity 0.15s',
-    }),
-);
-
-// ---------------------------------------------------------------------------
-// Summary section (top metrics bar)
+// Summary bar (top request headline)
 // ---------------------------------------------------------------------------
 
 const SummaryBar = styled(Box)(({theme}) => ({
     display: 'flex',
     flexWrap: 'wrap',
     gap: theme.spacing(3),
-    marginBottom: theme.spacing(3),
-    padding: theme.spacing(2, 2.5),
+    marginBottom: theme.spacing(2),
+    padding: theme.spacing(1.5, 2),
     borderRadius: theme.shape.borderRadius * 1.5,
     border: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
@@ -139,44 +60,79 @@ const SummaryBar = styled(Box)(({theme}) => ({
 
 const SummaryItem = styled(Box)({display: 'flex', alignItems: 'center', gap: 8});
 
-const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 600, fontSize: '15px'});
+const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 600, fontSize: '14px'});
 
-const SummaryLabel = styled(Typography)(({theme}) => ({fontSize: '12px', color: theme.palette.text.secondary}));
+const SummaryLabel = styled(Typography)(({theme}) => ({fontSize: '11px', color: theme.palette.text.secondary}));
 
 // ---------------------------------------------------------------------------
-// Performance breakdown section (WebAppInfo data)
+// Environment strip
 // ---------------------------------------------------------------------------
 
-const PerfGrid = styled(Box)(({theme}) => ({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-    gap: theme.spacing(2),
-    marginBottom: theme.spacing(3),
+const EnvStrip = styled(Box)(({theme}) => ({
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: theme.spacing(0.75),
+    marginBottom: theme.spacing(2),
+    padding: theme.spacing(1, 1.5),
+    borderRadius: theme.shape.borderRadius,
+    border: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.default,
+    cursor: 'pointer',
+    transition: 'border-color 0.15s',
+    '&:hover': {borderColor: theme.palette.primary.main},
 }));
 
-const PerfCard = styled(Box)(({theme}) => ({
-    padding: theme.spacing(2),
-    borderRadius: theme.shape.borderRadius * 1.5,
+const EnvChip = styled(Box)(({theme}) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 4,
+    padding: theme.spacing(0.25, 1),
+    borderRadius: theme.shape.borderRadius * 0.75,
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${theme.palette.divider}`,
+    fontSize: '11px',
+    fontWeight: 500,
+    color: theme.palette.text.secondary,
+    whiteSpace: 'nowrap',
+}));
+
+const EnvChipValue = styled('span')({fontFamily: primitives.fontFamilyMono, fontWeight: 600});
+
+// ---------------------------------------------------------------------------
+// Performance metrics (compact)
+// ---------------------------------------------------------------------------
+
+const MetricsRow = styled(Box)(({theme}) => ({
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+    gap: theme.spacing(1),
+    marginBottom: theme.spacing(2.5),
+}));
+
+const MetricCard = styled(Box)(({theme}) => ({
+    padding: theme.spacing(1, 1.5),
+    borderRadius: theme.shape.borderRadius,
     border: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
 }));
 
-const PerfLabel = styled(Typography)(({theme}) => ({
-    fontSize: '11px',
+const MetricLabel = styled(Typography)(({theme}) => ({
+    fontSize: '10px',
     fontWeight: 600,
     textTransform: 'uppercase' as const,
     letterSpacing: '0.5px',
     color: theme.palette.text.disabled,
-    marginBottom: theme.spacing(0.5),
+    lineHeight: 1.2,
 }));
 
-const PerfValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 600, fontSize: '18px'});
+const MetricValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 600, fontSize: '14px'});
 
-const PerfBarTrack = styled(Box)(({theme}) => ({
-    height: 4,
-    borderRadius: 2,
+const MetricBar = styled(Box)(({theme}) => ({
+    height: 3,
+    borderRadius: 1.5,
     backgroundColor: theme.palette.action.hover,
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(0.5),
     overflow: 'hidden',
 }));
 
@@ -189,6 +145,14 @@ type WebAppInfoData = {
     memoryUsage?: number;
 };
 
+const formatTime = (seconds: number) => {
+    if (seconds === 0) return '0 ms';
+    if (seconds > 1000 || seconds < 0) return 'N/A';
+    if (seconds < 0.001) return `${(seconds * 1000000).toFixed(0)} us`;
+    if (seconds < 1) return `${(seconds * 1000).toFixed(2)} ms`;
+    return `${seconds.toFixed(3)} s`;
+};
+
 const PerformanceSection = ({data}: {data: WebAppInfoData}) => {
     const totalTime = data.applicationProcessingTime || 0;
     const requestTime = data.requestProcessingTime || 0;
@@ -197,43 +161,18 @@ const PerformanceSection = ({data}: {data: WebAppInfoData}) => {
     const memPeak = data.memoryPeakUsage || 0;
     const memUsage = data.memoryUsage || 0;
 
-    const formatTime = (seconds: number) => {
-        if (seconds === 0) return '0 ms';
-        if (seconds > 1000) return 'N/A';
-        if (seconds < 0) return 'N/A';
-        if (seconds < 0.001) return `${(seconds * 1000000).toFixed(0)} µs`;
-        if (seconds < 1) return `${(seconds * 1000).toFixed(2)} ms`;
-        return `${seconds.toFixed(3)} s`;
-    };
-
     const validTimes = [totalTime, requestTime, preloadTime, emitTime].filter((t) => t > 0 && t <= 1000);
     const maxTime = validTimes.length > 0 ? Math.max(...validTimes) : 0.001;
-
     const safeRatio = (value: number, max: number) => (value > 0 && value <= 1000 ? value / max : 0);
 
     const items = [
+        {label: 'Total', value: formatTime(totalTime), ratio: safeRatio(totalTime, maxTime), color: 'primary.main'},
+        {label: 'Request', value: formatTime(requestTime), ratio: safeRatio(requestTime, maxTime), color: '#42A5F5'},
+        {label: 'Preload', value: formatTime(preloadTime), ratio: safeRatio(preloadTime, maxTime), color: '#AB47BC'},
+        {label: 'Emit', value: formatTime(emitTime), ratio: safeRatio(emitTime, maxTime), color: '#66BB6A'},
+        {label: 'Peak Mem', value: formatBytes(memPeak), ratio: memPeak > 0 ? 1 : 0, color: '#FFA726'},
         {
-            label: 'Total Time',
-            value: formatTime(totalTime),
-            ratio: safeRatio(totalTime, maxTime),
-            color: 'primary.main',
-        },
-        {
-            label: 'Request Processing',
-            value: formatTime(requestTime),
-            ratio: safeRatio(requestTime, maxTime),
-            color: '#42A5F5',
-        },
-        {
-            label: 'Preload Time',
-            value: formatTime(preloadTime),
-            ratio: safeRatio(preloadTime, maxTime),
-            color: '#AB47BC',
-        },
-        {label: 'Emit Time', value: formatTime(emitTime), ratio: safeRatio(emitTime, maxTime), color: '#66BB6A'},
-        {label: 'Peak Memory', value: formatBytes(memPeak), ratio: memPeak > 0 ? 1 : 0, color: '#FFA726'},
-        {
-            label: 'Memory Usage',
+            label: 'Mem Usage',
             value: formatBytes(memUsage),
             ratio: memPeak > 0 ? memUsage / memPeak : 0,
             color: '#26C6DA',
@@ -241,30 +180,157 @@ const PerformanceSection = ({data}: {data: WebAppInfoData}) => {
     ];
 
     return (
-        <PerfGrid>
+        <MetricsRow>
             {items.map((item) => (
-                <PerfCard key={item.label}>
-                    <PerfLabel>{item.label}</PerfLabel>
-                    <PerfValue sx={{color: item.color}}>{item.value}</PerfValue>
-                    <PerfBarTrack>
+                <MetricCard key={item.label}>
+                    <MetricLabel>{item.label}</MetricLabel>
+                    <MetricValue sx={{color: item.color}}>{item.value}</MetricValue>
+                    <MetricBar>
                         <Box
                             sx={{
                                 height: '100%',
                                 width: `${Math.max(2, item.ratio * 100)}%`,
                                 backgroundColor: item.color,
-                                borderRadius: 2,
+                                borderRadius: 1.5,
                                 transition: 'width 0.3s ease',
                             }}
                         />
-                    </PerfBarTrack>
-                </PerfCard>
+                    </MetricBar>
+                </MetricCard>
             ))}
-        </PerfGrid>
+        </MetricsRow>
     );
 };
 
 // ---------------------------------------------------------------------------
-// Helper: generate sparkline bars (decorative, based on badge count)
+// Section divider
+// ---------------------------------------------------------------------------
+
+const SectionDivider = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1.5),
+    marginBottom: theme.spacing(1.5),
+}));
+
+const DividerLine = styled(Box)(({theme}) => ({flex: 1, height: 1, backgroundColor: theme.palette.divider}));
+
+const DividerLabel = styled(Typography)(({theme}) => ({
+    fontSize: '11px',
+    fontWeight: 600,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.6px',
+    color: theme.palette.text.disabled,
+    whiteSpace: 'nowrap',
+}));
+
+// ---------------------------------------------------------------------------
+// Active collector cards
+// ---------------------------------------------------------------------------
+
+const ActiveGrid = styled(Box)(({theme}) => ({
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+    gap: theme.spacing(1.5),
+    marginBottom: theme.spacing(2),
+}));
+
+type CollectorCardRootProps = {hasError?: boolean};
+
+const ActiveCardRoot = styled(Box, {shouldForwardProp: (p) => p !== 'hasError'})<CollectorCardRootProps>(
+    ({theme, hasError}) => ({
+        background: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: theme.shape.borderRadius * 1.5,
+        padding: theme.spacing(2),
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+        ...(hasError && {borderLeft: `3px solid ${theme.palette.error.main}`}),
+        '&:hover': {
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            borderColor: theme.palette.primary.main,
+            transform: 'translateY(-1px)',
+        },
+    }),
+);
+
+const CardHeader = styled(Box)({display: 'flex', alignItems: 'center', justifyContent: 'space-between'});
+
+const CardTitle = styled(Box)(({theme}) => ({display: 'flex', alignItems: 'center', gap: theme.spacing(0.75)}));
+
+const CardIconBox = styled(Box)({
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+});
+
+const CardName = styled(Typography)({fontWeight: 600, fontSize: '13px'});
+
+type BadgeProps = {isError?: boolean};
+
+const Badge = styled('span', {shouldForwardProp: (p) => p !== 'isError'})<BadgeProps>(({theme, isError}) => ({
+    padding: '1px 7px',
+    borderRadius: 10,
+    fontSize: '11px',
+    fontWeight: 600,
+    backgroundColor: isError ? theme.palette.error.light : theme.palette.background.default,
+    color: isError ? theme.palette.error.main : theme.palette.text.secondary,
+}));
+
+const SparklineContainer = styled(Box)({display: 'flex', alignItems: 'flex-end', gap: 2, height: 14, marginTop: 8});
+
+type SparkBarProps = {isCurrent?: boolean; barColor?: string};
+
+const SparkBar = styled(Box, {shouldForwardProp: (p) => p !== 'isCurrent' && p !== 'barColor'})<SparkBarProps>(
+    ({theme, isCurrent, barColor}) => ({
+        width: 5,
+        borderRadius: '2px 2px 0 0',
+        backgroundColor: barColor || theme.palette.primary.main,
+        opacity: isCurrent ? 1 : 0.35,
+        transition: 'opacity 0.15s',
+    }),
+);
+
+// ---------------------------------------------------------------------------
+// Compact (empty/info) collector cards
+// ---------------------------------------------------------------------------
+
+const CompactGrid = styled(Box)(({theme}) => ({
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+    gap: theme.spacing(1),
+}));
+
+const CompactCard = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.75),
+    padding: theme.spacing(0.75, 1.25),
+    borderRadius: theme.shape.borderRadius,
+    border: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.paper,
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+    opacity: 0.7,
+    '&:hover': {opacity: 1, borderColor: theme.palette.primary.main},
+}));
+
+const CompactIconBox = styled(Box)({
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+});
+
+// ---------------------------------------------------------------------------
+// Helpers
 // ---------------------------------------------------------------------------
 
 function generateSparkBars(count: number): number[] {
@@ -275,10 +341,6 @@ function generateSparkBars(count: number): number[] {
     }
     return bars;
 }
-
-// ---------------------------------------------------------------------------
-// Build collector card data from debug entry
-// ---------------------------------------------------------------------------
 
 type CollectorCardData = {
     key: string;
@@ -299,7 +361,6 @@ function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
         .map((c) => (typeof c === 'string' ? c : c.id))
         .filter((c) => !hiddenCollectors.has(c))
         .filter((c) => {
-            // Show only one of Request/Command based on entry type
             if (c === CollectorsMap.CommandCollector && isWeb) return false;
             if (c === CollectorsMap.RequestCollector && isConsole) return false;
             return true;
@@ -312,10 +373,8 @@ function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
             const label = getCollectorLabel(collector);
             let summary = count != null ? `${count} ${label.toLowerCase()}` : label;
 
-            // Customize summaries
             if (collector === CollectorsMap.DatabaseCollector && entry.db) {
-                const queries = Number(entry.db.queries?.total ?? 0);
-                summary = `${queries} queries`;
+                summary = `${Number(entry.db.queries?.total ?? 0)} queries`;
             }
             if (collector === CollectorsMap.ExceptionCollector && isException) {
                 summary = `${count} exception`;
@@ -335,7 +394,7 @@ function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
 }
 
 // ---------------------------------------------------------------------------
-// IndexPage — card-grid dashboard (variant-d-minimal-zen)
+// IndexPage
 // ---------------------------------------------------------------------------
 
 export const IndexPage = () => {
@@ -346,7 +405,6 @@ export const IndexPage = () => {
     const [webAppInfo, setWebAppInfo] = useState<WebAppInfoData | null>(null);
     const [loadingPerf, setLoadingPerf] = useState(false);
 
-    // Fetch WebAppInfo collector data for performance breakdown
     useEffect(() => {
         if (!entry) return;
         if (!entry.collectors.some((c) => (typeof c === 'string' ? c : c.id) === CollectorsMap.WebAppInfoCollector))
@@ -370,6 +428,8 @@ export const IndexPage = () => {
     }
 
     const cards = buildCollectorCards(entry);
+    const activeCards = cards.filter((c) => c.badge != null && c.badge > 0);
+    const emptyCards = cards.filter((c) => c.badge == null || c.badge === 0);
 
     const handleCardClick = (collectorKey: string) => {
         setSearchParams((params) => {
@@ -396,17 +456,23 @@ export const IndexPage = () => {
 
     const phpVersion = entry.environment?.php?.version;
     const phpSapi = entry.environment?.php?.sapi;
+    const osName = entry.environment?.os;
     const adapter = isDebugEntryAboutWeb(entry) ? entry.web?.adapter : entry.console?.adapter;
     const status = isDebugEntryAboutWeb(entry) ? entry.response?.statusCode : null;
     const method = isDebugEntryAboutWeb(entry) ? entry.request?.method : null;
     const path = isDebugEntryAboutWeb(entry) ? entry.request?.path : null;
 
+    const hasEnvironment = entry.collectors.some(
+        (c) => (typeof c === 'string' ? c : c.id) === CollectorsMap.EnvironmentCollector,
+    );
+
     return (
         <Box>
+            {/* Request summary */}
             <SummaryBar>
                 {method && path && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: 'primary.main'}}>http</Icon>
+                        <Icon sx={{fontSize: 16, color: 'primary.main'}}>http</Icon>
                         <Box>
                             <SummaryValue>
                                 {method} {path}
@@ -417,7 +483,7 @@ export const IndexPage = () => {
                 )}
                 {status != null && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: status >= 400 ? 'error.main' : 'success.main'}}>
+                        <Icon sx={{fontSize: 16, color: status >= 400 ? 'error.main' : 'success.main'}}>
                             {status >= 400 ? 'error' : 'check_circle'}
                         </Icon>
                         <Box>
@@ -428,7 +494,7 @@ export const IndexPage = () => {
                 )}
                 {duration && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: 'primary.main'}}>timer</Icon>
+                        <Icon sx={{fontSize: 16, color: 'primary.main'}}>timer</Icon>
                         <Box>
                             <SummaryValue>{duration}</SummaryValue>
                             <SummaryLabel>Duration</SummaryLabel>
@@ -437,25 +503,16 @@ export const IndexPage = () => {
                 )}
                 {memory && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: 'success.main'}}>memory</Icon>
+                        <Icon sx={{fontSize: 16, color: 'success.main'}}>memory</Icon>
                         <Box>
                             <SummaryValue>{memory}</SummaryValue>
                             <SummaryLabel>Peak Memory</SummaryLabel>
                         </Box>
                     </SummaryItem>
                 )}
-                {phpVersion && (
-                    <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: '#777EB8'}}>code</Icon>
-                        <Box>
-                            <SummaryValue>PHP {phpVersion}</SummaryValue>
-                            <SummaryLabel>{[phpSapi, adapter].filter(Boolean).join(' / ') || 'Runtime'}</SummaryLabel>
-                        </Box>
-                    </SummaryItem>
-                )}
                 {isDebugEntryAboutConsole(entry) && entry.command && (
                     <SummaryItem>
-                        <Icon sx={{fontSize: 18, color: 'primary.main'}}>terminal</Icon>
+                        <Icon sx={{fontSize: 16, color: 'primary.main'}}>terminal</Icon>
                         <Box>
                             <SummaryValue>{entry.command.input || entry.command.name}</SummaryValue>
                             <SummaryLabel>Command (exit: {entry.command.exitCode})</SummaryLabel>
@@ -464,42 +521,112 @@ export const IndexPage = () => {
                 )}
             </SummaryBar>
 
-            {loadingPerf && <LinearProgress sx={{mb: 2}} />}
+            {/* Environment strip */}
+            {(phpVersion || adapter || osName) && (
+                <EnvStrip
+                    onClick={hasEnvironment ? () => handleCardClick(CollectorsMap.EnvironmentCollector) : undefined}
+                >
+                    <Icon sx={{fontSize: 14, color: 'text.disabled', mr: 0.25}}>dns</Icon>
+                    {phpVersion && (
+                        <EnvChip>
+                            PHP <EnvChipValue>{phpVersion}</EnvChipValue>
+                        </EnvChip>
+                    )}
+                    {phpSapi && (
+                        <EnvChip>
+                            SAPI <EnvChipValue>{phpSapi}</EnvChipValue>
+                        </EnvChip>
+                    )}
+                    {adapter && (
+                        <EnvChip>
+                            Adapter <EnvChipValue>{adapter}</EnvChipValue>
+                        </EnvChip>
+                    )}
+                    {osName && (
+                        <EnvChip>
+                            OS <EnvChipValue>{osName}</EnvChipValue>
+                        </EnvChip>
+                    )}
+                    {hasEnvironment && <Icon sx={{fontSize: 14, color: 'text.disabled', ml: 'auto'}}>open_in_new</Icon>}
+                </EnvStrip>
+            )}
+
+            {/* Performance breakdown */}
+            {loadingPerf && <LinearProgress sx={{mb: 1.5, borderRadius: 1}} />}
             {webAppInfo && <PerformanceSection data={webAppInfo} />}
 
-            <CardsGrid>
-                {cards.map((card) => {
-                    const sparkBars = generateSparkBars(card.badge ?? 0);
-                    return (
-                        <CollectorCardRoot
-                            key={card.key}
-                            hasError={card.isException}
-                            onClick={() => handleCardClick(card.key)}
-                        >
-                            <CardHeader>
-                                <CardTitle>
-                                    <CardIconBox sx={{backgroundColor: card.iconBg}}>
-                                        <Icon sx={{fontSize: 16, color: card.iconFg}}>{card.icon}</Icon>
-                                    </CardIconBox>
-                                    <CardName>{card.label}</CardName>
-                                </CardTitle>
-                                {card.badge != null && <Badge isError={card.isException}>{card.badge}</Badge>}
-                            </CardHeader>
-                            <CardSummary>{card.summary}</CardSummary>
-                            <SparklineContainer>
-                                {sparkBars.map((height, i) => (
-                                    <SparkBar
-                                        key={i}
-                                        sx={{height: `${height}%`}}
-                                        isCurrent={i === sparkBars.length - 1}
-                                        barColor={card.isException ? theme.palette.error.main : undefined}
-                                    />
-                                ))}
-                            </SparklineContainer>
-                        </CollectorCardRoot>
-                    );
-                })}
-            </CardsGrid>
+            {/* Active collectors */}
+            {activeCards.length > 0 && (
+                <>
+                    <SectionDivider>
+                        <DividerLabel>Collectors</DividerLabel>
+                        <DividerLine />
+                    </SectionDivider>
+                    <ActiveGrid>
+                        {activeCards.map((card) => {
+                            const sparkBars = generateSparkBars(card.badge ?? 0);
+                            return (
+                                <ActiveCardRoot
+                                    key={card.key}
+                                    hasError={card.isException}
+                                    onClick={() => handleCardClick(card.key)}
+                                >
+                                    <CardHeader>
+                                        <CardTitle>
+                                            <CardIconBox sx={{backgroundColor: card.iconBg}}>
+                                                <Icon sx={{fontSize: 14, color: card.iconFg}}>{card.icon}</Icon>
+                                            </CardIconBox>
+                                            <CardName>{card.label}</CardName>
+                                        </CardTitle>
+                                        <Badge isError={card.isException}>{card.badge}</Badge>
+                                    </CardHeader>
+                                    <SparklineContainer>
+                                        {sparkBars.map((height, i) => (
+                                            <SparkBar
+                                                key={i}
+                                                sx={{height: `${height}%`}}
+                                                isCurrent={i === sparkBars.length - 1}
+                                                barColor={card.isException ? theme.palette.error.main : undefined}
+                                            />
+                                        ))}
+                                    </SparklineContainer>
+                                </ActiveCardRoot>
+                            );
+                        })}
+                    </ActiveGrid>
+                </>
+            )}
+
+            {/* Empty / info collectors */}
+            {emptyCards.length > 0 && (
+                <>
+                    {activeCards.length === 0 && (
+                        <SectionDivider>
+                            <DividerLabel>Collectors</DividerLabel>
+                            <DividerLine />
+                        </SectionDivider>
+                    )}
+                    <CompactGrid>
+                        {emptyCards.map((card) => (
+                            <CompactCard key={card.key} onClick={() => handleCardClick(card.key)}>
+                                <CompactIconBox sx={{backgroundColor: card.iconBg}}>
+                                    <Icon sx={{fontSize: 12, color: card.iconFg}}>{card.icon}</Icon>
+                                </CompactIconBox>
+                                <Typography sx={{fontSize: '12px', fontWeight: 500, color: 'text.secondary'}}>
+                                    {card.label}
+                                </Typography>
+                                {card.badge != null && (
+                                    <Typography
+                                        sx={{fontSize: '10px', fontWeight: 600, color: 'text.disabled', ml: 'auto'}}
+                                    >
+                                        {card.badge}
+                                    </Typography>
+                                )}
+                            </CompactCard>
+                        ))}
+                    </CompactGrid>
+                </>
+            )}
         </Box>
     );
 };
