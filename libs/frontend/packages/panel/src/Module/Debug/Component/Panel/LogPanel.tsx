@@ -66,31 +66,7 @@ const DetailBox = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
-const FilterBar = styled(Box)(({theme}) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(0.5),
-    flexWrap: 'wrap',
-}));
-
-type LevelBadgeProps = {active?: boolean; badgeColor: string};
-
-const LevelBadge = styled('button', {shouldForwardProp: (p) => p !== 'active' && p !== 'badgeColor'})<LevelBadgeProps>(
-    ({theme, active, badgeColor}) => ({
-        border: 'none',
-        cursor: 'pointer',
-        fontSize: '10px',
-        fontWeight: 600,
-        padding: '2px 8px',
-        borderRadius: 10,
-        whiteSpace: 'nowrap',
-        transition: 'all 0.15s',
-        backgroundColor: active ? badgeColor : theme.palette.action.hover,
-        color: active ? theme.palette.common.white : theme.palette.text.secondary,
-        opacity: active ? 1 : 0.6,
-        '&:hover': {opacity: 1},
-    }),
-);
+// (severity badge chips are rendered inline via MUI Chip)
 
 export const LogPanel = ({data}: LogPanelProps) => {
     const theme = useTheme();
@@ -149,25 +125,49 @@ export const LogPanel = ({data}: LogPanelProps) => {
         return result;
     }, [data, activeLevels, deferredFilter]);
 
-    const action = (
-        <FilterBar>
-            {presentLevels.map((level) => (
-                <LevelBadge
-                    key={level}
-                    active={activeLevels.has(level)}
-                    badgeColor={levelColor(level, theme)}
-                    onClick={() => toggleLevel(level)}
-                >
-                    {level.toUpperCase()} {levelCounts.get(level)}
-                </LevelBadge>
-            ))}
-            <FilterInput value={filter} onChange={setFilter} placeholder="Filter logs..." />
-        </FilterBar>
-    );
-
     return (
         <Box>
-            <SectionTitle action={action}>{`${filtered.length} log entries`}</SectionTitle>
+            <SectionTitle
+                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter logs..." />}
+            >{`${filtered.length} log entries`}</SectionTitle>
+
+            {presentLevels.length > 1 && (
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                    {presentLevels.map((level) => {
+                        const color = levelColor(level, theme);
+                        const isActive = activeLevels.has(level);
+                        return (
+                            <Chip
+                                key={level}
+                                label={`${level.toUpperCase()} (${levelCounts.get(level)})`}
+                                size="small"
+                                onClick={() => toggleLevel(level)}
+                                variant={isActive ? 'filled' : 'outlined'}
+                                sx={{
+                                    fontSize: '11px',
+                                    height: 24,
+                                    borderRadius: 1,
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    borderColor: color,
+                                    ...(isActive
+                                        ? {backgroundColor: color, color: theme.palette.common.white}
+                                        : {color}),
+                                }}
+                            />
+                        );
+                    })}
+                    {activeLevels.size > 0 && (
+                        <Chip
+                            label="Clear"
+                            size="small"
+                            onClick={() => setActiveLevels(new Set())}
+                            variant="outlined"
+                            sx={{fontSize: '11px', height: 24, borderRadius: 1}}
+                        />
+                    )}
+                </Box>
+            )}
 
             {filtered.map((entry, index) => {
                 const expanded = expandedIndex === index;
