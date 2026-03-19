@@ -9,6 +9,7 @@
         mago-playgrounds-fix mago-playground-yiisoft-fix mago-playground-symfony-fix mago-playground-yii2-fix \
         check check-ci fix \
         install install-php install-frontend install-playgrounds \
+        serve-yiisoft serve-symfony serve-yii2 serve \
         fixtures fixtures-yiisoft fixtures-symfony fixtures-yii2 \
         test-fixtures test-fixtures-yiisoft test-fixtures-symfony test-fixtures-yii2
 
@@ -75,6 +76,12 @@ help: ## Show this help
 	@echo "  make install-php           Install PHP dependencies (root)"
 	@echo "  make install-frontend      Install frontend dependencies"
 	@echo "  make install-playgrounds   Install playground dependencies"
+	@echo ""
+	@echo "$(YELLOW)Playground Servers:$(RESET)"
+	@echo "  make serve                 Start all playground servers in background"
+	@echo "  make serve-yiisoft         Start Yiisoft server (port $(YIISOFT_PORT))"
+	@echo "  make serve-symfony         Start Symfony server (port $(SYMFONY_PORT))"
+	@echo "  make serve-yii2            Start Yii2 server (port $(YII2_PORT))"
 	@echo ""
 	@echo "$(YELLOW)Testing Fixtures:$(RESET)"
 	@echo "  make fixtures             Run test fixtures against all playgrounds"
@@ -254,6 +261,37 @@ fix: ## Fix all code (core + playgrounds + frontend)
 	@$(MAKE) frontend-fix
 	@echo ""
 	@echo "$(GREEN)All code fixed!$(RESET)"
+
+# ============================================================================
+# Playground Servers
+# ============================================================================
+
+serve-yiisoft: ## Start Yiisoft playground server (port $(YIISOFT_PORT))
+	@echo "$(CYAN)[Playground: Yiisoft] Starting server on port $(YIISOFT_PORT)...$(RESET)"
+	cd $(PLAYGROUND_DIR)/yiisoft-app && php ./yii serve --port=$(YIISOFT_PORT)
+
+serve-symfony: ## Start Symfony playground server (port $(SYMFONY_PORT))
+	@echo "$(CYAN)[Playground: Symfony] Starting server on port $(SYMFONY_PORT)...$(RESET)"
+	cd $(PLAYGROUND_DIR)/symfony-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:$(SYMFONY_PORT) -t public
+
+serve-yii2: ## Start Yii2 playground server (port $(YII2_PORT))
+	@echo "$(CYAN)[Playground: Yii2] Starting server on port $(YII2_PORT)...$(RESET)"
+	cd $(PLAYGROUND_DIR)/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:$(YII2_PORT) -t public
+
+serve: ## Start all playground servers in background
+	@echo "$(CYAN)Starting all playground servers...$(RESET)"
+	@$(MAKE) serve-yiisoft &
+	@$(MAKE) serve-symfony &
+	@$(MAKE) serve-yii2 &
+	@sleep 1
+	@echo ""
+	@echo "$(GREEN)Playground servers started:$(RESET)"
+	@echo "  Yiisoft:  http://127.0.0.1:$(YIISOFT_PORT)"
+	@echo "  Symfony:  http://127.0.0.1:$(SYMFONY_PORT)"
+	@echo "  Yii2:     http://127.0.0.1:$(YII2_PORT)"
+	@echo ""
+	@echo "$(YELLOW)Press Ctrl+C to stop all servers$(RESET)"
+	@wait
 
 # ============================================================================
 # Testing Fixtures
