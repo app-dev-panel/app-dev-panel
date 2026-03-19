@@ -50,6 +50,7 @@ final class WebAppInfoCollectorTest extends AbstractCollectorTestCase
         $this->assertSame('Symfony', $collected['adapter']);
 
         $summary = $collector->getSummary();
+        $this->assertIsArray($summary['web']);
         $this->assertSame('Symfony', $summary['web']['adapter']);
     }
 
@@ -64,6 +65,7 @@ final class WebAppInfoCollectorTest extends AbstractCollectorTestCase
         $this->assertSame('', $collected['adapter']);
 
         $summary = $collector->getSummary();
+        $this->assertIsArray($summary['web']);
         $this->assertSame('', $summary['web']['adapter']);
     }
 }

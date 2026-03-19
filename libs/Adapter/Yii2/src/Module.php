@@ -10,6 +10,7 @@ use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
 use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Controller\AdpApiController;
+use AppDevPanel\Adapter\Yii2\Controller\DebugQueryController;
 use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
 use AppDevPanel\Adapter\Yii2\EventListener\WebListener;
 use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
@@ -159,6 +160,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         $this->buildDebugger();
         $this->registerEventListeners($app);
         $this->registerRoutes($app);
+        $this->registerConsoleCommands($app);
     }
 
     public function getDebugger(): Debugger
@@ -481,6 +483,16 @@ class Module extends \yii\base\Module implements BootstrapInterface
         if ($logCollector instanceof LogCollector) {
             $this->registerDebugLogTarget($logCollector);
         }
+    }
+
+    private function registerConsoleCommands(Application $app): void
+    {
+        if (!$app instanceof ConsoleApplication) {
+            return;
+        }
+
+        $collectorRepository = \Yii::$container->get(CollectorRepositoryInterface::class);
+        $app->controllerMap['debug-query'] = new DebugQueryController('debug-query', $app, $collectorRepository);
     }
 
     private function registerDbProfiling(): void

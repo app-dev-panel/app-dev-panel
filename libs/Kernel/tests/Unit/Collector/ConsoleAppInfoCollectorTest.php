@@ -85,6 +85,7 @@ final class ConsoleAppInfoCollectorTest extends AbstractCollectorTestCase
         $this->assertSame('Yii3', $collected['adapter']);
 
         $summary = $collector->getSummary();
+        $this->assertIsArray($summary['console']);
         $this->assertSame('Yii3', $summary['console']['adapter']);
     }
 
@@ -105,6 +106,7 @@ final class ConsoleAppInfoCollectorTest extends AbstractCollectorTestCase
         $this->assertSame('', $collected['adapter']);
 
         $summary = $collector->getSummary();
+        $this->assertIsArray($summary['console']);
         $this->assertSame('', $summary['console']['adapter']);
     }
 }
