@@ -7,7 +7,7 @@ import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathPar
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {Box, Chip, Collapse, Icon, IconButton, TextField, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
 type HttpClientEntry = {
     startTime: number;
@@ -385,6 +385,7 @@ function statusGroup(code: number): string {
 export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
+    const deferredFilter = useDeferredValue(filter);
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
@@ -442,29 +443,30 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
                 return activeFilters.has(method) || activeFilters.has(group);
             });
         }
-        if (filter) {
+        if (deferredFilter) {
+            const lowerFilter = deferredFilter.toLowerCase();
             result = result.filter(
                 (e) =>
-                    e.uri.toLowerCase().includes(filter.toLowerCase()) ||
-                    e.method.toLowerCase().includes(filter.toLowerCase()) ||
-                    String(e.responseStatus).includes(filter),
+                    e.uri.toLowerCase().includes(lowerFilter) ||
+                    e.method.toLowerCase().includes(lowerFilter) ||
+                    String(e.responseStatus).includes(deferredFilter),
             );
         }
         return result;
-    }, [data, filter, activeFilters]);
+    }, [data, deferredFilter, activeFilters]);
 
-    const statusBadgeColor = (group: string): 'success' | 'primary' | 'warning' | 'error' | 'default' => {
+    const statusBadgeBg = (group: string): string => {
         switch (group) {
             case '2xx':
-                return 'success';
+                return theme.palette.success.main;
             case '3xx':
-                return 'primary';
+                return theme.palette.primary.main;
             case '4xx':
-                return 'warning';
+                return theme.palette.warning.main;
             case '5xx':
-                return 'error';
+                return theme.palette.error.main;
             default:
-                return 'default';
+                return theme.palette.text.disabled;
         }
     };
 
@@ -472,9 +474,7 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
         <Box>
             <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
                 <SectionTitle>{`${filtered.length} http requests`}</SectionTitle>
-                <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'text.disabled'}}>
-                    {formatDuration(totalTime)} total
-                </Typography>
+                <SectionTitle>{`${formatDuration(totalTime)} total`}</SectionTitle>
                 <TextField
                     size="small"
                     placeholder="Filter requests..."
@@ -487,40 +487,49 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
 
             {(badgeCounts.length > 1 || statusBadgeCounts.length > 1) && (
                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
-                    {statusBadgeCounts.map(([group, count]) => (
-                        <Chip
-                            key={group}
-                            label={`${group} (${count})`}
-                            size="small"
-                            onClick={() => toggleFilter(group)}
-                            variant={activeFilters.has(group) ? 'filled' : 'outlined'}
-                            color={activeFilters.has(group) ? statusBadgeColor(group) : 'default'}
-                            sx={{
-                                fontSize: '11px',
-                                height: 24,
-                                borderRadius: 1,
-                                fontWeight: activeFilters.has(group) ? 600 : 400,
-                                cursor: 'pointer',
-                            }}
-                        />
-                    ))}
-                    {badgeCounts.map(([method, count]) => (
-                        <Chip
-                            key={method}
-                            label={`${method} (${count})`}
-                            size="small"
-                            onClick={() => toggleFilter(method)}
-                            variant={activeFilters.has(method) ? 'filled' : 'outlined'}
-                            color={activeFilters.has(method) ? 'primary' : 'default'}
-                            sx={{
-                                fontSize: '11px',
-                                height: 24,
-                                borderRadius: 1,
-                                fontWeight: activeFilters.has(method) ? 600 : 400,
-                                cursor: 'pointer',
-                            }}
-                        />
-                    ))}
+                    {statusBadgeCounts.map(([group, count]) => {
+                        const isActive = activeFilters.has(group);
+                        return (
+                            <Chip
+                                key={group}
+                                label={`${group} (${count})`}
+                                size="small"
+                                onClick={() => toggleFilter(group)}
+                                sx={{
+                                    fontSize: '11px',
+                                    height: 24,
+                                    borderRadius: 1,
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    backgroundColor: isActive ? statusBadgeBg(group) : 'transparent',
+                                    color: isActive ? 'common.white' : statusBadgeBg(group),
+                                    border: `1px solid ${statusBadgeBg(group)}`,
+                                }}
+                            />
+                        );
+                    })}
+                    {badgeCounts.map(([method, count]) => {
+                        const isActive = activeFilters.has(method);
+                        const color = methodColor(method, theme);
+                        return (
+                            <Chip
+                                key={method}
+                                label={`${method} (${count})`}
+                                size="small"
+                                onClick={() => toggleFilter(method)}
+                                sx={{
+                                    fontSize: '11px',
+                                    height: 24,
+                                    borderRadius: 1,
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    backgroundColor: isActive ? color : 'transparent',
+                                    color: isActive ? 'common.white' : color,
+                                    border: `1px solid ${color}`,
+                                }}
+                            />
+                        );
+                    })}
                     {activeFilters.size > 0 && (
                         <Chip
                             label="Clear"
