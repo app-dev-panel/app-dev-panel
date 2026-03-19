@@ -428,8 +428,14 @@ export const IndexPage = () => {
     }
 
     const cards = buildCollectorCards(entry);
-    const activeCards = cards.filter((c) => c.badge != null && c.badge > 0);
-    const emptyCards = cards.filter((c) => c.badge == null || c.badge === 0);
+    // Primary panels (Request/Command) always show as active cards even without a badge count
+    const primaryCollectors = new Set([CollectorsMap.RequestCollector, CollectorsMap.CommandCollector]);
+    const activeCards = cards.filter(
+        (c) => primaryCollectors.has(c.key as CollectorsMap) || (c.badge != null && c.badge > 0),
+    );
+    const emptyCards = cards.filter(
+        (c) => !primaryCollectors.has(c.key as CollectorsMap) && (c.badge == null || c.badge === 0),
+    );
 
     const handleCardClick = (collectorKey: string) => {
         setSearchParams((params) => {
