@@ -5,7 +5,7 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Chip, Collapse, TextField, Tooltip, Typography} from '@mui/material';
+import {Box, Collapse, TextField, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useCallback, useMemo, useState} from 'react';
 
@@ -112,7 +112,21 @@ const LegendBar = styled(Box)(({theme}) => ({
     color: theme.palette.text.disabled,
 }));
 
-const LegendItem = styled(Box)({display: 'flex', alignItems: 'center', gap: 4});
+const LegendItem = styled(Box, {shouldForwardProp: (p) => p !== 'active' && p !== 'clickable'})<{
+    active?: boolean;
+    clickable?: boolean;
+}>(({theme, active, clickable}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
+    cursor: clickable ? 'pointer' : 'default',
+    padding: theme.spacing(0.25, 0.75),
+    borderRadius: theme.shape.borderRadius,
+    border: `1px solid ${active ? theme.palette.primary.main : 'transparent'}`,
+    backgroundColor: active ? theme.palette.action.selected : 'transparent',
+    transition: 'all 0.15s ease',
+    '&:hover': clickable ? {backgroundColor: theme.palette.action.hover, borderColor: theme.palette.divider} : {},
+}));
 
 const Swatch = styled(Box)({width: 12, height: 8, borderRadius: 2});
 
@@ -137,17 +151,8 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
         return <EmptyState icon="timeline" title="No timeline items found" />;
     }
 
-    // Unique labels for legend & badge counts
+    // Unique labels for legend
     const uniqueLabels = [...new Set(data.map((r) => r[2].split('\\').pop() ?? r[2]))];
-
-    const badgeCounts = useMemo(() => {
-        const counts = new Map<string, number>();
-        for (const row of data) {
-            const shortName = row[2].split('\\').pop() ?? row[2];
-            counts.set(shortName, (counts.get(shortName) ?? 0) + 1);
-        }
-        return [...counts.entries()].sort((a, b) => b[1] - a[1]);
-    }, [data]);
 
     const filtered = useMemo(() => {
         let result = data;
@@ -198,44 +203,23 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                 />
             </Box>
 
-            {badgeCounts.length > 1 && (
-                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
-                    {badgeCounts.map(([name, count]) => (
-                        <Chip
-                            key={name}
-                            label={`${name} (${count})`}
-                            size="small"
-                            onClick={() => toggleFilter(name)}
-                            variant={activeFilters.has(name) ? 'filled' : 'outlined'}
-                            color={activeFilters.has(name) ? 'primary' : 'default'}
-                            sx={{
-                                fontSize: '11px',
-                                height: 24,
-                                borderRadius: 1,
-                                fontWeight: activeFilters.has(name) ? 600 : 400,
-                                cursor: 'pointer',
-                            }}
-                        />
-                    ))}
-                    {activeFilters.size > 0 && (
-                        <Chip
-                            label="Clear"
-                            size="small"
-                            onClick={() => setActiveFilters(new Set())}
-                            variant="outlined"
-                            sx={{fontSize: '11px', height: 24, borderRadius: 1}}
-                        />
-                    )}
-                </Box>
-            )}
-
             <LegendBar>
-                {uniqueLabels.slice(0, 10).map((label, i) => (
-                    <LegendItem key={label}>
+                {uniqueLabels.map((label, i) => (
+                    <LegendItem
+                        key={label}
+                        active={activeFilters.has(label)}
+                        clickable={uniqueLabels.length > 1}
+                        onClick={() => uniqueLabels.length > 1 && toggleFilter(label)}
+                    >
                         <Swatch sx={{backgroundColor: getBarColor(i)}} />
                         <span>{label}</span>
                     </LegendItem>
                 ))}
+                {activeFilters.size > 0 && (
+                    <LegendItem clickable onClick={() => setActiveFilters(new Set())} sx={{color: 'text.secondary'}}>
+                        <span>Clear</span>
+                    </LegendItem>
+                )}
             </LegendBar>
 
             <TimeAxis>
