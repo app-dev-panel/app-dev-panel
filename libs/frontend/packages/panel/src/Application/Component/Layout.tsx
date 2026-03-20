@@ -1,5 +1,4 @@
 import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/NotificationCenter';
-import {NotificationSnackbar} from '@app-dev-panel/panel/Application/Component/NotificationSnackbar';
 
 import {useSelector} from '@app-dev-panel/panel/store';
 import {
@@ -334,7 +333,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     return (
         <>
             <CssBaseline />
-            <NotificationSnackbar />
             <Box sx={{display: 'flex', flexDirection: 'column', height: '100vh'}}>
                 <TopBar
                     method={topBarMethod}
