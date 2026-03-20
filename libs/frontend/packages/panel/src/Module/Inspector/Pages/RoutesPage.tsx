@@ -30,14 +30,9 @@ import React, {useCallback, useDeferredValue, useEffect, useMemo, useState} from
 // Types
 // ---------------------------------------------------------------------------
 
-type RouteType = {
-    id: string;
-    name: string;
-    pattern: string;
-    method: string;
-    middlewares: any[];
-    action: any[] | undefined;
-};
+type ActionType = {className: string; methodName: string} | null;
+
+type RouteType = {id: string; name: string; pattern: string; method: string; middlewares: any[]; action: ActionType};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -59,21 +54,31 @@ const methodColor = (method: string, theme: Theme): string => {
     }
 };
 
-function isClassCallable(value: any): value is [string, string] {
-    return Array.isArray(value) && value.length >= 2 && typeof value[0] === 'string' && typeof value[1] === 'string';
+function parseCallable(value: any): ActionType {
+    if (Array.isArray(value) && value.length >= 2 && typeof value[0] === 'string' && typeof value[1] === 'string') {
+        return {className: value[0], methodName: value[1]};
+    }
+    if (typeof value === 'string' && value.includes('::')) {
+        const [className, methodName] = value.split('::', 2);
+        if (className && methodName) {
+            return {className, methodName};
+        }
+    }
+    return null;
 }
 
 function collectGroupsAndRoutes(data: any): RouteType[] {
     const routes: RouteType[] = [];
     let i = 0;
     for (const route of data) {
-        let action: any[] | undefined = undefined;
+        let action: ActionType = null;
         const middlewares: any[] = Array.isArray(route.middlewares) ? [...route.middlewares] : [];
 
         if (middlewares.length > 0) {
             const last = middlewares[middlewares.length - 1];
-            if (isClassCallable(last)) {
-                action = [last[0], last[1]];
+            const parsed = parseCallable(last);
+            if (parsed) {
+                action = parsed;
                 middlewares.pop();
             }
         }
@@ -163,12 +168,42 @@ const CheckerBox = styled('form')(({theme}) => ({
 // Route detail (expanded)
 // ---------------------------------------------------------------------------
 
+const MiddlewareItem = ({mw}: {mw: any}) => {
+    const parsed = parseCallable(mw);
+    if (parsed) {
+        return (
+            <Typography
+                component="a"
+                href={`/inspector/files?class=${parsed.className}&method=${parsed.methodName}`}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                sx={{
+                    display: 'block',
+                    fontFamily: primitives.fontFamilyMono,
+                    fontSize: '12px',
+                    color: 'primary.main',
+                    textDecoration: 'none',
+                    py: 0.25,
+                    '&:hover': {textDecoration: 'underline'},
+                }}
+            >
+                {concatClassMethod(parsed.className, parsed.methodName)}
+            </Typography>
+        );
+    }
+    return (
+        <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'text.secondary', py: 0.25}}>
+            {typeof mw === 'string' ? mw : JSON.stringify(mw)}
+        </Typography>
+    );
+};
+
 const RouteDetail = ({route}: {route: RouteType}) => {
-    const actionFull = route.action ? concatClassMethod(route.action[0] as string, route.action[1] as string) : null;
+    const {action} = route;
+    const actionFull = action ? concatClassMethod(action.className, action.methodName) : null;
 
     return (
         <DetailBox>
-            {actionFull && (
+            {action && actionFull && (
                 <Box sx={{mb: route.middlewares.length > 0 ? 2 : 0}}>
                     <Typography
                         variant="caption"
@@ -179,7 +214,7 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                     <Box sx={{mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5}}>
                         <Typography
                             component="a"
-                            href={`/inspector/files?class=${route.action![0]}&method=${route.action![1]}`}
+                            href={`/inspector/files?class=${action.className}&method=${action.methodName}`}
                             onClick={(e: React.MouseEvent) => e.stopPropagation()}
                             sx={{
                                 fontFamily: primitives.fontFamilyMono,
@@ -206,7 +241,7 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                         <Tooltip title="Examine as a container entry">
                             <IconButton
                                 size="small"
-                                href={'/inspector/container/view?class=' + (route.action![0] as string)}
+                                href={'/inspector/container/view?class=' + action.className}
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <OpenInNew sx={{fontSize: 14}} />
@@ -225,44 +260,14 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                         Middlewares ({route.middlewares.length})
                     </Typography>
                     <Box sx={{mt: 0.5}}>
-                        {route.middlewares.map((mw, i) =>
-                            isClassCallable(mw) ? (
-                                <Typography
-                                    key={i}
-                                    component="a"
-                                    href={`/inspector/files?class=${mw[0]}&method=${mw[1]}`}
-                                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                    sx={{
-                                        display: 'block',
-                                        fontFamily: primitives.fontFamilyMono,
-                                        fontSize: '12px',
-                                        color: 'primary.main',
-                                        textDecoration: 'none',
-                                        py: 0.25,
-                                        '&:hover': {textDecoration: 'underline'},
-                                    }}
-                                >
-                                    {serializeCallable(mw)}
-                                </Typography>
-                            ) : (
-                                <Typography
-                                    key={i}
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
-                                        fontSize: '12px',
-                                        color: 'text.secondary',
-                                        py: 0.25,
-                                    }}
-                                >
-                                    {typeof mw === 'string' ? mw : JSON.stringify(mw)}
-                                </Typography>
-                            ),
-                        )}
+                        {route.middlewares.map((mw, i) => (
+                            <MiddlewareItem key={i} mw={mw} />
+                        ))}
                     </Box>
                 </Box>
             )}
 
-            {!actionFull && route.middlewares.length === 0 && (
+            {!action && route.middlewares.length === 0 && (
                 <Typography sx={{fontSize: '12px', color: 'text.disabled'}}>No additional details</Typography>
             )}
         </DetailBox>
@@ -423,15 +428,13 @@ export const RoutesPage = () => {
                     {/* Route rows */}
                     {filtered.map((route) => {
                         const expanded = expandedId === route.id;
-                        const hasDetails =
-                            route.action !== undefined || (route.middlewares && route.middlewares.length > 0);
-                        const actionShort =
-                            route.action && isClassCallable(route.action)
-                                ? concatClassMethod(
-                                      (route.action[0] as string).split('\\').pop() as string,
-                                      route.action[1] as string,
-                                  )
-                                : null;
+                        const hasDetails = route.action !== null || (route.middlewares && route.middlewares.length > 0);
+                        const actionShort = route.action
+                            ? concatClassMethod(
+                                  route.action.className.split('\\').pop() as string,
+                                  route.action.methodName,
+                              )
+                            : null;
 
                         return (
                             <Box key={route.id}>
@@ -456,7 +459,7 @@ export const RoutesPage = () => {
                                     <PatternCell>{route.pattern}</PatternCell>
                                     {actionShort && route.action && (
                                         <ActionInlineLink
-                                            href={`/inspector/files?class=${route.action[0]}&method=${route.action[1]}`}
+                                            href={`/inspector/files?class=${route.action.className}&method=${route.action.methodName}`}
                                             onClick={(e) => e.stopPropagation()}
                                         >
                                             {actionShort}
