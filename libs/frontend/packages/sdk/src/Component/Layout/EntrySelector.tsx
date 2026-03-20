@@ -407,6 +407,21 @@ export const EntrySelector = ({
         [matched, highlightedIndex, handleSelect, handleClose],
     );
 
+    // Find the current entry to build quick-filter from it
+    const currentEntry = currentEntryId ? entries.find((e) => e.id === currentEntryId) : undefined;
+    const currentIsWeb = currentEntry ? isDebugEntryAboutWeb(currentEntry) : false;
+
+    const handleQuickFilter = useCallback(() => {
+        if (!currentEntry || !currentIsWeb) return;
+        const path = currentEntry.request.path;
+        const next: EntryFilterState = {
+            enabled: true,
+            conditions: [{id: `qf_url_${Date.now()}`, field: 'url', operator: 'equals', value: path}],
+        };
+        setFilterState(next);
+        saveFilterState(next);
+    }, [currentEntry, currentIsWeb]);
+
     const hasConditions = filterState.conditions.length > 0;
 
     return (
@@ -443,6 +458,14 @@ export const EntrySelector = ({
                     onKeyDown={handleKeyDown}
                 />
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mr: 1}}>
+                    {currentIsWeb && (
+                        <GearButton
+                            onClick={handleQuickFilter}
+                            title={`Filter: ${currentEntry!.request.method} ${currentEntry!.request.path}`}
+                        >
+                            <Icon sx={{fontSize: 16}}>filter_alt</Icon>
+                        </GearButton>
+                    )}
                     {hasConditions && (
                         <ToolbarButton active={filterState.enabled} onClick={toggleFilter}>
                             Filter

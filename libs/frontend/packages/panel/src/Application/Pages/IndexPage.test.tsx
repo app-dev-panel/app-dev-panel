@@ -120,8 +120,8 @@ describe('IndexPage (Settings)', () => {
 
     it('clicking delete button removes favorite without switching URL', () => {
         const {store} = renderIndexPage(['http://127.0.0.1:8101', 'http://127.0.0.1:8102']);
-        // Find delete buttons (delete_outline icons)
-        const deleteButtons = screen.getAllByText('delete_outline');
+        // Find delete buttons (close icons rendered by Chip onDelete)
+        const deleteButtons = screen.getAllByText('close');
         fireEvent.click(deleteButtons[0]);
 
         const state = store.getState().application;
