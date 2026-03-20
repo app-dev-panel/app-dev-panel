@@ -7,7 +7,7 @@ import {
     changeThemeMode,
 } from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
-import {DebugEntry, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {DebugEntry, debugApi, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {CommandPalette} from '@app-dev-panel/sdk/Component/Layout/CommandPalette';
 import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
@@ -121,6 +121,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     // Fetch debug entries on mount and when backend URL changes
     useEffect(() => {
         dispatch(changeEntryAction(null));
+        dispatch(debugApi.util.resetApiState());
         getDebugQuery();
     }, [getDebugQuery, backendUrl, dispatch]);
 
