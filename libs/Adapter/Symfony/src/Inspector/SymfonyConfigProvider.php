@@ -54,7 +54,7 @@ final class SymfonyConfigProvider
     }
 
     /**
-     * @return array<string, list<string>>
+     * @return list<array{name: string, class: string|null, listeners: list<string>}>
      */
     private function getEventListeners(): array
     {
@@ -67,18 +67,43 @@ final class SymfonyConfigProvider
             return [];
         }
 
-        $listeners = [];
-        /** @var array<string, list<callable>> $allListeners */
-        $allListeners = $dispatcher->getListeners();
-        foreach ($allListeners as $eventName => $eventListeners) {
-            $listeners[$eventName] = [];
-            foreach ($eventListeners as $listener) {
-                $listeners[$eventName][] = $this->describeListener($listener);
+        // Build reverse alias map: string alias → FQCN
+        $reverseAliases = [];
+        $aliases = $this->containerParameters['event_dispatcher.event_aliases'] ?? [];
+        if (is_array($aliases)) {
+            foreach ($aliases as $class => $alias) {
+                if (is_string($class) && is_string($alias)) {
+                    $reverseAliases[$alias] = $class;
+                }
             }
         }
-        ksort($listeners);
 
-        return $listeners;
+        $result = [];
+        /** @var array<string, list<callable>> $allListeners */
+        $allListeners = $dispatcher->getListeners();
+        ksort($allListeners);
+
+        foreach ($allListeners as $eventName => $eventListeners) {
+            $class = null;
+            if (class_exists($eventName)) {
+                $class = $eventName;
+            } elseif (isset($reverseAliases[$eventName])) {
+                $class = $reverseAliases[$eventName];
+            }
+
+            $listeners = [];
+            foreach ($eventListeners as $listener) {
+                $listeners[] = $this->describeListener($listener);
+            }
+
+            $result[] = [
+                'name' => $eventName,
+                'class' => $class,
+                'listeners' => $listeners,
+            ];
+        }
+
+        return $result;
     }
 
     private function describeListener(mixed $listener): string

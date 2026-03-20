@@ -70,8 +70,10 @@ final class SymfonyConfigProviderTest extends TestCase
         $provider = new SymfonyConfigProvider($container);
         $result = $provider->get('events');
 
-        $this->assertArrayHasKey('kernel.request', $result);
-        $this->assertCount(1, $result['kernel.request']);
+        $this->assertCount(1, $result);
+        $this->assertSame('kernel.request', $result[0]['name']);
+        $this->assertNull($result[0]['class']);
+        $this->assertCount(1, $result[0]['listeners']);
     }
 
     public function testGetEventsGroupWithoutDispatcher(): void
@@ -95,8 +97,9 @@ final class SymfonyConfigProviderTest extends TestCase
         $provider = new SymfonyConfigProvider($container);
         $result = $provider->get('events');
 
-        $this->assertArrayHasKey('app.event', $result);
-        $this->assertStringContainsString('::onEvent', $result['app.event'][0]);
+        $this->assertCount(1, $result);
+        $this->assertSame('app.event', $result[0]['name']);
+        $this->assertStringContainsString('::onEvent', $result[0]['listeners'][0]);
     }
 
     public function testGetUnknownGroupReturnsEmpty(): void
@@ -133,8 +136,9 @@ final class SymfonyConfigProviderTest extends TestCase
         $provider = new SymfonyConfigProvider($container);
         $result = $provider->get('events');
 
-        $this->assertArrayHasKey('app.event', $result);
-        $this->assertStringContainsString('::__invoke', $result['app.event'][0]);
+        $this->assertCount(1, $result);
+        $this->assertSame('app.event', $result[0]['name']);
+        $this->assertStringContainsString('::__invoke', $result[0]['listeners'][0]);
     }
 
     public function testGetEventsWithClosureListener(): void
@@ -148,8 +152,9 @@ final class SymfonyConfigProviderTest extends TestCase
         $provider = new SymfonyConfigProvider($container);
         $result = $provider->get('events');
 
-        $this->assertArrayHasKey('app.event', $result);
-        $this->assertNotEmpty($result['app.event'][0]);
+        $this->assertCount(1, $result);
+        $this->assertSame('app.event', $result[0]['name']);
+        $this->assertNotEmpty($result[0]['listeners'][0]);
     }
 
     public function testGetEventsWhenDispatcherIsNotEventDispatcherInterface(): void
@@ -175,8 +180,44 @@ final class SymfonyConfigProviderTest extends TestCase
         $provider = new SymfonyConfigProvider($container);
         $result = $provider->get('events');
 
-        $keys = array_keys($result);
-        $this->assertSame('a.event', $keys[0]);
-        $this->assertSame('z.event', $keys[1]);
+        $this->assertCount(2, $result);
+        $this->assertSame('a.event', $result[0]['name']);
+        $this->assertSame('z.event', $result[1]['name']);
+    }
+
+    public function testGetEventsResolvesClassFromAliases(): void
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener('console.command', static function (): void {});
+
+        $container = new Container();
+        $container->set('event_dispatcher', $dispatcher);
+
+        $provider = new SymfonyConfigProvider($container, [
+            'event_dispatcher.event_aliases' => [
+                'Symfony\\Component\\Console\\Event\\ConsoleCommandEvent' => 'console.command',
+            ],
+        ]);
+        $result = $provider->get('events');
+
+        $this->assertCount(1, $result);
+        $this->assertSame('console.command', $result[0]['name']);
+        $this->assertSame('Symfony\\Component\\Console\\Event\\ConsoleCommandEvent', $result[0]['class']);
+    }
+
+    public function testGetEventsResolvesClassFromFqcn(): void
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(\stdClass::class, static function (): void {});
+
+        $container = new Container();
+        $container->set('event_dispatcher', $dispatcher);
+
+        $provider = new SymfonyConfigProvider($container);
+        $result = $provider->get('events');
+
+        $this->assertCount(1, $result);
+        $this->assertSame(\stdClass::class, $result[0]['name']);
+        $this->assertSame(\stdClass::class, $result[0]['class']);
     }
 }

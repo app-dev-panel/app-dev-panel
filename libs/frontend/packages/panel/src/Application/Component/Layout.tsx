@@ -45,7 +45,7 @@ const hiddenCollectors = new Set<string>([
 // ---------------------------------------------------------------------------
 const inspectorChildren = [
     {key: '/inspector/config', icon: 'settings', label: 'Configuration'},
-    {key: '/inspector/events', icon: 'bolt', label: 'Events'},
+    {key: '/inspector/events', icon: 'bolt', label: 'Event Listeners'},
     {key: '/inspector/routes', icon: 'alt_route', label: 'Routes'},
     {key: '/inspector/tests', icon: 'science', label: 'Tests'},
     {key: '/inspector/analyse', icon: 'analytics', label: 'Analyse'},
@@ -86,7 +86,7 @@ const ContentArea = styled(Box)(({theme}) => ({
     borderRadius: componentTokens.contentPanel.borderRadius,
     backgroundColor: theme.palette.background.paper,
     border: `1px solid ${theme.palette.divider}`,
-    padding: theme.spacing(3.5, 4.5),
+    padding: theme.spacing(2.5, 3),
     overflowY: 'auto',
 }));
 

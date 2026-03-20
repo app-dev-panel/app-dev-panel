@@ -150,11 +150,15 @@ type CurlBuilderResponse = {command: string};
 
 type CheckRouteResponse = {result: boolean; action: string[]};
 
-export type EventListenerType = {event: [string, string] | string};
+export type EventEntry = {name: string; class: string | null; listeners: Array<string | [string, string]>};
 
-export type EventListenersType = Record<string, EventListenerType[]>;
+export type EventListenersType = EventEntry[] | Record<string, Array<string | [string, string]>>;
 
-export type EventsResponse = {common: EventListenersType; console: EventListenersType; web: EventListenersType};
+export type EventsResponse = {
+    common: EventListenersType | null;
+    console: EventListenersType | null;
+    web: EventListenersType | null;
+};
 
 type Response<T = any> = {data: T};
 
