@@ -174,9 +174,7 @@ final class DatabaseControllerTest extends ControllerTestCase
     public function testExplainExceptionReturns500(): void
     {
         $provider = $this->createMock(SchemaProviderInterface::class);
-        $provider
-            ->method('explainQuery')
-            ->willThrowException(new \RuntimeException('Syntax error'));
+        $provider->method('explainQuery')->willThrowException(new \RuntimeException('Syntax error'));
 
         $controller = $this->createController($provider);
         $response = $controller->explain($this->post(['sql' => 'INVALID SQL']));
@@ -220,9 +218,7 @@ final class DatabaseControllerTest extends ControllerTestCase
     public function testQueryExceptionReturns500(): void
     {
         $provider = $this->createMock(SchemaProviderInterface::class);
-        $provider
-            ->method('executeQuery')
-            ->willThrowException(new \RuntimeException('Connection refused'));
+        $provider->method('executeQuery')->willThrowException(new \RuntimeException('Connection refused'));
 
         $controller = $this->createController($provider);
         $response = $controller->query($this->post(['sql' => 'SELECT 1']));
