@@ -246,6 +246,18 @@ final class FixtureRegistry
             new Fixture(name: 'router:basic', endpoint: '/test/fixtures/router', expectations: [
                 'router' => [
                     Expectation::notEmpty(),
+                    Expectation::fieldEquals('currentRoute.name', 'test_router'),
+                    Expectation::fieldEquals('currentRoute.pattern', '/test/fixtures/router'),
+                    Expectation::fieldContains('currentRoute.uri', '/test/fixtures/router'),
+                    Expectation::countGte(2),
+                ],
+            ]),
+
+            // === Router auto-collection (verifies RouterDataExtractor works on any request) ===
+            new Fixture(name: 'router:auto', endpoint: '/test/fixtures/logs', expectations: [
+                'router' => [
+                    Expectation::notEmpty(),
+                    Expectation::fieldContains('currentRoute.uri', '/test/fixtures/logs'),
                 ],
             ]),
 

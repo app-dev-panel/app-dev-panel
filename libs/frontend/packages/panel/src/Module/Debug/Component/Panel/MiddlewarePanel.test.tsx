@@ -68,7 +68,7 @@ describe('MiddlewarePanel', () => {
         const user = userEvent.setup();
         renderWithProviders(<MiddlewarePanel {...makeProps()} />, {preloadedState});
         await user.click(screen.getByText('AuthMiddleware'));
-        expect(screen.getByText('App\\Middleware\\AuthMiddleware')).toBeInTheDocument();
+        expect(screen.getAllByText('App\\Middleware\\AuthMiddleware').length).toBeGreaterThan(0);
     });
 
     it('renders only handler when stacks are empty', () => {

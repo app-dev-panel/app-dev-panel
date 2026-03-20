@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
+use AppDevPanel\Adapter\Symfony\Collector\RouterDataExtractor;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
@@ -11,7 +12,6 @@ use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
-use Symfony\Component\VarDumper\VarDumper;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -20,6 +20,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Maps Symfony HTTP kernel events to the ADP Debugger lifecycle.
@@ -45,6 +46,7 @@ final class HttpSubscriber implements EventSubscriberInterface
         private readonly ?ExceptionCollector $exceptionCollector = null,
         private readonly ?VarDumperCollector $varDumperCollector = null,
         private readonly ?EnvironmentCollector $environmentCollector = null,
+        private readonly ?RouterDataExtractor $routerDataExtractor = null,
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -100,6 +102,8 @@ final class HttpSubscriber implements EventSubscriberInterface
             $this->requestCollector->collectResponse($psrResponse);
         }
 
+        $this->routerDataExtractor?->extract($event->getRequest());
+
         // Add debug ID header to the response
         $event->getResponse()->headers->set('X-Debug-Id', $this->debugger->getId());
     }
@@ -132,7 +136,9 @@ final class HttpSubscriber implements EventSubscriberInterface
         }
 
         $collector = $this->varDumperCollector;
-        $previousHandler = VarDumper::setHandler(static function (mixed $var, ?string $label = null) use ($collector): void {
+        $previousHandler = VarDumper::setHandler(static function (mixed $var, ?string $label = null) use (
+            $collector,
+        ): void {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
             $line = '';
             foreach ($trace as $frame) {

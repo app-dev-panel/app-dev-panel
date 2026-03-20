@@ -1,7 +1,6 @@
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
-import {OpenInNew} from '@mui/icons-material';
-import {IconButton, Tooltip, useMediaQuery} from '@mui/material';
+import {Link, useMediaQuery} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import {DataType, JsonViewer, JsonViewerOnChange, JsonViewerTheme} from '@textea/json-viewer';
 import * as React from 'react';
@@ -60,15 +59,14 @@ export const JsonRenderer = React.memo(
                         Component: (props) => {
                             return (
                                 <Typography sx={{display: 'inline', wordBreak: 'break-word'}}>
-                                    {props.value}
-                                    <Tooltip title="Examine as a container entry">
-                                        <IconButton
-                                            size="small"
-                                            href={'/inspector/container/view?class=' + props.value}
-                                        >
-                                            <OpenInNew fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
+                                    <Link
+                                        href={'/inspector/container/view?class=' + props.value}
+                                        underline="hover"
+                                        color="primary"
+                                        sx={{cursor: 'pointer'}}
+                                    >
+                                        {props.value}
+                                    </Link>
                                 </Typography>
                             );
                         },
