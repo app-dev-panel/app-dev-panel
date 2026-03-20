@@ -1,5 +1,6 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, Collapse, Icon, IconButton, Typography} from '@mui/material';
@@ -8,31 +9,6 @@ import {useMemo, useState} from 'react';
 
 type Validation = {value: any; rules: any; result: boolean; errors: any};
 type ValidatorPanelProps = {data: Validation[]};
-
-const SummaryGrid = styled(Box)(({theme}) => ({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-    gap: theme.spacing(2),
-    marginBottom: theme.spacing(3),
-}));
-
-const SummaryCard = styled(Box)(({theme}) => ({
-    padding: theme.spacing(2),
-    borderRadius: theme.shape.borderRadius * 1.5,
-    border: `1px solid ${theme.palette.divider}`,
-    backgroundColor: theme.palette.background.paper,
-}));
-
-const SummaryLabel = styled(Typography)(({theme}) => ({
-    fontSize: '11px',
-    fontWeight: 600,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.5px',
-    color: theme.palette.text.disabled,
-    marginBottom: theme.spacing(0.5),
-}));
-
-const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 700, fontSize: '22px'});
 
 const ValidationRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
     ({theme, expanded}) => ({
@@ -66,21 +42,63 @@ const DetailBox = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
+const ErrorTable = styled('table')(({theme}) => ({
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: '12px',
+    fontFamily: primitives.fontFamilyMono,
+    '& th': {
+        textAlign: 'left',
+        padding: theme.spacing(0.5, 1),
+        fontWeight: 600,
+        fontSize: '10px',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        color: theme.palette.text.disabled,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+    },
+    '& td': {
+        padding: theme.spacing(0.5, 1),
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        color: theme.palette.text.secondary,
+    },
+    '& td:first-of-type': {fontWeight: 600, color: theme.palette.error.main, whiteSpace: 'nowrap', width: 1},
+}));
+
 function truncateValue(value: any): string {
     const str = typeof value === 'string' ? value : JSON.stringify(value);
     return str.length > 80 ? str.substring(0, 80) + '...' : str;
 }
 
-function getErrorCount(errors: any): number {
-    if (!errors) return 0;
-    if (Array.isArray(errors)) return errors.length;
-    if (typeof errors === 'object') return Object.keys(errors).length;
-    return 0;
+function flattenErrors(errors: any): {field: string; message: string}[] {
+    if (!errors || (Array.isArray(errors) && errors.length === 0)) return [];
+    if (Array.isArray(errors)) {
+        return errors.flatMap((e, i) => {
+            if (typeof e === 'string') return [{field: String(i), message: e}];
+            if (typeof e === 'object') return flattenErrors(e);
+            return [{field: String(i), message: String(e)}];
+        });
+    }
+    if (typeof errors === 'object') {
+        const rows: {field: string; message: string}[] = [];
+        for (const [field, msgs] of Object.entries(errors)) {
+            if (Array.isArray(msgs)) {
+                for (const msg of msgs) {
+                    rows.push({field, message: String(msg)});
+                }
+            } else {
+                rows.push({field, message: String(msgs)});
+            }
+        }
+        return rows;
+    }
+    return [];
 }
 
 export const ValidatorPanel = ({data}: ValidatorPanelProps) => {
     const theme = useTheme();
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+    const [filter, setFilter] = useState('');
 
     const {validCount, invalidCount} = useMemo(() => {
         let valid = 0;
@@ -92,36 +110,72 @@ export const ValidatorPanel = ({data}: ValidatorPanelProps) => {
         return {validCount: valid, invalidCount: invalid};
     }, [data]);
 
+    const filtered = useMemo(() => {
+        if (!data) return [];
+        if (!filter.trim()) return data;
+        const q = filter.toLowerCase();
+        return data.filter((v) => {
+            const valueStr = typeof v.value === 'string' ? v.value : JSON.stringify(v.value);
+            if (valueStr.toLowerCase().includes(q)) return true;
+            const rulesStr = typeof v.rules === 'string' ? v.rules : JSON.stringify(v.rules);
+            if (rulesStr.toLowerCase().includes(q)) return true;
+            const errStr = JSON.stringify(v.errors);
+            if (errStr.toLowerCase().includes(q)) return true;
+            const status = v.result ? 'valid' : 'invalid';
+            if (status.includes(q)) return true;
+            return false;
+        });
+    }, [data, filter]);
+
     if (!data || data.length === 0) {
         return <EmptyState icon="check_circle" title="No validations found" />;
     }
 
     return (
         <Box>
-            <SummaryGrid>
-                <SummaryCard>
-                    <SummaryLabel>Total</SummaryLabel>
-                    <SummaryValue sx={{color: 'primary.main'}}>{data.length}</SummaryValue>
-                </SummaryCard>
-                <SummaryCard>
-                    <SummaryLabel>Valid</SummaryLabel>
-                    <SummaryValue sx={{color: 'success.main'}}>{validCount}</SummaryValue>
-                </SummaryCard>
-                <SummaryCard>
-                    <SummaryLabel>Invalid</SummaryLabel>
-                    <SummaryValue sx={{color: invalidCount > 0 ? 'error.main' : 'text.disabled'}}>
-                        {invalidCount}
-                    </SummaryValue>
-                </SummaryCard>
-            </SummaryGrid>
+            <SectionTitle
+                action={
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        <Chip
+                            label={`${validCount} valid`}
+                            size="small"
+                            sx={{
+                                fontWeight: 600,
+                                fontSize: '10px',
+                                height: 20,
+                                borderRadius: 1,
+                                backgroundColor: theme.palette.success.main,
+                                color: 'common.white',
+                            }}
+                        />
+                        <Chip
+                            label={`${invalidCount} invalid`}
+                            size="small"
+                            sx={{
+                                fontWeight: 600,
+                                fontSize: '10px',
+                                height: 20,
+                                borderRadius: 1,
+                                backgroundColor:
+                                    invalidCount > 0 ? theme.palette.error.main : theme.palette.text.disabled,
+                                color: 'common.white',
+                            }}
+                        />
+                        <FilterInput value={filter} onChange={setFilter} placeholder="Filter validations..." />
+                    </Box>
+                }
+            >{`${filtered.length} validations`}</SectionTitle>
 
-            <SectionTitle>{`${data.length} validations`}</SectionTitle>
-
-            {data.map((validation, index) => {
-                const expanded = expandedIndex === index;
+            {filtered.map((validation, index) => {
+                const originalIndex = data.indexOf(validation);
+                const expanded = expandedIndex === originalIndex;
+                const errorRows = flattenErrors(validation.errors);
                 return (
-                    <Box key={index}>
-                        <ValidationRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
+                    <Box key={originalIndex}>
+                        <ValidationRow
+                            expanded={expanded}
+                            onClick={() => setExpandedIndex(expanded ? null : originalIndex)}
+                        >
                             <Icon
                                 sx={{
                                     fontSize: 18,
@@ -150,9 +204,9 @@ export const ValidatorPanel = ({data}: ValidatorPanelProps) => {
                             <ValuePreview sx={{color: 'text.secondary'}}>
                                 {truncateValue(validation.value)}
                             </ValuePreview>
-                            {getErrorCount(validation.errors) > 0 && (
+                            {errorRows.length > 0 && (
                                 <Chip
-                                    label={`${getErrorCount(validation.errors)} error${getErrorCount(validation.errors) !== 1 ? 's' : ''}`}
+                                    label={`${errorRows.length} error${errorRows.length !== 1 ? 's' : ''}`}
                                     size="small"
                                     variant="outlined"
                                     sx={{
@@ -187,14 +241,29 @@ export const ValidatorPanel = ({data}: ValidatorPanelProps) => {
                                     </Typography>
                                     <JsonRenderer value={validation.rules} />
                                 </Box>
-                                {getErrorCount(validation.errors) > 0 && (
+                                {errorRows.length > 0 && (
                                     <Box>
                                         <Typography
                                             sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}
                                         >
                                             Errors
                                         </Typography>
-                                        <JsonRenderer value={validation.errors} />
+                                        <ErrorTable>
+                                            <thead>
+                                                <tr>
+                                                    <th>Field</th>
+                                                    <th>Message</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {errorRows.map((row, i) => (
+                                                    <tr key={i}>
+                                                        <td>{row.field}</td>
+                                                        <td>{row.message}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </ErrorTable>
                                     </Box>
                                 )}
                             </DetailBox>
