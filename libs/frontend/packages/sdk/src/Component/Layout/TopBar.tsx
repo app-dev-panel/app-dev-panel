@@ -54,6 +54,7 @@ type TopBarProps = {
     onAutoRefreshToggle?: () => void;
     onShowInactiveCollectorsChange?: (value: boolean) => void;
     onNotificationsClick?: (e: React.MouseEvent<HTMLElement>) => void;
+    onLogoClick?: () => void;
 };
 
 const BarRoot = styled('header')(({theme}) => ({
@@ -78,6 +79,9 @@ const Logo = styled('div')(({theme}) => ({
     alignItems: 'center',
     gap: theme.spacing(0.75),
     flexShrink: 0,
+    cursor: 'pointer',
+    userSelect: 'none',
+    '&:hover': {opacity: 0.8},
 }));
 
 const Diamond = styled('div')(({theme}) => ({
@@ -117,6 +121,7 @@ export const TopBar = React.memo(
         onShowInactiveCollectorsChange,
         notificationCount,
         onNotificationsClick,
+        onLogoClick,
     }: TopBarProps) => {
         const theme = useTheme();
         const resolvedMode = mode ?? theme.palette.mode;
@@ -151,7 +156,7 @@ export const TopBar = React.memo(
 
         return (
             <BarRoot>
-                <Logo>
+                <Logo onClick={onLogoClick}>
                     <Diamond /> App Dev Panel
                 </Logo>
                 <CenterGroup>

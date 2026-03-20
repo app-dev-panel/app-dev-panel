@@ -191,6 +191,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     // Command palette
     const [paletteOpen, setPaletteOpen] = useState(false);
     const handleSearchClick = useCallback(() => setPaletteOpen(true), []);
+    const handleLogoClick = useCallback(() => navigate('/'), [navigate]);
     const handlePaletteClose = useCallback(() => setPaletteOpen(false), []);
 
     useEffect(() => {
@@ -350,6 +351,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onShowInactiveCollectorsChange={handleShowInactiveCollectorsChange}
                     notificationCount={notificationCount}
                     onNotificationsClick={handleNotificationsClick}
+                    onLogoClick={handleLogoClick}
                 />
                 <EntrySelector
                     anchorEl={entrySelectorAnchor}
