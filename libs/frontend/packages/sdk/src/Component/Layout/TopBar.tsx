@@ -2,6 +2,7 @@ import {RequestPill} from '@app-dev-panel/sdk/Component/Layout/RequestPill';
 import {SearchTrigger} from '@app-dev-panel/sdk/Component/Layout/SearchTrigger';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {
+    Badge,
     Box,
     Dialog,
     DialogContent,
@@ -16,8 +17,25 @@ import {
     Typography,
     type PaletteMode,
 } from '@mui/material';
-import {styled, useTheme} from '@mui/material/styles';
-import React, {useCallback, useState} from 'react';
+import {keyframes, styled, useTheme} from '@mui/material/styles';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+
+const bellShake = keyframes`
+    0% { transform: rotate(0deg); }
+    15% { transform: rotate(14deg); }
+    30% { transform: rotate(-14deg); }
+    45% { transform: rotate(10deg); }
+    60% { transform: rotate(-8deg); }
+    75% { transform: rotate(4deg); }
+    90% { transform: rotate(-2deg); }
+    100% { transform: rotate(0deg); }
+`;
+
+const badgePulse = keyframes`
+    0% { transform: scale(1) translate(50%, -50%); }
+    40% { transform: scale(1.4) translate(50%, -50%); }
+    100% { transform: scale(1) translate(50%, -50%); }
+`;
 
 type TopBarProps = {
     method?: string;
@@ -27,6 +45,7 @@ type TopBarProps = {
     mode?: PaletteMode;
     autoRefresh?: boolean;
     showInactiveCollectors?: boolean;
+    notificationCount?: number;
     onPrevEntry?: () => void;
     onNextEntry?: () => void;
     onEntryClick?: (e: React.MouseEvent) => void;
@@ -34,6 +53,8 @@ type TopBarProps = {
     onThemeToggle?: () => void;
     onAutoRefreshToggle?: () => void;
     onShowInactiveCollectorsChange?: (value: boolean) => void;
+    onNotificationsClick?: (e: React.MouseEvent<HTMLElement>) => void;
+    onLogoClick?: () => void;
 };
 
 const BarRoot = styled('header')(({theme}) => ({
@@ -58,6 +79,9 @@ const Logo = styled('div')(({theme}) => ({
     alignItems: 'center',
     gap: theme.spacing(0.75),
     flexShrink: 0,
+    cursor: 'pointer',
+    userSelect: 'none',
+    '&:hover': {opacity: 0.8},
 }));
 
 const Diamond = styled('div')(({theme}) => ({
@@ -95,6 +119,9 @@ export const TopBar = React.memo(
         onThemeToggle,
         onAutoRefreshToggle,
         onShowInactiveCollectorsChange,
+        notificationCount,
+        onNotificationsClick,
+        onLogoClick,
     }: TopBarProps) => {
         const theme = useTheme();
         const resolvedMode = mode ?? theme.palette.mode;
@@ -113,9 +140,23 @@ export const TopBar = React.memo(
         }, []);
         const handleSettingsClose = useCallback(() => setSettingsOpen(false), []);
 
+        // Bell animation on count change
+        const [bellAnimating, setBellAnimating] = useState(false);
+        const prevCountRef = useRef(notificationCount ?? 0);
+        useEffect(() => {
+            const prev = prevCountRef.current;
+            const current = notificationCount ?? 0;
+            prevCountRef.current = current;
+            if (current > prev && current > 0) {
+                setBellAnimating(true);
+                const timer = setTimeout(() => setBellAnimating(false), 600);
+                return () => clearTimeout(timer);
+            }
+        }, [notificationCount]);
+
         return (
             <BarRoot>
-                <Logo>
+                <Logo onClick={onLogoClick}>
                     <Diamond /> App Dev Panel
                 </Logo>
                 <CenterGroup>
@@ -151,6 +192,31 @@ export const TopBar = React.memo(
                 <SearchTrigger onClick={onSearchClick} />
                 <IconButton size="small" onClick={onThemeToggle}>
                     <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
+                </IconButton>
+                <IconButton size="small" onClick={onNotificationsClick}>
+                    <Badge
+                        badgeContent={notificationCount}
+                        color="error"
+                        max={99}
+                        sx={{
+                            '& .MuiBadge-badge': {
+                                fontSize: 10,
+                                height: 16,
+                                minWidth: 16,
+                                animation: bellAnimating ? `${badgePulse} 0.4s ease-out` : 'none',
+                            },
+                        }}
+                    >
+                        <Icon
+                            sx={{
+                                fontSize: 18,
+                                animation: bellAnimating ? `${bellShake} 0.5s ease-in-out` : 'none',
+                                transformOrigin: 'top center',
+                            }}
+                        >
+                            notifications
+                        </Icon>
+                    </Badge>
                 </IconButton>
                 <IconButton size="small" onClick={handleMenuOpen}>
                     <Icon sx={{fontSize: 18}}>more_vert</Icon>
