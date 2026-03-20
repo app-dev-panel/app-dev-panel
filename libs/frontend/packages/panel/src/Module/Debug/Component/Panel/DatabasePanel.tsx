@@ -1,7 +1,8 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
-import {useExplainQueryMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {useExecuteQueryMutation, useExplainQueryMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
+import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
@@ -18,7 +19,8 @@ import {
     Typography,
 } from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {useDeferredValue, useState} from 'react';
+import {type GridColDef, type GridRenderCellParams} from '@mui/x-data-grid';
+import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
 type QueryAction = {action: 'query.start' | 'query.end'; time: number};
 type Query = {
@@ -125,6 +127,71 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
     );
 };
 
+const QueryResultTable = ({
+    data,
+    error,
+    isLoading,
+}: {
+    data: Record<string, unknown>[] | undefined;
+    error: any;
+    isLoading: boolean;
+}) => {
+    const columns = useMemo<GridColDef[]>(() => {
+        if (!data || data.length === 0) return [];
+        return Object.keys(data[0]).map((key) => ({
+            field: key,
+            headerName: key,
+            flex: 1,
+            minWidth: 100,
+            renderCell: (params: GridRenderCellParams) => (
+                <span style={{wordBreak: 'break-all', maxHeight: 100, overflowY: 'hidden'}}>
+                    {params.value == null ? <em style={{color: '#999'}}>NULL</em> : String(params.value)}
+                </span>
+            ),
+        }));
+    }, [data]);
+
+    const getRowId = useCallback((_row: Record<string, unknown>, index?: number) => index ?? 0, []);
+
+    if (isLoading) {
+        return (
+            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, py: 1}}>
+                <CircularProgress size={14} />
+                <Typography sx={{fontSize: '12px', color: 'text.disabled'}}>Executing query...</Typography>
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Typography sx={{fontSize: '12px', color: 'error.main', fontFamily: primitives.fontFamilyMono}}>
+                {'data' in error && (error.data as any)?.data?.error
+                    ? (error.data as any).data.error
+                    : 'Failed to execute query'}
+            </Typography>
+        );
+    }
+
+    if (data && Array.isArray(data) && data.length === 0) {
+        return (
+            <Typography sx={{fontSize: '12px', color: 'text.disabled', fontFamily: primitives.fontFamilyMono}}>
+                Query returned no rows
+            </Typography>
+        );
+    }
+
+    if (!data) return null;
+
+    return (
+        <Box sx={{mt: 0.5}}>
+            <Typography sx={{fontSize: '11px', color: 'text.disabled', mb: 0.5}}>
+                {data.length} row{data.length !== 1 ? 's' : ''} returned
+            </Typography>
+            <DataTable rows={data as any[]} columns={columns} getRowId={getRowId} rowHeight="auto" />
+        </Box>
+    );
+};
+
 const QueryRowWithExplain = ({
     query,
     expanded,
@@ -144,6 +211,9 @@ const QueryRowWithExplain = ({
     const [analyzeQuery, {data: analyzeData, isLoading: analyzeLoading, error: analyzeError}] = useExplainQueryMutation(
         {fixedCacheKey: undefined},
     );
+    const [executeQuery, {data: queryData, isLoading: queryLoading, error: queryError}] = useExecuteQueryMutation({
+        fixedCacheKey: undefined,
+    });
     const sql = typeof query.rawSql === 'string' ? query.rawSql : query.sql;
 
     const handleExplain = (e: React.MouseEvent) => {
@@ -157,6 +227,14 @@ const QueryRowWithExplain = ({
     const handleAnalyze = (e: React.MouseEvent) => {
         e.stopPropagation();
         analyzeQuery({sql, params: query.params, analyze: true});
+        if (!expanded) {
+            onExpand();
+        }
+    };
+
+    const handleQuery = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        executeQuery({sql, params: query.params});
         if (!expanded) {
             onExpand();
         }
@@ -240,8 +318,12 @@ const QueryRowWithExplain = ({
                         analyzeData={analyzeData}
                         analyzeError={analyzeError}
                         analyzeLoading={analyzeLoading}
+                        queryData={queryData}
+                        queryError={queryError}
+                        queryLoading={queryLoading}
                         onExplain={handleExplain}
                         onAnalyze={handleAnalyze}
+                        onQuery={handleQuery}
                     />
                 </DetailBox>
             </Collapse>
@@ -293,8 +375,12 @@ const ExplainResult = ({
     analyzeData,
     analyzeError,
     analyzeLoading,
+    queryData,
+    queryError,
+    queryLoading,
     onExplain,
     onAnalyze,
+    onQuery,
 }: {
     data: any[] | undefined;
     error: any;
@@ -302,15 +388,33 @@ const ExplainResult = ({
     analyzeData: any[] | undefined;
     analyzeError: any;
     analyzeLoading: boolean;
+    queryData: Record<string, unknown>[] | undefined;
+    queryError: any;
+    queryLoading: boolean;
     onExplain: (e: React.MouseEvent) => void;
     onAnalyze: (e: React.MouseEvent) => void;
+    onQuery: (e: React.MouseEvent) => void;
 }) => {
     const hasExplainResult = data !== undefined || error;
     const hasAnalyzeResult = analyzeData !== undefined || analyzeError;
+    const hasQueryResult = queryData !== undefined || queryError;
+    const hasAnyResult = hasExplainResult || hasAnalyzeResult || hasQueryResult;
 
     return (
         <Box sx={{mt: 1.5}}>
-            <Box sx={{display: 'flex', gap: 1, mb: hasExplainResult || hasAnalyzeResult ? 1 : 0}}>
+            <Box sx={{display: 'flex', gap: 1, mb: hasAnyResult ? 1 : 0}}>
+                <Button
+                    size="small"
+                    variant={hasQueryResult ? 'text' : 'outlined'}
+                    disabled={queryLoading}
+                    onClick={onQuery}
+                    startIcon={
+                        queryLoading ? <CircularProgress size={14} /> : <Icon sx={{fontSize: 14}}>play_arrow</Icon>
+                    }
+                    sx={actionButtonSx}
+                >
+                    {hasQueryResult ? 'Re-run' : 'QUERY'}
+                </Button>
                 <Button
                     size="small"
                     variant={hasExplainResult ? 'text' : 'outlined'}
@@ -334,6 +438,14 @@ const ExplainResult = ({
                     {hasAnalyzeResult ? 'Repeat Analyze' : 'EXPLAIN ANALYZE'}
                 </Button>
             </Box>
+            {hasQueryResult && (
+                <Box sx={{mb: hasExplainResult || hasAnalyzeResult ? 1.5 : 0}}>
+                    <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                        QUERY RESULT
+                    </Typography>
+                    <QueryResultTable data={queryData} error={queryError} isLoading={queryLoading} />
+                </Box>
+            )}
             {hasExplainResult && (
                 <Box sx={{mb: hasAnalyzeResult ? 1.5 : 0}}>
                     <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>

@@ -91,6 +91,24 @@ class DbSchemaProvider implements SchemaProviderInterface
         return $command->queryAll();
     }
 
+    public function executeQuery(string $sql, array $params = []): array
+    {
+        $command = $this->db->createCommand($sql);
+        if ($params !== []) {
+            if (array_is_list($params)) {
+                $reindexed = [];
+                foreach ($params as $i => $value) {
+                    $reindexed[$i + 1] = $value;
+                }
+                $command->bindValues($reindexed);
+            } else {
+                $command->bindValues($params);
+            }
+        }
+
+        return $command->queryAll();
+    }
+
     private function isSqlite(): bool
     {
         return $this->db->getDriverName() === 'sqlite';

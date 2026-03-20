@@ -267,12 +267,7 @@ export function IndexPage() {
 
             <SectionLabel>API Status</SectionLabel>
             <StatusGrid>
-                <StatusCard
-                    title="Debug"
-                    icon="bug_report"
-                    status={debugStatus}
-                    onClick={() => handleChangeUrl(url)}
-                />
+                <StatusCard title="Debug" icon="bug_report" status={debugStatus} onClick={() => handleChangeUrl(url)} />
                 <StatusCard
                     title="Inspector"
                     icon="search"

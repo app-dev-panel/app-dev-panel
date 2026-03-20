@@ -52,4 +52,24 @@ final class DatabaseController
             return $this->responseFactory->createJsonResponse(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function query(ServerRequestInterface $request): ResponseInterface
+    {
+        /** @var array{sql?: string, params?: array<string, mixed>} $body */
+        $body = json_decode((string) $request->getBody(), true);
+        $sql = $body['sql'] ?? '';
+        $params = $body['params'] ?? [];
+
+        if ($sql === '') {
+            return $this->responseFactory->createJsonResponse(['error' => 'SQL query is required'], 400);
+        }
+
+        try {
+            $result = $this->schemaProvider->executeQuery($sql, $params);
+
+            return $this->responseFactory->createJsonResponse($result);
+        } catch (\Throwable $e) {
+            return $this->responseFactory->createJsonResponse(['error' => $e->getMessage()], 500);
+        }
+    }
 }

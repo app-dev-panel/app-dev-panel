@@ -216,6 +216,10 @@ export const inspectorApi = createApi({
             }),
             transformResponse: (result: Response<any[]>) => result.data,
         }),
+        executeQuery: builder.mutation<Record<string, unknown>[], {sql: string; params?: Record<string, any>}>({
+            query: ({sql, params}) => ({url: `table/query`, method: 'POST', body: {sql, params: params ?? {}}}),
+            transformResponse: (result: Response<Record<string, unknown>[]>) => result.data,
+        }),
         doRequest: builder.mutation<Response, {id: string}>({
             query: (args) => ({method: 'PUT', url: `request?debugEntryId=${args.id}`}),
             transformResponse: (result: Response) => result.data || [],
@@ -312,4 +316,5 @@ export const {
     useGetEventsQuery,
     useGetOpcacheQuery,
     useExplainQueryMutation,
+    useExecuteQueryMutation,
 } = inspectorApi;
