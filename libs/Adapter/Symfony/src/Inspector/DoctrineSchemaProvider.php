@@ -68,6 +68,16 @@ final class DoctrineSchemaProvider implements SchemaProviderInterface
         ];
     }
 
+    public function explainQuery(string $sql, array $params = []): array
+    {
+        $result = $this->connection->fetchAllAssociative(
+            'EXPLAIN ' . $sql,
+            $params,
+        );
+
+        return $result;
+    }
+
     /**
      * @param Column[] $columns
      * @return array<int, array{name: string, size: int|null, type: string, dbType: string, defaultValue: mixed, comment: string|null, allowNull: bool}>

@@ -25,6 +25,11 @@ final readonly class MessengerAction
             handled: true,
             failed: false,
             duration: 12.5,
+            message: [
+                'userId' => 42,
+                'channel' => 'email',
+                'subject' => 'Welcome to ADP',
+            ],
         );
         $this->queueCollector->logMessage(
             messageClass: 'App\\Message\\ProcessPayment',
@@ -34,6 +39,11 @@ final readonly class MessengerAction
             handled: false,
             failed: true,
             duration: 45.0,
+            message: [
+                'orderId' => 'ORD-12345',
+                'amount' => 99.99,
+                'currency' => 'USD',
+            ],
         );
 
         return new JsonResponse(['fixture' => 'messenger:basic', 'status' => 'ok']);

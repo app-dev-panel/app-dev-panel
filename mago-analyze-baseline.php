@@ -373,18 +373,6 @@ message = "Argument #1 of function `json_decode` is possibly `false`, but parame
 count = 2
 
 [[issues]]
-file = "libs/API/src/Inspector/Controller/DatabaseController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Database\SchemaProviderInterface::gettable`: expected `string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/DatabaseController.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
 file = "libs/API/src/Inspector/Controller/FileController.php"
 code = "array-to-string-conversion"
 message = "Potential array in right operand of string concatenation."
@@ -1726,7 +1714,7 @@ count = 2
 file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
@@ -3496,13 +3484,13 @@ count = 4
 file = "libs/Kernel/tests/Unit/Collector/QueueCollectorTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
-count = 16
+count = 13
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/QueueCollectorTest.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"

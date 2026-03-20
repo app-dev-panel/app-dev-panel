@@ -67,6 +67,16 @@ class DbSchemaProvider implements SchemaProviderInterface
         ];
     }
 
+    public function explainQuery(string $sql, array $params = []): array
+    {
+        $command = $this->db->createCommand('EXPLAIN ' . $sql);
+        foreach ($params as $name => $value) {
+            $command->bindValue($name, $value);
+        }
+
+        return $command->queryAll();
+    }
+
     /**
      * @param ColumnSchemaInterface[] $columns
      */

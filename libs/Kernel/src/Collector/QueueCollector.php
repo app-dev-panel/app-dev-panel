@@ -28,7 +28,7 @@ final class QueueCollector implements SummaryCollectorInterface
     /** @var array<string, array<int, mixed>> */
     private array $processingMessages = [];
 
-    /** @var array<int, array{messageClass: string, bus: string, transport: ?string, dispatched: bool, handled: bool, failed: bool, duration: float}> */
+    /** @var array<int, array{messageClass: string, bus: string, transport: ?string, dispatched: bool, handled: bool, failed: bool, duration: float, message: mixed}> */
     private array $messages = [];
 
     public function __construct(
@@ -82,6 +82,7 @@ final class QueueCollector implements SummaryCollectorInterface
         bool $handled = false,
         bool $failed = false,
         float $duration = 0.0,
+        mixed $message = null,
     ): void {
         if (!$this->isActive()) {
             return;
@@ -95,6 +96,7 @@ final class QueueCollector implements SummaryCollectorInterface
             'handled' => $handled,
             'failed' => $failed,
             'duration' => $duration,
+            'message' => $message,
         ];
 
         $this->timelineCollector->collect($this, count($this->messages));

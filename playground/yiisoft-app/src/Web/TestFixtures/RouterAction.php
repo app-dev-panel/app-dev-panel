@@ -24,6 +24,10 @@ final readonly class RouterAction implements RequestHandlerInterface
             'pattern' => '/test/fixtures/router',
             'arguments' => [],
             'uri' => '/test/fixtures/router',
+            'host' => null,
+            'action' => self::class,
+            'middlewares' => [],
+            'matchTime' => 0.123,
         ]);
         $this->routerCollector->collectRoutes(routes: [
             ['name' => 'home', 'pattern' => '/', 'methods' => ['GET']],

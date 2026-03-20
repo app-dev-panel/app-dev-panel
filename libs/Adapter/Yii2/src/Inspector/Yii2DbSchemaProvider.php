@@ -114,4 +114,14 @@ final class Yii2DbSchemaProvider implements SchemaProviderInterface
             'offset' => $offset,
         ];
     }
+
+    public function explainQuery(string $sql, array $params = []): array
+    {
+        $command = $this->connection->createCommand('EXPLAIN ' . $sql);
+        if ($params !== []) {
+            $command->bindValues($params);
+        }
+
+        return $command->queryAll();
+    }
 }

@@ -18,6 +18,7 @@ type Message = {
     handled: boolean;
     failed: boolean;
     duration: number;
+    message?: any;
 };
 
 type QueuePanelProps = {
@@ -244,6 +245,16 @@ const MessagesView = ({messages}: {messages: Message[]}) => {
                                 >
                                     {message.messageClass}
                                 </Typography>
+                                {message.message != null && (
+                                    <Box sx={{mt: 1.5}}>
+                                        <Typography
+                                            sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}
+                                        >
+                                            Message Data
+                                        </Typography>
+                                        <JsonRenderer value={message.message} />
+                                    </Box>
+                                )}
                             </DetailBox>
                         </Collapse>
                     </Box>
@@ -437,19 +448,61 @@ export const QueuePanel = ({data}: QueuePanelProps) => {
         return <EmptyState icon="queue" title="No queue operations found" />;
     }
 
-    const defaultTab: TabKey = hasMessages ? 'messages' : 'pushes';
-    const [value, setValue] = useState<TabKey>(defaultTab);
+    // Only messages — render directly without tabs
+    if (hasMessages && !hasQueueOps) {
+        return <MessagesView messages={data.messages ?? []} />;
+    }
 
-    const handleChange = (_event: SyntheticEvent, newValue: TabKey) => {
-        setValue(newValue);
-    };
+    // Only queue ops — render queue tabs without messages tab
+    if (!hasMessages && hasQueueOps) {
+        return (
+            <QueueTabsView
+                data={data}
+                pushCount={pushCount}
+                statusCount={statusCount}
+                processingCount={processingCount}
+            />
+        );
+    }
+
+    // Both messages and queue ops — render all tabs
+    return (
+        <QueueTabsView
+            data={data}
+            pushCount={pushCount}
+            statusCount={statusCount}
+            processingCount={processingCount}
+            showMessages
+            messageCount={messageCount}
+        />
+    );
+};
+
+const QueueTabsView = ({
+    data,
+    pushCount,
+    statusCount,
+    processingCount,
+    showMessages = false,
+    messageCount = 0,
+}: {
+    data: QueuePanelProps['data'];
+    pushCount: number;
+    statusCount: number;
+    processingCount: number;
+    showMessages?: boolean;
+    messageCount?: number;
+}) => {
+    const defaultTab: TabKey = showMessages ? 'messages' : 'pushes';
+    const [value, setValue] = useState<TabKey>(defaultTab);
+    const handleChange = (_event: SyntheticEvent, newValue: TabKey) => setValue(newValue);
 
     return (
         <Box>
             <TabContext value={value}>
                 <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
                     <StyledTabList onChange={handleChange}>
-                        {hasMessages && (
+                        {showMessages && (
                             <Tab
                                 label={
                                     <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
@@ -464,56 +517,52 @@ export const QueuePanel = ({data}: QueuePanelProps) => {
                                 value="messages"
                             />
                         )}
-                        {hasQueueOps && (
-                            <Tab
-                                label={
-                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                        Pushes
-                                        <Chip
-                                            label={pushCount}
-                                            size="small"
-                                            sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
-                                        />
-                                    </Box>
-                                }
-                                value="pushes"
-                            />
-                        )}
-                        {hasQueueOps && (
-                            <Tab
-                                label={
-                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                        Statuses
-                                        <Chip
-                                            label={statusCount}
-                                            size="small"
-                                            sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
-                                        />
-                                    </Box>
-                                }
-                                value="statuses"
-                            />
-                        )}
-                        {hasQueueOps && (
-                            <Tab
-                                label={
-                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                        Processing
-                                        <Chip
-                                            label={processingCount}
-                                            size="small"
-                                            sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
-                                        />
-                                    </Box>
-                                }
-                                value="processing"
-                            />
-                        )}
+                        <Tab
+                            label={
+                                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                    Pushes
+                                    <Chip
+                                        label={pushCount}
+                                        size="small"
+                                        sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
+                                    />
+                                </Box>
+                            }
+                            value="pushes"
+                        />
+                        <Tab
+                            label={
+                                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                    Statuses
+                                    <Chip
+                                        label={statusCount}
+                                        size="small"
+                                        sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
+                                    />
+                                </Box>
+                            }
+                            value="statuses"
+                        />
+                        <Tab
+                            label={
+                                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                    Processing
+                                    <Chip
+                                        label={processingCount}
+                                        size="small"
+                                        sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
+                                    />
+                                </Box>
+                            }
+                            value="processing"
+                        />
                     </StyledTabList>
                 </Box>
-                <TabPanel value="messages" sx={{padding: 0}}>
-                    <MessagesView messages={data.messages ?? []} />
-                </TabPanel>
+                {showMessages && (
+                    <TabPanel value="messages" sx={{padding: 0}}>
+                        <MessagesView messages={data.messages ?? []} />
+                    </TabPanel>
+                )}
                 <TabPanel value="pushes" sx={{padding: 0}}>
                     <PushesView pushes={data.pushes ?? {}} />
                 </TabPanel>

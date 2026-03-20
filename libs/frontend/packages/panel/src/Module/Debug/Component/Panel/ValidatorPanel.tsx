@@ -6,7 +6,7 @@ import {Box, Chip, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useMemo, useState} from 'react';
 
-type Validation = {value: any; rules: any; result: boolean; errors: any[]};
+type Validation = {value: any; rules: any; result: boolean; errors: any};
 type ValidatorPanelProps = {data: Validation[]};
 
 const SummaryGrid = styled(Box)(({theme}) => ({
@@ -69,6 +69,13 @@ const DetailBox = styled(Box)(({theme}) => ({
 function truncateValue(value: any): string {
     const str = typeof value === 'string' ? value : JSON.stringify(value);
     return str.length > 80 ? str.substring(0, 80) + '...' : str;
+}
+
+function getErrorCount(errors: any): number {
+    if (!errors) return 0;
+    if (Array.isArray(errors)) return errors.length;
+    if (typeof errors === 'object') return Object.keys(errors).length;
+    return 0;
 }
 
 export const ValidatorPanel = ({data}: ValidatorPanelProps) => {
@@ -143,9 +150,9 @@ export const ValidatorPanel = ({data}: ValidatorPanelProps) => {
                             <ValuePreview sx={{color: 'text.secondary'}}>
                                 {truncateValue(validation.value)}
                             </ValuePreview>
-                            {validation.errors.length > 0 && (
+                            {getErrorCount(validation.errors) > 0 && (
                                 <Chip
-                                    label={`${validation.errors.length} error${validation.errors.length !== 1 ? 's' : ''}`}
+                                    label={`${getErrorCount(validation.errors)} error${getErrorCount(validation.errors) !== 1 ? 's' : ''}`}
                                     size="small"
                                     variant="outlined"
                                     sx={{
@@ -180,7 +187,7 @@ export const ValidatorPanel = ({data}: ValidatorPanelProps) => {
                                     </Typography>
                                     <JsonRenderer value={validation.rules} />
                                 </Box>
-                                {validation.errors.length > 0 && (
+                                {getErrorCount(validation.errors) > 0 && (
                                     <Box>
                                         <Typography
                                             sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}

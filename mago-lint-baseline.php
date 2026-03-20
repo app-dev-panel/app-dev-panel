@@ -778,7 +778,7 @@ count = 1
 file = "libs/Kernel/tests/Unit/Collector/QueueCollectorTest.php"
 code = "assert-description"
 message = "Missing description in assert function."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/RouterCollectorTest.php"

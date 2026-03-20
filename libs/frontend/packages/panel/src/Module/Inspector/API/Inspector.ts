@@ -208,6 +208,10 @@ export const inspectorApi = createApi({
             query: (table) => (table ? `table/${table}` : `table`),
             transformResponse: (result: Response) => result.data || [],
         }),
+        explainQuery: builder.mutation<any[], {sql: string; params?: Record<string, any>}>({
+            query: ({sql, params}) => ({url: `table/explain`, method: 'POST', body: {sql, params: params ?? {}}}),
+            transformResponse: (result: Response<any[]>) => result.data,
+        }),
         doRequest: builder.mutation<Response, {id: string}>({
             query: (args) => ({method: 'PUT', url: `request?debugEntryId=${args.id}`}),
             transformResponse: (result: Response) => result.data || [],
@@ -303,4 +307,5 @@ export const {
     usePostCurlBuildMutation,
     useGetEventsQuery,
     useGetOpcacheQuery,
+    useExplainQueryMutation,
 } = inspectorApi;

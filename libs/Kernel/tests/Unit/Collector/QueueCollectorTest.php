@@ -32,6 +32,7 @@ final class QueueCollectorTest extends AbstractCollectorTestCase
             handled: true,
             failed: false,
             duration: 0.025,
+            message: ['userId' => 42, 'channel' => 'email'],
         );
         $collector->logMessage(
             messageClass: 'App\\Message\\ProcessPayment',
@@ -41,6 +42,7 @@ final class QueueCollectorTest extends AbstractCollectorTestCase
             handled: false,
             failed: true,
             duration: 0.100,
+            message: ['orderId' => 'ORD-123', 'amount' => 99.99],
         );
     }
 
@@ -70,8 +72,10 @@ final class QueueCollectorTest extends AbstractCollectorTestCase
         $this->assertTrue($msg['dispatched']);
         $this->assertTrue($msg['handled']);
         $this->assertFalse($msg['failed']);
+        $this->assertSame(['userId' => 42, 'channel' => 'email'], $msg['message']);
 
         $this->assertTrue($data['messages'][1]['failed']);
+        $this->assertSame(['orderId' => 'ORD-123', 'amount' => 99.99], $data['messages'][1]['message']);
     }
 
     protected function checkSummaryData(array $data): void
@@ -79,10 +83,12 @@ final class QueueCollectorTest extends AbstractCollectorTestCase
         parent::checkSummaryData($data);
 
         $this->assertArrayHasKey('queue', $data);
-        $this->assertSame(2, $data['queue']['countPushes']);
-        $this->assertSame(2, $data['queue']['countStatuses']);
-        $this->assertSame(1, $data['queue']['countProcessingMessages']);
-        $this->assertSame(2, $data['queue']['messageCount']);
-        $this->assertSame(1, $data['queue']['failedCount']);
+        $queue = $data['queue'];
+        assert(is_array($queue));
+        $this->assertSame(2, $queue['countPushes']);
+        $this->assertSame(2, $queue['countStatuses']);
+        $this->assertSame(1, $queue['countProcessingMessages']);
+        $this->assertSame(2, $queue['messageCount']);
+        $this->assertSame(1, $queue['failedCount']);
     }
 }

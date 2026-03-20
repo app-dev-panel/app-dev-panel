@@ -23,4 +23,9 @@ class NullSchemaProvider implements SchemaProviderInterface
             'offset' => $offset,
         ];
     }
+
+    public function explainQuery(string $sql, array $params = []): array
+    {
+        return [];
+    }
 }

@@ -26,4 +26,9 @@ final class NullSchemaProvider implements SchemaProviderInterface
             'total' => 0,
         ];
     }
+
+    public function explainQuery(string $sql, array $params = []): array
+    {
+        return [];
+    }
 }

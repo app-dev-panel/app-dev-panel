@@ -1,14 +1,24 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {useExplainQueryMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
-import {TabContext, TabPanel} from '@mui/lab';
-import TabList from '@mui/lab/TabList';
-import {Box, Chip, Collapse, Icon, IconButton, Tab, type Theme, Typography} from '@mui/material';
+import {
+    Box,
+    Button,
+    Chip,
+    CircularProgress,
+    Collapse,
+    Icon,
+    IconButton,
+    type Theme,
+    Tooltip,
+    Typography,
+} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {SyntheticEvent, useDeferredValue, useState} from 'react';
+import {useDeferredValue, useState} from 'react';
 
 type QueryAction = {action: 'query.start' | 'query.end'; time: number};
 type Query = {
@@ -20,8 +30,7 @@ type Query = {
     actions: QueryAction[];
     rowsNumber: number;
 };
-type Keys = 'queries' | 'transactions';
-type DatabasePanelProps = {data: {[key in Keys]?: Query[] | any}};
+type DatabasePanelProps = {data: {queries?: Query[]; transactions?: any[]}};
 
 function getQueryTime(actions: QueryAction[]) {
     const start = actions.find((a) => a.action === 'query.start');
@@ -71,17 +80,6 @@ const DetailBox = styled(Box)(({theme}) => ({
     backgroundColor: theme.palette.action.hover,
     borderBottom: `1px solid ${theme.palette.divider}`,
     fontSize: '12px',
-}));
-
-const StyledTabList = styled(TabList)(({theme}) => ({
-    minHeight: 36,
-    '& .MuiTab-root': {
-        minHeight: 36,
-        fontSize: '12px',
-        fontWeight: 600,
-        textTransform: 'none',
-        padding: theme.spacing(0.5, 2),
-    },
 }));
 
 const QueriesView = ({queries}: {queries: Query[]}) => {
@@ -144,6 +142,31 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
                         </QueryRow>
                         <Collapse in={expanded}>
                             <DetailBox>
+                                <Box sx={{mb: 1.5}}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5}}>
+                                        <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled'}}>
+                                            Raw SQL
+                                        </Typography>
+                                        <CopyButton
+                                            text={
+                                                typeof query.rawSql === 'string'
+                                                    ? query.rawSql
+                                                    : JSON.stringify(query.rawSql)
+                                            }
+                                        />
+                                    </Box>
+                                    <Typography
+                                        sx={{
+                                            fontFamily: primitives.fontFamilyMono,
+                                            fontSize: '12px',
+                                            color: 'text.secondary',
+                                            whiteSpace: 'pre-wrap',
+                                            wordBreak: 'break-word',
+                                        }}
+                                    >
+                                        {typeof query.rawSql === 'string' ? query.rawSql : JSON.stringify(query.rawSql)}
+                                    </Typography>
+                                </Box>
                                 {Object.keys(query.params).length > 0 && (
                                     <Box sx={{mb: 1.5}}>
                                         <Typography
@@ -154,20 +177,10 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
                                         <JsonRenderer value={query.params} />
                                     </Box>
                                 )}
-                                <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
-                                    Raw SQL
-                                </Typography>
-                                <Typography
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
-                                        fontSize: '12px',
-                                        color: 'text.secondary',
-                                        whiteSpace: 'pre-wrap',
-                                        wordBreak: 'break-word',
-                                    }}
-                                >
-                                    {typeof query.rawSql === 'string' ? query.rawSql : JSON.stringify(query.rawSql)}
-                                </Typography>
+                                <ExplainButton
+                                    sql={typeof query.rawSql === 'string' ? query.rawSql : query.sql}
+                                    params={query.params}
+                                />
                             </DetailBox>
                         </Collapse>
                     </Box>
@@ -177,38 +190,66 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
     );
 };
 
-export const DatabasePanel = ({data}: DatabasePanelProps) => {
-    const tabs = Object.keys(data) as Keys[];
-    const [value, setValue] = useState<Keys>(tabs[0]);
+const ExplainButton = ({sql, params}: {sql: string; params: Record<string, any>}) => {
+    const [explainQuery, {data, isLoading, error}] = useExplainQueryMutation();
 
-    const handleChange = (event: SyntheticEvent, newValue: Keys) => {
-        setValue(newValue);
+    const handleExplain = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        explainQuery({sql, params});
     };
 
-    if (!data || (data.queries?.length === 0 && data.transactions?.length === 0)) {
+    return (
+        <Box sx={{mt: 1.5}}>
+            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: data || error ? 1 : 0}}>
+                <Button
+                    size="small"
+                    variant="outlined"
+                    disabled={isLoading}
+                    onClick={handleExplain}
+                    startIcon={
+                        isLoading ? <CircularProgress size={14} /> : <Icon sx={{fontSize: 14}}>query_stats</Icon>
+                    }
+                    sx={{fontSize: '11px', textTransform: 'none', padding: '2px 10px', minHeight: 26, borderRadius: 1}}
+                >
+                    EXPLAIN
+                </Button>
+            </Box>
+            {error && (
+                <Typography sx={{fontSize: '12px', color: 'error.main', fontFamily: primitives.fontFamilyMono}}>
+                    {'data' in error && (error.data as any)?.data?.error
+                        ? (error.data as any).data.error
+                        : 'Failed to run EXPLAIN'}
+                </Typography>
+            )}
+            {data && Array.isArray(data) && data.length > 0 && <JsonRenderer value={data} />}
+        </Box>
+    );
+};
+
+const CopyButton = ({text}: {text: string}) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(text).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        });
+    };
+
+    return (
+        <Tooltip title={copied ? 'Copied!' : 'Copy'} placement="top">
+            <IconButton size="small" onClick={handleCopy} sx={{padding: '2px'}}>
+                <Icon sx={{fontSize: 14, color: 'text.disabled'}}>{copied ? 'check' : 'content_copy'}</Icon>
+            </IconButton>
+        </Tooltip>
+    );
+};
+
+export const DatabasePanel = ({data}: DatabasePanelProps) => {
+    if (!data || !data.queries || data.queries.length === 0) {
         return <EmptyState icon="storage" title="No queries found" />;
     }
 
-    return (
-        <Box>
-            <TabContext value={value}>
-                <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
-                    <StyledTabList onChange={handleChange}>
-                        {tabs.map((tab) => (
-                            <Tab label={tab} value={tab} key={tab} />
-                        ))}
-                    </StyledTabList>
-                </Box>
-                {tabs.map((tab) => (
-                    <TabPanel value={tab} key={tab} sx={{padding: 0}}>
-                        {tab === 'queries' ? (
-                            <QueriesView queries={data[tab]} />
-                        ) : tab === 'transactions' ? (
-                            <EmptyState icon="construction" title="Not supported yet" />
-                        ) : null}
-                    </TabPanel>
-                ))}
-            </TabContext>
-        </Box>
-    );
+    return <QueriesView queries={data.queries} />;
 };
