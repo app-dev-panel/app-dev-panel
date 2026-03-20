@@ -168,6 +168,10 @@ const CheckerBox = styled('form')(({theme}) => ({
 // Route detail (expanded)
 // ---------------------------------------------------------------------------
 
+function isClassName(value: string): boolean {
+    return value.includes('\\') && !value.includes(' ');
+}
+
 const MiddlewareItem = ({mw}: {mw: any}) => {
     const parsed = parseCallable(mw);
     if (parsed) {
@@ -187,6 +191,26 @@ const MiddlewareItem = ({mw}: {mw: any}) => {
                 }}
             >
                 {concatClassMethod(parsed.className, parsed.methodName)}
+            </Typography>
+        );
+    }
+    if (typeof mw === 'string' && isClassName(mw)) {
+        return (
+            <Typography
+                component="a"
+                href={`/inspector/files?class=${mw}`}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                sx={{
+                    display: 'block',
+                    fontFamily: primitives.fontFamilyMono,
+                    fontSize: '12px',
+                    color: 'primary.main',
+                    textDecoration: 'none',
+                    py: 0.25,
+                    '&:hover': {textDecoration: 'underline'},
+                }}
+            >
+                {mw}
             </Typography>
         );
     }

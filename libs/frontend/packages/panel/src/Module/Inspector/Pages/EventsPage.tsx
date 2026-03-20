@@ -139,6 +139,11 @@ const EventListeners = React.memo(({entries}: EventListenersProps) => {
                         </EventHeader>
                         {entry.listeners.map((listener, i) => {
                             const parsed = parseCallable(listener);
+                            const isClass =
+                                !parsed &&
+                                typeof listener === 'string' &&
+                                listener.includes('\\') &&
+                                !listener.includes(' ');
                             return (
                                 <ListenerRow key={i}>
                                     {parsed ? (
@@ -157,6 +162,23 @@ const EventListeners = React.memo(({entries}: EventListenersProps) => {
                                             }}
                                         >
                                             {serializeCallable(listener)}
+                                        </Typography>
+                                    ) : isClass ? (
+                                        <Typography
+                                            component="a"
+                                            href={`/inspector/files?class=${listener}`}
+                                            sx={{
+                                                flex: 1,
+                                                minWidth: 0,
+                                                fontFamily: primitives.fontFamilyMono,
+                                                fontSize: '12px',
+                                                color: 'primary.main',
+                                                textDecoration: 'none',
+                                                wordBreak: 'break-all',
+                                                '&:hover': {textDecoration: 'underline'},
+                                            }}
+                                        >
+                                            {listener}
                                         </Typography>
                                     ) : (
                                         <Typography
