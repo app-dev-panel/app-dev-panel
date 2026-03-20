@@ -70,6 +70,7 @@ src/
 │   ├── HttpClientInterfaceProxy.php      # PSR-18 proxy (feeds HttpClientCollector)
 │   ├── VarDumperCollector.php
 │   ├── TimelineCollector.php
+│   ├── CacheCollector.php               # Cache operations: get/set/delete (fed by adapter hooks)
 │   ├── DatabaseCollector.php            # SQL queries + transactions (fed by adapter hooks)
 │   ├── MailerCollector.php              # Email messages (fed by adapter hooks)
 │   ├── AssetBundleCollector.php         # Asset bundles (fed by adapter hooks)

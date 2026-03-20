@@ -26,6 +26,11 @@ libs/Testing/src/
 └── Command/
     └── DebugFixturesCommand.php # CLI command to run fixtures
 libs/Testing/tests/
+├── Unit/
+│   ├── Fixture/
+│   │   └── FixtureRegistryTest.php   # Registry structure, uniqueness, tag coverage
+│   └── Assertion/
+│       └── ExpectationEvaluatorTest.php # Evaluator logic for all expectation types
 └── E2E/
     ├── FixtureTestCase.php       # Base PHPUnit test case for HTTP E2E
     ├── CoreFixturesTest.php      # Core collector tests (logs, events, dump, timeline)
@@ -33,6 +38,7 @@ libs/Testing/tests/
     ├── ErrorFixturesTest.php     # Exception tests (runtime, chained)
     ├── AdvancedFixturesTest.php  # Multi-collector, heavy, http-client, filesystem
     ├── DebugApiTest.php           # Debug API endpoint contract tests
+    ├── InspectorApiTest.php       # Inspector API endpoint tests
     └── ScenarioTest.php           # Full pipeline E2E: reset, fire all fixtures, verify API
 ```
 
@@ -70,6 +76,10 @@ All playgrounds must implement these endpoints under `/test/fixtures/`:
 | `/test/fixtures/filesystem` | filesystem:basic | FilesystemStreamCollector |
 | `/test/fixtures/database` | database:basic | DatabaseCollector |
 | `/test/fixtures/mailer` | mailer:basic | MailerCollector |
+| `/test/fixtures/messenger` | messenger:basic | QueueCollector |
+| `/test/fixtures/validator` | validator:basic | ValidatorCollector |
+| `/test/fixtures/router` | router:basic | RouterCollector |
+| `/test/fixtures/cache` | cache:basic | CacheCollector |
 | `/test/fixtures/request-info` | web:app-info | WebAppInfoCollector |
 | `/test/fixtures/reset` | (setup) | Clears debug storage directly |
 | `/test/fixtures/reset-cli` | (setup) | Clears debug storage via `debug:reset` CLI command |
