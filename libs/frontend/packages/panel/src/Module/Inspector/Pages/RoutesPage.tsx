@@ -9,18 +9,15 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {concatClassMethod} from '@app-dev-panel/sdk/Helper/classMethodConcater';
 import {ContentCopy, OpenInNew} from '@mui/icons-material';
-import CheckIcon from '@mui/icons-material/Check';
 import {
     Alert,
     AlertTitle,
     Box,
     Chip,
     Collapse,
-    FormHelperText,
     Icon,
     IconButton,
     InputBase,
-    Paper,
     type Theme,
     Tooltip,
     Typography,
@@ -62,47 +59,38 @@ const methodColor = (method: string, theme: Theme): string => {
     }
 };
 
-function extractAction(middlewares: any[]): {action: any[] | undefined; actualMiddlewares: any[]} {
-    if (!Array.isArray(middlewares) || middlewares.length === 0) {
-        return {action: undefined, actualMiddlewares: []};
-    }
-
-    if (middlewares.length === 1) {
-        const single = middlewares[0];
-        if (Array.isArray(single) && single.length >= 2) {
-            return {action: [single[0], single[1]], actualMiddlewares: []};
-        }
-        if (typeof single === 'string') {
-            return {action: undefined, actualMiddlewares: []};
-        }
-        return {action: undefined, actualMiddlewares: middlewares};
-    }
-
-    const lastMiddleware = middlewares.at(-1);
-    if (Array.isArray(lastMiddleware) && lastMiddleware.length >= 2) {
-        return {action: [lastMiddleware[0], lastMiddleware[1]], actualMiddlewares: middlewares.slice(0, -1)};
-    }
-    return {action: undefined, actualMiddlewares: middlewares};
+function isClassCallable(value: any): value is [string, string] {
+    return Array.isArray(value) && value.length >= 2 && typeof value[0] === 'string' && typeof value[1] === 'string';
 }
 
 function collectGroupsAndRoutes(data: any): RouteType[] {
     const routes: RouteType[] = [];
     let i = 0;
     for (const route of data) {
-        const {action, actualMiddlewares} = extractAction(route.middlewares);
-        for (const method of route.methods.filter((method: string) => !['OPTIONS', 'HEAD'].includes(method))) {
+        let action: any[] | undefined = undefined;
+        const middlewares: any[] = Array.isArray(route.middlewares) ? [...route.middlewares] : [];
+
+        if (middlewares.length > 0) {
+            const last = middlewares[middlewares.length - 1];
+            if (isClassCallable(last)) {
+                action = [last[0], last[1]];
+                middlewares.pop();
+            }
+        }
+
+        for (const method of route.methods.filter((m: string) => !['OPTIONS', 'HEAD'].includes(m))) {
             routes.push({
                 id: String(i++),
                 name: route.name,
                 pattern: route.pattern,
                 method: method,
-                middlewares: actualMiddlewares,
+                middlewares: middlewares,
                 action: action,
             });
         }
     }
 
-    return routes.sort((one, two) => one.pattern.localeCompare(two.pattern));
+    return routes.sort((a, b) => a.pattern.localeCompare(b.pattern));
 }
 
 // ---------------------------------------------------------------------------
@@ -140,15 +128,16 @@ const NameCell = styled(Typography)(({theme}) => ({
     whiteSpace: 'nowrap',
 }));
 
-const ActionCell = styled(Typography)({
+const ActionInlineCell = styled(Typography)(({theme}) => ({
     fontFamily: primitives.fontFamilyMono,
     fontSize: '11px',
+    color: theme.palette.text.secondary,
     flexShrink: 0,
     maxWidth: 300,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-});
+}));
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(2, 2, 2, 6),
@@ -157,16 +146,27 @@ const DetailBox = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
+const CheckerBox = styled('form')(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0.5, 1),
+    marginBottom: theme.spacing(2),
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: 'none',
+}));
+
 // ---------------------------------------------------------------------------
 // Route detail (expanded)
 // ---------------------------------------------------------------------------
 
 const RouteDetail = ({route}: {route: RouteType}) => {
-    const actionStr = route.action ? concatClassMethod(route.action[0] as string, route.action[1] as string) : null;
+    const actionFull = route.action ? concatClassMethod(route.action[0] as string, route.action[1] as string) : null;
 
     return (
         <DetailBox>
-            {actionStr && (
+            {actionFull && (
                 <Box sx={{mb: route.middlewares.length > 0 ? 2 : 0}}>
                     <Typography
                         variant="caption"
@@ -178,10 +178,16 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                         <Typography
                             sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', wordBreak: 'break-all'}}
                         >
-                            {actionStr}
+                            {actionFull}
                         </Typography>
                         <Tooltip title="Copy">
-                            <IconButton size="small" onClick={() => clipboardCopy(actionStr)}>
+                            <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    clipboardCopy(actionFull);
+                                }}
+                            >
                                 <ContentCopy sx={{fontSize: 14}} />
                             </IconButton>
                         </Tooltip>
@@ -189,6 +195,7 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                             <IconButton
                                 size="small"
                                 href={'/inspector/container/view?class=' + (route.action![0] as string)}
+                                onClick={(e) => e.stopPropagation()}
                             >
                                 <OpenInNew sx={{fontSize: 14}} />
                             </IconButton>
@@ -216,7 +223,7 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                                     py: 0.25,
                                 }}
                             >
-                                {Array.isArray(mw)
+                                {isClassCallable(mw)
                                     ? serializeCallable(mw)
                                     : typeof mw === 'string'
                                       ? mw
@@ -227,7 +234,7 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                 </Box>
             )}
 
-            {!actionStr && route.middlewares.length === 0 && (
+            {!actionFull && route.middlewares.length === 0 && (
                 <Typography sx={{fontSize: '12px', color: 'text.disabled'}}>No additional details</Typography>
             )}
         </DetailBox>
@@ -243,22 +250,20 @@ export const RoutesPage = () => {
     const {data, isLoading, isSuccess} = useGetRoutesQuery();
     const [checkRouteQuery, checkRouteQueryInfo] = useLazyGetCheckRouteQuery();
     const [routes, setRoutes] = useState<RouteType[]>([]);
-    const [url, setUrl] = useState<string>('');
+    const [url, setUrl] = useState('');
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
-    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+    const [expandedId, setExpandedId] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!isSuccess) {
-            return;
-        }
-        const routes = collectGroupsAndRoutes(data);
-        setRoutes(routes);
+        if (!isSuccess) return;
+        setRoutes(collectGroupsAndRoutes(data));
     }, [isSuccess, data]);
 
     const onSubmitHandler = async (event: {preventDefault: () => void}) => {
         event.preventDefault();
+        if (!url.trim()) return;
         await checkRouteQuery(url);
     };
 
@@ -315,34 +320,28 @@ export const RoutesPage = () => {
         <>
             <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
 
-            {/* Route checker */}
-            <Paper
-                component="form"
-                onSubmit={onSubmitHandler}
-                sx={{p: [0.5, 1], my: 2, display: 'flex', alignItems: 'center'}}
-            >
+            {/* Route checker — compact inline form */}
+            <CheckerBox onSubmit={onSubmitHandler}>
+                <Tooltip title="Enter a path to check. Prefix with HTTP method (e.g. POST /login). Default is GET.">
+                    <Icon sx={{fontSize: 18, color: 'text.disabled', mr: 1}}>travel_explore</Icon>
+                </Tooltip>
                 <InputBase
-                    sx={{ml: 1, flex: 1}}
-                    placeholder={'/site/index, POST /auth/login, DELETE /user/1'}
+                    sx={{flex: 1, fontSize: '13px'}}
+                    placeholder="Check route: /site/index, POST /auth/login, DELETE /user/1"
                     value={url}
-                    onChange={(event) => setUrl(event.target.value)}
+                    onChange={(e) => setUrl(e.target.value)}
                 />
-                <IconButton type="submit" sx={{p: 2}}>
-                    <CheckIcon />
+                <IconButton type="submit" size="small" disabled={!url.trim()}>
+                    <Icon sx={{fontSize: 18}}>check</Icon>
                 </IconButton>
-            </Paper>
-            <FormHelperText variant="outlined">
-                Add an HTTP verb in the beginning of the path such as GET, POST, PUT, PATCH and etc. to check different
-                methods. <br />
-                Default method is GET and it can be omitted.
-            </FormHelperText>
+            </CheckerBox>
 
             {checkRouteQueryInfo.data && (
-                <Alert severity={checkRouteQueryInfo.data.result ? 'success' : 'error'} sx={{mt: 1}}>
+                <Alert severity={checkRouteQueryInfo.data.result ? 'success' : 'error'} sx={{mb: 2}} onClose={() => {}}>
                     {checkRouteQueryInfo.data.result ? (
                         <AlertTitle>{serializeCallable(checkRouteQueryInfo.data.action)}</AlertTitle>
                     ) : (
-                        <AlertTitle>{'Route is invalid'}</AlertTitle>
+                        <AlertTitle>Route is invalid</AlertTitle>
                     )}
                 </Alert>
             )}
@@ -394,22 +393,23 @@ export const RoutesPage = () => {
                     )}
 
                     {/* Route rows */}
-                    {filtered.map((route, index) => {
-                        const expanded = expandedIndex === index;
+                    {filtered.map((route) => {
+                        const expanded = expandedId === route.id;
                         const hasDetails =
                             route.action !== undefined || (route.middlewares && route.middlewares.length > 0);
-                        const actionShort = route.action
-                            ? concatClassMethod(
-                                  (route.action[0] as string).split('\\').pop() as string,
-                                  route.action[1] as string,
-                              )
-                            : null;
+                        const actionShort =
+                            route.action && isClassCallable(route.action)
+                                ? concatClassMethod(
+                                      (route.action[0] as string).split('\\').pop() as string,
+                                      route.action[1] as string,
+                                  )
+                                : null;
 
                         return (
                             <Box key={route.id}>
                                 <RouteRow
                                     expanded={expanded}
-                                    onClick={hasDetails ? () => setExpandedIndex(expanded ? null : index) : undefined}
+                                    onClick={hasDetails ? () => setExpandedId(expanded ? null : route.id) : undefined}
                                     sx={{cursor: hasDetails ? 'pointer' : 'default'}}
                                 >
                                     <Chip
@@ -426,9 +426,7 @@ export const RoutesPage = () => {
                                         }}
                                     />
                                     <PatternCell>{route.pattern}</PatternCell>
-                                    {actionShort && (
-                                        <ActionCell sx={{color: 'text.secondary'}}>{actionShort}</ActionCell>
-                                    )}
+                                    {actionShort && <ActionInlineCell>{actionShort}</ActionInlineCell>}
                                     {route.name && <NameCell>{route.name}</NameCell>}
                                     {hasDetails && (
                                         <IconButton size="small" sx={{flexShrink: 0}}>
