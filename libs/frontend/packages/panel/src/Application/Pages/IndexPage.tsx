@@ -3,7 +3,7 @@ import {useLazyGetParametersQuery} from '@app-dev-panel/panel/Module/Inspector/A
 import {useSelector} from '@app-dev-panel/panel/store';
 import {addFavoriteUrl, changeBaseUrl, removeFavoriteUrl} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction} from '@app-dev-panel/sdk/API/Debug/Context';
-import {DebugEntry, debugApi, useGetDebugQuery, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {DebugEntry, useGetDebugQuery, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {StatusCard} from '@app-dev-panel/sdk/Component/StatusCard';
@@ -203,7 +203,6 @@ export function IndexPage() {
     const handleChangeUrl = async (newUrl: string) => {
         setUrl(newUrl);
         dispatch(changeBaseUrl(newUrl));
-        dispatch(debugApi.util.resetApiState());
     };
 
     const onSubmitHandler = async (event: {preventDefault: () => void}) => {
