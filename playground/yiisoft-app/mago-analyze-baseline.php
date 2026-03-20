@@ -13,6 +13,12 @@ message = "Unsafe array access on type `mixed`."
 count = 3
 
 [[issues]]
+file = "config/common/di/db.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Db\Sqlite\Driver` not found.'
+count = 1
+
+[[issues]]
 file = "config/common/di/error-handler.php"
 code = "invalid-return-statement"
 message = "Invalid return type for function `10610436458813642739:228`: expected `null|string`, but found `array<array-key, string>|string`."

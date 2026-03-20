@@ -110,102 +110,146 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
                 const color = durationColor(ms, theme);
 
                 return (
-                    <Box key={index}>
-                        <QueryRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
-                            <Chip
-                                label={query.sql.trim().split(/\s/)[0]?.toUpperCase()}
-                                size="small"
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: '9px',
-                                    height: 18,
-                                    minWidth: 50,
-                                    backgroundColor: 'primary.main',
-                                    color: 'common.white',
-                                    borderRadius: 1,
-                                    flexShrink: 0,
-                                    mt: '2px',
-                                }}
-                            />
-                            <SqlCell>{query.sql}</SqlCell>
-                            {query.rowsNumber != null && (
-                                <Typography
-                                    sx={{fontSize: '11px', color: 'text.disabled', flexShrink: 0, whiteSpace: 'nowrap'}}
-                                >
-                                    {query.rowsNumber} row{query.rowsNumber !== 1 ? 's' : ''}
-                                </Typography>
-                            )}
-                            <DurationCell sx={{color}}>{formatMillisecondsAsDuration(ms)}</DurationCell>
-                            <IconButton size="small" sx={{flexShrink: 0}}>
-                                <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
-                            </IconButton>
-                        </QueryRow>
-                        <Collapse in={expanded}>
-                            <DetailBox>
-                                <Box sx={{mb: 1.5}}>
-                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5}}>
-                                        <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled'}}>
-                                            Raw SQL
-                                        </Typography>
-                                        <CopyButton
-                                            text={
-                                                typeof query.rawSql === 'string'
-                                                    ? query.rawSql
-                                                    : JSON.stringify(query.rawSql)
-                                            }
-                                        />
-                                    </Box>
-                                    <Typography
-                                        sx={{
-                                            fontFamily: primitives.fontFamilyMono,
-                                            fontSize: '12px',
-                                            color: 'text.secondary',
-                                            whiteSpace: 'pre-wrap',
-                                            wordBreak: 'break-word',
-                                        }}
-                                    >
-                                        {typeof query.rawSql === 'string' ? query.rawSql : JSON.stringify(query.rawSql)}
-                                    </Typography>
-                                </Box>
-                                {Object.keys(query.params).length > 0 && (
-                                    <Box sx={{mb: 1.5}}>
-                                        <Typography
-                                            sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}
-                                        >
-                                            Parameters
-                                        </Typography>
-                                        <JsonRenderer value={query.params} />
-                                    </Box>
-                                )}
-                                <ExplainButton
-                                    sql={typeof query.rawSql === 'string' ? query.rawSql : query.sql}
-                                    params={query.params}
-                                />
-                            </DetailBox>
-                        </Collapse>
-                    </Box>
+                    <QueryRowWithExplain
+                        key={index}
+                        query={query}
+                        expanded={expanded}
+                        ms={ms}
+                        color={color}
+                        onToggle={() => setExpandedIndex(expanded ? null : index)}
+                        onExpand={() => setExpandedIndex(index)}
+                    />
                 );
             })}
         </Box>
     );
 };
 
-const ExplainButton = ({sql, params}: {sql: string; params: Record<string, any>}) => {
+const QueryRowWithExplain = ({
+    query,
+    expanded,
+    ms,
+    color,
+    onToggle,
+    onExpand,
+}: {
+    query: Query;
+    expanded: boolean;
+    ms: number;
+    color: string;
+    onToggle: () => void;
+    onExpand: () => void;
+}) => {
     const [explainQuery, {data, isLoading, error}] = useExplainQueryMutation();
+    const sql = typeof query.rawSql === 'string' ? query.rawSql : query.sql;
 
     const handleExplain = (e: React.MouseEvent) => {
         e.stopPropagation();
-        explainQuery({sql, params});
+        explainQuery({sql, params: query.params});
+        if (!expanded) {
+            onExpand();
+        }
     };
 
     return (
+        <Box>
+            <QueryRow expanded={expanded} onClick={onToggle}>
+                <Chip
+                    label={query.sql.trim().split(/\s/)[0]?.toUpperCase()}
+                    size="small"
+                    sx={{
+                        fontWeight: 700,
+                        fontSize: '9px',
+                        height: 18,
+                        minWidth: 50,
+                        backgroundColor: 'primary.main',
+                        color: 'common.white',
+                        borderRadius: 1,
+                        flexShrink: 0,
+                        mt: '2px',
+                    }}
+                />
+                <SqlCell>{query.sql}</SqlCell>
+                {query.rowsNumber != null && (
+                    <Typography sx={{fontSize: '11px', color: 'text.disabled', flexShrink: 0, whiteSpace: 'nowrap'}}>
+                        {query.rowsNumber} row{query.rowsNumber !== 1 ? 's' : ''}
+                    </Typography>
+                )}
+                <DurationCell sx={{color}}>{formatMillisecondsAsDuration(ms)}</DurationCell>
+                <Tooltip title="EXPLAIN" placement="top">
+                    <IconButton
+                        size="small"
+                        onClick={handleExplain}
+                        disabled={isLoading}
+                        sx={{flexShrink: 0}}
+                        aria-label="Explain query"
+                    >
+                        {isLoading ? <CircularProgress size={14} /> : <Icon sx={{fontSize: 16}}>query_stats</Icon>}
+                    </IconButton>
+                </Tooltip>
+                <IconButton size="small" sx={{flexShrink: 0}}>
+                    <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                </IconButton>
+            </QueryRow>
+            <Collapse in={expanded}>
+                <DetailBox>
+                    <Box sx={{mb: 1.5}}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5}}>
+                            <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled'}}>
+                                Raw SQL
+                            </Typography>
+                            <CopyButton
+                                text={typeof query.rawSql === 'string' ? query.rawSql : JSON.stringify(query.rawSql)}
+                            />
+                        </Box>
+                        <Typography
+                            sx={{
+                                fontFamily: primitives.fontFamilyMono,
+                                fontSize: '12px',
+                                color: 'text.secondary',
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                            }}
+                        >
+                            {typeof query.rawSql === 'string' ? query.rawSql : JSON.stringify(query.rawSql)}
+                        </Typography>
+                    </Box>
+                    {Object.keys(query.params).length > 0 && (
+                        <Box sx={{mb: 1.5}}>
+                            <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                                Parameters
+                            </Typography>
+                            <JsonRenderer value={query.params} />
+                        </Box>
+                    )}
+                    <ExplainResult data={data} error={error} isLoading={isLoading} onExplain={handleExplain} />
+                </DetailBox>
+            </Collapse>
+        </Box>
+    );
+};
+
+const ExplainResult = ({
+    data,
+    error,
+    isLoading,
+    onExplain,
+}: {
+    data: any[] | undefined;
+    error: any;
+    isLoading: boolean;
+    onExplain: (e: React.MouseEvent) => void;
+}) => {
+    const hasResult = data !== undefined || error;
+
+    return (
         <Box sx={{mt: 1.5}}>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: data || error ? 1 : 0}}>
+            {!hasResult && (
                 <Button
                     size="small"
                     variant="outlined"
                     disabled={isLoading}
-                    onClick={handleExplain}
+                    onClick={onExplain}
                     startIcon={
                         isLoading ? <CircularProgress size={14} /> : <Icon sx={{fontSize: 14}}>query_stats</Icon>
                     }
@@ -213,15 +257,29 @@ const ExplainButton = ({sql, params}: {sql: string; params: Record<string, any>}
                 >
                     EXPLAIN
                 </Button>
-            </Box>
-            {error && (
-                <Typography sx={{fontSize: '12px', color: 'error.main', fontFamily: primitives.fontFamilyMono}}>
-                    {'data' in error && (error.data as any)?.data?.error
-                        ? (error.data as any).data.error
-                        : 'Failed to run EXPLAIN'}
-                </Typography>
             )}
-            {data && Array.isArray(data) && data.length > 0 && <JsonRenderer value={data} />}
+            {hasResult && (
+                <Box>
+                    <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                        EXPLAIN
+                    </Typography>
+                    {error && (
+                        <Typography sx={{fontSize: '12px', color: 'error.main', fontFamily: primitives.fontFamilyMono}}>
+                            {'data' in error && (error.data as any)?.data?.error
+                                ? (error.data as any).data.error
+                                : 'Failed to run EXPLAIN'}
+                        </Typography>
+                    )}
+                    {data && Array.isArray(data) && data.length > 0 && <JsonRenderer value={data} />}
+                    {data && Array.isArray(data) && data.length === 0 && (
+                        <Typography
+                            sx={{fontSize: '12px', color: 'text.disabled', fontFamily: primitives.fontFamilyMono}}
+                        >
+                            No EXPLAIN data returned
+                        </Typography>
+                    )}
+                </Box>
+            )}
         </Box>
     );
 };

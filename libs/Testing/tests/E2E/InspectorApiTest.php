@@ -12,6 +12,8 @@ use PHPUnit\Framework\TestCase;
  * E2E tests that verify the inspector API endpoints work correctly.
  * Tests live inspector actions (EXPLAIN, table list, etc.) against a running playground.
  *
+ * Requires a playground with SQLite configured (test_users table with seed data).
+ *
  * Run: PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Fixtures --group inspector
  */
 #[Group('fixtures')]
@@ -43,77 +45,81 @@ final class InspectorApiTest extends TestCase
         }
     }
 
-    public function testTableListReturnsJson(): void
+    public function testTableListReturnsTablesIncludingTestUsers(): void
     {
         $response = self::$client->get('/inspect/api/table');
 
         self::assertSame(200, $response->getStatusCode());
 
+        /** @var array{success: bool, data: list<array{table: string, records: int}>} $body */
         $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertIsArray($body);
-        self::assertTrue($body['success'] ?? false, 'Response should have success=true');
+        self::assertTrue($body['success'], 'Response should have success=true');
         self::assertIsArray($body['data']);
+        self::assertNotEmpty($body['data'], 'Table list should not be empty — SQLite DB must be configured');
+
+        $tableNames = array_column($body['data'], 'table');
+        self::assertContains('test_users', $tableNames, 'test_users table should exist');
     }
 
-    public function testExplainQueryWithValidSql(): void
+    public function testExplainSelectFromTestUsers(): void
     {
-        // First check that we have at least one table (database is configured)
-        $tablesResponse = self::$client->get('/inspect/api/table');
-        $tablesBody = json_decode((string) $tablesResponse->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $tables = $tablesBody['data'] ?? [];
-
-        if ($tables === []) {
-            self::markTestSkipped('No tables available — database not configured in this playground');
-        }
-
-        $tableName = $tables[0]['table'];
-
         $response = self::$client->post('/inspect/api/table/explain', [
             'json' => [
-                'sql' => sprintf('SELECT * FROM %s LIMIT 1', $tableName),
+                'sql' => 'SELECT * FROM test_users LIMIT 1',
                 'params' => [],
             ],
         ]);
 
         self::assertSame(200, $response->getStatusCode());
 
+        /** @var array{success: bool, data: list<array<string, mixed>>} $body */
         $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertIsArray($body);
-        self::assertTrue($body['success'] ?? false, 'EXPLAIN response should have success=true');
+        self::assertTrue($body['success'], 'EXPLAIN response should have success=true');
         self::assertIsArray($body['data'], 'EXPLAIN should return an array of plan rows');
         self::assertNotEmpty($body['data'], 'EXPLAIN plan should not be empty');
     }
 
-    public function testExplainQueryWithParameters(): void
+    public function testExplainSelectWithWhereAndParameters(): void
     {
-        // First check that we have at least one table
-        $tablesResponse = self::$client->get('/inspect/api/table');
-        $tablesBody = json_decode((string) $tablesResponse->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $tables = $tablesBody['data'] ?? [];
-
-        if ($tables === []) {
-            self::markTestSkipped('No tables available — database not configured in this playground');
-        }
-
-        $tableName = $tables[0]['table'];
-
         $response = self::$client->post('/inspect/api/table/explain', [
             'json' => [
-                'sql' => sprintf('SELECT * FROM %s WHERE 1 = ?', $tableName),
+                'sql' => 'SELECT * FROM test_users WHERE id = ?',
                 'params' => [1],
             ],
         ]);
 
         self::assertSame(200, $response->getStatusCode());
 
+        /** @var array{success: bool, data: list<array<string, mixed>>} $body */
         $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertIsArray($body);
-        self::assertTrue($body['success'] ?? false);
+        self::assertTrue($body['success']);
         self::assertIsArray($body['data']);
         self::assertNotEmpty($body['data'], 'EXPLAIN with parameters should return plan rows');
     }
 
-    public function testExplainQueryWithEmptySqlReturns400(): void
+    public function testExplainSelectWithNamedParameters(): void
+    {
+        $response = self::$client->post('/inspect/api/table/explain', [
+            'json' => [
+                'sql' => 'SELECT * FROM test_users WHERE name = :name',
+                'params' => [':name' => 'Alice'],
+            ],
+        ]);
+
+        self::assertSame(200, $response->getStatusCode());
+
+        /** @var array{success: bool, data: list<array<string, mixed>>} $body */
+        $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertIsArray($body);
+        self::assertTrue($body['success']);
+        self::assertIsArray($body['data']);
+        self::assertNotEmpty($body['data'], 'EXPLAIN with named parameters should return plan rows');
+    }
+
+    public function testExplainWithEmptySqlReturns400(): void
     {
         $response = self::$client->post('/inspect/api/table/explain', [
             'json' => [
@@ -122,11 +128,12 @@ final class InspectorApiTest extends TestCase
             ],
         ]);
 
+        /** @var array{status: int} $body */
         $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        self::assertSame(400, $body['status'] ?? $response->getStatusCode());
+        self::assertSame(400, $body['status']);
     }
 
-    public function testExplainQueryWithInvalidSqlReturns500(): void
+    public function testExplainWithInvalidSqlReturns500(): void
     {
         $response = self::$client->post('/inspect/api/table/explain', [
             'json' => [
@@ -135,12 +142,10 @@ final class InspectorApiTest extends TestCase
             ],
         ]);
 
+        /** @var array{status: int, data: array{error: string}} $body */
         $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertIsArray($body);
-
-        // Should return error status (500) or error in data
-        $status = $body['status'] ?? $response->getStatusCode();
-        self::assertSame(500, $status, 'Invalid SQL should return 500');
+        self::assertSame(500, $body['status'], 'Invalid SQL should return 500');
         self::assertArrayHasKey('data', $body);
         self::assertArrayHasKey('error', $body['data']);
     }

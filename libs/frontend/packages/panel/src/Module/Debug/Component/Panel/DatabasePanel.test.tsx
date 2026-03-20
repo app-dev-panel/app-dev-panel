@@ -81,6 +81,11 @@ describe('DatabasePanel', () => {
         expect(screen.getByText('Raw SQL')).toBeInTheDocument();
     });
 
+    it('shows EXPLAIN button on collapsed row', () => {
+        renderWithProviders(<DatabasePanel data={{queries: [makeQuery()]}} />);
+        expect(screen.getByLabelText('Explain query')).toBeInTheDocument();
+    });
+
     it('shows EXPLAIN button in expanded detail', async () => {
         const user = userEvent.setup();
         renderWithProviders(<DatabasePanel data={{queries: [makeQuery()]}} />);
