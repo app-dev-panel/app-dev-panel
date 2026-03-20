@@ -120,6 +120,72 @@ final class DatabaseControllerTest extends ControllerTestCase
         $controller->getTable($request);
     }
 
+    public function testExplain(): void
+    {
+        $plan = [['id' => 1, 'detail' => 'SCAN users']];
+
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->expects($this->once())
+            ->method('explainQuery')
+            ->with('SELECT * FROM users', [], false)
+            ->willReturn($plan);
+
+        $controller = $this->createController($provider);
+        $response = $controller->explain($this->post(['sql' => 'SELECT * FROM users']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertCount(1, $data);
+        $this->assertSame('SCAN users', $data[0]['detail']);
+    }
+
+    public function testExplainAnalyze(): void
+    {
+        $plan = [['id' => 1, 'detail' => 'SCAN users (actual rows=10)']];
+
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->expects($this->once())
+            ->method('explainQuery')
+            ->with('SELECT * FROM users', ['status' => 'active'], true)
+            ->willReturn($plan);
+
+        $controller = $this->createController($provider);
+        $response = $controller->explain($this->post([
+            'sql' => 'SELECT * FROM users',
+            'params' => ['status' => 'active'],
+            'analyze' => true,
+        ]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertCount(1, $data);
+    }
+
+    public function testExplainEmptySqlReturns400(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->explain($this->post(['sql' => '']));
+
+        $this->assertSame(400, $response->getStatusCode());
+    }
+
+    public function testExplainExceptionReturns500(): void
+    {
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->method('explainQuery')
+            ->willThrowException(new \RuntimeException('Syntax error'));
+
+        $controller = $this->createController($provider);
+        $response = $controller->explain($this->post(['sql' => 'INVALID SQL']));
+
+        $this->assertSame(500, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertSame('Syntax error', $data['error']);
+    }
+
     public function testQuery(): void
     {
         $rows = [
