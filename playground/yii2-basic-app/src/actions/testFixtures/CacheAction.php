@@ -21,28 +21,24 @@ final class CacheAction extends Action
             return ['fixture' => 'cache:basic', 'status' => 'error', 'message' => 'CacheCollector not found'];
         }
 
-        // Simulate cache operations by calling the collector directly.
-        // This tests the CacheCollector without requiring a real PSR-16 cache backend.
-
-        // 1. SET a key
         $cacheCollector->logCacheOperation(
             pool: 'default',
             operation: 'set',
             key: 'user:42',
             hit: false,
             duration: 0.001,
+            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
         );
 
-        // 2. GET a key (cache hit)
         $cacheCollector->logCacheOperation(
             pool: 'default',
             operation: 'get',
             key: 'user:42',
             hit: true,
             duration: 0.0005,
+            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
         );
 
-        // 3. GET a key (cache miss)
         $cacheCollector->logCacheOperation(
             pool: 'default',
             operation: 'get',
@@ -51,7 +47,6 @@ final class CacheAction extends Action
             duration: 0.0003,
         );
 
-        // 4. DELETE a key
         $cacheCollector->logCacheOperation(
             pool: 'default',
             operation: 'delete',

@@ -14,7 +14,7 @@ final class CacheCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
 
-    /** @var array<int, array{pool: string, operation: string, key: string, hit: bool, duration: float}> */
+    /** @var array<int, array{pool: string, operation: string, key: string, hit: bool, duration: float, value: mixed}> */
     private array $operations = [];
     private int $hits = 0;
     private int $misses = 0;
@@ -29,6 +29,7 @@ final class CacheCollector implements SummaryCollectorInterface
         string $key,
         bool $hit = false,
         float $duration = 0.0,
+        mixed $value = null,
     ): void {
         if (!$this->isActive()) {
             return;
@@ -40,6 +41,7 @@ final class CacheCollector implements SummaryCollectorInterface
             'key' => $key,
             'hit' => $hit,
             'duration' => $duration,
+            'value' => $value,
         ];
 
         if ($operation === 'get') {

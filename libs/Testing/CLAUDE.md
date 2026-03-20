@@ -80,6 +80,7 @@ All playgrounds must implement these endpoints under `/test/fixtures/`:
 | `/test/fixtures/validator` | validator:basic | ValidatorCollector |
 | `/test/fixtures/router` | router:basic | RouterCollector |
 | `/test/fixtures/cache` | cache:basic | CacheCollector |
+| `/test/fixtures/cache-heavy` | cache:heavy | CacheCollector |
 | `/test/fixtures/request-info` | web:app-info | WebAppInfoCollector |
 | `/test/fixtures/reset` | (setup) | Clears debug storage directly |
 | `/test/fixtures/reset-cli` | (setup) | Clears debug storage via `debug:reset` CLI command |

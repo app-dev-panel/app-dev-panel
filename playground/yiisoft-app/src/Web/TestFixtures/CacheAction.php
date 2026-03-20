@@ -22,25 +22,27 @@ final readonly class CacheAction implements RequestHandlerInterface
         // Simulate cache operations by calling the collector directly.
         // This tests the CacheCollector without requiring a real PSR-16 cache backend.
 
-        // 1. SET a key
+        // 1. SET a key with value
         $this->cacheCollector->logCacheOperation(
             pool: 'default',
             operation: 'set',
             key: 'user:42',
             hit: false,
             duration: 0.001,
+            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
         );
 
-        // 2. GET a key (cache hit)
+        // 2. GET a key (cache hit) — returns value
         $this->cacheCollector->logCacheOperation(
             pool: 'default',
             operation: 'get',
             key: 'user:42',
             hit: true,
             duration: 0.0005,
+            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
         );
 
-        // 3. GET a key (cache miss)
+        // 3. GET a key (cache miss) — no value
         $this->cacheCollector->logCacheOperation(
             pool: 'default',
             operation: 'get',

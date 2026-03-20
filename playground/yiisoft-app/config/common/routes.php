@@ -31,6 +31,7 @@ return [
             Route::get('/validator')->action(Web\TestFixtures\ValidatorAction::class)->name('test-validator'),
             Route::get('/router')->action(Web\TestFixtures\RouterAction::class)->name('test-router'),
             Route::get('/cache')->action(Web\TestFixtures\CacheAction::class)->name('test-cache'),
+            Route::get('/cache-heavy')->action(Web\TestFixtures\CacheHeavyAction::class)->name('test-cache-heavy'),
             Route::methods(['GET', 'POST'], '/reset')
                 ->action(Web\TestFixtures\ResetAction::class)
                 ->name('test-reset'),

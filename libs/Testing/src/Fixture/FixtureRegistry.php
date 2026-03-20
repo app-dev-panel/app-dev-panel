@@ -259,6 +259,15 @@ final class FixtureRegistry
                     Expectation::summaryGte('cache.misses', 1),
                 ],
             ]),
+
+            // === Cache heavy — many operations, multiple pools ===
+            new Fixture(name: 'cache:heavy', endpoint: '/test/fixtures/cache-heavy', expectations: [
+                'cache' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryGte('cache.totalOperations', 100),
+                    Expectation::summaryGte('cache.hits', 1),
+                ],
+            ]),
         ];
     }
 }
