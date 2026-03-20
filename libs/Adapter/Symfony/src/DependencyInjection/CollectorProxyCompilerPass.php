@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
+use AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
@@ -37,6 +39,7 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
         $this->decorateLogger($container);
         $this->decorateEventDispatcher($container);
         $this->decorateHttpClient($container);
+        $this->upgradeSchemaProvider($container);
         $this->collectContainerParameters($container);
     }
 
@@ -124,6 +127,28 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
                 new Reference(HttpClientInterfaceProxy::class . '.inner'),
                 new Reference(HttpClientCollector::class),
             ]);
+    }
+
+    /**
+     * Upgrades NullSchemaProvider to DoctrineSchemaProvider when Doctrine DBAL is available.
+     *
+     * This runs in the compiler pass (after all extensions) so doctrine.dbal.default_connection
+     * is guaranteed to be registered if DoctrineBundle is active.
+     */
+    private function upgradeSchemaProvider(ContainerBuilder $container): void
+    {
+        if (!class_exists(\Doctrine\DBAL\Connection::class)) {
+            return;
+        }
+
+        if (!$container->has('doctrine.dbal.default_connection')) {
+            return;
+        }
+
+        $container
+            ->register(SchemaProviderInterface::class, DoctrineSchemaProvider::class)
+            ->setArguments([new Reference('doctrine.dbal.default_connection')])
+            ->setPublic(false);
     }
 
     /**

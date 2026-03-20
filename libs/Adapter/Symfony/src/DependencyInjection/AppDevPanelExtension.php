@@ -480,16 +480,10 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([new Reference(JsonResponseFactoryInterface::class)])
             ->setPublic(true);
 
-        // Database inspector: prefer Doctrine DBAL when available, fall back to NullSchemaProvider
+        // Database inspector: register NullSchemaProvider as default.
+        // CompilerPass will upgrade to DoctrineSchemaProvider if Doctrine DBAL is available.
         if (!$container->has(SchemaProviderInterface::class)) {
-            if (class_exists(\Doctrine\DBAL\Connection::class) && $container->has('doctrine.dbal.default_connection')) {
-                $container
-                    ->register(SchemaProviderInterface::class, DoctrineSchemaProvider::class)
-                    ->setArguments([new Reference('doctrine.dbal.default_connection')])
-                    ->setPublic(false);
-            } else {
-                $container->register(SchemaProviderInterface::class, NullSchemaProvider::class)->setPublic(false);
-            }
+            $container->register(SchemaProviderInterface::class, NullSchemaProvider::class)->setPublic(false);
         }
 
         $container
