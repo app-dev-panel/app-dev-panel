@@ -3,11 +3,9 @@ import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 
 export const getCollectedCountByCollector = (collector: CollectorsMap, data: DebugEntry): number | undefined => {
     switch (collector) {
-        case CollectorsMap.AssetCollector:
-        case CollectorsMap.Yii2AssetBundleCollector:
+        case CollectorsMap.AssetBundleCollector:
             return Number(data.asset?.bundles?.total) || Number(data.assets?.bundleCount);
         case CollectorsMap.DatabaseCollector:
-        case CollectorsMap.Yii2DbCollector:
             return (
                 (Number(data.db?.queries?.total) || Number(data.db?.queryCount) || 0) +
                 Number(data.db?.transactions?.total || 0)
@@ -37,8 +35,7 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
         case CollectorsMap.HttpStreamCollector:
             return Number(data.http_stream?.length);
         case CollectorsMap.MailerCollector:
-        case CollectorsMap.Yii2MailerCollector:
-            return Number(data.mailer?.total) || Number(data.mailer?.messageCount);
+            return data.mailer?.total != null ? Number(data.mailer.total) : undefined;
         case CollectorsMap.CacheCollector:
             return Number(data.cache?.totalOperations);
         case CollectorsMap.FilesystemStreamCollector:

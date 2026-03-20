@@ -27,11 +27,9 @@ src/
 ├── Proxy/
 │   └── SymfonyEventDispatcherProxy.php             # Wraps event_dispatcher, implements Component interface
 ├── Collector/
-│   ├── DoctrineCollector.php                       # SQL queries, timing, params (requires doctrine/dbal)
 │   ├── TwigCollector.php                           # Template renders, timing (requires twig/twig)
 │   ├── SecurityCollector.php                       # User, roles, firewall
 │   ├── CacheCollector.php                          # Cache hits/misses, operations
-│   ├── MailerCollector.php                         # Sent emails
 │   ├── MessengerCollector.php                      # Message bus operations
 │   ├── SymfonyRequestCollector.php                 # Legacy: Symfony HttpFoundation collector (unused)
 │   └── SymfonyExceptionCollector.php               # Legacy: Symfony exception collector (unused)
@@ -163,11 +161,11 @@ Runs after all extensions. Responsibilities:
 
 | Collector | Fed by | Data |
 |-----------|--------|------|
-| `DoctrineCollector` | DBAL middleware calling `logQuery()` | SQL queries, params, time, backtrace |
+| `DatabaseCollector` (Kernel) | DBAL middleware calling `logQuery()` | SQL queries, params, time, backtrace |
 | `TwigCollector` | Profiler extension calling `logRender()` | Template names, render times |
 | `SecurityCollector` | Security event listener | User, roles, firewall, access decisions |
 | `CacheCollector` | Decorated cache adapter calling `logCacheOperation()` | Cache operations, hits/misses |
-| `MailerCollector` | Mailer MessageEvent listener | Emails sent |
+| `MailerCollector` (Kernel) | Mailer MessageEvent listener calling `collectMessage()` | Emails sent |
 | `MessengerCollector` | Messenger middleware calling `logMessage()` | Messages dispatched/handled/failed |
 
 ## Configuration Reference
@@ -190,11 +188,11 @@ app_dev_panel:
         filesystem_stream: true            # FilesystemStreamCollector
         http_stream: true                  # HttpStreamCollector
         command: true                      # CommandCollector
-        doctrine: true                     # DoctrineCollector (requires doctrine/dbal)
+        doctrine: true                     # DatabaseCollector (requires doctrine/dbal)
         twig: true                         # TwigCollector (requires twig/twig)
         security: true                     # SecurityCollector (requires symfony/security-bundle)
         cache: true                        # CacheCollector
-        mailer: true                       # MailerCollector (requires symfony/mailer)
+        mailer: true                       # MailerCollector from Kernel (requires symfony/mailer)
         messenger: true                    # MessengerCollector (requires symfony/messenger)
     ignored_requests:
         - '/_wdt/*'

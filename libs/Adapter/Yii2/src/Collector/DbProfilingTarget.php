@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Collector;
 
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use yii\log\Logger;
 use yii\log\Target;
 
 /**
- * Log target that intercepts Yii 2 DB profiling messages to feed DbCollector.
+ * Log target that intercepts Yii 2 DB profiling messages to feed DatabaseCollector.
  *
  * Yii 2's Command class uses Yii::beginProfile()/endProfile() for query profiling,
  * which writes LEVEL_PROFILE_BEGIN and LEVEL_PROFILE_END messages to the Logger.
  * This target captures those messages in real-time (exportInterval=1) and feeds
- * the DbCollector with query SQL, timing, and metadata.
+ * the DatabaseCollector with query SQL, timing, and metadata.
  *
  * Categories captured: 'yii\db\Command::execute', 'yii\db\Command::query'.
  */
@@ -23,7 +24,7 @@ final class DbProfilingTarget extends Target
     private array $activeQueries = [];
 
     public function __construct(
-        private readonly DbCollector $dbCollector,
+        private readonly DatabaseCollector $dbCollector,
     ) {
         parent::__construct();
 
@@ -47,11 +48,13 @@ final class DbProfilingTarget extends Target
             $sql = is_string($text) ? $text : (string) $text;
 
             if ($level === Logger::LEVEL_PROFILE_BEGIN) {
-                $this->activeQueries[$sql] = $timestamp;
-                $this->dbCollector->beginQuery();
+                $this->activeQueries[$sql] = (float) $timestamp;
             } elseif ($level === Logger::LEVEL_PROFILE_END) {
-                $this->dbCollector->logQuery($sql, [], 0);
+                $startTime = $this->activeQueries[$sql] ?? (float) $timestamp;
+                $endTime = (float) $timestamp;
                 unset($this->activeQueries[$sql]);
+
+                $this->dbCollector->logQuery($sql, $sql, [], '', $startTime, $endTime, 0);
             }
         }
     }

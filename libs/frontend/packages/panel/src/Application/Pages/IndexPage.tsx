@@ -45,6 +45,7 @@ const FavoriteItem = styled('div')(({theme}) => ({
     borderRadius: theme.shape.borderRadius,
     border: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
+    cursor: 'pointer',
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
@@ -172,19 +173,22 @@ export function IndexPage() {
                     <SectionLabel>Favorites</SectionLabel>
                     <FavoritesList>
                         {favoriteUrls.map((favUrl, index) => (
-                            <FavoriteItem key={index}>
+                            <FavoriteItem key={index} onClick={() => handleChangeUrl(favUrl)}>
                                 <Icon sx={{fontSize: 16, color: 'warning.main'}}>star</Icon>
                                 <Typography sx={{flex: 1, fontFamily: primitives.fontFamilyMono, fontSize: '13px'}}>
                                     {favUrl}
                                 </Typography>
-                                <IconButton size="small" href={favUrl}>
+                                <IconButton size="small" href={favUrl} onClick={(e) => e.stopPropagation()}>
                                     <Icon sx={{fontSize: 16}}>open_in_new</Icon>
                                 </IconButton>
-                                <IconButton size="small" onClick={() => dispatch(removeFavoriteUrl(favUrl))}>
+                                <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        dispatch(removeFavoriteUrl(favUrl));
+                                    }}
+                                >
                                     <Icon sx={{fontSize: 16}}>delete_outline</Icon>
-                                </IconButton>
-                                <IconButton size="small" onClick={() => handleChangeUrl(favUrl)}>
-                                    <Icon sx={{fontSize: 16, color: 'primary.main'}}>check</Icon>
                                 </IconButton>
                             </FavoriteItem>
                         ))}

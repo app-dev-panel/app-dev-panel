@@ -27,13 +27,11 @@ src/
 │   ├── AliasPathResolver.php            # PathResolverInterface via Yii Aliases
 │   └── YiiApiMiddleware.php             # PSR-15 middleware bridging to ApiApplication
 ├── Collector/
-│   ├── Db/                              # Database query interception
-│   │   ├── DatabaseCollector.php
+│   ├── Db/                              # Database query interception (uses core DatabaseCollector)
 │   │   ├── CommandInterfaceProxy.php
 │   │   ├── ConnectionInterfaceProxy.php
 │   │   └── TransactionInterfaceDecorator.php
-│   ├── Mailer/
-│   │   ├── MailerCollector.php
+│   ├── Mailer/                          # Mail interception (uses core MailerCollector)
 │   │   └── MailerInterfaceProxy.php
 │   ├── Middleware/
 │   │   └── MiddlewareCollector.php
@@ -154,7 +152,7 @@ DebugHeaders → ErrorCatcher → YiiApiMiddleware → SessionMiddleware → Csr
 
 ## Creating a New Adapter
 
-To integrate ADP with another framework (e.g., Symfony), follow this adapter's pattern:
+To integrate ADP with another framework (e.g., Laravel), follow this adapter's pattern:
 
 1. **DI integration**: Register Kernel proxies as service decorators
 2. **Event mapping**: Map framework events to `Debugger::startup()`/`shutdown()`

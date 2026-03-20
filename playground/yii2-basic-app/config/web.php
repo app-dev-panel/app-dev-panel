@@ -44,6 +44,8 @@ return [
                 'GET /test/fixtures/logs-heavy' => 'test-fixtures/logs-heavy',
                 'GET /test/fixtures/http-client' => 'test-fixtures/http-client',
                 'GET /test/fixtures/filesystem' => 'test-fixtures/filesystem',
+                'GET /test/fixtures/database' => 'test-fixtures/database',
+                'GET /test/fixtures/mailer' => 'test-fixtures/mailer',
                 '/test/fixtures/reset' => 'test-fixtures/reset',
                 '/test/fixtures/reset-cli' => 'test-fixtures/reset-cli',
             ],
@@ -82,6 +84,7 @@ return [
                 'http_stream' => true,
                 'command' => true,
                 'db' => true,
+                'mailer' => true,
             ],
             'ignoredRequests' => [
                 '/debug/api/*',

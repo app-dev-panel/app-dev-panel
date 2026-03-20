@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
-use AppDevPanel\Adapter\Yii2\Collector\DbCollector;
-use AppDevPanel\Adapter\Yii2\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
@@ -103,7 +103,7 @@ final class ApiEndpointTest extends TestCase
         $this->assertContains(RequestCollector::class, $collectorIds);
         $this->assertContains(LogCollector::class, $collectorIds);
         $this->assertContains(ExceptionCollector::class, $collectorIds);
-        $this->assertContains(DbCollector::class, $collectorIds);
+        $this->assertContains(DatabaseCollector::class, $collectorIds);
         $this->assertContains(MailerCollector::class, $collectorIds);
 
         // Yii2LogCollector class is deleted — only the global LogCollector is used
@@ -133,7 +133,7 @@ final class ApiEndpointTest extends TestCase
         // Should contain data keyed by collector FQCN
         $this->assertArrayHasKey(RequestCollector::class, $envelope['data']);
         $this->assertArrayHasKey(LogCollector::class, $envelope['data']);
-        $this->assertArrayHasKey(DbCollector::class, $envelope['data']);
+        $this->assertArrayHasKey(DatabaseCollector::class, $envelope['data']);
     }
 
     public function testViewRequestCollectorReturnsRequestDetails(): void
@@ -197,32 +197,33 @@ final class ApiEndpointTest extends TestCase
         $debugger->startup(StartupContext::forRequest($psrRequest));
         $debugId = $debugger->getId();
 
-        /** @var DbCollector $dbCollector */
-        $dbCollector = $module->getCollector(DbCollector::class);
-        $dbCollector->logConnection();
-        $dbCollector->beginQuery();
-        $dbCollector->logQuery('SELECT * FROM users WHERE active = ?', [1], 5);
-        $dbCollector->beginQuery();
-        $dbCollector->logQuery('SELECT COUNT(*) FROM users', [], 1);
+        /** @var DatabaseCollector $dbCollector */
+        $dbCollector = $module->getCollector(DatabaseCollector::class);
+        $startTime = microtime(true);
+        $dbCollector->logQuery('SELECT * FROM users WHERE active = ?', 'SELECT * FROM users WHERE active = ?', [1], '', $startTime, microtime(true), 5);
+        $startTime = microtime(true);
+        $dbCollector->logQuery('SELECT COUNT(*) FROM users', 'SELECT COUNT(*) FROM users', [], '', $startTime, microtime(true), 1);
 
         $debugger->shutdown();
 
         $envelope = $this->decodeEnvelope($this->apiGet(
-            "/debug/api/view/{$debugId}?collector=" . urlencode(DbCollector::class),
+            "/debug/api/view/{$debugId}?collector=" . urlencode(DatabaseCollector::class),
         ));
         $this->assertTrue($envelope['success']);
 
         $data = $envelope['data'];
-        $this->assertSame(2, $data['queryCount']);
-        $this->assertSame(1, $data['connectionCount']);
-        $this->assertGreaterThanOrEqual(0, $data['totalTime']);
+        $this->assertArrayHasKey('queries', $data);
+        $this->assertArrayHasKey('transactions', $data);
 
         $queries = $data['queries'];
         $this->assertCount(2, $queries);
         $this->assertStringContainsString('SELECT * FROM users', $queries[0]['sql']);
-        $this->assertSame('SELECT', $queries[0]['type']);
-        $this->assertSame(5, $queries[0]['rowCount']);
-        $this->assertGreaterThan(0, $queries[0]['time']);
+        $this->assertSame($queries[0]['sql'], $queries[0]['rawSql']);
+        $this->assertSame('success', $queries[0]['status']);
+        $this->assertSame(5, $queries[0]['rowsNumber']);
+        $this->assertCount(2, $queries[0]['actions']);
+        $this->assertSame('query.start', $queries[0]['actions'][0]['action']);
+        $this->assertSame('query.end', $queries[0]['actions'][1]['action']);
 
         $this->assertStringContainsString('SELECT COUNT', $queries[1]['sql']);
     }
@@ -265,7 +266,20 @@ final class ApiEndpointTest extends TestCase
 
         /** @var MailerCollector $mailerCollector */
         $mailerCollector = $module->getCollector(MailerCollector::class);
-        $mailerCollector->logMessage('noreply@example.com', ['user@example.com'], [], [], 'Welcome!', true);
+
+        $mailerCollector->collectMessage([
+            'from' => ['noreply@example.com' => 'No Reply'],
+            'to' => ['user@example.com' => 'User'],
+            'cc' => [],
+            'bcc' => [],
+            'replyTo' => [],
+            'subject' => 'Welcome!',
+            'textBody' => null,
+            'htmlBody' => null,
+            'raw' => '',
+            'charset' => 'utf-8',
+            'date' => date('r'),
+        ]);
 
         $debugger->shutdown();
 
@@ -275,11 +289,9 @@ final class ApiEndpointTest extends TestCase
         $this->assertTrue($envelope['success']);
 
         $data = $envelope['data'];
-        $this->assertSame(1, $data['messageCount']);
         $this->assertCount(1, $data['messages']);
         $this->assertSame('Welcome!', $data['messages'][0]['subject']);
-        $this->assertSame(['noreply@example.com'], $data['messages'][0]['from']);
-        $this->assertTrue($data['messages'][0]['isSuccessful']);
+        $this->assertSame(['noreply@example.com' => 'No Reply'], $data['messages'][0]['from']);
     }
 
     // -----------------------------------------------------------------------
@@ -300,10 +312,10 @@ final class ApiEndpointTest extends TestCase
         $logCollector->collect('info', 'msg1', [], '');
         $logCollector->collect('info', 'msg2', [], '');
 
-        /** @var DbCollector $dbCollector */
-        $dbCollector = $module->getCollector(DbCollector::class);
-        $dbCollector->beginQuery();
-        $dbCollector->logQuery('SELECT 1', [], 1);
+        /** @var DatabaseCollector $dbCollector */
+        $dbCollector = $module->getCollector(DatabaseCollector::class);
+        $startTime = microtime(true);
+        $dbCollector->logQuery('SELECT 1', 'SELECT 1', [], '', $startTime, microtime(true), 1);
 
         $debugger->shutdown();
 
@@ -319,7 +331,7 @@ final class ApiEndpointTest extends TestCase
 
         // DB summary
         $this->assertArrayHasKey('db', $summary);
-        $this->assertSame(1, $summary['db']['queryCount']);
+        $this->assertSame(1, $summary['db']['queries']['total']);
     }
 
     // -----------------------------------------------------------------------

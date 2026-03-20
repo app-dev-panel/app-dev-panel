@@ -65,20 +65,27 @@ Provided by `app-dev-panel/kernel`, reused by all adapters. The Symfony adapter 
 - **Fed by**: `ConsoleSubscriber` on all console events
 - **Data**: `{phpVersion, framework, startTime, memoryUsage}`
 
-## Symfony-Specific Collectors
-
-### DoctrineCollector
-- **ID**: `AppDevPanel\Adapter\Symfony\Collector\DoctrineCollector`
+### DatabaseCollector
+- **ID**: `AppDevPanel\Kernel\Collector\DatabaseCollector`
 - **Depends on**: `TimelineCollector`
 - **Fed by**: Doctrine DBAL middleware or SQL logger calling `logQuery()`
 - **Data**:
   ```
   {
-    queries: [{sql, params, types, executionTime, backtrace}],
-    totalTime, queryCount
+    queries: [{sql, rawSql, params, line, status, actions: [{action, time}], rowsNumber}],
+    transactions: [{id, position, status, line, level, actions}]
   }
   ```
-- **Summary**: `{doctrine: {queryCount, totalTime}}`
+- **Summary**: `{db: {queries: {error, total}, transactions: {error, total}}}`
+
+### MailerCollector
+- **ID**: `AppDevPanel\Kernel\Collector\MailerCollector`
+- **Depends on**: `TimelineCollector`
+- **Fed by**: Mailer MessageEvent listener normalizes Symfony Email objects and calls `collectMessage()`
+- **Data**: `{messages: [{from, to, cc, bcc, replyTo, subject, textBody, htmlBody, raw, charset, date}]}`
+- **Summary**: `{mailer: {total}}`
+
+## Symfony-Specific Collectors
 
 ### TwigCollector
 - **ID**: `AppDevPanel\Adapter\Symfony\Collector\TwigCollector`
@@ -105,12 +112,6 @@ Provided by `app-dev-panel/kernel`, reused by all adapters. The Symfony adapter 
 - **Fed by**: Decorated cache adapter calling `logCacheOperation()`
 - **Data**: `{operations: [{pool, operation, key, hit, duration}], hits, misses, totalOperations}`
 - **Summary**: `{cache: {hits, misses, totalOperations}}`
-
-### MailerCollector
-- **ID**: `AppDevPanel\Adapter\Symfony\Collector\MailerCollector`
-- **Fed by**: Mailer MessageEvent listener calling `logMessage()`
-- **Data**: `{messages: [{from, to, subject, transport}], messageCount}`
-- **Summary**: `{mailer: {messageCount}}`
 
 ### MessengerCollector
 - **ID**: `AppDevPanel\Adapter\Symfony\Collector\MessengerCollector`

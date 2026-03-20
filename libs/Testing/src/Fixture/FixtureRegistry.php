@@ -207,6 +207,23 @@ final class FixtureRegistry
                     Expectation::exists(),
                 ],
             ]),
+
+            // === Database ===
+            new Fixture(name: 'database:basic', endpoint: '/test/fixtures/database', expectations: [
+                'db' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryHasKey('queries'),
+                    Expectation::summaryGte('queries.total', 1),
+                ],
+            ]),
+
+            // === Mailer ===
+            new Fixture(name: 'mailer:basic', endpoint: '/test/fixtures/mailer', expectations: [
+                'mailer' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryGte('total', 1),
+                ],
+            ]),
         ];
     }
 }

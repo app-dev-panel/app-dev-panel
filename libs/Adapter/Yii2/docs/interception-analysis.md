@@ -32,9 +32,9 @@ Yii2 has its own systems that don't use PSR interfaces:
 | Yii2 API | Interception | Status |
 |---|---|---|
 | `Yii::getLogger()` | `DebugLogTarget extends yii\log\Target` → `LogCollector` | Done |
-| `yii\db\Command` | `EVENT_BEFORE/AFTER_EXECUTE` with `beginQuery()`/`logQuery()` | Done |
-| `yii\mail\BaseMailer` | `EVENT_AFTER_SEND` → `MailerCollector` | Done |
-| `yii\web\AssetBundle` | `View::EVENT_END_PAGE` → `AssetBundleCollector` | Done |
+| `yii\db\Command` | `DbProfilingTarget` → Kernel `DatabaseCollector::logQuery()` | Done |
+| `yii\mail\BaseMailer` | `EVENT_AFTER_SEND` → Kernel `MailerCollector::collectMessage()` | Done |
+| `yii\web\AssetBundle` | `View::EVENT_END_PAGE` → Kernel `AssetBundleCollector::collectBundles()` | Done |
 | `yii\base\Component::trigger()` | No single dispatch point; use behavior attachment | Future |
 
 ## Implementation Details
@@ -46,23 +46,22 @@ Yii2 has its own systems that don't use PSR interfaces:
 - Maps Yii levels to PSR-3: ERROR→error, WARNING→warning, INFO→info, TRACE→debug, PROFILE→debug
 - Feeds `LogCollector::collect()` per message in `export()`
 
-### 2. DbCollector (Timing + SQL analysis)
+### 2. DatabaseCollector (Kernel, fed by DbProfilingTarget)
 
-- `EVENT_BEFORE_EXECUTE` → `DbCollector::beginQuery()` starts `microtime(true)` timer
-- `EVENT_AFTER_EXECUTE` → `DbCollector::logQuery()` stops timer, calculates duration
-- Captures: SQL, params, row count, execution time, SQL type, caller backtrace
-- SQL type detection: SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, TRUNCATE, TRANSACTION, COMMIT, ROLLBACK, SHOW, EXPLAIN
+- `DbProfilingTarget` intercepts Yii log profiling messages for DB commands
+- Tracks query start times internally, calls `DatabaseCollector::logQuery()` on profile end
+- Captures: SQL, rawSql, params, line (backtrace), start/end times, row count
+- Output format: `{queries: [...], transactions: []}` (Kernel standard schema)
 
-### 3. MailerCollector
+### 3. MailerCollector (Kernel, fed by Module event hook)
 
-- `BaseMailer::EVENT_AFTER_SEND` → `MailerCollector::logMessage()`
-- Captures: from, to, cc, bcc, subject, isSuccessful
-- Address normalization: handles string, array, and null inputs
-- Summary: message count
+- `BaseMailer::EVENT_AFTER_SEND` → Module normalizes Yii2 `MessageInterface` → `MailerCollector::collectMessage()`
+- Captures: from, to, cc, bcc, replyTo, subject, textBody, htmlBody, raw, charset, date
+- Summary: total message count
 
-### 4. AssetBundleCollector (Web only)
+### 4. AssetBundleCollector (Kernel, fed by Module event hook)
 
-- `View::EVENT_END_PAGE` → reads `View::$assetBundles`
+- `View::EVENT_END_PAGE` → Module normalizes `View::$assetBundles` → `AssetBundleCollector::collectBundles()`
 - Captures: bundle class, sourcePath, basePath, baseUrl, CSS files, JS files, dependencies, options
 - Summary: bundle count
 

@@ -63,6 +63,29 @@ interface CollectorInterface
 - **Collects**: HTTP stream wrapper operations
 - **Data**: URL, method, response data
 
+#### DatabaseCollector
+- **Collects**: SQL queries and transactions
+- **Depends on**: `TimelineCollector`
+- **API**: `logQuery(string $sql, array $params, ...)`, `beginTransaction(...)`, `commitTransaction(...)`, `rollbackTransaction(...)`
+- **Data**: `{queries: [{sql, rawSql, params, line, status, actions, rowsNumber}], transactions: [{id, position, status, line, level, actions}]}`
+- **Summary**: `{db: {queries: {error, total}, transactions: {error, total}}}`
+- **Fed by**: Adapter hooks (Doctrine DBAL middleware, Yii DB profiling target, Yiisoft DB proxy)
+
+#### MailerCollector
+- **Collects**: Email messages sent by the application
+- **Depends on**: `TimelineCollector`
+- **API**: `collectMessage(array $message)` — accepts normalized message array with keys: from, to, cc, bcc, replyTo, subject, textBody, htmlBody, raw, charset, date
+- **Data**: `{messages: [{from, to, cc, bcc, replyTo, subject, textBody, htmlBody, raw, charset, date}]}`
+- **Summary**: `{mailer: {total}}`
+- **Fed by**: Adapter hooks (Symfony mailer event listener, Yii 2 BaseMailer event, Yiisoft MailerInterfaceProxy)
+
+#### AssetBundleCollector
+- **Collects**: Frontend asset bundles registered during page rendering
+- **API**: `collectBundles(array $bundles)` — accepts array of bundle data keyed by class name
+- **Data**: `{bundles: {className: {class, sourcePath, basePath, baseUrl, css, js, depends, options}}}`
+- **Summary**: `{assets: {bundleCount}}`
+- **Fed by**: Adapter hooks (Yii 2 View::EVENT_END_PAGE)
+
 ### Web-Specific Collectors
 
 #### RequestCollector

@@ -1,7 +1,11 @@
 import {NotificationSnackbar} from '@app-dev-panel/panel/Application/Component/NotificationSnackbar';
 
 import {useSelector} from '@app-dev-panel/panel/store';
-import {changeAutoLatest, changeThemeMode} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
+import {
+    changeAutoLatest,
+    changeShowInactiveCollectors,
+    changeThemeMode,
+} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
@@ -103,6 +107,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const [autoLatest, setAutoLatest] = useState<boolean>(false);
     const themeMode = useSelector((state) => state.application.themeMode) as string | undefined;
     const currentMode = themeMode || 'system';
+    const showInactiveCollectors = useSelector((state) => state.application.showInactiveCollectors) as boolean;
 
     // Fetch debug entries on mount
     useEffect(() => {
@@ -197,6 +202,13 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         });
     }, [dispatch]);
 
+    const handleShowInactiveCollectorsChange = useCallback(
+        (value: boolean) => {
+            dispatch(changeShowInactiveCollectors(value));
+        },
+        [dispatch],
+    );
+
     // TopBar debug info
     const topBarMethod = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.request?.method : undefined;
     const topBarPath = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.request?.path : undefined;
@@ -234,9 +246,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     badge: count,
                     badgeVariant: (isException ? 'error' : 'default') as 'error' | 'default',
                 };
-            });
+            })
+            .filter((c) => showInactiveCollectors || (c.badge != null && c.badge > 0));
         return [...overview, ...collectors, ...entriesList];
-    }, [debugEntry]);
+    }, [debugEntry, showInactiveCollectors]);
 
     // Build extra items for CommandPalette from current debug entry's collectors
     const paletteCollectorItems = useMemo(() => {
@@ -319,12 +332,14 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     status={topBarStatus}
                     duration={topBarDuration}
                     autoRefresh={autoLatest}
+                    showInactiveCollectors={showInactiveCollectors}
                     onPrevEntry={handlePrevEntry}
                     onNextEntry={handleNextEntry}
                     onEntryClick={handleEntryClick}
                     onSearchClick={handleSearchClick}
                     onThemeToggle={handleThemeToggle}
                     onAutoRefreshToggle={autoLatestHandler}
+                    onShowInactiveCollectorsChange={handleShowInactiveCollectorsChange}
                 />
                 <EntrySelector
                     anchorEl={entrySelectorAnchor}

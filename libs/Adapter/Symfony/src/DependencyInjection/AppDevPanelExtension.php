@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Collector\CacheCollector;
-use AppDevPanel\Adapter\Symfony\Collector\DoctrineCollector;
-use AppDevPanel\Adapter\Symfony\Collector\MailerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
 use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
 use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
@@ -49,6 +47,8 @@ use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
@@ -229,7 +229,7 @@ final class AppDevPanelExtension extends Extension
         // Symfony-specific collectors
         if ($collectors['doctrine']) {
             $container
-                ->register(DoctrineCollector::class, DoctrineCollector::class)
+                ->register(DatabaseCollector::class, DatabaseCollector::class)
                 ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
@@ -261,6 +261,7 @@ final class AppDevPanelExtension extends Extension
         if ($collectors['mailer']) {
             $container
                 ->register(MailerCollector::class, MailerCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yiisoft\Collector\Db;
 
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use Closure;
 use Yiisoft\Db\Command\CommandInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yiisoft\Collector\Db;
 
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use Yiisoft\Db\Transaction\TransactionInterface;
 
 final class TransactionInterfaceDecorator implements TransactionInterface

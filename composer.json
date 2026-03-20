@@ -46,6 +46,7 @@
   },
   "require-dev": {
     "carthage-software/mago": "^1.0",
+    "egulias/email-validator": "^4.0",
     "nyholm/psr7": "^1.8",
     "nyholm/psr7-server": "^1.1",
     "php-webdriver/webdriver": "^1.16",

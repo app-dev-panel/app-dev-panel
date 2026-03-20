@@ -18,36 +18,36 @@
 | `CommandCollector` | `command` | `{commands: [{name, input, exitCode}]}` |
 | `ConsoleAppInfoCollector` | `console-app-info` | `{startTime, endTime}` |
 
-## Yii 2-Specific Collectors
+### DatabaseCollector (Kernel)
 
-### DbCollector
+SQL queries via `DbProfilingTarget` feeding Kernel's `DatabaseCollector::logQuery()`.
 
-SQL queries via Yii 2 `yii\db\Command` events with accurate timing.
-
-**Fed by**: Paired `yii\db\Command::EVENT_BEFORE_EXECUTE` / `EVENT_AFTER_EXECUTE` event hooks
+**Fed by**: `DbProfilingTarget` (Yii log target intercepting DB profiling messages)
 
 **Data schema**:
 ```json
 {
     "queries": [
         {
-            "sql": "SELECT * FROM user WHERE id = 1",
-            "params": [],
-            "rowCount": 1,
-            "time": 0.003,
-            "type": "SELECT",
-            "backtrace": "/app/controllers/UserController.php:42"
+            "sql": "SELECT * FROM user WHERE id = ?",
+            "rawSql": "SELECT * FROM user WHERE id = 1",
+            "params": [1],
+            "line": "/app/controllers/UserController.php:42",
+            "status": "success",
+            "actions": [
+                {"action": "query.start", "time": 1710000000.123},
+                {"action": "query.end", "time": 1710000000.126}
+            ],
+            "rowsNumber": 1
         }
     ],
-    "queryCount": 15,
-    "connectionCount": 1,
-    "totalTime": 0.045
+    "transactions": []
 }
 ```
 
-**SQL types detected**: SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, TRUNCATE, TRANSACTION, COMMIT, ROLLBACK, SHOW, EXPLAIN, OTHER
+**Summary**: `{db: {queries: {error, total}, transactions: {error, total}}}`
 
-**Summary**: `{db: {queryCount: 15, totalTime: 45.0}}`
+## Yii 2-Specific Helpers
 
 ### DebugLogTarget
 
@@ -67,36 +67,40 @@ Yii log target feeding `LogCollector` in real-time as messages are flushed.
 
 **Integration**: Messages flow into `LogCollector` → `TimelineCollector`, visible alongside PSR-3 logs.
 
-### MailerCollector
+### MailerCollector (Kernel)
 
-Mail messages via `yii\mail\BaseMailer` events.
+Mail messages via Kernel's `MailerCollector::collectMessage()`.
 
-**Fed by**: `yii\mail\BaseMailer::EVENT_AFTER_SEND`
+**Fed by**: `yii\mail\BaseMailer::EVENT_AFTER_SEND` → normalized in `Module::registerMailerProfiling()`
 
 **Data schema**:
 ```json
 {
     "messages": [
         {
-            "from": ["sender@example.com"],
-            "to": ["recipient@example.com"],
-            "cc": [],
-            "bcc": [],
+            "from": {"sender@example.com": "Sender Name"},
+            "to": {"recipient@example.com": "Recipient"},
+            "cc": {},
+            "bcc": {},
+            "replyTo": {},
             "subject": "Welcome Email",
-            "isSuccessful": true
+            "textBody": "...",
+            "htmlBody": "...",
+            "raw": "",
+            "charset": "UTF-8",
+            "date": ""
         }
-    ],
-    "messageCount": 3
+    ]
 }
 ```
 
-**Summary**: `{mailer: {messageCount: 3}}`
+**Summary**: `{mailer: {total: 3}}`
 
-### AssetBundleCollector
+### AssetBundleCollector (Kernel)
 
-Asset bundles from `yii\web\View` (web requests only).
+Asset bundles via Kernel's `AssetBundleCollector::collectBundles()`.
 
-**Fed by**: `yii\web\View::EVENT_END_PAGE`
+**Fed by**: `yii\web\View::EVENT_END_PAGE` → normalized in `Module::registerAssetProfiling()`
 
 **Data schema**:
 ```json
@@ -112,8 +116,7 @@ Asset bundles from `yii\web\View` (web requests only).
             "depends": [],
             "options": {}
         }
-    },
-    "bundleCount": 5
+    }
 }
 ```
 

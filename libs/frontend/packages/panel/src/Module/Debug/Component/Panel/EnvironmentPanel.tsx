@@ -135,7 +135,7 @@ const PhpTab = ({php, os}: {php: PhpInfo; os: OsInfo}) => {
                 ))}
             </Box>
 
-            <SectionTitle>Loaded Extensions ({php.extensions?.length || 0})</SectionTitle>
+            <SectionTitle>{`Loaded Extensions (${php.extensions?.length || 0})`}</SectionTitle>
             <Box sx={{display: 'flex', gap: 0.5, flexWrap: 'wrap'}}>
                 {(php.extensions || []).map((ext) => (
                     <Chip key={ext} label={ext} size="small" variant="outlined" sx={{fontSize: '11px'}} />

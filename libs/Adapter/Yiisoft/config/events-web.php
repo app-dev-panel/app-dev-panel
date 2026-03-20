@@ -24,7 +24,6 @@ if (!isAppDevPanelEnabled($params)) {
 
 return [
     ApplicationStartup::class => [
-        static fn(ApplicationStartup $event, Debugger $debugger) => $debugger->startup(StartupContext::generic()),
         static fn(ApplicationStartup $event, WebAppInfoCollector $collector) => $collector->markApplicationStarted(),
     ],
     ApplicationShutdown::class => [

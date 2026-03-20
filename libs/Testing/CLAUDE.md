@@ -68,6 +68,8 @@ All playgrounds must implement these endpoints under `/test/fixtures/`:
 | `/test/fixtures/logs-heavy` | logs:heavy | LogCollector |
 | `/test/fixtures/http-client` | http-client:basic | HttpClientCollector |
 | `/test/fixtures/filesystem` | filesystem:basic | FilesystemStreamCollector |
+| `/test/fixtures/database` | database:basic | DatabaseCollector |
+| `/test/fixtures/mailer` | mailer:basic | MailerCollector |
 | `/test/fixtures/request-info` | web:app-info | WebAppInfoCollector |
 | `/test/fixtures/reset` | (setup) | Clears debug storage directly |
 | `/test/fixtures/reset-cli` | (setup) | Clears debug storage via `debug:reset` CLI command |

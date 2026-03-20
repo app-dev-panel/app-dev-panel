@@ -1,5 +1,6 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import ModuleLoader from '@app-dev-panel/panel/Application/Pages/RemoteComponent';
+import {AssetBundlePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/AssetBundlePanel';
 import {CachePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CachePanel';
 import {DatabasePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DatabasePanel';
 import {EnvironmentPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EnvironmentPanel';
@@ -9,11 +10,18 @@ import {FilesystemPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel
 import {HttpClientPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/HttpClientPanel';
 import {LogPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/LogPanel';
 import {MailerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MailerPanel';
+import {MessengerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MessengerPanel';
 import {MiddlewarePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MiddlewarePanel';
+import {QueuePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/QueuePanel';
 import {RequestPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RequestPanel';
+import {RouterPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RouterPanel';
+import {SecurityPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/SecurityPanel';
 import {ServicesPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ServicesPanel';
 import {TimelinePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelinePanel';
+import {TwigPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TwigPanel';
+import {ValidatorPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ValidatorPanel';
 import {VarDumperPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/VarDumperPanel';
+import {WebViewPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/WebViewPanel';
 import {DumpPage} from '@app-dev-panel/panel/Module/Debug/Pages/DumpPage';
 import {useSelector} from '@app-dev-panel/panel/store';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
@@ -38,12 +46,10 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
     const pages: {[name: string]: (data: any) => JSX.Element} = {
         [CollectorsMap.MailerCollector]: (data: any) => <MailerPanel data={data} />,
-        [CollectorsMap.Yii2MailerCollector]: (data: any) => <MailerPanel data={data} />,
         [CollectorsMap.ServiceCollector]: (data: any) => <ServicesPanel data={data} />,
         [CollectorsMap.TimelineCollector]: (data: any) => <TimelinePanel data={data} />,
         [CollectorsMap.LogCollector]: (data: any) => <LogPanel data={data} />,
         [CollectorsMap.DatabaseCollector]: (data: any) => <DatabasePanel data={data} />,
-        [CollectorsMap.Yii2DbCollector]: (data: any) => <DatabasePanel data={data} />,
         [CollectorsMap.FilesystemStreamCollector]: (data: any) => <FilesystemPanel data={data} />,
         [CollectorsMap.HttpClientCollector]: (data: any) => <HttpClientPanel data={data} />,
         [CollectorsMap.RequestCollector]: (data: any) => <RequestPanel data={data} />,
@@ -53,6 +59,14 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.VarDumperCollector]: (data: any) => <VarDumperPanel data={data} />,
         [CollectorsMap.CacheCollector]: (data: any) => <CachePanel data={data} />,
         [CollectorsMap.EnvironmentCollector]: (data: any) => <EnvironmentPanel data={data} />,
+        [CollectorsMap.TwigCollector]: (data: any) => <TwigPanel data={data} />,
+        [CollectorsMap.SecurityCollector]: (data: any) => <SecurityPanel data={data} />,
+        [CollectorsMap.MessengerCollector]: (data: any) => <MessengerPanel data={data} />,
+        [CollectorsMap.QueueCollector]: (data: any) => <QueuePanel data={data} />,
+        [CollectorsMap.RouterCollector]: (data: any) => <RouterPanel data={data} />,
+        [CollectorsMap.ValidatorCollector]: (data: any) => <ValidatorPanel data={data} />,
+        [CollectorsMap.WebViewCollector]: (data: any) => <WebViewPanel data={data} />,
+        [CollectorsMap.AssetBundleCollector]: (data: any) => <AssetBundlePanel data={data} />,
         default: (data: any) => {
             if (typeof data === 'object' && data.__isPanelRemote__) {
                 return (
