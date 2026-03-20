@@ -90,6 +90,6 @@ describe('componentTokens', () => {
     });
 
     it('has correct max width', () => {
-        expect(componentTokens.mainMaxWidth).toBe(1600);
+        expect(componentTokens.mainMaxWidth).toBe(1160);
     });
 });

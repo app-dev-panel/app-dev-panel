@@ -30,15 +30,15 @@ export const ConfigurationPage = () => {
                         <Tab value="container" label="Container" />
                     </TabList>
                 </Box>
-                <TabPanel value="container">
+                <TabPanel value="container" sx={{px: 0, py: 2}}>
                     <DataContextProvider>
                         <ContainerPage />
                     </DataContextProvider>
                 </TabPanel>
-                <TabPanel value="parameters">
+                <TabPanel value="parameters" sx={{px: 0, py: 2}}>
                     <Pages.ParametersPage />
                 </TabPanel>
-                <TabPanel value="definitions">
+                <TabPanel value="definitions" sx={{px: 0, py: 2}}>
                     <DataContextProvider>
                         <Pages.DefinitionsPage />
                     </DataContextProvider>

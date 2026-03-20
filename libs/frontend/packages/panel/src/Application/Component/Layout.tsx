@@ -86,7 +86,7 @@ const ContentArea = styled(Box)(({theme}) => ({
     borderRadius: componentTokens.contentPanel.borderRadius,
     backgroundColor: theme.palette.background.paper,
     border: `1px solid ${theme.palette.divider}`,
-    padding: theme.spacing(2.5, 3),
+    padding: theme.spacing(3.5, 4.5),
     overflowY: 'auto',
 }));
 

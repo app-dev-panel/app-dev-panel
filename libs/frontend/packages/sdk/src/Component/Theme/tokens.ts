@@ -103,5 +103,5 @@ export const componentTokens = {
     contentPanel: {borderRadius: primitives.radiusBase * 2},
     navItem: {height: 38, borderRadius: primitives.radiusBase, activeBarWidth: 3},
     mainGap: 16,
-    mainMaxWidth: 1600,
+    mainMaxWidth: 1160,
 } as const;
