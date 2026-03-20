@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\Tests\Integration;
 
 use AppDevPanel\Adapter\Symfony\AppDevPanelBundle;
-use AppDevPanel\Adapter\Symfony\Collector\CacheCollector;
-use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
-use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
+use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\MessageBusCollector;
+use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
@@ -99,11 +99,11 @@ final class BundleBootstrapTest extends TestCase
             CommandCollector::class,
             ConsoleAppInfoCollector::class,
             DatabaseCollector::class,
-            TwigCollector::class,
+            TemplateCollector::class,
             SecurityCollector::class,
             CacheCollector::class,
             MailerCollector::class,
-            MessengerCollector::class,
+            MessageBusCollector::class,
         ];
 
         foreach ($expectedCollectors as $class) {
@@ -244,11 +244,11 @@ final class BundleBootstrapTest extends TestCase
 
         // Disabled collectors should not exist
         $this->assertFalse($container->has(DatabaseCollector::class));
-        $this->assertFalse($container->has(TwigCollector::class));
+        $this->assertFalse($container->has(TemplateCollector::class));
         $this->assertFalse($container->has(SecurityCollector::class));
         $this->assertFalse($container->has(CacheCollector::class));
         $this->assertFalse($container->has(MailerCollector::class));
-        $this->assertFalse($container->has(MessengerCollector::class));
+        $this->assertFalse($container->has(MessageBusCollector::class));
 
         // Core collectors still available
         $this->assertInstanceOf(LogCollector::class, $container->get(LogCollector::class));

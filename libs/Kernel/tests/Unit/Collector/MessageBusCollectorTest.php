@@ -2,25 +2,23 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Symfony\Tests\Unit\Collector;
+namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
+use AppDevPanel\Kernel\Collector\MessageBusCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
 
-final class MessengerCollectorTest extends AbstractCollectorTestCase
+final class MessageBusCollectorTest extends AbstractCollectorTestCase
 {
     protected function getCollector(): CollectorInterface
     {
-        return new MessengerCollector(new TimelineCollector());
+        return new MessageBusCollector(new TimelineCollector());
     }
 
-    /**
-     * @param CollectorInterface|MessengerCollector $collector
-     */
     protected function collectTestData(CollectorInterface $collector): void
     {
+        assert($collector instanceof MessageBusCollector);
         $collector->logMessage(
             messageClass: 'App\\Message\\SendNotification',
             bus: 'messenger.bus.default',
@@ -64,8 +62,8 @@ final class MessengerCollectorTest extends AbstractCollectorTestCase
     {
         parent::checkSummaryData($data);
 
-        $this->assertArrayHasKey('messenger', $data);
-        $this->assertSame(2, $data['messenger']['messageCount']);
-        $this->assertSame(1, $data['messenger']['failedCount']);
+        $this->assertArrayHasKey('messageBus', $data);
+        $this->assertSame(2, $data['messageBus']['messageCount']);
+        $this->assertSame(1, $data['messageBus']['failedCount']);
     }
 }

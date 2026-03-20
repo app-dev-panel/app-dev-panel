@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Symfony\Tests\Unit\Collector;
+namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
+use AppDevPanel\Kernel\Collector\SecurityCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
 
 final class SecurityCollectorTest extends AbstractCollectorTestCase
@@ -15,11 +15,9 @@ final class SecurityCollectorTest extends AbstractCollectorTestCase
         return new SecurityCollector();
     }
 
-    /**
-     * @param CollectorInterface|SecurityCollector $collector
-     */
     protected function collectTestData(CollectorInterface $collector): void
     {
+        assert($collector instanceof SecurityCollector);
         $collector->collectUser('admin@example.com', ['ROLE_ADMIN', 'ROLE_USER'], true);
         $collector->collectFirewall('main');
         $collector->logAccessDecision('ROLE_ADMIN', 'App\\Entity\\User', 'ACCESS_GRANTED', [

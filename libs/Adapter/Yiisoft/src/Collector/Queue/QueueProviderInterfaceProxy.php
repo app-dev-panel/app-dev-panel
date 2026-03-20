@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yiisoft\Collector\Queue;
 
+use AppDevPanel\Kernel\Collector\QueueCollector;
 use BackedEnum;
 use Yiisoft\Queue\Provider\QueueProviderInterface;
 use Yiisoft\Queue\QueueInterface;

@@ -2,23 +2,15 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Symfony\Collector;
-
-use AppDevPanel\Kernel\Collector\CollectorTrait;
-use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
-use AppDevPanel\Kernel\Collector\TimelineCollector;
+namespace AppDevPanel\Kernel\Collector;
 
 /**
- * Collects Symfony Messenger data.
+ * Captures message bus / message queue dispatch data.
  *
- * Captures:
- * - Dispatched messages (class name, bus, transport)
- * - Handler execution results
- * - Failed messages with exception info
- *
- * Data is fed from Symfony Messenger middleware.
+ * Framework adapters call logMessage() with normalized data.
+ * Works with any message bus (Symfony Messenger, Laravel Queues, etc.).
  */
-final class MessengerCollector implements SummaryCollectorInterface
+final class MessageBusCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
 
@@ -75,14 +67,14 @@ final class MessengerCollector implements SummaryCollectorInterface
         }
 
         return [
-            'messenger' => [
+            'messageBus' => [
                 'messageCount' => count($this->messages),
                 'failedCount' => count(array_filter($this->messages, static fn(array $m) => $m['failed'])),
             ],
         ];
     }
 
-    private function reset(): void
+    protected function reset(): void
     {
         $this->messages = [];
     }

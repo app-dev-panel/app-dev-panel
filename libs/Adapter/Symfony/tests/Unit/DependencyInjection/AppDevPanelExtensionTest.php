@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\Tests\Unit\DependencyInjection;
 
-use AppDevPanel\Adapter\Symfony\Collector\CacheCollector;
-use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
-use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
+use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\MessageBusCollector;
+use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Adapter\Symfony\DependencyInjection\AppDevPanelExtension;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
@@ -70,11 +70,11 @@ final class AppDevPanelExtensionTest extends TestCase
             HttpClientCollector::class,
             VarDumperCollector::class,
             DatabaseCollector::class,
-            TwigCollector::class,
+            TemplateCollector::class,
             SecurityCollector::class,
             CacheCollector::class,
             MailerCollector::class,
-            MessengerCollector::class,
+            MessageBusCollector::class,
         ];
 
         foreach ($expectedCollectors as $collectorClass) {
@@ -115,10 +115,10 @@ final class AppDevPanelExtensionTest extends TestCase
         ], $container);
 
         $this->assertFalse($container->hasDefinition(DatabaseCollector::class));
-        $this->assertFalse($container->hasDefinition(TwigCollector::class));
+        $this->assertFalse($container->hasDefinition(TemplateCollector::class));
         $this->assertFalse($container->hasDefinition(SecurityCollector::class));
         $this->assertFalse($container->hasDefinition(MailerCollector::class));
-        $this->assertFalse($container->hasDefinition(MessengerCollector::class));
+        $this->assertFalse($container->hasDefinition(MessageBusCollector::class));
 
         // Core collectors still registered
         $this->assertTrue($container->hasDefinition(LogCollector::class));

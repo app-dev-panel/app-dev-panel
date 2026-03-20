@@ -23,16 +23,16 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
     [CollectorsMap.QueueCollector]: {label: 'Queue', icon: 'queue', weight: 14},
     [CollectorsMap.ValidatorCollector]: {label: 'Validator', icon: 'check_circle', weight: 16},
     [CollectorsMap.CacheCollector]: {label: 'Cache', icon: 'layers', weight: 15},
-    [CollectorsMap.TwigCollector]: {label: 'Twig', icon: 'code', weight: 15},
+    [CollectorsMap.TemplateCollector]: {label: 'Template', icon: 'code', weight: 15},
     [CollectorsMap.SecurityCollector]: {label: 'Security', icon: 'shield', weight: 15},
-    [CollectorsMap.MessengerCollector]: {label: 'Messenger', icon: 'send', weight: 15},
+    [CollectorsMap.MessageBusCollector]: {label: 'Message Bus', icon: 'send', weight: 15},
     [CollectorsMap.AssetBundleCollector]: {label: 'Assets', icon: 'web_asset', weight: 15},
 
     [CollectorsMap.EnvironmentCollector]: {label: 'Environment', icon: 'dns', weight: 0},
     [CollectorsMap.ConsoleAppInfoCollector]: {label: 'Console', icon: 'terminal', weight: 17},
     [CollectorsMap.WebAppInfoCollector]: {label: 'Web Info', icon: 'language', weight: 18},
     [CollectorsMap.CommandCollector]: {label: 'Command', icon: 'terminal', weight: 1},
-    [CollectorsMap.WebViewCollector]: {label: 'View', icon: 'visibility', weight: 20},
+    [CollectorsMap.ViewCollector]: {label: 'View', icon: 'visibility', weight: 20},
 };
 
 const defaultMeta: CollectorMeta = {label: 'Unknown', icon: 'extension', weight: 99};

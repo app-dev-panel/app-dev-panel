@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Symfony\Tests\Unit\Collector;
+namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use AppDevPanel\Adapter\Symfony\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
@@ -16,11 +16,9 @@ final class CacheCollectorTest extends AbstractCollectorTestCase
         return new CacheCollector(new TimelineCollector());
     }
 
-    /**
-     * @param CollectorInterface|CacheCollector $collector
-     */
     protected function collectTestData(CollectorInterface $collector): void
     {
+        assert($collector instanceof CacheCollector);
         $collector->logCacheOperation('app.cache', 'get', 'user.1', hit: true, duration: 0.001);
         $collector->logCacheOperation('app.cache', 'get', 'user.2', hit: false, duration: 0.002);
         $collector->logCacheOperation('app.cache', 'set', 'user.2', hit: false, duration: 0.003);

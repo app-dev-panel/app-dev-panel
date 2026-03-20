@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
-use AppDevPanel\Adapter\Symfony\Collector\CacheCollector;
-use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
-use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
+use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\MessageBusCollector;
+use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
@@ -237,7 +237,7 @@ final class AppDevPanelExtension extends Extension
 
         if ($collectors['twig']) {
             $container
-                ->register(TwigCollector::class, TwigCollector::class)
+                ->register(TemplateCollector::class, TemplateCollector::class)
                 ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
@@ -268,7 +268,7 @@ final class AppDevPanelExtension extends Extension
 
         if ($collectors['messenger']) {
             $container
-                ->register(MessengerCollector::class, MessengerCollector::class)
+                ->register(MessageBusCollector::class, MessageBusCollector::class)
                 ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
