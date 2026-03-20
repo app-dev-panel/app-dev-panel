@@ -3973,6 +3973,42 @@ message = "Assigning `mixed` type to a variable may lead to unexpected behavior.
 count = 1
 
 [[issues]]
+file = "libs/Testing/tests/E2E/InspectorApiTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/InspectorApiTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Testing/tests/E2E/InspectorApiTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Testing/tests/E2E/InspectorApiTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `nonnull`."
+count = 2
+
+[[issues]]
+file = "libs/Testing/tests/E2E/InspectorApiTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 9
+
+[[issues]]
+file = "libs/Testing/tests/E2E/InspectorApiTest.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
 file = "libs/Testing/tests/E2E/ScenarioTest.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
