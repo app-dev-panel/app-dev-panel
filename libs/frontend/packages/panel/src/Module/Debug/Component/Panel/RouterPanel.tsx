@@ -4,7 +4,7 @@ import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
-import {Box, Chip, type Theme, Typography} from '@mui/material';
+import {Box, Chip, Link, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useState} from 'react';
 
@@ -201,7 +201,19 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
             {routes && routes.length > 0 && (
                 <Box>
                     <SectionTitle
-                        action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter routes..." />}
+                        action={
+                            <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                                <Link
+                                    href="/inspector/routes"
+                                    underline="hover"
+                                    color="primary"
+                                    sx={{fontSize: '12px'}}
+                                >
+                                    Open in Inspector
+                                </Link>
+                                <FilterInput value={filter} onChange={setFilter} placeholder="Filter routes..." />
+                            </Box>
+                        }
                     >{`${filteredRoutes.length} routes`}</SectionTitle>
 
                     {filteredRoutes.map((route, index) => (
