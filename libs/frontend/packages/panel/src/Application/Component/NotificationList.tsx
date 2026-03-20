@@ -1,37 +1,48 @@
 import {useSelector} from '@app-dev-panel/panel/store';
-import {removeNotification} from '@app-dev-panel/sdk/Component/Notifications';
-import {Alert, AlertTitle, Button, List, ListItem, ListItemSecondaryAction} from '@mui/material';
-import Slide from '@mui/material/Slide';
+import {clearAll, removeById, selectNotifications} from '@app-dev-panel/sdk/Component/Notifications';
+import {Alert, AlertTitle, Box, Button, List, ListItem, ListItemSecondaryAction} from '@mui/material';
 import * as React from 'react';
 import {useDispatch} from 'react-redux';
 
-const TransitionUp = (props) => <Slide {...props} direction="up" />;
-
 export const NotificationList = React.memo(() => {
-    const notifications = useSelector((state) => state.notifications.notifications);
+    const notifications = useSelector(selectNotifications);
     const dispatch = useDispatch();
 
-    const handleCloseSnackbar = (notificationIndex: number) => (event: React.SyntheticEvent, reason?: string) => {
-        if (reason === 'clickaway') {
-            return;
-        }
+    const handleClear = React.useCallback(() => {
+        dispatch(clearAll());
+    }, [dispatch]);
 
-        dispatch(removeNotification(notificationIndex));
-    };
+    const handleRemove = React.useCallback(
+        (id: string) => {
+            dispatch(removeById(id));
+        },
+        [dispatch],
+    );
+
+    if (notifications.length === 0) {
+        return null;
+    }
 
     return (
         <List>
             <ListItem>
                 <ListItemSecondaryAction>
-                    <Button>Clear</Button>
+                    <Button onClick={handleClear}>Clear</Button>
                 </ListItemSecondaryAction>
             </ListItem>
-            {notifications.slice(5).map((notification, index) => (
-                <Alert key={notification.text + index} severity={notification.color} sx={{width: '100%'}}>
+            {notifications.map((notification) => (
+                <Alert
+                    key={notification.id}
+                    severity={notification.color}
+                    sx={{width: '100%', mb: 0.5}}
+                    onClose={() => handleRemove(notification.id)}
+                >
                     {notification.title && notification.title.length > 0 && (
                         <AlertTitle>{notification.title}</AlertTitle>
                     )}
-                    {notification.text}
+                    <Box component="span" sx={{wordBreak: 'break-word'}}>
+                        {notification.text}
+                    </Box>
                 </Alert>
             ))}
         </List>

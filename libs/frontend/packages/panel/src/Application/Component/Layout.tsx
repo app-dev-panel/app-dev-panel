@@ -1,3 +1,4 @@
+import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/NotificationCenter';
 import {NotificationSnackbar} from '@app-dev-panel/panel/Application/Component/NotificationSnackbar';
 
 import {useSelector} from '@app-dev-panel/panel/store';
@@ -13,6 +14,7 @@ import {CommandPalette} from '@app-dev-panel/sdk/Component/Layout/CommandPalette
 import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
 import {TopBar} from '@app-dev-panel/sdk/Component/Layout/TopBar';
 import {UnifiedSidebar} from '@app-dev-panel/sdk/Component/Layout/UnifiedSidebar';
+import {selectUnreadCount} from '@app-dev-panel/sdk/Component/Notifications';
 import {ScrollTopButton} from '@app-dev-panel/sdk/Component/ScrollTop';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {EventTypesEnum, useServerSentEvents} from '@app-dev-panel/sdk/Component/useServerSentEvents';
@@ -108,6 +110,14 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const themeMode = useSelector((state) => state.application.themeMode) as string | undefined;
     const currentMode = themeMode || 'system';
     const showInactiveCollectors = useSelector((state) => state.application.showInactiveCollectors) as boolean;
+    const notificationCount = useSelector(selectUnreadCount);
+
+    // Notification center popover
+    const [notificationAnchor, setNotificationAnchor] = useState<HTMLElement | null>(null);
+    const handleNotificationsClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
+        setNotificationAnchor((prev) => (prev ? null : e.currentTarget));
+    }, []);
+    const handleNotificationsClose = useCallback(() => setNotificationAnchor(null), []);
 
     // Fetch debug entries on mount
     useEffect(() => {
@@ -340,6 +350,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onThemeToggle={handleThemeToggle}
                     onAutoRefreshToggle={autoLatestHandler}
                     onShowInactiveCollectorsChange={handleShowInactiveCollectorsChange}
+                    notificationCount={notificationCount}
+                    onNotificationsClick={handleNotificationsClick}
                 />
                 <EntrySelector
                     anchorEl={entrySelectorAnchor}
@@ -349,6 +361,11 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     currentEntryId={debugEntry?.id}
                     onSelect={changeEntry}
                     onAllClick={() => navigate('/debug/list')}
+                />
+                <NotificationCenter
+                    anchorEl={notificationAnchor}
+                    open={Boolean(notificationAnchor)}
+                    onClose={handleNotificationsClose}
                 />
 
                 <MainArea>

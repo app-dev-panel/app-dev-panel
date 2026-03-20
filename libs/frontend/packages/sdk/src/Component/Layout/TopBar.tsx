@@ -2,6 +2,7 @@ import {RequestPill} from '@app-dev-panel/sdk/Component/Layout/RequestPill';
 import {SearchTrigger} from '@app-dev-panel/sdk/Component/Layout/SearchTrigger';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {
+    Badge,
     Box,
     Dialog,
     DialogContent,
@@ -27,6 +28,7 @@ type TopBarProps = {
     mode?: PaletteMode;
     autoRefresh?: boolean;
     showInactiveCollectors?: boolean;
+    notificationCount?: number;
     onPrevEntry?: () => void;
     onNextEntry?: () => void;
     onEntryClick?: (e: React.MouseEvent) => void;
@@ -34,6 +36,7 @@ type TopBarProps = {
     onThemeToggle?: () => void;
     onAutoRefreshToggle?: () => void;
     onShowInactiveCollectorsChange?: (value: boolean) => void;
+    onNotificationsClick?: (e: React.MouseEvent<HTMLElement>) => void;
 };
 
 const BarRoot = styled('header')(({theme}) => ({
@@ -95,6 +98,8 @@ export const TopBar = React.memo(
         onThemeToggle,
         onAutoRefreshToggle,
         onShowInactiveCollectorsChange,
+        notificationCount,
+        onNotificationsClick,
     }: TopBarProps) => {
         const theme = useTheme();
         const resolvedMode = mode ?? theme.palette.mode;
@@ -151,6 +156,16 @@ export const TopBar = React.memo(
                 <SearchTrigger onClick={onSearchClick} />
                 <IconButton size="small" onClick={onThemeToggle}>
                     <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
+                </IconButton>
+                <IconButton size="small" onClick={onNotificationsClick}>
+                    <Badge
+                        badgeContent={notificationCount}
+                        color="error"
+                        max={99}
+                        sx={{'& .MuiBadge-badge': {fontSize: 10, height: 16, minWidth: 16}}}
+                    >
+                        <Icon sx={{fontSize: 18}}>notifications</Icon>
+                    </Badge>
                 </IconButton>
                 <IconButton size="small" onClick={handleMenuOpen}>
                     <Icon sx={{fontSize: 18}}>more_vert</Icon>
