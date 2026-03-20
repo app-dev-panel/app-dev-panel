@@ -17,8 +17,25 @@ import {
     Typography,
     type PaletteMode,
 } from '@mui/material';
-import {styled, useTheme} from '@mui/material/styles';
-import React, {useCallback, useState} from 'react';
+import {keyframes, styled, useTheme} from '@mui/material/styles';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+
+const bellShake = keyframes`
+    0% { transform: rotate(0deg); }
+    15% { transform: rotate(14deg); }
+    30% { transform: rotate(-14deg); }
+    45% { transform: rotate(10deg); }
+    60% { transform: rotate(-8deg); }
+    75% { transform: rotate(4deg); }
+    90% { transform: rotate(-2deg); }
+    100% { transform: rotate(0deg); }
+`;
+
+const badgePulse = keyframes`
+    0% { transform: scale(1) translate(50%, -50%); }
+    40% { transform: scale(1.4) translate(50%, -50%); }
+    100% { transform: scale(1) translate(50%, -50%); }
+`;
 
 type TopBarProps = {
     method?: string;
@@ -118,6 +135,20 @@ export const TopBar = React.memo(
         }, []);
         const handleSettingsClose = useCallback(() => setSettingsOpen(false), []);
 
+        // Bell animation on count change
+        const [bellAnimating, setBellAnimating] = useState(false);
+        const prevCountRef = useRef(notificationCount ?? 0);
+        useEffect(() => {
+            const prev = prevCountRef.current;
+            const current = notificationCount ?? 0;
+            prevCountRef.current = current;
+            if (current > prev && current > 0) {
+                setBellAnimating(true);
+                const timer = setTimeout(() => setBellAnimating(false), 600);
+                return () => clearTimeout(timer);
+            }
+        }, [notificationCount]);
+
         return (
             <BarRoot>
                 <Logo>
@@ -162,9 +193,24 @@ export const TopBar = React.memo(
                         badgeContent={notificationCount}
                         color="error"
                         max={99}
-                        sx={{'& .MuiBadge-badge': {fontSize: 10, height: 16, minWidth: 16}}}
+                        sx={{
+                            '& .MuiBadge-badge': {
+                                fontSize: 10,
+                                height: 16,
+                                minWidth: 16,
+                                animation: bellAnimating ? `${badgePulse} 0.4s ease-out` : 'none',
+                            },
+                        }}
                     >
-                        <Icon sx={{fontSize: 18}}>notifications</Icon>
+                        <Icon
+                            sx={{
+                                fontSize: 18,
+                                animation: bellAnimating ? `${bellShake} 0.5s ease-in-out` : 'none',
+                                transformOrigin: 'top center',
+                            }}
+                        >
+                            notifications
+                        </Icon>
                     </Badge>
                 </IconButton>
                 <IconButton size="small" onClick={handleMenuOpen}>
