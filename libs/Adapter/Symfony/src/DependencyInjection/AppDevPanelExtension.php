@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
+use AppDevPanel\Adapter\Symfony\Collector\RouterDataExtractor;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
@@ -290,6 +291,14 @@ final class AppDevPanelExtension extends Extension
                 ->register(RouterCollector::class, RouterCollector::class)
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
+
+            $container
+                ->register(RouterDataExtractor::class, RouterDataExtractor::class)
+                ->setArguments([
+                    new Reference(RouterCollector::class),
+                    new Reference('router', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
+                ])
+                ->setPublic(false);
         }
     }
 
@@ -309,6 +318,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(ExceptionCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(VarDumperCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(EnvironmentCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+                new Reference(RouterDataExtractor::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
