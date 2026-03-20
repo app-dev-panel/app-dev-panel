@@ -3,7 +3,7 @@ import {useLazyGetParametersQuery} from '@app-dev-panel/panel/Module/Inspector/A
 import {useSelector} from '@app-dev-panel/panel/store';
 import {addFavoriteUrl, changeBaseUrl, removeFavoriteUrl} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction} from '@app-dev-panel/sdk/API/Debug/Context';
-import {DebugEntry, useGetDebugQuery, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {StatusCard} from '@app-dev-panel/sdk/Component/StatusCard';
@@ -167,29 +167,39 @@ export function IndexPage() {
     const dispatch = useDispatch();
     const theme = useTheme();
     const navigate = useNavigate();
-    const [debugQuery] = useLazyGetDebugQuery();
     const [inspectorQuery] = useLazyGetParametersQuery();
     const [giiQuery] = useLazyGetGeneratorsQuery();
     const baseUrl = useSelector((state) => state.application.baseUrl);
     const [url, setUrl] = useState<string>(String(baseUrl));
-    const initialStatus = {debug: 'loading' as const, inspector: 'loading' as const, gii: 'loading' as const};
-    const [status, setStatus] = useState<Record<string, 'connected' | 'disconnected' | 'loading'>>(initialStatus);
+    const [status, setStatus] = useState<Record<string, 'connected' | 'disconnected' | 'loading'>>({
+        debug: 'loading',
+        inspector: 'loading',
+        gii: 'loading',
+    });
     const favoriteUrls = useSelector((state) => state.application.favoriteUrls) as string[];
 
-    // Debug list state
+    // Debug list state — also drives debug status card (avoids race with Layout's resetApiState)
     const {
         data: entries,
         isLoading: debugLoading,
         isFetching: debugFetching,
+        isSuccess: debugSuccess,
+        isError: debugError,
         refetch: debugRefetch,
     } = useGetDebugQuery();
     const [filter, setFilter] = useState('');
 
+    // Derive debug status from the shared useGetDebugQuery hook (managed by Layout)
+    const debugStatus: 'connected' | 'disconnected' | 'loading' = debugFetching
+        ? 'loading'
+        : debugSuccess
+          ? 'connected'
+          : debugError
+            ? 'disconnected'
+            : 'loading';
+
     async function checkStatus() {
-        setStatus({debug: 'loading', inspector: 'loading', gii: 'loading'});
-        debugQuery()
-            .then((response) => setStatus((s) => ({...s, debug: response.isSuccess ? 'connected' : 'disconnected'})))
-            .catch(() => setStatus((s) => ({...s, debug: 'disconnected'})));
+        setStatus((s) => ({...s, inspector: 'loading', gii: 'loading'}));
         inspectorQuery()
             .then((response) =>
                 setStatus((s) => ({...s, inspector: response.isSuccess ? 'connected' : 'disconnected'})),
@@ -244,7 +254,13 @@ export function IndexPage() {
             <CurrentUrl>
                 <Icon sx={{fontSize: 18, color: 'text.disabled'}}>link</Icon>
                 <span style={{flex: 1}}>{String(defaultBackendUrl)}</span>
-                <IconButton size="small" onClick={() => checkStatus()}>
+                <IconButton
+                    size="small"
+                    onClick={() => {
+                        checkStatus();
+                        debugRefetch();
+                    }}
+                >
                     <Icon sx={{fontSize: 16}}>refresh</Icon>
                 </IconButton>
             </CurrentUrl>
@@ -254,7 +270,7 @@ export function IndexPage() {
                 <StatusCard
                     title="Debug"
                     icon="bug_report"
-                    status={status.debug}
+                    status={debugStatus}
                     onClick={() => handleChangeUrl(url)}
                 />
                 <StatusCard
