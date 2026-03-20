@@ -459,6 +459,14 @@ export const RoutesPage = () => {
                                   route.action.methodName,
                               )
                             : null;
+                        const firstClassMw =
+                            !route.action && route.middlewares?.length > 0
+                                ? route.middlewares.find(
+                                      (mw: any) => typeof mw === 'string' && mw.includes('\\') && !mw.includes(' '),
+                                  )
+                                : null;
+                        const firstClassMwShort =
+                            typeof firstClassMw === 'string' ? firstClassMw.split('\\').pop() : null;
 
                         return (
                             <Box key={route.id}>
@@ -487,6 +495,14 @@ export const RoutesPage = () => {
                                             onClick={(e) => e.stopPropagation()}
                                         >
                                             {actionShort}
+                                        </ActionInlineLink>
+                                    )}
+                                    {firstClassMwShort && (
+                                        <ActionInlineLink
+                                            href={`/inspector/files?class=${firstClassMw}`}
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            {firstClassMwShort}
                                         </ActionInlineLink>
                                     )}
                                     {route.name && <NameCell>{route.name}</NameCell>}
