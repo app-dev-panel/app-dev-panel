@@ -248,6 +248,26 @@ final class FixtureRegistry
                     Expectation::notEmpty(),
                 ],
             ]),
+
+            // === Cache ===
+            new Fixture(name: 'cache:basic', endpoint: '/test/fixtures/cache', expectations: [
+                'cache' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryHasKey('cache'),
+                    Expectation::summaryGte('cache.totalOperations', 3),
+                    Expectation::summaryGte('cache.hits', 1),
+                    Expectation::summaryGte('cache.misses', 1),
+                ],
+            ]),
+
+            // === Cache heavy — many operations, multiple pools ===
+            new Fixture(name: 'cache:heavy', endpoint: '/test/fixtures/cache-heavy', expectations: [
+                'cache' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryGte('cache.totalOperations', 100),
+                    Expectation::summaryGte('cache.hits', 1),
+                ],
+            ]),
         ];
     }
 }

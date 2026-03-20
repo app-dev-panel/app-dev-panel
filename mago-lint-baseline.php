@@ -925,6 +925,18 @@ message = "Class has a high kan defect score (1.9800000000000002)."
 count = 1
 
 [[issues]]
+file = "libs/Testing/tests/E2E/InspectorApiTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/Unit/Assertion/ExpectationEvaluatorTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
 file = "libs/Testing/tests/E2E/DebugApiTest.php"
 code = "prefer-early-continue"
 message = "Consider using early continue pattern to reduce nesting."

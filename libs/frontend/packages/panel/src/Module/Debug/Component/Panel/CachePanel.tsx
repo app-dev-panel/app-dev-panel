@@ -1,12 +1,13 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
+import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {Box, Chip, Icon, LinearProgress, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, LinearProgress, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
 
-type CacheOperation = {pool: string; operation: string; key: string; hit: boolean; duration: number};
+type CacheOperation = {pool: string; operation: string; key: string; hit: boolean; duration: number; value?: unknown};
 
 type CacheData = {operations: CacheOperation[]; hits: number; misses: number; totalOperations: number};
 
@@ -41,15 +42,19 @@ const SummaryLabel = styled(Typography)(({theme}) => ({
 
 const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 700, fontSize: '22px'});
 
-const OperationRow = styled(Box)(({theme}) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(1.5),
-    padding: theme.spacing(1, 1.5),
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    transition: 'background-color 0.1s ease',
-    '&:hover': {backgroundColor: theme.palette.action.hover},
-}));
+const OperationRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
+    ({theme, expanded}) => ({
+        display: 'flex',
+        alignItems: 'center',
+        gap: theme.spacing(1.5),
+        padding: theme.spacing(1, 1.5),
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        cursor: 'pointer',
+        transition: 'background-color 0.1s ease',
+        backgroundColor: expanded ? theme.palette.action.hover : 'transparent',
+        '&:hover': {backgroundColor: theme.palette.action.hover},
+    }),
+);
 
 const KeyCell = styled(Typography)({
     fontFamily: primitives.fontFamilyMono,
@@ -72,6 +77,12 @@ const PoolChip = styled(Chip)(({theme}) => ({
     fontSize: '10px',
     height: 20,
     borderRadius: theme.shape.borderRadius * 0.5,
+}));
+
+const ValueBox = styled(Box)(({theme}) => ({
+    padding: theme.spacing(1.5, 2, 1.5, 5.5),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.action.hover,
 }));
 
 // ---------------------------------------------------------------------------
@@ -182,6 +193,7 @@ export const CachePanel = ({data}: CachePanelProps) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
+    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
     if (!data || data.totalOperations === 0) {
         return (
@@ -270,53 +282,87 @@ export const CachePanel = ({data}: CachePanelProps) => {
             {filtered.map((op, index) => {
                 const isHit = op.operation === 'get' && op.hit;
                 const isMiss = op.operation === 'get' && !op.hit;
+                const hasValue = op.value !== null && op.value !== undefined;
+                const expanded = expandedIndex === index;
                 return (
-                    <OperationRow key={index}>
-                        <Tooltip title={op.operation} placement="top">
-                            <Icon sx={{fontSize: 16, color: 'text.disabled', flexShrink: 0}}>
-                                {operationIcon(op.operation)}
-                            </Icon>
-                        </Tooltip>
-                        <Chip
-                            label={op.operation.toUpperCase()}
-                            size="small"
-                            sx={{
-                                fontWeight: 600,
-                                fontSize: '10px',
-                                height: 20,
-                                minWidth: 50,
-                                borderRadius: 0.5,
-                                backgroundColor: isHit
-                                    ? theme.palette.success.light
-                                    : isMiss
-                                      ? theme.palette.warning.light
-                                      : theme.palette.action.hover,
-                                color: isHit
-                                    ? theme.palette.success.main
-                                    : isMiss
-                                      ? theme.palette.warning.main
-                                      : theme.palette.text.secondary,
-                            }}
-                        />
-                        {op.operation === 'get' && (
+                    <Box key={index}>
+                        <OperationRow
+                            expanded={expanded}
+                            onClick={() => hasValue && setExpandedIndex(expanded ? null : index)}
+                            sx={{cursor: hasValue ? 'pointer' : 'default'}}
+                        >
+                            <Tooltip title={op.operation} placement="top">
+                                <Icon sx={{fontSize: 16, color: 'text.disabled', flexShrink: 0}}>
+                                    {operationIcon(op.operation)}
+                                </Icon>
+                            </Tooltip>
                             <Chip
-                                label={op.hit ? 'HIT' : 'MISS'}
+                                label={op.operation.toUpperCase()}
                                 size="small"
                                 sx={{
-                                    fontWeight: 700,
-                                    fontSize: '9px',
-                                    height: 18,
-                                    minWidth: 40,
+                                    fontWeight: 600,
+                                    fontSize: '10px',
+                                    height: 20,
+                                    minWidth: 50,
                                     borderRadius: 0.5,
-                                    backgroundColor: op.hit ? theme.palette.success.main : theme.palette.warning.main,
-                                    color: 'common.white',
+                                    backgroundColor: isHit
+                                        ? theme.palette.success.light
+                                        : isMiss
+                                          ? theme.palette.warning.light
+                                          : theme.palette.action.hover,
+                                    color: isHit
+                                        ? theme.palette.success.main
+                                        : isMiss
+                                          ? theme.palette.warning.main
+                                          : theme.palette.text.secondary,
                                 }}
                             />
+                            {op.operation === 'get' && (
+                                <Chip
+                                    label={op.hit ? 'HIT' : 'MISS'}
+                                    size="small"
+                                    sx={{
+                                        fontWeight: 700,
+                                        fontSize: '9px',
+                                        height: 18,
+                                        minWidth: 40,
+                                        borderRadius: 0.5,
+                                        backgroundColor: op.hit
+                                            ? theme.palette.success.main
+                                            : theme.palette.warning.main,
+                                        color: 'common.white',
+                                    }}
+                                />
+                            )}
+                            <PoolChip label={op.pool} size="small" variant="outlined" />
+                            <KeyCell sx={{color: 'text.primary'}}>{op.key}</KeyCell>
+                            <DurationCell sx={{color: 'text.disabled'}}>{formatDuration(op.duration)}</DurationCell>
+                            {hasValue && (
+                                <Icon sx={{fontSize: 16, color: 'text.disabled', flexShrink: 0}}>
+                                    {expanded ? 'expand_less' : 'expand_more'}
+                                </Icon>
+                            )}
+                        </OperationRow>
+                        {hasValue && (
+                            <Collapse in={expanded}>
+                                <ValueBox>
+                                    <Typography
+                                        sx={{
+                                            fontSize: '11px',
+                                            fontWeight: 600,
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.5px',
+                                            color: 'text.disabled',
+                                            mb: 0.5,
+                                        }}
+                                    >
+                                        Value
+                                    </Typography>
+                                    <JsonRenderer value={op.value} depth={3} />
+                                </ValueBox>
+                            </Collapse>
                         )}
-                        <PoolChip label={op.pool} size="small" variant="outlined" />
-                        <KeyCell sx={{color: 'text.primary'}}>{op.key}</KeyCell>
-                        <DurationCell sx={{color: 'text.disabled'}}>{formatDuration(op.duration)}</DurationCell>
-                    </OperationRow>
+                    </Box>
                 );
             })}
         </Box>

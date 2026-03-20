@@ -19,9 +19,13 @@ final class CacheCollectorTest extends AbstractCollectorTestCase
     protected function collectTestData(CollectorInterface $collector): void
     {
         assert($collector instanceof CacheCollector);
-        $collector->logCacheOperation('app.cache', 'get', 'user.1', hit: true, duration: 0.001);
+        $collector->logCacheOperation('app.cache', 'get', 'user.1', hit: true, duration: 0.001, value: [
+            'name' => 'Alice',
+        ]);
         $collector->logCacheOperation('app.cache', 'get', 'user.2', hit: false, duration: 0.002);
-        $collector->logCacheOperation('app.cache', 'set', 'user.2', hit: false, duration: 0.003);
+        $collector->logCacheOperation('app.cache', 'set', 'user.2', hit: false, duration: 0.003, value: [
+            'name' => 'Bob',
+        ]);
     }
 
     protected function checkCollectedData(array $data): void
@@ -38,6 +42,10 @@ final class CacheCollectorTest extends AbstractCollectorTestCase
         $this->assertSame('get', $op['operation']);
         $this->assertSame('user.1', $op['key']);
         $this->assertTrue($op['hit']);
+        $this->assertSame(['name' => 'Alice'], $op['value']);
+
+        $this->assertNull($data['operations'][1]['value']);
+        $this->assertSame(['name' => 'Bob'], $data['operations'][2]['value']);
     }
 
     protected function checkSummaryData(array $data): void
