@@ -24,7 +24,7 @@ import {
 } from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
-import {useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -128,15 +128,17 @@ const NameCell = styled(Typography)(({theme}) => ({
     whiteSpace: 'nowrap',
 }));
 
-const ActionInlineCell = styled(Typography)(({theme}) => ({
+const ActionInlineLink = styled('a')(({theme}) => ({
     fontFamily: primitives.fontFamilyMono,
     fontSize: '11px',
-    color: theme.palette.text.secondary,
+    color: theme.palette.primary.main,
+    textDecoration: 'none',
     flexShrink: 0,
     maxWidth: 300,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    '&:hover': {textDecoration: 'underline'},
 }));
 
 const DetailBox = styled(Box)(({theme}) => ({
@@ -176,7 +178,17 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                     </Typography>
                     <Box sx={{mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5}}>
                         <Typography
-                            sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', wordBreak: 'break-all'}}
+                            component="a"
+                            href={`/inspector/files?class=${route.action![0]}&method=${route.action![1]}`}
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                            sx={{
+                                fontFamily: primitives.fontFamilyMono,
+                                fontSize: '12px',
+                                wordBreak: 'break-all',
+                                color: 'primary.main',
+                                textDecoration: 'none',
+                                '&:hover': {textDecoration: 'underline'},
+                            }}
                         >
                             {actionFull}
                         </Typography>
@@ -213,23 +225,39 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                         Middlewares ({route.middlewares.length})
                     </Typography>
                     <Box sx={{mt: 0.5}}>
-                        {route.middlewares.map((mw, i) => (
-                            <Typography
-                                key={i}
-                                sx={{
-                                    fontFamily: primitives.fontFamilyMono,
-                                    fontSize: '12px',
-                                    color: 'text.secondary',
-                                    py: 0.25,
-                                }}
-                            >
-                                {isClassCallable(mw)
-                                    ? serializeCallable(mw)
-                                    : typeof mw === 'string'
-                                      ? mw
-                                      : JSON.stringify(mw)}
-                            </Typography>
-                        ))}
+                        {route.middlewares.map((mw, i) =>
+                            isClassCallable(mw) ? (
+                                <Typography
+                                    key={i}
+                                    component="a"
+                                    href={`/inspector/files?class=${mw[0]}&method=${mw[1]}`}
+                                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                    sx={{
+                                        display: 'block',
+                                        fontFamily: primitives.fontFamilyMono,
+                                        fontSize: '12px',
+                                        color: 'primary.main',
+                                        textDecoration: 'none',
+                                        py: 0.25,
+                                        '&:hover': {textDecoration: 'underline'},
+                                    }}
+                                >
+                                    {serializeCallable(mw)}
+                                </Typography>
+                            ) : (
+                                <Typography
+                                    key={i}
+                                    sx={{
+                                        fontFamily: primitives.fontFamilyMono,
+                                        fontSize: '12px',
+                                        color: 'text.secondary',
+                                        py: 0.25,
+                                    }}
+                                >
+                                    {typeof mw === 'string' ? mw : JSON.stringify(mw)}
+                                </Typography>
+                            ),
+                        )}
                     </Box>
                 </Box>
             )}
@@ -426,7 +454,14 @@ export const RoutesPage = () => {
                                         }}
                                     />
                                     <PatternCell>{route.pattern}</PatternCell>
-                                    {actionShort && <ActionInlineCell>{actionShort}</ActionInlineCell>}
+                                    {actionShort && route.action && (
+                                        <ActionInlineLink
+                                            href={`/inspector/files?class=${route.action[0]}&method=${route.action[1]}`}
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            {actionShort}
+                                        </ActionInlineLink>
+                                    )}
                                     {route.name && <NameCell>{route.name}</NameCell>}
                                     {hasDetails && (
                                         <IconButton size="small" sx={{flexShrink: 0}}>
