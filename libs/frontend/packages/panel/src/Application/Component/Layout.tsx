@@ -118,10 +118,11 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     }, []);
     const handleNotificationsClose = useCallback(() => setNotificationAnchor(null), []);
 
-    // Fetch debug entries on mount
+    // Fetch debug entries on mount and when backend URL changes
     useEffect(() => {
+        dispatch(changeEntryAction(null));
         getDebugQuery();
-    }, [getDebugQuery]);
+    }, [getDebugQuery, backendUrl, dispatch]);
 
     useEffect(() => {
         setAutoLatest(autoLatestState);

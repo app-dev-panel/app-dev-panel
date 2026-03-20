@@ -14,25 +14,19 @@ export const useServerSentEvents = (
     onMessage: (event: MessageEvent<EventTypes>) => void,
     subscribe = true,
 ) => {
-    const prevOnMessage = useRef(onMessage);
-    const ServerSentEventsObserverRef = useRef(createServerSentEventsObserver(backendUrl));
+    const onMessageRef = useRef(onMessage);
+    onMessageRef.current = onMessage;
 
     useEffect(() => {
-        if (prevOnMessage.current) {
-            ServerSentEventsObserverRef.current.unsubscribe(prevOnMessage.current);
-        }
-        if (!subscribe) {
-            return () => {
-                ServerSentEventsObserverRef.current.unsubscribe(onMessage);
-            };
-        }
+        if (!subscribe || !backendUrl) return;
 
-        ServerSentEventsObserverRef.current.subscribe(onMessage);
-        prevOnMessage.current = onMessage;
+        const observer = createServerSentEventsObserver(backendUrl);
+        const handler = (event: MessageEvent<EventTypes>) => onMessageRef.current(event);
+        observer.subscribe(handler);
 
         return () => {
-            ServerSentEventsObserverRef.current.unsubscribe(onMessage);
-            ServerSentEventsObserverRef.current.close();
+            observer.unsubscribe(handler);
+            observer.close();
         };
-    }, [onMessage, subscribe]);
+    }, [backendUrl, subscribe]);
 };
