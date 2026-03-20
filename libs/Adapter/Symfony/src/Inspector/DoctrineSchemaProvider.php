@@ -84,6 +84,11 @@ final class DoctrineSchemaProvider implements SchemaProviderInterface
         );
     }
 
+    public function executeQuery(string $sql, array $params = []): array
+    {
+        return $this->connection->fetchAllAssociative($sql, $params);
+    }
+
     private function isSqlite(): bool
     {
         return str_contains($this->connection->getDatabasePlatform()::class, 'SQLite');

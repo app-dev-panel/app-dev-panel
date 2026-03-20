@@ -119,4 +119,50 @@ final class DatabaseControllerTest extends ControllerTestCase
         $request = $request->withAttribute('name', 't');
         $controller->getTable($request);
     }
+
+    public function testQuery(): void
+    {
+        $rows = [
+            ['id' => 1, 'name' => 'Alice'],
+            ['id' => 2, 'name' => 'Bob'],
+        ];
+
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->expects($this->once())
+            ->method('executeQuery')
+            ->with('SELECT * FROM users', ['active' => 1])
+            ->willReturn($rows);
+
+        $controller = $this->createController($provider);
+        $response = $controller->query($this->post(['sql' => 'SELECT * FROM users', 'params' => ['active' => 1]]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertCount(2, $data);
+        $this->assertSame('Alice', $data[0]['name']);
+    }
+
+    public function testQueryEmptySqlReturns400(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->query($this->post(['sql' => '']));
+
+        $this->assertSame(400, $response->getStatusCode());
+    }
+
+    public function testQueryExceptionReturns500(): void
+    {
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->method('executeQuery')
+            ->willThrowException(new \RuntimeException('Connection refused'));
+
+        $controller = $this->createController($provider);
+        $response = $controller->query($this->post(['sql' => 'SELECT 1']));
+
+        $this->assertSame(500, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertSame('Connection refused', $data['error']);
+    }
 }

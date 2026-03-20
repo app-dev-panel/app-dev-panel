@@ -115,6 +115,16 @@ final class Yii2DbSchemaProvider implements SchemaProviderInterface
         ];
     }
 
+    public function executeQuery(string $sql, array $params = []): array
+    {
+        $command = $this->connection->createCommand($sql);
+        if ($params !== []) {
+            $command->bindValues($params);
+        }
+
+        return $command->queryAll();
+    }
+
     public function explainQuery(string $sql, array $params = [], bool $analyze = false): array
     {
         $driverName = $this->connection->getDriverName();
