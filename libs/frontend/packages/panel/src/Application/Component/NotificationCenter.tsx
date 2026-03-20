@@ -179,8 +179,14 @@ export const NotificationCenter = React.memo(({anchorEl, open, onClose}: Notific
                         maxHeight: 520,
                         display: 'flex',
                         flexDirection: 'column',
-                        borderRadius: 2,
                         mt: 0.5,
+                        borderRadius: 1.5,
+                        border: 1,
+                        borderColor: 'divider',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
+                        backdropFilter: 'blur(12px)',
+                        backgroundColor: (t) =>
+                            t.palette.mode === 'dark' ? 'rgba(30, 41, 59, 0.92)' : 'rgba(255, 255, 255, 0.92)',
                     },
                 },
             }}
