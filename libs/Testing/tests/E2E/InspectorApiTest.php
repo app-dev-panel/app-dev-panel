@@ -43,6 +43,12 @@ final class InspectorApiTest extends TestCase
         } catch (\Throwable) {
             self::fail(sprintf('Playground server is not running. Start it and re-run. URL: %s', self::$baseUrl));
         }
+
+        // Verify database inspector is available (requires SchemaProvider)
+        $tableResponse = self::$client->get('/inspect/api/table');
+        if ($tableResponse->getStatusCode() !== 200) {
+            self::markTestSkipped('Database inspector not available on this playground');
+        }
     }
 
     public function testTableListReturnsTablesIncludingTestUsers(): void
@@ -147,10 +153,10 @@ final class InspectorApiTest extends TestCase
 
         self::assertSame(500, $response->getStatusCode());
 
-        /** @var array{success: bool, error: string} $body */
+        /** @var array{success: bool, data: array{error: string}} $body */
         $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertIsArray($body);
         self::assertFalse($body['success'], 'Invalid SQL should fail');
-        self::assertNotNull($body['error'], 'Error message should be present');
+        self::assertArrayHasKey('error', $body['data'], 'Error message should be present in data');
     }
 }

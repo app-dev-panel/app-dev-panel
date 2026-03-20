@@ -1,9 +1,9 @@
 export class Queue {
-    private queue: Function[] = [];
+    private queue: (() => void)[] = [];
 
     constructor(private state: 'initialized' | 'ready' = 'initialized') {}
 
-    public next(callback: Function) {
+    public next(callback: () => void) {
         if (this.state === 'ready') {
             callback();
         } else {
