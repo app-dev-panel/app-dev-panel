@@ -46,9 +46,21 @@ describe('getCollectedCountByCollector', () => {
         expect(getCollectedCountByCollector(CollectorsMap.MailerCollector, entry)).toBe(2);
     });
 
+    it('returns 0 for mailer when total is 0', () => {
+        const entry = makeEntry({mailer: {total: 0}});
+        expect(getCollectedCountByCollector(CollectorsMap.MailerCollector, entry)).toBe(0);
+    });
+
     it('returns undefined for mailer when no mailer data', () => {
         const entry = makeEntry();
         expect(getCollectedCountByCollector(CollectorsMap.MailerCollector, entry)).toBeUndefined();
+    });
+
+    it('does not return NaN for mailer with empty object', () => {
+        const entry = makeEntry({mailer: {}});
+        const result = getCollectedCountByCollector(CollectorsMap.MailerCollector, entry);
+        expect(result).toBeUndefined();
+        expect(Number.isNaN(result)).toBe(false);
     });
 
     it('returns timeline count', () => {
