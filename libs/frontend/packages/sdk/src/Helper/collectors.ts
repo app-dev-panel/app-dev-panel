@@ -17,17 +17,12 @@ export enum CollectorsMap {
     DatabaseCollector = 'AppDevPanel\\Kernel\\Collector\\DatabaseCollector',
     MailerCollector = 'AppDevPanel\\Kernel\\Collector\\MailerCollector',
     AssetBundleCollector = 'AppDevPanel\\Kernel\\Collector\\AssetBundleCollector',
-
-    // Yiisoft adapter collectors
-    MiddlewareCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Middleware\\MiddlewareCollector',
-    QueueCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Queue\\QueueCollector',
-    ValidatorCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Validator\\ValidatorCollector',
-    WebViewCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\View\\WebViewCollector',
-    RouterCollector = 'AppDevPanel\\Adapter\\Yiisoft\\Collector\\Router\\RouterCollector',
-
-    // Symfony adapter collectors
-    CacheCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\CacheCollector',
-    TwigCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\TwigCollector',
-    SecurityCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\SecurityCollector',
-    MessengerCollector = 'AppDevPanel\\Adapter\\Symfony\\Collector\\MessengerCollector',
+    MiddlewareCollector = 'AppDevPanel\\Kernel\\Collector\\MiddlewareCollector',
+    QueueCollector = 'AppDevPanel\\Kernel\\Collector\\QueueCollector',
+    ValidatorCollector = 'AppDevPanel\\Kernel\\Collector\\ValidatorCollector',
+    ViewCollector = 'AppDevPanel\\Kernel\\Collector\\ViewCollector',
+    RouterCollector = 'AppDevPanel\\Kernel\\Collector\\RouterCollector',
+    CacheCollector = 'AppDevPanel\\Kernel\\Collector\\CacheCollector',
+    TemplateCollector = 'AppDevPanel\\Kernel\\Collector\\TemplateCollector',
+    SecurityCollector = 'AppDevPanel\\Kernel\\Collector\\SecurityCollector',
 }

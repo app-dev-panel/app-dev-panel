@@ -7,7 +7,7 @@ namespace AppDevPanel\Adapter\Yiisoft\Inspector;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Query\Query;
-use Yiisoft\Db\Schema\ColumnSchemaInterface;
+use Yiisoft\Db\Schema\Column\ColumnInterface;
 use Yiisoft\Db\Schema\TableSchemaInterface;
 
 class DbSchemaProvider implements SchemaProviderInterface
@@ -67,8 +67,37 @@ class DbSchemaProvider implements SchemaProviderInterface
         ];
     }
 
+    public function explainQuery(string $sql, array $params = [], bool $analyze = false): array
+    {
+        $prefix = $this->isSqlite() ? 'EXPLAIN QUERY PLAN ' : 'EXPLAIN ';
+        if ($analyze && !$this->isSqlite()) {
+            $prefix = 'EXPLAIN ANALYZE ';
+        }
+
+        $command = $this->db->createCommand($prefix . $sql);
+        if ($params !== []) {
+            // PDO positional params are 1-based, but JSON arrays are 0-based
+            if (array_is_list($params)) {
+                $reindexed = [];
+                foreach ($params as $i => $value) {
+                    $reindexed[$i + 1] = $value;
+                }
+                $command->bindValues($reindexed);
+            } else {
+                $command->bindValues($params);
+            }
+        }
+
+        return $command->queryAll();
+    }
+
+    private function isSqlite(): bool
+    {
+        return $this->db->getDriverName() === 'sqlite';
+    }
+
     /**
-     * @param ColumnSchemaInterface[] $columns
+     * @param ColumnInterface[] $columns
      */
     private function serializeARColumnsSchemas(array $columns): array
     {
@@ -81,7 +110,7 @@ class DbSchemaProvider implements SchemaProviderInterface
                 'dbType' => $columnSchema->getDbType(),
                 'defaultValue' => $columnSchema->getDefaultValue(),
                 'comment' => $columnSchema->getComment(),
-                'allowNull' => $columnSchema->isAllowNull(),
+                'allowNull' => !($columnSchema->isNotNull() ?? false),
             ];
         }
         return $result;

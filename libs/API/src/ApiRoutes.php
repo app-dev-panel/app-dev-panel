@@ -137,6 +137,12 @@ final class ApiRoutes
                 [DatabaseController::class, 'getTable'],
                 'inspect/api/getTable',
             ),
+            new Route(
+                'POST',
+                '/inspect/api/table/explain',
+                [DatabaseController::class, 'explain'],
+                'inspect/api/table/explain',
+            ),
             new Route('PUT', '/inspect/api/request', [RequestController::class, 'request'], 'inspect/api/request'),
             new Route(
                 'POST',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yiisoft\Collector\Router;
 
+use AppDevPanel\Kernel\Collector\RouterCollector;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\UrlMatcherInterface;
@@ -19,7 +20,7 @@ final class UrlMatcherInterfaceProxy implements UrlMatcherInterface
     {
         $timeStart = microtime(true);
         $result = $this->urlMatcher->match($request);
-        $this->routerCollector->collect(microtime(true) - $timeStart);
+        $this->routerCollector->collectMatchTime(microtime(true) - $timeStart);
 
         return $result;
     }

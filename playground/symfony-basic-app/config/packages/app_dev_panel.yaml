@@ -21,7 +21,9 @@ app_dev_panel:
         security: false       # Enable when symfony/security-bundle is installed
         cache: true
         mailer: true
-        messenger: false      # Enable when symfony/messenger is installed
+        messenger: true
+        validator: true
+        router: true
     ignored_requests:
         - '/_wdt/*'
         - '/_profiler/*'

@@ -23,9 +23,9 @@ final readonly class DatabaseAction implements RequestHandlerInterface
         // This tests the DatabaseCollector without requiring yiisoft/db infrastructure.
         $start = microtime(true);
         $this->databaseCollector->logQuery(
-            sql: 'SELECT * FROM test WHERE id = :id',
-            rawSql: 'SELECT * FROM test WHERE id = 1',
-            params: [':id' => 1],
+            sql: 'SELECT * FROM test_users WHERE id = :id',
+            rawSql: 'SELECT * FROM test_users WHERE id = 1',
+            params: ['id' => 1],
             line: __FILE__ . ':' . __LINE__,
             startTime: $start,
             endTime: microtime(true),

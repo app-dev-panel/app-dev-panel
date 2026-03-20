@@ -27,6 +27,9 @@ return [
             Route::get('/filesystem')->action(Web\TestFixtures\FilesystemAction::class)->name('test-filesystem'),
             Route::get('/database')->action(Web\TestFixtures\DatabaseAction::class)->name('test-database'),
             Route::get('/mailer')->action(Web\TestFixtures\MailerAction::class)->name('test-mailer'),
+            Route::get('/messenger')->action(Web\TestFixtures\MessengerAction::class)->name('test-messenger'),
+            Route::get('/validator')->action(Web\TestFixtures\ValidatorAction::class)->name('test-validator'),
+            Route::get('/router')->action(Web\TestFixtures\RouterAction::class)->name('test-router'),
             Route::methods(['GET', 'POST'], '/reset')
                 ->action(Web\TestFixtures\ResetAction::class)
                 ->name('test-reset'),

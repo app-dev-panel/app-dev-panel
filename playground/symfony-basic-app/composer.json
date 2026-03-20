@@ -6,6 +6,8 @@
     "require": {
         "php": "^8.4",
         "app-dev-panel/adapter-symfony": "*",
+        "doctrine/dbal": "^4.4",
+        "doctrine/doctrine-bundle": "^3.2",
         "nyholm/psr7": "^1.8",
         "nyholm/psr7-server": "^1.1",
         "symfony/console": "^7.0",

@@ -2,21 +2,13 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Symfony\Collector;
-
-use AppDevPanel\Kernel\Collector\CollectorTrait;
-use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
-use AppDevPanel\Kernel\Collector\TimelineCollector;
+namespace AppDevPanel\Kernel\Collector;
 
 /**
- * Collects Symfony Cache component data.
+ * Captures cache operations (get, set, delete) across any caching backend.
  *
- * Captures:
- * - Cache hits/misses per pool
- * - Cache operation timing
- * - Total reads, writes, deletes
- *
- * Data is fed via `logCacheOperation()`, called from a decorated cache adapter.
+ * Framework adapters call logCacheOperation() with normalized data.
+ * Tracks hit/miss rates per pool and operation timing.
  */
 final class CacheCollector implements SummaryCollectorInterface
 {
@@ -90,7 +82,7 @@ final class CacheCollector implements SummaryCollectorInterface
         ];
     }
 
-    private function reset(): void
+    protected function reset(): void
     {
         $this->operations = [];
         $this->hits = 0;

@@ -26,9 +26,9 @@ describe('DatabasePanel', () => {
         expect(screen.getByText(/No queries found/)).toBeInTheDocument();
     });
 
-    it('renders tabs when queries exist', () => {
+    it('renders query list when queries exist', () => {
         renderWithProviders(<DatabasePanel data={{queries: [makeQuery()]}} />);
-        expect(screen.getByText('queries')).toBeInTheDocument();
+        expect(screen.getByText(/1 queries/)).toBeInTheDocument();
     });
 
     it('renders SQL text', () => {
@@ -81,10 +81,15 @@ describe('DatabasePanel', () => {
         expect(screen.getByText('Raw SQL')).toBeInTheDocument();
     });
 
-    it('shows transactions tab as not supported', async () => {
+    it('shows EXPLAIN button on collapsed row', () => {
+        renderWithProviders(<DatabasePanel data={{queries: [makeQuery()]}} />);
+        expect(screen.getByLabelText('Explain query')).toBeInTheDocument();
+    });
+
+    it('shows EXPLAIN button in expanded detail', async () => {
         const user = userEvent.setup();
-        renderWithProviders(<DatabasePanel data={{queries: [makeQuery()], transactions: []}} />);
-        await user.click(screen.getByText('transactions'));
-        expect(screen.getByText(/Not supported yet/)).toBeInTheDocument();
+        renderWithProviders(<DatabasePanel data={{queries: [makeQuery()]}} />);
+        await user.click(screen.getAllByText(/SELECT \* FROM users/)[0]);
+        expect(screen.getByText('EXPLAIN')).toBeInTheDocument();
     });
 });

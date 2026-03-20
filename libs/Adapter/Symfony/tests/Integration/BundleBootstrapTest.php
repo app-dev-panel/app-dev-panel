@@ -5,24 +5,26 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\Tests\Integration;
 
 use AppDevPanel\Adapter\Symfony\AppDevPanelBundle;
-use AppDevPanel\Adapter\Symfony\Collector\CacheCollector;
-use AppDevPanel\Adapter\Symfony\Collector\MessengerCollector;
-use AppDevPanel\Adapter\Symfony\Collector\SecurityCollector;
-use AppDevPanel\Adapter\Symfony\Collector\TwigCollector;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
+use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
-use AppDevPanel\Kernel\Collector\DatabaseCollector;
-use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RouterCollector;
+use AppDevPanel\Kernel\Collector\SecurityCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
@@ -99,11 +101,13 @@ final class BundleBootstrapTest extends TestCase
             CommandCollector::class,
             ConsoleAppInfoCollector::class,
             DatabaseCollector::class,
-            TwigCollector::class,
+            TemplateCollector::class,
             SecurityCollector::class,
             CacheCollector::class,
             MailerCollector::class,
-            MessengerCollector::class,
+            QueueCollector::class,
+            ValidatorCollector::class,
+            RouterCollector::class,
         ];
 
         foreach ($expectedCollectors as $class) {
@@ -239,16 +243,20 @@ final class BundleBootstrapTest extends TestCase
                 'cache' => false,
                 'mailer' => false,
                 'messenger' => false,
+                'validator' => false,
+                'router' => false,
             ],
         ]);
 
         // Disabled collectors should not exist
         $this->assertFalse($container->has(DatabaseCollector::class));
-        $this->assertFalse($container->has(TwigCollector::class));
+        $this->assertFalse($container->has(TemplateCollector::class));
         $this->assertFalse($container->has(SecurityCollector::class));
         $this->assertFalse($container->has(CacheCollector::class));
         $this->assertFalse($container->has(MailerCollector::class));
-        $this->assertFalse($container->has(MessengerCollector::class));
+        $this->assertFalse($container->has(QueueCollector::class));
+        $this->assertFalse($container->has(ValidatorCollector::class));
+        $this->assertFalse($container->has(RouterCollector::class));
 
         // Core collectors still available
         $this->assertInstanceOf(LogCollector::class, $container->get(LogCollector::class));

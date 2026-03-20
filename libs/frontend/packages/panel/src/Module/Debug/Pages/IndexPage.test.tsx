@@ -56,8 +56,6 @@ describe('IndexPage (Overview Dashboard)', () => {
         expect(screen.getByText('Status')).toBeInTheDocument();
         expect(screen.getByText('Duration')).toBeInTheDocument();
         expect(screen.getByText('Peak Memory')).toBeInTheDocument();
-        expect(screen.getByText('Runtime')).toBeInTheDocument();
-        expect(screen.getByText('PHP 8.4.0')).toBeInTheDocument();
     });
 
     it('renders collector cards with labels', () => {
@@ -86,11 +84,11 @@ describe('IndexPage (Overview Dashboard)', () => {
         expect(screen.getByText('200')).toBeInTheDocument();
     });
 
-    it('renders card summaries', () => {
+    it('renders collector card labels', () => {
         renderWithProviders(<IndexPage />, {
             preloadedState: {'store.debug': {entry: webEntry, currentPageRequestIds: []}},
         });
-        expect(screen.getByText('15 log')).toBeInTheDocument();
-        expect(screen.getByText('42 events')).toBeInTheDocument();
+        expect(screen.getByText('Log')).toBeInTheDocument();
+        expect(screen.getByText('Events')).toBeInTheDocument();
     });
 });

@@ -1,0 +1,105 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AppDevPanel\Adapter\Yiisoft\Tests\Unit\Collector\View;
+
+use AppDevPanel\Adapter\Yiisoft\Collector\View\ViewEventListener;
+use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\ViewCollector;
+use PHPUnit\Framework\TestCase;
+
+final class ViewEventListenerTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        if (!class_exists(\Yiisoft\View\Event\WebView\AfterRender::class, true)) {
+            $this->markTestSkipped('yiisoft/view is not installed.');
+        }
+    }
+
+    public function testCollectDelegatesRenderDataToViewCollector(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $collector = new ViewCollector($timeline);
+        $collector->startup();
+        $listener = new ViewEventListener($collector);
+
+        $event = $this->createMock(\Yiisoft\View\Event\WebView\AfterRender::class);
+        $event->method('getFile')->willReturn('/views/index.php');
+        $event->method('getResult')->willReturn('<h1>Hello</h1>');
+        $event->method('getParameters')->willReturn(['title' => 'Test']);
+
+        $listener->collect($event);
+
+        $collected = $collector->getCollected();
+        $this->assertCount(1, $collected);
+        $this->assertSame('/views/index.php', $collected[0]['file']);
+        $this->assertSame('<h1>Hello</h1>', $collected[0]['output']);
+        $this->assertSame(['title' => 'Test'], $collected[0]['parameters']);
+    }
+
+    public function testCollectMultipleRenderEvents(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $collector = new ViewCollector($timeline);
+        $collector->startup();
+        $listener = new ViewEventListener($collector);
+
+        $event1 = $this->createMock(\Yiisoft\View\Event\WebView\AfterRender::class);
+        $event1->method('getFile')->willReturn('/views/layout.php');
+        $event1->method('getResult')->willReturn('<html></html>');
+        $event1->method('getParameters')->willReturn([]);
+
+        $event2 = $this->createMock(\Yiisoft\View\Event\WebView\AfterRender::class);
+        $event2->method('getFile')->willReturn('/views/partial.php');
+        $event2->method('getResult')->willReturn('<div>Partial</div>');
+        $event2->method('getParameters')->willReturn(['key' => 'value']);
+
+        $listener->collect($event1);
+        $listener->collect($event2);
+
+        $collected = $collector->getCollected();
+        $this->assertCount(2, $collected);
+        $this->assertSame('/views/layout.php', $collected[0]['file']);
+        $this->assertSame('/views/partial.php', $collected[1]['file']);
+    }
+
+    public function testCollectUpdatesTimeline(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $collector = new ViewCollector($timeline);
+        $collector->startup();
+        $listener = new ViewEventListener($collector);
+
+        $event = $this->createMock(\Yiisoft\View\Event\WebView\AfterRender::class);
+        $event->method('getFile')->willReturn('/views/test.php');
+        $event->method('getResult')->willReturn('');
+        $event->method('getParameters')->willReturn([]);
+
+        $listener->collect($event);
+
+        $this->assertCount(1, $timeline->getCollected());
+    }
+
+    public function testCollectUpdatesSummary(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $collector = new ViewCollector($timeline);
+        $collector->startup();
+        $listener = new ViewEventListener($collector);
+
+        $event = $this->createMock(\Yiisoft\View\Event\WebView\AfterRender::class);
+        $event->method('getFile')->willReturn('/views/test.php');
+        $event->method('getResult')->willReturn('output');
+        $event->method('getParameters')->willReturn([]);
+
+        $listener->collect($event);
+
+        $this->assertSame(['view' => ['total' => 1]], $collector->getSummary());
+    }
+}

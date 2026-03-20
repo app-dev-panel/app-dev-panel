@@ -224,6 +224,30 @@ final class FixtureRegistry
                     Expectation::summaryGte('total', 1),
                 ],
             ]),
+
+            // === Messenger / Queue messages ===
+            new Fixture(name: 'messenger:basic', endpoint: '/test/fixtures/messenger', expectations: [
+                'queue' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryGte('messageCount', 2),
+                    Expectation::summaryGte('failedCount', 1),
+                ],
+            ]),
+
+            // === Validator ===
+            new Fixture(name: 'validator:basic', endpoint: '/test/fixtures/validator', expectations: [
+                'validator' => [
+                    Expectation::notEmpty(),
+                    Expectation::countGte(2),
+                ],
+            ]),
+
+            // === Router ===
+            new Fixture(name: 'router:basic', endpoint: '/test/fixtures/router', expectations: [
+                'router' => [
+                    Expectation::notEmpty(),
+                ],
+            ]),
         ];
     }
 }

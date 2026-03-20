@@ -2,23 +2,15 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Symfony\Collector;
-
-use AppDevPanel\Kernel\Collector\CollectorTrait;
-use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
-use AppDevPanel\Kernel\Collector\TimelineCollector;
+namespace AppDevPanel\Kernel\Collector;
 
 /**
- * Collects Twig template rendering data.
+ * Captures template rendering data with timing.
  *
- * Captures:
- * - Template names rendered
- * - Render time per template
- * - Total render count and cumulative time
- *
- * Data is fed via `logRender()` method, called from a Twig profiler extension.
+ * Framework adapters call logRender() with template name and render time.
+ * Works with any template engine (Twig, Blade, Plates, etc.).
  */
-final class TwigCollector implements SummaryCollectorInterface
+final class TemplateCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
 
@@ -65,14 +57,14 @@ final class TwigCollector implements SummaryCollectorInterface
         }
 
         return [
-            'twig' => [
+            'template' => [
                 'renderCount' => count($this->renders),
                 'totalTime' => $this->totalTime,
             ],
         ];
     }
 
-    private function reset(): void
+    protected function reset(): void
     {
         $this->renders = [];
         $this->totalTime = 0.0;

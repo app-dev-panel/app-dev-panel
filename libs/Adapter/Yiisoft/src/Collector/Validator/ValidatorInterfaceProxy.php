@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yiisoft\Collector\Validator;
 
+use AppDevPanel\Kernel\Collector\ValidatorCollector;
+use Traversable;
 use Yiisoft\Validator\Result;
 use Yiisoft\Validator\RulesProviderInterface;
 use Yiisoft\Validator\ValidationContext;
@@ -27,7 +29,11 @@ final class ValidatorInterfaceProxy implements ValidatorInterface
             $rules = (array) $data->getRules();
         }
 
-        $this->collector->collect($data, $result, $rules);
+        if ($rules instanceof Traversable) {
+            $rules = iterator_to_array($rules);
+        }
+
+        $this->collector->collect($data, $result->isValid(), $result->getErrors(), $rules);
 
         return $result;
     }

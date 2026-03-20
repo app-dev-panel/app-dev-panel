@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yiisoft\Collector\Queue;
 
+use AppDevPanel\Kernel\Collector\QueueCollector;
 use BackedEnum;
 use Yiisoft\Queue\Adapter\AdapterInterface;
 use Yiisoft\Queue\JobStatus;
@@ -21,7 +22,7 @@ final class QueueDecorator implements QueueInterface
     public function status(string|int $id): JobStatus
     {
         $result = $this->queue->status($id);
-        $this->collector->collectStatus((string) $id, $result);
+        $this->collector->collectStatus((string) $id, $result->key());
         return $result;
     }
 
@@ -30,7 +31,7 @@ final class QueueDecorator implements QueueInterface
         string|array|callable|MiddlewarePushInterface ...$middlewareDefinitions,
     ): MessageInterface {
         $message = $this->queue->push($message, ...$middlewareDefinitions);
-        $this->collector->collectPush($this->queue->getName(), $message, ...$middlewareDefinitions);
+        $this->collector->collectPush($this->queue->getName(), $message, array_values($middlewareDefinitions));
         return $message;
     }
 

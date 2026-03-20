@@ -27,6 +27,9 @@
         <testsuite name="Adapter-Symfony">
             <directory>libs/Adapter/Symfony/tests</directory>
         </testsuite>
+        <testsuite name="Adapter-Yiisoft">
+            <directory>libs/Adapter/Yiisoft/tests</directory>
+        </testsuite>
         <testsuite name="Adapter-Yii2">
             <directory>libs/Adapter/Yii2/tests</directory>
         </testsuite>
@@ -44,6 +47,7 @@
             <directory>libs/API/src</directory>
             <directory>libs/Cli/src</directory>
             <directory>libs/Adapter/Symfony/src</directory>
+            <directory>libs/Adapter/Yiisoft/src</directory>
             <directory>libs/Adapter/Yii2/src</directory>
         </include>
     </source>

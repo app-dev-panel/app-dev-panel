@@ -203,7 +203,6 @@ final class FixtureRunner
             'twig' => 'TwigCollector',
             'doctrine' => 'DoctrineCollector',
             'mailer' => 'MailerCollector',
-            'messenger' => 'MessengerCollector',
             'db' => 'DatabaseCollector',
             'queue' => 'QueueCollector',
             'middleware' => 'MiddlewareCollector',

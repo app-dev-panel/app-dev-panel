@@ -2,21 +2,13 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Symfony\Collector;
-
-use AppDevPanel\Kernel\Collector\CollectorTrait;
-use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
+namespace AppDevPanel\Kernel\Collector;
 
 /**
- * Collects Symfony Security component data.
+ * Captures authentication and authorization data.
  *
- * Captures:
- * - Authenticated user info (username, roles)
- * - Firewall name and configuration
- * - Authentication status
- * - Access decision log (voter results)
- *
- * Data is fed from Symfony security events or a security listener.
+ * Framework adapters call collectUser(), collectFirewall(), and logAccessDecision()
+ * with normalized data extracted from their security systems.
  */
 final class SecurityCollector implements SummaryCollectorInterface
 {
@@ -93,7 +85,7 @@ final class SecurityCollector implements SummaryCollectorInterface
         ];
     }
 
-    private function reset(): void
+    protected function reset(): void
     {
         $this->username = null;
         $this->roles = [];

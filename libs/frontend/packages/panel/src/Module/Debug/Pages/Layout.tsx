@@ -10,7 +10,6 @@ import {FilesystemPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel
 import {HttpClientPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/HttpClientPanel';
 import {LogPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/LogPanel';
 import {MailerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MailerPanel';
-import {MessengerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MessengerPanel';
 import {MiddlewarePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MiddlewarePanel';
 import {QueuePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/QueuePanel';
 import {RequestPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RequestPanel';
@@ -59,13 +58,12 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.VarDumperCollector]: (data: any) => <VarDumperPanel data={data} />,
         [CollectorsMap.CacheCollector]: (data: any) => <CachePanel data={data} />,
         [CollectorsMap.EnvironmentCollector]: (data: any) => <EnvironmentPanel data={data} />,
-        [CollectorsMap.TwigCollector]: (data: any) => <TwigPanel data={data} />,
+        [CollectorsMap.TemplateCollector]: (data: any) => <TwigPanel data={data} />,
         [CollectorsMap.SecurityCollector]: (data: any) => <SecurityPanel data={data} />,
-        [CollectorsMap.MessengerCollector]: (data: any) => <MessengerPanel data={data} />,
         [CollectorsMap.QueueCollector]: (data: any) => <QueuePanel data={data} />,
         [CollectorsMap.RouterCollector]: (data: any) => <RouterPanel data={data} />,
         [CollectorsMap.ValidatorCollector]: (data: any) => <ValidatorPanel data={data} />,
-        [CollectorsMap.WebViewCollector]: (data: any) => <WebViewPanel data={data} />,
+        [CollectorsMap.ViewCollector]: (data: any) => <WebViewPanel data={data} />,
         [CollectorsMap.AssetBundleCollector]: (data: any) => <AssetBundlePanel data={data} />,
         default: (data: any) => {
             if (typeof data === 'object' && data.__isPanelRemote__) {

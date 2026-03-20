@@ -12,7 +12,8 @@
         serve-yiisoft serve-symfony serve-yii2 serve \
         fixtures fixtures-yiisoft fixtures-symfony fixtures-yii2 \
         test-fixtures test-fixtures-yiisoft test-fixtures-symfony test-fixtures-yii2 \
-        test-scenario test-scenario-yiisoft test-scenario-symfony test-scenario-yii2
+        test-scenario test-scenario-yiisoft test-scenario-symfony test-scenario-yii2 \
+        test-playground test-playground-yiisoft test-playground-symfony
 
 # --- Port allocation ---
 # Frontend dev server
@@ -354,10 +355,42 @@ test-scenario: ## Run full scenario test against all playgrounds (requires runni
 	@echo "$(GREEN)All scenario tests passed!$(RESET)"
 
 # ============================================================================
+# Playground Integration Tests (starts server, runs tests, stops server)
+# ============================================================================
+
+test-playground-yiisoft: ## Start Yiisoft server, run E2E fixtures + scenario, stop server
+	@echo "$(CYAN)[Playground: Yiisoft] Starting server on port $(YIISOFT_PORT)...$(RESET)"
+	@cd $(PLAYGROUND_DIR)/yiisoft-app && composer serve &>/dev/null & echo $$! > /tmp/adp-yiisoft.pid
+	@sleep 3
+	@echo "$(CYAN)[Playground: Yiisoft] Running E2E fixture tests...$(RESET)"
+	@PLAYGROUND_URL=http://127.0.0.1:$(YIISOFT_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox; \
+		EXIT_CODE=$$?; \
+		kill $$(cat /tmp/adp-yiisoft.pid) 2>/dev/null || true; rm -f /tmp/adp-yiisoft.pid; \
+		pkill -f "127.0.0.1:$(YIISOFT_PORT)" 2>/dev/null || true; \
+		exit $$EXIT_CODE
+
+test-playground-symfony: ## Start Symfony server, run E2E fixtures + scenario, stop server
+	@echo "$(CYAN)[Playground: Symfony] Starting server on port $(SYMFONY_PORT)...$(RESET)"
+	@cd $(PLAYGROUND_DIR)/symfony-basic-app && composer serve &>/dev/null & echo $$! > /tmp/adp-symfony.pid
+	@sleep 3
+	@echo "$(CYAN)[Playground: Symfony] Running E2E fixture tests...$(RESET)"
+	@PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox; \
+		EXIT_CODE=$$?; \
+		kill $$(cat /tmp/adp-symfony.pid) 2>/dev/null || true; rm -f /tmp/adp-symfony.pid; \
+		pkill -f "127.0.0.1:$(SYMFONY_PORT)" 2>/dev/null || true; \
+		exit $$EXIT_CODE
+
+test-playground: ## Run playground integration tests (starts servers, runs E2E, stops servers)
+	@echo "$(CYAN)Running playground integration tests...$(RESET)"
+	@$(MAKE) test-playground-yiisoft
+	@$(MAKE) test-playground-symfony
+	@echo "$(GREEN)All playground integration tests passed!$(RESET)"
+
+# ============================================================================
 # Full pipeline
 # ============================================================================
 
-all: check test ## Run everything: checks + tests
+all: check test test-playground ## Run everything: checks + tests + playground E2E
 	@echo ""
 	@echo "$(GREEN)========================================$(RESET)"
 	@echo "$(GREEN)  All checks and tests passed!$(RESET)"
