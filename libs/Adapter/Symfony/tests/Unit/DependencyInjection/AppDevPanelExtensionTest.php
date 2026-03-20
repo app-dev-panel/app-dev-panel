@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\Tests\Unit\DependencyInjection;
 
-use AppDevPanel\Kernel\Collector\CacheCollector;
-use AppDevPanel\Kernel\Collector\MessageBusCollector;
-use AppDevPanel\Kernel\Collector\SecurityCollector;
-use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Adapter\Symfony\DependencyInjection\AppDevPanelExtension;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
@@ -17,14 +13,20 @@ use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
-use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RouterCollector;
+use AppDevPanel\Kernel\Collector\SecurityCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
@@ -74,7 +76,9 @@ final class AppDevPanelExtensionTest extends TestCase
             SecurityCollector::class,
             CacheCollector::class,
             MailerCollector::class,
-            MessageBusCollector::class,
+            QueueCollector::class,
+            ValidatorCollector::class,
+            RouterCollector::class,
         ];
 
         foreach ($expectedCollectors as $collectorClass) {
@@ -110,6 +114,8 @@ final class AppDevPanelExtensionTest extends TestCase
                     'security' => false,
                     'mailer' => false,
                     'messenger' => false,
+                    'validator' => false,
+                    'router' => false,
                 ],
             ],
         ], $container);
@@ -118,7 +124,9 @@ final class AppDevPanelExtensionTest extends TestCase
         $this->assertFalse($container->hasDefinition(TemplateCollector::class));
         $this->assertFalse($container->hasDefinition(SecurityCollector::class));
         $this->assertFalse($container->hasDefinition(MailerCollector::class));
-        $this->assertFalse($container->hasDefinition(MessageBusCollector::class));
+        $this->assertFalse($container->hasDefinition(QueueCollector::class));
+        $this->assertFalse($container->hasDefinition(ValidatorCollector::class));
+        $this->assertFalse($container->hasDefinition(RouterCollector::class));
 
         // Core collectors still registered
         $this->assertTrue($container->hasDefinition(LogCollector::class));

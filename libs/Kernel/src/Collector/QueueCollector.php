@@ -8,10 +8,12 @@ use function count;
 use function is_countable;
 
 /**
- * Captures message queue operations: pushes, statuses, processing.
+ * Captures message queue and message bus operations.
  *
- * Framework adapters call collectPush(), collectStatus(), collectWorkerProcessing()
- * with normalized data from their queue system.
+ * Unified collector for both queue systems (Yiisoft Queue) and message buses
+ * (Symfony Messenger, etc.). Framework adapters call:
+ * - collectPush(), collectStatus(), collectWorkerProcessing() for queue operations
+ * - logMessage() for message bus dispatches
  */
 final class QueueCollector implements SummaryCollectorInterface
 {
@@ -25,6 +27,9 @@ final class QueueCollector implements SummaryCollectorInterface
 
     /** @var array<string, array<int, mixed>> */
     private array $processingMessages = [];
+
+    /** @var array<int, array{messageClass: string, bus: string, transport: ?string, dispatched: bool, handled: bool, failed: bool, duration: float}> */
+    private array $messages = [];
 
     public function __construct(
         private readonly TimelineCollector $timelineCollector,
@@ -69,6 +74,32 @@ final class QueueCollector implements SummaryCollectorInterface
         $this->timelineCollector->collect($this, count($this->processingMessages));
     }
 
+    public function logMessage(
+        string $messageClass,
+        string $bus = 'default',
+        ?string $transport = null,
+        bool $dispatched = true,
+        bool $handled = false,
+        bool $failed = false,
+        float $duration = 0.0,
+    ): void {
+        if (!$this->isActive()) {
+            return;
+        }
+
+        $this->messages[] = [
+            'messageClass' => $messageClass,
+            'bus' => $bus,
+            'transport' => $transport,
+            'dispatched' => $dispatched,
+            'handled' => $handled,
+            'failed' => $failed,
+            'duration' => $duration,
+        ];
+
+        $this->timelineCollector->collect($this, count($this->messages));
+    }
+
     public function getCollected(): array
     {
         if (!$this->isActive()) {
@@ -79,6 +110,9 @@ final class QueueCollector implements SummaryCollectorInterface
             'pushes' => $this->pushes,
             'statuses' => $this->statuses,
             'processingMessages' => $this->processingMessages,
+            'messages' => $this->messages,
+            'messageCount' => count($this->messages),
+            'failedCount' => count(array_filter($this->messages, static fn(array $m) => $m['failed'])),
         ];
     }
 
@@ -95,6 +129,8 @@ final class QueueCollector implements SummaryCollectorInterface
                 'countProcessingMessages' => array_sum(array_map(static fn($m) => is_countable($m)
                     ? count($m)
                     : 0, $this->processingMessages)),
+                'messageCount' => count($this->messages),
+                'failedCount' => count(array_filter($this->messages, static fn(array $m) => $m['failed'])),
             ],
         ];
     }
@@ -104,5 +140,6 @@ final class QueueCollector implements SummaryCollectorInterface
         $this->pushes = [];
         $this->statuses = [];
         $this->processingMessages = [];
+        $this->messages = [];
     }
 }

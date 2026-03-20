@@ -1465,30 +1465,6 @@ message = "Invalid right operand: type `mixed` cannot be reliably used in string
 count = 2
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/DatabaseCollector.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/DatabaseCollector.php"
-code = "mixed-array-assignment"
-message = "Unsafe array assignment on type `mixed`."
-count = 14
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/DatabaseCollector.php"
-code = "mixed-operand"
-message = "Left operand in spaceship comparison (`<=>`) has `mixed` type."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/DatabaseCollector.php"
-code = "mixed-operand"
-message = "Right operand in spaceship comparison (`<=>`) has `mixed` type."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"
 code = "docblock-type-mismatch"
 message = "Docblock type `null|string` for parameter `$isolationLevel` is incompatible with native type `string`."
@@ -1525,27 +1501,15 @@ message = "This member selector uses a non-literal string type (`non-empty-strin
 count = 4
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerCollector.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Mailer\MessageInterface)`).'
-count = 12
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerCollector.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `quoted_printable_decode`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerCollector.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Mailer\MessageInterface`.'
-count = 2
-
-[[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerInterfaceProxy.php"
 code = "non-existent-class-like"
 message = 'Class `AppDevPanel\Adapter\Yiisoft\Collector\Mailer\MailerInterfaceProxy` cannot implement unknown type `MailerInterface`'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerInterfaceProxy.php"
+code = "unused-method"
+message = "Method `normalizemessage()` is never used."
 count = 1
 
 [[issues]]
@@ -1561,81 +1525,39 @@ message = "Property `$decorated` is never used."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareEventListener.php"
 code = "less-specific-nested-argument-type"
 message = "Argument type mismatch for argument #2 of `implode`: expected `array<array-key, Stringable|null|scalar>|null`, but provided type `array{0: string, ...}` is less specific."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareEventListener.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `spl_object_id`: expected `object`, but found `mixed`."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareEventListener.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareEventListener.php"
 code = "mixed-operand"
 message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareEventListener.php"
 code = "mixed-operand"
 message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareCollector.php"
+file = "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareEventListener.php"
 code = "non-existent-method"
 message = 'Method `__debuginfo` does not exist on type `Psr\Http\Server\MiddlewareInterface`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Queue\JobStatus)`).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Queue\QueueInterface)`).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
-code = "mixed-array-assignment"
-message = "Unsafe array assignment on type `mixed`."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Queue\JobStatus`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Queue\Message\MessageInterface`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Queue\Middleware\Push\MiddlewarePushInterface`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Queue/QueueCollector.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Queue\QueueInterface`.'
 count = 1
 
 [[issues]]
@@ -1693,51 +1615,45 @@ message = "Property `$worker` is never used."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterCollector.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 5
+file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterDataExtractor.php"
+code = "less-specific-nested-argument-type"
+message = '''Argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\RouterCollector::collectmatchedroute`: expected `array{'action': mixed, 'arguments': array<array-key, mixed>, 'host': null|string, 'matchTime': float, 'middlewares': array<array-key, mixed>, 'name': null|string, 'pattern': string, 'uri': string}`, but provided type `array{'action': mixed, 'arguments': array<string, string>, 'host': null|string, 'matchTime': int(0), 'middlewares': mixed, 'name': string, 'pattern': string, 'uri': string}` is less specific.'''
+count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterCollector.php"
+file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterDataExtractor.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Collector\RouterCollector::collectroutes`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterDataExtractor.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Kernel\Collector\RouterCollector::collectroutes`: expected `array<array-key, mixed>|null`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterDataExtractor.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterDataExtractor.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`nonnull`)."
 count = 2
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterCollector.php"
+file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterDataExtractor.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\collector\router\routercollector::getcurrentroute`. Saw type `mixed`.'
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\collector\router\routerdataextractor::getcurrentroute`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterCollector.php"
+file = "libs/Adapter/Yiisoft/src/Collector/Router/RouterDataExtractor.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\collector\router\routercollector::getroutebycurrentroute`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorCollector.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Validator\Result)`).'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorCollector.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorCollector.php"
-code = "mixed-operand"
-message = "Casting `mixed` to `bool`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorCollector.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Validator\Result`.'
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\collector\router\routerdataextractor::getroutebycurrentroute`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
@@ -1759,13 +1675,31 @@ message = "Property `$validator` is never used."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/View/WebViewCollector.php"
+file = "libs/Adapter/Yiisoft/src/Collector/View/ViewEventListener.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\Event\WebView\AfterRender)`).'
 count = 3
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/View/WebViewCollector.php"
+file = "libs/Adapter/Yiisoft/src/Collector/View/ViewEventListener.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Collector\ViewCollector::collectrender`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/View/ViewEventListener.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Kernel\Collector\ViewCollector::collectrender`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/View/ViewEventListener.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `AppDevPanel\Kernel\Collector\ViewCollector::collectrender`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Collector/View/ViewEventListener.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\Event\WebView\AfterRender`.'
 count = 1
@@ -1892,6 +1826,12 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
+code = "less-specific-return-statement"
+message = 'Returned type `appdevpanel\adapter\yiisoft\proxy\servicemethodproxy&static` is less specific than the declared return type `$this(appdevpanel\adapter\yiisoft\proxy\servicemethodproxy)` for function `appdevpanel\adapter\yiisoft\proxy\servicemethodproxy::getnewstaticinstance`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
@@ -1906,6 +1846,12 @@ count = 1
 file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
 code = "unsafe-instantiation"
 message = 'Unsafe `new static()`: constructor of `AppDevPanel\Adapter\Yiisoft\Proxy\ServiceMethodProxy` is not final and its signature might change in child classes, potentially leading to runtime errors.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ServiceProxy.php"
+code = "less-specific-return-statement"
+message = 'Returned type `appdevpanel\adapter\yiisoft\proxy\serviceproxy&static` is less specific than the declared return type `$this(appdevpanel\adapter\yiisoft\proxy\serviceproxy)` for function `appdevpanel\adapter\yiisoft\proxy\serviceproxy::getnewstaticinstance`.'
 count = 1
 
 [[issues]]
@@ -2089,6 +2035,24 @@ message = 'Could not infer a precise return type for function `appdevpanel\kerne
 count = 1
 
 [[issues]]
+file = "libs/Kernel/src/Collector/DatabaseCollector.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Collector/DatabaseCollector.php"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `mixed`."
+count = 4
+
+[[issues]]
+file = "libs/Kernel/src/Collector/DatabaseCollector.php"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `nonnull`."
+count = 10
+
+[[issues]]
 file = "libs/Kernel/src/Collector/EventDispatcherInterfaceProxy.php"
 code = "incompatible-property-visibility"
 message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `appdevpanel\kernel\collector\eventdispatcherinterfaceproxy` used by `appdevpanel\kernel\collector\eventdispatcherinterfaceproxy`: visibility differs (public vs private protected(set))'
@@ -2129,6 +2093,12 @@ file = "libs/Kernel/src/Collector/LoggerInterfaceProxy.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 3
+
+[[issues]]
+file = "libs/Kernel/src/Collector/RouterCollector.php"
+code = "redundant-null-coalesce"
+message = "Redundant null coalesce: left-hand side can never be `null` or undefined."
+count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamCollector.php"
@@ -3121,6 +3091,42 @@ message = "Property `$third` is never used."
 count = 1
 
 [[issues]]
+file = "libs/Kernel/tests/Unit/Collector/AssetBundleCollectorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 4
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/AssetBundleCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 9
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/AssetBundleCollectorTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/CacheCollectorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/CacheCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 8
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/CacheCollectorTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/tests/Unit/Collector/CommandCollectorTest.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
@@ -3167,6 +3173,24 @@ file = "libs/Kernel/tests/Unit/Collector/ConsoleAppInfoCollectorTest.php"
 code = "non-existent-method"
 message = 'Method `markapplicationstarted` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
 count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/DatabaseCollectorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 7
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/DatabaseCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 43
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/DatabaseCollectorTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/EnvironmentCollectorTest.php"
@@ -3415,6 +3439,72 @@ message = "This member selector uses a non-literal string type (`string`); its s
 count = 1
 
 [[issues]]
+file = "libs/Kernel/tests/Unit/Collector/MailerCollectorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 4
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/MailerCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 12
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/MailerCollectorTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/MailerCollectorTest.php"
+code = "possibly-invalid-argument"
+message = '''Possible argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\MailerCollector::collectmessage`: expected `array{'bcc': array<array-key, mixed>, 'cc': array<array-key, mixed>, 'charset': string, 'date': null|string, 'from': array<array-key, mixed>, 'htmlBody': null|string, 'raw': string, 'replyTo': array<array-key, mixed>, 'subject': string, 'textBody': null|string, 'to': array<array-key, mixed>}`, but possibly received `array<array-key, mixed>`.'''
+count = 2
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/MailerCollectorTest.php"
+code = "possibly-invalid-argument"
+message = '''Possible argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\MailerCollector::collectmessages`: expected `array<int, array{'bcc': array<array-key, mixed>, 'cc': array<array-key, mixed>, 'charset': string, 'date': null|string, 'from': array<array-key, mixed>, 'htmlBody': null|string, 'raw': string, 'replyTo': array<array-key, mixed>, 'subject': string, 'textBody': null|string, 'to': array<array-key, mixed>}>`, but possibly received `list{array<array-key, mixed>, array<array-key, mixed>}`.'''
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/MailerCollectorTest.php"
+code = "possibly-invalid-argument"
+message = '''Possible argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\MailerCollector::collectmessages`: expected `array<int, array{'bcc': array<array-key, mixed>, 'cc': array<array-key, mixed>, 'charset': string, 'date': null|string, 'from': array<array-key, mixed>, 'htmlBody': null|string, 'raw': string, 'replyTo': array<array-key, mixed>, 'subject': string, 'textBody': null|string, 'to': array<array-key, mixed>}>`, but possibly received `list{array<array-key, mixed>}`.'''
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/MiddlewareCollectorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/MiddlewareCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 6
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/QueueCollectorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 4
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/QueueCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 16
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/QueueCollectorTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"
 code = "missing-magic-method"
 message = "Call to documented magic method `method()` on a class that cannot handle it."
@@ -3436,6 +3526,36 @@ count = 1
 file = "libs/Kernel/tests/Unit/Collector/RequestCollectorTest.php"
 code = "non-existent-method"
 message = 'Method `collectresponse` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/RouterCollectorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/RouterCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 5
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/SecurityCollectorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/SecurityCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 6
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/SecurityCollectorTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
 
 [[issues]]
@@ -3499,6 +3619,18 @@ message = 'Redundant type assertion: `AppDevPanel\Kernel\Collector\Stream\HttpSt
 count = 1
 
 [[issues]]
+file = "libs/Kernel/tests/Unit/Collector/TemplateCollectorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/TemplateCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 6
+
+[[issues]]
 file = "libs/Kernel/tests/Unit/Collector/TimelineCollectorTest.php"
 code = "less-specific-argument"
 message = 'Argument type mismatch for argument #1 of `appdevpanel\kernel\collector\logcollector::__construct`: expected `AppDevPanel\Kernel\Collector\TimelineCollector`, but provided type `AppDevPanel\Kernel\Collector\CollectorInterface|AppDevPanel\Kernel\Collector\TimelineCollector` is less specific.'
@@ -3523,6 +3655,12 @@ message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector
 count = 2
 
 [[issues]]
+file = "libs/Kernel/tests/Unit/Collector/ValidatorCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 7
+
+[[issues]]
 file = "libs/Kernel/tests/Unit/Collector/VarDumperCollectorTest.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
@@ -3545,6 +3683,12 @@ file = "libs/Kernel/tests/Unit/Collector/VarDumperCollectorTest.php"
 code = "non-existent-method"
 message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
 count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/ViewCollectorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 4
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/WebAppInfoCollectorTest.php"

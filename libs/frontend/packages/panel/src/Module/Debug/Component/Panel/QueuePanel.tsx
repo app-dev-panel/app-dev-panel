@@ -1,18 +1,33 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Box, Chip, Collapse, Icon, IconButton, Tab, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, Tab, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {SyntheticEvent, useState} from 'react';
+import {SyntheticEvent, useDeferredValue, useState} from 'react';
+
+type Message = {
+    messageClass: string;
+    bus: string;
+    transport: string | null;
+    dispatched: boolean;
+    handled: boolean;
+    failed: boolean;
+    duration: number;
+};
 
 type QueuePanelProps = {
     data: {
         pushes: Record<string, {message: any; middlewares: any[]}[]>;
         statuses: {id: string; status: string}[];
         processingMessages: Record<string, any[]>;
+        messages?: Message[];
+        messageCount?: number;
+        failedCount?: number;
     };
 };
 
@@ -81,6 +96,162 @@ function statusColor(status: string, theme: ReturnType<typeof useTheme>): string
             return theme.palette.text.disabled;
     }
 }
+
+function shortClassName(fqcn: string): string {
+    const parts = fqcn.split('\\');
+    return parts[parts.length - 1] ?? fqcn;
+}
+
+function messageDurationColor(ms: number, theme: Theme): string {
+    if (ms > 100) return theme.palette.error.main;
+    if (ms > 30) return theme.palette.warning.main;
+    return theme.palette.success.main;
+}
+
+const MessageClassCell = styled(Typography)({
+    fontFamily: primitives.fontFamilyMono,
+    fontSize: '12px',
+    flex: 1,
+    wordBreak: 'break-word',
+    minWidth: 0,
+});
+
+const MessageDurationCell = styled(Typography)({
+    fontFamily: primitives.fontFamilyMono,
+    fontSize: '11px',
+    flexShrink: 0,
+    textAlign: 'right',
+    width: 80,
+});
+
+const MessagesView = ({messages}: {messages: Message[]}) => {
+    const theme = useTheme();
+    const [filter, setFilter] = useState('');
+    const deferredFilter = useDeferredValue(filter);
+    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+    if (!messages || messages.length === 0) {
+        return <EmptyState icon="send" title="No messages found" />;
+    }
+
+    const filtered = deferredFilter
+        ? messages.filter((m) => m.messageClass.toLowerCase().includes(deferredFilter.toLowerCase()))
+        : messages;
+
+    return (
+        <Box>
+            <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter messages..." />}>
+                {`${filtered.length} messages`}
+            </SectionTitle>
+            {filtered.map((message, index) => {
+                const expanded = expandedIndex === index;
+                const color = messageDurationColor(message.duration, theme);
+                return (
+                    <Box key={index}>
+                        <ItemRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
+                            <MessageClassCell>{shortClassName(message.messageClass)}</MessageClassCell>
+                            <Chip
+                                label={message.bus}
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                    fontFamily: primitives.fontFamilyMono,
+                                    fontSize: '10px',
+                                    height: 20,
+                                    borderRadius: 1,
+                                    flexShrink: 0,
+                                }}
+                            />
+                            {message.transport && (
+                                <Chip
+                                    label={message.transport}
+                                    size="small"
+                                    variant="outlined"
+                                    sx={{
+                                        fontFamily: primitives.fontFamilyMono,
+                                        fontSize: '10px',
+                                        height: 20,
+                                        borderRadius: 1,
+                                        flexShrink: 0,
+                                    }}
+                                />
+                            )}
+                            {message.failed ? (
+                                <Chip
+                                    label="FAILED"
+                                    size="small"
+                                    sx={{
+                                        fontWeight: 700,
+                                        fontSize: '9px',
+                                        height: 18,
+                                        minWidth: 50,
+                                        borderRadius: 1,
+                                        backgroundColor: theme.palette.error.main,
+                                        color: 'common.white',
+                                        flexShrink: 0,
+                                    }}
+                                />
+                            ) : message.handled ? (
+                                <Chip
+                                    label="HANDLED"
+                                    size="small"
+                                    sx={{
+                                        fontWeight: 700,
+                                        fontSize: '9px',
+                                        height: 18,
+                                        minWidth: 50,
+                                        borderRadius: 1,
+                                        backgroundColor: theme.palette.success.main,
+                                        color: 'common.white',
+                                        flexShrink: 0,
+                                    }}
+                                />
+                            ) : message.dispatched ? (
+                                <Chip
+                                    label="DISPATCHED"
+                                    size="small"
+                                    sx={{
+                                        fontWeight: 700,
+                                        fontSize: '9px',
+                                        height: 18,
+                                        minWidth: 50,
+                                        borderRadius: 1,
+                                        backgroundColor: theme.palette.warning.main,
+                                        color: 'common.white',
+                                        flexShrink: 0,
+                                    }}
+                                />
+                            ) : null}
+                            <MessageDurationCell sx={{color}}>
+                                {formatMillisecondsAsDuration(message.duration)}
+                            </MessageDurationCell>
+                            <IconButton size="small" sx={{flexShrink: 0}}>
+                                <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                            </IconButton>
+                        </ItemRow>
+                        <Collapse in={expanded}>
+                            <DetailBox>
+                                <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                                    Full Class Name
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        fontFamily: primitives.fontFamilyMono,
+                                        fontSize: '12px',
+                                        color: 'text.secondary',
+                                        wordBreak: 'break-all',
+                                    }}
+                                >
+                                    {message.messageClass}
+                                </Typography>
+                            </DetailBox>
+                        </Collapse>
+                    </Box>
+                );
+            })}
+        </Box>
+    );
+};
 
 const PushesView = ({pushes}: {pushes: Record<string, {message: any; middlewares: any[]}[]>}) => {
     const [expandedKey, setExpandedKey] = useState<string | null>(null);
@@ -247,81 +418,110 @@ const ProcessingView = ({processingMessages}: {processingMessages: Record<string
     );
 };
 
-type TabKey = 'pushes' | 'statuses' | 'processing';
+type TabKey = 'messages' | 'pushes' | 'statuses' | 'processing';
 
 export const QueuePanel = ({data}: QueuePanelProps) => {
-    const [value, setValue] = useState<TabKey>('pushes');
-
-    const handleChange = (_event: SyntheticEvent, newValue: TabKey) => {
-        setValue(newValue);
-    };
-
     if (!data) {
         return <EmptyState icon="queue" title="No queue data found" />;
     }
 
-    const pushCount = Object.values(data.pushes).reduce((sum, items) => sum + items.length, 0);
+    const messageCount = data.messages?.length ?? 0;
+    const pushCount = Object.values(data.pushes ?? {}).reduce((sum, items) => sum + items.length, 0);
     const statusCount = data.statuses?.length ?? 0;
-    const processingCount = Object.values(data.processingMessages).reduce((sum, items) => sum + items.length, 0);
+    const processingCount = Object.values(data.processingMessages ?? {}).reduce((sum, items) => sum + items.length, 0);
 
-    if (pushCount === 0 && statusCount === 0 && processingCount === 0) {
+    const hasMessages = messageCount > 0;
+    const hasQueueOps = pushCount > 0 || statusCount > 0 || processingCount > 0;
+
+    if (!hasMessages && !hasQueueOps) {
         return <EmptyState icon="queue" title="No queue operations found" />;
     }
+
+    const defaultTab: TabKey = hasMessages ? 'messages' : 'pushes';
+    const [value, setValue] = useState<TabKey>(defaultTab);
+
+    const handleChange = (_event: SyntheticEvent, newValue: TabKey) => {
+        setValue(newValue);
+    };
 
     return (
         <Box>
             <TabContext value={value}>
                 <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
                     <StyledTabList onChange={handleChange}>
-                        <Tab
-                            label={
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                    Pushes
-                                    <Chip
-                                        label={pushCount}
-                                        size="small"
-                                        sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
-                                    />
-                                </Box>
-                            }
-                            value="pushes"
-                        />
-                        <Tab
-                            label={
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                    Statuses
-                                    <Chip
-                                        label={statusCount}
-                                        size="small"
-                                        sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
-                                    />
-                                </Box>
-                            }
-                            value="statuses"
-                        />
-                        <Tab
-                            label={
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                    Processing
-                                    <Chip
-                                        label={processingCount}
-                                        size="small"
-                                        sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
-                                    />
-                                </Box>
-                            }
-                            value="processing"
-                        />
+                        {hasMessages && (
+                            <Tab
+                                label={
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                        Messages
+                                        <Chip
+                                            label={messageCount}
+                                            size="small"
+                                            sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
+                                        />
+                                    </Box>
+                                }
+                                value="messages"
+                            />
+                        )}
+                        {hasQueueOps && (
+                            <Tab
+                                label={
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                        Pushes
+                                        <Chip
+                                            label={pushCount}
+                                            size="small"
+                                            sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
+                                        />
+                                    </Box>
+                                }
+                                value="pushes"
+                            />
+                        )}
+                        {hasQueueOps && (
+                            <Tab
+                                label={
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                        Statuses
+                                        <Chip
+                                            label={statusCount}
+                                            size="small"
+                                            sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
+                                        />
+                                    </Box>
+                                }
+                                value="statuses"
+                            />
+                        )}
+                        {hasQueueOps && (
+                            <Tab
+                                label={
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                        Processing
+                                        <Chip
+                                            label={processingCount}
+                                            size="small"
+                                            sx={{fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
+                                        />
+                                    </Box>
+                                }
+                                value="processing"
+                            />
+                        )}
                     </StyledTabList>
                 </Box>
+                <TabPanel value="messages" sx={{padding: 0}}>
+                    <MessagesView messages={data.messages ?? []} />
+                </TabPanel>
                 <TabPanel value="pushes" sx={{padding: 0}}>
-                    <PushesView pushes={data.pushes} />
+                    <PushesView pushes={data.pushes ?? {}} />
                 </TabPanel>
                 <TabPanel value="statuses" sx={{padding: 0}}>
-                    <StatusesView statuses={data.statuses} />
+                    <StatusesView statuses={data.statuses ?? []} />
                 </TabPanel>
                 <TabPanel value="processing" sx={{padding: 0}}>
-                    <ProcessingView processingMessages={data.processingMessages} />
+                    <ProcessingView processingMessages={data.processingMessages ?? {}} />
                 </TabPanel>
             </TabContext>
         </Box>

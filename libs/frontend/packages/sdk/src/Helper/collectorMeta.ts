@@ -25,9 +25,7 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
     [CollectorsMap.CacheCollector]: {label: 'Cache', icon: 'layers', weight: 15},
     [CollectorsMap.TemplateCollector]: {label: 'Template', icon: 'code', weight: 15},
     [CollectorsMap.SecurityCollector]: {label: 'Security', icon: 'shield', weight: 15},
-    [CollectorsMap.MessageBusCollector]: {label: 'Message Bus', icon: 'send', weight: 15},
     [CollectorsMap.AssetBundleCollector]: {label: 'Assets', icon: 'web_asset', weight: 15},
-
     [CollectorsMap.EnvironmentCollector]: {label: 'Environment', icon: 'dns', weight: 0},
     [CollectorsMap.ConsoleAppInfoCollector]: {label: 'Console', icon: 'terminal', weight: 17},
     [CollectorsMap.WebAppInfoCollector]: {label: 'Web Info', icon: 'language', weight: 18},

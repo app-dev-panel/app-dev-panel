@@ -367,27 +367,9 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/DatabaseCollector.php"
-code = "prefer-static-closure"
-message = "This arrow function does not use `$this` and should be declared static."
-count = 3
-
-[[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"
 code = "explicit-nullable-param"
 message = "Parameter `$isolationLevel` is implicitly nullable and relies on a deprecated feature."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerCollector.php"
-code = "prefer-static-closure"
-message = "This arrow function does not use `$this` and should be declared static."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorCollector.php"
-code = "prefer-static-closure"
-message = "This arrow function does not use `$this` and should be declared static."
 count = 1
 
 [[issues]]
@@ -487,6 +469,30 @@ message = "Use of the `empty` construct."
 count = 1
 
 [[issues]]
+file = "libs/Kernel/src/Collector/DatabaseCollector.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/DatabaseCollector.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 4
+
+[[issues]]
+file = "libs/Kernel/src/Collector/DatabaseCollector.php"
+code = "prefer-static-closure"
+message = "This arrow function does not use `$this` and should be declared static."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Collector/DatabaseCollector.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/src/Collector/HttpClientCollector.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
@@ -496,6 +502,12 @@ count = 1
 file = "libs/Kernel/src/Collector/LoggerInterfaceProxy.php"
 code = "too-many-methods"
 message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/QueueCollector.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
 count = 1
 
 [[issues]]
@@ -721,6 +733,12 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/Kernel/tests/Unit/Collector/CacheCollectorTest.php"
+code = "assert-description"
+message = "Missing description in assert function."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
@@ -748,6 +766,48 @@ count = 1
 file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/MiddlewareCollectorTest.php"
+code = "assert-description"
+message = "Missing description in assert function."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/QueueCollectorTest.php"
+code = "assert-description"
+message = "Missing description in assert function."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/RouterCollectorTest.php"
+code = "assert-description"
+message = "Missing description in assert function."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/SecurityCollectorTest.php"
+code = "assert-description"
+message = "Missing description in assert function."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/TemplateCollectorTest.php"
+code = "assert-description"
+message = "Missing description in assert function."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/ValidatorCollectorTest.php"
+code = "assert-description"
+message = "Missing description in assert function."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/ViewCollectorTest.php"
+code = "assert-description"
+message = "Missing description in assert function."
 count = 1
 
 [[issues]]
@@ -811,6 +871,18 @@ message = "Class has high complexity."
 count = 1
 
 [[issues]]
+file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.34)."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 2
+
+[[issues]]
 file = "libs/Testing/src/Command/DebugFixturesCommand.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -862,4 +934,34 @@ count = 1
 file = "libs/Testing/tests/E2E/FixtureTestCase.php"
 code = "prefer-early-continue"
 message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (4.1000000000000005)."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 4
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 3
+
+[[issues]]
+file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1

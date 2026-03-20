@@ -64,7 +64,7 @@ count = 6
 file = "config/common/routes.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 37
+count = 43
 
 [[issues]]
 file = "config/common/routes.php"
@@ -76,7 +76,7 @@ count = 2
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Yiisoft\Router\Route`.'
-count = 15
+count = 18
 
 [[issues]]
 file = "config/common/routes.php"
@@ -529,6 +529,24 @@ message = "Property `$responseFactory` is never used."
 count = 1
 
 [[issues]]
+file = "src/Web/TestFixtures/MessengerAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\MessengerAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/MessengerAction.php"
+code = "unused-property"
+message = "Property `$queueCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/MessengerAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
 file = "src/Web/TestFixtures/MultiAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\MultiAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -595,6 +613,24 @@ message = "Property `$responseFactory` is never used."
 count = 1
 
 [[issues]]
+file = "src/Web/TestFixtures/RouterAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\RouterAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/RouterAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/RouterAction.php"
+code = "unused-property"
+message = "Property `$routerCollector` is never used."
+count = 1
+
+[[issues]]
 file = "src/Web/TestFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\TimelineAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -610,4 +646,22 @@ count = 1
 file = "src/Web/TestFixtures/TimelineAction.php"
 code = "unused-property"
 message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ValidatorAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\ValidatorAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ValidatorAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ValidatorAction.php"
+code = "unused-property"
+message = "Property `$validatorCollector` is never used."
 count = 1

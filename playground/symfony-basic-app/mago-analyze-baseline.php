@@ -427,6 +427,42 @@ message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\
 count = 1
 
 [[issues]]
+file = "src/Controller/TestFixtures/MessengerAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\QueueCollector)`).'
+count = 2
+
+[[issues]]
+file = "src/Controller/TestFixtures/MessengerAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/MessengerAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/MessengerAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/MessengerAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\QueueCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/MessengerAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/MultiAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\EventDispatcher\EventDispatcherInterface)`).'
@@ -589,6 +625,42 @@ message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\
 count = 1
 
 [[issues]]
+file = "src/Controller/TestFixtures/RouterAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\RouterCollector)`).'
+count = 2
+
+[[issues]]
+file = "src/Controller/TestFixtures/RouterAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/RouterAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/RouterAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/RouterAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\RouterCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/RouterAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/TimelineAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
@@ -620,6 +692,42 @@ count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/TimelineAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\ValidatorCollector)`).'
+count = 2
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\ValidatorCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
 count = 1

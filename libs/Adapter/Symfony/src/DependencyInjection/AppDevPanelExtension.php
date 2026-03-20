@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
-use AppDevPanel\Kernel\Collector\CacheCollector;
-use AppDevPanel\Kernel\Collector\MessageBusCollector;
-use AppDevPanel\Kernel\Collector\SecurityCollector;
-use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
@@ -18,8 +14,6 @@ use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
 use AppDevPanel\Api\ApiApplication;
-use AppDevPanel\Cli\Command\DebugQueryCommand;
-use AppDevPanel\Cli\Command\DebugResetCommand;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
@@ -46,19 +40,27 @@ use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Cli\Command\DebugQueryCommand;
+use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
-use AppDevPanel\Kernel\Collector\DatabaseCollector;
-use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RouterCollector;
+use AppDevPanel\Kernel\Collector\SecurityCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
@@ -142,7 +144,8 @@ final class AppDevPanelExtension extends Extension
                 ->addTag('app_dev_panel.collector')
                 ->addTag('app_dev_panel.collector.web');
 
-            $container->register(WebAppInfoCollector::class, WebAppInfoCollector::class)
+            $container
+                ->register(WebAppInfoCollector::class, WebAppInfoCollector::class)
                 ->setArguments([new Reference(TimelineCollector::class), 'Symfony'])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector')
@@ -219,7 +222,8 @@ final class AppDevPanelExtension extends Extension
                 ->addTag('app_dev_panel.collector')
                 ->addTag('app_dev_panel.collector.console');
 
-            $container->register(ConsoleAppInfoCollector::class, ConsoleAppInfoCollector::class)
+            $container
+                ->register(ConsoleAppInfoCollector::class, ConsoleAppInfoCollector::class)
                 ->setArguments([new Reference(TimelineCollector::class), 'Symfony'])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector')
@@ -268,8 +272,22 @@ final class AppDevPanelExtension extends Extension
 
         if ($collectors['messenger']) {
             $container
-                ->register(MessageBusCollector::class, MessageBusCollector::class)
+                ->register(QueueCollector::class, QueueCollector::class)
                 ->setArguments([new Reference(TimelineCollector::class)])
+                ->setPublic(false)
+                ->addTag('app_dev_panel.collector');
+        }
+
+        if ($collectors['validator']) {
+            $container
+                ->register(ValidatorCollector::class, ValidatorCollector::class)
+                ->setPublic(false)
+                ->addTag('app_dev_panel.collector');
+        }
+
+        if ($collectors['router']) {
+            $container
+                ->register(RouterCollector::class, RouterCollector::class)
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }
@@ -577,7 +595,8 @@ final class AppDevPanelExtension extends Extension
 
     private function registerCliCommands(ContainerBuilder $container): void
     {
-        $container->register(DebugResetCommand::class, DebugResetCommand::class)
+        $container
+            ->register(DebugResetCommand::class, DebugResetCommand::class)
             ->setArguments([
                 new Reference(StorageInterface::class),
                 new Reference(Debugger::class),
@@ -585,7 +604,8 @@ final class AppDevPanelExtension extends Extension
             ->addTag('console.command')
             ->setPublic(false);
 
-        $container->register(DebugQueryCommand::class, DebugQueryCommand::class)
+        $container
+            ->register(DebugQueryCommand::class, DebugQueryCommand::class)
             ->setArguments([
                 new Reference(CollectorRepositoryInterface::class),
             ])

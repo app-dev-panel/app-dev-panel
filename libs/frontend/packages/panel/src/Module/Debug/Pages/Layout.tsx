@@ -10,7 +10,6 @@ import {FilesystemPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel
 import {HttpClientPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/HttpClientPanel';
 import {LogPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/LogPanel';
 import {MailerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MailerPanel';
-import {MessengerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MessengerPanel';
 import {MiddlewarePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MiddlewarePanel';
 import {QueuePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/QueuePanel';
 import {RequestPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RequestPanel';
@@ -61,7 +60,6 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.EnvironmentCollector]: (data: any) => <EnvironmentPanel data={data} />,
         [CollectorsMap.TemplateCollector]: (data: any) => <TwigPanel data={data} />,
         [CollectorsMap.SecurityCollector]: (data: any) => <SecurityPanel data={data} />,
-        [CollectorsMap.MessageBusCollector]: (data: any) => <MessengerPanel data={data} />,
         [CollectorsMap.QueueCollector]: (data: any) => <QueuePanel data={data} />,
         [CollectorsMap.RouterCollector]: (data: any) => <RouterPanel data={data} />,
         [CollectorsMap.ValidatorCollector]: (data: any) => <ValidatorPanel data={data} />,
