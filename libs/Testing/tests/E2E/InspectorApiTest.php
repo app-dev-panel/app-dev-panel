@@ -105,7 +105,7 @@ final class InspectorApiTest extends TestCase
         $response = self::$client->post('/inspect/api/table/explain', [
             'json' => [
                 'sql' => 'SELECT * FROM test_users WHERE name = :name',
-                'params' => [':name' => 'Alice'],
+                'params' => ['name' => 'Alice'],
             ],
         ]);
 
@@ -128,9 +128,12 @@ final class InspectorApiTest extends TestCase
             ],
         ]);
 
-        /** @var array{status: int} $body */
+        self::assertSame(400, $response->getStatusCode());
+
+        /** @var array{success: bool, data: array{error: string}} $body */
         $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        self::assertSame(400, $body['status']);
+        self::assertFalse($body['success']);
+        self::assertIsArray($body['data']);
     }
 
     public function testExplainWithInvalidSqlReturns500(): void
@@ -142,11 +145,12 @@ final class InspectorApiTest extends TestCase
             ],
         ]);
 
-        /** @var array{status: int, data: array{error: string}} $body */
+        self::assertSame(500, $response->getStatusCode());
+
+        /** @var array{success: bool, error: string} $body */
         $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         self::assertIsArray($body);
-        self::assertSame(500, $body['status'], 'Invalid SQL should return 500');
-        self::assertArrayHasKey('data', $body);
-        self::assertArrayHasKey('error', $body['data']);
+        self::assertFalse($body['success'], 'Invalid SQL should fail');
+        self::assertNotNull($body['error'], 'Error message should be present');
     }
 }

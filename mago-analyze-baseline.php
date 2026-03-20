@@ -3975,12 +3975,6 @@ count = 1
 [[issues]]
 file = "libs/Testing/tests/E2E/InspectorApiTest.php"
 code = "redundant-type-comparison"
-message = "Redundant type assertion: `$body` of type `array{'data': array{'error': string}, 'status': int}` is always not `array<array-key, mixed>`."
-count = 1
-
-[[issues]]
-file = "libs/Testing/tests/E2E/InspectorApiTest.php"
-code = "redundant-type-comparison"
 message = "Redundant type assertion: `$body` of type `array{'data': list<array<string, mixed>>, 'success': bool}` is always not `array<array-key, mixed>`."
 count = 3
 
@@ -3988,6 +3982,12 @@ count = 3
 file = "libs/Testing/tests/E2E/InspectorApiTest.php"
 code = "redundant-type-comparison"
 message = "Redundant type assertion: `$body` of type `array{'data': list<array{'records': int, 'table': string}>, 'success': bool}` is always not `array<array-key, mixed>`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/InspectorApiTest.php"
+code = "redundant-type-comparison"
+message = "Redundant type assertion: `$body` of type `array{'error': string, 'success': bool}` is always not `array<array-key, mixed>`."
 count = 1
 
 [[issues]]

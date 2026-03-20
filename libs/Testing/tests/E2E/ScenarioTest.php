@@ -153,10 +153,10 @@ final class ScenarioTest extends FixtureTestCase
     {
         $foundPhp = false;
         foreach (self::$summaryEntries as $entry) {
-            $web = $entry['web'] ?? null;
-            if (is_array($web) && isset($web['php']['version'])) {
+            $environment = $entry['environment'] ?? null;
+            if (is_array($environment) && isset($environment['php']['version'])) {
                 $foundPhp = true;
-                self::assertSame(PHP_VERSION, $web['php']['version']);
+                self::assertSame(PHP_VERSION, $environment['php']['version']);
                 break;
             }
         }
