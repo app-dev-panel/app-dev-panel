@@ -34,17 +34,18 @@ final class DatabaseController
 
     public function explain(ServerRequestInterface $request): ResponseInterface
     {
-        /** @var array{sql?: string, params?: array<string, mixed>} $body */
+        /** @var array{sql?: string, params?: array<string, mixed>, analyze?: bool} $body */
         $body = json_decode((string) $request->getBody(), true);
         $sql = $body['sql'] ?? '';
         $params = $body['params'] ?? [];
+        $analyze = $body['analyze'] ?? false;
 
         if ($sql === '') {
             return $this->responseFactory->createJsonResponse(['error' => 'SQL query is required'], 400);
         }
 
         try {
-            $result = $this->schemaProvider->explainQuery($sql, $params);
+            $result = $this->schemaProvider->explainQuery($sql, $params, $analyze);
 
             return $this->responseFactory->createJsonResponse($result);
         } catch (\Throwable $e) {

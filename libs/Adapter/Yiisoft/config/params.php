@@ -15,12 +15,16 @@ use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
+use AppDevPanel\Adapter\Yiisoft\Collector\Router\UrlMatcherInterfaceProxy;
+use AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
@@ -29,6 +33,8 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Yiisoft\Injector\Injector;
+use Yiisoft\Router\UrlMatcherInterface;
+use Yiisoft\Validator\ValidatorInterface;
 
 /**
  * @var $params array
@@ -53,10 +59,12 @@ return [
             ExceptionCollector::class,
             VarDumperCollector::class,
             TimelineCollector::class,
+            ValidatorCollector::class,
         ],
         'collectors.web' => [
             WebAppInfoCollector::class,
             RequestCollector::class,
+            RouterCollector::class,
         ],
         'collectors.console' => [
             ConsoleAppInfoCollector::class,
@@ -67,6 +75,8 @@ return [
             LoggerInterface::class => [LoggerInterfaceProxy::class, LogCollector::class],
             EventDispatcherInterface::class => [EventDispatcherInterfaceProxy::class, EventCollector::class],
             ClientInterface::class => [HttpClientInterfaceProxy::class, HttpClientCollector::class],
+            UrlMatcherInterface::class => [UrlMatcherInterfaceProxy::class, RouterCollector::class],
+            ValidatorInterface::class => [ValidatorInterfaceProxy::class, ValidatorCollector::class],
         ],
         'dumper.excludedClasses' => [
             'PhpParser\\Parser\\Php7',

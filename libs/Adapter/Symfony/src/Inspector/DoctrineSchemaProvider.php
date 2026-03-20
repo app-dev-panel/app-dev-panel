@@ -68,14 +68,25 @@ final class DoctrineSchemaProvider implements SchemaProviderInterface
         ];
     }
 
-    public function explainQuery(string $sql, array $params = []): array
+    public function explainQuery(string $sql, array $params = [], bool $analyze = false): array
     {
-        $result = $this->connection->fetchAllAssociative(
-            'EXPLAIN ' . $sql,
+        if ($this->isSqlite()) {
+            $prefix = 'EXPLAIN QUERY PLAN ';
+        } elseif ($analyze) {
+            $prefix = 'EXPLAIN ANALYZE ';
+        } else {
+            $prefix = 'EXPLAIN ';
+        }
+
+        return $this->connection->fetchAllAssociative(
+            $prefix . $sql,
             $params,
         );
+    }
 
-        return $result;
+    private function isSqlite(): bool
+    {
+        return str_contains($this->connection->getDatabasePlatform()::class, 'SQLite');
     }
 
     /**

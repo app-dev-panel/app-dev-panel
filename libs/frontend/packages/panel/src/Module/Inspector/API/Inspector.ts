@@ -208,8 +208,12 @@ export const inspectorApi = createApi({
             query: (table) => (table ? `table/${table}` : `table`),
             transformResponse: (result: Response) => result.data || [],
         }),
-        explainQuery: builder.mutation<any[], {sql: string; params?: Record<string, any>}>({
-            query: ({sql, params}) => ({url: `table/explain`, method: 'POST', body: {sql, params: params ?? {}}}),
+        explainQuery: builder.mutation<any[], {sql: string; params?: Record<string, any>; analyze?: boolean}>({
+            query: ({sql, params, analyze}) => ({
+                url: `table/explain`,
+                method: 'POST',
+                body: {sql, params: params ?? {}, analyze: analyze ?? false},
+            }),
             transformResponse: (result: Response<any[]>) => result.data,
         }),
         doRequest: builder.mutation<Response, {id: string}>({

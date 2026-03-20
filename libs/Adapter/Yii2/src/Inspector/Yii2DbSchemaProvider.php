@@ -115,9 +115,17 @@ final class Yii2DbSchemaProvider implements SchemaProviderInterface
         ];
     }
 
-    public function explainQuery(string $sql, array $params = []): array
+    public function explainQuery(string $sql, array $params = [], bool $analyze = false): array
     {
-        $command = $this->connection->createCommand('EXPLAIN ' . $sql);
+        $driverName = $this->connection->getDriverName();
+        if ($driverName === 'sqlite') {
+            $prefix = 'EXPLAIN QUERY PLAN ';
+        } elseif ($analyze) {
+            $prefix = 'EXPLAIN ANALYZE ';
+        } else {
+            $prefix = 'EXPLAIN ';
+        }
+        $command = $this->connection->createCommand($prefix . $sql);
         if ($params !== []) {
             $command->bindValues($params);
         }

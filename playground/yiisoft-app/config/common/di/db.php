@@ -12,7 +12,7 @@ return [
     ConnectionInterface::class => [
         'class' => Connection::class,
         '__construct()' => [
-            new Driver('sqlite:' . dirname(__DIR__, 2) . '/var/data/test.db'),
+            new Driver('sqlite:' . dirname(__DIR__, 3) . '/var/data/test.db'),
         ],
     ],
 ];

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2a5162a9866ed88ec459082d19eb34a2",
+    "content-hash": "bc07cd4b0972f7dcf430450ace921604",
     "packages": [
         {
             "name": "alexkart/curl-builder",
@@ -3147,16 +3147,16 @@
         },
         {
             "name": "yiisoft/db",
-            "version": "dev-master",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/db.git",
-                "reference": "dffa745e646d475b6dd993a421c26a088e1c4f0f"
+                "reference": "fae72a47856f6947de7e5e18d7e5dd0b46ee1daa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/db/zipball/dffa745e646d475b6dd993a421c26a088e1c4f0f",
-                "reference": "dffa745e646d475b6dd993a421c26a088e1c4f0f",
+                "url": "https://api.github.com/repos/yiisoft/db/zipball/fae72a47856f6947de7e5e18d7e5dd0b46ee1daa",
+                "reference": "fae72a47856f6947de7e5e18d7e5dd0b46ee1daa",
                 "shasum": ""
             },
             "require": {
@@ -3184,7 +3184,6 @@
                 "yiisoft/var-dumper": "^1.7",
                 "yiisoft/yii-debug": "dev-master"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "bamarni-bin": {
@@ -3236,45 +3235,51 @@
                     "type": "opencollective"
                 }
             ],
-            "time": "2026-02-23T02:57:37+00:00"
+            "time": "2026-02-09T19:21:43+00:00"
         },
         {
             "name": "yiisoft/db-sqlite",
-            "version": "dev-improve-parse",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/db-sqlite.git",
-                "reference": "2ca850cd6e5eab62a68074b45aaff1a96037af21"
+                "reference": "b0158543abb378e4524777c8000e3a2180ff6363"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/db-sqlite/zipball/2ca850cd6e5eab62a68074b45aaff1a96037af21",
-                "reference": "2ca850cd6e5eab62a68074b45aaff1a96037af21",
+                "url": "https://api.github.com/repos/yiisoft/db-sqlite/zipball/b0158543abb378e4524777c8000e3a2180ff6363",
+                "reference": "b0158543abb378e4524777c8000e3a2180ff6363",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
                 "ext-pdo": "*",
-                "php": "8.1 - 8.4",
-                "yiisoft/db": "dev-master"
+                "php": "8.1 - 8.5",
+                "yiisoft/db": "^2.0"
             },
             "provide": {
                 "yiisoft/db-implementation": "1.0.0"
             },
             "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.8.3",
                 "friendsofphp/php-cs-fixer": "^3.89.1",
                 "maglnet/composer-require-checker": "^4.7.1",
                 "phpunit/phpunit": "^10.5.45",
                 "rector/rector": "^2.0.10",
-                "roave/infection-static-analysis-plugin": "^1.35",
                 "spatie/phpunit-watcher": "^1.24",
-                "vimeo/psalm": "^5.26.1 || ^6.8.8",
                 "yiisoft/aliases": "^2.0",
                 "yiisoft/psr-dummy-provider": "^1.0",
                 "yiisoft/test-support": "^3.0",
                 "yiisoft/var-dumper": "^1.7"
             },
             "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": true,
+                    "target-directory": "tools"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Yiisoft\\Db\\Sqlite\\": "src"
@@ -3312,7 +3317,7 @@
                     "type": "opencollective"
                 }
             ],
-            "time": "2025-11-25T21:33:36+00:00"
+            "time": "2025-12-05T14:55:48+00:00"
         },
         {
             "name": "yiisoft/definitions",
@@ -9847,10 +9852,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "yiisoft/db": 20,
-        "yiisoft/db-sqlite": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

@@ -1700,8 +1700,14 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Db\Schema\Column\ColumnInterface)`).'
+count = 7
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider::serializearcolumnsschemas`: expected `array<array-key, Yiisoft\Db\Schema\ColumnSchemaInterface>`, but found `mixed`.'
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider::serializearcolumnsschemas`: expected `array<array-key, unknown-ref(Yiisoft\Db\Schema\Column\ColumnInterface)>`, but found `mixed`.'
 count = 1
 
 [[issues]]
@@ -1718,9 +1724,21 @@ count = 2
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Db\Schema\Column\ColumnInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
 code = "possible-method-access-on-null"
 message = "Attempting to call a method on `null`."
 count = 5
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider::serializearcolumnsschemas`: expected `array<array-key, unknown-ref(Yiisoft\Db\Schema\Column\ColumnInterface)>`, but possibly received `array<string, Yiisoft\Db\Schema\ColumnSchemaInterface>`.'
+count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
@@ -3975,6 +3993,12 @@ count = 1
 [[issues]]
 file = "libs/Testing/tests/E2E/InspectorApiTest.php"
 code = "redundant-type-comparison"
+message = "Redundant type assertion: `$body` of type `array{'data': array{'error': string}, 'success': bool}` is always not `array<array-key, mixed>`."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/InspectorApiTest.php"
+code = "redundant-type-comparison"
 message = "Redundant type assertion: `$body` of type `array{'data': list<array<string, mixed>>, 'success': bool}` is always not `array<array-key, mixed>`."
 count = 3
 
@@ -3982,12 +4006,6 @@ count = 3
 file = "libs/Testing/tests/E2E/InspectorApiTest.php"
 code = "redundant-type-comparison"
 message = "Redundant type assertion: `$body` of type `array{'data': list<array{'records': int, 'table': string}>, 'success': bool}` is always not `array<array-key, mixed>`."
-count = 1
-
-[[issues]]
-file = "libs/Testing/tests/E2E/InspectorApiTest.php"
-code = "redundant-type-comparison"
-message = "Redundant type assertion: `$body` of type `array{'error': string, 'success': bool}` is always not `array<array-key, mixed>`."
 count = 1
 
 [[issues]]

@@ -27,7 +27,7 @@ final class NullSchemaProvider implements SchemaProviderInterface
         ];
     }
 
-    public function explainQuery(string $sql, array $params = []): array
+    public function explainQuery(string $sql, array $params = [], bool $analyze = false): array
     {
         return [];
     }

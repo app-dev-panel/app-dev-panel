@@ -140,12 +140,23 @@ const QueryRowWithExplain = ({
     onToggle: () => void;
     onExpand: () => void;
 }) => {
-    const [explainQuery, {data, isLoading, error}] = useExplainQueryMutation();
+    const [explainQuery, {data, isLoading, error}] = useExplainQueryMutation({fixedCacheKey: undefined});
+    const [analyzeQuery, {data: analyzeData, isLoading: analyzeLoading, error: analyzeError}] = useExplainQueryMutation(
+        {fixedCacheKey: undefined},
+    );
     const sql = typeof query.rawSql === 'string' ? query.rawSql : query.sql;
 
     const handleExplain = (e: React.MouseEvent) => {
         e.stopPropagation();
         explainQuery({sql, params: query.params});
+        if (!expanded) {
+            onExpand();
+        }
+    };
+
+    const handleAnalyze = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        analyzeQuery({sql, params: query.params, analyze: true});
         if (!expanded) {
             onExpand();
         }
@@ -222,62 +233,121 @@ const QueryRowWithExplain = ({
                             <JsonRenderer value={query.params} />
                         </Box>
                     )}
-                    <ExplainResult data={data} error={error} isLoading={isLoading} onExplain={handleExplain} />
+                    <ExplainResult
+                        data={data}
+                        error={error}
+                        isLoading={isLoading}
+                        analyzeData={analyzeData}
+                        analyzeError={analyzeError}
+                        analyzeLoading={analyzeLoading}
+                        onExplain={handleExplain}
+                        onAnalyze={handleAnalyze}
+                    />
                 </DetailBox>
             </Collapse>
         </Box>
     );
 };
 
+const ExplainDataView = ({data, error, label}: {data: any[] | undefined; error: any; label: string}) => {
+    if (error) {
+        return (
+            <Typography sx={{fontSize: '12px', color: 'error.main', fontFamily: primitives.fontFamilyMono}}>
+                {'data' in error && (error.data as any)?.data?.error
+                    ? (error.data as any).data.error
+                    : `Failed to run ${label}`}
+            </Typography>
+        );
+    }
+    if (data && Array.isArray(data) && data.length > 0) {
+        const hasDetail = data.every((row) => typeof row === 'object' && 'detail' in row);
+        if (hasDetail) {
+            return (
+                <Box sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'text.secondary'}}>
+                    {data.map((row, i) => (
+                        <Box key={i} sx={{py: 0.25}}>
+                            {row.detail}
+                        </Box>
+                    ))}
+                </Box>
+            );
+        }
+        return <JsonRenderer value={data} />;
+    }
+    if (data && Array.isArray(data) && data.length === 0) {
+        return (
+            <Typography sx={{fontSize: '12px', color: 'text.disabled', fontFamily: primitives.fontFamilyMono}}>
+                No {label} data returned
+            </Typography>
+        );
+    }
+    return null;
+};
+
+const actionButtonSx = {fontSize: '11px', textTransform: 'none', padding: '2px 10px', minHeight: 26, borderRadius: 1};
+
 const ExplainResult = ({
     data,
     error,
     isLoading,
+    analyzeData,
+    analyzeError,
+    analyzeLoading,
     onExplain,
+    onAnalyze,
 }: {
     data: any[] | undefined;
     error: any;
     isLoading: boolean;
+    analyzeData: any[] | undefined;
+    analyzeError: any;
+    analyzeLoading: boolean;
     onExplain: (e: React.MouseEvent) => void;
+    onAnalyze: (e: React.MouseEvent) => void;
 }) => {
-    const hasResult = data !== undefined || error;
+    const hasExplainResult = data !== undefined || error;
+    const hasAnalyzeResult = analyzeData !== undefined || analyzeError;
 
     return (
         <Box sx={{mt: 1.5}}>
-            {!hasResult && (
+            <Box sx={{display: 'flex', gap: 1, mb: hasExplainResult || hasAnalyzeResult ? 1 : 0}}>
                 <Button
                     size="small"
-                    variant="outlined"
+                    variant={hasExplainResult ? 'text' : 'outlined'}
                     disabled={isLoading}
                     onClick={onExplain}
                     startIcon={
                         isLoading ? <CircularProgress size={14} /> : <Icon sx={{fontSize: 14}}>query_stats</Icon>
                     }
-                    sx={{fontSize: '11px', textTransform: 'none', padding: '2px 10px', minHeight: 26, borderRadius: 1}}
+                    sx={actionButtonSx}
                 >
-                    EXPLAIN
+                    {hasExplainResult ? 'Repeat' : 'EXPLAIN'}
                 </Button>
-            )}
-            {hasResult && (
-                <Box>
+                <Button
+                    size="small"
+                    variant={hasAnalyzeResult ? 'text' : 'outlined'}
+                    disabled={analyzeLoading}
+                    onClick={onAnalyze}
+                    startIcon={analyzeLoading ? <CircularProgress size={14} /> : <Icon sx={{fontSize: 14}}>speed</Icon>}
+                    sx={actionButtonSx}
+                >
+                    {hasAnalyzeResult ? 'Repeat Analyze' : 'EXPLAIN ANALYZE'}
+                </Button>
+            </Box>
+            {hasExplainResult && (
+                <Box sx={{mb: hasAnalyzeResult ? 1.5 : 0}}>
                     <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
                         EXPLAIN
                     </Typography>
-                    {error && (
-                        <Typography sx={{fontSize: '12px', color: 'error.main', fontFamily: primitives.fontFamilyMono}}>
-                            {'data' in error && (error.data as any)?.data?.error
-                                ? (error.data as any).data.error
-                                : 'Failed to run EXPLAIN'}
-                        </Typography>
-                    )}
-                    {data && Array.isArray(data) && data.length > 0 && <JsonRenderer value={data} />}
-                    {data && Array.isArray(data) && data.length === 0 && (
-                        <Typography
-                            sx={{fontSize: '12px', color: 'text.disabled', fontFamily: primitives.fontFamilyMono}}
-                        >
-                            No EXPLAIN data returned
-                        </Typography>
-                    )}
+                    <ExplainDataView data={data} error={error} label="EXPLAIN" />
+                </Box>
+            )}
+            {hasAnalyzeResult && (
+                <Box>
+                    <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                        EXPLAIN ANALYZE
+                    </Typography>
+                    <ExplainDataView data={analyzeData} error={analyzeError} label="EXPLAIN ANALYZE" />
                 </Box>
             )}
         </Box>

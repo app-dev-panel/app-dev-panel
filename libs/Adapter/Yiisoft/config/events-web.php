@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use AppDevPanel\Adapter\Yiisoft\Collector\Router\RouterDataExtractor;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -46,6 +47,7 @@ return [
         static fn(AfterRequest $event, RequestCollector $collector) => $event->getResponse() !== null
             ? $collector->collectResponse($event->getResponse())
             : null,
+        static fn(AfterRequest $event, RouterDataExtractor $extractor) => $extractor->extract(),
     ],
     AfterEmit::class => [
         [ProfilerInterface::class, 'flush'],
