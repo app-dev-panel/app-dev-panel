@@ -105,16 +105,23 @@ export const FileExplorerPage = () => {
         })();
     }, [path, className]);
 
+    const highlightLines: [number, number] | [number] | undefined = (() => {
+        if (file?.startLine && file?.endLine) return [file.startLine, file.endLine];
+        if (file?.startLine) return [file.startLine];
+        return parsePathLineAnchor(window.location.hash);
+    })();
+
     useLayoutEffect(() => {
         if (file) {
-            if (file.startLine) {
-                scrollToAnchor(25, `L${file.startLine}`);
-                return;
+            const anchor = file.startLine ? `L${file.startLine}` : undefined;
+            if (!anchor) {
+                const lines = parsePathLineAnchor(window.location.hash);
+                scrollToAnchor(25, lines && `L${lines[0]}`);
+            } else {
+                scrollToAnchor(25, anchor);
             }
-            const lines = parsePathLineAnchor(window.location.hash);
-            scrollToAnchor(25, lines && `L${lines[0]}`);
         }
-    });
+    }, [file]);
     const changePath = (path: string) => {
         setSearchParams({path});
     };
@@ -134,11 +141,7 @@ export const FileExplorerPage = () => {
                         </Button>
                         <PageHeader title={file.path} icon="description" />
                     </Box>
-                    <CodeHighlight
-                        language={file.extension}
-                        code={file.content}
-                        highlightLines={parsePathLineAnchor(window.location.hash)}
-                    />
+                    <CodeHighlight language={file.extension} code={file.content} highlightLines={highlightLines} />
                     <Box>
                         <Typography>Directory: @root{file.directory}</Typography>
                         <Typography>Permissions: {file.permissions}</Typography>

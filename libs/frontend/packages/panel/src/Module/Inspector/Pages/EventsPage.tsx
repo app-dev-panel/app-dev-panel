@@ -1,17 +1,17 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {EventEntry, EventListenersType, useGetEventsQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
-import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {OpenInNew} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Box, Button, Chip, IconButton, Tab, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, IconButton, Tab, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import React, {SyntheticEvent, useCallback, useMemo, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
@@ -33,6 +33,17 @@ function normalizeEntries(data: EventListenersType | null): EventEntry[] {
 function shortClassName(fqcn: string): string {
     const parts = fqcn.split('\\');
     return parts[parts.length - 1];
+}
+
+function parseCallable(value: any): {className: string; methodName: string} | null {
+    if (Array.isArray(value) && value.length >= 2 && typeof value[0] === 'string' && typeof value[1] === 'string') {
+        return {className: value[0], methodName: value[1]};
+    }
+    if (typeof value === 'string' && value.includes('::')) {
+        const [className, methodName] = value.split('::', 2);
+        if (className && methodName) return {className, methodName};
+    }
+    return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -127,27 +138,61 @@ const EventListeners = React.memo(({entries}: EventListenersProps) => {
                             )}
                         </EventHeader>
                         {entry.listeners.map((listener, i) => {
-                            const isArray = Array.isArray(listener);
+                            const parsed = parseCallable(listener);
+                            const isClass =
+                                !parsed &&
+                                typeof listener === 'string' &&
+                                listener.includes('\\') &&
+                                !listener.includes(' ');
                             return (
                                 <ListenerRow key={i}>
-                                    <Box sx={{flex: 1, minWidth: 0, overflow: 'hidden'}}>
-                                        <CodeHighlight
-                                            language="php"
-                                            code={serializeCallable(listener)}
-                                            showLineNumbers={false}
-                                        />
-                                    </Box>
-                                    {isArray && (
-                                        <Tooltip title="Open in File Explorer">
-                                            <Button
-                                                size="small"
-                                                href={`/inspector/files?class=${listener[0]}&method=${listener[1]}`}
-                                                endIcon={<OpenInNew sx={{fontSize: 14}} />}
-                                                sx={{flexShrink: 0, whiteSpace: 'nowrap'}}
-                                            >
-                                                Inspect
-                                            </Button>
-                                        </Tooltip>
+                                    {parsed ? (
+                                        <Typography
+                                            component="a"
+                                            href={`/inspector/files?class=${parsed.className}&method=${parsed.methodName}`}
+                                            sx={{
+                                                flex: 1,
+                                                minWidth: 0,
+                                                fontFamily: primitives.fontFamilyMono,
+                                                fontSize: '12px',
+                                                color: 'primary.main',
+                                                textDecoration: 'none',
+                                                wordBreak: 'break-all',
+                                                '&:hover': {textDecoration: 'underline'},
+                                            }}
+                                        >
+                                            {serializeCallable(listener)}
+                                        </Typography>
+                                    ) : isClass ? (
+                                        <Typography
+                                            component="a"
+                                            href={`/inspector/files?class=${listener}`}
+                                            sx={{
+                                                flex: 1,
+                                                minWidth: 0,
+                                                fontFamily: primitives.fontFamilyMono,
+                                                fontSize: '12px',
+                                                color: 'primary.main',
+                                                textDecoration: 'none',
+                                                wordBreak: 'break-all',
+                                                '&:hover': {textDecoration: 'underline'},
+                                            }}
+                                        >
+                                            {listener}
+                                        </Typography>
+                                    ) : (
+                                        <Typography
+                                            sx={{
+                                                flex: 1,
+                                                minWidth: 0,
+                                                fontFamily: primitives.fontFamilyMono,
+                                                fontSize: '12px',
+                                                color: 'text.secondary',
+                                                wordBreak: 'break-all',
+                                            }}
+                                        >
+                                            {serializeCallable(listener)}
+                                        </Typography>
                                     )}
                                 </ListenerRow>
                             );
