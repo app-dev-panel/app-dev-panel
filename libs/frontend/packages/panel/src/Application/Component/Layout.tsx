@@ -45,7 +45,7 @@ const hiddenCollectors = new Set<string>([
 // ---------------------------------------------------------------------------
 const inspectorChildren = [
     {key: '/inspector/config', icon: 'settings', label: 'Configuration'},
-    {key: '/inspector/events', icon: 'bolt', label: 'Events'},
+    {key: '/inspector/events', icon: 'bolt', label: 'Event Listeners'},
     {key: '/inspector/routes', icon: 'alt_route', label: 'Routes'},
     {key: '/inspector/tests', icon: 'science', label: 'Tests'},
     {key: '/inspector/analyse', icon: 'analytics', label: 'Analyse'},

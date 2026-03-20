@@ -126,7 +126,13 @@ const defaultPages: PaletteItem[] = [
         shortcut: '/config',
         section: 'Inspector',
     },
-    {icon: 'bolt', label: 'Inspector > Events', path: '/inspector/events', shortcut: '/events', section: 'Inspector'},
+    {
+        icon: 'bolt',
+        label: 'Inspector > Event Listeners',
+        path: '/inspector/events',
+        shortcut: '/events',
+        section: 'Inspector',
+    },
     {
         icon: 'alt_route',
         label: 'Inspector > Routes',
