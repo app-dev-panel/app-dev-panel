@@ -31,4 +31,9 @@ final class NullSchemaProvider implements SchemaProviderInterface
     {
         return [];
     }
+
+    public function executeQuery(string $sql, array $params = []): array
+    {
+        return [];
+    }
 }

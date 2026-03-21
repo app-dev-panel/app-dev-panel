@@ -78,10 +78,7 @@ final class DoctrineSchemaProvider implements SchemaProviderInterface
             $prefix = 'EXPLAIN ';
         }
 
-        return $this->connection->fetchAllAssociative(
-            $prefix . $sql,
-            $params,
-        );
+        return $this->connection->fetchAllAssociative($prefix . $sql, $params);
     }
 
     public function executeQuery(string $sql, array $params = []): array

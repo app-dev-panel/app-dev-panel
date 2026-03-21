@@ -47,12 +47,14 @@ final class DebugQueryControllerTest extends TestCase
     public function testListWithEntries(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
-        $repository->method('getSummary')->willReturn([
-            [
-                'id' => 'abc-123',
-                'request' => ['method' => 'GET', 'url' => '/test', 'responseStatusCode' => '200'],
-            ],
-        ]);
+        $repository
+            ->method('getSummary')
+            ->willReturn([
+                [
+                    'id' => 'abc-123',
+                    'request' => ['method' => 'GET', 'url' => '/test', 'responseStatusCode' => '200'],
+                ],
+            ]);
 
         $controller = $this->createController($repository);
         $result = $controller->runAction('list');
@@ -63,11 +65,13 @@ final class DebugQueryControllerTest extends TestCase
     public function testListWithLimit(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
-        $repository->method('getSummary')->willReturn([
-            ['id' => '1'],
-            ['id' => '2'],
-            ['id' => '3'],
-        ]);
+        $repository
+            ->method('getSummary')
+            ->willReturn([
+                ['id' => '1'],
+                ['id' => '2'],
+                ['id' => '3'],
+            ]);
 
         $controller = $this->createController($repository);
         $result = $controller->actionList(limit: 2);
@@ -107,9 +111,11 @@ final class DebugQueryControllerTest extends TestCase
     public function testViewWithUnknownCollector(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
-        $repository->method('getDetail')->willReturn([
-            'AppDevPanel\\Kernel\\Collector\\LogCollector' => [],
-        ]);
+        $repository
+            ->method('getDetail')
+            ->willReturn([
+                'AppDevPanel\\Kernel\\Collector\\LogCollector' => [],
+            ]);
 
         $controller = $this->createController($repository);
         $result = $controller->actionView('abc-123', collector: 'NonExistent');

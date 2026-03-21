@@ -12,6 +12,7 @@ paths = [
     "libs/Adapter/Yii2/src",
     "libs/Adapter/Yii2/tests",
     "libs/Adapter/Laravel/src",
+    "libs/Adapter/Laravel/tests",
     "libs/Adapter/Cycle/src",
     "libs/Testing/src",
     "libs/Testing/tests",

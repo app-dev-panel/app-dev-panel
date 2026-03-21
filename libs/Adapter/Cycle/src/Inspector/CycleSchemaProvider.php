@@ -52,6 +52,16 @@ class CycleSchemaProvider implements SchemaProviderInterface
         ];
     }
 
+    public function explainQuery(string $sql, array $params = [], bool $analyze = false): array
+    {
+        return [];
+    }
+
+    public function executeQuery(string $sql, array $params = []): array
+    {
+        return [];
+    }
+
     /**
      * @param ColumnInterface[] $columns
      */

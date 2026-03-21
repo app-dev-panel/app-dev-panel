@@ -85,9 +85,25 @@ final class PlaygroundIntegrationTest extends TestCase
         /** @var DatabaseCollector|null $dbCollector */
         $dbCollector = $module->getCollector(DatabaseCollector::class);
         $startTime = microtime(true);
-        $dbCollector?->logQuery('SELECT * FROM users LIMIT 10', 'SELECT * FROM users LIMIT 10', [], '', $startTime, microtime(true), 3);
+        $dbCollector?->logQuery(
+            'SELECT * FROM users LIMIT 10',
+            'SELECT * FROM users LIMIT 10',
+            [],
+            '',
+            $startTime,
+            microtime(true),
+            3,
+        );
         $startTime = microtime(true);
-        $dbCollector?->logQuery('SELECT COUNT(*) FROM users', 'SELECT COUNT(*) FROM users', [], '', $startTime, microtime(true), 1);
+        $dbCollector?->logQuery(
+            'SELECT COUNT(*) FROM users',
+            'SELECT COUNT(*) FROM users',
+            [],
+            '',
+            $startTime,
+            microtime(true),
+            1,
+        );
 
         // Simulate response
         $psrResponse = $psr17->createResponse(200);
@@ -132,7 +148,15 @@ final class PlaygroundIntegrationTest extends TestCase
         /** @var DatabaseCollector|null $dbCollector */
         $dbCollector = $module->getCollector(DatabaseCollector::class);
         $startTime = microtime(true);
-        $dbCollector?->logQuery('INSERT INTO submissions (data) VALUES (?)', 'INSERT INTO submissions (data) VALUES (?)', ['test'], '', $startTime, microtime(true), 1);
+        $dbCollector?->logQuery(
+            'INSERT INTO submissions (data) VALUES (?)',
+            'INSERT INTO submissions (data) VALUES (?)',
+            ['test'],
+            '',
+            $startTime,
+            microtime(true),
+            1,
+        );
 
         $debugger->shutdown();
 

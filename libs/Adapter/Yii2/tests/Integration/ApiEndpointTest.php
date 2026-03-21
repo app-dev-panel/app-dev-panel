@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
-use AppDevPanel\Kernel\Collector\DatabaseCollector;
-use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Module;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\StartupContext;
@@ -200,9 +200,25 @@ final class ApiEndpointTest extends TestCase
         /** @var DatabaseCollector $dbCollector */
         $dbCollector = $module->getCollector(DatabaseCollector::class);
         $startTime = microtime(true);
-        $dbCollector->logQuery('SELECT * FROM users WHERE active = ?', 'SELECT * FROM users WHERE active = ?', [1], '', $startTime, microtime(true), 5);
+        $dbCollector->logQuery(
+            'SELECT * FROM users WHERE active = ?',
+            'SELECT * FROM users WHERE active = ?',
+            [1],
+            '',
+            $startTime,
+            microtime(true),
+            5,
+        );
         $startTime = microtime(true);
-        $dbCollector->logQuery('SELECT COUNT(*) FROM users', 'SELECT COUNT(*) FROM users', [], '', $startTime, microtime(true), 1);
+        $dbCollector->logQuery(
+            'SELECT COUNT(*) FROM users',
+            'SELECT COUNT(*) FROM users',
+            [],
+            '',
+            $startTime,
+            microtime(true),
+            1,
+        );
 
         $debugger->shutdown();
 

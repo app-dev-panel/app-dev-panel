@@ -40,12 +40,7 @@ final class HttpClientListener
             $uniqueId = spl_object_hash($request);
             $this->requestStartTimes[$uniqueId] = microtime(true);
 
-            ($this->collectorFactory)()->collect(
-                $request->toPsrRequest(),
-                microtime(true),
-                '',
-                $uniqueId,
-            );
+            ($this->collectorFactory)()->collect($request->toPsrRequest(), microtime(true), '', $uniqueId);
         });
 
         $events->listen(ResponseReceived::class, function (ResponseReceived $event): void {
@@ -63,11 +58,7 @@ final class HttpClientListener
             $uniqueId = spl_object_hash($event->request);
             unset($this->requestStartTimes[$uniqueId]);
 
-            ($this->collectorFactory)()->collectTotalTime(
-                null,
-                microtime(true),
-                $uniqueId,
-            );
+            ($this->collectorFactory)()->collectTotalTime(null, microtime(true), $uniqueId);
         });
     }
 }

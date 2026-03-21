@@ -7,7 +7,7 @@ It collects runtime data (logs, events, requests, exceptions, database queries, 
 a web UI to inspect, analyze, and debug them.
 
 The project is currently a fork/consolidation from Yii Debug into a single monorepo, with the goal of becoming
-fully framework-independent. The first adapter targets Yii 3; additional adapters (Symfony, Laravel, etc.) will follow.
+fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, and Yii 2.
 
 ## Tech Stack
 
@@ -24,6 +24,7 @@ fully framework-independent. The first adapter targets Yii 3; additional adapter
 ├── playground/                    # Demo/reference applications per framework
 │   ├── yiisoft-app/              # Yii 3 (Yiisoft) reference application
 │   ├── symfony-basic-app/        # Symfony 7 minimal demo
+│   ├── laravel-app/              # Laravel 12 minimal demo
 │   └── yii2-basic-app/          # Yii 2 minimal demo
 ├── libs/
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
@@ -33,6 +34,7 @@ fully framework-independent. The first adapter targets Yii 3; additional adapter
 │   ├── Adapter/
 │   │   ├── Yiisoft/              # Yii 3 framework adapter
 │   │   ├── Symfony/              # Symfony framework adapter
+│   │   ├── Laravel/              # Laravel framework adapter
 │   │   ├── Yii2/                 # Yii 2 framework adapter
 │   │   └── Cycle/                # Cycle ORM adapter (database schema only)
 │   └── frontend/                 # Frontend monorepo
@@ -280,6 +282,7 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 - `libs/Testing/CLAUDE.md` — Test fixtures and runner
 - `libs/Adapter/Yiisoft/CLAUDE.md` — Yii 3 adapter integration
 - `libs/Adapter/Symfony/CLAUDE.md` — Symfony adapter integration
+- `libs/Adapter/Laravel/CLAUDE.md` — Laravel adapter integration
 - `libs/Adapter/Yii2/CLAUDE.md` — Yii 2 adapter integration
 - `libs/frontend/CLAUDE.md` — Frontend architecture
 

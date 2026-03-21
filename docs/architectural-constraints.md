@@ -30,6 +30,7 @@ The core principle: **common modules must never depend on framework-specific cod
 | **Adapter/Yiisoft** | Kernel, API, Cli, Yii 3 packages | Other adapters |
 | **Adapter/Cycle** | API, Cycle ORM packages | Other adapters |
 | **Adapter/Symfony** | Kernel, API, Cli, Symfony packages | Other adapters |
+| **Adapter/Laravel** | Kernel, API, Cli, Laravel (Illuminate) packages | Other adapters |
 | **Adapter/Yii2** | Kernel, API, Cli, Yii 2 packages | Other adapters |
 | **Frontend** | Nothing (communicates via HTTP) | Any PHP package |
 
@@ -49,7 +50,7 @@ Storage and serialization must remain behind abstractions:
 |---------|-------------|-----------------|
 | Debug data storage | `StorageInterface` | `FileStorage`, `MemoryStorage` |
 | Object serialization | `Dumper` class | JSON-based (built-in) |
-| Database inspection | `SchemaProviderInterface` | `NullSchemaProvider` (API), `DbSchemaProvider` (Yiisoft), `CycleSchemaProvider` (Cycle), `DoctrineSchemaProvider` (Symfony), `Yii2DbSchemaProvider` (Yii2) |
+| Database inspection | `SchemaProviderInterface` | `NullSchemaProvider` (API), `DbSchemaProvider` (Yiisoft), `CycleSchemaProvider` (Cycle), `DoctrineSchemaProvider` (Symfony), `LaravelSchemaProvider` (Laravel), `Yii2DbSchemaProvider` (Yii2) |
 | Command execution | `CommandInterface` | `BashCommand`, `PHPUnitCommand`, etc. |
 
 New storage backends (Redis, database, etc.) must implement `StorageInterface` without
@@ -122,6 +123,7 @@ When creating an adapter for a new framework (e.g., Laravel, Slim, Laminas):
 | Adapter | Framework | Pattern | Key Classes |
 |---------|-----------|---------|-------------|
 | `libs/Adapter/Symfony/` | Symfony 6.4–8.x | Bundle + Extension + CompilerPass | `AppDevPanelBundle`, `AppDevPanelExtension`, `CollectorProxyCompilerPass` |
+| `libs/Adapter/Laravel/` | Laravel 11.x–12.x | ServiceProvider (register + boot) | `AppDevPanelServiceProvider`, event listeners, `DebugMiddleware` |
 | `libs/Adapter/Yiisoft/` | Yii 3 | Config plugin + ServiceProvider | `DebugServiceProvider`, config files (`di.php`, `events-web.php`) |
 | `libs/Adapter/Yii2/` | Yii 2 | Module + BootstrapInterface | `Module`, `Bootstrap`, URL rules |
 | `libs/Adapter/Cycle/` | Cycle ORM | Standalone (API only) | `CycleSchemaProvider` — lightweight, no Kernel dependency |

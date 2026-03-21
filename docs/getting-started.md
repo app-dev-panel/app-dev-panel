@@ -34,6 +34,7 @@ make serve
 make serve-yiisoft    # Yii 3 on port 8101
 make serve-symfony    # Symfony on port 8102
 make serve-yii2       # Yii 2 on port 8103
+make serve-laravel    # Laravel on port 8104
 
 # Start the frontend dev server
 cd libs/frontend
@@ -67,6 +68,15 @@ composer require app-dev-panel/kernel app-dev-panel/api app-dev-panel/adapter-sy
 Register the bundle in `config/bundles.php` and configure in `config/packages/app_dev_panel.yaml`.
 See `libs/Adapter/Symfony/CLAUDE.md` for full configuration reference.
 
+### Laravel
+
+```bash
+composer require app-dev-panel/kernel app-dev-panel/api app-dev-panel/adapter-laravel
+```
+
+Auto-registered via Laravel package discovery. Publish config with `php artisan vendor:publish --tag=app-dev-panel-config`.
+See `libs/Adapter/Laravel/CLAUDE.md` for full configuration reference.
+
 ### Yii 2
 
 ```bash
@@ -95,7 +105,7 @@ To integrate ADP with a different framework, create an adapter that:
 5. Registers API routes for `/debug/api/*` and `/inspect/api/*`
 6. Optionally depends on `app-dev-panel/cli` for CLI commands (`debug:reset`, `debug:server`, etc.)
 
-See `libs/Adapter/Symfony/` and `libs/Adapter/Yiisoft/` for reference implementations.
+See `libs/Adapter/Symfony/`, `libs/Adapter/Laravel/`, and `libs/Adapter/Yiisoft/` for reference implementations.
 See `docs/architectural-constraints.md` for dependency rules.
 
 ## PHP Built-in Server
@@ -114,6 +124,7 @@ PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 |-----------|-------------|
 | `playground/yiisoft-app/` | Yii 3 demo app (port 8101) |
 | `playground/symfony-basic-app/` | Symfony demo app (port 8102) |
+| `playground/laravel-app/` | Laravel demo app (port 8104) |
 | `playground/yii2-basic-app/` | Yii 2 demo app (port 8103) |
 | `libs/Kernel/` | Core debugging engine |
 | `libs/API/` | REST API + SSE endpoints |
@@ -121,6 +132,7 @@ PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 | `libs/Testing/` | Test fixture definitions, runner, CLI command |
 | `libs/Adapter/Yiisoft/` | Yii 3 framework adapter |
 | `libs/Adapter/Symfony/` | Symfony framework adapter |
+| `libs/Adapter/Laravel/` | Laravel framework adapter |
 | `libs/Adapter/Yii2/` | Yii 2 framework adapter |
 | `libs/Adapter/Cycle/` | Cycle ORM adapter (database schema only) |
 | `libs/frontend/` | Frontend monorepo (panel, toolbar, SDK) |

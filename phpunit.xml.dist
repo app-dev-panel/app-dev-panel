@@ -30,6 +30,9 @@
         <testsuite name="Adapter-Yiisoft">
             <directory>libs/Adapter/Yiisoft/tests</directory>
         </testsuite>
+        <testsuite name="Adapter-Laravel">
+            <directory>libs/Adapter/Laravel/tests</directory>
+        </testsuite>
         <testsuite name="Adapter-Yii2">
             <directory>libs/Adapter/Yii2/tests</directory>
         </testsuite>
@@ -51,6 +54,7 @@
             <directory>libs/Cli/src</directory>
             <directory>libs/Adapter/Symfony/src</directory>
             <directory>libs/Adapter/Yiisoft/src</directory>
+            <directory>libs/Adapter/Laravel/src</directory>
             <directory>libs/Adapter/Yii2/src</directory>
         </include>
     </source>

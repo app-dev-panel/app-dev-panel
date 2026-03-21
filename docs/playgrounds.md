@@ -6,7 +6,7 @@ Reference applications demonstrating ADP integration with specific frameworks.
 
 A playground is a minimal, working application for a specific PHP framework with ADP fully integrated. Each playground:
 
-- Installs the corresponding ADP adapter (`adapter-yiisoft`, `adapter-symfony`, `adapter-yii2`)
+- Installs the corresponding ADP adapter (`adapter-yiisoft`, `adapter-symfony`, `adapter-laravel`, `adapter-yii2`)
 - Configures collectors, storage, and API routes
 - Exposes demo endpoints that generate debug data (logs, exceptions, events)
 - Exposes `/test/fixtures/*` endpoints for automated testing
@@ -20,6 +20,7 @@ Playgrounds have **no unit tests**. Quality is enforced via Mago only.
 playground/
 ├── yiisoft-app/          # Yii 3 — port 8101
 ├── symfony-basic-app/    # Symfony 7 — port 8102
+├── laravel-app/          # Laravel 12 — port 8104
 └── yii2-basic-app/       # Yii 2 — port 8103
 ```
 
@@ -29,6 +30,7 @@ playground/
 |------------|------|-------------------|
 | Yiisoft | 8101 | `YIISOFT_PORT` |
 | Symfony | 8102 | `SYMFONY_PORT` |
+| Laravel | 8104 | `LARAVEL_PORT` |
 | Yii2 | 8103 | `YII2_PORT` |
 
 Override: `make fixtures-symfony SYMFONY_PORT=9000`
@@ -55,6 +57,7 @@ make install-playgrounds
 # Start each server (separate terminals)
 cd playground/yiisoft-app && ./yii serve --port=8101
 cd playground/symfony-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t public
+cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
 cd playground/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8103 -t public
 ```
 
@@ -67,6 +70,7 @@ make fixtures              # All playgrounds in parallel
 make fixtures-yiisoft      # Yiisoft only
 make fixtures-symfony      # Symfony only
 make fixtures-yii2         # Yii2 only
+make fixtures-laravel      # Laravel only
 ```
 
 ---
@@ -273,6 +277,95 @@ src/Controller/
     ├── ResetCliAction.php
     ├── RouterAction.php
     ├── TestFixtureEvent.php
+    ├── TimelineAction.php
+    └── ValidatorAction.php
+```
+
+---
+
+## Laravel Playground (Laravel 12)
+
+**Path:** `playground/laravel-app/`
+**Adapter:** `app-dev-panel/adapter-laravel`
+**Integration method:** Laravel package discovery (auto-registered via `extra.laravel.providers`)
+
+### Installation
+
+The adapter auto-registers via Laravel's package discovery. No manual registration needed.
+
+**composer.json:**
+```json
+{
+    "require": {
+        "app-dev-panel/adapter-laravel": "*"
+    }
+}
+```
+
+Publish config: `php artisan vendor:publish --tag=app-dev-panel-config`
+
+### How It Works
+
+1. `AppDevPanelServiceProvider` auto-discovered via `extra.laravel.providers` in adapter's composer.json
+2. `register()` wires: `StorageInterface`, `Debugger`, all collectors, API services, CLI commands
+3. `boot()` publishes config, loads routes, pushes `DebugMiddleware`, registers event listeners, decorates PSR services
+4. `DebugMiddleware` maps request lifecycle → `Debugger::startup()` / `Debugger::shutdown()`
+5. Event listeners capture: `QueryExecuted`, cache events, `MessageSent`, queue events, HTTP client events, console events
+6. PSR proxies decorate: Logger → `LoggerInterfaceProxy`, HttpClient → `HttpClientInterfaceProxy`, EventDispatcher → `LaravelEventDispatcherProxy`
+
+### Key Config Files
+
+| File | Purpose |
+|------|---------|
+| `config/app-dev-panel.php` | ADP configuration (published from adapter) |
+| `config/app.php` | Application config |
+| `config/database.php` | Database connections |
+| `routes/web.php` | App routes + test fixture routes |
+| `routes/api.php` | API routes |
+
+### Entry Points
+
+- **HTTP:** `public/index.php` → Laravel HTTP Kernel
+- **CLI:** `php artisan` → Laravel Console Kernel
+
+### Debug Storage
+
+`storage/debug/` (via `storage_path('debug')`)
+
+### App Routes
+
+| Method | Path | Handler |
+|--------|------|---------|
+| GET | `/` | `HomeController::index()` |
+| GET | `/test/fixtures/*` | `TestFixtures\*Action` (invokable controllers) |
+
+### Controller Structure
+
+Laravel uses invokable controller classes (one class per action):
+
+```
+app/Http/Controllers/
+├── HomeController.php
+└── TestFixtures/
+    ├── CacheAction.php
+    ├── CacheHeavyAction.php
+    ├── DatabaseAction.php
+    ├── DumpAction.php
+    ├── EventsAction.php
+    ├── ExceptionAction.php
+    ├── ExceptionChainedAction.php
+    ├── FilesystemAction.php
+    ├── HttpClientAction.php
+    ├── LogsAction.php
+    ├── LogsContextAction.php
+    ├── LogsHeavyAction.php
+    ├── MailerAction.php
+    ├── MessengerAction.php
+    ├── MultiAction.php
+    ├── RequestInfoAction.php
+    ├── ResetAction.php
+    ├── ResetCliAction.php
+    ├── RouterAction.php
     ├── TimelineAction.php
     └── ValidatorAction.php
 ```
@@ -514,4 +607,5 @@ Create baseline files (`mago-lint-baseline.php`, `mago-analyze-baseline.php`) if
 | 8101 | Yiisoft |
 | 8102 | Symfony |
 | 8103 | Yii2 |
-| 8104+ | Available for new playgrounds |
+| 8104 | Laravel |
+| 8105+ | Available for new playgrounds |
