@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Controllers\TestFixtures;
 
 use App\Events\TestFixtureEvent;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\JsonResponse;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 
 final readonly class MultiAction
 {
     public function __construct(
         private LoggerInterface $logger,
-        private EventDispatcherInterface $eventDispatcher,
+        private Dispatcher $eventDispatcher,
     ) {}
 
     public function __invoke(): JsonResponse

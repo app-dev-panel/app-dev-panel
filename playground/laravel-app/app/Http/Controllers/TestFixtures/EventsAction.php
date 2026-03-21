@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\TestFixtures;
 
 use App\Events\TestFixtureEvent;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\JsonResponse;
-use Psr\EventDispatcher\EventDispatcherInterface;
 
 final readonly class EventsAction
 {
     public function __construct(
-        private EventDispatcherInterface $eventDispatcher,
+        private Dispatcher $eventDispatcher,
     ) {}
 
     public function __invoke(): JsonResponse
