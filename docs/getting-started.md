@@ -15,46 +15,48 @@
 git clone <repository-url>
 cd app-dev-panel
 
-# PHP dependencies
-composer install
+# Install everything (PHP + frontend + playgrounds)
+make install
 
-# Frontend dependencies
-cd libs/app-dev-panel
-npm install
+# Or install selectively:
+make install-php           # PHP dependencies only
+make install-frontend      # Frontend dependencies only
+make install-playgrounds   # Playground dependencies only
 ```
 
 ### 2. Start the Demo Application
 
 ```bash
-# Start the PHP backend (Yii 3 reference app)
-cd playground/yiisoft-app
-PHP_CLI_SERVER_WORKERS=3 php -S 0.0.0.0:8080 -t public
+# Start all playground servers in background
+make serve
 
-# Start the frontend dev server (from libs/app-dev-panel)
-cd libs/app-dev-panel
-npm run dev
+# Or start individually (separate terminals)
+make serve-yiisoft    # Yii 3 on port 8101
+make serve-symfony    # Symfony on port 8102
+make serve-yii2       # Yii 2 on port 8103
+
+# Start the frontend dev server
+cd libs/frontend
+npm start
 ```
 
 ### 3. Using Docker
 
 ```bash
-cd libs/app-dev-panel
+cd libs/frontend
 docker-compose up
 ```
 
 ## Integrating ADP into Your Application
 
-### Yii 3 (First-Party Adapter)
-
-1. Install the packages:
+### Yii 3 (Yiisoft)
 
 ```bash
 composer require app-dev-panel/kernel app-dev-panel/api app-dev-panel/adapter-yiisoft
 ```
 
-2. The Yii config plugin will auto-register the debug panel. No manual configuration needed.
-
-3. Access the debug panel at `http://your-app/debug/api/` (API) or via the frontend SPA.
+The Yii config plugin auto-registers the debug panel. No manual configuration needed.
+Access the debug API at `http://your-app/debug/api/`.
 
 ### Symfony
 
@@ -63,6 +65,7 @@ composer require app-dev-panel/kernel app-dev-panel/api app-dev-panel/adapter-sy
 ```
 
 Register the bundle in `config/bundles.php` and configure in `config/packages/app_dev_panel.yaml`.
+See `libs/Adapter/Symfony/CLAUDE.md` for full configuration reference.
 
 ### Yii 2
 
@@ -70,18 +73,30 @@ Register the bundle in `config/bundles.php` and configure in `config/packages/ap
 composer require app-dev-panel/kernel app-dev-panel/api app-dev-panel/adapter-yii2
 ```
 
-The adapter auto-registers via `BootstrapInterface`. Configure in application config `modules` section.
+The adapter auto-registers via `BootstrapInterface`. Configure the module in application config `modules` section.
+See `libs/Adapter/Yii2/CLAUDE.md` for full configuration reference.
+
+### Cycle ORM (Database Schema Only)
+
+```bash
+composer require app-dev-panel/api app-dev-panel/adapter-cycle
+```
+
+Provides `CycleSchemaProvider` for database schema inspection. No Kernel dependency — only wires into the API's `SchemaProviderInterface`.
 
 ### Other Frameworks
 
-To integrate ADP with a different framework, you need to create an adapter that:
+To integrate ADP with a different framework, create an adapter that:
 
 1. Registers Kernel proxy classes as service decorators in your DI container
 2. Hooks into application lifecycle events (startup/shutdown)
 3. Configures which collectors are active
-4. Explicitly registers all inspector controllers in DI (see existing adapters)
+4. Explicitly registers all inspector controllers in DI
+5. Registers API routes for `/debug/api/*` and `/inspect/api/*`
+6. Optionally depends on `app-dev-panel/cli` for CLI commands (`debug:reset`, `debug:server`, etc.)
 
-See `libs/Adapter/Yiisoft/`, `libs/Adapter/Symfony/`, `libs/Adapter/Yii2/` for reference implementations.
+See `libs/Adapter/Symfony/` and `libs/Adapter/Yiisoft/` for reference implementations.
+See `docs/architectural-constraints.md` for dependency rules.
 
 ## PHP Built-in Server
 
@@ -97,22 +112,35 @@ PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 
 | Directory | Description |
 |-----------|-------------|
-| `playground/` | Demo apps (Yii 3, Symfony, Yii 2) |
+| `playground/yiisoft-app/` | Yii 3 demo app (port 8101) |
+| `playground/symfony-basic-app/` | Symfony demo app (port 8102) |
+| `playground/yii2-basic-app/` | Yii 2 demo app (port 8103) |
 | `libs/Kernel/` | Core debugging engine |
 | `libs/API/` | REST API + SSE endpoints |
-| `libs/Cli/` | CLI commands |
+| `libs/Cli/` | CLI commands (debug server, reset, broadcast, query) |
+| `libs/Testing/` | Test fixture definitions, runner, CLI command |
 | `libs/Adapter/Yiisoft/` | Yii 3 framework adapter |
-| `libs/app-dev-panel/` | Frontend (React SPA + toolbar + SDK) |
+| `libs/Adapter/Symfony/` | Symfony framework adapter |
+| `libs/Adapter/Yii2/` | Yii 2 framework adapter |
+| `libs/Adapter/Cycle/` | Cycle ORM adapter (database schema only) |
+| `libs/frontend/` | Frontend monorepo (panel, toolbar, SDK) |
 | `docs/` | Global documentation |
 
 ## Running Tests
 
 ```bash
-# Run all backend tests from project root
-composer test
+# Run ALL tests in parallel (PHP + frontend)
+make test
 
-# Run with code coverage
-composer test:coverage
+# PHP tests only
+make test-php
+
+# Frontend tests only
+make test-frontend
+
+# PHP coverage (requires PCOV extension)
+php vendor/bin/phpunit --coverage-text
+php vendor/bin/phpunit --coverage-html=coverage
 ```
 
 ## Code Quality (Mago)
@@ -123,47 +151,39 @@ combines a linter, formatter, and static analyzer in one binary.
 ### Available Commands
 
 ```bash
-# Check code formatting (dry-run, no changes)
-composer format:check
+# Fix all code (PHP core + playgrounds + frontend)
+make fix
 
-# Fix code formatting
-composer format:fix
+# Check all code (PHP core + playgrounds + frontend)
+make check
 
-# Run linter (find code smells, inconsistencies)
-composer lint
+# Granular — core libs only
+make mago                # Check formatting + lint + analyze
+make mago-fix            # Fix formatting, then lint + analyze
 
-# Run static analyzer (find type errors, logic bugs)
-composer analyze
+# Granular — playgrounds only
+make mago-playgrounds      # Check all playgrounds
+make mago-playgrounds-fix  # Fix all playgrounds
 
-# Run all checks at once
-composer check
-
-# Fix formatting, then run lint + analyze
-composer fix
+# Granular — frontend only
+make frontend-check      # Prettier + ESLint
+make frontend-fix        # Fix frontend issues
 ```
-
-### Configuration
-
-Mago is configured via `mago.toml` in the project root. Key settings:
-
-- **Source paths**: `libs/Kernel/src`, `libs/API/src`, `libs/Cli/src`, `libs/Adapter/Yiisoft/src` + their tests
-- **Formatter preset**: PSR-12
-- **Vendor included**: For type information resolution
 
 ### Development Workflow
 
 After completing any feature or bugfix:
 
 ```bash
-composer fix       # Fix formatting + run linter + analyzer
-composer test      # Run all tests
+make fix       # Fix all code
+make test      # Run all tests
 ```
 
 All checks must pass before the feature is considered complete. CI enforces this on PRs.
 
 ## CI/CD
 
-GitHub Actions automatically runs on every PR:
+GitHub Actions runs on every push and PR:
 
 - **Test matrix**: PHP 8.4 and 8.5 on Linux and Windows
 - **Mago checks**: Format, lint, and analyze as separate jobs
@@ -172,5 +192,5 @@ GitHub Actions automatically runs on every PR:
 ## Frontend Tests
 
 ```bash
-cd libs/app-dev-panel && npm test
+cd libs/frontend && npm test
 ```

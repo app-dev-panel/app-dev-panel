@@ -95,14 +95,47 @@ modifying existing code. Serialization format changes must not break the API con
 
 ## Adding a New Adapter
 
-When creating an adapter for a new framework (e.g., Symfony, Laravel):
+When creating an adapter for a new framework (e.g., Laravel, Slim, Laminas):
 
-1. Create `libs/Adapter/NewFramework/`
-2. The adapter **may** depend on the target framework's packages
-3. The adapter **must** depend on `app-dev-panel/kernel`
-4. The adapter **may** depend on `app-dev-panel/api` (for route registration)
-5. The adapter **must not** depend on other adapters
-6. The adapter **must not** modify Kernel or API code — only wire into them via configuration
+1. Create `libs/Adapter/<FrameworkName>/`
+2. The adapter **must** depend on `app-dev-panel/kernel`
+3. The adapter **may** depend on `app-dev-panel/api` (for route registration and inspector endpoints)
+4. The adapter **may** depend on `app-dev-panel/cli` (for CLI commands: `debug:reset`, `debug:server`, etc.)
+5. The adapter **may** depend on the target framework's packages
+6. The adapter **must not** depend on other adapters
+7. The adapter **must not** modify Kernel or API code — only wire into them via configuration
+
+### Adapter Responsibilities
+
+| Responsibility | Description |
+|----------------|-------------|
+| **Lifecycle mapping** | Map framework events (request start/end, console start/end) → `Debugger::startup()` / `Debugger::shutdown()` |
+| **Proxy wiring** | Register Kernel proxies (`LoggerInterfaceProxy`, `EventDispatcherInterfaceProxy`, `HttpClientInterfaceProxy`) as service decorators in the framework's DI |
+| **Framework-specific proxies** | Create proxies for framework-specific APIs not covered by PSR (e.g., `SymfonyEventDispatcherProxy`, Yii2 `DbProfilingTarget`) |
+| **Collector configuration** | Configure which collectors are active, pass framework-specific settings |
+| **Storage setup** | Wire `StorageInterface` implementation (typically `FileStorage`) with framework-appropriate paths |
+| **Route registration** | Register API routes for `/debug/api/*` and `/inspect/api/*` |
+| **Inspector providers** | Implement `SchemaProviderInterface`, `ConfigProviderInterface`, route adapters for framework-specific introspection |
+
+### Reference Implementations
+
+| Adapter | Framework | Pattern | Key Classes |
+|---------|-----------|---------|-------------|
+| `libs/Adapter/Symfony/` | Symfony 6.4–8.x | Bundle + Extension + CompilerPass | `AppDevPanelBundle`, `AppDevPanelExtension`, `CollectorProxyCompilerPass` |
+| `libs/Adapter/Yiisoft/` | Yii 3 | Config plugin + ServiceProvider | `DebugServiceProvider`, config files (`di.php`, `events-web.php`) |
+| `libs/Adapter/Yii2/` | Yii 2 | Module + BootstrapInterface | `Module`, `Bootstrap`, URL rules |
+| `libs/Adapter/Cycle/` | Cycle ORM | Standalone (API only) | `CycleSchemaProvider` — lightweight, no Kernel dependency |
+
+### Minimal New Adapter Checklist
+
+1. Create `composer.json` with `app-dev-panel/kernel` + `app-dev-panel/api` dependencies
+2. Implement lifecycle event mapping → `Debugger::startup()` / `Debugger::shutdown()`
+3. Register Kernel PSR proxies as service decorators (logger, event dispatcher, HTTP client)
+4. Wire `FileStorage` with a framework-appropriate path
+5. Register API controller routes (`/debug/api/*`, `/inspect/api/*`)
+6. Register all inspector controllers in DI (they are not auto-discovered)
+7. Create `CLAUDE.md` documenting integration flow, configuration, and proxy mapping
+8. Create a playground in `playground/<framework>-app/` (see `docs/playgrounds.md`)
 
 ## Adding New Storage
 
