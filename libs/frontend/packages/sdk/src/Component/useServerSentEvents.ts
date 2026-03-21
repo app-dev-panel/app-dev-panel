@@ -20,7 +20,7 @@ export const useServerSentEvents = (
     useEffect(() => {
         if (!subscribe || !backendUrl) return;
 
-        const observer = createServerSentEventsObserver(backendUrl);
+        const observer = createServerSentEventsObserver(backendUrl + '/debug/api/event-stream');
         const handler = (event: MessageEvent<EventTypes>) => onMessageRef.current(event);
         observer.subscribe(handler);
 

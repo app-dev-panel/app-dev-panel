@@ -22,11 +22,24 @@ final class LoggerDecoratorTest extends TestCase
     }
 
     #[Test]
-    public function broadcasterPropertyIsPubliclyAccessible(): void
+    public function acceptsBroadcasterViaConstructor(): void
     {
         $decorated = $this->createStub(LoggerInterface::class);
-        $decorator = new LoggerDecorator($decorated);
+        $broadcaster = new Broadcaster();
+        $decorator = new LoggerDecorator($decorated, $broadcaster);
 
-        $this->assertInstanceOf(Broadcaster::class, $decorator->broadcaster);
+        $this->assertInstanceOf(LoggerInterface::class, $decorator);
+    }
+
+    #[Test]
+    public function delegatesToDecoratedLogger(): void
+    {
+        $decorated = $this->createMock(LoggerInterface::class);
+        $decorated->expects($this->once())
+            ->method('log')
+            ->with('info', 'test message', []);
+
+        $decorator = new LoggerDecorator($decorated);
+        $decorator->info('test message');
     }
 }

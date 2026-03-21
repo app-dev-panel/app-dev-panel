@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\DebugServer;
 
-use Throwable;
-
 final class Broadcaster
 {
-    private const SOCKET_ECONNREFUSED = 61;
+    /**
+     * ECONNREFUSED: 61 on macOS, 111 on Linux.
+     */
+    private const SOCKET_ECONNREFUSED = \PHP_OS_FAMILY === 'Darwin' ? 61 : 111;
 
     /**
      * Broadcasts a message to all connected debug servers.
@@ -17,7 +18,7 @@ final class Broadcaster
      */
     public function broadcast(int $type, string $data): array
     {
-        $files = glob(sys_get_temp_dir() . '/yii-dev-server-*.sock', GLOB_NOSORT);
+        $files = glob(sys_get_temp_dir() . '/adp-dev-server-*.sock', GLOB_NOSORT);
         $uniqueErrors = [];
         $payload = json_encode([$type, $data], JSON_THROW_ON_ERROR);
         foreach ($files as $file) {
@@ -38,8 +39,6 @@ final class Broadcaster
                      */
                     continue;
                 }
-            } catch (Throwable $e) {
-                throw $e;
             } finally {
                 fclose($socket);
             }

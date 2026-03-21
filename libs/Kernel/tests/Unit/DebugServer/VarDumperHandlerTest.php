@@ -21,10 +21,11 @@ final class VarDumperHandlerTest extends TestCase
     }
 
     #[Test]
-    public function broadcasterPropertyIsPubliclyAccessible(): void
+    public function acceptsBroadcasterViaConstructor(): void
     {
-        $handler = new VarDumperHandler();
+        $broadcaster = new Broadcaster();
+        $handler = new VarDumperHandler($broadcaster);
 
-        $this->assertInstanceOf(Broadcaster::class, $handler->broadcaster);
+        $this->assertInstanceOf(HandlerInterface::class, $handler);
     }
 }

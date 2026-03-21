@@ -81,7 +81,11 @@ final class SocketReader
         }
     }
 
-    private const SOCKET_EAGAIN = 35;
+    /**
+     * EAGAIN/EWOULDBLOCK: 35 on macOS, 11 on Linux.
+     * PHP ext-sockets defines SOCKET_EAGAIN when available.
+     */
+    private const SOCKET_EAGAIN = \PHP_OS_FAMILY === 'Darwin' ? 35 : 11;
 
     private function closeSocket(): void
     {

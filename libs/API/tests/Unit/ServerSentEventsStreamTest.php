@@ -70,7 +70,7 @@ final class ServerSentEventsStreamTest extends TestCase
     public function testGetSize(): void
     {
         $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
-        $this->assertSame(0, $stream->getSize());
+        $this->assertNull($stream->getSize());
     }
 
     public function testTell(): void

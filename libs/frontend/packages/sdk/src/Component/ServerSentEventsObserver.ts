@@ -73,5 +73,4 @@ class ServerSentEvents {
     };
 }
 
-export const createServerSentEventsObserver = (backendUrl: string) =>
-    new ServerSentEvents(backendUrl + '/debug/api/event-stream');
+export const createServerSentEventsObserver = (url: string) => new ServerSentEvents(url);

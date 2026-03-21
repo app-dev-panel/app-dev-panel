@@ -5,30 +5,54 @@ declare(strict_types=1);
 namespace AppDevPanel\Api;
 
 use Closure;
+use Generator;
 use Psr\Http\Message\StreamInterface;
 
 final class ServerSentEventsStream implements StreamInterface, \Stringable
 {
-    public array $buffer = [];
+    /** @var array<int, string> */
+    private array $buffer = [];
     private bool $eof = false;
+    private ?Generator $generator = null;
 
+    /**
+     * @param Closure $stream Callback-based stream (legacy): fn(array &$buffer): bool
+     */
     public function __construct(
-        private Closure $stream,
+        private readonly Closure $stream,
     ) {}
+
+    /**
+     * Create a stream from a generator-returning closure.
+     *
+     * The closure must return a Generator that yields SSE data strings.
+     * Yielding an empty string signals end-of-stream.
+     *
+     * @param Closure(): Generator<int, string> $factory
+     */
+    public static function fromGenerator(Closure $factory): self
+    {
+        $instance = new self(static fn (): bool => false);
+        $instance->generator = $factory();
+
+        return $instance;
+    }
 
     public function close(): void
     {
         $this->eof = true;
     }
 
-    public function detach(): void
+    public function detach(): null
     {
         $this->eof = true;
+
+        return null;
     }
 
-    public function getSize(): int
+    public function getSize(): ?int
     {
-        return 0;
+        return null;
     }
 
     public function tell(): int
@@ -71,10 +95,58 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
         return true;
     }
 
-    /**
-     * TODO: support length reading
-     */
     public function read(int $length): string
+    {
+        if ($this->generator !== null) {
+            return $this->readFromGenerator();
+        }
+
+        return $this->readFromCallback();
+    }
+
+    public function getContents(): string
+    {
+        return $this->read(8_388_608);
+    }
+
+    /**
+     * @return mixed[]|null
+     */
+    public function getMetadata($key = null): array|null
+    {
+        if ($key !== null) {
+            return null;
+        }
+
+        return [];
+    }
+
+    public function __toString(): string
+    {
+        return $this->getContents();
+    }
+
+    private function readFromGenerator(): string
+    {
+        if (!$this->generator->valid()) {
+            $this->eof = true;
+
+            return '';
+        }
+
+        $message = $this->generator->current();
+        $this->generator->next();
+
+        if ($message === '' || $message === null) {
+            $this->eof = true;
+
+            return '';
+        }
+
+        return sprintf("data: %s\n\n", $message);
+    }
+
+    private function readFromCallback(): string
     {
         $continue = ($this->stream)($this->buffer);
 
@@ -88,21 +160,7 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
             $output .= sprintf("data: %s\n", $value);
         }
         $output .= "\n";
+
         return $output;
-    }
-
-    public function getContents(): string
-    {
-        return $this->read(1024);
-    }
-
-    public function getMetadata($key = null): array
-    {
-        return [];
-    }
-
-    public function __toString(): string
-    {
-        return $this->getContents();
     }
 }

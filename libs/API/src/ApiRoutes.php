@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api;
 
 use AppDevPanel\Api\Debug\Controller\DebugController;
+use AppDevPanel\Api\Debug\Controller\DebugServerController;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
@@ -44,6 +45,12 @@ final class ApiRoutes
                 '/debug/api/event-stream',
                 [DebugController::class, 'eventStream'],
                 'debug/api/event-stream',
+            ),
+            new Route(
+                'GET',
+                '/debug/api/dev',
+                [DebugServerController::class, 'stream'],
+                'debug/api/dev',
             ),
         ];
     }

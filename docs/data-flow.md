@@ -281,7 +281,7 @@ External App                          ADP
 $ php yii dev -a 0.0.0.0 -p 8890
 
 1. Connection::create() -> Create AF_UNIX SOCK_DGRAM socket
-2. Connection::bind()   -> Bind to /tmp/yii-dev-server-{random}.sock
+2. Connection::bind()   -> Bind to /tmp/adp-dev-server-{random}.sock
 3. Print: "Listening on {socket_uri}"
 4. SocketReader::read() -> Generator loop:
      |
@@ -308,7 +308,7 @@ VarDumperHandler / LoggerDecorator
       v
 Broadcaster::broadcast(type, data)
       |
-      +-- Glob /tmp/yii-dev-server-*.sock
+      +-- Glob /tmp/adp-dev-server-*.sock
       +-- For each socket file:
       |     fsockopen(socket_uri)
       |     Write: 8-byte length + base64(json_encode([type, data]))

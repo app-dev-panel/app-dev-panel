@@ -69,10 +69,9 @@ final class DebugServerCommand extends Command
         if (\function_exists('pcntl_signal')) {
             $io->success('Quit the server with CTRL-C or COMMAND-C.');
 
-            \pcntl_signal(\SIGINT, function () use ($connection): void {
-                $this->logger->info('Debug server shutting down.');
+            \pcntl_signal(\SIGINT, static function () use ($connection): never {
                 $connection->close();
-                exit(1);
+                exit(0);
             });
         }
 

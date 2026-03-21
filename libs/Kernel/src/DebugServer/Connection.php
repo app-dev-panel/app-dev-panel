@@ -50,7 +50,7 @@ final class Connection
     public function bind(): void
     {
         $n = random_int(0, PHP_INT_MAX);
-        $file = sprintf(sys_get_temp_dir() . '/yii-dev-server-%d.sock', $n);
+        $file = sprintf(sys_get_temp_dir() . '/adp-dev-server-%d.sock', $n);
         $this->uri = $file;
         if (!socket_bind($this->socket, $file)) {
             $socket_last_error = socket_last_error($this->socket);

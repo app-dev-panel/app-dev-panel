@@ -280,6 +280,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         () => [
             {key: 'home', icon: 'home', label: 'Home', href: '/'},
             {key: 'debug', icon: 'bug_report', label: 'Debug', href: '/debug', children: debugChildren},
+            {key: 'dev-server', icon: 'terminal', label: 'Dev Server', href: '/dev-server'},
             {key: 'inspector', icon: 'search', label: 'Inspector', href: '/inspector', children: inspectorChildren},
             {key: 'gii', icon: 'build_circle', label: 'Gii', href: '/gii'},
             {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api'},

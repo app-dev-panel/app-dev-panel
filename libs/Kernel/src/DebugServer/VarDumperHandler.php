@@ -9,11 +9,11 @@ use Yiisoft\VarDumper\VarDumper;
 
 final class VarDumperHandler implements HandlerInterface
 {
-    public Broadcaster $broadcaster;
+    private readonly Broadcaster $broadcaster;
 
-    public function __construct()
+    public function __construct(?Broadcaster $broadcaster = null)
     {
-        $this->broadcaster = new Broadcaster();
+        $this->broadcaster = $broadcaster ?? new Broadcaster();
     }
 
     public function handle(mixed $variable, int $depth, bool $highlight = false): void
