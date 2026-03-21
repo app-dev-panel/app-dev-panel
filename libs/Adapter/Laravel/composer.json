@@ -1,0 +1,63 @@
+{
+    "name": "app-dev-panel/adapter-laravel",
+    "type": "library",
+    "description": "Laravel framework adapter for Application Development Panel (ADP)",
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "app-dev-panel/api": "*",
+        "app-dev-panel/kernel": "*",
+        "app-dev-panel/cli": "*",
+        "guzzlehttp/guzzle": "^7.5",
+        "guzzlehttp/psr7": "^2.4",
+        "nyholm/psr7": "^1.8",
+        "psr/container": "^2.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/http-client": "^1.0",
+        "psr/http-message": "^1.0|^2.0",
+        "psr/log": "^3.0",
+        "illuminate/contracts": "^11.0|^12.0",
+        "illuminate/http": "^11.0|^12.0",
+        "illuminate/routing": "^11.0|^12.0",
+        "illuminate/support": "^11.0|^12.0",
+        "symfony/var-dumper": "^6.4|^7.0|^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "orchestra/testbench": "^9.0|^10.0"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../Kernel"
+        },
+        {
+            "type": "path",
+            "url": "../../API"
+        },
+        {
+            "type": "path",
+            "url": "../../Cli"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "AppDevPanel\\Adapter\\Laravel\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AppDevPanel\\Adapter\\Laravel\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AppDevPanel\\Adapter\\Laravel\\AppDevPanelServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

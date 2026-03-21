@@ -1,0 +1,56 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\TestFixtures\CacheAction;
+use App\Http\Controllers\TestFixtures\CacheHeavyAction;
+use App\Http\Controllers\TestFixtures\DatabaseAction;
+use App\Http\Controllers\TestFixtures\DumpAction;
+use App\Http\Controllers\TestFixtures\EventsAction;
+use App\Http\Controllers\TestFixtures\ExceptionAction;
+use App\Http\Controllers\TestFixtures\ExceptionChainedAction;
+use App\Http\Controllers\TestFixtures\FilesystemAction;
+use App\Http\Controllers\TestFixtures\HttpClientAction;
+use App\Http\Controllers\TestFixtures\LogsAction;
+use App\Http\Controllers\TestFixtures\LogsContextAction;
+use App\Http\Controllers\TestFixtures\LogsHeavyAction;
+use App\Http\Controllers\TestFixtures\MailerAction;
+use App\Http\Controllers\TestFixtures\MessengerAction;
+use App\Http\Controllers\TestFixtures\MultiAction;
+use App\Http\Controllers\TestFixtures\RequestInfoAction;
+use App\Http\Controllers\TestFixtures\ResetAction;
+use App\Http\Controllers\TestFixtures\ResetCliAction;
+use App\Http\Controllers\TestFixtures\RouterAction;
+use App\Http\Controllers\TestFixtures\TimelineAction;
+use App\Http\Controllers\TestFixtures\ValidatorAction;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', [HomeController::class, 'index']);
+Route::get('/api/users', [HomeController::class, 'users']);
+Route::get('/api/error', [HomeController::class, 'error']);
+
+// Test fixtures
+Route::prefix('test/fixtures')->group(function (): void {
+    Route::match(['GET', 'POST'], '/reset', ResetAction::class);
+    Route::match(['GET', 'POST'], '/reset-cli', ResetCliAction::class);
+    Route::get('/logs', LogsAction::class);
+    Route::get('/logs-context', LogsContextAction::class);
+    Route::get('/logs-heavy', LogsHeavyAction::class);
+    Route::get('/events', EventsAction::class);
+    Route::get('/dump', DumpAction::class);
+    Route::get('/timeline', TimelineAction::class);
+    Route::get('/exception', ExceptionAction::class);
+    Route::get('/exception-chained', ExceptionChainedAction::class);
+    Route::get('/request-info', RequestInfoAction::class);
+    Route::get('/multi', MultiAction::class);
+    Route::get('/cache', CacheAction::class);
+    Route::get('/cache-heavy', CacheHeavyAction::class);
+    Route::get('/database', DatabaseAction::class);
+    Route::get('/http-client', HttpClientAction::class);
+    Route::get('/mailer', MailerAction::class);
+    Route::get('/messenger', MessengerAction::class);
+    Route::get('/validator', ValidatorAction::class);
+    Route::get('/router', RouterAction::class);
+    Route::get('/filesystem', FilesystemAction::class);
+});

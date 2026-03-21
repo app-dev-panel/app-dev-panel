@@ -1,42 +1,22 @@
 [source]
 paths = [
-    "libs/Kernel/src",
-    "libs/Kernel/tests",
-    "libs/API/src",
-    "libs/API/tests",
-    "libs/Cli/src",
-    "libs/Cli/tests",
-    "libs/Adapter/Yiisoft/src",
-    "libs/Adapter/Symfony/src",
-    "libs/Adapter/Symfony/tests",
-    "libs/Adapter/Yii2/src",
-    "libs/Adapter/Yii2/tests",
-    "libs/Adapter/Laravel/src",
-    "libs/Adapter/Cycle/src",
-    "libs/Testing/src",
-    "libs/Testing/tests",
+    "app",
+    "config",
+    "public",
+    "routes",
+    "bootstrap",
 ]
-includes = ["vendor"]
 excludes = [
-    "playground/**",
-    "libs/yii-dev-panel/**",
-    "var/**",
-    "cache/**",
-    "runtime/**",
+    "vendor/**",
+    "storage/**",
 ]
 extensions = ["php"]
 
 [formatter]
 preset = "default"
 
-[analyzer]
-baseline = "mago-analyze-baseline.php"
-
-[linter]
-baseline = "mago-lint-baseline.php"
-
 [linter.rules]
-# Disable noisy rules that don't add value for this codebase
+# Disable noisy rules (aligned with core config)
 literal-named-argument = { enabled = false }
 tagged-todo = { enabled = false }
 halstead = { enabled = false }
@@ -49,7 +29,7 @@ no-multi-assignments = { enabled = false }
 single-class-per-file = { enabled = false }
 no-nested-ternary = { enabled = false }
 
-# Downgrade to warnings for existing codebase patterns
+# Downgrade to warnings
 too-many-methods = { level = "warning" }
 excessive-parameter-list = { level = "warning" }
 cyclomatic-complexity = { level = "warning", threshold = 15 }
