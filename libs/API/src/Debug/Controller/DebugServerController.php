@@ -34,23 +34,21 @@ final class DebugServerController
             ->withHeader('Content-Type', 'text/event-stream')
             ->withHeader('Cache-Control', 'no-cache')
             ->withHeader('Connection', 'keep-alive')
-            ->withBody(
-                ServerSentEventsStream::fromGenerator(function () use ($reader, $connection) {
-                    try {
-                        foreach ($reader->read() as $message) {
-                            match ($message[0]) {
-                                Connection::TYPE_ERROR => yield '',
-                                Connection::TYPE_RELEASE => connection_aborted() ? yield '' : null,
-                                Connection::TYPE_RESULT => yield $message[1],
-                                default => null,
-                            };
-                        }
-                    } finally {
-                        $connection->close();
+            ->withBody(ServerSentEventsStream::fromGenerator(function () use ($reader, $connection) {
+                try {
+                    foreach ($reader->read() as $message) {
+                        match ($message[0]) {
+                            Connection::TYPE_ERROR => yield '',
+                            Connection::TYPE_RELEASE => connection_aborted() ? yield '' : null,
+                            Connection::TYPE_RESULT => yield $message[1],
+                            default => null,
+                        };
                     }
+                } finally {
+                    $connection->close();
+                }
 
-                    return '';
-                }),
-            );
+                return '';
+            }));
     }
 }

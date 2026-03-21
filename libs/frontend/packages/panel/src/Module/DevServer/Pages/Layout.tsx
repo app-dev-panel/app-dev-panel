@@ -3,6 +3,7 @@ import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {useDevServerEvents} from '@app-dev-panel/sdk/Component/useDevServerEvents';
+import {logLevelColor} from '@app-dev-panel/sdk/Helper/logLevelColor';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import TableRowsIcon from '@mui/icons-material/TableRows';
@@ -20,35 +21,18 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import {styled, type Theme, useTheme} from '@mui/material/styles';
-import {type MouseEvent, useCallback, useState} from 'react';
+import {styled, useTheme} from '@mui/material/styles';
+import {type MouseEvent, useCallback, useMemo, useRef, useState} from 'react';
 
+/** Matches Connection::MESSAGE_TYPE_VAR_DUMPER (0x001B) and MESSAGE_TYPE_LOGGER (0x002B) in PHP */
 enum EventTypeEnum {
     VAR_DUMPER = 27,
     LOGS = 43,
 }
 
-type EventItem = {data: string; time: Date; type: EventTypeEnum};
+type ParsedEventItem = {id: number; data: unknown; time: Date; type: EventTypeEnum};
 
-const levelColor = (level: string, theme: Theme): string => {
-    switch (level) {
-        case 'emergency':
-        case 'alert':
-        case 'critical':
-        case 'error':
-            return theme.palette.error.main;
-        case 'warning':
-            return theme.palette.warning.main;
-        case 'notice':
-            return theme.palette.primary.main;
-        case 'info':
-            return theme.palette.success.main;
-        case 'debug':
-            return theme.palette.text.disabled;
-        default:
-            return theme.palette.text.disabled;
-    }
-};
+const MAX_EVENTS = 5000;
 
 const StyledListItem = styled(ListItem)(({theme}) => ({
     alignItems: 'flex-start',
@@ -58,6 +42,8 @@ const StyledListItem = styled(ListItem)(({theme}) => ({
 }));
 
 const TimeLabel = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontSize: '11px', whiteSpace: 'nowrap'});
+
+const FallbackText = styled(Typography)({fontSize: '13px', wordBreak: 'break-word'});
 
 function DebugEntryIcon({type}: {type: EventTypeEnum}) {
     if (type === EventTypeEnum.VAR_DUMPER) {
@@ -77,51 +63,51 @@ function DebugEntryIcon({type}: {type: EventTypeEnum}) {
     return null;
 }
 
-function DebugEntryContent({data, type}: {data: string; type: EventTypeEnum}) {
+function VarDumperContent({data}: {data: unknown}) {
+    if (typeof data === 'string') {
+        return <FallbackText>{data}</FallbackText>;
+    }
+    return <JsonRenderer value={data} />;
+}
+
+function LogContent({data}: {data: unknown}) {
     const theme = useTheme();
 
-    if (type === EventTypeEnum.VAR_DUMPER) {
-        try {
-            return <JsonRenderer value={JSON.parse(data)} />;
-        } catch {
-            return <Typography sx={{fontSize: '13px', wordBreak: 'break-word'}}>{data}</Typography>;
-        }
+    if (typeof data !== 'object' || data === null) {
+        return <FallbackText>{String(data)}</FallbackText>;
     }
 
-    if (type === EventTypeEnum.LOGS) {
-        try {
-            const parsed = JSON.parse(data);
-            const level = parsed.level || 'info';
-            const color = levelColor(level, theme);
-            return (
-                <Box>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 0.5}}>
-                        <Chip
-                            label={level.toUpperCase()}
-                            size="small"
-                            sx={{
-                                fontWeight: 600,
-                                fontSize: '10px',
-                                height: 20,
-                                minWidth: 50,
-                                backgroundColor: color,
-                                color: 'common.white',
-                                borderRadius: 1,
-                            }}
-                        />
-                        <Typography sx={{fontSize: '13px', fontWeight: 500}}>{parsed.message}</Typography>
-                    </Box>
-                    {parsed.context && Object.keys(parsed.context).length > 0 && (
-                        <JsonRenderer value={parsed.context} depth={2} />
-                    )}
-                </Box>
-            );
-        } catch {
-            return <Typography sx={{fontSize: '13px', wordBreak: 'break-word'}}>{data}</Typography>;
-        }
-    }
+    const parsed = data as {level?: string; message?: string; context?: Record<string, unknown>};
+    const level = parsed.level || 'info';
+    const color = logLevelColor(level, theme);
 
-    return <Typography sx={{fontSize: '13px', wordBreak: 'break-word'}}>{data}</Typography>;
+    return (
+        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap'}}>
+            <Chip
+                label={level.toUpperCase()}
+                size="small"
+                sx={{
+                    fontWeight: 600,
+                    fontSize: '10px',
+                    height: 20,
+                    minWidth: 50,
+                    backgroundColor: color,
+                    color: 'common.white',
+                    borderRadius: 1,
+                }}
+            />
+            <Typography sx={{fontSize: '13px', fontWeight: 500}}>{parsed.message}</Typography>
+            {parsed.context && Object.keys(parsed.context).length > 0 && (
+                <JsonRenderer value={parsed.context} depth={2} />
+            )}
+        </Box>
+    );
+}
+
+function DebugEntryContent({data, type}: {data: unknown; type: EventTypeEnum}) {
+    if (type === EventTypeEnum.VAR_DUMPER) return <VarDumperContent data={data} />;
+    if (type === EventTypeEnum.LOGS) return <LogContent data={data} />;
+    return <FallbackText>{String(data)}</FallbackText>;
 }
 
 function formatTime(date: Date): string {
@@ -134,23 +120,32 @@ function formatTime(date: Date): string {
 }
 
 export const Layout = () => {
-    const [events, setEvents] = useState<EventItem[]>([]);
-    const [counters, setCounters] = useState<Record<EventTypeEnum, number>>({
-        [EventTypeEnum.VAR_DUMPER]: 0,
-        [EventTypeEnum.LOGS]: 0,
-    });
+    const [events, setEvents] = useState<ParsedEventItem[]>([]);
     const backendUrl = useSelector((state) => state.application.baseUrl);
+    const nextId = useRef(0);
 
     const onMessage = useCallback((m: MessageEvent) => {
-        let data: [number, string];
+        let raw: [number, string];
         try {
-            data = JSON.parse(m.data);
+            raw = JSON.parse(m.data);
         } catch {
             return;
         }
-        const type = data[0] as EventTypeEnum;
-        setCounters((prev) => ({...prev, [type]: (prev[type] || 0) + 1}));
-        setEvents((prev) => [{data: data[1], time: new Date(), type}, ...prev]);
+
+        let parsed: unknown;
+        try {
+            parsed = JSON.parse(raw[1]);
+        } catch {
+            parsed = raw[1];
+        }
+
+        const id = nextId.current++;
+        const type = raw[0] as EventTypeEnum;
+        setEvents((prev) => {
+            const next = [{id, data: parsed, time: new Date(), type}, ...prev];
+            if (next.length > MAX_EVENTS) next.length = MAX_EVENTS;
+            return next;
+        });
     }, []);
 
     useDevServerEvents(backendUrl, onMessage, true);
@@ -163,10 +158,15 @@ export const Layout = () => {
 
     const handleClear = () => {
         setEvents([]);
-        setCounters({[EventTypeEnum.VAR_DUMPER]: 0, [EventTypeEnum.LOGS]: 0});
     };
 
-    const filtered = events.filter((e) => activeTypes.includes(e.type));
+    const filtered = useMemo(() => events.filter((e) => activeTypes.includes(e.type)), [events, activeTypes]);
+
+    const counters = useMemo(() => {
+        const counts = {[EventTypeEnum.VAR_DUMPER]: 0, [EventTypeEnum.LOGS]: 0};
+        for (const e of events) counts[e.type] = (counts[e.type] || 0) + 1;
+        return counts;
+    }, [events]);
 
     return (
         <Box>
@@ -210,8 +210,8 @@ export const Layout = () => {
                 </Box>
             ) : (
                 <List disablePadding>
-                    {filtered.map((event, index) => (
-                        <StyledListItem key={index}>
+                    {filtered.map((event) => (
+                        <StyledListItem key={event.id}>
                             <ListItemIcon sx={{minWidth: 40, pt: 0.5}}>
                                 <DebugEntryIcon type={event.type} />
                             </ListItemIcon>

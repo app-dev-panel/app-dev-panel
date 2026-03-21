@@ -46,12 +46,7 @@ final class ApiRoutes
                 [DebugController::class, 'eventStream'],
                 'debug/api/event-stream',
             ),
-            new Route(
-                'GET',
-                '/debug/api/dev',
-                [DebugServerController::class, 'stream'],
-                'debug/api/dev',
-            ),
+            new Route('GET', '/debug/api/dev', [DebugServerController::class, 'stream'], 'debug/api/dev'),
         ];
     }
 

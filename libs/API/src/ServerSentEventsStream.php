@@ -32,7 +32,7 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
      */
     public static function fromGenerator(Closure $factory): self
     {
-        $instance = new self(static fn (): bool => false);
+        $instance = new self(static fn(): bool => false);
         $instance->generator = $factory();
 
         return $instance;
@@ -112,7 +112,7 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
     /**
      * @return mixed[]|null
      */
-    public function getMetadata($key = null): array|null
+    public function getMetadata($key = null): ?array
     {
         if ($key !== null) {
             return null;

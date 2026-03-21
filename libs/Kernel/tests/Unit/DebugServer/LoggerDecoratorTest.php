@@ -35,11 +35,39 @@ final class LoggerDecoratorTest extends TestCase
     public function delegatesToDecoratedLogger(): void
     {
         $decorated = $this->createMock(LoggerInterface::class);
-        $decorated->expects($this->once())
-            ->method('log')
-            ->with('info', 'test message', []);
+        $decorated->expects($this->once())->method('log')->with('info', 'test message', []);
 
         $decorator = new LoggerDecorator($decorated);
         $decorator->info('test message');
+    }
+
+    #[Test]
+    public function passesContextToDecoratedLogger(): void
+    {
+        $context = ['user' => 'admin', 'action' => 'login'];
+
+        $decorated = $this->createMock(LoggerInterface::class);
+        $decorated->expects($this->once())->method('log')->with('warning', 'access attempt', $context);
+
+        $decorator = new LoggerDecorator($decorated);
+        $decorator->warning('access attempt', $context);
+    }
+
+    #[Test]
+    public function supportsAllPsr3LogLevels(): void
+    {
+        $decorated = $this->createMock(LoggerInterface::class);
+        $decorated->expects($this->exactly(8))->method('log');
+
+        $decorator = new LoggerDecorator($decorated);
+
+        $decorator->emergency('emergency');
+        $decorator->alert('alert');
+        $decorator->critical('critical');
+        $decorator->error('error');
+        $decorator->warning('warning');
+        $decorator->notice('notice');
+        $decorator->info('info');
+        $decorator->debug('debug');
     }
 }

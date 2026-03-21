@@ -175,4 +175,93 @@ final class ServerSentEventsStreamTest extends TestCase
         $output2 = $stream->read(1024);
         $this->assertStringNotContainsString('first-call', $output2);
     }
+
+    public function testFromGeneratorReadsYieldedValues(): void
+    {
+        $stream = ServerSentEventsStream::fromGenerator(static function () {
+            yield 'first';
+            yield 'second';
+        });
+
+        $output1 = $stream->read(1024);
+        $this->assertSame("data: first\n\n", $output1);
+
+        $output2 = $stream->read(1024);
+        $this->assertSame("data: second\n\n", $output2);
+    }
+
+    public function testFromGeneratorEofAfterGeneratorExhausted(): void
+    {
+        $stream = ServerSentEventsStream::fromGenerator(static function () {
+            yield 'only';
+        });
+
+        $this->assertFalse($stream->eof());
+
+        $stream->read(1024);
+        $this->assertFalse($stream->eof());
+
+        $stream->read(1024);
+        $this->assertTrue($stream->eof());
+    }
+
+    public function testFromGeneratorEmptyStringSignalsEof(): void
+    {
+        $stream = ServerSentEventsStream::fromGenerator(static function () {
+            yield 'data';
+            yield '';
+        });
+
+        $stream->read(1024);
+        $this->assertFalse($stream->eof());
+
+        $stream->read(1024);
+        $this->assertTrue($stream->eof());
+    }
+
+    public function testFromGeneratorNullSignalsEof(): void
+    {
+        $stream = ServerSentEventsStream::fromGenerator(static function () {
+            yield 'data';
+            yield null;
+        });
+
+        $stream->read(1024);
+        $this->assertFalse($stream->eof());
+
+        $stream->read(1024);
+        $this->assertTrue($stream->eof());
+    }
+
+    public function testFromGeneratorFormatsAsSseData(): void
+    {
+        $json = json_encode(['type' => 'debug-updated', 'payload' => []]);
+        $stream = ServerSentEventsStream::fromGenerator(static function () use ($json) {
+            yield $json;
+        });
+
+        $output = $stream->read(1024);
+
+        $this->assertSame("data: {$json}\n\n", $output);
+    }
+
+    public function testFromGeneratorGetContents(): void
+    {
+        $stream = ServerSentEventsStream::fromGenerator(static function () {
+            yield 'event-data';
+        });
+
+        $contents = $stream->getContents();
+
+        $this->assertSame("data: event-data\n\n", $contents);
+    }
+
+    public function testFromGeneratorToString(): void
+    {
+        $stream = ServerSentEventsStream::fromGenerator(static function () {
+            yield 'hello-generator';
+        });
+
+        $this->assertSame("data: hello-generator\n\n", (string) $stream);
+    }
 }

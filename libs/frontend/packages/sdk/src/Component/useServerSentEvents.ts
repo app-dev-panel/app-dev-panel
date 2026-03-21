@@ -9,10 +9,11 @@ export enum EventTypesEnum {
 
 export type EventTypes = DebugUpdatedType;
 
-export const useServerSentEvents = (
+export const useServerSentEvents = <T = EventTypes>(
     backendUrl: string,
-    onMessage: (event: MessageEvent<EventTypes>) => void,
+    onMessage: (event: MessageEvent<T>) => void,
     subscribe = true,
+    endpoint = '/debug/api/event-stream',
 ) => {
     const onMessageRef = useRef(onMessage);
     onMessageRef.current = onMessage;
@@ -20,13 +21,13 @@ export const useServerSentEvents = (
     useEffect(() => {
         if (!subscribe || !backendUrl) return;
 
-        const observer = createServerSentEventsObserver(backendUrl + '/debug/api/event-stream');
-        const handler = (event: MessageEvent<EventTypes>) => onMessageRef.current(event);
+        const observer = createServerSentEventsObserver(backendUrl + endpoint);
+        const handler = (event: MessageEvent<T>) => onMessageRef.current(event);
         observer.subscribe(handler);
 
         return () => {
             observer.unsubscribe(handler);
             observer.close();
         };
-    }, [backendUrl, subscribe]);
+    }, [backendUrl, subscribe, endpoint]);
 };

@@ -6,33 +6,14 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
-import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
+import {logLevelColor} from '@app-dev-panel/sdk/Helper/logLevelColor';
+import {Box, Chip, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
 
 type Level = 'emergency' | 'alert' | 'critical' | 'error' | 'warning' | 'notice' | 'info' | 'debug';
 type LogEntry = {context: object; level: Level; line: string; message: unknown; time: number};
 type LogPanelProps = {data: LogEntry[]};
-
-const levelColor = (level: string, theme: Theme): string => {
-    switch (level) {
-        case 'emergency':
-        case 'alert':
-        case 'critical':
-        case 'error':
-            return theme.palette.error.main;
-        case 'warning':
-            return theme.palette.warning.main;
-        case 'notice':
-            return theme.palette.primary.main;
-        case 'info':
-            return theme.palette.success.main;
-        case 'debug':
-            return theme.palette.text.disabled;
-        default:
-            return theme.palette.text.disabled;
-    }
-};
 
 const SEVERITY_ORDER: Level[] = ['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'];
 
@@ -137,7 +118,7 @@ export const LogPanel = ({data}: LogPanelProps) => {
             {presentLevels.length > 1 && (
                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
                     {presentLevels.map((level) => {
-                        const color = levelColor(level, theme);
+                        const color = logLevelColor(level, theme);
                         const isActive = activeLevels.has(level);
                         return (
                             <Chip
@@ -174,7 +155,7 @@ export const LogPanel = ({data}: LogPanelProps) => {
 
             {filtered.map((entry, index) => {
                 const expanded = expandedIndex === index;
-                const color = levelColor(entry.level, theme);
+                const color = logLevelColor(entry.level, theme);
                 return (
                     <Box key={index}>
                         <LogRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>

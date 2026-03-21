@@ -25,13 +25,35 @@ final class ConnectionTest extends TestCase
         $this->assertSame(0x002B, Connection::MESSAGE_TYPE_LOGGER);
     }
 
-    public function testCreateAndClose(): void
+    public function testCreateReturnsConnectionInstance(): void
+    {
+        $connection = Connection::create();
+
+        $this->assertInstanceOf(Connection::class, $connection);
+
+        $connection->close();
+    }
+
+    public function testBindCreatesSocketFile(): void
     {
         $connection = Connection::create();
         $connection->bind();
 
         $uri = $connection->getUri();
         $this->assertNotEmpty($uri);
+        $this->assertStringContainsString('adp-dev-server-', $uri);
+        $this->assertStringEndsWith('.sock', $uri);
+        $this->assertFileExists($uri);
+
+        $connection->close();
+    }
+
+    public function testCloseRemovesSocketFile(): void
+    {
+        $connection = Connection::create();
+        $connection->bind();
+
+        $uri = $connection->getUri();
         $this->assertFileExists($uri);
 
         $connection->close();
@@ -45,5 +67,19 @@ final class ConnectionTest extends TestCase
         $this->assertInstanceOf(Socket::class, $connection->getSocket());
 
         $connection->close();
+    }
+
+    public function testMultipleConnectionsGetUniqueUris(): void
+    {
+        $conn1 = Connection::create();
+        $conn1->bind();
+
+        $conn2 = Connection::create();
+        $conn2->bind();
+
+        $this->assertNotSame($conn1->getUri(), $conn2->getUri());
+
+        $conn1->close();
+        $conn2->close();
     }
 }

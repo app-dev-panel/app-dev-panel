@@ -28,4 +28,24 @@ final class VarDumperHandlerTest extends TestCase
 
         $this->assertInstanceOf(HandlerInterface::class, $handler);
     }
+
+    #[Test]
+    public function handleDoesNotThrowForScalarValue(): void
+    {
+        $handler = new VarDumperHandler();
+
+        $handler->handle('hello world', 3);
+
+        $this->addToAssertionCount(1);
+    }
+
+    #[Test]
+    public function handleDoesNotThrowForArrayValue(): void
+    {
+        $handler = new VarDumperHandler();
+
+        $handler->handle(['key' => 'value', 'nested' => [1, 2, 3]], 3);
+
+        $this->addToAssertionCount(1);
+    }
 }
