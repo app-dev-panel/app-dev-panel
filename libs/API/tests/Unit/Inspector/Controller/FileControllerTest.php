@@ -148,6 +148,8 @@ final class FileControllerTest extends ControllerTestCase
         $this->assertArrayHasKey('permissions', $data);
         $this->assertArrayHasKey('user', $data);
         $this->assertArrayHasKey('group', $data);
+        $this->assertArrayHasKey('mtime', $data);
+        $this->assertIsInt($data['mtime']);
         $this->assertArrayHasKey('directory', $data);
         $this->assertArrayHasKey('absolutePath', $data);
     }

@@ -145,6 +145,7 @@ final class FileController
             'size' => $file->getSize(),
             'type' => $file->getType(),
             'permissions' => substr(sprintf('%o', $file->getPerms()), -4),
+            'mtime' => $file->getMTime(),
         ];
     }
 
