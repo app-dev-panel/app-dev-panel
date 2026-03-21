@@ -44,12 +44,12 @@ final class DatabaseControllerTest extends ControllerTestCase
             'columns' => [],
             'records' => [['id' => 1, 'name' => 'Alice']],
             'totalCount' => 1,
-            'limit' => 1000,
+            'limit' => 50,
             'offset' => 0,
         ];
 
         $provider = $this->createMock(SchemaProviderInterface::class);
-        $provider->expects($this->once())->method('getTable')->with('users', 1000, 0)->willReturn($tableData);
+        $provider->expects($this->once())->method('getTable')->with('users', 50, 0)->willReturn($tableData);
 
         $controller = $this->createController($provider);
         $request = $this->get();
@@ -82,13 +82,13 @@ final class DatabaseControllerTest extends ControllerTestCase
         $this->assertSame(200, $response->getStatusCode());
     }
 
-    public function testGetTableLimitCappedAt10000(): void
+    public function testGetTableLimitCappedAt1000(): void
     {
         $provider = $this->createMock(SchemaProviderInterface::class);
         $provider
             ->expects($this->once())
             ->method('getTable')
-            ->with('big', 10000, 0)
+            ->with('big', 1000, 0)
             ->willReturn([
                 'table' => 'big',
                 'records' => [],
@@ -101,13 +101,32 @@ final class DatabaseControllerTest extends ControllerTestCase
         $controller->getTable($request);
     }
 
+    public function testGetTableLimitMinimumIsOne(): void
+    {
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->expects($this->once())
+            ->method('getTable')
+            ->with('t', 1, 0)
+            ->willReturn([
+                'table' => 't',
+                'records' => [],
+                'totalCount' => 0,
+            ]);
+
+        $controller = $this->createController($provider);
+        $request = $this->get(['limit' => '0']);
+        $request = $request->withAttribute('name', 't');
+        $controller->getTable($request);
+    }
+
     public function testGetTableNegativeOffsetClampedToZero(): void
     {
         $provider = $this->createMock(SchemaProviderInterface::class);
         $provider
             ->expects($this->once())
             ->method('getTable')
-            ->with('t', 1000, 0)
+            ->with('t', 50, 0)
             ->willReturn([
                 'table' => 't',
                 'records' => [],

@@ -11,6 +11,10 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class DatabaseController
 {
+    private const int DEFAULT_LIMIT = 50;
+    private const int MAX_LIMIT = 1000;
+    private const int MIN_LIMIT = 1;
+
     public function __construct(
         private readonly JsonResponseFactoryInterface $responseFactory,
         private readonly SchemaProviderInterface $schemaProvider,
@@ -26,7 +30,7 @@ final class DatabaseController
         /** @var string $tableName */
         $tableName = $request->getAttribute('name');
         $queryParams = $request->getQueryParams();
-        $limit = min((int) ($queryParams['limit'] ?? 1000), 10000);
+        $limit = max(self::MIN_LIMIT, min((int) ($queryParams['limit'] ?? self::DEFAULT_LIMIT), self::MAX_LIMIT));
         $offset = max((int) ($queryParams['offset'] ?? 0), 0);
 
         return $this->responseFactory->createJsonResponse($this->schemaProvider->getTable($tableName, $limit, $offset));

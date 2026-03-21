@@ -36,7 +36,7 @@ class DbSchemaProvider implements SchemaProviderInterface
         return $tables;
     }
 
-    public function getTable(string $tableName, int $limit = 1000, int $offset = 0): array
+    public function getTable(string $tableName, int $limit = 50, int $offset = 0): array
     {
         /** @var TableSchemaInterface[] $tableSchemas */
         $schema = $this->db->getSchema()->getTableSchema($tableName);
