@@ -81,17 +81,53 @@ ADP follows a **layered architecture**:
 5. **API** serves stored data via REST endpoints; SSE notifies the frontend of new entries
 6. **Frontend** fetches and renders the data in a web UI
 
+## Prerequisites
+
+Before running tests or code quality checks, install all dependencies:
+
+```bash
+make install                        # Install ALL deps (PHP + frontend + playgrounds)
+```
+
+Or install selectively:
+
+```bash
+make install-php                    # Composer install (root) — required for PHP tests and Mago
+make install-frontend               # npm install (libs/frontend) — required for frontend tests
+make install-playgrounds            # Composer install for each playground — required for fixture tests
+```
+
+### PHP Coverage Driver
+
+Line coverage reports require the **PCOV** extension (recommended) or Xdebug:
+
+```bash
+pecl install pcov                   # Install PCOV
+echo "extension=pcov.so" >> "$(php -i | grep 'Scan this dir' | awk '{print $NF}')/pcov.ini"
+php -m | grep pcov                  # Verify: should print "pcov"
+```
+
+Without PCOV, `--coverage-text` / `--coverage-html` will fail with "No code coverage driver available".
+
+### E2E Tests
+
+E2E tests have additional requirements:
+
+- **PHP E2E** (`make test-fixtures`): playground servers must be running (`make serve`)
+- **Frontend E2E** (`make test-frontend-e2e`): Chrome/Chromium + matching ChromeDriver version
+
+### Quick Start (run everything)
+
+```bash
+make install                        # 1. Install all dependencies
+make all                            # 2. Run all checks + all tests
+```
+
 ## Key Commands
 
 The project uses a **top-level Makefile** as the single entry point for all tasks. Run `make help` for a full list.
 
 ```bash
-# Install
-make install                        # Install ALL deps (PHP + frontend + playgrounds)
-make install-php                    # Install PHP dependencies only
-make install-frontend               # Install frontend dependencies only
-make install-playgrounds            # Install playground dependencies only
-
 # Tests
 make test                           # Run ALL tests in parallel (PHP + frontend)
 make test-php                       # Run PHP unit tests (PHPUnit)
