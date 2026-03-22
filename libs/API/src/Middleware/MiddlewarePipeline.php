@@ -42,7 +42,7 @@ final class MiddlewarePipeline implements RequestHandlerInterface
 
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
-                if (!isset($this->middlewares[$this->index])) {
+                if (!array_key_exists($this->index, $this->middlewares)) {
                     return $this->fallbackHandler->handle($request);
                 }
 

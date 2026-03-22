@@ -181,7 +181,7 @@ final class FlattenException implements Stringable
         foreach ($trace as $entry) {
             $class = '';
             $namespace = '';
-            if (isset($entry['class'])) {
+            if (array_key_exists('class', $entry)) {
                 $parts = explode('\\', $entry['class']);
                 $class = array_pop($parts);
                 $namespace = implode('\\', $parts);
@@ -195,7 +195,7 @@ final class FlattenException implements Stringable
                 'function' => $entry['function'] ?? null,
                 'file' => $entry['file'] ?? null,
                 'line' => $entry['line'] ?? null,
-                'args' => isset($entry['args']) ? $this->flattenArgs($entry['args']) : [],
+                'args' => array_key_exists('args', $entry) ? $this->flattenArgs($entry['args']) : [],
             ];
         }
     }

@@ -74,7 +74,7 @@ final class DebugController
 
         $collector = $request->getQueryParams()['collector'] ?? null;
         if ($collector !== null) {
-            if (isset($data[$collector])) {
+            if (array_key_exists($collector, $data)) {
                 $data = $data[$collector];
             } else {
                 throw new NotFoundException('Requested collector doesn\'t exists.');

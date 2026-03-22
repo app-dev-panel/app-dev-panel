@@ -57,7 +57,7 @@ final class DatabaseCollector implements SummaryCollectorInterface
      */
     public function collectQueryEnd(string $id, int $rowsNumber): void
     {
-        if (!$this->isActive() || !isset($this->queries[$id])) {
+        if (!$this->isActive() || !array_key_exists($id, $this->queries)) {
             return;
         }
 
@@ -76,7 +76,7 @@ final class DatabaseCollector implements SummaryCollectorInterface
      */
     public function collectQueryError(string $id, Throwable $exception): void
     {
-        if (!$this->isActive() || !isset($this->queries[$id])) {
+        if (!$this->isActive() || !array_key_exists($id, $this->queries)) {
             return;
         }
 
@@ -145,7 +145,7 @@ final class DatabaseCollector implements SummaryCollectorInterface
 
     public function collectTransactionRollback(string $line): void
     {
-        if (!$this->isActive() || !isset($this->transactions[$this->currentTransactionId])) {
+        if (!$this->isActive() || !array_key_exists($this->currentTransactionId, $this->transactions)) {
             return;
         }
 
@@ -160,7 +160,7 @@ final class DatabaseCollector implements SummaryCollectorInterface
 
     public function collectTransactionCommit(string $line): void
     {
-        if (!$this->isActive() || !isset($this->transactions[$this->currentTransactionId])) {
+        if (!$this->isActive() || !array_key_exists($this->currentTransactionId, $this->transactions)) {
             return;
         }
 

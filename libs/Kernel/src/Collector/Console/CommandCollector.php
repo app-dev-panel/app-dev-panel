@@ -81,7 +81,7 @@ final class CommandCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (empty($this->commands)) {
+        if ($this->commands === []) {
             return [];
         }
 

@@ -63,6 +63,12 @@ count = 1
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_key_exists`: expected `bool|float|int|null|string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Debug/Controller/DebugController.php"
+code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface::getobject`: expected `string`, but found `mixed`.'
 count = 1
 
@@ -88,13 +94,13 @@ count = 3
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 7
+count = 8
 
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
 code = "mixed-assignment"
 message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
-count = 2
+count = 1
 
 [[issues]]
 file = "libs/API/src/Debug/Controller/DebugController.php"
@@ -153,8 +159,20 @@ count = 1
 [[issues]]
 file = "libs/API/src/Debug/Repository/CollectorRepository.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\api\debug\repository\collectorrepository::loaddata`. Saw type `nonnull`.'
+message = 'Could not infer a precise return type for function `appdevpanel\api\debug\repository\collectorrepository::loaddata`. Saw type `mixed`.'
 count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_key_exists`: expected `array<array-key, mixed>`, but found `mixed`."
+count = 9
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 5
 
 [[issues]]
 file = "libs/API/src/Ingestion/Controller/IngestionController.php"
@@ -267,7 +285,7 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "invalid-iterator"
-message = "The expression provided to `foreach` is not iterable. It resolved to type `nonnull`, which is not iterable."
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
 count = 1
 
 [[issues]]
@@ -310,13 +328,7 @@ count = 1
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 8
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/CommandController.php"
-code = "mixed-assignment"
-message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
-count = 1
+count = 9
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
@@ -399,7 +411,7 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/FileController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `class_exists`: expected `string`, but found `truthy-mixed`."
+message = "Invalid argument type for argument #1 of `class_exists`: expected `string`, but found `nonnull`."
 count = 1
 
 [[issues]]
@@ -663,6 +675,12 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_key_exists`: expected `bool|float|int|null|string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `nonnull`."
 count = 1
 
@@ -700,7 +718,7 @@ count = 2
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "mixed-array-index"
 message = "Invalid index type `mixed` used for array access on `array<array-key, array<string, array<array-key, mixed>>>`."
-count = 4
+count = 3
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
@@ -1719,7 +1737,13 @@ count = 3
 [[issues]]
 file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `nonnull`."
+message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_key_exists`: expected `array<array-key, mixed>`, but found `mixed`."
 count = 2
 
 [[issues]]
@@ -1730,6 +1754,12 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 3
@@ -1737,7 +1767,7 @@ count = 3
 [[issues]]
 file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
 code = "mixed-operand"
-message = "Invalid left operand: type `nonnull` cannot be reliably used in string concatenation."
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
 count = 1
 
 [[issues]]
@@ -2349,7 +2379,7 @@ count = 2
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `nonnull`."
+message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `mixed`."
 count = 2
 
 [[issues]]
@@ -2367,6 +2397,12 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_key_exists`: expected `array<array-key, mixed>`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but found `mixed`.'
 count = 2
 
@@ -2378,6 +2414,12 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 6
@@ -2385,7 +2427,7 @@ count = 6
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "mixed-operand"
-message = "Invalid left operand: type `nonnull` cannot be reliably used in string concatenation."
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
 count = 1
 
 [[issues]]
@@ -3027,8 +3069,20 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `nonnull`."
+message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `mixed`."
 count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_key_exists`: expected `array<array-key, mixed>`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 3
 
 [[issues]]
 file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
@@ -3039,7 +3093,7 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
 code = "mixed-operand"
-message = "Invalid left operand: type `nonnull` cannot be reliably used in string concatenation."
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
 count = 1
 
 [[issues]]
@@ -3867,13 +3921,13 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
 code = "less-specific-return-statement"
-message = 'Returned type `array<array-key, nonnull>` is less specific than the declared return type `array<string, string>` for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getcomponents`.'
+message = 'Returned type `array<array-key, mixed>` is less specific than the declared return type `array<string, string>` for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getcomponents`.'
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
 code = "less-specific-return-statement"
-message = 'Returned type `array<array-key, nonnull>` is less specific than the declared return type `array<string, string>` for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getmodules`.'
+message = 'Returned type `array<array-key, mixed>` is less specific than the declared return type `array<string, string>` for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getmodules`.'
 count = 1
 
 [[issues]]
@@ -4665,7 +4719,7 @@ count = 4
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy::getserviceproxy`. Saw type `nonnull`.'
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy::getserviceproxy`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
@@ -4684,6 +4738,12 @@ count = 1
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
 code = "unknown-class-instantiation"
 message = "Cannot determine the concrete class for instantiation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_key_exists`: expected `array<array-key, mixed>`, but found `mixed`."
 count = 1
 
 [[issues]]
@@ -4719,7 +4779,7 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
 code = "invalid-callable"
-message = "Expression of type `nonnull` cannot be called as a function or method."
+message = "Expression of type `mixed` cannot be called as a function or method."
 count = 1
 
 [[issues]]
@@ -4732,13 +4792,7 @@ count = 1
 file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
-code = "mixed-assignment"
-message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
@@ -4761,14 +4815,26 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `str_ends_with`: expected `string`, but found `nonnull`."
+message = "Invalid argument type for argument #1 of `str_ends_with`: expected `string`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_key_exists`: expected `array<array-key, mixed>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
 count = 2
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Cli/src/Command/DebugQueryCommand.php"
@@ -4924,13 +4990,7 @@ count = 2
 file = "libs/Kernel/src/Collector/DatabaseCollector.php"
 code = "mixed-array-assignment"
 message = "Unsafe array assignment on type `mixed`."
-count = 4
-
-[[issues]]
-file = "libs/Kernel/src/Collector/DatabaseCollector.php"
-code = "mixed-array-assignment"
-message = "Unsafe array assignment on type `nonnull`."
-count = 10
+count = 14
 
 [[issues]]
 file = "libs/Kernel/src/Collector/HttpClientCollector.php"
@@ -5522,6 +5582,18 @@ count = 7
 
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
+code = "redundant-comparison"
+message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Dumper.php"
+code = "redundant-condition"
+message = "This condition (type `true`) will always evaluate to true."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Dumper.php"
 code = "template-constraint-violation"
 message = "Argument type mismatch for template `V`."
 count = 1
@@ -5558,9 +5630,15 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `nonnull`."
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_key_exists`: expected `array<array-key, mixed>`, but found `mixed`."
 count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
 
 [[issues]]
 file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"

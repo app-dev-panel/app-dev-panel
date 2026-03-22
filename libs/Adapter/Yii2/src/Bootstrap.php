@@ -40,7 +40,7 @@ final class Bootstrap implements BootstrapInterface
         // Respect explicit configuration
         if ($app->hasModule('debug-panel')) {
             $config = $app->getModules()['debug-panel'] ?? [];
-            if (is_array($config) && isset($config['enabled']) && $config['enabled'] === false) {
+            if (is_array($config) && array_key_exists('enabled', $config) && $config['enabled'] === false) {
                 return false;
             }
             return true;

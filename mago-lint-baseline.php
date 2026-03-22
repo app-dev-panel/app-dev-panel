@@ -7,34 +7,10 @@ message = "Parameter list is too long."
 count = 1
 
 [[issues]]
-file = "libs/API/src/Debug/Controller/DebugController.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Repository/CollectorRepository.php"
-code = "no-empty"
-message = "Use of the `empty` construct."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Repository/CollectorRepository.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
 file = "libs/API/src/Ingestion/Controller/IngestionController.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
 count = 1
-
-[[issues]]
-file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 4
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
@@ -49,21 +25,9 @@ message = "Class has a high kan defect score (2.25)."
 count = 1
 
 [[issues]]
-file = "libs/API/src/Inspector/Controller/CommandController.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
 file = "libs/API/src/Inspector/Controller/FileController.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/FileController.php"
-code = "no-empty"
-message = "Use of the `empty` construct."
 count = 1
 
 [[issues]]
@@ -79,21 +43,9 @@ message = "Do not commit debug functions."
 count = 1
 
 [[issues]]
-file = "libs/API/src/Inspector/Controller/ServiceController.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 3
-
-[[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/TranslationController.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
@@ -106,12 +58,6 @@ count = 1
 file = "libs/API/src/Inspector/Test/PHPUnitJSONReporter.php"
 code = "too-many-methods"
 message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Middleware/MiddlewarePipeline.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
@@ -143,12 +89,6 @@ file = "libs/API/tests/Unit/Inspector/Controller/ComposerControllerTest.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
 count = 3
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/ControllerTestCase.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 2
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
@@ -217,12 +157,6 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -250,12 +184,6 @@ count = 1
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
@@ -295,12 +223,6 @@ message = "Parameter list is too long."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -310,12 +232,6 @@ count = 1
 file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
 code = "kan-defect"
 message = "Class has a high kan defect score (2.06)."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
@@ -355,12 +271,6 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yii2/src/Bootstrap.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Yii2/src/Controller/DebugQueryController.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -383,12 +293,6 @@ file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
 code = "kan-defect"
 message = "Class has a high kan defect score (2.24)."
 count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 2
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
@@ -476,12 +380,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
@@ -491,12 +389,6 @@ file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
 count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 4
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
@@ -509,18 +401,6 @@ file = "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
 count = 3
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
 
 [[issues]]
 file = "libs/Cli/src/Command/DebugQueryCommand.php"
@@ -547,12 +427,6 @@ message = "Class has high complexity."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
-code = "no-empty"
-message = "Use of the `empty` construct."
-count = 1
-
-[[issues]]
 file = "libs/Kernel/src/Collector/DatabaseCollector.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
@@ -560,20 +434,8 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/DatabaseCollector.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 4
-
-[[issues]]
-file = "libs/Kernel/src/Collector/DatabaseCollector.php"
 code = "too-many-methods"
 message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/HttpClientCollector.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
@@ -674,12 +536,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
-code = "no-empty"
-message = "Use of the `empty` construct."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Dumper.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
@@ -698,27 +554,9 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/FlattenException.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/src/FlattenException.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
-code = "no-empty"
-message = "Use of the `empty` construct."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 2
 
 [[issues]]
 file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
@@ -739,33 +577,15 @@ message = "Interface has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/Service/FileServiceRegistry.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 2
-
-[[issues]]
 file = "libs/Kernel/src/Service/ServiceDescriptor.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/Service/ServiceDescriptor.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Storage/FileStorage.php"
-code = "no-empty"
-message = "Use of the `empty` construct."
 count = 1
 
 [[issues]]
@@ -778,12 +598,6 @@ count = 2
 file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "too-many-methods"
 message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Storage/MemoryStorage.php"
-code = "no-empty"
-message = "Use of the `empty` construct."
 count = 1
 
 [[issues]]
@@ -911,12 +725,6 @@ file = "libs/Testing/tests/E2E/ScenarioTest.php"
 code = "kan-defect"
 message = "Class has a high kan defect score (4.1000000000000005)."
 count = 1
-
-[[issues]]
-file = "libs/Testing/tests/E2E/ScenarioTest.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 4
 
 [[issues]]
 file = "libs/Testing/tests/E2E/ScenarioTest.php"

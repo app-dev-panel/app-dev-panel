@@ -25,7 +25,7 @@ final class IngestionController
     {
         $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
-        if (!isset($body['collectors']) || !is_array($body['collectors'])) {
+        if (!array_key_exists('collectors', $body) || !is_array($body['collectors'])) {
             throw new InvalidArgumentException('Field "collectors" is required and must be an object.');
         }
 
@@ -44,7 +44,7 @@ final class IngestionController
     {
         $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
-        if (!isset($body['entries']) || !is_array($body['entries'])) {
+        if (!array_key_exists('entries', $body) || !is_array($body['entries'])) {
             throw new InvalidArgumentException('Field "entries" is required and must be an array.');
         }
 
@@ -54,7 +54,7 @@ final class IngestionController
 
         $ids = [];
         foreach ($body['entries'] as $entry) {
-            if (!isset($entry['collectors']) || !is_array($entry['collectors'])) {
+            if (!array_key_exists('collectors', $entry) || !is_array($entry['collectors'])) {
                 throw new InvalidArgumentException('Each entry must have a "collectors" field.');
             }
             $ids[] = $this->writeEntry($entry);
@@ -73,7 +73,7 @@ final class IngestionController
     {
         $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
-        if (!isset($body['level'], $body['message'])) {
+        if (!array_key_exists('level', $body) || !array_key_exists('message', $body)) {
             throw new InvalidArgumentException('Fields "level" and "message" are required.');
         }
 

@@ -179,7 +179,7 @@ final class Dumper
                 }
 
                 $properties = $this->getObjectProperties($variable);
-                if (empty($properties)) {
+                if ($properties === []) {
                     if ($inlineObject) {
                         $output = '{stateless object}';
                         break;
@@ -249,7 +249,7 @@ final class Dumper
         if ($type === 'stream') {
             return stream_get_meta_data($resource);
         }
-        if (!empty($type)) {
+        if ($type !== '') {
             return sprintf('{%s resource}', $type);
         }
 

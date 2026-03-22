@@ -60,7 +60,7 @@ final class HttpClientCollector implements SummaryCollectorInterface
             return;
         }
 
-        if (!isset($this->requests[$uniqueId])) {
+        if (!array_key_exists($uniqueId, $this->requests)) {
             return;
         }
         /** @psalm-suppress UnsupportedReferenceUsage */

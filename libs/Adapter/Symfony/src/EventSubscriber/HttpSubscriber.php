@@ -142,7 +142,7 @@ final class HttpSubscriber implements EventSubscriberInterface
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
             $line = '';
             foreach ($trace as $frame) {
-                if (!(isset($frame['file']) && !str_contains($frame['file'], 'vendor/'))) {
+                if (!(array_key_exists('file', $frame) && !str_contains($frame['file'], 'vendor/'))) {
                     continue;
                 }
 

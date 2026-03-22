@@ -162,7 +162,7 @@ final class FileStorage implements StorageInterface
 
         try {
             $summaryFiles = glob($this->path . '/**/**/summary.json', GLOB_NOSORT);
-            if (empty($summaryFiles) || count($summaryFiles) <= $this->historySize) {
+            if ($summaryFiles === false || $summaryFiles === [] || count($summaryFiles) <= $this->historySize) {
                 return;
             }
 

@@ -32,7 +32,7 @@ final class FileServiceRegistry implements ServiceRegistryInterface
     public function heartbeat(string $service): void
     {
         $services = $this->load();
-        if (!isset($services[$service])) {
+        if (!array_key_exists($service, $services)) {
             return;
         }
         $services[$service]['lastSeenAt'] = microtime(true);
@@ -42,7 +42,7 @@ final class FileServiceRegistry implements ServiceRegistryInterface
     public function resolve(string $service): ?ServiceDescriptor
     {
         $services = $this->load();
-        if (!isset($services[$service])) {
+        if (!array_key_exists($service, $services)) {
             return null;
         }
 

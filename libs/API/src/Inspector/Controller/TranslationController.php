@@ -45,7 +45,7 @@ final class TranslationController
         foreach ($categorySources as $categorySource) {
             $categoryName = $categorySource->getName();
 
-            if (!isset($messages[$categoryName])) {
+            if (!array_key_exists($categoryName, $messages)) {
                 $messages[$categoryName] = [];
             }
 

@@ -11,6 +11,7 @@ use Psr\Container\ContainerInterface;
 use Yiisoft\Proxy\ProxyManager;
 use Yiisoft\Proxy\ProxyTrait;
 
+use function array_key_exists;
 use function is_callable;
 use function is_object;
 use function is_string;
@@ -90,7 +91,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
 
     private function getServiceProxy(string $service, object $instance): ?object
     {
-        if (isset($this->serviceProxy[$service])) {
+        if (array_key_exists($service, $this->serviceProxy)) {
             return $this->serviceProxy[$service];
         }
 

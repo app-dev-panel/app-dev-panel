@@ -81,11 +81,11 @@ abstract class ControllerTestCase extends TestCase
     protected function container(array $services = []): ContainerInterface
     {
         $container = $this->createMock(ContainerInterface::class);
-        $container->method('has')->willReturnCallback(static fn(string $id) => isset($services[$id]));
+        $container->method('has')->willReturnCallback(static fn(string $id) => array_key_exists($id, $services));
         $container
             ->method('get')
             ->willReturnCallback(static function (string $id) use ($services) {
-                if (!isset($services[$id])) {
+                if (!array_key_exists($id, $services)) {
                     throw new \RuntimeException(sprintf('Service "%s" not found in test container.', $id));
                 }
                 return $services[$id];

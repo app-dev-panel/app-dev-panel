@@ -26,7 +26,7 @@ final class FileController
         $class = $queryParams['class'] ?? '';
         $method = $queryParams['method'] ?? '';
 
-        if (!empty($class) && class_exists($class)) {
+        if ($class !== '' && class_exists($class)) {
             $reflection = new ReflectionClass($class);
             $destination = $reflection->getFileName();
             if ($method !== '' && $reflection->hasMethod($method)) {

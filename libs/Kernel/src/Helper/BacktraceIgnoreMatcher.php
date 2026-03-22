@@ -17,7 +17,7 @@ final class BacktraceIgnoreMatcher
 {
     public static function isIgnoredByFile(array $backtrace, array $patterns): bool
     {
-        if (!isset($backtrace[2])) {
+        if (!array_key_exists(2, $backtrace)) {
             return false;
         }
         $path = $backtrace[2]['file'];
@@ -27,12 +27,16 @@ final class BacktraceIgnoreMatcher
 
     public static function isIgnoredByClass(array $backtrace, array $classes): bool
     {
-        return isset($backtrace[3]['class']) && in_array($backtrace[3]['class'], $classes, true);
+        return (
+            array_key_exists(3, $backtrace)
+            && array_key_exists('class', $backtrace[3])
+            && in_array($backtrace[3]['class'], $classes, true)
+        );
     }
 
     public static function doesStringMatchPattern(string $string, array $patterns): bool
     {
-        if (empty($patterns)) {
+        if ($patterns === []) {
             return false;
         }
         return new CombinedRegexp($patterns)->matches($string);

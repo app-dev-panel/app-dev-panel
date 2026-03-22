@@ -50,7 +50,7 @@ final class Yii2ConfigProvider
         foreach ($this->app->getComponents() as $id => $definition) {
             if (is_object($definition)) {
                 $components[$id] = $definition::class;
-            } elseif (is_array($definition) && isset($definition['class'])) {
+            } elseif (is_array($definition) && array_key_exists('class', $definition)) {
                 $components[$id] = $definition['class'];
             } elseif (is_string($definition)) {
                 $components[$id] = $definition;
@@ -170,7 +170,7 @@ final class Yii2ConfigProvider
         foreach ($this->app->getModules() as $id => $module) {
             if (is_object($module)) {
                 $modules[$id] = $module::class;
-            } elseif (is_array($module) && isset($module['class'])) {
+            } elseif (is_array($module) && array_key_exists('class', $module)) {
                 $modules[$id] = $module['class'];
             } elseif (is_string($module)) {
                 $modules[$id] = $module;

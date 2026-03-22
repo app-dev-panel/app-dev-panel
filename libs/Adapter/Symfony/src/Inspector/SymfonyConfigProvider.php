@@ -89,7 +89,7 @@ final class SymfonyConfigProvider
             $class = null;
             if (class_exists($eventName)) {
                 $class = $eventName;
-            } elseif (isset($reverseAliases[$eventName])) {
+            } elseif (array_key_exists($eventName, $reverseAliases)) {
                 $class = $reverseAliases[$eventName];
             }
 

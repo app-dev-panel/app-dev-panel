@@ -20,7 +20,7 @@ class ServiceMethodProxy extends ServiceProxy
     protected function afterCall(string $methodName, array $arguments, mixed $result, float $timeStart): mixed
     {
         try {
-            if (isset($this->methods[$methodName])) {
+            if (array_key_exists($methodName, $this->methods)) {
                 $callback = $this->methods[$methodName];
                 $result = $callback($result, ...$arguments);
             }

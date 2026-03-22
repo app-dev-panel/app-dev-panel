@@ -98,7 +98,7 @@ final class ScenarioTest extends FixtureTestCase
     {
         $missing = [];
         foreach (FixtureRegistry::all() as $fixture) {
-            if (isset(self::$fixtureDebugIds[$fixture->name])) {
+            if (array_key_exists($fixture->name, self::$fixtureDebugIds)) {
                 continue;
             }
 
@@ -137,7 +137,12 @@ final class ScenarioTest extends FixtureTestCase
         $foundAdapter = false;
         foreach (self::$summaryEntries as $entry) {
             $web = $entry['web'] ?? null;
-            if (is_array($web) && isset($web['adapter']) && is_string($web['adapter']) && $web['adapter'] !== '') {
+            if (
+                is_array($web)
+                && array_key_exists('adapter', $web)
+                && is_string($web['adapter'])
+                && $web['adapter'] !== ''
+            ) {
                 $foundAdapter = true;
                 self::assertContains(
                     $web['adapter'],
@@ -156,7 +161,7 @@ final class ScenarioTest extends FixtureTestCase
         $foundPhp = false;
         foreach (self::$summaryEntries as $entry) {
             $environment = $entry['environment'] ?? null;
-            if (is_array($environment) && isset($environment['php']['version'])) {
+            if (is_array($environment) && ($environment['php']['version'] ?? null) !== null) {
                 $foundPhp = true;
                 self::assertSame(PHP_VERSION, $environment['php']['version']);
                 break;
@@ -435,7 +440,7 @@ final class ScenarioTest extends FixtureTestCase
      */
     private static function getDebugData(string $debugId): ?array
     {
-        if (isset(self::$debugDataCache[$debugId])) {
+        if (array_key_exists($debugId, self::$debugDataCache)) {
             return self::$debugDataCache[$debugId];
         }
 
