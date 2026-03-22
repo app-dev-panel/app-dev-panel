@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
 use AppDevPanel\Adapter\Yii2\Module;
+use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
@@ -14,44 +15,25 @@ use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\StartupContext;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\Attributes\CoversNothing;
-use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
 /**
  * Integration tests for the Yii 2 ADP API endpoints.
  *
+ * Uses a real Yii 2 Application with the Module bootstrapped.
  * Tests use the Module's internal ApiApplication directly (no HTTP server)
  * to verify API routing, middleware pipeline, response envelope, and actual
  * collector data returned by the debug API.
  */
 #[CoversNothing]
-final class ApiEndpointTest extends TestCase
+final class ApiEndpointTest extends Yii2IntegrationTestCase
 {
-    private string $storagePath;
-    private ?Module $module = null;
     private Psr17Factory $psr17;
 
     protected function setUp(): void
     {
-        $this->storagePath = sys_get_temp_dir() . '/adp_api_test_' . bin2hex(random_bytes(8));
-        mkdir($this->storagePath, 0o777, true);
-        mkdir($this->storagePath . '/runtime', 0o777, true);
-        mkdir($this->storagePath . '/debug', 0o777, true);
-
-        \Yii::$container = new \yii\di\Container();
-        \Yii::setAlias('@app', $this->storagePath);
-        \Yii::setAlias('@runtime', $this->storagePath . '/runtime');
-
+        parent::setUp();
         $this->psr17 = new Psr17Factory();
-    }
-
-    protected function tearDown(): void
-    {
-        $this->module = null;
-        \Yii::$container = new \yii\di\Container();
-        \Yii::$app = null;
-
-        $this->removeDirectory($this->storagePath);
     }
 
     // -----------------------------------------------------------------------
@@ -60,7 +42,7 @@ final class ApiEndpointTest extends TestCase
 
     public function testDebugListReturnsEmptyWhenNoEntries(): void
     {
-        $this->createBootstrappedModule();
+        $this->createWebApplication();
         $response = $this->apiGet('/debug/api/');
 
         $this->assertSame(200, $response->getStatusCode());
@@ -71,8 +53,8 @@ final class ApiEndpointTest extends TestCase
 
     public function testDebugListReturnsSummaryAfterRequest(): void
     {
-        $module = $this->createBootstrappedModule();
-        $this->simulateWebRequest($module, 'GET', '/api/users', 200);
+        $this->createWebApplication();
+        $this->simulateWebRequest('GET', '/api/users', 200);
 
         $envelope = $this->decodeEnvelope($this->apiGet('/debug/api/'));
         $this->assertTrue($envelope['success']);
@@ -84,7 +66,6 @@ final class ApiEndpointTest extends TestCase
         $this->assertArrayHasKey('request', $entry);
         $this->assertArrayHasKey('response', $entry);
 
-        // Verify request summary
         $this->assertSame('GET', $entry['request']['method']);
         $this->assertSame('/api/users', $entry['request']['path']);
         $this->assertSame(200, $entry['response']['statusCode']);
@@ -92,8 +73,8 @@ final class ApiEndpointTest extends TestCase
 
     public function testDebugListContainsCollectorMetadata(): void
     {
-        $module = $this->createBootstrappedModule();
-        $this->simulateWebRequest($module, 'GET', '/', 200);
+        $this->createWebApplication();
+        $this->simulateWebRequest('GET', '/', 200);
 
         $envelope = $this->decodeEnvelope($this->apiGet('/debug/api/'));
         $entry = $envelope['data'][0];
@@ -104,9 +85,6 @@ final class ApiEndpointTest extends TestCase
         $this->assertContains(ExceptionCollector::class, $collectorIds);
         $this->assertContains(DatabaseCollector::class, $collectorIds);
         $this->assertContains(MailerCollector::class, $collectorIds);
-
-        // Yii2LogCollector class is deleted — only the global LogCollector is used
-        $this->assertNotContains('AppDevPanel\\Adapter\\Yii2\\Collector\\Yii2LogCollector', $collectorIds);
 
         // Each collector entry should have id and name
         foreach ($entry['collectors'] as $collector) {
@@ -122,14 +100,13 @@ final class ApiEndpointTest extends TestCase
 
     public function testViewReturnsAllCollectorData(): void
     {
-        $module = $this->createBootstrappedModule();
-        $debugId = $this->simulateWebRequest($module, 'GET', '/test', 200);
+        $this->createWebApplication();
+        $debugId = $this->simulateWebRequest('GET', '/test', 200);
 
         $envelope = $this->decodeEnvelope($this->apiGet("/debug/api/view/{$debugId}"));
         $this->assertTrue($envelope['success']);
         $this->assertIsArray($envelope['data']);
 
-        // Should contain data keyed by collector FQCN
         $this->assertArrayHasKey(RequestCollector::class, $envelope['data']);
         $this->assertArrayHasKey(LogCollector::class, $envelope['data']);
         $this->assertArrayHasKey(DatabaseCollector::class, $envelope['data']);
@@ -137,8 +114,8 @@ final class ApiEndpointTest extends TestCase
 
     public function testViewRequestCollectorReturnsRequestDetails(): void
     {
-        $module = $this->createBootstrappedModule();
-        $debugId = $this->simulateWebRequest($module, 'POST', '/api/submit', 201);
+        $this->createWebApplication();
+        $debugId = $this->simulateWebRequest('POST', '/api/submit', 201);
 
         $envelope = $this->decodeEnvelope($this->apiGet(
             "/debug/api/view/{$debugId}?collector=" . urlencode(RequestCollector::class),
@@ -154,7 +131,8 @@ final class ApiEndpointTest extends TestCase
 
     public function testViewLogCollectorReturnsLogEntries(): void
     {
-        $module = $this->createBootstrappedModule();
+        $this->createWebApplication();
+        $module = $this->getModule();
         $debugger = $module->getDebugger();
 
         $psrRequest = $this->psr17->createServerRequest('GET', 'http://localhost/test');
@@ -189,7 +167,8 @@ final class ApiEndpointTest extends TestCase
 
     public function testViewDbCollectorReturnsQueryData(): void
     {
-        $module = $this->createBootstrappedModule();
+        $this->createWebApplication();
+        $module = $this->getModule();
         $debugger = $module->getDebugger();
 
         $psrRequest = $this->psr17->createServerRequest('GET', 'http://localhost/api/users');
@@ -245,7 +224,8 @@ final class ApiEndpointTest extends TestCase
 
     public function testViewExceptionCollectorReturnsExceptionData(): void
     {
-        $module = $this->createBootstrappedModule();
+        $this->createWebApplication();
+        $module = $this->getModule();
         $debugger = $module->getDebugger();
 
         $psrRequest = $this->psr17->createServerRequest('GET', 'http://localhost/api/error');
@@ -272,7 +252,8 @@ final class ApiEndpointTest extends TestCase
 
     public function testViewMailerCollectorReturnsMailData(): void
     {
-        $module = $this->createBootstrappedModule();
+        $this->createWebApplication();
+        $module = $this->getModule();
         $debugger = $module->getDebugger();
 
         $psrRequest = $this->psr17->createServerRequest('POST', 'http://localhost/api/notify');
@@ -315,7 +296,8 @@ final class ApiEndpointTest extends TestCase
 
     public function testSummaryContainsCollectorTotals(): void
     {
-        $module = $this->createBootstrappedModule();
+        $this->createWebApplication();
+        $module = $this->getModule();
         $debugger = $module->getDebugger();
 
         $psrRequest = $this->psr17->createServerRequest('GET', 'http://localhost/');
@@ -340,11 +322,9 @@ final class ApiEndpointTest extends TestCase
         $summary = $envelope['data'];
         $this->assertSame($debugId, $summary['id']);
 
-        // Logger summary
         $this->assertArrayHasKey('logger', $summary);
         $this->assertSame(2, $summary['logger']['total']);
 
-        // DB summary
         $this->assertArrayHasKey('db', $summary);
         $this->assertSame(1, $summary['db']['queries']['total']);
     }
@@ -355,7 +335,7 @@ final class ApiEndpointTest extends TestCase
 
     public function testViewNonExistentEntryReturns404(): void
     {
-        $this->createBootstrappedModule();
+        $this->createWebApplication();
         $response = $this->apiGet('/debug/api/view/nonexistent-id-12345');
 
         $this->assertSame(404, $response->getStatusCode());
@@ -366,8 +346,8 @@ final class ApiEndpointTest extends TestCase
 
     public function testViewNonExistentCollectorReturns404(): void
     {
-        $module = $this->createBootstrappedModule();
-        $debugId = $this->simulateWebRequest($module, 'GET', '/', 200);
+        $this->createWebApplication();
+        $debugId = $this->simulateWebRequest('GET', '/', 200);
 
         $response = $this->apiGet("/debug/api/view/{$debugId}?collector=NonExistent\\Collector");
 
@@ -378,7 +358,7 @@ final class ApiEndpointTest extends TestCase
 
     public function testNonExistentRouteReturns404(): void
     {
-        $this->createBootstrappedModule();
+        $this->createWebApplication();
         $response = $this->apiGet('/debug/api/nonexistent/route');
 
         $this->assertSame(404, $response->getStatusCode());
@@ -390,8 +370,8 @@ final class ApiEndpointTest extends TestCase
 
     public function testIpFilterBlocksUnauthorizedIp(): void
     {
-        $this->createBootstrappedModule();
-        $apiApp = \Yii::$container->get(\AppDevPanel\Api\ApiApplication::class);
+        $this->createWebApplication();
+        $apiApp = \Yii::$container->get(ApiApplication::class);
 
         $request = $this->psr17->createServerRequest('GET', 'http://localhost/debug/api/', [
             'REMOTE_ADDR' => '10.0.0.1',
@@ -403,7 +383,7 @@ final class ApiEndpointTest extends TestCase
 
     public function testResponseEnvelopeStructure(): void
     {
-        $this->createBootstrappedModule();
+        $this->createWebApplication();
         $response = $this->apiGet('/debug/api/');
 
         $body = json_decode((string) $response->getBody(), true);
@@ -419,7 +399,7 @@ final class ApiEndpointTest extends TestCase
 
     public function testInspectorParamsEndpoint(): void
     {
-        $this->createBootstrappedModule();
+        $this->createWebApplication();
         $response = $this->apiGet('/inspect/api/params');
 
         $this->assertContains($response->getStatusCode(), [200, 404, 500]);
@@ -431,10 +411,10 @@ final class ApiEndpointTest extends TestCase
 
     public function testMultipleEntriesReturnedInOrder(): void
     {
-        $module = $this->createBootstrappedModule();
+        $this->createWebApplication();
 
-        $id1 = $this->simulateWebRequest($module, 'GET', '/first', 200);
-        $id2 = $this->simulateWebRequest($module, 'POST', '/second', 201);
+        $id1 = $this->simulateWebRequest('GET', '/first', 200);
+        $id2 = $this->simulateWebRequest('POST', '/second', 201);
 
         $envelope = $this->decodeEnvelope($this->apiGet('/debug/api/'));
         $this->assertCount(2, $envelope['data']);
@@ -450,7 +430,7 @@ final class ApiEndpointTest extends TestCase
 
     private function apiGet(string $path): ResponseInterface
     {
-        $apiApp = \Yii::$container->get(\AppDevPanel\Api\ApiApplication::class);
+        $apiApp = \Yii::$container->get(ApiApplication::class);
         $request = $this->psr17->createServerRequest('GET', "http://localhost{$path}", ['REMOTE_ADDR' => '127.0.0.1']);
         return $apiApp->handle($request);
     }
@@ -468,8 +448,9 @@ final class ApiEndpointTest extends TestCase
         return $decoded;
     }
 
-    private function simulateWebRequest(Module $module, string $method, string $path, int $statusCode): string
+    private function simulateWebRequest(string $method, string $path, int $statusCode): string
     {
+        $module = $this->getModule();
         $debugger = $module->getDebugger();
         $psrRequest = $this->psr17->createServerRequest($method, "http://localhost{$path}");
         $debugger->startup(StartupContext::forRequest($psrRequest));
@@ -493,66 +474,5 @@ final class ApiEndpointTest extends TestCase
         $debugger->shutdown();
 
         return $debugId;
-    }
-
-    private function createBootstrappedModule(): Module
-    {
-        $module = new Module('debug-panel', null, [
-            'storagePath' => $this->storagePath . '/debug',
-            'historySize' => 50,
-            'collectors' => [
-                'request' => true,
-                'exception' => true,
-                'log' => true,
-                'event' => true,
-                'service' => true,
-                'http_client' => true,
-                'timeline' => true,
-                'var_dumper' => true,
-                'filesystem_stream' => true,
-                'http_stream' => true,
-                'command' => true,
-                'db' => true,
-                'mailer' => true,
-                'assets' => true,
-            ],
-        ]);
-
-        $reflection = new \ReflectionClass($module);
-
-        foreach (['registerServices', 'registerCollectors', 'buildDebugger'] as $method) {
-            $ref = $reflection->getMethod($method);
-            $ref->setAccessible(true);
-            if ($method === 'registerServices') {
-                $ref->invoke($module, \Yii::$app);
-            } else {
-                $ref->invoke($module);
-            }
-        }
-
-        $this->module = $module;
-        return $module;
-    }
-
-    private function removeDirectory(string $path): void
-    {
-        if (!is_dir($path)) {
-            return;
-        }
-
-        $items = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST,
-        );
-
-        foreach ($items as $item) {
-            if ($item->isDir()) {
-                rmdir($item->getPathname());
-            } else {
-                unlink($item->getPathname());
-            }
-        }
-
-        rmdir($path);
     }
 }

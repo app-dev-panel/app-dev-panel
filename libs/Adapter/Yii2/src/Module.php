@@ -279,8 +279,8 @@ class Module extends \yii\base\Module implements BootstrapInterface
             ),
         );
 
-        // Schema provider
-        if (isset(\Yii::$app->db)) {
+        // Schema provider — use has() instead of isset() to avoid Yii2 magic property exceptions
+        if (\Yii::$app !== null && \Yii::$app->has('db')) {
             \Yii::$container->setSingleton(
                 SchemaProviderInterface::class,
                 static fn() => new Yii2DbSchemaProvider(\Yii::$app->db),
