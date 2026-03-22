@@ -48,7 +48,7 @@ final class SocketReader
                 continue;
             }
 
-            $length = unpack('P', (string) $header);
+            $length = unpack('P', $header);
             $localBuffer = '';
             $bytesToRead = $length[1];
             $bytesRead = 0;

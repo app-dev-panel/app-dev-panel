@@ -103,11 +103,7 @@ final class Yii2ConfigProvider
         // 3. Behaviors attached to the application.
         $behaviors = $this->app->getBehaviors();
         foreach ($behaviors as $name => $behavior) {
-            $events['behavior:' . $name] = [
-                $behavior instanceof Behavior
-                    ? $behavior::class
-                    : (is_object($behavior) ? $behavior::class : (string) $behavior),
-            ];
+            $events['behavior:' . $name] = [$behavior::class];
         }
 
         ksort($events);

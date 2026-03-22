@@ -36,7 +36,7 @@ final class Yii2RouteAdapter
             'hosts' => $this->rule->host ? [$this->rule->host] : [],
             'pattern' => $this->rule->name,
             'methods' => $this->rule->verb ?? [],
-            'defaults' => $this->rule->defaults ?? [],
+            'defaults' => $this->rule->defaults,
             'override' => 0,
             'middlewares' => [$this->rule->route],
         ];

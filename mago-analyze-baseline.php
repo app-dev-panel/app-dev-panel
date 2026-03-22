@@ -2989,18 +2989,6 @@ message = 'Possible argument type mismatch for argument #2 of `psr\http\message\
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Symfony/src/Controller/AdpApiController.php"
-code = "redundant-comparison"
-message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Symfony/src/Controller/AdpApiController.php"
-code = "redundant-logical-operation"
-message = "Redundant `&&` operation: left operand is evaluated and right operand is always truthy."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `symfony\component\dependencyinjection\container::setparameter`: expected `UnitEnum|array<array-key, mixed>|null|scalar`, but found `mixed`.'
@@ -3793,12 +3781,6 @@ message = 'Possible argument type mismatch for argument #2 of `AppDevPanel\Adapt
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
-code = "redundant-docblock-type"
-message = "Redundant docblock type for variable `$apiApp`."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Yii2/src/Controller/DebugQueryController.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #1 of `yii\base\controller::__construct`: expected `string`, but found `mixed`.'
@@ -3866,12 +3848,6 @@ count = 4
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
-code = "invalid-class-string-expression"
-message = "Expression of type `never` cannot be used as a class name."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
 code = "invalid-iterator"
 message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
 count = 1
@@ -3928,30 +3904,6 @@ count = 1
 file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getinstanceevents`. Saw type `nonnull`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
-code = "no-value"
-message = "Argument #1 passed to function `is_object` has type `never`, meaning it cannot produce a value."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
-code = "redundant-condition"
-message = "Redundant ternary operator: condition is always truthy."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
-code = "redundant-type-comparison"
-message = "Redundant type assertion: `$behavior` of type `never` is always not `object`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Inspector/Yii2RouteAdapter.php"
-code = "redundant-null-coalesce"
-message = "Redundant null coalesce: left-hand side can never be `null` or undefined."
 count = 1
 
 [[issues]]
@@ -4070,12 +4022,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Module.php"
-code = "redundant-cast"
-message = "Redundant cast to `(string)`: the expression already has this type."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
 code = "redundant-comparison"
 message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
 count = 2
@@ -4084,36 +4030,6 @@ count = 2
 file = "libs/Adapter/Yii2/src/Module.php"
 code = "redundant-logical-operation"
 message = "Redundant `&&` operation: left operand is always truthy and right operand is evaluated."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
-code = "redundant-logical-operation"
-message = "Redundant `||` operation: left operand is evaluated and right operand is always falsy."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
-code = "redundant-null-coalesce"
-message = "Redundant null coalesce: left-hand side can never be `null` or undefined."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
-code = "redundant-type-comparison"
-message = 'Redundant condition: variable `$view->assetBundles` (type `array<array-key, yii\web\AssetBundle>`) is already known to be `array<array-key, mixed>`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
-code = "redundant-type-comparison"
-message = '''Redundant condition: variable `$view` (type `yii\web\View`) is already known to be `has-property<'assetBundles'>`.'''
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
-code = "redundant-type-comparison"
-message = 'Redundant type assertion: `$view->assetBundles` of type `array<array-key, yii\web\AssetBundle>` is always not `array<array-key, mixed>`.'
 count = 1
 
 [[issues]]
@@ -4373,12 +4289,6 @@ file = "libs/Adapter/Yii2/tests/Unit/ModuleRouteRegistrationTest.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
 count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/bootstrap.php"
-code = "unused-statement"
-message = "Expression has no effect as a statement"
-count = 3
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
@@ -4975,18 +4885,6 @@ message = "Possibly null right operand used in string concatenation (type `null|
 count = 1
 
 [[issues]]
-file = "libs/Cli/src/Server/server-router.php"
-code = "redundant-comparison"
-message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
-count = 1
-
-[[issues]]
-file = "libs/Cli/src/Server/server-router.php"
-code = "redundant-logical-operation"
-message = "Redundant `&&` operation: left operand is evaluated and right operand is always truthy."
-count = 1
-
-[[issues]]
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `array_key_exists`: expected `bool|float|int|null|string`, but found `mixed`."
@@ -5057,12 +4955,6 @@ file = "libs/Kernel/src/Collector/LoggerInterfaceProxy.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 3
-
-[[issues]]
-file = "libs/Kernel/src/Collector/RouterCollector.php"
-code = "redundant-null-coalesce"
-message = "Redundant null coalesce: left-hand side can never be `null` or undefined."
-count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamCollector.php"
@@ -5540,12 +5432,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/DebugServer/SocketReader.php"
-code = "redundant-cast"
-message = "Redundant cast to `(string)`: the expression already has this type."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/DebugServer/SocketReader.php"
 code = "reference-to-undefined-variable"
 message = "Reference created from a previously undefined variable `$buffer`."
 count = 1
@@ -5806,12 +5692,6 @@ count = 1
 file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
 code = "possibly-null-argument"
 message = "Argument #1 of function `stream_set_write_buffer` is possibly `null`, but parameter type `resource` does not accept it."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
-code = "redundant-type-comparison"
-message = "Redundant type assertion: `$this->stream` of type `open-resource` is always not `open-resource`."
 count = 1
 
 [[issues]]
@@ -6343,18 +6223,6 @@ message = "Assigning `mixed` type to a variable may lead to unexpected behavior.
 count = 2
 
 [[issues]]
-file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
-code = "redundant-comparison"
-message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
-code = "redundant-logical-operation"
-message = "Redundant `&&` operation: left operand is always truthy and right operand is evaluated."
-count = 1
-
-[[issues]]
 file = "libs/Kernel/tests/Unit/Collector/LogCollectorTest.php"
 code = "non-existent-method"
 message = 'Method `collect` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
@@ -6823,12 +6691,6 @@ message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Testi
 count = 1
 
 [[issues]]
-file = "libs/Testing/src/Command/DebugFixturesCommand.php"
-code = "redundant-cast"
-message = "Redundant cast to `(string)`: the expression already has this type."
-count = 2
-
-[[issues]]
 file = "libs/Testing/src/Runner/FixtureResult.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
@@ -6958,24 +6820,6 @@ count = 4
 file = "libs/Testing/tests/E2E/ScenarioTest.php"
 code = "mixed-assignment"
 message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/Testing/tests/E2E/ScenarioTest.php"
-code = "redundant-cast"
-message = "Redundant cast to `(string)`: the expression already has this type."
-count = 4
-
-[[issues]]
-file = "libs/Testing/tests/E2E/ScenarioTest.php"
-code = "redundant-condition"
-message = "Redundant ternary operator: condition is always truthy."
-count = 1
-
-[[issues]]
-file = "libs/Testing/tests/E2E/ScenarioTest.php"
-code = "redundant-type-comparison"
-message = "Redundant type assertion: `$body` of type `array<string, mixed>` is always not `array<array-key, mixed>`."
 count = 1
 
 [[issues]]

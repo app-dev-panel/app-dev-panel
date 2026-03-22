@@ -43,7 +43,7 @@ final class AdpApiController
 
         // Copy body
         $content = $request->getContent();
-        if ($content !== '' && $content !== false) {
+        if ($content !== '') {
             $body = $psr17Factory->createStream($content);
             $psrRequest = $psrRequest->withBody($body);
         }

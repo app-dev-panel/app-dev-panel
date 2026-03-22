@@ -121,8 +121,7 @@ final class InspectController
     {
         ob_start();
         phpinfo();
-        $phpinfo = ob_get_contents();
-        ob_get_clean();
+        $phpinfo = ob_get_clean();
 
         return $this->responseFactory->createJsonResponse($phpinfo);
     }

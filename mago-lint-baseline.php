@@ -391,6 +391,12 @@ message = "Use of the `isset` construct."
 count = 2
 
 [[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "no-redundant-use"
+message = "Unused import: `Behavior`."
+count = 1
+
+[[issues]]
 file = "libs/Adapter/Yii2/src/Inspector/Yii2DbSchemaProvider.php"
 code = "no-empty-catch-clause"
 message = "Do not use empty `catch` blocks."

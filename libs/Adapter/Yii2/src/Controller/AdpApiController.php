@@ -46,7 +46,6 @@ final class AdpApiController extends Controller
 
     public function actionHandle(string $path = ''): Response
     {
-        /** @var ApiApplication $apiApp */
         $apiApp = \Yii::$container->get(ApiApplication::class);
 
         $psrRequest = $this->convertYiiRequestToPsr7(\Yii::$app->getRequest());

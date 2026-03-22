@@ -11,9 +11,15 @@ declare(strict_types=1);
  * - Loads autoloader and framework class
  */
 
-defined('YII_ENABLE_ERROR_HANDLER') or define('YII_ENABLE_ERROR_HANDLER', false);
-defined('YII_DEBUG') or define('YII_DEBUG', true);
-defined('YII_ENV') or define('YII_ENV', 'test');
+if (!defined('YII_ENABLE_ERROR_HANDLER')) {
+    define('YII_ENABLE_ERROR_HANDLER', false);
+}
+if (!defined('YII_DEBUG')) {
+    define('YII_DEBUG', true);
+}
+if (!defined('YII_ENV')) {
+    define('YII_ENV', 'test');
+}
 
 // Root autoloader (from monorepo root)
 $rootAutoload = dirname(__DIR__, 4) . '/vendor/autoload.php';

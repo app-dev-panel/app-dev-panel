@@ -197,8 +197,8 @@ final class ScenarioTest extends FixtureTestCase
                 self::assertIsString($key);
                 self::assertStringContainsString(
                     'Collector',
-                    (string) $key,
-                    sprintf('Collector key "%s" should contain "Collector" (FQCN format)', (string) $key),
+                    $key,
+                    sprintf('Collector key "%s" should contain "Collector" (FQCN format)', $key),
                 );
             }
 
@@ -222,11 +222,11 @@ final class ScenarioTest extends FixtureTestCase
         // Find LogCollector key
         $logKey = null;
         foreach (array_keys($data) as $key) {
-            if (!str_contains((string) $key, 'LogCollector')) {
+            if (!str_contains($key, 'LogCollector')) {
                 continue;
             }
 
-            $logKey = (string) $key;
+            $logKey = $key;
             break;
         }
         self::assertNotNull($logKey, 'LogCollector not found in data');
@@ -375,7 +375,7 @@ final class ScenarioTest extends FixtureTestCase
         if ($cliResponse->getStatusCode() >= 200 && $cliResponse->getStatusCode() < 300) {
             /** @var array<string, mixed> $body */
             $body = json_decode((string) $cliResponse->getBody(), true, 512, JSON_THROW_ON_ERROR);
-            self::$cliResetResult = is_array($body) ? $body : [];
+            self::$cliResetResult = $body;
             usleep(200_000);
         }
     }

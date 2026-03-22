@@ -86,7 +86,6 @@ $requestPath = parse_url($requestUri, PHP_URL_PATH);
 // Serve frontend static files if configured and path doesn't match API
 if (
     $frontendPath !== null
-    && $frontendPath !== false
     && !str_starts_with($requestPath, '/debug/api')
     && !str_starts_with($requestPath, '/inspect/api')
 ) {

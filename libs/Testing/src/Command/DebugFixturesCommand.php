@@ -107,7 +107,7 @@ final class DebugFixturesCommand extends Command
                     return [$fixture];
                 }
             }
-            $io->error(sprintf('Fixture "%s" not found.', (string) $fixtureName));
+            $io->error(sprintf('Fixture "%s" not found.', $fixtureName));
             return null;
         }
 
@@ -116,7 +116,7 @@ final class DebugFixturesCommand extends Command
             if ($fixtures === []) {
                 $io->error(sprintf(
                     'No fixtures found for tag "%s". Available tags: %s',
-                    (string) $tag,
+                    $tag,
                     implode(', ', FixtureRegistry::tags()),
                 ));
                 return null;

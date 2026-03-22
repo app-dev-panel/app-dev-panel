@@ -684,11 +684,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
                     'cc' => self::normalizeAddresses($message->getCc()),
                     'bcc' => self::normalizeAddresses($message->getBcc()),
                     'replyTo' => self::normalizeAddresses($message->getReplyTo()),
-                    'subject' => $message->getSubject() ?? '',
+                    'subject' => $message->getSubject(),
                     'textBody' => method_exists($message, 'getTextBody') ? $message->getTextBody() : null,
                     'htmlBody' => method_exists($message, 'getHtmlBody') ? $message->getHtmlBody() : null,
-                    'raw' => method_exists($message, 'toString') ? (string) $message->toString() : '',
-                    'charset' => $message->getCharset() ?? 'utf-8',
+                    'raw' => method_exists($message, 'toString') ? $message->toString() : '',
+                    'charset' => $message->getCharset(),
                     'date' => date('r'),
                 ];
                 $mailerCollector->collectMessage($normalized);
@@ -739,7 +739,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         ): void {
             /** @var \yii\web\View $view */
             $view = $event->sender;
-            if (!property_exists($view, 'assetBundles') || !is_array($view->assetBundles)) {
+            if ($view->assetBundles === []) {
                 return;
             }
 
