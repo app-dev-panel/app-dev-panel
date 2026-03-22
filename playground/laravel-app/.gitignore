@@ -1,0 +1,8 @@
+/vendor/
+/storage/debug/
+/storage/logs/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+/bootstrap/cache/packages.php
+/bootstrap/cache/services.php

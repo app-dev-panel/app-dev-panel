@@ -6,7 +6,7 @@ Reference applications demonstrating ADP integration with specific frameworks.
 
 A playground is a minimal, working application for a specific PHP framework with ADP fully integrated. Each playground:
 
-- Installs the corresponding ADP adapter (`adapter-yiisoft`, `adapter-symfony`, `adapter-yii2`)
+- Installs the corresponding ADP adapter (`adapter-yiisoft`, `adapter-symfony`, `adapter-laravel`, `adapter-yii2`)
 - Configures collectors, storage, and API routes
 - Exposes demo endpoints that generate debug data (logs, exceptions, events)
 - Exposes `/test/fixtures/*` endpoints for automated testing
@@ -20,6 +20,7 @@ Playgrounds have **no unit tests**. Quality is enforced via Mago only.
 playground/
 ├── yiisoft-app/          # Yii 3 — port 8101
 ├── symfony-basic-app/    # Symfony 7 — port 8102
+├── laravel-app/          # Laravel 12 — port 8104
 └── yii2-basic-app/       # Yii 2 — port 8103
 ```
 
@@ -29,6 +30,7 @@ playground/
 |------------|------|-------------------|
 | Yiisoft | 8101 | `YIISOFT_PORT` |
 | Symfony | 8102 | `SYMFONY_PORT` |
+| Laravel | 8104 | `LARAVEL_PORT` |
 | Yii2 | 8103 | `YII2_PORT` |
 
 Override: `make fixtures-symfony SYMFONY_PORT=9000`
@@ -55,6 +57,7 @@ make install-playgrounds
 # Start each server (separate terminals)
 cd playground/yiisoft-app && ./yii serve --port=8101
 cd playground/symfony-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t public
+cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
 cd playground/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8103 -t public
 ```
 
@@ -67,6 +70,7 @@ make fixtures              # All playgrounds in parallel
 make fixtures-yiisoft      # Yiisoft only
 make fixtures-symfony      # Symfony only
 make fixtures-yii2         # Yii2 only
+make fixtures-laravel      # Laravel only
 ```
 
 ---
@@ -132,10 +136,28 @@ Yiisoft uses PSR-15 request handler classes (one class per action):
 src/Web/
 ├── HomePage/Action.php
 └── TestFixtures/
-    ├── LogsAction.php
+    ├── CacheAction.php
+    ├── CacheHeavyAction.php
+    ├── DatabaseAction.php
+    ├── DumpAction.php
     ├── EventsAction.php
     ├── ExceptionAction.php
-    └── ...
+    ├── ExceptionChainedAction.php
+    ├── FilesystemAction.php
+    ├── HttpClientAction.php
+    ├── LogsAction.php
+    ├── LogsContextAction.php
+    ├── LogsHeavyAction.php
+    ├── MailerAction.php
+    ├── MessengerAction.php
+    ├── MultiAction.php
+    ├── RequestInfoAction.php
+    ├── ResetAction.php
+    ├── ResetCliAction.php
+    ├── RouterAction.php
+    ├── TestFixtureEvent.php
+    ├── TimelineAction.php
+    └── ValidatorAction.php
 ```
 
 ---
@@ -234,8 +256,118 @@ Standard Symfony controllers with route attributes:
 ```
 src/Controller/
 ├── HomeController.php
-├── TestFixtures/
-└──     (13 action classes)
+└── TestFixtures/
+    ├── CacheAction.php
+    ├── CacheHeavyAction.php
+    ├── DatabaseAction.php
+    ├── DumpAction.php
+    ├── EventsAction.php
+    ├── ExceptionAction.php
+    ├── ExceptionChainedAction.php
+    ├── FilesystemAction.php
+    ├── HttpClientAction.php
+    ├── LogsAction.php
+    ├── LogsContextAction.php
+    ├── LogsHeavyAction.php
+    ├── MailerAction.php
+    ├── MessengerAction.php
+    ├── MultiAction.php
+    ├── RequestInfoAction.php
+    ├── ResetAction.php
+    ├── ResetCliAction.php
+    ├── RouterAction.php
+    ├── TestFixtureEvent.php
+    ├── TimelineAction.php
+    └── ValidatorAction.php
+```
+
+---
+
+## Laravel Playground (Laravel 12)
+
+**Path:** `playground/laravel-app/`
+**Adapter:** `app-dev-panel/adapter-laravel`
+**Integration method:** Laravel package discovery (auto-registered via `extra.laravel.providers`)
+
+### Installation
+
+The adapter auto-registers via Laravel's package discovery. No manual registration needed.
+
+**composer.json:**
+```json
+{
+    "require": {
+        "app-dev-panel/adapter-laravel": "*"
+    }
+}
+```
+
+Publish config: `php artisan vendor:publish --tag=app-dev-panel-config`
+
+### How It Works
+
+1. `AppDevPanelServiceProvider` auto-discovered via `extra.laravel.providers` in adapter's composer.json
+2. `register()` wires: `StorageInterface`, `Debugger`, all collectors, API services, CLI commands
+3. `boot()` publishes config, loads routes, pushes `DebugMiddleware`, registers event listeners, decorates PSR services
+4. `DebugMiddleware` maps request lifecycle → `Debugger::startup()` / `Debugger::shutdown()`
+5. Event listeners capture: `QueryExecuted`, cache events, `MessageSent`, queue events, HTTP client events, console events
+6. PSR proxies decorate: Logger → `LoggerInterfaceProxy`, HttpClient → `HttpClientInterfaceProxy`, EventDispatcher → `LaravelEventDispatcherProxy`
+
+### Key Config Files
+
+| File | Purpose |
+|------|---------|
+| `config/app-dev-panel.php` | ADP configuration (published from adapter) |
+| `config/app.php` | Application config |
+| `config/database.php` | Database connections |
+| `routes/web.php` | App routes + test fixture routes |
+| `routes/api.php` | API routes |
+
+### Entry Points
+
+- **HTTP:** `public/index.php` → Laravel HTTP Kernel
+- **CLI:** `php artisan` → Laravel Console Kernel
+
+### Debug Storage
+
+`storage/debug/` (via `storage_path('debug')`)
+
+### App Routes
+
+| Method | Path | Handler |
+|--------|------|---------|
+| GET | `/` | `HomeController::index()` |
+| GET | `/test/fixtures/*` | `TestFixtures\*Action` (invokable controllers) |
+
+### Controller Structure
+
+Laravel uses invokable controller classes (one class per action):
+
+```
+app/Http/Controllers/
+├── HomeController.php
+└── TestFixtures/
+    ├── CacheAction.php
+    ├── CacheHeavyAction.php
+    ├── DatabaseAction.php
+    ├── DumpAction.php
+    ├── EventsAction.php
+    ├── ExceptionAction.php
+    ├── ExceptionChainedAction.php
+    ├── FilesystemAction.php
+    ├── HttpClientAction.php
+    ├── LogsAction.php
+    ├── LogsContextAction.php
+    ├── LogsHeavyAction.php
+    ├── MailerAction.php
+    ├── MessengerAction.php
+    ├── MultiAction.php
+    ├── RequestInfoAction.php
+    ├── ResetAction.php
+    ├── ResetCliAction.php
+    ├── RouterAction.php
+    ├── TimelineAction.php
+    └── ValidatorAction.php
 ```
 
 ---
@@ -316,13 +448,34 @@ return [
 
 ### Controller Structure
 
-Standard Yii2 controllers with action methods:
+Yii2 uses standalone action classes (one class per action):
 
 ```
-src/controllers/
-├── SiteController.php
-└── TestFixtures/
+src/
+├── controllers/
+│   └── SiteController.php
+└── actions/testFixtures/
+    ├── CacheAction.php
+    ├── CacheHeavyAction.php
+    ├── DatabaseAction.php
+    ├── DumpAction.php
+    ├── EventsAction.php
+    ├── ExceptionAction.php
+    ├── ExceptionChainedAction.php
+    ├── FilesystemAction.php
+    ├── HttpClientAction.php
+    ├── LogsAction.php
+    ├── LogsContextAction.php
+    ├── LogsHeavyAction.php
+    ├── MailerAction.php
+    ├── MultiAction.php
+    ├── RequestInfoAction.php
+    ├── ResetAction.php
+    ├── ResetCliAction.php
+    └── TimelineAction.php
 ```
+
+Yii2 playground has 18 fixture actions. Missing compared to Yiisoft/Symfony: `MessengerAction`, `RouterAction`, `ValidatorAction` (these collectors are not supported in Yii 2).
 
 ---
 
@@ -330,11 +483,129 @@ src/controllers/
 
 To add a playground for a new framework:
 
-1. Create `playground/<framework>-app/` with a minimal app
-2. Install the corresponding ADP adapter
-3. Configure collectors, storage, and API routes per the adapter docs
-4. Add demo endpoints (`/`, `/api/users`, `/api/error`)
-5. Implement `/test/fixtures/*` endpoints matching `FixtureRegistry` (see `libs/Testing/CLAUDE.md`)
-6. Add `composer serve` script
-7. Add Makefile targets: `mago-playground-<name>`, `fixtures-<name>`
-8. Add port allocation in Makefile variables
+### 1. Create the App
+
+Create `playground/<framework>-app/` with a minimal application for the target framework.
+Use the framework's official skeleton/starter (e.g., `composer create-project`).
+
+### 2. Install the ADP Adapter
+
+```bash
+cd playground/<framework>-app
+composer require app-dev-panel/kernel app-dev-panel/api app-dev-panel/adapter-<framework>
+```
+
+Use path repositories in `composer.json` to reference the local monorepo packages:
+
+```json
+{
+    "repositories": [
+        {"type": "path", "url": "../../libs/Kernel"},
+        {"type": "path", "url": "../../libs/API"},
+        {"type": "path", "url": "../../libs/Cli"},
+        {"type": "path", "url": "../../libs/Testing"},
+        {"type": "path", "url": "../../libs/Adapter/<Framework>"}
+    ]
+}
+```
+
+### 3. Configure ADP
+
+- Wire collectors, storage, and API routes per the adapter's docs
+- Set storage path to a framework-appropriate runtime directory
+- Configure `ignored_requests` to exclude `/debug/api/*` from debug collection
+
+### 4. Add Demo Endpoints
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/` | Home / demo page |
+| GET | `/api/users` | Example JSON API endpoint |
+| GET | `/api/error` | Example error-throwing endpoint |
+
+### 5. Implement Fixture Endpoints
+
+All playgrounds **must** implement `/test/fixtures/*` endpoints matching `FixtureRegistry` (see `libs/Testing/CLAUDE.md`).
+
+**Required fixture endpoints (core):**
+
+| Endpoint | Fixture | Collectors Tested |
+|----------|---------|-------------------|
+| `/test/fixtures/reset` | (setup) | Clears debug storage |
+| `/test/fixtures/reset-cli` | (setup) | Clears storage via CLI command |
+| `/test/fixtures/logs` | logs:basic | LogCollector |
+| `/test/fixtures/logs-context` | logs:context | LogCollector |
+| `/test/fixtures/logs-heavy` | logs:heavy | LogCollector |
+| `/test/fixtures/events` | events:basic | EventCollector |
+| `/test/fixtures/dump` | var-dumper:basic | VarDumperCollector |
+| `/test/fixtures/timeline` | timeline:basic | TimelineCollector |
+| `/test/fixtures/request-info` | request:basic | RequestCollector, WebAppInfoCollector |
+| `/test/fixtures/exception` | exception:runtime | ExceptionCollector |
+| `/test/fixtures/exception-chained` | exception:chained | ExceptionCollector |
+| `/test/fixtures/multi` | multi:logs-and-events | LogCollector, EventCollector, TimelineCollector |
+| `/test/fixtures/http-client` | http-client:basic | HttpClientCollector |
+| `/test/fixtures/filesystem` | filesystem:basic | FilesystemStreamCollector |
+| `/test/fixtures/cache` | cache:basic | CacheCollector |
+| `/test/fixtures/cache-heavy` | cache:heavy | CacheCollector |
+| `/test/fixtures/database` | database:basic | DatabaseCollector |
+
+**Optional fixture endpoints (framework-dependent):**
+
+| Endpoint | Fixture | Notes |
+|----------|---------|-------|
+| `/test/fixtures/mailer` | mailer:basic | Requires mailer integration |
+| `/test/fixtures/messenger` | messenger:basic | Requires queue/messenger integration |
+| `/test/fixtures/validator` | validator:basic | Requires validator integration |
+| `/test/fixtures/router` | router:basic | Requires router introspection |
+
+All fixture responses must return JSON. The reset endpoints accept both GET and POST.
+
+### 6. Add Composer Serve Script
+
+Add a `serve` script to `composer.json`:
+
+```json
+{
+    "scripts": {
+        "serve": "PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:<PORT> -t public"
+    }
+}
+```
+
+### 7. Add Makefile Targets
+
+In the root `Makefile`, add:
+
+- `FRAMEWORK_PORT ?= 810X` — port allocation variable
+- `serve-<framework>` — start the server
+- `mago-playground-<framework>` — Mago checks
+- `mago-playground-<framework>-fix` — Mago fix
+- `fixtures-<framework>` — CLI fixtures
+- `test-fixtures-<framework>` — PHPUnit E2E fixtures
+- `test-scenario-<framework>` — Scenario test
+- `test-playground-<framework>` — Full integration (start server, run E2E, stop server)
+
+Update the aggregate targets (`mago-playgrounds`, `fixtures`, `test-fixtures`, `serve`) to include the new playground.
+
+### 8. Add Mago Configuration
+
+Create `mago.toml` in the playground root (or add the playground to a shared config).
+Create baseline files (`mago-lint-baseline.php`, `mago-analyze-baseline.php`) if the framework's skeleton has pre-existing issues.
+
+### 9. Update Documentation
+
+- Update this file (`docs/playgrounds.md`) with the new playground section
+- Update `docs/getting-started.md` project structure table
+- Update root `CLAUDE.md` repository structure
+- Add port allocation to the port table above
+
+### Current Port Allocation
+
+| Port | Playground |
+|------|------------|
+| 8100 | Frontend dev server |
+| 8101 | Yiisoft |
+| 8102 | Symfony |
+| 8103 | Yii2 |
+| 8104 | Laravel |
+| 8105+ | Available for new playgrounds |

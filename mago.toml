@@ -7,6 +7,13 @@ paths = [
     "libs/Cli/src",
     "libs/Cli/tests",
     "libs/Adapter/Yiisoft/src",
+    "libs/Adapter/Symfony/src",
+    "libs/Adapter/Symfony/tests",
+    "libs/Adapter/Yii2/src",
+    "libs/Adapter/Yii2/tests",
+    "libs/Adapter/Laravel/src",
+    "libs/Adapter/Laravel/tests",
+    "libs/Adapter/Cycle/src",
     "libs/Testing/src",
     "libs/Testing/tests",
 ]

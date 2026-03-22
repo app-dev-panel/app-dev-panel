@@ -45,7 +45,9 @@ final class DebugQueryController extends Controller
         $entries = array_slice($entries, 0, $limit);
 
         if ($json) {
-            Console::stdout(json_encode($entries, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+            Console::stdout(
+                json_encode($entries, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n",
+            );
             return ExitCode::OK;
         }
 
@@ -66,14 +68,10 @@ final class DebugQueryController extends Controller
             ];
         }
 
-        $this->writeColored(sprintf(
-            "%-36s  %-6s  %-30s  %-6s  %s\n",
-            'ID',
-            'Method',
-            'URL',
-            'Status',
-            'Collectors',
-        ), Console::BOLD);
+        $this->writeColored(
+            sprintf("%-36s  %-6s  %-30s  %-6s  %s\n", 'ID', 'Method', 'URL', 'Status', 'Collectors'),
+            Console::BOLD,
+        );
         Console::stdout(str_repeat('-', 100) . "\n");
 
         foreach ($rows as $row) {
@@ -122,13 +120,17 @@ final class DebugQueryController extends Controller
         }
 
         if ($json) {
-            Console::stdout(json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+            Console::stdout(
+                json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n",
+            );
             return ExitCode::OK;
         }
 
         if ($collector !== null) {
             $this->writeColored(sprintf("Collector: %s (Entry: %s)\n", $collector, $id), Console::BOLD);
-            Console::stdout(json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+            Console::stdout(
+                json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n",
+            );
             return ExitCode::OK;
         }
 
@@ -138,10 +140,10 @@ final class DebugQueryController extends Controller
         foreach ($data as $collectorName => $collectorData) {
             $this->writeColored(sprintf("\n[%s]\n", (string) $collectorName), Console::BOLD, Console::FG_CYAN);
             if (is_array($collectorData) && $collectorData !== []) {
-                Console::stdout(json_encode(
-                    $collectorData,
-                    JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES,
-                ) . "\n");
+                Console::stdout(
+                    json_encode($collectorData, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                        . "\n",
+                );
             } else {
                 $this->writeColored("(empty)\n", Console::FG_GREY);
             }

@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2;
 
-use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
-use AppDevPanel\Kernel\Collector\DatabaseCollector;
-use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Adapter\Yii2\Controller\AdpApiController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugQueryController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugResetController;
@@ -42,14 +39,17 @@ use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
+use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -585,7 +585,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
         restore_exception_handler();
 
         $debugger = $this->debugger;
-        set_exception_handler(static function (\Throwable $exception) use ($exceptionCollector, $debugger, $previousHandler): void {
+        set_exception_handler(static function (\Throwable $exception) use (
+            $exceptionCollector,
+            $debugger,
+            $previousHandler,
+        ): void {
             // Feed the collector before Yii2's handler clears the exception
             $exceptionCollector->collect($exception);
 
@@ -596,7 +600,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
             // Delegate to Yii2's error handler
             if ($previousHandler !== null) {
-                ($previousHandler)($exception);
+                $previousHandler($exception);
             }
         });
     }
