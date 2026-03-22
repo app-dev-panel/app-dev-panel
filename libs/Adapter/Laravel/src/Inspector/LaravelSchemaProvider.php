@@ -35,7 +35,7 @@ final class LaravelSchemaProvider implements SchemaProviderInterface
         return $tables;
     }
 
-    public function getTable(string $tableName, int $limit = 1000, int $offset = 0): array
+    public function getTable(string $tableName, int $limit = SchemaProviderInterface::DEFAULT_LIMIT, int $offset = 0): array
     {
         $schema = $this->connection->getSchemaBuilder();
         $columns = $schema->getColumns($tableName);

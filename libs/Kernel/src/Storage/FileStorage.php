@@ -22,12 +22,14 @@ use function uasort;
 
 final class FileStorage implements StorageInterface
 {
+    public const int DEFAULT_HISTORY_SIZE = 50;
+
     /**
      * @var CollectorInterface[]
      */
     private array $collectors = [];
 
-    private int $historySize = 50;
+    private int $historySize = self::DEFAULT_HISTORY_SIZE;
 
     public function __construct(
         private readonly string $path,

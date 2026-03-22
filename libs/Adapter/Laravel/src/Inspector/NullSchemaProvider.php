@@ -16,7 +16,7 @@ final class NullSchemaProvider implements SchemaProviderInterface
         return [];
     }
 
-    public function getTable(string $tableName, int $limit = 1000, int $offset = 0): array
+    public function getTable(string $tableName, int $limit = SchemaProviderInterface::DEFAULT_LIMIT, int $offset = 0): array
     {
         return [
             'name' => $tableName,

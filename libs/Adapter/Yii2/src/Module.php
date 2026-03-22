@@ -96,7 +96,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     /**
      * @var int Maximum number of debug entries to keep.
      */
-    public int $historySize = 50;
+    public int $historySize = FileStorage::DEFAULT_HISTORY_SIZE;
 
     /**
      * @var array<string, bool> Collector toggle map.
