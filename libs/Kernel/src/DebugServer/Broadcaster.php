@@ -23,7 +23,9 @@ final class Broadcaster
         foreach ($files as $file) {
             $socket = @fsockopen('udg://' . $file, -1, $errno, $errstr);
             if ($errno === self::SOCKET_ECONNREFUSED) {
-                @unlink($file);
+                if (file_exists($file)) {
+                    unlink($file);
+                }
                 continue;
             }
             if ($errno !== 0) {

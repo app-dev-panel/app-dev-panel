@@ -75,8 +75,11 @@ final class Connection
 
     public function close(): void
     {
+        $path = null;
         @socket_getsockname($this->socket, $path);
         @socket_close($this->socket);
-        @unlink($path);
+        if ($path !== null && file_exists($path)) {
+            unlink($path);
+        }
     }
 }

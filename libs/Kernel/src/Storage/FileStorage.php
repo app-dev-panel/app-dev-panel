@@ -150,7 +150,12 @@ final class FileStorage implements StorageInterface
     private function gc(): void
     {
         $lockFile = $this->path . '/.gc.lock';
-        $lockHandle = @fopen($lockFile, 'c');
+        set_error_handler(static fn(): bool => true);
+        try {
+            $lockHandle = fopen($lockFile, 'c');
+        } finally {
+            restore_error_handler();
+        }
         if ($lockHandle === false) {
             return;
         }
@@ -188,7 +193,9 @@ final class FileStorage implements StorageInterface
         } finally {
             flock($lockHandle, LOCK_UN);
             fclose($lockHandle);
-            @unlink($lockFile);
+            if (file_exists($lockFile)) {
+                unlink($lockFile);
+            }
         }
     }
 }

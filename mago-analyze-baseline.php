@@ -5462,8 +5462,14 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/DebugServer/Connection.php"
-code = "reference-to-undefined-variable"
-message = "Reference created from a previously undefined variable `$path`."
+code = "redundant-comparison"
+message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/Connection.php"
+code = "redundant-logical-operation"
+message = "Redundant `&&` operation: left operand is always truthy and right operand is evaluated."
 count = 1
 
 [[issues]]
@@ -5492,6 +5498,18 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/DebugServer/SocketReader.php"
+code = "redundant-comparison"
+message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
+code = "redundant-logical-operation"
+message = "Redundant `&&` operation: left operand is always truthy and right operand is evaluated."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
 code = "reference-to-undefined-variable"
 message = "Reference created from a previously undefined variable `$buffer`."
 count = 1
@@ -5500,12 +5518,6 @@ count = 1
 file = "libs/Kernel/src/DebugServer/SocketReader.php"
 code = "reference-to-undefined-variable"
 message = "Reference created from a previously undefined variable `$header`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/DebugServer/SocketReader.php"
-code = "reference-to-undefined-variable"
-message = "Reference created from a previously undefined variable `$path`."
 count = 1
 
 [[issues]]
