@@ -1,24 +1,6 @@
 variant = "loose"
 
 [[issues]]
-file = "config/reference.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Config\Loader\ParamConfigurator`.'
-count = 1599
-
-[[issues]]
-file = "config/reference.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\DependencyInjection\Loader\Configurator\ReferenceConfigurator`.'
-count = 42
-
-[[issues]]
-file = "config/reference.php"
-code = "non-existent-method"
-message = 'Method `config` does not exist on type `Symfony\Component\DependencyInjection\Loader\Configurator\AppReference`.'
-count = 1
-
-[[issues]]
 file = "config/routes/app_dev_panel.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator)`).'
@@ -70,6 +52,78 @@ count = 1
 file = "src/Controller/HomeController.php"
 code = "non-existent-class-like"
 message = 'Class `App\Controller\HomeController` cannot extend unknown type `AbstractController`'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
+count = 4
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\CacheCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\CacheCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
 count = 1
 
 [[issues]]

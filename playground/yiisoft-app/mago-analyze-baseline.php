@@ -70,7 +70,7 @@ count = 6
 file = "config/common/routes.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 43
+count = 47
 
 [[issues]]
 file = "config/common/routes.php"
@@ -82,7 +82,7 @@ count = 2
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Yiisoft\Router\Route`.'
-count = 18
+count = 20
 
 [[issues]]
 file = "config/common/routes.php"
@@ -371,6 +371,42 @@ file = "src/Web/Shared/Layout/Main/layout.php"
 code = "non-existent-method"
 message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
 count = 4
+
+[[issues]]
+file = "src/Web/TestFixtures/CacheAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\CacheAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/CacheAction.php"
+code = "unused-property"
+message = "Property `$cacheCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/CacheAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\CacheHeavyAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/CacheHeavyAction.php"
+code = "unused-property"
+message = "Property `$cacheCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/CacheHeavyAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
 
 [[issues]]
 file = "src/Web/TestFixtures/DatabaseAction.php"
