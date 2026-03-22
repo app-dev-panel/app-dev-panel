@@ -51,7 +51,7 @@ final class CacheHeavyAction extends Action
                 operation: $operation,
                 key: $key,
                 hit: $hit,
-                duration: rand(100, 5000) / 1000000,
+                duration: rand(100, 5_000) / 1_000_000,
                 value: $value,
             );
         }

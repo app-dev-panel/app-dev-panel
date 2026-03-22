@@ -6,7 +6,6 @@ namespace AppDevPanel\Adapter\Yii2;
 
 use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
-use AppDevPanel\Adapter\Yii2\Controller\AdpApiController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugQueryController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugResetController;
 use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
@@ -337,7 +336,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             ),
         );
 
-        $appParams = $app?->params ?? [];
+        $appParams = $app->params ?? [];
         \Yii::$container->setSingleton(
             InspectController::class,
             static fn() => new InspectController(

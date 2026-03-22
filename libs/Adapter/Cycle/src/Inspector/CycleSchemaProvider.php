@@ -33,8 +33,11 @@ class CycleSchemaProvider implements SchemaProviderInterface
         return $tables;
     }
 
-    public function getTable(string $tableName, int $limit = SchemaProviderInterface::DEFAULT_LIMIT, int $offset = 0): array
-    {
+    public function getTable(
+        string $tableName,
+        int $limit = SchemaProviderInterface::DEFAULT_LIMIT,
+        int $offset = 0,
+    ): array {
         $database = $this->databaseProvider->database();
         $schema = $database->table($tableName);
 

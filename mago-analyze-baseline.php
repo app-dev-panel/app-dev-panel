@@ -1058,21 +1058,27 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
+
+[[issues]]
+file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
-count = 1
+count = 4
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
-count = 2
+count = 8
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
+count = 6
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
@@ -1096,7 +1102,7 @@ count = 1
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
-count = 12
+count = 11
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
@@ -1108,7 +1114,7 @@ count = 1
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
-count = 6
+count = 7
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
@@ -1313,6 +1319,3156 @@ file = "libs/API/tests/Unit/ServerSentEventsStreamTest.php"
 code = "redundant-condition"
 message = "This condition (type `true`) will always evaluate to true."
 count = 1
+
+[[issues]]
+file = "libs/Adapter/Cycle/src/Inspector/CycleSchemaProvider.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Cycle/src/Inspector/CycleSchemaProvider.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Cycle\Database\ColumnInterface)`).'
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Cycle/src/Inspector/CycleSchemaProvider.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Cycle\Database\DatabaseProviderInterface)`).'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Cycle/src/Inspector/CycleSchemaProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider::serializecyclecolumnsschemas`: expected `array<array-key, unknown-ref(Cycle\Database\ColumnInterface)>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Cycle/src/Inspector/CycleSchemaProvider.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 8
+
+[[issues]]
+file = "libs/Adapter/Cycle/src/Inspector/CycleSchemaProvider.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 20
+
+[[issues]]
+file = "libs/Adapter/Cycle/src/Inspector/CycleSchemaProvider.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Cycle\Database\ColumnInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Cycle/src/Inspector/CycleSchemaProvider.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Cycle\Database\DatabaseProviderInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "non-existent-class-like"
+message = 'Class `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider` cannot extend unknown type `ServiceProvider`'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `decoratepsrservices()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `isenabled()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registerapiservices()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registerclicommands()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registercollectors()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registercoreservices()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registerdebugger()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registereventlisteners()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registermiddleware()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-property"
+message = "Property `$collectorClasses` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Routing\Route)`).'
+count = 12
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Routing\Router)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "less-specific-nested-argument-type"
+message = '''Argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\RouterCollector::collectmatchedroute`: expected `array{'action': mixed, 'arguments': array<array-key, mixed>, 'host': null|string, 'matchTime': float, 'middlewares': array<array-key, mixed>, 'name': null|string, 'pattern': string, 'uri': string}`, but provided type `array{'action': mixed, 'arguments': mixed, 'host': mixed, 'matchTime': int(0), 'middlewares': list<mixed>, 'name': mixed, 'pattern': truthy-string, 'uri': mixed}` is less specific.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_filter`: expected `array<('K.array_filter() extends array-key), mixed>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `ltrim`: expected `string`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Request`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Routing\Route`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Routing\Router`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "template-constraint-violation"
+message = "Argument type mismatch for template `K`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "unknown-iterator-type"
+message = "Cannot determine the type of the expression provided to `foreach`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `Symfony\Component\HttpFoundation\ResponseHeaderBag::set`: expected `string`, but provided type `array-key` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Nyholm\Psr7\Factory\Psr17Factory::createstream`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Psr\Http\Message\ServerRequestInterface::withqueryparams`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `psr\http\message\messageinterface::withheader`: expected `string`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `Psr\Http\Message\UriInterface|string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Request`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
+code = "unknown-iterator-type"
+message = "Cannot determine the type of the expression provided to `foreach`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Cache\Events\CacheHit)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Cache\Events\CacheMissed)`).'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Cache\Events\KeyForgotten)`).'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Cache\Events\KeyWritten)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Cache\Events\CacheHit`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Cache\Events\CacheMissed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Cache\Events\KeyForgotten`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Cache\Events\KeyWritten`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "null-argument"
+message = 'Argument #3 of method `AppDevPanel\Kernel\Collector\CacheCollector::logcacheoperation` is `null`, but parameter type `string` does not accept it.'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
+code = "redundant-null-coalesce"
+message = "Redundant null coalesce: left-hand side is always `null`."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Console\Events\CommandStarting)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Console\Events\CommandFinished`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Console\Events\CommandStarting`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
+code = "write-only-property"
+message = "Property `$appInfoCollectorFactory` is written to but never read."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
+code = "write-only-property"
+message = "Property `$commandCollectorFactory` is written to but never read."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
+code = "write-only-property"
+message = "Property `$exceptionCollectorFactory` is written to but never read."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "invalid-argument"
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Kernel\Collector\DatabaseCollector::logquery`: expected `string`, but found `array<array-key, string>|null`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Database\Events\QueryExecuted)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #5 of `AppDevPanel\Kernel\Collector\DatabaseCollector::logquery`: expected `float`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `nonnull` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `nonnull` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "mixed-operand"
+message = "Right operand in binary operation has type `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Database\Events\QueryExecuted`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "null-argument"
+message = 'Argument #1 of method `AppDevPanel\Kernel\Collector\DatabaseCollector::logquery` is `null`, but parameter type `string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "null-argument"
+message = 'Argument #3 of method `AppDevPanel\Kernel\Collector\DatabaseCollector::logquery` is `null`, but parameter type `array<array-key, mixed>` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "null-iterator"
+message = "Iterating over `null` in `foreach`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "null-operand"
+message = "Left operand in arithmetic operation cannot be `null`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "possibly-null-argument"
+message = 'Argument #2 of method `AppDevPanel\Kernel\Collector\DatabaseCollector::logquery` is possibly `null`, but parameter type `string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "possibly-null-argument"
+message = "Argument #3 of function `preg_replace` is possibly `null`, but parameter type `array<array-key, string>|string` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Http\Client\Events\ConnectionFailed)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Http\Client\Events\RequestSending)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Http\Client\Events\ResponseReceived)`).'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Collector\HttpClientCollector::collect`: expected `Psr\Http\Message\RequestInterface`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Collector\HttpClientCollector::collecttotaltime`: expected `Psr\Http\Message\ResponseInterface|null`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Client\Events\ConnectionFailed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Client\Events\RequestSending`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Client\Events\ResponseReceived`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
+code = "null-argument"
+message = "Argument #1 of function `spl_object_hash` is `null`, but parameter type `object` does not accept it."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Mail\Events\MessageSent)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
+code = "less-specific-nested-argument-type"
+message = '''Argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\MailerCollector::collectmessage`: expected `array{'bcc': array<array-key, mixed>, 'cc': array<array-key, mixed>, 'charset': string, 'date': null|string, 'from': array<array-key, mixed>, 'htmlBody': null|string, 'raw': string, 'replyTo': array<array-key, mixed>, 'subject': string, 'textBody': null|string, 'to': array<array-key, mixed>}`, but provided type `array{'bcc': array{}, 'cc': array{}, 'charset': string('utf-8'), 'date': string, 'from': array<array-key, mixed>, 'htmlBody': mixed, 'raw': string(''), 'replyTo': array{}, 'subject': mixed, 'textBody': mixed, 'to': array<array-key, mixed>}` is less specific.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
+code = "method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 7
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used for array access on `array<array-key, mixed>`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Mail\Events\MessageSent`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
+code = "unknown-iterator-type"
+message = "Cannot determine the type of the expression provided to `foreach`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Queue\Events\JobFailed)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Queue\Events\JobProcessed)`).'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Queue\Events\JobProcessing)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 9
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Collector\QueueCollector::logmessage`: expected `string`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `AppDevPanel\Kernel\Collector\QueueCollector::logmessage`: expected `null|string`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used for array access on `array<string, float>`."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Queue\Events\JobFailed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Queue\Events\JobProcessed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Queue\Events\JobProcessing`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "null-argument"
+message = 'Argument #2 of method `AppDevPanel\Kernel\Collector\QueueCollector::logmessage` is `null`, but parameter type `string` does not accept it.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
+code = "property-type-coercion"
+message = "A value of a less specific type `array<array-key, float>` is being assigned to property `$$jobStartTimes` (array<string, float>)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Foundation\Application)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "invalid-return-statement"
+message = '''Invalid return type for function `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::get`: expected `array<string, mixed>`, but found `array<string, mixed>|list<array{'class': null|string, 'listeners'?: list<string>, 'name': string}>`.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "less-specific-argument"
+message = "Argument type mismatch for argument #1 of `class_exists`: expected `string`, but provided type `array-key` is less specific."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "less-specific-nested-return-statement"
+message = '''Returned type `array{}|non-empty-list<array{'class': mixed, 'name': mixed}>` is less specific than the declared return type `list<array{'class': string, 'name': string}>` for function `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::getproviders` due to nested 'mixed'.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "less-specific-return-statement"
+message = 'Returned type `array<array-key, array-key>` is less specific than the declared return type `array<string, string>` for function `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::getservices`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "less-specific-return-statement"
+message = 'Returned type `array<array-key, mixed>` is less specific than the declared return type `array<string, mixed>` for function `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::getparameters`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "less-specific-return-statement"
+message = '''Returned type `array{}|non-empty-list<array{'class': class-string|null, 'listeners': array{}|non-empty-list<string>, 'name': array-key}>` is less specific than the declared return type `list<array{'class': null|string, 'listeners': list<string>, 'name': string}>` for function `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::geteventlisteners`.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `ksort`: expected `array<('K.ksort() extends array-key), ('V.ksort() extends mixed)>`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `method_exists`: expected `class-string|object`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 9
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Foundation\Application`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "non-existent-function"
+message = 'Could not find definition for function `AppDevPanel\Adapter\Laravel\Inspector\class_basename` (also tried as `class_basename` in a broader scope).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `method_exists`: expected `class-string|object`, but possibly received `unknown-ref(Illuminate\Contracts\Foundation\Application)`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "unknown-iterator-type"
+message = "Cannot determine the type of the expression provided to `foreach`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Routing\Route)`).'
+count = 8
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Routing\Route)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `ltrim`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Routing\Route`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteCollectionAdapter.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Routing\Router)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteCollectionAdapter.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelrouteadapter::__construct`: expected `unknown-ref(Illuminate\Routing\Route)`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteCollectionAdapter.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteCollectionAdapter.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Routing\Router`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteCollectionAdapter.php"
+code = "unknown-iterator-type"
+message = "Cannot determine the type of the expression provided to `foreach`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Database\Connection)`).'
+count = 9
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "invalid-type-cast"
+message = "Casting `mixed` to `array`."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "less-specific-nested-return-statement"
+message = '''Returned type `array{}|non-empty-list<array{'allowNull': bool, 'comment': mixed, 'dbType': nonnull, 'defaultValue': mixed, 'name': mixed, 'size': null, 'type': nonnull}>` is less specific than the declared return type `list<array{'allowNull': bool, 'comment': null|string, 'dbType': string, 'defaultValue': mixed, 'name': string, 'size': int|null, 'type': string}>` for function `appdevpanel\adapter\laravel\inspector\laravelschemaprovider::serializecolumns` due to nested 'mixed'.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider::getprimarykeys`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider::serializecolumns`: expected `list<array<string, mixed>>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_map`: expected `array<('K.array_map() extends array-key), mixed>`, but found `mixed`."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 12
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 10
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "mixed-operand"
+message = "Casting `mixed` to `bool`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\laravel\inspector\laravelschemaprovider::getprimarykeys`. Saw type `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Database\Connection`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Routing\Router)`).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `appdevpanel\adapter\laravel\inspector\laravelmatchresult::__construct`: expected `null|string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Routing\Router`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Illuminate\Http\Request`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
+count = 5
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Nyholm\Psr7\Factory\Psr17Factory::createstream`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Psr\Http\Message\ServerRequestInterface::withqueryparams`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `psr\http\message\messageinterface::withheader`: expected `string`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `str_starts_with`: expected `string`, but found `mixed`."
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `Psr\Http\Message\UriInterface|string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `nonnull` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `nonnull` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Request`.'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "possible-method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but possibly received `list<null|string>`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "unknown-iterator-type"
+message = "Cannot determine the type of the expression provided to `foreach`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php"
+code = "non-existent-class-like"
+message = 'Class `AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy` cannot implement unknown type `Dispatcher`'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php"
+code = "unused-property"
+message = "Property `$collector` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php"
+code = "unused-property"
+message = "Property `$decorated` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor::extract`: expected `unknown-ref(Illuminate\Http\Request)`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Routing\RouteCollection` not found.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Routing\Route` not found.'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Illuminate\Routing\Router` does not exist.'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Illuminate\Http\Request`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #2 of `appdevpanel\adapter\laravel\collector\routerdataextractor::__construct`: expected `unknown-ref(Illuminate\Routing\Router)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Routing\Router`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Controller/AdpApiControllerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\adapter\laravel\controller\adpapicontroller::__invoke`: expected `unknown-ref(Illuminate\Http\Request)`, but found `mixed`.'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Controller/AdpApiControllerTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Controller/AdpApiControllerTest.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Illuminate\Http\Request`.'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 20
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "no-value"
+message = "Argument #1 passed to closure `Closure` has type `never`, meaning it cannot produce a value."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Cache\Events\CacheHit` not found.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Cache\Events\CacheMissed` not found.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Cache\Events\KeyForgotten` not found.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Cache\Events\KeyWritten` not found.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Illuminate\Contracts\Events\Dispatcher` does not exist.'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\CacheListener::register`: expected `unknown-ref(Illuminate\Contracts\Events\Dispatcher)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Contracts\Events\Dispatcher`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
+code = "no-value"
+message = "Argument #1 passed to closure `Closure` has type `never`, meaning it cannot produce a value."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Console\Events\CommandFinished` not found.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Console\Events\CommandStarting` not found.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Illuminate\Contracts\Events\Dispatcher` does not exist.'
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\ConsoleListener::register`: expected `unknown-ref(Illuminate\Contracts\Events\Dispatcher)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Contracts\Events\Dispatcher`.'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "invalid-return-statement"
+message = 'Invalid return type for function `appdevpanel\adapter\laravel\tests\unit\eventlistener\databaselistenertest::registerlistener`: expected `array{0: AppDevPanel\Kernel\Collector\DatabaseCollector, 1: (closure(...mixed): mixed)}`, but found `list{AppDevPanel\Kernel\Collector\DatabaseCollector, (closure(...mixed=): mixed)|null}`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertstringcontainsstring`: expected `string`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 8
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "no-value"
+message = "Argument #1 passed to closure `Closure` has type `never`, meaning it cannot produce a value."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Database\Events\QueryExecuted` not found.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Illuminate\Contracts\Events\Dispatcher` does not exist.'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener::register`: expected `unknown-ref(Illuminate\Contracts\Events\Dispatcher)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Contracts\Events\Dispatcher`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
+code = "docblock-type-mismatch"
+message = 'Docblock return type `unknown-ref(Illuminate\Contracts\Foundation\Application)` is incompatible with native return type `unknown-ref(Illuminate\Contracts\Foundation\Application)`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Foundation\Application)`).'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
+code = "invalid-return-statement"
+message = 'Invalid return type for function `appdevpanel\adapter\laravel\tests\unit\inspector\laravelconfigprovidertest::createappmock`: expected `unknown-ref(Illuminate\Contracts\Foundation\Application)`, but found `PHPUnit\Framework\MockObject\MockObject&Illuminate\Contracts\Foundation\Application`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Config\Repository` not found.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Foundation\Application`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `PHPUnit\Framework\MockObject\MockObject`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::__construct`: expected `unknown-ref(Illuminate\Contracts\Foundation\Application)`, but possibly received `unknown-ref(Illuminate\Contracts\Foundation\Application)`.'
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteAdapterTest.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 5
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteAdapterTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcontains`: expected `iterable<mixed, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteAdapterTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertnotcontains`: expected `iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteAdapterTest.php"
+code = "no-value"
+message = 'Argument #1 passed to method `appdevpanel\adapter\laravel\inspector\laravelrouteadapter::__construct` has type `never`, meaning it cannot produce a value.'
+count = 5
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteAdapterTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Routing\Route` not found.'
+count = 5
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Routing\RouteCollection` not found.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Routing\Route` not found.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Illuminate\Routing\Router` does not exist.'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelroutecollectionadapter::__construct`: expected `unknown-ref(Illuminate\Routing\Router)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Routing\Router`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 5
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Routing\RouteCollection` not found.'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Routing\Route` not found.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Illuminate\Routing\Router` does not exist.'
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelurlmatcheradapter::__construct`: expected `unknown-ref(Illuminate\Routing\Router)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Routing\Router`.'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Middleware/DebugMiddlewareTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware::handle`: expected `unknown-ref(Illuminate\Http\Request)`, but found `mixed`.'
+count = 5
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Middleware/DebugMiddlewareTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware::terminate`: expected `unknown-ref(Illuminate\Http\Request)`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Middleware/DebugMiddlewareTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 9
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Middleware/DebugMiddlewareTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Middleware/DebugMiddlewareTest.php"
+code = "mixed-property-access"
+message = "Attempting to access a property on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Middleware/DebugMiddlewareTest.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Illuminate\Http\Request`.'
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Proxy/LaravelEventDispatcherProxyTest.php"
+code = "deprecated-method"
+message = 'Call to deprecated method: `phpunit\framework\assert::istype`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Proxy/LaravelEventDispatcherProxyTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Proxy/LaravelEventDispatcherProxyTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 22
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Proxy/LaravelEventDispatcherProxyTest.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Illuminate\Contracts\Events\Dispatcher` does not exist.'
+count = 20
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Proxy/LaravelEventDispatcherProxyTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\proxy\laraveleventdispatcherproxy::__construct`: expected `unknown-ref(Illuminate\Contracts\Events\Dispatcher)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Contracts\Events\Dispatcher`.'
+count = 10
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Collector/RouterDataExtractor.php"
+code = "less-specific-nested-argument-type"
+message = '''Argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\RouterCollector::collectmatchedroute`: expected `array{'action': mixed, 'arguments': array<array-key, mixed>, 'host': null|string, 'matchTime': float, 'middlewares': array<array-key, mixed>, 'name': null|string, 'pattern': string, 'uri': string}`, but provided type `array{'action': mixed, 'arguments': mixed, 'host': null|string, 'matchTime': int(0), 'middlewares': array{}, 'name': nonnull, 'pattern': nonnull, 'uri': string}` is less specific.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Collector/RouterDataExtractor.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `Symfony\Component\Routing\RouteCollection::get`: expected `string`, but found `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Collector/RouterDataExtractor.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Collector/RouterDataExtractor.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Controller/AdpApiController.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `Symfony\Component\HttpFoundation\ResponseHeaderBag::set`: expected `string`, but provided type `array-key` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Controller/AdpApiController.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but possibly received `list<null|string>`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Controller/AdpApiController.php"
+code = "redundant-comparison"
+message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Controller/AdpApiController.php"
+code = "redundant-logical-operation"
+message = "Redundant `&&` operation: left operand is evaluated and right operand is always truthy."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `symfony\component\dependencyinjection\container::setparameter`: expected `UnitEnum|array<array-key, mixed>|null|scalar`, but found `mixed`.'
+count = 5
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `symfony\component\dependencyinjection\container::setparameter`: expected `UnitEnum|array<array-key, mixed>|null|scalar`, but found `nonnull`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 21
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/CollectorProxyCompilerPass.php"
+code = "less-specific-argument"
+message = "Argument type mismatch for argument #1 of `str_starts_with`: expected `string`, but provided type `array-key` is less specific."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/CollectorProxyCompilerPass.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `nonnull` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `nonnull` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but possibly received `list<null|string>`.'
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Doctrine\DBAL\Connection)`).'
+count = 11
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Doctrine\DBAL\Schema\Column)`).'
+count = 8
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "less-specific-nested-return-statement"
+message = '''Returned type `array{}|non-empty-list<array{'allowNull': bool, 'comment': mixed, 'dbType': mixed, 'defaultValue': mixed, 'name': mixed, 'size': mixed, 'type': mixed}>` is less specific than the declared return type `array<int, array{'allowNull': bool, 'comment': null|string, 'dbType': string, 'defaultValue': mixed, 'name': string, 'size': int|null, 'type': string}>` for function `appdevpanel\adapter\symfony\inspector\doctrineschemaprovider::serializecolumns` due to nested 'mixed'.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider::serializecolumns`: expected `array<array-key, unknown-ref(Doctrine\DBAL\Schema\Column)>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 9
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 8
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`nonnull`)."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\symfony\inspector\doctrineschemaprovider::executequery`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\symfony\inspector\doctrineschemaprovider::explainquery`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Doctrine\DBAL\Connection`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/DoctrineSchemaProvider.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Doctrine\DBAL\Schema\Column`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
+code = "less-specific-return-statement"
+message = '''Returned type `array<array-key, mixed>|list<array{'class': null|string, 'listeners': list<string>, 'name': string}>` is less specific than the declared return type `array<string, mixed>` for function `appdevpanel\adapter\symfony\inspector\symfonyconfigprovider::get`.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyRouteAdapter.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyUrlMatcherAdapter.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `appdevpanel\adapter\symfony\inspector\symfonymatchresult::__construct`: expected `null|string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyUrlMatcherAdapter.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Proxy/SymfonyEventDispatcherProxy.php"
+code = "incompatible-parameter-type"
+message = '''Parameter `$event` of `AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy::dispatch()` expects type `('T.symfony\contracts\eventdispatcher\eventdispatcherinterface::dispatch() extends object)` but parent `Psr\EventDispatcher\EventDispatcherInterface::dispatch()` expects type `object`'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Proxy/SymfonyEventDispatcherProxy.php"
+code = "less-specific-nested-argument-type"
+message = 'Argument type mismatch for argument #2 of `Symfony\Component\EventDispatcher\EventDispatcherInterface::addlistener`: expected `(callable(...mixed=): mixed)`, but provided type `(callable(...mixed): mixed)|array<array-key, mixed>` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
+code = "ambiguous-object-method-access"
+message = "Cannot statically verify method call on a generic `object` type."
+count = 18
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `reset`: expected `array<('K.reset() extends mixed), ('V.reset() extends mixed)>|object`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 7
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 9
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
+code = "possible-method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 18
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "invalid-return-statement"
+message = '''Invalid return type for function `appdevpanel\adapter\symfony\tests\integration\consoleprocessintegrationtest::runconsole`: expected `array{'exitCode': int, 'stderr': string, 'stdout': string}`, but found `array{'exitCode': int, 'stderr': false|string, 'stdout': false|string}`.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "less-specific-nested-return-statement"
+message = '''Returned type `array{'data': mixed, 'summary': mixed}` is less specific than the declared return type `array{'data': array<array-key, mixed>, 'summary': array<array-key, mixed>}` for function `appdevpanel\adapter\symfony\tests\integration\consoleprocessintegrationtest::readentry` due to nested 'mixed'.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_column`: expected `array<array-key, array<string('id'), ('V.array_column() extends mixed)>|object>|list<array<string('id'), ('V.array_column() extends mixed)>|object>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_column`: expected `array<array-key, array<string('message'), ('V.array_column() extends mixed)>|object>|list<array<string('message'), ('V.array_column() extends mixed)>|object>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_column`: expected `array<array-key, array<string('name'), ('V.array_column() extends mixed)>|object>|list<array<string('name'), ('V.array_column() extends mixed)>|object>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #3 of `proc_open`: expected `array<array-key, mixed>|null`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 8
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used for array access on `array<array-key, mixed>`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `escapeshellarg` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `proc_close` is possibly `false`, but parameter type `resource` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "possibly-false-argument"
+message = "Argument #4 of function `proc_open` is possibly `false`, but parameter type `non-empty-string|null` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "possibly-false-iterator"
+message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "possibly-false-operand"
+message = "Possibly false left operand used in string concatenation (type `false|string`)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #4 of `proc_open`: expected `non-empty-string|null`, but possibly received `false|string`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$pipes`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "ambiguous-object-method-access"
+message = "Cannot statically verify method call on a generic `object` type."
+count = 19
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_filter`: expected `array<('K.array_filter() extends array-key), array<array-key, mixed>>`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `count`: expected `Countable|array<array-key, mixed>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `reset`: expected `array<('K.reset() extends mixed), ('V.reset() extends mixed)>|object`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 7
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "possible-method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 19
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/LoggerProxyIntegrationTest.php"
+code = "template-constraint-violation"
+message = "Argument type mismatch for template `K`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 17
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Collector/RouterDataExtractorTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `nonnull`."
+count = 7
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/DependencyInjection/CollectorProxyCompilerPassTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/DependencyInjection/CollectorProxyCompilerPassTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/DependencyInjection/ConfigurationTest.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/DependencyInjection/ConfigurationTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcontains`: expected `iterable<mixed, mixed>`, but found `mixed`.'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/DependencyInjection/ConfigurationTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 11
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/DependencyInjection/ConfigurationTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/EventSubscriber/ConsoleSubscriberTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/EventSubscriber/HttpSubscriberTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 13
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 10
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 14
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "non-existent-class"
+message = 'Class `Doctrine\DBAL\Schema\Column` not found.'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "non-existent-class"
+message = 'Class `Doctrine\DBAL\Schema\Index` not found.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "non-existent-class"
+message = 'Class `Doctrine\DBAL\Schema\Table` not found.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "non-existent-class"
+message = 'Class `Doctrine\DBAL\Types\IntegerType` not found.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "non-existent-class"
+message = 'Class `Doctrine\DBAL\Types\StringType` not found.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Doctrine\DBAL\Connection` does not exist.'
+count = 20
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Doctrine\DBAL\Schema\AbstractSchemaManager` does not exist.'
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/DoctrineSchemaProviderTest.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\symfony\inspector\doctrineschemaprovider::__construct`: expected `unknown-ref(Doctrine\DBAL\Connection)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Doctrine\DBAL\Connection`.'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyConfigProviderTest.php"
+code = "mismatched-array-index"
+message = "Invalid array key type: `int(0)` is not a valid key for this array."
+count = 14
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyConfigProviderTest.php"
+code = "mismatched-array-index"
+message = "Invalid array key type: `int(1)` is not a valid key for this array."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyConfigProviderTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyConfigProviderTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertstringcontainsstring`: expected `string`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyConfigProviderTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 18
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyConfigProviderTest.php"
+code = "redundant-type-comparison"
+message = "Redundant type assertion: `$result` of type `array<string, mixed>` is always not `array<array-key, mixed>`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyRouteAdapterTest.php"
+code = "less-specific-nested-argument-type"
+message = 'Argument type mismatch for argument #2 of `symfony\component\routing\route::__construct`: expected `array<array-key, string>|string`, but provided type `array<array-key, mixed>` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyRouteAdapterTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarraynothaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyRouteAdapterTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyRouteCollectionAdapterTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyRouteCollectionAdapterTest.php"
+code = "redundant-type-comparison"
+message = 'Redundant type assertion: `$routes` of type `list<AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteAdapter>` is always not `iterable<mixed, AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteAdapter>`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyUrlMatcherAdapterTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Bootstrap.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Collector/DbProfilingTarget.php"
+code = "invalid-destructuring-source"
+message = "Invalid destructuring assignment: Cannot unpack type `mixed` into variables."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Collector/DbProfilingTarget.php"
+code = "invalid-type-cast"
+message = "Casting `mixed` to `float`."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Collector/DbProfilingTarget.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 5
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Collector/DebugLogTarget.php"
+code = "invalid-destructuring-source"
+message = "Invalid destructuring assignment: Cannot unpack type `mixed` into variables."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Collector/DebugLogTarget.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\adapter\yii2\collector\debuglogtarget::maplevel`: expected `int`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Collector/DebugLogTarget.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 5
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "invalid-return-statement"
+message = 'Invalid return type for function `appdevpanel\adapter\yii2\controller\adpapicontroller::convertpsr7toyiiresponse`: expected `yii\web\Response`, but found `yii\console\Response|yii\web\Response`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `yii\web\HeaderCollection::set`: expected `string`, but provided type `array-key` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "less-specific-nested-argument-type"
+message = '''Argument type mismatch for argument #1 of `psr\http\message\messageinterface::withheader`: expected `string`, but provided type `('K.iteratoraggregate extends mixed)` is less specific.'''
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "less-specific-nested-argument-type"
+message = '''Argument type mismatch for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but provided type `('V.iteratoraggregate extends mixed)` is less specific.'''
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 5
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "non-documented-method"
+message = 'Ambiguous method call to `getheaders` on class `yii\console\Response`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "non-documented-method"
+message = 'Ambiguous method call to `getmethod` on class `yii\console\Request`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "non-documented-method"
+message = 'Ambiguous method call to `setstatuscode` on class `yii\console\Response`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "non-documented-property"
+message = 'Ambiguous property access: $content on class `yii\console\Response`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "non-documented-property"
+message = 'Ambiguous property access: $format on class `yii\console\Response`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Yii2\Controller\AdpApiController::convertyiirequesttopsr7`: expected `yii\web\Request`, but possibly received `yii\console\Request|yii\web\Request`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #2 of `AppDevPanel\Adapter\Yii2\Controller\AdpApiController::createstreamedresponse`: expected `yii\web\Response`, but possibly received `yii\console\Response|yii\web\Response`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/AdpApiController.php"
+code = "redundant-docblock-type"
+message = "Redundant docblock type for variable `$apiApp`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/DebugQueryController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `yii\base\controller::__construct`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/DebugQueryController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `yii\base\controller::__construct`: expected `yii\base\Module`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/DebugQueryController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `yii\base\controller::__construct`: expected `array<string, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/DebugQueryController.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/DebugResetController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `yii\base\controller::__construct`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/DebugResetController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `yii\base\controller::__construct`: expected `yii\base\Module`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/DebugResetController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `yii\base\controller::__construct`: expected `array<string, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/EventListener/ConsoleListener.php"
+code = "invalid-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Collector\Console\CommandCollector::collect`: expected `Symfony\Component\Console\Event\ConsoleErrorEvent|Symfony\Component\Console\Event\ConsoleEvent|Symfony\Component\Console\Event\ConsoleTerminateEvent`, but found `yii\base\Event`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/EventListener/ConsoleListener.php"
+code = "mixed-property-type-coercion"
+message = "A value with a less specific type `nonnull` is being assigned to property `$$currentCommand` (null|string)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/EventListener/WebListener.php"
+code = "less-specific-nested-argument-type"
+message = '''Argument type mismatch for argument #1 of `psr\http\message\messageinterface::withheader`: expected `string`, but provided type `('K.iteratoraggregate extends mixed)` is less specific.'''
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/EventListener/WebListener.php"
+code = "less-specific-nested-argument-type"
+message = '''Argument type mismatch for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but provided type `('V.iteratoraggregate extends mixed)` is less specific.'''
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "invalid-class-string-expression"
+message = "Expression of type `never` cannot be used as a class name."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "invalid-return-statement"
+message = 'Invalid return type for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::geteventhandlers`: expected `array<string, list<string>>`, but found `array<truthy-string, array<array-key, string>|list<class-string<yii\base\Behavior>|string>>`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "less-specific-return-statement"
+message = 'Returned type `array<array-key, mixed>` is less specific than the declared return type `array<string, mixed>` for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getparams`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "less-specific-return-statement"
+message = 'Returned type `array<array-key, nonnull>` is less specific than the declared return type `array<string, string>` for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getcomponents`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "less-specific-return-statement"
+message = 'Returned type `array<array-key, nonnull>` is less specific than the declared return type `array<string, string>` for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getmodules`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_map`: expected `array<('K.array_map() extends array-key), array<array-key, mixed>>`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getclasslevelevents`. Saw type `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getinstanceevents`. Saw type `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "no-value"
+message = "Argument #1 passed to function `is_object` has type `never`, meaning it cannot produce a value."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "redundant-condition"
+message = "Redundant ternary operator: condition is always truthy."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "redundant-type-comparison"
+message = "Redundant type assertion: `$behavior` of type `never` is always not `object`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2RouteAdapter.php"
+code = "redundant-null-coalesce"
+message = "Redundant null coalesce: left-hand side can never be `null` or undefined."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2RouteCollection.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "invalid-argument"
+message = 'Invalid argument type for argument #3 of `appdevpanel\api\inspector\controller\requestcontroller::__construct`: expected `array<array-key, string>`, but found `Psr\Http\Message\ResponseFactoryInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "less-specific-argument"
+message = '''Argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\AssetBundleCollector::collectbundles`: expected `array<string, array{'basePath': null|string, 'baseUrl': null|string, 'class': string, 'css': array<array-key, mixed>, 'depends': array<array-key, mixed>, 'js': array<array-key, mixed>, 'options': array<array-key, mixed>, 'sourcePath': null|string}>`, but provided type `array<array-key, array{'basePath': string, 'baseUrl': string, 'class': class-string<yii\web\AssetBundle>, 'css': array<array-key, array<int|string, mixed>|string>, 'depends': array<array-key, class-string>, 'js': array<array-key, array<int|string, mixed>|string>, 'options': array<string('cssOptions')|string('jsOptions')|string('publishOptions'), array{'afterCopy'?: (callable(...mixed): mixed), 'beforeCopy'?: (callable(...mixed): mixed), 'caseSensitive'?: bool, 'except'?: array<array-key, string>, 'forceCopy'?: bool, 'only'?: array<array-key, string>}|array{'appendTimestamp'?: bool, 'depends'?: array<array-key, class-string>, 'position'?: int}>, 'sourcePath': null|string}>` is less specific.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #2 of `appdevpanel\adapter\yii2\eventlistener\consolelistener::__construct`: expected `AppDevPanel\Kernel\Collector\Console\CommandCollector|null`, but provided type `AppDevPanel\Kernel\Collector\CollectorInterface|null` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #2 of `appdevpanel\adapter\yii2\eventlistener\weblistener::__construct`: expected `AppDevPanel\Kernel\Collector\Web\RequestCollector|null`, but provided type `AppDevPanel\Kernel\Collector\CollectorInterface|null` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #3 of `appdevpanel\adapter\yii2\eventlistener\consolelistener::__construct`: expected `AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector|null`, but provided type `AppDevPanel\Kernel\Collector\CollectorInterface|null` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #3 of `appdevpanel\adapter\yii2\eventlistener\weblistener::__construct`: expected `AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector|null`, but provided type `AppDevPanel\Kernel\Collector\CollectorInterface|null` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #4 of `appdevpanel\adapter\yii2\eventlistener\consolelistener::__construct`: expected `AppDevPanel\Kernel\Collector\ExceptionCollector|null`, but provided type `AppDevPanel\Kernel\Collector\CollectorInterface|null` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #4 of `appdevpanel\adapter\yii2\eventlistener\weblistener::__construct`: expected `AppDevPanel\Kernel\Collector\ExceptionCollector|null`, but provided type `AppDevPanel\Kernel\Collector\CollectorInterface|null` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "less-specific-nested-argument-type"
+message = '''Argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\MailerCollector::collectmessage`: expected `array{'bcc': array<array-key, mixed>, 'cc': array<array-key, mixed>, 'charset': string, 'date': null|string, 'from': array<array-key, mixed>, 'htmlBody': null|string, 'raw': string, 'replyTo': array<array-key, mixed>, 'subject': string, 'textBody': null|string, 'to': array<array-key, mixed>}`, but provided type `array{'bcc': array<string, string>, 'cc': array<string, string>, 'charset': string, 'date': string, 'from': array<string, string>, 'htmlBody': mixed, 'raw': string, 'replyTo': array<string, string>, 'subject': string, 'textBody': mixed, 'to': array<string, string>}` is less specific.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "possible-method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "possibly-false-argument"
+message = 'Argument #1 of method `appdevpanel\api\pathresolver::__construct` is possibly `false`, but parameter type `string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "possibly-false-argument"
+message = 'Argument #1 of method `appdevpanel\kernel\storage\filestorage::__construct` is possibly `false`, but parameter type `string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "possibly-false-argument"
+message = 'Argument #2 of method `appdevpanel\api\pathresolver::__construct` is possibly `false`, but parameter type `string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "possibly-false-operand"
+message = "Possibly false left operand used in string concatenation (type `false|string`)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #2 of `appdevpanel\api\inspector\controller\requestcontroller::__construct`: expected `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface`, but possibly received `Psr\Http\Client\ClientInterface`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "possibly-null-argument"
+message = 'Argument #1 of method `appdevpanel\adapter\yii2\eventlistener\consolelistener::__construct` is possibly `null`, but parameter type `AppDevPanel\Kernel\Debugger` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "possibly-null-argument"
+message = 'Argument #1 of method `appdevpanel\adapter\yii2\eventlistener\weblistener::__construct` is possibly `null`, but parameter type `AppDevPanel\Kernel\Debugger` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "redundant-cast"
+message = "Redundant cast to `(string)`: the expression already has this type."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "redundant-logical-operation"
+message = "Redundant `||` operation: left operand is evaluated and right operand is always falsy."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "redundant-null-coalesce"
+message = "Redundant null coalesce: left-hand side can never be `null` or undefined."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "redundant-type-comparison"
+message = 'Redundant condition: variable `$view->assetBundles` (type `array<array-key, yii\web\AssetBundle>`) is already known to be `array<array-key, mixed>`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "redundant-type-comparison"
+message = '''Redundant condition: variable `$view` (type `yii\web\View`) is already known to be `has-property<'assetBundles'>`.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "redundant-type-comparison"
+message = 'Redundant type assertion: `$view->assetBundles` of type `array<array-key, yii\web\AssetBundle>` is always not `array<array-key, mixed>`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "too-few-arguments"
+message = 'Too few arguments provided for method `appdevpanel\api\inspector\controller\translationcontroller::__construct`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "too-many-arguments"
+message = 'Too many arguments provided for method `appdevpanel\api\inspector\controller\requestcontroller::__construct`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "unreachable-else-clause"
+message = "Unreachable else clause"
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "invalid-property-assignment-value"
+message = "Invalid property assignment value"
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "invalid-return-statement"
+message = '''Invalid return type for function `appdevpanel\adapter\yii2\tests\integration\apiendpointtest::decodeenvelope`: expected `array{'data': mixed, 'error': null|string, 'id': null|string, 'success': bool}`, but found `array<array-key, mixed>`.'''
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_column`: expected `array<array-key, array<string('id'), ('V.array_column() extends mixed)>|object>|list<array<string('id'), ('V.array_column() extends mixed)>|object>`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 16
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 6
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertstringcontainsstring`: expected `string`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 69
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 12
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "write-only-property"
+message = "Property `$module` is written to but never read."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
+code = "impossible-condition"
+message = "This condition (type `false`) will always evaluate to false."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
+code = "property-type-coercion"
+message = "A value of a less specific type `non-empty-array<array-key, mixed>` is being assigned to property `$$collectors` (array<string, bool>)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
+code = "too-few-arguments"
+message = 'Too few arguments provided for method `AppDevPanel\Kernel\Storage\StorageInterface::read`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
+code = "write-only-property"
+message = "Property `$module` is written to but never read."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundConfigTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_search`: expected `array<('K.array_search() extends array-key), string('debug-panel')>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundConfigTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_search`: expected `array<('K.array_search() extends array-key), string('log')>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundConfigTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundConfigTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcontains`: expected `iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundConfigTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundConfigTest.php"
+code = "mixed-property-type-coercion"
+message = "A value with a less specific type `mixed` is being assigned to property `$$config` (array<array-key, mixed>)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
+code = "invalid-property-assignment-value"
+message = "Invalid property assignment value"
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertarrayhaskey`: expected `ArrayAccess<array-key, mixed>|array<array-key, mixed>`, but found `mixed`.'
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertstringcontainsstring`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 13
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 7
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/BootstrapTest.php"
+code = "deprecated-method"
+message = 'Call to deprecated method: `phpunit\framework\assert::istype`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/Collector/DebugLogTargetTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 11
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/Controller/DebugQueryControllerTest.php"
+code = "invalid-property-assignment-value"
+message = "Invalid property assignment value"
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/Controller/DebugQueryControllerTest.php"
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
+count = 7
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/EventListener/WebListenerTest.php"
+code = "unused-property"
+message = "Property `$storagePath` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/Inspector/Yii2DbSchemaProviderTest.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::assertcount`: expected `Countable|iterable<mixed, mixed>`, but found `mixed`.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/Inspector/Yii2DbSchemaProviderTest.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 15
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/Inspector/Yii2DbSchemaProviderTest.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleInitTest.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleInitTest.php"
+code = "invalid-property-assignment-value"
+message = "Invalid property assignment value"
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleInitTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleInitTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleInitTest.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `dirname` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleInitTest.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `realpath` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleRouteRegistrationTest.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleRouteRegistrationTest.php"
+code = "invalid-property-assignment-value"
+message = "Invalid property assignment value"
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleRouteRegistrationTest.php"
+code = "less-specific-nested-argument-type"
+message = "Argument type mismatch for argument #1 of `array_column`: expected `array<array-key, array<string('pattern'), ('V.array_column() extends mixed)>|object>|list<array<string('pattern'), ('V.array_column() extends mixed)>|object>`, but provided type `array<array-key, mixed>` is less specific."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleRouteRegistrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleRouteRegistrationTest.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/bootstrap.php"
+code = "unused-statement"
+message = "Expression has no effect as a statement"
+count = 2
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
@@ -1720,7 +4876,7 @@ count = 2
 file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
+count = 3
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
@@ -3124,7 +6280,7 @@ count = 1
 file = "libs/Kernel/tests/Unit/Collector/CacheCollectorTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
-count = 8
+count = 12
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/CacheCollectorTest.php"
@@ -3849,7 +7005,7 @@ count = 2
 [[issues]]
 file = "libs/Kernel/tests/Unit/ProxyDecoratedCallsTest.php"
 code = "incompatible-property-visibility"
-message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `class@anonymous:9720836125357557984-1142:1323` used by `class@anonymous:9720836125357557984-1142:1323`: visibility differs (public vs private protected(set))'
+message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `class@anonymous:9720836125357557984-1144:1325` used by `class@anonymous:9720836125357557984-1144:1325`: visibility differs (public vs private protected(set))'
 count = 1
 
 [[issues]]
@@ -3994,13 +7150,13 @@ count = 1
 file = "libs/Testing/tests/E2E/InspectorApiTest.php"
 code = "redundant-type-comparison"
 message = "Redundant type assertion: `$body` of type `array{'data': array{'error': string}, 'success': bool}` is always not `array<array-key, mixed>`."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Testing/tests/E2E/InspectorApiTest.php"
 code = "redundant-type-comparison"
 message = "Redundant type assertion: `$body` of type `array{'data': list<array<string, mixed>>, 'success': bool}` is always not `array<array-key, mixed>`."
-count = 3
+count = 7
 
 [[issues]]
 file = "libs/Testing/tests/E2E/InspectorApiTest.php"

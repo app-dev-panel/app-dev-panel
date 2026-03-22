@@ -17,7 +17,7 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
 
     protected function collectTestData(CollectorInterface $collector): void
     {
-        assert($collector instanceof RouterCollector);
+        assert($collector instanceof RouterCollector, 'Expected RouterCollector instance');
         $collector->collectMatchedRoute([
             'matchTime' => 0.005,
             'name' => 'home',

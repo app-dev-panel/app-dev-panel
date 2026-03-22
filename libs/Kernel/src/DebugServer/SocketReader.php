@@ -77,7 +77,7 @@ final class SocketReader
                 $localBuffer .= $buffer;
                 $bytesRead += $bufferLength;
             }
-            yield [Connection::TYPE_RESULT, base64_decode($localBuffer)];
+            yield [Connection::TYPE_RESULT, base64_decode($localBuffer, true)];
         }
     }
 

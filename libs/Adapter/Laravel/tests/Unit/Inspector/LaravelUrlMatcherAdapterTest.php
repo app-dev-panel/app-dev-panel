@@ -47,7 +47,7 @@ final class LaravelUrlMatcherAdapterTest extends TestCase
 
     public function testMatchClosureRouteHasNoController(): void
     {
-        $route = new Route(['GET'], '/closure', fn() => 'hello');
+        $route = new Route(['GET'], '/closure', static fn() => 'hello');
 
         $routeCollection = new RouteCollection();
         $routeCollection->add($route);

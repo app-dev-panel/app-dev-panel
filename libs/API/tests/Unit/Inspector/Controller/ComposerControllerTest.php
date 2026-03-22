@@ -16,7 +16,7 @@ final class ComposerControllerTest extends ControllerTestCase
     protected function setUp(): void
     {
         $this->fixtureDir = sys_get_temp_dir() . '/adp-composer-test-' . uniqid();
-        mkdir($this->fixtureDir, 0755, true);
+        mkdir($this->fixtureDir, 0o755, true);
     }
 
     protected function tearDown(): void

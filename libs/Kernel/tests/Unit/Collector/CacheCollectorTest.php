@@ -18,7 +18,7 @@ final class CacheCollectorTest extends AbstractCollectorTestCase
 
     protected function collectTestData(CollectorInterface $collector): void
     {
-        assert($collector instanceof CacheCollector);
+        assert($collector instanceof CacheCollector, 'Expected CacheCollector instance');
         $collector->logCacheOperation('app.cache', 'get', 'user.1', hit: true, duration: 0.001, value: [
             'name' => 'Alice',
         ]);

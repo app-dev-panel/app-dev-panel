@@ -15,7 +15,7 @@ final class FileServiceRegistryTest extends TestCase
     protected function setUp(): void
     {
         $this->storagePath = sys_get_temp_dir() . '/adp-registry-test-' . uniqid();
-        mkdir($this->storagePath, 0755, true);
+        mkdir($this->storagePath, 0o755, true);
     }
 
     protected function tearDown(): void
@@ -87,7 +87,7 @@ final class FileServiceRegistryTest extends TestCase
         $before = $registry->resolve('test-svc');
         $this->assertNotNull($before);
 
-        usleep(10000); // 10ms
+        usleep(10_000); // 10ms
         $registry->heartbeat('test-svc');
 
         $after = $registry->resolve('test-svc');

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
-use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
@@ -78,7 +77,7 @@ final class ModuleIntegrationTest extends TestCase
         ];
 
         foreach ($expectedClasses as $expected) {
-            $this->assertContains($expected, $collectorClasses, "Missing collector: $expected");
+            $this->assertContains($expected, $collectorClasses, "Missing collector: {$expected}");
         }
     }
 

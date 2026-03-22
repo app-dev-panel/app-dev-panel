@@ -13,7 +13,6 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
 
 final class DebugControllerTest extends TestCase
 {
@@ -183,7 +182,7 @@ final class DebugControllerTest extends TestCase
         $factory = $this->createMock(JsonResponseFactoryInterface::class);
         $factory
             ->method('createJsonResponse')
-            ->willReturnCallback(function (mixed $data, int $status = 200): Response {
+            ->willReturnCallback(static function (mixed $data, int $status = 200): Response {
                 return new Response($status, ['Content-Type' => 'application/json'], json_encode($data));
             });
         return $factory;

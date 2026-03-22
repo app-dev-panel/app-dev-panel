@@ -25,7 +25,7 @@ final class DebugMiddlewareTest extends TestCase
         $request = Request::create('/debug/api/list');
         $expectedResponse = new Response('OK');
 
-        $response = $middleware->handle($request, fn() => $expectedResponse);
+        $response = $middleware->handle($request, static fn() => $expectedResponse);
 
         // Debug API requests are passed through without modification
         $this->assertSame($expectedResponse, $response);
@@ -39,7 +39,7 @@ final class DebugMiddlewareTest extends TestCase
         $request = Request::create('/inspect/api/config');
         $expectedResponse = new Response('OK');
 
-        $response = $middleware->handle($request, fn() => $expectedResponse);
+        $response = $middleware->handle($request, static fn() => $expectedResponse);
 
         $this->assertSame($expectedResponse, $response);
         $this->assertFalse($response->headers->has('X-Debug-Id'));
@@ -52,7 +52,7 @@ final class DebugMiddlewareTest extends TestCase
         $request = Request::create('/test-page', 'GET');
         $expectedResponse = new Response('Hello', 200);
 
-        $response = $middleware->handle($request, fn() => $expectedResponse);
+        $response = $middleware->handle($request, static fn() => $expectedResponse);
 
         $this->assertTrue($response->headers->has('X-Debug-Id'));
         $this->assertNotEmpty($response->headers->get('X-Debug-Id'));
@@ -77,7 +77,7 @@ final class DebugMiddlewareTest extends TestCase
 
         $request = Request::create('/test');
         $expectedResponse = new Response('OK');
-        $middleware->handle($request, fn() => $expectedResponse);
+        $middleware->handle($request, static fn() => $expectedResponse);
 
         $middleware->terminate($request, $expectedResponse);
 
@@ -100,7 +100,7 @@ final class DebugMiddlewareTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Test error');
 
-        $middleware->handle($request, function (): never {
+        $middleware->handle($request, static function (): never {
             throw new \RuntimeException('Test error');
         });
     }

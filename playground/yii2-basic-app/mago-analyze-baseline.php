@@ -43,6 +43,18 @@ message = "Expression has no effect as a statement"
 count = 2
 
 [[issues]]
+file = "src/actions/testFixtures/CacheAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\CacheAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
+file = "src/actions/testFixtures/CacheHeavyAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\CacheHeavyAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
 file = "src/actions/testFixtures/DatabaseAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\DatabaseAction` cannot extend unknown type `Action`'

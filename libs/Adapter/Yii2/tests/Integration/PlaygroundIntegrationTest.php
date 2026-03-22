@@ -7,12 +7,9 @@ namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
-use AppDevPanel\Kernel\Collector\LogCollector;
-use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
-use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -256,7 +253,7 @@ final class PlaygroundIntegrationTest extends TestCase
         $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
 
         foreach ($ids as $id) {
-            $this->assertArrayHasKey($id, $summaries, "Entry $id should exist in storage");
+            $this->assertArrayHasKey($id, $summaries, "Entry {$id} should exist in storage");
         }
 
         // IDs should be different
@@ -313,7 +310,7 @@ final class PlaygroundIntegrationTest extends TestCase
         // Verify collector keys are FQCN strings
         foreach (array_keys($entry) as $key) {
             $this->assertIsString($key);
-            $this->assertStringContainsString('\\', $key, "Collector key should be a FQCN: $key");
+            $this->assertStringContainsString('\\', $key, "Collector key should be a FQCN: {$key}");
         }
     }
 

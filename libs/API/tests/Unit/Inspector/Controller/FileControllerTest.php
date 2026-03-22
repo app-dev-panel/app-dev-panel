@@ -14,9 +14,9 @@ final class FileControllerTest extends ControllerTestCase
     protected function setUp(): void
     {
         $this->fixtureDir = sys_get_temp_dir() . '/adp-file-test-' . uniqid();
-        mkdir($this->fixtureDir, 0755, true);
+        mkdir($this->fixtureDir, 0o755, true);
         file_put_contents($this->fixtureDir . '/test.txt', 'hello world');
-        mkdir($this->fixtureDir . '/subdir', 0755, true);
+        mkdir($this->fixtureDir . '/subdir', 0o755, true);
         file_put_contents($this->fixtureDir . '/subdir/nested.php', '<?php echo 1;');
     }
 

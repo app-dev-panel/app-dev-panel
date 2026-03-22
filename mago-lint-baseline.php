@@ -13,18 +13,6 @@ message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
-file = "libs/API/src/Debug/Middleware/TokenAuthMiddleware.php"
-code = "no-insecure-comparison"
-message = "Insecure comparison of sensitive data."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Debug/Middleware/TokenAuthMiddleware.php"
-code = "sensitive-parameter"
-message = "Parameters that may contain sensitive information should be marked with the `#[SensitiveParameter]` attribute."
-count = 1
-
-[[issues]]
 file = "libs/API/src/Debug/Repository/CollectorRepository.php"
 code = "no-empty"
 message = "Use of the `empty` construct."
@@ -64,12 +52,6 @@ count = 1
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/DatabaseController.php"
-code = "readable-literal"
-message = "Numeric literal could use underscore separators for readability."
 count = 1
 
 [[issues]]
@@ -140,44 +122,8 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Debug/Controller/DebugControllerTest.php"
-code = "no-redundant-use"
-message = "Unused import: `ResponseInterface`."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Debug/Controller/DebugControllerTest.php"
-code = "prefer-static-closure"
-message = "This closure does not use `$this` and should be declared static."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Debug/Controller/DebugControllerTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Debug/Middleware/ResponseDataWrapperTest.php"
-code = "prefer-static-closure"
-message = "This closure does not use `$this` and should be declared static."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
-code = "explicit-octal"
-message = "Use explicit octal numeral notation."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
-code = "prefer-static-closure"
-message = "This closure does not use `$this` and should be declared static."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Ingestion/Controller/IngestionControllerTest.php"
-code = "readable-literal"
-message = "Numeric literal could use underscore separators for readability."
 count = 1
 
 [[issues]]
@@ -194,12 +140,6 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/ComposerControllerTest.php"
-code = "explicit-octal"
-message = "Use explicit octal numeral notation."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/ComposerControllerTest.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
 count = 3
@@ -211,22 +151,10 @@ message = "Use of the `isset` construct."
 count = 2
 
 [[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/ControllerTestCase.php"
-code = "prefer-static-closure"
-message = "This closure does not use `$this` and should be declared static."
-count = 1
-
-[[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
-code = "readable-literal"
-message = "Numeric literal could use underscore separators for readability."
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
-code = "explicit-octal"
-message = "Use explicit octal numeral notation."
-count = 2
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
@@ -248,20 +176,8 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
-code = "explicit-octal"
-message = "Use explicit octal numeral notation."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/ServiceControllerTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Middleware/InspectorProxyMiddlewareTest.php"
-code = "no-redundant-use"
-message = "Unused import: `ServerRequestInterface`."
 count = 1
 
 [[issues]]
@@ -272,6 +188,318 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/ServerSentEventsStreamTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.9000000000000004)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.9200000000000002)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
+code = "prefer-first-class-callable"
+message = "Use first-class callable syntax `...` instead of a arrow function."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
+code = "prefer-first-class-callable"
+message = "Use first-class callable syntax `...` instead of a arrow function."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/tests/Unit/Proxy/LaravelEventDispatcherProxyTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.9700000000000002)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.06)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/AppDevPanelBundleTest.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/DependencyInjection/AppDevPanelExtensionTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/DependencyInjection/CollectorProxyCompilerPassTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/EventSubscriber/HttpSubscriberTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyConfigProviderTest.php"
+code = "no-literal-password"
+message = "Literal passwords or sensitive data should not be stored in code."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/tests/Unit/Inspector/SymfonyConfigProviderTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Bootstrap.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/DebugQueryController.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Controller/DebugQueryController.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.21)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.24)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2DbSchemaProvider.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (3.7800000000000002)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "too-many-properties"
+message = "Class has too many properties."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/Controller/DebugQueryControllerTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
@@ -373,6 +601,12 @@ message = "Parameter `$isolationLevel` is implicitly nullable and relies on a de
 count = 1
 
 [[issues]]
+file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.8800000000000001)."
+count = 1
+
+[[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -445,15 +679,9 @@ message = "Class has a high kan defect score (2.27)."
 count = 1
 
 [[issues]]
-file = "libs/Cli/src/Command/ServeCommand.php"
-code = "explicit-octal"
-message = "Use explicit octal numeral notation."
-count = 1
-
-[[issues]]
-file = "libs/Cli/src/Command/ServeCommand.php"
-code = "prefer-static-closure"
-message = "This closure does not use `$this` and should be declared static."
+file = "libs/Kernel/src/Collector/CacheCollector.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
 count = 1
 
 [[issues]]
@@ -479,12 +707,6 @@ file = "libs/Kernel/src/Collector/DatabaseCollector.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
 count = 4
-
-[[issues]]
-file = "libs/Kernel/src/Collector/DatabaseCollector.php"
-code = "prefer-static-closure"
-message = "This arrow function does not use `$this` and should be declared static."
-count = 2
 
 [[issues]]
 file = "libs/Kernel/src/Collector/DatabaseCollector.php"
@@ -563,12 +785,6 @@ file = "libs/Kernel/src/DebugServer/SocketReader.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
 count = 3
-
-[[issues]]
-file = "libs/Kernel/src/DebugServer/SocketReader.php"
-code = "strict-behavior"
-message = "Call to `base64_decode` must enforce strict comparison."
-count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Debugger.php"
@@ -668,12 +884,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Service/FileServiceRegistry.php"
-code = "explicit-octal"
-message = "Use explicit octal numeral notation."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Service/FileServiceRegistry.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
 count = 2
@@ -733,12 +943,6 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/tests/Unit/Collector/CacheCollectorTest.php"
-code = "assert-description"
-message = "Missing description in assert function."
-count = 1
-
-[[issues]]
 file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
@@ -752,12 +956,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
-code = "braced-string-interpolation"
-message = "Unbraced variable in string interpolation."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
 count = 1
@@ -766,48 +964,6 @@ count = 1
 file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/MiddlewareCollectorTest.php"
-code = "assert-description"
-message = "Missing description in assert function."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/QueueCollectorTest.php"
-code = "assert-description"
-message = "Missing description in assert function."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/RouterCollectorTest.php"
-code = "assert-description"
-message = "Missing description in assert function."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/SecurityCollectorTest.php"
-code = "assert-description"
-message = "Missing description in assert function."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/TemplateCollectorTest.php"
-code = "assert-description"
-message = "Missing description in assert function."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ValidatorCollectorTest.php"
-code = "assert-description"
-message = "Missing description in assert function."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/ViewCollectorTest.php"
-code = "assert-description"
-message = "Missing description in assert function."
 count = 1
 
 [[issues]]
@@ -815,12 +971,6 @@ file = "libs/Kernel/tests/Unit/DebuggerTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/DumperTest.php"
-code = "braced-string-interpolation"
-message = "Unbraced variable in string interpolation."
-count = 3
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/DumperTest.php"
@@ -839,24 +989,6 @@ file = "libs/Kernel/tests/Unit/Helper/BacktraceIgnoreMatcherTest.php"
 code = "require-preg-quote-delimiter"
 message = "Missing delimiter argument in `preg_quote()` call"
 count = 5
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/ProxyDecoratedCallsTest.php"
-code = "braced-string-interpolation"
-message = "Unbraced variable in string interpolation."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Service/FileServiceRegistryTest.php"
-code = "explicit-octal"
-message = "Use explicit octal numeral notation."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Service/FileServiceRegistryTest.php"
-code = "readable-literal"
-message = "Numeric literal could use underscore separators for readability."
-count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Service/FileServiceRegistryTest.php"
@@ -925,18 +1057,6 @@ message = "Class has a high kan defect score (1.9800000000000002)."
 count = 1
 
 [[issues]]
-file = "libs/Testing/tests/E2E/InspectorApiTest.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Testing/tests/Unit/Assertion/ExpectationEvaluatorTest.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
 file = "libs/Testing/tests/E2E/DebugApiTest.php"
 code = "prefer-early-continue"
 message = "Consider using early continue pattern to reduce nesting."
@@ -946,6 +1066,12 @@ count = 1
 file = "libs/Testing/tests/E2E/FixtureTestCase.php"
 code = "prefer-early-continue"
 message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/InspectorApiTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -974,6 +1100,12 @@ count = 3
 
 [[issues]]
 file = "libs/Testing/tests/E2E/ScenarioTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/Unit/Assertion/ExpectationEvaluatorTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1

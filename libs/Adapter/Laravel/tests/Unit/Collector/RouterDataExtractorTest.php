@@ -25,7 +25,7 @@ final class RouterDataExtractorTest extends TestCase
         $request = Request::create('/users/42', 'GET');
         $matchedRoute->bind($request);
         $matchedRoute->setParameter('id', '42');
-        $request->setRouteResolver(fn() => $matchedRoute);
+        $request->setRouteResolver(static fn() => $matchedRoute);
 
         $routeCollection = new RouteCollection();
         $routeCollection->add(new Route(['GET'], '/users', ['uses' => 'UserController@index']));

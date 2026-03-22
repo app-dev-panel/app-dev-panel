@@ -17,7 +17,7 @@ final class SecurityCollectorTest extends AbstractCollectorTestCase
 
     protected function collectTestData(CollectorInterface $collector): void
     {
-        assert($collector instanceof SecurityCollector);
+        assert($collector instanceof SecurityCollector, 'Expected SecurityCollector instance');
         $collector->collectUser('admin@example.com', ['ROLE_ADMIN', 'ROLE_USER'], true);
         $collector->collectFirewall('main');
         $collector->logAccessDecision('ROLE_ADMIN', 'App\\Entity\\User', 'ACCESS_GRANTED', [

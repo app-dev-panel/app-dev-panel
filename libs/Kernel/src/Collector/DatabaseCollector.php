@@ -194,11 +194,17 @@ final class DatabaseCollector implements SummaryCollectorInterface
         return [
             'db' => [
                 'queries' => [
-                    'error' => count(array_filter($this->queries, fn(array $query) => $query['status'] === 'error')),
+                    'error' => count(array_filter(
+                        $this->queries,
+                        static fn(array $query) => $query['status'] === 'error',
+                    )),
                     'total' => count($this->queries),
                 ],
                 'transactions' => [
-                    'error' => count(array_filter($this->transactions, fn(array $tx) => $tx['status'] === 'rollback')),
+                    'error' => count(array_filter(
+                        $this->transactions,
+                        static fn(array $tx) => $tx['status'] === 'rollback',
+                    )),
                     'total' => count($this->transactions),
                 ],
             ],

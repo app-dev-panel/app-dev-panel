@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\Tests\Unit\EventListener;
 
 use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
-use AppDevPanel\Kernel\Collector\Console\CommandCollector;
-use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
-use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;

@@ -18,7 +18,7 @@ final class QueueCollectorTest extends AbstractCollectorTestCase
 
     protected function collectTestData(CollectorInterface $collector): void
     {
-        assert($collector instanceof QueueCollector);
+        assert($collector instanceof QueueCollector, 'Expected QueueCollector instance');
         $collector->collectPush('default', ['class' => 'SendEmail', 'data' => ['to' => 'test@example.com']]);
         $collector->collectPush('default', ['class' => 'ProcessPayment', 'data' => ['amount' => 100]]);
         $collector->collectStatus('job-1', 'completed');
@@ -84,7 +84,7 @@ final class QueueCollectorTest extends AbstractCollectorTestCase
 
         $this->assertArrayHasKey('queue', $data);
         $queue = $data['queue'];
-        assert(is_array($queue));
+        assert(is_array($queue), 'Expected queue data to be an array');
         $this->assertSame(2, $queue['countPushes']);
         $this->assertSame(2, $queue['countStatuses']);
         $this->assertSame(1, $queue['countProcessingMessages']);

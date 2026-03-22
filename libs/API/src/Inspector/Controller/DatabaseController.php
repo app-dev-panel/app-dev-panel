@@ -29,7 +29,10 @@ final class DatabaseController
         /** @var string $tableName */
         $tableName = $request->getAttribute('name');
         $queryParams = $request->getQueryParams();
-        $limit = max(self::MIN_LIMIT, min((int) ($queryParams['limit'] ?? SchemaProviderInterface::DEFAULT_LIMIT), self::MAX_LIMIT));
+        $limit = max(self::MIN_LIMIT, min(
+            (int) ($queryParams['limit'] ?? SchemaProviderInterface::DEFAULT_LIMIT),
+            self::MAX_LIMIT,
+        ));
         $offset = max((int) ($queryParams['offset'] ?? 0), 0);
 
         return $this->responseFactory->createJsonResponse($this->schemaProvider->getTable($tableName, $limit, $offset));

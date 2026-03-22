@@ -8,7 +8,6 @@ use AppDevPanel\Adapter\Yii2\Module;
 use PHPUnit\Framework\TestCase;
 use yii\web\Application;
 use yii\web\UrlManager;
-use yii\web\UrlRule;
 
 /**
  * Tests that Module::bootstrap() correctly registers API routes.

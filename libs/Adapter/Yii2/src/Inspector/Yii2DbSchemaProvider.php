@@ -66,8 +66,11 @@ final class Yii2DbSchemaProvider implements SchemaProviderInterface
         return $tables;
     }
 
-    public function getTable(string $tableName, int $limit = SchemaProviderInterface::DEFAULT_LIMIT, int $offset = 0): array
-    {
+    public function getTable(
+        string $tableName,
+        int $limit = SchemaProviderInterface::DEFAULT_LIMIT,
+        int $offset = 0,
+    ): array {
         $schema = $this->connection->getSchema();
         $tableSchema = $schema->getTableSchema($tableName);
 

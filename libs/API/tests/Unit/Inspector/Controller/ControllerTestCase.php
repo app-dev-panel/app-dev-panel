@@ -26,7 +26,7 @@ abstract class ControllerTestCase extends TestCase
             $factory = $this->createMock(JsonResponseFactoryInterface::class);
             $factory
                 ->method('createJsonResponse')
-                ->willReturnCallback(function (mixed $data, int $status = 200): ResponseInterface {
+                ->willReturnCallback(static function (mixed $data, int $status = 200): ResponseInterface {
                     return new Response($status, ['Content-Type' => 'application/json'], json_encode($data));
                 });
             $this->responseFactory = $factory;

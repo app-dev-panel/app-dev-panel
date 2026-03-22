@@ -13,8 +13,6 @@ use AppDevPanel\Adapter\Laravel\EventListener\HttpClientListener;
 use AppDevPanel\Adapter\Laravel\EventListener\MailListener;
 use AppDevPanel\Adapter\Laravel\EventListener\QueueListener;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelConfigProvider;
-use AppDevPanel\Adapter\Laravel\Inspector\LaravelMatchResult;
-use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelUrlMatcherAdapter;
@@ -324,10 +322,13 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->app->singletonIf(ResponseFactoryInterface::class, HttpFactory::class);
         $this->app->singletonIf(StreamFactoryInterface::class, HttpFactory::class);
         $this->app->singletonIf(UriFactoryInterface::class, HttpFactory::class);
-        $this->app->singletonIf(ClientInterface::class, fn() => new Client(['timeout' => 10]));
+        $this->app->singletonIf(ClientInterface::class, static fn() => new Client(['timeout' => 10]));
 
         // Path resolver
-        $this->app->singleton(PathResolverInterface::class, fn() => new PathResolver(base_path(), storage_path()));
+        $this->app->singleton(
+            PathResolverInterface::class,
+            static fn() => new PathResolver(base_path(), storage_path()),
+        );
 
         // JSON response factory
         $this->app->singleton(
@@ -341,7 +342,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         // Service registry
         $this->app->singleton(
             ServiceRegistryInterface::class,
-            fn() => new FileServiceRegistry($config->get('app-dev-panel.storage.path') . '/services'),
+            static fn() => new FileServiceRegistry($config->get('app-dev-panel.storage.path') . '/services'),
         );
 
         // Collector repository
