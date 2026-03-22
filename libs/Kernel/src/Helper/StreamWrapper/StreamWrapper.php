@@ -103,11 +103,15 @@ final class StreamWrapper implements StreamWrapperInterface
     }
 
     /**
-     * @psalm-suppress InvalidReturnType Unfortunately, I don't know what to return here.
+     * @return resource|false
      */
-    public function stream_cast(int $castAs): void
+    public function stream_cast(int $castAs): mixed
     {
-        // ???
+        if (is_resource($this->stream)) {
+            return $this->stream;
+        }
+
+        return false;
     }
 
     public function stream_eof(): bool
@@ -211,6 +215,8 @@ final class StreamWrapper implements StreamWrapperInterface
                 return false;
             }
             trigger_error($e->getMessage(), E_USER_ERROR);
+
+            return false;
         }
     }
 

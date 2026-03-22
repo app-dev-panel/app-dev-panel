@@ -21,9 +21,10 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
         $this->eof = true;
     }
 
-    public function detach(): void
+    public function detach(): mixed
     {
         $this->eof = true;
+        return null;
     }
 
     public function getSize(): int

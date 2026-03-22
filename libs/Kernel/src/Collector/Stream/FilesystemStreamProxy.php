@@ -129,7 +129,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
         return $this->__call(__FUNCTION__, func_get_args());
     }
 
-    public function stream_cast(int $castAs)
+    public function stream_cast(int $castAs): mixed
     {
         return $this->__call(__FUNCTION__, func_get_args());
     }

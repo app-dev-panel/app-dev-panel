@@ -403,15 +403,17 @@ class Module extends \yii\base\Module implements BootstrapInterface
             RequestController::class,
             static fn() => new RequestController(
                 \Yii::$container->get(JsonResponseFactoryInterface::class),
-                \Yii::$container->get(ClientInterface::class),
-                \Yii::$container->get(ResponseFactoryInterface::class),
-                \Yii::$container->get(StreamFactoryInterface::class),
+                \Yii::$container->get(CollectorRepositoryInterface::class),
             ),
         );
 
         \Yii::$container->setSingleton(
             TranslationController::class,
-            static fn() => new TranslationController(\Yii::$container->get(JsonResponseFactoryInterface::class)),
+            static fn() => new TranslationController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                new \Psr\Log\NullLogger(),
+                \Yii::$container->get(\Psr\Container\ContainerInterface::class),
+            ),
         );
 
         \Yii::$container->setSingleton(

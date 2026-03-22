@@ -50,7 +50,7 @@ interface StorageInterface
      *
      * @return array data from storage
      */
-    public function read(string $type, ?string $id): array;
+    public function read(string $type, ?string $id = null): array;
 
     /**
      * Write a debug entry directly to storage without using collectors.

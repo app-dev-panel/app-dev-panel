@@ -818,18 +818,6 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/ServerSentEventsStream.php"
-code = "docblock-type-mismatch"
-message = "Docblock return type `resource` is incompatible with native return type `void`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/ServerSentEventsStream.php"
-code = "missing-return-statement"
-message = "Missing return statement in function 'detach'"
-count = 1
-
-[[issues]]
-file = "libs/API/src/ServerSentEventsStream.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `mixed`."
 count = 1
@@ -3974,12 +3962,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Module.php"
-code = "invalid-argument"
-message = 'Invalid argument type for argument #3 of `appdevpanel\api\inspector\controller\requestcontroller::__construct`: expected `array<array-key, string>`, but found `Psr\Http\Message\ResponseFactoryInterface`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
 code = "less-specific-argument"
 message = '''Argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\AssetBundleCollector::collectbundles`: expected `array<string, array{'basePath': null|string, 'baseUrl': null|string, 'class': string, 'css': array<array-key, mixed>, 'depends': array<array-key, mixed>, 'js': array<array-key, mixed>, 'options': array<array-key, mixed>, 'sourcePath': null|string}>`, but provided type `array<array-key, array{'basePath': string, 'baseUrl': string, 'class': class-string<yii\web\AssetBundle>, 'css': array<array-key, array<int|string, mixed>|string>, 'depends': array<array-key, class-string>, 'js': array<array-key, array<int|string, mixed>|string>, 'options': array<string('cssOptions')|string('jsOptions')|string('publishOptions'), array{'afterCopy'?: (callable(...mixed): mixed), 'beforeCopy'?: (callable(...mixed): mixed), 'caseSensitive'?: bool, 'except'?: array<array-key, string>, 'forceCopy'?: bool, 'only'?: array<array-key, string>}|array{'appendTimestamp'?: bool, 'depends'?: array<array-key, class-string>, 'position'?: int}>, 'sourcePath': null|string}>` is less specific.'''
 count = 1
@@ -4076,12 +4058,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Module.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #2 of `appdevpanel\api\inspector\controller\requestcontroller::__construct`: expected `AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface`, but possibly received `Psr\Http\Client\ClientInterface`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
 code = "possibly-null-argument"
 message = 'Argument #1 of method `appdevpanel\adapter\yii2\eventlistener\consolelistener::__construct` is possibly `null`, but parameter type `AppDevPanel\Kernel\Debugger` does not accept it.'
 count = 1
@@ -4141,18 +4117,6 @@ message = 'Redundant type assertion: `$view->assetBundles` of type `array<array-
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
-code = "too-few-arguments"
-message = 'Too few arguments provided for method `appdevpanel\api\inspector\controller\translationcontroller::__construct`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
-code = "too-many-arguments"
-message = 'Too many arguments provided for method `appdevpanel\api\inspector\controller\requestcontroller::__construct`.'
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
 code = "invalid-iterator"
 message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
@@ -4199,12 +4163,6 @@ file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 12
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
-code = "too-few-arguments"
-message = 'Too few arguments provided for method `AppDevPanel\Kernel\Storage\StorageInterface::read`.'
-count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/tests/Integration/PlaygroundConfigTest.php"
@@ -4772,12 +4730,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
-code = "incompatible-property-visibility"
-message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy` used by `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy`: visibility differs (public vs protected)'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy::getserviceproxyfromcallable`: expected `(callable(...mixed=): mixed)`, but found `mixed`.'
 count = 1
@@ -4894,12 +4846,6 @@ count = 1
 file = "libs/Adapter/Yiisoft/src/Proxy/ServiceProxy.php"
 code = "unsafe-instantiation"
 message = 'Unsafe `new static()`: constructor of `AppDevPanel\Adapter\Yiisoft\Proxy\ServiceProxy` is not final and its signature might change in child classes, potentially leading to runtime errors.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
-code = "incompatible-property-visibility"
-message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `appdevpanel\adapter\yiisoft\proxy\vardumperhandlerinterfaceproxy` used by `appdevpanel\adapter\yiisoft\proxy\vardumperhandlerinterfaceproxy`: visibility differs (public vs private protected(set))'
 count = 1
 
 [[issues]]
@@ -5089,12 +5035,6 @@ message = "Unsafe array assignment on type `nonnull`."
 count = 10
 
 [[issues]]
-file = "libs/Kernel/src/Collector/EventDispatcherInterfaceProxy.php"
-code = "incompatible-property-visibility"
-message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `appdevpanel\kernel\collector\eventdispatcherinterfaceproxy` used by `appdevpanel\kernel\collector\eventdispatcherinterfaceproxy`: visibility differs (public vs private protected(set))'
-count = 1
-
-[[issues]]
 file = "libs/Kernel/src/Collector/HttpClientCollector.php"
 code = "possibly-invalid-argument"
 message = "Possible argument type mismatch for argument #1 of `array_sum`: expected `array<array-key, float|int>`, but possibly received `array<array-key, array<array-key, array<array-key, string>>|float|int|string>`."
@@ -5104,18 +5044,6 @@ count = 1
 file = "libs/Kernel/src/Collector/HttpClientCollector.php"
 code = "possibly-null-array-index"
 message = "Possibly using `null` as an array index to access elementof variable $this->requests."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/HttpClientInterfaceProxy.php"
-code = "incompatible-property-visibility"
-message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `appdevpanel\kernel\collector\httpclientinterfaceproxy` used by `appdevpanel\kernel\collector\httpclientinterfaceproxy`: visibility differs (public vs private protected(set))'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/LoggerInterfaceProxy.php"
-code = "incompatible-property-visibility"
-message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `appdevpanel\kernel\collector\loggerinterfaceproxy` used by `appdevpanel\kernel\collector\loggerinterfaceproxy`: visibility differs (public vs private protected(set))'
 count = 1
 
 [[issues]]
@@ -5756,12 +5684,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
-code = "docblock-type-mismatch"
-message = "Docblock return type `resource` is incompatible with native return type `void`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
 code = "falsable-return-statement"
 message = '''Function `appdevpanel\kernel\helper\streamwrapper\streamwrapper::stream_tell` is declared to return `int` but possibly returns 'false' (inferred as `false|non-negative-int`).'''
 count = 1
@@ -5788,18 +5710,6 @@ count = 1
 file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
 code = "invalid-return-statement"
 message = 'Invalid return type for function `appdevpanel\kernel\helper\streamwrapper\streamwrapper::stream_write`: expected `int`, but found `false|non-negative-int`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
-code = "missing-return-statement"
-message = "Missing return statement in function 'stream_cast'"
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
-code = "missing-return-statement"
-message = "Missing return statement in function 'url_stat'"
 count = 1
 
 [[issues]]
@@ -5906,9 +5816,21 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/ProxyDecoratedCalls.php"
-code = "ambiguous-object-property-access"
-message = "Cannot statically verify property access on a generic `object` type."
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/ProxyDecoratedCalls.php"
+code = "mixed-property-access"
+message = "Attempting to access a property on a non-object type (`mixed`)."
 count = 2
+
+[[issues]]
+file = "libs/Kernel/src/ProxyDecoratedCalls.php"
+code = "non-documented-property"
+message = 'Ambiguous property access: $decorated on class `AppDevPanel\Kernel\ProxyDecoratedCalls`.'
+count = 3
 
 [[issues]]
 file = "libs/Kernel/src/ProxyDecoratedCalls.php"
@@ -6278,12 +6200,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/EventDispatcherInterfaceProxyTest.php"
-code = "missing-return-statement"
-message = "Missing return statement in function 'dispatch'"
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/EventDispatcherInterfaceProxyTest.php"
 code = "non-documented-method"
 message = 'Ambiguous method call to `getproxiedcall` on class `AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy`.'
 count = 1
@@ -6377,12 +6293,6 @@ file = "libs/Kernel/tests/Unit/Collector/HttpClientCollectorTest.php"
 code = "non-existent-method"
 message = 'Method `collecttotaltime` does not exist on type `AppDevPanel\Kernel\Collector\CollectorInterface`.'
 count = 3
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/HttpClientInterfaceProxyTest.php"
-code = "missing-return-statement"
-message = "Missing return statement in function 'sendrequest'"
-count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/Collector/HttpClientInterfaceProxyTest.php"
@@ -6877,12 +6787,6 @@ message = "Cannot statically verify property access on a generic `object` type."
 count = 2
 
 [[issues]]
-file = "libs/Kernel/tests/Unit/ProxyDecoratedCallsTest.php"
-code = "incompatible-property-visibility"
-message = 'Property `$decorated` is defined differently in `AppDevPanel\Kernel\ProxyDecoratedCalls` and `class@anonymous:9720836125357557984-1144:1325` used by `class@anonymous:9720836125357557984-1144:1325`: visibility differs (public vs private protected(set))'
-count = 1
-
-[[issues]]
 file = "libs/Kernel/tests/Unit/Service/FileServiceRegistryTest.php"
 code = "possibly-false-iterator"
 message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
@@ -6899,12 +6803,6 @@ file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 2
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Storage/AbstractStorageTestCase.php"
-code = "too-few-arguments"
-message = 'Too few arguments provided for method `AppDevPanel\Kernel\Storage\StorageInterface::read`.'
-count = 1
 
 [[issues]]
 file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
