@@ -160,16 +160,18 @@ final class ExpectationEvaluator
         }
 
         foreach ($data as $entry) {
-            if (is_array($entry)) {
-                $actual = $this->getByPath($entry, $path);
-                if ($actual === $expected) {
-                    return AssertionResult::pass(sprintf(
-                        '[%s] found entry with "%s" = %s',
-                        $collectorName,
-                        $path,
-                        json_encode($expected, JSON_THROW_ON_ERROR),
-                    ));
-                }
+            if (!is_array($entry)) {
+                continue;
+            }
+
+            $actual = $this->getByPath($entry, $path);
+            if ($actual === $expected) {
+                return AssertionResult::pass(sprintf(
+                    '[%s] found entry with "%s" = %s',
+                    $collectorName,
+                    $path,
+                    json_encode($expected, JSON_THROW_ON_ERROR),
+                ));
             }
         }
 
@@ -192,16 +194,18 @@ final class ExpectationEvaluator
         }
 
         foreach ($data as $entry) {
-            if (is_array($entry)) {
-                $actual = $this->getByPath($entry, $path);
-                if (is_string($actual) && str_contains($actual, $substring)) {
-                    return AssertionResult::pass(sprintf(
-                        '[%s] found entry with "%s" containing "%s"',
-                        $collectorName,
-                        $path,
-                        $substring,
-                    ));
-                }
+            if (!is_array($entry)) {
+                continue;
+            }
+
+            $actual = $this->getByPath($entry, $path);
+            if (is_string($actual) && str_contains($actual, $substring)) {
+                return AssertionResult::pass(sprintf(
+                    '[%s] found entry with "%s" containing "%s"',
+                    $collectorName,
+                    $path,
+                    $substring,
+                ));
             }
         }
 

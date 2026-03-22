@@ -1732,7 +1732,7 @@ count = 3
 file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `nonnull`."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
@@ -2362,7 +2362,7 @@ count = 2
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `nonnull`."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
@@ -3052,7 +3052,7 @@ count = 1
 file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `nonnull`."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
@@ -4034,6 +4034,18 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Module.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "mixed-operand"
+message = "Right operand in `&&` operation has `mixed` type."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
 code = "possible-method-access-on-null"
 message = "Attempting to call a method on `null`."
 count = 1
@@ -4088,6 +4100,18 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Module.php"
+code = "redundant-comparison"
+message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "redundant-logical-operation"
+message = "Redundant `&&` operation: left operand is always truthy and right operand is evaluated."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
 code = "redundant-logical-operation"
 message = "Redundant `||` operation: left operand is evaluated and right operand is always falsy."
 count = 1
@@ -4129,27 +4153,9 @@ message = 'Too many arguments provided for method `appdevpanel\api\inspector\con
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
-code = "unreachable-else-clause"
-message = "Unreachable else clause"
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
 code = "invalid-iterator"
 message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
-code = "invalid-method-access"
-message = "Attempting to access a method on a non-object type (`string`)."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
-code = "invalid-property-assignment-value"
-message = "Invalid property assignment value"
 count = 1
 
 [[issues]]
@@ -4163,18 +4169,6 @@ file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `array_column`: expected `array<array-key, array<string('id'), ('V.array_column() extends mixed)>|object>|list<array<string('id'), ('V.array_column() extends mixed)>|object>`, but found `mixed`."
 count = 2
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
-count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
@@ -4207,51 +4201,9 @@ message = "Assigning `mixed` type to a variable may lead to unexpected behavior.
 count = 12
 
 [[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
-code = "write-only-property"
-message = "Property `$module` is written to but never read."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
-code = "impossible-condition"
-message = "This condition (type `false`) will always evaluate to false."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
-code = "invalid-method-access"
-message = "Attempting to access a method on a non-object type (`string`)."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
-code = "property-type-coercion"
-message = "A value of a less specific type `non-empty-array<array-key, mixed>` is being assigned to property `$$collectors` (array<string, bool>)."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
 code = "too-few-arguments"
 message = 'Too few arguments provided for method `AppDevPanel\Kernel\Storage\StorageInterface::read`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
-code = "write-only-property"
-message = "Property `$module` is written to but never read."
 count = 1
 
 [[issues]]
@@ -4292,32 +4244,8 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
-code = "invalid-method-access"
-message = "Attempting to access a method on a non-object type (`string`)."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
-code = "invalid-property-assignment-value"
-message = "Invalid property assignment value"
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
 count = 1
 
 [[issues]]
@@ -4349,6 +4277,30 @@ file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 7
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/Yii2IntegrationTestCase.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`string`)."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/Yii2IntegrationTestCase.php"
+code = "invalid-property-assignment-value"
+message = "Invalid property assignment value"
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/Yii2IntegrationTestCase.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rmdir`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Integration/Yii2IntegrationTestCase.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `unlink`: expected `string`, but found `mixed`."
+count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/tests/Unit/BootstrapTest.php"
@@ -4468,61 +4420,7 @@ count = 1
 file = "libs/Adapter/Yii2/tests/bootstrap.php"
 code = "unused-statement"
 message = "Expression has no effect as a statement"
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `bool|null` for parameter `$forRead` is incompatible with native type `bool`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `int|null` for parameter `$dataType` is incompatible with native type `int`."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `int|null` for parameter `$length` is incompatible with native type `int`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `int|null|string` for parameter `$value` is incompatible with native type `int|string`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `null|string` for parameter `$delete` is incompatible with native type `string`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `null|string` for parameter `$indexMethod` is incompatible with native type `string`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `null|string` for parameter `$indexType` is incompatible with native type `string`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `null|string` for parameter `$options` is incompatible with native type `string`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `null|string` for parameter `$update` is incompatible with native type `string`."
-count = 1
+count = 3
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
@@ -4568,24 +4466,6 @@ count = 42
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `null|string` for parameter `$isolationLevel` is incompatible with native type `string`."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `null|string` for parameter `$sequenceName` is incompatible with native type `string`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `null|string` for parameter `$sql` is incompatible with native type `string`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
 count = 4
@@ -4607,12 +4487,6 @@ file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
 code = "mixed-operand"
 message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
 count = 2
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"
-code = "docblock-type-mismatch"
-message = "Docblock type `null|string` for parameter `$isolationLevel` is incompatible with native type `string`."
-count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"

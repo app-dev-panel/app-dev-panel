@@ -235,9 +235,11 @@ final class ConsoleProcessIntegrationTest extends TestCase
         foreach ($dateDirs as $dateDir) {
             $entryDirs = glob($dateDir . '/*', GLOB_ONLYDIR);
             foreach ($entryDirs as $entryDir) {
-                if (file_exists($entryDir . '/summary.json')) {
-                    $entries[] = $entryDir;
+                if (!file_exists($entryDir . '/summary.json')) {
+                    continue;
                 }
+
+                $entries[] = $entryDir;
             }
         }
 

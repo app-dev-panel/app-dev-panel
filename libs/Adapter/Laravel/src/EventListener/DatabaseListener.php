@@ -47,10 +47,12 @@ final class DatabaseListener
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 15);
             $line = '';
             foreach ($trace as $frame) {
-                if (isset($frame['file']) && !str_contains($frame['file'], 'vendor/')) {
-                    $line = $frame['file'] . ':' . ($frame['line'] ?? 0);
-                    break;
+                if (!(isset($frame['file']) && !str_contains($frame['file'], 'vendor/'))) {
+                    continue;
                 }
+
+                $line = $frame['file'] . ':' . ($frame['line'] ?? 0);
+                break;
             }
 
             $collector->logQuery(

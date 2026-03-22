@@ -151,18 +151,22 @@ final class DebugFixturesCommand extends Command
                 $io->text(sprintf('  <fg=red>FAIL</> %s', $result->fixture->name));
 
                 foreach ($result->assertions as $assertion) {
-                    if (!$assertion->passed) {
-                        $io->text(sprintf('       <fg=red>✗</> %s', $assertion->message));
+                    if ($assertion->passed) {
+                        continue;
                     }
+
+                    $io->text(sprintf('       <fg=red>✗</> %s', $assertion->message));
                 }
             }
 
             // Show assertions in verbose mode
             if ($output->isVerbose()) {
                 foreach ($result->assertions as $assertion) {
-                    if ($assertion->passed) {
-                        $io->text(sprintf('       <fg=green>✓</> %s', $assertion->message));
+                    if (!$assertion->passed) {
+                        continue;
                     }
+
+                    $io->text(sprintf('       <fg=green>✓</> %s', $assertion->message));
                 }
                 if ($result->debugId !== null) {
                     $io->text(sprintf('       Debug ID: %s', $result->debugId));

@@ -57,9 +57,11 @@ abstract class FixtureTestCase extends TestCase
 
         $failures = [];
         foreach ($result->assertions as $assertion) {
-            if (!$assertion->passed) {
-                $failures[] = $assertion->message;
+            if ($assertion->passed) {
+                continue;
             }
+
+            $failures[] = $assertion->message;
         }
 
         self::assertTrue(

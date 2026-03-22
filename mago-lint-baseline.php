@@ -223,12 +223,6 @@ message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -238,12 +232,6 @@ count = 1
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "kan-defect"
 message = "Class has a high kan defect score (1.9200000000000002)."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
 count = 1
 
 [[issues]]
@@ -271,27 +259,9 @@ message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php"
 code = "too-many-methods"
 message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
-code = "prefer-first-class-callable"
-message = "Use first-class callable syntax `...` instead of a arrow function."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
-code = "prefer-first-class-callable"
-message = "Use first-class callable syntax `...` instead of a arrow function."
 count = 1
 
 [[issues]]
@@ -331,12 +301,6 @@ message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -355,27 +319,9 @@ message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Symfony/tests/Integration/ConsoleProcessIntegrationTest.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Symfony/tests/Unit/AppDevPanelBundleTest.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
 count = 1
 
 [[issues]]
@@ -464,12 +410,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Module.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
@@ -482,18 +422,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/tests/Integration/ApiEndpointTest.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/ModuleIntegrationTest.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/tests/Integration/PlaygroundIntegrationTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
@@ -512,92 +440,14 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$dataType` is implicitly nullable and relies on a deprecated feature."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$delete` is implicitly nullable and relies on a deprecated feature."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$forRead` is implicitly nullable and relies on a deprecated feature."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$indexMethod` is implicitly nullable and relies on a deprecated feature."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$indexType` is implicitly nullable and relies on a deprecated feature."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$length` is implicitly nullable and relies on a deprecated feature."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$options` is implicitly nullable and relies on a deprecated feature."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$update` is implicitly nullable and relies on a deprecated feature."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$value` is implicitly nullable and relies on a deprecated feature."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$isolationLevel` is implicitly nullable and relies on a deprecated feature."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$sequenceName` is implicitly nullable and relies on a deprecated feature."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
-code = "explicit-nullable-param"
-message = "Parameter `$sql` is implicitly nullable and relies on a deprecated feature."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
 code = "too-many-methods"
 message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php"
-code = "explicit-nullable-param"
-message = "Parameter `$isolationLevel` is implicitly nullable and relies on a deprecated feature."
 count = 1
 
 [[issues]]
@@ -1009,12 +859,6 @@ message = "Class has a high kan defect score (2.34)."
 count = 1
 
 [[issues]]
-file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
-count = 2
-
-[[issues]]
 file = "libs/Testing/src/Command/DebugFixturesCommand.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -1027,21 +871,9 @@ message = "Class has a high kan defect score (2.4400000000000004)."
 count = 1
 
 [[issues]]
-file = "libs/Testing/src/Command/DebugFixturesCommand.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
-count = 2
-
-[[issues]]
 file = "libs/Testing/src/Fixture/Fixture.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
-count = 1
-
-[[issues]]
-file = "libs/Testing/src/Runner/FixtureResult.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
 count = 1
 
 [[issues]]
@@ -1054,18 +886,6 @@ count = 1
 file = "libs/Testing/src/Runner/FixtureRunner.php"
 code = "kan-defect"
 message = "Class has a high kan defect score (1.9800000000000002)."
-count = 1
-
-[[issues]]
-file = "libs/Testing/tests/E2E/DebugApiTest.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
-count = 1
-
-[[issues]]
-file = "libs/Testing/tests/E2E/FixtureTestCase.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
 count = 1
 
 [[issues]]
@@ -1091,12 +911,6 @@ file = "libs/Testing/tests/E2E/ScenarioTest.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
 count = 4
-
-[[issues]]
-file = "libs/Testing/tests/E2E/ScenarioTest.php"
-code = "prefer-early-continue"
-message = "Consider using early continue pattern to reduce nesting."
-count = 3
 
 [[issues]]
 file = "libs/Testing/tests/E2E/ScenarioTest.php"

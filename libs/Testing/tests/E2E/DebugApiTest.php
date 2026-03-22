@@ -118,10 +118,12 @@ final class DebugApiTest extends TestCase
         // Find a key containing "LogCollector"
         $logCollectorKey = null;
         foreach (array_keys($data) as $key) {
-            if (str_contains((string) $key, 'LogCollector')) {
-                $logCollectorKey = $key;
-                break;
+            if (!str_contains((string) $key, 'LogCollector')) {
+                continue;
             }
+
+            $logCollectorKey = $key;
+            break;
         }
 
         if ($logCollectorKey === null) {

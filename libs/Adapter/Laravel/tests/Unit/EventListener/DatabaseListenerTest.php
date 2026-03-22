@@ -24,7 +24,7 @@ final class DatabaseListenerTest extends TestCase
                 $registeredListeners[$event] = $callback;
             });
 
-        $listener = new DatabaseListener(fn() => $this->createCollector());
+        $listener = new DatabaseListener($this->createCollector(...));
         $listener->register($dispatcher);
 
         $this->assertArrayHasKey(QueryExecuted::class, $registeredListeners);

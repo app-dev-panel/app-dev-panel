@@ -14,7 +14,7 @@ final class TransactionInterfaceDecorator implements TransactionInterface
         private DatabaseCollector $collector,
     ) {}
 
-    public function begin(string $isolationLevel = null): void
+    public function begin(?string $isolationLevel = null): void
     {
         [$callStack] = debug_backtrace();
 

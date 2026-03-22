@@ -72,9 +72,11 @@ final class SymfonyConfigProvider
         $aliases = $this->containerParameters['event_dispatcher.event_aliases'] ?? [];
         if (is_array($aliases)) {
             foreach ($aliases as $class => $alias) {
-                if (is_string($class) && is_string($alias)) {
-                    $reverseAliases[$alias] = $class;
+                if (!(is_string($class) && is_string($alias))) {
+                    continue;
                 }
+
+                $reverseAliases[$alias] = $class;
             }
         }
 

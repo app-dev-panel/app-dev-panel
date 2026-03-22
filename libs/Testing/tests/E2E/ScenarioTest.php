@@ -98,9 +98,11 @@ final class ScenarioTest extends FixtureTestCase
     {
         $missing = [];
         foreach (FixtureRegistry::all() as $fixture) {
-            if (!isset(self::$fixtureDebugIds[$fixture->name])) {
-                $missing[] = $fixture->name;
+            if (isset(self::$fixtureDebugIds[$fixture->name])) {
+                continue;
             }
+
+            $missing[] = $fixture->name;
         }
 
         self::assertEmpty($missing, sprintf('Fixtures without debug IDs: %s', implode(', ', $missing)));
@@ -220,10 +222,12 @@ final class ScenarioTest extends FixtureTestCase
         // Find LogCollector key
         $logKey = null;
         foreach (array_keys($data) as $key) {
-            if (str_contains((string) $key, 'LogCollector')) {
-                $logKey = (string) $key;
-                break;
+            if (!str_contains((string) $key, 'LogCollector')) {
+                continue;
             }
+
+            $logKey = (string) $key;
+            break;
         }
         self::assertNotNull($logKey, 'LogCollector not found in data');
 
@@ -329,9 +333,11 @@ final class ScenarioTest extends FixtureTestCase
 
         $failures = [];
         foreach ($result->assertions as $assertion) {
-            if (!$assertion->passed) {
-                $failures[] = $assertion->message;
+            if ($assertion->passed) {
+                continue;
             }
+
+            $failures[] = $assertion->message;
         }
 
         self::assertTrue(

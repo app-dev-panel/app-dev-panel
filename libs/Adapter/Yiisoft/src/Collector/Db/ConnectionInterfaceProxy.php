@@ -23,7 +23,7 @@ final class ConnectionInterfaceProxy implements ConnectionInterface
         private DatabaseCollector $collector,
     ) {}
 
-    public function beginTransaction(string $isolationLevel = null): TransactionInterface
+    public function beginTransaction(?string $isolationLevel = null): TransactionInterface
     {
         [$callStack] = debug_backtrace();
 
@@ -38,7 +38,7 @@ final class ConnectionInterfaceProxy implements ConnectionInterface
         return $this->connection->createBatchQueryResult($query, $each);
     }
 
-    public function createCommand(string $sql = null, array $params = []): CommandInterface
+    public function createCommand(?string $sql = null, array $params = []): CommandInterface
     {
         return new CommandInterfaceProxy($this->connection->createCommand($sql, $params), $this->collector);
     }
@@ -53,7 +53,7 @@ final class ConnectionInterfaceProxy implements ConnectionInterface
         $this->connection->close();
     }
 
-    public function getLastInsertID(string $sequenceName = null): string
+    public function getLastInsertID(?string $sequenceName = null): string
     {
         return $this->connection->getLastInsertID($sequenceName);
     }
@@ -125,7 +125,7 @@ final class ConnectionInterfaceProxy implements ConnectionInterface
         $this->connection->setTablePrefix($value);
     }
 
-    public function transaction(Closure $closure, string $isolationLevel = null): mixed
+    public function transaction(Closure $closure, ?string $isolationLevel = null): mixed
     {
         [$callStack] = debug_backtrace();
 

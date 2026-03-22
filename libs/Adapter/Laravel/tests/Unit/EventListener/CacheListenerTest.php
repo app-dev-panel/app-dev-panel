@@ -26,7 +26,7 @@ final class CacheListenerTest extends TestCase
                 $registeredListeners[$event] = $callback;
             });
 
-        $listener = new CacheListener(fn() => $this->createCollector());
+        $listener = new CacheListener($this->createCollector(...));
         $listener->register($dispatcher);
 
         $this->assertCount(4, $registeredListeners);
