@@ -44,12 +44,16 @@ final class DatabaseControllerTest extends ControllerTestCase
             'columns' => [],
             'records' => [['id' => 1, 'name' => 'Alice']],
             'totalCount' => 1,
-            'limit' => 50,
+            'limit' => SchemaProviderInterface::DEFAULT_LIMIT,
             'offset' => 0,
         ];
 
         $provider = $this->createMock(SchemaProviderInterface::class);
-        $provider->expects($this->once())->method('getTable')->with('users', 50, 0)->willReturn($tableData);
+        $provider
+            ->expects($this->once())
+            ->method('getTable')
+            ->with('users', SchemaProviderInterface::DEFAULT_LIMIT, 0)
+            ->willReturn($tableData);
 
         $controller = $this->createController($provider);
         $request = $this->get();
@@ -59,23 +63,42 @@ final class DatabaseControllerTest extends ControllerTestCase
         $this->assertSame(200, $response->getStatusCode());
     }
 
+    public function testGetTableUsesDefaultLimitFromInterface(): void
+    {
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->expects($this->once())
+            ->method('getTable')
+            ->with('users', SchemaProviderInterface::DEFAULT_LIMIT, 0)
+            ->willReturn([
+                'table' => 'users',
+                'records' => [],
+                'totalCount' => 0,
+            ]);
+
+        $controller = $this->createController($provider);
+        $request = $this->get();
+        $request = $request->withAttribute('name', 'users');
+        $controller->getTable($request);
+    }
+
     public function testGetTableWithPagination(): void
     {
         $provider = $this->createMock(SchemaProviderInterface::class);
         $provider
             ->expects($this->once())
             ->method('getTable')
-            ->with('orders', 50, 100)
+            ->with('orders', SchemaProviderInterface::DEFAULT_LIMIT, 100)
             ->willReturn([
                 'table' => 'orders',
                 'records' => [],
                 'totalCount' => 200,
-                'limit' => 50,
+                'limit' => SchemaProviderInterface::DEFAULT_LIMIT,
                 'offset' => 100,
             ]);
 
         $controller = $this->createController($provider);
-        $request = $this->get(['limit' => '50', 'offset' => '100']);
+        $request = $this->get(['limit' => (string) SchemaProviderInterface::DEFAULT_LIMIT, 'offset' => '100']);
         $request = $request->withAttribute('name', 'orders');
         $response = $controller->getTable($request);
 
@@ -126,7 +149,7 @@ final class DatabaseControllerTest extends ControllerTestCase
         $provider
             ->expects($this->once())
             ->method('getTable')
-            ->with('t', 50, 0)
+            ->with('t', SchemaProviderInterface::DEFAULT_LIMIT, 0)
             ->willReturn([
                 'table' => 't',
                 'records' => [],

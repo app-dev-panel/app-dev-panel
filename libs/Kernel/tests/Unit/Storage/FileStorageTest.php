@@ -20,6 +20,11 @@ final class FileStorageTest extends AbstractStorageTestCase
         FileHelper::removeDirectory($this->path);
     }
 
+    public function testDefaultHistorySizeConstant(): void
+    {
+        $this->assertSame(50, FileStorage::DEFAULT_HISTORY_SIZE);
+    }
+
     /**
      * @dataProvider dataProvider()
      */
