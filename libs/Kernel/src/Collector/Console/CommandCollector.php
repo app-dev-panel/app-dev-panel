@@ -47,6 +47,31 @@ final class CommandCollector implements SummaryCollectorInterface
         };
     }
 
+    /**
+     * Framework-agnostic entry point for collecting command data.
+     *
+     * Use this when the framework doesn't use Symfony Console events (e.g. Yii 2).
+     *
+     * @param array{name: string, input: ?string, exitCode?: int, error?: string, command?: object|null, output?: ?string} $data
+     */
+    public function collectCommandData(array $data): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+
+        $this->timelineCollector->collect($this, crc32($data['name'] ?? 'unknown'));
+
+        $this->commands['command'] = [
+            'name' => $data['name'] ?? '',
+            'command' => $data['command'] ?? null,
+            'input' => $data['input'] ?? null,
+            'output' => $data['output'] ?? null,
+            'exitCode' => $data['exitCode'] ?? self::UNDEFINED_EXIT_CODE,
+            ...(isset($data['error']) ? ['error' => $data['error']] : []),
+        ];
+    }
+
     public function getSummary(): array
     {
         if ($this->commands === []) {
@@ -54,7 +79,7 @@ final class CommandCollector implements SummaryCollectorInterface
         }
 
         $commandEvent =
-            $this->commands[ConsoleErrorEvent::class] ?? $this->commands[ConsoleTerminateEvent::class] ?? $this->commands[ConsoleEvent::class]
+            $this->commands[ConsoleErrorEvent::class] ?? $this->commands[ConsoleTerminateEvent::class] ?? $this->commands[ConsoleEvent::class] ?? $this->commands['command']
                 ?? null;
 
         if ($commandEvent === null) {
