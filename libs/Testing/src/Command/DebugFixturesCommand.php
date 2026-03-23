@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AppDevPanel\Testing\Command;
 
 use AppDevPanel\Testing\Fixture\FixtureRegistry;
-use AppDevPanel\Testing\Runner\FixtureResult;
 use AppDevPanel\Testing\Runner\FixtureRunner;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -15,14 +14,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-/**
- * Run ADP test fixtures against a live playground instance.
- *
- * Usage:
- *   debug:fixtures http://localhost:8080
- *   debug:fixtures http://localhost:8080 --tag=core
- *   debug:fixtures http://localhost:8080 --fixture=logs:basic
- */
 #[AsCommand(name: 'debug:fixtures', description: 'Run ADP test fixtures against a playground')]
 final class DebugFixturesCommand extends Command
 {
@@ -72,7 +63,9 @@ final class DebugFixturesCommand extends Command
 
         $results = $runner->runAll($fixtures);
 
-        return $this->renderResults($io, $output, $results);
+        $renderer = new FixtureResultRenderer();
+
+        return $renderer->render($io, $output, $results);
     }
 
     private function listFixtures(SymfonyStyle $io): int
@@ -107,7 +100,7 @@ final class DebugFixturesCommand extends Command
                     return [$fixture];
                 }
             }
-            $io->error(sprintf('Fixture "%s" not found.', (string) $fixtureName));
+            $io->error(sprintf('Fixture "%s" not found.', $fixtureName));
             return null;
         }
 
@@ -116,7 +109,7 @@ final class DebugFixturesCommand extends Command
             if ($fixtures === []) {
                 $io->error(sprintf(
                     'No fixtures found for tag "%s". Available tags: %s',
-                    (string) $tag,
+                    $tag,
                     implode(', ', FixtureRegistry::tags()),
                 ));
                 return null;
@@ -125,60 +118,5 @@ final class DebugFixturesCommand extends Command
         }
 
         return FixtureRegistry::all();
-    }
-
-    /**
-     * @param list<FixtureResult> $results
-     */
-    private function renderResults(SymfonyStyle $io, OutputInterface $output, array $results): int
-    {
-        $passed = 0;
-        $failed = 0;
-        $skipped = 0;
-
-        foreach ($results as $result) {
-            if ($result->error !== null) {
-                $skipped++;
-                $io->text(sprintf('  <fg=yellow>SKIP</> %s — %s', $result->fixture->name, $result->error));
-                continue;
-            }
-
-            if ($result->passed) {
-                $passed++;
-                $io->text(sprintf('  <fg=green>PASS</> %s', $result->fixture->name));
-            } else {
-                $failed++;
-                $io->text(sprintf('  <fg=red>FAIL</> %s', $result->fixture->name));
-
-                foreach ($result->assertions as $assertion) {
-                    if (!$assertion->passed) {
-                        $io->text(sprintf('       <fg=red>✗</> %s', $assertion->message));
-                    }
-                }
-            }
-
-            // Show assertions in verbose mode
-            if ($output->isVerbose()) {
-                foreach ($result->assertions as $assertion) {
-                    if ($assertion->passed) {
-                        $io->text(sprintf('       <fg=green>✓</> %s', $assertion->message));
-                    }
-                }
-                if ($result->debugId !== null) {
-                    $io->text(sprintf('       Debug ID: %s', $result->debugId));
-                }
-            }
-        }
-
-        $io->newLine();
-        $io->text(sprintf(
-            'Results: <fg=green>%d passed</>, <fg=red>%d failed</>, <fg=yellow>%d skipped</>, %d total',
-            $passed,
-            $failed,
-            $skipped,
-            count($results),
-        ));
-
-        return $failed > 0 ? Command::FAILURE : Command::SUCCESS;
     }
 }

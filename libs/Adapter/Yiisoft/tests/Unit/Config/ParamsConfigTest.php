@@ -25,14 +25,14 @@ final class ParamsConfigTest extends TestCase
     {
         $ignored = $this->params['app-dev-panel/yiisoft']['ignoredRequests'];
 
-        $this->assertContains('/debug/api/*', $ignored);
+        $this->assertContains('/debug/api/**', $ignored);
     }
 
     public function testIgnoredRequestsIncludesInspectApi(): void
     {
         $ignored = $this->params['app-dev-panel/yiisoft']['ignoredRequests'];
 
-        $this->assertContains('/inspect/api/*', $ignored);
+        $this->assertContains('/inspect/api/**', $ignored);
     }
 
     public function testEnabledByDefault(): void

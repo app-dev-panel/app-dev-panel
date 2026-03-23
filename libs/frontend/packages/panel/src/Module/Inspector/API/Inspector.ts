@@ -26,6 +26,18 @@ export type CommandResponseType<T = any> = {status: 'ok' | 'error' | 'fail'; res
 export type CacheResponseType = any;
 export type PutTranslationArgumentType = {category: string; locale: string; translation: string; message: string};
 
+export type TableColumn = {name: string; type: string; [key: string]: unknown};
+export type TableQueryParams = {table: string; limit?: number; offset?: number};
+export type TableResponse = {
+    table: string;
+    primaryKeys: string[];
+    columns: TableColumn[];
+    records: Record<string, unknown>[];
+    totalCount: number;
+    limit: number;
+    offset: number;
+};
+
 type ComposerResponse = {
     json: {require: Record<string, string>; 'require-dev': Record<string, string>};
     lock: {packages: {name: string; version: string}[]; 'packages-dev': {name: string; version: string}[]};
@@ -208,9 +220,13 @@ export const inspectorApi = createApi({
             query: (body) => ({method: 'PUT', url: `translations`, body: body}),
             transformResponse: (result: Response) => result.data || [],
         }),
-        getTable: builder.query<Response, string | void>({
-            query: (table) => (table ? `table/${table}` : `table`),
+        getTable: builder.query<Response, void>({
+            query: () => `table`,
             transformResponse: (result: Response) => result.data || [],
+        }),
+        getTableData: builder.query<TableResponse, TableQueryParams>({
+            query: ({table, limit = 50, offset = 0}) => `table/${table}?limit=${limit}&offset=${offset}`,
+            transformResponse: (result: Response<TableResponse>) => result.data,
         }),
         explainQuery: builder.mutation<any[], {sql: string; params?: Record<string, any>; analyze?: boolean}>({
             query: ({sql, params, analyze}) => ({
@@ -307,6 +323,7 @@ export const {
     useGetRoutesQuery,
     useLazyGetCheckRouteQuery,
     useGetTableQuery,
+    useGetTableDataQuery,
     useGetPhpInfoQuery,
     useGetComposerQuery,
     useGetCacheQuery,

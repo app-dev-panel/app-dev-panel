@@ -140,7 +140,7 @@ final class ResponseDataWrapperTest extends TestCase
         $factory = $this->createMock(JsonResponseFactoryInterface::class);
         $factory
             ->method('createJsonResponse')
-            ->willReturnCallback(function (mixed $data, int $status = 200): Response {
+            ->willReturnCallback(static function (mixed $data, int $status = 200): Response {
                 return new Response($status, ['Content-Type' => 'application/json'], json_encode($data));
             });
         return $factory;

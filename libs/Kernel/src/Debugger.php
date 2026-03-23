@@ -17,6 +17,7 @@ final class Debugger
     private bool $active = false;
     private bool $shutdownRegistered = false;
     private readonly LoggerInterface $logger;
+    private DebuggerIgnoreConfig $ignoreConfig;
 
     public function __construct(
         private readonly DebuggerIdGenerator $idGenerator,
@@ -25,10 +26,10 @@ final class Debugger
          * @var CollectorInterface[]
          */
         private readonly array $collectors,
-        private array $ignoredRequests = [],
-        private array $ignoredCommands = [],
+        ?DebuggerIgnoreConfig $ignoreConfig = null,
         ?LoggerInterface $logger = null,
     ) {
+        $this->ignoreConfig = $ignoreConfig ?? new DebuggerIgnoreConfig();
         $this->logger = $logger ?? new NullLogger();
     }
 
@@ -118,7 +119,7 @@ final class Debugger
             return true;
         }
         $path = $request->getUri()->getPath();
-        foreach ($this->ignoredRequests as $pattern) {
+        foreach ($this->ignoreConfig->requests as $pattern) {
             if (new WildcardPattern($pattern)->match($path)) {
                 return true;
             }
@@ -134,7 +135,7 @@ final class Debugger
         if (getenv('YII_DEBUG_IGNORE') === 'true') {
             return true;
         }
-        foreach ($this->ignoredCommands as $pattern) {
+        foreach ($this->ignoreConfig->commands as $pattern) {
             if (new WildcardPattern($pattern)->match($command)) {
                 return true;
             }
@@ -150,7 +151,7 @@ final class Debugger
     public function withIgnoredRequests(array $ignoredRequests): self
     {
         $new = clone $this;
-        $new->ignoredRequests = $ignoredRequests;
+        $new->ignoreConfig = new DebuggerIgnoreConfig($ignoredRequests, $this->ignoreConfig->commands);
         return $new;
     }
 
@@ -162,7 +163,7 @@ final class Debugger
     public function withIgnoredCommands(array $ignoredCommands): self
     {
         $new = clone $this;
-        $new->ignoredCommands = $ignoredCommands;
+        $new->ignoreConfig = new DebuggerIgnoreConfig($this->ignoreConfig->requests, $ignoredCommands);
         return $new;
     }
 }

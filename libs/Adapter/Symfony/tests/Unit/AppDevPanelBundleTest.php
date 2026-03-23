@@ -32,10 +32,12 @@ final class AppDevPanelBundleTest extends TestCase
         $passes = $container->getCompilerPassConfig()->getBeforeOptimizationPasses();
         $hasCompilerPass = false;
         foreach ($passes as $pass) {
-            if ($pass instanceof CollectorProxyCompilerPass) {
-                $hasCompilerPass = true;
-                break;
+            if (!$pass instanceof CollectorProxyCompilerPass) {
+                continue;
             }
+
+            $hasCompilerPass = true;
+            break;
         }
 
         $this->assertTrue($hasCompilerPass, 'CollectorProxyCompilerPass should be registered');

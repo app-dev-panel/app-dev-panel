@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\TestFixtures;
 
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\QueryRecord;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -20,7 +21,7 @@ final readonly class DatabaseAction
         // Simulate a database query by calling the collector directly.
         // This tests the DatabaseCollector without requiring Doctrine DBAL infrastructure.
         $start = microtime(true);
-        $this->databaseCollector->logQuery(
+        $this->databaseCollector->logQuery(new QueryRecord(
             sql: 'SELECT * FROM test_users WHERE id = :id',
             rawSql: 'SELECT * FROM test_users WHERE id = 1',
             params: ['id' => 1],
@@ -28,7 +29,7 @@ final readonly class DatabaseAction
             startTime: $start,
             endTime: microtime(true),
             rowsNumber: 1,
-        );
+        ));
 
         return new JsonResponse(['fixture' => 'database:basic', 'status' => 'ok']);
     }

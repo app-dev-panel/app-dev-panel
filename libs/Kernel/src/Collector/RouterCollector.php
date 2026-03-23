@@ -31,7 +31,7 @@ final class RouterCollector implements SummaryCollectorInterface
         }
 
         $this->currentRoute = $routeData;
-        $this->matchTime = $routeData['matchTime'] ?? 0;
+        $this->matchTime = $routeData['matchTime'];
     }
 
     /**

@@ -14,9 +14,9 @@ final class FileControllerTest extends ControllerTestCase
     protected function setUp(): void
     {
         $this->fixtureDir = sys_get_temp_dir() . '/adp-file-test-' . uniqid();
-        mkdir($this->fixtureDir, 0755, true);
+        mkdir($this->fixtureDir, 0o755, true);
         file_put_contents($this->fixtureDir . '/test.txt', 'hello world');
-        mkdir($this->fixtureDir . '/subdir', 0755, true);
+        mkdir($this->fixtureDir . '/subdir', 0o755, true);
         file_put_contents($this->fixtureDir . '/subdir/nested.php', '<?php echo 1;');
     }
 
@@ -104,8 +104,12 @@ final class FileControllerTest extends ControllerTestCase
             $response = $controller->files($this->get(['path' => '/escape/' . basename($outsideFile)]));
             $this->assertSame(403, $response->getStatusCode());
         } finally {
-            @unlink($outsideFile);
-            @unlink($symlinkPath ?? '');
+            if (file_exists($outsideFile)) {
+                unlink($outsideFile);
+            }
+            if (isset($symlinkPath) && file_exists($symlinkPath)) {
+                unlink($symlinkPath);
+            }
         }
     }
 
@@ -148,6 +152,8 @@ final class FileControllerTest extends ControllerTestCase
         $this->assertArrayHasKey('permissions', $data);
         $this->assertArrayHasKey('user', $data);
         $this->assertArrayHasKey('group', $data);
+        $this->assertArrayHasKey('mtime', $data);
+        $this->assertIsInt($data['mtime']);
         $this->assertArrayHasKey('directory', $data);
         $this->assertArrayHasKey('absolutePath', $data);
     }

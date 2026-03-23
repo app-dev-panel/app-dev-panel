@@ -17,7 +17,7 @@ final class LaravelConfigProviderTest extends TestCase
         $configRepo = new Repository($configData);
 
         $app = $this->createAppMock();
-        $app->method('make')->willReturnCallback(function (string $abstract) use ($configRepo): mixed {
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($configRepo): mixed {
             if ($abstract === 'config') {
                 return $configRepo;
             }
@@ -36,7 +36,7 @@ final class LaravelConfigProviderTest extends TestCase
         $configRepo = new Repository(['key' => 'value']);
 
         $app = $this->createAppMock();
-        $app->method('make')->willReturnCallback(function (string $abstract) use ($configRepo): mixed {
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($configRepo): mixed {
             if ($abstract === 'config') {
                 return $configRepo;
             }

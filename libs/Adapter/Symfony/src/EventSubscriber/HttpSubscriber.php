@@ -4,16 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
-use AppDevPanel\Adapter\Symfony\Collector\RouterDataExtractor;
-use AppDevPanel\Kernel\Collector\EnvironmentCollector;
-use AppDevPanel\Kernel\Collector\ExceptionCollector;
-use AppDevPanel\Kernel\Collector\VarDumperCollector;
-use AppDevPanel\Kernel\Collector\Web\RequestCollector;
-use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
-use Nyholm\Psr7\Factory\Psr17Factory;
-use Nyholm\Psr7Server\ServerRequestCreator;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -35,19 +27,16 @@ use Symfony\Component\VarDumper\VarDumper;
  */
 final class HttpSubscriber implements EventSubscriberInterface
 {
-    private ?Psr17Factory $psr17Factory = null;
+    private readonly Psr7Converter $psr7Converter;
 
     private bool $varDumperHandlerRegistered = false;
 
     public function __construct(
         private readonly Debugger $debugger,
-        private readonly ?RequestCollector $requestCollector = null,
-        private readonly ?WebAppInfoCollector $webAppInfoCollector = null,
-        private readonly ?ExceptionCollector $exceptionCollector = null,
-        private readonly ?VarDumperCollector $varDumperCollector = null,
-        private readonly ?EnvironmentCollector $environmentCollector = null,
-        private readonly ?RouterDataExtractor $routerDataExtractor = null,
-    ) {}
+        private readonly HttpSubscriberCollectors $collectors = new HttpSubscriberCollectors(),
+    ) {
+        $this->psr7Converter = new Psr7Converter();
+    }
 
     public static function getSubscribedEvents(): array
     {
@@ -65,23 +54,21 @@ final class HttpSubscriber implements EventSubscriberInterface
             return;
         }
 
-        // Don't debug ADP's own API requests
-        $path = $event->getRequest()->getPathInfo();
-        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+        if ($this->isAdpApiRequest($event->getRequest()->getPathInfo())) {
             return;
         }
 
         $symfonyRequest = $event->getRequest();
-        $psrRequest = $this->convertSymfonyRequestToPsr7($symfonyRequest);
+        $psrRequest = $this->psr7Converter->convertRequest($symfonyRequest);
 
         $this->registerVarDumperHandler();
 
         $this->debugger->startup(StartupContext::forRequest($psrRequest));
 
-        $this->webAppInfoCollector?->markApplicationStarted();
-        $this->webAppInfoCollector?->markRequestStarted();
-        $this->requestCollector?->collectRequest($psrRequest);
-        $this->environmentCollector?->collectFromRequest($psrRequest);
+        $this->collectors->webAppInfo?->markApplicationStarted();
+        $this->collectors->webAppInfo?->markRequestStarted();
+        $this->collectors->request?->collectRequest($psrRequest);
+        $this->collectors->environment?->collectFromRequest($psrRequest);
     }
 
     public function onKernelResponse(ResponseEvent $event): void
@@ -90,19 +77,18 @@ final class HttpSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $path = $event->getRequest()->getPathInfo();
-        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+        if ($this->isAdpApiRequest($event->getRequest()->getPathInfo())) {
             return;
         }
 
-        $this->webAppInfoCollector?->markRequestFinished();
+        $this->collectors->webAppInfo?->markRequestFinished();
 
-        if ($this->requestCollector !== null) {
-            $psrResponse = $this->convertSymfonyResponseToPsr7($event->getResponse());
-            $this->requestCollector->collectResponse($psrResponse);
+        if ($this->collectors->request !== null) {
+            $psrResponse = $this->psr7Converter->convertResponse($event->getResponse());
+            $this->collectors->request->collectResponse($psrResponse);
         }
 
-        $this->routerDataExtractor?->extract($event->getRequest());
+        $this->collectors->routerDataExtractor?->extract($event->getRequest());
 
         // Add debug ID header to the response
         $event->getResponse()->headers->set('X-Debug-Id', $this->debugger->getId());
@@ -110,91 +96,52 @@ final class HttpSubscriber implements EventSubscriberInterface
 
     public function onKernelException(ExceptionEvent $event): void
     {
-        $path = $event->getRequest()->getPathInfo();
-        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+        if ($this->isAdpApiRequest($event->getRequest()->getPathInfo())) {
             return;
         }
 
-        $this->exceptionCollector?->collect($event->getThrowable());
+        $this->collectors->exception?->collect($event->getThrowable());
     }
 
     public function onKernelTerminate(TerminateEvent $event): void
     {
-        $path = $event->getRequest()->getPathInfo();
-        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+        if ($this->isAdpApiRequest($event->getRequest()->getPathInfo())) {
             return;
         }
 
-        $this->webAppInfoCollector?->markApplicationFinished();
+        $this->collectors->webAppInfo?->markApplicationFinished();
         $this->debugger->shutdown();
+    }
+
+    private function isAdpApiRequest(string $path): bool
+    {
+        return str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api');
     }
 
     private function registerVarDumperHandler(): void
     {
-        if ($this->varDumperHandlerRegistered || $this->varDumperCollector === null) {
+        if ($this->varDumperHandlerRegistered || $this->collectors->varDumper === null) {
             return;
         }
 
-        $collector = $this->varDumperCollector;
+        $collector = $this->collectors->varDumper;
         $previousHandler = VarDumper::setHandler(static function (mixed $var, ?string $label = null) use (
             $collector,
         ): void {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
             $line = '';
             foreach ($trace as $frame) {
-                if (isset($frame['file']) && !str_contains($frame['file'], 'vendor/')) {
-                    $line = $frame['file'] . ':' . ($frame['line'] ?? 0);
-                    break;
+                if (!(array_key_exists('file', $frame) && !str_contains($frame['file'], 'vendor/'))) {
+                    continue;
                 }
+
+                $line = $frame['file'] . ':' . ($frame['line'] ?? 0);
+                break;
             }
 
             $collector->collect($var, $label ?? $line);
         });
 
         $this->varDumperHandlerRegistered = true;
-    }
-
-    private function getPsr17Factory(): Psr17Factory
-    {
-        return $this->psr17Factory ??= new Psr17Factory();
-    }
-
-    private function convertSymfonyRequestToPsr7(\Symfony\Component\HttpFoundation\Request $symfonyRequest): \Psr\Http\Message\ServerRequestInterface
-    {
-        $psr17Factory = $this->getPsr17Factory();
-        $psrRequest = new ServerRequestCreator(
-            $psr17Factory,
-            $psr17Factory,
-            $psr17Factory,
-            $psr17Factory,
-        )->fromGlobals();
-
-        // Override URI from the Symfony request to ensure accuracy
-        $uri = $psr17Factory->createUri($symfonyRequest->getUri());
-        $psrRequest = $psrRequest->withUri($uri)->withMethod($symfonyRequest->getMethod());
-
-        foreach ($symfonyRequest->headers->all() as $name => $values) {
-            $psrRequest = $psrRequest->withHeader($name, $values);
-        }
-
-        return $psrRequest;
-    }
-
-    private function convertSymfonyResponseToPsr7(\Symfony\Component\HttpFoundation\Response $symfonyResponse): \Psr\Http\Message\ResponseInterface
-    {
-        $psr17Factory = $this->getPsr17Factory();
-        $psrResponse = $psr17Factory->createResponse($symfonyResponse->getStatusCode());
-
-        foreach ($symfonyResponse->headers->all() as $name => $values) {
-            $psrResponse = $psrResponse->withHeader($name, $values);
-        }
-
-        $content = $symfonyResponse->getContent();
-        if ($content !== false) {
-            $body = $psr17Factory->createStream($content);
-            $psrResponse = $psrResponse->withBody($body);
-        }
-
-        return $psrResponse;
     }
 }

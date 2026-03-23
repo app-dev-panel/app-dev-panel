@@ -37,7 +37,7 @@ final class ProxyDecoratedCallsTest extends TestCase
         $decorated = new class {
             public function greet(string $name): string
             {
-                return "Hello, $name!";
+                return "Hello, {$name}!";
             }
         };
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Web\TestFixtures;
 
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\QueryRecord;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -22,7 +23,7 @@ final readonly class DatabaseAction implements RequestHandlerInterface
         // Simulate a database query by calling the collector directly.
         // This tests the DatabaseCollector without requiring yiisoft/db infrastructure.
         $start = microtime(true);
-        $this->databaseCollector->logQuery(
+        $this->databaseCollector->logQuery(new QueryRecord(
             sql: 'SELECT * FROM test_users WHERE id = :id',
             rawSql: 'SELECT * FROM test_users WHERE id = 1',
             params: ['id' => 1],
@@ -30,7 +31,7 @@ final readonly class DatabaseAction implements RequestHandlerInterface
             startTime: $start,
             endTime: microtime(true),
             rowsNumber: 1,
-        );
+        ));
 
         return $this->responseFactory->createResponse(['fixture' => 'database:basic', 'status' => 'ok']);
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\EventListener;
 
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
+use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
@@ -29,6 +30,7 @@ final class WebListener
         private readonly ?RequestCollector $requestCollector = null,
         private readonly ?WebAppInfoCollector $webAppInfoCollector = null,
         private readonly ?ExceptionCollector $exceptionCollector = null,
+        private readonly ?RouterCollector $routerCollector = null,
     ) {}
 
     public function onBeforeRequest(\yii\base\Event $event): void
@@ -70,6 +72,7 @@ final class WebListener
         }
 
         $this->webAppInfoCollector?->markRequestFinished();
+        $this->extractRouteData($app);
 
         if ($this->requestCollector !== null) {
             $psrResponse = $this->convertYiiResponseToPsr7($app->getResponse());
@@ -145,5 +148,44 @@ final class WebListener
         }
 
         return $psrResponse;
+    }
+
+    /**
+     * Auto-extract route data from Yii2's resolved controller/action.
+     *
+     * Only collects if the RouterCollector hasn't been fed manually (e.g., by RouterAction fixture).
+     * Uses getCollected() emptiness as the check since there's no public "hasRoute" method.
+     */
+    private function extractRouteData(\yii\web\Application $app): void
+    {
+        if ($this->routerCollector === null) {
+            return;
+        }
+
+        // Skip if router data was already collected manually (e.g., by a fixture action)
+        $collected = $this->routerCollector->getCollected();
+        if (isset($collected['currentRoute'])) {
+            return;
+        }
+
+        $controller = $app->controller;
+        if ($controller === null) {
+            return;
+        }
+
+        $action = $controller->action;
+        $uri = $app->getRequest()->getUrl();
+        $path = parse_url($uri, PHP_URL_PATH) ?: $uri;
+
+        $this->routerCollector->collectMatchedRoute([
+            'matchTime' => 0,
+            'name' => null,
+            'pattern' => $path,
+            'arguments' => $app->requestedParams,
+            'host' => null,
+            'uri' => $uri,
+            'action' => $action !== null ? $action::class : $controller::class,
+            'middlewares' => [],
+        ]);
     }
 }

@@ -97,9 +97,9 @@ Frontend → API (HTTP only)
 
 ## Mago Baselines
 
-Existing issues are suppressed via baseline files. New code must not introduce new issues.
+Existing lint issues are suppressed via a baseline file. Analyzer rules that produce false positives
+are suppressed via `ignore` in `mago.toml`. New code must not introduce new issues.
 
 ```bash
 composer lint:baseline      # Regenerate lint baseline
-composer analyze:baseline   # Regenerate analyze baseline
 ```

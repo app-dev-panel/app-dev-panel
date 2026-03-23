@@ -10,6 +10,7 @@ use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Dumper;
 use AppDevPanel\Kernel\Storage\MemoryStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
@@ -17,9 +18,7 @@ use function json_decode;
 
 abstract class AbstractStorageTestCase extends TestCase
 {
-    /**
-     * @dataProvider dataProvider()
-     */
+    #[DataProvider('dataProvider')]
     public function testAddAndGet(array $data): void
     {
         $idGenerator = new DebuggerIdGenerator();
@@ -31,9 +30,7 @@ abstract class AbstractStorageTestCase extends TestCase
         $this->assertEquals([$collector->getId() => $data], $storage->getData());
     }
 
-    /**
-     * @dataProvider dataProvider()
-     */
+    #[DataProvider('dataProvider')]
     public function testRead(array $data): void
     {
         $idGenerator = new DebuggerIdGenerator();
@@ -54,9 +51,7 @@ abstract class AbstractStorageTestCase extends TestCase
         $this->assertEquals([$idGenerator->getId() => $encodedExpectedData], $encodedResult);
     }
 
-    /**
-     * @dataProvider dataProvider()
-     */
+    #[DataProvider('dataProvider')]
     public function testFlush(array $data): void
     {
         $idGenerator = new DebuggerIdGenerator();

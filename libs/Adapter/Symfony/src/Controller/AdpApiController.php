@@ -43,7 +43,7 @@ final class AdpApiController
 
         // Copy body
         $content = $request->getContent();
-        if ($content !== '' && $content !== false) {
+        if ($content !== '') {
             $body = $psr17Factory->createStream($content);
             $psrRequest = $psrRequest->withBody($body);
         }
@@ -79,7 +79,7 @@ final class AdpApiController
         }
 
         return new StreamedResponse(
-            function () use ($body): void {
+            static function () use ($body): void {
                 while (!$body->eof()) {
                     echo $body->read(8192);
                     if (ob_get_level() > 0) {

@@ -57,7 +57,7 @@ final class LaravelEventDispatcherProxyTest extends TestCase
     public function testListenForwardsToDecorated(): void
     {
         $inner = $this->createMock(Dispatcher::class);
-        $callback = fn() => null;
+        $callback = static fn() => null;
         $inner->expects($this->once())->method('listen')->with('test.event', $callback);
 
         $proxy = new LaravelEventDispatcherProxy($inner, $this->collector);

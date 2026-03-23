@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Laravel\EventListener;
 
+use AppDevPanel\Kernel\Collector\MessageRecord;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Queue\Events\JobFailed;
@@ -43,19 +44,18 @@ final class QueueListener
             $duration = (microtime(true) - $startTime) * 1000;
             unset($this->jobStartTimes[$jobId]);
 
-            ($this->collectorFactory)()->logMessage(
+            ($this->collectorFactory)()->logMessage(new MessageRecord(
                 messageClass: $event->job->resolveName(),
                 bus: $event->connectionName,
                 transport: $event->job->getQueue(),
                 dispatched: true,
                 handled: true,
-                failed: false,
                 duration: $duration,
                 message: [
                     'jobId' => $jobId,
                     'attempts' => $event->job->attempts(),
                 ],
-            );
+            ));
         });
 
         $events->listen(JobFailed::class, function (JobFailed $event): void {
@@ -64,19 +64,18 @@ final class QueueListener
             $duration = (microtime(true) - $startTime) * 1000;
             unset($this->jobStartTimes[$jobId]);
 
-            ($this->collectorFactory)()->logMessage(
+            ($this->collectorFactory)()->logMessage(new MessageRecord(
                 messageClass: $event->job->resolveName(),
                 bus: $event->connectionName,
                 transport: $event->job->getQueue(),
                 dispatched: true,
-                handled: false,
                 failed: true,
                 duration: $duration,
                 message: [
                     'jobId' => $jobId,
                     'exception' => $event->exception->getMessage(),
                 ],
-            );
+            ));
         });
     }
 }

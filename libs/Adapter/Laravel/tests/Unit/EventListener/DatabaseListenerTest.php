@@ -20,11 +20,11 @@ final class DatabaseListenerTest extends TestCase
         $dispatcher = $this->createMock(Dispatcher::class);
         $dispatcher
             ->method('listen')
-            ->willReturnCallback(function (string $event, \Closure $callback) use (&$registeredListeners): void {
+            ->willReturnCallback(static function (string $event, \Closure $callback) use (&$registeredListeners): void {
                 $registeredListeners[$event] = $callback;
             });
 
-        $listener = new DatabaseListener(fn() => $this->createCollector());
+        $listener = new DatabaseListener($this->createCollector(...));
         $listener->register($dispatcher);
 
         $this->assertArrayHasKey(QueryExecuted::class, $registeredListeners);
@@ -85,11 +85,11 @@ final class DatabaseListenerTest extends TestCase
         $dispatcher = $this->createMock(Dispatcher::class);
         $dispatcher
             ->method('listen')
-            ->willReturnCallback(function (string $event, \Closure $cb) use (&$callback): void {
+            ->willReturnCallback(static function (string $event, \Closure $cb) use (&$callback): void {
                 $callback = $cb;
             });
 
-        $listener = new DatabaseListener(fn() => $collector);
+        $listener = new DatabaseListener(static fn() => $collector);
         $listener->register($dispatcher);
 
         return [$collector, $callback];

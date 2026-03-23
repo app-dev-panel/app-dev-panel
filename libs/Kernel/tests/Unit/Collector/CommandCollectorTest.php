@@ -62,4 +62,105 @@ final class CommandCollectorTest extends AbstractCollectorTestCase
         $this->assertEquals('test1', $data['command']['input']);
         $this->assertEquals(null, $data['command']['class']);
     }
+
+    public function testCollectCommandDataStoresData(): void
+    {
+        $collector = $this->getCollector();
+        $collector->startup();
+
+        $collector->collectCommandData([
+            'name' => 'migrate/up',
+            'input' => 'migrate/up --interactive=0',
+        ]);
+
+        $collected = $collector->getCollected();
+        $this->assertArrayHasKey('command', $collected);
+        $this->assertSame('migrate/up', $collected['command']['name']);
+        $this->assertSame('migrate/up --interactive=0', $collected['command']['input']);
+        $this->assertSame(-1, $collected['command']['exitCode']);
+    }
+
+    public function testCollectCommandDataWithExitCode(): void
+    {
+        $collector = $this->getCollector();
+        $collector->startup();
+
+        $collector->collectCommandData([
+            'name' => 'cache/clear',
+            'input' => 'cache/clear',
+            'exitCode' => 0,
+        ]);
+
+        $collected = $collector->getCollected();
+        $this->assertSame(0, $collected['command']['exitCode']);
+    }
+
+    public function testCollectCommandDataWithError(): void
+    {
+        $collector = $this->getCollector();
+        $collector->startup();
+
+        $collector->collectCommandData([
+            'name' => 'migrate/up',
+            'input' => 'migrate/up',
+            'exitCode' => 1,
+            'error' => 'Migration failed',
+        ]);
+
+        $collected = $collector->getCollected();
+        $this->assertSame('Migration failed', $collected['command']['error']);
+        $this->assertSame(1, $collected['command']['exitCode']);
+    }
+
+    public function testCollectCommandDataOverwritesPrevious(): void
+    {
+        $collector = $this->getCollector();
+        $collector->startup();
+
+        $collector->collectCommandData([
+            'name' => 'migrate/up',
+            'input' => 'migrate/up',
+        ]);
+
+        $collector->collectCommandData([
+            'name' => 'migrate/up',
+            'input' => 'migrate/up',
+            'exitCode' => 0,
+        ]);
+
+        $collected = $collector->getCollected();
+        $this->assertSame(0, $collected['command']['exitCode']);
+    }
+
+    public function testCollectCommandDataSummary(): void
+    {
+        $collector = $this->getCollector();
+        $collector->startup();
+
+        $collector->collectCommandData([
+            'name' => 'cache/flush',
+            'input' => 'cache/flush --all',
+            'exitCode' => 0,
+        ]);
+
+        $summary = $collector->getSummary();
+        $this->assertArrayHasKey('command', $summary);
+        $this->assertSame('cache/flush', $summary['command']['name']);
+        $this->assertSame('cache/flush --all', $summary['command']['input']);
+        $this->assertSame(0, $summary['command']['exitCode']);
+        $this->assertNull($summary['command']['class']);
+    }
+
+    public function testCollectCommandDataInactiveDoesNothing(): void
+    {
+        $collector = $this->getCollector();
+        // Don't call startup() — collector is inactive
+
+        $collector->collectCommandData([
+            'name' => 'test',
+            'input' => 'test',
+        ]);
+
+        $this->assertEmpty($collector->getCollected());
+    }
 }

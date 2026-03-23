@@ -9,7 +9,7 @@ use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
-use AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider;
+use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriberCollectors;
 use AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
@@ -78,7 +78,6 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -130,6 +129,12 @@ final class AppDevPanelExtension extends Extension
     {
         $collectors = $config['collectors'];
 
+        $this->registerKernelCollectors($container, $collectors);
+        $this->registerSymfonySpecificCollectors($container, $collectors);
+    }
+
+    private function registerKernelCollectors(ContainerBuilder $container, array $collectors): void
+    {
         if ($collectors['environment'] ?? true) {
             $container
                 ->register(EnvironmentCollector::class, EnvironmentCollector::class)
@@ -138,69 +143,60 @@ final class AppDevPanelExtension extends Extension
         }
 
         if ($collectors['request']) {
-            $container
-                ->register(RequestCollector::class, RequestCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector')
-                ->addTag('app_dev_panel.collector.web');
-
-            $container
-                ->register(WebAppInfoCollector::class, WebAppInfoCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class), 'Symfony'])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector')
-                ->addTag('app_dev_panel.collector.web');
+            $this->registerRequestCollectors($container);
         }
 
-        if ($collectors['exception']) {
-            $container
-                ->register(ExceptionCollector::class, ExceptionCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-        }
+        $this->registerSimpleCollectors($container, $collectors);
+        $this->registerStreamCollectors($container, $collectors);
 
-        if ($collectors['log']) {
-            $container
-                ->register(LogCollector::class, LogCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
+        if ($collectors['command']) {
+            $this->registerCommandCollectors($container);
         }
+    }
 
-        if ($collectors['event']) {
-            $container
-                ->register(EventCollector::class, EventCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-        }
+    private function registerRequestCollectors(ContainerBuilder $container): void
+    {
+        $container
+            ->register(RequestCollector::class, RequestCollector::class)
+            ->setArguments([new Reference(TimelineCollector::class)])
+            ->setPublic(false)
+            ->addTag('app_dev_panel.collector')
+            ->addTag('app_dev_panel.collector.web');
 
-        if ($collectors['service']) {
-            $container
-                ->register(ServiceCollector::class, ServiceCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-        }
+        $container
+            ->register(WebAppInfoCollector::class, WebAppInfoCollector::class)
+            ->setArguments([new Reference(TimelineCollector::class), 'Symfony'])
+            ->setPublic(false)
+            ->addTag('app_dev_panel.collector')
+            ->addTag('app_dev_panel.collector.web');
+    }
 
-        if ($collectors['http_client']) {
+    private function registerSimpleCollectors(ContainerBuilder $container, array $collectors): void
+    {
+        /** @var array<string, class-string> $timelineCollectorMap */
+        $timelineCollectorMap = [
+            'exception' => ExceptionCollector::class,
+            'log' => LogCollector::class,
+            'event' => EventCollector::class,
+            'service' => ServiceCollector::class,
+            'http_client' => HttpClientCollector::class,
+            'var_dumper' => VarDumperCollector::class,
+        ];
+
+        foreach ($timelineCollectorMap as $key => $class) {
+            if (!$collectors[$key]) {
+                continue;
+            }
             $container
-                ->register(HttpClientCollector::class, HttpClientCollector::class)
+                ->register($class, $class)
                 ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }
+    }
 
-        if ($collectors['var_dumper']) {
-            $container
-                ->register(VarDumperCollector::class, VarDumperCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-        }
-
+    private function registerStreamCollectors(ContainerBuilder $container, array $collectors): void
+    {
         if ($collectors['filesystem_stream']) {
             $container
                 ->register(FilesystemStreamCollector::class, FilesystemStreamCollector::class)
@@ -214,92 +210,79 @@ final class AppDevPanelExtension extends Extension
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }
+    }
 
-        if ($collectors['command']) {
-            $container
-                ->register(CommandCollector::class, CommandCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector')
-                ->addTag('app_dev_panel.collector.console');
+    private function registerCommandCollectors(ContainerBuilder $container): void
+    {
+        $container
+            ->register(CommandCollector::class, CommandCollector::class)
+            ->setArguments([new Reference(TimelineCollector::class)])
+            ->setPublic(false)
+            ->addTag('app_dev_panel.collector')
+            ->addTag('app_dev_panel.collector.console');
 
-            $container
-                ->register(ConsoleAppInfoCollector::class, ConsoleAppInfoCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class), 'Symfony'])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector')
-                ->addTag('app_dev_panel.collector.console');
-        }
+        $container
+            ->register(ConsoleAppInfoCollector::class, ConsoleAppInfoCollector::class)
+            ->setArguments([new Reference(TimelineCollector::class), 'Symfony'])
+            ->setPublic(false)
+            ->addTag('app_dev_panel.collector')
+            ->addTag('app_dev_panel.collector.console');
+    }
 
-        // Symfony-specific collectors
-        if ($collectors['doctrine']) {
-            $container
-                ->register(DatabaseCollector::class, DatabaseCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-        }
+    private function registerSymfonySpecificCollectors(ContainerBuilder $container, array $collectors): void
+    {
+        /** @var array<string, class-string> $timelineCollectorMap */
+        $timelineCollectorMap = [
+            'doctrine' => DatabaseCollector::class,
+            'twig' => TemplateCollector::class,
+            'cache' => CacheCollector::class,
+            'mailer' => MailerCollector::class,
+            'messenger' => QueueCollector::class,
+        ];
 
-        if ($collectors['twig']) {
+        foreach ($timelineCollectorMap as $key => $class) {
+            if (!$collectors[$key]) {
+                continue;
+            }
             $container
-                ->register(TemplateCollector::class, TemplateCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-        }
-
-        if ($collectors['security']) {
-            $container
-                ->register(SecurityCollector::class, SecurityCollector::class)
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-        }
-
-        if ($collectors['cache']) {
-            $container
-                ->register(CacheCollector::class, CacheCollector::class)
+                ->register($class, $class)
                 ->setArguments([new Reference(TimelineCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }
 
-        if ($collectors['mailer']) {
-            $container
-                ->register(MailerCollector::class, MailerCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-        }
+        /** @var array<string, class-string> $simpleCollectorMap */
+        $simpleCollectorMap = [
+            'security' => SecurityCollector::class,
+            'validator' => ValidatorCollector::class,
+        ];
 
-        if ($collectors['messenger']) {
-            $container
-                ->register(QueueCollector::class, QueueCollector::class)
-                ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-        }
-
-        if ($collectors['validator']) {
-            $container
-                ->register(ValidatorCollector::class, ValidatorCollector::class)
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
+        foreach ($simpleCollectorMap as $key => $class) {
+            if (!$collectors[$key]) {
+                continue;
+            }
+            $container->register($class, $class)->setPublic(false)->addTag('app_dev_panel.collector');
         }
 
         if ($collectors['router']) {
-            $container
-                ->register(RouterCollector::class, RouterCollector::class)
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-
-            $container
-                ->register(RouterDataExtractor::class, RouterDataExtractor::class)
-                ->setArguments([
-                    new Reference(RouterCollector::class),
-                    new Reference('router', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
-                ])
-                ->setPublic(false);
+            $this->registerRouterCollector($container);
         }
+    }
+
+    private function registerRouterCollector(ContainerBuilder $container): void
+    {
+        $container
+            ->register(RouterCollector::class, RouterCollector::class)
+            ->setPublic(false)
+            ->addTag('app_dev_panel.collector');
+
+        $container
+            ->register(RouterDataExtractor::class, RouterDataExtractor::class)
+            ->setArguments([
+                new Reference(RouterCollector::class),
+                new Reference('router', ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false);
     }
 
     private function registerEventSubscribers(ContainerBuilder $container): void
@@ -310,15 +293,22 @@ final class AppDevPanelExtension extends Extension
             ->setPublic(false);
 
         $container
-            ->register(HttpSubscriber::class, HttpSubscriber::class)
+            ->register(HttpSubscriberCollectors::class, HttpSubscriberCollectors::class)
             ->setArguments([
-                new Reference(Debugger::class),
                 new Reference(RequestCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(WebAppInfoCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(ExceptionCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(VarDumperCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(EnvironmentCollector::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
                 new Reference(RouterDataExtractor::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false);
+
+        $container
+            ->register(HttpSubscriber::class, HttpSubscriber::class)
+            ->setArguments([
+                new Reference(Debugger::class),
+                new Reference(HttpSubscriberCollectors::class),
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
@@ -350,7 +340,16 @@ final class AppDevPanelExtension extends Extension
         $container->setParameter('app_dev_panel.container_parameters', []);
         $container->setParameter('app_dev_panel.bundle_config', []);
 
-        // PSR-17 factories (use GuzzleHttp\Psr7\HttpFactory as default)
+        $this->registerPsrFactories($container);
+        $this->registerApiCoreServices($container);
+        $this->registerApiMiddleware($container);
+        $this->registerApiControllers($container);
+        $this->registerInspectorServices($container);
+        $this->registerApiApplication($container);
+    }
+
+    private function registerPsrFactories(ContainerBuilder $container): void
+    {
         if (!$container->has(ResponseFactoryInterface::class)) {
             $container->register(ResponseFactoryInterface::class, HttpFactory::class)->setPublic(false);
         }
@@ -366,14 +365,15 @@ final class AppDevPanelExtension extends Extension
                 ->setArguments([['timeout' => 10]])
                 ->setPublic(false);
         }
+    }
 
-        // Path resolver
+    private function registerApiCoreServices(ContainerBuilder $container): void
+    {
         $container
             ->register(PathResolverInterface::class, PathResolver::class)
             ->setArguments(['%kernel.project_dir%', '%kernel.project_dir%/var'])
             ->setPublic(false);
 
-        // JSON response factory
         $container
             ->register(JsonResponseFactoryInterface::class, JsonResponseFactory::class)
             ->setArguments([
@@ -382,18 +382,19 @@ final class AppDevPanelExtension extends Extension
             ])
             ->setPublic(false);
 
-        // Service registry
         $container
             ->register(ServiceRegistryInterface::class, FileServiceRegistry::class)
             ->setArguments(['%app_dev_panel.storage.path%/services'])
             ->setPublic(false);
 
-        // Collector repository
         $container
             ->register(CollectorRepositoryInterface::class, CollectorRepository::class)
             ->setArguments([new Reference(StorageInterface::class)])
             ->setPublic(false);
+    }
 
+    private function registerApiMiddleware(ContainerBuilder $container): void
+    {
         // Middleware — must be public so ApiApplication::buildPipeline() can fetch them via container->has/get
         $container
             ->register(IpFilterMiddleware::class, IpFilterMiddleware::class)
@@ -428,8 +429,10 @@ final class AppDevPanelExtension extends Extension
                 new Reference(UriFactoryInterface::class),
             ])
             ->setPublic(true);
+    }
 
-        // Controllers
+    private function registerApiControllers(ContainerBuilder $container): void
+    {
         $container
             ->register(DebugController::class, DebugController::class)
             ->setArguments([
@@ -504,6 +507,17 @@ final class AppDevPanelExtension extends Extension
             ])
             ->setPublic(true);
 
+        $container
+            ->register(RequestController::class, RequestController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(CollectorRepositoryInterface::class),
+            ])
+            ->setPublic(true);
+    }
+
+    private function registerInspectorServices(ContainerBuilder $container): void
+    {
         // Symfony config provider for inspector
         $container
             ->register(SymfonyConfigProvider::class, SymfonyConfigProvider::class)
@@ -570,16 +584,10 @@ final class AppDevPanelExtension extends Extension
                 new Reference(SymfonyUrlMatcherAdapter::class, ContainerBuilder::IGNORE_ON_INVALID_REFERENCE),
             ])
             ->setPublic(true);
+    }
 
-        $container
-            ->register(RequestController::class, RequestController::class)
-            ->setArguments([
-                new Reference(JsonResponseFactoryInterface::class),
-                new Reference(CollectorRepositoryInterface::class),
-            ])
-            ->setPublic(true);
-
-        // ApiApplication
+    private function registerApiApplication(ContainerBuilder $container): void
+    {
         $container
             ->register(ApiApplication::class, ApiApplication::class)
             ->setArguments([

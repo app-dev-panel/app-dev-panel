@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace AppDevPanel\Kernel;
 
 /**
- * @property object $decorated
+ * Delegates magic __get, __set, __call to $this->decorated.
+ *
+ * Classes using this trait must declare a $decorated property
+ * holding the proxied object instance.
  */
 trait ProxyDecoratedCalls
 {

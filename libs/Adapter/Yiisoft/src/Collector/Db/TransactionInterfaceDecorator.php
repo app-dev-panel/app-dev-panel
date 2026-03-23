@@ -14,7 +14,7 @@ final class TransactionInterfaceDecorator implements TransactionInterface
         private DatabaseCollector $collector,
     ) {}
 
-    public function begin(string $isolationLevel = null): void
+    public function begin(?string $isolationLevel = null): void
     {
         [$callStack] = debug_backtrace();
 
@@ -29,7 +29,7 @@ final class TransactionInterfaceDecorator implements TransactionInterface
 
         $this->decorated->commit();
 
-        $this->collector->collectTransactionCommit($callStack['file'] . ':' . $callStack['line']);
+        $this->collector->collectTransactionEnd('commit', $callStack['file'] . ':' . $callStack['line']);
     }
 
     public function getLevel(): int
@@ -48,7 +48,7 @@ final class TransactionInterfaceDecorator implements TransactionInterface
 
         $this->decorated->rollBack();
 
-        $this->collector->collectTransactionRollback($callStack['file'] . ':' . $callStack['line']);
+        $this->collector->collectTransactionEnd('rollback', $callStack['file'] . ':' . $callStack['line']);
     }
 
     public function setIsolationLevel(string $level): void

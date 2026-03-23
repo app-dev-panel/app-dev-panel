@@ -98,9 +98,11 @@ final class ScenarioTest extends FixtureTestCase
     {
         $missing = [];
         foreach (FixtureRegistry::all() as $fixture) {
-            if (!isset(self::$fixtureDebugIds[$fixture->name])) {
-                $missing[] = $fixture->name;
+            if (array_key_exists($fixture->name, self::$fixtureDebugIds)) {
+                continue;
             }
+
+            $missing[] = $fixture->name;
         }
 
         self::assertEmpty($missing, sprintf('Fixtures without debug IDs: %s', implode(', ', $missing)));
@@ -135,7 +137,12 @@ final class ScenarioTest extends FixtureTestCase
         $foundAdapter = false;
         foreach (self::$summaryEntries as $entry) {
             $web = $entry['web'] ?? null;
-            if (is_array($web) && isset($web['adapter']) && is_string($web['adapter']) && $web['adapter'] !== '') {
+            if (
+                is_array($web)
+                && array_key_exists('adapter', $web)
+                && is_string($web['adapter'])
+                && $web['adapter'] !== ''
+            ) {
                 $foundAdapter = true;
                 self::assertContains(
                     $web['adapter'],
@@ -154,7 +161,7 @@ final class ScenarioTest extends FixtureTestCase
         $foundPhp = false;
         foreach (self::$summaryEntries as $entry) {
             $environment = $entry['environment'] ?? null;
-            if (is_array($environment) && isset($environment['php']['version'])) {
+            if (is_array($environment) && ($environment['php']['version'] ?? null) !== null) {
                 $foundPhp = true;
                 self::assertSame(PHP_VERSION, $environment['php']['version']);
                 break;
@@ -195,8 +202,8 @@ final class ScenarioTest extends FixtureTestCase
                 self::assertIsString($key);
                 self::assertStringContainsString(
                     'Collector',
-                    (string) $key,
-                    sprintf('Collector key "%s" should contain "Collector" (FQCN format)', (string) $key),
+                    $key,
+                    sprintf('Collector key "%s" should contain "Collector" (FQCN format)', $key),
                 );
             }
 
@@ -220,10 +227,12 @@ final class ScenarioTest extends FixtureTestCase
         // Find LogCollector key
         $logKey = null;
         foreach (array_keys($data) as $key) {
-            if (str_contains((string) $key, 'LogCollector')) {
-                $logKey = (string) $key;
-                break;
+            if (!str_contains($key, 'LogCollector')) {
+                continue;
             }
+
+            $logKey = $key;
+            break;
         }
         self::assertNotNull($logKey, 'LogCollector not found in data');
 
@@ -329,9 +338,11 @@ final class ScenarioTest extends FixtureTestCase
 
         $failures = [];
         foreach ($result->assertions as $assertion) {
-            if (!$assertion->passed) {
-                $failures[] = $assertion->message;
+            if ($assertion->passed) {
+                continue;
             }
+
+            $failures[] = $assertion->message;
         }
 
         self::assertTrue(
@@ -369,7 +380,7 @@ final class ScenarioTest extends FixtureTestCase
         if ($cliResponse->getStatusCode() >= 200 && $cliResponse->getStatusCode() < 300) {
             /** @var array<string, mixed> $body */
             $body = json_decode((string) $cliResponse->getBody(), true, 512, JSON_THROW_ON_ERROR);
-            self::$cliResetResult = is_array($body) ? $body : [];
+            self::$cliResetResult = $body;
             usleep(200_000);
         }
     }
@@ -429,7 +440,7 @@ final class ScenarioTest extends FixtureTestCase
      */
     private static function getDebugData(string $debugId): ?array
     {
-        if (isset(self::$debugDataCache[$debugId])) {
+        if (array_key_exists($debugId, self::$debugDataCache)) {
             return self::$debugDataCache[$debugId];
         }
 

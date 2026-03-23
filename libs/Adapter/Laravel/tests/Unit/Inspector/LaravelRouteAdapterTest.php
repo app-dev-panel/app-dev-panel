@@ -37,7 +37,7 @@ final class LaravelRouteAdapterTest extends TestCase
 
     public function testDebugInfoWithClosureAction(): void
     {
-        $route = new Route(['GET'], '/closure', fn() => 'hello');
+        $route = new Route(['GET'], '/closure', static fn() => 'hello');
 
         $adapter = new LaravelRouteAdapter($route);
         $info = $adapter->__debugInfo();

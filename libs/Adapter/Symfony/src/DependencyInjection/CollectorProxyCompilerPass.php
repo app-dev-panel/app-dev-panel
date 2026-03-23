@@ -15,11 +15,13 @@ use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -50,14 +52,18 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
             $collectorRefs[] = new Reference($id);
         }
 
+        $ignoreConfigDef = new Definition(DebuggerIgnoreConfig::class, [
+            '%app_dev_panel.ignored_requests%',
+            '%app_dev_panel.ignored_commands%',
+        ]);
+
         $container
             ->register(Debugger::class, Debugger::class)
             ->setArguments([
                 new Reference(DebuggerIdGenerator::class),
                 new Reference(StorageInterface::class),
                 $collectorRefs,
-                '%app_dev_panel.ignored_requests%',
-                '%app_dev_panel.ignored_commands%',
+                $ignoreConfigDef,
             ])
             ->setPublic(true);
     }

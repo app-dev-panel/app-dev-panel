@@ -7,10 +7,12 @@ namespace AppDevPanel\Kernel\Tests\Unit;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\StartupContext;
 use AppDevPanel\Kernel\Storage\MemoryStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Nyholm\Psr7\ServerRequest;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class DebuggerTest extends TestCase
@@ -35,7 +37,7 @@ final class DebuggerTest extends TestCase
         $storage = $this->getMockBuilder(StorageInterface::class)->getMock();
         $storage->expects($this->once())->method('addCollector');
 
-        $debugger = new Debugger($idGenerator, $storage, [$collector], ['/test']);
+        $debugger = new Debugger($idGenerator, $storage, [$collector], new DebuggerIgnoreConfig(requests: ['/test']));
         $debugger->startup(StartupContext::forRequest(new ServerRequest('GET', '/debug')));
     }
 
@@ -64,7 +66,7 @@ final class DebuggerTest extends TestCase
         $storage = $this->getMockBuilder(StorageInterface::class)->getMock();
         $storage->expects($this->never())->method('flush');
 
-        $debugger = new Debugger($idGenerator, $storage, [$collector], []);
+        $debugger = new Debugger($idGenerator, $storage, [$collector]);
         $debugger->startup(StartupContext::forRequest(new ServerRequest('GET', '/test', ['X-Debug-Ignore' => 'true'])));
         $debugger->shutdown();
     }
@@ -87,7 +89,7 @@ final class DebuggerTest extends TestCase
         $storage->expects($this->never())->method('flush');
 
         putenv('YII_DEBUG_IGNORE=true');
-        $debugger = new Debugger($idGenerator, $storage, [$collector], []);
+        $debugger = new Debugger($idGenerator, $storage, [$collector]);
         $debugger->startup(StartupContext::forCommand('command'));
         putenv('YII_DEBUG_IGNORE=false');
         $debugger->shutdown();
@@ -116,14 +118,12 @@ final class DebuggerTest extends TestCase
         $storage = $this->getMockBuilder(StorageInterface::class)->getMock();
         $storage->expects($this->never())->method('flush');
 
-        $debugger = new Debugger($idGenerator, $storage, [$collector], ['/test']);
+        $debugger = new Debugger($idGenerator, $storage, [$collector], new DebuggerIgnoreConfig(requests: ['/test']));
         $debugger->startup(StartupContext::forRequest(new ServerRequest('GET', '/test')));
         $debugger->shutdown();
     }
 
-    /**
-     * @dataProvider dataShutdownWithSkipCommandCollect
-     */
+    #[DataProvider('dataShutdownWithSkipCommandCollect')]
     public function testShutdownWithSkipCommandCollect(array $ignoredCommands, ?string $ignoredCommand): void
     {
         $idGenerator = new DebuggerIdGenerator();
@@ -134,7 +134,12 @@ final class DebuggerTest extends TestCase
         $storage->expects($this->never())->method('addCollector');
         $storage->expects($this->never())->method('flush');
 
-        $debugger = new Debugger($idGenerator, $storage, [$collector], [], $ignoredCommands);
+        $debugger = new Debugger(
+            $idGenerator,
+            $storage,
+            [$collector],
+            new DebuggerIgnoreConfig(commands: $ignoredCommands),
+        );
         $debugger->startup(StartupContext::forCommand($ignoredCommand));
         $debugger->shutdown();
     }
@@ -159,9 +164,7 @@ final class DebuggerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider dataShutdownWithoutSkipCommandCollect
-     */
+    #[DataProvider('dataShutdownWithoutSkipCommandCollect')]
     public function testShutdownWithoutSkipCommandCollect(array $ignoredCommands, ?string $ignoredCommand): void
     {
         $idGenerator = new DebuggerIdGenerator();
@@ -172,7 +175,12 @@ final class DebuggerTest extends TestCase
         $storage->expects($this->once())->method('addCollector');
         $storage->expects($this->once())->method('flush');
 
-        $debugger = new Debugger($idGenerator, $storage, [$collector], [], $ignoredCommands);
+        $debugger = new Debugger(
+            $idGenerator,
+            $storage,
+            [$collector],
+            new DebuggerIgnoreConfig(commands: $ignoredCommands),
+        );
         $debugger->startup(StartupContext::forCommand($ignoredCommand));
         $debugger->shutdown();
     }

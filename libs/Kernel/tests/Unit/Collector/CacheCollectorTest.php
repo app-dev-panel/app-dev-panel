@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
 use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\CacheOperationRecord;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
@@ -18,14 +19,30 @@ final class CacheCollectorTest extends AbstractCollectorTestCase
 
     protected function collectTestData(CollectorInterface $collector): void
     {
-        assert($collector instanceof CacheCollector);
-        $collector->logCacheOperation('app.cache', 'get', 'user.1', hit: true, duration: 0.001, value: [
-            'name' => 'Alice',
-        ]);
-        $collector->logCacheOperation('app.cache', 'get', 'user.2', hit: false, duration: 0.002);
-        $collector->logCacheOperation('app.cache', 'set', 'user.2', hit: false, duration: 0.003, value: [
-            'name' => 'Bob',
-        ]);
+        assert($collector instanceof CacheCollector, 'Expected CacheCollector instance');
+        $collector->logCacheOperation(new CacheOperationRecord(
+            'app.cache',
+            'get',
+            'user.1',
+            hit: true,
+            duration: 0.001,
+            value: [
+                'name' => 'Alice',
+            ],
+        ));
+        $collector->logCacheOperation(
+            new CacheOperationRecord('app.cache', 'get', 'user.2', hit: false, duration: 0.002),
+        );
+        $collector->logCacheOperation(new CacheOperationRecord(
+            'app.cache',
+            'set',
+            'user.2',
+            hit: false,
+            duration: 0.003,
+            value: [
+                'name' => 'Bob',
+            ],
+        ));
     }
 
     protected function checkCollectedData(array $data): void

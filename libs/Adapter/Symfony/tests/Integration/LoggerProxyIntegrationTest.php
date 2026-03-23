@@ -10,7 +10,6 @@ use AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
-use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;

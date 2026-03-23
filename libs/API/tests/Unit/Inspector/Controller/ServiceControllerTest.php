@@ -16,7 +16,7 @@ final class ServiceControllerTest extends ControllerTestCase
     protected function setUp(): void
     {
         $this->storagePath = sys_get_temp_dir() . '/adp-svc-ctrl-test-' . uniqid();
-        mkdir($this->storagePath, 0755, true);
+        mkdir($this->storagePath, 0o755, true);
     }
 
     protected function tearDown(): void

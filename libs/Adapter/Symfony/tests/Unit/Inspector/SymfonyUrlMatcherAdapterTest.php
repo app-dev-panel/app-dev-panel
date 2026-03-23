@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\Tests\Unit\Inspector;
 
-use AppDevPanel\Adapter\Symfony\Inspector\SymfonyMatchResult;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
 use GuzzleHttp\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;

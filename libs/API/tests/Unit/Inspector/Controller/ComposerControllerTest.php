@@ -16,14 +16,20 @@ final class ComposerControllerTest extends ControllerTestCase
     protected function setUp(): void
     {
         $this->fixtureDir = sys_get_temp_dir() . '/adp-composer-test-' . uniqid();
-        mkdir($this->fixtureDir, 0755, true);
+        mkdir($this->fixtureDir, 0o755, true);
     }
 
     protected function tearDown(): void
     {
-        @unlink($this->fixtureDir . '/composer.json');
-        @unlink($this->fixtureDir . '/composer.lock');
-        @rmdir($this->fixtureDir);
+        if (file_exists($this->fixtureDir . '/composer.json')) {
+            unlink($this->fixtureDir . '/composer.json');
+        }
+        if (file_exists($this->fixtureDir . '/composer.lock')) {
+            unlink($this->fixtureDir . '/composer.lock');
+        }
+        if (is_dir($this->fixtureDir)) {
+            rmdir($this->fixtureDir);
+        }
     }
 
     private function createController(): ComposerController

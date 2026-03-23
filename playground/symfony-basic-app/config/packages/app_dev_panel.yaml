@@ -25,9 +25,9 @@ app_dev_panel:
         validator: true
         router: true
     ignored_requests:
-        - '/_wdt/*'
-        - '/_profiler/*'
-        - '/debug/api/*'
+        - '/_wdt/**'
+        - '/_profiler/**'
+        - '/debug/api/**'
     ignored_commands:
         - 'completion'
         - 'help'

@@ -28,7 +28,7 @@ final class ConsoleListenerTest extends TestCase
         $dispatcher = $this->createMock(Dispatcher::class);
         $dispatcher
             ->method('listen')
-            ->willReturnCallback(function (string $event, \Closure $callback) use (&$registeredListeners): void {
+            ->willReturnCallback(static function (string $event, \Closure $callback) use (&$registeredListeners): void {
                 $registeredListeners[$event] = $callback;
             });
 
@@ -46,7 +46,7 @@ final class ConsoleListenerTest extends TestCase
         $dispatcher = $this->createMock(Dispatcher::class);
         $dispatcher
             ->method('listen')
-            ->willReturnCallback(function (string $event, \Closure $callback) use (&$registeredListeners): void {
+            ->willReturnCallback(static function (string $event, \Closure $callback) use (&$registeredListeners): void {
                 $registeredListeners[$event] = $callback;
             });
 
@@ -70,7 +70,7 @@ final class ConsoleListenerTest extends TestCase
         $dispatcher = $this->createMock(Dispatcher::class);
         $dispatcher
             ->method('listen')
-            ->willReturnCallback(function (string $event, \Closure $callback) use (&$registeredListeners): void {
+            ->willReturnCallback(static function (string $event, \Closure $callback) use (&$registeredListeners): void {
                 $registeredListeners[$event] = $callback;
             });
 
@@ -110,11 +110,11 @@ final class ConsoleListenerTest extends TestCase
         $timeline = new TimelineCollector();
 
         return new ConsoleListener(
-            fn() => $debugger,
-            fn() => new CommandCollector($timeline),
-            fn() => new ConsoleAppInfoCollector($timeline, 'Laravel'),
-            fn() => new ExceptionCollector($timeline),
-            fn() => new EnvironmentCollector(),
+            static fn() => $debugger,
+            static fn() => new CommandCollector($timeline),
+            static fn() => new ConsoleAppInfoCollector($timeline, 'Laravel'),
+            static fn() => new ExceptionCollector($timeline),
+            static fn() => new EnvironmentCollector(),
         );
     }
 }

@@ -21,7 +21,7 @@ final class IngestionControllerTest extends TestCase
     protected function setUp(): void
     {
         $this->storagePath = sys_get_temp_dir() . '/adp-ingestion-test-' . uniqid();
-        mkdir($this->storagePath, 0755, true);
+        mkdir($this->storagePath, 0o755, true);
     }
 
     protected function tearDown(): void
@@ -42,7 +42,7 @@ final class IngestionControllerTest extends TestCase
         $factory = $this->createMock(JsonResponseFactoryInterface::class);
         $factory
             ->method('createJsonResponse')
-            ->willReturnCallback(function (mixed $data, int $status = 200): Response {
+            ->willReturnCallback(static function (mixed $data, int $status = 200): Response {
                 return new Response($status, ['Content-Type' => 'application/json'], json_encode($data));
             });
         return $factory;
@@ -211,7 +211,7 @@ final class IngestionControllerTest extends TestCase
             'debugId' => 'read-test-001',
             'collectors' => [
                 'custom_collector' => [
-                    ['key' => 'value', 'timestamp' => 1710000000],
+                    ['key' => 'value', 'timestamp' => 1_710_000_000],
                 ],
             ],
         ]));

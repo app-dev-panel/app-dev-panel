@@ -57,7 +57,7 @@ final class DatabaseCollector implements SummaryCollectorInterface
      */
     public function collectQueryEnd(string $id, int $rowsNumber): void
     {
-        if (!$this->isActive() || !isset($this->queries[$id])) {
+        if (!$this->isActive() || !array_key_exists($id, $this->queries)) {
             return;
         }
 
@@ -76,7 +76,7 @@ final class DatabaseCollector implements SummaryCollectorInterface
      */
     public function collectQueryError(string $id, Throwable $exception): void
     {
-        if (!$this->isActive() || !isset($this->queries[$id])) {
+        if (!$this->isActive() || !array_key_exists($id, $this->queries)) {
             return;
         }
 
@@ -93,15 +93,8 @@ final class DatabaseCollector implements SummaryCollectorInterface
     /**
      * Log a completed query in one call (for adapters that measure timing externally).
      */
-    public function logQuery(
-        string $sql,
-        string $rawSql,
-        array $params,
-        string $line,
-        float $startTime,
-        float $endTime,
-        int $rowsNumber = 0,
-    ): void {
+    public function logQuery(QueryRecord $record): void
+    {
         if (!$this->isActive()) {
             return;
         }
@@ -109,16 +102,16 @@ final class DatabaseCollector implements SummaryCollectorInterface
         $this->queries[] = [
             'position' => $this->position++,
             'transactionId' => $this->currentTransactionId,
-            'sql' => $sql,
-            'rawSql' => $rawSql,
-            'params' => $params,
-            'line' => $line,
+            'sql' => $record->sql,
+            'rawSql' => $record->rawSql,
+            'params' => $record->params,
+            'line' => $record->line,
             'status' => 'success',
             'actions' => [
-                ['action' => 'query.start', 'time' => $startTime],
-                ['action' => 'query.end', 'time' => $endTime],
+                ['action' => 'query.start', 'time' => $record->startTime],
+                ['action' => 'query.end', 'time' => $record->endTime],
             ],
-            'rowsNumber' => $rowsNumber,
+            'rowsNumber' => $record->rowsNumber,
         ];
 
         $this->timelineCollector->collect($this, count($this->queries));
@@ -143,30 +136,15 @@ final class DatabaseCollector implements SummaryCollectorInterface
         ];
     }
 
-    public function collectTransactionRollback(string $line): void
+    public function collectTransactionEnd(string $status, string $line): void
     {
-        if (!$this->isActive() || !isset($this->transactions[$this->currentTransactionId])) {
+        if (!$this->isActive() || !array_key_exists($this->currentTransactionId, $this->transactions)) {
             return;
         }
 
-        $this->transactions[$this->currentTransactionId]['status'] = 'rollback';
+        $this->transactions[$this->currentTransactionId]['status'] = $status;
         $this->transactions[$this->currentTransactionId]['actions'][] = [
-            'action' => 'transaction.rollback',
-            'line' => $line,
-            'time' => microtime(true),
-        ];
-        ++$this->currentTransactionId;
-    }
-
-    public function collectTransactionCommit(string $line): void
-    {
-        if (!$this->isActive() || !isset($this->transactions[$this->currentTransactionId])) {
-            return;
-        }
-
-        $this->transactions[$this->currentTransactionId]['status'] = 'commit';
-        $this->transactions[$this->currentTransactionId]['actions'][] = [
-            'action' => 'transaction.commit',
+            'action' => 'transaction.' . $status,
             'line' => $line,
             'time' => microtime(true),
         ];
@@ -194,11 +172,17 @@ final class DatabaseCollector implements SummaryCollectorInterface
         return [
             'db' => [
                 'queries' => [
-                    'error' => count(array_filter($this->queries, fn(array $query) => $query['status'] === 'error')),
+                    'error' => count(array_filter(
+                        $this->queries,
+                        static fn(array $query) => $query['status'] === 'error',
+                    )),
                     'total' => count($this->queries),
                 ],
                 'transactions' => [
-                    'error' => count(array_filter($this->transactions, fn(array $tx) => $tx['status'] === 'rollback')),
+                    'error' => count(array_filter(
+                        $this->transactions,
+                        static fn(array $tx) => $tx['status'] === 'rollback',
+                    )),
                     'total' => count($this->transactions),
                 ],
             ],

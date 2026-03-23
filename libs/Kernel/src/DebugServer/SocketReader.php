@@ -48,7 +48,7 @@ final class SocketReader
                 continue;
             }
 
-            $length = unpack('P', (string) $header);
+            $length = unpack('P', $header);
             $localBuffer = '';
             $bytesToRead = $length[1];
             $bytesRead = 0;
@@ -77,7 +77,7 @@ final class SocketReader
                 $localBuffer .= $buffer;
                 $bytesRead += $bufferLength;
             }
-            yield [Connection::TYPE_RESULT, base64_decode($localBuffer)];
+            yield [Connection::TYPE_RESULT, base64_decode($localBuffer, true)];
         }
     }
 
@@ -85,8 +85,11 @@ final class SocketReader
 
     private function closeSocket(): void
     {
+        $path = null;
         @socket_getsockname($this->socket, $path);
         @socket_close($this->socket);
-        @unlink($path);
+        if ($path !== null && file_exists($path)) {
+            unlink($path);
+        }
     }
 }

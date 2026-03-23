@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Laravel\EventListener;
 
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\QueryRecord;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Events\QueryExecuted;
 
@@ -47,21 +48,22 @@ final class DatabaseListener
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 15);
             $line = '';
             foreach ($trace as $frame) {
-                if (isset($frame['file']) && !str_contains($frame['file'], 'vendor/')) {
-                    $line = $frame['file'] . ':' . ($frame['line'] ?? 0);
-                    break;
+                if (!(array_key_exists('file', $frame) && !str_contains($frame['file'], 'vendor/'))) {
+                    continue;
                 }
+
+                $line = $frame['file'] . ':' . ($frame['line'] ?? 0);
+                break;
             }
 
-            $collector->logQuery(
+            $collector->logQuery(new QueryRecord(
                 sql: $sql,
                 rawSql: $rawSql,
                 params: $bindings,
                 line: $line,
                 startTime: $startTime,
                 endTime: $endTime,
-                rowsNumber: 0,
-            );
+            ));
         });
     }
 }

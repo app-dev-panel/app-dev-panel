@@ -23,7 +23,7 @@ final class VarDumperHandlerInterfaceProxy implements HandlerInterface
 
         $callStack = null;
         foreach ($stack as $value) {
-            if (!isset($value['file'])) {
+            if (!array_key_exists('file', $value)) {
                 continue;
             }
             if (str_ends_with($value['file'], '/var-dumper/src/functions.php')) {

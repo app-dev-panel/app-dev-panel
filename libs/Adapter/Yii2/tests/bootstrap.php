@@ -4,11 +4,22 @@ declare(strict_types=1);
 
 /**
  * Test bootstrap for Yii 2 adapter tests.
- * Loads the Yii 2 framework class which provides the global Yii class.
+ *
+ * Sets up the Yii 2 framework environment for PHPUnit:
+ * - Disables Yii 2's error handler (PHPUnit manages errors)
+ * - Defines debug/env constants
+ * - Loads autoloader and framework class
  */
 
-defined('YII_DEBUG') or define('YII_DEBUG', true);
-defined('YII_ENV') or define('YII_ENV', 'test');
+if (!defined('YII_ENABLE_ERROR_HANDLER')) {
+    define('YII_ENABLE_ERROR_HANDLER', false);
+}
+if (!defined('YII_DEBUG')) {
+    define('YII_DEBUG', true);
+}
+if (!defined('YII_ENV')) {
+    define('YII_ENV', 'test');
+}
 
 // Root autoloader (from monorepo root)
 $rootAutoload = dirname(__DIR__, 4) . '/vendor/autoload.php';

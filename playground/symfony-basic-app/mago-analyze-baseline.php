@@ -73,6 +73,90 @@ message = 'Class `App\Controller\HomeController` cannot extend unknown type `Abs
 count = 1
 
 [[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
+count = 4
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
+count = 4
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\CacheCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\CacheCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/DatabaseAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`).'
@@ -88,6 +172,12 @@ count = 1
 file = "src/Controller/TestFixtures/DatabaseAction.php"
 code = "non-existent-attribute-class"
 message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/DatabaseAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\QueryRecord` not found.'
 count = 1
 
 [[issues]]
@@ -461,6 +551,12 @@ file = "src/Controller/TestFixtures/MessengerAction.php"
 code = "non-existent-attribute-class"
 message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
 count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/MessengerAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\MessageRecord` not found.'
+count = 2
 
 [[issues]]
 file = "src/Controller/TestFixtures/MessengerAction.php"

@@ -38,6 +38,9 @@ final class TestFixturesController extends Controller
             'mailer' => \App\actions\testFixtures\MailerAction::class,
             'cache' => \App\actions\testFixtures\CacheAction::class,
             'cache-heavy' => \App\actions\testFixtures\CacheHeavyAction::class,
+            'router' => \App\actions\testFixtures\RouterAction::class,
+            'validator' => \App\actions\testFixtures\ValidatorAction::class,
+            'messenger' => \App\actions\testFixtures\MessengerAction::class,
             'reset' => \App\actions\testFixtures\ResetAction::class,
             'reset-cli' => \App\actions\testFixtures\ResetCliAction::class,
         ];

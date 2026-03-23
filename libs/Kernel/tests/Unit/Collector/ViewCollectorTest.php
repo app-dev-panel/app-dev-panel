@@ -18,7 +18,7 @@ final class ViewCollectorTest extends AbstractCollectorTestCase
 
     protected function collectTestData(CollectorInterface $collector): void
     {
-        assert($collector instanceof ViewCollector);
+        assert($collector instanceof ViewCollector, 'Expected ViewCollector instance');
         $collector->collectRender('/views/layout.php', '<html>...</html>', ['title' => 'Home']);
         $collector->collectRender('/views/index.php', '<div>content</div>', ['items' => [1, 2, 3]]);
     }

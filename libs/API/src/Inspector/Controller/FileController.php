@@ -22,40 +22,44 @@ final class FileController
 
     public function files(ServerRequestInterface $request): ResponseInterface
     {
-        $queryParams = $request->getQueryParams();
-        $class = $queryParams['class'] ?? '';
-        $method = $queryParams['method'] ?? '';
+        $params = $request->getQueryParams() + ['class' => '', 'method' => '', 'path' => ''];
 
-        if (!empty($class) && class_exists($class)) {
-            $reflection = new ReflectionClass($class);
-            $destination = $reflection->getFileName();
-            if ($method !== '' && $reflection->hasMethod($method)) {
-                $reflectionMethod = $reflection->getMethod($method);
-                $startLine = $reflectionMethod->getStartLine();
-                $endLine = $reflectionMethod->getEndLine();
-            }
-            if ($destination === false) {
-                return $this->responseFactory->createJsonResponse([
-                    'message' => sprintf('Cannot find source of class "%s".', $class),
-                ], 404);
-            }
-            return $this->readFile($destination, [
-                'startLine' => $startLine ?? null,
-                'endLine' => $endLine ?? null,
-            ]);
+        if ($params['class'] !== '' && class_exists($params['class'])) {
+            return $this->resolveClassFile($params['class'], $params['method']);
         }
 
-        $path = $queryParams['path'] ?? '';
+        return $this->resolvePathFile($params['path']);
+    }
 
+    private function resolveClassFile(string $class, string $method): ResponseInterface
+    {
+        $reflection = new ReflectionClass($class);
+        $destination = $reflection->getFileName();
+
+        if ($destination === false) {
+            return $this->responseFactory->createJsonResponse([
+                'message' => sprintf('Cannot find source of class "%s".', $class),
+            ], 404);
+        }
+
+        $extra = ['startLine' => null, 'endLine' => null];
+        if ($method !== '' && $reflection->hasMethod($method)) {
+            $reflectionMethod = $reflection->getMethod($method);
+            $extra = [
+                'startLine' => $reflectionMethod->getStartLine(),
+                'endLine' => $reflectionMethod->getEndLine(),
+            ];
+        }
+
+        return $this->readFile($destination, $extra);
+    }
+
+    private function resolvePathFile(string $path): ResponseInterface
+    {
         $rootPath = realpath($this->pathResolver->getRootPath());
-
-        $destination = $this->removeBasePath($rootPath, $path);
-
-        if (!str_starts_with($destination, '/')) {
-            $destination = '/' . $destination;
-        }
-
-        $destination = realpath($rootPath . $destination);
+        $relative = preg_replace('/^' . preg_quote($rootPath, '/') . '/', '', $path, 1);
+        $relative = '/' . ltrim($relative, '/');
+        $destination = realpath($rootPath . $relative);
 
         if ($destination === false) {
             return $this->responseFactory->createJsonResponse([
@@ -69,70 +73,45 @@ final class FileController
             ], 403);
         }
 
-        if (!is_dir($destination)) {
-            return $this->readFile($destination);
-        }
+        return is_dir($destination) ? $this->listDirectory($destination, $rootPath) : $this->readFile($destination);
+    }
 
+    private function listDirectory(string $destination, string $rootPath): ResponseInterface
+    {
         $directoryIterator = new RecursiveDirectoryIterator(
             $destination,
-            FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO,
+            FilesystemIterator::KEY_AS_PATHNAME
+            | FilesystemIterator::CURRENT_AS_FILEINFO
+            | FilesystemIterator::SKIP_DOTS,
         );
+
+        $parentPath = realpath($destination . '/..') . '/';
+        $parentEntry = str_starts_with($parentPath, $rootPath)
+            ? [array_merge(['path' => preg_replace(
+                '/^' . preg_quote($rootPath, '/') . '/',
+                '',
+                $parentPath,
+                1,
+            )], $this->serializeFileInfo(new SplFileInfo(dirname($destination))))]
+            : [];
 
         $files = [];
         foreach ($directoryIterator as $file) {
-            if ($file->getBasename() === '.') {
+            $filePath = $file->isDir() ? $file->getPathName() . '/' : $file->getPathName();
+
+            if (!str_starts_with($filePath, $rootPath)) {
                 continue;
             }
 
-            $path = $file->getPathName();
-            if ($file->isDir()) {
-                if ($file->getBasename() === '..') {
-                    $path = realpath($path);
-                }
-                $path .= '/';
-            }
-            if (!str_starts_with($path, $rootPath)) {
-                continue;
-            }
-            $path = $this->removeBasePath($rootPath, $path);
-            $files[] = array_merge([
-                'path' => $path,
-            ], $this->serializeFileInfo($file));
+            $files[] = array_merge(['path' => preg_replace(
+                '/^' . preg_quote($rootPath, '/') . '/',
+                '',
+                $filePath,
+                1,
+            )], $this->serializeFileInfo($file));
         }
 
-        return $this->responseFactory->createJsonResponse($files);
-    }
-
-    private function removeBasePath(string $rootPath, string $path): string|array|null
-    {
-        return preg_replace('/^' . preg_quote($rootPath, '/') . '/', '', $path, 1);
-    }
-
-    private function getUserOwner(int $uid): array
-    {
-        if ($uid === 0 || !function_exists('posix_getpwuid') || false === ($info = posix_getpwuid($uid))) {
-            return [
-                'id' => $uid,
-            ];
-        }
-        return [
-            'uid' => $info['uid'],
-            'gid' => $info['gid'],
-            'name' => $info['name'],
-        ];
-    }
-
-    private function getGroupOwner(int $gid): array
-    {
-        if ($gid === 0 || !function_exists('posix_getgrgid') || false === ($info = posix_getgrgid($gid))) {
-            return [
-                'id' => $gid,
-            ];
-        }
-        return [
-            'gid' => $info['gid'],
-            'name' => $info['name'],
-        ];
+        return $this->responseFactory->createJsonResponse(array_merge($parentEntry, $files));
     }
 
     private function serializeFileInfo(SplFileInfo $file): array
@@ -140,24 +119,37 @@ final class FileController
         return [
             'baseName' => $file->getBasename(),
             'extension' => $file->getExtension(),
-            'user' => $this->getUserOwner((int) $file->getOwner()),
-            'group' => $this->getGroupOwner((int) $file->getGroup()),
+            'user' => $this->resolveOwnerInfo((int) $file->getOwner(), 'posix_getpwuid', ['uid', 'gid', 'name']),
+            'group' => $this->resolveOwnerInfo((int) $file->getGroup(), 'posix_getgrgid', ['gid', 'name']),
             'size' => $file->getSize(),
             'type' => $file->getType(),
             'permissions' => substr(sprintf('%o', $file->getPerms()), -4),
+            'mtime' => $file->getMTime(),
         ];
+    }
+
+    private function resolveOwnerInfo(int $id, string $posixFunction, array $fields): array
+    {
+        if ($id === 0 || !function_exists($posixFunction)) {
+            return ['id' => $id];
+        }
+
+        $info = $posixFunction($id);
+
+        return $info !== false ? array_intersect_key($info, array_flip($fields)) : ['id' => $id];
     }
 
     private function readFile(string $destination, array $extra = []): ResponseInterface
     {
         $rootPath = $this->pathResolver->getRootPath();
+        $pattern = '/^' . preg_quote($rootPath, '/') . '/';
         $file = new SplFileInfo($destination);
         return $this->responseFactory->createJsonResponse(array_merge(
             $extra,
             [
-                'directory' => $this->removeBasePath($rootPath, dirname($destination)),
+                'directory' => preg_replace($pattern, '', dirname($destination), 1),
                 'content' => file_get_contents($destination),
-                'path' => $this->removeBasePath($rootPath, $destination),
+                'path' => preg_replace($pattern, '', $destination, 1),
                 'absolutePath' => $destination,
             ],
             $this->serializeFileInfo($file),

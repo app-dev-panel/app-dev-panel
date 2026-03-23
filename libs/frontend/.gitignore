@@ -12,6 +12,7 @@ dev-dist
 
 # testing
 /coverage
+__screenshots__
 
 # production
 /build

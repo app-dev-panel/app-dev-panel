@@ -18,7 +18,7 @@ final class TemplateCollectorTest extends AbstractCollectorTestCase
 
     protected function collectTestData(CollectorInterface $collector): void
     {
-        assert($collector instanceof TemplateCollector);
+        assert($collector instanceof TemplateCollector, 'Expected TemplateCollector instance');
         $collector->logRender('base.html.twig', 0.012);
         $collector->logRender('pages/home.html.twig', 0.008);
         $collector->logRender('components/navbar.html.twig', 0.003);

@@ -68,34 +68,41 @@ final class LaravelConfigProvider
      */
     private function getEventListeners(): array
     {
-        if (!$this->app->bound('events')) {
+        $allListeners = $this->getRawEventListeners();
+        if ($allListeners === null) {
             return [];
+        }
+
+        ksort($allListeners);
+
+        $result = [];
+        foreach ($allListeners as $eventName => $listeners) {
+            $result[] = [
+                'name' => $eventName,
+                'class' => class_exists($eventName) ? $eventName : null,
+                'listeners' => array_map($this->describeListener(...), $listeners),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array<string, list<mixed>>|null
+     */
+    private function getRawEventListeners(): ?array
+    {
+        if (!$this->app->bound('events')) {
+            return null;
         }
 
         $dispatcher = $this->app->make('events');
 
         if (!method_exists($dispatcher, 'getRawListeners')) {
-            return [];
+            return null;
         }
 
-        $result = [];
-        $allListeners = $dispatcher->getRawListeners();
-        ksort($allListeners);
-
-        foreach ($allListeners as $eventName => $listeners) {
-            $described = [];
-            foreach ($listeners as $listener) {
-                $described[] = $this->describeListener($listener);
-            }
-
-            $result[] = [
-                'name' => $eventName,
-                'class' => class_exists($eventName) ? $eventName : null,
-                'listeners' => $described,
-            ];
-        }
-
-        return $result;
+        return $dispatcher->getRawListeners();
     }
 
     /**
@@ -130,7 +137,8 @@ final class LaravelConfigProvider
             $ref = new \ReflectionFunction($listener);
             $class = $ref->getClosureScopeClass();
             if ($class !== null) {
-                return $class->getName() . '::' . ($ref->getName() !== '{closure}' ? $ref->getName() : '{closure}');
+                $name = $ref->getName() !== '{closure}' ? $ref->getName() : '{closure}';
+                return $class->getName() . '::' . $name;
             }
             return $ref->getName();
         }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\Tests\Unit\EventSubscriber;
 
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
+use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriberCollectors;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -67,7 +68,7 @@ final class HttpSubscriberTest extends TestCase
         $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
-        $subscriber = new HttpSubscriber($debugger, $requestCollector);
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(request: $requestCollector));
 
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = Request::create('/test');
@@ -87,7 +88,7 @@ final class HttpSubscriberTest extends TestCase
         $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
-        $subscriber = new HttpSubscriber($debugger, $requestCollector);
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(request: $requestCollector));
 
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = Request::create('/api/users', 'POST');
@@ -108,7 +109,7 @@ final class HttpSubscriberTest extends TestCase
         $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
-        $subscriber = new HttpSubscriber($debugger, $requestCollector);
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(request: $requestCollector));
 
         // First trigger request to start debugger
         $kernel = $this->createMock(HttpKernelInterface::class);
@@ -138,7 +139,7 @@ final class HttpSubscriberTest extends TestCase
         $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
-        $subscriber = new HttpSubscriber($debugger, $requestCollector);
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(request: $requestCollector));
 
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = Request::create('/test');
@@ -160,7 +161,7 @@ final class HttpSubscriberTest extends TestCase
         $debugger = new Debugger($idGenerator, $storage, [$exceptionCollector, $timeline]);
         $debugger->startup(StartupContext::generic());
 
-        $subscriber = new HttpSubscriber($debugger, exceptionCollector: $exceptionCollector);
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(exception: $exceptionCollector));
 
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = Request::create('/test');
@@ -201,7 +202,7 @@ final class HttpSubscriberTest extends TestCase
         $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
-        $subscriber = new HttpSubscriber($debugger, $requestCollector);
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(request: $requestCollector));
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = Request::create('/api/data', 'GET');
 
@@ -249,7 +250,7 @@ final class HttpSubscriberTest extends TestCase
         $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
-        $subscriber = new HttpSubscriber($debugger, $requestCollector);
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(request: $requestCollector));
         $kernel = $this->createMock(HttpKernelInterface::class);
 
         $request = Request::create('/debug/api/summary');
@@ -269,7 +270,7 @@ final class HttpSubscriberTest extends TestCase
         $requestCollector = new RequestCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$requestCollector, $timeline]);
 
-        $subscriber = new HttpSubscriber($debugger, $requestCollector);
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(request: $requestCollector));
         $kernel = $this->createMock(HttpKernelInterface::class);
 
         $request = Request::create('/inspect/api/table');
@@ -307,7 +308,7 @@ final class HttpSubscriberTest extends TestCase
         $debugger = new Debugger($idGenerator, $storage, [$exceptionCollector, $timeline]);
         $debugger->startup(StartupContext::generic());
 
-        $subscriber = new HttpSubscriber($debugger, exceptionCollector: $exceptionCollector);
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(exception: $exceptionCollector));
         $kernel = $this->createMock(HttpKernelInterface::class);
 
         $request = Request::create('/debug/api/data');
@@ -349,7 +350,7 @@ final class HttpSubscriberTest extends TestCase
         $webAppInfo = new WebAppInfoCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$webAppInfo, $timeline]);
 
-        $subscriber = new HttpSubscriber($debugger, webAppInfoCollector: $webAppInfo);
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(webAppInfo: $webAppInfo));
         $kernel = $this->createMock(HttpKernelInterface::class);
 
         $request = Request::create('/test');

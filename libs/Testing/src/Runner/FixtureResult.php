@@ -29,10 +29,12 @@ final readonly class FixtureResult
     {
         $allPassed = true;
         foreach ($assertions as $assertion) {
-            if (!$assertion->passed) {
-                $allPassed = false;
-                break;
+            if ($assertion->passed) {
+                continue;
             }
+
+            $allPassed = false;
+            break;
         }
 
         return new self($fixture, $allPassed, $assertions, debugId: $debugId);

@@ -8,6 +8,7 @@ use AppDevPanel\Kernel as D;
 use AppDevPanel\Kernel\Dumper;
 use AppDevPanel\Kernel\Tests\Support\Stub\ThreeProperties;
 use DateTimeZone;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
@@ -100,9 +101,7 @@ final class DumperTest extends TestCase
             JSON, Dumper::create($object)->asJsonObjectsMap(0, true));
     }
 
-    /**
-     * @dataProvider loopAsJsonObjectMapDataProvider
-     */
+    #[DataProvider('loopAsJsonObjectMapDataProvider')]
     public function testLoopAsJsonObjectsMap(mixed $var, int $depth, $expectedResult): void
     {
         $exportResult = Dumper::create($var)->asJsonObjectsMap($depth, true);
@@ -357,9 +356,7 @@ final class DumperTest extends TestCase
         return $head;
     }
 
-    /**
-     * @dataProvider asJsonObjectMapDataProvider
-     */
+    #[DataProvider('asJsonObjectMapDataProvider')]
     public function testAsJsonObjectsMap(mixed $var, $expectedResult): void
     {
         $exportResult = Dumper::create($var)->asJsonObjectsMap();
@@ -405,9 +402,7 @@ final class DumperTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider jsonDataProvider()
-     */
+    #[DataProvider('jsonDataProvider')]
     public function testAsJson($variable, string $result): void
     {
         $output = Dumper::create($variable)->asJson();
@@ -491,9 +486,7 @@ final class DumperTest extends TestCase
             S, $map);
     }
 
-    /**
-     * @dataProvider dataDeepNestedArray
-     */
+    #[DataProvider('dataDeepNestedArray')]
     public function testDeepNestedArray(array $variable, string $expectedResult): void
     {
         $actualResult = Dumper::create($variable)->asJson(2);
@@ -822,21 +815,21 @@ final class DumperTest extends TestCase
         yield 'stdout' => [
             STDOUT,
             <<<S
-                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":$stdoutSeekable,"uri":"php:\/\/stdout"}
+                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":{$stdoutSeekable},"uri":"php:\/\/stdout"}
                 S,
         ];
         $stderrSeekable = stream_get_meta_data(STDERR)['seekable'] ? 'true' : 'false';
         yield 'stderr' => [
             STDERR,
             <<<S
-                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":$stderrSeekable,"uri":"php:\/\/stderr"}
+                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":{$stderrSeekable},"uri":"php:\/\/stderr"}
                 S,
         ];
         $stdinSeekable = stream_get_meta_data(STDIN)['seekable'] ? 'true' : 'false';
         yield 'stdin' => [
             STDIN,
             <<<S
-                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"rb","unread_bytes":0,"seekable":$stdinSeekable,"uri":"php:\/\/stdin"}
+                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"rb","unread_bytes":0,"seekable":{$stdinSeekable},"uri":"php:\/\/stdin"}
                 S,
         ];
     }

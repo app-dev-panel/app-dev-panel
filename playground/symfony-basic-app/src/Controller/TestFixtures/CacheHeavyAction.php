@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\TestFixtures;
 
 use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\CacheOperationRecord;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -42,14 +43,14 @@ final readonly class CacheHeavyAction
                 ];
             }
 
-            $this->cacheCollector->logCacheOperation(
+            $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
                 pool: $pool,
                 operation: $operation,
                 key: $key,
                 hit: $hit,
-                duration: rand(100, 5000) / 1000000,
+                duration: rand(100, 5_000) / 1_000_000,
                 value: $value,
-            );
+            ));
         }
 
         return new JsonResponse(['fixture' => 'cache:heavy', 'status' => 'ok']);

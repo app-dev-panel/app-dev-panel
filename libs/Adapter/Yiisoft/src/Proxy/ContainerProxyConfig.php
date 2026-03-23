@@ -7,6 +7,7 @@ namespace AppDevPanel\Adapter\Yiisoft\Proxy;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
+use function array_key_exists;
 use function in_array;
 use function is_callable;
 
@@ -109,22 +110,32 @@ final class ContainerProxyConfig
 
     public function hasDecoratedService(string $service): bool
     {
-        return isset($this->decoratedServices[$service]) || in_array($service, $this->decoratedServices, true);
+        return (
+            array_key_exists($service, $this->decoratedServices) || in_array($service, $this->decoratedServices, true)
+        );
     }
 
-    public function hasDecoratedServiceArrayConfigWithStringKeys(string $service): bool
+    public function getServiceConfigType(string $service): ServiceConfigType
     {
-        return $this->hasDecoratedServiceArrayConfig($service) && !isset($this->decoratedServices[$service][0]);
-    }
+        if (!array_key_exists($service, $this->decoratedServices)) {
+            return ServiceConfigType::None;
+        }
 
-    public function hasDecoratedServiceArrayConfig(string $service): bool
-    {
-        return isset($this->decoratedServices[$service]) && is_array($this->decoratedServices[$service]);
-    }
+        $config = $this->decoratedServices[$service];
 
-    public function hasDecoratedServiceCallableConfig(string $service): bool
-    {
-        return isset($this->decoratedServices[$service]) && is_callable($this->decoratedServices[$service]);
+        if (is_callable($config)) {
+            return ServiceConfigType::Callable;
+        }
+
+        if (is_array($config) && !array_key_exists(0, $config)) {
+            return ServiceConfigType::MethodCallbacks;
+        }
+
+        if (is_array($config)) {
+            return ServiceConfigType::ArrayDefinition;
+        }
+
+        return ServiceConfigType::None;
     }
 
     public function hasDispatcher(): bool

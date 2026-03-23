@@ -17,7 +17,7 @@ final class ValidatorCollectorTest extends AbstractCollectorTestCase
 
     protected function collectTestData(CollectorInterface $collector): void
     {
-        assert($collector instanceof ValidatorCollector);
+        assert($collector instanceof ValidatorCollector, 'Expected ValidatorCollector instance');
         $collector->collect('valid@email.com', true, [], ['email', 'required']);
         $collector->collect('', false, [['message' => 'Value cannot be blank', 'valuePath' => []]], ['required']);
         $collector->collect(42, true, []);

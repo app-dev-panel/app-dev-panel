@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
+use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use Yiisoft\Definitions\ReferencesArray;
 
 require_once __DIR__ . '/helpers.php';
@@ -19,7 +20,9 @@ return [
                 $params['app-dev-panel/yiisoft']['collectors'],
                 $params['app-dev-panel/yiisoft']['collectors.web'] ?? [],
             )),
-            'ignoredRequests' => $params['app-dev-panel/yiisoft']['ignoredRequests'],
+            'ignoreConfig' => new DebuggerIgnoreConfig(
+                requests: $params['app-dev-panel/yiisoft']['ignoredRequests'],
+            ),
         ],
     ],
     WebAppInfoCollector::class => [

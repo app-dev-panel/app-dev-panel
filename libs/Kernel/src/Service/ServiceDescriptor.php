@@ -62,7 +62,7 @@ final readonly class ServiceDescriptor
         return new self(
             service: (string) $data['service'],
             language: (string) ($data['language'] ?? 'unknown'),
-            inspectorUrl: isset($data['inspectorUrl']) ? (string) $data['inspectorUrl'] : null,
+            inspectorUrl: array_key_exists('inspectorUrl', $data) ? (string) $data['inspectorUrl'] : null,
             capabilities: (array) ($data['capabilities'] ?? []),
             registeredAt: (float) ($data['registeredAt'] ?? microtime(true)),
             lastSeenAt: (float) ($data['lastSeenAt'] ?? microtime(true)),

@@ -24,9 +24,9 @@ interface StreamWrapperInterface
     public function stream_seek(int $offset, int $whence = SEEK_SET): bool;
 
     /**
-     * @return resource
+     * @return resource|false
      */
-    public function stream_cast(int $castAs);
+    public function stream_cast(int $castAs): mixed;
 
     public function stream_stat(): array|false;
 

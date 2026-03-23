@@ -23,7 +23,7 @@ final class ServiceController
         /** @var array<string, mixed> $body */
         $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
-        if (!isset($body['service']) || !is_string($body['service']) || $body['service'] === '') {
+        if (!array_key_exists('service', $body) || !is_string($body['service']) || $body['service'] === '') {
             throw new InvalidArgumentException('Field "service" is required and must be a non-empty string.');
         }
 
@@ -31,7 +31,7 @@ final class ServiceController
             throw new InvalidArgumentException('Service name "local" is reserved.');
         }
 
-        if (!isset($body['inspectorUrl']) || !is_string($body['inspectorUrl'])) {
+        if (!array_key_exists('inspectorUrl', $body) || !is_string($body['inspectorUrl'])) {
             throw new InvalidArgumentException('Field "inspectorUrl" is required and must be a string.');
         }
 
@@ -60,7 +60,7 @@ final class ServiceController
         /** @var array<string, mixed> $body */
         $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
-        if (!isset($body['service']) || !is_string($body['service'])) {
+        if (!array_key_exists('service', $body) || !is_string($body['service'])) {
             throw new InvalidArgumentException('Field "service" is required.');
         }
 

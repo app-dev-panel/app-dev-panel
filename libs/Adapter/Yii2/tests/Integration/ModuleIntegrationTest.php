@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
-use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
@@ -13,52 +12,29 @@ use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\QueryRecord;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\StartupContext;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use PHPUnit\Framework\Attributes\CoversNothing;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Integration test for the Yii 2 ADP Module.
  *
- * Tests the full bootstrap lifecycle without a real Yii application.
+ * Tests the full bootstrap lifecycle using a real Yii 2 Application.
  * Verifies that all services, collectors, and the debugger are properly wired.
  */
 #[CoversNothing]
-final class ModuleIntegrationTest extends TestCase
+final class ModuleIntegrationTest extends Yii2IntegrationTestCase
 {
-    private string $storagePath;
-    private ?Module $module = null;
-
-    protected function setUp(): void
-    {
-        $this->storagePath = sys_get_temp_dir() . '/adp_yii2_test_' . bin2hex(random_bytes(8));
-        mkdir($this->storagePath, 0o777, true);
-
-        // Ensure Yii container is clean
-        if (class_exists(\Yii::class)) {
-            \Yii::$container = new \yii\di\Container();
-        }
-    }
-
-    protected function tearDown(): void
-    {
-        $this->module = null;
-
-        if (class_exists(\Yii::class)) {
-            \Yii::$container = new \yii\di\Container();
-        }
-
-        $this->removeDirectory($this->storagePath);
-    }
-
     public function testModuleRegistersAllDefaultCollectors(): void
     {
-        $module = $this->createModule();
+        $this->createWebApplication();
+        $module = $this->getModule();
 
         $collectors = $module->getCollectorInstances();
         $this->assertNotEmpty($collectors);
@@ -78,13 +54,14 @@ final class ModuleIntegrationTest extends TestCase
         ];
 
         foreach ($expectedClasses as $expected) {
-            $this->assertContains($expected, $collectorClasses, "Missing collector: $expected");
+            $this->assertContains($expected, $collectorClasses, "Missing collector: {$expected}");
         }
     }
 
     public function testModuleBuildsDebugger(): void
     {
-        $module = $this->createModule();
+        $this->createWebApplication();
+        $module = $this->getModule();
 
         $debugger = $module->getDebugger();
         $this->assertInstanceOf(Debugger::class, $debugger);
@@ -92,7 +69,7 @@ final class ModuleIntegrationTest extends TestCase
 
     public function testModuleRegistersStorageInContainer(): void
     {
-        $this->createModule();
+        $this->createWebApplication();
 
         $this->assertTrue(\Yii::$container->has(StorageInterface::class));
         $this->assertTrue(\Yii::$container->has(DebuggerIdGenerator::class));
@@ -101,14 +78,15 @@ final class ModuleIntegrationTest extends TestCase
 
     public function testModuleRegistersApiApplicationInContainer(): void
     {
-        $this->createModule();
+        $this->createWebApplication();
 
         $this->assertTrue(\Yii::$container->has(ApiApplication::class));
     }
 
     public function testGetCollectorByClass(): void
     {
-        $module = $this->createModule();
+        $this->createWebApplication();
+        $module = $this->getModule();
 
         $dbCollector = $module->getCollector(DatabaseCollector::class);
         $this->assertInstanceOf(DatabaseCollector::class, $dbCollector);
@@ -121,9 +99,25 @@ final class ModuleIntegrationTest extends TestCase
 
     public function testSelectiveCollectorDisabling(): void
     {
-        $module = $this->createModule([
-            'db' => false,
+        $this->createWebApplication([
+            'collectors' => [
+                'request' => true,
+                'exception' => true,
+                'log' => true,
+                'event' => true,
+                'service' => true,
+                'http_client' => true,
+                'timeline' => true,
+                'var_dumper' => true,
+                'filesystem_stream' => true,
+                'http_stream' => true,
+                'command' => true,
+                'db' => false,
+                'mailer' => true,
+                'assets' => true,
+            ],
         ]);
+        $module = $this->getModule();
 
         $collectorClasses = array_map(static fn($c) => $c::class, $module->getCollectorInstances());
 
@@ -134,7 +128,8 @@ final class ModuleIntegrationTest extends TestCase
 
     public function testTimelineCollectorIsSingleton(): void
     {
-        $module = $this->createModule();
+        $this->createWebApplication();
+        $module = $this->getModule();
 
         $timeline1 = $module->getTimelineCollector();
         $timeline2 = $module->getTimelineCollector();
@@ -144,89 +139,39 @@ final class ModuleIntegrationTest extends TestCase
 
     public function testDebuggerLifecycleStartupShutdown(): void
     {
-        $module = $this->createModule();
+        $this->createWebApplication();
+        $module = $this->getModule();
         $debugger = $module->getDebugger();
 
-        // Simulate startup
         $psr17 = new \Nyholm\Psr7\Factory\Psr17Factory();
         $psrRequest = $psr17->createServerRequest('GET', 'http://localhost/test');
 
-        $debugger->startup(\AppDevPanel\Kernel\StartupContext::forRequest($psrRequest));
+        $debugger->startup(StartupContext::forRequest($psrRequest));
         $debugId = $debugger->getId();
         $this->assertNotEmpty($debugId);
 
-        // Collect some data
         /** @var DatabaseCollector $dbCollector */
         $dbCollector = $module->getCollector(DatabaseCollector::class);
         $startTime = microtime(true);
-        $dbCollector->logQuery('SELECT 1', 'SELECT 1', [], '', $startTime, microtime(true), 1);
+        $dbCollector->logQuery(new QueryRecord('SELECT 1', 'SELECT 1', [], '', $startTime, microtime(true), 1));
 
-        // Shutdown — flush to storage
         $debugger->shutdown();
 
-        // Verify data was stored
         $storage = \Yii::$container->get(StorageInterface::class);
         $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
         $this->assertNotEmpty($summaries, 'Storage should contain at least one summary entry after flush');
     }
 
-    private function createModule(array $collectorOverrides = []): Module
+    public function testModuleDisabledSkipsBootstrap(): void
     {
-        // We need a minimal Yii app for aliases
-        if (!\Yii::$app) {
-            // Set up minimal Yii environment
-            \Yii::setAlias('@app', $this->storagePath);
-            \Yii::setAlias('@runtime', $this->storagePath . '/runtime');
+        $this->createWebApplication(['enabled' => false]);
 
-            if (!is_dir($this->storagePath . '/runtime')) {
-                mkdir($this->storagePath . '/runtime', 0o777, true);
-            }
-        }
+        // Module exists but should not have initialized the debugger
+        $module = \Yii::$app->getModule('debug-panel');
+        $this->assertInstanceOf(Module::class, $module);
 
-        $module = new Module('debug-panel', null, [
-            'storagePath' => $this->storagePath . '/debug',
-            'historySize' => 10,
-        ]);
-
-        if ($collectorOverrides !== []) {
-            $module->collectors = array_merge($module->collectors, $collectorOverrides);
-        }
-
-        // Manually call the parts of bootstrap that don't require a real Application
-        $this->invokePrivateMethod($module, 'registerServices', [\Yii::$app]);
-        $this->invokePrivateMethod($module, 'registerCollectors');
-        $this->invokePrivateMethod($module, 'buildDebugger');
-
-        $this->module = $module;
-        return $module;
-    }
-
-    private function invokePrivateMethod(object $object, string $method, array $args = []): mixed
-    {
-        $reflection = new \ReflectionMethod($object, $method);
-        $reflection->setAccessible(true);
-        return $reflection->invoke($object, ...$args);
-    }
-
-    private function removeDirectory(string $path): void
-    {
-        if (!is_dir($path)) {
-            return;
-        }
-
-        $items = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST,
-        );
-
-        foreach ($items as $item) {
-            if ($item->isDir()) {
-                rmdir($item->getPathname());
-            } else {
-                unlink($item->getPathname());
-            }
-        }
-
-        rmdir($path);
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Debugger is not initialized');
+        $module->getDebugger();
     }
 }

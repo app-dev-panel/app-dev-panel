@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Web\TestFixtures;
 
 use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\CacheOperationRecord;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -44,14 +45,14 @@ final readonly class CacheHeavyAction implements RequestHandlerInterface
                 ];
             }
 
-            $this->cacheCollector->logCacheOperation(
+            $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
                 pool: $pool,
                 operation: $operation,
                 key: $key,
                 hit: $hit,
-                duration: rand(100, 5000) / 1000000,
+                duration: rand(100, 5_000) / 1_000_000,
                 value: $value,
-            );
+            ));
         }
 
         return $this->responseFactory->createResponse(['fixture' => 'cache:heavy', 'status' => 'ok']);

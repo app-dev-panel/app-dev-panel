@@ -7,6 +7,7 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Cli\Command\DebugServerCommand;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
+use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Yiisoft\Definitions\ReferencesArray;
 
@@ -23,7 +24,9 @@ return [
                 $params['app-dev-panel/yiisoft']['collectors'],
                 $params['app-dev-panel/yiisoft']['collectors.console'] ?? [],
             )),
-            'ignoredCommands' => $params['app-dev-panel/yiisoft']['ignoredCommands'],
+            'ignoreConfig' => new DebuggerIgnoreConfig(
+                commands: $params['app-dev-panel/yiisoft']['ignoredCommands'],
+            ),
         ],
     ],
     ConsoleAppInfoCollector::class => [

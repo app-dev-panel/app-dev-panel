@@ -4,11 +4,9 @@ import {renderApp} from './renderApp';
 import './setup';
 
 describe('API Interaction', () => {
-    it('homepage shows backend URL input with default value', async () => {
+    it('homepage renders with application title', async () => {
         renderApp('/');
-        await expect.element(page.getByText('MENU')).toBeVisible();
-        const input = document.querySelector('input[value*="127.0.0.1"]') as HTMLInputElement | null;
-        expect(input).not.toBeNull();
+        await expect.element(page.getByText('Application Development Panel')).toBeVisible();
     });
 
     it('debug page triggers API call and shows data', async () => {
@@ -22,19 +20,9 @@ describe('API Interaction', () => {
         expect(hasData).toBe(true);
     });
 
-    it('clicking REFRESH triggers a new API call', async () => {
-        renderApp('/debug');
-        await expect.element(page.getByText('REFRESH')).toBeVisible();
-        const refreshButton = page.getByText('REFRESH');
-        await refreshButton.click();
-        // After refresh, page should still be functional
-        await new Promise((r) => setTimeout(r, 500));
-        await expect.element(page.getByText('Debug')).toBeVisible();
-    });
-
     it('inspector config page loads data from API', async () => {
         renderApp('/inspector/config');
-        await expect.element(page.getByText('MENU')).toBeVisible();
+        await expect.element(page.getByText('Configuration')).toBeVisible();
         await new Promise((r) => setTimeout(r, 1000));
         const bodyText = document.body.textContent || '';
         // Should show configuration groups or data from mock
@@ -44,7 +32,7 @@ describe('API Interaction', () => {
 
     it('redux persist saves state to localStorage', async () => {
         renderApp('/');
-        await expect.element(page.getByText('MENU')).toBeVisible();
+        await expect.element(page.getByText('Application Development Panel')).toBeVisible();
         // Wait for Redux Persist to flush
         await new Promise((r) => setTimeout(r, 500));
         const persistedState = localStorage.getItem('persist:root') || localStorage.getItem('persist:application');
@@ -60,6 +48,6 @@ describe('API Interaction', () => {
     it('handles API errors gracefully on inspector pages', async () => {
         renderApp('/inspector/database');
         // Even if API returns unexpected data, app should not crash
-        await expect.element(page.getByText('MENU')).toBeVisible();
+        await expect.element(page.getByText('Database')).toBeVisible();
     });
 });

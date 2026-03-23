@@ -46,7 +46,7 @@ final class ServeCommand extends Command
         }
 
         if (!is_dir($storagePath)) {
-            mkdir($storagePath, 0777, true);
+            mkdir($storagePath, 0o777, true);
         }
 
         $phpBinary = new PhpExecutableFinder()->find();
@@ -85,7 +85,7 @@ final class ServeCommand extends Command
 
         $process->setTimeout(null);
 
-        $process->run(function (string $type, string $buffer) use ($io): void {
+        $process->run(static function (string $type, string $buffer) use ($io): void {
             $io->text(rtrim($buffer));
         });
 

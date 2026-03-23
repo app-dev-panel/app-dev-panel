@@ -157,7 +157,7 @@ return [
         'validator' => true,
         'router' => true,
     ],
-    'ignored_requests' => ['/debug/api/*', '/inspect/api/*'],
+    'ignored_requests' => ['/debug/api/**', '/inspect/api/**'],
     'ignored_commands' => ['completion', 'help', 'list', 'debug:*', 'cache:*'],
     'dumper' => ['excluded_classes' => []],
     'api' => [

@@ -23,29 +23,16 @@ final class CacheCollector implements SummaryCollectorInterface
         private readonly TimelineCollector $timelineCollector,
     ) {}
 
-    public function logCacheOperation(
-        string $pool,
-        string $operation,
-        string $key,
-        bool $hit = false,
-        float $duration = 0.0,
-        mixed $value = null,
-    ): void {
+    public function logCacheOperation(CacheOperationRecord $record): void
+    {
         if (!$this->isActive()) {
             return;
         }
 
-        $this->operations[] = [
-            'pool' => $pool,
-            'operation' => $operation,
-            'key' => $key,
-            'hit' => $hit,
-            'duration' => $duration,
-            'value' => $value,
-        ];
+        $this->operations[] = $record->toArray();
 
-        if ($operation === 'get') {
-            if ($hit) {
+        if ($record->operation === 'get') {
+            if ($record->hit) {
                 ++$this->hits;
             } else {
                 ++$this->misses;

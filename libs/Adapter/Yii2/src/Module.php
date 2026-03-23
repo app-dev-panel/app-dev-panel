@@ -6,7 +6,6 @@ namespace AppDevPanel\Adapter\Yii2;
 
 use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
-use AppDevPanel\Adapter\Yii2\Controller\AdpApiController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugQueryController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugResetController;
 use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
@@ -40,25 +39,31 @@ use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
+use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\FileStorage;
@@ -96,7 +101,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     /**
      * @var int Maximum number of debug entries to keep.
      */
-    public int $historySize = 50;
+    public int $historySize = FileStorage::DEFAULT_HISTORY_SIZE;
 
     /**
      * @var array<string, bool> Collector toggle map.
@@ -116,12 +121,17 @@ class Module extends \yii\base\Module implements BootstrapInterface
         'db' => true,
         'mailer' => true,
         'assets' => true,
+        'environment' => true,
+        'cache' => true,
+        'router' => true,
+        'queue' => true,
+        'validator' => true,
     ];
 
     /**
      * @var string[] URL patterns to ignore (wildcard).
      */
-    public array $ignoredRequests = ['/debug/api/*', '/inspect/api/*'];
+    public array $ignoredRequests = ['/debug/api/**', '/inspect/api/**'];
 
     /**
      * @var string[] Command name patterns to ignore (wildcard).
@@ -213,6 +223,15 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         $storagePath = \Yii::getAlias($this->storagePath);
 
+        $this->registerCoreServices($storagePath);
+        $this->registerMiddleware($storagePath);
+        $containerBridge = $this->registerContainerBridge();
+        $this->registerApiApplication($containerBridge);
+        $this->registerInspectorControllers($app, $containerBridge);
+    }
+
+    private function registerCoreServices(string $storagePath): void
+    {
         $idGenerator = new DebuggerIdGenerator();
         $storage = new FileStorage($storagePath, $idGenerator, $this->excludedClasses);
 
@@ -251,6 +270,23 @@ class Module extends \yii\base\Module implements BootstrapInterface
             static fn() => new CollectorRepository(\Yii::$container->get(StorageInterface::class)),
         );
 
+        // Schema provider — use has() instead of isset() to avoid Yii2 magic property exceptions
+        if (\Yii::$app !== null && \Yii::$app->has('db')) {
+            \Yii::$container->setSingleton(
+                SchemaProviderInterface::class,
+                static fn() => new Yii2DbSchemaProvider(\Yii::$app->db),
+            );
+        } else {
+            \Yii::$container->setSingleton(SchemaProviderInterface::class, NullSchemaProvider::class);
+        }
+
+        // Config provider
+        \Yii::$container->setSingleton(Yii2ConfigProvider::class, static fn() => new Yii2ConfigProvider(\Yii::$app));
+        \Yii::$container->set('config', Yii2ConfigProvider::class);
+    }
+
+    private function registerMiddleware(string $storagePath): void
+    {
         // Middleware: ResponseDataWrapper (wraps JSON responses, catches NotFoundException → 404)
         \Yii::$container->setSingleton(
             ResponseDataWrapper::class,
@@ -279,21 +315,10 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 \Yii::$container->get(UriFactoryInterface::class),
             ),
         );
+    }
 
-        // Schema provider
-        if (isset(\Yii::$app->db)) {
-            \Yii::$container->setSingleton(
-                SchemaProviderInterface::class,
-                static fn() => new Yii2DbSchemaProvider(\Yii::$app->db),
-            );
-        } else {
-            \Yii::$container->setSingleton(SchemaProviderInterface::class, NullSchemaProvider::class);
-        }
-
-        // Config provider
-        \Yii::$container->setSingleton(Yii2ConfigProvider::class, static fn() => new Yii2ConfigProvider(\Yii::$app));
-        \Yii::$container->set('config', Yii2ConfigProvider::class);
-
+    private function registerContainerBridge(): \Psr\Container\ContainerInterface
+    {
         // PSR-11 Container bridge — wraps Yii 2 container as PSR ContainerInterface.
         // Must be registered so that inspector controllers (resolved via DI) can receive it.
         $containerBridge = new class implements \Psr\Container\ContainerInterface {
@@ -309,7 +334,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
         };
         \Yii::$container->setSingleton(\Psr\Container\ContainerInterface::class, static fn() => $containerBridge);
 
-        // API Application
+        return $containerBridge;
+    }
+
+    private function registerApiApplication(\Psr\Container\ContainerInterface $containerBridge): void
+    {
         \Yii::$container->setSingleton(ApiApplication::class, static function () use ($containerBridge) {
             return new ApiApplication(
                 $containerBridge,
@@ -317,7 +346,12 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 \Yii::$container->get(StreamFactoryInterface::class),
             );
         });
+    }
 
+    private function registerInspectorControllers(
+        ?Application $app,
+        \Psr\Container\ContainerInterface $containerBridge,
+    ): void {
         // Inspector controllers — explicit registration to avoid auto-wiring issues.
         // Each adapter must register these (same pattern as Yiisoft/Symfony adapters).
         \Yii::$container->setSingleton(
@@ -337,7 +371,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             ),
         );
 
-        $appParams = $app?->params ?? [];
+        $appParams = $app->params ?? [];
         \Yii::$container->setSingleton(
             InspectController::class,
             static fn() => new InspectController(
@@ -404,15 +438,17 @@ class Module extends \yii\base\Module implements BootstrapInterface
             RequestController::class,
             static fn() => new RequestController(
                 \Yii::$container->get(JsonResponseFactoryInterface::class),
-                \Yii::$container->get(ClientInterface::class),
-                \Yii::$container->get(ResponseFactoryInterface::class),
-                \Yii::$container->get(StreamFactoryInterface::class),
+                \Yii::$container->get(CollectorRepositoryInterface::class),
             ),
         );
 
         \Yii::$container->setSingleton(
             TranslationController::class,
-            static fn() => new TranslationController(\Yii::$container->get(JsonResponseFactoryInterface::class)),
+            static fn() => new TranslationController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                new \Psr\Log\NullLogger(),
+                \Yii::$container->get(\Psr\Container\ContainerInterface::class),
+            ),
         );
 
         \Yii::$container->setSingleton(
@@ -426,64 +462,53 @@ class Module extends \yii\base\Module implements BootstrapInterface
         $timeline = $this->getTimelineCollector();
         $this->collectorInstances[] = $timeline;
 
-        $collectors = $this->collectors;
+        $collectorMap = $this->buildCollectorMap($timeline);
 
-        if ($collectors['request'] ?? true) {
-            $this->collectorInstances[] = new RequestCollector($timeline);
-            $this->collectorInstances[] = new WebAppInfoCollector($timeline, 'Yii2');
+        foreach ($collectorMap as $key => $factory) {
+            if (!($this->collectors[$key] ?? true)) {
+                continue;
+            }
+            foreach ($factory() as $collector) {
+                $this->collectorInstances[] = $collector;
+            }
         }
+    }
 
-        if ($collectors['exception'] ?? true) {
-            $this->collectorInstances[] = new ExceptionCollector($timeline);
-        }
-
-        if ($collectors['log'] ?? true) {
-            $this->collectorInstances[] = new LogCollector($timeline);
-        }
-
-        if ($collectors['event'] ?? true) {
-            $this->collectorInstances[] = new EventCollector($timeline);
-        }
-
-        if ($collectors['service'] ?? true) {
-            $this->collectorInstances[] = new ServiceCollector($timeline);
-        }
-
-        if ($collectors['http_client'] ?? true) {
-            $this->collectorInstances[] = new HttpClientCollector($timeline);
-        }
-
-        if ($collectors['var_dumper'] ?? true) {
-            $varDumperCollector = new VarDumperCollector($timeline);
-            $this->collectorInstances[] = $varDumperCollector;
-            \Yii::$container->setSingleton(VarDumperCollector::class, $varDumperCollector);
-        }
-
-        if ($collectors['filesystem_stream'] ?? true) {
-            $this->collectorInstances[] = new FilesystemStreamCollector();
-        }
-
-        if ($collectors['http_stream'] ?? true) {
-            $this->collectorInstances[] = new HttpStreamCollector();
-        }
-
-        if ($collectors['command'] ?? true) {
-            $this->collectorInstances[] = new CommandCollector($timeline);
-            $this->collectorInstances[] = new ConsoleAppInfoCollector($timeline, 'Yii2');
-        }
-
-        // Yii2-specific collectors
-        if ($collectors['db'] ?? true) {
-            $this->collectorInstances[] = new DatabaseCollector($timeline);
-        }
-
-        if ($collectors['mailer'] ?? true) {
-            $this->collectorInstances[] = new MailerCollector($timeline);
-        }
-
-        if ($collectors['assets'] ?? true) {
-            $this->collectorInstances[] = new AssetBundleCollector($timeline);
-        }
+    /**
+     * @return array<string, \Closure(): list<CollectorInterface>>
+     */
+    private function buildCollectorMap(TimelineCollector $timeline): array
+    {
+        return [
+            'request' => static fn(): array => [
+                new RequestCollector($timeline),
+                new WebAppInfoCollector($timeline, 'Yii2'),
+            ],
+            'exception' => static fn(): array => [new ExceptionCollector($timeline)],
+            'log' => static fn(): array => [new LogCollector($timeline)],
+            'event' => static fn(): array => [new EventCollector($timeline)],
+            'service' => static fn(): array => [new ServiceCollector($timeline)],
+            'http_client' => static fn(): array => [new HttpClientCollector($timeline)],
+            'var_dumper' => static function () use ($timeline): array {
+                $varDumperCollector = new VarDumperCollector($timeline);
+                \Yii::$container->setSingleton(VarDumperCollector::class, $varDumperCollector);
+                return [$varDumperCollector];
+            },
+            'filesystem_stream' => static fn(): array => [new FilesystemStreamCollector()],
+            'http_stream' => static fn(): array => [new HttpStreamCollector()],
+            'command' => static fn(): array => [
+                new CommandCollector($timeline),
+                new ConsoleAppInfoCollector($timeline, 'Yii2'),
+            ],
+            'db' => static fn(): array => [new DatabaseCollector($timeline)],
+            'mailer' => static fn(): array => [new MailerCollector($timeline)],
+            'assets' => static fn(): array => [new AssetBundleCollector($timeline)],
+            'environment' => static fn(): array => [new EnvironmentCollector()],
+            'cache' => static fn(): array => [new CacheCollector($timeline)],
+            'router' => static fn(): array => [new RouterCollector()],
+            'queue' => static fn(): array => [new QueueCollector($timeline)],
+            'validator' => static fn(): array => [new ValidatorCollector()],
+        ];
     }
 
     private function buildDebugger(): void
@@ -492,8 +517,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             \Yii::$container->get(DebuggerIdGenerator::class),
             \Yii::$container->get(StorageInterface::class),
             $this->collectorInstances,
-            $this->ignoredRequests,
-            $this->ignoredCommands,
+            new DebuggerIgnoreConfig($this->ignoredRequests, $this->ignoredCommands),
         );
 
         \Yii::$container->setSingleton(Debugger::class, $this->debugger);
@@ -501,43 +525,55 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
     private function registerEventListeners(Application $app): void
     {
+        $this->registerApplicationListeners($app);
+        $this->registerCollectorProfiling($app);
+    }
+
+    private function registerApplicationListeners(Application $app): void
+    {
         if ($app instanceof WebApplication) {
-            $listener = new WebListener(
-                $this->debugger,
-                $this->getCollector(RequestCollector::class),
-                $this->getCollector(WebAppInfoCollector::class),
-                $this->getCollector(ExceptionCollector::class),
-            );
-
-            Event::on(WebApplication::class, WebApplication::EVENT_BEFORE_REQUEST, [$listener, 'onBeforeRequest']);
-            Event::on(WebApplication::class, WebApplication::EVENT_AFTER_REQUEST, [$listener, 'onAfterRequest']);
-
-            // Hook into exception handling: Yii2's ErrorHandler calls exit(1) after rendering,
-            // so EVENT_AFTER_REQUEST never fires. We wrap handleException to capture the exception
-            // and flush debug data before exit.
-            $this->hookErrorHandler($app, $listener);
+            $this->registerWebListeners($app);
         }
 
         if ($app instanceof ConsoleApplication) {
-            $listener = new ConsoleListener(
-                $this->debugger,
-                $this->getCollector(CommandCollector::class),
-                $this->getCollector(ConsoleAppInfoCollector::class),
-                $this->getCollector(ExceptionCollector::class),
-            );
-
-            Event::on(
-                ConsoleApplication::class,
-                ConsoleApplication::EVENT_BEFORE_REQUEST,
-                [$listener, 'onBeforeRequest'],
-            );
-            Event::on(
-                ConsoleApplication::class,
-                ConsoleApplication::EVENT_AFTER_REQUEST,
-                [$listener, 'onAfterRequest'],
-            );
+            $this->registerConsoleListeners($app);
         }
+    }
 
+    private function registerWebListeners(WebApplication $app): void
+    {
+        $listener = new WebListener(
+            $this->debugger,
+            $this->getCollector(RequestCollector::class),
+            $this->getCollector(WebAppInfoCollector::class),
+            $this->getCollector(ExceptionCollector::class),
+            $this->getCollector(RouterCollector::class),
+        );
+
+        Event::on(WebApplication::class, WebApplication::EVENT_BEFORE_REQUEST, [$listener, 'onBeforeRequest']);
+        Event::on(WebApplication::class, WebApplication::EVENT_AFTER_REQUEST, [$listener, 'onAfterRequest']);
+
+        // Hook into exception handling: Yii2's ErrorHandler calls exit(1) after rendering,
+        // so EVENT_AFTER_REQUEST never fires. We wrap handleException to capture the exception
+        // and flush debug data before exit.
+        $this->hookErrorHandler($app, $listener);
+    }
+
+    private function registerConsoleListeners(ConsoleApplication $app): void
+    {
+        $listener = new ConsoleListener(
+            $this->debugger,
+            $this->getCollector(CommandCollector::class),
+            $this->getCollector(ConsoleAppInfoCollector::class),
+            $this->getCollector(ExceptionCollector::class),
+        );
+
+        Event::on(ConsoleApplication::class, ConsoleApplication::EVENT_BEFORE_REQUEST, [$listener, 'onBeforeRequest']);
+        Event::on(ConsoleApplication::class, ConsoleApplication::EVENT_AFTER_REQUEST, [$listener, 'onAfterRequest']);
+    }
+
+    private function registerCollectorProfiling(Application $app): void
+    {
         // Register event profiling if EventCollector is active
         if ($this->getCollector(EventCollector::class) !== null) {
             $this->registerEventProfiling();
@@ -683,11 +719,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
                     'cc' => self::normalizeAddresses($message->getCc()),
                     'bcc' => self::normalizeAddresses($message->getBcc()),
                     'replyTo' => self::normalizeAddresses($message->getReplyTo()),
-                    'subject' => $message->getSubject() ?? '',
+                    'subject' => $message->getSubject(),
                     'textBody' => method_exists($message, 'getTextBody') ? $message->getTextBody() : null,
                     'htmlBody' => method_exists($message, 'getHtmlBody') ? $message->getHtmlBody() : null,
-                    'raw' => method_exists($message, 'toString') ? (string) $message->toString() : '',
-                    'charset' => $message->getCharset() ?? 'utf-8',
+                    'raw' => method_exists($message, 'toString') ? $message->toString() : '',
+                    'charset' => $message->getCharset(),
                     'date' => date('r'),
                 ];
                 $mailerCollector->collectMessage($normalized);
@@ -738,7 +774,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         ): void {
             /** @var \yii\web\View $view */
             $view = $event->sender;
-            if (!property_exists($view, 'assetBundles') || !is_array($view->assetBundles)) {
+            if ($view->assetBundles === []) {
                 return;
             }
 

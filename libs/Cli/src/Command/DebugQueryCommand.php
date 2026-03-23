@@ -53,10 +53,14 @@ final class DebugQueryCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $action = (string) $input->getArgument('action');
 
+        if ($action !== 'list' && $action !== 'view') {
+            $io->error(sprintf('Unknown action "%s". Available: list, view', $action));
+            return Command::FAILURE;
+        }
+
         return match ($action) {
             'list' => $this->listEntries($input, $output, $io),
             'view' => $this->viewEntry($input, $output, $io),
-            default => $this->invalidAction($io, $action),
         };
     }
 
@@ -126,41 +130,44 @@ final class DebugQueryCommand extends Command
                 }
                 return Command::FAILURE;
             }
-            $data = is_array($data[$collectorClass]) ? $data[$collectorClass] : [];
+
+            $collectorData = is_array($data[$collectorClass]) ? $data[$collectorClass] : [];
+
+            if (!$json) {
+                $io->title(sprintf('Collector: %s (Entry: %s)', $collectorClass, $id));
+            }
+
+            $this->writeJson($output, $collectorData);
+            return Command::SUCCESS;
         }
 
         if ($json) {
-            $output->writeln(json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            $this->writeJson($output, $data);
             return Command::SUCCESS;
         }
 
-        if (is_string($collectorClass)) {
-            $io->title(sprintf('Collector: %s (Entry: %s)', $collectorClass, $id));
-            $output->writeln(json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-            return Command::SUCCESS;
-        }
+        $this->renderFullEntry($io, $output, $data, $id);
 
+        return Command::SUCCESS;
+    }
+
+    private function renderFullEntry(SymfonyStyle $io, OutputInterface $output, array $data, string $id): void
+    {
         $io->title(sprintf('Debug Entry: %s', $id));
 
         foreach ($data as $collector => $collectorData) {
             $io->section((string) $collector);
             if (is_array($collectorData) && $collectorData !== []) {
-                $output->writeln(json_encode(
-                    $collectorData,
-                    JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES,
-                ));
+                $this->writeJson($output, $collectorData);
             } else {
                 $io->text('(empty)');
             }
         }
-
-        return Command::SUCCESS;
     }
 
-    private function invalidAction(SymfonyStyle $io, string $action): int
+    private function writeJson(OutputInterface $output, array $data): void
     {
-        $io->error(sprintf('Unknown action "%s". Available: list, view', $action));
-        return Command::FAILURE;
+        $output->writeln(json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 
     private function extractRequestInfo(array $entry, string $key, string $default): string
@@ -181,24 +188,20 @@ final class DebugQueryCommand extends Command
     private function formatCollectors(array $entry): string
     {
         $parts = [];
-        $loggerTotal = (int) ($entry['logger']['total'] ?? 0);
-        if ($loggerTotal > 0) {
-            $parts[] = sprintf('logs:%d', $loggerTotal);
+
+        foreach (['logger' => 'logs', 'event' => 'events', 'timeline' => 'timeline'] as $key => $label) {
+            $total = (int) ($entry[$key]['total'] ?? 0);
+            if ($total > 0) {
+                $parts[] = sprintf('%s:%d', $label, $total);
+            }
         }
-        $eventTotal = (int) ($entry['event']['total'] ?? 0);
-        if ($eventTotal > 0) {
-            $parts[] = sprintf('events:%d', $eventTotal);
-        }
+
         if (
             array_key_exists('exception', $entry)
             && is_array($entry['exception'])
             && array_key_exists('class', $entry['exception'])
         ) {
             $parts[] = 'exception';
-        }
-        $timelineTotal = (int) ($entry['timeline']['total'] ?? 0);
-        if ($timelineTotal > 0) {
-            $parts[] = sprintf('timeline:%d', $timelineTotal);
         }
 
         return $parts !== [] ? implode(', ', $parts) : '—';

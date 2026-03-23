@@ -18,7 +18,7 @@ final class MiddlewareCollectorTest extends AbstractCollectorTestCase
 
     protected function collectTestData(CollectorInterface $collector): void
     {
-        assert($collector instanceof MiddlewareCollector);
+        assert($collector instanceof MiddlewareCollector, 'Expected MiddlewareCollector instance');
         $collector->collectBefore('App\\Middleware\\AuthMiddleware', 1000.0, 1024);
         $collector->collectBefore('App\\Middleware\\CsrfMiddleware', 1000.1, 2048);
         $collector->collectBefore('App\\Controller\\HomeController', 1000.2, 3072);

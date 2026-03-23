@@ -27,9 +27,11 @@ final class LaravelRouteAdapter
 
         $routeMiddlewares = $this->route->gatherMiddleware();
         foreach ($routeMiddlewares as $m) {
-            if (is_string($m)) {
-                $middlewares[] = $m;
+            if (!is_string($m)) {
+                continue;
             }
+
+            $middlewares[] = $m;
         }
 
         return [

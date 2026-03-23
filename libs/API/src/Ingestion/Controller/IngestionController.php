@@ -23,11 +23,8 @@ final class IngestionController
      */
     public function ingest(ServerRequestInterface $request): ResponseInterface
     {
-        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
-
-        if (!isset($body['collectors']) || !is_array($body['collectors'])) {
-            throw new InvalidArgumentException('Field "collectors" is required and must be an object.');
-        }
+        $body = $this->decodeRequestBody($request);
+        $this->requireArrayField($body, 'collectors', 'Field "collectors" is required and must be an object.');
 
         $id = $this->writeEntry($body);
 
@@ -42,11 +39,8 @@ final class IngestionController
      */
     public function ingestBatch(ServerRequestInterface $request): ResponseInterface
     {
-        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
-
-        if (!isset($body['entries']) || !is_array($body['entries'])) {
-            throw new InvalidArgumentException('Field "entries" is required and must be an array.');
-        }
+        $body = $this->decodeRequestBody($request);
+        $this->requireArrayField($body, 'entries', 'Field "entries" is required and must be an array.');
 
         if (count($body['entries']) > 100) {
             throw new InvalidArgumentException('Maximum 100 entries per batch.');
@@ -54,9 +48,7 @@ final class IngestionController
 
         $ids = [];
         foreach ($body['entries'] as $entry) {
-            if (!isset($entry['collectors']) || !is_array($entry['collectors'])) {
-                throw new InvalidArgumentException('Each entry must have a "collectors" field.');
-            }
+            $this->requireArrayField($entry, 'collectors', 'Each entry must have a "collectors" field.');
             $ids[] = $this->writeEntry($entry);
         }
 
@@ -71,34 +63,8 @@ final class IngestionController
      */
     public function ingestLog(ServerRequestInterface $request): ResponseInterface
     {
-        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
-
-        if (!isset($body['level'], $body['message'])) {
-            throw new InvalidArgumentException('Fields "level" and "message" are required.');
-        }
-
-        $logEntry = [
-            'time' => microtime(true),
-            'level' => $body['level'],
-            'message' => $body['message'],
-            'context' => $body['context'] ?? [],
-            'line' => $body['line'] ?? '',
-        ];
-
-        $entry = [
-            'collectors' => [
-                'logs' => [$logEntry],
-            ],
-            'context' => [
-                'type' => 'generic',
-                'service' => $body['service'] ?? 'external',
-            ],
-            'summary' => [
-                'logger' => ['total' => 1],
-            ],
-        ];
-
-        $id = $this->writeEntry($entry);
+        $body = $this->decodeRequestBody($request);
+        $id = $this->writeEntry($this->buildLogEntry($body));
 
         return $this->responseFactory->createJsonResponse([
             'id' => $id,
@@ -120,6 +86,46 @@ final class IngestionController
         $json = json_encode(yaml_parse($yaml), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
         return $this->responseFactory->createJsonResponse($json);
+    }
+
+    private function decodeRequestBody(ServerRequestInterface $request): array
+    {
+        return json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    private function requireArrayField(array $data, string $field, string $message): void
+    {
+        if (!array_key_exists($field, $data) || !is_array($data[$field])) {
+            throw new InvalidArgumentException($message);
+        }
+    }
+
+    private function buildLogEntry(array $body): array
+    {
+        if (!array_key_exists('level', $body) || !array_key_exists('message', $body)) {
+            throw new InvalidArgumentException('Fields "level" and "message" are required.');
+        }
+
+        $logEntry = [
+            'time' => microtime(true),
+            'level' => $body['level'],
+            'message' => $body['message'],
+            'context' => $body['context'] ?? [],
+            'line' => $body['line'] ?? '',
+        ];
+
+        return [
+            'collectors' => [
+                'logs' => [$logEntry],
+            ],
+            'context' => [
+                'type' => 'generic',
+                'service' => $body['service'] ?? 'external',
+            ],
+            'summary' => [
+                'logger' => ['total' => 1],
+            ],
+        ];
     }
 
     private function writeEntry(array $entry): string

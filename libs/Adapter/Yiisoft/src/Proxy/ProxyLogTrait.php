@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yiisoft\Proxy;
 
+use AppDevPanel\Kernel\Event\MethodCallRecord;
 use AppDevPanel\Kernel\Event\ProxyMethodCallEvent;
 
 trait ProxyLogTrait
@@ -21,12 +22,21 @@ trait ProxyLogTrait
         $error = $this->getCurrentError();
         $this->processLogData($arguments, $result, $error);
 
-        if ($this->config->getCollector() !== null) {
-            $this->logToCollector($service, $instance, $method, $arguments, $result, $error, $timeStart);
-        }
+        $record = new MethodCallRecord(
+            $service,
+            $instance::class,
+            $method,
+            $arguments,
+            $result,
+            $this->getCurrentResultStatus(),
+            $error,
+            $timeStart,
+            microtime(true),
+        );
 
+        $this->config->getCollector()?->collect($record);
         if ($this->config->getDispatcher() !== null) {
-            $this->logToEvent($service, $instance, $method, $arguments, $result, $error, $timeStart);
+            $this->config->getDispatcher()->dispatch(new ProxyMethodCallEvent($record));
         }
     }
 
@@ -46,54 +56,6 @@ trait ProxyLogTrait
         if (!($this->config->getLogLevel() & ContainerInterfaceProxy::LOG_ERROR)) {
             $error = null;
         }
-    }
-
-    private function logToCollector(
-        string $service,
-        object $instance,
-        string $method,
-        ?array $arguments,
-        mixed $result,
-        ?object $error,
-        float $timeStart,
-    ): void {
-        $this->config->getCollector()?->collect(
-            $service,
-            $instance::class,
-            $method,
-            $arguments,
-            $result,
-            $this->getCurrentResultStatus(),
-            $error,
-            $timeStart,
-            microtime(true),
-        );
-    }
-
-    private function logToEvent(
-        string $service,
-        object $instance,
-        string $method,
-        ?array $arguments,
-        mixed $result,
-        ?object $error,
-        float $timeStart,
-    ): void {
-        $this->config
-            ->getDispatcher()
-            ?->dispatch(
-                new ProxyMethodCallEvent(
-                    $service,
-                    $instance::class,
-                    $method,
-                    $arguments,
-                    $result,
-                    $this->getCurrentResultStatus(),
-                    $error,
-                    $timeStart,
-                    microtime(true),
-                ),
-            );
     }
 
     private function getCurrentResultStatus(): string

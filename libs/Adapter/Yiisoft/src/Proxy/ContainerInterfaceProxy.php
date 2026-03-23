@@ -11,6 +11,7 @@ use Psr\Container\ContainerInterface;
 use Yiisoft\Proxy\ProxyManager;
 use Yiisoft\Proxy\ProxyTrait;
 
+use function array_key_exists;
 use function is_callable;
 use function is_object;
 use function is_string;
@@ -51,7 +52,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
         $timeStart = microtime(true);
         $instance = null;
         try {
-            $instance = $this->getInstance($id);
+            $instance = $id === ContainerInterface::class ? $this : $this->decorated->get($id);
         } catch (ContainerExceptionInterface $e) {
             $this->repeatError($e);
         } finally {
@@ -59,28 +60,11 @@ final class ContainerInterfaceProxy implements ContainerInterface
         }
 
         if (is_object($instance) && ($proxy = $this->getServiceProxy($id, $instance))) {
-            $this->setServiceProxyCache($id, $proxy);
+            $this->serviceProxy[$id] = $proxy;
             return $proxy;
         }
 
         return $instance;
-    }
-
-    /**
-     * @throws ContainerExceptionInterface
-     */
-    private function getInstance(string $id): mixed
-    {
-        if ($id === ContainerInterface::class) {
-            return $this;
-        }
-
-        return $this->decorated->get($id);
-    }
-
-    private function isDecorated(string $service): bool
-    {
-        return $this->isActive() && $this->config->hasDecoratedService($service);
     }
 
     public function isActive(): bool
@@ -90,90 +74,31 @@ final class ContainerInterfaceProxy implements ContainerInterface
 
     private function getServiceProxy(string $service, object $instance): ?object
     {
-        if (isset($this->serviceProxy[$service])) {
+        if (array_key_exists($service, $this->serviceProxy)) {
             return $this->serviceProxy[$service];
         }
 
-        if (!$this->isDecorated($service)) {
+        if (!$this->isActive() || !$this->config->hasDecoratedService($service)) {
             return null;
         }
 
-        if ($this->config->hasDecoratedServiceCallableConfig($service)) {
-            return $this->getServiceProxyFromCallable($this->config->getDecoratedServiceConfig($service), $instance);
-        }
-
-        if ($this->config->hasDecoratedServiceArrayConfigWithStringKeys($service)) {
-            return $this->getCommonMethodProxy(
-                interface_exists($service) || class_exists($service) ? $service : $instance::class,
+        return match ($this->config->getServiceConfigType($service)) {
+            ServiceConfigType::Callable => $this->config->getDecoratedServiceConfig($service)($this, $instance),
+            ServiceConfigType::MethodCallbacks => $this->createMethodProxy($service, $instance),
+            ServiceConfigType::ArrayDefinition => $this->createArrayProxy(
                 $instance,
                 $this->config->getDecoratedServiceConfig($service),
-            );
-        }
-
-        if ($this->config->hasDecoratedServiceArrayConfig($service)) {
-            return $this->getServiceProxyFromArray($instance, $this->config->getDecoratedServiceConfig($service));
-        }
-
-        if (interface_exists($service) && ($this->config->hasCollector() || $this->config->hasDispatcher())) {
-            return $this->getCommonServiceProxy($service, $instance);
-        }
-
-        return null;
+            ),
+            ServiceConfigType::None => $this->createInterfaceProxy($service, $instance),
+        };
     }
 
-    private function getServiceProxyFromCallable(callable $callback, object $instance): ?object
+    private function createInterfaceProxy(string $service, object $instance): ?object
     {
-        return $callback($this, $instance);
-    }
-
-    /**
-     * @psalm-param class-string $service
-     */
-    private function getCommonMethodProxy(string $service, object $instance, array $callbacks): ?object
-    {
-        $methods = [];
-        foreach ($callbacks as $method => $callback) {
-            if (!(is_string($method) && is_callable($callback))) {
-                continue;
-            }
-
-            $methods[$method] = $callback;
-        }
-
-        return $this->proxyManager->createObjectProxy($service, ServiceMethodProxy::class, [
-            $service,
-            $instance,
-            $methods,
-            $this->config,
-        ]);
-    }
-
-    private function getServiceProxyFromArray(object $instance, array $params): ?object
-    {
-        try {
-            $proxyClass = array_shift($params);
-            foreach ($params as $index => $param) {
-                if (!is_string($param)) {
-                    continue;
-                }
-
-                try {
-                    $params[$index] = $this->get($param);
-                } catch (Exception) {
-                    //leave as is
-                }
-            }
-            return new $proxyClass($instance, ...$params);
-        } catch (Exception) {
+        if (!interface_exists($service) || !($this->config->hasCollector() || $this->config->hasDispatcher())) {
             return null;
         }
-    }
 
-    /**
-     * @psalm-param class-string $service
-     */
-    private function getCommonServiceProxy(string $service, object $instance): object
-    {
         return $this->proxyManager->createObjectProxy($service, ServiceProxy::class, [
             $service,
             $instance,
@@ -181,9 +106,46 @@ final class ContainerInterfaceProxy implements ContainerInterface
         ]);
     }
 
-    private function setServiceProxyCache(string $service, object $instance): void
+    private function createMethodProxy(string $service, object $instance): ?object
     {
-        $this->serviceProxy[$service] = $instance;
+        $callbacks = $this->config->getDecoratedServiceConfig($service);
+        $proxyTarget = interface_exists($service) || class_exists($service) ? $service : $instance::class;
+        $methods = [];
+        foreach ($callbacks as $method => $callback) {
+            if (!is_string($method) || !is_callable($callback)) {
+                continue;
+            }
+            $methods[$method] = $callback;
+        }
+
+        return $this->proxyManager->createObjectProxy($proxyTarget, ServiceMethodProxy::class, [
+            $proxyTarget,
+            $instance,
+            $methods,
+            $this->config,
+        ]);
+    }
+
+    private function createArrayProxy(object $instance, array $params): ?object
+    {
+        try {
+            $proxyClass = array_shift($params);
+            foreach ($params as $index => $param) {
+                if (!is_string($param)) {
+                    continue;
+                }
+                try {
+                    $params[$index] = $this->get($param);
+                } catch (Exception) {
+                    // Silently ignore: parameter may not be a resolvable service ID.
+                    // Keep the original string value as-is.
+                    continue;
+                }
+            }
+            return new $proxyClass($instance, ...$params);
+        } catch (Exception) {
+            return null;
+        }
     }
 
     /**

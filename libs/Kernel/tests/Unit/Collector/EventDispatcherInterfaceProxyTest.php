@@ -44,7 +44,10 @@ final class EventDispatcherInterfaceProxyTest extends TestCase
                 return $args;
             }
 
-            public function dispatch(object $event) {}
+            public function dispatch(object $event)
+            {
+                return $event;
+            }
         };
         $collector = new EventCollector(new TimelineCollector());
         $proxy = new EventDispatcherInterfaceProxy($dispatcher, $collector);

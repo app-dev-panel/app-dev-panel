@@ -4,36 +4,23 @@ import {renderApp} from './renderApp';
 import './setup';
 
 describe('Debug Page', () => {
-    it('renders debug page with entry selector', async () => {
+    it('renders debug page with sidebar', async () => {
         renderApp('/debug');
-        // Wait for debug entries to load — should show autocomplete or entries
         await expect.element(page.getByText('Debug')).toBeVisible();
     });
 
-    it('shows REFRESH button', async () => {
+    it('renders top bar', async () => {
         renderApp('/debug');
-        await expect.element(page.getByText('REFRESH')).toBeVisible();
+        await expect.element(page.getByText('App Dev Panel')).toBeVisible();
     });
 
-    it('shows LIST button', async () => {
+    it('shows inspector in sidebar', async () => {
         renderApp('/debug');
-        await expect.element(page.getByText('LIST')).toBeVisible();
-    });
-
-    it('shows REPEAT REQUEST button', async () => {
-        renderApp('/debug');
-        await expect.element(page.getByText('REPEAT REQUEST')).toBeVisible();
-    });
-
-    it('shows Latest auto toggle', async () => {
-        renderApp('/debug');
-        await expect.element(page.getByText('Latest auto')).toBeVisible();
+        await expect.element(page.getByText('Inspector')).toBeVisible();
     });
 
     it('loads debug entries from mock API', async () => {
         renderApp('/debug');
-        // The mock returns entries with IDs entry-001, entry-002
-        // The autocomplete should eventually show the first entry
         await expect.element(page.getByText('Debug')).toBeVisible();
         // Give RTK Query time to fetch
         await new Promise((r) => setTimeout(r, 1000));
@@ -57,8 +44,8 @@ describe('Debug Page', () => {
         await expect.element(page.getByText('Debug')).toBeVisible();
     });
 
-    it('renders debug object page', async () => {
+    it('renders debug object page without crashing', async () => {
         renderApp('/debug/object');
-        await expect.element(page.getByText('MENU')).toBeVisible();
+        await expect.element(page.getByText('App Dev Panel')).toBeVisible();
     });
 });

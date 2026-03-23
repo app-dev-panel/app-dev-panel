@@ -50,7 +50,10 @@ final class HttpClientInterfaceProxyTest extends TestCase
                 return $args;
             }
 
-            public function sendRequest(RequestInterface $request): ResponseInterface {}
+            public function sendRequest(RequestInterface $request): ResponseInterface
+            {
+                throw new \RuntimeException('Not implemented');
+            }
         };
         $collector = new HttpClientCollector(new TimelineCollector());
         $proxy = new HttpClientInterfaceProxy($httpClient, $collector);

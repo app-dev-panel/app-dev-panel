@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Laravel\EventListener;
 
 use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\CacheOperationRecord;
 use Illuminate\Cache\Events\CacheHit;
 use Illuminate\Cache\Events\CacheMissed;
 use Illuminate\Cache\Events\KeyForgotten;
@@ -32,45 +33,38 @@ final class CacheListener
     public function register(Dispatcher $events): void
     {
         $events->listen(CacheHit::class, function (CacheHit $event): void {
-            ($this->collectorFactory)()->logCacheOperation(
+            ($this->collectorFactory)()->logCacheOperation(new CacheOperationRecord(
                 pool: $event->storeName ?? 'default',
                 operation: 'get',
                 key: $event->key,
                 hit: true,
-                duration: 0,
                 value: $event->value,
-            );
+            ));
         });
 
         $events->listen(CacheMissed::class, function (CacheMissed $event): void {
-            ($this->collectorFactory)()->logCacheOperation(
+            ($this->collectorFactory)()->logCacheOperation(new CacheOperationRecord(
                 pool: $event->storeName ?? 'default',
                 operation: 'get',
                 key: $event->key,
-                hit: false,
-                duration: 0,
-            );
+            ));
         });
 
         $events->listen(KeyWritten::class, function (KeyWritten $event): void {
-            ($this->collectorFactory)()->logCacheOperation(
+            ($this->collectorFactory)()->logCacheOperation(new CacheOperationRecord(
                 pool: $event->storeName ?? 'default',
                 operation: 'set',
                 key: $event->key,
-                hit: false,
-                duration: 0,
                 value: $event->value,
-            );
+            ));
         });
 
         $events->listen(KeyForgotten::class, function (KeyForgotten $event): void {
-            ($this->collectorFactory)()->logCacheOperation(
+            ($this->collectorFactory)()->logCacheOperation(new CacheOperationRecord(
                 pool: $event->storeName ?? 'default',
                 operation: 'delete',
                 key: $event->key,
-                hit: false,
-                duration: 0,
-            );
+            ));
         });
     }
 }

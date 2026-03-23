@@ -35,8 +35,11 @@ final class LaravelSchemaProvider implements SchemaProviderInterface
         return $tables;
     }
 
-    public function getTable(string $tableName, int $limit = 1000, int $offset = 0): array
-    {
+    public function getTable(
+        string $tableName,
+        int $limit = SchemaProviderInterface::DEFAULT_LIMIT,
+        int $offset = 0,
+    ): array {
         $schema = $this->connection->getSchemaBuilder();
         $columns = $schema->getColumns($tableName);
         $totalCount = (int) $this->connection->table($tableName)->count();
@@ -48,7 +51,7 @@ final class LaravelSchemaProvider implements SchemaProviderInterface
             ->toArray();
 
         // Convert objects to arrays
-        $records = array_map(fn(mixed $record): array => (array) $record, $records);
+        $records = array_map(static fn(mixed $record): array => (array) $record, $records);
 
         return [
             'table' => $tableName,
@@ -75,14 +78,14 @@ final class LaravelSchemaProvider implements SchemaProviderInterface
 
         $results = $this->connection->select($prefix . $sql, $params);
 
-        return array_map(fn(mixed $row): array => (array) $row, $results);
+        return array_map(static fn(mixed $row): array => (array) $row, $results);
     }
 
     public function executeQuery(string $sql, array $params = []): array
     {
         $results = $this->connection->select($sql, $params);
 
-        return array_map(fn(mixed $row): array => (array) $row, $results);
+        return array_map(static fn(mixed $row): array => (array) $row, $results);
     }
 
     /**
@@ -98,7 +101,9 @@ final class LaravelSchemaProvider implements SchemaProviderInterface
                 }
             }
         } catch (\Throwable) {
-            // Gracefully handle missing index info
+            // Silently ignore: some database drivers do not support index introspection.
+            // Return empty array below as a safe fallback.
+            $indexes = [];
         }
 
         return [];

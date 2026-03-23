@@ -22,11 +22,11 @@ final class CacheListenerTest extends TestCase
         $dispatcher = $this->createMock(Dispatcher::class);
         $dispatcher
             ->method('listen')
-            ->willReturnCallback(function (string $event, \Closure $callback) use (&$registeredListeners): void {
+            ->willReturnCallback(static function (string $event, \Closure $callback) use (&$registeredListeners): void {
                 $registeredListeners[$event] = $callback;
             });
 
-        $listener = new CacheListener(fn() => $this->createCollector());
+        $listener = new CacheListener($this->createCollector(...));
         $listener->register($dispatcher);
 
         $this->assertCount(4, $registeredListeners);
@@ -110,11 +110,11 @@ final class CacheListenerTest extends TestCase
         $dispatcher = $this->createMock(Dispatcher::class);
         $dispatcher
             ->method('listen')
-            ->willReturnCallback(function (string $event, \Closure $callback) use (&$listeners): void {
+            ->willReturnCallback(static function (string $event, \Closure $callback) use (&$listeners): void {
                 $listeners[$event] = $callback;
             });
 
-        $listener = new CacheListener(fn() => $collector);
+        $listener = new CacheListener(static fn() => $collector);
         $listener->register($dispatcher);
 
         return [$collector, $listeners];

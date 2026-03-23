@@ -4,16 +4,24 @@ paths = [
     "config",
     "public",
     "routes",
-    "bootstrap",
+    "bootstrap/app.php",
+    "bootstrap/providers.php",
 ]
 excludes = [
     "vendor/**",
     "storage/**",
+    "bootstrap/cache/**",
 ]
 extensions = ["php"]
 
 [formatter]
 preset = "default"
+
+[analyzer]
+baseline = "mago-analyze-baseline.php"
+
+[linter]
+baseline = "mago-lint-baseline.php"
 
 [linter.rules]
 # Disable noisy rules (aligned with core config)

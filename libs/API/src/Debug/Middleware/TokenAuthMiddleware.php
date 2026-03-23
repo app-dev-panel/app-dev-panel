@@ -16,6 +16,7 @@ final class TokenAuthMiddleware implements MiddlewareInterface
     public function __construct(
         private readonly ResponseFactoryInterface $responseFactory,
         private readonly StreamFactoryInterface $streamFactory,
+        #[\SensitiveParameter]
         private readonly string $token,
     ) {}
 
@@ -27,7 +28,7 @@ final class TokenAuthMiddleware implements MiddlewareInterface
 
         $header = $request->getHeaderLine('X-Debug-Token');
 
-        if ($header === $this->token) {
+        if (hash_equals($this->token, $header)) {
             return $handler->handle($request);
         }
 

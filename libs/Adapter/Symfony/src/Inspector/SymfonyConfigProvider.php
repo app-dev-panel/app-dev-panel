@@ -58,25 +58,12 @@ final class SymfonyConfigProvider
      */
     private function getEventListeners(): array
     {
-        if (!$this->container->has('event_dispatcher')) {
+        $dispatcher = $this->resolveEventDispatcher();
+        if ($dispatcher === null) {
             return [];
         }
 
-        $dispatcher = $this->container->get('event_dispatcher');
-        if (!$dispatcher instanceof EventDispatcherInterface) {
-            return [];
-        }
-
-        // Build reverse alias map: string alias → FQCN
-        $reverseAliases = [];
-        $aliases = $this->containerParameters['event_dispatcher.event_aliases'] ?? [];
-        if (is_array($aliases)) {
-            foreach ($aliases as $class => $alias) {
-                if (is_string($class) && is_string($alias)) {
-                    $reverseAliases[$alias] = $class;
-                }
-            }
-        }
+        $reverseAliases = $this->buildReverseAliasMap();
 
         $result = [];
         /** @var array<string, list<callable>> $allListeners */
@@ -84,26 +71,50 @@ final class SymfonyConfigProvider
         ksort($allListeners);
 
         foreach ($allListeners as $eventName => $eventListeners) {
-            $class = null;
-            if (class_exists($eventName)) {
-                $class = $eventName;
-            } elseif (isset($reverseAliases[$eventName])) {
-                $class = $reverseAliases[$eventName];
-            }
-
-            $listeners = [];
-            foreach ($eventListeners as $listener) {
-                $listeners[] = $this->describeListener($listener);
-            }
-
             $result[] = [
                 'name' => $eventName,
-                'class' => $class,
-                'listeners' => $listeners,
+                'class' => class_exists($eventName) ? $eventName : $reverseAliases[$eventName] ?? null,
+                'listeners' => array_map($this->describeListener(...), $eventListeners),
             ];
         }
 
         return $result;
+    }
+
+    private function resolveEventDispatcher(): ?EventDispatcherInterface
+    {
+        if (!$this->container->has('event_dispatcher')) {
+            return null;
+        }
+
+        $dispatcher = $this->container->get('event_dispatcher');
+        if (!$dispatcher instanceof EventDispatcherInterface) {
+            return null;
+        }
+
+        return $dispatcher;
+    }
+
+    /**
+     * Build reverse alias map: string alias -> FQCN.
+     *
+     * @return array<string, string>
+     */
+    private function buildReverseAliasMap(): array
+    {
+        $aliases = $this->containerParameters['event_dispatcher.event_aliases'] ?? [];
+        if (!is_array($aliases)) {
+            return [];
+        }
+
+        $reverseAliases = [];
+        foreach ($aliases as $class => $alias) {
+            if (!is_string($class) || !is_string($alias)) {
+                continue;
+            }
+            $reverseAliases[$alias] = $class;
+        }
+        return $reverseAliases;
     }
 
     private function describeListener(mixed $listener): string
