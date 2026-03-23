@@ -100,57 +100,73 @@ Analyzed source code of 10+ debug panel solutions:
 
 | # | Feature | Source | Description | ADP Status |
 |---|---------|--------|-------------|------------|
-| 44 | **Livewire/Inertia component tracking** | Debugbar | Track SPA framework component renders, props, updates | Missing (framework-specific) |
-| 45 | **Feature flag tracking** | Debugbar (Pennant) | Monitor feature flag evaluations: flag name, result, scope | Missing |
-| 46 | **Xdebug profiling integration** | Clockwork, Xdebug | Import Xdebug cachegrind/trace files for call graph analysis | Missing |
-| 47 | **SQL query formatting** | Django, Clockwork | Pretty-print and syntax-highlight SQL with proper indentation | Missing — raw SQL likely |
-| 48 | **Template rendering call graph** | Symfony | Visualize template include/extend hierarchy as a tree with timing | Missing — ViewPanel shows flat list |
-| 49 | **Static file tracking** | Django | Monitor which static files (CSS, JS, images) are served and from which paths | Missing |
-| 50 | **Signal/event subscribers list** | Django | Show all registered signal handlers, not just dispatched events | Missing — similar to not-called listeners |
-| 51 | **Localization/translation collector** | PHP DebugBar | Track translation key lookups, missing translations, locale changes | Partial — Inspector has translations but no debug-time tracking |
-| 52 | **Object instance counter** | PHP DebugBar | Count instances of specific classes created during request | Missing |
-| 53 | **Sentry integration** | Buggregator | Accept Sentry SDK events and display them in the panel | Missing |
-| 54 | **Ray protocol support** | Buggregator | Accept Spatie Ray payloads for display | Missing |
-| 55 | **Monolog integration** | Buggregator | Accept Monolog log entries via TCP/UDP | Missing |
+| 44 | **Client-side Web Vitals** | Clockwork | Collect browser performance metrics (LCP, FID, CLS, TTFB) via JS package and display alongside server data | Missing |
+| 45 | **Server-Timing W3C headers** | Clockwork, Debugbar | Send timeline events as W3C Server-Timing headers visible in browser DevTools Network tab | Missing |
+| 46 | **Query re-execution** | Debugbar | Re-run captured SELECT queries and show results directly in the panel | Missing |
+| 47 | **On-demand/sampling mode** | Clockwork, Pulse | Only collect when browser extension is open, or sample 1-in-N requests, or errors-only/slow-only modes | Missing |
+| 48 | **Test profiling with assertions** | Clockwork | Collect PHPUnit test execution data with per-assertion pass/fail tracking | Missing |
+| 49 | **Remote path mapping** | Debugbar, Clockwork, Ray | Map server file paths to local paths for Docker/Vagrant — makes IDE links work in containerized envs | Missing |
+| 50 | **Gzip compressed storage** | Clockwork | Compress stored debug data files with gzip to reduce disk usage | Missing |
+| 51 | **Pause/resume recording** | Telescope | CLI commands to pause/resume data collection without restarting the app | Missing |
+| 52 | **Tag-based monitoring** | Telescope | Monitor specific tags (user ID, job class) to only record entries matching those tags | Missing |
+| 53 | **Pre-aggregated time buckets** | Pulse | Aggregate data (count/min/max/sum/avg) at write time for efficient dashboard queries | Missing |
+| 54 | **Request sampling per recorder** | Pulse | Different sample rates per collector (e.g., 100% for exceptions, 1% for cache) with deterministic sampling | Missing |
+| 55 | **URL/key grouping via regex** | Pulse | Group similar URLs (`/users/*/orders`) and cache keys into categories for aggregation | Missing |
+| 56 | **Livewire/Inertia component tracking** | Debugbar | Track SPA framework component renders, props, updates, data diffs | Missing (framework-specific) |
+| 57 | **Feature flag tracking** | Debugbar (Pennant) | Monitor feature flag evaluations: flag name, result, scope | Missing |
+| 58 | **Xdebug profiling integration** | Clockwork, Xdebug | Import Xdebug cachegrind/trace files for call graph analysis | Missing |
+| 59 | **SQL query formatting** | Django, Clockwork | Pretty-print and syntax-highlight SQL with proper indentation | Missing — raw SQL likely |
+| 60 | **Template rendering call graph** | Symfony | Visualize template include/extend hierarchy as a tree with timing | Missing — ViewPanel shows flat list |
+| 61 | **Static file tracking** | Django | Monitor which static files (CSS, JS, images) are served and from which paths | Missing |
+| 62 | **Signal/event subscribers list** | Django | Show all registered signal handlers, not just dispatched events | Missing — similar to not-called listeners |
+| 63 | **Localization/translation collector** | PHP DebugBar | Track translation key lookups, missing translations, locale changes | Partial — Inspector has translations but no debug-time tracking |
+| 64 | **Object instance counter** | PHP DebugBar | Count instances of specific classes created during request | Missing |
+| 65 | **Sentry integration** | Buggregator | Accept Sentry SDK events and display them in the panel | Missing |
+| 66 | **Ray protocol support** | Buggregator | Accept Spatie Ray payloads for display | Missing |
+| 67 | **Monolog integration** | Buggregator | Accept Monolog log entries via TCP/UDP | Missing |
+| 68 | **Execution pause/breakpoints** | Spatie Ray | Halt PHP execution from panel and resume from UI (like a remote breakpoint) | Missing |
+| 69 | **PHPStan/Rector rules for cleanup** | Spatie Ray | Ship static analysis rules to detect and remove debug calls before production | Missing |
+| 70 | **Deprecation warning handler** | Debugbar | Custom error handler for PHP deprecation notices with dedicated tracking | Missing |
+| 71 | **Duplicate view grouping** | Debugbar | Auto-group repeated identical view renders with count (N+1 views detection) | Missing |
 
 ### Tier 5: High Complexity, High Relevance
 
 | # | Feature | Source | Description | ADP Status |
 |---|---------|--------|-------------|------------|
-| 56 | **Performance budgets/thresholds** | Pulse, Blackfire | Define acceptable limits (query count, response time, memory) and alert when exceeded | Missing |
-| 57 | **Slow request aggregation** | Pulse | Aggregate slow requests over time periods, identify patterns and trends | Missing |
-| 58 | **Server health monitoring** | Pulse | CPU, memory, disk, network metrics from application servers over time | Missing |
-| 59 | **Distributed tracing** | OpenTelemetry, Sentry, New Relic | Trace requests across multiple services with span hierarchy and timing | Missing |
-| 60 | **Session replay** | Sentry | Record user interactions (clicks, navigation, inputs) and replay them | Missing |
-| 61 | **Error grouping & deduplication** | Sentry | Automatically group similar exceptions, track frequency and first/last seen | Missing |
-| 62 | **User feedback widget** | Sentry | Allow end-users to submit feedback/bug reports with context | Missing |
-| 63 | **HTTP dump server** | Buggregator | Accept arbitrary HTTP requests for inspection (webhook testing) | Missing |
-| 64 | **Continuous profiling** | Blackfire | Always-on lightweight profiling in production with sampling | Missing |
+| 72 | **Performance budgets/thresholds** | Pulse, Blackfire | Define acceptable limits (query count, response time, memory) and alert when exceeded | Missing |
+| 73 | **Slow request aggregation** | Pulse | Aggregate slow requests over time periods, identify patterns and trends | Missing |
+| 74 | **Server health monitoring** | Pulse | CPU, memory, disk, network metrics from application servers over time | Missing |
+| 75 | **Distributed tracing** | OpenTelemetry, Sentry, New Relic | Trace requests across multiple services with span hierarchy and timing | Missing |
+| 76 | **Session replay** | Sentry | Record user interactions (clicks, navigation, inputs) and replay them | Missing |
+| 77 | **Error grouping & deduplication** | Sentry | Automatically group similar exceptions, track frequency and first/last seen | Missing |
+| 78 | **User feedback widget** | Sentry | Allow end-users to submit feedback/bug reports with context | Missing |
+| 79 | **HTTP dump server** | Buggregator | Accept arbitrary HTTP requests for inspection (webhook testing) | Missing |
+| 80 | **Continuous profiling** | Blackfire | Always-on lightweight profiling in production with sampling | Missing |
 
 ### Tier 6: High Complexity, Medium Relevance
 
 | # | Feature | Source | Description | ADP Status |
 |---|---------|--------|-------------|------------|
-| 65 | **AI-powered analysis** | Blackfire, New Relic | Automatic performance recommendations based on collected data | Missing |
-| 66 | **Call graph visualization** | Blackfire, Xdebug | Interactive function call graph with time/memory per node | Missing |
-| 67 | **Comparison mode** | Blackfire | Compare two profiles side-by-side to find performance regressions | Missing |
-| 68 | **Alerting system** | New Relic, Pulse, Sentry | Configure alerts for error rates, response times, custom metrics | Missing |
-| 69 | **Database schema diff** | N/A (novel) | Compare database schema between requests or versions | Missing |
-| 70 | **Custom dashboard builder** | Grafana, New Relic | User-configurable widgets/panels on a dashboard | Missing |
-| 71 | **Plugin/extension system** | PHP DebugBar, Clockwork | Allow third-party packages to register custom panels and collectors | Partial — CollectorInterface exists but no frontend plugin API |
-| 72 | **Export/share profiles** | Blackfire, Symfony | Export debug data as shareable files or links | Missing |
-| 73 | **OpenTelemetry ingestion** | Buggregator, Sentry | Accept OTLP protocol data (traces, metrics, logs) | Missing |
-| 74 | **SSO/Authentication** | Buggregator | Auth0, Kinde integration for multi-user access control | Missing |
+| 81 | **AI-powered analysis** | Blackfire, New Relic | Automatic performance recommendations based on collected data | Missing |
+| 82 | **Call graph visualization** | Blackfire, Xdebug | Interactive function call graph with time/memory per node | Missing |
+| 83 | **Comparison mode** | Blackfire | Compare two profiles side-by-side to find performance regressions | Missing |
+| 84 | **Alerting system** | New Relic, Pulse, Sentry | Configure alerts for error rates, response times, custom metrics | Missing |
+| 85 | **Database schema diff** | N/A (novel) | Compare database schema between requests or versions | Missing |
+| 86 | **Custom dashboard builder** | Grafana, New Relic | User-configurable widgets/panels on a dashboard | Missing |
+| 87 | **Plugin/extension system** | PHP DebugBar, Clockwork | Allow third-party packages to register custom panels and collectors | Partial — CollectorInterface exists but no frontend plugin API |
+| 88 | **Export/share profiles** | Blackfire, Symfony | Export debug data as shareable files or links | Missing |
+| 89 | **OpenTelemetry ingestion** | Buggregator, Sentry | Accept OTLP protocol data (traces, metrics, logs) | Missing |
+| 90 | **SSO/Authentication** | Buggregator | Auth0, Kinde integration for multi-user access control | Missing |
 
 ### Tier 7: Very High Complexity, Lower Relevance (Aspirational)
 
 | # | Feature | Source | Description | ADP Status |
 |---|---------|--------|-------------|------------|
-| 75 | **Production-safe mode** | New Relic, Blackfire, Sentry | Lightweight agent for production with sampling and minimal overhead | Missing |
-| 76 | **Mobile/responsive debug UI** | N/A (novel) | Debug panel optimized for mobile device debugging | Missing |
-| 77 | **Collaborative debugging** | N/A (novel) | Share live debug sessions with team members | Missing |
-| 78 | **Automated test generation** | N/A (novel) | Generate test cases from captured request/response pairs | Missing |
-| 79 | **API version changelog** | N/A (novel) | Track API response changes between deployments | Missing |
+| 91 | **Production-safe mode** | New Relic, Blackfire, Sentry | Lightweight agent for production with sampling and minimal overhead | Missing |
+| 92 | **Mobile/responsive debug UI** | N/A (novel) | Debug panel optimized for mobile device debugging | Missing |
+| 93 | **Collaborative debugging** | N/A (novel) | Share live debug sessions with team members | Missing |
+| 94 | **Automated test generation** | N/A (novel) | Generate test cases from captured request/response pairs | Missing |
+| 95 | **API version changelog** | N/A (novel) | Track API response changes between deployments | Missing |
 
 ### Tier 8: Features from APM/Observability Tools (Advanced, High-Impact)
 
@@ -158,25 +174,25 @@ These features come from professional APM tools (Blackfire, Datadog, Sentry, Gra
 
 | # | Feature | Source | Description | ADP Status |
 |---|---------|--------|-------------|------------|
-| 80 | **Performance assertions/budgets in config** | Blackfire | Define thresholds in config file (e.g., `queries < 5`, `memory < 10MB`), auto-evaluate per request and show pass/fail | Missing |
-| 81 | **Profile comparison/diff** | Blackfire | Compare two request profiles side-by-side, highlight regressions in red, improvements in blue | Missing |
-| 82 | **Breadcrumb trail** | Sentry | Automatic ordered log of ALL events (queries, logs, HTTP calls, clicks) leading to an error — unified cross-collector timeline | Missing — Timeline exists but not error-centric |
-| 83 | **N+1 query auto-detection** | Sentry, Datadog | Detect repeated similar queries automatically (not just duplicates but pattern matching) | Missing |
-| 84 | **Request phase breakdown** | Chrome DevTools | Split request into named phases (bootstrap, routing, controller, view rendering, response) with timing per phase | Missing — Timeline has events but no phase segmentation |
-| 85 | **Timeline markers (user-defined)** | Blackfire | Allow developers to place custom annotations on the timeline via API call (`$debugger->mark('payment started')`) | Missing |
-| 86 | **Trigger-based collector activation** | Xdebug | Enable expensive collectors per-request via header/cookie/query param — avoids always-on overhead | Missing |
-| 87 | **Unified event timeline** | Vue DevTools | Single timeline combining events, state changes, queries, logs from ALL collectors chronologically | Partial — TimelineCollector exists but collectors may not all feed into it |
-| 88 | **Service topology graph** | Grafana/Tempo | Auto-generate service dependency graph from collected HTTP/queue data showing error rates and latency per edge | Missing |
-| 89 | **Multiple trace visualization modes** | Datadog | Same data viewable as waterfall, flame graph, span list, or service map — user switches between views | Missing — single view per panel |
-| 90 | **Trace-as-flame-graph** | Grafana/Tempo | Render entire request lifecycle as an interactive flame graph (not profiling data but collector events) | Missing |
-| 91 | **Issue grouping/deduplication** | Sentry | Group similar errors/exceptions by fingerprint, track frequency and first/last seen | Missing |
-| 92 | **Logs-in-context** | New Relic | Auto-correlate log entries with specific request traces, view logs inline within request detail | Partial — LogCollector per-request but no cross-request correlation |
-| 93 | **Code hotspots** | Datadog | Link trace spans to specific source code lines consuming the most CPU/memory | Missing |
-| 94 | **Live search over recent data** | Datadog | Real-time search across recent requests by any attribute (15-min rolling window, no pre-indexing) | Missing |
-| 95 | **Producer/Consumer span model** | OpenTelemetry | Model async jobs showing creation-to-processing lifecycle as linked spans | Missing — QueueCollector tracks but no span linking |
-| 96 | **Baggage/context propagation** | OpenTelemetry | Pass debug context (tenant ID, feature flags) across service boundaries via headers | Missing |
-| 97 | **Release-to-error mapping** | Sentry | Map every error to the specific release/commit/deploy, detect regressions per deploy | Missing |
-| 98 | **AI-assisted analysis** | Sentry (Seer), Grafana, Chrome | LLM-powered interpretation of profiles/errors with automated fix suggestions | Missing |
+| 96 | **Performance assertions/budgets in config** | Blackfire | Define thresholds in config file (e.g., `queries < 5`, `memory < 10MB`), auto-evaluate per request and show pass/fail | Missing |
+| 97 | **Profile comparison/diff** | Blackfire | Compare two request profiles side-by-side, highlight regressions in red, improvements in blue | Missing |
+| 98 | **Breadcrumb trail** | Sentry | Automatic ordered log of ALL events (queries, logs, HTTP calls, clicks) leading to an error — unified cross-collector timeline | Missing — Timeline exists but not error-centric |
+| 99 | **N+1 query auto-detection** | Sentry, Datadog | Detect repeated similar queries automatically (not just duplicates but pattern matching) | Missing |
+| 100 | **Request phase breakdown** | Chrome DevTools | Split request into named phases (bootstrap, routing, controller, view rendering, response) with timing per phase | Missing — Timeline has events but no phase segmentation |
+| 101 | **Timeline markers (user-defined)** | Blackfire | Allow developers to place custom annotations on the timeline via API call (`$debugger->mark('payment started')`) | Missing |
+| 102 | **Trigger-based collector activation** | Xdebug | Enable expensive collectors per-request via header/cookie/query param — avoids always-on overhead | Missing |
+| 103 | **Unified event timeline** | Vue DevTools | Single timeline combining events, state changes, queries, logs from ALL collectors chronologically | Partial — TimelineCollector exists but collectors may not all feed into it |
+| 104 | **Service topology graph** | Grafana/Tempo | Auto-generate service dependency graph from collected HTTP/queue data showing error rates and latency per edge | Missing |
+| 105 | **Multiple trace visualization modes** | Datadog | Same data viewable as waterfall, flame graph, span list, or service map — user switches between views | Missing — single view per panel |
+| 106 | **Trace-as-flame-graph** | Grafana/Tempo | Render entire request lifecycle as an interactive flame graph (not profiling data but collector events) | Missing |
+| 107 | **Issue grouping/deduplication** | Sentry | Group similar errors/exceptions by fingerprint, track frequency and first/last seen | Missing |
+| 108 | **Logs-in-context** | New Relic | Auto-correlate log entries with specific request traces, view logs inline within request detail | Partial — LogCollector per-request but no cross-request correlation |
+| 109 | **Code hotspots** | Datadog | Link trace spans to specific source code lines consuming the most CPU/memory | Missing |
+| 110 | **Live search over recent data** | Datadog | Real-time search across recent requests by any attribute (15-min rolling window, no pre-indexing) | Missing |
+| 111 | **Producer/Consumer span model** | OpenTelemetry | Model async jobs showing creation-to-processing lifecycle as linked spans | Missing — QueueCollector tracks but no span linking |
+| 112 | **Baggage/context propagation** | OpenTelemetry | Pass debug context (tenant ID, feature flags) across service boundaries via headers | Missing |
+| 113 | **Release-to-error mapping** | Sentry | Map every error to the specific release/commit/deploy, detect regressions per deploy | Missing |
+| 114 | **AI-assisted analysis** | Sentry (Seer), Grafana, Chrome | LLM-powered interpretation of profiles/errors with automated fix suggestions | Missing |
 
 ---
 
