@@ -1,6 +1,24 @@
 variant = "loose"
 
 [[issues]]
+file = "config/reference.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Config\Loader\ParamConfigurator`.'
+count = 1599
+
+[[issues]]
+file = "config/reference.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\DependencyInjection\Loader\Configurator\ReferenceConfigurator`.'
+count = 42
+
+[[issues]]
+file = "config/reference.php"
+code = "non-existent-method"
+message = 'Method `config` does not exist on type `Symfony\Component\DependencyInjection\Loader\Configurator\AppReference`.'
+count = 1
+
+[[issues]]
 file = "config/routes/app_dev_panel.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator)`).'
@@ -75,6 +93,12 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/CacheAction.php"
 code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
+count = 4
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-class"
 message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
 count = 1
 
@@ -111,6 +135,12 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/CacheHeavyAction.php"
 code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class"
 message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
 count = 1
 
@@ -142,6 +172,12 @@ count = 1
 file = "src/Controller/TestFixtures/DatabaseAction.php"
 code = "non-existent-attribute-class"
 message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/DatabaseAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\QueryRecord` not found.'
 count = 1
 
 [[issues]]
@@ -515,6 +551,12 @@ file = "src/Controller/TestFixtures/MessengerAction.php"
 code = "non-existent-attribute-class"
 message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
 count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/MessengerAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\MessageRecord` not found.'
+count = 2
 
 [[issues]]
 file = "src/Controller/TestFixtures/MessengerAction.php"

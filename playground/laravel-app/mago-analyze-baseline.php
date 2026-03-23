@@ -45,6 +45,12 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/CacheAction.php"
 code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
+count = 4
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/CacheAction.php"
+code = "non-existent-class"
 message = 'Class `Illuminate\Http\JsonResponse` not found.'
 count = 1
 
@@ -75,6 +81,12 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/CacheHeavyAction.php"
 code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class"
 message = 'Class `Illuminate\Http\JsonResponse` not found.'
 count = 1
 
@@ -100,6 +112,12 @@ count = 1
 file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
 code = "never-return"
 message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\QueryRecord` not found.'
 count = 1
 
 [[issues]]
@@ -401,6 +419,12 @@ file = "app/Http/Controllers/TestFixtures/MessengerAction.php"
 code = "never-return"
 message = "Cannot return value with type 'never' from this function."
 count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/MessengerAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\MessageRecord` not found.'
+count = 2
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/MessengerAction.php"
