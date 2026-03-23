@@ -8,10 +8,17 @@ use yii\base\BootstrapInterface;
 
 /**
  * Initializes the SQLite database with required tables for the playground.
- * Runs once on first request; subsequent requests skip if tables exist.
+ * Creates table on first request; ensures seed data is complete on every startup.
  */
 final class DatabaseBootstrap implements BootstrapInterface
 {
+    private const SEED_DATA = [
+        ['John Doe',   'john@example.com'],
+        ['Jane Smith', 'jane@example.com'],
+        ['Bob Wilson', 'bob@example.com'],
+        ['Alice',      'alice@example.com'],
+    ];
+
     public function bootstrap($app): void
     {
         if (!$app instanceof \yii\web\Application && !$app instanceof \yii\console\Application) {
@@ -19,34 +26,37 @@ final class DatabaseBootstrap implements BootstrapInterface
         }
 
         $db = $app->db;
-
         $schema = $db->getSchema();
-        if ($schema->getTableSchema('test_users') !== null) {
+
+        if ($schema->getTableSchema('test_users') === null) {
+            $db
+                ->createCommand()
+                ->createTable('test_users', [
+                    'id' => 'pk',
+                    'name' => 'string NOT NULL',
+                    'email' => 'string NOT NULL',
+                    'created_at' => 'datetime DEFAULT CURRENT_TIMESTAMP',
+                ])
+                ->execute();
+
+            $db->createCommand()->batchInsert('test_users', ['name', 'email'], self::SEED_DATA)->execute();
+
             return;
         }
 
-        $db
-            ->createCommand()
-            ->createTable('test_users', [
-                'id' => 'pk',
-                'name' => 'string NOT NULL',
-                'email' => 'string NOT NULL',
-                'created_at' => 'datetime DEFAULT CURRENT_TIMESTAMP',
-            ])
-            ->execute();
+        // Ensure all seed rows exist (handles case where table was created with older seed data)
+        $existingNames = $db->createCommand('SELECT name FROM test_users')->queryColumn();
+        $missing = [];
+        foreach (self::SEED_DATA as $row) {
+            if (in_array($row[0], $existingNames, true)) {
+                continue;
+            }
 
-        $db
-            ->createCommand()
-            ->batchInsert(
-                'test_users',
-                ['name', 'email'],
-                [
-                    ['John Doe',   'john@example.com'],
-                    ['Jane Smith', 'jane@example.com'],
-                    ['Bob Wilson', 'bob@example.com'],
-                    ['Alice',      'alice@example.com'],
-                ],
-            )
-            ->execute();
+            $missing[] = $row;
+        }
+
+        if ($missing !== []) {
+            $db->createCommand()->batchInsert('test_users', ['name', 'email'], $missing)->execute();
+        }
     }
 }
