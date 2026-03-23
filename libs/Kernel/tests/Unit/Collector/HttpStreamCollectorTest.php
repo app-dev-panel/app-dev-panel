@@ -62,7 +62,7 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
     {
         $httpStreamBefore = static function (string $url) {
             $host = parse_url($url, PHP_URL_HOST);
-            if ($host !== null && !@dns_get_record($host, DNS_A)) {
+            if ($host !== null && !dns_get_record($host, DNS_A)) {
                 TestCase::markTestSkipped("Cannot resolve host: {$host} (no network)");
             }
         };

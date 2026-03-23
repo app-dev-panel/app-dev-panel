@@ -59,5 +59,6 @@ no-error-control-operator = { level = "warning" }
 no-empty = { level = "warning" }
 no-isset = { level = "warning" }
 no-empty-catch-clause = { level = "warning" }
+no-debug-symbols = { exclude = ["libs/API/src/Inspector/Controller/InspectController.php"] }
 require-preg-quote-delimiter = { level = "warning" }
 strict-behavior = { level = "warning" }

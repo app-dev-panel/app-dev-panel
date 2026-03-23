@@ -104,8 +104,12 @@ final class FileControllerTest extends ControllerTestCase
             $response = $controller->files($this->get(['path' => '/escape/' . basename($outsideFile)]));
             $this->assertSame(403, $response->getStatusCode());
         } finally {
-            @unlink($outsideFile);
-            @unlink($symlinkPath ?? '');
+            if (file_exists($outsideFile)) {
+                unlink($outsideFile);
+            }
+            if (isset($symlinkPath) && file_exists($symlinkPath)) {
+                unlink($symlinkPath);
+            }
         }
     }
 

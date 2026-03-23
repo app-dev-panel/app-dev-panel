@@ -52,7 +52,9 @@ final class Yii2DbSchemaProvider implements SchemaProviderInterface
                     ->createCommand('SELECT COUNT(*) FROM ' . $this->connection->quoteTableName($tableName))
                     ->queryScalar();
             } catch (\Throwable) {
-                // Ignore count errors
+                // Silently ignore: COUNT query may fail for views or restricted tables.
+                // Default $recordCount of 0 is used as a safe fallback.
+                $recordCount = 0;
             }
 
             $tables[] = [

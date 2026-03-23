@@ -7,7 +7,6 @@ namespace AppDevPanel\Adapter\Yii2\Inspector;
 use ReflectionClass;
 use ReflectionProperty;
 use yii\base\Application;
-use yii\base\Behavior;
 use yii\base\Component;
 use yii\base\Event;
 

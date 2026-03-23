@@ -37,12 +37,6 @@ message = "Class has high complexity."
 count = 1
 
 [[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "no-debug-symbols"
-message = "Do not commit debug functions."
-count = 1
-
-[[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -85,12 +79,6 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/ComposerControllerTest.php"
-code = "no-error-control-operator"
-message = "Unsafe use of error control operator `@`."
-count = 3
-
-[[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/DatabaseControllerTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
@@ -98,9 +86,9 @@ count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
-code = "no-error-control-operator"
-message = "Unsafe use of error control operator `@`."
-count = 2
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
 
 [[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
@@ -146,12 +134,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "no-empty-catch-clause"
-message = "Do not use empty `catch` blocks."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
@@ -166,12 +148,6 @@ count = 1
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "kan-defect"
 message = "Class has a high kan defect score (1.9200000000000002)."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
-code = "no-empty-catch-clause"
-message = "Do not use empty `catch` blocks."
 count = 1
 
 [[issues]]
@@ -295,18 +271,6 @@ message = "Class has a high kan defect score (2.24)."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
-code = "no-redundant-use"
-message = "Unused import: `Behavior`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Inspector/Yii2DbSchemaProvider.php"
-code = "no-empty-catch-clause"
-message = "Do not use empty `catch` blocks."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Yii2/src/Module.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -370,12 +334,6 @@ count = 1
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
-code = "no-empty-catch-clause"
-message = "Do not use empty `catch` blocks."
 count = 1
 
 [[issues]]
@@ -613,21 +571,9 @@ message = "Parameter list is too long."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
-code = "no-error-control-operator"
-message = "Unsafe use of error control operator `@`."
-count = 1
-
-[[issues]]
 file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/tests/Unit/Collector/HttpStreamCollectorTest.php"
-code = "no-error-control-operator"
-message = "Unsafe use of error control operator `@`."
 count = 1
 
 [[issues]]

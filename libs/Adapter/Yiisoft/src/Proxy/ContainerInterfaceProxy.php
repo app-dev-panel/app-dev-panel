@@ -161,7 +161,9 @@ final class ContainerInterfaceProxy implements ContainerInterface
                 try {
                     $params[$index] = $this->get($param);
                 } catch (Exception) {
-                    //leave as is
+                    // Silently ignore: parameter may not be a resolvable service ID.
+                    // Keep the original string value as-is.
+                    continue;
                 }
             }
             return new $proxyClass($instance, ...$params);

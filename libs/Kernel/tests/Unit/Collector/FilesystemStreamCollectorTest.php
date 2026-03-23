@@ -55,7 +55,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
     {
         $mkdirBefore = static function (string $path) {
             if (is_dir($path)) {
-                @rmdir($path);
+                rmdir($path);
             }
         };
         $mkdirOperation = static function (string $path) {

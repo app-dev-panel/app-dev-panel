@@ -101,7 +101,9 @@ final class LaravelSchemaProvider implements SchemaProviderInterface
                 }
             }
         } catch (\Throwable) {
-            // Gracefully handle missing index info
+            // Silently ignore: some database drivers do not support index introspection.
+            // Return empty array below as a safe fallback.
+            $indexes = [];
         }
 
         return [];

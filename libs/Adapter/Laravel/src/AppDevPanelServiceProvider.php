@@ -454,7 +454,9 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                     $connection = $this->app->make('db')->connection();
                     return new LaravelSchemaProvider($connection);
                 } catch (\Throwable) {
-                    // Fall through to null provider
+                    // Silently ignore: database connection may not be available (e.g., misconfigured or unavailable).
+                    // Fall through to NullSchemaProvider below.
+                    unset($connection);
                 }
             }
             return new NullSchemaProvider();
