@@ -152,20 +152,51 @@ Analyzed source code of 10+ debug panel solutions:
 | 78 | **Automated test generation** | N/A (novel) | Generate test cases from captured request/response pairs | Missing |
 | 79 | **API version changelog** | N/A (novel) | Track API response changes between deployments | Missing |
 
+### Tier 8: Features from APM/Observability Tools (Advanced, High-Impact)
+
+These features come from professional APM tools (Blackfire, Datadog, Sentry, Grafana, OpenTelemetry) and represent the next level of debug panel evolution.
+
+| # | Feature | Source | Description | ADP Status |
+|---|---------|--------|-------------|------------|
+| 80 | **Performance assertions/budgets in config** | Blackfire | Define thresholds in config file (e.g., `queries < 5`, `memory < 10MB`), auto-evaluate per request and show pass/fail | Missing |
+| 81 | **Profile comparison/diff** | Blackfire | Compare two request profiles side-by-side, highlight regressions in red, improvements in blue | Missing |
+| 82 | **Breadcrumb trail** | Sentry | Automatic ordered log of ALL events (queries, logs, HTTP calls, clicks) leading to an error — unified cross-collector timeline | Missing — Timeline exists but not error-centric |
+| 83 | **N+1 query auto-detection** | Sentry, Datadog | Detect repeated similar queries automatically (not just duplicates but pattern matching) | Missing |
+| 84 | **Request phase breakdown** | Chrome DevTools | Split request into named phases (bootstrap, routing, controller, view rendering, response) with timing per phase | Missing — Timeline has events but no phase segmentation |
+| 85 | **Timeline markers (user-defined)** | Blackfire | Allow developers to place custom annotations on the timeline via API call (`$debugger->mark('payment started')`) | Missing |
+| 86 | **Trigger-based collector activation** | Xdebug | Enable expensive collectors per-request via header/cookie/query param — avoids always-on overhead | Missing |
+| 87 | **Unified event timeline** | Vue DevTools | Single timeline combining events, state changes, queries, logs from ALL collectors chronologically | Partial — TimelineCollector exists but collectors may not all feed into it |
+| 88 | **Service topology graph** | Grafana/Tempo | Auto-generate service dependency graph from collected HTTP/queue data showing error rates and latency per edge | Missing |
+| 89 | **Multiple trace visualization modes** | Datadog | Same data viewable as waterfall, flame graph, span list, or service map — user switches between views | Missing — single view per panel |
+| 90 | **Trace-as-flame-graph** | Grafana/Tempo | Render entire request lifecycle as an interactive flame graph (not profiling data but collector events) | Missing |
+| 91 | **Issue grouping/deduplication** | Sentry | Group similar errors/exceptions by fingerprint, track frequency and first/last seen | Missing |
+| 92 | **Logs-in-context** | New Relic | Auto-correlate log entries with specific request traces, view logs inline within request detail | Partial — LogCollector per-request but no cross-request correlation |
+| 93 | **Code hotspots** | Datadog | Link trace spans to specific source code lines consuming the most CPU/memory | Missing |
+| 94 | **Live search over recent data** | Datadog | Real-time search across recent requests by any attribute (15-min rolling window, no pre-indexing) | Missing |
+| 95 | **Producer/Consumer span model** | OpenTelemetry | Model async jobs showing creation-to-processing lifecycle as linked spans | Missing — QueueCollector tracks but no span linking |
+| 96 | **Baggage/context propagation** | OpenTelemetry | Pass debug context (tenant ID, feature flags) across service boundaries via headers | Missing |
+| 97 | **Release-to-error mapping** | Sentry | Map every error to the specific release/commit/deploy, detect regressions per deploy | Missing |
+| 98 | **AI-assisted analysis** | Sentry (Seer), Grafana, Chrome | LLM-powered interpretation of profiles/errors with automated fix suggestions | Missing |
+
 ---
 
-## Quick-Win Recommendations (Top 10 by Impact/Effort Ratio)
+## Quick-Win Recommendations (Top 15 by Impact/Effort Ratio)
 
-1. **Session data viewer** — Add session tab to RequestPanel
-2. **Not-Called Listeners + Orphaned Events** — Extend EventCollector to track registered-but-unused
-3. **Toolbar AJAX tracking** — JS interceptor in toolbar for XHR/fetch
-4. **Duplicate query detection** — Analyze collected queries for duplicates/N+1
-5. **Slow query highlighting** — Add threshold config to DatabasePanel
-6. **Copy as cURL one-click** — Add button to RequestPanel and HttpClientPanel
-7. **Email HTML preview** — Iframe rendering in MailerPanel
-8. **Redirect chain tracking** — Capture redirect info in RequestCollector
-9. **Interactive timeline** — Upgrade TimelinePanel from table to SVG visualization
-10. **Redis command tracking** — New collector for Redis operations
+1. **Session data viewer** — Add session tab to RequestPanel (Tier 1, ~2h)
+2. **Not-Called Listeners + Orphaned Events** — Extend EventCollector to track registered-but-unused (Tier 1, ~4h)
+3. **Toolbar AJAX tracking** — JS interceptor in toolbar for XHR/fetch (Tier 1, ~4h)
+4. **Duplicate/N+1 query detection** — Analyze collected queries for duplicates and similar patterns (Tier 2, ~4h)
+5. **Slow query highlighting** — Add threshold config to DatabasePanel (Tier 2, ~2h)
+6. **Copy as cURL one-click** — Add button to RequestPanel and HttpClientPanel (Tier 1, ~2h)
+7. **Email HTML preview** — Iframe rendering in MailerPanel with text/HTML/source tabs (Tier 1, ~3h)
+8. **Redirect chain tracking** — Capture redirect info in RequestCollector (Tier 1, ~3h)
+9. **Timeline markers API** — Allow `$debugger->mark('label')` to add custom annotations (Tier 8, ~3h)
+10. **Performance assertions in config** — Define budgets (query count, memory, time) with pass/fail per request (Tier 8, ~6h)
+11. **Request phase breakdown** — Segment timeline into named phases (bootstrap, routing, controller, response) (Tier 8, ~4h)
+12. **Redis command tracking** — New collector for Redis operations (Tier 2, ~6h)
+13. **Interactive SVG timeline** — Upgrade TimelinePanel to interactive SVG with zoom/filter (Tier 2, ~8h)
+14. **IDE file link integration** — Configurable click-to-open-in-IDE links for all file paths (Tier 2, ~4h)
+15. **Trigger-based collector activation** — Enable/disable collectors per-request via header (Tier 8, ~4h)
 
 ---
 
@@ -183,6 +214,11 @@ Analyzed source code of 10+ debug panel solutions:
 | Buggregator | ~12 | ~4 | ~8 |
 | Blackfire.io | ~15 | ~3 | ~12 |
 | Sentry | ~12 | ~2 | ~10 |
+| Datadog APM | ~15 | ~3 | ~12 |
+| Grafana/Tempo | ~10 | ~1 | ~9 |
+| OpenTelemetry | ~8 | ~2 | ~6 |
+| Chrome DevTools | ~8 | ~1 | ~7 |
+| Vue/React DevTools | ~10 | ~2 | ~8 |
 | PHP DebugBar | ~10 | ~7 | ~3 |
 
 **ADP's unique strengths not found in competitors:**
@@ -195,3 +231,22 @@ Analyzed source code of 10+ debug panel solutions:
 - Service registry for multi-app debugging — rare (only Buggregator has similar)
 - Framework-agnostic ingestion API — rare
 - Fuzzy search with keyboard layout transliteration — unique
+
+---
+
+## Strategic Roadmap Suggestion
+
+### Phase 1: Parity with Symfony WebProfiler (Tier 1-2)
+Focus: Session viewer, not-called listeners, AJAX tracking, duplicate queries, slow query highlighting, cURL copy, email preview, redirect tracking, IDE links. **~40h effort.**
+
+### Phase 2: Enhanced Developer Experience (Tier 2-3)
+Focus: Interactive SVG timeline, Redis tracking, notification tracking, form profiling, SQL query formatting, profile search, persistent storage backends. **~60h effort.**
+
+### Phase 3: APM-Lite Features (Tier 8 selected)
+Focus: Performance budgets, timeline markers, request phase breakdown, N+1 detection, trigger-based activation, breadcrumb trail. **~40h effort.**
+
+### Phase 4: Advanced Visualization (Tier 5-6)
+Focus: Flame graph rendering, profile comparison/diff, service topology graph, multiple trace views, issue grouping. **~80h effort.**
+
+### Phase 5: Observability Integration (Tier 6-8)
+Focus: OpenTelemetry ingestion, distributed tracing, context propagation, export/share profiles. **~100h effort.**
