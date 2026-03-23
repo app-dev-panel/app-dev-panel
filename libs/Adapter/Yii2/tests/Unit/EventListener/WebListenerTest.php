@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\Tests\Unit\EventListener;
 
 use AppDevPanel\Adapter\Yii2\EventListener\WebListener;
+use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
+use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
@@ -13,16 +15,17 @@ use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\MemoryStorage;
 use PHPUnit\Framework\TestCase;
+use yii\base\Action;
+use yii\base\Controller;
 use yii\base\Event;
 use yii\web\Application;
 use yii\web\HeaderCollection;
 use yii\web\Request;
 use yii\web\Response;
+use yii\web\UrlRule;
 
 final class WebListenerTest extends TestCase
 {
-    private string $storagePath;
-
     public function testOnBeforeRequestStartsDebugger(): void
     {
         [$listener, $debugger] = $this->createListener();
@@ -123,6 +126,157 @@ final class WebListenerTest extends TestCase
         $this->assertTrue(true, 'No exception thrown for non-web-app sender');
     }
 
+    public function testExtractRouteDataFromRecorder(): void
+    {
+        $recorder = new RouterMatchRecorder();
+        $routerCollector = new RouterCollector();
+
+        [$listener] = $this->createListenerWithRouter($routerCollector, $recorder);
+
+        $rule = $this->createMock(UrlRule::class);
+        $rule->name = 'site/<action>';
+        $rule->host = null;
+
+        // Simulate routing match
+        $recorder->markStartIfNeeded();
+        $recorder->recordMatch($rule, ['site/index', ['action' => 'index']]);
+
+        $controller = $this->createMock(Controller::class);
+        $action = $this->createMock(Action::class);
+        $controller->action = $action;
+
+        $app = $this->createWebApp('/site/index');
+        $app->controller = $controller;
+
+        $event = new Event(['sender' => $app]);
+        $listener->onBeforeRequest($event);
+
+        // Check collected data before shutdown (collectors still active)
+        $this->simulateAfterRequestWithoutShutdown($listener, $app);
+
+        $collected = $routerCollector->getCollected();
+        $this->assertArrayHasKey('currentRoute', $collected);
+
+        $route = $collected['currentRoute'];
+        $this->assertSame('site/<action>', $route['name']);
+        $this->assertSame('site/<action>', $route['pattern']);
+        $this->assertSame(['action' => 'index'], $route['arguments']);
+        $this->assertGreaterThan(0, $route['matchTime']);
+        $this->assertSame('/site/index', $route['uri']);
+    }
+
+    public function testExtractRouteDataFromRecorderWithHostConstraint(): void
+    {
+        $recorder = new RouterMatchRecorder();
+        $routerCollector = new RouterCollector();
+
+        [$listener] = $this->createListenerWithRouter($routerCollector, $recorder);
+
+        $rule = $this->createMock(UrlRule::class);
+        $rule->name = 'api/<controller>/<action>';
+        $rule->host = 'api.example.com';
+
+        $recorder->markStartIfNeeded();
+        $recorder->recordMatch($rule, ['api/users/list', ['controller' => 'users', 'action' => 'list']]);
+
+        $controller = $this->createMock(Controller::class);
+        $controller->action = $this->createMock(Action::class);
+
+        $app = $this->createWebApp('/api/users/list');
+        $app->controller = $controller;
+
+        $event = new Event(['sender' => $app]);
+        $listener->onBeforeRequest($event);
+        $this->simulateAfterRequestWithoutShutdown($listener, $app);
+
+        $collected = $routerCollector->getCollected();
+        $this->assertSame('api.example.com', $collected['currentRoute']['host']);
+    }
+
+    public function testFallbackToControllerWhenNoRecorder(): void
+    {
+        $routerCollector = new RouterCollector();
+
+        [$listener] = $this->createListenerWithRouter($routerCollector, null);
+
+        $controller = $this->createMock(Controller::class);
+        $action = $this->createMock(Action::class);
+        $controller->action = $action;
+
+        $app = $this->createWebApp('/site/about');
+        $app->controller = $controller;
+        $app->requestedRoute = 'site/about';
+        $app->requestedParams = [];
+
+        $event = new Event(['sender' => $app]);
+        $listener->onBeforeRequest($event);
+        $this->simulateAfterRequestWithoutShutdown($listener, $app);
+
+        $collected = $routerCollector->getCollected();
+        $this->assertArrayHasKey('currentRoute', $collected);
+
+        $route = $collected['currentRoute'];
+        $this->assertSame('site/about', $route['pattern']);
+        $this->assertSame(0, $route['matchTime']);
+        $this->assertNull($route['name']);
+    }
+
+    public function testNoRouteDataWhenControllerIsNullAndNoRecorder(): void
+    {
+        $routerCollector = new RouterCollector();
+
+        [$listener] = $this->createListenerWithRouter($routerCollector, null);
+
+        $app = $this->createWebApp('/nonexistent');
+        $app->controller = null;
+
+        $event = new Event(['sender' => $app]);
+        $listener->onBeforeRequest($event);
+        $this->simulateAfterRequestWithoutShutdown($listener, $app);
+
+        $collected = $routerCollector->getCollected();
+        $this->assertNull($collected['currentRoute']);
+    }
+
+    public function testRecorderResetAfterShutdown(): void
+    {
+        $recorder = new RouterMatchRecorder();
+        $routerCollector = new RouterCollector();
+
+        [$listener] = $this->createListenerWithRouter($routerCollector, $recorder);
+
+        $rule = $this->createMock(UrlRule::class);
+        $rule->name = 'site/index';
+        $rule->host = null;
+
+        $recorder->markStartIfNeeded();
+        $recorder->recordMatch($rule, ['site/index', []]);
+
+        $app = $this->createWebApp('/site/index');
+        $app->controller = $this->createMock(Controller::class);
+        $app->controller->action = $this->createMock(Action::class);
+
+        $event = new Event(['sender' => $app]);
+        $listener->onBeforeRequest($event);
+        $listener->onAfterRequest($event);
+
+        // Recorder should be reset after shutdown
+        $this->assertNull($recorder->getMatchedRule());
+        $this->assertNull($recorder->getMatchResult());
+    }
+
+    /**
+     * Invoke onAfterRequest logic that extracts route data but skip debugger->shutdown().
+     *
+     * This allows asserting collected data before collectors are reset.
+     * Uses reflection to call the private extractRouteData method directly.
+     */
+    private function simulateAfterRequestWithoutShutdown(WebListener $listener, Application $app): void
+    {
+        $reflection = new \ReflectionMethod($listener, 'extractRouteData');
+        $reflection->invoke($listener, $app);
+    }
+
     /**
      * @return array{0: WebListener, 1: Debugger, 2: TimelineCollector, 3: MemoryStorage}
      */
@@ -138,6 +292,23 @@ final class WebListenerTest extends TestCase
         $listener = new WebListener($debugger, $requestCollector);
 
         return [$listener, $debugger, $timeline, $storage];
+    }
+
+    /**
+     * @return array{0: WebListener, 1: Debugger}
+     */
+    private function createListenerWithRouter(RouterCollector $routerCollector, ?RouterMatchRecorder $recorder): array
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $requestCollector = new RequestCollector($timeline);
+
+        $debugger = new Debugger($idGenerator, $storage, [$timeline, $requestCollector, $routerCollector]);
+
+        $listener = new WebListener($debugger, $requestCollector, null, null, $routerCollector, $recorder);
+
+        return [$listener, $debugger];
     }
 
     private function createWebApp(string $url): Application

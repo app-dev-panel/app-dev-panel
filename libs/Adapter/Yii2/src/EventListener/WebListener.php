@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\EventListener;
 
+use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -11,6 +12,7 @@ use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
 use Nyholm\Psr7\Factory\Psr17Factory;
+use yii\web\UrlRule;
 
 /**
  * Maps Yii 2 web application events to the ADP Debugger lifecycle.
@@ -31,6 +33,7 @@ final class WebListener
         private readonly ?WebAppInfoCollector $webAppInfoCollector = null,
         private readonly ?ExceptionCollector $exceptionCollector = null,
         private readonly ?RouterCollector $routerCollector = null,
+        private readonly ?RouterMatchRecorder $matchRecorder = null,
     ) {}
 
     public function onBeforeRequest(\yii\base\Event $event): void
@@ -90,6 +93,7 @@ final class WebListener
         \Yii::getLogger()->flush(true);
 
         $this->debugger->shutdown();
+        $this->matchRecorder?->reset();
     }
 
     /**
@@ -151,7 +155,7 @@ final class WebListener
     }
 
     /**
-     * Auto-extract route data from Yii2's resolved controller/action.
+     * Extract route data from RouterMatchRecorder (proxy-based) or fall back to controller/action.
      *
      * Only collects if the RouterCollector hasn't been fed manually (e.g., by RouterAction fixture).
      * Uses getCollected() emptiness as the check since there's no public "hasRoute" method.
@@ -168,19 +172,73 @@ final class WebListener
             return;
         }
 
+        $uri = $app->getRequest()->getUrl();
+
+        // Primary: use proxy-recorded match data (accurate pattern, name, timing)
+        if ($this->matchRecorder !== null && $this->matchRecorder->getMatchedRule() !== null) {
+            $this->extractFromRecorder($app, $uri);
+            return;
+        }
+
+        // Fallback: extract from resolved controller/action (no match timing, no pattern)
+        $this->extractFromController($app, $uri);
+    }
+
+    /**
+     * Extract route data from the proxy-recorded match (preferred path).
+     */
+    private function extractFromRecorder(\yii\web\Application $app, string $uri): void
+    {
+        $rule = $this->matchRecorder->getMatchedRule();
+        $matchResult = $this->matchRecorder->getMatchResult();
+        $controller = $app->controller;
+
+        $name = null;
+        $pattern = $uri;
+        $host = null;
+
+        if ($rule instanceof UrlRule) {
+            $name = $rule->name;
+            $pattern = $rule->name;
+            $host = $rule->host;
+        }
+
+        $action = null;
+        if ($controller !== null) {
+            $action = $controller->action !== null ? $controller->action::class : $controller::class;
+        }
+
+        $this->routerCollector->collectMatchedRoute([
+            'matchTime' => $this->matchRecorder->getMatchTime(),
+            'name' => $name,
+            'pattern' => $pattern,
+            'arguments' => $matchResult[1] ?? [],
+            'host' => $host,
+            'uri' => $uri,
+            'action' => $action,
+            'middlewares' => [],
+        ]);
+    }
+
+    /**
+     * Fallback: extract route data from Yii2's resolved controller/action.
+     *
+     * Used when no proxy-recorded match is available (e.g., default route fallback,
+     * or when UrlManager rules are not proxied).
+     */
+    private function extractFromController(\yii\web\Application $app, string $uri): void
+    {
         $controller = $app->controller;
         if ($controller === null) {
             return;
         }
 
         $action = $controller->action;
-        $uri = $app->getRequest()->getUrl();
-        $path = parse_url($uri, PHP_URL_PATH) ?: $uri;
 
         $this->routerCollector->collectMatchedRoute([
             'matchTime' => 0,
             'name' => null,
-            'pattern' => $path,
+            'pattern' => $app->requestedRoute,
             'arguments' => $app->requestedParams,
             'host' => null,
             'uri' => $uri,

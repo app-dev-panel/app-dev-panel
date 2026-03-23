@@ -14,6 +14,8 @@ use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2DbSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteCollection;
+use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
+use AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
@@ -157,6 +159,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
     private ?Debugger $debugger = null;
     private ?TimelineCollector $timelineCollector = null;
+    private ?RouterMatchRecorder $matchRecorder = null;
 
     /** @var CollectorInterface[] */
     private array $collectorInstances = [];
@@ -180,8 +183,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
         $this->registerServices($app);
         $this->registerCollectors();
         $this->buildDebugger();
-        $this->registerEventListeners($app);
         $this->registerRoutes($app);
+        $this->wrapUrlRules($app);
+        $this->registerEventListeners($app);
         $this->registerConsoleCommands($app);
     }
 
@@ -548,6 +552,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $this->getCollector(WebAppInfoCollector::class),
             $this->getCollector(ExceptionCollector::class),
             $this->getCollector(RouterCollector::class),
+            $this->matchRecorder,
         );
 
         Event::on(WebApplication::class, WebApplication::EVENT_BEFORE_REQUEST, [$listener, 'onBeforeRequest']);
@@ -804,6 +809,32 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         $target = new DebugLogTarget($logCollector);
         \Yii::$app->log->targets['adp-debug'] = $target;
+    }
+
+    /**
+     * Wrap UrlManager rules with UrlRuleProxy to intercept route matching.
+     *
+     * Must be called after registerRoutes() so ADP's own rules are also wrapped.
+     * The recorder captures which rule matched and how long matching took.
+     */
+    private function wrapUrlRules(Application $app): void
+    {
+        if (!$app instanceof WebApplication) {
+            return;
+        }
+
+        if (!($this->collectors['router'] ?? true)) {
+            return;
+        }
+
+        $this->matchRecorder = new RouterMatchRecorder();
+        $urlManager = $app->getUrlManager();
+
+        $wrappedRules = [];
+        foreach ($urlManager->rules as $rule) {
+            $wrappedRules[] = new UrlRuleProxy($rule, $this->matchRecorder);
+        }
+        $urlManager->rules = $wrappedRules;
     }
 
     private function registerRoutes(Application $app): void
