@@ -1370,243 +1370,321 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "non-existent-class-like"
-message = 'Class `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider` cannot extend unknown type `ServiceProvider`'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `decorateeventdispatcherproxy()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `decoratehttpclientproxy()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `decorateloggerproxy()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `decoratepsrservices()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `isenabled()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerapiapplication()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerapicontrollers()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerapicoreservices()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerapimiddleware()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerapiservices()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerclicommands()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registercollectors()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registercommandcollectors()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registercoreservices()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerdebugcollectors()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerdebugger()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registereventlisteners()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerinspectorservices()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registermiddleware()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerpsrfactories()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerrequestcollectors()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registerroutercollector()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registersimplecollectors()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-method"
-message = "Method `registertimelinecollectors()` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
-code = "unused-property"
-message = "Property `$collectorClasses` is never used."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
+code = "ambiguous-instantiation-target"
+message = "Ambiguous instantiation: the expression used with `new` can resolve to multiple different classes."
 count = 2
 
 [[issues]]
-file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Routing\Route)`).'
-count = 12
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "ambiguous-object-method-access"
+message = "Cannot statically verify method call on a generic `object` type."
+count = 11
 
 [[issues]]
-file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Routing\Router)`).'
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider::registerapicoreservices`: expected `Illuminate\Contracts\Config\Repository`, but provided type `object` is less specific.'
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
-code = "less-specific-nested-argument-type"
-message = '''Argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\RouterCollector::collectmatchedroute`: expected `array{'action': mixed, 'arguments': array<array-key, mixed>, 'host': null|string, 'matchTime': float, 'middlewares': array<array-key, mixed>, 'name': null|string, 'pattern': string, 'uri': string}`, but provided type `array{'action': mixed, 'arguments': mixed, 'host': mixed, 'matchTime': int(0), 'middlewares': list<mixed>, 'name': mixed, 'pattern': truthy-string, 'uri': mixed}` is less specific.'''
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider::registerapimiddleware`: expected `Illuminate\Contracts\Config\Repository`, but provided type `object` is less specific.'
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\CacheListener::register`: expected `Illuminate\Contracts\Events\Dispatcher`, but provided type `object` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\ConsoleListener::register`: expected `Illuminate\Contracts\Events\Dispatcher`, but provided type `object` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener::register`: expected `Illuminate\Contracts\Events\Dispatcher`, but provided type `object` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\HttpClientListener::register`: expected `Illuminate\Contracts\Events\Dispatcher`, but provided type `object` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\MailListener::register`: expected `Illuminate\Contracts\Events\Dispatcher`, but provided type `object` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\QueueListener::register`: expected `Illuminate\Contracts\Events\Dispatcher`, but provided type `object` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelroutecollectionadapter::__construct`: expected `Illuminate\Routing\Router`, but provided type `object` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelurlmatcheradapter::__construct`: expected `Illuminate\Routing\Router`, but provided type `object` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #2 of `appdevpanel\adapter\laravel\collector\routerdataextractor::__construct`: expected `Illuminate\Routing\Router`, but provided type `object` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #2 of `appdevpanel\api\inspector\controller\translationcontroller::__construct`: expected `Psr\Log\LoggerInterface`, but provided type `null|object` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "less-specific-argument"
+message = 'Argument type mismatch for argument #3 of `appdevpanel\kernel\debugger::__construct`: expected `array<array-key, AppDevPanel\Kernel\Collector\CollectorInterface>`, but provided type `array{}|non-empty-list<object>` is less specific.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `array_filter`: expected `array<('K.array_filter() extends array-key), mixed>`, but found `mixed`."
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider::decorateeventdispatcherproxy`: expected `array<string, bool>`, but found `mixed`.'
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `ltrim`: expected `string`, but found `mixed`."
-count = 2
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider::decoratehttpclientproxy`: expected `array<string, bool>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider::decorateloggerproxy`: expected `array<string, bool>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider::registercommandcollectors`: expected `array<string, bool>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider::registerrequestcollectors`: expected `array<string, bool>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider::registerroutercollector`: expected `array<string, bool>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider::registersimplecollectors`: expected `array<string, bool>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider::registertimelinecollectors`: expected `array<string, bool>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelschemaprovider::__construct`: expected `Illuminate\Database\Connection`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\adapter\laravel\proxy\laraveleventdispatcherproxy::__construct`: expected `Illuminate\Contracts\Events\Dispatcher`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\api\pathresolver::__construct`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\kernel\collector\httpclientinterfaceproxy::__construct`: expected `Psr\Http\Client\ClientInterface`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\kernel\collector\loggerinterfaceproxy::__construct`: expected `Psr\Log\LoggerInterface`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\kernel\debuggerignoreconfig::__construct`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `appdevpanel\kernel\storage\filestorage::__construct`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `appdevpanel\api\pathresolver::__construct`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `appdevpanel\kernel\debuggerignoreconfig::__construct`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `appdevpanel\api\debug\middleware\tokenauthmiddleware::__construct`: expected `string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `appdevpanel\api\inspector\controller\inspectcontroller::__construct`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `appdevpanel\api\middleware\ipfiltermiddleware::__construct`: expected `array<array-key, string>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #3 of `appdevpanel\kernel\storage\filestorage::__construct`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "non-existent-function"
+message = 'Could not find definition for function `AppDevPanel\Adapter\Laravel\base_path` (also tried as `base_path` in a broader scope).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "non-existent-function"
+message = 'Could not find definition for function `AppDevPanel\Adapter\Laravel\storage_path` (also tried as `storage_path` in a broader scope).'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\eventlistener\cachelistener::__construct`: expected `(closure(): AppDevPanel\Kernel\Collector\CacheCollector)`, but possibly received `(closure(): AppDevPanel\Kernel\Collector\CacheCollector|AppDevPanel\Kernel\Collector\DatabaseCollector|AppDevPanel\Kernel\Collector\HttpClientCollector|AppDevPanel\Kernel\Collector\MailerCollector|AppDevPanel\Kernel\Collector\QueueCollector)`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\eventlistener\databaselistener::__construct`: expected `(closure(): AppDevPanel\Kernel\Collector\DatabaseCollector)`, but possibly received `(closure(): AppDevPanel\Kernel\Collector\CacheCollector|AppDevPanel\Kernel\Collector\DatabaseCollector|AppDevPanel\Kernel\Collector\HttpClientCollector|AppDevPanel\Kernel\Collector\MailerCollector|AppDevPanel\Kernel\Collector\QueueCollector)`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\eventlistener\httpclientlistener::__construct`: expected `(closure(): AppDevPanel\Kernel\Collector\HttpClientCollector)`, but possibly received `(closure(): AppDevPanel\Kernel\Collector\CacheCollector|AppDevPanel\Kernel\Collector\DatabaseCollector|AppDevPanel\Kernel\Collector\HttpClientCollector|AppDevPanel\Kernel\Collector\MailerCollector|AppDevPanel\Kernel\Collector\QueueCollector)`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\eventlistener\maillistener::__construct`: expected `(closure(): AppDevPanel\Kernel\Collector\MailerCollector)`, but possibly received `(closure(): AppDevPanel\Kernel\Collector\CacheCollector|AppDevPanel\Kernel\Collector\DatabaseCollector|AppDevPanel\Kernel\Collector\HttpClientCollector|AppDevPanel\Kernel\Collector\MailerCollector|AppDevPanel\Kernel\Collector\QueueCollector)`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\eventlistener\queuelistener::__construct`: expected `(closure(): AppDevPanel\Kernel\Collector\QueueCollector)`, but possibly received `(closure(): AppDevPanel\Kernel\Collector\CacheCollector|AppDevPanel\Kernel\Collector\DatabaseCollector|AppDevPanel\Kernel\Collector\HttpClientCollector|AppDevPanel\Kernel\Collector\MailerCollector|AppDevPanel\Kernel\Collector\QueueCollector)`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "possibly-null-argument"
+message = 'Argument #2 of method `appdevpanel\api\inspector\controller\translationcontroller::__construct` is possibly `null`, but parameter type `Psr\Log\LoggerInterface` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "possibly-undefined-variable"
+message = "Variable `$connection` might be undefined here because its assignment occurs within a `try` block."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unsafe-instantiation"
+message = 'Unsafe `new $class_name`: constructor of `AppDevPanel\Kernel\Collector\LogCollector` is not final and its signature might change in child classes, potentially leading to runtime errors.'
+count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Request`.'
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Routing\Route`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Routing\Router`.'
+code = "non-iterable-object-iteration"
+message = 'Iterating over object of type `Illuminate\Routing\RouteCollectionInterface` which does not implement `Iterator` or `IteratorAggregate`.'
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
-code = "template-constraint-violation"
-message = "Argument type mismatch for template `K`."
+code = "redundant-comparison"
+message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
-code = "unknown-iterator-type"
-message = "Cannot determine the type of the expression provided to `foreach`."
+code = "redundant-condition"
+message = "This condition (type `true`) will always evaluate to true."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
-count = 3
+file = "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php"
+code = "redundant-docblock-type"
+message = "Redundant docblock type for variable `$route`."
+count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
@@ -1616,170 +1694,20 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "method-access-on-null"
-message = "Attempting to call a method on `null`."
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Nyholm\Psr7\Factory\Psr17Factory::createstream`: expected `string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Psr\Http\Message\ServerRequestInterface::withqueryparams`: expected `array<array-key, mixed>`, but found `mixed`.'
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but possibly received `list<null|string>`.'
 count = 2
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `psr\http\message\messageinterface::withheader`: expected `string`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `Psr\Http\Message\UriInterface|string`, but found `mixed`.'
+code = "redundant-comparison"
+message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #3 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `array<array-key, mixed>`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Request`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Controller/AdpApiController.php"
-code = "unknown-iterator-type"
-message = "Cannot determine the type of the expression provided to `foreach`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Cache\Events\CacheHit)`).'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Cache\Events\CacheMissed)`).'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Cache\Events\KeyForgotten)`).'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Cache\Events\KeyWritten)`).'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Cache\Events\CacheHit`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Cache\Events\CacheMissed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Cache\Events\KeyForgotten`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Cache\Events\KeyWritten`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "null-argument"
-message = 'Argument #3 of method `appdevpanel\kernel\collector\cacheoperationrecord::__construct` is `null`, but parameter type `string` does not accept it.'
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/CacheListener.php"
-code = "redundant-null-coalesce"
-message = "Redundant null coalesce: left-hand side is always `null`."
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Console\Events\CommandStarting)`).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Console\Events\CommandFinished`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Console\Events\CommandStarting`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/ConsoleListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
+code = "redundant-logical-operation"
+message = "Redundant `&&` operation: left operand is evaluated and right operand is always truthy."
 count = 1
 
 [[issues]]
@@ -1802,24 +1730,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "invalid-argument"
-message = 'Invalid argument type for argument #2 of `appdevpanel\kernel\collector\queryrecord::__construct`: expected `string`, but found `array<array-key, string>|null`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Database\Events\QueryExecuted)`).'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `mixed`."
 count = 2
@@ -1832,12 +1742,6 @@ count = 2
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #5 of `appdevpanel\kernel\collector\queryrecord::__construct`: expected `float`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
 count = 3
@@ -1846,7 +1750,7 @@ count = 3
 file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
+count = 2
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
@@ -1861,286 +1765,16 @@ message = "Invalid right operand: type `nonnull` cannot be reliably used in stri
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "mixed-operand"
-message = "Right operand in binary operation has type `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Database\Events\QueryExecuted`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "null-argument"
-message = 'Argument #1 of method `appdevpanel\kernel\collector\queryrecord::__construct` is `null`, but parameter type `string` does not accept it.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "null-argument"
-message = 'Argument #3 of method `appdevpanel\kernel\collector\queryrecord::__construct` is `null`, but parameter type `array<array-key, mixed>` does not accept it.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "null-iterator"
-message = "Iterating over `null` in `foreach`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "null-operand"
-message = "Left operand in arithmetic operation cannot be `null`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "possibly-null-argument"
-message = 'Argument #2 of method `appdevpanel\kernel\collector\queryrecord::__construct` is possibly `null`, but parameter type `string` does not accept it.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php"
-code = "possibly-null-argument"
-message = "Argument #3 of function `preg_replace` is possibly `null`, but parameter type `array<array-key, string>|string` does not accept it."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Http\Client\Events\ConnectionFailed)`).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Http\Client\Events\RequestSending)`).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Http\Client\Events\ResponseReceived)`).'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "method-access-on-null"
-message = "Attempting to call a method on `null`."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Collector\HttpClientCollector::collect`: expected `Psr\Http\Message\RequestInterface`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Collector\HttpClientCollector::collecttotaltime`: expected `Psr\Http\Message\ResponseInterface|null`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Client\Events\ConnectionFailed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Client\Events\RequestSending`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Client\Events\ResponseReceived`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/HttpClientListener.php"
-code = "null-argument"
-message = "Argument #1 of function `spl_object_hash` is `null`, but parameter type `object` does not accept it."
-count = 3
-
-[[issues]]
 file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Mail\Events\MessageSent)`).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
-code = "less-specific-nested-argument-type"
-message = '''Argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\MailerCollector::collectmessage`: expected `array{'bcc': array<array-key, mixed>, 'cc': array<array-key, mixed>, 'charset': string, 'date': null|string, 'from': array<array-key, mixed>, 'htmlBody': null|string, 'raw': string, 'replyTo': array<array-key, mixed>, 'subject': string, 'textBody': null|string, 'to': array<array-key, mixed>}`, but provided type `array{'bcc': array{}, 'cc': array{}, 'charset': string('utf-8'), 'date': string, 'from': array<array-key, mixed>, 'htmlBody': mixed, 'raw': string(''), 'replyTo': array{}, 'subject': mixed, 'textBody': mixed, 'to': array<array-key, mixed>}` is less specific.'''
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
-code = "method-access-on-null"
-message = "Attempting to call a method on `null`."
-count = 7
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
-code = "mixed-array-index"
-message = "Invalid index type `mixed` used for array access on `array<array-key, mixed>`."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 6
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Mail\Events\MessageSent`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/MailListener.php"
-code = "unknown-iterator-type"
-message = "Cannot determine the type of the expression provided to `foreach`."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Queue\Events\JobFailed)`).'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Queue\Events\JobProcessed)`).'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Queue\Events\JobProcessing)`).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "method-access-on-null"
-message = "Attempting to call a method on `null`."
-count = 9
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `appdevpanel\kernel\collector\messagerecord::__construct`: expected `string`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #3 of `appdevpanel\kernel\collector\messagerecord::__construct`: expected `null|string`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "mixed-array-index"
-message = "Invalid index type `mixed` used for array access on `array<string, float>`."
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Events\Dispatcher`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Queue\Events\JobFailed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Queue\Events\JobProcessed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Queue\Events\JobProcessing`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "null-argument"
-message = 'Argument #2 of method `appdevpanel\kernel\collector\messagerecord::__construct` is `null`, but parameter type `string` does not accept it.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/EventListener/QueueListener.php"
-code = "property-type-coercion"
-message = "A value of a less specific type `array<array-key, float>` is being assigned to property `$$jobStartTimes` (array<string, float>)."
+code = "possibly-invalid-argument"
+message = '''Possible argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\MailerCollector::collectmessage`: expected `array{'bcc': array<array-key, mixed>, 'cc': array<array-key, mixed>, 'charset': string, 'date': null|string, 'from': array<array-key, mixed>, 'htmlBody': null|string, 'raw': string, 'replyTo': array<array-key, mixed>, 'subject': string, 'textBody': null|string, 'to': array<array-key, mixed>}`, but possibly received `array{'bcc': array{}, 'cc': array{}, 'charset': string('utf-8'), 'date': string, 'from': array<string, string>, 'htmlBody': resource|string, 'raw': string(''), 'replyTo': array{}, 'subject': string, 'textBody': resource|string, 'to': array<string, string>}`.'''
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Foundation\Application)`).'
-count = 3
+code = "ambiguous-object-method-access"
+message = "Cannot statically verify method call on a generic `object` type."
+count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
@@ -2151,7 +1785,7 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "less-specific-nested-return-statement"
-message = '''Returned type `array{}|non-empty-list<array{'class': mixed, 'name': mixed}>` is less specific than the declared return type `list<array{'class': string, 'name': string}>` for function `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::getproviders` due to nested 'mixed'.'''
+message = '''Returned type `array{}|non-empty-list<array{'class': mixed, 'name': string}>` is less specific than the declared return type `list<array{'class': string, 'name': string}>` for function `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::getproviders` due to nested 'mixed'.'''
 count = 1
 
 [[issues]]
@@ -2175,26 +1809,20 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `ksort`: expected `array<('K.ksort() extends array-key), ('V.ksort() extends mixed)>`, but found `mixed`."
+message = "Invalid argument type for argument #1 of `class_basename`: expected `object|string`, but found `mixed`."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `method_exists`: expected `class-string|object`, but found `mixed`."
+message = "Invalid argument type for argument #1 of `ksort`: expected `array<('K.ksort() extends array-key), ('V.ksort() extends mixed)>`, but found `mixed`."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 6
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 1
+count = 4
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
@@ -2210,74 +1838,20 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Foundation\Application`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
-code = "non-existent-function"
-message = 'Could not find definition for function `AppDevPanel\Adapter\Laravel\Inspector\class_basename` (also tried as `class_basename` in a broader scope).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `method_exists`: expected `class-string|object`, but possibly received `unknown-ref(Illuminate\Contracts\Foundation\Application)`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "unknown-iterator-type"
 message = "Cannot determine the type of the expression provided to `foreach`."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
-code = "invalid-iterator"
-message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Routing\Route)`).'
-count = 8
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Routing\Route)`).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `ltrim`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteAdapter.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Routing\Route`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteCollectionAdapter.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Routing\Router)`).'
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteCollectionAdapter.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelrouteadapter::__construct`: expected `unknown-ref(Illuminate\Routing\Route)`, but found `mixed`.'
+message = 'Invalid argument type for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelrouteadapter::__construct`: expected `Illuminate\Routing\Route`, but found `mixed`.'
 count = 1
 
 [[issues]]
@@ -2288,27 +1862,9 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteCollectionAdapter.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Routing\Router`.'
+code = "non-iterable-object-iteration"
+message = 'Iterating over object of type `Illuminate\Routing\RouteCollectionInterface` which does not implement `Iterator` or `IteratorAggregate`.'
 count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelRouteCollectionAdapter.php"
-code = "unknown-iterator-type"
-message = "Cannot determine the type of the expression provided to `foreach`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
-code = "invalid-iterator"
-message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Database\Connection)`).'
-count = 9
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
@@ -2324,104 +1880,20 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider::getprimarykeys`: expected `string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider::serializecolumns`: expected `list<array<string, mixed>>`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `array_map`: expected `array<('K.array_map() extends array-key), mixed>`, but found `mixed`."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 12
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 10
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
 code = "mixed-operand"
 message = "Casting `mixed` to `bool`."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\adapter\laravel\inspector\laravelschemaprovider::getprimarykeys`. Saw type `nonnull`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelSchemaProvider.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Database\Connection`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Routing\Router)`).'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `appdevpanel\adapter\laravel\inspector\laravelmatchresult::__construct`: expected `null|string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
+code = "redundant-null-coalesce"
+message = "Redundant null coalesce: left-hand side can never be `null` or undefined."
 count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Routing\Router`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelUrlMatcherAdapter.php"
-code = "non-existent-method"
-message = 'Method `create` does not exist on type `Illuminate\Http\Request`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
-count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `str_contains`: expected `string`, but found `mixed`."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `str_starts_with`: expected `string`, but found `mixed`."
 count = 2
 
 [[issues]]
@@ -2440,7 +1912,7 @@ count = 3
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
+count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
@@ -2456,135 +1928,51 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Request`.'
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "possible-method-access-on-null"
 message = "Attempting to call a method on `null`."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "invalid-property-access"
-message = 'Attempting to access a property on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "method-access-on-null"
-message = "Attempting to call a method on `null`."
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but possibly received `list<null|string>`.'
 count = 4
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `string`, but found `mixed`.'
+code = "redundant-comparison"
+message = "Redundant `!==` comparison: left-hand side is always not identical to right-hand side."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Nyholm\Psr7\Factory\Psr17Factory::createstream`: expected `string`, but found `mixed`.'
+code = "redundant-logical-operation"
+message = "Redundant `&&` operation: left operand is evaluated and right operand is always truthy."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Psr\Http\Message\ServerRequestInterface::withqueryparams`: expected `array<array-key, mixed>`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `psr\http\message\messageinterface::withheader`: expected `string`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `Psr\Http\Message\UriInterface|string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #3 of `Nyholm\Psr7\Factory\Psr17Factory::createserverrequest`: expected `array<array-key, mixed>`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
+file = "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Request`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #2 of `psr\http\message\messageinterface::withheader`: expected `array<array-key, string>|string`, but possibly received `list<null|string>`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/Psr7Converter.php"
-code = "unknown-iterator-type"
-message = "Cannot determine the type of the expression provided to `foreach`."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php"
-code = "non-existent-class-like"
-message = 'Class `AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy` cannot implement unknown type `Dispatcher`'
+code = "mixed-operand"
+message = "Invalid left operand: type `nonnull` cannot be reliably used in string concatenation."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php"
-code = "unused-property"
-message = "Property `$collector` is never used."
+code = "mixed-operand"
+message = "Invalid right operand: type `nonnull` cannot be reliably used in string concatenation."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php"
-code = "unused-property"
-message = "Property `$decorated` is never used."
+code = "string-member-selector"
+message = "This member selector uses a non-literal string type (`string`); its specific value cannot be statically determined."
 count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
-code = "impossible-assignment"
-message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
-code = "missing-magic-method"
-message = "Call to documented magic method `method()` on a class that cannot handle it."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor::extract`: expected `unknown-ref(Illuminate\Http\Request)`, but found `mixed`.'
-count = 2
 
 [[issues]]
 file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
@@ -2597,72 +1985,6 @@ file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
 count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Routing\RouteCollection` not found.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Routing\Route` not found.'
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Illuminate\Routing\Router` does not exist.'
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
-code = "non-existent-method"
-message = 'Method `create` does not exist on type `Illuminate\Http\Request`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Collector/RouterDataExtractorTest.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #2 of `appdevpanel\adapter\laravel\collector\routerdataextractor::__construct`: expected `unknown-ref(Illuminate\Routing\Router)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Routing\Router`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Controller/AdpApiControllerTest.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `appdevpanel\adapter\laravel\controller\adpapicontroller::__invoke`: expected `unknown-ref(Illuminate\Http\Request)`, but found `mixed`.'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Controller/AdpApiControllerTest.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Controller/AdpApiControllerTest.php"
-code = "non-existent-method"
-message = 'Method `create` does not exist on type `Illuminate\Http\Request`.'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
-code = "impossible-assignment"
-message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
-count = 4
 
 [[issues]]
 file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
@@ -2683,106 +2005,10 @@ message = "Unsafe array access on type `mixed`."
 count = 20
 
 [[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
-code = "no-value"
-message = "Argument #1 passed to closure `Closure` has type `never`, meaning it cannot produce a value."
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Cache\Events\CacheHit` not found.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Cache\Events\CacheMissed` not found.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Cache\Events\KeyForgotten` not found.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Cache\Events\KeyWritten` not found.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Illuminate\Contracts\Events\Dispatcher` does not exist.'
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/CacheListenerTest.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\CacheListener::register`: expected `unknown-ref(Illuminate\Contracts\Events\Dispatcher)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Contracts\Events\Dispatcher`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
-code = "impossible-assignment"
-message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
-count = 3
-
-[[issues]]
 file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
 code = "missing-magic-method"
 message = "Call to documented magic method `method()` on a class that cannot handle it."
 count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
-code = "no-value"
-message = "Argument #1 passed to closure `Closure` has type `never`, meaning it cannot produce a value."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Console\Events\CommandFinished` not found.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Console\Events\CommandStarting` not found.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Illuminate\Contracts\Events\Dispatcher` does not exist.'
-count = 6
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/ConsoleListenerTest.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\ConsoleListener::register`: expected `unknown-ref(Illuminate\Contracts\Events\Dispatcher)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Contracts\Events\Dispatcher`.'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
-code = "impossible-assignment"
-message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
-count = 2
 
 [[issues]]
 file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
@@ -2815,100 +2041,10 @@ message = "Unsafe array access on type `mixed`."
 count = 8
 
 [[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
-code = "no-value"
-message = "Argument #1 passed to closure `Closure` has type `never`, meaning it cannot produce a value."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Database\Events\QueryExecuted` not found.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Illuminate\Contracts\Events\Dispatcher` does not exist.'
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/EventListener/DatabaseListenerTest.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener::register`: expected `unknown-ref(Illuminate\Contracts\Events\Dispatcher)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Contracts\Events\Dispatcher`.'
-count = 2
-
-[[issues]]
 file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
-code = "docblock-type-mismatch"
-message = 'Docblock return type `unknown-ref(Illuminate\Contracts\Foundation\Application)` is incompatible with native return type `unknown-ref(Illuminate\Contracts\Foundation\Application)`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
-code = "impossible-assignment"
-message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Foundation\Application)`).'
+code = "missing-magic-method"
+message = "Call to documented magic method `method()` on a class that cannot handle it."
 count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
-code = "invalid-return-statement"
-message = 'Invalid return type for function `appdevpanel\adapter\laravel\tests\unit\inspector\laravelconfigprovidertest::createappmock`: expected `unknown-ref(Illuminate\Contracts\Foundation\Application)`, but found `PHPUnit\Framework\MockObject\MockObject&Illuminate\Contracts\Foundation\Application`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Config\Repository` not found.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Foundation\Application`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `PHPUnit\Framework\MockObject\MockObject`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelConfigProviderTest.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::__construct`: expected `unknown-ref(Illuminate\Contracts\Foundation\Application)`, but possibly received `unknown-ref(Illuminate\Contracts\Foundation\Application)`.'
-count = 6
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteAdapterTest.php"
-code = "impossible-assignment"
-message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
-count = 5
 
 [[issues]]
 file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteAdapterTest.php"
@@ -2923,118 +2059,10 @@ message = 'Invalid argument type for argument #2 of `phpunit\framework\assert::a
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteAdapterTest.php"
-code = "no-value"
-message = 'Argument #1 passed to method `appdevpanel\adapter\laravel\inspector\laravelrouteadapter::__construct` has type `never`, meaning it cannot produce a value.'
-count = 5
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteAdapterTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Routing\Route` not found.'
-count = 5
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
-code = "impossible-assignment"
-message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
-code = "missing-magic-method"
-message = "Call to documented magic method `method()` on a class that cannot handle it."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Routing\RouteCollection` not found.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Routing\Route` not found.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Illuminate\Routing\Router` does not exist.'
-count = 4
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelRouteCollectionAdapterTest.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelroutecollectionadapter::__construct`: expected `unknown-ref(Illuminate\Routing\Router)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Routing\Router`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
-code = "impossible-assignment"
-message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
-count = 5
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
-code = "missing-magic-method"
-message = "Call to documented magic method `method()` on a class that cannot handle it."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Routing\RouteCollection` not found.'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Routing\Route` not found.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Illuminate\Routing\Router` does not exist.'
-count = 6
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Inspector/LaravelUrlMatcherAdapterTest.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\inspector\laravelurlmatcheradapter::__construct`: expected `unknown-ref(Illuminate\Routing\Router)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Routing\Router`.'
-count = 3
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Middleware/DebugMiddlewareTest.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware::handle`: expected `unknown-ref(Illuminate\Http\Request)`, but found `mixed`.'
-count = 5
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Middleware/DebugMiddlewareTest.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware::terminate`: expected `unknown-ref(Illuminate\Http\Request)`, but found `mixed`.'
-count = 2
-
-[[issues]]
 file = "libs/Adapter/Laravel/tests/Unit/Middleware/DebugMiddlewareTest.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 9
+count = 3
 
 [[issues]]
 file = "libs/Adapter/Laravel/tests/Unit/Middleware/DebugMiddlewareTest.php"
@@ -3049,40 +2077,10 @@ message = "Attempting to access a property on a non-object type (`mixed`)."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Middleware/DebugMiddlewareTest.php"
-code = "non-existent-method"
-message = 'Method `create` does not exist on type `Illuminate\Http\Request`.'
-count = 6
-
-[[issues]]
 file = "libs/Adapter/Laravel/tests/Unit/Proxy/LaravelEventDispatcherProxyTest.php"
 code = "deprecated-method"
 message = 'Call to deprecated method: `phpunit\framework\assert::istype`.'
 count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Proxy/LaravelEventDispatcherProxyTest.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Proxy/LaravelEventDispatcherProxyTest.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 22
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Proxy/LaravelEventDispatcherProxyTest.php"
-code = "non-existent-class-like"
-message = 'Class, Interface, or Trait `Illuminate\Contracts\Events\Dispatcher` does not exist.'
-count = 20
-
-[[issues]]
-file = "libs/Adapter/Laravel/tests/Unit/Proxy/LaravelEventDispatcherProxyTest.php"
-code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `appdevpanel\adapter\laravel\proxy\laraveleventdispatcherproxy::__construct`: expected `unknown-ref(Illuminate\Contracts\Events\Dispatcher)`, but possibly received `PHPUnit\Framework\MockObject\MockObject&Illuminate\Contracts\Events\Dispatcher`.'
-count = 10
 
 [[issues]]
 file = "libs/Adapter/Symfony/src/Collector/RouterDataExtractor.php"

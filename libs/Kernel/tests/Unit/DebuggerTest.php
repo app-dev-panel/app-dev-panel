@@ -12,6 +12,7 @@ use AppDevPanel\Kernel\StartupContext;
 use AppDevPanel\Kernel\Storage\MemoryStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Nyholm\Psr7\ServerRequest;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class DebuggerTest extends TestCase
@@ -122,9 +123,7 @@ final class DebuggerTest extends TestCase
         $debugger->shutdown();
     }
 
-    /**
-     * @dataProvider dataShutdownWithSkipCommandCollect
-     */
+    #[DataProvider('dataShutdownWithSkipCommandCollect')]
     public function testShutdownWithSkipCommandCollect(array $ignoredCommands, ?string $ignoredCommand): void
     {
         $idGenerator = new DebuggerIdGenerator();
@@ -165,9 +164,7 @@ final class DebuggerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider dataShutdownWithoutSkipCommandCollect
-     */
+    #[DataProvider('dataShutdownWithoutSkipCommandCollect')]
     public function testShutdownWithoutSkipCommandCollect(array $ignoredCommands, ?string $ignoredCommand): void
     {
         $idGenerator = new DebuggerIdGenerator();
