@@ -10,10 +10,10 @@ import {useDeferredValue, useState} from 'react';
 
 type CurrentRoute = {
     matchTime: number;
-    name: string;
+    name: string | null;
     pattern: string;
-    arguments: Record<string, string>;
-    host: string;
+    arguments: Record<string, string> | null;
+    host: string | null;
     uri: string;
     action: any;
     middlewares: any[];
@@ -115,10 +115,12 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
             {currentRoute && (
                 <InfoCard>
                     <Typography sx={{fontSize: '14px', fontWeight: 600, mb: 1.5}}>Current Route</Typography>
-                    <FieldRow>
-                        <FieldLabel>Name</FieldLabel>
-                        <FieldValue sx={{fontWeight: 500}}>{currentRoute.name}</FieldValue>
-                    </FieldRow>
+                    {currentRoute.name && (
+                        <FieldRow>
+                            <FieldLabel>Name</FieldLabel>
+                            <FieldValue sx={{fontWeight: 500}}>{currentRoute.name}</FieldValue>
+                        </FieldRow>
+                    )}
                     <FieldRow>
                         <FieldLabel>Pattern</FieldLabel>
                         <FieldValue sx={{fontFamily: primitives.fontFamilyMono}}>{currentRoute.pattern}</FieldValue>
@@ -148,35 +150,38 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
                         </FieldRow>
                     )}
 
-                    {Object.keys(currentRoute.arguments).length > 0 && (
-                        <Box sx={{mt: 1.5}}>
-                            <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
-                                Arguments
-                            </Typography>
-                            {Object.entries(currentRoute.arguments).map(([key, val]) => (
-                                <Box key={key} sx={{display: 'flex', gap: 1, ml: 1, mb: 0.25}}>
-                                    <Typography
-                                        sx={{
-                                            fontFamily: primitives.fontFamilyMono,
-                                            fontSize: '12px',
-                                            color: 'primary.main',
-                                        }}
-                                    >
-                                        {key}:
-                                    </Typography>
-                                    <Typography
-                                        sx={{
-                                            fontFamily: primitives.fontFamilyMono,
-                                            fontSize: '12px',
-                                            color: 'text.secondary',
-                                        }}
-                                    >
-                                        {val}
-                                    </Typography>
-                                </Box>
-                            ))}
-                        </Box>
-                    )}
+                    {currentRoute.arguments &&
+                        typeof currentRoute.arguments === 'object' &&
+                        !Array.isArray(currentRoute.arguments) &&
+                        Object.keys(currentRoute.arguments).length > 0 && (
+                            <Box sx={{mt: 1.5}}>
+                                <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                                    Arguments
+                                </Typography>
+                                {Object.entries(currentRoute.arguments).map(([key, val]) => (
+                                    <Box key={key} sx={{display: 'flex', gap: 1, ml: 1, mb: 0.25}}>
+                                        <Typography
+                                            sx={{
+                                                fontFamily: primitives.fontFamilyMono,
+                                                fontSize: '12px',
+                                                color: 'primary.main',
+                                            }}
+                                        >
+                                            {key}:
+                                        </Typography>
+                                        <Typography
+                                            sx={{
+                                                fontFamily: primitives.fontFamilyMono,
+                                                fontSize: '12px',
+                                                color: 'text.secondary',
+                                            }}
+                                        >
+                                            {val}
+                                        </Typography>
+                                    </Box>
+                                ))}
+                            </Box>
+                        )}
 
                     {currentRoute.action && (
                         <Box sx={{mt: 1.5}}>
