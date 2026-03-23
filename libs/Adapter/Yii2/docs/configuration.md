@@ -38,9 +38,9 @@ return [
 
             // URL patterns to skip (wildcard)
             'ignoredRequests' => [
-                '/debug/api/*',
-                '/inspect/api/*',
-                '/assets/*',
+                '/debug/api/**',
+                '/inspect/api/**',
+                '/assets/**',
             ],
 
             // Console command patterns to skip (wildcard)

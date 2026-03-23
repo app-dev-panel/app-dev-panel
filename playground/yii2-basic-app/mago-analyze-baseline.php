@@ -121,6 +121,12 @@ message = 'Class `App\actions\testFixtures\MailerAction` cannot extend unknown t
 count = 1
 
 [[issues]]
+file = "src/actions/testFixtures/MessengerAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\MessengerAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
 file = "src/actions/testFixtures/MultiAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\MultiAction` cannot extend unknown type `Action`'
@@ -145,9 +151,27 @@ message = 'Class `App\actions\testFixtures\ResetCliAction` cannot extend unknown
 count = 1
 
 [[issues]]
+file = "src/actions/testFixtures/RouterAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\RouterAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
 file = "src/actions/testFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\TimelineAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
+file = "src/actions/testFixtures/ValidatorAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\ValidatorAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
+file = "src/bootstrap/DatabaseBootstrap.php"
+code = "non-existent-class-like"
+message = 'Class `App\bootstrap\DatabaseBootstrap` cannot implement unknown type `BootstrapInterface`'
 count = 1
 
 [[issues]]

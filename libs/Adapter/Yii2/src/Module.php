@@ -39,6 +39,7 @@ use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
+use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
@@ -49,10 +50,13 @@ use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
@@ -116,12 +120,16 @@ class Module extends \yii\base\Module implements BootstrapInterface
         'db' => true,
         'mailer' => true,
         'assets' => true,
+        'cache' => true,
+        'router' => true,
+        'queue' => true,
+        'validator' => true,
     ];
 
     /**
      * @var string[] URL patterns to ignore (wildcard).
      */
-    public array $ignoredRequests = ['/debug/api/*', '/inspect/api/*'];
+    public array $ignoredRequests = ['/debug/api/**', '/inspect/api/**'];
 
     /**
      * @var string[] Command name patterns to ignore (wildcard).
@@ -493,6 +501,10 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'db' => static fn(): array => [new DatabaseCollector($timeline)],
             'mailer' => static fn(): array => [new MailerCollector($timeline)],
             'assets' => static fn(): array => [new AssetBundleCollector($timeline)],
+            'cache' => static fn(): array => [new CacheCollector($timeline)],
+            'router' => static fn(): array => [new RouterCollector()],
+            'queue' => static fn(): array => [new QueueCollector($timeline)],
+            'validator' => static fn(): array => [new ValidatorCollector()],
         ];
     }
 

@@ -58,9 +58,9 @@ app_dev_panel:
     # URL patterns to skip (wildcard matching).
     # Matching requests will not generate debug entries.
     ignored_requests:
-        - '/_wdt/*'
-        - '/_profiler/*'
-        - '/debug/api/*'
+        - '/_wdt/**'
+        - '/_profiler/**'
+        - '/debug/api/**'
 
     # Command name patterns to skip (wildcard matching).
     ignored_commands:

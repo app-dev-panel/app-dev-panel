@@ -69,7 +69,7 @@ It registers the `debug-panel` module if enabled (auto-enables in YII_DEBUG mode
             'mailer' => true,
             'assets' => true,
         ],
-        'ignoredRequests' => ['/debug/api/*', '/inspect/api/*'],
+        'ignoredRequests' => ['/debug/api/**', '/inspect/api/**'],
         'ignoredCommands' => ['help', 'list', 'cache/*', 'asset/*'],
         'allowedIps' => ['127.0.0.1', '::1'],
     ],

@@ -201,7 +201,7 @@ app_dev_panel:
         command: true
         cache: true
     ignored_requests:
-        - '/debug/api/*'
+        - '/debug/api/**'
 ```
 
 **`config/routes/app_dev_panel.php`:**
@@ -405,7 +405,7 @@ return [
                 'command' => true,
                 'db' => true,
             ],
-            'ignoredRequests' => ['/debug/api/*', '/inspect/api/*', '/assets/*'],
+            'ignoredRequests' => ['/debug/api/**', '/inspect/api/**', '/assets/**'],
         ],
     ],
 ];

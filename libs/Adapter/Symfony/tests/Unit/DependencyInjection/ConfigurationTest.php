@@ -24,9 +24,9 @@ final class ConfigurationTest extends TestCase
         }
 
         // Default ignored patterns
-        $this->assertContains('/_wdt/*', $config['ignored_requests']);
-        $this->assertContains('/_profiler/*', $config['ignored_requests']);
-        $this->assertContains('/debug/api/*', $config['ignored_requests']);
+        $this->assertContains('/_wdt/**', $config['ignored_requests']);
+        $this->assertContains('/_profiler/**', $config['ignored_requests']);
+        $this->assertContains('/debug/api/**', $config['ignored_requests']);
         $this->assertContains('completion', $config['ignored_commands']);
 
         $this->assertSame([], $config['dumper']['excluded_classes']);

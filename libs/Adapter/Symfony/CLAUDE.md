@@ -197,7 +197,7 @@ app_dev_panel:
     ignored_requests:
         - '/_wdt/*'
         - '/_profiler/*'
-        - '/debug/api/*'
+        - '/debug/api/**'
     ignored_commands:
         - 'completion'
         - 'help'
