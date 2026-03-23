@@ -164,21 +164,39 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `array_key_exists`: expected `array<array-key, mixed>`, but found `mixed`."
-count = 9
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
 
 [[issues]]
 file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
-count = 5
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Ingestion\Controller\IngestionController::requirearrayfield`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Ingestion\Controller\IngestionController::writeentry`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `count`: expected `Countable|array<array-key, mixed>`, but found `mixed`."
+count = 1
 
 [[issues]]
 file = "libs/API/src/Ingestion/Controller/IngestionController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 4
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/IngestionController.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\api\ingestion\controller\ingestioncontroller::decoderequestbody`. Saw type `mixed`.'
+count = 1
 
 [[issues]]
 file = "libs/API/src/Ingestion/Controller/IngestionController.php"
@@ -297,19 +315,19 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `array_key_exists`: expected `bool|float|int|null|string`, but found `nonnull`."
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Controller\CommandController::resolvecommand`: expected `array<array-key, mixed>|string`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/CommandController.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Controller\CommandController::validatecommandname`: expected `null|string`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #2 of `implode`: expected `array<array-key, Stringable|null|scalar>|null`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/CommandController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
 count = 1
 
 [[issues]]
@@ -321,32 +339,26 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "mixed-array-index"
-message = '''Invalid index type `nonnull` used for array access on `array<string, class-string<AppDevPanel\Api\Inspector\CommandInterface>|list{string('composer'), array-key}|list{string('composer'), array-key}>`.'''
+message = "Invalid index type `mixed` used for array access on `array<array-key, mixed>`."
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 9
+count = 6
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 4
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\api\inspector\controller\commandcontroller::resolvecommand`. Saw type `mixed`.'
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "possibly-false-argument"
 message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
 count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/CommandController.php"
-code = "possibly-static-access-on-interface"
-message = 'Potential static method call on interface `AppDevPanel\Api\Inspector\CommandInterface` via `class-string`.'
-count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/ComposerController.php"
@@ -398,14 +410,20 @@ count = 4
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/FileController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `ReflectionClass::getmethod`: expected `string`, but found `nonnull`."
+code = "less-specific-nested-argument-type"
+message = "Argument type mismatch for argument #1 of `array_flip`: expected `array<array-key, ('V.array_flip() extends array-key)>`, but provided type `array<array-key, mixed>` is less specific."
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/FileController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `ReflectionClass::hasmethod`: expected `string`, but found `nonnull`."
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Controller\FileController::resolvepathfile`: expected `string`, but found `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_intersect_key`: expected `array<('K.array_intersect_key() extends array-key), ('V.array_intersect_key() extends mixed)>`, but found `mixed`."
 count = 1
 
 [[issues]]
@@ -435,20 +453,14 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/FileController.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `AppDevPanel\Api\Inspector\Controller\FileController::removebasepath`: expected `string`, but found `nonnull`.'
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/FileController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Api\Inspector\Controller\FileController::resolveclassfile`: expected `string`, but found `nonnull`.'
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/FileController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/FileController.php"
@@ -466,13 +478,19 @@ count = 1
 file = "libs/API/src/Inspector/Controller/FileController.php"
 code = "possibly-false-argument"
 message = 'Argument #1 of method `AppDevPanel\Api\Inspector\Controller\FileController::removebasepath` is possibly `false`, but parameter type `string` does not accept it.'
-count = 2
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/FileController.php"
 code = "possibly-false-argument"
 message = "Argument #2 of function `str_starts_with` is possibly `false`, but parameter type `string` does not accept it."
-count = 2
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "possibly-false-argument"
+message = 'Argument #2 of method `AppDevPanel\Api\Inspector\Controller\FileController::listdirectory` is possibly `false`, but parameter type `string` does not accept it.'
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/FileController.php"
@@ -484,6 +502,12 @@ count = 1
 file = "libs/API/src/Inspector/Controller/FileController.php"
 code = "possibly-invalid-argument"
 message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Api\Inspector\Controller\FileController::serializefileinfo`: expected `SplFileInfo`, but possibly received `RecursiveDirectoryIterator|SplFileInfo|null|string`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #1 of `reflectionclass::__construct`: expected `('T.reflectionclass extends object)|class-string<'T.reflectionclass extends object>`, but possibly received `string`."
 count = 1
 
 [[issues]]
@@ -503,6 +527,12 @@ file = "libs/API/src/Inspector/Controller/FileController.php"
 code = "possibly-null-operand"
 message = "Possibly null right operand used in string concatenation (type `array<array-key, mixed>|null|string`)."
 count = 2
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "template-constraint-violation"
+message = "Argument type mismatch for template `V`."
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/GitController.php"
@@ -525,25 +555,19 @@ count = 5
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `class_exists`: expected `string`, but found `nonnull`."
-count = 2
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Controller\InspectController::validateclassname`: expected `null|string`, but found `mixed`.'
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `interface_exists`: expected `string`, but found `nonnull`."
+message = 'Invalid argument type for argument #1 of `Psr\Container\ContainerInterface::get`: expected `string`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `ksort`: expected `array<('K.ksort() extends array-key), ('V.ksort() extends mixed)>`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
 count = 1
 
 [[issues]]
@@ -563,6 +587,12 @@ file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
 count = 3
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/InspectController.php"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #1 of `reflectionclass::__construct`: expected `('T.reflectionclass extends object)|class-string<'T.reflectionclass extends object>`, but possibly received `string`."
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/RequestController.php"
@@ -652,18 +682,12 @@ count = 1
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "ambiguous-object-method-access"
 message = "Cannot statically verify method call on a generic `object` type."
-count = 1
+count = 3
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "invalid-array-element-key"
 message = "Invalid array key type."
-count = 2
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/TranslationController.php"
-code = "invalid-iterator"
-message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
 count = 2
 
 [[issues]]
@@ -675,7 +699,7 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `array_key_exists`: expected `bool|float|int|null|string`, but found `mixed`."
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Controller\TranslationController::validatelocale`: expected `string`, but found `nonnull`.'
 count = 1
 
 [[issues]]
@@ -693,7 +717,7 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `array_map`: expected `array<('K.array_map() extends array-key), object>`, but found `mixed`."
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Api\Inspector\Controller\TranslationController::findcategorysource`: expected `string`, but found `nonnull`.'
 count = 1
 
 [[issues]]
@@ -704,33 +728,27 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `nonnull`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/TranslationController.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
-count = 2
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used for array access on `array<array-key, array<mixed, array<array-key, mixed>>>`."
+count = 3
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "mixed-array-index"
-message = "Invalid index type `mixed` used for array access on `array<array-key, array<string, array<array-key, mixed>>>`."
-count = 3
+message = "Invalid index type `mixed` used for array access on `array<mixed, array<array-key, mixed>>`."
+count = 2
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 10
+count = 8
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
 code = "mixed-assignment"
 message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
-count = 4
+count = 3
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
@@ -740,9 +758,45 @@ count = 3
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/TranslationController.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`nonnull`)."
-count = 2
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\api\inspector\controller\translationcontroller::findcategorysource`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/TranslationController.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\api\inspector\controller\translationcontroller::resolvecategorysources`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Middleware/InspectorProxyMiddleware.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware::validateservicedescriptor`: expected `string`, but found `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Middleware/InspectorProxyMiddleware.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `sprintf`: expected `Stringable|null|scalar`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Middleware/InspectorProxyMiddleware.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Middleware/InspectorProxyMiddleware.php"
+code = "possibly-false-argument"
+message = "Argument #3 of function `substr` is possibly `false`, but parameter type `int|null` does not accept it."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Middleware/InspectorProxyMiddleware.php"
+code = "possibly-false-operand"
+message = "Left operand in `>` comparison might be `false` (type `false|non-negative-int`)."
+count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Test/CodeceptionJSONReporter.php"
@@ -1383,6 +1437,24 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
 code = "unused-method"
+message = "Method `decorateeventdispatcherproxy()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `decoratehttpclientproxy()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `decorateloggerproxy()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
 message = "Method `decoratepsrservices()` is never used."
 count = 1
 
@@ -1390,6 +1462,30 @@ count = 1
 file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
 code = "unused-method"
 message = "Method `isenabled()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registerapiapplication()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registerapicontrollers()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registerapicoreservices()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registerapimiddleware()` is never used."
 count = 1
 
 [[issues]]
@@ -1413,7 +1509,19 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
 code = "unused-method"
+message = "Method `registercommandcollectors()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
 message = "Method `registercoreservices()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registerdebugcollectors()` is never used."
 count = 1
 
 [[issues]]
@@ -1431,7 +1539,43 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
 code = "unused-method"
+message = "Method `registerinspectorservices()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
 message = "Method `registermiddleware()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registerpsrfactories()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registerrequestcollectors()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registerroutercollector()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registersimplecollectors()` is never used."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "unused-method"
+message = "Method `registertimelinecollectors()` is never used."
 count = 1
 
 [[issues]]
@@ -2054,12 +2198,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
-code = "invalid-iterator"
-message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Foundation\Application)`).'
 count = 3
@@ -2068,12 +2206,6 @@ count = 3
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "invalid-return-statement"
 message = '''Invalid return type for function `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::get`: expected `array<string, mixed>`, but found `array<string, mixed>|list<array{'class': null|string, 'listeners'?: list<string>, 'name': string}>`.'''
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
-code = "less-specific-argument"
-message = "Argument type mismatch for argument #1 of `class_exists`: expected `string`, but provided type `array-key` is less specific."
 count = 1
 
 [[issues]]
@@ -2096,12 +2228,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
-code = "less-specific-return-statement"
-message = '''Returned type `array{}|non-empty-list<array{'class': class-string|null, 'listeners': array{}|non-empty-list<string>, 'name': array-key}>` is less specific than the declared return type `list<array{'class': null|string, 'listeners': list<string>, 'name': string}>` for function `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::geteventlisteners`.'''
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
 count = 1
@@ -2110,7 +2236,7 @@ count = 1
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `ksort`: expected `array<('K.ksort() extends array-key), ('V.ksort() extends mixed)>`, but found `mixed`."
-count = 2
+count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
@@ -2122,7 +2248,7 @@ count = 1
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 9
+count = 6
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
@@ -2132,8 +2258,8 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
-code = "mixed-operand"
-message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\laravel\inspector\laravelconfigprovider::getraweventlisteners`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
@@ -2151,8 +2277,20 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Laravel\Inspector\LaravelConfigProvider::describearraylistener`: expected `array{0: object|string, 1: string}`, but possibly received `non-empty-array<array-key, mixed>`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "possibly-invalid-argument"
 message = 'Possible argument type mismatch for argument #1 of `method_exists`: expected `class-string|object`, but possibly received `unknown-ref(Illuminate\Contracts\Foundation\Application)`.'
 count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
+code = "redundant-cast"
+message = "Redundant cast to `(string)`: the expression already has this type."
+count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
@@ -2338,7 +2476,7 @@ count = 1
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
-count = 5
+count = 4
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
@@ -2386,7 +2524,7 @@ count = 2
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "mixed-argument"
 message = "Invalid argument type for argument #1 of `str_starts_with`: expected `string`, but found `mixed`."
-count = 6
+count = 2
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
@@ -2422,7 +2560,7 @@ count = 3
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 6
+count = 5
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
@@ -2440,7 +2578,7 @@ count = 1
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Request`.'
-count = 3
+count = 5
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
@@ -3033,6 +3171,18 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
 code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Adapter\Symfony\DependencyInjection\AppDevPanelExtension::registerkernelcollectors`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Adapter\Symfony\DependencyInjection\AppDevPanelExtension::registersymfonyspecificcollectors`: expected `array<array-key, mixed>`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
+code = "mixed-argument"
 message = 'Invalid argument type for argument #2 of `symfony\component\dependencyinjection\container::setparameter`: expected `UnitEnum|array<array-key, mixed>|null|scalar`, but found `mixed`.'
 count = 5
 
@@ -3046,7 +3196,7 @@ count = 2
 file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
-count = 21
+count = 3
 
 [[issues]]
 file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
@@ -3206,8 +3356,14 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
-code = "mixed-operand"
-message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+code = "possibly-invalid-argument"
+message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider::describearraylistener`: expected `array{0: object|string, 1: string}`, but possibly received `non-empty-array<array-key, mixed>`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
+code = "redundant-cast"
+message = "Redundant cast to `(string)`: the expression already has this type."
 count = 1
 
 [[issues]]
@@ -3908,12 +4064,6 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
-code = "invalid-return-statement"
-message = 'Invalid return type for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::geteventhandlers`: expected `array<string, list<string>>`, but found `array<truthy-string, array<array-key, string>|list<class-string<yii\base\Behavior>|string>>`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
 code = "less-specific-return-statement"
 message = 'Returned type `array<array-key, mixed>` is less specific than the declared return type `array<string, mixed>` for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getparams`.'
 count = 1
@@ -3921,13 +4071,7 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
 code = "less-specific-return-statement"
-message = 'Returned type `array<array-key, mixed>` is less specific than the declared return type `array<string, string>` for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getcomponents`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
-code = "less-specific-return-statement"
-message = 'Returned type `array<array-key, mixed>` is less specific than the declared return type `array<string, string>` for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getmodules`.'
+message = 'Returned type `array<array-key, string>` is less specific than the declared return type `array<string, string>` for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::resolvedefinitionmap`.'
 count = 1
 
 [[issues]]
@@ -3940,7 +4084,7 @@ count = 2
 file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 6
+count = 5
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
@@ -3958,6 +4102,12 @@ count = 1
 file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::getinstanceevents`. Saw type `nonnull`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\adapter\yii2\inspector\yii2configprovider::resolvedefinitiontype`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
@@ -4041,25 +4191,25 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Yii2/src/Module.php"
 code = "possibly-false-argument"
+message = 'Argument #1 of method `AppDevPanel\Adapter\Yii2\Module::registercoreservices` is possibly `false`, but parameter type `string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "possibly-false-argument"
+message = 'Argument #1 of method `AppDevPanel\Adapter\Yii2\Module::registermiddleware` is possibly `false`, but parameter type `string` does not accept it.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "possibly-false-argument"
 message = 'Argument #1 of method `appdevpanel\api\pathresolver::__construct` is possibly `false`, but parameter type `string` does not accept it.'
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Module.php"
 code = "possibly-false-argument"
-message = 'Argument #1 of method `appdevpanel\kernel\storage\filestorage::__construct` is possibly `false`, but parameter type `string` does not accept it.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
-code = "possibly-false-argument"
 message = 'Argument #2 of method `appdevpanel\api\pathresolver::__construct` is possibly `false`, but parameter type `string` does not accept it.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yii2/src/Module.php"
-code = "possibly-false-operand"
-message = "Possibly false left operand used in string concatenation (type `false|string`)."
 count = 1
 
 [[issues]]
@@ -4659,20 +4809,8 @@ count = 7
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider::serializearcolumnsschemas`: expected `array<array-key, unknown-ref(Yiisoft\Db\Schema\Column\ColumnInterface)>`, but found `mixed`.'
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider::serializecolumns`: expected `array<array-key, unknown-ref(Yiisoft\Db\Schema\Column\ColumnInterface)>`, but found `mixed`.'
 count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `Yiisoft\Db\Query\Query::from`: expected `Yiisoft\Db\Expression\ExpressionInterface|array<array-key, mixed>|string`, but found `mixed`.'
-count = 2
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
@@ -4684,49 +4822,49 @@ count = 1
 file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
 code = "possible-method-access-on-null"
 message = "Attempting to call a method on `null`."
-count = 5
+count = 3
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
 code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider::serializearcolumnsschemas`: expected `array<array-key, unknown-ref(Yiisoft\Db\Schema\Column\ColumnInterface)>`, but possibly received `array<string, Yiisoft\Db\Schema\ColumnSchemaInterface>`.'
+message = 'Possible argument type mismatch for argument #1 of `AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider::serializecolumns`: expected `array<array-key, unknown-ref(Yiisoft\Db\Schema\Column\ColumnInterface)>`, but possibly received `array<string, Yiisoft\Db\Schema\ColumnSchemaInterface>`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
+code = "possibly-null-argument"
+message = 'Argument #1 of method `AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider::tablequery` is possibly `null`, but parameter type `Yiisoft\Db\Schema\TableSchemaInterface` does not accept it.'
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "invalid-callable"
+message = "Expression of type `mixed` cannot be called as a function or method."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy::getserviceproxyfromcallable`: expected `(callable(...mixed=): mixed)`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy::getserviceproxyfromarray`: expected `array<array-key, mixed>`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #3 of `AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy::getcommonmethodproxy`: expected `array<array-key, mixed>`, but found `mixed`.'
+message = 'Invalid argument type for argument #2 of `AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy::createarrayproxy`: expected `array<array-key, mixed>`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 4
+count = 6
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy::getserviceproxy`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\adapter\yiisoft\proxy\containerinterfaceproxy::getserviceproxyfromcallable`. Saw type `mixed`.'
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
@@ -4742,8 +4880,8 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `array_key_exists`: expected `array<array-key, mixed>`, but found `mixed`."
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
 
 [[issues]]
@@ -4774,6 +4912,12 @@ count = 1
 file = "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php"
 code = "non-existent-method"
 message = 'Method `hascurrenterror` does not exist on type `AppDevPanel\Adapter\Yiisoft\Proxy\ProxyLogTrait`.'
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php"
+code = "possible-method-access-on-null"
+message = "Attempting to call a method on `null`."
 count = 1
 
 [[issues]]
@@ -4835,6 +4979,12 @@ file = "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 2
+
+[[issues]]
+file = "libs/Cli/src/Command/DebugQueryCommand.php"
+code = "less-specific-nested-argument-type"
+message = "Argument type mismatch for argument #2 of `implode`: expected `array<array-key, Stringable|null|scalar>|null`, but provided type `non-empty-array<array-key, mixed>` is less specific."
+count = 1
 
 [[issues]]
 file = "libs/Cli/src/Command/DebugQueryCommand.php"
@@ -4952,32 +5102,20 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `array_key_exists`: expected `bool|float|int|null|string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `nonnull`."
 count = 3
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
-code = "mixed-array-index"
-message = "Invalid index type `mixed` used for array access on `non-empty-array<array-key, mixed>`."
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\console\commandcollector::fetchoutput`. Saw type `mixed`.'
+code = "non-existent-method"
+message = 'Method `fetch` does not exist on type `Symfony\Component\Console\Output\OutputInterface`.'
 count = 1
 
 [[issues]]
@@ -5024,56 +5162,8 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector::collect`: expected `string`, but provided type `array-key` is less specific.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector::collect`: expected `string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #3 of `AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector::collect`: expected `array<array-key, mixed>`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::dir_closedir`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::dir_opendir`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::dir_readdir`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::dir_rewinddir`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
@@ -5097,36 +5187,6 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_cast`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_eof`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_flush`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_lock`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_metadata`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_open`. Saw type `mixed`.'
 count = 1
 
@@ -5134,36 +5194,6 @@ count = 1
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_read`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_seek`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_set_option`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_stat`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_tell`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::stream_truncate`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
@@ -5177,18 +5207,6 @@ file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::unlink`. Saw type `mixed`.'
 count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\filesystemstreamproxy::url_stat`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "string-member-selector"
-message = "This member selector uses a non-literal string type (`string`); its specific value cannot be statically determined."
-count = 2
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
@@ -5216,36 +5234,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "less-specific-argument"
-message = 'Argument type mismatch for argument #1 of `AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector::collect`: expected `string`, but provided type `array-key` is less specific.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #2 of `AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector::collect`: expected `string`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-argument"
-message = 'Invalid argument type for argument #3 of `AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector::collect`: expected `array<array-key, mixed>`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "mixed-assignment"
 message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
 count = 1
@@ -5253,25 +5241,7 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::dir_closedir`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::dir_opendir`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::dir_readdir`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::dir_rewinddir`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
@@ -5295,36 +5265,6 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_cast`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_eof`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_flush`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_lock`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_metadata`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_open`. Saw type `mixed`.'
 count = 1
 
@@ -5332,36 +5272,6 @@ count = 1
 file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_read`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_seek`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_set_option`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_stat`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_tell`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::stream_truncate`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
@@ -5378,27 +5288,123 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\httpstreamproxy::url_stat`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "possibly-null-argument"
 message = "Argument #1 of function `stream_get_meta_data` is possibly `null`, but parameter type `resource` does not accept it."
 count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "string-member-selector"
-message = "This member selector uses a non-literal string type (`string`); its specific value cannot be statically determined."
-count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "unused-statement"
 message = "Expression has no effect as a statement"
 count = 3
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::dir_closedir`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::dir_opendir`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::dir_rewinddir`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::stream_eof`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::stream_flush`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::stream_lock`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::stream_metadata`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::stream_seek`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::stream_set_option`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::stream_stat`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::stream_tell`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::stream_truncate`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `appdevpanel\kernel\collector\stream\streamproxytrait::url_stat`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "non-existent-property"
+message = 'Static property `$collector` does not exist on trait `AppDevPanel\Kernel\Collector\Stream\StreamProxyTrait`.'
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php"
+code = "string-member-selector"
+message = "This member selector uses a non-literal string type (`string`); its specific value cannot be statically determined."
+count = 2
 
 [[issues]]
 file = "libs/Kernel/src/Collector/Web/RequestCollector.php"
@@ -5540,12 +5546,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
-code = "invalid-iterator"
-message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Dumper.php"
 code = "invalid-return-statement"
 message = 'Invalid return type for function `appdevpanel\kernel\dumper::asjsoninternal`: expected `string`, but found `false|non-empty-string`.'
 count = 1
@@ -5565,32 +5565,20 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Dumper::getobjectdescription`: expected `object`, but found `mixed`.'
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Dumper::dumparray`: expected `array<array-key, mixed>`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Dumper::getobjectproperties`: expected `object`, but found `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Dumper.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `array_key_exists`: expected `bool|float|int|null|string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Dumper.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `count`: expected `Countable|array<array-key, mixed>`, but found `mixed`."
+message = 'Invalid argument type for argument #1 of `AppDevPanel\Kernel\Dumper::dumpobject`: expected `object`, but found `mixed`.'
 count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 7
+count = 5
 
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
@@ -5618,14 +5606,8 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/FlattenException.php"
-code = "mixed-return-statement"
-message = 'Could not infer a precise return type for function `appdevpanel\kernel\flattenexception::getcode`. Saw type `mixed`.'
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/FlattenException.php"
 code = "possibly-invalid-argument"
-message = '''Possible argument type mismatch for argument #1 of `AppDevPanel\Kernel\FlattenException::settrace`: expected `list<array{'args'?: array<array-key, mixed>, 'class'?: class-string, 'file'?: string, 'function'?: string, 'line'?: int, 'type'?: string}>`, but possibly received `array<array-key, mixed>`.'''
+message = '''Possible argument type mismatch for argument #1 of `AppDevPanel\Kernel\FlattenException::flattentrace`: expected `list<array{'args'?: array<array-key, mixed>, 'class'?: class-string, 'file'?: string, 'function'?: string, 'line'?: int, 'type'?: string}>`, but possibly received `array<array-key, mixed>`.'''
 count = 1
 
 [[issues]]
@@ -6767,6 +6749,18 @@ file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 8
+
+[[issues]]
+file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
+code = "possibly-null-argument"
+message = 'Argument #2 of method `AppDevPanel\Testing\Assertion\ExpectationEvaluator::fieldnotfound` is possibly `null`, but parameter type `string` does not accept it.'
+count = 2
+
+[[issues]]
+file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
+code = "possibly-null-argument"
+message = 'Argument #2 of method `AppDevPanel\Testing\Assertion\ExpectationEvaluator::getbypath` is possibly `null`, but parameter type `string` does not accept it.'
+count = 4
 
 [[issues]]
 file = "libs/Testing/src/Command/DebugFixturesCommand.php"

@@ -45,12 +45,50 @@ final class DebugQueryController extends Controller
         $entries = array_slice($entries, 0, $limit);
 
         if ($json) {
-            Console::stdout(
-                json_encode($entries, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n",
-            );
+            $this->outputJson($entries);
             return ExitCode::OK;
         }
 
+        $this->renderEntryTable($entries);
+        return ExitCode::OK;
+    }
+
+    /**
+     * View full data for a debug entry.
+     *
+     * @param string $id Debug entry ID.
+     * @param string|null $collector Collector class name to filter by.
+     * @param bool $json Output raw JSON.
+     */
+    public function actionView(string $id, ?string $collector = null, bool $json = false): int
+    {
+        try {
+            $data = $this->collectorRepository->getDetail($id);
+        } catch (\Throwable $e) {
+            Console::stderr(Console::ansiFormat($e->getMessage() . "\n", [Console::FG_RED]));
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        if ($collector !== null) {
+            return $this->renderCollectorView($data, $id, $collector, $json);
+        }
+
+        if ($json) {
+            $this->outputJson($data);
+            return ExitCode::OK;
+        }
+
+        $this->renderFullEntryView($data, $id);
+        return ExitCode::OK;
+    }
+
+    private function outputJson(mixed $data): void
+    {
+        Console::stdout(json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+    }
+
+    private function renderEntryTable(array $entries): void
+    {
         $this->writeColored(sprintf("Debug Entries (showing %d)\n", count($entries)), Console::BOLD);
         Console::stdout(str_repeat('=', 60) . "\n");
 
@@ -84,72 +122,47 @@ final class DebugQueryController extends Controller
                 $row[4],
             ));
         }
-
-        return ExitCode::OK;
     }
 
-    /**
-     * View full data for a debug entry.
-     *
-     * @param string $id Debug entry ID.
-     * @param string|null $collector Collector class name to filter by.
-     * @param bool $json Output raw JSON.
-     */
-    public function actionView(string $id, ?string $collector = null, bool $json = false): int
+    private function renderCollectorView(array $data, string $id, string $collector, bool $json): int
     {
-        try {
-            $data = $this->collectorRepository->getDetail($id);
-        } catch (\Throwable $e) {
-            Console::stderr(Console::ansiFormat($e->getMessage() . "\n", [Console::FG_RED]));
+        if (!array_key_exists($collector, $data)) {
+            Console::stderr(Console::ansiFormat(
+                sprintf("Collector \"%s\" not found in entry \"%s\".\n", $collector, $id),
+                [Console::FG_RED],
+            ));
+            Console::stderr("Available collectors:\n");
+            foreach (array_keys($data) as $key) {
+                Console::stderr(sprintf("  - %s\n", (string) $key));
+            }
             return ExitCode::UNSPECIFIED_ERROR;
         }
 
-        if ($collector !== null) {
-            if (!array_key_exists($collector, $data)) {
-                Console::stderr(Console::ansiFormat(
-                    sprintf("Collector \"%s\" not found in entry \"%s\".\n", $collector, $id),
-                    [Console::FG_RED],
-                ));
-                Console::stderr("Available collectors:\n");
-                foreach (array_keys($data) as $key) {
-                    Console::stderr(sprintf("  - %s\n", (string) $key));
-                }
-                return ExitCode::UNSPECIFIED_ERROR;
-            }
-            $data = is_array($data[$collector]) ? $data[$collector] : [];
-        }
+        $collectorData = is_array($data[$collector]) ? $data[$collector] : [];
 
         if ($json) {
-            Console::stdout(
-                json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n",
-            );
+            $this->outputJson($collectorData);
             return ExitCode::OK;
         }
 
-        if ($collector !== null) {
-            $this->writeColored(sprintf("Collector: %s (Entry: %s)\n", $collector, $id), Console::BOLD);
-            Console::stdout(
-                json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n",
-            );
-            return ExitCode::OK;
-        }
+        $this->writeColored(sprintf("Collector: %s (Entry: %s)\n", $collector, $id), Console::BOLD);
+        $this->outputJson($collectorData);
+        return ExitCode::OK;
+    }
 
+    private function renderFullEntryView(array $data, string $id): void
+    {
         $this->writeColored(sprintf("Debug Entry: %s\n", $id), Console::BOLD);
         Console::stdout(str_repeat('=', 60) . "\n");
 
         foreach ($data as $collectorName => $collectorData) {
             $this->writeColored(sprintf("\n[%s]\n", (string) $collectorName), Console::BOLD, Console::FG_CYAN);
             if (is_array($collectorData) && $collectorData !== []) {
-                Console::stdout(
-                    json_encode($collectorData, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
-                        . "\n",
-                );
+                $this->outputJson($collectorData);
             } else {
                 $this->writeColored("(empty)\n", Console::FG_GREY);
             }
         }
-
-        return ExitCode::OK;
     }
 
     private function writeColored(string $text, int ...$formats): void

@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Laravel\Middleware;
 
-use AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor;
-use AppDevPanel\Kernel\Collector\EnvironmentCollector;
-use AppDevPanel\Kernel\Collector\ExceptionCollector;
-use AppDevPanel\Kernel\Collector\VarDumperCollector;
-use AppDevPanel\Kernel\Collector\Web\RequestCollector;
-use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
 use Illuminate\Http\Request;
@@ -30,48 +24,30 @@ final class DebugMiddleware
 
     public function __construct(
         private readonly Debugger $debugger,
-        private readonly ?RequestCollector $requestCollector = null,
-        private readonly ?WebAppInfoCollector $webAppInfoCollector = null,
-        private readonly ?ExceptionCollector $exceptionCollector = null,
-        private readonly ?VarDumperCollector $varDumperCollector = null,
-        private readonly ?EnvironmentCollector $environmentCollector = null,
-        private readonly ?RouterDataExtractor $routerDataExtractor = null,
+        private readonly DebugCollectors $collectors = new DebugCollectors(),
     ) {}
 
     public function handle(Request $request, \Closure $next): mixed
     {
-        $path = $request->getPathInfo();
-        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+        if ($this->isAdpApiPath($request)) {
             return $next($request);
         }
 
         $psrRequest = $this->convertLaravelRequestToPsr7($request);
 
         $this->registerVarDumperHandler();
-
         $this->debugger->startup(StartupContext::forRequest($psrRequest));
-
-        $this->webAppInfoCollector?->markApplicationStarted();
-        $this->webAppInfoCollector?->markRequestStarted();
-        $this->requestCollector?->collectRequest($psrRequest);
-        $this->environmentCollector?->collectFromRequest($psrRequest);
+        $this->collectBeforeRequest($psrRequest);
 
         try {
             /** @var SymfonyResponse $response */
             $response = $next($request);
         } catch (\Throwable $e) {
-            $this->exceptionCollector?->collect($e);
+            $this->collectors->exception?->collect($e);
             throw $e;
         }
 
-        $this->webAppInfoCollector?->markRequestFinished();
-
-        if ($this->requestCollector !== null) {
-            $psrResponse = $this->convertSymfonyResponseToPsr7($response);
-            $this->requestCollector->collectResponse($psrResponse);
-        }
-
-        $this->routerDataExtractor?->extract($request);
+        $this->collectAfterResponse($request, $response);
 
         $response->headers->set('X-Debug-Id', $this->debugger->getId());
 
@@ -80,22 +56,47 @@ final class DebugMiddleware
 
     public function terminate(Request $request, SymfonyResponse $response): void
     {
-        $path = $request->getPathInfo();
-        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+        if ($this->isAdpApiPath($request)) {
             return;
         }
 
-        $this->webAppInfoCollector?->markApplicationFinished();
+        $this->collectors->webAppInfo?->markApplicationFinished();
         $this->debugger->shutdown();
+    }
+
+    private function isAdpApiPath(Request $request): bool
+    {
+        $path = $request->getPathInfo();
+        return str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api');
+    }
+
+    private function collectBeforeRequest(\Psr\Http\Message\ServerRequestInterface $psrRequest): void
+    {
+        $this->collectors->webAppInfo?->markApplicationStarted();
+        $this->collectors->webAppInfo?->markRequestStarted();
+        $this->collectors->request?->collectRequest($psrRequest);
+        $this->collectors->environment?->collectFromRequest($psrRequest);
+    }
+
+    private function collectAfterResponse(Request $request, SymfonyResponse $response): void
+    {
+        $this->collectors->webAppInfo?->markRequestFinished();
+
+        if ($this->collectors->request !== null) {
+            $psrResponse = $this->convertSymfonyResponseToPsr7($response);
+            $this->collectors->request->collectResponse($psrResponse);
+        }
+
+        $this->collectors->routerDataExtractor?->extract($request);
     }
 
     private function registerVarDumperHandler(): void
     {
-        if (self::$varDumperHandlerRegistered || $this->varDumperCollector === null) {
+        if (self::$varDumperHandlerRegistered || $this->collectors->varDumper === null) {
             return;
         }
 
-        $collector = $this->varDumperCollector;
+        $collector = $this->collectors->varDumper;
         VarDumper::setHandler(static function (mixed $var, ?string $label = null) use ($collector): void {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
             $line = '';

@@ -30,26 +30,11 @@ class CommandController
 
     public function index(ServerRequestInterface $request): ResponseInterface
     {
-        $result = [];
-        foreach ($this->commandMap as $groupName => $commands) {
-            foreach ($commands as $name => $command) {
-                if (!is_subclass_of($command, CommandInterface::class)) {
-                    continue;
-                }
-                $result[] = [
-                    'name' => $name,
-                    'title' => $command::getTitle(),
-                    'group' => $groupName,
-                    'description' => $command::getDescription(),
-                ];
-            }
-        }
+        $result = $this->collectRegisteredCommands();
 
-        $composerScripts = $this->getComposerScripts();
-        foreach ($composerScripts as $scriptName => $commands) {
-            $commandName = "composer/{$scriptName}";
+        foreach ($this->getComposerScripts() as $scriptName => $commands) {
             $result[] = [
-                'name' => $commandName,
+                'name' => "composer/{$scriptName}",
                 'title' => $scriptName,
                 'group' => 'composer',
                 'description' => implode("\n", $commands),
@@ -61,24 +46,66 @@ class CommandController
 
     public function run(ServerRequestInterface $request): ResponseInterface
     {
-        $commandList = [];
-        foreach ($this->commandMap as $commands) {
-            foreach ($commands as $name => $command) {
-                if (!is_subclass_of($command, CommandInterface::class)) {
-                    continue;
-                }
-                $commandList[$name] = $command;
-            }
-        }
-        $composerScripts = $this->getComposerScripts();
-        foreach ($composerScripts as $scriptName => $commands) {
-            $commandName = "composer/{$scriptName}";
-            $commandList[$commandName] = ['composer', $scriptName];
-        }
+        $commandList = $this->buildCommandList();
 
         $queryParams = $request->getQueryParams();
         $commandName = $queryParams['command'] ?? null;
 
+        $this->validateCommandName($commandName, $commandList);
+
+        $command = $this->resolveCommand($commandList[$commandName]);
+        $result = $command->run();
+
+        return $this->responseFactory->createJsonResponse([
+            'status' => $result->getStatus(),
+            'result' => $result->getResult(),
+            'error' => $result->getErrors(),
+        ]);
+    }
+
+    /**
+     * @return iterable<string, array{group: string, class: class-string}>
+     */
+    private function iterateValidCommands(): iterable
+    {
+        foreach ($this->commandMap as $groupName => $commands) {
+            foreach ($commands as $name => $command) {
+                if (!is_subclass_of($command, CommandInterface::class)) {
+                    continue;
+                }
+                yield $name => ['group' => $groupName, 'class' => $command];
+            }
+        }
+    }
+
+    private function collectRegisteredCommands(): array
+    {
+        $result = [];
+        foreach ($this->iterateValidCommands() as $name => $info) {
+            $result[] = [
+                'name' => $name,
+                'title' => $info['class']::getTitle(),
+                'group' => $info['group'],
+                'description' => $info['class']::getDescription(),
+            ];
+        }
+        return $result;
+    }
+
+    private function buildCommandList(): array
+    {
+        $commandList = [];
+        foreach ($this->iterateValidCommands() as $name => $info) {
+            $commandList[$name] = $info['class'];
+        }
+        foreach ($this->getComposerScripts() as $scriptName => $commands) {
+            $commandList["composer/{$scriptName}"] = ['composer', $scriptName];
+        }
+        return $commandList;
+    }
+
+    private function validateCommandName(?string $commandName, array $commandList): void
+    {
         if ($commandName === null) {
             throw new InvalidArgumentException(sprintf('Command must not be null. Available commands: "%s".', implode(
                 '", "',
@@ -93,34 +120,32 @@ class CommandController
                 implode('", "', array_keys($commandList)),
             ));
         }
+    }
 
-        $commandClass = $commandList[$commandName];
+    private function resolveCommand(string|array $commandClass): CommandInterface
+    {
         if (is_string($commandClass) && $this->container->has($commandClass)) {
-            $command = $this->container->get($commandClass);
-        } else {
-            $command = new BashCommand($this->pathResolver, (array) $commandClass);
+            return $this->container->get($commandClass);
         }
-        $result = $command->run();
 
-        return $this->responseFactory->createJsonResponse([
-            'status' => $result->getStatus(),
-            'result' => $result->getResult(),
-            'error' => $result->getErrors(),
-        ]);
+        return new BashCommand($this->pathResolver, (array) $commandClass);
     }
 
     private function getComposerScripts(): array
     {
-        $result = [];
         $composerJsonPath = $this->pathResolver->getRootPath() . '/composer.json';
-        if (file_exists($composerJsonPath)) {
-            $composerJsonCommands = json_decode(file_get_contents($composerJsonPath), true, 512, JSON_THROW_ON_ERROR);
-            if (is_array($composerJsonCommands) && array_key_exists('scripts', $composerJsonCommands)) {
-                $scripts = $composerJsonCommands['scripts'];
-                foreach ($scripts as $name => $script) {
-                    $result[$name] = (array) $script;
-                }
-            }
+        if (!file_exists($composerJsonPath)) {
+            return [];
+        }
+
+        $composerJson = json_decode(file_get_contents($composerJsonPath), true, 512, JSON_THROW_ON_ERROR);
+        if (!is_array($composerJson) || !array_key_exists('scripts', $composerJson)) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($composerJson['scripts'] as $name => $script) {
+            $result[$name] = (array) $script;
         }
         return $result;
     }

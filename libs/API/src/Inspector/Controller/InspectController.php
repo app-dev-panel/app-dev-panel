@@ -51,29 +51,9 @@ final class InspectController
 
     public function classes(ServerRequestInterface $request): ResponseInterface
     {
-        $classes = [];
+        $inspected = $this->filterDeclaredClasses();
 
-        $inspected = [...get_declared_classes(), ...get_declared_interfaces()];
-        $patterns = [
-            static fn(string $class) => !str_starts_with($class, 'ComposerAutoloaderInit'),
-            static fn(string $class) => !str_starts_with($class, 'Composer\\'),
-            static fn(string $class) => !str_starts_with($class, 'AppDevPanel\\'),
-            static fn(string $class) => !str_contains($class, '@anonymous'),
-            static fn(string $class) => !is_subclass_of($class, Throwable::class),
-        ];
-        foreach ($patterns as $patternFunction) {
-            $inspected = array_filter($inspected, $patternFunction);
-        }
-
-        foreach ($inspected as $className) {
-            $class = new ReflectionClass($className);
-
-            if ($class->isInternal() || $class->isAbstract() || $class->isAnonymous()) {
-                continue;
-            }
-
-            $classes[] = $className;
-        }
+        $classes = array_values(array_filter($inspected, $this->isInspectable(...)));
         sort($classes);
 
         return $this->responseFactory->createJsonResponse($classes);
@@ -84,29 +64,7 @@ final class InspectController
         $queryParams = $request->getQueryParams();
         $className = $queryParams['classname'] ?? null;
 
-        if ($className === null || $className === '') {
-            throw new InvalidArgumentException('Query parameter "classname" is required.');
-        }
-
-        if (!class_exists($className) && !interface_exists($className)) {
-            throw new InvalidArgumentException(sprintf('Class "%s" does not exist.', $className));
-        }
-
-        $reflection = new ReflectionClass($className);
-
-        if ($reflection->isInternal()) {
-            throw new InvalidArgumentException('Inspector cannot initialize internal classes.');
-        }
-        if ($reflection->implementsInterface(Throwable::class)) {
-            throw new InvalidArgumentException('Inspector cannot initialize exceptions.');
-        }
-
-        if (!$this->container->has($className)) {
-            throw new InvalidArgumentException(sprintf(
-                'Class "%s" is not registered in the DI container.',
-                $className,
-            ));
-        }
+        $reflection = $this->validateClassName($className);
 
         $variable = $this->container->get($className);
         $result = VarDumper::create($variable)->asPrimitives(3);
@@ -141,5 +99,56 @@ final class InspectController
             'console' => [],
             'web' => VarDumper::create($config->get('events-web'))->asPrimitives(),
         ]);
+    }
+
+    private function filterDeclaredClasses(): array
+    {
+        $inspected = [...get_declared_classes(), ...get_declared_interfaces()];
+        $patterns = [
+            static fn(string $class) => !str_starts_with($class, 'ComposerAutoloaderInit'),
+            static fn(string $class) => !str_starts_with($class, 'Composer\\'),
+            static fn(string $class) => !str_starts_with($class, 'AppDevPanel\\'),
+            static fn(string $class) => !str_contains($class, '@anonymous'),
+            static fn(string $class) => !is_subclass_of($class, Throwable::class),
+        ];
+        foreach ($patterns as $patternFunction) {
+            $inspected = array_filter($inspected, $patternFunction);
+        }
+        return $inspected;
+    }
+
+    private function isInspectable(string $className): bool
+    {
+        $class = new ReflectionClass($className);
+        return !$class->isInternal() && !$class->isAbstract() && !$class->isAnonymous();
+    }
+
+    private function validateClassName(?string $className): ReflectionClass
+    {
+        if ($className === null || $className === '') {
+            throw new InvalidArgumentException('Query parameter "classname" is required.');
+        }
+
+        if (!class_exists($className) && !interface_exists($className)) {
+            throw new InvalidArgumentException(sprintf('Class "%s" does not exist.', $className));
+        }
+
+        $reflection = new ReflectionClass($className);
+
+        if ($reflection->isInternal()) {
+            throw new InvalidArgumentException('Inspector cannot initialize internal classes.');
+        }
+        if ($reflection->implementsInterface(Throwable::class)) {
+            throw new InvalidArgumentException('Inspector cannot initialize exceptions.');
+        }
+
+        if (!$this->container->has($className)) {
+            throw new InvalidArgumentException(sprintf(
+                'Class "%s" is not registered in the DI container.',
+                $className,
+            ));
+        }
+
+        return $reflection;
     }
 }

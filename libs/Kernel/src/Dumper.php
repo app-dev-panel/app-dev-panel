@@ -131,89 +131,114 @@ final class Dumper
         int $objectCollapseLevel,
         bool $inlineObject,
     ): mixed {
-        switch (gettype($variable)) {
-            case 'array':
-                if ($depth <= $level) {
-                    $valuesCount = count($variable);
-                    if ($valuesCount === 0) {
-                        return [];
-                    }
-                    return sprintf('array (%d %s) [...]', $valuesCount, $valuesCount === 1 ? 'item' : 'items');
-                }
+        return match (gettype($variable)) {
+            'array' => $this->dumpArray($variable, $depth, $level, $objectCollapseLevel, $inlineObject),
+            'object' => $this->dumpObject($variable, $depth, $level, $objectCollapseLevel, $inlineObject),
+            'resource', 'resource (closed)' => $this->getResourceDescription($variable),
+            default => $variable,
+        };
+    }
 
-                $output = [];
-                foreach ($variable as $key => $value) {
-                    $keyDisplay = str_replace("\0", '::', trim((string) $key));
-                    $output[$keyDisplay] = $this->dumpNestedInternal(
-                        $value,
-                        $depth,
-                        $level + 1,
-                        $objectCollapseLevel,
-                        $inlineObject,
-                    );
-                }
+    private function dumpArray(
+        array $variable,
+        int $depth,
+        int $level,
+        int $objectCollapseLevel,
+        bool $inlineObject,
+    ): array|string {
+        if ($depth <= $level) {
+            $valuesCount = count($variable);
+            if ($valuesCount === 0) {
+                return [];
+            }
+            return sprintf('array (%d %s) [...]', $valuesCount, $valuesCount === 1 ? 'item' : 'items');
+        }
 
-                break;
-            case 'object':
-                $objectDescription = $this->getObjectDescription($variable);
-
-                if ($variable instanceof Closure) {
-                    $output = $inlineObject
-                        ? $this->exportClosure($variable)
-                        : [$objectDescription => $this->exportClosure($variable)];
-                    break;
-                }
-
-                if ($objectCollapseLevel < $level && array_key_exists($objectDescription, $this->objects)) {
-                    $output = 'object@' . $objectDescription;
-                    break;
-                }
-
-                if (
-                    $depth <= $level
-                    || array_key_exists($variable::class, $this->excludedClasses)
-                    || !array_key_exists($objectDescription, $this->objects)
-                ) {
-                    $output = $objectDescription . ' (...)';
-                    break;
-                }
-
-                $properties = $this->getObjectProperties($variable);
-                if ($properties === []) {
-                    if ($inlineObject) {
-                        $output = '{stateless object}';
-                        break;
-                    }
-                    $output = [$objectDescription => '{stateless object}'];
-                    break;
-                }
-                $output = [];
-                foreach ($properties as $key => $value) {
-                    $keyDisplay = $this->normalizeProperty((string) $key);
-                    /**
-                     * @psalm-suppress InvalidArrayOffset
-                     */
-                    $output[$objectDescription][$keyDisplay] = $this->dumpNestedInternal(
-                        $value,
-                        $depth,
-                        $level + 1,
-                        $objectCollapseLevel,
-                        $inlineObject,
-                    );
-                }
-                if ($inlineObject) {
-                    $output = $output[$objectDescription];
-                }
-                break;
-            case 'resource':
-            case 'resource (closed)':
-                $output = $this->getResourceDescription($variable);
-                break;
-            default:
-                $output = $variable;
+        $output = [];
+        foreach ($variable as $key => $value) {
+            $keyDisplay = str_replace("\0", '::', trim((string) $key));
+            $output[$keyDisplay] = $this->dumpNestedInternal(
+                $value,
+                $depth,
+                $level + 1,
+                $objectCollapseLevel,
+                $inlineObject,
+            );
         }
 
         return $output;
+    }
+
+    private function dumpObject(
+        object $variable,
+        int $depth,
+        int $level,
+        int $objectCollapseLevel,
+        bool $inlineObject,
+    ): mixed {
+        $objectDescription = $this->getObjectDescription($variable);
+
+        if ($variable instanceof Closure) {
+            return $this->dumpClosure($variable, $objectDescription, $inlineObject);
+        }
+
+        if ($objectCollapseLevel < $level && array_key_exists($objectDescription, $this->objects)) {
+            return 'object@' . $objectDescription;
+        }
+
+        if (
+            $depth <= $level
+            || array_key_exists($variable::class, $this->excludedClasses)
+            || !array_key_exists($objectDescription, $this->objects)
+        ) {
+            return $objectDescription . ' (...)';
+        }
+
+        return $this->dumpObjectProperties(
+            $variable,
+            $objectDescription,
+            $depth,
+            $level,
+            $objectCollapseLevel,
+            $inlineObject,
+        );
+    }
+
+    private function dumpClosure(Closure $variable, string $objectDescription, bool $inlineObject): array|string
+    {
+        $exported = $this->exportClosure($variable);
+        return $inlineObject ? $exported : [$objectDescription => $exported];
+    }
+
+    private function dumpObjectProperties(
+        object $variable,
+        string $objectDescription,
+        int $depth,
+        int $level,
+        int $objectCollapseLevel,
+        bool $inlineObject,
+    ): array|string {
+        $properties = $this->getObjectProperties($variable);
+        if ($properties === []) {
+            return $inlineObject ? '{stateless object}' : [$objectDescription => '{stateless object}'];
+        }
+
+        $output = [];
+        foreach ($properties as $key => $value) {
+            $keyDisplay = $this->normalizeProperty((string) $key);
+            /**
+             * @psalm-suppress InvalidArrayOffset
+             */
+            $output[$keyDisplay] = $this->dumpNestedInternal(
+                $value,
+                $depth,
+                $level + 1,
+                $objectCollapseLevel,
+                $inlineObject,
+            );
+        }
+
+        return $inlineObject ? $output : [$objectDescription => $output];
     }
 
     private function getObjectDescription(object $object): string

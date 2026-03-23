@@ -9,53 +9,20 @@ use AppDevPanel\Kernel\Helper\StreamWrapper\StreamWrapper;
 use AppDevPanel\Kernel\Helper\StreamWrapper\StreamWrapperInterface;
 use Yiisoft\Strings\CombinedRegexp;
 
-use const SEEK_SET;
-
 final class FilesystemStreamProxy implements StreamWrapperInterface
 {
-    public static bool $registered = false;
-    /**
-     * @var resource|null
-     */
-    public $context;
-    public StreamWrapper $decorated;
-    public bool $ignored = false;
+    use StreamProxyTrait;
 
     public static ?FilesystemStreamCollector $collector = null;
     public static array $ignoredPathPatterns = [];
     public static array $ignoredClasses = [];
-    public array $operations = [];
-
-    public function __construct()
-    {
-        $this->decorated = new StreamWrapper();
-        $this->decorated->context = $this->context;
-    }
-
-    public function __call(string $name, array $arguments)
-    {
-        try {
-            self::unregister();
-            return $this->decorated->{$name}(...$arguments);
-        } finally {
-            self::register();
-        }
-    }
 
     public function __destruct()
     {
         if (self::$collector === null) {
             return;
         }
-        foreach ($this->operations as $name => $operation) {
-            self::$collector->collect(operation: $name, path: $operation['path'], args: $operation['args']);
-        }
-        self::unregister();
-    }
-
-    public function __get(string $name)
-    {
-        return $this->decorated->{$name};
+        $this->flushOperationsToCollector();
     }
 
     public static function register(): void
@@ -83,15 +50,6 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
         self::$registered = false;
     }
 
-    private function isIgnored(): bool
-    {
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4);
-        return (
-            BacktraceIgnoreMatcher::isIgnoredByClass($backtrace, self::$ignoredClasses)
-            || BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, self::$ignoredPathPatterns)
-        );
-    }
-
     public function stream_open(string $path, string $mode, int $options, ?string &$opened_path): bool
     {
         $this->ignored = $this->isIgnored();
@@ -109,46 +67,6 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
         return $this->__call(__FUNCTION__, func_get_args());
     }
 
-    public function stream_set_option(int $option, int $arg1, ?int $arg2): bool
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function stream_tell(): int
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function stream_eof(): bool
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function stream_seek(int $offset, int $whence = SEEK_SET): bool
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function stream_cast(int $castAs): mixed
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function stream_stat(): array|false
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function dir_closedir(): bool
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function dir_opendir(string $path, int $options): bool
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
     public function dir_readdir(): false|string
     {
         if (!$this->ignored) {
@@ -157,11 +75,6 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
                 'args' => [],
             ];
         }
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function dir_rewinddir(): bool
-    {
         return $this->__call(__FUNCTION__, func_get_args());
     }
 
@@ -205,31 +118,6 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
         return $this->__call(__FUNCTION__, func_get_args());
     }
 
-    public function stream_close(): void
-    {
-        $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function stream_flush(): bool
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function stream_lock(int $operation): bool
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function stream_metadata(string $path, int $option, mixed $value): bool
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
-    public function stream_truncate(int $new_size): bool
-    {
-        return $this->__call(__FUNCTION__, func_get_args());
-    }
-
     public function stream_write(string $data): int
     {
         if (!$this->ignored) {
@@ -253,8 +141,12 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
         return $this->__call(__FUNCTION__, func_get_args());
     }
 
-    public function url_stat(string $path, int $flags): array|false
+    private function isIgnored(): bool
     {
-        return $this->__call(__FUNCTION__, func_get_args());
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4);
+        return (
+            BacktraceIgnoreMatcher::isIgnoredByClass($backtrace, self::$ignoredClasses)
+            || BacktraceIgnoreMatcher::isIgnoredByFile($backtrace, self::$ignoredPathPatterns)
+        );
     }
 }

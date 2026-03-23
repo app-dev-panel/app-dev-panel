@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
+use AppDevPanel\Kernel\Event\MethodCallRecord;
+
 final class ServiceCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
@@ -22,31 +24,22 @@ final class ServiceCollector implements SummaryCollectorInterface
         return $this->items;
     }
 
-    public function collect(
-        string $service,
-        string $class,
-        string $method,
-        ?array $arguments,
-        mixed $result,
-        string $status,
-        ?object $error,
-        float $timeStart,
-        float $timeEnd,
-    ): void {
+    public function collect(MethodCallRecord $record): void
+    {
         if (!$this->isActive()) {
             return;
         }
 
         $this->items[] = [
-            'service' => $service,
-            'class' => $class,
-            'method' => $method,
-            'arguments' => $arguments,
-            'result' => $result,
-            'status' => $status,
-            'error' => $error,
-            'timeStart' => $timeStart,
-            'timeEnd' => $timeEnd,
+            'service' => $record->service,
+            'class' => $record->class,
+            'method' => $record->methodName,
+            'arguments' => $record->arguments,
+            'result' => $record->result,
+            'status' => $record->status,
+            'error' => $record->error,
+            'timeStart' => $record->timeStart,
+            'timeEnd' => $record->timeEnd,
         ];
         $this->timelineCollector->collect($this, count($this->items));
     }

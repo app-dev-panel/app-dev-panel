@@ -145,44 +145,61 @@ final class DebugFixturesCommand extends Command
 
             if ($result->passed) {
                 $passed++;
-                $io->text(sprintf('  <fg=green>PASS</> %s', $result->fixture->name));
+                $this->renderPassedResult($io, $result);
             } else {
                 $failed++;
-                $io->text(sprintf('  <fg=red>FAIL</> %s', $result->fixture->name));
-
-                foreach ($result->assertions as $assertion) {
-                    if ($assertion->passed) {
-                        continue;
-                    }
-
-                    $io->text(sprintf('       <fg=red>✗</> %s', $assertion->message));
-                }
+                $this->renderFailedResult($io, $result);
             }
 
-            // Show assertions in verbose mode
-            if ($output->isVerbose()) {
-                foreach ($result->assertions as $assertion) {
-                    if (!$assertion->passed) {
-                        continue;
-                    }
-
-                    $io->text(sprintf('       <fg=green>✓</> %s', $assertion->message));
-                }
-                if ($result->debugId !== null) {
-                    $io->text(sprintf('       Debug ID: %s', $result->debugId));
-                }
-            }
+            $this->renderVerboseDetails($io, $output, $result);
         }
 
+        $this->renderSummary($io, $passed, $failed, $skipped, count($results));
+
+        return $failed > 0 ? Command::FAILURE : Command::SUCCESS;
+    }
+
+    private function renderPassedResult(SymfonyStyle $io, FixtureResult $result): void
+    {
+        $io->text(sprintf('  <fg=green>PASS</> %s', $result->fixture->name));
+    }
+
+    private function renderFailedResult(SymfonyStyle $io, FixtureResult $result): void
+    {
+        $io->text(sprintf('  <fg=red>FAIL</> %s', $result->fixture->name));
+
+        foreach ($result->assertions as $assertion) {
+            if (!$assertion->passed) {
+                $io->text(sprintf('       <fg=red>✗</> %s', $assertion->message));
+            }
+        }
+    }
+
+    private function renderVerboseDetails(SymfonyStyle $io, OutputInterface $output, FixtureResult $result): void
+    {
+        if (!$output->isVerbose()) {
+            return;
+        }
+
+        foreach ($result->assertions as $assertion) {
+            if ($assertion->passed) {
+                $io->text(sprintf('       <fg=green>✓</> %s', $assertion->message));
+            }
+        }
+        if ($result->debugId !== null) {
+            $io->text(sprintf('       Debug ID: %s', $result->debugId));
+        }
+    }
+
+    private function renderSummary(SymfonyStyle $io, int $passed, int $failed, int $skipped, int $total): void
+    {
         $io->newLine();
         $io->text(sprintf(
             'Results: <fg=green>%d passed</>, <fg=red>%d failed</>, <fg=yellow>%d skipped</>, %d total',
             $passed,
             $failed,
             $skipped,
-            count($results),
+            $total,
         ));
-
-        return $failed > 0 ? Command::FAILURE : Command::SUCCESS;
     }
 }

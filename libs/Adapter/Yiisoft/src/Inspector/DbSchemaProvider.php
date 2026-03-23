@@ -27,10 +27,8 @@ class DbSchemaProvider implements SchemaProviderInterface
             $tables[] = [
                 'table' => $quoter->unquoteSimpleTableName($schema->getName()),
                 'primaryKeys' => $schema->getPrimaryKey(),
-                'columns' => $this->serializeARColumnsSchemas($schema->getColumns()),
-                'records' => new Query($this->db)
-                    ->from($schema->getName())
-                    ->count(),
+                'columns' => $this->serializeColumns($schema->getColumns()),
+                'records' => $this->tableQuery($schema)->count(),
             ];
         }
         return $tables;
@@ -41,30 +39,18 @@ class DbSchemaProvider implements SchemaProviderInterface
         int $limit = SchemaProviderInterface::DEFAULT_LIMIT,
         int $offset = 0,
     ): array {
-        /** @var TableSchemaInterface[] $tableSchemas */
         $schema = $this->db->getSchema()->getTableSchema($tableName);
-        $totalCount = new Query($this->db)
-            ->from($schema->getName())
-            ->count();
-        $records = new Query($this->db)
-            ->from($schema->getName())
-            ->limit($limit)
-            ->offset($offset)
-            ->all();
-        $data = [];
-
-        foreach ($records as $r => $record) {
-            foreach ($record as $n => $attribute) {
-                $data[$r][$n] = $attribute;
-            }
-        }
 
         return [
             'table' => $schema->getName(),
             'primaryKeys' => $schema->getPrimaryKey(),
-            'columns' => $this->serializeARColumnsSchemas($schema->getColumns()),
-            'records' => $data,
-            'totalCount' => $totalCount,
+            'columns' => $this->serializeColumns($schema->getColumns()),
+            'records' => $this
+                ->tableQuery($schema)
+                ->limit($limit)
+                ->offset($offset)
+                ->all(),
+            'totalCount' => $this->tableQuery($schema)->count(),
             'limit' => $limit,
             'offset' => $offset,
         ];
@@ -72,55 +58,45 @@ class DbSchemaProvider implements SchemaProviderInterface
 
     public function explainQuery(string $sql, array $params = [], bool $analyze = false): array
     {
-        $prefix = $this->isSqlite() ? 'EXPLAIN QUERY PLAN ' : 'EXPLAIN ';
-        if ($analyze && !$this->isSqlite()) {
-            $prefix = 'EXPLAIN ANALYZE ';
-        }
+        $prefix = $this->buildExplainPrefix($analyze);
 
-        $command = $this->db->createCommand($prefix . $sql);
-        if ($params !== []) {
-            // PDO positional params are 1-based, but JSON arrays are 0-based
-            if (array_is_list($params)) {
-                $reindexed = [];
-                foreach ($params as $i => $value) {
-                    $reindexed[$i + 1] = $value;
-                }
-                $command->bindValues($reindexed);
-            } else {
-                $command->bindValues($params);
-            }
-        }
-
-        return $command->queryAll();
+        return $this->executeWithParams($prefix . $sql, $params);
     }
 
     public function executeQuery(string $sql, array $params = []): array
     {
+        return $this->executeWithParams($sql, $params);
+    }
+
+    private function tableQuery(TableSchemaInterface $schema): Query
+    {
+        return new Query($this->db)->from($schema->getName());
+    }
+
+    private function buildExplainPrefix(bool $analyze): string
+    {
+        if ($this->db->getDriverName() === 'sqlite') {
+            return 'EXPLAIN QUERY PLAN ';
+        }
+
+        return $analyze ? 'EXPLAIN ANALYZE ' : 'EXPLAIN ';
+    }
+
+    private function executeWithParams(string $sql, array $params): array
+    {
         $command = $this->db->createCommand($sql);
         if ($params !== []) {
-            if (array_is_list($params)) {
-                $reindexed = [];
-                foreach ($params as $i => $value) {
-                    $reindexed[$i + 1] = $value;
-                }
-                $command->bindValues($reindexed);
-            } else {
-                $command->bindValues($params);
-            }
+            // PDO positional params are 1-based, but JSON arrays are 0-based
+            $command->bindValues(array_is_list($params) ? array_combine(range(1, count($params)), $params) : $params);
         }
 
         return $command->queryAll();
-    }
-
-    private function isSqlite(): bool
-    {
-        return $this->db->getDriverName() === 'sqlite';
     }
 
     /**
      * @param ColumnInterface[] $columns
      */
-    private function serializeARColumnsSchemas(array $columns): array
+    private function serializeColumns(array $columns): array
     {
         $result = [];
         foreach ($columns as $columnSchema) {

@@ -51,10 +51,50 @@ single-class-per-file = { enabled = false }
 no-nested-ternary = { enabled = false }
 
 # Downgrade to warnings for existing codebase patterns
-too-many-methods = { level = "warning" }
-excessive-parameter-list = { level = "warning" }
-cyclomatic-complexity = { level = "warning", threshold = 15 }
-kan-defect = { level = "warning" }
+# Exclude test files (many test methods is expected) and interface proxies (method count dictated by interface)
+too-many-methods = { level = "warning", exclude = [
+    # Test files — test classes inherently need many test methods
+    "libs/Kernel/tests/**",
+    "libs/API/tests/**",
+    "libs/Adapter/Symfony/tests/**",
+    "libs/Adapter/Yii2/tests/**",
+    "libs/Adapter/Laravel/tests/**",
+    "libs/Testing/tests/**",
+    # Interface proxies — method count dictated by the interface they implement
+    "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php",
+    "libs/Kernel/src/Helper/StreamWrapper/StreamWrapperInterface.php",
+    "libs/Kernel/src/Collector/LoggerInterfaceProxy.php",
+    "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php",
+    "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php",
+    "libs/API/src/Inspector/Test/PHPUnitJSONReporter.php",
+    "libs/API/src/ServerSentEventsStream.php",
+    "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php",
+    "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php",
+    "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php",
+    # Trait centralizes passthrough methods from stream wrapper protocol
+    "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php",
+] }
+excessive-parameter-list = { level = "warning", exclude = [
+    # Test files — test helpers may need many params for setting up test scenarios
+    "libs/Kernel/tests/**",
+    "libs/API/tests/**",
+    "libs/Adapter/Symfony/tests/**",
+    "libs/Adapter/Yii2/tests/**",
+    "libs/Adapter/Laravel/tests/**",
+    "libs/Testing/tests/**",
+    # Interface proxies — parameter lists dictated by the interface
+    "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php",
+    # DTOs — all params are distinct fields of the record
+    "libs/Kernel/src/Event/MethodCallRecord.php",
+    # Internal recursive methods thread context through call stack
+    "libs/Kernel/src/Dumper.php",
+] }
+cyclomatic-complexity = { level = "warning", threshold = 15, exclude = [
+    "libs/Testing/tests/**",
+] }
+kan-defect = { level = "warning", exclude = [
+    "libs/Testing/tests/**",
+] }
 no-error-control-operator = { level = "warning" }
 no-empty = { level = "warning" }
 no-isset = { level = "warning" }

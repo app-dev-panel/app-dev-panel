@@ -11,8 +11,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 final class CommandCollector implements SummaryCollectorInterface
 {
@@ -42,41 +40,11 @@ final class CommandCollector implements SummaryCollectorInterface
 
         $this->timelineCollector->collect($this, spl_object_id($event));
 
-        $command = $event->getCommand();
-
-        if ($event instanceof ConsoleErrorEvent) {
-            $this->commands[$event::class] = [
-                'name' => $event->getInput()->getFirstArgument() ?? '',
-                'command' => $command,
-                'input' => $this->castInputToString($event->getInput()),
-                'output' => $this->fetchOutput($event->getOutput()),
-                'error' => $event->getError()->getMessage(),
-                'exitCode' => $event->getExitCode(),
-            ];
-
-            return;
-        }
-
-        if ($event instanceof ConsoleTerminateEvent) {
-            $this->commands[$event::class] = [
-                'name' => $command?->getName() ?? $event->getInput()->getFirstArgument() ?? '',
-                'command' => $command,
-                'input' => $this->castInputToString($event->getInput()),
-                'output' => $this->fetchOutput($event->getOutput()),
-                'exitCode' => $event->getExitCode(),
-            ];
-            return;
-        }
-
-        $definition = $command?->getDefinition();
-        $this->commands[$event::class] = [
-            'name' => $command?->getName() ?? $event->getInput()->getFirstArgument() ?? '',
-            'command' => $command,
-            'input' => $this->castInputToString($event->getInput()),
-            'output' => $this->fetchOutput($event->getOutput()),
-            'arguments' => $definition?->getArguments() ?? [],
-            'options' => $definition?->getOptions() ?? [],
-        ];
+        $this->commands[$event::class] = match (true) {
+            $event instanceof ConsoleErrorEvent => $this->collectErrorEvent($event),
+            $event instanceof ConsoleTerminateEvent => $this->collectTerminateEvent($event),
+            default => $this->collectGenericEvent($event),
+        };
     }
 
     public function getSummary(): array
@@ -85,17 +53,9 @@ final class CommandCollector implements SummaryCollectorInterface
             return [];
         }
 
-        $eventTypes = $this->getSupportedEvents();
-
-        $commandEvent = null;
-        foreach ($eventTypes as $eventType) {
-            if (!array_key_exists($eventType, $this->commands)) {
-                continue;
-            }
-
-            $commandEvent = $this->commands[$eventType];
-            break;
-        }
+        $commandEvent =
+            $this->commands[ConsoleErrorEvent::class] ?? $this->commands[ConsoleTerminateEvent::class] ?? $this->commands[ConsoleEvent::class]
+                ?? null;
 
         if ($commandEvent === null) {
             return [];
@@ -111,31 +71,49 @@ final class CommandCollector implements SummaryCollectorInterface
         ];
     }
 
+    private function collectErrorEvent(ConsoleErrorEvent $event): array
+    {
+        return [
+            ...$this->buildBaseCommandData($event),
+            'error' => $event->getError()->getMessage(),
+            'exitCode' => $event->getExitCode(),
+        ];
+    }
+
+    private function collectTerminateEvent(ConsoleTerminateEvent $event): array
+    {
+        return [
+            ...$this->buildBaseCommandData($event),
+            'exitCode' => $event->getExitCode(),
+        ];
+    }
+
+    private function collectGenericEvent(ConsoleEvent $event): array
+    {
+        $command = $event->getCommand();
+        $definition = $command?->getDefinition();
+
+        return [
+            ...$this->buildBaseCommandData($event),
+            'arguments' => $definition?->getArguments() ?? [],
+            'options' => $definition?->getOptions() ?? [],
+        ];
+    }
+
+    private function buildBaseCommandData(ConsoleEvent $event): array
+    {
+        $command = $event->getCommand();
+        $input = $event->getInput();
+        return [
+            'name' => $command?->getName() ?? $input->getFirstArgument() ?? '',
+            'command' => $command,
+            'input' => method_exists($input, '__toString') ? $input->__toString() : null,
+            'output' => method_exists($event->getOutput(), 'fetch') ? $event->getOutput()->fetch() : null,
+        ];
+    }
+
     private function reset(): void
     {
         $this->commands = [];
-    }
-
-    private function fetchOutput(OutputInterface $output): ?string
-    {
-        if (method_exists($output, 'fetch')) {
-            return $output->fetch();
-        }
-
-        return null;
-    }
-
-    private function castInputToString(InputInterface $input): ?string
-    {
-        return method_exists($input, '__toString') ? $input->__toString() : null;
-    }
-
-    private function getSupportedEvents(): array
-    {
-        return [
-            ConsoleErrorEvent::class,
-            ConsoleTerminateEvent::class,
-            ConsoleEvent::class,
-        ];
     }
 }

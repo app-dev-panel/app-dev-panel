@@ -118,43 +118,71 @@ final class DebugQueryCommand extends Command
         }
 
         if (is_string($collectorClass)) {
-            if (!array_key_exists($collectorClass, $data)) {
-                $io->error(sprintf('Collector "%s" not found in entry "%s".', $collectorClass, $id));
-                $io->text('Available collectors:');
-                foreach (array_keys($data) as $key) {
-                    $io->text(sprintf('  - %s', (string) $key));
-                }
-                return Command::FAILURE;
-            }
-            $data = is_array($data[$collectorClass]) ? $data[$collectorClass] : [];
+            return $this->viewCollector($io, $output, $data, $collectorClass, $id, $json);
         }
 
         if ($json) {
-            $output->writeln(json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            $this->writeJson($output, $data);
             return Command::SUCCESS;
         }
 
-        if (is_string($collectorClass)) {
-            $io->title(sprintf('Collector: %s (Entry: %s)', $collectorClass, $id));
-            $output->writeln(json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $this->renderFullEntry($io, $output, $data, $id);
+
+        return Command::SUCCESS;
+    }
+
+    private function viewCollector(
+        SymfonyStyle $io,
+        OutputInterface $output,
+        array $data,
+        string $collectorClass,
+        string $id,
+        bool $json,
+    ): int {
+        if (!array_key_exists($collectorClass, $data)) {
+            $this->renderCollectorNotFound($io, $data, $collectorClass, $id);
+            return Command::FAILURE;
+        }
+
+        $collectorData = is_array($data[$collectorClass]) ? $data[$collectorClass] : [];
+
+        if ($json) {
+            $this->writeJson($output, $collectorData);
             return Command::SUCCESS;
         }
 
+        $io->title(sprintf('Collector: %s (Entry: %s)', $collectorClass, $id));
+        $this->writeJson($output, $collectorData);
+
+        return Command::SUCCESS;
+    }
+
+    private function renderCollectorNotFound(SymfonyStyle $io, array $data, string $collectorClass, string $id): void
+    {
+        $io->error(sprintf('Collector "%s" not found in entry "%s".', $collectorClass, $id));
+        $io->text('Available collectors:');
+        foreach (array_keys($data) as $key) {
+            $io->text(sprintf('  - %s', (string) $key));
+        }
+    }
+
+    private function renderFullEntry(SymfonyStyle $io, OutputInterface $output, array $data, string $id): void
+    {
         $io->title(sprintf('Debug Entry: %s', $id));
 
         foreach ($data as $collector => $collectorData) {
             $io->section((string) $collector);
             if (is_array($collectorData) && $collectorData !== []) {
-                $output->writeln(json_encode(
-                    $collectorData,
-                    JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES,
-                ));
+                $this->writeJson($output, $collectorData);
             } else {
                 $io->text('(empty)');
             }
         }
+    }
 
-        return Command::SUCCESS;
+    private function writeJson(OutputInterface $output, array $data): void
+    {
+        $output->writeln(json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 
     private function invalidAction(SymfonyStyle $io, string $action): int
@@ -181,26 +209,30 @@ final class DebugQueryCommand extends Command
     private function formatCollectors(array $entry): string
     {
         $parts = [];
-        $loggerTotal = (int) ($entry['logger']['total'] ?? 0);
-        if ($loggerTotal > 0) {
-            $parts[] = sprintf('logs:%d', $loggerTotal);
+        $this->appendCollectorCount($parts, $entry, 'logger', 'logs');
+        $this->appendCollectorCount($parts, $entry, 'event', 'events');
+        if ($this->hasException($entry)) {
+            $parts[] = 'exception';
         }
-        $eventTotal = (int) ($entry['event']['total'] ?? 0);
-        if ($eventTotal > 0) {
-            $parts[] = sprintf('events:%d', $eventTotal);
+        $this->appendCollectorCount($parts, $entry, 'timeline', 'timeline');
+
+        return $parts !== [] ? implode(', ', $parts) : '—';
+    }
+
+    private function appendCollectorCount(array &$parts, array $entry, string $key, string $label): void
+    {
+        $total = (int) ($entry[$key]['total'] ?? 0);
+        if ($total > 0) {
+            $parts[] = sprintf('%s:%d', $label, $total);
         }
-        if (
+    }
+
+    private function hasException(array $entry): bool
+    {
+        return (
             array_key_exists('exception', $entry)
             && is_array($entry['exception'])
             && array_key_exists('class', $entry['exception'])
-        ) {
-            $parts[] = 'exception';
-        }
-        $timelineTotal = (int) ($entry['timeline']['total'] ?? 0);
-        if ($timelineTotal > 0) {
-            $parts[] = sprintf('timeline:%d', $timelineTotal);
-        }
-
-        return $parts !== [] ? implode(', ', $parts) : '—';
+        );
     }
 }

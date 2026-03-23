@@ -115,21 +115,52 @@ final class ContainerProxyConfig
         );
     }
 
+    public function getServiceConfigType(string $service): ServiceConfigType
+    {
+        if (!array_key_exists($service, $this->decoratedServices)) {
+            return ServiceConfigType::None;
+        }
+
+        $config = $this->decoratedServices[$service];
+
+        if (is_callable($config)) {
+            return ServiceConfigType::Callable;
+        }
+
+        if (is_array($config) && !array_key_exists(0, $config)) {
+            return ServiceConfigType::MethodCallbacks;
+        }
+
+        if (is_array($config)) {
+            return ServiceConfigType::ArrayDefinition;
+        }
+
+        return ServiceConfigType::None;
+    }
+
+    /**
+     * @deprecated Use {@see getServiceConfigType()} instead.
+     */
     public function hasDecoratedServiceArrayConfigWithStringKeys(string $service): bool
     {
-        return (
-            $this->hasDecoratedServiceArrayConfig($service) && !array_key_exists(0, $this->decoratedServices[$service])
-        );
+        return $this->getServiceConfigType($service) === ServiceConfigType::MethodCallbacks;
     }
 
+    /**
+     * @deprecated Use {@see getServiceConfigType()} instead.
+     */
     public function hasDecoratedServiceArrayConfig(string $service): bool
     {
-        return array_key_exists($service, $this->decoratedServices) && is_array($this->decoratedServices[$service]);
+        $type = $this->getServiceConfigType($service);
+        return $type === ServiceConfigType::ArrayDefinition || $type === ServiceConfigType::MethodCallbacks;
     }
 
+    /**
+     * @deprecated Use {@see getServiceConfigType()} instead.
+     */
     public function hasDecoratedServiceCallableConfig(string $service): bool
     {
-        return array_key_exists($service, $this->decoratedServices) && is_callable($this->decoratedServices[$service]);
+        return $this->getServiceConfigType($service) === ServiceConfigType::Callable;
     }
 
     public function hasDispatcher(): bool

@@ -17,6 +17,7 @@ use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelUrlMatcherAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\NullSchemaProvider;
+use AppDevPanel\Adapter\Laravel\Middleware\DebugCollectors;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware;
 use AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy;
 use AppDevPanel\Api\ApiApplication;
@@ -103,6 +104,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->registerCoreServices();
         $this->registerCollectors();
         $this->registerDebugger();
+        $this->registerDebugCollectors();
         $this->registerApiServices();
         $this->registerCliCommands();
     }
@@ -151,143 +153,129 @@ final class AppDevPanelServiceProvider extends ServiceProvider
     {
         $collectors = $this->app->make('config')->get('app-dev-panel.collectors', []);
 
-        if ($collectors['environment'] ?? true) {
-            $this->app->singleton(EnvironmentCollector::class);
-            $this->collectorClasses[] = EnvironmentCollector::class;
+        $this->registerSimpleCollectors($collectors);
+        $this->registerTimelineCollectors($collectors);
+        $this->registerRequestCollectors($collectors);
+        $this->registerCommandCollectors($collectors);
+        $this->registerRouterCollector($collectors);
+    }
+
+    /**
+     * Register collectors that need no constructor arguments.
+     *
+     * @param array<string, bool> $collectors
+     */
+    private function registerSimpleCollectors(array $collectors): void
+    {
+        $simpleCollectors = [
+            'environment' => EnvironmentCollector::class,
+            'filesystem_stream' => FilesystemStreamCollector::class,
+            'http_stream' => HttpStreamCollector::class,
+            'validator' => ValidatorCollector::class,
+        ];
+
+        foreach ($simpleCollectors as $key => $class) {
+            if ($collectors[$key] ?? true) {
+                $this->app->singleton($class);
+                $this->collectorClasses[] = $class;
+            }
+        }
+    }
+
+    /**
+     * Register collectors that require only TimelineCollector.
+     *
+     * @param array<string, bool> $collectors
+     */
+    private function registerTimelineCollectors(array $collectors): void
+    {
+        $timelineCollectors = [
+            'exception' => ExceptionCollector::class,
+            'log' => LogCollector::class,
+            'event' => EventCollector::class,
+            'service' => ServiceCollector::class,
+            'http_client' => HttpClientCollector::class,
+            'var_dumper' => VarDumperCollector::class,
+            'database' => DatabaseCollector::class,
+            'cache' => CacheCollector::class,
+            'mailer' => MailerCollector::class,
+            'queue' => QueueCollector::class,
+        ];
+
+        foreach ($timelineCollectors as $key => $class) {
+            if ($collectors[$key] ?? true) {
+                $this->app->singleton($class, fn() => new $class($this->app->make(TimelineCollector::class)));
+                $this->collectorClasses[] = $class;
+            }
+        }
+    }
+
+    /**
+     * Register request-related collectors (RequestCollector + WebAppInfoCollector).
+     *
+     * @param array<string, bool> $collectors
+     */
+    private function registerRequestCollectors(array $collectors): void
+    {
+        if (!($collectors['request'] ?? true)) {
+            return;
         }
 
-        if ($collectors['request'] ?? true) {
-            $this->app->singleton(
-                RequestCollector::class,
-                fn() => new RequestCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = RequestCollector::class;
+        $this->app->singleton(
+            RequestCollector::class,
+            fn() => new RequestCollector($this->app->make(TimelineCollector::class)),
+        );
+        $this->collectorClasses[] = RequestCollector::class;
 
-            $this->app->singleton(
-                WebAppInfoCollector::class,
-                fn() => new WebAppInfoCollector($this->app->make(TimelineCollector::class), 'Laravel'),
-            );
-            $this->collectorClasses[] = WebAppInfoCollector::class;
+        $this->app->singleton(
+            WebAppInfoCollector::class,
+            fn() => new WebAppInfoCollector($this->app->make(TimelineCollector::class), 'Laravel'),
+        );
+        $this->collectorClasses[] = WebAppInfoCollector::class;
+    }
+
+    /**
+     * Register command-related collectors (CommandCollector + ConsoleAppInfoCollector).
+     *
+     * @param array<string, bool> $collectors
+     */
+    private function registerCommandCollectors(array $collectors): void
+    {
+        if (!($collectors['command'] ?? true)) {
+            return;
         }
 
-        if ($collectors['exception'] ?? true) {
-            $this->app->singleton(
-                ExceptionCollector::class,
-                fn() => new ExceptionCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = ExceptionCollector::class;
+        $this->app->singleton(
+            CommandCollector::class,
+            fn() => new CommandCollector($this->app->make(TimelineCollector::class)),
+        );
+        $this->collectorClasses[] = CommandCollector::class;
+
+        $this->app->singleton(
+            ConsoleAppInfoCollector::class,
+            fn() => new ConsoleAppInfoCollector($this->app->make(TimelineCollector::class), 'Laravel'),
+        );
+        $this->collectorClasses[] = ConsoleAppInfoCollector::class;
+    }
+
+    /**
+     * Register RouterCollector and RouterDataExtractor.
+     *
+     * @param array<string, bool> $collectors
+     */
+    private function registerRouterCollector(array $collectors): void
+    {
+        if (!($collectors['router'] ?? true)) {
+            return;
         }
 
-        if ($collectors['log'] ?? true) {
-            $this->app->singleton(
-                LogCollector::class,
-                fn() => new LogCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = LogCollector::class;
-        }
+        $this->app->singleton(RouterCollector::class);
+        $this->collectorClasses[] = RouterCollector::class;
 
-        if ($collectors['event'] ?? true) {
-            $this->app->singleton(
-                EventCollector::class,
-                fn() => new EventCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = EventCollector::class;
-        }
-
-        if ($collectors['service'] ?? true) {
-            $this->app->singleton(
-                ServiceCollector::class,
-                fn() => new ServiceCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = ServiceCollector::class;
-        }
-
-        if ($collectors['http_client'] ?? true) {
-            $this->app->singleton(
-                HttpClientCollector::class,
-                fn() => new HttpClientCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = HttpClientCollector::class;
-        }
-
-        if ($collectors['var_dumper'] ?? true) {
-            $this->app->singleton(
-                VarDumperCollector::class,
-                fn() => new VarDumperCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = VarDumperCollector::class;
-        }
-
-        if ($collectors['filesystem_stream'] ?? true) {
-            $this->app->singleton(FilesystemStreamCollector::class);
-            $this->collectorClasses[] = FilesystemStreamCollector::class;
-        }
-
-        if ($collectors['http_stream'] ?? true) {
-            $this->app->singleton(HttpStreamCollector::class);
-            $this->collectorClasses[] = HttpStreamCollector::class;
-        }
-
-        if ($collectors['command'] ?? true) {
-            $this->app->singleton(
-                CommandCollector::class,
-                fn() => new CommandCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = CommandCollector::class;
-
-            $this->app->singleton(
-                ConsoleAppInfoCollector::class,
-                fn() => new ConsoleAppInfoCollector($this->app->make(TimelineCollector::class), 'Laravel'),
-            );
-            $this->collectorClasses[] = ConsoleAppInfoCollector::class;
-        }
-
-        if ($collectors['database'] ?? true) {
-            $this->app->singleton(
-                DatabaseCollector::class,
-                fn() => new DatabaseCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = DatabaseCollector::class;
-        }
-
-        if ($collectors['cache'] ?? true) {
-            $this->app->singleton(
-                CacheCollector::class,
-                fn() => new CacheCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = CacheCollector::class;
-        }
-
-        if ($collectors['mailer'] ?? true) {
-            $this->app->singleton(
-                MailerCollector::class,
-                fn() => new MailerCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = MailerCollector::class;
-        }
-
-        if ($collectors['queue'] ?? true) {
-            $this->app->singleton(
-                QueueCollector::class,
-                fn() => new QueueCollector($this->app->make(TimelineCollector::class)),
-            );
-            $this->collectorClasses[] = QueueCollector::class;
-        }
-
-        if ($collectors['validator'] ?? true) {
-            $this->app->singleton(ValidatorCollector::class);
-            $this->collectorClasses[] = ValidatorCollector::class;
-        }
-
-        if ($collectors['router'] ?? true) {
-            $this->app->singleton(RouterCollector::class);
-            $this->collectorClasses[] = RouterCollector::class;
-
-            $this->app->singleton(
-                RouterDataExtractor::class,
-                fn() => new RouterDataExtractor($this->app->make(RouterCollector::class), $this->app->make('router')),
-            );
-        }
+        $this->app->singleton(
+            RouterDataExtractor::class,
+            fn() => new RouterDataExtractor($this->app->make(RouterCollector::class), $this->app->make('router')),
+        );
     }
 
     private function registerDebugger(): void
@@ -310,6 +298,31 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         });
     }
 
+    private function registerDebugCollectors(): void
+    {
+        $this->app->singleton(
+            DebugCollectors::class,
+            fn() => new DebugCollectors(
+                request: $this->app->bound(RequestCollector::class) ? $this->app->make(RequestCollector::class) : null,
+                webAppInfo: $this->app->bound(WebAppInfoCollector::class)
+                    ? $this->app->make(WebAppInfoCollector::class)
+                    : null,
+                exception: $this->app->bound(ExceptionCollector::class)
+                    ? $this->app->make(ExceptionCollector::class)
+                    : null,
+                varDumper: $this->app->bound(VarDumperCollector::class)
+                    ? $this->app->make(VarDumperCollector::class)
+                    : null,
+                environment: $this->app->bound(EnvironmentCollector::class)
+                    ? $this->app->make(EnvironmentCollector::class)
+                    : null,
+                routerDataExtractor: $this->app->bound(RouterDataExtractor::class)
+                    ? $this->app->make(RouterDataExtractor::class)
+                    : null,
+            ),
+        );
+    }
+
     private function registerApiServices(): void
     {
         $config = $this->app->make('config');
@@ -318,19 +331,32 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             return;
         }
 
-        // PSR-17 factories
+        $this->registerPsrFactories();
+        $this->registerApiCoreServices($config);
+        $this->registerApiMiddleware($config);
+        $this->registerApiControllers();
+        $this->registerInspectorServices();
+        $this->registerApiApplication();
+    }
+
+    private function registerPsrFactories(): void
+    {
         $this->app->singletonIf(ResponseFactoryInterface::class, HttpFactory::class);
         $this->app->singletonIf(StreamFactoryInterface::class, HttpFactory::class);
         $this->app->singletonIf(UriFactoryInterface::class, HttpFactory::class);
         $this->app->singletonIf(ClientInterface::class, static fn() => new Client(['timeout' => 10]));
+    }
 
-        // Path resolver
+    /**
+     * @param \Illuminate\Contracts\Config\Repository $config
+     */
+    private function registerApiCoreServices(mixed $config): void
+    {
         $this->app->singleton(
             PathResolverInterface::class,
             static fn() => new PathResolver(base_path(), storage_path()),
         );
 
-        // JSON response factory
         $this->app->singleton(
             JsonResponseFactoryInterface::class,
             fn() => new JsonResponseFactory(
@@ -339,19 +365,22 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
-        // Service registry
         $this->app->singleton(
             ServiceRegistryInterface::class,
             static fn() => new FileServiceRegistry($config->get('app-dev-panel.storage.path') . '/services'),
         );
 
-        // Collector repository
         $this->app->singleton(
             CollectorRepositoryInterface::class,
             fn() => new CollectorRepository($this->app->make(StorageInterface::class)),
         );
+    }
 
-        // Middleware
+    /**
+     * @param \Illuminate\Contracts\Config\Repository $config
+     */
+    private function registerApiMiddleware(mixed $config): void
+    {
         $this->app->singleton(
             IpFilterMiddleware::class,
             fn() => new IpFilterMiddleware(
@@ -385,8 +414,10 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 $this->app->make(UriFactoryInterface::class),
             ),
         );
+    }
 
-        // Controllers
+    private function registerApiControllers(): void
+    {
         $this->app->singleton(
             DebugController::class,
             fn() => new DebugController(
@@ -447,7 +478,17 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             fn() => new OpcacheController($this->app->make(JsonResponseFactoryInterface::class)),
         );
 
-        // Database inspector
+        $this->app->singleton(
+            RequestController::class,
+            fn() => new RequestController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(CollectorRepositoryInterface::class),
+            ),
+        );
+    }
+
+    private function registerInspectorServices(): void
+    {
         $this->app->singleton(SchemaProviderInterface::class, function () {
             if ($this->app->bound('db')) {
                 try {
@@ -470,7 +511,6 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
-        // Laravel config provider for inspector
         $this->app->singleton(LaravelConfigProvider::class, fn() => new LaravelConfigProvider($this->app));
         $this->app->alias(LaravelConfigProvider::class, 'config.adp');
 
@@ -506,7 +546,6 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
-        // Laravel route inspection adapters
         $this->app->singleton(
             LaravelRouteCollectionAdapter::class,
             fn() => new LaravelRouteCollectionAdapter($this->app->make('router')),
@@ -525,16 +564,10 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 $this->app->make(LaravelUrlMatcherAdapter::class),
             ),
         );
+    }
 
-        $this->app->singleton(
-            RequestController::class,
-            fn() => new RequestController(
-                $this->app->make(JsonResponseFactoryInterface::class),
-                $this->app->make(CollectorRepositoryInterface::class),
-            ),
-        );
-
-        // ApiApplication
+    private function registerApiApplication(): void
+    {
         $this->app->singleton(
             ApiApplication::class,
             fn() => new ApiApplication(
@@ -544,7 +577,6 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
-        // Bridge controller
         $this->app->singleton(
             AdpApiController::class,
             fn() => new AdpApiController($this->app->make(ApiApplication::class)),
@@ -579,29 +611,19 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $events = $this->app->make('events');
         $collectors = $this->app->make('config')->get('app-dev-panel.collectors', []);
 
-        if ($collectors['database'] ?? true) {
-            $listener = new DatabaseListener(fn() => $this->app->make(DatabaseCollector::class));
-            $listener->register($events);
-        }
+        $simpleListeners = [
+            'database' => [DatabaseListener::class, DatabaseCollector::class],
+            'cache' => [CacheListener::class, CacheCollector::class],
+            'mailer' => [MailListener::class, MailerCollector::class],
+            'queue' => [QueueListener::class, QueueCollector::class],
+            'http_client' => [HttpClientListener::class, HttpClientCollector::class],
+        ];
 
-        if ($collectors['cache'] ?? true) {
-            $listener = new CacheListener(fn() => $this->app->make(CacheCollector::class));
-            $listener->register($events);
-        }
-
-        if ($collectors['mailer'] ?? true) {
-            $listener = new MailListener(fn() => $this->app->make(MailerCollector::class));
-            $listener->register($events);
-        }
-
-        if ($collectors['queue'] ?? true) {
-            $listener = new QueueListener(fn() => $this->app->make(QueueCollector::class));
-            $listener->register($events);
-        }
-
-        if ($collectors['http_client'] ?? true) {
-            $listener = new HttpClientListener(fn() => $this->app->make(HttpClientCollector::class));
-            $listener->register($events);
+        foreach ($simpleListeners as $key => [$listenerClass, $collectorClass]) {
+            if ($collectors[$key] ?? true) {
+                $listener = new $listenerClass(fn() => $this->app->make($collectorClass));
+                $listener->register($events);
+            }
         }
 
         if ($collectors['command'] ?? true) {
@@ -620,33 +642,62 @@ final class AppDevPanelServiceProvider extends ServiceProvider
     {
         $collectors = $this->app->make('config')->get('app-dev-panel.collectors', []);
 
-        if (($collectors['log'] ?? true) && $this->app->bound(LogCollector::class)) {
-            $this->app->extend(\Psr\Log\LoggerInterface::class, function ($logger) {
-                if ($logger instanceof LoggerInterfaceProxy) {
-                    return $logger;
-                }
-                return new LoggerInterfaceProxy($logger, $this->app->make(LogCollector::class));
-            });
+        $this->decorateLoggerProxy($collectors);
+        $this->decorateHttpClientProxy($collectors);
+        $this->decorateEventDispatcherProxy($collectors);
+    }
+
+    /**
+     * @param array<string, bool> $collectors
+     */
+    private function decorateLoggerProxy(array $collectors): void
+    {
+        if (!(($collectors['log'] ?? true) && $this->app->bound(LogCollector::class))) {
+            return;
         }
 
-        if (($collectors['http_client'] ?? true) && $this->app->bound(HttpClientCollector::class)) {
-            if ($this->app->bound(ClientInterface::class)) {
-                $this->app->extend(ClientInterface::class, function ($client) {
-                    if ($client instanceof HttpClientInterfaceProxy) {
-                        return $client;
-                    }
-                    return new HttpClientInterfaceProxy($client, $this->app->make(HttpClientCollector::class));
-                });
+        $this->app->extend(\Psr\Log\LoggerInterface::class, function ($logger) {
+            if ($logger instanceof LoggerInterfaceProxy) {
+                return $logger;
             }
+            return new LoggerInterfaceProxy($logger, $this->app->make(LogCollector::class));
+        });
+    }
+
+    /**
+     * @param array<string, bool> $collectors
+     */
+    private function decorateHttpClientProxy(array $collectors): void
+    {
+        if (!(($collectors['http_client'] ?? true) && $this->app->bound(HttpClientCollector::class))) {
+            return;
+        }
+        if (!$this->app->bound(ClientInterface::class)) {
+            return;
         }
 
-        if (($collectors['event'] ?? true) && $this->app->bound(EventCollector::class)) {
-            $this->app->extend('events', function ($dispatcher) {
-                if ($dispatcher instanceof LaravelEventDispatcherProxy) {
-                    return $dispatcher;
-                }
-                return new LaravelEventDispatcherProxy($dispatcher, $this->app->make(EventCollector::class));
-            });
+        $this->app->extend(ClientInterface::class, function ($client) {
+            if ($client instanceof HttpClientInterfaceProxy) {
+                return $client;
+            }
+            return new HttpClientInterfaceProxy($client, $this->app->make(HttpClientCollector::class));
+        });
+    }
+
+    /**
+     * @param array<string, bool> $collectors
+     */
+    private function decorateEventDispatcherProxy(array $collectors): void
+    {
+        if (!(($collectors['event'] ?? true) && $this->app->bound(EventCollector::class))) {
+            return;
         }
+
+        $this->app->extend('events', function ($dispatcher) {
+            if ($dispatcher instanceof LaravelEventDispatcherProxy) {
+                return $dispatcher;
+            }
+            return new LaravelEventDispatcherProxy($dispatcher, $this->app->make(EventCollector::class));
+        });
     }
 }

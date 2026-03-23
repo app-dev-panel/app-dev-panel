@@ -94,13 +94,14 @@ final class ExpectationEvaluator
         ?string $path,
         mixed $expected,
     ): AssertionResult {
-        if ($path === null) {
-            return AssertionResult::fail(sprintf('[%s] field_equals requires a path', $collectorName));
+        $pathCheck = $this->requirePath($collectorName, 'field_equals', $path);
+        if ($pathCheck !== null) {
+            return $pathCheck;
         }
 
         $actual = $this->getByPath($data, $path);
         if ($actual === null && $expected !== null) {
-            return AssertionResult::fail(sprintf('[%s] field "%s" not found', $collectorName, $path));
+            return $this->fieldNotFound($collectorName, $path);
         }
 
         if ($actual !== $expected) {
@@ -127,13 +128,14 @@ final class ExpectationEvaluator
         ?string $path,
         string $substring,
     ): AssertionResult {
-        if ($path === null) {
-            return AssertionResult::fail(sprintf('[%s] field_contains requires a path', $collectorName));
+        $pathCheck = $this->requirePath($collectorName, 'field_contains', $path);
+        if ($pathCheck !== null) {
+            return $pathCheck;
         }
 
         $actual = $this->getByPath($data, $path);
         if ($actual === null) {
-            return AssertionResult::fail(sprintf('[%s] field "%s" not found', $collectorName, $path));
+            return $this->fieldNotFound($collectorName, $path);
         }
 
         if (!is_string($actual) || !str_contains($actual, $substring)) {
@@ -155,8 +157,9 @@ final class ExpectationEvaluator
         ?string $path,
         mixed $expected,
     ): AssertionResult {
-        if ($path === null) {
-            return AssertionResult::fail(sprintf('[%s] any_field_equals requires a path', $collectorName));
+        $pathCheck = $this->requirePath($collectorName, 'any_field_equals', $path);
+        if ($pathCheck !== null) {
+            return $pathCheck;
         }
 
         foreach ($data as $entry) {
@@ -189,8 +192,9 @@ final class ExpectationEvaluator
         ?string $path,
         string $substring,
     ): AssertionResult {
-        if ($path === null) {
-            return AssertionResult::fail(sprintf('[%s] any_field_contains requires a path', $collectorName));
+        $pathCheck = $this->requirePath($collectorName, 'any_field_contains', $path);
+        if ($pathCheck !== null) {
+            return $pathCheck;
         }
 
         foreach ($data as $entry) {
@@ -215,6 +219,20 @@ final class ExpectationEvaluator
             $path,
             $substring,
         ));
+    }
+
+    private function requirePath(string $collectorName, string $assertionType, ?string $path): ?AssertionResult
+    {
+        if ($path === null) {
+            return AssertionResult::fail(sprintf('[%s] %s requires a path', $collectorName, $assertionType));
+        }
+
+        return null;
+    }
+
+    private function fieldNotFound(string $collectorName, string $path): AssertionResult
+    {
+        return AssertionResult::fail(sprintf('[%s] field "%s" not found', $collectorName, $path));
     }
 
     private function getByPath(array $data, string $path): mixed

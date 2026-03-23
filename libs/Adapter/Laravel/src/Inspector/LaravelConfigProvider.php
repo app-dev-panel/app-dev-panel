@@ -68,34 +68,41 @@ final class LaravelConfigProvider
      */
     private function getEventListeners(): array
     {
-        if (!$this->app->bound('events')) {
+        $allListeners = $this->getRawEventListeners();
+        if ($allListeners === null) {
             return [];
+        }
+
+        ksort($allListeners);
+
+        $result = [];
+        foreach ($allListeners as $eventName => $listeners) {
+            $result[] = [
+                'name' => $eventName,
+                'class' => class_exists($eventName) ? $eventName : null,
+                'listeners' => array_map($this->describeListener(...), $listeners),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array<string, list<mixed>>|null
+     */
+    private function getRawEventListeners(): ?array
+    {
+        if (!$this->app->bound('events')) {
+            return null;
         }
 
         $dispatcher = $this->app->make('events');
 
         if (!method_exists($dispatcher, 'getRawListeners')) {
-            return [];
+            return null;
         }
 
-        $result = [];
-        $allListeners = $dispatcher->getRawListeners();
-        ksort($allListeners);
-
-        foreach ($allListeners as $eventName => $listeners) {
-            $described = [];
-            foreach ($listeners as $listener) {
-                $described[] = $this->describeListener($listener);
-            }
-
-            $result[] = [
-                'name' => $eventName,
-                'class' => class_exists($eventName) ? $eventName : null,
-                'listeners' => $described,
-            ];
-        }
-
-        return $result;
+        return $dispatcher->getRawListeners();
     }
 
     /**
@@ -123,20 +130,36 @@ final class LaravelConfigProvider
             return $listener;
         }
         if (is_array($listener) && count($listener) === 2) {
-            $class = is_object($listener[0]) ? $listener[0]::class : (string) $listener[0];
-            return $class . '::' . $listener[1];
+            return $this->describeArrayListener($listener);
         }
         if ($listener instanceof \Closure) {
-            $ref = new \ReflectionFunction($listener);
-            $class = $ref->getClosureScopeClass();
-            if ($class !== null) {
-                return $class->getName() . '::' . ($ref->getName() !== '{closure}' ? $ref->getName() : '{closure}');
-            }
-            return $ref->getName();
+            return $this->describeClosureListener($listener);
         }
         if (is_object($listener) && method_exists($listener, '__invoke')) {
             return $listener::class . '::__invoke';
         }
         return get_debug_type($listener);
+    }
+
+    /**
+     * @param array{0: object|string, 1: string} $listener
+     */
+    private function describeArrayListener(array $listener): string
+    {
+        $class = is_object($listener[0]) ? $listener[0]::class : (string) $listener[0];
+        return $class . '::' . $listener[1];
+    }
+
+    private function describeClosureListener(\Closure $listener): string
+    {
+        $ref = new \ReflectionFunction($listener);
+        $class = $ref->getClosureScopeClass();
+
+        if ($class !== null) {
+            $name = $ref->getName() !== '{closure}' ? $ref->getName() : '{closure}';
+            return $class->getName() . '::' . $name;
+        }
+
+        return $ref->getName();
     }
 }

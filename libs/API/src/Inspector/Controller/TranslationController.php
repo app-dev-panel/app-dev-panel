@@ -25,14 +25,59 @@ final class TranslationController
 
     public function getTranslations(ServerRequestInterface $request): ResponseInterface
     {
+        $categorySources = $this->resolveCategorySources();
+        if ($categorySources instanceof ResponseInterface) {
+            return $categorySources;
+        }
+
+        $locales = $this->resolveLocales();
+        $messages = $this->collectMessages($categorySources, $locales);
+
+        $response = VarDumper::create($messages)->asPrimitives(255);
+        return $this->responseFactory->createJsonResponse($response);
+    }
+
+    public function putTranslation(ServerRequestInterface $request): ResponseInterface
+    {
+        $categorySources = $this->resolveCategorySources();
+        if ($categorySources instanceof ResponseInterface) {
+            return $categorySources;
+        }
+
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $locale = $body['locale'] ?? '';
+        $this->validateLocale($locale);
+
+        $categorySource = $this->findCategorySource($categorySources, $body['category'] ?? '');
+        $translationId = $body['translation'] ?? '';
+        $newMessage = $body['message'] ?? '';
+
+        $messages = $categorySource->getMessages($locale);
+        $messages = array_replace_recursive($messages, [
+            $translationId => [
+                'message' => $newMessage,
+            ],
+        ]);
+        $categorySource->write($locale, $messages);
+
+        $result = [$locale => $messages];
+        $response = VarDumper::create($result)->asPrimitives(255);
+        return $this->responseFactory->createJsonResponse($response);
+    }
+
+    private function resolveCategorySources(): array|ResponseInterface
+    {
         if (!$this->container->has('tag@translation.categorySource')) {
             return $this->responseFactory->createJsonResponse([
                 'error' => 'Translation inspection requires framework integration.',
             ], 501);
         }
 
-        $categorySources = $this->container->get('tag@translation.categorySource');
+        return $this->container->get('tag@translation.categorySource');
+    }
 
+    private function resolveLocales(): array
+    {
         /** @var string[] $locales */
         $locales = array_keys($this->params['locale']['locales'] ?? []);
         if ($locales === []) {
@@ -41,13 +86,15 @@ final class TranslationController
                 . 'Make sure that "$params[\'locale\'][\'locales\']" contains all available locales.',
             );
         }
+        return $locales;
+    }
+
+    private function collectMessages(array $categorySources, array $locales): array
+    {
         $messages = [];
         foreach ($categorySources as $categorySource) {
             $categoryName = $categorySource->getName();
-
-            if (!array_key_exists($categoryName, $messages)) {
-                $messages[$categoryName] = [];
-            }
+            $messages[$categoryName] ??= [];
 
             try {
                 foreach ($locales as $locale) {
@@ -60,56 +107,28 @@ final class TranslationController
                 $this->logger->warning($exception->getMessage(), ['exception' => $exception]);
             }
         }
-
-        $response = VarDumper::create($messages)->asPrimitives(255);
-        return $this->responseFactory->createJsonResponse($response);
+        return $messages;
     }
 
-    public function putTranslation(ServerRequestInterface $request): ResponseInterface
+    private function validateLocale(string $locale): void
     {
-        if (!$this->container->has('tag@translation.categorySource')) {
-            return $this->responseFactory->createJsonResponse([
-                'error' => 'Translation inspection requires framework integration.',
-            ], 501);
-        }
-
-        $categorySources = $this->container->get('tag@translation.categorySource');
-
-        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
-        $categoryName = $body['category'] ?? '';
-        $locale = $body['locale'] ?? '';
-        $translationId = $body['translation'] ?? '';
-        $newMessage = $body['message'] ?? '';
-
         if (!preg_match('/^[a-zA-Z]{2,3}([_-][a-zA-Z0-9]{2,8})*$/', $locale)) {
             throw new InvalidArgumentException(sprintf('Invalid locale "%s".', $locale));
         }
+    }
 
-        $categorySource = null;
+    private function findCategorySource(array $categorySources, string $categoryName): object
+    {
         foreach ($categorySources as $possibleCategorySource) {
-            if ($possibleCategorySource->getName() !== $categoryName) {
-                continue;
+            if ($possibleCategorySource->getName() === $categoryName) {
+                return $possibleCategorySource;
             }
-
-            $categorySource = $possibleCategorySource;
         }
-        if ($categorySource === null) {
-            throw new InvalidArgumentException(sprintf(
-                'Invalid category name "%s". Only the following categories are available: "%s"',
-                $categoryName,
-                implode('", "', array_map(static fn(object $cs) => $cs->getName(), $categorySources)),
-            ));
-        }
-        $messages = $categorySource->getMessages($locale);
-        $messages = array_replace_recursive($messages, [
-            $translationId => [
-                'message' => $newMessage,
-            ],
-        ]);
-        $categorySource->write($locale, $messages);
 
-        $result = [$locale => $messages];
-        $response = VarDumper::create($result)->asPrimitives(255);
-        return $this->responseFactory->createJsonResponse($response);
+        throw new InvalidArgumentException(sprintf(
+            'Invalid category name "%s". Only the following categories are available: "%s"',
+            $categoryName,
+            implode('", "', array_map(static fn(object $cs) => $cs->getName(), $categorySources)),
+        ));
     }
 }

@@ -9,6 +9,7 @@ use AppDevPanel\Testing\Assertion\ExpectationEvaluator;
 use AppDevPanel\Testing\Fixture\Fixture;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Runs a fixture against a live playground instance:
@@ -64,7 +65,28 @@ final class FixtureRunner
 
     private function doRun(Fixture $fixture): FixtureResult
     {
-        // Step 1: Hit the fixture endpoint
+        $response = $this->client->request($fixture->method, $fixture->endpoint, $this->buildRequestOptions($fixture));
+
+        $debugId = $this->resolveDebugId($response);
+        if ($debugId === null) {
+            return FixtureResult::skip($fixture, 'Could not determine debug entry ID');
+        }
+
+        $debugData = $this->fetchDebugData($debugId);
+        if ($debugData === null) {
+            return FixtureResult::skip($fixture, sprintf('Could not fetch debug data for ID: %s', $debugId));
+        }
+
+        $assertions = $this->evaluateExpectations($fixture, $debugData);
+
+        return FixtureResult::fromAssertions($fixture, $assertions, $debugId);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildRequestOptions(Fixture $fixture): array
+    {
         $options = [];
         if ($fixture->headers !== []) {
             $options['headers'] = $fixture->headers;
@@ -73,30 +95,18 @@ final class FixtureRunner
             $options['body'] = $fixture->body;
         }
 
-        $response = $this->client->request($fixture->method, $fixture->endpoint, $options);
+        return $options;
+    }
 
-        // Try to get debug ID from response header
+    private function resolveDebugId(ResponseInterface $response): ?string
+    {
         $debugId = $response->getHeaderLine('X-Debug-Id');
 
-        // Step 2: If no X-Debug-Id header, find the latest entry from the debug API
         if ($debugId === '') {
             $debugId = $this->findLatestDebugId();
         }
 
-        if ($debugId === null || $debugId === '') {
-            return FixtureResult::skip($fixture, 'Could not determine debug entry ID');
-        }
-
-        // Step 3: Fetch full debug data with retries (storage write may be async)
-        $debugData = $this->fetchDebugData($debugId);
-        if ($debugData === null) {
-            return FixtureResult::skip($fixture, sprintf('Could not fetch debug data for ID: %s', $debugId));
-        }
-
-        // Step 4: Evaluate expectations
-        $assertions = $this->evaluateExpectations($fixture, $debugData);
-
-        return FixtureResult::fromAssertions($fixture, $assertions, $debugId);
+        return $debugId === null || $debugId === '' ? null : $debugId;
     }
 
     private function findLatestDebugId(): ?string
@@ -169,6 +179,34 @@ final class FixtureRunner
         return $allAssertions;
     }
 
+    private const COLLECTOR_NAME_MAP = [
+        'logger' => 'LogCollector',
+        'event' => 'EventCollector',
+        'exception' => 'ExceptionCollector',
+        'http' => 'HttpClientCollector',
+        'service' => 'ServiceCollector',
+        'timeline' => 'TimelineCollector',
+        'var-dumper' => 'VarDumperCollector',
+        'request' => 'RequestCollector',
+        'web' => 'WebAppInfoCollector',
+        'command' => 'CommandCollector',
+        'console' => 'ConsoleAppInfoCollector',
+        'fs_stream' => 'FilesystemStreamCollector',
+        'http_stream' => 'HttpStreamCollector',
+        'cache' => 'CacheCollector',
+        'security' => 'SecurityCollector',
+        'twig' => 'TwigCollector',
+        'doctrine' => 'DoctrineCollector',
+        'mailer' => 'MailerCollector',
+        'db' => 'DatabaseCollector',
+        'queue' => 'QueueCollector',
+        'middleware' => 'MiddlewareCollector',
+        'router' => 'RouterCollector',
+        'validator' => 'ValidatorCollector',
+        'view' => 'WebViewCollector',
+        'assets' => 'AssetBundleCollector',
+    ];
+
     /**
      * @param array<string, mixed> $debugData
      *
@@ -176,52 +214,58 @@ final class FixtureRunner
      */
     private function findCollectorData(array $debugData, string $collectorName): ?array
     {
-        // Direct key match
-        if (array_key_exists($collectorName, $debugData)) {
-            $value = $debugData[$collectorName];
+        return (
+            $this->findByDirectKey($debugData, $collectorName) ?? $this->findByClassName(
+                $debugData,
+                $collectorName,
+            ) ?? $this->findByPartialMatch($debugData, $collectorName)
+        );
+    }
 
-            return is_array($value) ? $value : null;
+    /**
+     * @param array<string, mixed> $debugData
+     *
+     * @return array<array-key, mixed>|null
+     */
+    private function findByDirectKey(array $debugData, string $collectorName): ?array
+    {
+        if (!array_key_exists($collectorName, $debugData)) {
+            return null;
         }
 
-        // Match by collector name pattern in the FQCN key
-        $nameMap = [
-            'logger' => 'LogCollector',
-            'event' => 'EventCollector',
-            'exception' => 'ExceptionCollector',
-            'http' => 'HttpClientCollector',
-            'service' => 'ServiceCollector',
-            'timeline' => 'TimelineCollector',
-            'var-dumper' => 'VarDumperCollector',
-            'request' => 'RequestCollector',
-            'web' => 'WebAppInfoCollector',
-            'command' => 'CommandCollector',
-            'console' => 'ConsoleAppInfoCollector',
-            'fs_stream' => 'FilesystemStreamCollector',
-            'http_stream' => 'HttpStreamCollector',
-            'cache' => 'CacheCollector',
-            'security' => 'SecurityCollector',
-            'twig' => 'TwigCollector',
-            'doctrine' => 'DoctrineCollector',
-            'mailer' => 'MailerCollector',
-            'db' => 'DatabaseCollector',
-            'queue' => 'QueueCollector',
-            'middleware' => 'MiddlewareCollector',
-            'router' => 'RouterCollector',
-            'validator' => 'ValidatorCollector',
-            'view' => 'WebViewCollector',
-            'assets' => 'AssetBundleCollector',
-        ];
+        $value = $debugData[$collectorName];
 
-        $className = $nameMap[$collectorName] ?? null;
-        if ($className !== null) {
-            foreach ($debugData as $key => $value) {
-                if (is_string($key) && str_contains($key, $className) && is_array($value)) {
-                    return $value;
-                }
+        return is_array($value) ? $value : null;
+    }
+
+    /**
+     * @param array<string, mixed> $debugData
+     *
+     * @return array<array-key, mixed>|null
+     */
+    private function findByClassName(array $debugData, string $collectorName): ?array
+    {
+        $className = self::COLLECTOR_NAME_MAP[$collectorName] ?? null;
+        if ($className === null) {
+            return null;
+        }
+
+        foreach ($debugData as $key => $value) {
+            if (is_string($key) && str_contains($key, $className) && is_array($value)) {
+                return $value;
             }
         }
 
-        // Fallback: partial match on collector name
+        return null;
+    }
+
+    /**
+     * @param array<string, mixed> $debugData
+     *
+     * @return array<array-key, mixed>|null
+     */
+    private function findByPartialMatch(array $debugData, string $collectorName): ?array
+    {
         foreach ($debugData as $key => $value) {
             if (is_string($key) && is_array($value) && str_contains(strtolower($key), strtolower($collectorName))) {
                 return $value;

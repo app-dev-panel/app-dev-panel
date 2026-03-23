@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Laravel\Tests\Unit\Middleware;
 
+use AppDevPanel\Adapter\Laravel\Middleware\DebugCollectors;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
@@ -93,7 +94,10 @@ final class DebugMiddlewareTest extends TestCase
         $exceptionCollector = new ExceptionCollector($timeline);
         $debugger = new Debugger($idGenerator, $storage, [$exceptionCollector, $timeline]);
 
-        $middleware = new DebugMiddleware(debugger: $debugger, exceptionCollector: $exceptionCollector);
+        $middleware = new DebugMiddleware(
+            debugger: $debugger,
+            collectors: new DebugCollectors(exception: $exceptionCollector),
+        );
 
         $request = Request::create('/error');
 
@@ -119,8 +123,7 @@ final class DebugMiddlewareTest extends TestCase
 
         $middleware = new DebugMiddleware(
             debugger: $debugger,
-            requestCollector: $requestCollector,
-            webAppInfoCollector: $webAppInfoCollector,
+            collectors: new DebugCollectors(request: $requestCollector, webAppInfo: $webAppInfoCollector),
         );
 
         return [$middleware, $debugger, $storage];

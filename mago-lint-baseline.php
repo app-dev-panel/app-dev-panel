@@ -1,18 +1,6 @@
 variant = "loose"
 
 [[issues]]
-file = "libs/API/src/ApiConfig.php"
-code = "excessive-parameter-list"
-message = "Parameter list is too long."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Ingestion/Controller/IngestionController.php"
-code = "cyclomatic-complexity"
-message = "Class has high complexity."
-count = 1
-
-[[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -21,17 +9,11 @@ count = 1
 [[issues]]
 file = "libs/API/src/Inspector/Controller/CommandController.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.25)."
+message = "Class has a high kan defect score (2.18)."
 count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/FileController.php"
-code = "cyclomatic-complexity"
-message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/InspectController.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
 count = 1
@@ -46,18 +28,6 @@ count = 1
 file = "libs/API/src/Inspector/Middleware/InspectorProxyMiddleware.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Test/PHPUnitJSONReporter.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/API/src/ServerSentEventsStream.php"
-code = "too-many-methods"
-message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -129,8 +99,14 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.9000000000000004)."
+message = "Class has a high kan defect score (2.47)."
 count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 3
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
@@ -147,25 +123,19 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (1.9200000000000002)."
+message = "Class has a high kan defect score (1.7600000000000002)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugCollectors.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
 count = 1
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
-code = "excessive-parameter-list"
-message = "Parameter list is too long."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php"
-code = "too-many-methods"
-message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -183,7 +153,19 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (1.9700000000000002)."
+message = "Class has a high kan defect score (1.9600000000000002)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 3
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -194,6 +176,12 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriberCollectors.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
 count = 1
@@ -207,7 +195,13 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.06)."
+message = "Class has a high kan defect score (1.84)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
 count = 1
 
 [[issues]]
@@ -267,7 +261,13 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.24)."
+message = "Class has a high kan defect score (2.02)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -279,7 +279,19 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Yii2/src/Module.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (3.7800000000000002)."
+message = "Class has a high kan defect score (3.4000000000000004)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "prefer-static-closure"
+message = "This closure does not use `$this` and should be declared static."
 count = 1
 
 [[issues]]
@@ -307,39 +319,9 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "excessive-parameter-list"
-message = "Parameter list is too long."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php"
-code = "kan-defect"
-message = "Class has a high kan defect score (1.8800000000000001)."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php"
-code = "too-many-methods"
-message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -358,7 +340,7 @@ count = 1
 file = "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
-count = 3
+count = 1
 
 [[issues]]
 file = "libs/Cli/src/Command/DebugQueryCommand.php"
@@ -368,8 +350,20 @@ count = 1
 
 [[issues]]
 file = "libs/Cli/src/Command/DebugQueryCommand.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Command/DebugQueryCommand.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.27)."
+message = "Class has a high kan defect score (2.13)."
+count = 1
+
+[[issues]]
+file = "libs/Cli/src/Command/DebugQueryCommand.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -379,12 +373,6 @@ message = "Parameter list is too long."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/Collector/Console/CommandCollector.php"
-code = "cyclomatic-complexity"
-message = "Class has high complexity."
-count = 1
-
-[[issues]]
 file = "libs/Kernel/src/Collector/DatabaseCollector.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
@@ -392,12 +380,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/DatabaseCollector.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/LoggerInterfaceProxy.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
@@ -409,21 +391,9 @@ message = "Parameter list is too long."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/Collector/ServiceCollector.php"
-code = "excessive-parameter-list"
-message = "Parameter list is too long."
-count = 1
-
-[[issues]]
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
-code = "too-many-methods"
-message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -437,12 +407,6 @@ file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
 count = 2
-
-[[issues]]
-file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
 
 [[issues]]
 file = "libs/Kernel/src/DebugServer/Broadcaster.php"
@@ -489,7 +453,7 @@ count = 1
 [[issues]]
 file = "libs/Kernel/src/Dumper.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.7600000000000002)."
+message = "Class has a high kan defect score (2.62)."
 count = 1
 
 [[issues]]
@@ -499,39 +463,9 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/Event/ProxyMethodCallEvent.php"
-code = "excessive-parameter-list"
-message = "Parameter list is too long."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/FlattenException.php"
-code = "cyclomatic-complexity"
-message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/FlattenException.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
 file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapperInterface.php"
-code = "too-many-methods"
-message = "Interface has too many methods."
 count = 1
 
 [[issues]]
@@ -615,7 +549,13 @@ count = 1
 [[issues]]
 file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.34)."
+message = "Class has a high kan defect score (2.41)."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Assertion/ExpectationEvaluator.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -629,6 +569,12 @@ file = "libs/Testing/src/Command/DebugFixturesCommand.php"
 code = "kan-defect"
 message = "Class has a high kan defect score (2.4400000000000004)."
 count = 1
+
+[[issues]]
+file = "libs/Testing/src/Command/DebugFixturesCommand.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 2
 
 [[issues]]
 file = "libs/Testing/src/Fixture/Fixture.php"
@@ -646,6 +592,12 @@ count = 1
 file = "libs/Testing/src/Runner/FixtureRunner.php"
 code = "kan-defect"
 message = "Class has a high kan defect score (1.9800000000000002)."
+count = 1
+
+[[issues]]
+file = "libs/Testing/src/Runner/FixtureRunner.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
 
 [[issues]]
