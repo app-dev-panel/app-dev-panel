@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="Mago">
+    <MagoSettings>
+      <MagoConfiguration tool_path="$PROJECT_DIR$/vendor/bin/mago" />
+      <mago_by_interpreter asDefaultInterpreter="true" interpreter_id="61ffe08f-616d-4f06-a724-2f763fa98f59" tool_path="$PROJECT_DIR$/vendor/bin/mago" />
+    </MagoSettings>
+  </component>
   <component name="PhpCSFixer">
     <phpcsfixer_settings>
       <PhpCSFixerConfiguration tool_path="$PROJECT_DIR$/vendor/bin/php-cs-fixer" />
@@ -83,9 +89,7 @@
       <path value="$PROJECT_DIR$/vendor/yiisoft/json" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/translator" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/friendly-exception" />
-      <path value="$PROJECT_DIR$/vendor/httpsoft/http-message" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/http" />
-      <path value="$PROJECT_DIR$/vendor/yiisoft/data-response" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/arrays" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/middleware-dispatcher" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/di" />
@@ -115,15 +119,9 @@
       <path value="$PROJECT_DIR$/vendor/yiisoft/error-handler" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/router-fastroute" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/yii-console" />
-      <path value="$PROJECT_DIR$/vendor/yiisoft/network-utilities" />
-      <path value="$PROJECT_DIR$/vendor/yiisoft/yii-middleware" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/db-sqlite" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/cache" />
-      <path value="$PROJECT_DIR$/vendor/yiisoft/security" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/yii-http" />
-      <path value="$PROJECT_DIR$/vendor/yiisoft/cookies" />
-      <path value="$PROJECT_DIR$/vendor/yiisoft/session" />
-      <path value="$PROJECT_DIR$/vendor/yiisoft/validator" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/db" />
       <path value="$PROJECT_DIR$/vendor/yiisoft/event-dispatcher" />
       <path value="$PROJECT_DIR$/vendor/app-dev-panel/kernel" />
@@ -143,6 +141,62 @@
       <path value="$PROJECT_DIR$/vendor/symfony/http-foundation" />
       <path value="$PROJECT_DIR$/vendor/psr/cache" />
       <path value="$PROJECT_DIR$/vendor/nyholm/psr7-server" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/yii2" />
+      <path value="$PROJECT_DIR$/vendor/yiisoft/yii2-composer" />
+      <path value="$PROJECT_DIR$/vendor/app-dev-panel/adapter-yii2" />
+      <path value="$PROJECT_DIR$/vendor/ezyang/htmlpurifier" />
+      <path value="$PROJECT_DIR$/vendor/app-dev-panel/testing" />
+      <path value="$PROJECT_DIR$/vendor/laravel/serializable-closure" />
+      <path value="$PROJECT_DIR$/vendor/laravel/prompts" />
+      <path value="$PROJECT_DIR$/vendor/dflydev/dot-access-data" />
+      <path value="$PROJECT_DIR$/vendor/league/config" />
+      <path value="$PROJECT_DIR$/vendor/egulias/email-validator" />
+      <path value="$PROJECT_DIR$/vendor/league/commonmark" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/database" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/config" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/mail" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/pipeline" />
+      <path value="$PROJECT_DIR$/vendor/carbonphp/carbon-doctrine-types" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/cache" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/filesystem" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/container" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/contracts" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/bus" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/http" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/macroable" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/conditionable" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/support" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/routing" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/events" />
+      <path value="$PROJECT_DIR$/vendor/nunomaduro/termwind" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/view" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/queue" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/reflection" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/session" />
+      <path value="$PROJECT_DIR$/vendor/fruitcake/php-cors" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/collections" />
+      <path value="$PROJECT_DIR$/vendor/illuminate/console" />
+      <path value="$PROJECT_DIR$/vendor/nette/utils" />
+      <path value="$PROJECT_DIR$/vendor/nette/schema" />
+      <path value="$PROJECT_DIR$/vendor/brick/math" />
+      <path value="$PROJECT_DIR$/vendor/nesbot/carbon" />
+      <path value="$PROJECT_DIR$/vendor/app-dev-panel/adapter-laravel" />
+      <path value="$PROJECT_DIR$/vendor/guzzlehttp/uri-template" />
+      <path value="$PROJECT_DIR$/vendor/symfony/clock" />
+      <path value="$PROJECT_DIR$/vendor/tijsverkoyen/css-to-inline-styles" />
+      <path value="$PROJECT_DIR$/vendor/symfony/css-selector" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php83" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-idn" />
+      <path value="$PROJECT_DIR$/vendor/symfony/translation-contracts" />
+      <path value="$PROJECT_DIR$/vendor/symfony/mailer" />
+      <path value="$PROJECT_DIR$/vendor/symfony/mime" />
+      <path value="$PROJECT_DIR$/vendor/voku/portable-ascii" />
+      <path value="$PROJECT_DIR$/vendor/ramsey/collection" />
+      <path value="$PROJECT_DIR$/vendor/symfony/translation" />
+      <path value="$PROJECT_DIR$/vendor/ramsey/uuid" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/lexer" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/inflector" />
+      <path value="$PROJECT_DIR$/vendor/psr/clock" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.4" />
