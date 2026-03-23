@@ -221,7 +221,7 @@ final class WebListenerTest extends TestCase
         $this->assertNull($route['name']);
     }
 
-    public function testNoRouteDataWhenControllerIsNullAndNoRecorder(): void
+    public function testRouteDataRecordedEvenWhenControllerIsNull(): void
     {
         $routerCollector = new RouterCollector();
 
@@ -229,13 +229,43 @@ final class WebListenerTest extends TestCase
 
         $app = $this->createWebApp('/nonexistent');
         $app->controller = null;
+        $app->requestedRoute = 'nonexistent';
 
         $event = new Event(['sender' => $app]);
         $listener->onBeforeRequest($event);
         $this->simulateAfterRequestWithoutShutdown($listener, $app);
 
         $collected = $routerCollector->getCollected();
-        $this->assertNull($collected['currentRoute']);
+        $this->assertArrayHasKey('currentRoute', $collected);
+        $route = $collected['currentRoute'];
+        $this->assertSame('nonexistent', $route['pattern']);
+        $this->assertNull($route['action']);
+        $this->assertSame('/nonexistent', $route['uri']);
+    }
+
+    public function testOnExceptionHandlerExtractsRouteData(): void
+    {
+        $routerCollector = new RouterCollector();
+
+        [$listener] = $this->createListenerWithRouter($routerCollector, null);
+
+        $app = $this->createWebApp('/test/fixtures/request-info');
+        $app->controller = null;
+        $app->requestedRoute = 'test/fixtures/request-info';
+        $app->requestedParams = [];
+
+        // Simulate: onBeforeRequest fires, then exception occurs (no onAfterRequest)
+        $event = new Event(['sender' => $app]);
+        $listener->onBeforeRequest($event);
+
+        // Exception handler path — onAfterRequest never fires
+        $listener->onExceptionHandler($app);
+
+        $collected = $routerCollector->getCollected();
+        $this->assertArrayHasKey('currentRoute', $collected);
+        $route = $collected['currentRoute'];
+        $this->assertSame('test/fixtures/request-info', $route['pattern']);
+        $this->assertSame('/test/fixtures/request-info', $route['uri']);
     }
 
     public function testRecorderResetAfterShutdown(): void

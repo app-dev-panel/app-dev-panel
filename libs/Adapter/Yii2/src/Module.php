@@ -630,9 +630,15 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $exceptionCollector,
             $debugger,
             $previousHandler,
+            $listener,
+            $app,
         ): void {
             // Feed the collector before Yii2's handler clears the exception
             $exceptionCollector->collect($exception);
+
+            // Extract route data and flush logs that onAfterRequest would have done.
+            // EVENT_AFTER_REQUEST never fires when exceptions propagate to the error handler.
+            $listener->onExceptionHandler($app);
 
             // Add X-Debug-Id header before Yii2 renders error response
             if (!headers_sent()) {

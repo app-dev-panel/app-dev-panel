@@ -97,6 +97,22 @@ final class WebListener
     }
 
     /**
+     * Called from the exception handler when EVENT_AFTER_REQUEST won't fire.
+     *
+     * Extracts route data and flushes logs so the debugger shutdown (via
+     * register_shutdown_function) can persist a complete debug entry.
+     */
+    public function onExceptionHandler(\yii\web\Application $app): void
+    {
+        $this->webAppInfoCollector?->markRequestFinished();
+        $this->extractRouteData($app);
+        $this->webAppInfoCollector?->markApplicationFinished();
+
+        \Yii::getLogger()->flush(true);
+        $this->matchRecorder?->reset();
+    }
+
+    /**
      * Called after each action — captures unhandled exceptions that Yii's error handler caught.
      */
     public function onAfterAction(): void
@@ -229,20 +245,16 @@ final class WebListener
     private function extractFromController(\yii\web\Application $app, string $uri): void
     {
         $controller = $app->controller;
-        if ($controller === null) {
-            return;
-        }
-
-        $action = $controller->action;
+        $action = $controller?->action;
 
         $this->routerCollector->collectMatchedRoute([
             'matchTime' => 0,
             'name' => null,
-            'pattern' => $app->requestedRoute,
+            'pattern' => $app->requestedRoute ?: $uri,
             'arguments' => $app->requestedParams,
             'host' => null,
             'uri' => $uri,
-            'action' => $action !== null ? $action::class : $controller::class,
+            'action' => $action !== null ? $action::class : ($controller !== null ? $controller::class : null),
             'middlewares' => [],
         ]);
     }
