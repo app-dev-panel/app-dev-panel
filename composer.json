@@ -105,8 +105,7 @@
     "format:fix": "Fixes code formatting",
     "check": "Runs all checks: format, lint, analyze",
     "fix": "Fixes code style and runs all checks",
-    "lint:baseline": "Regenerates the mago lint baseline",
-    "analyze:baseline": "Regenerates the mago analyze baseline"
+    "lint:baseline": "Regenerates the mago lint baseline"
   },
   "scripts": {
     "test": "@test:unit",
@@ -127,8 +126,7 @@
       "@lint",
       "@analyze"
     ],
-    "lint:baseline": "mago lint --generate-baseline --baseline=mago-lint-baseline.php",
-    "analyze:baseline": "mago analyze --generate-baseline --baseline=mago-analyze-baseline.php"
+    "lint:baseline": "mago lint --generate-baseline --baseline=mago-lint-baseline.php"
   },
   "autoload-dev": {
     "psr-4": {

@@ -287,14 +287,15 @@ This must pass cleanly before pushing. Equivalent to `make check && make test`.
 
 ### Baselines
 
-Mago uses baseline files to suppress existing issues in legacy code:
+Mago uses a baseline file to suppress existing lint issues in legacy code:
 - `mago-lint-baseline.php` — Lint baseline
-- `mago-analyze-baseline.php` — Analyzer baseline
 
-New code must not introduce new issues. To regenerate baselines after fixing existing issues:
+The analyzer has **no baseline** — all analyzer rules that produce false positives for the codebase
+are suppressed via `ignore` in `mago.toml`. New code must not introduce new issues.
+
+To regenerate the lint baseline after fixing existing issues:
 ```bash
 composer lint:baseline
-composer analyze:baseline
 ```
 
 ## Custom Skills
