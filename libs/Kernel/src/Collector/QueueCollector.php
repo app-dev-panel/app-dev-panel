@@ -74,30 +74,13 @@ final class QueueCollector implements SummaryCollectorInterface
         $this->timelineCollector->collect($this, count($this->processingMessages));
     }
 
-    public function logMessage(
-        string $messageClass,
-        string $bus = 'default',
-        ?string $transport = null,
-        bool $dispatched = true,
-        bool $handled = false,
-        bool $failed = false,
-        float $duration = 0.0,
-        mixed $message = null,
-    ): void {
+    public function logMessage(MessageRecord $record): void
+    {
         if (!$this->isActive()) {
             return;
         }
 
-        $this->messages[] = [
-            'messageClass' => $messageClass,
-            'bus' => $bus,
-            'transport' => $transport,
-            'dispatched' => $dispatched,
-            'handled' => $handled,
-            'failed' => $failed,
-            'duration' => $duration,
-            'message' => $message,
-        ];
+        $this->messages[] = $record->toArray();
 
         $this->timelineCollector->collect($this, count($this->messages));
     }

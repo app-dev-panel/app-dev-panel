@@ -38,7 +38,7 @@ final class DebugQueryController extends Controller
         $entries = $this->collectorRepository->getSummary();
 
         if ($entries === []) {
-            $this->writeColored("No debug entries found.\n", Console::FG_YELLOW);
+            Console::stdout(Console::ansiFormat("No debug entries found.\n", [Console::FG_YELLOW]));
             return ExitCode::OK;
         }
 
@@ -89,7 +89,7 @@ final class DebugQueryController extends Controller
 
     private function renderEntryTable(array $entries): void
     {
-        $this->writeColored(sprintf("Debug Entries (showing %d)\n", count($entries)), Console::BOLD);
+        Console::stdout(Console::ansiFormat(sprintf("Debug Entries (showing %d)\n", count($entries)), [Console::BOLD]));
         Console::stdout(str_repeat('=', 60) . "\n");
 
         $rows = [];
@@ -106,10 +106,10 @@ final class DebugQueryController extends Controller
             ];
         }
 
-        $this->writeColored(
+        Console::stdout(Console::ansiFormat(
             sprintf("%-36s  %-6s  %-30s  %-6s  %s\n", 'ID', 'Method', 'URL', 'Status', 'Collectors'),
-            Console::BOLD,
-        );
+            [Console::BOLD],
+        ));
         Console::stdout(str_repeat('-', 100) . "\n");
 
         foreach ($rows as $row) {
@@ -140,34 +140,33 @@ final class DebugQueryController extends Controller
 
         $collectorData = is_array($data[$collector]) ? $data[$collector] : [];
 
-        if ($json) {
-            $this->outputJson($collectorData);
-            return ExitCode::OK;
+        if (!$json) {
+            Console::stdout(Console::ansiFormat(
+                sprintf("Collector: %s (Entry: %s)\n", $collector, $id),
+                [Console::BOLD],
+            ));
         }
 
-        $this->writeColored(sprintf("Collector: %s (Entry: %s)\n", $collector, $id), Console::BOLD);
         $this->outputJson($collectorData);
         return ExitCode::OK;
     }
 
     private function renderFullEntryView(array $data, string $id): void
     {
-        $this->writeColored(sprintf("Debug Entry: %s\n", $id), Console::BOLD);
+        Console::stdout(Console::ansiFormat(sprintf("Debug Entry: %s\n", $id), [Console::BOLD]));
         Console::stdout(str_repeat('=', 60) . "\n");
 
         foreach ($data as $collectorName => $collectorData) {
-            $this->writeColored(sprintf("\n[%s]\n", (string) $collectorName), Console::BOLD, Console::FG_CYAN);
+            Console::stdout(Console::ansiFormat(
+                sprintf("\n[%s]\n", (string) $collectorName),
+                [Console::BOLD, Console::FG_CYAN],
+            ));
             if (is_array($collectorData) && $collectorData !== []) {
                 $this->outputJson($collectorData);
             } else {
-                $this->writeColored("(empty)\n", Console::FG_GREY);
+                Console::stdout(Console::ansiFormat("(empty)\n", [Console::FG_GREY]));
             }
         }
-    }
-
-    private function writeColored(string $text, int ...$formats): void
-    {
-        Console::stdout(Console::ansiFormat($text, $formats));
     }
 
     private function extractRequestInfo(array $entry, string $key, string $default): string
@@ -188,24 +187,20 @@ final class DebugQueryController extends Controller
     private function formatCollectors(array $entry): string
     {
         $parts = [];
-        $loggerTotal = (int) ($entry['logger']['total'] ?? 0);
-        if ($loggerTotal > 0) {
-            $parts[] = sprintf('logs:%d', $loggerTotal);
+
+        foreach (['logger' => 'logs', 'event' => 'events', 'timeline' => 'timeline'] as $key => $label) {
+            $total = (int) ($entry[$key]['total'] ?? 0);
+            if ($total > 0) {
+                $parts[] = sprintf('%s:%d', $label, $total);
+            }
         }
-        $eventTotal = (int) ($entry['event']['total'] ?? 0);
-        if ($eventTotal > 0) {
-            $parts[] = sprintf('events:%d', $eventTotal);
-        }
+
         if (
             array_key_exists('exception', $entry)
             && is_array($entry['exception'])
             && array_key_exists('class', $entry['exception'])
         ) {
             $parts[] = 'exception';
-        }
-        $timelineTotal = (int) ($entry['timeline']['total'] ?? 0);
-        if ($timelineTotal > 0) {
-            $parts[] = sprintf('timeline:%d', $timelineTotal);
         }
 
         return $parts !== [] ? implode(', ', $parts) : '—';

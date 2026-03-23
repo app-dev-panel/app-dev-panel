@@ -7,7 +7,6 @@ namespace AppDevPanel\Adapter\Laravel\Middleware;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
 use Illuminate\Http\Request;
-use Nyholm\Psr7\Factory\Psr17Factory;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\VarDumper\VarDumper;
 
@@ -22,10 +21,14 @@ final class DebugMiddleware
 {
     private static bool $varDumperHandlerRegistered = false;
 
+    private readonly Psr7Converter $psr7Converter;
+
     public function __construct(
         private readonly Debugger $debugger,
         private readonly DebugCollectors $collectors = new DebugCollectors(),
-    ) {}
+    ) {
+        $this->psr7Converter = new Psr7Converter();
+    }
 
     public function handle(Request $request, \Closure $next): mixed
     {
@@ -33,7 +36,7 @@ final class DebugMiddleware
             return $next($request);
         }
 
-        $psrRequest = $this->convertLaravelRequestToPsr7($request);
+        $psrRequest = $this->psr7Converter->convertRequest($request);
 
         $this->registerVarDumperHandler();
         $this->debugger->startup(StartupContext::forRequest($psrRequest));
@@ -83,7 +86,7 @@ final class DebugMiddleware
         $this->collectors->webAppInfo?->markRequestFinished();
 
         if ($this->collectors->request !== null) {
-            $psrResponse = $this->convertSymfonyResponseToPsr7($response);
+            $psrResponse = $this->psr7Converter->convertResponse($response);
             $this->collectors->request->collectResponse($psrResponse);
         }
 
@@ -112,48 +115,5 @@ final class DebugMiddleware
         });
 
         self::$varDumperHandlerRegistered = true;
-    }
-
-    private function convertLaravelRequestToPsr7(Request $request): \Psr\Http\Message\ServerRequestInterface
-    {
-        $psr17Factory = new Psr17Factory();
-
-        $psrRequest = $psr17Factory->createServerRequest(
-            $request->getMethod(),
-            $request->getUri(),
-            $request->server->all(),
-        );
-
-        foreach ($request->headers->all() as $name => $values) {
-            $psrRequest = $psrRequest->withHeader($name, $values);
-        }
-
-        $psrRequest = $psrRequest->withQueryParams($request->query->all());
-
-        $content = $request->getContent();
-        if ($content !== '' && $content !== false) {
-            $body = $psr17Factory->createStream($content);
-            $psrRequest = $psrRequest->withBody($body);
-        }
-
-        return $psrRequest;
-    }
-
-    private function convertSymfonyResponseToPsr7(SymfonyResponse $response): \Psr\Http\Message\ResponseInterface
-    {
-        $psr17Factory = new Psr17Factory();
-        $psrResponse = $psr17Factory->createResponse($response->getStatusCode());
-
-        foreach ($response->headers->all() as $name => $values) {
-            $psrResponse = $psrResponse->withHeader($name, $values);
-        }
-
-        $content = $response->getContent();
-        if ($content !== false) {
-            $body = $psr17Factory->createStream($content);
-            $psrResponse = $psrResponse->withBody($body);
-        }
-
-        return $psrResponse;
     }
 }

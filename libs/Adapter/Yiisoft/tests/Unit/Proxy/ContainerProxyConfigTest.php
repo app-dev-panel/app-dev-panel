@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yiisoft\Tests\Unit\Proxy;
 
 use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerProxyConfig;
+use AppDevPanel\Adapter\Yiisoft\Proxy\ServiceConfigType;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
@@ -71,9 +72,7 @@ final class ContainerProxyConfigTest extends TestCase
         $this->assertTrue($config->hasCollector());
         $this->assertTrue($config->hasDispatcher());
         $this->assertTrue($config->hasDecoratedService(LoggerInterface::class));
-        $this->assertTrue($config->hasDecoratedServiceArrayConfig(LoggerInterface::class));
-        $this->assertFalse($config->hasDecoratedServiceArrayConfigWithStringKeys(LoggerInterface::class));
-        $this->assertFalse($config->hasDecoratedServiceCallableConfig(LoggerInterface::class));
+        $this->assertSame(ServiceConfigType::ArrayDefinition, $config->getServiceConfigType(LoggerInterface::class));
     }
 
     private function createServiceCollector(): ServiceCollector

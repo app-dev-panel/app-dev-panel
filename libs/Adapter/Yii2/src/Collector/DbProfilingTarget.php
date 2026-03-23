@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\Collector;
 
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\QueryRecord;
 use yii\log\Logger;
 use yii\log\Target;
 
@@ -54,7 +55,7 @@ final class DbProfilingTarget extends Target
                 $endTime = (float) $timestamp;
                 unset($this->activeQueries[$sql]);
 
-                $this->dbCollector->logQuery($sql, $sql, [], '', $startTime, $endTime, 0);
+                $this->dbCollector->logQuery(new QueryRecord($sql, $sql, [], '', $startTime, $endTime));
             }
         }
     }

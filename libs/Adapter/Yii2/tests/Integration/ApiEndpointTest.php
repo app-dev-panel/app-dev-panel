@@ -10,6 +10,7 @@ use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\QueryRecord;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\StartupContext;
@@ -179,23 +180,27 @@ final class ApiEndpointTest extends Yii2IntegrationTestCase
         $dbCollector = $module->getCollector(DatabaseCollector::class);
         $startTime = microtime(true);
         $dbCollector->logQuery(
-            'SELECT * FROM users WHERE active = ?',
-            'SELECT * FROM users WHERE active = ?',
-            [1],
-            '',
-            $startTime,
-            microtime(true),
-            5,
+            new QueryRecord(
+                'SELECT * FROM users WHERE active = ?',
+                'SELECT * FROM users WHERE active = ?',
+                [1],
+                '',
+                $startTime,
+                microtime(true),
+                5,
+            ),
         );
         $startTime = microtime(true);
         $dbCollector->logQuery(
-            'SELECT COUNT(*) FROM users',
-            'SELECT COUNT(*) FROM users',
-            [],
-            '',
-            $startTime,
-            microtime(true),
-            1,
+            new QueryRecord(
+                'SELECT COUNT(*) FROM users',
+                'SELECT COUNT(*) FROM users',
+                [],
+                '',
+                $startTime,
+                microtime(true),
+                1,
+            ),
         );
 
         $debugger->shutdown();
@@ -312,7 +317,7 @@ final class ApiEndpointTest extends Yii2IntegrationTestCase
         /** @var DatabaseCollector $dbCollector */
         $dbCollector = $module->getCollector(DatabaseCollector::class);
         $startTime = microtime(true);
-        $dbCollector->logQuery('SELECT 1', 'SELECT 1', [], '', $startTime, microtime(true), 1);
+        $dbCollector->logQuery(new QueryRecord('SELECT 1', 'SELECT 1', [], '', $startTime, microtime(true), 1));
 
         $debugger->shutdown();
 

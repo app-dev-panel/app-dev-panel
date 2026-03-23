@@ -130,36 +130,21 @@ final class LaravelConfigProvider
             return $listener;
         }
         if (is_array($listener) && count($listener) === 2) {
-            return $this->describeArrayListener($listener);
+            $class = is_object($listener[0]) ? $listener[0]::class : (string) $listener[0];
+            return $class . '::' . $listener[1];
         }
         if ($listener instanceof \Closure) {
-            return $this->describeClosureListener($listener);
+            $ref = new \ReflectionFunction($listener);
+            $class = $ref->getClosureScopeClass();
+            if ($class !== null) {
+                $name = $ref->getName() !== '{closure}' ? $ref->getName() : '{closure}';
+                return $class->getName() . '::' . $name;
+            }
+            return $ref->getName();
         }
         if (is_object($listener) && method_exists($listener, '__invoke')) {
             return $listener::class . '::__invoke';
         }
         return get_debug_type($listener);
-    }
-
-    /**
-     * @param array{0: object|string, 1: string} $listener
-     */
-    private function describeArrayListener(array $listener): string
-    {
-        $class = is_object($listener[0]) ? $listener[0]::class : (string) $listener[0];
-        return $class . '::' . $listener[1];
-    }
-
-    private function describeClosureListener(\Closure $listener): string
-    {
-        $ref = new \ReflectionFunction($listener);
-        $class = $ref->getClosureScopeClass();
-
-        if ($class !== null) {
-            $name = $ref->getName() !== '{closure}' ? $ref->getName() : '{closure}';
-            return $class->getName() . '::' . $name;
-        }
-
-        return $ref->getName();
     }
 }

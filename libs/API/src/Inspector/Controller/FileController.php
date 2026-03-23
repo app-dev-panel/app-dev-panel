@@ -22,17 +22,13 @@ final class FileController
 
     public function files(ServerRequestInterface $request): ResponseInterface
     {
-        $queryParams = $request->getQueryParams();
-        $class = $queryParams['class'] ?? '';
-        $method = $queryParams['method'] ?? '';
+        $params = $request->getQueryParams() + ['class' => '', 'method' => '', 'path' => ''];
 
-        if ($class !== '' && class_exists($class)) {
-            return $this->resolveClassFile($class, $method);
+        if ($params['class'] !== '' && class_exists($params['class'])) {
+            return $this->resolveClassFile($params['class'], $params['method']);
         }
 
-        $path = $queryParams['path'] ?? '';
-
-        return $this->resolvePathFile($path);
+        return $this->resolvePathFile($params['path']);
     }
 
     private function resolveClassFile(string $class, string $method): ResponseInterface
@@ -61,13 +57,9 @@ final class FileController
     private function resolvePathFile(string $path): ResponseInterface
     {
         $rootPath = realpath($this->pathResolver->getRootPath());
-        $destination = $this->removeBasePath($rootPath, $path);
-
-        if (!str_starts_with($destination, '/')) {
-            $destination = '/' . $destination;
-        }
-
-        $destination = realpath($rootPath . $destination);
+        $relative = preg_replace('/^' . preg_quote($rootPath, '/') . '/', '', $path, 1);
+        $relative = '/' . ltrim($relative, '/');
+        $destination = realpath($rootPath . $relative);
 
         if ($destination === false) {
             return $this->responseFactory->createJsonResponse([
@@ -81,47 +73,45 @@ final class FileController
             ], 403);
         }
 
-        if (!is_dir($destination)) {
-            return $this->readFile($destination);
-        }
-
-        return $this->listDirectory($destination, $rootPath);
+        return is_dir($destination) ? $this->listDirectory($destination, $rootPath) : $this->readFile($destination);
     }
 
     private function listDirectory(string $destination, string $rootPath): ResponseInterface
     {
         $directoryIterator = new RecursiveDirectoryIterator(
             $destination,
-            FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO,
+            FilesystemIterator::KEY_AS_PATHNAME
+            | FilesystemIterator::CURRENT_AS_FILEINFO
+            | FilesystemIterator::SKIP_DOTS,
         );
+
+        $parentPath = realpath($destination . '/..') . '/';
+        $parentEntry = str_starts_with($parentPath, $rootPath)
+            ? [array_merge(['path' => preg_replace(
+                '/^' . preg_quote($rootPath, '/') . '/',
+                '',
+                $parentPath,
+                1,
+            )], $this->serializeFileInfo(new SplFileInfo(dirname($destination))))]
+            : [];
 
         $files = [];
         foreach ($directoryIterator as $file) {
-            if ($file->getBasename() === '.') {
-                continue;
-            }
-
-            $filePath = $file->getPathName();
-            if ($file->isDir()) {
-                $filePath = ($file->getBasename() === '..' ? realpath($filePath) : $filePath) . '/';
-            }
+            $filePath = $file->isDir() ? $file->getPathName() . '/' : $file->getPathName();
 
             if (!str_starts_with($filePath, $rootPath)) {
                 continue;
             }
 
-            $files[] = array_merge(['path' => $this->removeBasePath(
-                $rootPath,
+            $files[] = array_merge(['path' => preg_replace(
+                '/^' . preg_quote($rootPath, '/') . '/',
+                '',
                 $filePath,
+                1,
             )], $this->serializeFileInfo($file));
         }
 
-        return $this->responseFactory->createJsonResponse($files);
-    }
-
-    private function removeBasePath(string $rootPath, string $path): string|array|null
-    {
-        return preg_replace('/^' . preg_quote($rootPath, '/') . '/', '', $path, 1);
+        return $this->responseFactory->createJsonResponse(array_merge($parentEntry, $files));
     }
 
     private function serializeFileInfo(SplFileInfo $file): array
@@ -140,11 +130,7 @@ final class FileController
 
     private function resolveOwnerInfo(int $id, string $posixFunction, array $fields): array
     {
-        if ($id === 0) {
-            return ['id' => $id];
-        }
-
-        if (!function_exists($posixFunction)) {
+        if ($id === 0 || !function_exists($posixFunction)) {
             return ['id' => $id];
         }
 
@@ -156,13 +142,14 @@ final class FileController
     private function readFile(string $destination, array $extra = []): ResponseInterface
     {
         $rootPath = $this->pathResolver->getRootPath();
+        $pattern = '/^' . preg_quote($rootPath, '/') . '/';
         $file = new SplFileInfo($destination);
         return $this->responseFactory->createJsonResponse(array_merge(
             $extra,
             [
-                'directory' => $this->removeBasePath($rootPath, dirname($destination)),
+                'directory' => preg_replace($pattern, '', dirname($destination), 1),
                 'content' => file_get_contents($destination),
-                'path' => $this->removeBasePath($rootPath, $destination),
+                'path' => preg_replace($pattern, '', $destination, 1),
                 'absolutePath' => $destination,
             ],
             $this->serializeFileInfo($file),

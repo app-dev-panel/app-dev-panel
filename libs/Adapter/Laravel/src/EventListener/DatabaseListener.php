@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Laravel\EventListener;
 
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\QueryRecord;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Events\QueryExecuted;
 
@@ -55,15 +56,14 @@ final class DatabaseListener
                 break;
             }
 
-            $collector->logQuery(
+            $collector->logQuery(new QueryRecord(
                 sql: $sql,
                 rawSql: $rawSql,
                 params: $bindings,
                 line: $line,
                 startTime: $startTime,
                 endTime: $endTime,
-                rowsNumber: 0,
-            );
+            ));
         });
     }
 }

@@ -58,6 +58,7 @@ use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\FileStorage;
@@ -454,10 +455,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
         $collectorMap = $this->buildCollectorMap($timeline);
 
         foreach ($collectorMap as $key => $factory) {
-            if ($this->collectors[$key] ?? true) {
-                foreach ($factory() as $collector) {
-                    $this->collectorInstances[] = $collector;
-                }
+            if (!($this->collectors[$key] ?? true)) {
+                continue;
+            }
+            foreach ($factory() as $collector) {
+                $this->collectorInstances[] = $collector;
             }
         }
     }
@@ -477,7 +479,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'event' => static fn(): array => [new EventCollector($timeline)],
             'service' => static fn(): array => [new ServiceCollector($timeline)],
             'http_client' => static fn(): array => [new HttpClientCollector($timeline)],
-            'var_dumper' => function () use ($timeline): array {
+            'var_dumper' => static function () use ($timeline): array {
                 $varDumperCollector = new VarDumperCollector($timeline);
                 \Yii::$container->setSingleton(VarDumperCollector::class, $varDumperCollector);
                 return [$varDumperCollector];
@@ -500,8 +502,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             \Yii::$container->get(DebuggerIdGenerator::class),
             \Yii::$container->get(StorageInterface::class),
             $this->collectorInstances,
-            $this->ignoredRequests,
-            $this->ignoredCommands,
+            new DebuggerIgnoreConfig($this->ignoredRequests, $this->ignoredCommands),
         );
 
         \Yii::$container->setSingleton(Debugger::class, $this->debugger);

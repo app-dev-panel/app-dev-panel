@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\actions\testFixtures;
 
 use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\CacheOperationRecord;
 use yii\base\Action;
 
 final class CacheHeavyAction extends Action
@@ -46,14 +47,14 @@ final class CacheHeavyAction extends Action
                 ];
             }
 
-            $cacheCollector->logCacheOperation(
+            $cacheCollector->logCacheOperation(new CacheOperationRecord(
                 pool: $pool,
                 operation: $operation,
                 key: $key,
                 hit: $hit,
                 duration: rand(100, 5_000) / 1_000_000,
                 value: $value,
-            );
+            ));
         }
 
         return ['fixture' => 'cache:heavy', 'status' => 'ok'];

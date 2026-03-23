@@ -73,7 +73,7 @@ final class SymfonyConfigProvider
         foreach ($allListeners as $eventName => $eventListeners) {
             $result[] = [
                 'name' => $eventName,
-                'class' => $this->resolveEventClass($eventName, $reverseAliases),
+                'class' => class_exists($eventName) ? $eventName : $reverseAliases[$eventName] ?? null,
                 'listeners' => array_map($this->describeListener(...), $eventListeners),
             ];
         }
@@ -109,52 +109,34 @@ final class SymfonyConfigProvider
 
         $reverseAliases = [];
         foreach ($aliases as $class => $alias) {
-            if (is_string($class) && is_string($alias)) {
-                $reverseAliases[$alias] = $class;
+            if (!is_string($class) || !is_string($alias)) {
+                continue;
             }
+            $reverseAliases[$alias] = $class;
         }
         return $reverseAliases;
     }
 
-    /**
-     * @param array<string, string> $reverseAliases
-     */
-    private function resolveEventClass(string $eventName, array $reverseAliases): ?string
-    {
-        if (class_exists($eventName)) {
-            return $eventName;
-        }
-
-        return $reverseAliases[$eventName] ?? null;
-    }
-
     private function describeListener(mixed $listener): string
     {
-        return match (true) {
-            is_string($listener) => $listener,
-            is_array($listener) && count($listener) === 2 => $this->describeArrayListener($listener),
-            $listener instanceof \Closure => $this->describeClosureListener($listener),
-            is_object($listener) && method_exists($listener, '__invoke') => $listener::class . '::__invoke',
-            default => get_debug_type($listener),
-        };
-    }
-
-    /**
-     * @param array{0: object|string, 1: string} $listener
-     */
-    private function describeArrayListener(array $listener): string
-    {
-        $class = is_object($listener[0]) ? $listener[0]::class : (string) $listener[0];
-        return $class . '::' . $listener[1];
-    }
-
-    private function describeClosureListener(\Closure $listener): string
-    {
-        $ref = new \ReflectionFunction($listener);
-        $class = $ref->getClosureScopeClass();
-        if ($class !== null) {
-            return $class->getName() . '::' . ($ref->getName() !== '{closure}' ? $ref->getName() : '{closure}');
+        if (is_string($listener)) {
+            return $listener;
         }
-        return $ref->getName();
+        if (is_array($listener) && count($listener) === 2) {
+            $class = is_object($listener[0]) ? $listener[0]::class : (string) $listener[0];
+            return $class . '::' . $listener[1];
+        }
+        if ($listener instanceof \Closure) {
+            $ref = new \ReflectionFunction($listener);
+            $class = $ref->getClosureScopeClass();
+            if ($class !== null) {
+                return $class->getName() . '::' . ($ref->getName() !== '{closure}' ? $ref->getName() : '{closure}');
+            }
+            return $ref->getName();
+        }
+        if (is_object($listener) && method_exists($listener, '__invoke')) {
+            return $listener::class . '::__invoke';
+        }
+        return get_debug_type($listener);
     }
 }

@@ -6,11 +6,15 @@ namespace AppDevPanel\Testing\Assertion;
 
 use AppDevPanel\Testing\Fixture\Expectation;
 
-/**
- * Evaluates expectations against actual collector data.
- */
 final class ExpectationEvaluator
 {
+    private readonly FieldAssertionEvaluator $fieldEvaluator;
+
+    public function __construct()
+    {
+        $this->fieldEvaluator = new FieldAssertionEvaluator();
+    }
+
     /**
      * @param array $collectorData Data from a single collector
      * @param list<Expectation> $expectations
@@ -31,42 +35,24 @@ final class ExpectationEvaluator
     private function evaluateOne(string $collectorName, array $data, Expectation $expectation): AssertionResult
     {
         return match ($expectation->type) {
-            'exists' => $this->assertExists($collectorName),
+            'exists' => AssertionResult::pass(sprintf('[%s] collector exists', $collectorName)),
             'not_empty' => $this->assertNotEmpty($collectorName, $data),
             'count_gte' => $this->assertCountGte($collectorName, $data, (int) $expectation->value),
-            'field_equals' => $this->assertFieldEquals($collectorName, $data, $expectation->path, $expectation->value),
-            'field_contains' => $this->assertFieldContains(
+            'field_equals',
+            'field_contains',
+            'any_field_equals',
+            'any_field_contains',
+                => $this->fieldEvaluator->evaluate($collectorName, $data, $expectation),
+            'summary_has_key', 'summary_gte' => AssertionResult::pass(sprintf(
+                '[%s] summary check (deferred)',
                 $collectorName,
-                $data,
-                $expectation->path,
-                (string) $expectation->value,
-            ),
-            'any_field_equals' => $this->assertAnyFieldEquals(
-                $collectorName,
-                $data,
-                $expectation->path,
-                $expectation->value,
-            ),
-            'any_field_contains' => $this->assertAnyFieldContains(
-                $collectorName,
-                $data,
-                $expectation->path,
-                (string) $expectation->value,
-            ),
-            'summary_has_key' => AssertionResult::pass(sprintf('[%s] summary check (deferred)', $collectorName)),
-            'summary_gte' => AssertionResult::pass(sprintf('[%s] summary check (deferred)', $collectorName)),
+            )),
             default => AssertionResult::fail(sprintf(
                 '[%s] Unknown assertion type: %s',
                 $collectorName,
                 $expectation->type,
             )),
         };
-    }
-
-    private function assertExists(string $collectorName): AssertionResult
-    {
-        // If we got here, the collector key exists in the response
-        return AssertionResult::pass(sprintf('[%s] collector exists', $collectorName));
     }
 
     private function assertNotEmpty(string $collectorName, array $data): AssertionResult
@@ -86,170 +72,5 @@ final class ExpectationEvaluator
         }
 
         return AssertionResult::pass(sprintf('[%s] has %d entries (>= %d)', $collectorName, $count, $min));
-    }
-
-    private function assertFieldEquals(
-        string $collectorName,
-        array $data,
-        ?string $path,
-        mixed $expected,
-    ): AssertionResult {
-        $pathCheck = $this->requirePath($collectorName, 'field_equals', $path);
-        if ($pathCheck !== null) {
-            return $pathCheck;
-        }
-
-        $actual = $this->getByPath($data, $path);
-        if ($actual === null && $expected !== null) {
-            return $this->fieldNotFound($collectorName, $path);
-        }
-
-        if ($actual !== $expected) {
-            return AssertionResult::fail(sprintf(
-                '[%s] field "%s": expected %s, got %s',
-                $collectorName,
-                $path,
-                json_encode($expected, JSON_THROW_ON_ERROR),
-                json_encode($actual, JSON_THROW_ON_ERROR),
-            ));
-        }
-
-        return AssertionResult::pass(sprintf(
-            '[%s] field "%s" equals %s',
-            $collectorName,
-            $path,
-            json_encode($expected, JSON_THROW_ON_ERROR),
-        ));
-    }
-
-    private function assertFieldContains(
-        string $collectorName,
-        array $data,
-        ?string $path,
-        string $substring,
-    ): AssertionResult {
-        $pathCheck = $this->requirePath($collectorName, 'field_contains', $path);
-        if ($pathCheck !== null) {
-            return $pathCheck;
-        }
-
-        $actual = $this->getByPath($data, $path);
-        if ($actual === null) {
-            return $this->fieldNotFound($collectorName, $path);
-        }
-
-        if (!is_string($actual) || !str_contains($actual, $substring)) {
-            return AssertionResult::fail(sprintf(
-                '[%s] field "%s": expected to contain "%s", got %s',
-                $collectorName,
-                $path,
-                $substring,
-                json_encode($actual, JSON_THROW_ON_ERROR),
-            ));
-        }
-
-        return AssertionResult::pass(sprintf('[%s] field "%s" contains "%s"', $collectorName, $path, $substring));
-    }
-
-    private function assertAnyFieldEquals(
-        string $collectorName,
-        array $data,
-        ?string $path,
-        mixed $expected,
-    ): AssertionResult {
-        $pathCheck = $this->requirePath($collectorName, 'any_field_equals', $path);
-        if ($pathCheck !== null) {
-            return $pathCheck;
-        }
-
-        foreach ($data as $entry) {
-            if (!is_array($entry)) {
-                continue;
-            }
-
-            $actual = $this->getByPath($entry, $path);
-            if ($actual === $expected) {
-                return AssertionResult::pass(sprintf(
-                    '[%s] found entry with "%s" = %s',
-                    $collectorName,
-                    $path,
-                    json_encode($expected, JSON_THROW_ON_ERROR),
-                ));
-            }
-        }
-
-        return AssertionResult::fail(sprintf(
-            '[%s] no entry has "%s" = %s',
-            $collectorName,
-            $path,
-            json_encode($expected, JSON_THROW_ON_ERROR),
-        ));
-    }
-
-    private function assertAnyFieldContains(
-        string $collectorName,
-        array $data,
-        ?string $path,
-        string $substring,
-    ): AssertionResult {
-        $pathCheck = $this->requirePath($collectorName, 'any_field_contains', $path);
-        if ($pathCheck !== null) {
-            return $pathCheck;
-        }
-
-        foreach ($data as $entry) {
-            if (!is_array($entry)) {
-                continue;
-            }
-
-            $actual = $this->getByPath($entry, $path);
-            if (is_string($actual) && str_contains($actual, $substring)) {
-                return AssertionResult::pass(sprintf(
-                    '[%s] found entry with "%s" containing "%s"',
-                    $collectorName,
-                    $path,
-                    $substring,
-                ));
-            }
-        }
-
-        return AssertionResult::fail(sprintf(
-            '[%s] no entry has "%s" containing "%s"',
-            $collectorName,
-            $path,
-            $substring,
-        ));
-    }
-
-    private function requirePath(string $collectorName, string $assertionType, ?string $path): ?AssertionResult
-    {
-        if ($path === null) {
-            return AssertionResult::fail(sprintf('[%s] %s requires a path', $collectorName, $assertionType));
-        }
-
-        return null;
-    }
-
-    private function fieldNotFound(string $collectorName, string $path): AssertionResult
-    {
-        return AssertionResult::fail(sprintf('[%s] field "%s" not found', $collectorName, $path));
-    }
-
-    private function getByPath(array $data, string $path): mixed
-    {
-        $keys = explode('.', $path);
-        $current = $data;
-
-        foreach ($keys as $key) {
-            if (is_array($current) && array_key_exists($key, $current)) {
-                $current = $current[$key];
-            } elseif (is_array($current) && is_numeric($key) && array_key_exists((int) $key, $current)) {
-                $current = $current[(int) $key];
-            } else {
-                return null;
-            }
-        }
-
-        return $current;
     }
 }

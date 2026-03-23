@@ -138,31 +138,6 @@ final class ContainerProxyConfig
         return ServiceConfigType::None;
     }
 
-    /**
-     * @deprecated Use {@see getServiceConfigType()} instead.
-     */
-    public function hasDecoratedServiceArrayConfigWithStringKeys(string $service): bool
-    {
-        return $this->getServiceConfigType($service) === ServiceConfigType::MethodCallbacks;
-    }
-
-    /**
-     * @deprecated Use {@see getServiceConfigType()} instead.
-     */
-    public function hasDecoratedServiceArrayConfig(string $service): bool
-    {
-        $type = $this->getServiceConfigType($service);
-        return $type === ServiceConfigType::ArrayDefinition || $type === ServiceConfigType::MethodCallbacks;
-    }
-
-    /**
-     * @deprecated Use {@see getServiceConfigType()} instead.
-     */
-    public function hasDecoratedServiceCallableConfig(string $service): bool
-    {
-        return $this->getServiceConfigType($service) === ServiceConfigType::Callable;
-    }
-
     public function hasDispatcher(): bool
     {
         return $this->dispatcher !== null;

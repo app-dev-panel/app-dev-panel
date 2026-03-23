@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
 use AppDevPanel\Kernel\Collector\CollectorInterface;
+use AppDevPanel\Kernel\Collector\MessageRecord;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
@@ -24,26 +25,24 @@ final class QueueCollectorTest extends AbstractCollectorTestCase
         $collector->collectStatus('job-1', 'completed');
         $collector->collectStatus('job-2', 'pending');
         $collector->collectWorkerProcessing(['class' => 'SendEmail'], 'default');
-        $collector->logMessage(
+        $collector->logMessage(new MessageRecord(
             messageClass: 'App\\Message\\SendNotification',
             bus: 'messenger.bus.default',
             transport: 'async',
             dispatched: true,
             handled: true,
-            failed: false,
             duration: 0.025,
             message: ['userId' => 42, 'channel' => 'email'],
-        );
-        $collector->logMessage(
+        ));
+        $collector->logMessage(new MessageRecord(
             messageClass: 'App\\Message\\ProcessPayment',
             bus: 'messenger.bus.default',
             transport: 'async',
             dispatched: true,
-            handled: false,
             failed: true,
             duration: 0.100,
             message: ['orderId' => 'ORD-123', 'amount' => 99.99],
-        );
+        ));
     }
 
     protected function checkCollectedData(array $data): void

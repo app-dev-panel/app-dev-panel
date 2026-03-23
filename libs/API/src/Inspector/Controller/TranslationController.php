@@ -49,13 +49,9 @@ final class TranslationController
         $this->validateLocale($locale);
 
         $categorySource = $this->findCategorySource($categorySources, $body['category'] ?? '');
-        $translationId = $body['translation'] ?? '';
-        $newMessage = $body['message'] ?? '';
-
-        $messages = $categorySource->getMessages($locale);
-        $messages = array_replace_recursive($messages, [
-            $translationId => [
-                'message' => $newMessage,
+        $messages = array_replace_recursive($categorySource->getMessages($locale), [
+            $body['translation'] ?? '' => [
+                'message' => $body['message'] ?? '',
             ],
         ]);
         $categorySource->write($locale, $messages);
@@ -94,14 +90,10 @@ final class TranslationController
         $messages = [];
         foreach ($categorySources as $categorySource) {
             $categoryName = $categorySource->getName();
-            $messages[$categoryName] ??= [];
 
             try {
                 foreach ($locales as $locale) {
-                    $messages[$categoryName][$locale] = array_merge(
-                        $messages[$categoryName][$locale] ?? [],
-                        $categorySource->getMessages($locale),
-                    );
+                    $messages[$categoryName][$locale] = $categorySource->getMessages($locale);
                 }
             } catch (Throwable $exception) {
                 $this->logger->warning($exception->getMessage(), ['exception' => $exception]);

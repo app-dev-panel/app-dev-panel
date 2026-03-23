@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Middleware;
 
-use AppDevPanel\Kernel\Service\ServiceDescriptor;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -55,16 +54,22 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
     {
         $service = $request->getQueryParams()['service'] ?? null;
 
-        if ($service === null || $service === '' || $service === 'local') {
+        if (in_array($service, [null, '', 'local'], true)) {
             return $handler->handle($request);
         }
 
-        $descriptor = $this->validateServiceDescriptor($service);
-        if ($descriptor instanceof ResponseInterface) {
-            return $descriptor;
+        $descriptor = $this->registry->resolve($service);
+        if ($descriptor === null) {
+            return $this->errorResponse(404, sprintf('Service "%s" not found.', $service));
+        }
+        if (!$descriptor->isOnline()) {
+            return $this->errorResponse(503, sprintf('Service "%s" is offline.', $service));
         }
 
-        $path = $this->extractInspectorPath($request);
+        $fullPath = $request->getUri()->getPath();
+        $prefix = '/inspect/api';
+        $path = str_starts_with($fullPath, $prefix) ? (substr($fullPath, strlen($prefix)) ?: '/') : $fullPath;
+
         $capability = $this->resolveCapability($path);
 
         if ($capability !== null && !$descriptor->supports($capability)) {
@@ -78,43 +83,12 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
         return $this->proxy($request, $descriptor->inspectorUrl, $path);
     }
 
-    private function validateServiceDescriptor(string $service): ServiceDescriptor|ResponseInterface
-    {
-        $descriptor = $this->registry->resolve($service);
-        if ($descriptor === null) {
-            return $this->errorResponse(404, sprintf('Service "%s" not found.', $service));
-        }
-
-        if (!$descriptor->isOnline()) {
-            return $this->errorResponse(503, sprintf('Service "%s" is offline.', $service));
-        }
-
-        return $descriptor;
-    }
-
-    private function extractInspectorPath(ServerRequestInterface $request): string
-    {
-        $fullPath = $request->getUri()->getPath();
-
-        $prefix = '/inspect/api';
-        if (str_starts_with($fullPath, $prefix)) {
-            return substr($fullPath, strlen($prefix)) ?: '/';
-        }
-
-        return $fullPath;
-    }
-
     private function resolveCapability(string $path): ?string
     {
-        // Try exact match first, then progressively strip path segments
-        $candidate = $path;
-        while ($candidate !== '' && $candidate !== '/') {
-            if (array_key_exists($candidate, self::CAPABILITY_MAP)) {
-                return self::CAPABILITY_MAP[$candidate];
+        foreach (self::CAPABILITY_MAP as $prefix => $capability) {
+            if (str_starts_with($path, $prefix)) {
+                return $capability;
             }
-            // Strip last path segment or query string
-            $lastSlash = strrpos($candidate, '/');
-            $candidate = $lastSlash > 0 ? substr($candidate, 0, $lastSlash) : '';
         }
 
         return null;
@@ -147,20 +121,16 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
     {
         $message = $e->getMessage();
 
-        $errorCategories = [
-            [
-                'status' => 502,
-                'prefix' => 'Cannot connect to service',
-                'patterns' => ['Connection refused', 'Could not resolve host'],
-            ],
-            ['status' => 504, 'prefix' => 'Service request timed out', 'patterns' => ['timed out', 'Timeout']],
+        $patternMap = [
+            'Connection refused' => [502, 'Cannot connect to service'],
+            'Could not resolve host' => [502, 'Cannot connect to service'],
+            'timed out' => [504, 'Service request timed out'],
+            'Timeout' => [504, 'Service request timed out'],
         ];
 
-        foreach ($errorCategories as $category) {
-            foreach ($category['patterns'] as $pattern) {
-                if (str_contains($message, $pattern)) {
-                    return $this->errorResponse($category['status'], sprintf('%s: %s', $category['prefix'], $message));
-                }
+        foreach ($patternMap as $pattern => [$status, $prefix]) {
+            if (str_contains($message, $pattern)) {
+                return $this->errorResponse($status, sprintf('%s: %s', $prefix, $message));
             }
         }
 

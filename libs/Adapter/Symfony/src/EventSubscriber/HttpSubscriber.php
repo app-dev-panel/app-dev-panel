@@ -6,8 +6,6 @@ namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
-use Nyholm\Psr7\Factory\Psr17Factory;
-use Nyholm\Psr7Server\ServerRequestCreator;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -29,14 +27,16 @@ use Symfony\Component\VarDumper\VarDumper;
  */
 final class HttpSubscriber implements EventSubscriberInterface
 {
-    private ?Psr17Factory $psr17Factory = null;
+    private readonly Psr7Converter $psr7Converter;
 
     private bool $varDumperHandlerRegistered = false;
 
     public function __construct(
         private readonly Debugger $debugger,
         private readonly HttpSubscriberCollectors $collectors = new HttpSubscriberCollectors(),
-    ) {}
+    ) {
+        $this->psr7Converter = new Psr7Converter();
+    }
 
     public static function getSubscribedEvents(): array
     {
@@ -59,7 +59,7 @@ final class HttpSubscriber implements EventSubscriberInterface
         }
 
         $symfonyRequest = $event->getRequest();
-        $psrRequest = $this->convertSymfonyRequestToPsr7($symfonyRequest);
+        $psrRequest = $this->psr7Converter->convertRequest($symfonyRequest);
 
         $this->registerVarDumperHandler();
 
@@ -84,7 +84,7 @@ final class HttpSubscriber implements EventSubscriberInterface
         $this->collectors->webAppInfo?->markRequestFinished();
 
         if ($this->collectors->request !== null) {
-            $psrResponse = $this->convertSymfonyResponseToPsr7($event->getResponse());
+            $psrResponse = $this->psr7Converter->convertResponse($event->getResponse());
             $this->collectors->request->collectResponse($psrResponse);
         }
 
@@ -143,49 +143,5 @@ final class HttpSubscriber implements EventSubscriberInterface
         });
 
         $this->varDumperHandlerRegistered = true;
-    }
-
-    private function getPsr17Factory(): Psr17Factory
-    {
-        return $this->psr17Factory ??= new Psr17Factory();
-    }
-
-    private function convertSymfonyRequestToPsr7(\Symfony\Component\HttpFoundation\Request $symfonyRequest): \Psr\Http\Message\ServerRequestInterface
-    {
-        $psr17Factory = $this->getPsr17Factory();
-        $psrRequest = new ServerRequestCreator(
-            $psr17Factory,
-            $psr17Factory,
-            $psr17Factory,
-            $psr17Factory,
-        )->fromGlobals();
-
-        // Override URI from the Symfony request to ensure accuracy
-        $uri = $psr17Factory->createUri($symfonyRequest->getUri());
-        $psrRequest = $psrRequest->withUri($uri)->withMethod($symfonyRequest->getMethod());
-
-        foreach ($symfonyRequest->headers->all() as $name => $values) {
-            $psrRequest = $psrRequest->withHeader($name, $values);
-        }
-
-        return $psrRequest;
-    }
-
-    private function convertSymfonyResponseToPsr7(\Symfony\Component\HttpFoundation\Response $symfonyResponse): \Psr\Http\Message\ResponseInterface
-    {
-        $psr17Factory = $this->getPsr17Factory();
-        $psrResponse = $psr17Factory->createResponse($symfonyResponse->getStatusCode());
-
-        foreach ($symfonyResponse->headers->all() as $name => $values) {
-            $psrResponse = $psrResponse->withHeader($name, $values);
-        }
-
-        $content = $symfonyResponse->getContent();
-        if ($content !== false) {
-            $body = $psr17Factory->createStream($content);
-            $psrResponse = $psrResponse->withBody($body);
-        }
-
-        return $psrResponse;
     }
 }

@@ -6,6 +6,7 @@ namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\QueryRecord;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
 
@@ -60,7 +61,7 @@ final class DatabaseCollectorTest extends AbstractCollectorTestCase
 
         $start = microtime(true);
         $end = $start + 0.015;
-        $collector->logQuery('SELECT 1', 'SELECT 1', [], '/test.php:1', $start, $end, 1);
+        $collector->logQuery(new QueryRecord('SELECT 1', 'SELECT 1', [], '/test.php:1', $start, $end, 1));
 
         $data = $collector->getCollected();
         $this->assertCount(1, $data['queries']);
@@ -97,7 +98,7 @@ final class DatabaseCollectorTest extends AbstractCollectorTestCase
         $collector->collectTransactionStart('SERIALIZABLE', '/test.php:1');
         $collector->collectQueryStart('q1', 'INSERT INTO t VALUES(1)', 'INSERT INTO t VALUES(1)', [], '/test.php:2');
         $collector->collectQueryEnd('q1', 1);
-        $collector->collectTransactionCommit('/test.php:3');
+        $collector->collectTransactionEnd('commit', '/test.php:3');
 
         $data = $collector->getCollected();
         $this->assertCount(1, $data['transactions']);
@@ -117,7 +118,7 @@ final class DatabaseCollectorTest extends AbstractCollectorTestCase
         $collector->startup();
 
         $collector->collectTransactionStart(null, '/test.php:1');
-        $collector->collectTransactionRollback('/test.php:2');
+        $collector->collectTransactionEnd('rollback', '/test.php:2');
 
         $summary = $collector->getSummary();
         $this->assertSame(1, $summary['db']['transactions']['error']);
@@ -130,10 +131,10 @@ final class DatabaseCollectorTest extends AbstractCollectorTestCase
         $collector->collectQueryStart('q1', 'SELECT 1', 'SELECT 1', [], '/test.php:1');
         $collector->collectQueryEnd('q1', 0);
         $collector->collectQueryError('q1', new \RuntimeException('test'));
-        $collector->logQuery('SELECT 1', 'SELECT 1', [], '/test.php:1', 0.0, 0.01);
+        $collector->logQuery(new QueryRecord('SELECT 1', 'SELECT 1', [], '/test.php:1', 0.0, 0.01));
         $collector->collectTransactionStart(null, '/test.php:1');
-        $collector->collectTransactionCommit('/test.php:2');
-        $collector->collectTransactionRollback('/test.php:3');
+        $collector->collectTransactionEnd('commit', '/test.php:2');
+        $collector->collectTransactionEnd('rollback', '/test.php:3');
 
         $this->assertSame([], $collector->getCollected());
         $this->assertSame([], $collector->getSummary());
@@ -144,7 +145,7 @@ final class DatabaseCollectorTest extends AbstractCollectorTestCase
         $collector = new DatabaseCollector(new TimelineCollector());
         $collector->startup();
 
-        $collector->logQuery('SELECT 1', 'SELECT 1', [], '/test.php:1', 0.0, 0.01, 1);
+        $collector->logQuery(new QueryRecord('SELECT 1', 'SELECT 1', [], '/test.php:1', 0.0, 0.01, 1));
         $this->assertCount(1, $collector->getCollected()['queries']);
 
         $collector->shutdown();

@@ -44,7 +44,7 @@ final class Yii2ConfigProvider
      */
     private function getComponents(): array
     {
-        return $this->resolveDefinitionMap($this->app->getComponents());
+        return self::resolveDefinitionMap($this->app->getComponents());
     }
 
     /**
@@ -64,21 +64,7 @@ final class Yii2ConfigProvider
     {
         $events = [];
 
-        $this->collectClassLevelEventHandlers($events);
-        $this->collectInstanceEventHandlers($events);
-        $this->collectBehaviorHandlers($events);
-
-        ksort($events);
-        return $events;
-    }
-
-    /**
-     * @param array<string, list<string>> $events
-     */
-    private function collectClassLevelEventHandlers(array &$events): void
-    {
-        $classEvents = $this->getClassLevelEvents();
-        foreach ($classEvents as $eventName => $handlers) {
+        foreach ($this->getClassLevelEvents() as $eventName => $handlers) {
             foreach ($handlers as $className => $classHandlers) {
                 $key = $className . '::' . $eventName;
                 $events[$key] = array_map(static fn(array $handler): string => self::describeHandler(
@@ -86,31 +72,20 @@ final class Yii2ConfigProvider
                 ), $classHandlers);
             }
         }
-    }
 
-    /**
-     * @param array<string, list<string>> $events
-     */
-    private function collectInstanceEventHandlers(array &$events): void
-    {
-        $instanceEvents = $this->getInstanceEvents($this->app);
-        foreach ($instanceEvents as $eventName => $handlers) {
+        foreach ($this->getInstanceEvents($this->app) as $eventName => $handlers) {
             $key = $this->app::class . '::' . $eventName . ' (instance)';
             $events[$key] = array_map(static fn(array $handler): string => self::describeHandler(
                 $handler[0],
             ), $handlers);
         }
-    }
 
-    /**
-     * @param array<string, list<string>> $events
-     */
-    private function collectBehaviorHandlers(array &$events): void
-    {
-        $behaviors = $this->app->getBehaviors();
-        foreach ($behaviors as $name => $behavior) {
+        foreach ($this->app->getBehaviors() as $name => $behavior) {
             $events['behavior:' . $name] = [$behavior::class];
         }
+
+        ksort($events);
+        return $events;
     }
 
     /**
@@ -143,27 +118,22 @@ final class Yii2ConfigProvider
         }
     }
 
-    /**
-     * Describe an event handler as a human-readable string.
-     */
     private static function describeHandler(mixed $handler): string
     {
-        return match (true) {
-            is_string($handler) => $handler,
-            is_array($handler) && count($handler) === 2 => self::describeArrayHandler($handler),
-            $handler instanceof \Closure => 'Closure',
-            is_object($handler) => $handler::class . '::__invoke',
-            default => get_debug_type($handler),
-        };
-    }
-
-    /**
-     * Describe an array-style [class/object, method] event handler.
-     */
-    private static function describeArrayHandler(array $handler): string
-    {
-        $class = is_object($handler[0]) ? $handler[0]::class : (string) $handler[0];
-        return $class . '::' . (string) $handler[1];
+        if (is_string($handler)) {
+            return $handler;
+        }
+        if (is_array($handler) && count($handler) === 2) {
+            $class = is_object($handler[0]) ? $handler[0]::class : (string) $handler[0];
+            return $class . '::' . (string) $handler[1];
+        }
+        if ($handler instanceof \Closure) {
+            return 'Closure';
+        }
+        if (is_object($handler) && method_exists($handler, '__invoke')) {
+            return $handler::class . '::__invoke';
+        }
+        return get_debug_type($handler);
     }
 
     /**
@@ -171,7 +141,7 @@ final class Yii2ConfigProvider
      */
     private function getModules(): array
     {
-        return $this->resolveDefinitionMap($this->app->getModules());
+        return self::resolveDefinitionMap($this->app->getModules());
     }
 
     /**
@@ -179,30 +149,18 @@ final class Yii2ConfigProvider
      *
      * @return array<string, string>
      */
-    private function resolveDefinitionMap(array $definitions): array
+    private static function resolveDefinitionMap(array $definitions): array
     {
         $resolved = [];
         foreach ($definitions as $id => $definition) {
-            $resolved[$id] = self::resolveDefinitionType($definition);
+            $resolved[$id] = match (true) {
+                is_object($definition) => $definition::class,
+                is_array($definition) && array_key_exists('class', $definition) => $definition['class'],
+                is_string($definition) => $definition,
+                default => get_debug_type($definition),
+            };
         }
         ksort($resolved);
         return $resolved;
-    }
-
-    /**
-     * Resolve a single Yii 2 definition to a human-readable type string.
-     */
-    private static function resolveDefinitionType(mixed $definition): string
-    {
-        if (is_object($definition)) {
-            return $definition::class;
-        }
-        if (is_array($definition) && array_key_exists('class', $definition)) {
-            return $definition['class'];
-        }
-        if (is_string($definition)) {
-            return $definition;
-        }
-        return get_debug_type($definition);
     }
 }

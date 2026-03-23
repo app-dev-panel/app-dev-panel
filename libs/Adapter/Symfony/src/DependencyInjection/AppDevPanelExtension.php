@@ -184,13 +184,14 @@ final class AppDevPanelExtension extends Extension
         ];
 
         foreach ($timelineCollectorMap as $key => $class) {
-            if ($collectors[$key]) {
-                $container
-                    ->register($class, $class)
-                    ->setArguments([new Reference(TimelineCollector::class)])
-                    ->setPublic(false)
-                    ->addTag('app_dev_panel.collector');
+            if (!$collectors[$key]) {
+                continue;
             }
+            $container
+                ->register($class, $class)
+                ->setArguments([new Reference(TimelineCollector::class)])
+                ->setPublic(false)
+                ->addTag('app_dev_panel.collector');
         }
     }
 
@@ -240,13 +241,14 @@ final class AppDevPanelExtension extends Extension
         ];
 
         foreach ($timelineCollectorMap as $key => $class) {
-            if ($collectors[$key]) {
-                $container
-                    ->register($class, $class)
-                    ->setArguments([new Reference(TimelineCollector::class)])
-                    ->setPublic(false)
-                    ->addTag('app_dev_panel.collector');
+            if (!$collectors[$key]) {
+                continue;
             }
+            $container
+                ->register($class, $class)
+                ->setArguments([new Reference(TimelineCollector::class)])
+                ->setPublic(false)
+                ->addTag('app_dev_panel.collector');
         }
 
         /** @var array<string, class-string> $simpleCollectorMap */
@@ -256,9 +258,10 @@ final class AppDevPanelExtension extends Extension
         ];
 
         foreach ($simpleCollectorMap as $key => $class) {
-            if ($collectors[$key]) {
-                $container->register($class, $class)->setPublic(false)->addTag('app_dev_panel.collector');
+            if (!$collectors[$key]) {
+                continue;
             }
+            $container->register($class, $class)->setPublic(false)->addTag('app_dev_panel.collector');
         }
 
         if ($collectors['router']) {

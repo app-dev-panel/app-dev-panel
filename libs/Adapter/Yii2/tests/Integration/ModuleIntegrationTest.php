@@ -12,6 +12,7 @@ use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\QueryRecord;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
@@ -152,7 +153,7 @@ final class ModuleIntegrationTest extends Yii2IntegrationTestCase
         /** @var DatabaseCollector $dbCollector */
         $dbCollector = $module->getCollector(DatabaseCollector::class);
         $startTime = microtime(true);
-        $dbCollector->logQuery('SELECT 1', 'SELECT 1', [], '', $startTime, microtime(true), 1);
+        $dbCollector->logQuery(new QueryRecord('SELECT 1', 'SELECT 1', [], '', $startTime, microtime(true), 1));
 
         $debugger->shutdown();
 

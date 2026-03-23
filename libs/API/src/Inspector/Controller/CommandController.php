@@ -64,40 +64,42 @@ class CommandController
     }
 
     /**
-     * @return iterable<string, array{group: string, class: class-string}>
+     * @return array<string, array{group: string, class: class-string}>
      */
-    private function iterateValidCommands(): iterable
-    {
-        foreach ($this->commandMap as $groupName => $commands) {
-            foreach ($commands as $name => $command) {
-                if (!is_subclass_of($command, CommandInterface::class)) {
-                    continue;
-                }
-                yield $name => ['group' => $groupName, 'class' => $command];
-            }
-        }
-    }
-
-    private function collectRegisteredCommands(): array
+    private function getValidCommands(): array
     {
         $result = [];
-        foreach ($this->iterateValidCommands() as $name => $info) {
-            $result[] = [
-                'name' => $name,
-                'title' => $info['class']::getTitle(),
-                'group' => $info['group'],
-                'description' => $info['class']::getDescription(),
-            ];
+        foreach ($this->commandMap as $groupName => $commands) {
+            $valid = array_filter($commands, static fn(string $class) => is_subclass_of(
+                $class,
+                CommandInterface::class,
+            ));
+            foreach ($valid as $name => $command) {
+                $result[$name] = ['group' => $groupName, 'class' => $command];
+            }
         }
         return $result;
     }
 
+    private function collectRegisteredCommands(): array
+    {
+        $validCommands = $this->getValidCommands();
+        return array_values(array_map(
+            static fn(string $name, array $info) => [
+                'name' => $name,
+                'title' => $info['class']::getTitle(),
+                'group' => $info['group'],
+                'description' => $info['class']::getDescription(),
+            ],
+            array_keys($validCommands),
+            $validCommands,
+        ));
+    }
+
     private function buildCommandList(): array
     {
-        $commandList = [];
-        foreach ($this->iterateValidCommands() as $name => $info) {
-            $commandList[$name] = $info['class'];
-        }
+        $commandList = array_map(static fn(array $info) => $info['class'], $this->getValidCommands());
+
         foreach ($this->getComposerScripts() as $scriptName => $commands) {
             $commandList["composer/{$scriptName}"] = ['composer', $scriptName];
         }
@@ -112,7 +114,6 @@ class CommandController
                 array_keys($commandList),
             )));
         }
-
         if (!array_key_exists($commandName, $commandList)) {
             throw new InvalidArgumentException(sprintf(
                 'Unknown command "%s". Available commands: "%s".',
@@ -127,7 +128,6 @@ class CommandController
         if (is_string($commandClass) && $this->container->has($commandClass)) {
             return $this->container->get($commandClass);
         }
-
         return new BashCommand($this->pathResolver, (array) $commandClass);
     }
 
@@ -139,14 +139,8 @@ class CommandController
         }
 
         $composerJson = json_decode(file_get_contents($composerJsonPath), true, 512, JSON_THROW_ON_ERROR);
-        if (!is_array($composerJson) || !array_key_exists('scripts', $composerJson)) {
-            return [];
-        }
+        $scripts = $composerJson['scripts'] ?? [];
 
-        $result = [];
-        foreach ($composerJson['scripts'] as $name => $script) {
-            $result[$name] = (array) $script;
-        }
-        return $result;
+        return is_array($scripts) ? array_map(static fn(mixed $script) => (array) $script, $scripts) : [];
     }
 }

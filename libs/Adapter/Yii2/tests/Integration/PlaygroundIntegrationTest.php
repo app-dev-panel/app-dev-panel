@@ -6,6 +6,7 @@ namespace AppDevPanel\Adapter\Yii2\Tests\Integration;
 
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
+use AppDevPanel\Kernel\Collector\QueryRecord;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\StartupContext;
@@ -58,23 +59,27 @@ final class PlaygroundIntegrationTest extends Yii2IntegrationTestCase
         $dbCollector = $module->getCollector(DatabaseCollector::class);
         $startTime = microtime(true);
         $dbCollector?->logQuery(
-            'SELECT * FROM users LIMIT 10',
-            'SELECT * FROM users LIMIT 10',
-            [],
-            '',
-            $startTime,
-            microtime(true),
-            3,
+            new QueryRecord(
+                'SELECT * FROM users LIMIT 10',
+                'SELECT * FROM users LIMIT 10',
+                [],
+                '',
+                $startTime,
+                microtime(true),
+                3,
+            ),
         );
         $startTime = microtime(true);
         $dbCollector?->logQuery(
-            'SELECT COUNT(*) FROM users',
-            'SELECT COUNT(*) FROM users',
-            [],
-            '',
-            $startTime,
-            microtime(true),
-            1,
+            new QueryRecord(
+                'SELECT COUNT(*) FROM users',
+                'SELECT COUNT(*) FROM users',
+                [],
+                '',
+                $startTime,
+                microtime(true),
+                1,
+            ),
         );
 
         $psrResponse = $psr17->createResponse(200);
@@ -118,13 +123,15 @@ final class PlaygroundIntegrationTest extends Yii2IntegrationTestCase
         $dbCollector = $module->getCollector(DatabaseCollector::class);
         $startTime = microtime(true);
         $dbCollector?->logQuery(
-            'INSERT INTO submissions (data) VALUES (?)',
-            'INSERT INTO submissions (data) VALUES (?)',
-            ['test'],
-            '',
-            $startTime,
-            microtime(true),
-            1,
+            new QueryRecord(
+                'INSERT INTO submissions (data) VALUES (?)',
+                'INSERT INTO submissions (data) VALUES (?)',
+                ['test'],
+                '',
+                $startTime,
+                microtime(true),
+                1,
+            ),
         );
 
         $debugger->shutdown();

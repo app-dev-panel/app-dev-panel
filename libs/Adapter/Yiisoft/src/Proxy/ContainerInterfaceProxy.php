@@ -52,7 +52,7 @@ final class ContainerInterfaceProxy implements ContainerInterface
         $timeStart = microtime(true);
         $instance = null;
         try {
-            $instance = $this->getInstance($id);
+            $instance = $id === ContainerInterface::class ? $this : $this->decorated->get($id);
         } catch (ContainerExceptionInterface $e) {
             $this->repeatError($e);
         } finally {
@@ -65,18 +65,6 @@ final class ContainerInterfaceProxy implements ContainerInterface
         }
 
         return $instance;
-    }
-
-    /**
-     * @throws ContainerExceptionInterface
-     */
-    private function getInstance(string $id): mixed
-    {
-        if ($id === ContainerInterface::class) {
-            return $this;
-        }
-
-        return $this->decorated->get($id);
     }
 
     public function isActive(): bool
@@ -101,11 +89,11 @@ final class ContainerInterfaceProxy implements ContainerInterface
                 $instance,
                 $this->config->getDecoratedServiceConfig($service),
             ),
-            ServiceConfigType::None => $this->createCommonProxy($service, $instance),
+            ServiceConfigType::None => $this->createInterfaceProxy($service, $instance),
         };
     }
 
-    private function createCommonProxy(string $service, object $instance): ?object
+    private function createInterfaceProxy(string $service, object $instance): ?object
     {
         if (!interface_exists($service) || !($this->config->hasCollector() || $this->config->hasDispatcher())) {
             return null;

@@ -73,6 +73,7 @@ use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\FileStorage;
@@ -175,10 +176,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         ];
 
         foreach ($simpleCollectors as $key => $class) {
-            if ($collectors[$key] ?? true) {
-                $this->app->singleton($class);
-                $this->collectorClasses[] = $class;
+            if (!($collectors[$key] ?? true)) {
+                continue;
             }
+            $this->app->singleton($class);
+            $this->collectorClasses[] = $class;
         }
     }
 
@@ -203,10 +205,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         ];
 
         foreach ($timelineCollectors as $key => $class) {
-            if ($collectors[$key] ?? true) {
-                $this->app->singleton($class, fn() => new $class($this->app->make(TimelineCollector::class)));
-                $this->collectorClasses[] = $class;
+            if (!($collectors[$key] ?? true)) {
+                continue;
             }
+            $this->app->singleton($class, fn() => new $class($this->app->make(TimelineCollector::class)));
+            $this->collectorClasses[] = $class;
         }
     }
 
@@ -292,8 +295,10 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 $this->app->make(DebuggerIdGenerator::class),
                 $this->app->make(StorageInterface::class),
                 $collectors,
-                $config->get('app-dev-panel.ignored_requests', []),
-                $config->get('app-dev-panel.ignored_commands', []),
+                new DebuggerIgnoreConfig(
+                    $config->get('app-dev-panel.ignored_requests', []),
+                    $config->get('app-dev-panel.ignored_commands', []),
+                ),
             );
         });
     }
@@ -620,10 +625,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         ];
 
         foreach ($simpleListeners as $key => [$listenerClass, $collectorClass]) {
-            if ($collectors[$key] ?? true) {
-                $listener = new $listenerClass(fn() => $this->app->make($collectorClass));
-                $listener->register($events);
+            if (!($collectors[$key] ?? true)) {
+                continue;
             }
+            $listener = new $listenerClass(fn() => $this->app->make($collectorClass));
+            $listener->register($events);
         }
 
         if ($collectors['command'] ?? true) {
