@@ -124,7 +124,7 @@ final class Yii2DbSchemaProvider implements SchemaProviderInterface
     {
         $command = $this->connection->createCommand($sql);
         if ($params !== []) {
-            $command->bindValues($params);
+            $command->bindValues($this->normalizeParams($params));
         }
 
         return $command->queryAll();
@@ -142,9 +142,41 @@ final class Yii2DbSchemaProvider implements SchemaProviderInterface
         }
         $command = $this->connection->createCommand($prefix . $sql);
         if ($params !== []) {
-            $command->bindValues($params);
+            $command->bindValues($this->normalizeParams($params));
         }
 
         return $command->queryAll();
+    }
+
+    /**
+     * Normalize parameter keys for Yii 2's bindValues():
+     * - Named params without colon prefix get ':' prepended
+     * - Positional (0-indexed) params are converted to ':p0', ':p1', ... and SQL '?' placeholders are replaced
+     */
+    private function normalizeParams(array $params): array
+    {
+        if ($params === []) {
+            return [];
+        }
+
+        $isPositional = array_is_list($params);
+        if (!$isPositional) {
+            $normalized = [];
+            foreach ($params as $key => $value) {
+                $key = (string) $key;
+                if (!str_starts_with($key, ':')) {
+                    $key = ':' . $key;
+                }
+                $normalized[$key] = $value;
+            }
+            return $normalized;
+        }
+
+        // Positional params: Yii 2 PDO needs 1-based integer keys for '?' placeholders
+        $normalized = [];
+        foreach (array_values($params) as $i => $value) {
+            $normalized[$i + 1] = $value;
+        }
+        return $normalized;
     }
 }

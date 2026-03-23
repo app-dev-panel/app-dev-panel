@@ -44,6 +44,7 @@ final class DatabaseBootstrap implements BootstrapInterface
                     ['John Doe',   'john@example.com'],
                     ['Jane Smith', 'jane@example.com'],
                     ['Bob Wilson', 'bob@example.com'],
+                    ['Alice',      'alice@example.com'],
                 ],
             )
             ->execute();

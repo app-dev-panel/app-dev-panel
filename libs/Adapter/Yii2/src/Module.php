@@ -44,6 +44,7 @@ use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
@@ -120,6 +121,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         'db' => true,
         'mailer' => true,
         'assets' => true,
+        'environment' => true,
         'cache' => true,
         'router' => true,
         'queue' => true,
@@ -501,6 +503,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'db' => static fn(): array => [new DatabaseCollector($timeline)],
             'mailer' => static fn(): array => [new MailerCollector($timeline)],
             'assets' => static fn(): array => [new AssetBundleCollector($timeline)],
+            'environment' => static fn(): array => [new EnvironmentCollector()],
             'cache' => static fn(): array => [new CacheCollector($timeline)],
             'router' => static fn(): array => [new RouterCollector()],
             'queue' => static fn(): array => [new QueueCollector($timeline)],
@@ -544,6 +547,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $this->getCollector(RequestCollector::class),
             $this->getCollector(WebAppInfoCollector::class),
             $this->getCollector(ExceptionCollector::class),
+            $this->getCollector(RouterCollector::class),
         );
 
         Event::on(WebApplication::class, WebApplication::EVENT_BEFORE_REQUEST, [$listener, 'onBeforeRequest']);

@@ -4,23 +4,26 @@ declare(strict_types=1);
 
 namespace App\actions\testFixtures;
 
+use AppDevPanel\Kernel\Storage\StorageInterface;
 use yii\base\Action;
 
 final class ResetCliAction extends Action
 {
     public function run(): array
     {
-        $yiiPath = \Yii::getAlias('@app') . '/yii';
+        /** @var \AppDevPanel\Adapter\Yii2\Module $module */
+        $module = \Yii::$app->getModule('debug-panel');
+        $module->getDebugger()->stop();
 
-        $output = [];
-        $exitCode = 0;
-        exec(sprintf('php %s debug-reset 2>&1', escapeshellarg($yiiPath)), $output, $exitCode);
+        /** @var StorageInterface $storage */
+        $storage = \Yii::$container->get(StorageInterface::class);
+        $storage->clear();
 
         return [
             'fixture' => 'reset-cli',
-            'status' => $exitCode === 0 ? 'ok' : 'error',
-            'exitCode' => $exitCode,
-            'output' => implode("\n", $output),
+            'status' => 'ok',
+            'exitCode' => 0,
+            'output' => 'Debug storage cleared.',
         ];
     }
 }

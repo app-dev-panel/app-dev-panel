@@ -22,7 +22,7 @@ final class RouterAction extends Action
         }
 
         $routerCollector->collectMatchedRoute([
-            'name' => 'test-router',
+            'name' => 'test_router',
             'pattern' => '/test/fixtures/router',
             'arguments' => [],
             'uri' => '/test/fixtures/router',
@@ -33,7 +33,7 @@ final class RouterAction extends Action
         ]);
         $routerCollector->collectRoutes(routes: [
             ['name' => 'home', 'pattern' => '/', 'methods' => ['GET']],
-            ['name' => 'test-router', 'pattern' => '/test/fixtures/router', 'methods' => ['GET']],
+            ['name' => 'test_router', 'pattern' => '/test/fixtures/router', 'methods' => ['GET']],
             ['name' => 'test-logs', 'pattern' => '/test/fixtures/logs', 'methods' => ['GET']],
         ]);
 

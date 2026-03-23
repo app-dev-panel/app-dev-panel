@@ -91,6 +91,7 @@ return [
                 'db' => true,
                 'mailer' => true,
                 'assets' => true,
+                'environment' => true,
                 'cache' => true,
                 'router' => true,
                 'queue' => true,

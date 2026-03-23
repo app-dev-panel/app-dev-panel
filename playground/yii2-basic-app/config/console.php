@@ -8,7 +8,7 @@ return [
     'id' => 'adp-yii2-playground-console',
     'basePath' => dirname(__DIR__) . '/src',
     'runtimePath' => dirname(__DIR__) . '/runtime',
-    'bootstrap' => ['log'],
+    'bootstrap' => ['debug-panel', 'log'],
     'controllerNamespace' => 'App\\commands',
     'params' => $params,
 
