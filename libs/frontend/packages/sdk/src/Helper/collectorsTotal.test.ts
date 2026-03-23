@@ -92,4 +92,18 @@ describe('getCollectedCountByCollector', () => {
         const entry = makeEntry({fs_stream: {read: 5, write: 3, mkdir: 1}});
         expect(getCollectedCountByCollector(CollectorsMap.FilesystemStreamCollector, entry)).toBe(9);
     });
+
+    it('returns queue count including messageCount', () => {
+        const entry = makeEntry({
+            queue: {countPushes: 0, countStatuses: 0, countProcessingMessages: 0, messageCount: 2},
+        });
+        expect(getCollectedCountByCollector(CollectorsMap.QueueCollector, entry)).toBe(2);
+    });
+
+    it('returns queue count summing all fields', () => {
+        const entry = makeEntry({
+            queue: {countPushes: 3, countStatuses: 1, countProcessingMessages: 2, messageCount: 5},
+        });
+        expect(getCollectedCountByCollector(CollectorsMap.QueueCollector, entry)).toBe(11);
+    });
 });

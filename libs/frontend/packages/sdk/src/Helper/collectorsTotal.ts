@@ -28,7 +28,8 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
             return (
                 Number(data.queue?.countPushes) +
                 Number(data.queue?.countStatuses) +
-                Number(data.queue?.countProcessingMessages)
+                Number(data.queue?.countProcessingMessages) +
+                Number(data.queue?.messageCount)
             );
         case CollectorsMap.HttpClientCollector:
             return Number(data.http?.count);
