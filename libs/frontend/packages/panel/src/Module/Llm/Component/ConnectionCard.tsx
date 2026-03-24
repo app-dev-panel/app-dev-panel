@@ -273,7 +273,7 @@ export const ConnectionCard = () => {
                         Connect an LLM provider to use AI-powered debug analysis
                     </Typography>
                 </Box>
-                <Chip label="Disconnected" size="small" />
+                <Chip label="Disconnected" size="small" color="error" />
             </Box>
 
             {error && (
