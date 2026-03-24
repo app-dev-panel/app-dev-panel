@@ -1,6 +1,8 @@
 import {createBaseQuery} from '@app-dev-panel/sdk/API/createBaseQuery';
 import {createApi} from '@reduxjs/toolkit/query/react';
 
+export type LlmProvider = 'openrouter' | 'anthropic';
+
 export type LlmStatus = {connected: boolean; provider: string; model: string | null};
 
 export type LlmModel = {id: string; name: string; context_length: number; pricing: Record<string, string>};
@@ -8,6 +10,10 @@ export type LlmModel = {id: string; name: string; context_length: number; pricin
 type OAuthInitiateResponse = {authUrl: string; codeVerifier: string};
 
 type OAuthExchangeResponse = {connected: boolean; error?: string};
+
+type ConnectRequest = {provider: LlmProvider; apiKey: string};
+
+type ConnectResponse = {connected: boolean; provider: string};
 
 type ModelsResponse = {models: LlmModel[]};
 
@@ -30,6 +36,11 @@ export const llmApi = createApi({
             query: () => '/status',
             transformResponse: (result: {data: LlmStatus}) => result.data,
             providesTags: ['llm/status'],
+        }),
+        connect: builder.mutation<ConnectResponse, ConnectRequest>({
+            query: (body) => ({url: '/connect', method: 'POST', body}),
+            transformResponse: (result: {data: ConnectResponse}) => result.data,
+            invalidatesTags: ['llm/status'],
         }),
         oauthInitiate: builder.mutation<OAuthInitiateResponse, {callbackUrl: string}>({
             query: (body) => ({url: '/oauth/initiate', method: 'POST', body}),
@@ -66,6 +77,7 @@ export const llmApi = createApi({
 
 export const {
     useGetStatusQuery,
+    useConnectMutation,
     useOauthInitiateMutation,
     useOauthExchangeMutation,
     useDisconnectMutation,

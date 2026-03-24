@@ -36,6 +36,13 @@ final class FileLlmSettings implements LlmSettingsInterface
         return $this->provider;
     }
 
+    public function setProvider(string $provider): void
+    {
+        $this->load();
+        $this->provider = $provider;
+        $this->save();
+    }
+
     public function getModel(): ?string
     {
         $this->load();

@@ -1,5 +1,7 @@
 import {
     LlmModel,
+    LlmProvider,
+    useConnectMutation,
     useDisconnectMutation,
     useGetModelsQuery,
     useGetStatusQuery,
@@ -20,19 +22,27 @@ import {
     MenuItem,
     Select,
     Skeleton,
+    TextField,
+    ToggleButton,
+    ToggleButtonGroup,
     Typography,
 } from '@mui/material';
 import {useCallback, useState} from 'react';
 
+const providerLabels: Record<LlmProvider, string> = {openrouter: 'OpenRouter', anthropic: 'Anthropic (Claude)'};
+
 export const ConnectionCard = () => {
     const {data: status, isLoading} = useGetStatusQuery();
     const [initiate] = useOauthInitiateMutation();
+    const [connect] = useConnectMutation();
     const [disconnect] = useDisconnectMutation();
     const [setModel] = useSetModelMutation();
     const {data: models, isLoading: modelsLoading} = useGetModelsQuery(undefined, {skip: !status?.connected});
     const [error, setError] = useState<string | null>(null);
+    const [selectedProvider, setSelectedProvider] = useState<LlmProvider>('anthropic');
+    const [apiKey, setApiKey] = useState('');
 
-    const handleConnect = useCallback(async () => {
+    const handleOpenRouterConnect = useCallback(async () => {
         setError(null);
         try {
             const callbackUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/llm/callback');
@@ -43,6 +53,20 @@ export const ConnectionCard = () => {
             setError('Failed to initiate OAuth flow.');
         }
     }, [initiate]);
+
+    const handleApiKeyConnect = useCallback(async () => {
+        setError(null);
+        if (!apiKey.trim()) {
+            setError('API key is required.');
+            return;
+        }
+        try {
+            await connect({provider: selectedProvider, apiKey: apiKey.trim()}).unwrap();
+            setApiKey('');
+        } catch {
+            setError('Failed to connect with API key.');
+        }
+    }, [connect, selectedProvider, apiKey]);
 
     const handleDisconnect = useCallback(async () => {
         await disconnect();
@@ -59,20 +83,23 @@ export const ConnectionCard = () => {
         return <Skeleton variant="rectangular" height={200} sx={{borderRadius: 2}} />;
     }
 
-    const popularModels = (models ?? []).filter(
-        (m: LlmModel) =>
-            m.id.startsWith('anthropic/') ||
-            m.id.startsWith('openai/') ||
-            m.id.startsWith('google/') ||
-            m.id.startsWith('meta-llama/') ||
-            m.id.startsWith('mistralai/'),
+    const isAnthropic = status?.provider === 'anthropic';
+
+    const popularModels = (models ?? []).filter((m: LlmModel) =>
+        isAnthropic
+            ? m.id.startsWith('claude-')
+            : m.id.startsWith('anthropic/') ||
+              m.id.startsWith('openai/') ||
+              m.id.startsWith('google/') ||
+              m.id.startsWith('meta-llama/') ||
+              m.id.startsWith('mistralai/'),
     );
 
     return (
         <Card variant="outlined">
             <CardHeader
                 title="LLM Connection"
-                subheader="Connect via OpenRouter to use AI-powered debug analysis"
+                subheader="Connect an LLM provider to use AI-powered debug analysis"
                 action={
                     <Chip
                         label={status?.connected ? 'Connected' : 'Disconnected'}
@@ -90,7 +117,8 @@ export const ConnectionCard = () => {
                 {status?.connected ? (
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                         <Typography variant="body2" color="text.secondary">
-                            Provider: <strong>{status.provider}</strong>
+                            Provider:{' '}
+                            <strong>{providerLabels[status.provider as LlmProvider] ?? status.provider}</strong>
                         </Typography>
                         <FormControl size="small" fullWidth>
                             <InputLabel>Model</InputLabel>
@@ -112,11 +140,41 @@ export const ConnectionCard = () => {
                         </FormControl>
                     </Box>
                 ) : (
-                    <Typography variant="body2" color="text.secondary">
-                        Connect your OpenRouter account to enable AI-powered analysis of debug data. OpenRouter provides
-                        access to Claude, GPT-4, Llama, Mistral, and many other models through a single OAuth
-                        integration.
-                    </Typography>
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                        <ToggleButtonGroup
+                            value={selectedProvider}
+                            exclusive
+                            onChange={(_, value) => value && setSelectedProvider(value)}
+                            size="small"
+                            fullWidth
+                        >
+                            <ToggleButton value="anthropic">Anthropic (Claude)</ToggleButton>
+                            <ToggleButton value="openrouter">OpenRouter</ToggleButton>
+                        </ToggleButtonGroup>
+
+                        {selectedProvider === 'anthropic' ? (
+                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                                <Typography variant="body2" color="text.secondary">
+                                    Connect directly with your Anthropic API key to use Claude models.
+                                </Typography>
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    label="API Key"
+                                    type="password"
+                                    placeholder="sk-ant-..."
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleApiKeyConnect()}
+                                />
+                            </Box>
+                        ) : (
+                            <Typography variant="body2" color="text.secondary">
+                                Connect your OpenRouter account to access Claude, GPT-4, Llama, Mistral, and many other
+                                models through a single OAuth integration.
+                            </Typography>
+                        )}
+                    </Box>
                 )}
             </CardContent>
             <CardActions>
@@ -124,8 +182,12 @@ export const ConnectionCard = () => {
                     <Button size="small" color="error" onClick={handleDisconnect}>
                         Disconnect
                     </Button>
+                ) : selectedProvider === 'anthropic' ? (
+                    <Button size="small" variant="contained" onClick={handleApiKeyConnect} disabled={!apiKey.trim()}>
+                        Connect with API Key
+                    </Button>
                 ) : (
-                    <Button size="small" variant="contained" onClick={handleConnect}>
+                    <Button size="small" variant="contained" onClick={handleOpenRouterConnect}>
                         Connect with OpenRouter
                     </Button>
                 )}

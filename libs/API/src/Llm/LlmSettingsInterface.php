@@ -12,6 +12,8 @@ interface LlmSettingsInterface
 
     public function getProvider(): string;
 
+    public function setProvider(string $provider): void;
+
     public function getModel(): ?string;
 
     public function setModel(?string $model): void;

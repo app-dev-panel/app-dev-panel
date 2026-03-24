@@ -20,6 +20,10 @@ final class LlmController
     private const string OPENROUTER_MODELS_URL = 'https://openrouter.ai/api/v1/models';
     private const string OPENROUTER_COMPLETIONS_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
+    private const string ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
+    private const string ANTHROPIC_MODELS_URL = 'https://api.anthropic.com/v1/models';
+    private const string ANTHROPIC_API_VERSION = '2023-06-01';
+
     public function __construct(
         private readonly JsonResponseFactoryInterface $responseFactory,
         private readonly LlmSettingsInterface $settings,
@@ -37,7 +41,36 @@ final class LlmController
     }
 
     /**
-     * POST /debug/api/llm/oauth/initiate — Start OAuth PKCE flow.
+     * POST /debug/api/llm/connect — Connect with direct API key (for Anthropic and other key-based providers).
+     *
+     * Body: { "provider": "anthropic", "apiKey": "sk-ant-..." }
+     */
+    public function connect(ServerRequestInterface $request): ResponseInterface
+    {
+        /** @var array<string, mixed> $body */
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        $provider = $body['provider'] ?? null;
+        $apiKey = $body['apiKey'] ?? null;
+
+        if (!is_string($provider) || $provider === '') {
+            throw new InvalidArgumentException('Field "provider" is required and must be a non-empty string.');
+        }
+        if (!is_string($apiKey) || $apiKey === '') {
+            throw new InvalidArgumentException('Field "apiKey" is required and must be a non-empty string.');
+        }
+
+        $this->settings->setProvider($provider);
+        $this->settings->setApiKey($apiKey);
+
+        return $this->responseFactory->createJsonResponse([
+            'connected' => true,
+            'provider' => $provider,
+        ]);
+    }
+
+    /**
+     * POST /debug/api/llm/oauth/initiate — Start OAuth PKCE flow (OpenRouter only).
      *
      * Body: { "callbackUrl": "..." }
      * Returns: { "authUrl": "...", "codeVerifier": "..." }
@@ -55,11 +88,14 @@ final class LlmController
         $codeVerifier = $this->generateCodeVerifier();
         $codeChallenge = $this->generateCodeChallenge($codeVerifier);
 
-        $authUrl = self::OPENROUTER_AUTH_URL . '?' . http_build_query([
-            'callback_url' => $callbackUrl,
-            'code_challenge' => $codeChallenge,
-            'code_challenge_method' => 'S256',
-        ]);
+        $authUrl =
+            self::OPENROUTER_AUTH_URL
+            . '?'
+            . http_build_query([
+                'callback_url' => $callbackUrl,
+                'code_challenge' => $codeChallenge,
+                'code_challenge_method' => 'S256',
+            ]);
 
         return $this->responseFactory->createJsonResponse([
             'authUrl' => $authUrl,
@@ -68,7 +104,7 @@ final class LlmController
     }
 
     /**
-     * POST /debug/api/llm/oauth/exchange — Exchange authorization code for API key.
+     * POST /debug/api/llm/oauth/exchange — Exchange authorization code for API key (OpenRouter only).
      *
      * Body: { "code": "...", "codeVerifier": "..." }
      */
@@ -112,6 +148,7 @@ final class LlmController
             ], 400);
         }
 
+        $this->settings->setProvider('openrouter');
         $this->settings->setApiKey($data['key']);
 
         return $this->responseFactory->createJsonResponse([
@@ -152,7 +189,7 @@ final class LlmController
     }
 
     /**
-     * GET /debug/api/llm/models — List available models from OpenRouter.
+     * GET /debug/api/llm/models — List available models.
      */
     public function models(ServerRequestInterface $request): ResponseInterface
     {
@@ -162,31 +199,17 @@ final class LlmController
             ], 401);
         }
 
-        $modelsRequest = $this->requestFactory
-            ->createRequest('GET', self::OPENROUTER_MODELS_URL)
-            ->withHeader('Authorization', 'Bearer ' . $this->settings->getApiKey());
+        $provider = $this->settings->getProvider();
 
-        $modelsResponse = $this->httpClient->sendRequest($modelsRequest);
-        $responseBody = $modelsResponse->getBody()->getContents();
-
-        /** @var array{data?: list<array<string, mixed>>} $data */
-        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
-
-        $models = [];
-        foreach (($data['data'] ?? []) as $model) {
-            $models[] = [
-                'id' => $model['id'] ?? '',
-                'name' => $model['name'] ?? '',
-                'context_length' => $model['context_length'] ?? 0,
-                'pricing' => $model['pricing'] ?? [],
-            ];
+        if ($provider === 'anthropic') {
+            return $this->anthropicModels();
         }
 
-        return $this->responseFactory->createJsonResponse(['models' => $models]);
+        return $this->openRouterModels();
     }
 
     /**
-     * POST /debug/api/llm/chat — Proxy chat completions to OpenRouter.
+     * POST /debug/api/llm/chat — Proxy chat completions.
      *
      * Body: { "messages": [...], "model"?: "...", "temperature"?: 0.7 }
      */
@@ -206,9 +229,152 @@ final class LlmController
             throw new InvalidArgumentException('Field "messages" is required and must be a non-empty array.');
         }
 
-        $model = $body['model'] ?? $this->settings->getModel() ?? 'anthropic/claude-sonnet-4';
+        $model = $body['model'] ?? $this->settings->getModel();
         $temperature = isset($body['temperature']) ? (float) $body['temperature'] : 0.7;
 
+        $provider = $this->settings->getProvider();
+
+        if ($provider === 'anthropic') {
+            $model ??= 'claude-sonnet-4-20250514';
+
+            return $this->anthropicChat($messages, $model, $temperature);
+        }
+
+        $model ??= 'anthropic/claude-sonnet-4';
+
+        return $this->openRouterChat($messages, $model, $temperature);
+    }
+
+    /**
+     * POST /debug/api/llm/analyze — Analyze debug entry data with LLM.
+     *
+     * Body: { "debugEntryId": "...", "context": {...}, "prompt"?: "..." }
+     */
+    public function analyze(ServerRequestInterface $request): ResponseInterface
+    {
+        if (!$this->settings->isConnected()) {
+            return $this->responseFactory->createJsonResponse([
+                'error' => 'Not connected. Complete OAuth flow first.',
+            ], 401);
+        }
+
+        /** @var array<string, mixed> $body */
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        $context = $body['context'] ?? null;
+        if (!is_array($context)) {
+            throw new InvalidArgumentException('Field "context" is required and must be an object.');
+        }
+
+        $userPrompt =
+            $body['prompt']
+            ?? 'Analyze this debug data and provide insights, potential issues, and suggestions for improvement.';
+
+        $systemPrompt = <<<'PROMPT'
+            You are an expert application debugger integrated into the Application Development Panel (ADP).
+            You analyze debug data from PHP web applications and provide actionable insights.
+
+            When analyzing debug data, focus on:
+            1. Errors and exceptions — root cause analysis and fix suggestions
+            2. Performance issues — slow queries, N+1 problems, excessive memory usage
+            3. Security concerns — exposed sensitive data, insecure headers
+            4. Best practices — PSR compliance, proper logging levels, caching opportunities
+
+            Keep responses concise and actionable. Use markdown formatting.
+            PROMPT;
+
+        $contextJson = json_encode($context, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        $messages = [
+            ['role' => 'system', 'content' => $systemPrompt],
+            ['role' => 'user', 'content' => "Here is the debug data:\n\n```json\n{$contextJson}\n```\n\n{$userPrompt}"],
+        ];
+
+        $provider = $this->settings->getProvider();
+
+        if ($provider === 'anthropic') {
+            $model = $this->settings->getModel() ?? 'claude-sonnet-4-20250514';
+            $response = $this->anthropicChat($messages, $model, 0.3);
+        } else {
+            $model = $this->settings->getModel() ?? 'anthropic/claude-sonnet-4';
+            $response = $this->openRouterChat($messages, $model, 0.3);
+        }
+
+        $responseBody = $response->getBody()->getContents();
+
+        /** @var array<string, mixed> $data */
+        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
+
+        if (isset($data['error'])) {
+            return $this->responseFactory->createJsonResponse([
+                'error' => $data['error'],
+            ], 502);
+        }
+
+        $content = $provider === 'anthropic'
+            ? $data['content'][0]['text'] ?? ''
+            : $data['choices'][0]['message']['content'] ?? '';
+
+        return $this->responseFactory->createJsonResponse([
+            'analysis' => $content,
+            'model' => $model,
+        ]);
+    }
+
+    private function openRouterModels(): ResponseInterface
+    {
+        $modelsRequest = $this->requestFactory->createRequest('GET', self::OPENROUTER_MODELS_URL)->withHeader(
+            'Authorization',
+            'Bearer ' . $this->settings->getApiKey(),
+        );
+
+        $modelsResponse = $this->httpClient->sendRequest($modelsRequest);
+        $responseBody = $modelsResponse->getBody()->getContents();
+
+        /** @var array{data?: list<array<string, mixed>>} $data */
+        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
+
+        $models = [];
+        foreach ($data['data'] ?? [] as $model) {
+            $models[] = [
+                'id' => $model['id'] ?? '',
+                'name' => $model['name'] ?? '',
+                'context_length' => $model['context_length'] ?? 0,
+                'pricing' => $model['pricing'] ?? [],
+            ];
+        }
+
+        return $this->responseFactory->createJsonResponse(['models' => $models]);
+    }
+
+    private function anthropicModels(): ResponseInterface
+    {
+        $modelsRequest = $this->requestFactory
+            ->createRequest('GET', self::ANTHROPIC_MODELS_URL)
+            ->withHeader('x-api-key', (string) $this->settings->getApiKey())
+            ->withHeader('anthropic-version', self::ANTHROPIC_API_VERSION);
+
+        $modelsResponse = $this->httpClient->sendRequest($modelsRequest);
+        $responseBody = $modelsResponse->getBody()->getContents();
+
+        /** @var array{data?: list<array<string, mixed>>} $data */
+        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
+
+        $models = [];
+        foreach ($data['data'] ?? [] as $model) {
+            $models[] = [
+                'id' => $model['id'] ?? '',
+                'name' => $model['display_name'] ?? $model['id'] ?? '',
+                'context_length' => $model['context_window'] ?? 0,
+                'pricing' => [],
+            ];
+        }
+
+        return $this->responseFactory->createJsonResponse(['models' => $models]);
+    }
+
+    private function openRouterChat(array $messages, string $model, float $temperature): ResponseInterface
+    {
         $chatBody = json_encode([
             'model' => $model,
             'messages' => $messages,
@@ -233,81 +399,63 @@ final class LlmController
     }
 
     /**
-     * POST /debug/api/llm/analyze — Analyze debug entry data with LLM.
-     *
-     * Body: { "debugEntryId": "...", "context": {...}, "prompt"?: "..." }
+     * @param list<array{role: string, content: string}> $messages
      */
-    public function analyze(ServerRequestInterface $request): ResponseInterface
+    private function anthropicChat(array $messages, string $model, float $temperature): ResponseInterface
     {
-        if (!$this->settings->isConnected()) {
-            return $this->responseFactory->createJsonResponse([
-                'error' => 'Not connected. Complete OAuth flow first.',
-            ], 401);
+        $systemPrompt = null;
+        $chatMessages = [];
+        foreach ($messages as $message) {
+            if ($message['role'] === 'system') {
+                $systemPrompt = $message['content'];
+            } else {
+                $chatMessages[] = $message;
+            }
         }
 
-        /** @var array<string, mixed> $body */
-        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
-
-        $context = $body['context'] ?? null;
-        if (!is_array($context)) {
-            throw new InvalidArgumentException('Field "context" is required and must be an object.');
-        }
-
-        $userPrompt = $body['prompt'] ?? 'Analyze this debug data and provide insights, potential issues, and suggestions for improvement.';
-
-        $systemPrompt = <<<'PROMPT'
-You are an expert application debugger integrated into the Application Development Panel (ADP).
-You analyze debug data from PHP web applications and provide actionable insights.
-
-When analyzing debug data, focus on:
-1. Errors and exceptions — root cause analysis and fix suggestions
-2. Performance issues — slow queries, N+1 problems, excessive memory usage
-3. Security concerns — exposed sensitive data, insecure headers
-4. Best practices — PSR compliance, proper logging levels, caching opportunities
-
-Keep responses concise and actionable. Use markdown formatting.
-PROMPT;
-
-        $contextJson = json_encode($context, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-
-        $messages = [
-            ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => "Here is the debug data:\n\n```json\n{$contextJson}\n```\n\n{$userPrompt}"],
-        ];
-
-        $model = $this->settings->getModel() ?? 'anthropic/claude-sonnet-4';
-
-        $chatBody = json_encode([
+        $payload = [
             'model' => $model,
-            'messages' => $messages,
-            'temperature' => 0.3,
-        ], JSON_THROW_ON_ERROR);
+            'max_tokens' => 4096,
+            'messages' => $chatMessages,
+            'temperature' => $temperature,
+        ];
+        if ($systemPrompt !== null) {
+            $payload['system'] = $systemPrompt;
+        }
+
+        $chatBody = json_encode($payload, JSON_THROW_ON_ERROR);
 
         $chatRequest = $this->requestFactory
-            ->createRequest('POST', self::OPENROUTER_COMPLETIONS_URL)
+            ->createRequest('POST', self::ANTHROPIC_MESSAGES_URL)
             ->withHeader('Content-Type', 'application/json')
-            ->withHeader('Authorization', 'Bearer ' . $this->settings->getApiKey())
-            ->withHeader('HTTP-Referer', 'https://app-dev-panel.dev')
-            ->withHeader('X-Title', 'Application Development Panel')
+            ->withHeader('x-api-key', (string) $this->settings->getApiKey())
+            ->withHeader('anthropic-version', self::ANTHROPIC_API_VERSION)
             ->withBody($this->streamFactory->createStream($chatBody));
 
         $chatResponse = $this->httpClient->sendRequest($chatRequest);
         $responseBody = $chatResponse->getBody()->getContents();
 
-        /** @var array{choices?: list<array{message?: array{content?: string}}>, error?: array<string, mixed>} $data */
-        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
+        /** @var array<string, mixed> $anthropicData */
+        $anthropicData = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
 
-        if (isset($data['error'])) {
-            return $this->responseFactory->createJsonResponse([
-                'error' => $data['error'],
-            ], 502);
+        if (isset($anthropicData['error'])) {
+            return $this->responseFactory->createJsonResponse($anthropicData);
         }
 
-        $content = $data['choices'][0]['message']['content'] ?? '';
+        // Normalize Anthropic response to OpenAI-compatible format
+        $content = $anthropicData['content'][0]['text'] ?? '';
 
         return $this->responseFactory->createJsonResponse([
-            'analysis' => $content,
-            'model' => $model,
+            'choices' => [
+                [
+                    'message' => [
+                        'role' => 'assistant',
+                        'content' => $content,
+                    ],
+                ],
+            ],
+            'model' => $anthropicData['model'] ?? $model,
+            'usage' => $anthropicData['usage'] ?? [],
         ]);
     }
 

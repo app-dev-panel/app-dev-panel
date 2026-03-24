@@ -51,9 +51,7 @@ export const OAuthCallback = () => {
                 </Box>
             )}
             {status === 'success' && (
-                <Alert severity="success">
-                    Successfully connected to OpenRouter! This window will close automatically.
-                </Alert>
+                <Alert severity="success">Successfully connected! This window will close automatically.</Alert>
             )}
             {status === 'error' && <Alert severity="error">{error}</Alert>}
         </Box>

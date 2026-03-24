@@ -225,6 +225,7 @@ final class ApiRoutes
     {
         return [
             new Route('GET', '/debug/api/llm/status', [LlmController::class, 'status'], 'debug/api/llm/status'),
+            new Route('POST', '/debug/api/llm/connect', [LlmController::class, 'connect'], 'debug/api/llm/connect'),
             new Route(
                 'POST',
                 '/debug/api/llm/oauth/initiate',
