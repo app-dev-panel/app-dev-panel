@@ -71,20 +71,10 @@ export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNew
             MuiPaper: {
                 styleOverrides: {outlined: {borderColor: palette.divider, boxShadow: semanticTokens.shadows.sm}},
             },
-            MuiMenu: {
-                styleOverrides: {
-                    paper: {border: `1px solid ${palette.divider}`, backgroundImage: 'none'},
-                },
-            },
-            MuiPopover: {
-                styleOverrides: {
-                    paper: {border: `1px solid ${palette.divider}`, backgroundImage: 'none'},
-                },
-            },
+            MuiMenu: {styleOverrides: {paper: {border: `1px solid ${palette.divider}`, backgroundImage: 'none'}}},
+            MuiPopover: {styleOverrides: {paper: {border: `1px solid ${palette.divider}`, backgroundImage: 'none'}}},
             MuiAutocomplete: {
-                styleOverrides: {
-                    paper: {border: `1px solid ${palette.divider}`, backgroundImage: 'none'},
-                },
+                styleOverrides: {paper: {border: `1px solid ${palette.divider}`, backgroundImage: 'none'}},
             },
             MuiButton: {styleOverrides: {root: {textTransform: 'none', fontWeight: 500}}},
         },

@@ -1,0 +1,42 @@
+import {SvgIcon, type SvgIconProps} from '@mui/material';
+
+type DuckIconProps = SvgIconProps & {monochromeColor?: string};
+
+export function DuckIcon({monochromeColor, ...props}: DuckIconProps) {
+    if (monochromeColor) {
+        return (
+            <SvgIcon viewBox="0 0 128 128" {...props}>
+                {/* Monochrome: single-color silhouette for small/UI contexts */}
+                <path
+                    d="M42 20a24 24 0 0 1 24 24c0 3-1 6-2 8 14 6 28 18 30 34 3 20-14 36-44 36S6 106 10 86c3-14 14-26 28-32a24 24 0 0 1 4-34Z"
+                    fill={monochromeColor}
+                />
+                <path d="M24 40c-6-3-14-1-14 5s8 9 14 5Z" fill={monochromeColor} />
+            </SvgIcon>
+        );
+    }
+
+    return (
+        <SvgIcon viewBox="0 0 128 128" {...props}>
+            {/* Body — warm yellow oval */}
+            <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D" />
+            {/* Head — overlapping circle */}
+            <circle cx="44" cy="44" r="24" fill="#FCD34D" />
+            {/* Beak — orange, pointing left */}
+            <path d="M24 40L10 44L24 48Z" fill="#FB923C" />
+            {/* Eye */}
+            <circle cx="38" cy="38" r="3.5" fill="#292524" />
+            <circle cx="37" cy="37" r="1.2" fill="white" />
+            {/* Wing accent */}
+            <path d="M56 74C64 66 82 68 94 78" stroke="#FBBF24" strokeWidth="3" strokeLinecap="round" fill="none" />
+            {/* Water ripple */}
+            <path
+                d="M16 108C24 104 32 104 40 108C48 112 56 112 64 108C72 104 80 104 88 108C96 112 104 112 112 108"
+                stroke="#93C5FD"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                fill="none"
+            />
+        </SvgIcon>
+    );
+}

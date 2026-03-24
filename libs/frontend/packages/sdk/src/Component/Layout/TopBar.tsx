@@ -1,5 +1,6 @@
 import {RequestPill} from '@app-dev-panel/sdk/Component/Layout/RequestPill';
 import {SearchTrigger} from '@app-dev-panel/sdk/Component/Layout/SearchTrigger';
+import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {editorPresetLabels, type EditorPreset} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {
@@ -91,14 +92,6 @@ const Logo = styled('div')(({theme}) => ({
     '&:hover': {opacity: 0.8},
 }));
 
-const Diamond = styled('div')(({theme}) => ({
-    width: 8,
-    height: 8,
-    backgroundColor: theme.palette.primary.main,
-    transform: 'rotate(45deg)',
-    borderRadius: 1,
-}));
-
 const CenterGroup = styled('div')({
     flex: 1,
     display: 'flex',
@@ -168,7 +161,7 @@ export const TopBar = React.memo(
         return (
             <BarRoot>
                 <Logo onClick={onLogoClick}>
-                    <Diamond /> App Dev Panel
+                    <DuckIcon sx={{fontSize: 22}} /> App Dev Panel
                 </Logo>
                 <CenterGroup>
                     <IconButton size="small" onClick={onPrevEntry} disabled={!method}>
