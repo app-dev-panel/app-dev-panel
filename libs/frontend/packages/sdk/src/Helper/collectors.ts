@@ -30,4 +30,5 @@ export enum CollectorsMap {
     TranslatorCollector = 'AppDevPanel\\Kernel\\Collector\\TranslatorCollector',
     ElasticsearchCollector = 'AppDevPanel\\Kernel\\Collector\\ElasticsearchCollector',
     RedisCollector = 'AppDevPanel\\Kernel\\Collector\\RedisCollector',
+    CodeCoverageCollector = 'AppDevPanel\\Kernel\\Collector\\CodeCoverageCollector',
 }

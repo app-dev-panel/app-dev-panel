@@ -32,6 +32,7 @@ return [
         'router' => true,
         'opentelemetry' => true,
         'translator' => true,
+        'code_coverage' => false,
     ],
 
     'ignored_requests' => [

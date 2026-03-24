@@ -23,6 +23,7 @@ export const routes = [
             {path: 'phpinfo', element: <Pages.PhpInfoPage />},
             {path: 'composer', element: <Pages.ComposerPage />},
             {path: 'opcache', element: <Pages.OpcachePage />},
+            {path: 'coverage', element: <Pages.CodeCoveragePage />},
             {path: 'container', children: [{path: 'view', element: <Pages.ContainerEntryPage />}]},
             {
                 path: 'git',

@@ -29,6 +29,7 @@ use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface
 use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
+use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
@@ -60,6 +61,7 @@ use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
 use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\CodeCoverageCollector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
@@ -172,6 +174,14 @@ final class AppDevPanelExtension extends Extension
 
         $this->registerSimpleCollectors($container, $collectors);
         $this->registerStreamCollectors($container, $collectors);
+
+        if ($collectors['code_coverage']) {
+            $container
+                ->register(CodeCoverageCollector::class, CodeCoverageCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class), [], ['vendor']])
+                ->setPublic(false)
+                ->addTag('app_dev_panel.collector');
+        }
 
         if ($collectors['command']) {
             $this->registerCommandCollectors($container);
@@ -597,6 +607,14 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
                 new Reference(AuthorizationConfigProviderInterface::class),
+            ])
+            ->setPublic(true);
+
+        $container
+            ->register(CodeCoverageController::class, CodeCoverageController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(PathResolverInterface::class),
             ])
             ->setPublic(true);
 
