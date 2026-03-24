@@ -269,7 +269,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const debugChildren = useMemo(() => {
         const entriesList = [{key: '__entries__', icon: 'list', label: 'All Entries'}];
         if (!debugEntry) return entriesList;
-        const overview = [{key: '__overview__', icon: 'grid_view', label: 'Overview'}];
         const isWeb = isDebugEntryAboutWeb(debugEntry);
         const isConsole = isDebugEntryAboutConsole(debugEntry);
         const collectors = [...debugEntry.collectors]
@@ -293,7 +292,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 };
             })
             .filter((c) => showInactiveCollectors || (c.badge != null && c.badge > 0));
-        return [...overview, ...collectors, ...entriesList];
+        return [...collectors, ...entriesList];
     }, [debugEntry, showInactiveCollectors]);
 
     // Build extra items for CommandPalette from current debug entry's collectors
@@ -327,7 +326,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             return '__entries__';
         }
         if (location.pathname.startsWith('/debug')) {
-            return selectedCollector || '__overview__';
+            return selectedCollector || undefined;
         }
         if (location.pathname.startsWith('/inspector')) {
             // Find matching inspector child
@@ -347,10 +346,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const handleChildClick = useCallback(
         (sectionKey: string, childKey: string) => {
             if (sectionKey === 'debug') {
-                if (childKey === '__overview__') {
-                    navigate('/debug');
-                    return;
-                }
                 if (childKey === '__entries__') {
                     navigate('/debug/list');
                     return;
