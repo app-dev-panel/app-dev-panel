@@ -13,11 +13,7 @@ export const Layout = () => {
 
     return (
         <>
-            <PageHeader
-                title="LLM Integration"
-                icon="psychology"
-                description="AI-powered debug analysis via OpenRouter"
-            />
+            <PageHeader title="LLM Integration" icon="psychology" description="AI-powered debug analysis" />
             <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 2}}>
                 <ConnectionCard />
                 <Box>

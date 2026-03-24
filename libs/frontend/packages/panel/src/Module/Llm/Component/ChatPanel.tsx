@@ -4,6 +4,21 @@ import {useCallback, useRef, useState} from 'react';
 
 type Message = {role: 'user' | 'assistant'; content: string};
 
+const extractErrorMessage = (err: unknown): string | null => {
+    if (typeof err === 'object' && err !== null && 'data' in err) {
+        const data = (err as {data: unknown}).data;
+        if (typeof data === 'object' && data !== null) {
+            const obj = data as Record<string, unknown>;
+            if (typeof obj.error === 'string') return obj.error;
+            if (typeof obj.data === 'object' && obj.data !== null) {
+                const inner = obj.data as Record<string, unknown>;
+                if (typeof inner.error === 'string') return inner.error;
+            }
+        }
+    }
+    return null;
+};
+
 export const ChatPanel = () => {
     const {data: status} = useGetStatusQuery();
     const [chat, {isLoading}] = useChatMutation();
@@ -28,15 +43,16 @@ export const ChatPanel = () => {
 
             const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
             setMessages((prev) => [...prev, {role: 'assistant', content: assistantContent}]);
-        } catch {
-            setError('Failed to get response from LLM.');
+        } catch (err: unknown) {
+            const message = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
+            setError(message);
         }
 
         setTimeout(() => messagesEndRef.current?.scrollIntoView({behavior: 'smooth'}), 100);
     }, [input, messages, chat, isLoading]);
 
     if (!status?.connected) {
-        return <Alert severity="info">Connect your OpenRouter account first to use the chat feature.</Alert>;
+        return <Alert severity="info">Connect an LLM provider first to use the chat feature.</Alert>;
     }
 
     return (

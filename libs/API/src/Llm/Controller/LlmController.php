@@ -395,6 +395,16 @@ final class LlmController
         /** @var array<string, mixed> $data */
         $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
 
+        if (isset($data['error'])) {
+            $errorMessage = is_array($data['error'])
+                ? $data['error']['message'] ?? 'Unknown OpenRouter API error.'
+                : (string) $data['error'];
+
+            return $this->responseFactory->createJsonResponse([
+                'error' => $errorMessage,
+            ], 502);
+        }
+
         return $this->responseFactory->createJsonResponse($data);
     }
 
@@ -439,7 +449,13 @@ final class LlmController
         $anthropicData = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
 
         if (isset($anthropicData['error'])) {
-            return $this->responseFactory->createJsonResponse($anthropicData);
+            $errorMessage = is_array($anthropicData['error'])
+                ? $anthropicData['error']['message'] ?? 'Unknown Anthropic API error.'
+                : (string) $anthropicData['error'];
+
+            return $this->responseFactory->createJsonResponse([
+                'error' => $errorMessage,
+            ], 502);
         }
 
         // Normalize Anthropic response to OpenAI-compatible format

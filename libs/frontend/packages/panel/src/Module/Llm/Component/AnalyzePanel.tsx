@@ -17,6 +17,21 @@ import {
 } from '@mui/material';
 import {useCallback, useState} from 'react';
 
+const extractErrorMessage = (err: unknown): string | null => {
+    if (typeof err === 'object' && err !== null && 'data' in err) {
+        const data = (err as {data: unknown}).data;
+        if (typeof data === 'object' && data !== null) {
+            const obj = data as Record<string, unknown>;
+            if (typeof obj.error === 'string') return obj.error;
+            if (typeof obj.data === 'object' && obj.data !== null) {
+                const inner = obj.data as Record<string, unknown>;
+                if (typeof inner.error === 'string') return inner.error;
+            }
+        }
+    }
+    return null;
+};
+
 export const AnalyzePanel = () => {
     const {data: status} = useGetStatusQuery();
     const {data: entries} = useGetDebugQuery();
@@ -40,13 +55,14 @@ export const AnalyzePanel = () => {
                 prompt: prompt || undefined,
             }).unwrap();
             setResult(response.analysis);
-        } catch {
-            setError('Failed to analyze debug entry.');
+        } catch (err: unknown) {
+            const message = extractErrorMessage(err) ?? 'Failed to analyze debug entry.';
+            setError(message);
         }
     }, [selectedEntry, entries, analyze, prompt]);
 
     if (!status?.connected) {
-        return <Alert severity="info">Connect your OpenRouter account first to analyze debug entries with AI.</Alert>;
+        return <Alert severity="info">Connect an LLM provider first to analyze debug entries with AI.</Alert>;
     }
 
     return (
