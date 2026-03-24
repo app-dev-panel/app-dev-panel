@@ -488,7 +488,9 @@ final class LlmController
     {
         $apiKey = (string) $this->settings->getApiKey();
 
-        if (str_starts_with($apiKey, 'sk-ant-oat')) {
+        // Try Bearer auth first — works with both subscription tokens and OAuth tokens.
+        // Falls back to x-api-key only for non-Anthropic keys.
+        if (str_starts_with($apiKey, 'sk-ant-')) {
             return $request->withHeader('Authorization', 'Bearer ' . $apiKey);
         }
 
