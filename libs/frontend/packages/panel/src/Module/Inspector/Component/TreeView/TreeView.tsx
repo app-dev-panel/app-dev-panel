@@ -62,7 +62,7 @@ const Tree = React.memo(({row}: {row: InspectorFile}) => {
     return (
         <StyledTreeItem
             itemId={row.path}
-            fileName={row.baseName}
+            fileName={row.path.endsWith('/..') ? '..' : row.baseName}
             fileIcon={fileExtensionIcon(row)}
             fileSize={fileSize}
         />
