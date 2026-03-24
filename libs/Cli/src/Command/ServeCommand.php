@@ -16,6 +16,13 @@ use Symfony\Component\Process\Process;
 #[AsCommand(name: 'serve', description: 'Start standalone ADP API server')]
 final class ServeCommand extends Command
 {
+    public function __construct(
+        private readonly ?string $routerScript = null,
+        private readonly ?PhpExecutableFinder $phpExecutableFinder = null,
+    ) {
+        parent::__construct();
+    }
+
     protected function configure(): void
     {
         $this
@@ -38,7 +45,7 @@ final class ServeCommand extends Command
         $runtimePath = $input->getOption('runtime-path') ?? $storagePath;
         $frontendPath = $input->getOption('frontend-path');
 
-        $routerScript = dirname(__DIR__) . '/Server/server-router.php';
+        $routerScript = $this->routerScript ?? dirname(__DIR__) . '/Server/server-router.php';
 
         if (!file_exists($routerScript)) {
             $io->error('Server router script not found: ' . $routerScript);
@@ -49,7 +56,7 @@ final class ServeCommand extends Command
             mkdir($storagePath, 0o777, true);
         }
 
-        $phpBinary = new PhpExecutableFinder()->find();
+        $phpBinary = ($this->phpExecutableFinder ?? new PhpExecutableFinder())->find();
         if ($phpBinary === false) {
             $io->error('PHP binary not found.');
             return Command::FAILURE;
