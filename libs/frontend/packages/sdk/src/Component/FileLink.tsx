@@ -1,8 +1,9 @@
 import {parseFilePath, parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import {Code} from '@mui/icons-material';
-import {IconButton, Link, Tooltip} from '@mui/material';
+import {IconButton, Tooltip} from '@mui/material';
 import {type ReactNode} from 'react';
+import {Link as RouterLink} from 'react-router-dom';
 
 type FileLinkProps = {
     /** File path, optionally with :line suffix (e.g. "/app/src/Foo.php:42") */
@@ -27,6 +28,9 @@ function extractLineFromPath(path: string): number | undefined {
 /**
  * Renders a link to the internal File Explorer with an optional "Open in Editor" button.
  * The editor button appears only when an editor is configured in settings.
+ *
+ * Uses React Router Link directly (not MUI Link) to ensure SPA navigation
+ * even when rendered inside components that override the MUI theme (e.g. JsonViewer).
  */
 export const FileLink = ({path, className, methodName, line, children, sx}: FileLinkProps) => {
     const getEditorUrl = useEditorUrl();
@@ -51,9 +55,9 @@ export const FileLink = ({path, className, methodName, line, children, sx}: File
     return (
         <span style={{display: 'inline-flex', alignItems: 'center', gap: 2, ...sx}}>
             {children !== undefined ? (
-                <Link href={explorerHref} sx={{color: 'inherit', textDecoration: 'inherit'}}>
+                <RouterLink to={explorerHref} style={{color: 'inherit', textDecoration: 'inherit'}}>
                     {children}
-                </Link>
+                </RouterLink>
             ) : null}
             {editorUrl && (
                 <Tooltip title="Open in Editor">
