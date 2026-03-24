@@ -158,6 +158,7 @@ export const FileExplorerPage = () => {
     };
 
     const editorUrl = file ? getEditorUrl(file.path, file.startLine) : null;
+    const directoryEditorUrl = !file && path !== '/' ? getEditorUrl(path) : null;
 
     return (
         <>
@@ -218,10 +219,41 @@ export const FileExplorerPage = () => {
                 </Box>
             )}
             {!file && (
-                <>
-                    <PathBreadcrumbs path={path} onClick={changePath} />
-                    <TreeView tree={tree} onSelect={changePath} />
-                </>
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5}}>
+                        {path !== '/' && (
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<ArrowBack />}
+                                onClick={() => {
+                                    const parent = path.replace(/\/[^/]+\/?$/, '') || '/';
+                                    changePath(parent);
+                                }}
+                                sx={{flexShrink: 0}}
+                            >
+                                Back
+                            </Button>
+                        )}
+                        <PathBreadcrumbs path={path} onClick={changePath} />
+                        {directoryEditorUrl && (
+                            <Tooltip title="Open in Editor">
+                                <IconButton
+                                    size="small"
+                                    component="a"
+                                    href={directoryEditorUrl}
+                                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                    sx={{flexShrink: 0, color: 'primary.main'}}
+                                >
+                                    <OpenInNew sx={{fontSize: 18}} />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                    </Box>
+                    <Paper variant="outlined" sx={{borderRadius: 2}}>
+                        <TreeView tree={tree} onSelect={changePath} />
+                    </Paper>
+                </Box>
             )}
 
             {getClassQueryInfo.error &&
