@@ -373,6 +373,165 @@ export const DashboardPage = () => {
                 />
             </HealthGrid>
 
+            {/* Commands + Tests & Analyse */}
+            <Columns>
+                <PanelRoot variant="outlined">
+                    <PanelHeader>
+                        <Typography variant="body2" sx={{fontWeight: 600}}>
+                            Commands
+                        </Typography>
+                        <MuiLink component={Link} to="/inspector/commands" underline="hover" variant="body2">
+                            View all {commands.length > 0 && commands.length} &rarr;
+                        </MuiLink>
+                    </PanelHeader>
+                    {commands.length === 0 ? (
+                        <Box sx={{p: 2.5}}>
+                            <Typography variant="body2" sx={{color: 'text.disabled'}}>
+                                No commands available
+                            </Typography>
+                        </Box>
+                    ) : (
+                        commands.slice(0, 8).map((cmd) => (
+                            <RowBox key={cmd.name}>
+                                <Typography variant="caption" sx={{color: 'text.disabled', flexShrink: 0}}>
+                                    {cmd.group}
+                                </Typography>
+                                <Typography variant="body2" sx={{flex: 1, fontWeight: 500}}>
+                                    {cmd.title}
+                                </Typography>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => runCommand(cmd.name)}
+                                    disabled={runningCommands[cmd.name] === 'loading'}
+                                    color={
+                                        runningCommands[cmd.name] === 'ok'
+                                            ? 'success'
+                                            : runningCommands[cmd.name] === 'error'
+                                              ? 'error'
+                                              : 'primary'
+                                    }
+                                    sx={{minWidth: 'auto', px: 1.5, py: 0.25, fontSize: 11}}
+                                    endIcon={
+                                        runningCommands[cmd.name] === 'loading' ? (
+                                            <CircularProgress size={12} color="inherit" />
+                                        ) : null
+                                    }
+                                >
+                                    Run
+                                </Button>
+                            </RowBox>
+                        ))
+                    )}
+                </PanelRoot>
+
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2.5}}>
+                    <PanelRoot variant="outlined">
+                        <PanelHeader>
+                            <Typography variant="body2" sx={{fontWeight: 600}}>
+                                Tests
+                            </Typography>
+                            <MuiLink component={Link} to="/inspector/tests" underline="hover" variant="body2">
+                                Details &rarr;
+                            </MuiLink>
+                        </PanelHeader>
+                        <Box sx={{p: 2.5, display: 'flex', alignItems: 'center', gap: 2}}>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={runTests}
+                                disabled={testsStatus === 'loading'}
+                                color={testsStatus === 'ok' ? 'success' : testsStatus === 'error' ? 'error' : 'primary'}
+                                endIcon={
+                                    testsStatus === 'loading' ? <CircularProgress size={16} color="inherit" /> : null
+                                }
+                            >
+                                Run Codeception
+                            </Button>
+                            {testsResult && (
+                                <Typography variant="body2" sx={{color: 'text.secondary'}}>
+                                    <Typography
+                                        component="span"
+                                        variant="body2"
+                                        sx={{color: 'success.main', fontWeight: 600}}
+                                    >
+                                        {testsResult.passed} passed
+                                    </Typography>
+                                    {testsResult.failed > 0 && (
+                                        <>
+                                            {' \u00b7 '}
+                                            <Typography
+                                                component="span"
+                                                variant="body2"
+                                                sx={{color: 'error.main', fontWeight: 600}}
+                                            >
+                                                {testsResult.failed} failed
+                                            </Typography>
+                                        </>
+                                    )}
+                                </Typography>
+                            )}
+                        </Box>
+                    </PanelRoot>
+
+                    <PanelRoot variant="outlined">
+                        <PanelHeader>
+                            <Typography variant="body2" sx={{fontWeight: 600}}>
+                                Analyse
+                            </Typography>
+                            <MuiLink component={Link} to="/inspector/analyse" underline="hover" variant="body2">
+                                Details &rarr;
+                            </MuiLink>
+                        </PanelHeader>
+                        <Box sx={{p: 2.5, display: 'flex', alignItems: 'center', gap: 2}}>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={runAnalyse}
+                                disabled={analyseStatus === 'loading'}
+                                color={
+                                    analyseStatus === 'ok' ? 'success' : analyseStatus === 'error' ? 'error' : 'primary'
+                                }
+                                endIcon={
+                                    analyseStatus === 'loading' ? <CircularProgress size={16} color="inherit" /> : null
+                                }
+                            >
+                                Run Psalm
+                            </Button>
+                            {analyseResult && (
+                                <Typography variant="body2" sx={{color: 'text.secondary'}}>
+                                    {analyseResult.errors > 0 ? (
+                                        <Typography
+                                            component="span"
+                                            variant="body2"
+                                            sx={{color: 'error.main', fontWeight: 600}}
+                                        >
+                                            {analyseResult.errors} errors
+                                        </Typography>
+                                    ) : (
+                                        <Typography
+                                            component="span"
+                                            variant="body2"
+                                            sx={{color: 'success.main', fontWeight: 600}}
+                                        >
+                                            No errors
+                                        </Typography>
+                                    )}
+                                    {analyseResult.info > 0 && (
+                                        <>
+                                            {' \u00b7 '}
+                                            <Typography component="span" variant="body2" sx={{color: 'text.disabled'}}>
+                                                {analyseResult.info} info
+                                            </Typography>
+                                        </>
+                                    )}
+                                </Typography>
+                            )}
+                        </Box>
+                    </PanelRoot>
+                </Box>
+            </Columns>
+
             {/* Routes + Database */}
             <Columns>
                 <PanelRoot variant="outlined">
@@ -535,165 +694,6 @@ export const DashboardPage = () => {
                         </Box>
                     )}
                 </PanelRoot>
-            </Columns>
-
-            {/* Commands + Tests & Analyse */}
-            <Columns>
-                <PanelRoot variant="outlined">
-                    <PanelHeader>
-                        <Typography variant="body2" sx={{fontWeight: 600}}>
-                            Commands
-                        </Typography>
-                        <MuiLink component={Link} to="/inspector/commands" underline="hover" variant="body2">
-                            View all {commands.length > 0 && commands.length} &rarr;
-                        </MuiLink>
-                    </PanelHeader>
-                    {commands.length === 0 ? (
-                        <Box sx={{p: 2.5}}>
-                            <Typography variant="body2" sx={{color: 'text.disabled'}}>
-                                No commands available
-                            </Typography>
-                        </Box>
-                    ) : (
-                        commands.slice(0, 8).map((cmd) => (
-                            <RowBox key={cmd.name}>
-                                <Typography variant="caption" sx={{color: 'text.disabled', flexShrink: 0}}>
-                                    {cmd.group}
-                                </Typography>
-                                <Typography variant="body2" sx={{flex: 1, fontWeight: 500}}>
-                                    {cmd.title}
-                                </Typography>
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    onClick={() => runCommand(cmd.name)}
-                                    disabled={runningCommands[cmd.name] === 'loading'}
-                                    color={
-                                        runningCommands[cmd.name] === 'ok'
-                                            ? 'success'
-                                            : runningCommands[cmd.name] === 'error'
-                                              ? 'error'
-                                              : 'primary'
-                                    }
-                                    sx={{minWidth: 'auto', px: 1.5, py: 0.25, fontSize: 11}}
-                                    endIcon={
-                                        runningCommands[cmd.name] === 'loading' ? (
-                                            <CircularProgress size={12} color="inherit" />
-                                        ) : null
-                                    }
-                                >
-                                    Run
-                                </Button>
-                            </RowBox>
-                        ))
-                    )}
-                </PanelRoot>
-
-                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2.5}}>
-                    <PanelRoot variant="outlined">
-                        <PanelHeader>
-                            <Typography variant="body2" sx={{fontWeight: 600}}>
-                                Tests
-                            </Typography>
-                            <MuiLink component={Link} to="/inspector/tests" underline="hover" variant="body2">
-                                Details &rarr;
-                            </MuiLink>
-                        </PanelHeader>
-                        <Box sx={{p: 2.5, display: 'flex', alignItems: 'center', gap: 2}}>
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                onClick={runTests}
-                                disabled={testsStatus === 'loading'}
-                                color={testsStatus === 'ok' ? 'success' : testsStatus === 'error' ? 'error' : 'primary'}
-                                endIcon={
-                                    testsStatus === 'loading' ? <CircularProgress size={16} color="inherit" /> : null
-                                }
-                            >
-                                Run Codeception
-                            </Button>
-                            {testsResult && (
-                                <Typography variant="body2" sx={{color: 'text.secondary'}}>
-                                    <Typography
-                                        component="span"
-                                        variant="body2"
-                                        sx={{color: 'success.main', fontWeight: 600}}
-                                    >
-                                        {testsResult.passed} passed
-                                    </Typography>
-                                    {testsResult.failed > 0 && (
-                                        <>
-                                            {' \u00b7 '}
-                                            <Typography
-                                                component="span"
-                                                variant="body2"
-                                                sx={{color: 'error.main', fontWeight: 600}}
-                                            >
-                                                {testsResult.failed} failed
-                                            </Typography>
-                                        </>
-                                    )}
-                                </Typography>
-                            )}
-                        </Box>
-                    </PanelRoot>
-
-                    <PanelRoot variant="outlined">
-                        <PanelHeader>
-                            <Typography variant="body2" sx={{fontWeight: 600}}>
-                                Analyse
-                            </Typography>
-                            <MuiLink component={Link} to="/inspector/analyse" underline="hover" variant="body2">
-                                Details &rarr;
-                            </MuiLink>
-                        </PanelHeader>
-                        <Box sx={{p: 2.5, display: 'flex', alignItems: 'center', gap: 2}}>
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                onClick={runAnalyse}
-                                disabled={analyseStatus === 'loading'}
-                                color={
-                                    analyseStatus === 'ok' ? 'success' : analyseStatus === 'error' ? 'error' : 'primary'
-                                }
-                                endIcon={
-                                    analyseStatus === 'loading' ? <CircularProgress size={16} color="inherit" /> : null
-                                }
-                            >
-                                Run Psalm
-                            </Button>
-                            {analyseResult && (
-                                <Typography variant="body2" sx={{color: 'text.secondary'}}>
-                                    {analyseResult.errors > 0 ? (
-                                        <Typography
-                                            component="span"
-                                            variant="body2"
-                                            sx={{color: 'error.main', fontWeight: 600}}
-                                        >
-                                            {analyseResult.errors} errors
-                                        </Typography>
-                                    ) : (
-                                        <Typography
-                                            component="span"
-                                            variant="body2"
-                                            sx={{color: 'success.main', fontWeight: 600}}
-                                        >
-                                            No errors
-                                        </Typography>
-                                    )}
-                                    {analyseResult.info > 0 && (
-                                        <>
-                                            {' \u00b7 '}
-                                            <Typography component="span" variant="body2" sx={{color: 'text.disabled'}}>
-                                                {analyseResult.info} info
-                                            </Typography>
-                                        </>
-                                    )}
-                                </Typography>
-                            )}
-                        </Box>
-                    </PanelRoot>
-                </Box>
             </Columns>
 
             {/* Composer packages */}
