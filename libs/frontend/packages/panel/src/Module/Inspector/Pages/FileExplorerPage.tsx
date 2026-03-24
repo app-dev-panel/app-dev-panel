@@ -7,12 +7,12 @@ import {
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {TreeView} from '@app-dev-panel/panel/Module/Inspector/Component/TreeView/TreeView';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
-import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {parseFilePath, parsePathLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {scrollToAnchor} from '@app-dev-panel/sdk/Helper/scrollToAnchor';
-import {Undo} from '@mui/icons-material';
-import {Box, Breadcrumbs, Button, Link, Typography} from '@mui/material';
+import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
+import {ArrowBack, FolderOpen, Lock, OpenInNew, Person, Storage} from '@mui/icons-material';
+import {Box, Breadcrumbs, Button, IconButton, Link, Paper, Tooltip, Typography} from '@mui/material';
 import {useEffect, useLayoutEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
@@ -66,6 +66,35 @@ const PathBreadcrumbs = ({path, onClick}: PathBreadcrumbsProps) => {
     );
 };
 
+type FileMetaBarProps = {file: InspectorFileContent};
+
+const FileMetaBar = ({file}: FileMetaBarProps) => {
+    const items = [
+        {icon: <FolderOpen sx={{fontSize: 16}} />, label: `@root${file.directory}`},
+        {icon: <Lock sx={{fontSize: 16}} />, label: file.permissions},
+        {
+            icon: <Person sx={{fontSize: 16}} />,
+            label: `${file.user?.name ?? file.user.uid}:${file.group?.name ?? file.group.gid}`,
+        },
+        {icon: <Storage sx={{fontSize: 16}} />, label: formatBytes(file.size)},
+    ];
+
+    return (
+        <Box
+            sx={{display: 'flex', flexWrap: 'wrap', gap: 2.5, px: 2, py: 1.5, bgcolor: 'action.hover', borderRadius: 1}}
+        >
+            {items.map((item, i) => (
+                <Box key={i} sx={{display: 'flex', alignItems: 'center', gap: 0.75}}>
+                    <Box sx={{color: 'text.disabled', display: 'flex', alignItems: 'center'}}>{item.icon}</Box>
+                    <Typography variant="body2" color="text.secondary">
+                        {item.label}
+                    </Typography>
+                </Box>
+            ))}
+        </Box>
+    );
+};
+
 function sortTree(data: InspectorFile[]) {
     return data.slice().sort((file1, file2) => {
         if (file1.path.endsWith('/') && !file2.path.endsWith('/')) {
@@ -83,6 +112,7 @@ export const FileExplorerPage = () => {
     const path = searchParams.get('path') || '/';
     const className = searchParams.get('class') || '';
     const methodName = searchParams.get('method') || '';
+    const getEditorUrl = useEditorUrl();
 
     const [lazyGetFilesQuery, getFilesQueryInfo] = useLazyGetFilesQuery();
     const [lazyGetClassQuery, getClassQueryInfo] = useLazyGetClassQuery();
@@ -122,40 +152,70 @@ export const FileExplorerPage = () => {
             }
         }
     }, [file]);
+
     const changePath = (path: string) => {
         setSearchParams({path});
     };
 
+    const editorUrl = file ? getEditorUrl(file.path, file.startLine) : null;
+
     return (
         <>
             {file && (
-                <>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 2}}>
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5}}>
                         <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<ArrowBack />}
                             onClick={() => {
                                 setFile(null);
                                 changePath(file.directory);
                             }}
+                            sx={{flexShrink: 0}}
                         >
-                            <Undo /> Back
+                            Back
                         </Button>
-                        <PageHeader title={file.path} icon="description" />
-                    </Box>
-                    <CodeHighlight
-                        language={file.extension}
-                        code={file.content}
-                        highlightLines={highlightLines}
-                        filePath={file.path}
-                    />
-                    <Box>
-                        <Typography>Directory: @root{file.directory}</Typography>
-                        <Typography>Permissions: {file.permissions}</Typography>
-                        <Typography>
-                            Owner: {file.user?.name ?? file.user.uid}:{file.group?.name ?? file.group.gid}
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                fontWeight: 600,
+                                fontFamily: "'JetBrains Mono', monospace",
+                                fontSize: '14px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                minWidth: 0,
+                            }}
+                        >
+                            {file.path}
                         </Typography>
-                        <Typography>Size: {formatBytes(file.size)}</Typography>
+                        {editorUrl && (
+                            <Tooltip title="Open in Editor">
+                                <IconButton
+                                    size="small"
+                                    component="a"
+                                    href={editorUrl}
+                                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                    sx={{flexShrink: 0, color: 'primary.main'}}
+                                >
+                                    <OpenInNew sx={{fontSize: 18}} />
+                                </IconButton>
+                            </Tooltip>
+                        )}
                     </Box>
-                </>
+
+                    <FileMetaBar file={file} />
+
+                    <Paper variant="outlined" sx={{overflow: 'hidden', borderRadius: 2}}>
+                        <CodeHighlight
+                            language={file.extension}
+                            code={file.content}
+                            highlightLines={highlightLines}
+                            filePath={file.path}
+                        />
+                    </Paper>
+                </Box>
             )}
             {!file && (
                 <>
