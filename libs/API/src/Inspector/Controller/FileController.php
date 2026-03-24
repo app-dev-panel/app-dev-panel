@@ -174,15 +174,16 @@ final class FileController
     private function readClassFile(string $destination, array $extra = []): ResponseInterface
     {
         $rootPath = $this->pathResolver->getRootPath();
+        $insideRoot = str_starts_with($destination, $rootPath);
         $pattern = '/^' . preg_quote($rootPath, '/') . '/';
 
         $file = new SplFileInfo($destination);
         return $this->responseFactory->createJsonResponse(array_merge(
             $extra,
             [
-                'directory' => preg_replace($pattern, '', dirname($destination), 1),
+                'directory' => $insideRoot ? preg_replace($pattern, '', dirname($destination), 1) : null,
                 'content' => file_get_contents($destination),
-                'path' => preg_replace($pattern, '', $destination, 1),
+                'path' => $insideRoot ? preg_replace($pattern, '', $destination, 1) : '/' . $file->getBasename(),
                 'absolutePath' => $this->pathMapper->mapToLocal($destination),
             ],
             $this->serializeFileInfo($file),
