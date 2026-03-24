@@ -295,6 +295,74 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         ];
     }
 
+    public function testFileStreamFixtureScenario(): void
+    {
+        $collector = new FilesystemStreamCollector();
+        $collector->startup();
+
+        $tmpDir = __DIR__ . DIRECTORY_SEPARATOR . 'stub' . DIRECTORY_SEPARATOR . 'stream-fixture-' . uniqid();
+        $tmpFile = $tmpDir . DIRECTORY_SEPARATOR . 'stream-test.txt';
+        $renamedFile = $tmpDir . DIRECTORY_SEPARATOR . 'stream-test-renamed.txt';
+
+        try {
+            // Run all operations in a closure so $stream goes out of scope
+            // and the proxy flushes its buffered operations via __destruct
+            (static function () use ($tmpDir, $tmpFile, $renamedFile): void {
+                mkdir($tmpDir, 0o777, true);
+
+                $stream = fopen($tmpFile, 'w+');
+                fwrite($stream, 'ADP file stream test');
+                fseek($stream, 0);
+                fread($stream, 20);
+                fclose($stream);
+                unset($stream);
+
+                rename($tmpFile, $renamedFile);
+                unlink($renamedFile);
+                rmdir($tmpDir);
+            })();
+
+            $collected = $collector->getCollected();
+            $summary = $collector->getSummary();
+        } finally {
+            $collector->shutdown();
+            if (is_file($tmpFile)) {
+                @unlink($tmpFile);
+            }
+            if (is_file($renamedFile)) {
+                @unlink($renamedFile);
+            }
+            if (is_dir($tmpDir)) {
+                @rmdir($tmpDir);
+            }
+        }
+
+        // Verify all operation types are present
+        $this->assertArrayHasKey('mkdir', $collected);
+        $this->assertArrayHasKey('write', $collected);
+        $this->assertArrayHasKey('read', $collected, 'read operations should be collected');
+        $this->assertArrayHasKey('rename', $collected, 'rename operations should be collected');
+        $this->assertArrayHasKey('unlink', $collected, 'unlink operations should be collected');
+        $this->assertArrayHasKey('rmdir', $collected, 'rmdir operations should be collected');
+
+        // Verify operation counts
+        $this->assertCount(1, $collected['mkdir']);
+        $this->assertCount(1, $collected['write']);
+        $this->assertCount(1, $collected['read']);
+        $this->assertCount(1, $collected['rename']);
+        $this->assertCount(1, $collected['unlink']);
+        $this->assertCount(1, $collected['rmdir']);
+
+        // Verify summary
+        $this->assertArrayHasKey('fs_stream', $summary);
+        $this->assertEquals(1, $summary['fs_stream']['mkdir']);
+        $this->assertEquals(1, $summary['fs_stream']['write']);
+        $this->assertEquals(1, $summary['fs_stream']['read']);
+        $this->assertEquals(1, $summary['fs_stream']['rename']);
+        $this->assertEquals(1, $summary['fs_stream']['unlink']);
+        $this->assertEquals(1, $summary['fs_stream']['rmdir']);
+    }
+
     protected function getCollector(): CollectorInterface
     {
         return new FilesystemStreamCollector();

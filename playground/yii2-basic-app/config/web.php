@@ -44,6 +44,7 @@ return [
                 'GET /test/fixtures/logs-heavy' => 'test-fixtures/logs-heavy',
                 'GET /test/fixtures/http-client' => 'test-fixtures/http-client',
                 'GET /test/fixtures/filesystem' => 'test-fixtures/filesystem',
+                'GET /test/fixtures/filesystem-streams' => 'test-fixtures/filesystem-streams',
                 'GET /test/fixtures/database' => 'test-fixtures/database',
                 'GET /test/fixtures/mailer' => 'test-fixtures/mailer',
                 'GET /test/fixtures/cache' => 'test-fixtures/cache',
