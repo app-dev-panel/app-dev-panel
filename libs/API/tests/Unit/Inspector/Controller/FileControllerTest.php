@@ -26,11 +26,12 @@ final class FileControllerTest extends ControllerTestCase
         $this->removeDir($this->fixtureDir);
     }
 
-    private function createController(): FileController
+    private function createController(?string $rootPath = null): FileController
     {
+        $root = $rootPath ?? $this->fixtureDir;
         $pathResolver = $this->createMock(PathResolverInterface::class);
-        $pathResolver->method('getRootPath')->willReturn($this->fixtureDir);
-        $pathResolver->method('getRuntimePath')->willReturn($this->fixtureDir . '/runtime');
+        $pathResolver->method('getRootPath')->willReturn($root);
+        $pathResolver->method('getRuntimePath')->willReturn($root . '/runtime');
 
         return new FileController($this->createResponseFactory(), $pathResolver);
     }
@@ -116,7 +117,7 @@ final class FileControllerTest extends ControllerTestCase
 
     public function testReadByClassName(): void
     {
-        $controller = $this->createController();
+        $controller = $this->createController(dirname(__DIR__, 4));
         $response = $controller->files($this->get(['class' => self::class]));
 
         $this->assertSame(200, $response->getStatusCode());
@@ -127,7 +128,7 @@ final class FileControllerTest extends ControllerTestCase
 
     public function testReadByClassNameWithMethod(): void
     {
-        $controller = $this->createController();
+        $controller = $this->createController(dirname(__DIR__, 4));
         $response = $controller->files($this->get([
             'class' => self::class,
             'method' => 'testReadByClassNameWithMethod',
@@ -138,6 +139,17 @@ final class FileControllerTest extends ControllerTestCase
         $this->assertArrayHasKey('startLine', $data);
         $this->assertArrayHasKey('endLine', $data);
         $this->assertIsInt($data['startLine']);
+    }
+
+    public function testReadByClassNameOutsideRootAllowed(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->files($this->get(['class' => self::class]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('content', $data);
+        $this->assertStringContainsString('FileControllerTest', $data['content']);
     }
 
     public function testFileInfoFields(): void

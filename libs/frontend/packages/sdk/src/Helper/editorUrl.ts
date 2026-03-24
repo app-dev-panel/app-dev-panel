@@ -1,4 +1,19 @@
-export type EditorPreset = 'none' | 'phpstorm' | 'vscode' | 'vscode-insiders' | 'cursor' | 'sublime' | 'zed' | 'custom';
+export type EditorPreset =
+    | 'none'
+    | 'phpstorm'
+    | 'idea'
+    | 'webstorm'
+    | 'goland'
+    | 'pycharm'
+    | 'rubymine'
+    | 'rider'
+    | 'clion'
+    | 'vscode'
+    | 'vscode-insiders'
+    | 'cursor'
+    | 'sublime'
+    | 'zed'
+    | 'custom';
 
 export type EditorConfig = {editor: EditorPreset; customUrlTemplate: string; pathMapping: Record<string, string>};
 
@@ -6,6 +21,13 @@ export const defaultEditorConfig: EditorConfig = {editor: 'none', customUrlTempl
 
 const editorTemplates: Record<Exclude<EditorPreset, 'none' | 'custom'>, string> = {
     phpstorm: 'phpstorm://open?file={file}&line={line}',
+    idea: 'idea://open?file={file}&line={line}',
+    webstorm: 'webstorm://open?file={file}&line={line}',
+    goland: 'goland://open?file={file}&line={line}',
+    pycharm: 'pycharm://open?file={file}&line={line}',
+    rubymine: 'rubymine://open?file={file}&line={line}',
+    rider: 'rider://open?file={file}&line={line}',
+    clion: 'clion://open?file={file}&line={line}',
     vscode: 'vscode://file/{file}:{line}',
     'vscode-insiders': 'vscode-insiders://file/{file}:{line}',
     cursor: 'cursor://file/{file}:{line}',
@@ -16,6 +38,13 @@ const editorTemplates: Record<Exclude<EditorPreset, 'none' | 'custom'>, string> 
 export const editorPresetLabels: Record<EditorPreset, string> = {
     none: 'None (File Explorer only)',
     phpstorm: 'PhpStorm',
+    idea: 'IntelliJ IDEA',
+    webstorm: 'WebStorm',
+    goland: 'GoLand',
+    pycharm: 'PyCharm',
+    rubymine: 'RubyMine',
+    rider: 'Rider',
+    clion: 'CLion',
     vscode: 'VS Code',
     'vscode-insiders': 'VS Code Insiders',
     cursor: 'Cursor',

@@ -3,20 +3,18 @@ import {SearchTrigger} from '@app-dev-panel/sdk/Component/Layout/SearchTrigger';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {editorPresetLabels, type EditorPreset} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {
+    Autocomplete,
     Badge,
     Box,
     Dialog,
     DialogContent,
     DialogTitle,
-    FormControl,
     Icon,
     IconButton,
-    InputLabel,
     ListItemIcon,
     ListItemText,
     Menu,
     MenuItem,
-    Select,
     Switch,
     TextField,
     Typography,
@@ -276,20 +274,16 @@ export const TopBar = React.memo(
                             <Typography variant="body1" sx={{mb: 1.5}}>
                                 Editor Integration
                             </Typography>
-                            <FormControl fullWidth size="small" sx={{mb: 1.5}}>
-                                <InputLabel>Editor</InputLabel>
-                                <Select
-                                    value={editorPreset ?? 'none'}
-                                    label="Editor"
-                                    onChange={(e) => onEditorPresetChange?.(e.target.value as EditorPreset)}
-                                >
-                                    {Object.entries(editorPresetLabels).map(([key, label]) => (
-                                        <MenuItem key={key} value={key}>
-                                            {label}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
+                            <Autocomplete
+                                size="small"
+                                options={Object.keys(editorPresetLabels) as EditorPreset[]}
+                                getOptionLabel={(option) => editorPresetLabels[option] ?? option}
+                                value={editorPreset ?? 'none'}
+                                onChange={(_, value) => onEditorPresetChange?.(value ?? 'none')}
+                                disableClearable
+                                renderInput={(params) => <TextField {...params} label="Editor" />}
+                                sx={{mb: 1.5}}
+                            />
                             {editorPreset === 'custom' && (
                                 <TextField
                                     fullWidth

@@ -1,10 +1,12 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
-import {Box, Chip, Link, type Theme, Typography} from '@mui/material';
+import {OpenInNew} from '@mui/icons-material';
+import {Box, Button, Chip, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useState} from 'react';
 
@@ -184,12 +186,28 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
                         )}
 
                     {currentRoute.action && (
-                        <Box sx={{mt: 1.5}}>
-                            <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
-                                Action
-                            </Typography>
-                            <JsonRenderer value={currentRoute.action} />
-                        </Box>
+                        <FieldRow>
+                            <FieldLabel>Action</FieldLabel>
+                            <FieldValue sx={{fontFamily: primitives.fontFamilyMono}}>
+                                {typeof currentRoute.action === 'string' ? (
+                                    <FileLink className={currentRoute.action}>
+                                        <Typography
+                                            component="span"
+                                            sx={{
+                                                fontFamily: primitives.fontFamilyMono,
+                                                fontSize: '12px',
+                                                color: 'primary.main',
+                                                '&:hover': {textDecoration: 'underline'},
+                                            }}
+                                        >
+                                            {currentRoute.action}
+                                        </Typography>
+                                    </FileLink>
+                                ) : (
+                                    <JsonRenderer value={currentRoute.action} />
+                                )}
+                            </FieldValue>
+                        </FieldRow>
                     )}
 
                     {currentRoute.middlewares && currentRoute.middlewares.length > 0 && (
@@ -208,14 +226,15 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
                     <SectionTitle
                         action={
                             <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                                <Link
+                                <Button
                                     href="/inspector/routes"
-                                    underline="hover"
-                                    color="primary"
-                                    sx={{fontSize: '12px'}}
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<OpenInNew sx={{fontSize: '14px !important'}} />}
+                                    sx={{fontSize: '11px', textTransform: 'none', height: 28, borderRadius: 1, px: 1.5}}
                                 >
-                                    Open in Inspector
-                                </Link>
+                                    Inspector
+                                </Button>
                                 <FilterInput value={filter} onChange={setFilter} placeholder="Filter routes..." />
                             </Box>
                         }

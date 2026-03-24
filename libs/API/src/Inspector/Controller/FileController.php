@@ -54,7 +54,7 @@ final class FileController
             ];
         }
 
-        return $this->readFile($destination, $extra);
+        return $this->readClassFile($destination, $extra);
     }
 
     private function resolvePathFile(string $path): ResponseInterface
@@ -146,6 +146,13 @@ final class FileController
     private function readFile(string $destination, array $extra = []): ResponseInterface
     {
         $rootPath = $this->pathResolver->getRootPath();
+
+        if (!str_starts_with($destination, $rootPath)) {
+            return $this->responseFactory->createJsonResponse([
+                'message' => 'Access denied: path is outside the project root.',
+            ], 403);
+        }
+
         $pattern = '/^' . preg_quote($rootPath, '/') . '/';
         $file = new SplFileInfo($destination);
         return $this->responseFactory->createJsonResponse(array_merge(
@@ -154,6 +161,30 @@ final class FileController
                 'directory' => preg_replace($pattern, '', dirname($destination), 1),
                 'content' => file_get_contents($destination),
                 'path' => preg_replace($pattern, '', $destination, 1),
+                'absolutePath' => $this->pathMapper->mapToLocal($destination),
+            ],
+            $this->serializeFileInfo($file),
+        ));
+    }
+
+    /**
+     * Read a file resolved from a class name. No root-path restriction — if the class
+     * is loaded by PHP, its source is trusted and always readable.
+     */
+    private function readClassFile(string $destination, array $extra = []): ResponseInterface
+    {
+        $rootPath = $this->pathResolver->getRootPath();
+        $insideRoot = str_starts_with($destination, $rootPath);
+        $pattern = '/^' . preg_quote($rootPath, '/') . '/';
+
+        $file = new SplFileInfo($destination);
+        return $this->responseFactory->createJsonResponse(array_merge(
+            $extra,
+            [
+                'directory' => $insideRoot ? preg_replace($pattern, '', dirname($destination), 1) : dirname($destination),
+                'content' => file_get_contents($destination),
+                'path' => $insideRoot ? preg_replace($pattern, '', $destination, 1) : $destination,
+                'insideRoot' => $insideRoot,
                 'absolutePath' => $this->pathMapper->mapToLocal($destination),
             ],
             $this->serializeFileInfo($file),

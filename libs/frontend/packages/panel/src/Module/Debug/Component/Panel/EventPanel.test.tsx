@@ -78,7 +78,7 @@ describe('EventPanel', () => {
         renderWithProviders(<EventPanel events={[makeEvent({name: 'App\\Event\\Click'})]} />, {preloadedState});
         const elements = screen.getAllByText('Click');
         await user.click(elements[0]);
-        expect(screen.getByText('Open File')).toBeInTheDocument();
+        expect(screen.getByLabelText('Open File')).toBeInTheDocument();
         expect(screen.getByText('App\\Event\\Click')).toBeInTheDocument();
     });
 

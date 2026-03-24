@@ -1,6 +1,7 @@
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
-import {Link, useMediaQuery} from '@mui/material';
+import {useMediaQuery} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import {DataType, JsonViewer, JsonViewerOnChange, JsonViewerTheme} from '@textea/json-viewer';
 import * as React from 'react';
@@ -20,7 +21,6 @@ export const JsonRenderer = React.memo(
         const mode: JsonViewerTheme = prefersDarkMode ? 'dark' : 'light';
 
         if (typeof value == 'string' && value.match(REGEXP_PHP_FUNCTION)?.length) {
-            const html = value.replaceAll('\n', '<br/>').replaceAll(' ', '&nbsp');
             return <CodeHighlight language={'php'} code={value} showLineNumbers={false} fontSize={10} />;
         }
 
@@ -50,7 +50,7 @@ export const JsonRenderer = React.memo(
                     },
                     {
                         is: (value: any) => Array.isArray(value) && value.length === 0,
-                        Component: (props) => {
+                        Component: () => {
                             return <>[]</>;
                         },
                     },
@@ -58,16 +58,20 @@ export const JsonRenderer = React.memo(
                         is: (value: any) => typeof value === 'string' && isClassString(value),
                         Component: (props) => {
                             return (
-                                <Typography sx={{display: 'inline', wordBreak: 'break-word'}}>
-                                    <Link
-                                        href={'/inspector/container/view?class=' + props.value}
-                                        underline="hover"
-                                        color="primary"
-                                        sx={{cursor: 'pointer'}}
+                                <FileLink className={props.value}>
+                                    <Typography
+                                        component="span"
+                                        sx={{
+                                            display: 'inline',
+                                            wordBreak: 'break-word',
+                                            color: 'primary.main',
+                                            cursor: 'pointer',
+                                            '&:hover': {textDecoration: 'underline'},
+                                        }}
                                     >
                                         {props.value}
-                                    </Link>
-                                </Typography>
+                                    </Typography>
+                                </FileLink>
                             );
                         },
                     },

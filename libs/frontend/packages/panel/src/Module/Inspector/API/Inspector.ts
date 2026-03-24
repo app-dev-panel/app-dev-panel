@@ -17,6 +17,7 @@ export type InspectorFileContent = {
     content: string;
     startLine?: number;
     endLine?: number;
+    insideRoot?: boolean;
 } & InspectorFile;
 
 export type ConfigurationType = Record<string, object | string>;
