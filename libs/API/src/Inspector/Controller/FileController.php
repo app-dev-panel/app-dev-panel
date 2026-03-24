@@ -181,9 +181,10 @@ final class FileController
         return $this->responseFactory->createJsonResponse(array_merge(
             $extra,
             [
-                'directory' => $insideRoot ? preg_replace($pattern, '', dirname($destination), 1) : null,
+                'directory' => $insideRoot ? preg_replace($pattern, '', dirname($destination), 1) : dirname($destination),
                 'content' => file_get_contents($destination),
-                'path' => $insideRoot ? preg_replace($pattern, '', $destination, 1) : '/' . $file->getBasename(),
+                'path' => $insideRoot ? preg_replace($pattern, '', $destination, 1) : $destination,
+                'insideRoot' => $insideRoot,
                 'absolutePath' => $this->pathMapper->mapToLocal($destination),
             ],
             $this->serializeFileInfo($file),

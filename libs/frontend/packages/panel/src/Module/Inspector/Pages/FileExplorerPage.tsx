@@ -17,9 +17,9 @@ import {Alert, AlertTitle, Box, Breadcrumbs, IconButton, Link, Paper, Tooltip, T
 import {useCallback, useEffect, useLayoutEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
-type PathBreadcrumbsProps = {onClick: (nodeId: string) => void; path: string};
+type PathBreadcrumbsProps = {onClick: (nodeId: string) => void; path: string; insideRoot?: boolean};
 
-const PathBreadcrumbs = ({path, onClick}: PathBreadcrumbsProps) => {
+const PathBreadcrumbs = ({path, onClick, insideRoot = true}: PathBreadcrumbsProps) => {
     const paths = path.split('/').filter((s) => !!s.length);
     const fullPath: string[] = [];
 
@@ -27,17 +27,19 @@ const PathBreadcrumbs = ({path, onClick}: PathBreadcrumbsProps) => {
 
     return (
         <Breadcrumbs sx={{minWidth: 0}}>
-            <Link
-                underline="hover"
-                color="inherit"
-                href={'#'}
-                onClick={() => {
-                    onClick('/');
-                    return false;
-                }}
-            >
-                @root
-            </Link>
+            {insideRoot && (
+                <Link
+                    underline="hover"
+                    color="inherit"
+                    href={'#'}
+                    onClick={() => {
+                        onClick('/');
+                        return false;
+                    }}
+                >
+                    @root
+                </Link>
+            )}
             {paths.map((directory, index) => {
                 fullPath.push(directory);
                 const currentPath = '/' + fullPath.join('/');
@@ -45,6 +47,14 @@ const PathBreadcrumbs = ({path, onClick}: PathBreadcrumbsProps) => {
                 if (index === paths.length - 1) {
                     return (
                         <Typography key={index} color="text.primary" sx={{fontWeight: 600}}>
+                            {directory}
+                        </Typography>
+                    );
+                }
+
+                if (!insideRoot) {
+                    return (
+                        <Typography key={index} color="text.secondary">
                             {directory}
                         </Typography>
                     );
@@ -109,6 +119,7 @@ const ActionButtons = ({editorUrl, fullPath, showCopy = true}: ActionButtonsProp
 type FileMetaBarProps = {file: InspectorFileContent; onDirectoryClick?: (path: string) => void};
 
 const FileMetaBar = ({file, onDirectoryClick}: FileMetaBarProps) => {
+    const insideRoot = file.insideRoot !== false;
     const items = [
         {icon: <Lock sx={{fontSize: 16}} />, label: file.permissions},
         {
@@ -126,15 +137,21 @@ const FileMetaBar = ({file, onDirectoryClick}: FileMetaBarProps) => {
                 <Box sx={{color: 'text.disabled', display: 'flex', alignItems: 'center'}}>
                     <FolderOpen sx={{fontSize: 16}} />
                 </Box>
-                <Link
-                    component="button"
-                    variant="body2"
-                    underline="hover"
-                    color="text.secondary"
-                    onClick={() => onDirectoryClick?.(file.directory)}
-                >
-                    @root{file.directory}
-                </Link>
+                {insideRoot ? (
+                    <Link
+                        component="button"
+                        variant="body2"
+                        underline="hover"
+                        color="text.secondary"
+                        onClick={() => onDirectoryClick?.(file.directory)}
+                    >
+                        @root{file.directory}
+                    </Link>
+                ) : (
+                    <Typography variant="body2" color="text.secondary">
+                        {file.directory}
+                    </Typography>
+                )}
             </Box>
             {items.map((item, i) => (
                 <Box key={i} sx={{display: 'flex', alignItems: 'center', gap: 0.75}}>
@@ -278,7 +295,11 @@ export const FileExplorerPage = () => {
             {!error && file && (
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                        <PathBreadcrumbs path={file.path} onClick={handleBreadcrumbClick} />
+                        <PathBreadcrumbs
+                            path={file.path}
+                            onClick={handleBreadcrumbClick}
+                            insideRoot={file.insideRoot !== false}
+                        />
                         <ActionButtons editorUrl={editorUrl} fullPath={file.path} />
                     </Box>
 
