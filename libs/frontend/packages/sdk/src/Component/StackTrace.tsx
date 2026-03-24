@@ -45,10 +45,14 @@ function renderCallText(call: string): ReactNode {
 
     return (
         <>
-            <CallLink href={buildClassHref(className, methodName)}>
+            <CallLink href={buildClassHref(className)}>
                 {className}
             </CallLink>
-            {'->'}{methodName}({renderArgs(argsStr)})
+            {'->'}
+            <CallLink href={buildClassHref(className, methodName)}>
+                {methodName}
+            </CallLink>
+            ({renderArgs(argsStr)})
         </>
     );
 }

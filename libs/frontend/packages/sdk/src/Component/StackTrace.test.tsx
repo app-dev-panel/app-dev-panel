@@ -30,12 +30,16 @@ describe('StackTrace', () => {
     it('renders class method calls as links', () => {
         renderWithProviders(<StackTrace trace={sampleTrace} />);
         const controllerLink = screen.getByText('App\\Controller');
-        expect(controllerLink.closest('a')).toHaveAttribute(
+        expect(controllerLink.closest('a')).toHaveAttribute('href', '/inspector/files?class=App%5CController');
+        const handleLink = screen.getByText('handle');
+        expect(handleLink.closest('a')).toHaveAttribute(
             'href',
             '/inspector/files?class=App%5CController&method=handle',
         );
         const kernelLink = screen.getByText('App\\Kernel');
-        expect(kernelLink.closest('a')).toHaveAttribute('href', '/inspector/files?class=App%5CKernel&method=run');
+        expect(kernelLink.closest('a')).toHaveAttribute('href', '/inspector/files?class=App%5CKernel');
+        const runLink = screen.getByText('run');
+        expect(runLink.closest('a')).toHaveAttribute('href', '/inspector/files?class=App%5CKernel&method=run');
     });
 
     it('renders {main} frame as plain text', () => {
