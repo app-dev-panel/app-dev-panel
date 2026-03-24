@@ -257,6 +257,26 @@ final class DebugQueryCommandTest extends TestCase
         $this->assertStringContainsString('exception', $display);
     }
 
+    public function testListEntryWithoutRequestInfo(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->willReturn([
+                [
+                    'id' => 'no-req-1',
+                    'logger' => ['total' => 0],
+                ],
+            ]);
+
+        $tester = new CommandTester(new DebugQueryCommand($repository));
+        $tester->execute(['action' => 'list']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('no-req-1', $display);
+    }
+
     public function testExtractRequestInfoFromCommandSummary(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
