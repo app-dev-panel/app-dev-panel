@@ -123,6 +123,43 @@ const methodColor = (method: string, theme: Theme): string => {
 };
 
 // ---------------------------------------------------------------------------
+// Quick filters
+// ---------------------------------------------------------------------------
+
+type QuickFilterKey = '4xx' | '5xx' | '500ms' | '1s' | 'errors' | 'POST';
+
+type QuickFilterDef = {
+    key: QuickFilterKey;
+    label: string;
+    color: 'error' | 'warning' | 'primary' | 'info';
+    test: (e: DebugEntry) => boolean;
+};
+
+const QUICK_FILTERS: QuickFilterDef[] = [
+    {
+        key: '4xx',
+        label: '4xx',
+        color: 'warning',
+        test: (e) => (e.response?.statusCode ?? 0) >= 400 && (e.response?.statusCode ?? 0) < 500,
+    },
+    {key: '5xx', label: '5xx', color: 'error', test: (e) => (e.response?.statusCode ?? 0) >= 500},
+    {key: 'errors', label: 'Errors', color: 'error', test: (e) => e.exception != null},
+    {
+        key: '500ms',
+        label: '500ms+',
+        color: 'info',
+        test: (e) => (e.web?.request?.processingTime ?? e.console?.request?.processingTime ?? 0) >= 0.5,
+    },
+    {
+        key: '1s',
+        label: '1s+',
+        color: 'warning',
+        test: (e) => (e.web?.request?.processingTime ?? e.console?.request?.processingTime ?? 0) >= 1,
+    },
+    {key: 'POST', label: 'POST', color: 'primary', test: (e) => e.request?.method === 'POST'},
+];
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -152,21 +189,28 @@ export const AnalyzePanel = () => {
     const [result, setResult] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [filter, setFilter] = useState('');
+    const [activeQuickFilters, setActiveQuickFilters] = useState<Set<QuickFilterKey>>(new Set());
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const listRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const recentEntries = useMemo(() => (entries ?? []).slice(0, 50), [entries]);
 
-    // Fuzzy-filter entries (with layout-aware search)
+    // Apply quick filters first, then fuzzy text filter
+    const quickFiltered = useMemo(() => {
+        if (activeQuickFilters.size === 0) return recentEntries;
+        const activeDefs = QUICK_FILTERS.filter((f) => activeQuickFilters.has(f.key));
+        return recentEntries.filter((entry) => activeDefs.some((f) => f.test(entry)));
+    }, [recentEntries, activeQuickFilters]);
+
     const matched: MatchedEntry[] = useMemo(() => {
         if (!filter.trim()) {
-            return recentEntries.map((entry) => ({entry, indices: [], searchText: getSearchText(entry)}));
+            return quickFiltered.map((entry) => ({entry, indices: [], searchText: getSearchText(entry)}));
         }
 
         const variants = searchVariants(filter);
         const results: (MatchedEntry & {score: number})[] = [];
-        for (const entry of recentEntries) {
+        for (const entry of quickFiltered) {
             const searchText = getSearchText(entry);
             let bestMatch: ReturnType<typeof fuzzyMatch> = null;
             for (const variant of variants) {
@@ -182,7 +226,20 @@ export const AnalyzePanel = () => {
 
         results.sort((a, b) => a.score - b.score);
         return results;
-    }, [recentEntries, filter]);
+    }, [quickFiltered, filter]);
+
+    const toggleQuickFilter = useCallback((key: QuickFilterKey) => {
+        setActiveQuickFilters((prev) => {
+            const next = new Set(prev);
+            if (next.has(key)) {
+                next.delete(key);
+            } else {
+                next.add(key);
+            }
+            return next;
+        });
+        setHighlightedIndex(-1);
+    }, []);
 
     const toggleEntry = useCallback((id: string) => {
         setSelectedEntries((prev) => {
@@ -294,12 +351,35 @@ export const AnalyzePanel = () => {
                             sx={{mr: 1, flexShrink: 0}}
                         />
                     )}
-                    {filter && (
+                    {(filter || activeQuickFilters.size > 0) && (
                         <Typography variant="caption" color="text.disabled" sx={{mr: 2, flexShrink: 0}}>
                             {matched.length} of {recentEntries.length}
                         </Typography>
                     )}
                 </FilterRow>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        gap: 0.5,
+                        px: 1,
+                        py: 0.5,
+                        borderBottom: 1,
+                        borderColor: 'divider',
+                        flexWrap: 'wrap',
+                    }}
+                >
+                    {QUICK_FILTERS.map((qf) => (
+                        <Chip
+                            key={qf.key}
+                            label={qf.label}
+                            size="small"
+                            color={activeQuickFilters.has(qf.key) ? qf.color : 'default'}
+                            variant={activeQuickFilters.has(qf.key) ? 'filled' : 'outlined'}
+                            onClick={() => toggleQuickFilter(qf.key)}
+                            sx={{height: 22, fontSize: '11px', cursor: 'pointer'}}
+                        />
+                    ))}
+                </Box>
                 <Box ref={listRef} sx={{overflowY: 'auto', maxHeight: 280}}>
                     {matched.length === 0 && (
                         <Box sx={{textAlign: 'center', py: 3, color: 'text.disabled'}}>

@@ -6,6 +6,7 @@ import {
     useGetModelsQuery,
     useGetStatusQuery,
     useOauthInitiateMutation,
+    useSetCustomPromptMutation,
     useSetModelMutation,
 } from '@app-dev-panel/panel/Module/Llm/API/Llm';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -17,6 +18,7 @@ import {
     Chip,
     Collapse,
     IconButton,
+    InputAdornment,
     Paper,
     Skeleton,
     TextField,
@@ -24,7 +26,7 @@ import {
     ToggleButtonGroup,
     Typography,
 } from '@mui/material';
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 
 const providerLabels: Record<LlmProvider, string> = {
     openrouter: 'OpenRouter',
@@ -44,12 +46,20 @@ export const ConnectionCard = () => {
     const [connect] = useConnectMutation();
     const [disconnect] = useDisconnectMutation();
     const [setModel] = useSetModelMutation();
+    const [setCustomPrompt] = useSetCustomPromptMutation();
     const {data: models, isLoading: modelsLoading} = useGetModelsQuery(undefined, {skip: !status?.connected});
     const [error, setError] = useState<string | null>(null);
     const [selectedProvider, setSelectedProvider] = useState<LlmProvider>('anthropic');
     const [apiKey, setApiKey] = useState('');
     const [expanded, setExpanded] = useState(false);
     const [freeOnly, setFreeOnly] = useState(false);
+    const [localPrompt, setLocalPrompt] = useState(status?.customPrompt ?? '');
+
+    useEffect(() => {
+        if (status?.customPrompt !== undefined) {
+            setLocalPrompt(status.customPrompt);
+        }
+    }, [status?.customPrompt]);
 
     const handleOpenRouterConnect = useCallback(async () => {
         setError(null);
@@ -168,41 +178,78 @@ export const ConnectionCard = () => {
                                 {error}
                             </Alert>
                         )}
-                        <Box sx={{display: 'flex', gap: 1, alignItems: 'flex-start'}}>
-                            <Autocomplete
-                                size="small"
-                                fullWidth
-                                options={popularModels}
-                                getOptionLabel={(option: LlmModel) =>
-                                    isOpenRouter && isFreeModel(option)
-                                        ? `${option.name} (free) (${option.id})`
-                                        : `${option.name} (${option.id})`
-                                }
-                                value={selectedModel ?? null}
-                                onChange={(_, option) => option && handleModelChange(option.id)}
-                                loading={modelsLoading}
-                                isOptionEqualToValue={(option, value) => option.id === value.id}
-                                renderInput={(params) => <TextField {...params} label="Model" />}
-                            />
-                            {isOpenRouter && (
-                                <ToggleButton
-                                    value="free"
-                                    selected={freeOnly}
-                                    onChange={() => setFreeOnly((prev) => !prev)}
-                                    size="small"
-                                    sx={{
-                                        whiteSpace: 'nowrap',
-                                        px: 1.5,
-                                        height: 40,
-                                        textTransform: 'none',
-                                        fontWeight: 600,
-                                        fontSize: '12px',
+                        <Autocomplete
+                            size="small"
+                            fullWidth
+                            options={popularModels}
+                            getOptionLabel={(option: LlmModel) =>
+                                isOpenRouter && isFreeModel(option)
+                                    ? `${option.name} (free) (${option.id})`
+                                    : `${option.name} (${option.id})`
+                            }
+                            value={selectedModel ?? null}
+                            onChange={(_, option) => option && handleModelChange(option.id)}
+                            loading={modelsLoading}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Model"
+                                    slotProps={{
+                                        input: {
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <>
+                                                    {isOpenRouter && (
+                                                        <InputAdornment position="end" sx={{mr: -0.5}}>
+                                                            <ToggleButton
+                                                                value="free"
+                                                                selected={freeOnly}
+                                                                onChange={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setFreeOnly((prev) => !prev);
+                                                                }}
+                                                                size="small"
+                                                                sx={{
+                                                                    px: 1,
+                                                                    py: 0,
+                                                                    height: 24,
+                                                                    textTransform: 'none',
+                                                                    fontWeight: 600,
+                                                                    fontSize: '11px',
+                                                                    lineHeight: 1,
+                                                                    borderRadius: 1,
+                                                                }}
+                                                            >
+                                                                Free
+                                                            </ToggleButton>
+                                                        </InputAdornment>
+                                                    )}
+                                                    {params.InputProps.endAdornment}
+                                                </>
+                                            ),
+                                        },
                                     }}
-                                >
-                                    Free
-                                </ToggleButton>
+                                />
                             )}
-                        </Box>
+                        />
+                        <TextField
+                            size="small"
+                            fullWidth
+                            multiline
+                            minRows={2}
+                            maxRows={5}
+                            label="Custom instructions"
+                            placeholder="e.g. Reply in English. Focus on root causes and fixes..."
+                            value={localPrompt}
+                            onChange={(e) => setLocalPrompt(e.target.value)}
+                            onBlur={() => {
+                                if (localPrompt !== (status?.customPrompt ?? '')) {
+                                    setCustomPrompt({customPrompt: localPrompt});
+                                }
+                            }}
+                            helperText="Appended to every LLM request (chat & analyze)"
+                        />
                         <Box>
                             <Button size="small" color="error" onClick={handleDisconnect}>
                                 Disconnect

@@ -7,11 +7,13 @@ namespace AppDevPanel\Api\Llm;
 final class FileLlmSettings implements LlmSettingsInterface
 {
     private const int DEFAULT_TIMEOUT = 30;
+    private const string DEFAULT_CUSTOM_PROMPT = 'Reply in English. Be concise and actionable — focus on root causes and fixes, not descriptions of what the code does.';
 
     private ?string $apiKey = null;
     private string $provider = 'openrouter';
     private ?string $model = null;
     private int $timeout = self::DEFAULT_TIMEOUT;
+    private string $customPrompt = self::DEFAULT_CUSTOM_PROMPT;
     private bool $loaded = false;
 
     public function __construct(
@@ -74,6 +76,20 @@ final class FileLlmSettings implements LlmSettingsInterface
         $this->save();
     }
 
+    public function getCustomPrompt(): string
+    {
+        $this->load();
+
+        return $this->customPrompt;
+    }
+
+    public function setCustomPrompt(string $prompt): void
+    {
+        $this->load();
+        $this->customPrompt = $prompt;
+        $this->save();
+    }
+
     public function isConnected(): bool
     {
         $this->load();
@@ -87,6 +103,7 @@ final class FileLlmSettings implements LlmSettingsInterface
         $this->model = null;
         $this->provider = 'openrouter';
         $this->timeout = self::DEFAULT_TIMEOUT;
+        $this->customPrompt = self::DEFAULT_CUSTOM_PROMPT;
         $this->loaded = true;
 
         $file = $this->filePath();
@@ -96,7 +113,7 @@ final class FileLlmSettings implements LlmSettingsInterface
     }
 
     /**
-     * @return array{connected: bool, provider: string, model: string|null, timeout: int}
+     * @return array{connected: bool, provider: string, model: string|null, timeout: int, customPrompt: string}
      */
     public function toArray(): array
     {
@@ -107,6 +124,7 @@ final class FileLlmSettings implements LlmSettingsInterface
             'provider' => $this->provider,
             'model' => $this->model,
             'timeout' => $this->timeout,
+            'customPrompt' => $this->customPrompt,
         ];
     }
 
@@ -127,13 +145,16 @@ final class FileLlmSettings implements LlmSettingsInterface
             return;
         }
 
-        /** @var array{apiKey?: string, provider?: string, model?: string, timeout?: int} $data */
+        /** @var array{apiKey?: string, provider?: string, model?: string, timeout?: int, customPrompt?: string} $data */
         $data = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
 
         $this->apiKey = isset($data['apiKey']) && is_string($data['apiKey']) ? $data['apiKey'] : null;
         $this->provider = isset($data['provider']) && is_string($data['provider']) ? $data['provider'] : 'openrouter';
         $this->model = isset($data['model']) && is_string($data['model']) ? $data['model'] : null;
         $this->timeout = isset($data['timeout']) && is_int($data['timeout']) ? $data['timeout'] : self::DEFAULT_TIMEOUT;
+        $this->customPrompt = isset($data['customPrompt']) && is_string($data['customPrompt'])
+            ? $data['customPrompt']
+            : self::DEFAULT_CUSTOM_PROMPT;
     }
 
     private function save(): void
@@ -150,6 +171,7 @@ final class FileLlmSettings implements LlmSettingsInterface
                 'provider' => $this->provider,
                 'model' => $this->model,
                 'timeout' => $this->timeout,
+                'customPrompt' => $this->customPrompt,
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
             LOCK_EX,
         );

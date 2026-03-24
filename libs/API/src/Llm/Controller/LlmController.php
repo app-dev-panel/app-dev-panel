@@ -215,6 +215,26 @@ final class LlmController
     }
 
     /**
+     * POST /debug/api/llm/custom-prompt — Set custom prompt that is appended to system instructions.
+     *
+     * Body: { "customPrompt": "..." }
+     */
+    public function setCustomPrompt(ServerRequestInterface $request): ResponseInterface
+    {
+        /** @var array<string, mixed> $body */
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        $prompt = $body['customPrompt'] ?? null;
+        if (!is_string($prompt)) {
+            throw new InvalidArgumentException('Field "customPrompt" is required and must be a string.');
+        }
+
+        $this->settings->setCustomPrompt($prompt);
+
+        return $this->responseFactory->createJsonResponse($this->settings->toArray());
+    }
+
+    /**
      * GET /debug/api/llm/models — List available models.
      */
     public function models(ServerRequestInterface $request): ResponseInterface
@@ -257,6 +277,12 @@ final class LlmController
 
         $model = $body['model'] ?? $this->settings->getModel();
         $temperature = isset($body['temperature']) ? (float) $body['temperature'] : 0.7;
+
+        // Prepend custom prompt as a system-level instruction if configured.
+        $customPrompt = $this->settings->getCustomPrompt();
+        if ($customPrompt !== '') {
+            array_unshift($messages, ['role' => 'system', 'content' => $customPrompt]);
+        }
 
         $provider = $this->settings->getProvider();
 
@@ -314,6 +340,11 @@ final class LlmController
 
             Keep responses concise and actionable. Use markdown formatting.
             PROMPT;
+
+        $customPrompt = $this->settings->getCustomPrompt();
+        if ($customPrompt !== '') {
+            $instructions .= "\n\nAdditional user instructions:\n" . $customPrompt;
+        }
 
         $contextJson = json_encode($context, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
