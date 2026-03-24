@@ -1,62 +1,66 @@
-# Application Development Panel Monorepo
+# ADP Frontend Monorepo
 
-This is a monorepo for Application Development Panel and its SDK.
+React/TypeScript frontend for the Application Development Panel.
 
-## Architecture
+## Packages
 
-The project follows monorepository patterns. The project consists of several packages:
+### [`@app-dev-panel/panel`](packages/panel/README.md)
 
-### `@app-dev-panel/panel`
+Main SPA application — debug viewer, inspector (20+ pages), code generation, OpenAPI browser.
 
-[README](packages/app-dev-panel/README.md)
+### [`@app-dev-panel/sdk`](packages/sdk/)
 
-The SDK package. It is used to simplify creating applications or custom panels.
+Shared SDK — API clients (RTK Query), reusable components, theming, search/filter helpers.
 
-### `@app-dev-panel/sdk`
+### [`@app-dev-panel/toolbar`](packages/toolbar/)
 
-[README](packages/app-dev-panel-sdk/README.md)
+Embeddable toolbar widget for displaying debug summary directly on the page.
 
-The `toolbar` application. It is used to display the toolbar on the page.
-
-The package is used to display the toolbar on the page. It can be used separately from the `app-dev-panel` application.
-
-The `toolbar` application requires only `sdk` package.
-
-### `@app-dev-panel/toolbar`
-
-[README](packages/app-dev-toolbar/README.md)
-
-The main application.
-
-The `app` application requires both `sdk` and `toolbar` packages.
-
-### Examples
-
-#### [`examples/remote-panel`](examples/remote-panel)
-
-Example of remote components that may be used as a custom panel.
-
-Read more about how to work with remote components [here](docs/guide/en/shared_components.md).
-
-#### Dependency graph
+### Dependency Graph
 
 ```mermaid
 flowchart LR
-
-    A[app-dev-panel] --> C(app-dev-panel-sdk)
-    A[app-dev-panel] --> B
-    B[app-dev-toolbar] --> C
+    A[panel] --> C(sdk)
+    A[panel] --> B
+    B[toolbar] --> C
 ```
+
+## Tech Stack
+
+- React 18, TypeScript 5.5, Vite 5.4
+- Material-UI 5 with custom dark/light theming
+- Redux Toolkit + RTK Query
+- Lerna 8 (monorepo management)
+- Prettier 3.8+, ESLint 9
+
+## Development
+
+```bash
+npm install              # Install all workspace dependencies
+npm start                # Start all Vite dev servers
+npm run build            # Production build all packages
+npm run check            # Run all code quality checks (Prettier + ESLint)
+```
+
+### Running with a Backend
+
+Start any playground backend (Laravel, Symfony, Yii 3, or Yii 2) and point the panel to it:
+
+```bash
+# Terminal 1: Start a playground
+cd ../../playground/laravel-app && php artisan serve --port=8104
+
+# Terminal 2: Start the frontend
+npm start
+```
+
+Open `http://localhost:3000` and set the backend URL in settings.
 
 ## Documentation
 
-- [Guide](docs/guide/en/README.md)
+- [Frontend Architecture](CLAUDE.md)
+- [SDK Reference](docs/sdk.md)
 
 ## License
 
-The Application Development Panel is free software. It is released under the terms of the BSD License.
-Please see [`LICENSE`](./LICENSE.md) for more information.
-
-## Support the project
-
-[![Open Collective](https://img.shields.io/badge/Open%20Collective-sponsor-7eadf1?logo=open%20collective&logoColor=7eadf1&labelColor=555555)](https://opencollective.com/app-dev-panel)
+BSD-3-Clause. See [LICENSE.md](./LICENSE.md) for details.
