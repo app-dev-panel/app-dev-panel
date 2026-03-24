@@ -278,13 +278,25 @@ final class LlmController
         $model = $body['model'] ?? $this->settings->getModel();
         $temperature = isset($body['temperature']) ? (float) $body['temperature'] : 0.7;
 
-        // Prepend custom prompt as a system-level instruction if configured.
+        // Prepend custom prompt if configured.
+        // Anthropic and OpenAI support system role; OpenRouter models may not (e.g. Gemma),
+        // so merge into the first user message instead.
         $customPrompt = $this->settings->getCustomPrompt();
-        if ($customPrompt !== '') {
-            array_unshift($messages, ['role' => 'system', 'content' => $customPrompt]);
-        }
-
         $provider = $this->settings->getProvider();
+
+        if ($customPrompt !== '') {
+            if ($provider === 'anthropic' || $provider === 'openai') {
+                array_unshift($messages, ['role' => 'system', 'content' => $customPrompt]);
+            } else {
+                // Merge into first user message for maximum model compatibility.
+                for ($i = 0, $len = count($messages); $i < $len; $i++) {
+                    if ($messages[$i]['role'] === 'user') {
+                        $messages[$i]['content'] = "[Instructions: {$customPrompt}]\n\n" . $messages[$i]['content'];
+                        break;
+                    }
+                }
+            }
+        }
 
         if ($provider === 'anthropic') {
             $model ??= 'claude-sonnet-4-20250514';
