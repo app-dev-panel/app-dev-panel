@@ -37,7 +37,7 @@ No external PHP packages required.
          ▲                    ▲
          │                    │
     StdioTransport      McpController
-    (bin/adp-mcp)       (POST /debug/api/mcp)
+    (bin/adp-mcp)       (POST /inspect/api/mcp)
 ```
 
 ## Directory Structure
@@ -108,31 +108,60 @@ Environment variable `ADP_STORAGE_PATH` also accepted.
 
 ### HTTP (integrated into ADP server)
 
-Automatically available when ADP server runs via `debug:serve`:
+Automatically available when ADP server runs via any adapter or `debug:serve`.
+
+The endpoint URL follows the pattern `http://<host>:<port>/inspect/api/mcp`, where `<host>:<port>`
+is the address of the running application with ADP installed.
 
 ```
-POST /debug/api/mcp
+POST /inspect/api/mcp
 Content-Type: application/json
 
 {"jsonrpc":"2.0","id":1,"method":"tools/list"}
 ```
 
-Client config:
+**Direct URL client config** (for MCP clients that support HTTP URLs):
 ```json
 {
   "mcpServers": {
-    "adp": {
-      "url": "http://localhost:8888/debug/api/mcp"
+    "AppDevPanel": {
+      "url": "http://localhost:8080/inspect/api/mcp"
     }
   }
 }
 ```
+
+**Via `mcp-remote` proxy** (for MCP clients that only support stdio, e.g., Claude Desktop):
+```json
+{
+  "mcpServers": {
+    "AppDevPanel": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "http://localhost:8080/inspect/api/mcp"]
+    }
+  }
+}
+```
+
+Replace `localhost:8080` with your application's actual address and port.
+For playground servers: Yiisoft `:8101`, Symfony `:8102`, Yii2 `:8103`, Laravel `:8104`.
 
 The HTTP endpoint:
 - Bypasses `ResponseDataWrapper` (JSON-RPC has its own envelope)
 - Inherits IP filter and token auth from API middleware
 - Returns 204 for notifications (no JSON-RPC `id`)
 - Returns 400 for parse errors
+- Can be enabled/disabled via `PUT /inspect/api/mcp/settings` (returns -32000 when disabled)
+
+### Settings API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/inspect/api/mcp/settings` | Get MCP enabled status: `{enabled: bool}` |
+| PUT | `/inspect/api/mcp/settings` | Set MCP enabled status: body `{enabled: bool}` |
+
+The enabled state is persisted as `mcp-settings.json` in the storage directory.
+The frontend exposes a toggle in Settings > MCP Server.
 
 ## MCP Protocol
 
@@ -237,11 +266,14 @@ Shows first 100 events with offset from first event in milliseconds.
 
 | Module | Integration |
 |--------|-------------|
-| **API** | `McpController` at `POST /debug/api/mcp`, route in `ApiRoutes::debugRoutes()` |
+| **API** | `McpController` at `POST /inspect/api/mcp`, route in `ApiRoutes::inspectorRoutes()` |
+| **API** | `McpSettingsController` at `GET/PUT /inspect/api/mcp/settings` |
+| **API** | `McpSettings` — file-based enabled/disabled persistence (`mcp-settings.json`) |
 | **API** | `ApiApplication::buildPipeline()` skips `ResponseDataWrapper` for MCP path |
 | **Cli** | `McpServeCommand` (`mcp:serve`) for stdio standalone |
-| **Cli** | `server-router.php` registers `McpController` in standalone server DI |
+| **Cli** | `server-router.php` registers `McpController` + `McpSettingsController` in standalone server DI |
 | **Kernel** | All tools read from `StorageInterface` (FileStorage in production) |
+| **Frontend** | MCP Server toggle in Settings dialog, RTK Query for `getMcpSettings`/`updateMcpSettings` |
 
 ## Test Summary
 
