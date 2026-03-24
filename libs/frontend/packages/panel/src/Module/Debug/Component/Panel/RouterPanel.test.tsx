@@ -107,8 +107,8 @@ describe('RouterPanel', () => {
         expect(screen.queryByText('/home')).not.toBeInTheDocument();
     });
 
-    it('renders Open in Inspector link', () => {
+    it('renders Inspector button', () => {
         renderWithProviders(<RouterPanel data={{currentRoute: null, routes: [makeRoute()]}} />);
-        expect(screen.getByText('Open in Inspector')).toBeInTheDocument();
+        expect(screen.getByText('Inspector')).toBeInTheDocument();
     });
 });

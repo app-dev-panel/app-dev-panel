@@ -1,5 +1,6 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
@@ -258,17 +259,19 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                         </Typography>
                                     )}
                                 </Box>
-                                <Typography
-                                    variant="caption"
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
-                                        color: 'text.secondary',
-                                        display: 'block',
-                                        mb: 1,
-                                    }}
-                                >
-                                    {row[2]}
-                                </Typography>
+                                <FileLink className={row[2]}>
+                                    <Typography
+                                        variant="caption"
+                                        component="span"
+                                        sx={{
+                                            fontFamily: primitives.fontFamilyMono,
+                                            color: 'primary.main',
+                                            '&:hover': {textDecoration: 'underline'},
+                                        }}
+                                    >
+                                        {row[2]}
+                                    </Typography>
+                                </FileLink>
                                 {!!row[3] && (
                                     <JsonRenderer
                                         value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]}

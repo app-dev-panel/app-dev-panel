@@ -1,4 +1,4 @@
-import {parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
+import {parseFilePath, parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import {Code} from '@mui/icons-material';
 import {IconButton, Tooltip} from '@mui/material';
@@ -28,29 +28,57 @@ function parseTraceString(trace: string): Array<StackFrame | string> {
         });
 }
 
+const isVendorFrame = (file: string): boolean => file.includes('/vendor/') || file.includes('/node_modules/');
+
 const TraceContainer = styled('div')(({theme}) => ({
     fontFamily: "'JetBrains Mono', monospace",
     backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.default : theme.palette.grey[50],
     borderRadius: theme.shape.borderRadius,
-    padding: theme.spacing(1.5),
     overflow: 'auto',
 }));
 
-const FrameLine = styled('div')(({theme}) => ({
+const FrameRow = styled('div', {shouldForwardProp: (p) => p !== 'dimmed'})<{dimmed?: boolean}>(({theme, dimmed}) => ({
     display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(0.5),
-    padding: '2px 0',
-    '&:hover': {backgroundColor: theme.palette.action.hover, borderRadius: 2},
+    alignItems: 'flex-start',
+    gap: theme.spacing(1),
+    padding: theme.spacing(0.75, 1.5),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    opacity: dimmed ? 0.5 : 1,
+    transition: 'opacity 0.15s, background-color 0.15s',
+    '&:hover': {opacity: 1, backgroundColor: theme.palette.action.hover},
+    '&:last-child': {borderBottom: 'none'},
 }));
+
+const FrameIndex = styled('span')(({theme}) => ({
+    color: theme.palette.text.disabled,
+    minWidth: '2.5em',
+    flexShrink: 0,
+    paddingTop: 1,
+}));
+
+const FrameBody = styled('div')({flex: 1, minWidth: 0});
+
+const FileRow = styled('div')({display: 'flex', alignItems: 'center', gap: 4});
 
 const FrameFileLink = styled('a')(({theme}) => ({
     color: theme.palette.primary.main,
     textDecoration: 'none',
+    fontWeight: 600,
     '&:hover': {textDecoration: 'underline'},
 }));
 
-const PlainLine = styled('div')({padding: '2px 0', color: 'inherit'});
+const CallText = styled('div')(({theme}) => ({
+    color: theme.palette.text.secondary,
+    marginTop: 1,
+    wordBreak: 'break-all',
+}));
+
+const PlainLine = styled('div')(({theme}) => ({
+    padding: theme.spacing(0.75, 1.5),
+    color: theme.palette.text.disabled,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    '&:last-child': {borderBottom: 'none'},
+}));
 
 export const StackTrace = React.memo(({trace, fontSize = 10}: StackTraceProps) => {
     const getEditorUrl = useEditorUrl();
@@ -65,28 +93,37 @@ export const StackTrace = React.memo(({trace, fontSize = 10}: StackTraceProps) =
 
                 const explorerHref = `/inspector/files?path=${parseFilePath(frame.file)}#L${frame.line}`;
                 const editorUrl = getEditorUrl(frame.file, frame.line);
+                const shortFile = parseFilename(frame.file);
+                const vendor = isVendorFrame(frame.file);
 
                 return (
-                    <FrameLine key={index}>
-                        <span style={{color: 'gray', minWidth: '2.5em'}}>#{index}</span>
-                        <FrameFileLink href={explorerHref}>
-                            {frame.file}({frame.line})
-                        </FrameFileLink>
-                        {editorUrl && (
-                            <Tooltip title="Open in Editor">
-                                <IconButton
-                                    size="small"
-                                    component="a"
-                                    href={editorUrl}
-                                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                    sx={{p: 0.25}}
-                                >
-                                    <Code sx={{fontSize: 12}} />
-                                </IconButton>
-                            </Tooltip>
-                        )}
-                        <span style={{opacity: 0.7}}>{frame.call}</span>
-                    </FrameLine>
+                    <FrameRow key={index} dimmed={vendor}>
+                        <FrameIndex>#{index}</FrameIndex>
+                        <FrameBody>
+                            <FileRow>
+                                <Tooltip title={frame.file} placement="top-start">
+                                    <FrameFileLink href={explorerHref}>
+                                        {shortFile}:{frame.line}
+                                    </FrameFileLink>
+                                </Tooltip>
+                                {editorUrl && (
+                                    <Tooltip title="Open in Editor">
+                                        <IconButton
+                                            size="small"
+                                            component="a"
+                                            href={editorUrl}
+                                            aria-label="Open in Editor"
+                                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                            sx={{p: 0.25}}
+                                        >
+                                            <Code sx={{fontSize: 12}} />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
+                            </FileRow>
+                            {frame.call && <CallText>{frame.call}</CallText>}
+                        </FrameBody>
+                    </FrameRow>
                 );
             })}
         </TraceContainer>
