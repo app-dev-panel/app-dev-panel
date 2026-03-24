@@ -58,6 +58,7 @@ use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
@@ -66,6 +67,8 @@ use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\ServerRequest;
@@ -159,6 +162,10 @@ $services = [
     ComposerController::class => new ComposerController($jsonResponseFactory, $pathResolver),
     RoutingController::class => new RoutingController($jsonResponseFactory),
     RequestController::class => new RequestController($jsonResponseFactory, $collectorRepository),
+    McpController::class => new McpController(
+        $jsonResponseFactory,
+        new McpServer(McpToolRegistryFactory::create($storage)),
+    ),
 ];
 
 // Lazy-loaded controllers that need container

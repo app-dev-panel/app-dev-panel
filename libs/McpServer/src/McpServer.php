@@ -10,8 +10,8 @@ use AppDevPanel\McpServer\Transport\StdioTransport;
 /**
  * MCP (Model Context Protocol) server for ADP.
  *
- * Implements the MCP protocol over stdio transport (JSON-RPC 2.0).
- * Exposes debug data tools to AI assistants.
+ * Implements the MCP protocol (JSON-RPC 2.0).
+ * Can run over stdio transport (for CLI) or be called directly via process() for HTTP.
  */
 final class McpServer
 {
@@ -22,15 +22,19 @@ final class McpServer
     private bool $initialized = false;
 
     public function __construct(
-        private readonly StdioTransport $transport,
         private readonly ToolRegistry $toolRegistry,
+        private readonly ?StdioTransport $transport = null,
     ) {}
 
     /**
-     * Run the MCP server main loop. Blocks until stdin is closed.
+     * Run the MCP server main loop over stdio. Blocks until stdin is closed.
      */
     public function run(): void
     {
+        if ($this->transport === null) {
+            throw new \RuntimeException('Cannot run() without a stdio transport. Use process() for HTTP.');
+        }
+
         while (true) {
             $message = $this->transport->receive();
 
@@ -38,14 +42,20 @@ final class McpServer
                 break;
             }
 
-            $this->handleMessage($message);
+            $response = $this->process($message);
+
+            if ($response !== null) {
+                $this->transport->send($response);
+            }
         }
     }
 
     /**
-     * Handle a single incoming JSON-RPC message. Useful for testing.
+     * Process a single JSON-RPC message and return the response (or null for notifications).
+     *
+     * @return array<string, mixed>|null JSON-RPC response, or null for notifications
      */
-    public function handleMessage(array $message): void
+    public function process(array $message): ?array
     {
         $method = $message['method'] ?? null;
         $id = $message['id'] ?? null;
@@ -53,19 +63,19 @@ final class McpServer
 
         if ($method === null) {
             if ($id !== null) {
-                $this->sendError($id, -32_600, 'Invalid Request: missing method');
+                return self::errorResponse($id, -32_600, 'Invalid Request: missing method');
             }
-            return;
+            return null;
         }
 
-        // Notifications (no id) — no response expected
+        // Notifications (no id) — no response
         if ($id === null) {
             $this->handleNotification($method, $params);
-            return;
+            return null;
         }
 
-        // Requests (with id) — response expected
-        $this->handleRequest($id, $method, $params);
+        // Requests (with id) — return response
+        return $this->handleRequest($id, $method, $params);
     }
 
     private function handleNotification(string $method, array $params): void
@@ -77,20 +87,20 @@ final class McpServer
         };
     }
 
-    private function handleRequest(int|string $id, string $method, array $params): void
+    private function handleRequest(int|string $id, string $method, array $params): array
     {
-        match ($method) {
-            'initialize' => $this->handleInitialize($id, $params),
-            'ping' => $this->sendResult($id, []),
+        return match ($method) {
+            'initialize' => $this->handleInitialize($id),
+            'ping' => self::resultResponse($id, []),
             'tools/list' => $this->handleToolsList($id),
             'tools/call' => $this->handleToolsCall($id, $params),
-            default => $this->sendError($id, -32_601, sprintf('Method not found: %s', $method)),
+            default => self::errorResponse($id, -32_601, sprintf('Method not found: %s', $method)),
         };
     }
 
-    private function handleInitialize(int|string $id, array $params): void
+    private function handleInitialize(int|string $id): array
     {
-        $this->sendResult($id, [
+        return self::resultResponse($id, [
             'protocolVersion' => self::PROTOCOL_VERSION,
             'capabilities' => [
                 'tools' => [
@@ -104,14 +114,14 @@ final class McpServer
         ]);
     }
 
-    private function handleToolsList(int|string $id): void
+    private function handleToolsList(int|string $id): array
     {
-        $this->sendResult($id, [
+        return self::resultResponse($id, [
             'tools' => $this->toolRegistry->list(),
         ]);
     }
 
-    private function handleToolsCall(int|string $id, array $params): void
+    private function handleToolsCall(int|string $id, array $params): array
     {
         $toolName = $params['name'] ?? '';
         $arguments = $params['arguments'] ?? [];
@@ -119,42 +129,47 @@ final class McpServer
         $tool = $this->toolRegistry->get($toolName);
 
         if ($tool === null) {
-            $this->sendResult($id, [
+            return self::resultResponse($id, [
                 'content' => [['type' => 'text', 'text' => sprintf('Unknown tool: %s', $toolName)]],
                 'isError' => true,
             ]);
-            return;
         }
 
         try {
             $result = $tool->execute($arguments);
-            $this->sendResult($id, $result);
+            return self::resultResponse($id, $result);
         } catch (\Throwable $e) {
-            $this->sendResult($id, [
+            return self::resultResponse($id, [
                 'content' => [['type' => 'text', 'text' => sprintf('Tool error: %s', $e->getMessage())]],
                 'isError' => true,
             ]);
         }
     }
 
-    private function sendResult(int|string $id, mixed $result): void
+    /**
+     * @return array{jsonrpc: string, id: int|string, result: mixed}
+     */
+    private static function resultResponse(int|string $id, mixed $result): array
     {
-        $this->transport->send([
+        return [
             'jsonrpc' => '2.0',
             'id' => $id,
             'result' => $result,
-        ]);
+        ];
     }
 
-    private function sendError(int|string $id, int $code, string $message): void
+    /**
+     * @return array{jsonrpc: string, id: int|string, error: array{code: int, message: string}}
+     */
+    private static function errorResponse(int|string $id, int $code, string $message): array
     {
-        $this->transport->send([
+        return [
             'jsonrpc' => '2.0',
             'id' => $id,
             'error' => [
                 'code' => $code,
                 'message' => $message,
             ],
-        ]);
+        ];
     }
 }

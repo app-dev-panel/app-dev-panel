@@ -7,13 +7,7 @@ namespace AppDevPanel\Cli\Command;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\McpServer\McpServer;
-use AppDevPanel\McpServer\Tool\Debug\AnalyzeExceptionTool;
-use AppDevPanel\McpServer\Tool\Debug\ListEntriesTool;
-use AppDevPanel\McpServer\Tool\Debug\SearchLogsTool;
-use AppDevPanel\McpServer\Tool\Debug\ViewDatabaseQueriesTool;
-use AppDevPanel\McpServer\Tool\Debug\ViewEntryTool;
-use AppDevPanel\McpServer\Tool\Debug\ViewTimelineTool;
-use AppDevPanel\McpServer\Tool\ToolRegistry;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\McpServer\Transport\StdioTransport;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -64,17 +58,10 @@ final class McpServeCommand extends Command
         }
 
         $storage = new FileStorage($storagePath, new DebuggerIdGenerator());
-
-        $toolRegistry = new ToolRegistry();
-        $toolRegistry->register(new ListEntriesTool($storage));
-        $toolRegistry->register(new ViewEntryTool($storage));
-        $toolRegistry->register(new SearchLogsTool($storage));
-        $toolRegistry->register(new AnalyzeExceptionTool($storage));
-        $toolRegistry->register(new ViewDatabaseQueriesTool($storage));
-        $toolRegistry->register(new ViewTimelineTool($storage));
+        $toolRegistry = McpToolRegistryFactory::create($storage);
 
         $transport = new StdioTransport();
-        $server = new McpServer($transport, $toolRegistry);
+        $server = new McpServer($toolRegistry, $transport);
 
         // Write status to stderr (not stdout, which is for MCP protocol)
         fwrite(STDERR, sprintf("ADP MCP server started (storage: %s)\n", $storagePath));

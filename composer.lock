@@ -348,11 +348,12 @@
             "dist": {
                 "type": "path",
                 "url": "libs/API",
-                "reference": "5a54f2b6467b5f77d93be9c4dff2b46dd857ee79"
+                "reference": "87a39166789c219775212a2f480e6b90481dcf53"
             },
             "require": {
                 "alexkart/curl-builder": "^1.0",
                 "app-dev-panel/kernel": "*",
+                "app-dev-panel/mcp-server": "*",
                 "gitonomy/gitlib": "^1.3",
                 "guzzlehttp/guzzle": "^7.5",
                 "guzzlehttp/psr7": "^2.4",

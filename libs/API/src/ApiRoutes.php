@@ -20,6 +20,7 @@ use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
+use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Router\Route;
 use AppDevPanel\Api\Router\Router;
 
@@ -48,6 +49,7 @@ final class ApiRoutes
                 'debug/api/event-stream',
             ),
             new Route('GET', '/debug/api/settings', [SettingsController::class, 'index'], 'debug/api/settings'),
+            new Route('POST', '/debug/api/mcp', [McpController::class, 'handle'], 'debug/api/mcp'),
         ];
     }
 

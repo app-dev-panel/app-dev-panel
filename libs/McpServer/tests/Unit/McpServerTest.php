@@ -7,16 +7,15 @@ namespace AppDevPanel\McpServer\Tests\Unit;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\Tool\ToolInterface;
 use AppDevPanel\McpServer\Tool\ToolRegistry;
-use AppDevPanel\McpServer\Transport\StdioTransport;
 use PHPUnit\Framework\TestCase;
 
 final class McpServerTest extends TestCase
 {
     public function testInitializeReturnsCapabilities(): void
     {
-        [$server, $output] = $this->createServer();
+        $server = $this->createServer();
 
-        $server->handleMessage([
+        $response = $server->process([
             'jsonrpc' => '2.0',
             'id' => 1,
             'method' => 'initialize',
@@ -26,8 +25,6 @@ final class McpServerTest extends TestCase
             ],
         ]);
 
-        $response = $this->readResponse($output);
-
         $this->assertSame(1, $response['id']);
         $this->assertSame('2024-11-05', $response['result']['protocolVersion']);
         $this->assertSame('adp-mcp', $response['result']['serverInfo']['name']);
@@ -36,15 +33,13 @@ final class McpServerTest extends TestCase
 
     public function testPingReturnsEmptyResult(): void
     {
-        [$server, $output] = $this->createServer();
+        $server = $this->createServer();
 
-        $server->handleMessage([
+        $response = $server->process([
             'jsonrpc' => '2.0',
             'id' => 2,
             'method' => 'ping',
         ]);
-
-        $response = $this->readResponse($output);
 
         $this->assertSame(2, $response['id']);
         $this->assertSame([], $response['result']);
@@ -60,15 +55,13 @@ final class McpServerTest extends TestCase
         $registry = new ToolRegistry();
         $registry->register($tool);
 
-        [$server, $output] = $this->createServer($registry);
+        $server = $this->createServer($registry);
 
-        $server->handleMessage([
+        $response = $server->process([
             'jsonrpc' => '2.0',
             'id' => 3,
             'method' => 'tools/list',
         ]);
-
-        $response = $this->readResponse($output);
 
         $this->assertSame(3, $response['id']);
         $this->assertCount(1, $response['result']['tools']);
@@ -89,16 +82,14 @@ final class McpServerTest extends TestCase
         $registry = new ToolRegistry();
         $registry->register($tool);
 
-        [$server, $output] = $this->createServer($registry);
+        $server = $this->createServer($registry);
 
-        $server->handleMessage([
+        $response = $server->process([
             'jsonrpc' => '2.0',
             'id' => 4,
             'method' => 'tools/call',
             'params' => ['name' => 'test_tool', 'arguments' => ['arg1' => 'value1']],
         ]);
-
-        $response = $this->readResponse($output);
 
         $this->assertSame(4, $response['id']);
         $this->assertSame('result', $response['result']['content'][0]['text']);
@@ -106,16 +97,14 @@ final class McpServerTest extends TestCase
 
     public function testToolsCallWithUnknownToolReturnsError(): void
     {
-        [$server, $output] = $this->createServer();
+        $server = $this->createServer();
 
-        $server->handleMessage([
+        $response = $server->process([
             'jsonrpc' => '2.0',
             'id' => 5,
             'method' => 'tools/call',
             'params' => ['name' => 'nonexistent'],
         ]);
-
-        $response = $this->readResponse($output);
 
         $this->assertSame(5, $response['id']);
         $this->assertTrue($response['result']['isError']);
@@ -131,16 +120,14 @@ final class McpServerTest extends TestCase
         $registry = new ToolRegistry();
         $registry->register($tool);
 
-        [$server, $output] = $this->createServer($registry);
+        $server = $this->createServer($registry);
 
-        $server->handleMessage([
+        $response = $server->process([
             'jsonrpc' => '2.0',
             'id' => 6,
             'method' => 'tools/call',
             'params' => ['name' => 'failing_tool', 'arguments' => []],
         ]);
-
-        $response = $this->readResponse($output);
 
         $this->assertSame(6, $response['id']);
         $this->assertTrue($response['result']['isError']);
@@ -149,66 +136,56 @@ final class McpServerTest extends TestCase
 
     public function testUnknownMethodReturnsError(): void
     {
-        [$server, $output] = $this->createServer();
+        $server = $this->createServer();
 
-        $server->handleMessage([
+        $response = $server->process([
             'jsonrpc' => '2.0',
             'id' => 7,
             'method' => 'unknown/method',
         ]);
-
-        $response = $this->readResponse($output);
 
         $this->assertSame(7, $response['id']);
         $this->assertArrayHasKey('error', $response);
         $this->assertSame(-32_601, $response['error']['code']);
     }
 
-    public function testNotificationDoesNotProduceResponse(): void
+    public function testNotificationReturnsNull(): void
     {
-        [$server, $output] = $this->createServer();
+        $server = $this->createServer();
 
-        $server->handleMessage([
+        $response = $server->process([
             'method' => 'initialized',
         ]);
 
-        rewind($output);
-        $content = stream_get_contents($output);
-
-        $this->assertSame('', $content);
+        $this->assertNull($response);
     }
 
     public function testMissingMethodWithIdReturnsInvalidRequest(): void
     {
-        [$server, $output] = $this->createServer();
+        $server = $this->createServer();
 
-        $server->handleMessage([
+        $response = $server->process([
             'jsonrpc' => '2.0',
             'id' => 8,
         ]);
-
-        $response = $this->readResponse($output);
 
         $this->assertSame(8, $response['id']);
         $this->assertSame(-32_600, $response['error']['code']);
     }
 
-    /**
-     * @return array{McpServer, resource}
-     */
-    private function createServer(?ToolRegistry $registry = null): array
+    public function testMissingMethodWithoutIdReturnsNull(): void
     {
-        $output = fopen('php://memory', 'rw');
-        $transport = new StdioTransport(STDIN, $output);
+        $server = $this->createServer();
 
-        return [new McpServer($transport, $registry ?? new ToolRegistry()), $output];
+        $response = $server->process([
+            'jsonrpc' => '2.0',
+        ]);
+
+        $this->assertNull($response);
     }
 
-    private function readResponse(mixed $output): array
+    private function createServer(?ToolRegistry $registry = null): McpServer
     {
-        rewind($output);
-        $line = fgets($output);
-
-        return json_decode($line, true, 512, JSON_THROW_ON_ERROR);
+        return new McpServer($registry ?? new ToolRegistry());
     }
 }
