@@ -67,6 +67,7 @@ use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
+use AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
@@ -682,6 +683,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->decorateLoggerProxy($collectors);
         $this->decorateHttpClientProxy($collectors);
         $this->decorateEventDispatcherProxy($collectors);
+        $this->decorateSpanProcessorProxy($collectors);
     }
 
     /**
@@ -735,6 +737,31 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 return $dispatcher;
             }
             return new LaravelEventDispatcherProxy($dispatcher, $this->app->make(EventCollector::class));
+        });
+    }
+
+    /**
+     * @param array<string, bool> $collectors
+     */
+    private function decorateSpanProcessorProxy(array $collectors): void
+    {
+        if (!interface_exists(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class)) {
+            return;
+        }
+
+        if (!(($collectors['opentelemetry'] ?? true) && $this->app->bound(OpenTelemetryCollector::class))) {
+            return;
+        }
+
+        if (!$this->app->bound(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class)) {
+            return;
+        }
+
+        $this->app->extend(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class, function ($processor) {
+            if ($processor instanceof SpanProcessorInterfaceProxy) {
+                return $processor;
+            }
+            return new SpanProcessorInterfaceProxy($processor, $this->app->make(OpenTelemetryCollector::class));
         });
     }
 }

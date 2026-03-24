@@ -13,6 +13,8 @@ use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
+use AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
@@ -41,6 +43,7 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
         $this->decorateLogger($container);
         $this->decorateEventDispatcher($container);
         $this->decorateHttpClient($container);
+        $this->decorateSpanProcessor($container);
         $this->upgradeSchemaProvider($container);
         $this->collectContainerParameters($container);
     }
@@ -132,6 +135,29 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
             ->setArguments([
                 new Reference(HttpClientInterfaceProxy::class . '.inner'),
                 new Reference(HttpClientCollector::class),
+            ]);
+    }
+
+    private function decorateSpanProcessor(ContainerBuilder $container): void
+    {
+        if (!interface_exists(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class)) {
+            return;
+        }
+
+        if (!$container->has(OpenTelemetryCollector::class)) {
+            return;
+        }
+
+        if (!$container->has(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class)) {
+            return;
+        }
+
+        $container
+            ->register(SpanProcessorInterfaceProxy::class, SpanProcessorInterfaceProxy::class)
+            ->setDecoratedService(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class)
+            ->setArguments([
+                new Reference(SpanProcessorInterfaceProxy::class . '.inner'),
+                new Reference(OpenTelemetryCollector::class),
             ]);
     }
 

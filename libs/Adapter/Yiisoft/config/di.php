@@ -45,7 +45,19 @@ if (!isAppDevPanelEnabled($params)) {
     return $common;
 }
 
+$otelDefs = [];
+if (interface_exists(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class)) {
+    $otelDefs[\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class] = static fn(
+        ContainerInterface $container,
+        \OpenTelemetry\SDK\Trace\SpanProcessorInterface $processor,
+    ) => new \AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy(
+        $processor,
+        $container->get(\AppDevPanel\Kernel\Collector\OpenTelemetryCollector::class),
+    );
+}
+
 return array_merge(
+    $otelDefs,
     [
         ContainerProxyConfig::class => static function (ContainerInterface $container) use ($params) {
             $params = $params['app-dev-panel/yiisoft'];
