@@ -99,7 +99,6 @@ final class LlmController
                 'callback_url' => $callbackUrl,
                 'code_challenge' => $codeChallenge,
                 'code_challenge_method' => 'S256',
-                'key_label' => 'AppDevPanel',
             ]);
 
         return $this->responseFactory->createJsonResponse([
