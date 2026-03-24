@@ -11,7 +11,7 @@ import {parseFilePath, parsePathLineAnchor} from '@app-dev-panel/sdk/Helper/file
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {scrollToAnchor} from '@app-dev-panel/sdk/Helper/scrollToAnchor';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
-import {ContentCopy, FolderOpen, Lock, OpenInNew, Person, Storage} from '@mui/icons-material';
+import {Code, ContentCopy, FolderOpen, Lock, Person, Storage} from '@mui/icons-material';
 import {Box, Breadcrumbs, IconButton, Link, Paper, Tooltip, Typography} from '@mui/material';
 import {useCallback, useEffect, useLayoutEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
@@ -95,7 +95,7 @@ const ActionButtons = ({editorUrl, fullPath}: ActionButtonsProps) => {
                         onClick={(e: React.MouseEvent) => e.stopPropagation()}
                         sx={{color: 'primary.main'}}
                     >
-                        <OpenInNew sx={{fontSize: 16}} />
+                        <Code sx={{fontSize: 16}} />
                     </IconButton>
                 </Tooltip>
             )}
