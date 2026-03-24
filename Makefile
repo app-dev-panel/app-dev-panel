@@ -14,7 +14,8 @@
         test-fixtures test-fixtures-yiisoft test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel \
         test-scenario test-scenario-yiisoft test-scenario-symfony test-scenario-yii2 test-scenario-laravel \
         test-playground test-playground-yiisoft test-playground-symfony test-playground-laravel \
-        test-mcp test-mcp-yiisoft test-mcp-symfony test-mcp-yii2 test-mcp-laravel
+        test-mcp test-mcp-yiisoft test-mcp-symfony test-mcp-yii2 test-mcp-laravel \
+        coverage coverage-html coverage-build
 
 # --- Port allocation ---
 # Frontend dev server
@@ -110,6 +111,11 @@ help: ## Show this help
 	@echo "  make test-mcp-symfony     MCP API E2E against Symfony playground"
 	@echo "  make test-mcp-yii2        MCP API E2E against Yii2 playground"
 	@echo "  make test-mcp-laravel     MCP API E2E against Laravel playground"
+	@echo ""
+	@echo "$(YELLOW)Coverage (Docker + PCOV):$(RESET)"
+	@echo "  make coverage              Run PHP tests with coverage (text + clover XML)"
+	@echo "  make coverage-html         Run PHP tests with HTML coverage report"
+	@echo "  make coverage-build        Build the coverage Docker image"
 	@echo ""
 	@echo "$(YELLOW)Ports:$(RESET)"
 	@echo "  Frontend:  $(FRONTEND_PORT)"
@@ -460,6 +466,28 @@ test-playground: ## Run playground integration tests (starts servers, runs E2E, 
 	@$(MAKE) test-playground-symfony
 	@$(MAKE) test-playground-laravel
 	@echo "$(GREEN)All playground integration tests passed!$(RESET)"
+
+# ============================================================================
+# Coverage (Docker + PCOV)
+# ============================================================================
+
+COVERAGE_IMAGE := adp-coverage
+
+coverage-build: ## Build Docker image for coverage collection (PCOV)
+	@echo "$(CYAN)Building coverage Docker image...$(RESET)"
+	docker build -f docker/coverage.Dockerfile -t $(COVERAGE_IMAGE) .
+
+coverage: coverage-build ## Run PHP tests with coverage (text + clover XML)
+	@echo "$(CYAN)Running PHP tests with coverage (Docker + PCOV)...$(RESET)"
+	docker run --rm -v $(ROOT_DIR):/app $(COVERAGE_IMAGE)
+	@echo ""
+	@echo "$(GREEN)Coverage report generated: coverage.xml$(RESET)"
+
+coverage-html: coverage-build ## Run PHP tests with coverage (HTML report)
+	@echo "$(CYAN)Running PHP tests with HTML coverage (Docker + PCOV)...$(RESET)"
+	docker run --rm -v $(ROOT_DIR):/app $(COVERAGE_IMAGE) --coverage-html=coverage --coverage-text
+	@echo ""
+	@echo "$(GREEN)HTML coverage report generated: coverage/$(RESET)"
 
 # ============================================================================
 # Full pipeline

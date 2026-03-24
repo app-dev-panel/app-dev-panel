@@ -101,17 +101,19 @@ make install-frontend               # npm install (libs/frontend) — required f
 make install-playgrounds            # Composer install for each playground — required for fixture tests
 ```
 
-### PHP Coverage Driver
+### PHP Coverage (Docker + PCOV)
 
-Line coverage reports require the **PCOV** extension (recommended) or Xdebug:
+Coverage collection uses a dedicated Docker image with PCOV pre-installed (`docker/coverage.Dockerfile`).
+Do **not** install PCOV on the host — always use Docker for coverage:
 
 ```bash
-pecl install pcov                   # Install PCOV
-echo "extension=pcov.so" >> "$(php -i | grep 'Scan this dir' | awk '{print $NF}')/pcov.ini"
-php -m | grep pcov                  # Verify: should print "pcov"
+make coverage                       # Run tests with coverage (text + clover XML → coverage.xml)
+make coverage-html                  # Run tests with HTML report (→ coverage/)
+make coverage-build                 # Build the coverage Docker image only
 ```
 
-Without PCOV, `--coverage-text` / `--coverage-html` will fail with "No code coverage driver available".
+The Docker image (`adp-coverage`) is built automatically on first `make coverage` run.
+Requires Docker daemon running.
 
 ### E2E Tests
 
@@ -157,6 +159,10 @@ make frontend-fix                   # Fix frontend code quality issues
 make check                          # Run ALL code quality checks (core + playgrounds + frontend)
 make fix                            # Fix all code (core + playgrounds + frontend)
 make all                            # Run everything: checks + tests
+
+# Coverage (Docker + PCOV)
+make coverage                       # Run PHP tests with coverage (text + clover XML)
+make coverage-html                  # Run PHP tests with HTML coverage report
 
 # CI
 make ci                             # Full CI pipeline: all checks + all tests
@@ -242,9 +248,9 @@ Playgrounds are demo/reference apps — they have **no unit tests**. Quality is 
 ### Running Coverage Locally
 
 ```bash
-# PHP coverage (requires PCOV extension)
-php vendor/bin/phpunit --coverage-text          # Text summary
-php vendor/bin/phpunit --coverage-html=coverage  # HTML report in coverage/
+# PHP coverage (Docker + PCOV — the only supported method)
+make coverage                                    # Text summary + clover XML
+make coverage-html                               # HTML report in coverage/
 
 # Frontend coverage
 cd libs/frontend && npx vitest run --coverage    # Vitest with c8/istanbul
