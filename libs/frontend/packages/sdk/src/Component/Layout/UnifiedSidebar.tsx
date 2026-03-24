@@ -145,12 +145,15 @@ export const UnifiedSidebar = React.memo(
         return (
             <SidebarRoot variant="outlined">
                 {sections.map((section, idx) => {
-                    const isActiveSection =
+                    const isSectionMatch =
                         section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
                     const hasChildren = section.children && section.children.length > 0;
+                    const hasActiveChild =
+                        hasChildren && activeChildKey != null && section.children!.some((c) => c.key === activeChildKey);
+                    const isActiveSection = isSectionMatch && !hasActiveChild;
                     const manualState = collapsed[section.key];
                     const isExpanded =
-                        hasChildren && (manualState === false || (manualState === undefined && isActiveSection));
+                        hasChildren && (manualState === false || (manualState === undefined && isSectionMatch));
 
                     return (
                         <React.Fragment key={section.key}>
