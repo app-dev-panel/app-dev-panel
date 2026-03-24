@@ -232,7 +232,7 @@ ADP — debugging и development панель, которая:
 
 ### Weaknesses (Слабые стороны)
 - W1: Нет бренда/узнаваемости → нужен маркетинг
-- W2: Происхождение из Yii Debug → воспринимается как "Yii-only" → ребрендинг
+- W2: Остаточные следы Yii-происхождения (порядок в docs, frontend README) → завершить ребрендинг
 - W3: Нет документации для конечных пользователей → Getting Started guides
 - W4: Нет видео-контента → скринкасты и конференции
 - W5: Auth/CSRF не завершены → приоритет в roadmap
@@ -255,7 +255,7 @@ ADP — debugging и development панель, которая:
 - T1: "Telescope достаточно" для Laravel-разработчиков
 - T2: Symfony Profiler встроен в фреймворк
 - T3: APM-инструменты расширяют dev-time функционал
-- T4: Низкий interest к Yii глобально → ребрендинг от Yii-ассоциации
+- T4: Низкий interest к Yii глобально → важно позиционировать ADP как framework-agnostic (ребрендинг уже проведён)
 
 
 ---
@@ -421,15 +421,21 @@ ADP — debugging и development панель, которая:
 | 6 | **WordPress adapter** | Огромное сообщество WordPress | Масштабирование аудитории |
 | 7 | **Node.js / Python native adapters** | Не только ingestion API, а полноценные адаптеры | Расширение за пределы PHP |
 
-### 8.5 Ребрендинг от Yii-ассоциации
+### 8.5 Завершение ребрендинга (остаточные следы Yii)
 
-**Проблема**: ADP произошёл из Yii Debug. Это создаёт впечатление "Yii-only" инструмента.
+**Контекст**: ADP произошёл из Yii Debug, но ребрендинг уже проведён — org `app-dev-panel`, пакеты `app-dev-panel/*`, ядро не зависит от Yii. Ассоциация минимальна, но есть остатки, которые стоит устранить.
 
-**Действия:**
-1. Убрать все упоминания Yii из главного README (кроме списка поддерживаемых фреймворков)
-2. В маркетинговых материалах ставить Laravel и Symfony первыми (по размеру сообщества)
-3. Домашняя страница / landing: Laravel demo как первый пример
-4. GitHub topics: `laravel`, `symfony`, `php-debugging` (не `yii`)
+**Что осталось:**
+- Документация (getting-started.md) — Yii идёт первым в списках (исторический порядок)
+- Frontend README — содержит "Maintained by Yii Software", ссылки на Yii Forum
+- Gii модуль — Yii-специфичное название, незнакомое Laravel/Symfony разработчикам
+- Git history — видно происхождение из yiisoft/yii-debug
+
+**Рекомендации:**
+1. В документации и маркетинге ставить Laravel и Symfony первыми (по размеру сообщества)
+2. Обновить frontend README — убрать Yii-специфичные ссылки
+3. Рассмотреть переименование Gii → Code Generator (более универсальное название)
+4. GitHub topics: `laravel`, `symfony`, `php-debugging`, `php-profiler`
 5. Packagist keywords: `debug-panel`, `laravel-debug`, `symfony-debug`, `php-profiler`
 
 ---
