@@ -1,5 +1,4 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
-import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -7,7 +6,7 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
-import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
+import {Code} from '@mui/icons-material';
 import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
@@ -85,7 +84,6 @@ export const EventPanel = ({events}: EventTimelineProps) => {
     const deferredFilter = useDeferredValue(filter);
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-    const debugEntry = useDebugEntry();
     const theme = useTheme();
 
     const badgeCounts = useMemo(() => {
@@ -191,7 +189,6 @@ export const EventPanel = ({events}: EventTimelineProps) => {
             {filtered.map((event, index) => {
                 const expanded = expandedIndex === index;
                 const shortName = event.name.split('\\').pop() ?? event.name;
-                const objectId = parseObjectId(event.event || '');
                 const color = getColor(shortName);
                 const prevEvent = index > 0 ? filtered[index - 1] : null;
                 const deltaMs = prevEvent ? (event.time - prevEvent.time) * 1000 : null;
@@ -245,23 +242,11 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                                             clickable
                                             label="Open File"
                                             size="small"
-                                            icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
+                                            icon={<Code sx={{fontSize: '14px !important'}} />}
                                             sx={{fontSize: '11px', height: 24}}
                                             variant="outlined"
                                         />
                                     </FileLink>
-                                    {objectId && debugEntry && (
-                                        <Chip
-                                            component="a"
-                                            clickable
-                                            href={`/debug/object?debugEntry=${debugEntry.id}&id=${objectId}`}
-                                            label="Examine Object"
-                                            size="small"
-                                            icon={<Icon sx={{fontSize: '14px !important'}}>data_object</Icon>}
-                                            sx={{fontSize: '11px', height: 24}}
-                                            variant="outlined"
-                                        />
-                                    )}
                                 </Box>
 
                                 {event.event && <JsonRenderer value={event.event} depth={3} />}

@@ -1,6 +1,7 @@
 import {parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
-import {Icon, IconButton, Tooltip} from '@mui/material';
+import {Code} from '@mui/icons-material';
+import {IconButton, Tooltip} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import React from 'react';
 
@@ -80,7 +81,7 @@ export const StackTrace = React.memo(({trace, fontSize = 10}: StackTraceProps) =
                                     onClick={(e: React.MouseEvent) => e.stopPropagation()}
                                     sx={{p: 0.25}}
                                 >
-                                    <Icon sx={{fontSize: 12}}>edit</Icon>
+                                    <Code sx={{fontSize: 12}} />
                                 </IconButton>
                             </Tooltip>
                         )}

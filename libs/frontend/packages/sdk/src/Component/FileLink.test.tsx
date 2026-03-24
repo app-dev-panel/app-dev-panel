@@ -46,7 +46,7 @@ describe('FileLink', () => {
 
     it('does not render editor button when editor is none (default)', () => {
         renderWithProviders(<FileLink path="/src/app.php">app.php</FileLink>);
-        expect(screen.queryByText('edit')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Open in Editor')).not.toBeInTheDocument();
     });
 
     it('renders editor button when editor is configured', () => {
@@ -55,7 +55,7 @@ describe('FileLink', () => {
                 application: {baseUrl: '', editorConfig: {editor: 'phpstorm', customUrlTemplate: '', pathMapping: {}}},
             },
         });
-        expect(screen.getByText('edit')).toBeInTheDocument();
+        expect(screen.getByLabelText('Open in Editor')).toBeInTheDocument();
     });
 
     it('editor button has correct href', () => {
@@ -72,7 +72,7 @@ describe('FileLink', () => {
                 },
             },
         );
-        const editButton = screen.getByText('edit').closest('a');
+        const editButton = screen.getByLabelText('Open in Editor');
         expect(editButton).toHaveAttribute('href', 'phpstorm://open?file=%2Fsrc%2Fapp.php&line=42');
     });
 
@@ -82,7 +82,7 @@ describe('FileLink', () => {
                 application: {baseUrl: '', editorConfig: {editor: 'vscode', customUrlTemplate: '', pathMapping: {}}},
             },
         });
-        const editButton = screen.getByText('edit').closest('a');
+        const editButton = screen.getByLabelText('Open in Editor');
         expect(editButton).toHaveAttribute('href', 'vscode://file/%2Fsrc%2Fapp.php:99');
     });
 
@@ -100,7 +100,7 @@ describe('FileLink', () => {
                 },
             },
         );
-        const editButton = screen.getByText('edit').closest('a');
+        const editButton = screen.getByLabelText('Open in Editor');
         expect(editButton).toHaveAttribute('href', 'vscode://file/%2Fsrc%2Fapp.php:5');
     });
 
@@ -111,7 +111,7 @@ describe('FileLink', () => {
             },
         });
         // No path means no editor URL can be generated
-        expect(screen.queryByText('edit')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Open in Editor')).not.toBeInTheDocument();
     });
 
     it('renders without children (editor-only mode)', () => {
@@ -122,7 +122,7 @@ describe('FileLink', () => {
         });
         // No anchor for children but editor button exists
         expect(container.querySelector('a[href^="/inspector"]')).toBeNull();
-        expect(screen.getByText('edit')).toBeInTheDocument();
+        expect(screen.getByLabelText('Open in Editor')).toBeInTheDocument();
     });
 
     it('applies path mapping in editor URL', () => {
@@ -143,7 +143,7 @@ describe('FileLink', () => {
                 },
             },
         );
-        const editButton = screen.getByText('edit').closest('a');
+        const editButton = screen.getByLabelText('Open in Editor');
         expect(editButton).toHaveAttribute('href', 'vscode://file/%2FUsers%2Fdev%2Fproject%2Fsrc%2FController.php:10');
     });
 });
