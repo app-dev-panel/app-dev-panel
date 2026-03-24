@@ -149,4 +149,158 @@ final class Yii2DbSchemaProviderTest extends TestCase
         $this->assertCount(1, $tables);
         $this->assertSame(0, $tables[0]['records']);
     }
+
+    public function testGetTablesSkipsNullTableSchema(): void
+    {
+        $schema = $this->createMock(Schema::class);
+        $schema->method('getTableNames')->willReturn(['valid_table', 'null_table']);
+        $schema
+            ->method('getTableSchema')
+            ->willReturnCallback(static function (string $name) {
+                if ($name === 'null_table') {
+                    return null;
+                }
+                $tableSchema = new TableSchema();
+                $tableSchema->name = $name;
+                $tableSchema->primaryKey = [];
+                $tableSchema->columns = [];
+                return $tableSchema;
+            });
+
+        $countCommand = $this->createMock(Command::class);
+        $countCommand->method('queryScalar')->willReturn('0');
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('getSchema')->willReturn($schema);
+        $connection->method('quoteTableName')->willReturnArgument(0);
+        $connection->method('createCommand')->willReturn($countCommand);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $tables = $provider->getTables();
+
+        $this->assertCount(1, $tables);
+        $this->assertSame('valid_table', $tables[0]['table']);
+    }
+
+    public function testExecuteQueryWithoutParams(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->method('queryAll')->willReturn([['id' => 1, 'name' => 'Alice']]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('createCommand')->with('SELECT * FROM users')->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $result = $provider->executeQuery('SELECT * FROM users');
+
+        $this->assertSame([['id' => 1, 'name' => 'Alice']], $result);
+    }
+
+    public function testExecuteQueryWithNamedParams(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->expects($this->once())->method('bindValues')->with([':id' => 1])->willReturnSelf();
+        $command->method('queryAll')->willReturn([['id' => 1]]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('createCommand')->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $result = $provider->executeQuery('SELECT * FROM users WHERE id = :id', ['id' => 1]);
+
+        $this->assertSame([['id' => 1]], $result);
+    }
+
+    public function testExecuteQueryWithNamedParamsAlreadyPrefixed(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->expects($this->once())->method('bindValues')->with([':name' => 'Alice'])->willReturnSelf();
+        $command->method('queryAll')->willReturn([]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('createCommand')->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $provider->executeQuery('SELECT * FROM users WHERE name = :name', [':name' => 'Alice']);
+    }
+
+    public function testExecuteQueryWithPositionalParams(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->expects($this->once())->method('bindValues')->with([1 => 'Alice', 2 => 30])->willReturnSelf();
+        $command->method('queryAll')->willReturn([]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('createCommand')->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $provider->executeQuery('SELECT * FROM users WHERE name = ? AND age = ?', ['Alice', 30]);
+    }
+
+    public function testExplainQueryDefault(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->method('queryAll')->willReturn([['EXPLAIN' => 'Seq Scan on users']]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('getDriverName')->willReturn('pgsql');
+        $connection
+            ->expects($this->once())
+            ->method('createCommand')
+            ->with('EXPLAIN SELECT * FROM users')
+            ->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $result = $provider->explainQuery('SELECT * FROM users');
+
+        $this->assertSame([['EXPLAIN' => 'Seq Scan on users']], $result);
+    }
+
+    public function testExplainQueryWithAnalyze(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->method('queryAll')->willReturn([['EXPLAIN' => 'Seq Scan']]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('getDriverName')->willReturn('mysql');
+        $connection
+            ->expects($this->once())
+            ->method('createCommand')
+            ->with('EXPLAIN ANALYZE SELECT * FROM users')
+            ->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $provider->explainQuery('SELECT * FROM users', [], true);
+    }
+
+    public function testExplainQuerySqlite(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->method('queryAll')->willReturn([['detail' => 'SCAN TABLE users']]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('getDriverName')->willReturn('sqlite');
+        $connection
+            ->expects($this->once())
+            ->method('createCommand')
+            ->with('EXPLAIN QUERY PLAN SELECT * FROM users')
+            ->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $provider->explainQuery('SELECT * FROM users');
+    }
+
+    public function testExplainQueryWithParams(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->expects($this->once())->method('bindValues')->with([':id' => 5])->willReturnSelf();
+        $command->method('queryAll')->willReturn([]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('getDriverName')->willReturn('pgsql');
+        $connection->method('createCommand')->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $provider->explainQuery('SELECT * FROM users WHERE id = :id', ['id' => 5]);
+    }
 }

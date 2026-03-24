@@ -8,8 +8,10 @@ use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteAdapter;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteCollection;
 use AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy;
 use PHPUnit\Framework\TestCase;
+use yii\web\CompositeUrlRule;
 use yii\web\UrlManager;
 use yii\web\UrlRule;
+use yii\web\UrlRuleInterface;
 
 final class Yii2RouteCollectionTest extends TestCase
 {
@@ -81,5 +83,66 @@ final class Yii2RouteCollectionTest extends TestCase
         $this->assertCount(1, $routes);
         $info = $routes[0]->__debugInfo();
         $this->assertSame([], $info['hosts']);
+    }
+
+    public function testGetRoutesWithCompositeUrlRuleExtractsSubRules(): void
+    {
+        $subRule = $this->createMock(UrlRule::class);
+        $subRule->name = 'api/users/<id>';
+
+        $compositeRule = $this->getMockBuilder(CompositeUrlRule::class)->disableOriginalConstructor()->getMock();
+
+        $reflection = new \ReflectionProperty(CompositeUrlRule::class, 'rules');
+        $reflection->setValue($compositeRule, [$subRule]);
+
+        $urlManager = $this->createMock(UrlManager::class);
+        $urlManager->rules = [$compositeRule];
+
+        $collection = new Yii2RouteCollection($urlManager);
+        $routes = $collection->getRoutes();
+
+        $this->assertCount(1, $routes);
+        $info = $routes[0]->__debugInfo();
+        $this->assertSame('api/users/<id>', $info['name']);
+    }
+
+    public function testGetRoutesWithCompositeUrlRuleNullSubRules(): void
+    {
+        $compositeRule = $this->getMockBuilder(CompositeUrlRule::class)->disableOriginalConstructor()->getMock();
+
+        $reflection = new \ReflectionProperty(CompositeUrlRule::class, 'rules');
+        $reflection->setValue($compositeRule, null);
+
+        $compositeRule->method('createRules')->willReturn([]);
+
+        $urlManager = $this->createMock(UrlManager::class);
+        $urlManager->rules = [$compositeRule];
+
+        $collection = new Yii2RouteCollection($urlManager);
+        $routes = $collection->getRoutes();
+
+        $this->assertCount(1, $routes);
+        $info = $routes[0]->__debugInfo();
+        $this->assertSame($compositeRule::class, $info['name']);
+    }
+
+    public function testCompositeUrlRuleWithUrlRuleInterfaceSubRules(): void
+    {
+        $subRule = $this->createMock(UrlRuleInterface::class);
+
+        $compositeRule = $this->getMockBuilder(CompositeUrlRule::class)->disableOriginalConstructor()->getMock();
+
+        $reflection = new \ReflectionProperty(CompositeUrlRule::class, 'rules');
+        $reflection->setValue($compositeRule, [$subRule]);
+
+        $urlManager = $this->createMock(UrlManager::class);
+        $urlManager->rules = [$compositeRule];
+
+        $collection = new Yii2RouteCollection($urlManager);
+        $routes = $collection->getRoutes();
+
+        $this->assertCount(1, $routes);
+        $info = $routes[0]->__debugInfo();
+        $this->assertSame($subRule::class, $info['name']);
     }
 }
