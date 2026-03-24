@@ -23,12 +23,7 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
-use AppDevPanel\Api\Mcp\Controller\McpController;
-use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
-use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
-use AppDevPanel\McpServer\McpServer;
-use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
@@ -48,6 +43,9 @@ use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
+use AppDevPanel\Api\Mcp\Controller\McpController;
+use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
+use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
 use AppDevPanel\Api\PathMapper;
@@ -67,8 +65,8 @@ use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
-use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
@@ -86,6 +84,8 @@ use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use Psr\Http\Client\ClientInterface;
@@ -502,16 +502,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         $storagePath = \Yii::getAlias($this->storagePath);
 
-        \Yii::$container->setSingleton(
-            McpSettings::class,
-            static fn() => new McpSettings($storagePath),
-        );
+        \Yii::$container->setSingleton(McpSettings::class, static fn() => new McpSettings($storagePath));
 
         \Yii::$container->setSingleton(
             McpServer::class,
-            static fn() => new McpServer(
-                McpToolRegistryFactory::create(\Yii::$container->get(StorageInterface::class)),
-            ),
+            static fn() => new McpServer(McpToolRegistryFactory::create(\Yii::$container->get(StorageInterface::class))),
         );
 
         \Yii::$container->setSingleton(
