@@ -141,12 +141,15 @@ final class FileControllerTest extends ControllerTestCase
         $this->assertIsInt($data['startLine']);
     }
 
-    public function testReadByClassNameOutsideRootReturns403(): void
+    public function testReadByClassNameOutsideRootAllowed(): void
     {
         $controller = $this->createController();
         $response = $controller->files($this->get(['class' => self::class]));
 
-        $this->assertSame(403, $response->getStatusCode());
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('content', $data);
+        $this->assertStringContainsString('FileControllerTest', $data['content']);
     }
 
     public function testFileInfoFields(): void

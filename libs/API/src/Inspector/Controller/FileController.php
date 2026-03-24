@@ -54,7 +54,7 @@ final class FileController
             ];
         }
 
-        return $this->readFile($destination, $extra);
+        return $this->readClassFile($destination, $extra);
     }
 
     private function resolvePathFile(string $path): ResponseInterface
@@ -161,6 +161,25 @@ final class FileController
                 'directory' => preg_replace($pattern, '', dirname($destination), 1),
                 'content' => file_get_contents($destination),
                 'path' => preg_replace($pattern, '', $destination, 1),
+                'absolutePath' => $this->pathMapper->mapToLocal($destination),
+            ],
+            $this->serializeFileInfo($file),
+        ));
+    }
+
+    /**
+     * Read a file resolved from a class name. No root-path restriction — if the class
+     * is loaded by PHP, its source is trusted and always readable.
+     */
+    private function readClassFile(string $destination, array $extra = []): ResponseInterface
+    {
+        $file = new SplFileInfo($destination);
+        return $this->responseFactory->createJsonResponse(array_merge(
+            $extra,
+            [
+                'directory' => dirname($destination),
+                'content' => file_get_contents($destination),
+                'path' => $destination,
                 'absolutePath' => $this->pathMapper->mapToLocal($destination),
             ],
             $this->serializeFileInfo($file),
