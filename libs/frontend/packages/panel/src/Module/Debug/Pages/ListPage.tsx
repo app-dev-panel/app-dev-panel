@@ -1,7 +1,5 @@
 import {changeEntryAction} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
-import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
@@ -14,6 +12,8 @@ import {
     CircularProgress,
     Icon,
     IconButton,
+    InputAdornment,
+    TextField,
     Tooltip,
     Typography,
     type Theme,
@@ -159,18 +159,48 @@ export const ListPage = () => {
 
     return (
         <Box>
-            <SectionTitle
-                action={
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                        <FilterInput value={filter} onChange={setFilter} placeholder="Filter entries..." />
-                        <Tooltip title={isFetching ? 'Refreshing...' : 'Refresh'}>
-                            <IconButton size="small" onClick={() => refetch()} disabled={isFetching}>
-                                <Icon sx={{fontSize: 18}}>{isFetching ? 'hourglass_empty' : 'refresh'}</Icon>
-                            </IconButton>
-                        </Tooltip>
-                    </Box>
-                }
-            >{`${filtered.length} debug entries`}</SectionTitle>
+            <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, mb: 2}}>
+                <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Search by URL, method, command, or ID..."
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    slotProps={{
+                        input: {
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Icon sx={{fontSize: 18, color: 'text.disabled'}}>search</Icon>
+                                </InputAdornment>
+                            ),
+                            endAdornment: filter ? (
+                                <InputAdornment position="end">
+                                    <IconButton size="small" onClick={() => setFilter('')} sx={{p: 0.25}}>
+                                        <Icon sx={{fontSize: 16}}>close</Icon>
+                                    </IconButton>
+                                </InputAdornment>
+                            ) : null,
+                        },
+                    }}
+                    sx={{'& .MuiOutlinedInput-root': {fontSize: '13px', borderRadius: 1}}}
+                />
+                <Typography
+                    variant="body2"
+                    sx={{
+                        color: 'text.disabled',
+                        flexShrink: 0,
+                        fontFamily: primitives.fontFamilyMono,
+                        fontSize: '12px',
+                    }}
+                >
+                    {filtered.length}/{entries?.length ?? 0}
+                </Typography>
+                <Tooltip title={isFetching ? 'Refreshing...' : 'Refresh'}>
+                    <IconButton size="small" onClick={() => refetch()} disabled={isFetching}>
+                        <Icon sx={{fontSize: 18}}>{isFetching ? 'hourglass_empty' : 'refresh'}</Icon>
+                    </IconButton>
+                </Tooltip>
+            </Box>
 
             {filtered.map((entry) => {
                 if (isDebugEntryAboutWeb(entry)) {
