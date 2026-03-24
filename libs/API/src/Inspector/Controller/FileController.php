@@ -145,7 +145,7 @@ final class FileController
 
     private function readFile(string $destination, array $extra = []): ResponseInterface
     {
-        $rootPath = $this->pathResolver->getRootPath();
+        $rootPath = realpath($this->pathResolver->getRootPath()) ?: $this->pathResolver->getRootPath();
         $pattern = '/^' . preg_quote($rootPath, '/') . '/';
         $file = new SplFileInfo($destination);
         return $this->responseFactory->createJsonResponse(array_merge(
