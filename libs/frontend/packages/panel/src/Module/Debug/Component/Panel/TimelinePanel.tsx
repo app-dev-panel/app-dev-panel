@@ -122,14 +122,14 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
         });
     }, []);
 
-    if (!data || !Array.isArray(data) || data.length === 0) {
-        return <EmptyState icon="timeline" title="No timeline items found" />;
-    }
-
     // Unique labels for legend
-    const uniqueLabels = [...new Set(data.map((r) => r[2].split('\\').pop() ?? r[2]))];
+    const uniqueLabels = useMemo(
+        () => (!data || data.length === 0 ? [] : [...new Set(data.map((r) => r[2].split('\\').pop() ?? r[2]))]),
+        [data],
+    );
 
     const filtered = useMemo(() => {
+        if (!data || !Array.isArray(data)) return [];
         let result = data;
         if (activeFilters.size > 0) {
             result = result.filter((r) => {
@@ -143,6 +143,10 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
         }
         return result;
     }, [data, deferredFilter, activeFilters]);
+
+    if (!data || !Array.isArray(data) || data.length === 0) {
+        return <EmptyState icon="timeline" title="No timeline items found" />;
+    }
 
     // Events are point-in-time: row[0] is microtime, row[1] is a reference (not duration)
     // Use full data range for consistent axis regardless of filters

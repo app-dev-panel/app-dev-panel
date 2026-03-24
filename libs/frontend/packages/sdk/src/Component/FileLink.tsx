@@ -1,7 +1,7 @@
 import {parseFilePath, parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import {Code} from '@mui/icons-material';
-import {IconButton, Tooltip} from '@mui/material';
+import {IconButton, Link, Tooltip} from '@mui/material';
 import {type ReactNode} from 'react';
 
 type FileLinkProps = {
@@ -51,9 +51,9 @@ export const FileLink = ({path, className, methodName, line, children, sx}: File
     return (
         <span style={{display: 'inline-flex', alignItems: 'center', gap: 2, ...sx}}>
             {children !== undefined ? (
-                <a href={explorerHref} style={{color: 'inherit', textDecoration: 'inherit'}}>
+                <Link href={explorerHref} sx={{color: 'inherit', textDecoration: 'inherit'}}>
                     {children}
-                </a>
+                </Link>
             ) : null}
             {editorUrl && (
                 <Tooltip title="Open in Editor">
