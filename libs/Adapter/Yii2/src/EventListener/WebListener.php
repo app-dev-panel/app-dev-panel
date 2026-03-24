@@ -245,7 +245,7 @@ final class WebListener
     private function extractFromController(\yii\web\Application $app, string $uri): void
     {
         $controller = $app->controller;
-        $action = $controller?->action;
+        $action = $controller->action;
 
         $this->routerCollector->collectMatchedRoute([
             'matchTime' => 0,
