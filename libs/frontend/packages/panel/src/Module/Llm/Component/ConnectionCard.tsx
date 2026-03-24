@@ -30,7 +30,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 
 const providerLabels: Record<LlmProvider, string> = {
     openrouter: 'OpenRouter',
-    anthropic: 'Anthropic (Claude)',
+    anthropic: 'Anthropic',
     openai: 'OpenAI',
 };
 
@@ -49,7 +49,7 @@ export const ConnectionCard = () => {
     const [setCustomPrompt] = useSetCustomPromptMutation();
     const {data: models, isLoading: modelsLoading} = useGetModelsQuery(undefined, {skip: !status?.connected});
     const [error, setError] = useState<string | null>(null);
-    const [selectedProvider, setSelectedProvider] = useState<LlmProvider>('anthropic');
+    const [selectedProvider, setSelectedProvider] = useState<LlmProvider>('openrouter');
     const [apiKey, setApiKey] = useState('');
     const [expanded, setExpanded] = useState(false);
     const [freeOnly, setFreeOnly] = useState(false);
@@ -289,12 +289,17 @@ export const ConnectionCard = () => {
                 size="small"
                 fullWidth
             >
+                <ToggleButton value="openrouter">OpenRouter</ToggleButton>
                 <ToggleButton value="anthropic">Anthropic</ToggleButton>
                 <ToggleButton value="openai">OpenAI</ToggleButton>
-                <ToggleButton value="openrouter">OpenRouter</ToggleButton>
             </ToggleButtonGroup>
 
-            {selectedProvider === 'anthropic' ? (
+            {selectedProvider === 'openrouter' ? (
+                <Typography variant="body2" color="text.secondary">
+                    Connect your OpenRouter account to access Claude, GPT-4, Llama, Mistral, and many other models
+                    through a single OAuth integration.
+                </Typography>
+            ) : selectedProvider === 'anthropic' ? (
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                     <Typography variant="body2" color="text.secondary">
                         Connect directly with your Anthropic API key to use Claude models.
@@ -310,7 +315,7 @@ export const ConnectionCard = () => {
                         onKeyDown={(e) => e.key === 'Enter' && handleApiKeyConnect()}
                     />
                 </Box>
-            ) : selectedProvider === 'openai' ? (
+            ) : (
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                     <Typography variant="body2" color="text.secondary">
                         Connect with your OpenAI API key to use GPT-4o, o1, and other models.
@@ -326,11 +331,6 @@ export const ConnectionCard = () => {
                         onKeyDown={(e) => e.key === 'Enter' && handleApiKeyConnect()}
                     />
                 </Box>
-            ) : (
-                <Typography variant="body2" color="text.secondary">
-                    Connect your OpenRouter account to access Claude, GPT-4, Llama, Mistral, and many other models
-                    through a single OAuth integration.
-                </Typography>
             )}
 
             {selectedProvider === 'openrouter' ? (

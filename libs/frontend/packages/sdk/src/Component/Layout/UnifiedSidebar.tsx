@@ -111,9 +111,13 @@ export const UnifiedSidebar = React.memo(
                 prevPathRef.current = activePath;
                 // Find the section that matches the new path and uncollapse it
                 for (const section of sections) {
-                    const isActive =
-                        section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
-                    if (isActive && section.children && section.children.length > 0 && collapsed[section.key] === true) {
+                    const isActive = section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
+                    if (
+                        isActive &&
+                        section.children &&
+                        section.children.length > 0 &&
+                        collapsed[section.key] === true
+                    ) {
                         setCollapsed((prev) => {
                             const next = {...prev};
                             delete next[section.key];
@@ -149,7 +153,9 @@ export const UnifiedSidebar = React.memo(
                         section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
                     const hasChildren = section.children && section.children.length > 0;
                     const hasActiveChild =
-                        hasChildren && activeChildKey != null && section.children!.some((c) => c.key === activeChildKey);
+                        hasChildren &&
+                        activeChildKey != null &&
+                        section.children!.some((c) => c.key === activeChildKey);
                     const isActiveSection = isSectionMatch && !hasActiveChild;
                     const manualState = collapsed[section.key];
                     const isExpanded =
@@ -160,10 +166,7 @@ export const UnifiedSidebar = React.memo(
                             {idx > 0 && idx === sections.length - 3 && <Divider sx={{mx: 1.25, my: 0.75}} />}
                             {hasChildren ? (
                                 <>
-                                    <SectionHeader
-                                        active={isActiveSection}
-                                        onClick={() => onNavigate(section.href)}
-                                    >
+                                    <SectionHeader active={isActiveSection} onClick={() => onNavigate(section.href)}>
                                         <Icon sx={{fontSize: 19, flexShrink: 0}}>{section.icon}</Icon>
                                         <SectionLabel>{section.label}</SectionLabel>
                                         <ExpandButton
