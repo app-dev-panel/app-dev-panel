@@ -8,16 +8,16 @@ import {
     useOauthInitiateMutation,
     useSetModelMutation,
 } from '@app-dev-panel/panel/Module/Llm/API/Llm';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     Alert,
     Autocomplete,
     Box,
     Button,
-    Card,
-    CardActions,
-    CardContent,
-    CardHeader,
     Chip,
+    Collapse,
+    IconButton,
+    Paper,
     Skeleton,
     TextField,
     ToggleButton,
@@ -42,6 +42,7 @@ export const ConnectionCard = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedProvider, setSelectedProvider] = useState<LlmProvider>('anthropic');
     const [apiKey, setApiKey] = useState('');
+    const [expanded, setExpanded] = useState(false);
 
     const handleOpenRouterConnect = useCallback(async () => {
         setError(null);
@@ -71,6 +72,7 @@ export const ConnectionCard = () => {
 
     const handleDisconnect = useCallback(async () => {
         await disconnect();
+        setExpanded(false);
     }, [disconnect]);
 
     const handleModelChange = useCallback(
@@ -81,10 +83,11 @@ export const ConnectionCard = () => {
     );
 
     if (isLoading) {
-        return <Skeleton variant="rectangular" height={200} sx={{borderRadius: 2}} />;
+        return <Skeleton variant="rectangular" height={48} sx={{borderRadius: 1}} />;
     }
 
     const provider = status?.provider;
+    const connected = status?.connected ?? false;
 
     const popularModels = (models ?? []).filter((m: LlmModel) => {
         if (provider === 'anthropic') return m.id.startsWith('claude-');
@@ -99,113 +102,172 @@ export const ConnectionCard = () => {
         );
     });
 
-    return (
-        <Card variant="outlined">
-            <CardHeader
-                title="LLM Connection"
-                subheader="Connect an LLM provider to use AI-powered debug analysis"
-                action={
-                    <Chip
-                        label={status?.connected ? 'Connected' : 'Disconnected'}
-                        color={status?.connected ? 'success' : 'default'}
-                        size="small"
-                    />
-                }
-            />
-            <CardContent>
-                {error && (
-                    <Alert severity="error" sx={{mb: 2}} onClose={() => setError(null)}>
-                        {error}
-                    </Alert>
-                )}
-                {status?.connected ? (
-                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                        <Typography variant="body2" color="text.secondary">
-                            Provider:{' '}
-                            <strong>{providerLabels[status.provider as LlmProvider] ?? status.provider}</strong>
+    const selectedModel = popularModels.find((m) => m.id === status?.model);
+
+    // Connected: compact summary bar, expandable
+    if (connected) {
+        return (
+            <Paper variant="outlined" sx={{overflow: 'hidden'}}>
+                <Box
+                    onClick={() => setExpanded((prev) => !prev)}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.5,
+                        px: 2,
+                        py: 1,
+                        cursor: 'pointer',
+                        '&:hover': {bgcolor: 'action.hover'},
+                        transition: 'background-color 0.15s',
+                    }}
+                >
+                    <Chip label="Connected" color="success" size="small" />
+                    <Typography variant="body2" color="text.secondary">
+                        {providerLabels[provider as LlmProvider] ?? provider}
+                    </Typography>
+                    {selectedModel && (
+                        <>
+                            <Typography variant="body2" color="text.disabled">
+                                /
+                            </Typography>
+                            <Typography variant="body2" noWrap sx={{flex: 1, minWidth: 0}}>
+                                {selectedModel.name}
+                            </Typography>
+                        </>
+                    )}
+                    {!selectedModel && (
+                        <Typography variant="body2" color="warning.main" sx={{flex: 1}}>
+                            No model selected
                         </Typography>
+                    )}
+                    <IconButton
+                        size="small"
+                        sx={{transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s'}}
+                    >
+                        <ExpandMoreIcon fontSize="small" />
+                    </IconButton>
+                </Box>
+                <Collapse in={expanded}>
+                    <Box sx={{px: 2, pb: 2, pt: 1, display: 'flex', flexDirection: 'column', gap: 2}}>
+                        {error && (
+                            <Alert severity="error" onClose={() => setError(null)}>
+                                {error}
+                            </Alert>
+                        )}
                         <Autocomplete
                             size="small"
                             fullWidth
                             options={popularModels}
                             getOptionLabel={(option: LlmModel) => `${option.name} (${option.id})`}
-                            value={popularModels.find((m) => m.id === status.model) ?? null}
+                            value={selectedModel ?? null}
                             onChange={(_, option) => option && handleModelChange(option.id)}
                             loading={modelsLoading}
                             isOptionEqualToValue={(option, value) => option.id === value.id}
                             renderInput={(params) => <TextField {...params} label="Model" />}
                         />
+                        <Box>
+                            <Button size="small" color="error" onClick={handleDisconnect}>
+                                Disconnect
+                            </Button>
+                        </Box>
                     </Box>
-                ) : (
-                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                        <ToggleButtonGroup
-                            value={selectedProvider}
-                            exclusive
-                            onChange={(_, value) => value && setSelectedProvider(value)}
-                            size="small"
-                            fullWidth
-                        >
-                            <ToggleButton value="anthropic">Anthropic</ToggleButton>
-                            <ToggleButton value="openai">OpenAI</ToggleButton>
-                            <ToggleButton value="openrouter">OpenRouter</ToggleButton>
-                        </ToggleButtonGroup>
+                </Collapse>
+            </Paper>
+        );
+    }
 
-                        {selectedProvider === 'anthropic' ? (
-                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                                <Typography variant="body2" color="text.secondary">
-                                    Connect directly with your Anthropic API key to use Claude models.
-                                </Typography>
-                                <TextField
-                                    size="small"
-                                    fullWidth
-                                    label="API Key"
-                                    type="password"
-                                    placeholder="sk-ant-..."
-                                    value={apiKey}
-                                    onChange={(e) => setApiKey(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleApiKeyConnect()}
-                                />
-                            </Box>
-                        ) : selectedProvider === 'openai' ? (
-                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                                <Typography variant="body2" color="text.secondary">
-                                    Connect with your OpenAI API key to use GPT-4o, o1, and other models.
-                                </Typography>
-                                <TextField
-                                    size="small"
-                                    fullWidth
-                                    label="API Key"
-                                    type="password"
-                                    placeholder="sk-proj-..."
-                                    value={apiKey}
-                                    onChange={(e) => setApiKey(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleApiKeyConnect()}
-                                />
-                            </Box>
-                        ) : (
-                            <Typography variant="body2" color="text.secondary">
-                                Connect your OpenRouter account to access Claude, GPT-4, Llama, Mistral, and many other
-                                models through a single OAuth integration.
-                            </Typography>
-                        )}
-                    </Box>
-                )}
-            </CardContent>
-            <CardActions>
-                {status?.connected ? (
-                    <Button size="small" color="error" onClick={handleDisconnect}>
-                        Disconnect
-                    </Button>
-                ) : selectedProvider === 'openrouter' ? (
-                    <Button size="small" variant="contained" onClick={handleOpenRouterConnect}>
-                        Connect with OpenRouter
-                    </Button>
-                ) : (
-                    <Button size="small" variant="contained" onClick={handleApiKeyConnect} disabled={!apiKey.trim()}>
-                        Connect with API Key
-                    </Button>
-                )}
-            </CardActions>
-        </Card>
+    // Disconnected: full setup form
+    return (
+        <Paper variant="outlined" sx={{p: 2, display: 'flex', flexDirection: 'column', gap: 2}}>
+            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                <Box>
+                    <Typography variant="body1" fontWeight={600}>
+                        LLM Connection
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Connect an LLM provider to use AI-powered debug analysis
+                    </Typography>
+                </Box>
+                <Chip label="Disconnected" size="small" />
+            </Box>
+
+            {error && (
+                <Alert severity="error" onClose={() => setError(null)}>
+                    {error}
+                </Alert>
+            )}
+
+            <ToggleButtonGroup
+                value={selectedProvider}
+                exclusive
+                onChange={(_, value) => value && setSelectedProvider(value)}
+                size="small"
+                fullWidth
+            >
+                <ToggleButton value="anthropic">Anthropic</ToggleButton>
+                <ToggleButton value="openai">OpenAI</ToggleButton>
+                <ToggleButton value="openrouter">OpenRouter</ToggleButton>
+            </ToggleButtonGroup>
+
+            {selectedProvider === 'anthropic' ? (
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                    <Typography variant="body2" color="text.secondary">
+                        Connect directly with your Anthropic API key to use Claude models.
+                    </Typography>
+                    <TextField
+                        size="small"
+                        fullWidth
+                        label="API Key"
+                        type="password"
+                        placeholder="sk-ant-..."
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleApiKeyConnect()}
+                    />
+                </Box>
+            ) : selectedProvider === 'openai' ? (
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                    <Typography variant="body2" color="text.secondary">
+                        Connect with your OpenAI API key to use GPT-4o, o1, and other models.
+                    </Typography>
+                    <TextField
+                        size="small"
+                        fullWidth
+                        label="API Key"
+                        type="password"
+                        placeholder="sk-proj-..."
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleApiKeyConnect()}
+                    />
+                </Box>
+            ) : (
+                <Typography variant="body2" color="text.secondary">
+                    Connect your OpenRouter account to access Claude, GPT-4, Llama, Mistral, and many other models
+                    through a single OAuth integration.
+                </Typography>
+            )}
+
+            {selectedProvider === 'openrouter' ? (
+                <Button
+                    size="small"
+                    variant="contained"
+                    onClick={handleOpenRouterConnect}
+                    sx={{alignSelf: 'flex-start'}}
+                >
+                    Connect with OpenRouter
+                </Button>
+            ) : (
+                <Button
+                    size="small"
+                    variant="contained"
+                    onClick={handleApiKeyConnect}
+                    disabled={!apiKey.trim()}
+                    sx={{alignSelf: 'flex-start'}}
+                >
+                    Connect with API Key
+                </Button>
+            )}
+        </Paper>
     );
 };

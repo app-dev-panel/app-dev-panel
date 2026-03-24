@@ -259,7 +259,7 @@ final class LlmController
     /**
      * POST /debug/api/llm/analyze — Analyze debug entry data with LLM.
      *
-     * Body: { "debugEntryId": "...", "context": {...}, "prompt"?: "..." }
+     * Body: { "context": {...}, "prompt"?: "..." }
      */
     public function analyze(ServerRequestInterface $request): ResponseInterface
     {
@@ -302,22 +302,17 @@ final class LlmController
         ];
 
         $provider = $this->settings->getProvider();
+        $model = $this->settings->getModel();
 
         if ($provider === 'anthropic') {
-            $model = $this->settings->getModel() ?? 'claude-sonnet-4-20250514';
-            $response = $this->anthropicChat($messages, $model, 0.3);
+            $model ??= 'claude-sonnet-4-20250514';
         } elseif ($provider === 'openai') {
-            $model = $this->settings->getModel() ?? 'gpt-4o';
-            $response = $this->openAiChat($messages, $model, 0.3);
+            $model ??= 'gpt-4o';
         } else {
-            $model = $this->settings->getModel() ?? 'anthropic/claude-sonnet-4';
-            $response = $this->openRouterChat($messages, $model, 0.3);
+            $model ??= 'anthropic/claude-sonnet-4';
         }
 
-        $responseBody = $response->getBody()->getContents();
-
-        /** @var array<string, mixed> $data */
-        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
+        $data = $this->sendChat($provider, $messages, $model, 0.3);
 
         if (isset($data['error'])) {
             return $this->responseFactory->createJsonResponse([
@@ -325,13 +320,31 @@ final class LlmController
             ], 502);
         }
 
-        // Both providers return normalized OpenAI-compatible format
+        // All providers return normalized OpenAI-compatible format
         $content = $data['choices'][0]['message']['content'] ?? '';
 
         return $this->responseFactory->createJsonResponse([
             'analysis' => $content,
             'model' => $model,
         ]);
+    }
+
+    /**
+     * Send chat messages to the configured provider and return parsed response data.
+     *
+     * @param list<array{role: string, content: string}> $messages
+     * @return array<string, mixed>
+     */
+    private function sendChat(string $provider, array $messages, string $model, float $temperature): array
+    {
+        if ($provider === 'anthropic') {
+            return $this->sendAnthropicChat($messages, $model, $temperature);
+        }
+        if ($provider === 'openai') {
+            return $this->sendOpenAiChat($messages, $model, $temperature);
+        }
+
+        return $this->sendOpenRouterChat($messages, $model, $temperature);
     }
 
     private function openRouterModels(): ResponseInterface
@@ -390,6 +403,21 @@ final class LlmController
 
     private function openRouterChat(array $messages, string $model, float $temperature): ResponseInterface
     {
+        $data = $this->sendOpenRouterChat($messages, $model, $temperature);
+
+        if (isset($data['error'])) {
+            return $this->responseFactory->createJsonResponse(['error' => $data['error']], 502);
+        }
+
+        return $this->responseFactory->createJsonResponse($data);
+    }
+
+    /**
+     * @param list<array{role: string, content: string}> $messages
+     * @return array<string, mixed>
+     */
+    private function sendOpenRouterChat(array $messages, string $model, float $temperature): array
+    {
         $chatBody = json_encode([
             'model' => $model,
             'messages' => $messages,
@@ -415,9 +443,21 @@ final class LlmController
                 ? $data['error']['message'] ?? 'Unknown OpenRouter API error.'
                 : (string) $data['error'];
 
-            return $this->responseFactory->createJsonResponse([
-                'error' => $errorMessage,
-            ], 502);
+            return ['error' => $errorMessage];
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param list<array{role: string, content: string}> $messages
+     */
+    private function anthropicChat(array $messages, string $model, float $temperature): ResponseInterface
+    {
+        $data = $this->sendAnthropicChat($messages, $model, $temperature);
+
+        if (isset($data['error'])) {
+            return $this->responseFactory->createJsonResponse(['error' => $data['error']], 502);
         }
 
         return $this->responseFactory->createJsonResponse($data);
@@ -425,8 +465,9 @@ final class LlmController
 
     /**
      * @param list<array{role: string, content: string}> $messages
+     * @return array<string, mixed>
      */
-    private function anthropicChat(array $messages, string $model, float $temperature): ResponseInterface
+    private function sendAnthropicChat(array $messages, string $model, float $temperature): array
     {
         $systemPrompt = null;
         $chatMessages = [];
@@ -469,15 +510,13 @@ final class LlmController
                 ? $anthropicData['error']['message'] ?? 'Unknown Anthropic API error.'
                 : (string) $anthropicData['error'];
 
-            return $this->responseFactory->createJsonResponse([
-                'error' => $errorMessage,
-            ], 502);
+            return ['error' => $errorMessage];
         }
 
         // Normalize Anthropic response to OpenAI-compatible format
         $content = $anthropicData['content'][0]['text'] ?? '';
 
-        return $this->responseFactory->createJsonResponse([
+        return [
             'choices' => [
                 [
                     'message' => [
@@ -488,7 +527,7 @@ final class LlmController
             ],
             'model' => $anthropicData['model'] ?? $model,
             'usage' => $anthropicData['usage'] ?? [],
-        ]);
+        ];
     }
 
     private function openAiModels(): ResponseInterface
@@ -529,6 +568,21 @@ final class LlmController
      */
     private function openAiChat(array $messages, string $model, float $temperature): ResponseInterface
     {
+        $data = $this->sendOpenAiChat($messages, $model, $temperature);
+
+        if (isset($data['error'])) {
+            return $this->responseFactory->createJsonResponse(['error' => $data['error']], 502);
+        }
+
+        return $this->responseFactory->createJsonResponse($data);
+    }
+
+    /**
+     * @param list<array{role: string, content: string}> $messages
+     * @return array<string, mixed>
+     */
+    private function sendOpenAiChat(array $messages, string $model, float $temperature): array
+    {
         $chatBody = json_encode([
             'model' => $model,
             'messages' => $messages,
@@ -552,12 +606,10 @@ final class LlmController
                 ? $data['error']['message'] ?? 'Unknown OpenAI API error.'
                 : (string) $data['error'];
 
-            return $this->responseFactory->createJsonResponse([
-                'error' => $errorMessage,
-            ], 502);
+            return ['error' => $errorMessage];
         }
 
-        return $this->responseFactory->createJsonResponse($data);
+        return $data;
     }
 
     /**
