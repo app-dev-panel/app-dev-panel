@@ -199,7 +199,6 @@ const defaultPages: PaletteItem[] = [
         shortcut: '/opcache',
         section: 'Inspector',
     },
-    {icon: 'build_circle', label: 'GenCode', path: '/gen-code', shortcut: '/gencode', section: 'Pages'},
     {icon: 'data_object', label: 'Open API', path: '/open-api', shortcut: '/openapi', section: 'Pages'},
     {icon: 'web', label: 'Frames', path: '/frames', shortcut: '/frames', section: 'Pages'},
 ];

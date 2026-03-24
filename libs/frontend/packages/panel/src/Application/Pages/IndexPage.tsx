@@ -1,5 +1,4 @@
 import {DebugEntryList} from '@app-dev-panel/panel/Module/Debug/Component/DebugEntryList';
-import {useLazyGetGeneratorsQuery} from '@app-dev-panel/panel/Module/GenCode/API/GenCode';
 import {useLazyGetParametersQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {useSelector} from '@app-dev-panel/panel/store';
 import {addFavoriteUrl, changeBaseUrl, removeFavoriteUrl} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
@@ -18,7 +17,7 @@ import {useDispatch} from 'react-redux';
 
 const StatusGrid = styled('div')(({theme}) => ({
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(2, 1fr)',
     gap: theme.spacing(2),
     marginBottom: theme.spacing(3),
 }));
@@ -74,13 +73,11 @@ export function IndexPage() {
     const defaultBackendUrl = useSelector((state) => state.application.baseUrl) as string;
     const dispatch = useDispatch();
     const [inspectorQuery] = useLazyGetParametersQuery();
-    const [genCodeQuery] = useLazyGetGeneratorsQuery();
     const baseUrl = useSelector((state) => state.application.baseUrl);
     const [url, setUrl] = useState<string>(String(baseUrl));
     const [status, setStatus] = useState<Record<string, 'connected' | 'disconnected' | 'loading'>>({
         debug: 'loading',
         inspector: 'loading',
-        genCode: 'loading',
     });
     const favoriteUrls = useSelector((state) => state.application.favoriteUrls) as string[];
 
@@ -102,15 +99,12 @@ export function IndexPage() {
             : 'loading';
 
     async function checkStatus() {
-        setStatus((s) => ({...s, inspector: 'loading', genCode: 'loading'}));
+        setStatus((s) => ({...s, inspector: 'loading'}));
         inspectorQuery()
             .then((response) =>
                 setStatus((s) => ({...s, inspector: response.isSuccess ? 'connected' : 'disconnected'})),
             )
             .catch(() => setStatus((s) => ({...s, inspector: 'disconnected'})));
-        genCodeQuery()
-            .then((response) => setStatus((s) => ({...s, genCode: response.isSuccess ? 'connected' : 'disconnected'})))
-            .catch(() => setStatus((s) => ({...s, genCode: 'disconnected'})));
     }
 
     const handleChangeUrl = async (newUrl: string) => {
@@ -156,12 +150,6 @@ export function IndexPage() {
                     title="Inspector"
                     icon="search"
                     status={status.inspector}
-                    onClick={() => handleChangeUrl(url)}
-                />
-                <StatusCard
-                    title="GenCode"
-                    icon="build_circle"
-                    status={status.genCode}
                     onClick={() => handleChangeUrl(url)}
                 />
             </StatusGrid>
