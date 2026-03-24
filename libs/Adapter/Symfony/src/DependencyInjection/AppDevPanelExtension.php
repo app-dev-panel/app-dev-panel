@@ -46,7 +46,9 @@ use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Controller\LlmController;
+use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
+use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
@@ -593,6 +595,12 @@ final class AppDevPanelExtension extends Extension
             ->setArguments(['%app_dev_panel.storage.path%'])
             ->setPublic(true);
 
+        // LLM history storage
+        $container
+            ->register(LlmHistoryStorageInterface::class, FileLlmHistoryStorage::class)
+            ->setArguments(['%app_dev_panel.storage.path%'])
+            ->setPublic(true);
+
         // LLM controller
         $container
             ->register(LlmController::class, LlmController::class)
@@ -602,6 +610,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(ClientInterface::class),
                 new Reference(RequestFactoryInterface::class),
                 new Reference(StreamFactoryInterface::class),
+                new Reference(LlmHistoryStorageInterface::class),
             ])
             ->setPublic(true);
     }

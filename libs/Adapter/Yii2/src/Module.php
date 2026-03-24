@@ -44,7 +44,9 @@ use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Controller\LlmController;
+use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
+use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
@@ -536,6 +538,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
         );
 
         \Yii::$container->setSingleton(
+            LlmHistoryStorageInterface::class,
+            static fn() => new FileLlmHistoryStorage($resolvedStoragePath),
+        );
+
+        \Yii::$container->setSingleton(
             LlmController::class,
             static fn() => new LlmController(
                 \Yii::$container->get(JsonResponseFactoryInterface::class),
@@ -543,6 +550,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 \Yii::$container->get(ClientInterface::class),
                 \Yii::$container->get(RequestFactoryInterface::class),
                 \Yii::$container->get(StreamFactoryInterface::class),
+                \Yii::$container->get(LlmHistoryStorageInterface::class),
             ),
         );
     }

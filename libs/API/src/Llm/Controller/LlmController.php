@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Llm\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
@@ -35,6 +36,7 @@ final class LlmController
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory,
+        private readonly LlmHistoryStorageInterface $historyStorage,
     ) {}
 
     /**
@@ -401,6 +403,67 @@ final class LlmController
             'analysis' => $content,
             'model' => $model,
         ]);
+    }
+
+    /**
+     * GET /debug/api/llm/history — Get chat history.
+     */
+    public function history(ServerRequestInterface $request): ResponseInterface
+    {
+        return $this->responseFactory->createJsonResponse($this->historyStorage->getAll());
+    }
+
+    /**
+     * POST /debug/api/llm/history — Add a history entry.
+     *
+     * Body: { "query": "...", "response": "...", "timestamp": 123, "error"?: "..." }
+     */
+    public function addHistory(ServerRequestInterface $request): ResponseInterface
+    {
+        /** @var array{query?: string, response?: string, timestamp?: int, error?: string} $body */
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        $query = $body['query'] ?? '';
+        $response = $body['response'] ?? '';
+        $timestamp = $body['timestamp'] ?? time();
+
+        if ($query === '') {
+            throw new InvalidArgumentException('Field "query" is required.');
+        }
+
+        $entry = [
+            'query' => $query,
+            'response' => $response,
+            'timestamp' => $timestamp,
+        ];
+        if (isset($body['error']) && $body['error'] !== '') {
+            $entry['error'] = $body['error'];
+        }
+
+        $this->historyStorage->add($entry);
+
+        return $this->responseFactory->createJsonResponse($this->historyStorage->getAll());
+    }
+
+    /**
+     * DELETE /debug/api/llm/history/{index} — Delete a single history entry.
+     */
+    public function deleteHistory(ServerRequestInterface $request): ResponseInterface
+    {
+        $index = (int) $request->getAttribute('index');
+        $this->historyStorage->delete($index);
+
+        return $this->responseFactory->createJsonResponse($this->historyStorage->getAll());
+    }
+
+    /**
+     * DELETE /debug/api/llm/history — Clear all history.
+     */
+    public function clearHistory(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->historyStorage->clear();
+
+        return $this->responseFactory->createJsonResponse([]);
     }
 
     /**

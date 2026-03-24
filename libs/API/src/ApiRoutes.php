@@ -255,6 +255,25 @@ final class ApiRoutes
             new Route('GET', '/debug/api/llm/models', [LlmController::class, 'models'], 'debug/api/llm/models'),
             new Route('POST', '/debug/api/llm/chat', [LlmController::class, 'chat'], 'debug/api/llm/chat'),
             new Route('POST', '/debug/api/llm/analyze', [LlmController::class, 'analyze'], 'debug/api/llm/analyze'),
+            new Route('GET', '/debug/api/llm/history', [LlmController::class, 'history'], 'debug/api/llm/history'),
+            new Route(
+                'POST',
+                '/debug/api/llm/history',
+                [LlmController::class, 'addHistory'],
+                'debug/api/llm/history/add',
+            ),
+            new Route(
+                'DELETE',
+                '/debug/api/llm/history/{index}',
+                [LlmController::class, 'deleteHistory'],
+                'debug/api/llm/history/delete',
+            ),
+            new Route(
+                'DELETE',
+                '/debug/api/llm/history',
+                [LlmController::class, 'clearHistory'],
+                'debug/api/llm/history/clear',
+            ),
         ];
     }
 

@@ -22,7 +22,9 @@ use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Ingestion\Controller\OtlpController;
 use AppDevPanel\Api\Llm\Controller\LlmController;
+use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
+use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
@@ -256,6 +258,11 @@ return [
         $container->get(Aliases::class)->get($params['app-dev-panel/yiisoft']['path'] ?? '@runtime/debug'),
     ),
 
+    // LLM history storage
+    LlmHistoryStorageInterface::class => static fn(ContainerInterface $container) => new FileLlmHistoryStorage(
+        $container->get(Aliases::class)->get($params['app-dev-panel/yiisoft']['path'] ?? '@runtime/debug'),
+    ),
+
     // LLM controller
     LlmController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
@@ -263,7 +270,8 @@ return [
         ClientInterface $httpClient,
         RequestFactoryInterface $requestFactory,
         StreamFactoryInterface $streamFactory,
-    ) => new LlmController($jsonResponseFactory, $llmSettings, $httpClient, $requestFactory, $streamFactory),
+        LlmHistoryStorageInterface $historyStorage,
+    ) => new LlmController($jsonResponseFactory, $llmSettings, $httpClient, $requestFactory, $streamFactory, $historyStorage),
 
     // ApiApplication
     ApiApplication::class => static fn(

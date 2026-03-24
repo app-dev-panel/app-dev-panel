@@ -1,4 +1,11 @@
-import {useChatMutation, useGetStatusQuery} from '@app-dev-panel/panel/Module/Llm/API/Llm';
+import {
+    useAddHistoryMutation,
+    useChatMutation,
+    useClearHistoryMutation,
+    useDeleteHistoryMutation,
+    useGetHistoryQuery,
+    useGetStatusQuery,
+} from '@app-dev-panel/panel/Module/Llm/API/Llm';
 import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
 import {SendButton} from '@app-dev-panel/panel/Module/Llm/Component/SendButton';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -24,8 +31,6 @@ import {useCallback, useRef, useState} from 'react';
 type MessageStatus = 'ok' | 'error' | 'sending';
 type Message = {role: 'user' | 'assistant'; content: string; status: MessageStatus; error?: string};
 
-type HistoryEntry = {query: string; response: string; timestamp: number; error?: string};
-
 const extractErrorMessage = (err: unknown): string | null => {
     if (typeof err === 'object' && err !== null && 'data' in err) {
         const data = (err as {data: unknown}).data;
@@ -42,16 +47,19 @@ const extractErrorMessage = (err: unknown): string | null => {
 };
 
 const formatTime = (ts: number): string => {
-    const d = new Date(ts);
+    const d = new Date(ts * 1000);
     return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
 };
 
 export const ChatPanel = () => {
     const {data: status} = useGetStatusQuery();
     const [chat, {isLoading}] = useChatMutation();
+    const {data: history = []} = useGetHistoryQuery();
+    const [addHistory] = useAddHistoryMutation();
+    const [deleteHistory] = useDeleteHistoryMutation();
+    const [clearHistory] = useClearHistoryMutation();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
-    const [history, setHistory] = useState<HistoryEntry[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = useCallback(() => {
@@ -74,33 +82,31 @@ export const ChatPanel = () => {
                     return [...updated, {role: 'assistant', content: assistantContent, status: 'ok'}];
                 });
 
-                // Add to history
                 if (sendingMsg) {
-                    setHistory((prev) => [
-                        {query: sendingMsg.content, response: assistantContent, timestamp: Date.now()},
-                        ...prev,
-                    ]);
+                    addHistory({
+                        query: sendingMsg.content,
+                        response: assistantContent,
+                        timestamp: Math.floor(Date.now() / 1000),
+                    });
                 }
             } catch (err: unknown) {
                 const errorMsg = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
                 setMessages((prev) =>
                     prev.map((m) => (m.status === 'sending' ? {...m, status: 'error' as const, error: errorMsg} : m)),
                 );
-                // Add failed request to history
                 if (sendingMsg) {
-                    setHistory((prev) => [
-                        {query: sendingMsg.content, response: '', timestamp: Date.now(), error: errorMsg},
-                        ...prev,
-                    ]);
-                }
-                // Restore text to input so user can edit and retry
-                if (sendingMsg) {
+                    addHistory({
+                        query: sendingMsg.content,
+                        response: '',
+                        timestamp: Math.floor(Date.now() / 1000),
+                        error: errorMsg,
+                    });
                     setInput(sendingMsg.content);
                 }
             }
             scrollToBottom();
         },
-        [chat, scrollToBottom],
+        [chat, scrollToBottom, addHistory],
     );
 
     const handleSend = useCallback(async () => {
@@ -131,14 +137,6 @@ export const ChatPanel = () => {
         },
         [messages, sendMessages, scrollToBottom],
     );
-
-    const handleDeleteHistory = useCallback((index: number) => {
-        setHistory((prev) => prev.filter((_, i) => i !== index));
-    }, []);
-
-    const handleClearHistory = useCallback(() => {
-        setHistory([]);
-    }, []);
 
     if (!status?.connected) {
         return <Alert severity="info">Connect an LLM provider first to use the chat feature.</Alert>;
@@ -272,7 +270,7 @@ export const ChatPanel = () => {
                                     size="small"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        handleClearHistory();
+                                        clearHistory();
                                     }}
                                     sx={{mr: 1}}
                                 >
@@ -318,7 +316,7 @@ export const ChatPanel = () => {
                                                 size="small"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleDeleteHistory(i);
+                                                    deleteHistory(i);
                                                 }}
                                             >
                                                 <DeleteOutlineIcon sx={{fontSize: 14}} />

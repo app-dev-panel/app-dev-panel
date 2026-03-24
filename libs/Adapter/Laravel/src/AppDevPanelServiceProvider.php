@@ -51,7 +51,9 @@ use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Controller\LlmController;
+use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
+use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
@@ -558,6 +560,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
+            LlmHistoryStorageInterface::class,
+            fn() => new FileLlmHistoryStorage($this->app->make('config')->get('app-dev-panel.storage.path')),
+        );
+
+        $this->app->singleton(
             LlmController::class,
             fn() => new LlmController(
                 $this->app->make(JsonResponseFactoryInterface::class),
@@ -565,6 +572,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 $this->app->make(ClientInterface::class),
                 $this->app->make(RequestFactoryInterface::class),
                 $this->app->make(StreamFactoryInterface::class),
+                $this->app->make(LlmHistoryStorageInterface::class),
             ),
         );
     }

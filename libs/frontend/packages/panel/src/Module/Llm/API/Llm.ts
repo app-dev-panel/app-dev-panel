@@ -33,10 +33,14 @@ type AnalyzeRequest = {context: Record<string, unknown>; prompt?: string};
 
 type AnalyzeResponse = {analysis: string; model: string};
 
+export type HistoryEntry = {query: string; response: string; timestamp: number; error?: string};
+
+type AddHistoryRequest = {query: string; response: string; timestamp: number; error?: string};
+
 export const llmApi = createApi({
     reducerPath: 'api.llm',
     baseQuery: createBaseQuery('/debug/api/llm'),
-    tagTypes: ['llm/status'],
+    tagTypes: ['llm/status', 'llm/history'],
     endpoints: (builder) => ({
         getStatus: builder.query<LlmStatus, void>({
             query: () => '/status',
@@ -88,6 +92,26 @@ export const llmApi = createApi({
             query: (body) => ({url: '/analyze', method: 'POST', body}),
             transformResponse: (result: {data: AnalyzeResponse}) => result.data,
         }),
+        getHistory: builder.query<HistoryEntry[], void>({
+            query: () => '/history',
+            transformResponse: (result: {data: HistoryEntry[]}) => result.data,
+            providesTags: ['llm/history'],
+        }),
+        addHistory: builder.mutation<HistoryEntry[], AddHistoryRequest>({
+            query: (body) => ({url: '/history', method: 'POST', body}),
+            transformResponse: (result: {data: HistoryEntry[]}) => result.data,
+            invalidatesTags: ['llm/history'],
+        }),
+        deleteHistory: builder.mutation<HistoryEntry[], number>({
+            query: (index) => ({url: `/history/${index}`, method: 'DELETE'}),
+            transformResponse: (result: {data: HistoryEntry[]}) => result.data,
+            invalidatesTags: ['llm/history'],
+        }),
+        clearHistory: builder.mutation<HistoryEntry[], void>({
+            query: () => ({url: '/history', method: 'DELETE'}),
+            transformResponse: (result: {data: HistoryEntry[]}) => result.data,
+            invalidatesTags: ['llm/history'],
+        }),
     }),
 });
 
@@ -103,4 +127,8 @@ export const {
     useSetCustomPromptMutation,
     useChatMutation,
     useAnalyzeMutation,
+    useGetHistoryQuery,
+    useAddHistoryMutation,
+    useDeleteHistoryMutation,
+    useClearHistoryMutation,
 } = llmApi;
