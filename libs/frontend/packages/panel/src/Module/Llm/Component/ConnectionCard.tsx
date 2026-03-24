@@ -7,7 +7,6 @@ import {
     useGetStatusQuery,
     useOauthInitiateMutation,
     useSetModelMutation,
-    useSetTimeoutMutation,
 } from '@app-dev-panel/panel/Module/Llm/API/Llm';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
@@ -20,7 +19,6 @@ import {
     IconButton,
     Paper,
     Skeleton,
-    Slider,
     TextField,
     ToggleButton,
     ToggleButtonGroup,
@@ -46,7 +44,6 @@ export const ConnectionCard = () => {
     const [connect] = useConnectMutation();
     const [disconnect] = useDisconnectMutation();
     const [setModel] = useSetModelMutation();
-    const [setTimeoutApi] = useSetTimeoutMutation();
     const {data: models, isLoading: modelsLoading} = useGetModelsQuery(undefined, {skip: !status?.connected});
     const [error, setError] = useState<string | null>(null);
     const [selectedProvider, setSelectedProvider] = useState<LlmProvider>('anthropic');
@@ -90,14 +87,6 @@ export const ConnectionCard = () => {
             await setModel({model: modelId});
         },
         [setModel],
-    );
-
-    const handleTimeoutChange = useCallback(
-        async (_: unknown, value: number | number[]) => {
-            const timeout = typeof value === 'number' ? value : value[0];
-            await setTimeoutApi({timeout});
-        },
-        [setTimeoutApi],
     );
 
     const provider = status?.provider;
@@ -165,9 +154,6 @@ export const ConnectionCard = () => {
                             No model selected
                         </Typography>
                     )}
-                    <Typography variant="caption" color="text.disabled">
-                        {status?.timeout ?? 30}s
-                    </Typography>
                     <IconButton
                         size="small"
                         sx={{transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s'}}
@@ -216,27 +202,6 @@ export const ConnectionCard = () => {
                                     Free
                                 </ToggleButton>
                             )}
-                        </Box>
-                        <Box>
-                            <Typography variant="caption" color="text.secondary" gutterBottom>
-                                Request timeout: {status?.timeout ?? 30}s
-                            </Typography>
-                            <Slider
-                                size="small"
-                                value={status?.timeout ?? 30}
-                                onChange={handleTimeoutChange}
-                                min={5}
-                                max={120}
-                                step={5}
-                                marks={[
-                                    {value: 5, label: '5s'},
-                                    {value: 30, label: '30s'},
-                                    {value: 60, label: '60s'},
-                                    {value: 120, label: '120s'},
-                                ]}
-                                valueLabelDisplay="auto"
-                                valueLabelFormat={(v) => `${v}s`}
-                            />
                         </Box>
                         <Box>
                             <Button size="small" color="error" onClick={handleDisconnect}>

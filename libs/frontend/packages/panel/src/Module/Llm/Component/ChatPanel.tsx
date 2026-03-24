@@ -1,6 +1,7 @@
 import {useChatMutation, useGetStatusQuery} from '@app-dev-panel/panel/Module/Llm/API/Llm';
 import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
-import {Alert, Box, Button, CircularProgress, Paper, TextField, Typography} from '@mui/material';
+import {SendButton} from '@app-dev-panel/panel/Module/Llm/Component/SendButton';
+import {Alert, Box, CircularProgress, Paper, TextField, Typography} from '@mui/material';
 import {useCallback, useRef, useState} from 'react';
 
 type Message = {role: 'user' | 'assistant'; content: string};
@@ -128,9 +129,7 @@ export const ChatPanel = () => {
                     multiline
                     maxRows={3}
                 />
-                <Button variant="contained" onClick={handleSend} disabled={isLoading || !input.trim()}>
-                    Send
-                </Button>
+                <SendButton label="Send" onClick={handleSend} disabled={!input.trim()} loading={isLoading} />
             </Box>
         </Box>
     );

@@ -1,5 +1,6 @@
 import {useAnalyzeMutation, useGetStatusQuery} from '@app-dev-panel/panel/Module/Llm/API/Llm';
 import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
+import {SendButton} from '@app-dev-panel/panel/Module/Llm/Component/SendButton';
 import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {HighlightedText, fuzzyMatch} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
@@ -10,12 +11,11 @@ import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {
     Alert,
     Box,
-    Button,
     Card,
     CardContent,
     CardHeader,
+    Checkbox,
     Chip,
-    CircularProgress,
     Icon,
     Paper,
     TextField,
@@ -54,8 +54,8 @@ const EntryRow = styled(Box, {shouldForwardProp: (p) => p !== 'active' && p !== 
 }>(({theme, active, highlighted}) => ({
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing(1.25),
-    padding: theme.spacing(1, 2),
+    gap: theme.spacing(1),
+    padding: theme.spacing(0.75, 1, 0.75, 0),
     cursor: 'pointer',
     fontFamily: primitives.fontFamilyMono,
     fontSize: '13px',
@@ -147,7 +147,7 @@ export const AnalyzePanel = () => {
     const {data: status} = useGetStatusQuery();
     const {data: entries} = useGetDebugQuery();
     const [analyze, {isLoading}] = useAnalyzeMutation();
-    const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
+    const [selectedEntries, setSelectedEntries] = useState<Set<string>>(new Set());
     const [prompt, setPrompt] = useState('');
     const [result, setResult] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -157,10 +157,6 @@ export const AnalyzePanel = () => {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const recentEntries = useMemo(() => (entries ?? []).slice(0, 50), [entries]);
-    const currentEntry = useMemo(
-        () => recentEntries.find((e) => e.id === selectedEntry),
-        [recentEntries, selectedEntry],
-    );
 
     // Fuzzy-filter entries (with layout-aware search)
     const matched: MatchedEntry[] = useMemo(() => {
@@ -188,14 +184,42 @@ export const AnalyzePanel = () => {
         return results;
     }, [recentEntries, filter]);
 
+    const toggleEntry = useCallback((id: string) => {
+        setSelectedEntries((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) {
+                next.delete(id);
+            } else {
+                next.add(id);
+            }
+            return next;
+        });
+    }, []);
+
+    const toggleAll = useCallback(() => {
+        const visibleIds = matched.map((m) => m.entry.id);
+        setSelectedEntries((prev) => {
+            const allSelected = visibleIds.every((id) => prev.has(id));
+            if (allSelected) {
+                const next = new Set(prev);
+                visibleIds.forEach((id) => next.delete(id));
+                return next;
+            }
+            return new Set([...prev, ...visibleIds]);
+        });
+    }, [matched]);
+
     const handleAnalyze = useCallback(async () => {
-        if (!currentEntry) return;
+        if (selectedEntries.size === 0) return;
         setError(null);
         setResult(null);
 
+        const selected = recentEntries.filter((e) => selectedEntries.has(e.id));
+        const context = selected.length === 1 ? selected[0] : selected;
+
         try {
             const response = await analyze({
-                context: currentEntry as unknown as Record<string, unknown>,
+                context: context as unknown as Record<string, unknown>,
                 prompt: prompt || undefined,
             }).unwrap();
             setResult(response.analysis);
@@ -203,7 +227,7 @@ export const AnalyzePanel = () => {
             const message = extractErrorMessage(err) ?? 'Failed to analyze debug entry.';
             setError(message);
         }
-    }, [currentEntry, analyze, prompt]);
+    }, [selectedEntries, recentEntries, analyze, prompt]);
 
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent) => {
@@ -216,11 +240,11 @@ export const AnalyzePanel = () => {
             } else if (e.key === 'Enter') {
                 e.preventDefault();
                 if (highlightedIndex >= 0 && highlightedIndex < matched.length) {
-                    setSelectedEntry(matched[highlightedIndex].entry.id);
+                    toggleEntry(matched[highlightedIndex].entry.id);
                 }
             }
         },
-        [matched, highlightedIndex],
+        [matched, highlightedIndex, toggleEntry],
     );
 
     // Scroll highlighted row into view
@@ -237,11 +261,21 @@ export const AnalyzePanel = () => {
         return <Alert severity="info">Connect an LLM provider first to analyze debug entries with AI.</Alert>;
     }
 
+    const allVisibleSelected = matched.length > 0 && matched.every((m) => selectedEntries.has(m.entry.id));
+    const someVisibleSelected = matched.some((m) => selectedEntries.has(m.entry.id));
+
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, height: '100%'}}>
-            {/* Entry list with filter — matching navbar style */}
+            {/* Entry list with filter and checkboxes */}
             <Paper variant="outlined" sx={{overflow: 'hidden', borderRadius: 1.5}}>
                 <FilterRow>
+                    <Checkbox
+                        size="small"
+                        checked={allVisibleSelected}
+                        indeterminate={someVisibleSelected && !allVisibleSelected}
+                        onChange={toggleAll}
+                        sx={{ml: 0.5}}
+                    />
                     <FilterInput
                         ref={inputRef}
                         placeholder="Search by URL, method, or command..."
@@ -252,6 +286,14 @@ export const AnalyzePanel = () => {
                         }}
                         onKeyDown={handleKeyDown}
                     />
+                    {selectedEntries.size > 0 && (
+                        <Chip
+                            label={`${selectedEntries.size} selected`}
+                            size="small"
+                            color="primary"
+                            sx={{mr: 1, flexShrink: 0}}
+                        />
+                    )}
                     {filter && (
                         <Typography variant="caption" color="text.disabled" sx={{mr: 2, flexShrink: 0}}>
                             {matched.length} of {recentEntries.length}
@@ -267,7 +309,7 @@ export const AnalyzePanel = () => {
                         </Box>
                     )}
                     {matched.map(({entry, indices}, idx) => {
-                        const active = entry.id === selectedEntry;
+                        const active = selectedEntries.has(entry.id);
                         const isHighlighted = idx === highlightedIndex;
 
                         if (isDebugEntryAboutWeb(entry)) {
@@ -281,8 +323,9 @@ export const AnalyzePanel = () => {
                                     data-entry-row
                                     active={active}
                                     highlighted={isHighlighted}
-                                    onClick={() => setSelectedEntry(entry.id)}
+                                    onClick={() => toggleEntry(entry.id)}
                                 >
+                                    <Checkbox size="small" checked={active} sx={{p: 0.25, ml: 0.5}} />
                                     <MethodLabel sx={{color: methodColor(entry.request.method, theme)}}>
                                         <HighlightedText text={entry.request.method} indices={methodIndices} />
                                     </MethodLabel>
@@ -331,8 +374,9 @@ export const AnalyzePanel = () => {
                                     data-entry-row
                                     active={active}
                                     highlighted={isHighlighted}
-                                    onClick={() => setSelectedEntry(entry.id)}
+                                    onClick={() => toggleEntry(entry.id)}
                                 >
+                                    <Checkbox size="small" checked={active} sx={{p: 0.25, ml: 0.5}} />
                                     <Icon sx={{fontSize: 14, color: 'text.disabled'}}>terminal</Icon>
                                     <PathLabel>
                                         <HighlightedText text={commandText} indices={indices} />
@@ -380,8 +424,9 @@ export const AnalyzePanel = () => {
                                 data-entry-row
                                 active={active}
                                 highlighted={isHighlighted}
-                                onClick={() => setSelectedEntry(entry.id)}
+                                onClick={() => toggleEntry(entry.id)}
                             >
+                                <Checkbox size="small" checked={active} sx={{p: 0.25, ml: 0.5}} />
                                 <PathLabel>
                                     <HighlightedText text={entry.id} indices={indices} />
                                 </PathLabel>
@@ -407,7 +452,7 @@ export const AnalyzePanel = () => {
                 </Alert>
             )}
 
-            {/* Input area — chat-like, at the bottom */}
+            {/* Input area with split send/timeout button */}
             <Box sx={{display: 'flex', gap: 1, mt: 'auto'}}>
                 <TextField
                     fullWidth
@@ -424,14 +469,12 @@ export const AnalyzePanel = () => {
                     multiline
                     maxRows={3}
                 />
-                <Button
-                    variant="contained"
+                <SendButton
+                    label="Analyze"
                     onClick={handleAnalyze}
-                    disabled={isLoading || !selectedEntry}
-                    startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : undefined}
-                >
-                    Analyze
-                </Button>
+                    disabled={selectedEntries.size === 0}
+                    loading={isLoading}
+                />
             </Box>
         </Box>
     );
