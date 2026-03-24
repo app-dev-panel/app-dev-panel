@@ -43,43 +43,12 @@ final class FileStorage implements StorageInterface
     public function read(string $type, ?string $id = null): array
     {
         clearstatcache();
-        $data = [];
 
-        $gzPattern = sprintf('%s/**/%s/%s.json.gz', $this->path, $id ?? '**', $type);
-        $jsonPattern = sprintf('%s/**/%s/%s.json', $this->path, $id ?? '**', $type);
-
-        $gzFiles = glob($gzPattern, GLOB_NOSORT) ?: [];
-        $jsonFiles = glob($jsonPattern, GLOB_NOSORT) ?: [];
-
-        // Index gz files by entry directory to skip legacy duplicates
-        $gzDirs = [];
-        foreach ($gzFiles as $file) {
-            $gzDirs[dirname($file)] = true;
+        if ($id !== null) {
+            return $this->readEntry($type, $id);
         }
 
-        // Merge: prefer .json.gz, fall back to .json for legacy entries
-        $dataFiles = $gzFiles;
-        foreach ($jsonFiles as $file) {
-            if (array_key_exists(dirname($file), $gzDirs)) {
-                continue;
-            }
-
-            $dataFiles[] = $file;
-        }
-
-        uasort($dataFiles, static fn($a, $b) => filemtime($a) <=> filemtime($b));
-
-        foreach ($dataFiles as $file) {
-            $dir = dirname($file);
-            $entryId = substr($dir, strlen(dirname($file, 2)) + 1);
-            $raw = file_get_contents($file);
-            if (str_ends_with($file, '.gz')) {
-                $raw = gzdecode($raw);
-            }
-            $data[$entryId] = Json::decode($raw);
-        }
-
-        return $data;
+        return $this->readAll($type);
     }
 
     public function write(string $id, array $summary, array $data, array $objects): void
@@ -144,6 +113,86 @@ final class FileStorage implements StorageInterface
         }
 
         return $summaryData;
+    }
+
+    /**
+     * Fast path: read a single entry by ID. Uses direct file existence check instead of glob+sort.
+     */
+    private function readEntry(string $type, string $id): array
+    {
+        $dirs = glob($this->path . '/*/' . $id, GLOB_ONLYDIR | GLOB_NOSORT);
+        if ($dirs === false || $dirs === []) {
+            return [];
+        }
+
+        $dir = $dirs[0];
+        $raw = $this->readFile($dir . '/' . $type);
+        if ($raw === null) {
+            return [];
+        }
+
+        return [$id => Json::decode($raw)];
+    }
+
+    /**
+     * Read all entries of given type, sorted by modification time.
+     */
+    private function readAll(string $type): array
+    {
+        $data = [];
+
+        $gzFiles = glob(sprintf('%s/**/**/%s.json.gz', $this->path, $type), GLOB_NOSORT) ?: [];
+
+        // Only scan for legacy .json files if needed
+        $jsonFiles = glob(sprintf('%s/**/**/%s.json', $this->path, $type), GLOB_NOSORT) ?: [];
+
+        if ($jsonFiles !== []) {
+            // Index gz dirs to skip legacy duplicates
+            $gzDirs = [];
+            foreach ($gzFiles as $file) {
+                $gzDirs[dirname($file)] = true;
+            }
+
+            foreach ($jsonFiles as $file) {
+                if (array_key_exists(dirname($file), $gzDirs)) {
+                    continue;
+                }
+
+                $gzFiles[] = $file;
+            }
+        }
+
+        uasort($gzFiles, static fn($a, $b) => filemtime($a) <=> filemtime($b));
+
+        foreach ($gzFiles as $file) {
+            $dir = dirname($file);
+            $entryId = substr($dir, strlen(dirname($file, 2)) + 1);
+            $raw = file_get_contents($file);
+            if (str_ends_with($file, '.gz')) {
+                $raw = gzdecode($raw);
+            }
+            $data[$entryId] = Json::decode($raw);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Reads a storage file, trying .json.gz first, then .json fallback.
+     */
+    private function readFile(string $basePath): ?string
+    {
+        $gzPath = $basePath . '.json.gz';
+        if (file_exists($gzPath)) {
+            return gzdecode(file_get_contents($gzPath));
+        }
+
+        $jsonPath = $basePath . '.json';
+        if (file_exists($jsonPath)) {
+            return file_get_contents($jsonPath);
+        }
+
+        return null;
     }
 
     /**
