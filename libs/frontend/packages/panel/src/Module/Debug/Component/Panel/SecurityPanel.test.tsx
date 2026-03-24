@@ -4,12 +4,32 @@ import userEvent from '@testing-library/user-event';
 import {describe, expect, it} from 'vitest';
 import {SecurityPanel} from './SecurityPanel';
 
-type AccessDecision = {attribute: string; subject: string; result: string; voters: string[]};
+type AccessDecision = {
+    attribute: string;
+    subject: string;
+    result: string;
+    voters: string[];
+    duration?: number | null;
+    context?: Record<string, unknown>;
+};
+type AuthenticationEvent = {
+    type: string;
+    provider: string;
+    result: string;
+    time: number;
+    details: Record<string, unknown>;
+};
+type TokenInfo = {type: string; attributes: Record<string, unknown>; expiresAt: string | null};
+type ImpersonationInfo = {originalUser: string; impersonatedUser: string};
 type SecurityData = {
     username: string | null;
     roles: string[];
+    effectiveRoles?: string[];
     firewallName: string | null;
     authenticated: boolean;
+    token?: TokenInfo | null;
+    impersonation?: ImpersonationInfo | null;
+    authenticationEvents?: AuthenticationEvent[];
     accessDecisions: AccessDecision[];
 };
 
@@ -79,19 +99,22 @@ describe('SecurityPanel', () => {
 
     it('renders access decisions section title with counts', () => {
         const decisions = [
-            makeDecision({result: 'GRANTED'}),
-            makeDecision({result: 'DENIED', attribute: 'EDIT'}),
-            makeDecision({result: 'GRANTED', attribute: 'VIEW'}),
+            makeDecision({result: 'ACCESS_GRANTED'}),
+            makeDecision({result: 'ACCESS_DENIED', attribute: 'EDIT'}),
+            makeDecision({result: 'ACCESS_GRANTED', attribute: 'VIEW'}),
         ];
         renderWithProviders(<SecurityPanel data={makeSecurityData({accessDecisions: decisions})} />);
         expect(screen.getByText('3 access decisions (2 granted, 1 denied)')).toBeInTheDocument();
     });
 
     it('renders decision result chips', () => {
-        const decisions = [makeDecision({result: 'GRANTED'}), makeDecision({result: 'DENIED', attribute: 'DELETE'})];
+        const decisions = [
+            makeDecision({result: 'ACCESS_GRANTED'}),
+            makeDecision({result: 'ACCESS_DENIED', attribute: 'DELETE'}),
+        ];
         renderWithProviders(<SecurityPanel data={makeSecurityData({accessDecisions: decisions})} />);
-        expect(screen.getByText('GRANTED')).toBeInTheDocument();
-        expect(screen.getByText('DENIED')).toBeInTheDocument();
+        expect(screen.getByText('ACCESS_GRANTED')).toBeInTheDocument();
+        expect(screen.getByText('ACCESS_DENIED')).toBeInTheDocument();
     });
 
     it('expands decision row on click to show voters', async () => {
@@ -102,5 +125,72 @@ describe('SecurityPanel', () => {
         expect(screen.getByText('Voters')).toBeInTheDocument();
         expect(screen.getByText('RoleVoter')).toBeInTheDocument();
         expect(screen.getByText('SecurityVoter')).toBeInTheDocument();
+    });
+
+    it('renders impersonation banner', () => {
+        renderWithProviders(
+            <SecurityPanel
+                data={makeSecurityData({
+                    impersonation: {originalUser: 'admin@example.com', impersonatedUser: 'user@example.com'},
+                })}
+            />,
+        );
+        expect(screen.getByText(/Impersonating user@example.com/)).toBeInTheDocument();
+        expect(screen.getByText(/original: admin@example.com/)).toBeInTheDocument();
+    });
+
+    it('renders token info', () => {
+        renderWithProviders(
+            <SecurityPanel
+                data={makeSecurityData({token: {type: 'jwt', attributes: {sub: '123'}, expiresAt: '2026-12-31'}})}
+            />,
+        );
+        expect(screen.getByText('JWT')).toBeInTheDocument();
+        expect(screen.getByText('expires 2026-12-31')).toBeInTheDocument();
+    });
+
+    it('renders effective roles when different from assigned', () => {
+        renderWithProviders(
+            <SecurityPanel
+                data={makeSecurityData({
+                    roles: ['ROLE_ADMIN'],
+                    effectiveRoles: ['ROLE_ADMIN', 'ROLE_USER', 'ROLE_EDITOR'],
+                })}
+            />,
+        );
+        expect(screen.getByText('ROLE_USER')).toBeInTheDocument();
+        expect(screen.getByText('ROLE_EDITOR')).toBeInTheDocument();
+    });
+
+    it('renders authentication events', () => {
+        renderWithProviders(
+            <SecurityPanel
+                data={makeSecurityData({
+                    authenticationEvents: [
+                        {type: 'login', provider: 'form_login', result: 'success', time: 1234567890, details: {}},
+                        {type: 'failure', provider: 'api_key', result: 'failure', time: 1234567891, details: {}},
+                    ],
+                })}
+            />,
+        );
+        expect(screen.getByText('Authentication Events (2)')).toBeInTheDocument();
+        expect(screen.getByText('login')).toBeInTheDocument();
+        expect(screen.getByText('form_login')).toBeInTheDocument();
+    });
+
+    it('renders decision duration when present', async () => {
+        const user = userEvent.setup();
+        const decisions = [makeDecision({attribute: 'EDIT', duration: 0.0023})];
+        renderWithProviders(<SecurityPanel data={makeSecurityData({accessDecisions: decisions})} />);
+        expect(screen.getByText('2.3ms')).toBeInTheDocument();
+    });
+
+    it('renders decision context when expanded', async () => {
+        const user = userEvent.setup();
+        const decisions = [makeDecision({attribute: 'EDIT_POST', context: {route: '/admin/posts'}})];
+        renderWithProviders(<SecurityPanel data={makeSecurityData({accessDecisions: decisions})} />);
+        await user.click(screen.getByText('EDIT_POST'));
+        expect(screen.getByText('Context')).toBeInTheDocument();
+        expect(screen.getByText('route: /admin/posts')).toBeInTheDocument();
     });
 });

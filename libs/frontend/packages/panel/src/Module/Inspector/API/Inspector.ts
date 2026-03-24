@@ -159,6 +159,15 @@ type OpcacheResponse = {
     };
 };
 
+export type AuthorizationGuard = {name: string; provider: string; config: Record<string, unknown>};
+export type AuthorizationVoter = {name: string; type: string; priority: number | null};
+export type AuthorizationResponse = {
+    guards: AuthorizationGuard[];
+    roleHierarchy: Record<string, string[]>;
+    voters: AuthorizationVoter[];
+    config: Record<string, unknown>;
+};
+
 type CurlBuilderResponse = {command: string};
 
 type CheckRouteResponse = {result: boolean; action: string[]};
@@ -304,6 +313,10 @@ export const inspectorApi = createApi({
             transformResponse: (result: Response<CommandResponseType>) => result.data,
             invalidatesTags: ['inspector/composer'],
         }),
+        getAuthorization: builder.query<AuthorizationResponse, void>({
+            query: () => `authorization`,
+            transformResponse: (result: Response<AuthorizationResponse>) => result.data,
+        }),
         getMcpSettings: builder.query<{enabled: boolean}, void>({
             query: () => `mcp/settings`,
             transformResponse: (result: Response<{enabled: boolean}>) => result.data,
@@ -350,5 +363,6 @@ export const {
     useExplainQueryMutation,
     useExecuteQueryMutation,
     useGetMcpSettingsQuery,
+    useGetAuthorizationQuery,
     useUpdateMcpSettingsMutation,
 } = inspectorApi;
