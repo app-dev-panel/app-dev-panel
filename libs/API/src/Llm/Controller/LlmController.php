@@ -99,6 +99,7 @@ final class LlmController
                 'callback_url' => $callbackUrl,
                 'code_challenge' => $codeChallenge,
                 'code_challenge_method' => 'S256',
+                'key_label' => 'AppDevPanel',
             ]);
 
         return $this->responseFactory->createJsonResponse([
@@ -130,6 +131,7 @@ final class LlmController
         $exchangeBody = json_encode([
             'code' => $code,
             'code_verifier' => $codeVerifier,
+            'code_challenge_method' => 'S256',
         ], JSON_THROW_ON_ERROR);
 
         $exchangeRequest = $this->requestFactory
