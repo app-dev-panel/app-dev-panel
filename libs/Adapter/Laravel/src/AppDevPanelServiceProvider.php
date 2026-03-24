@@ -70,6 +70,7 @@ use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
@@ -213,6 +214,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'cache' => CacheCollector::class,
             'mailer' => MailerCollector::class,
             'queue' => QueueCollector::class,
+            'opentelemetry' => OpenTelemetryCollector::class,
         ];
 
         foreach ($timelineCollectors as $key => $class) {

@@ -63,6 +63,7 @@ use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
+use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
@@ -194,6 +195,7 @@ final class AppDevPanelExtension extends Extension
             'http_client' => HttpClientCollector::class,
             'var_dumper' => VarDumperCollector::class,
             'deprecation' => DeprecationCollector::class,
+            'opentelemetry' => OpenTelemetryCollector::class,
         ];
 
         foreach ($timelineCollectorMap as $key => $class) {
