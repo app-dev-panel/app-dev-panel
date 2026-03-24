@@ -329,6 +329,65 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 - `libs/Adapter/Cycle/CLAUDE.md` — Cycle ORM adapter (database schema only)
 - `libs/frontend/CLAUDE.md` — Frontend architecture
 
+## Planned Features & Integrations
+
+Tracked in [#40](https://github.com/app-dev-panel/app-dev-panel/issues/40).
+
+### Profiling & Performance
+- **Memory Profiler** — peak memory tracking, allocations per collector
+- **N+1 Query Detector** — pattern analysis in DatabaseCollector, automatic warnings
+- **Slow Request Highlighter** — configurable thresholds for requests/DB queries, visual markers in UI
+- **Flame Chart / Call Graph** — Timeline data visualized as flame chart
+
+### New Collectors
+- **SessionCollector** — session data (PSR-7, framework sessions)
+- **AuthCollector** — login attempts, token validation, permission checks
+- **RedisCollector** — Redis commands, execution time, keys
+- **ElasticsearchCollector** — ES queries and responses
+- **GraphQL Collector** — queries/mutations, resolvers, timing
+- **WebSocketCollector** — WS messages, connections
+- **FileUploadCollector** — uploaded files, sizes, MIME types
+
+### New Framework Adapters
+- **Slim Framework** — PSR-15, natural fit via PSR proxies
+- **Laminas/Mezzio** — PSR-15, straightforward integration
+- **CakePHP** — popular PHP framework
+- **CodeIgniter 4** — large user base
+- **WordPress** — hooks/filters system, huge audience
+- **Drupal** — enterprise CMS
+
+### Frontend / UX
+- **Diff View** — side-by-side comparison of two debug entries
+- **Request Replay** — re-execute HTTP request from panel (extends existing cURL builder)
+- **Bookmarks/Favorites** — bookmark specific debug entries
+- **Global Search** — full-text search across all collectors
+- **Browser Notifications** — alerts for slow requests, errors, deprecations
+- **Export** — export debug entry as JSON/HAR for sharing
+- **Keyboard Shortcuts** — keyboard navigation across panels
+
+### External Service Integrations
+- **Sentry** — send exceptions to Sentry + link back to debug entry
+- **Grafana/Prometheus** — export metrics as Prometheus endpoint
+- **OpenTelemetry** — OTLP traces/spans collector, correlation with debug entries
+- **Xdebug/PCOV** — code coverage for a specific request
+- **IDE Integration** — clickable file paths, open in PhpStorm/VSCode via protocol handler
+
+### AI Features
+- **AI Query Analyzer** — SQL explanation, optimization suggestions (EXPLAIN ANALYZE)
+- **AI Error Analyzer** — stack trace analysis, fix suggestions
+- **AI Log Summarizer** — log summarization for long request chains
+
+### Multi-app / Distributed
+- **Distributed Tracing** — correlation IDs across microservices, unified timeline
+- **Multi-app Dashboard** — single panel for multiple apps (Service Registry already exists)
+- **Remote Debug** — connect to remote server via WebSocket/SSE
+
+### Infrastructure
+- **cURL Stream Support** — TODO in `HttpStreamCollector`
+- **Storage Backends** — SQLite/Redis instead of JSON files
+- **Data Retention Policies** — auto-cleanup of old entries
+- **Authentication** — password/token protection for staging environments
+
 ## Coding Conventions
 
 - PHP: PER-CS (PER-2) via Mago, strict types, final classes where possible
