@@ -281,7 +281,7 @@ final class LlmController
             $body['prompt']
             ?? 'Analyze this debug data and provide insights, potential issues, and suggestions for improvement.';
 
-        $systemPrompt = <<<'PROMPT'
+        $instructions = <<<'PROMPT'
             You are an expert application debugger integrated into the Application Development Panel (ADP).
             You analyze debug data from PHP web applications and provide actionable insights.
 
@@ -296,9 +296,19 @@ final class LlmController
 
         $contextJson = json_encode($context, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
+        // Truncate context to avoid exceeding model context windows (especially free/small models).
+        $maxContextLength = 12000;
+        if (strlen($contextJson) > $maxContextLength) {
+            $contextJson = substr($contextJson, 0, $maxContextLength) . "\n... [truncated]";
+        }
+
+        // Merge instructions into a single user message for maximum model compatibility.
+        // Some models (especially free ones) do not support the system role.
         $messages = [
-            ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => "Here is the debug data:\n\n```json\n{$contextJson}\n```\n\n{$userPrompt}"],
+            [
+                'role' => 'user',
+                'content' => "{$instructions}\n\nHere is the debug data:\n\n```json\n{$contextJson}\n```\n\n{$userPrompt}",
+            ],
         ];
 
         $provider = $this->settings->getProvider();
@@ -442,6 +452,22 @@ final class LlmController
             $errorMessage = is_array($data['error'])
                 ? $data['error']['message'] ?? 'Unknown OpenRouter API error.'
                 : (string) $data['error'];
+
+            // Append provider-specific details when available (e.g. rate limits, context overflow).
+            if (is_array($data['error'])) {
+                $code = $data['error']['code'] ?? null;
+                $metadata = $data['error']['metadata'] ?? null;
+                $details = [];
+                if ($code !== null) {
+                    $details[] = "code: {$code}";
+                }
+                if (is_array($metadata) && isset($metadata['raw'])) {
+                    $details[] = (string) $metadata['raw'];
+                }
+                if ($details !== []) {
+                    $errorMessage .= ' (' . implode('; ', $details) . ')';
+                }
+            }
 
             return ['error' => $errorMessage];
         }
