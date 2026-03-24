@@ -8,10 +8,12 @@ import {DataType} from '@textea/json-viewer';
 import {deepUpdate} from 'immupdate';
 import * as React from 'react';
 import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 export const JsonRenderer = React.memo((props: JsonRendererProps) => {
     const [objectQuery] = useLazyGetObjectQuery();
     const debugEntry = useDebugEntry();
+    const navigate = useNavigate();
     const [data, setData] = useState(props.value);
 
     const objectLoader = async (objectString: string, pathes: (string | number)[]) => {
@@ -35,10 +37,13 @@ export const JsonRenderer = React.memo((props: JsonRendererProps) => {
                         sx={{display: 'inline-flex', alignItems: 'center', gap: 0.25, wordBreak: 'break-word'}}
                     >
                         <Link
-                            href={`/debug/object?debugEntry=${debugEntry!.id}&id=${parseObjectId(props.value)}`}
+                            component="button"
+                            onClick={() =>
+                                navigate(`/debug/object?debugEntry=${debugEntry!.id}&id=${parseObjectId(props.value)}`)
+                            }
                             underline="hover"
                             color="primary"
-                            sx={{cursor: 'pointer'}}
+                            sx={{cursor: 'pointer', font: 'inherit', verticalAlign: 'baseline'}}
                         >
                             {toObjectReference(props.value)}
                         </Link>
