@@ -15,6 +15,8 @@ import {
     Icon,
     IconButton,
     type Theme,
+    ToggleButton,
+    ToggleButtonGroup,
     Tooltip,
     Typography,
 } from '@mui/material';
@@ -32,7 +34,9 @@ type Query = {
     actions: QueryAction[];
     rowsNumber: number;
 };
-type DatabasePanelProps = {data: {queries?: Query[]; transactions?: any[]}};
+type DuplicateGroup = {key: string; count: number; indices: number[]};
+type DuplicatesData = {groups: DuplicateGroup[]; totalDuplicatedCount: number};
+type DatabasePanelProps = {data: {queries?: Query[]; transactions?: any[]; duplicates?: DuplicatesData}};
 
 function getQueryTime(actions: QueryAction[]) {
     const start = actions.find((a) => a.action === 'query.start');
@@ -84,11 +88,26 @@ const DetailBox = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
-const QueriesView = ({queries}: {queries: Query[]}) => {
+const GroupHeader = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: theme.spacing(1.5),
+    padding: theme.spacing(1, 1.5),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    cursor: 'pointer',
+    transition: 'background-color 0.1s ease',
+    backgroundColor: theme.palette.action.selected,
+    '&:hover': {backgroundColor: theme.palette.action.hover},
+}));
+
+const QueriesView = ({queries, duplicates}: {queries: Query[]; duplicates: DuplicatesData}) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+    const [viewMode, setViewMode] = useState<'flat' | 'grouped'>('flat');
+
+    const hasDuplicates = duplicates.groups.length > 0;
 
     if (!queries || queries.length === 0) {
         return <EmptyState icon="storage" title="No queries found" />;
@@ -100,29 +119,169 @@ const QueriesView = ({queries}: {queries: Query[]}) => {
 
     const totalTime = queries.reduce((sum, q) => sum + getQueryTime(q.actions), 0);
 
+    const groupedView = useMemo(() => {
+        if (!hasDuplicates || viewMode !== 'grouped') return null;
+        const filterLower = deferredFilter.toLowerCase();
+        return duplicates.groups
+            .filter((group) => !deferredFilter || group.key.toLowerCase().includes(filterLower))
+            .map((group) => ({
+                ...group,
+                items: group.indices.map((i) => queries[i]).filter(Boolean),
+                totalTime: group.indices.reduce((sum, i) => {
+                    const q = queries[i];
+                    return sum + (q ? getQueryTime(q.actions) : 0);
+                }, 0),
+            }));
+    }, [hasDuplicates, viewMode, duplicates.groups, queries, deferredFilter]);
+
     return (
         <Box>
             <SectionTitle
-                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter SQL..." />}
-            >{`${filtered.length} queries · ${formatMillisecondsAsDuration(totalTime)} total`}</SectionTitle>
-
-            {filtered.map((query, index) => {
-                const expanded = expandedIndex === index;
-                const ms = getQueryTime(query.actions);
-                const color = durationColor(ms, theme);
-
-                return (
-                    <QueryRowWithExplain
-                        key={index}
-                        query={query}
-                        expanded={expanded}
-                        ms={ms}
-                        color={color}
-                        onToggle={() => setExpandedIndex(expanded ? null : index)}
-                        onExpand={() => setExpandedIndex(index)}
+                action={
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        {hasDuplicates && (
+                            <ToggleButtonGroup
+                                value={viewMode}
+                                exclusive
+                                onChange={(_e, value) => value && setViewMode(value)}
+                                size="small"
+                                sx={{height: 28}}
+                            >
+                                <ToggleButton value="flat" sx={{fontSize: '11px', px: 1.5, textTransform: 'none'}}>
+                                    All
+                                </ToggleButton>
+                                <ToggleButton value="grouped" sx={{fontSize: '11px', px: 1.5, textTransform: 'none'}}>
+                                    <Tooltip title="Show duplicate queries (N+1)" placement="top">
+                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                            Duplicates
+                                            <Chip
+                                                label={duplicates.groups.length}
+                                                size="small"
+                                                color="warning"
+                                                sx={{fontSize: '10px', height: 18, minWidth: 20, borderRadius: 1}}
+                                            />
+                                        </Box>
+                                    </Tooltip>
+                                </ToggleButton>
+                            </ToggleButtonGroup>
+                        )}
+                        <FilterInput value={filter} onChange={setFilter} placeholder="Filter SQL..." />
+                    </Box>
+                }
+            >
+                {`${filtered.length} queries · ${formatMillisecondsAsDuration(totalTime)} total`}
+                {hasDuplicates && (
+                    <Chip
+                        label={`N+1`}
+                        size="small"
+                        color="warning"
+                        sx={{fontSize: '10px', height: 18, borderRadius: 1, ml: 1}}
                     />
-                );
-            })}
+                )}
+            </SectionTitle>
+
+            {viewMode === 'grouped' && groupedView
+                ? groupedView.map((group) => (
+                      <DuplicateQueryGroup
+                          key={group.key}
+                          group={group}
+                          queries={queries}
+                          expandedIndex={expandedIndex}
+                          onToggleExpand={setExpandedIndex}
+                      />
+                  ))
+                : filtered.map((query, index) => {
+                      const expanded = expandedIndex === index;
+                      const ms = getQueryTime(query.actions);
+                      const color = durationColor(ms, theme);
+
+                      return (
+                          <QueryRowWithExplain
+                              key={index}
+                              query={query}
+                              expanded={expanded}
+                              ms={ms}
+                              color={color}
+                              onToggle={() => setExpandedIndex(expanded ? null : index)}
+                              onExpand={() => setExpandedIndex(index)}
+                          />
+                      );
+                  })}
+        </Box>
+    );
+};
+
+const DuplicateQueryGroup = ({
+    group,
+    queries,
+    expandedIndex,
+    onToggleExpand,
+}: {
+    group: DuplicateGroup & {items: Query[]; totalTime: number};
+    queries: Query[];
+    expandedIndex: number | null;
+    onToggleExpand: (index: number | null) => void;
+}) => {
+    const theme = useTheme();
+    const [expanded, setExpanded] = useState(false);
+
+    const sqlPreview = group.key;
+    const verb = sqlPreview.trim().split(/\s/)[0]?.toUpperCase();
+
+    return (
+        <Box>
+            <GroupHeader onClick={() => setExpanded(!expanded)}>
+                <Chip
+                    label={verb}
+                    size="small"
+                    sx={{
+                        fontWeight: 700,
+                        fontSize: '9px',
+                        height: 18,
+                        minWidth: 50,
+                        backgroundColor: 'primary.main',
+                        color: 'common.white',
+                        borderRadius: 1,
+                        flexShrink: 0,
+                        mt: '2px',
+                    }}
+                />
+                <SqlCell sx={{color: 'text.primary'}}>{sqlPreview}</SqlCell>
+                <Chip
+                    label={`${group.count}x`}
+                    size="small"
+                    color="warning"
+                    sx={{fontWeight: 700, fontSize: '11px', height: 22, borderRadius: 1, flexShrink: 0}}
+                />
+                <DurationCell sx={{color: durationColor(group.totalTime, theme)}}>
+                    {formatMillisecondsAsDuration(group.totalTime)}
+                </DurationCell>
+                <IconButton size="small" sx={{flexShrink: 0}}>
+                    <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                </IconButton>
+            </GroupHeader>
+            <Collapse in={expanded}>
+                <Box sx={{pl: 2}}>
+                    {group.indices.map((originalIndex) => {
+                        const query = queries[originalIndex];
+                        if (!query) return null;
+                        const isExpanded = expandedIndex === originalIndex;
+                        const ms = getQueryTime(query.actions);
+                        const color = durationColor(ms, theme);
+                        return (
+                            <QueryRowWithExplain
+                                key={originalIndex}
+                                query={query}
+                                expanded={isExpanded}
+                                ms={ms}
+                                color={color}
+                                onToggle={() => onToggleExpand(isExpanded ? null : originalIndex)}
+                                onExpand={() => onToggleExpand(originalIndex)}
+                            />
+                        );
+                    })}
+                </Box>
+            </Collapse>
         </Box>
     );
 };
@@ -491,5 +650,7 @@ export const DatabasePanel = ({data}: DatabasePanelProps) => {
         return <EmptyState icon="storage" title="No queries found" />;
     }
 
-    return <QueriesView queries={data.queries} />;
+    const duplicates: DuplicatesData = data.duplicates ?? {groups: [], totalDuplicatedCount: 0};
+
+    return <QueriesView queries={data.queries} duplicates={duplicates} />;
 };

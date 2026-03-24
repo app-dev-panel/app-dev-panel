@@ -72,6 +72,14 @@ const StatLabel = styled(Typography)({fontFamily: primitives.fontFamilyMono, fon
 // Helpers
 // ---------------------------------------------------------------------------
 
+const hasN1Indicator = (entry: DebugEntry): boolean => {
+    return (
+        (entry.db?.duplicateGroups ?? 0) > 0 ||
+        (entry.view?.duplicateGroups ?? 0) > 0 ||
+        (entry.queue?.duplicateGroups ?? 0) > 0
+    );
+};
+
 const methodColor = (method: string, theme: Theme): string => {
     switch (method.toUpperCase()) {
         case 'GET':
@@ -201,6 +209,23 @@ export const ListPage = () => {
                                     </StatLabel>
                                 </StatCell>
                             )}
+                            {hasN1Indicator(entry) && (
+                                <Tooltip title="Duplicate operations detected (N+1)">
+                                    <Chip
+                                        label="N+1"
+                                        size="small"
+                                        color="warning"
+                                        sx={{
+                                            fontWeight: 700,
+                                            fontSize: '9px',
+                                            height: 18,
+                                            minWidth: 32,
+                                            borderRadius: 1,
+                                            flexShrink: 0,
+                                        }}
+                                    />
+                                </Tooltip>
+                            )}
                             {entry.exception && (
                                 <Tooltip title={entry.exception.message}>
                                     <Icon sx={{fontSize: 15, color: 'error.main'}}>error</Icon>
@@ -240,6 +265,23 @@ export const ListPage = () => {
                                     <Icon sx={{fontSize: 13, color: 'text.disabled'}}>description</Icon>
                                     <StatLabel sx={{color: 'text.disabled'}}>{entry.logger.total}</StatLabel>
                                 </StatCell>
+                            )}
+                            {hasN1Indicator(entry) && (
+                                <Tooltip title="Duplicate operations detected (N+1)">
+                                    <Chip
+                                        label="N+1"
+                                        size="small"
+                                        color="warning"
+                                        sx={{
+                                            fontWeight: 700,
+                                            fontSize: '9px',
+                                            height: 18,
+                                            minWidth: 32,
+                                            borderRadius: 1,
+                                            flexShrink: 0,
+                                        }}
+                                    />
+                                </Tooltip>
                             )}
                             <StatusChip
                                 label={exitOk ? 'OK' : `EXIT ${entry.command?.exitCode}`}

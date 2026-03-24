@@ -18,6 +18,7 @@ use function is_countable;
 final class QueueCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
+    use DuplicateDetectionTrait;
 
     /** @var array<string, array<int, array{message: mixed, middlewares: array}>> */
     private array $pushes = [];
@@ -98,6 +99,10 @@ final class QueueCollector implements SummaryCollectorInterface
             'messages' => $this->messages,
             'messageCount' => count($this->messages),
             'failedCount' => count(array_filter($this->messages, static fn(array $m) => $m['failed'])),
+            'duplicates' => $this->detectDuplicates(
+                $this->messages,
+                static fn(array $message) => $message['messageClass'],
+            ),
         ];
     }
 
@@ -106,6 +111,8 @@ final class QueueCollector implements SummaryCollectorInterface
         if (!$this->isActive()) {
             return [];
         }
+
+        $duplicates = $this->detectDuplicates($this->messages, static fn(array $message) => $message['messageClass']);
 
         return [
             'queue' => [
@@ -116,6 +123,8 @@ final class QueueCollector implements SummaryCollectorInterface
                     : 0, $this->processingMessages)),
                 'messageCount' => count($this->messages),
                 'failedCount' => count(array_filter($this->messages, static fn(array $m) => $m['failed'])),
+                'duplicateGroups' => count($duplicates['groups']),
+                'totalDuplicatedCount' => $duplicates['totalDuplicatedCount'],
             ],
         ];
     }

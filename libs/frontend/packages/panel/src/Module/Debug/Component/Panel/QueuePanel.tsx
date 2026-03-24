@@ -6,9 +6,21 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Box, Chip, Collapse, Icon, IconButton, Tab, type Theme, Typography} from '@mui/material';
+import {
+    Box,
+    Chip,
+    Collapse,
+    Icon,
+    IconButton,
+    Tab,
+    type Theme,
+    ToggleButton,
+    ToggleButtonGroup,
+    Tooltip,
+    Typography,
+} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {SyntheticEvent, useDeferredValue, useState} from 'react';
+import {SyntheticEvent, useDeferredValue, useMemo, useState} from 'react';
 
 type Message = {
     messageClass: string;
@@ -21,6 +33,9 @@ type Message = {
     message?: any;
 };
 
+type DuplicateGroup = {key: string; count: number; indices: number[]};
+type DuplicatesData = {groups: DuplicateGroup[]; totalDuplicatedCount: number};
+
 type QueuePanelProps = {
     data: {
         pushes: Record<string, {message: any; middlewares: any[]}[]>;
@@ -29,6 +44,7 @@ type QueuePanelProps = {
         messages?: Message[];
         messageCount?: number;
         failedCount?: number;
+        duplicates?: DuplicatesData;
     };
 };
 
@@ -109,6 +125,18 @@ function messageDurationColor(ms: number, theme: Theme): string {
     return theme.palette.success.main;
 }
 
+const GroupHeader = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: theme.spacing(1.5),
+    padding: theme.spacing(1, 1.5),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    cursor: 'pointer',
+    transition: 'background-color 0.1s ease',
+    backgroundColor: theme.palette.action.selected,
+    '&:hover': {backgroundColor: theme.palette.action.hover},
+}));
+
 const MessageClassCell = styled(Typography)({
     fontFamily: primitives.fontFamilyMono,
     fontSize: '12px',
@@ -125,11 +153,178 @@ const MessageDurationCell = styled(Typography)({
     width: 80,
 });
 
-const MessagesView = ({messages}: {messages: Message[]}) => {
+const MessageItem = ({message, expanded, onToggle}: {message: Message; expanded: boolean; onToggle: () => void}) => {
     const theme = useTheme();
+    const color = messageDurationColor(message.duration, theme);
+    return (
+        <Box>
+            <ItemRow expanded={expanded} onClick={onToggle}>
+                <MessageClassCell>{shortClassName(message.messageClass)}</MessageClassCell>
+                <Chip
+                    label={message.bus}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                        fontFamily: primitives.fontFamilyMono,
+                        fontSize: '10px',
+                        height: 20,
+                        borderRadius: 1,
+                        flexShrink: 0,
+                    }}
+                />
+                {message.transport && (
+                    <Chip
+                        label={message.transport}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                            fontFamily: primitives.fontFamilyMono,
+                            fontSize: '10px',
+                            height: 20,
+                            borderRadius: 1,
+                            flexShrink: 0,
+                        }}
+                    />
+                )}
+                {message.failed ? (
+                    <Chip
+                        label="FAILED"
+                        size="small"
+                        sx={{
+                            fontWeight: 700,
+                            fontSize: '9px',
+                            height: 18,
+                            minWidth: 50,
+                            borderRadius: 1,
+                            backgroundColor: theme.palette.error.main,
+                            color: 'common.white',
+                            flexShrink: 0,
+                        }}
+                    />
+                ) : message.handled ? (
+                    <Chip
+                        label="HANDLED"
+                        size="small"
+                        sx={{
+                            fontWeight: 700,
+                            fontSize: '9px',
+                            height: 18,
+                            minWidth: 50,
+                            borderRadius: 1,
+                            backgroundColor: theme.palette.success.main,
+                            color: 'common.white',
+                            flexShrink: 0,
+                        }}
+                    />
+                ) : message.dispatched ? (
+                    <Chip
+                        label="DISPATCHED"
+                        size="small"
+                        sx={{
+                            fontWeight: 700,
+                            fontSize: '9px',
+                            height: 18,
+                            minWidth: 50,
+                            borderRadius: 1,
+                            backgroundColor: theme.palette.warning.main,
+                            color: 'common.white',
+                            flexShrink: 0,
+                        }}
+                    />
+                ) : null}
+                <MessageDurationCell sx={{color}}>{formatMillisecondsAsDuration(message.duration)}</MessageDurationCell>
+                <IconButton size="small" sx={{flexShrink: 0}}>
+                    <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                </IconButton>
+            </ItemRow>
+            <Collapse in={expanded}>
+                <DetailBox>
+                    <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                        Full Class Name
+                    </Typography>
+                    <Typography
+                        sx={{
+                            fontFamily: primitives.fontFamilyMono,
+                            fontSize: '12px',
+                            color: 'text.secondary',
+                            wordBreak: 'break-all',
+                        }}
+                    >
+                        {message.messageClass}
+                    </Typography>
+                    {message.message != null && (
+                        <Box sx={{mt: 1.5}}>
+                            <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                                Message Data
+                            </Typography>
+                            <JsonRenderer value={message.message} />
+                        </Box>
+                    )}
+                </DetailBox>
+            </Collapse>
+        </Box>
+    );
+};
+
+const DuplicateMessageGroup = ({
+    group,
+    messages,
+    expandedIndex,
+    onToggleExpand,
+}: {
+    group: DuplicateGroup & {items: Message[]};
+    messages: Message[];
+    expandedIndex: number | null;
+    onToggleExpand: (index: number | null) => void;
+}) => {
+    const theme = useTheme();
+    const [expanded, setExpanded] = useState(false);
+    const totalDuration = group.indices.reduce((sum, i) => sum + (messages[i]?.duration ?? 0), 0);
+
+    return (
+        <Box>
+            <GroupHeader onClick={() => setExpanded(!expanded)}>
+                <MessageClassCell>{shortClassName(group.key)}</MessageClassCell>
+                <Chip
+                    label={`${group.count}x`}
+                    size="small"
+                    color="warning"
+                    sx={{fontWeight: 700, fontSize: '11px', height: 22, borderRadius: 1, flexShrink: 0}}
+                />
+                <MessageDurationCell sx={{color: messageDurationColor(totalDuration, theme)}}>
+                    {formatMillisecondsAsDuration(totalDuration)}
+                </MessageDurationCell>
+                <IconButton size="small" sx={{flexShrink: 0}}>
+                    <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                </IconButton>
+            </GroupHeader>
+            <Collapse in={expanded}>
+                <Box sx={{pl: 2}}>
+                    {group.indices.map((originalIndex) => {
+                        const message = messages[originalIndex];
+                        if (!message) return null;
+                        return (
+                            <MessageItem
+                                key={originalIndex}
+                                message={message}
+                                expanded={expandedIndex === originalIndex}
+                                onToggle={() => onToggleExpand(expandedIndex === originalIndex ? null : originalIndex)}
+                            />
+                        );
+                    })}
+                </Box>
+            </Collapse>
+        </Box>
+    );
+};
+
+const MessagesView = ({messages, duplicates}: {messages: Message[]; duplicates: DuplicatesData}) => {
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+    const [viewMode, setViewMode] = useState<'flat' | 'grouped'>('flat');
+
+    const hasDuplicates = duplicates.groups.length > 0;
 
     if (!messages || messages.length === 0) {
         return <EmptyState icon="send" title="No messages found" />;
@@ -139,127 +334,77 @@ const MessagesView = ({messages}: {messages: Message[]}) => {
         ? messages.filter((m) => m.messageClass.toLowerCase().includes(deferredFilter.toLowerCase()))
         : messages;
 
+    const groupedView = useMemo(() => {
+        if (!hasDuplicates || viewMode !== 'grouped') return null;
+        const filterLower = deferredFilter.toLowerCase();
+        return duplicates.groups
+            .filter((group) => !deferredFilter || group.key.toLowerCase().includes(filterLower))
+            .map((group) => ({...group, items: group.indices.map((i) => messages[i]).filter(Boolean)}));
+    }, [hasDuplicates, viewMode, duplicates.groups, messages, deferredFilter]);
+
     return (
         <Box>
-            <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter messages..." />}>
-                {`${filtered.length} messages`}
-            </SectionTitle>
-            {filtered.map((message, index) => {
-                const expanded = expandedIndex === index;
-                const color = messageDurationColor(message.duration, theme);
-                return (
-                    <Box key={index}>
-                        <ItemRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
-                            <MessageClassCell>{shortClassName(message.messageClass)}</MessageClassCell>
-                            <Chip
-                                label={message.bus}
+            <SectionTitle
+                action={
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        {hasDuplicates && (
+                            <ToggleButtonGroup
+                                value={viewMode}
+                                exclusive
+                                onChange={(_e, value) => value && setViewMode(value)}
                                 size="small"
-                                variant="outlined"
-                                sx={{
-                                    fontFamily: primitives.fontFamilyMono,
-                                    fontSize: '10px',
-                                    height: 20,
-                                    borderRadius: 1,
-                                    flexShrink: 0,
-                                }}
-                            />
-                            {message.transport && (
-                                <Chip
-                                    label={message.transport}
-                                    size="small"
-                                    variant="outlined"
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
-                                        fontSize: '10px',
-                                        height: 20,
-                                        borderRadius: 1,
-                                        flexShrink: 0,
-                                    }}
-                                />
-                            )}
-                            {message.failed ? (
-                                <Chip
-                                    label="FAILED"
-                                    size="small"
-                                    sx={{
-                                        fontWeight: 700,
-                                        fontSize: '9px',
-                                        height: 18,
-                                        minWidth: 50,
-                                        borderRadius: 1,
-                                        backgroundColor: theme.palette.error.main,
-                                        color: 'common.white',
-                                        flexShrink: 0,
-                                    }}
-                                />
-                            ) : message.handled ? (
-                                <Chip
-                                    label="HANDLED"
-                                    size="small"
-                                    sx={{
-                                        fontWeight: 700,
-                                        fontSize: '9px',
-                                        height: 18,
-                                        minWidth: 50,
-                                        borderRadius: 1,
-                                        backgroundColor: theme.palette.success.main,
-                                        color: 'common.white',
-                                        flexShrink: 0,
-                                    }}
-                                />
-                            ) : message.dispatched ? (
-                                <Chip
-                                    label="DISPATCHED"
-                                    size="small"
-                                    sx={{
-                                        fontWeight: 700,
-                                        fontSize: '9px',
-                                        height: 18,
-                                        minWidth: 50,
-                                        borderRadius: 1,
-                                        backgroundColor: theme.palette.warning.main,
-                                        color: 'common.white',
-                                        flexShrink: 0,
-                                    }}
-                                />
-                            ) : null}
-                            <MessageDurationCell sx={{color}}>
-                                {formatMillisecondsAsDuration(message.duration)}
-                            </MessageDurationCell>
-                            <IconButton size="small" sx={{flexShrink: 0}}>
-                                <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
-                            </IconButton>
-                        </ItemRow>
-                        <Collapse in={expanded}>
-                            <DetailBox>
-                                <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
-                                    Full Class Name
-                                </Typography>
-                                <Typography
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
-                                        fontSize: '12px',
-                                        color: 'text.secondary',
-                                        wordBreak: 'break-all',
-                                    }}
-                                >
-                                    {message.messageClass}
-                                </Typography>
-                                {message.message != null && (
-                                    <Box sx={{mt: 1.5}}>
-                                        <Typography
-                                            sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}
-                                        >
-                                            Message Data
-                                        </Typography>
-                                        <JsonRenderer value={message.message} />
-                                    </Box>
-                                )}
-                            </DetailBox>
-                        </Collapse>
+                                sx={{height: 28}}
+                            >
+                                <ToggleButton value="flat" sx={{fontSize: '11px', px: 1.5, textTransform: 'none'}}>
+                                    All
+                                </ToggleButton>
+                                <ToggleButton value="grouped" sx={{fontSize: '11px', px: 1.5, textTransform: 'none'}}>
+                                    <Tooltip title="Show duplicate messages (N+1)" placement="top">
+                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                            Duplicates
+                                            <Chip
+                                                label={duplicates.groups.length}
+                                                size="small"
+                                                color="warning"
+                                                sx={{fontSize: '10px', height: 18, minWidth: 20, borderRadius: 1}}
+                                            />
+                                        </Box>
+                                    </Tooltip>
+                                </ToggleButton>
+                            </ToggleButtonGroup>
+                        )}
+                        <FilterInput value={filter} onChange={setFilter} placeholder="Filter messages..." />
                     </Box>
-                );
-            })}
+                }
+            >
+                {`${filtered.length} messages`}
+                {hasDuplicates && (
+                    <Chip
+                        label={`N+1`}
+                        size="small"
+                        color="warning"
+                        sx={{fontSize: '10px', height: 18, borderRadius: 1, ml: 1}}
+                    />
+                )}
+            </SectionTitle>
+            {viewMode === 'grouped' && groupedView
+                ? groupedView.map((group) => (
+                      <DuplicateMessageGroup
+                          key={group.key}
+                          group={group}
+                          messages={messages}
+                          expandedIndex={expandedIndex}
+                          onToggleExpand={setExpandedIndex}
+                      />
+                  ))
+                : filtered.map((message, index) => (
+                      <MessageItem
+                          key={index}
+                          message={message}
+                          expanded={expandedIndex === index}
+                          onToggle={() => setExpandedIndex(expandedIndex === index ? null : index)}
+                      />
+                  ))}
         </Box>
     );
 };
@@ -450,7 +595,12 @@ export const QueuePanel = ({data}: QueuePanelProps) => {
 
     // Only messages — render directly without tabs
     if (hasMessages && !hasQueueOps) {
-        return <MessagesView messages={data.messages ?? []} />;
+        return (
+            <MessagesView
+                messages={data.messages ?? []}
+                duplicates={data.duplicates ?? {groups: [], totalDuplicatedCount: 0}}
+            />
+        );
     }
 
     // Only queue ops — render queue tabs without messages tab
@@ -560,7 +710,10 @@ const QueueTabsView = ({
                 </Box>
                 {showMessages && (
                     <TabPanel value="messages" sx={{padding: 0}}>
-                        <MessagesView messages={data.messages ?? []} />
+                        <MessagesView
+                            messages={data.messages ?? []}
+                            duplicates={data.duplicates ?? {groups: [], totalDuplicatedCount: 0}}
+                        />
                     </TabPanel>
                 )}
                 <TabPanel value="pushes" sx={{padding: 0}}>

@@ -27,10 +27,15 @@ final class ViewCollectorTest extends AbstractCollectorTestCase
     {
         parent::checkCollectedData($data);
 
-        $this->assertCount(2, $data);
-        $this->assertSame('/views/layout.php', $data[0]['file']);
-        $this->assertSame('<html>...</html>', $data[0]['output']);
-        $this->assertSame(['title' => 'Home'], $data[0]['parameters']);
+        $this->assertArrayHasKey('renders', $data);
+        $this->assertArrayHasKey('duplicates', $data);
+        $this->assertCount(2, $data['renders']);
+        $this->assertSame('/views/layout.php', $data['renders'][0]['file']);
+        $this->assertSame('<html>...</html>', $data['renders'][0]['output']);
+        $this->assertSame(['title' => 'Home'], $data['renders'][0]['parameters']);
+
+        $this->assertSame([], $data['duplicates']['groups']);
+        $this->assertSame(0, $data['duplicates']['totalDuplicatedCount']);
     }
 
     protected function checkSummaryData(array $data): void

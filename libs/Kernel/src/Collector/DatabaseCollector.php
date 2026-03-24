@@ -6,6 +6,9 @@ namespace AppDevPanel\Kernel\Collector;
 
 use Throwable;
 
+use function array_values;
+use function count;
+
 /**
  * Captures SQL queries and transactions from the application.
  *
@@ -18,6 +21,7 @@ use Throwable;
 final class DatabaseCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
+    use DuplicateDetectionTrait;
 
     private array $queries = [];
     private array $transactions = [];
@@ -157,9 +161,14 @@ final class DatabaseCollector implements SummaryCollectorInterface
             return [];
         }
 
+        $queries = array_values($this->queries);
+
         return [
-            'queries' => $this->queries,
+            'queries' => $queries,
             'transactions' => $this->transactions,
+            'duplicates' => $this->detectDuplicates($queries, static fn(array $query) => $query['rawSql'] !== ''
+                ? $query['rawSql']
+                : $query['sql']),
         ];
     }
 
@@ -168,6 +177,11 @@ final class DatabaseCollector implements SummaryCollectorInterface
         if (!$this->isActive()) {
             return [];
         }
+
+        $queries = array_values($this->queries);
+        $duplicates = $this->detectDuplicates($queries, static fn(array $query) => $query['rawSql'] !== ''
+            ? $query['rawSql']
+            : $query['sql']);
 
         return [
             'db' => [
@@ -185,6 +199,8 @@ final class DatabaseCollector implements SummaryCollectorInterface
                     )),
                     'total' => count($this->transactions),
                 ],
+                'duplicateGroups' => count($duplicates['groups']),
+                'totalDuplicatedCount' => $duplicates['totalDuplicatedCount'],
             ],
         ];
     }

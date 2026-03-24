@@ -17,7 +17,13 @@ export type DebugEntry = {
     timeline?: {total: number};
     'var-dumper'?: {total: number};
     validator?: {total: number; valid: number; invalid: number};
-    queue?: {countPushes: number; countStatuses: number; countProcessingMessages: number};
+    queue?: {
+        countPushes: number;
+        countStatuses: number;
+        countProcessingMessages: number;
+        duplicateGroups?: number;
+        totalDuplicatedCount?: number;
+    };
     http?: {count: number; totalTime: number};
     fs_stream?: {read?: number; write?: number; mkdir?: number};
     http_stream?: [];
@@ -40,7 +46,12 @@ export type DebugEntry = {
     middleware?: {total: number};
     asset?: {bundles: {total: number}};
     exception?: {class: string; message: string; line: string; file: string; code: string};
-    db?: {queries: {error: number; total: number}; transactions: {error: number; total: number}};
+    db?: {
+        queries: {error: number; total: number};
+        transactions: {error: number; total: number};
+        duplicateGroups?: number;
+        totalDuplicatedCount?: number;
+    };
     [name: string]: any;
 };
 type SummaryResponseType = {data: DebugEntry[]};
