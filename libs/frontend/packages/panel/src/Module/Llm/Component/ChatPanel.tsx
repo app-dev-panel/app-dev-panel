@@ -1,0 +1,116 @@
+import {useChatMutation, useGetStatusQuery} from '@app-dev-panel/panel/Module/Llm/API/Llm';
+import {Alert, Box, Button, CircularProgress, Paper, TextField, Typography} from '@mui/material';
+import {useCallback, useRef, useState} from 'react';
+
+type Message = {role: 'user' | 'assistant'; content: string};
+
+export const ChatPanel = () => {
+    const {data: status} = useGetStatusQuery();
+    const [chat, {isLoading}] = useChatMutation();
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [input, setInput] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const handleSend = useCallback(async () => {
+        if (!input.trim() || isLoading) return;
+
+        const userMessage: Message = {role: 'user', content: input.trim()};
+        const newMessages = [...messages, userMessage];
+        setMessages(newMessages);
+        setInput('');
+        setError(null);
+
+        try {
+            const result = await chat({
+                messages: newMessages.map((m) => ({role: m.role, content: m.content})),
+            }).unwrap();
+
+            const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
+            setMessages((prev) => [...prev, {role: 'assistant', content: assistantContent}]);
+        } catch {
+            setError('Failed to get response from LLM.');
+        }
+
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({behavior: 'smooth'}), 100);
+    }, [input, messages, chat, isLoading]);
+
+    if (!status?.connected) {
+        return <Alert severity="info">Connect your OpenRouter account first to use the chat feature.</Alert>;
+    }
+
+    return (
+        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, height: '100%'}}>
+            <Paper
+                variant="outlined"
+                sx={{
+                    flex: 1,
+                    minHeight: 300,
+                    maxHeight: 500,
+                    overflow: 'auto',
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1.5,
+                }}
+            >
+                {messages.length === 0 && (
+                    <Typography variant="body2" color="text.secondary" sx={{textAlign: 'center', mt: 4}}>
+                        Ask questions about your application, debug data, or get development advice.
+                    </Typography>
+                )}
+                {messages.map((msg, i) => (
+                    <Box
+                        key={i}
+                        sx={{
+                            alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                            maxWidth: '80%',
+                            p: 1.5,
+                            borderRadius: 2,
+                            bgcolor: msg.role === 'user' ? 'primary.main' : 'background.default',
+                            color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
+                        }}
+                    >
+                        <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
+                            {msg.content}
+                        </Typography>
+                    </Box>
+                ))}
+                {isLoading && (
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        <CircularProgress size={16} />
+                        <Typography variant="body2" color="text.secondary">
+                            Thinking...
+                        </Typography>
+                    </Box>
+                )}
+                <div ref={messagesEndRef} />
+            </Paper>
+            {error && (
+                <Alert severity="error" onClose={() => setError(null)}>
+                    {error}
+                </Alert>
+            )}
+            <Box sx={{display: 'flex', gap: 1}}>
+                <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Ask about your application..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSend();
+                        }
+                    }}
+                    multiline
+                    maxRows={3}
+                />
+                <Button variant="contained" onClick={handleSend} disabled={isLoading || !input.trim()}>
+                    Send
+                </Button>
+            </Box>
+        </Box>
+    );
+};

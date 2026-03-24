@@ -20,6 +20,7 @@ use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
+use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
 use AppDevPanel\Api\Router\Route;
@@ -217,11 +218,44 @@ final class ApiRoutes
         ];
     }
 
+    /**
+     * @return Route[]
+     */
+    public static function llmRoutes(): array
+    {
+        return [
+            new Route('GET', '/debug/api/llm/status', [LlmController::class, 'status'], 'debug/api/llm/status'),
+            new Route(
+                'POST',
+                '/debug/api/llm/oauth/initiate',
+                [LlmController::class, 'oauthInitiate'],
+                'debug/api/llm/oauth/initiate',
+            ),
+            new Route(
+                'POST',
+                '/debug/api/llm/oauth/exchange',
+                [LlmController::class, 'oauthExchange'],
+                'debug/api/llm/oauth/exchange',
+            ),
+            new Route(
+                'POST',
+                '/debug/api/llm/disconnect',
+                [LlmController::class, 'disconnect'],
+                'debug/api/llm/disconnect',
+            ),
+            new Route('POST', '/debug/api/llm/model', [LlmController::class, 'setModel'], 'debug/api/llm/model'),
+            new Route('GET', '/debug/api/llm/models', [LlmController::class, 'models'], 'debug/api/llm/models'),
+            new Route('POST', '/debug/api/llm/chat', [LlmController::class, 'chat'], 'debug/api/llm/chat'),
+            new Route('POST', '/debug/api/llm/analyze', [LlmController::class, 'analyze'], 'debug/api/llm/analyze'),
+        ];
+    }
+
     public static function register(Router $router): void
     {
         $router->addRoutes(self::debugRoutes());
         $router->addRoutes(self::ingestionRoutes());
         $router->addRoutes(self::serviceRoutes());
         $router->addRoutes(self::inspectorRoutes());
+        $router->addRoutes(self::llmRoutes());
     }
 }
