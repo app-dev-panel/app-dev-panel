@@ -5,11 +5,20 @@
     "keywords": [
         "debug",
         "debug-panel",
+        "debugger",
+        "profiler",
         "cycle-orm",
+        "cycle",
         "database",
         "schema",
         "inspector",
-        "developer-tools"
+        "database-inspector",
+        "monitoring",
+        "observability",
+        "ai",
+        "llm",
+        "developer-tools",
+        "devtools"
     ],
     "license": "MIT",
     "require": {

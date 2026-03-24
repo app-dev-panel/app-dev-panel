@@ -5,10 +5,18 @@
     "keywords": [
         "debug",
         "debug-panel",
+        "debugger",
         "cli",
         "console",
         "debug-server",
-        "developer-tools"
+        "profiler",
+        "monitoring",
+        "observability",
+        "diagnostics",
+        "ai",
+        "llm",
+        "developer-tools",
+        "devtools"
     ],
     "minimum-stability": "dev",
     "require": {

@@ -5,11 +5,22 @@
     "keywords": [
         "debug",
         "debug-panel",
+        "debugger",
         "profiler",
         "php-profiler",
         "collectors",
+        "tracing",
+        "logging",
+        "observability",
+        "monitoring",
+        "diagnostics",
+        "performance",
+        "apm",
+        "ai",
+        "llm",
         "psr",
-        "developer-tools"
+        "developer-tools",
+        "devtools"
     ],
     "minimum-stability": "dev",
     "prefer-stable": true,

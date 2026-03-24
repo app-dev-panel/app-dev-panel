@@ -5,11 +5,27 @@
     "keywords": [
         "debug",
         "debug-panel",
+        "debugger",
+        "debugbar",
         "profiler",
         "laravel",
         "laravel-debug",
+        "laravel-debugbar",
         "laravel-profiler",
-        "developer-tools"
+        "laravel-telescope",
+        "telescope",
+        "inspector",
+        "monitoring",
+        "observability",
+        "tracing",
+        "logging",
+        "performance",
+        "apm",
+        "ai",
+        "llm",
+        "ai-debugging",
+        "developer-tools",
+        "devtools"
     ],
     "license": "MIT",
     "require": {

@@ -5,11 +5,24 @@
     "keywords": [
         "debug",
         "debug-panel",
+        "debugger",
+        "debugbar",
         "profiler",
         "yii",
         "yii3",
         "yiisoft",
-        "developer-tools"
+        "yii-debug",
+        "inspector",
+        "monitoring",
+        "observability",
+        "tracing",
+        "logging",
+        "performance",
+        "apm",
+        "ai",
+        "llm",
+        "developer-tools",
+        "devtools"
     ],
     "require": {
         "php": "^8.4",

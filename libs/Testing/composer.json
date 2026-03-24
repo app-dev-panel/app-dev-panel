@@ -8,7 +8,11 @@
         "testing",
         "fixtures",
         "e2e",
-        "developer-tools"
+        "integration-testing",
+        "quality-assurance",
+        "ai",
+        "developer-tools",
+        "devtools"
     ],
     "minimum-stability": "dev",
     "require": {

@@ -5,11 +5,24 @@
     "keywords": [
         "debug",
         "debug-panel",
+        "debugger",
+        "debugbar",
         "profiler",
         "yii2",
         "yii2-extension",
         "yii2-debug",
-        "developer-tools"
+        "yii-debug-toolbar",
+        "inspector",
+        "monitoring",
+        "observability",
+        "tracing",
+        "logging",
+        "performance",
+        "apm",
+        "ai",
+        "llm",
+        "developer-tools",
+        "devtools"
     ],
     "license": "MIT",
     "require": {

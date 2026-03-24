@@ -10,7 +10,17 @@
         "inspector",
         "rest-api",
         "sse",
-        "developer-tools"
+        "openapi",
+        "observability",
+        "monitoring",
+        "tracing",
+        "ai",
+        "llm",
+        "ai-debugging",
+        "ingestion",
+        "microservices",
+        "developer-tools",
+        "devtools"
     ],
     "license": "BSD-3-Clause",
     "minimum-stability": "dev",

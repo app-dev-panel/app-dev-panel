@@ -5,11 +5,26 @@
     "keywords": [
         "debug",
         "debug-panel",
+        "debugger",
+        "debugbar",
         "profiler",
         "symfony",
         "symfony-bundle",
         "symfony-debug",
-        "developer-tools"
+        "symfony-profiler",
+        "web-profiler",
+        "inspector",
+        "monitoring",
+        "observability",
+        "tracing",
+        "logging",
+        "performance",
+        "apm",
+        "ai",
+        "llm",
+        "ai-debugging",
+        "developer-tools",
+        "devtools"
     ],
     "license": "MIT",
     "require": {
