@@ -7,6 +7,7 @@ import {
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {TreeView} from '@app-dev-panel/panel/Module/Inspector/Component/TreeView/TreeView';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
+import {SearchFilter, type SearchMatch} from '@app-dev-panel/sdk/Component/SearchFilter';
 import {parseFilePath, parsePathLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {scrollToAnchor} from '@app-dev-panel/sdk/Helper/scrollToAnchor';
@@ -156,6 +157,7 @@ export const FileExplorerPage = () => {
     const [lazyGetFilesQuery, getFilesQueryInfo] = useLazyGetFilesQuery();
     const [lazyGetClassQuery, getClassQueryInfo] = useLazyGetClassQuery();
     const [tree, setTree] = useState<InspectorFile[]>([]);
+    const [filteredTree, setFilteredTree] = useState<InspectorFile[]>([]);
     const [file, setFile] = useState<InspectorFileContent | null>(null);
 
     useEffect(() => {
@@ -196,6 +198,11 @@ export const FileExplorerPage = () => {
         setSearchParams({path});
     };
 
+    const getFileSearchText = useCallback((f: InspectorFile) => f.baseName, []);
+    const handleFilterChange = useCallback((results: SearchMatch<InspectorFile>[]) => {
+        setFilteredTree(results.map((r) => r.item));
+    }, []);
+
     const editorUrl = file ? getEditorUrl(file.path, file.startLine) : null;
     const directoryEditorUrl = !file ? getEditorUrl(path) : null;
 
@@ -232,9 +239,17 @@ export const FileExplorerPage = () => {
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         <PathBreadcrumbs path={path} onClick={handleBreadcrumbClick} />
                         <ActionButtons editorUrl={directoryEditorUrl} fullPath={path} showCopy={path !== '/'} />
+                        <Box sx={{ml: 'auto'}}>
+                            <SearchFilter
+                                items={tree}
+                                getSearchText={getFileSearchText}
+                                placeholder="Filter files..."
+                                onChange={handleFilterChange}
+                            />
+                        </Box>
                     </Box>
                     <Paper variant="outlined" sx={{borderRadius: 2}}>
-                        <TreeView tree={tree} onSelect={changePath} />
+                        <TreeView tree={filteredTree} onSelect={changePath} />
                     </Paper>
                 </Box>
             )}
