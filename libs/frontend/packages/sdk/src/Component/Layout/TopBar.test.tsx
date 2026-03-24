@@ -69,8 +69,8 @@ describe('TopBar', () => {
 
         // Editor Integration section is visible
         expect(screen.getByText('Editor Integration')).toBeInTheDocument();
-        // The select shows the current preset label
-        expect(screen.getByText('None (File Explorer only)')).toBeInTheDocument();
+        // The autocomplete shows the current preset label
+        expect(screen.getByLabelText('Editor')).toHaveValue('None (File Explorer only)');
     });
 
     it('shows custom template field when editor is custom', async () => {
