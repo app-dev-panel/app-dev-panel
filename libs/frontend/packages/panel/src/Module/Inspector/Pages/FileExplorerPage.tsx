@@ -11,9 +11,9 @@ import {parseFilePath, parsePathLineAnchor} from '@app-dev-panel/sdk/Helper/file
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {scrollToAnchor} from '@app-dev-panel/sdk/Helper/scrollToAnchor';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
-import {ArrowBack, FolderOpen, Lock, OpenInNew, Person, Storage} from '@mui/icons-material';
-import {Box, Breadcrumbs, Button, IconButton, Link, Paper, Tooltip, Typography} from '@mui/material';
-import {useEffect, useLayoutEffect, useState} from 'react';
+import {ContentCopy, FolderOpen, Lock, OpenInNew, Person, Storage} from '@mui/icons-material';
+import {Box, Breadcrumbs, IconButton, Link, Paper, Tooltip, Typography} from '@mui/material';
+import {useCallback, useEffect, useLayoutEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
 type PathBreadcrumbsProps = {onClick: (nodeId: string) => void; path: string};
@@ -25,12 +25,12 @@ const PathBreadcrumbs = ({path, onClick}: PathBreadcrumbsProps) => {
     useBreadcrumbs(() => ['Inspector', 'File Explorer']);
 
     return (
-        <Breadcrumbs>
+        <Breadcrumbs sx={{minWidth: 0}}>
             <Link
                 underline="hover"
                 color="inherit"
                 href={'#'}
-                onClick={(e) => {
+                onClick={() => {
                     onClick('/');
                     return false;
                 }}
@@ -38,14 +38,16 @@ const PathBreadcrumbs = ({path, onClick}: PathBreadcrumbsProps) => {
                 @root
             </Link>
             {paths.map((directory, index) => {
+                fullPath.push(directory);
+                const currentPath = '/' + fullPath.join('/');
+
                 if (index === paths.length - 1) {
                     return (
-                        <Typography key={index} color="text.primary">
+                        <Typography key={index} color="text.primary" sx={{fontWeight: 600}}>
                             {directory}
                         </Typography>
                     );
                 }
-                fullPath.push(directory);
 
                 return (
                     <Link
@@ -53,8 +55,8 @@ const PathBreadcrumbs = ({path, onClick}: PathBreadcrumbsProps) => {
                         underline="hover"
                         color="inherit"
                         href={'#'}
-                        onClick={(e) => {
-                            onClick('/' + fullPath.join('/'));
+                        onClick={() => {
+                            onClick(currentPath);
                             return false;
                         }}
                     >
@@ -63,6 +65,41 @@ const PathBreadcrumbs = ({path, onClick}: PathBreadcrumbsProps) => {
                 );
             })}
         </Breadcrumbs>
+    );
+};
+
+type ActionButtonsProps = {editorUrl: string | null; fullPath: string};
+
+const ActionButtons = ({editorUrl, fullPath}: ActionButtonsProps) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = useCallback(() => {
+        navigator.clipboard.writeText(fullPath);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+    }, [fullPath]);
+
+    return (
+        <Box sx={{display: 'flex', alignItems: 'center', flexShrink: 0}}>
+            <Tooltip title={copied ? 'Copied!' : 'Copy path'}>
+                <IconButton size="small" onClick={handleCopy} sx={{color: copied ? 'success.main' : undefined}}>
+                    <ContentCopy sx={{fontSize: 16}} />
+                </IconButton>
+            </Tooltip>
+            {editorUrl && (
+                <Tooltip title="Open in Editor">
+                    <IconButton
+                        size="small"
+                        component="a"
+                        href={editorUrl}
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        sx={{color: 'primary.main'}}
+                    >
+                        <OpenInNew sx={{fontSize: 16}} />
+                    </IconButton>
+                </Tooltip>
+            )}
+        </Box>
     );
 };
 
@@ -158,52 +195,22 @@ export const FileExplorerPage = () => {
     };
 
     const editorUrl = file ? getEditorUrl(file.path, file.startLine) : null;
-    const directoryEditorUrl = !file && path !== '/' ? getEditorUrl(path) : null;
+    const directoryEditorUrl = !file ? getEditorUrl(path) : null;
+
+    const handleBreadcrumbClick = (clickedPath: string) => {
+        if (file) {
+            setFile(null);
+        }
+        changePath(clickedPath);
+    };
 
     return (
         <>
             {file && (
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5}}>
-                        <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<ArrowBack />}
-                            onClick={() => {
-                                setFile(null);
-                                changePath(file.directory);
-                            }}
-                            sx={{flexShrink: 0}}
-                        >
-                            Back
-                        </Button>
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                fontWeight: 600,
-                                fontFamily: "'JetBrains Mono', monospace",
-                                fontSize: '14px',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                minWidth: 0,
-                            }}
-                        >
-                            {file.path}
-                        </Typography>
-                        {editorUrl && (
-                            <Tooltip title="Open in Editor">
-                                <IconButton
-                                    size="small"
-                                    component="a"
-                                    href={editorUrl}
-                                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                    sx={{flexShrink: 0, color: 'primary.main'}}
-                                >
-                                    <OpenInNew sx={{fontSize: 18}} />
-                                </IconButton>
-                            </Tooltip>
-                        )}
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        <PathBreadcrumbs path={file.path} onClick={handleBreadcrumbClick} />
+                        <ActionButtons editorUrl={editorUrl} fullPath={file.path} />
                     </Box>
 
                     <FileMetaBar file={file} />
@@ -220,35 +227,9 @@ export const FileExplorerPage = () => {
             )}
             {!file && (
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5}}>
-                        {path !== '/' && (
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={<ArrowBack />}
-                                onClick={() => {
-                                    const parent = path.replace(/\/[^/]+\/?$/, '') || '/';
-                                    changePath(parent);
-                                }}
-                                sx={{flexShrink: 0}}
-                            >
-                                Back
-                            </Button>
-                        )}
-                        <PathBreadcrumbs path={path} onClick={changePath} />
-                        {directoryEditorUrl && (
-                            <Tooltip title="Open in Editor">
-                                <IconButton
-                                    size="small"
-                                    component="a"
-                                    href={directoryEditorUrl}
-                                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                    sx={{flexShrink: 0, color: 'primary.main'}}
-                                >
-                                    <OpenInNew sx={{fontSize: 18}} />
-                                </IconButton>
-                            </Tooltip>
-                        )}
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        <PathBreadcrumbs path={path} onClick={handleBreadcrumbClick} />
+                        <ActionButtons editorUrl={directoryEditorUrl} fullPath={path} />
                     </Box>
                     <Paper variant="outlined" sx={{borderRadius: 2}}>
                         <TreeView tree={tree} onSelect={changePath} />
