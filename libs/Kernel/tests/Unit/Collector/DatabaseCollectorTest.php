@@ -34,9 +34,10 @@ final class DatabaseCollectorTest extends AbstractCollectorTestCase
     {
         $this->assertArrayHasKey('queries', $data);
         $this->assertArrayHasKey('transactions', $data);
+        $this->assertArrayHasKey('duplicates', $data);
         $this->assertCount(1, $data['queries']);
 
-        $query = $data['queries']['q1'];
+        $query = $data['queries'][0];
         $this->assertSame('SELECT * FROM users WHERE id = ?', $query['sql']);
         $this->assertSame('SELECT * FROM users WHERE id = 1', $query['rawSql']);
         $this->assertSame('success', $query['status']);
@@ -44,6 +45,9 @@ final class DatabaseCollectorTest extends AbstractCollectorTestCase
         $this->assertCount(2, $query['actions']);
         $this->assertSame('query.start', $query['actions'][0]['action']);
         $this->assertSame('query.end', $query['actions'][1]['action']);
+
+        $this->assertSame([], $data['duplicates']['groups']);
+        $this->assertSame(0, $data['duplicates']['totalDuplicatedCount']);
     }
 
     protected function checkSummaryData(array $data): void
@@ -83,8 +87,8 @@ final class DatabaseCollectorTest extends AbstractCollectorTestCase
         $collector->collectQueryError('e1', new \RuntimeException('syntax error'));
 
         $data = $collector->getCollected();
-        $this->assertSame('error', $data['queries']['e1']['status']);
-        $this->assertInstanceOf(\RuntimeException::class, $data['queries']['e1']['exception']);
+        $this->assertSame('error', $data['queries'][0]['status']);
+        $this->assertInstanceOf(\RuntimeException::class, $data['queries'][0]['exception']);
 
         $summary = $collector->getSummary();
         $this->assertSame(1, $summary['db']['queries']['error']);

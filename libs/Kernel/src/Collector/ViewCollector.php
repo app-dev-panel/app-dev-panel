@@ -15,6 +15,7 @@ use function count;
 final class ViewCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
+    use DuplicateDetectionTrait;
 
     /** @var array<int, array{file: string, output: string, parameters: array}> */
     private array $renders = [];
@@ -43,7 +44,10 @@ final class ViewCollector implements SummaryCollectorInterface
             return [];
         }
 
-        return $this->renders;
+        return [
+            'renders' => $this->renders,
+            'duplicates' => $this->detectDuplicates($this->renders, static fn(array $render) => $render['file']),
+        ];
     }
 
     public function getSummary(): array
@@ -52,9 +56,13 @@ final class ViewCollector implements SummaryCollectorInterface
             return [];
         }
 
+        $duplicates = $this->detectDuplicates($this->renders, static fn(array $render) => $render['file']);
+
         return [
             'view' => [
                 'total' => count($this->renders),
+                'duplicateGroups' => count($duplicates['groups']),
+                'totalDuplicatedCount' => $duplicates['totalDuplicatedCount'],
             ],
         ];
     }
