@@ -377,7 +377,7 @@ export const DashboardPage = () => {
                                     {table.columns} cols
                                 </Typography>
                                 <Typography variant="body2" sx={{fontWeight: 600, color: 'text.secondary'}}>
-                                    {table.records.toLocaleString()}
+                                    {table.records.toLocaleString()} records
                                 </Typography>
                             </RowBox>
                         ))
