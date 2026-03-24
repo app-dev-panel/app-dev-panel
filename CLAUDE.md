@@ -29,6 +29,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 ├── libs/
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
 │   ├── API/                      # HTTP API: debug endpoints, inspector endpoints, SSE
+│   ├── McpServer/                # MCP server: AI assistant integration (stdio + HTTP)
 │   ├── Cli/                      # CLI commands: debug server, reset, broadcast, query
 │   ├── Testing/                  # Test fixtures: definitions, runner, CLI command
 │   ├── Adapter/
@@ -43,7 +44,9 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │           ├── toolbar/              # Embeddable toolbar widget
 │           └── sdk/                  # Shared SDK (components, API clients, helpers)
 ├── CLAUDE.md                     # This file
-└── docs/                         # Global documentation
+└── docs/
+    ├── mcp-server-plan.md        # MCP server design plan (phases, tools, resources)
+    └── ...                       # Other global documentation
 ```
 
 ## Architecture
@@ -51,9 +54,10 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 ADP follows a **layered architecture**:
 
 1. **Kernel** — Core engine. Manages debugger lifecycle, data collectors, storage, and proxy system. Framework-independent.
-2. **API** — HTTP layer. Exposes debug data and inspector endpoints via REST + SSE. Framework-independent.
-3. **Adapter** — Framework bridge. Wires Kernel collectors into a specific framework's DI, events, and middleware.
-4. **Frontend** — React SPA. Consumes the API and renders debug/inspector UI.
+2. **API** — HTTP layer. Exposes debug data and inspector endpoints via REST + SSE + MCP. Framework-independent.
+3. **McpServer** — MCP (Model Context Protocol) server. Exposes debug data tools to AI assistants via stdio and HTTP transports.
+4. **Adapter** — Framework bridge. Wires Kernel collectors into a specific framework's DI, events, and middleware.
+5. **Frontend** — React SPA. Consumes the API and renders debug/inspector UI.
 
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
@@ -208,7 +212,9 @@ GitHub Actions runs on every push and PR:
 | Adapter-Yii2 | `libs/Adapter/Yii2` | 95 | 0 | 0.1s | **57.3%** (373/651) |
 | Adapter-Cycle | `libs/Adapter/Cycle` | 10 | 0 | 0.02s | — |
 | Cli | `libs/Cli` | 6 | 0 | 0.02s | **41.1%** (30/73) |
-| **Total** | **all libs** | **701** | **16** | **~1m 22s** | **66.7%** (3135/4702) |
+| McpServer | `libs/McpServer` | 48 | 0 | 0.02s | — |
+| McpServer (API) | `libs/API` (Mcp controller) | 6 | 0 | 0.02s | — |
+| **Total** | **all libs** | **755** | **16** | **~1m 22s** | — |
 
 E2E suite (54 tests) requires Chrome + ChromeDriver and runs separately via `make test-frontend-e2e`.
 
@@ -320,6 +326,7 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 
 - `libs/Kernel/CLAUDE.md` — Core engine internals
 - `libs/API/CLAUDE.md` — HTTP API endpoints and middleware
+- `libs/McpServer/CLAUDE.md` — MCP server (AI assistant integration)
 - `libs/Cli/CLAUDE.md` — CLI commands
 - `libs/Testing/CLAUDE.md` — Test fixtures and runner
 - `libs/Adapter/Yiisoft/CLAUDE.md` — Yii 3 adapter integration

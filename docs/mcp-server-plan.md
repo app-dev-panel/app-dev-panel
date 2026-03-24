@@ -1,6 +1,21 @@
 # MCP Server for ADP — Detailed Plan
 
-Status: Planning. Date: 2026-03-24.
+Status: **Phase 1-2 implemented** (core + debug tools + HTTP transport). Date: 2026-03-24.
+
+### Implementation Status
+
+| Phase | Status | Details |
+|-------|--------|---------|
+| Phase 1: Core infrastructure | **Done** | McpServer, StdioTransport, ToolInterface, ToolRegistry, bin/adp-mcp |
+| Phase 2: Debug tools | **Done** | 6 tools: list_debug_entries, view_debug_entry, search_logs, analyze_exception, view_database_queries, view_timeline |
+| Phase 3: Inspector tools | Planned | list_routes, check_route, database_schema, query_database, etc. |
+| Phase 4: Resources | Planned | debug://entries, debug://schema, debug://routes |
+| Phase 5: CLI + config | **Partial** | mcp:serve command done. Config options pending. |
+| Phase 6: Adapter integration | **Partial** | HTTP transport via ApiApplication done. Per-adapter DI wiring pending. |
+
+**Bonus (not in original plan)**: HTTP transport via `POST /debug/api/mcp` — MCP runs inside ADP HTTP server.
+
+Module docs: `libs/McpServer/CLAUDE.md`
 
 ---
 
