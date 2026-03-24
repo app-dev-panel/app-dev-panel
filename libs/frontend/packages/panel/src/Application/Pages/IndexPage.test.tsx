@@ -30,8 +30,8 @@ const stubInspectorGitApi = createApi({
     endpoints: () => ({}),
 });
 
-const stubGiiApi = createApi({
-    reducerPath: 'api.gii',
+const stubGenCodeApi = createApi({
+    reducerPath: 'api.genCode',
     baseQuery: () => ({data: {generators: []}}),
     endpoints: (builder) => ({getGenerators: builder.query<unknown[], void>({query: () => '/generator'})}),
 });
@@ -44,7 +44,7 @@ const renderIndexPage = (favoriteUrls: string[] = []) => {
             [debugApi.reducerPath]: debugApi.reducer,
             [stubInspectorApi.reducerPath]: stubInspectorApi.reducer,
             [stubInspectorGitApi.reducerPath]: stubInspectorGitApi.reducer,
-            [stubGiiApi.reducerPath]: stubGiiApi.reducer,
+            [stubGenCodeApi.reducerPath]: stubGenCodeApi.reducer,
         },
         preloadedState: {
             application: {
@@ -65,7 +65,7 @@ const renderIndexPage = (favoriteUrls: string[] = []) => {
                 debugApi.middleware,
                 stubInspectorApi.middleware,
                 stubInspectorGitApi.middleware,
-                stubGiiApi.middleware,
+                stubGenCodeApi.middleware,
             ),
     });
 
@@ -136,7 +136,7 @@ describe('IndexPage (Settings)', () => {
         renderIndexPage();
         expect(screen.getByText('Debug')).toBeInTheDocument();
         expect(screen.getByText('Inspector')).toBeInTheDocument();
-        expect(screen.getByText('Gii')).toBeInTheDocument();
+        expect(screen.getByText('GenCode')).toBeInTheDocument();
     });
 
     it('renders backend URL input', () => {

@@ -1,11 +1,11 @@
-import {GiiGenerator, usePostDiffMutation, usePostGenerateMutation} from '@app-dev-panel/panel/Module/Gii/API/Gii';
-import {FileDiffDialog} from '@app-dev-panel/panel/Module/Gii/Component/FileDiffDialog';
-import {FilePreviewDialog} from '@app-dev-panel/panel/Module/Gii/Component/FilePreviewDialog';
-import {StepProps} from '@app-dev-panel/panel/Module/Gii/Component/GeneratorSteps/Step.types';
-import {mapErrorsToForm} from '@app-dev-panel/panel/Module/Gii/Component/errorMapper';
-import {matchSeverityByFileState} from '@app-dev-panel/panel/Module/Gii/Component/matchSeverity';
-import {Context} from '@app-dev-panel/panel/Module/Gii/Context/Context';
-import {FileOperationEnum, FileStateEnum, GiiFile} from '@app-dev-panel/panel/Module/Gii/Types/FIle.types';
+import {GenCodeGenerator, usePostDiffMutation, usePostGenerateMutation} from '@app-dev-panel/panel/Module/GenCode/API/GenCode';
+import {FileDiffDialog} from '@app-dev-panel/panel/Module/GenCode/Component/FileDiffDialog';
+import {FilePreviewDialog} from '@app-dev-panel/panel/Module/GenCode/Component/FilePreviewDialog';
+import {StepProps} from '@app-dev-panel/panel/Module/GenCode/Component/GeneratorSteps/Step.types';
+import {mapErrorsToForm} from '@app-dev-panel/panel/Module/GenCode/Component/errorMapper';
+import {matchSeverityByFileState} from '@app-dev-panel/panel/Module/GenCode/Component/matchSeverity';
+import {Context} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
+import {FileOperationEnum, FileStateEnum, GenCodeFile} from '@app-dev-panel/panel/Module/GenCode/Types/FIle.types';
 import {yup} from '@app-dev-panel/sdk/Adapter/yup';
 import {
     Box,
@@ -40,7 +40,7 @@ function getStateLabel(state: FileStateEnum) {
     return result;
 }
 
-function createValidationSchema(files: GiiFile[]) {
+function createValidationSchema(files: GenCodeFile[]) {
     const rulesSet: Record<string, any> = {};
     files.map(({id}, index) => {
         rulesSet[id] = yup.number().required().oneOf([5, 6, 7]);
@@ -49,7 +49,7 @@ function createValidationSchema(files: GiiFile[]) {
     return yup.object(rulesSet);
 }
 
-function FileAction({file, generator}: {file: GiiFile; generator: GiiGenerator}) {
+function FileAction({file, generator}: {file: GenCodeFile; generator: GenCodeGenerator}) {
     const context = useContext(Context);
     const form = useFormContext();
     const [value, setValue] = useState(form.getValues(file.id));

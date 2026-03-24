@@ -1,6 +1,6 @@
-import {StepProps} from '@app-dev-panel/panel/Module/Gii/Component/GeneratorSteps/Step.types';
-import {matchSeverityByResultStatus} from '@app-dev-panel/panel/Module/Gii/Component/matchSeverity';
-import {Context} from '@app-dev-panel/panel/Module/Gii/Context/Context';
+import {StepProps} from '@app-dev-panel/panel/Module/GenCode/Component/GeneratorSteps/Step.types';
+import {matchSeverityByResultStatus} from '@app-dev-panel/panel/Module/GenCode/Component/matchSeverity';
+import {Context} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
 import {Alert, AlertTitle, Box, Button, ButtonGroup} from '@mui/material';
 import {useContext} from 'react';
 

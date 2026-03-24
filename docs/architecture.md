@@ -117,7 +117,7 @@ Console commands for debug server operations:
 
 React SPA that consumes the API.
 
-- **Modules**: Debug, Inspector, Gii, OpenAPI, Frames -- each implements `ModuleInterface` with routes, reducers, middlewares
+- **Modules**: Debug, Inspector, GenCode, OpenAPI, Frames -- each implements `ModuleInterface` with routes, reducers, middlewares
 - **SDK**: Shared library with API clients (RTK Query), components, helpers, Redux slices
 - **Toolbar**: Lightweight embeddable widget for in-page debugging
 - **Code splitting**: Inspector pages use `React.lazy()` + `Suspense`

@@ -1,8 +1,8 @@
-import {usePostPreviewMutation} from '@app-dev-panel/panel/Module/Gii/API/Gii';
-import {FormInput} from '@app-dev-panel/panel/Module/Gii/Component/FormInput';
-import {StepProps} from '@app-dev-panel/panel/Module/Gii/Component/GeneratorSteps/Step.types';
-import {mapErrorsToForm} from '@app-dev-panel/panel/Module/Gii/Component/errorMapper';
-import {Context} from '@app-dev-panel/panel/Module/Gii/Context/Context';
+import {usePostPreviewMutation} from '@app-dev-panel/panel/Module/GenCode/API/GenCode';
+import {FormInput} from '@app-dev-panel/panel/Module/GenCode/Component/FormInput';
+import {StepProps} from '@app-dev-panel/panel/Module/GenCode/Component/GeneratorSteps/Step.types';
+import {mapErrorsToForm} from '@app-dev-panel/panel/Module/GenCode/Component/errorMapper';
+import {Context} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
 import {createYupValidationSchema} from '@app-dev-panel/sdk/Adapter/yup/yii.validator';
 import {yupResolver} from '@hookform/resolvers/yup/dist/yup';
 import {Box, Button, ButtonGroup} from '@mui/material';

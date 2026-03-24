@@ -75,7 +75,7 @@ npm i @app-dev-panel/panel
     - Composer (requiring packages, `composer.json` and `composer.lock` inspection)
         - Explore both `composer.json` and `composer.lock` files
         - Switch any package version
-- Gii
+- GenCode
     - Generators
         - Controller generator
 

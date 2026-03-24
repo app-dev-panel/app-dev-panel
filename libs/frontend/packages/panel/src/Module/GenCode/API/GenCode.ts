@@ -1,43 +1,43 @@
 import {createBaseQuery} from '@app-dev-panel/sdk/API/createBaseQuery';
-import {GiiGeneratorAttribute} from '@app-dev-panel/sdk/Types/Gii';
+import {GenCodeGeneratorAttribute} from '@app-dev-panel/sdk/Types/GenCode';
 import {createApi} from '@reduxjs/toolkit/query/react';
 
-export type GiiGenerator = {
+export type GenCodeGenerator = {
     id: string;
     description: string;
     name: string;
-    attributes: Record<string, GiiGeneratorAttribute>;
+    attributes: Record<string, GenCodeGeneratorAttribute>;
     [name: string]: any;
 };
-type SummaryResponseType = {generators: GiiGenerator[]};
+type SummaryResponseType = {generators: GenCodeGenerator[]};
 type PreviewResponseType = {files: any[]; operations: any[]; errors: {[name: string]: any} | undefined};
 
-type GiiPreviewType = {generator: string; parameters: any};
-type GiiGenerateType = {generator: string; parameters: any; answers: any};
-type GiiDiffType = {generator: string; parameters: any; fileId: string};
-export const giiApi = createApi({
-    reducerPath: 'api.gii',
-    baseQuery: createBaseQuery('/gii/api'),
+type GenCodePreviewType = {generator: string; parameters: any};
+type GenCodeGenerateType = {generator: string; parameters: any; answers: any};
+type GenCodeDiffType = {generator: string; parameters: any; fileId: string};
+export const genCodeApi = createApi({
+    reducerPath: 'api.genCode',
+    baseQuery: createBaseQuery('/gen-code/api'),
     endpoints: (builder) => ({
-        getGenerators: builder.query<GiiGenerator[], void>({
+        getGenerators: builder.query<GenCodeGenerator[], void>({
             query: () => `/generator`,
-            transformResponse: (result: SummaryResponseType) => (result.generators as GiiGenerator[]) || [],
+            transformResponse: (result: SummaryResponseType) => (result.generators as GenCodeGenerator[]) || [],
         }),
-        postPreview: builder.mutation<PreviewResponseType, GiiPreviewType>({
+        postPreview: builder.mutation<PreviewResponseType, GenCodePreviewType>({
             query: ({generator, parameters}) => ({
                 url: `/generator/${generator}/preview`,
                 method: 'POST',
                 body: {parameters},
             }),
         }),
-        postGenerate: builder.mutation<PreviewResponseType, GiiGenerateType>({
+        postGenerate: builder.mutation<PreviewResponseType, GenCodeGenerateType>({
             query: ({generator, parameters, answers}) => ({
                 url: `/generator/${generator}/generate`,
                 method: 'POST',
                 body: {parameters, answers},
             }),
         }),
-        postDiff: builder.mutation<PreviewResponseType, GiiDiffType>({
+        postDiff: builder.mutation<PreviewResponseType, GenCodeDiffType>({
             query: ({generator, parameters, fileId}) => ({
                 url: `/generator/${generator}/diff?file=${fileId}`,
                 method: 'POST',
@@ -53,4 +53,4 @@ export const {
     usePostPreviewMutation,
     usePostGenerateMutation,
     usePostDiffMutation,
-} = giiApi;
+} = genCodeApi;

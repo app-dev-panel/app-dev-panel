@@ -125,7 +125,7 @@ registerRoute(
 //     }
 // });
 
-const debuggerApiRoutesRegExp = /\/debug|gii|inspect\//i;
+const debuggerApiRoutesRegExp = /\/debug|gen-code|inspect\//i;
 self.addEventListener('fetch', (event) => {
     const request = event.request;
     if (request.mode === 'navigate') {

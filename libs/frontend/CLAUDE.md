@@ -30,7 +30,7 @@ packages/
 │   │   └── Module/         # Feature modules
 │   │       ├── Debug/      # Debug data viewer
 │   │       ├── Inspector/  # Application inspector (20+ pages)
-│   │       ├── Gii/        # Code generator UI
+│   │       ├── GenCode/    # Code generator UI
 │   │       ├── OpenApi/    # Swagger UI integration
 │   │       └── Frames/     # iFrame support for remote panels
 │   └── vite.config.ts
@@ -116,7 +116,7 @@ All pages share a single unified layout (`Application/Component/Layout.tsx`):
 │ Insp.  │                                    │
 │  ├ Cfg │                                    │
 │  └ ... │                                    │
-│ Gii    │                                    │
+│ GenCode│                                    │
 │ OpenAPI│                                    │
 │ Frames │                                    │
 └────────┴────────────────────────────────────┘
@@ -127,7 +127,7 @@ All pages share a single unified layout (`Application/Component/Layout.tsx`):
 **Debug Layout** (`Module/Debug/Pages/Layout.tsx`) is a thin wrapper that handles collector data loading — reads `collector` from URL params, fetches collector info, and renders the appropriate panel component. It has no shell (TopBar, sidebar) of its own.
 
 **UnifiedSidebar** sections:
-- Home, Debug (expandable: Overview + collectors + All Entries), Inspector (expandable: 14 sub-pages), Gii, Open API, Frames
+- Home, Debug (expandable: Overview + collectors + All Entries), Inspector (expandable: 14 sub-pages), GenCode, Open API, Frames
 - Debug sub-items are dynamic (built from current entry's collectors)
 - Inspector sub-items are static (config, events, routes, etc.)
 
@@ -218,7 +218,7 @@ Reducers:
 ├── api.debug            # RTK Query cache (debug endpoints)
 ├── api.inspector        # RTK Query cache (inspector endpoints)
 ├── api.inspector.git    # RTK Query cache (git endpoints)
-└── api.gii              # RTK Query cache (gii endpoints)
+└── api.genCode          # RTK Query cache (genCode endpoints)
 ```
 
 Key features:
@@ -236,7 +236,7 @@ Key features:
 | `debugApi` | `/debug/api/` | getDebug, getCollectorInfo, getObject |
 | `inspectorApi` | `/debug/api/inspector/` | getParameters, getConfiguration, getTable, runCommand, doRequest (20+) |
 | `gitApi` | `/debug/api/inspector/git/` | getSummary, getLog, checkout, command |
-| `giiApi` | `/gii/api` | getGenerators, postPreview, postGenerate, postDiff |
+| `genCodeApi` | `/gen-code/api` | getGenerators, postPreview, postGenerate, postDiff |
 
 **Server-Sent Events (SSE)**:
 - Endpoint: `/debug/api/event-stream`

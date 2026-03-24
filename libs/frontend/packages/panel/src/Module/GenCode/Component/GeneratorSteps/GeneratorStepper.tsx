@@ -1,8 +1,8 @@
-import {GiiGenerator} from '@app-dev-panel/panel/Module/Gii/API/Gii';
-import {GenerateStep} from '@app-dev-panel/panel/Module/Gii/Component/GeneratorSteps/GenerateStep';
-import {PreviewStep} from '@app-dev-panel/panel/Module/Gii/Component/GeneratorSteps/PreviewStep';
-import {ResultStep} from '@app-dev-panel/panel/Module/Gii/Component/GeneratorSteps/ResultStep';
-import {Context} from '@app-dev-panel/panel/Module/Gii/Context/Context';
+import {GenCodeGenerator} from '@app-dev-panel/panel/Module/GenCode/API/GenCode';
+import {GenerateStep} from '@app-dev-panel/panel/Module/GenCode/Component/GeneratorSteps/GenerateStep';
+import {PreviewStep} from '@app-dev-panel/panel/Module/GenCode/Component/GeneratorSteps/PreviewStep';
+import {ResultStep} from '@app-dev-panel/panel/Module/GenCode/Component/GeneratorSteps/ResultStep';
+import {Context} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
 import {StepContent} from '@mui/material';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
@@ -16,7 +16,7 @@ const steps = [
     {component: ResultStep, label: 'Result'},
 ];
 
-type GeneratorStepperProps = {generator: GiiGenerator};
+type GeneratorStepperProps = {generator: GenCodeGenerator};
 
 export const GeneratorStepper = ({generator}: GeneratorStepperProps) => {
     const [activeStepIndex, setActiveStepIndex] = React.useState(0);

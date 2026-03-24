@@ -1,12 +1,12 @@
-import {GiiFile} from '@app-dev-panel/panel/Module/Gii/Types/FIle.types';
+import {GenCodeFile} from '@app-dev-panel/panel/Module/GenCode/Types/FIle.types';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 
-export type FileDiffDialogProps = {open: boolean; file: GiiFile; content: string; onClose: () => void};
+export type FilePreviewDialogProps = {open: boolean; file: GenCodeFile; onClose: () => void};
 
-export function FileDiffDialog(props: FileDiffDialogProps) {
-    const {onClose, file, content, open} = props;
+export function FilePreviewDialog(props: FilePreviewDialogProps) {
+    const {onClose, file, open} = props;
 
     const handleClose = () => {
         onClose();
@@ -15,7 +15,7 @@ export function FileDiffDialog(props: FileDiffDialogProps) {
     return (
         <Dialog onClose={handleClose} open={open} fullWidth maxWidth="md">
             <DialogTitle>{file.relativePath}</DialogTitle>
-            <CodeHighlight language="diff" code={content} />
+            <CodeHighlight language={file.type} code={file.content} />
         </Dialog>
     );
 }

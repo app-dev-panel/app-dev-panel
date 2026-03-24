@@ -31,10 +31,10 @@
 | `/inspector/git/log` | GitLogPage | Git commit log |
 | `/inspector/cache` | CachePage | Cache contents |
 
-### Gii Module (code generation)
+### GenCode Module (code generation)
 | Route | Page | Purpose |
 |-------|------|---------|
-| `/gii` | Layout | Select generator, fill form, preview, generate |
+| `/gen-code` | Layout | Select generator, fill form, preview, generate |
 
 ### OpenAPI Module
 | Route | Page | Purpose |

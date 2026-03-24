@@ -5,7 +5,7 @@
   "types": "dist/index.d.ts",
   "keywords": [
     "debug",
-    "gii",
+    "gen-code",
     "app-dev-panel",
     "sdk"
   ],

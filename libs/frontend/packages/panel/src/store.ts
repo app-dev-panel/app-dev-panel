@@ -1,5 +1,5 @@
 import {middlewares as FramesMiddlewares, reducers as FramesReducers} from '@app-dev-panel/panel/Module/Frames/api';
-import {middlewares as GiiMiddlewares, reducers as GiiReducers} from '@app-dev-panel/panel/Module/Gii/api';
+import {middlewares as GenCodeMiddlewares, reducers as GenCodeReducers} from '@app-dev-panel/panel/Module/GenCode/api';
 import {
     middlewares as InspectorMiddlewares,
     reducers as InspectorReducers,
@@ -24,7 +24,7 @@ const rootReducer = combineReducers({
     ...ApplicationReducers,
     ...InspectorReducers,
     ...DebugReducers,
-    ...GiiReducers,
+    ...GenCodeReducers,
     ...OpenApiReducers,
     ...FramesReducers,
     // ...ToolbarApiReducers,
@@ -42,7 +42,7 @@ export const createStore = (preloadedState: PreloadedStateShapeFromReducersMapOb
                     ...ApplicationMiddlewares,
                     ...InspectorMiddlewares,
                     ...DebugMiddlewares,
-                    ...GiiMiddlewares,
+                    ...GenCodeMiddlewares,
                     ...OpenApiMiddlewares,
                     ...FramesMiddlewares,
                     // ...ToolbarApiMiddlewares,
