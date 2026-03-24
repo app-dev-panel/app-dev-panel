@@ -41,6 +41,7 @@ final class TestFixturesController extends Controller
             'router' => \App\actions\testFixtures\RouterAction::class,
             'validator' => \App\actions\testFixtures\ValidatorAction::class,
             'messenger' => \App\actions\testFixtures\MessengerAction::class,
+            'opentelemetry' => \App\actions\testFixtures\OpenTelemetryAction::class,
             'reset' => \App\actions\testFixtures\ResetAction::class,
             'reset-cli' => \App\actions\testFixtures\ResetCliAction::class,
         ];

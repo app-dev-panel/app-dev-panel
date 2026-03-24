@@ -58,6 +58,7 @@ use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
@@ -540,6 +541,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'router' => static fn(): array => [new RouterCollector()],
             'queue' => static fn(): array => [new QueueCollector($timeline)],
             'validator' => static fn(): array => [new ValidatorCollector()],
+            'opentelemetry' => static fn(): array => [new OpenTelemetryCollector($timeline)],
         ];
     }
 

@@ -20,6 +20,7 @@ use AppDevPanel\Adapter\Yiisoft\Collector\Router\UrlMatcherInterfaceProxy;
 use AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
@@ -62,6 +63,7 @@ return [
             VarDumperCollector::class,
             TimelineCollector::class,
             ValidatorCollector::class,
+            OpenTelemetryCollector::class,
         ],
         'collectors.web' => [
             WebAppInfoCollector::class,

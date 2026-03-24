@@ -50,6 +50,7 @@ return [
                 'GET /test/fixtures/cache-heavy' => 'test-fixtures/cache-heavy',
                 'GET /test/fixtures/router' => 'test-fixtures/router',
                 'GET /test/fixtures/validator' => 'test-fixtures/validator',
+                'GET /test/fixtures/opentelemetry' => 'test-fixtures/opentelemetry',
                 'GET /test/fixtures/messenger' => 'test-fixtures/messenger',
                 '/test/fixtures/reset' => 'test-fixtures/reset',
                 '/test/fixtures/reset-cli' => 'test-fixtures/reset-cli',
@@ -96,6 +97,7 @@ return [
                 'router' => true,
                 'queue' => true,
                 'validator' => true,
+                'opentelemetry' => true,
             ],
             'ignoredRequests' => [
                 '/debug/api/**',

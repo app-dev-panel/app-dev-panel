@@ -25,6 +25,7 @@ return [
             \AppDevPanel\Kernel\Collector\TimelineCollector::class,
             \AppDevPanel\Kernel\Collector\DatabaseCollector::class,
             \AppDevPanel\Kernel\Collector\MailerCollector::class,
+            \AppDevPanel\Kernel\Collector\OpenTelemetryCollector::class,
         ],
     ],
 

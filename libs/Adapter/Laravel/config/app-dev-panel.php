@@ -30,6 +30,7 @@ return [
         'queue' => true,
         'validator' => true,
         'router' => true,
+        'opentelemetry' => true,
     ],
 
     'ignored_requests' => [

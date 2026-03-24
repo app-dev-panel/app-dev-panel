@@ -20,6 +20,7 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\Ingestion\Controller\OtlpController;
 use AppDevPanel\Api\NullPathMapper;
 use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
@@ -152,6 +153,11 @@ return [
         JsonResponseFactoryInterface $jsonResponseFactory,
         StorageInterface $storage,
     ) => new IngestionController($jsonResponseFactory, $storage),
+
+    OtlpController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        StorageInterface $storage,
+    ) => new OtlpController($jsonResponseFactory, $storage),
 
     ServiceController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,

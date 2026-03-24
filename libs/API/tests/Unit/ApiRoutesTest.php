@@ -7,6 +7,7 @@ namespace AppDevPanel\Api\Tests\Unit;
 use AppDevPanel\Api\ApiRoutes;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\Ingestion\Controller\OtlpController;
 use AppDevPanel\Api\Router\Route;
 use AppDevPanel\Api\Router\Router;
 use PHPUnit\Framework\TestCase;
@@ -36,6 +37,7 @@ final class ApiRoutesTest extends TestCase
         $this->assertContains('/debug/api/ingest/batch', $paths);
         $this->assertContains('/debug/api/ingest/log', $paths);
         $this->assertContains('/debug/api/openapi.json', $paths);
+        $this->assertContains('/debug/api/otlp/v1/traces', $paths);
     }
 
     public function testServiceRoutesReturnRoutes(): void
@@ -102,10 +104,11 @@ final class ApiRoutesTest extends TestCase
         }
     }
 
-    public function testIngestionRoutesUseIngestionController(): void
+    public function testIngestionRoutesUseIngestionControllers(): void
     {
+        $allowedControllers = [IngestionController::class, OtlpController::class];
         foreach (ApiRoutes::ingestionRoutes() as $route) {
-            $this->assertSame(IngestionController::class, $route->handler[0]);
+            $this->assertContains($route->handler[0], $allowedControllers);
         }
     }
 }

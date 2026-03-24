@@ -20,6 +20,9 @@
         "yiisoft/strings": "^2.2",
         "yiisoft/var-dumper": "^1.7"
     },
+    "suggest": {
+        "open-telemetry/sdk": "Required for SpanProcessorInterfaceProxy to capture OpenTelemetry spans"
+    },
     "require-dev": {
     },
     "autoload": {

@@ -18,6 +18,7 @@ use App\Http\Controllers\TestFixtures\LogsHeavyAction;
 use App\Http\Controllers\TestFixtures\MailerAction;
 use App\Http\Controllers\TestFixtures\MessengerAction;
 use App\Http\Controllers\TestFixtures\MultiAction;
+use App\Http\Controllers\TestFixtures\OpenTelemetryAction;
 use App\Http\Controllers\TestFixtures\RequestInfoAction;
 use App\Http\Controllers\TestFixtures\ResetAction;
 use App\Http\Controllers\TestFixtures\ResetCliAction;
@@ -53,4 +54,5 @@ Route::prefix('test/fixtures')->group(function (): void {
     Route::get('/validator', ValidatorAction::class);
     Route::get('/router', RouterAction::class);
     Route::get('/filesystem', FilesystemAction::class);
+    Route::get('/opentelemetry', OpenTelemetryAction::class);
 });

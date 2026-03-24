@@ -32,6 +32,7 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
     [CollectorsMap.CommandCollector]: {label: 'Command', icon: 'terminal', weight: 1},
     [CollectorsMap.ViewCollector]: {label: 'View', icon: 'visibility', weight: 20},
     [CollectorsMap.DeprecationCollector]: {label: 'Deprecations', icon: 'warning_amber', weight: 5},
+    [CollectorsMap.OpenTelemetryCollector]: {label: 'Traces', icon: 'account_tree', weight: 9},
 };
 
 const defaultMeta: CollectorMeta = {label: 'Unknown', icon: 'extension', weight: 99};
