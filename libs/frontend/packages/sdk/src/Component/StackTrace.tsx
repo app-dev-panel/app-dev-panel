@@ -3,7 +3,7 @@ import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import {Code} from '@mui/icons-material';
 import {IconButton, Tooltip} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import React from 'react';
+import React, {type ReactNode} from 'react';
 
 type StackFrame = {file: string; line: number; call: string};
 
@@ -26,6 +26,56 @@ function parseTraceString(trace: string): Array<StackFrame | string> {
             }
             return line;
         });
+}
+
+const classMethodRegex = /^((?:[A-Z][a-zA-Z0-9_]*\\)+[A-Z][a-zA-Z0-9_]*)(->|::)([a-zA-Z_][a-zA-Z0-9_]*)\((.*)\)$/s;
+const objectArgRegex = /Object\(((?:[A-Z][a-zA-Z0-9_]*\\)+[A-Z][a-zA-Z0-9_]*)\)/g;
+
+function buildClassHref(className: string, methodName?: string): string {
+    const params = new URLSearchParams({class: className});
+    if (methodName) params.set('method', methodName);
+    return `/inspector/files?${params.toString()}`;
+}
+
+function renderCallText(call: string): ReactNode {
+    const match = call.match(classMethodRegex);
+    if (!match) return call;
+
+    const [, className, , methodName, argsStr] = match;
+
+    return (
+        <>
+            <CallLink href={buildClassHref(className, methodName)}>
+                {className}::{methodName}
+            </CallLink>
+            ({renderArgs(argsStr)})
+        </>
+    );
+}
+
+function renderArgs(argsStr: string): ReactNode {
+    if (!argsStr) return null;
+
+    const parts: ReactNode[] = [];
+    let lastIndex = 0;
+
+    for (const match of argsStr.matchAll(objectArgRegex)) {
+        const before = argsStr.slice(lastIndex, match.index);
+        if (before) parts.push(before);
+
+        const objClassName = match[1];
+        parts.push(
+            <span key={match.index}>
+                Object(<CallLink href={buildClassHref(objClassName)}>{objClassName}</CallLink>)
+            </span>,
+        );
+        lastIndex = match.index + match[0].length;
+    }
+
+    const rest = argsStr.slice(lastIndex);
+    if (rest) parts.push(rest);
+
+    return parts.length === 1 && typeof parts[0] === 'string' ? parts[0] : <>{parts}</>;
 }
 
 const isVendorFrame = (file: string): boolean => file.includes('/vendor/') || file.includes('/node_modules/');
@@ -71,6 +121,12 @@ const CallText = styled('div')(({theme}) => ({
     color: theme.palette.text.secondary,
     marginTop: 1,
     wordBreak: 'break-all',
+}));
+
+const CallLink = styled('a')(({theme}) => ({
+    color: theme.palette.primary.main,
+    textDecoration: 'none',
+    '&:hover': {textDecoration: 'underline'},
 }));
 
 const PlainLine = styled('div')(({theme}) => ({
@@ -121,7 +177,7 @@ export const StackTrace = React.memo(({trace, fontSize = 10}: StackTraceProps) =
                                     </Tooltip>
                                 )}
                             </FileRow>
-                            {frame.call && <CallText>{frame.call}</CallText>}
+                            {frame.call && <CallText>{renderCallText(frame.call)}</CallText>}
                         </FrameBody>
                     </FrameRow>
                 );

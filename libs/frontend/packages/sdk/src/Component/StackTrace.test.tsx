@@ -27,10 +27,15 @@ describe('StackTrace', () => {
         expect(link.closest('a')).toHaveAttribute('href', '/inspector/files?path=/src/app.php#L42');
     });
 
-    it('renders function calls', () => {
+    it('renders class method calls as links', () => {
         renderWithProviders(<StackTrace trace={sampleTrace} />);
-        expect(screen.getByText('App\\Controller->handle()')).toBeInTheDocument();
-        expect(screen.getByText('App\\Kernel->run()')).toBeInTheDocument();
+        const controllerLink = screen.getByText('App\\Controller::handle');
+        expect(controllerLink.closest('a')).toHaveAttribute(
+            'href',
+            '/inspector/files?class=App%5CController&method=handle',
+        );
+        const kernelLink = screen.getByText('App\\Kernel::run');
+        expect(kernelLink.closest('a')).toHaveAttribute('href', '/inspector/files?class=App%5CKernel&method=run');
     });
 
     it('renders {main} frame as plain text', () => {
@@ -87,6 +92,18 @@ describe('StackTrace', () => {
         const trace = '#0 /vendor/framework/Router.php(10): dispatch()';
         renderWithProviders(<StackTrace trace={trace} />);
         expect(screen.getByText('Router.php:10')).toBeInTheDocument();
+    });
+
+    it('renders Object() class arguments as links', () => {
+        const trace = '#0 /src/app.php(42): App\\Controller->handle(Object(Symfony\\Http\\Request), 1)';
+        renderWithProviders(<StackTrace trace={trace} />);
+        const objLink = screen.getByText('Symfony\\Http\\Request');
+        expect(objLink.closest('a')).toHaveAttribute('href', '/inspector/files?class=Symfony%5CHttp%5CRequest');
+    });
+
+    it('renders plain function calls as text', () => {
+        renderWithProviders(<StackTrace trace="#0 /src/app.php(42): doStuff()" />);
+        expect(screen.getByText('doStuff()')).toBeInTheDocument();
     });
 
     it('applies custom fontSize', () => {
