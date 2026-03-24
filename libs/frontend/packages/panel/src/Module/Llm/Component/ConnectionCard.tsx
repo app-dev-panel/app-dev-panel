@@ -10,6 +10,7 @@ import {
 } from '@app-dev-panel/panel/Module/Llm/API/Llm';
 import {
     Alert,
+    Autocomplete,
     Box,
     Button,
     Card,
@@ -17,10 +18,6 @@ import {
     CardContent,
     CardHeader,
     Chip,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
     Skeleton,
     TextField,
     ToggleButton,
@@ -127,24 +124,17 @@ export const ConnectionCard = () => {
                             Provider:{' '}
                             <strong>{providerLabels[status.provider as LlmProvider] ?? status.provider}</strong>
                         </Typography>
-                        <FormControl size="small" fullWidth>
-                            <InputLabel>Model</InputLabel>
-                            <Select
-                                value={status.model ?? ''}
-                                label="Model"
-                                onChange={(e) => handleModelChange(e.target.value)}
-                            >
-                                {modelsLoading ? (
-                                    <MenuItem disabled>Loading models...</MenuItem>
-                                ) : (
-                                    popularModels.map((m: LlmModel) => (
-                                        <MenuItem key={m.id} value={m.id}>
-                                            {m.name} ({m.id})
-                                        </MenuItem>
-                                    ))
-                                )}
-                            </Select>
-                        </FormControl>
+                        <Autocomplete
+                            size="small"
+                            fullWidth
+                            options={popularModels}
+                            getOptionLabel={(option: LlmModel) => `${option.name} (${option.id})`}
+                            value={popularModels.find((m) => m.id === status.model) ?? null}
+                            onChange={(_, option) => option && handleModelChange(option.id)}
+                            loading={modelsLoading}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            renderInput={(params) => <TextField {...params} label="Model" />}
+                        />
                     </Box>
                 ) : (
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
