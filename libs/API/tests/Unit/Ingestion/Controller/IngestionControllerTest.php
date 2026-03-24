@@ -73,7 +73,7 @@ final class IngestionControllerTest extends TestCase
         $this->assertNotEmpty($data['id']);
 
         // Verify files were written
-        $files = glob($this->storagePath . '/**/**/summary.json');
+        $files = glob($this->storagePath . '/**/**/summary.json.gz');
         $this->assertCount(1, $files);
     }
 
@@ -112,9 +112,9 @@ final class IngestionControllerTest extends TestCase
         $this->assertSame('external-123', $data['id']);
 
         // Verify summary has context
-        $summaryFiles = glob($this->storagePath . '/**/external-123/summary.json');
+        $summaryFiles = glob($this->storagePath . '/**/external-123/summary.json.gz');
         $this->assertCount(1, $summaryFiles);
-        $summary = json_decode(file_get_contents($summaryFiles[0]), true, 512, JSON_THROW_ON_ERROR);
+        $summary = json_decode(gzdecode(file_get_contents($summaryFiles[0])), true, 512, JSON_THROW_ON_ERROR);
         $this->assertSame('web', $summary['context']['type']);
         $this->assertSame('python', $summary['context']['language']);
     }
@@ -145,7 +145,7 @@ final class IngestionControllerTest extends TestCase
         $this->assertCount(3, $data['ids']);
 
         // Verify 3 entries in storage
-        $files = glob($this->storagePath . '/**/**/summary.json');
+        $files = glob($this->storagePath . '/**/**/summary.json.gz');
         $this->assertCount(3, $files);
     }
 
@@ -187,9 +187,9 @@ final class IngestionControllerTest extends TestCase
         $this->assertTrue($data['success']);
 
         // Verify data was stored
-        $dataFiles = glob($this->storagePath . '/**/**/data.json');
+        $dataFiles = glob($this->storagePath . '/**/**/data.json.gz');
         $this->assertCount(1, $dataFiles);
-        $stored = json_decode(file_get_contents($dataFiles[0]), true, 512, JSON_THROW_ON_ERROR);
+        $stored = json_decode(gzdecode(file_get_contents($dataFiles[0])), true, 512, JSON_THROW_ON_ERROR);
         $this->assertArrayHasKey('logs', $stored);
         $this->assertSame('error', $stored['logs'][0]['level']);
         $this->assertSame('Connection refused', $stored['logs'][0]['message']);
@@ -260,8 +260,8 @@ final class IngestionControllerTest extends TestCase
         $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
         // Verify summary contains all collector names
-        $summaryFiles = glob($this->storagePath . '/**/' . $data['id'] . '/summary.json');
-        $summary = json_decode(file_get_contents($summaryFiles[0]), true, 512, JSON_THROW_ON_ERROR);
+        $summaryFiles = glob($this->storagePath . '/**/' . $data['id'] . '/summary.json.gz');
+        $summary = json_decode(gzdecode(file_get_contents($summaryFiles[0])), true, 512, JSON_THROW_ON_ERROR);
         /** @var list<array{id: string, name: string}> $collectors */
         $collectors = $summary['collectors'];
         $collectorIds = array_column($collectors, 'id');

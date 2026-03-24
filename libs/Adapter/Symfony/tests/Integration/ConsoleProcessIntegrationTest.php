@@ -235,7 +235,7 @@ final class ConsoleProcessIntegrationTest extends TestCase
         foreach ($dateDirs as $dateDir) {
             $entryDirs = glob($dateDir . '/*', GLOB_ONLYDIR);
             foreach ($entryDirs as $entryDir) {
-                if (!file_exists($entryDir . '/summary.json')) {
+                if (!file_exists($entryDir . '/summary.json.gz') && !file_exists($entryDir . '/summary.json')) {
                     continue;
                 }
 
@@ -254,9 +254,18 @@ final class ConsoleProcessIntegrationTest extends TestCase
     private function readEntry(string $entryDir): array
     {
         return [
-            'summary' => json_decode(file_get_contents($entryDir . '/summary.json'), true, 512, JSON_THROW_ON_ERROR),
-            'data' => json_decode(file_get_contents($entryDir . '/data.json'), true, 512, JSON_THROW_ON_ERROR),
+            'summary' => json_decode(self::readStorageFile($entryDir . '/summary'), true, 512, JSON_THROW_ON_ERROR),
+            'data' => json_decode(self::readStorageFile($entryDir . '/data'), true, 512, JSON_THROW_ON_ERROR),
         ];
+    }
+
+    private static function readStorageFile(string $basePath): string
+    {
+        if (file_exists($basePath . '.json.gz')) {
+            return gzdecode(file_get_contents($basePath . '.json.gz'));
+        }
+
+        return file_get_contents($basePath . '.json');
     }
 
     private function clearDebugStorage(): void
