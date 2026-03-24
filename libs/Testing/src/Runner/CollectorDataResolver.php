@@ -32,6 +32,7 @@ final class CollectorDataResolver
         'validator' => 'ValidatorCollector',
         'view' => 'WebViewCollector',
         'assets' => 'AssetBundleCollector',
+        'opentelemetry' => 'OpenTelemetryCollector',
     ];
 
     /**

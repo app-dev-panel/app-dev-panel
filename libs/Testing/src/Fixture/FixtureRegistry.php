@@ -280,6 +280,17 @@ final class FixtureRegistry
                     Expectation::summaryGte('cache.hits', 1),
                 ],
             ]),
+
+            // === OpenTelemetry ===
+            new Fixture(name: 'opentelemetry:basic', endpoint: '/test/fixtures/opentelemetry', expectations: [
+                'opentelemetry' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryHasKey('opentelemetry'),
+                    Expectation::summaryGte('opentelemetry.spans', 4),
+                    Expectation::summaryGte('opentelemetry.traces', 1),
+                    Expectation::summaryGte('opentelemetry.errors', 1),
+                ],
+            ]),
         ];
     }
 }
