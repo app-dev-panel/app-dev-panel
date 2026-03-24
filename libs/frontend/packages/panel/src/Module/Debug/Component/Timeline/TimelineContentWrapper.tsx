@@ -1,7 +1,7 @@
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
-import {parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
-import {DataObject, OpenInNew} from '@mui/icons-material';
+import {DataObject} from '@mui/icons-material';
 import TimelineContent from '@mui/lab/TimelineContent';
 import {IconButton, Tooltip} from '@mui/material';
 import Box from '@mui/material/Box';
@@ -28,13 +28,7 @@ export const TimelineContentWrapper = React.memo((props: PropsWithChildren<Timel
                         <DataObject color="secondary" fontSize="small" />
                     </IconButton>
                 </Tooltip>
-                {file && (
-                    <Tooltip title="Open in File Explorer">
-                        <IconButton size="small" href={`/inspector/files?path=${parseFilePath(file)}`}>
-                            <OpenInNew fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                )}
+                {file && <FileLink path={file} />}
             </Box>
             <Box>{children}</Box>
         </TimelineContent>

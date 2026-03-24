@@ -1,19 +1,24 @@
 import {RequestPill} from '@app-dev-panel/sdk/Component/Layout/RequestPill';
 import {SearchTrigger} from '@app-dev-panel/sdk/Component/Layout/SearchTrigger';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {editorPresetLabels, type EditorPreset} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {
     Badge,
     Box,
     Dialog,
     DialogContent,
     DialogTitle,
+    FormControl,
     Icon,
     IconButton,
+    InputLabel,
     ListItemIcon,
     ListItemText,
     Menu,
     MenuItem,
+    Select,
     Switch,
+    TextField,
     Typography,
     type PaletteMode,
 } from '@mui/material';
@@ -46,6 +51,8 @@ type TopBarProps = {
     autoRefresh?: boolean;
     showInactiveCollectors?: boolean;
     notificationCount?: number;
+    editorPreset?: EditorPreset;
+    editorCustomTemplate?: string;
     onPrevEntry?: () => void;
     onNextEntry?: () => void;
     onEntryClick?: (e: React.MouseEvent) => void;
@@ -53,6 +60,8 @@ type TopBarProps = {
     onThemeToggle?: () => void;
     onAutoRefreshToggle?: () => void;
     onShowInactiveCollectorsChange?: (value: boolean) => void;
+    onEditorPresetChange?: (preset: EditorPreset) => void;
+    onEditorCustomTemplateChange?: (template: string) => void;
     onNotificationsClick?: (e: React.MouseEvent<HTMLElement>) => void;
     onLogoClick?: () => void;
 };
@@ -119,6 +128,10 @@ export const TopBar = React.memo(
         onThemeToggle,
         onAutoRefreshToggle,
         onShowInactiveCollectorsChange,
+        editorPreset,
+        editorCustomTemplate,
+        onEditorPresetChange,
+        onEditorCustomTemplateChange,
         notificationCount,
         onNotificationsClick,
         onLogoClick,
@@ -258,6 +271,36 @@ export const TopBar = React.memo(
                                 onChange={(_, checked) => onShowInactiveCollectorsChange?.(checked)}
                                 sx={{ml: 2, flexShrink: 0}}
                             />
+                        </Box>
+                        <Box sx={{borderTop: 1, borderColor: 'divider', pt: 2, mt: 1}}>
+                            <Typography variant="body1" sx={{mb: 1.5}}>
+                                Editor Integration
+                            </Typography>
+                            <FormControl fullWidth size="small" sx={{mb: 1.5}}>
+                                <InputLabel>Editor</InputLabel>
+                                <Select
+                                    value={editorPreset ?? 'none'}
+                                    label="Editor"
+                                    onChange={(e) => onEditorPresetChange?.(e.target.value as EditorPreset)}
+                                >
+                                    {Object.entries(editorPresetLabels).map(([key, label]) => (
+                                        <MenuItem key={key} value={key}>
+                                            {label}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            {editorPreset === 'custom' && (
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Custom URL template"
+                                    placeholder="myeditor://open?file={file}&line={line}"
+                                    value={editorCustomTemplate ?? ''}
+                                    onChange={(e) => onEditorCustomTemplateChange?.(e.target.value)}
+                                    helperText="Use {file} and {line} placeholders"
+                                />
+                            )}
                         </Box>
                     </DialogContent>
                 </Dialog>

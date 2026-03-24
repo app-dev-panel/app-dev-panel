@@ -1,10 +1,10 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useRunCommandMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
-import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
-import {Check, ContentCopy, Error, FilePresent} from '@mui/icons-material';
+import {Check, ContentCopy, Error} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import {Box, Button, CircularProgress, IconButton, styled, Tooltip} from '@mui/material';
@@ -32,15 +32,7 @@ const columns: GridColDef[] = [
                         <ContentCopy fontSize="small" />
                     </IconButton>
                 </Tooltip>
-                <Tooltip title="Examine as a file in new window">
-                    <IconButton
-                        size="small"
-                        href={'/inspector/files?path=' + parseFilePathWithLineAnchor(params.row.path)}
-                    >
-                        <FilePresent fontSize="small" />
-                    </IconButton>
-                </Tooltip>
-                {params.value}
+                <FileLink path={params.row.path}>{params.value}</FileLink>
             </span>
         ),
     },

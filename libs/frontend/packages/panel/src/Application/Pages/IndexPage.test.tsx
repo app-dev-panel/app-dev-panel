@@ -57,6 +57,7 @@ const renderIndexPage = (favoriteUrls: string[] = []) => {
                 selectedService: 'local',
                 themeMode: 'system' as const,
                 showInactiveCollectors: false,
+                editorConfig: {editor: 'none' as const, customUrlTemplate: '', pathMapping: {}},
             },
         },
         middleware: (getDefaultMiddleware) =>

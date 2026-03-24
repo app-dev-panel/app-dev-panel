@@ -3,6 +3,8 @@ import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/Not
 import {useSelector} from '@app-dev-panel/panel/store';
 import {
     changeAutoLatest,
+    changeEditorCustomTemplate,
+    changeEditorPreset,
     changeShowInactiveCollectors,
     changeThemeMode,
 } from '@app-dev-panel/sdk/API/Application/ApplicationContext';
@@ -21,6 +23,7 @@ import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -109,6 +112,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const themeMode = useSelector((state) => state.application.themeMode) as string | undefined;
     const currentMode = themeMode || 'system';
     const showInactiveCollectors = useSelector((state) => state.application.showInactiveCollectors) as boolean;
+    const editorConfig = useSelector((state) => state.application.editorConfig) ?? defaultEditorConfig;
     const notificationCount = useSelector(selectUnreadCount);
 
     // Notification center popover
@@ -217,6 +221,20 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const handleShowInactiveCollectorsChange = useCallback(
         (value: boolean) => {
             dispatch(changeShowInactiveCollectors(value));
+        },
+        [dispatch],
+    );
+
+    const handleEditorPresetChange = useCallback(
+        (preset: EditorPreset) => {
+            dispatch(changeEditorPreset(preset));
+        },
+        [dispatch],
+    );
+
+    const handleEditorCustomTemplateChange = useCallback(
+        (template: string) => {
+            dispatch(changeEditorCustomTemplate(template));
         },
         [dispatch],
     );
@@ -351,6 +369,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onThemeToggle={handleThemeToggle}
                     onAutoRefreshToggle={autoLatestHandler}
                     onShowInactiveCollectorsChange={handleShowInactiveCollectorsChange}
+                    editorPreset={editorConfig.editor}
+                    editorCustomTemplate={editorConfig.customUrlTemplate}
+                    onEditorPresetChange={handleEditorPresetChange}
+                    onEditorCustomTemplateChange={handleEditorCustomTemplateChange}
                     notificationCount={notificationCount}
                     onNotificationsClick={handleNotificationsClick}
                     onLogoClick={handleLogoClick}

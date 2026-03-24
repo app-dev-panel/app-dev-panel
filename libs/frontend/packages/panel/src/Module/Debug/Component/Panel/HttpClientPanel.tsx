@@ -3,11 +3,11 @@ import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
-import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
@@ -314,19 +314,20 @@ const RequestDetail = ({entry}: {entry: HttpClientEntry}) => {
                         Source
                     </Typography>
                     <Box sx={{mt: 0.5}}>
-                        <Typography
-                            variant="caption"
-                            component="a"
-                            href={`/inspector/files?path=${parseFilePathWithLineAnchor(entry.line)}`}
-                            sx={{
-                                fontFamily: primitives.fontFamilyMono,
-                                color: 'primary.main',
-                                textDecoration: 'none',
-                                '&:hover': {textDecoration: 'underline'},
-                            }}
-                        >
-                            {entry.line}
-                        </Typography>
+                        <FileLink path={entry.line}>
+                            <Typography
+                                variant="caption"
+                                component="span"
+                                sx={{
+                                    fontFamily: primitives.fontFamilyMono,
+                                    color: 'primary.main',
+                                    textDecoration: 'none',
+                                    '&:hover': {textDecoration: 'underline'},
+                                }}
+                            >
+                                {entry.line}
+                            </Typography>
+                        </FileLink>
                     </Box>
                 </Box>
             )}

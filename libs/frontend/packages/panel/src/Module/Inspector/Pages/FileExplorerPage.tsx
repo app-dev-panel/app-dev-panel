@@ -141,7 +141,12 @@ export const FileExplorerPage = () => {
                         </Button>
                         <PageHeader title={file.path} icon="description" />
                     </Box>
-                    <CodeHighlight language={file.extension} code={file.content} highlightLines={highlightLines} />
+                    <CodeHighlight
+                        language={file.extension}
+                        code={file.content}
+                        highlightLines={highlightLines}
+                        filePath={file.path}
+                    />
                     <Box>
                         <Typography>Directory: @root{file.directory}</Typography>
                         <Typography>Permissions: {file.permissions}</Typography>

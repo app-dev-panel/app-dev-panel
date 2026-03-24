@@ -1,7 +1,9 @@
 import {InspectorFileContent, useLazyGetFilesQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {StackTrace} from '@app-dev-panel/sdk/Component/StackTrace';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilename, parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
@@ -64,7 +66,7 @@ const Message = styled(Typography)(({theme}) => ({
     color: theme.palette.text.secondary,
 }));
 
-const FileLink = styled(Typography)({
+const FileLinkLabel = styled(Typography)({
     fontFamily: primitives.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
@@ -121,26 +123,28 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
             <Typography sx={{fontSize: '13px', mb: 2, color: 'text.primary'}}>{exception.message}</Typography>
 
             <Box sx={{display: 'flex', gap: 1, mb: 2}}>
-                <Chip
-                    component="a"
-                    clickable
-                    href={`/inspector/files?class=${parseFilePath(exception.class)}`}
-                    label="Open Exception Class"
-                    size="small"
-                    icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
-                    sx={{fontSize: '11px', height: 24}}
-                    variant="outlined"
-                />
-                <Chip
-                    component="a"
-                    clickable
-                    href={`/inspector/files?path=${parseFilePath(localFile)}#L${exception.line}`}
-                    label="Open Source Location"
-                    size="small"
-                    icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
-                    sx={{fontSize: '11px', height: 24}}
-                    variant="outlined"
-                />
+                <FileLink className={parseFilePath(exception.class)}>
+                    <Chip
+                        component="span"
+                        clickable
+                        label="Open Exception Class"
+                        size="small"
+                        icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
+                        sx={{fontSize: '11px', height: 24}}
+                        variant="outlined"
+                    />
+                </FileLink>
+                <FileLink path={localFile} line={+exception.line}>
+                    <Chip
+                        component="span"
+                        clickable
+                        label="Open Source Location"
+                        size="small"
+                        icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
+                        sx={{fontSize: '11px', height: 24}}
+                        variant="outlined"
+                    />
+                </FileLink>
             </Box>
 
             {file && (
@@ -151,6 +155,7 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
                         highlightLines={[lineNumber]}
                         highlightColor={alpha(theme.palette.error.main, 0.15)}
                         wrappedLines={[lineNumber - 5, lineNumber + 5]}
+                        filePath={parseFilePath(exception.file)}
                     />
                 </Box>
             )}
@@ -183,7 +188,7 @@ const TraceBlock = ({trace}: {trace: string}) => {
             </Box>
             <Collapse in={open}>
                 <Box sx={{mt: 1, borderRadius: 1, overflow: 'hidden', border: `1px solid`, borderColor: 'divider'}}>
-                    <CodeHighlight fontSize={10} language={'text/plain'} code={trace} />
+                    <StackTrace trace={trace} fontSize={10} />
                 </Box>
             </Collapse>
         </Box>
@@ -215,8 +220,19 @@ export const ExceptionPanel = ({exceptions}: ExceptionPanelProps) => {
                                 <ClassName>{exception.class}</ClassName>
                                 <Message>{exception.message}</Message>
                             </Box>
-                            <FileLink component="span" sx={{color: 'text.disabled'}}>
-                                {parseFilename(pathMapper.toLocal(exception.file))}:{exception.line}
+                            <FileLink path={pathMapper.toLocal(exception.file)} line={+exception.line}>
+                                <Typography
+                                    component="span"
+                                    sx={{
+                                        fontFamily: primitives.fontFamilyMono,
+                                        fontSize: '11px',
+                                        flexShrink: 0,
+                                        whiteSpace: 'nowrap',
+                                        color: 'text.disabled',
+                                    }}
+                                >
+                                    {parseFilename(pathMapper.toLocal(exception.file))}:{exception.line}
+                                </Typography>
                             </FileLink>
                         </ExceptionRow>
                         <Collapse in={expanded}>

@@ -1,9 +1,9 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useRunCommandMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
-import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
-import {Check, ContentCopy, Error, FilePresent} from '@mui/icons-material';
+import {Check, ContentCopy, Error} from '@mui/icons-material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     Accordion,
@@ -41,15 +41,7 @@ const columns: GridColDef[] = [
                             <ContentCopy fontSize="small" />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Examine as a file">
-                        <IconButton
-                            size="small"
-                            href={'/inspector/files?path=' + parseFilePathWithLineAnchor(filePath)}
-                        >
-                            <FilePresent fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                    {filePath}
+                    <FileLink path={filePath}>{filePath}</FileLink>
                 </span>
             );
         },

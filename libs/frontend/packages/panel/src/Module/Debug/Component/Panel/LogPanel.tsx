@@ -1,9 +1,9 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
@@ -203,19 +203,20 @@ export const LogPanel = ({data}: LogPanelProps) => {
                             <DetailBox>
                                 {entry.line && (
                                     <Box sx={{mb: 1}}>
-                                        <Typography
-                                            variant="caption"
-                                            component="a"
-                                            href={`/inspector/files?path=${parseFilePathWithLineAnchor(pathMapper.toLocalWithLine(entry.line))}`}
-                                            sx={{
-                                                fontFamily: primitives.fontFamilyMono,
-                                                color: 'primary.main',
-                                                textDecoration: 'none',
-                                                '&:hover': {textDecoration: 'underline'},
-                                            }}
-                                        >
-                                            {pathMapper.toLocalWithLine(entry.line)}
-                                        </Typography>
+                                        <FileLink path={pathMapper.toLocalWithLine(entry.line)}>
+                                            <Typography
+                                                variant="caption"
+                                                component="span"
+                                                sx={{
+                                                    fontFamily: primitives.fontFamilyMono,
+                                                    color: 'primary.main',
+                                                    textDecoration: 'none',
+                                                    '&:hover': {textDecoration: 'underline'},
+                                                }}
+                                            >
+                                                {pathMapper.toLocalWithLine(entry.line)}
+                                            </Typography>
+                                        </FileLink>
                                     </Box>
                                 )}
                                 {entry.context && Object.keys(entry.context).length > 0 && (

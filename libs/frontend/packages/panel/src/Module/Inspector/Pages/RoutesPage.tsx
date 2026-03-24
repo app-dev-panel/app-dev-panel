@@ -1,6 +1,7 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetRoutesQuery, useLazyGetCheckRouteQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
@@ -176,42 +177,44 @@ const MiddlewareItem = ({mw}: {mw: any}) => {
     const parsed = parseCallable(mw);
     if (parsed) {
         return (
-            <Typography
-                component="a"
-                href={`/inspector/files?class=${parsed.className}&method=${parsed.methodName}`}
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                sx={{
-                    display: 'block',
-                    fontFamily: primitives.fontFamilyMono,
-                    fontSize: '12px',
-                    color: 'primary.main',
-                    textDecoration: 'none',
-                    py: 0.25,
-                    '&:hover': {textDecoration: 'underline'},
-                }}
-            >
-                {concatClassMethod(parsed.className, parsed.methodName)}
-            </Typography>
+            <FileLink className={parsed.className} methodName={parsed.methodName}>
+                <Typography
+                    component="span"
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                    sx={{
+                        display: 'block',
+                        fontFamily: primitives.fontFamilyMono,
+                        fontSize: '12px',
+                        color: 'primary.main',
+                        textDecoration: 'none',
+                        py: 0.25,
+                        '&:hover': {textDecoration: 'underline'},
+                    }}
+                >
+                    {concatClassMethod(parsed.className, parsed.methodName)}
+                </Typography>
+            </FileLink>
         );
     }
     if (typeof mw === 'string' && isClassName(mw)) {
         return (
-            <Typography
-                component="a"
-                href={`/inspector/files?class=${mw}`}
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                sx={{
-                    display: 'block',
-                    fontFamily: primitives.fontFamilyMono,
-                    fontSize: '12px',
-                    color: 'primary.main',
-                    textDecoration: 'none',
-                    py: 0.25,
-                    '&:hover': {textDecoration: 'underline'},
-                }}
-            >
-                {mw}
-            </Typography>
+            <FileLink className={mw}>
+                <Typography
+                    component="span"
+                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                    sx={{
+                        display: 'block',
+                        fontFamily: primitives.fontFamilyMono,
+                        fontSize: '12px',
+                        color: 'primary.main',
+                        textDecoration: 'none',
+                        py: 0.25,
+                        '&:hover': {textDecoration: 'underline'},
+                    }}
+                >
+                    {mw}
+                </Typography>
+            </FileLink>
         );
     }
     return (
@@ -236,21 +239,22 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                         Action
                     </Typography>
                     <Box sx={{mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5}}>
-                        <Typography
-                            component="a"
-                            href={`/inspector/files?class=${action.className}&method=${action.methodName}`}
-                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                            sx={{
-                                fontFamily: primitives.fontFamilyMono,
-                                fontSize: '12px',
-                                wordBreak: 'break-all',
-                                color: 'primary.main',
-                                textDecoration: 'none',
-                                '&:hover': {textDecoration: 'underline'},
-                            }}
-                        >
-                            {actionFull}
-                        </Typography>
+                        <FileLink className={action.className} methodName={action.methodName}>
+                            <Typography
+                                component="span"
+                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                sx={{
+                                    fontFamily: primitives.fontFamilyMono,
+                                    fontSize: '12px',
+                                    wordBreak: 'break-all',
+                                    color: 'primary.main',
+                                    textDecoration: 'none',
+                                    '&:hover': {textDecoration: 'underline'},
+                                }}
+                            >
+                                {actionFull}
+                            </Typography>
+                        </FileLink>
                         <Tooltip title="Copy">
                             <IconButton
                                 size="small"
@@ -490,20 +494,27 @@ export const RoutesPage = () => {
                                     />
                                     <PatternCell>{route.pattern}</PatternCell>
                                     {actionShort && route.action && (
-                                        <ActionInlineLink
-                                            href={`/inspector/files?class=${route.action.className}&method=${route.action.methodName}`}
-                                            onClick={(e) => e.stopPropagation()}
+                                        <FileLink
+                                            className={route.action.className}
+                                            methodName={route.action.methodName}
                                         >
-                                            {actionShort}
-                                        </ActionInlineLink>
+                                            <ActionInlineLink
+                                                as="span"
+                                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                            >
+                                                {actionShort}
+                                            </ActionInlineLink>
+                                        </FileLink>
                                     )}
                                     {firstClassMwShort && (
-                                        <ActionInlineLink
-                                            href={`/inspector/files?class=${firstClassMw}`}
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            {firstClassMwShort}
-                                        </ActionInlineLink>
+                                        <FileLink className={firstClassMw}>
+                                            <ActionInlineLink
+                                                as="span"
+                                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                            >
+                                                {firstClassMwShort}
+                                            </ActionInlineLink>
+                                        </FileLink>
                                     )}
                                     {route.name && <NameCell>{route.name}</NameCell>}
                                     {hasDetails && (
