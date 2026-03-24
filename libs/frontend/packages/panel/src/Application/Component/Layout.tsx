@@ -318,7 +318,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 icon: 'psychology',
                 label: 'LLM',
                 href: '/llm',
-                children: [{key: '/mcp', icon: 'hub', label: 'MCP'}],
+                children: [{key: '/llm/mcp', icon: 'hub', label: 'MCP'}],
             },
             {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api'},
             {key: 'frames', icon: 'web', label: 'Frames', href: '/frames'},
@@ -339,8 +339,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             const match = inspectorChildren.find((c) => location.pathname.startsWith(c.key));
             return match?.key;
         }
-        if (location.pathname.startsWith('/mcp')) {
-            return '/mcp';
+        if (location.pathname.startsWith('/llm/mcp')) {
+            return '/llm/mcp';
         }
         return undefined;
     }, [location.pathname, selectedCollector]);
