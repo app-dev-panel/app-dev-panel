@@ -117,11 +117,8 @@ export const EventPanel = ({events}: EventTimelineProps) => {
         [theme],
     );
 
-    if (!events || events.length === 0) {
-        return <EmptyState icon="bolt" title="No dispatched events found" />;
-    }
-
     const filtered = useMemo(() => {
+        if (!events) return [];
         let result = events;
         if (activeFilters.size > 0) {
             result = result.filter((e) => {
@@ -135,6 +132,10 @@ export const EventPanel = ({events}: EventTimelineProps) => {
         }
         return result;
     }, [events, deferredFilter, activeFilters]);
+
+    if (!events || events.length === 0) {
+        return <EmptyState icon="bolt" title="No dispatched events found" />;
+    }
 
     const formatDelta = (ms: number): string => {
         if (ms < 1) return `+${(ms * 1000).toFixed(0)}µs`;
