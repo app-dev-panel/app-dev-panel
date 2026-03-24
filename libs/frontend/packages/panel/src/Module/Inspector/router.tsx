@@ -5,6 +5,7 @@ export const routes = [
     {
         path: 'inspector',
         children: [
+            {index: true, element: <Pages.DashboardPage />},
             {path: 'tests', element: <Pages.TestsPage />},
             {path: 'analyse', element: <Pages.AnalysePage />},
             {path: 'routes', element: <Pages.RoutesPage />},
