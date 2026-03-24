@@ -6,7 +6,7 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
-import {Code} from '@mui/icons-material';
+import {Description} from '@mui/icons-material';
 import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
@@ -235,17 +235,18 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                                     {event.name}
                                 </Typography>
 
-                                <Box sx={{display: 'flex', gap: 1, mb: 1.5}}>
+                                <Box sx={{display: 'flex', gap: 0.5, mb: 1.5}}>
                                     <FileLink path={event.line}>
-                                        <Chip
-                                            component="span"
-                                            clickable
-                                            label="Open File"
-                                            size="small"
-                                            icon={<Code sx={{fontSize: '14px !important'}} />}
-                                            sx={{fontSize: '11px', height: 24}}
-                                            variant="outlined"
-                                        />
+                                        <Tooltip title="Open File">
+                                            <IconButton
+                                                size="small"
+                                                component="span"
+                                                aria-label="Open File"
+                                                sx={{p: 0.5}}
+                                            >
+                                                <Description sx={{fontSize: 16}} />
+                                            </IconButton>
+                                        </Tooltip>
                                     </FileLink>
                                 </Box>
 

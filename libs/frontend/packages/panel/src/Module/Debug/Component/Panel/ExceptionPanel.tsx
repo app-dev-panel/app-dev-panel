@@ -7,7 +7,8 @@ import {StackTrace} from '@app-dev-panel/sdk/Component/StackTrace';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilename, parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
-import {Box, Chip, Collapse, Icon, Typography} from '@mui/material';
+import {BugReport, FmdGood} from '@mui/icons-material';
+import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
 import {alpha, styled, useTheme} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
 
@@ -66,13 +67,6 @@ const Message = styled(Typography)(({theme}) => ({
     color: theme.palette.text.secondary,
 }));
 
-const FileLinkLabel = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
-    fontSize: '11px',
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
-}) as typeof Typography;
-
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(2),
     backgroundColor: theme.palette.action.hover,
@@ -122,28 +116,20 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
 
             <Typography sx={{fontSize: '13px', mb: 2, color: 'text.primary'}}>{exception.message}</Typography>
 
-            <Box sx={{display: 'flex', gap: 1, mb: 2}}>
+            <Box sx={{display: 'flex', gap: 0.5, mb: 2}}>
                 <FileLink className={parseFilePath(exception.class)}>
-                    <Chip
-                        component="span"
-                        clickable
-                        label="Open Exception Class"
-                        size="small"
-                        icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
-                        sx={{fontSize: '11px', height: 24}}
-                        variant="outlined"
-                    />
+                    <Tooltip title="Open Exception Class">
+                        <IconButton size="small" component="span" aria-label="Open Exception Class" sx={{p: 0.5}}>
+                            <BugReport sx={{fontSize: 16}} />
+                        </IconButton>
+                    </Tooltip>
                 </FileLink>
                 <FileLink path={localFile} line={+exception.line}>
-                    <Chip
-                        component="span"
-                        clickable
-                        label="Open Source Location"
-                        size="small"
-                        icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
-                        sx={{fontSize: '11px', height: 24}}
-                        variant="outlined"
-                    />
+                    <Tooltip title="Open Source Location">
+                        <IconButton size="small" component="span" aria-label="Open Source Location" sx={{p: 0.5}}>
+                            <FmdGood sx={{fontSize: 16}} />
+                        </IconButton>
+                    </Tooltip>
                 </FileLink>
             </Box>
 

@@ -70,8 +70,8 @@ describe('ExceptionPanel', () => {
     it('always shows exception detail (no expand needed)', () => {
         renderWithProviders(<ExceptionPanel exceptions={[makeException()]} />);
         // Detail is always visible — chips should be immediately present
-        expect(screen.getByText('Open Exception Class')).toBeInTheDocument();
-        expect(screen.getByText('Open Source Location')).toBeInTheDocument();
+        expect(screen.getByLabelText('Open Exception Class')).toBeInTheDocument();
+        expect(screen.getByLabelText('Open Source Location')).toBeInTheDocument();
     });
 
     it('shows error code chip when code is not 0', () => {
