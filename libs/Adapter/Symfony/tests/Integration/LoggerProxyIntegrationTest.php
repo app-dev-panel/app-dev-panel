@@ -206,6 +206,10 @@ final class LoggerProxyIntegrationTest extends TestCase
 
         $this->assertCount(1, $appLogs, 'Logger proxy should intercept via "logger" service ID');
         $this->assertSame('Log via logger service ID', $appLogs[0]['message']);
+
+        // Complete the lifecycle to restore error handlers
+        $response = new Response('OK', 200);
+        $httpSubscriber->onKernelTerminate(new TerminateEvent($kernel, $request, $response));
     }
 
     public function testLoggerProxyDelegatesToOriginalLogger(): void
@@ -226,6 +230,10 @@ final class LoggerProxyIntegrationTest extends TestCase
 
         // No exception = delegation works
         $this->assertTrue(true);
+
+        // Complete the lifecycle to restore error handlers
+        $response = new Response('OK', 200);
+        $httpSubscriber->onKernelTerminate(new TerminateEvent($kernel, $request, $response));
     }
 
     private function buildContainer(): ContainerBuilder

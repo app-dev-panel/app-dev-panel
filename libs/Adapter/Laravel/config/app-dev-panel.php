@@ -20,6 +20,7 @@ return [
         'http_client' => true,
         'timeline' => true,
         'var_dumper' => true,
+        'deprecation' => true,
         'filesystem_stream' => true,
         'http_stream' => true,
         'command' => true,

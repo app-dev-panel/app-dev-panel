@@ -331,6 +331,14 @@ final class BundleBootstrapTest extends TestCase
         $this->assertCount(1, $data);
         $this->assertSame(\RuntimeException::class, $data[0]['class']);
         $this->assertSame('Integration test error', $data[0]['message']);
+
+        // Complete the lifecycle to restore error handlers
+        $response = new \Symfony\Component\HttpFoundation\Response('Error', 500);
+        $httpSubscriber->onKernelTerminate(new \Symfony\Component\HttpKernel\Event\TerminateEvent(
+            $kernel,
+            $request,
+            $response,
+        ));
     }
 
     /**

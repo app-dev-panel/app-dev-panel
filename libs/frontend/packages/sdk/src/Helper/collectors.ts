@@ -25,4 +25,5 @@ export enum CollectorsMap {
     CacheCollector = 'AppDevPanel\\Kernel\\Collector\\CacheCollector',
     TemplateCollector = 'AppDevPanel\\Kernel\\Collector\\TemplateCollector',
     SecurityCollector = 'AppDevPanel\\Kernel\\Collector\\SecurityCollector',
+    DeprecationCollector = 'AppDevPanel\\Kernel\\Collector\\DeprecationCollector',
 }

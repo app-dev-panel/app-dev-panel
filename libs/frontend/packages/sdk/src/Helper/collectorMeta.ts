@@ -31,6 +31,7 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
     [CollectorsMap.WebAppInfoCollector]: {label: 'Web Info', icon: 'language', weight: 18},
     [CollectorsMap.CommandCollector]: {label: 'Command', icon: 'terminal', weight: 1},
     [CollectorsMap.ViewCollector]: {label: 'View', icon: 'visibility', weight: 20},
+    [CollectorsMap.DeprecationCollector]: {label: 'Deprecations', icon: 'warning_amber', weight: 5},
 };
 
 const defaultMeta: CollectorMeta = {label: 'Unknown', icon: 'extension', weight: 99};

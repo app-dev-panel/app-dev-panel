@@ -3,6 +3,7 @@ import ModuleLoader from '@app-dev-panel/panel/Application/Pages/RemoteComponent
 import {AssetBundlePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/AssetBundlePanel';
 import {CachePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CachePanel';
 import {DatabasePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DatabasePanel';
+import {DeprecationPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DeprecationPanel';
 import {EnvironmentPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EnvironmentPanel';
 import {EventPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EventPanel';
 import {ExceptionPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ExceptionPanel';
@@ -55,6 +56,7 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.MiddlewareCollector]: (data: any) => <MiddlewarePanel {...data} />,
         [CollectorsMap.EventCollector]: (data: any) => <EventPanel events={data} />,
         [CollectorsMap.ExceptionCollector]: (data: any) => <ExceptionPanel exceptions={data} />,
+        [CollectorsMap.DeprecationCollector]: (data: any) => <DeprecationPanel data={data} />,
         [CollectorsMap.VarDumperCollector]: (data: any) => <VarDumperPanel data={data} />,
         [CollectorsMap.CacheCollector]: (data: any) => <CachePanel data={data} />,
         [CollectorsMap.EnvironmentCollector]: (data: any) => <EnvironmentPanel data={data} />,

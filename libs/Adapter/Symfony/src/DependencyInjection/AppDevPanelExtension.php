@@ -47,6 +47,7 @@ use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\DeprecationCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -181,6 +182,7 @@ final class AppDevPanelExtension extends Extension
             'service' => ServiceCollector::class,
             'http_client' => HttpClientCollector::class,
             'var_dumper' => VarDumperCollector::class,
+            'deprecation' => DeprecationCollector::class,
         ];
 
         foreach ($timelineCollectorMap as $key => $class) {
