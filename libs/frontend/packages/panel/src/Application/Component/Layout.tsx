@@ -313,8 +313,13 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             {key: 'home', icon: 'home', label: 'Home', href: '/'},
             {key: 'debug', icon: 'bug_report', label: 'Debug', href: '/debug', children: debugChildren},
             {key: 'inspector', icon: 'search', label: 'Inspector', href: '/inspector', children: inspectorChildren},
-            {key: 'llm', icon: 'psychology', label: 'LLM', href: '/llm'},
-            {key: 'mcp', icon: 'hub', label: 'MCP', href: '/mcp'},
+            {
+                key: 'llm',
+                icon: 'psychology',
+                label: 'LLM',
+                href: '/llm',
+                children: [{key: '/mcp', icon: 'hub', label: 'MCP'}],
+            },
             {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api'},
             {key: 'frames', icon: 'web', label: 'Frames', href: '/frames'},
         ],
@@ -333,6 +338,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             // Find matching inspector child
             const match = inspectorChildren.find((c) => location.pathname.startsWith(c.key));
             return match?.key;
+        }
+        if (location.pathname.startsWith('/mcp')) {
+            return '/mcp';
         }
         return undefined;
     }, [location.pathname, selectedCollector]);
@@ -355,7 +363,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 if (debugEntry) {
                     navigate(`/debug?collector=${encodeURIComponent(childKey)}&debugEntry=${debugEntry.id}`);
                 }
-            } else if (sectionKey === 'inspector') {
+            } else if (sectionKey === 'inspector' || sectionKey === 'llm') {
                 navigate(childKey);
             }
         },
