@@ -164,38 +164,49 @@ export const ChatPanel = () => {
                 )}
                 {messages.map((msg, i) => (
                     <Box key={i} sx={{alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%'}}>
-                        <Box
-                            sx={{
-                                p: 1.5,
-                                borderRadius: 2,
-                                ...(msg.role === 'user'
-                                    ? {bgcolor: 'primary.main', color: 'primary.contrastText'}
-                                    : {bgcolor: 'background.default', color: 'text.primary'}),
-                                opacity: msg.status === 'sending' ? 0.7 : 1,
-                            }}
-                        >
-                            {msg.role === 'assistant' ? (
-                                <Markdown content={msg.content} />
-                            ) : (
-                                <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
+                        {msg.status === 'error' ? (
+                            <>
+                                <Alert
+                                    severity="error"
+                                    action={
+                                        <Tooltip title="Retry">
+                                            <IconButton size="small" color="error" onClick={() => handleRetry(i)}>
+                                                <ReplayIcon sx={{fontSize: 16}} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    }
+                                >
                                     {msg.content}
-                                </Typography>
-                            )}
-                        </Box>
-                        {msg.status === 'error' && msg.error && (
-                            <Alert
-                                severity="error"
-                                action={
-                                    <Tooltip title="Retry">
-                                        <IconButton size="small" color="error" onClick={() => handleRetry(i)}>
-                                            <ReplayIcon sx={{fontSize: 16}} />
-                                        </IconButton>
-                                    </Tooltip>
-                                }
-                                sx={{mt: 0.5}}
+                                </Alert>
+                                {msg.error && (
+                                    <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        sx={{mt: 0.5, display: 'block'}}
+                                    >
+                                        {msg.error}
+                                    </Typography>
+                                )}
+                            </>
+                        ) : (
+                            <Box
+                                sx={{
+                                    p: 1.5,
+                                    borderRadius: 2,
+                                    ...(msg.role === 'user'
+                                        ? {bgcolor: 'primary.main', color: 'primary.contrastText'}
+                                        : {bgcolor: 'background.default', color: 'text.primary'}),
+                                    opacity: msg.status === 'sending' ? 0.7 : 1,
+                                }}
                             >
-                                {msg.error}
-                            </Alert>
+                                {msg.role === 'assistant' ? (
+                                    <Markdown content={msg.content} />
+                                ) : (
+                                    <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
+                                        {msg.content}
+                                    </Typography>
+                                )}
+                            </Box>
                         )}
                     </Box>
                 ))}
