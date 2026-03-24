@@ -163,7 +163,7 @@ Yup validation schema generators — converts Yii validator rules to Yup schemas
 | File | Purpose |
 |------|---------|
 | `Module.types.ts` | `ModuleInterface` — contract for feature modules |
-| `Gii/index.ts` | `GiiGeneratorAttribute` — Gii generator attribute types |
+| `GenCode/index.ts` | `GenCodeGeneratorAttribute` — Code generator attribute types |
 
 ## Configuration
 

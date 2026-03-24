@@ -210,8 +210,8 @@ export const handlers = [
         return HttpResponse.json({data: {groups: ['app', 'web'], data: {'app.name': 'Test App'}}});
     }),
 
-    // Gii API
-    http.get(`${BASE}/gii/api/generator`, () => {
+    // GenCode API
+    http.get(`${BASE}/gen-code/api/generator`, () => {
         return HttpResponse.json({data: []});
     }),
 

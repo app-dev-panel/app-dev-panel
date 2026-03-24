@@ -1,7 +1,7 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
-import {GiiGenerator, useGetGeneratorsQuery} from '@app-dev-panel/panel/Module/Gii/API/Gii';
-import {GeneratorStepper} from '@app-dev-panel/panel/Module/Gii/Component/GeneratorSteps/GeneratorStepper';
-import {ContextProvider} from '@app-dev-panel/panel/Module/Gii/Context/Context';
+import {GenCodeGenerator, useGetGeneratorsQuery} from '@app-dev-panel/panel/Module/GenCode/API/GenCode';
+import {GeneratorStepper} from '@app-dev-panel/panel/Module/GenCode/Component/GeneratorSteps/GeneratorStepper';
+import {ContextProvider} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
@@ -16,7 +16,7 @@ import {ErrorBoundary} from 'react-error-boundary';
 import {useSearchParams} from 'react-router-dom';
 
 const Layout = () => {
-    const [selectedGenerator, setSelectedGenerator] = useState<GiiGenerator | null>(null);
+    const [selectedGenerator, setSelectedGenerator] = useState<GenCodeGenerator | null>(null);
     const [searchParams] = useSearchParams();
 
     const {data, isLoading} = useGetGeneratorsQuery();
@@ -32,13 +32,13 @@ const Layout = () => {
             (data || []).map((generator, index) => ({
                 name: generator.id,
                 text: generator.name,
-                href: '/gii?generator=' + generator.id,
+                href: '/gen-code?generator=' + generator.id,
                 icon: index % 2 === 0 ? <InboxIcon /> : <MailIcon />,
             })),
         [data],
     );
 
-    useBreadcrumbs(() => ['Gii', !!selectedGenerator ? selectedGenerator.name : null]);
+    useBreadcrumbs(() => ['GenCode', !!selectedGenerator ? selectedGenerator.name : null]);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
@@ -49,13 +49,13 @@ const Layout = () => {
             <PageHeader title="Code Generator" icon="build_circle" description="Generate code from templates" />
             {links.length === 0 ? (
                 <InfoBox
-                    title="Gii generators are empty"
+                    title="Code generators are empty"
                     text={
                         <>
-                            <Typography>Gii is not configured or it does not have any generators.</Typography>
+                            <Typography>Code generator is not configured or it does not have any generators.</Typography>
                             <Typography>
-                                Make sure Gii is active and its configuration has at least one active generator.&nbsp;
-                                <Link href="/inspector/config/parameters?filter=app-dev-panel/gii">
+                                Make sure the code generator is active and its configuration has at least one active generator.&nbsp;
+                                <Link href="/inspector/config/parameters?filter=app-dev-panel/gen-code">
                                     Open parameters.
                                 </Link>
                             </Typography>

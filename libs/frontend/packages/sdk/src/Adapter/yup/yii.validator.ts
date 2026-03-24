@@ -1,9 +1,9 @@
 import {yup} from '@app-dev-panel/sdk/Adapter/yup';
-import {GiiGeneratorAttribute, GiiGeneratorAttributeRule} from '@app-dev-panel/sdk/Types/Gii';
+import {GenCodeGeneratorAttribute, GenCodeGeneratorAttributeRule} from '@app-dev-panel/sdk/Types/GenCode';
 import * as Yup from 'yup';
 import {Schema} from 'yup';
 
-function createYupValidationRules(rules: GiiGeneratorAttributeRule[]) {
+function createYupValidationRules(rules: GenCodeGeneratorAttributeRule[]) {
     const currentSet: Schema[] = [];
 
     for (const rule of rules) {
@@ -35,7 +35,7 @@ function createYupValidationRules(rules: GiiGeneratorAttributeRule[]) {
     return yup.mixed().sequence(currentSet);
 }
 
-export function createYupValidationSchema(attributes: Record<string, GiiGeneratorAttribute>): Yup.AnyObjectSchema {
+export function createYupValidationSchema(attributes: Record<string, GenCodeGeneratorAttribute>): Yup.AnyObjectSchema {
     const rulesSet: any = {};
     Object.entries(attributes).map(([attributeName, attribute], index) => {
         rulesSet[attributeName] = createYupValidationRules(attribute.rules);

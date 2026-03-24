@@ -1,9 +1,9 @@
-import {GiiFile} from '@app-dev-panel/panel/Module/Gii/Types/FIle.types';
-import {GiiResult} from '@app-dev-panel/panel/Module/Gii/Types/Result.types';
+import {GenCodeFile} from '@app-dev-panel/panel/Module/GenCode/Types/FIle.types';
+import {GenCodeResult} from '@app-dev-panel/panel/Module/GenCode/Types/Result.types';
 import {createAction, createReducer} from '@reduxjs/toolkit';
 import React, {createContext} from 'react';
 
-type State = {files: GiiFile[]; operations: any[]; parameters: any[]; results: GiiResult[]};
+type State = {files: GenCodeFile[]; operations: any[]; parameters: any[]; results: GenCodeResult[]};
 
 const initialState: State = {files: [], operations: [], parameters: [], results: []};
 

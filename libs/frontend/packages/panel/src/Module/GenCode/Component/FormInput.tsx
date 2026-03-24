@@ -1,9 +1,9 @@
 import {matchInputType} from '@app-dev-panel/sdk/Adapter/yii/inputTypeMatcher';
-import {GiiGeneratorAttribute} from '@app-dev-panel/sdk/Types/Gii';
+import {GenCodeGeneratorAttribute} from '@app-dev-panel/sdk/Types/GenCode';
 import {Autocomplete, FormHelperText, TextField} from '@mui/material';
 import {Controller, useFormContext} from 'react-hook-form';
 
-type FormInputProps = {attributeName: string; attribute: GiiGeneratorAttribute};
+type FormInputProps = {attributeName: string; attribute: GenCodeGeneratorAttribute};
 
 export function FormInput({attributeName, attribute}: FormInputProps) {
     const form = useFormContext();

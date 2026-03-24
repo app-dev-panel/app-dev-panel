@@ -9,7 +9,7 @@ export enum FileStateEnum {
     NOT_EXIST = 'not_exist',
 }
 
-export type GiiFile = {
+export type GenCodeFile = {
     content: string;
     id: string;
     operation: FileOperationEnum;

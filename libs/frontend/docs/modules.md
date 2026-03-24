@@ -59,7 +59,7 @@ export const middlewares = [inspectorApi.middleware, gitApi.middleware];
 | Application | `/`, `/shared` | No | App shell, home page, shared layout |
 | Debug | `/debug/*` | No | Debug entry viewer with collector tabs |
 | Inspector | `/inspector/*` | No | Live application introspection (20+ pages) |
-| Gii | `/gii/*` | No | Code generation wizard |
+| GenCode | `/gen-code/*` | No | Code generation wizard |
 | OpenAPI | `/open-api/*` | No | Swagger UI integration |
 | Frames | `/frames/*` | No | iFrame manager for remote panels |
 
@@ -200,9 +200,9 @@ Two RTK Query APIs:
 
 All inspector endpoints use `keepUnusedDataFor: 0` (no caching — always fresh data).
 
-## Gii Module
+## GenCode Module
 
-**Path prefix**: `/gii`
+**Path prefix**: `/gen-code`
 
 Code generation wizard. Uses a local React Context with `useReducer` for wizard step state.
 
@@ -210,9 +210,9 @@ Code generation wizard. Uses a local React Context with `useReducer` for wizard 
 
 | Page | Route | Description |
 |------|-------|-------------|
-| GiiPage | `/gii` | Generator selection + multi-step form |
+| GenCodePage | `/gen-code` | Generator selection + multi-step form |
 
-### API Endpoints (giiApi)
+### API Endpoints (genCodeApi)
 
 | Endpoint | Type | Description |
 |----------|------|-------------|

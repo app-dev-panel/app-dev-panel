@@ -1,4 +1,4 @@
-import {useLazyGetGeneratorsQuery} from '@app-dev-panel/panel/Module/Gii/API/Gii';
+import {useLazyGetGeneratorsQuery} from '@app-dev-panel/panel/Module/GenCode/API/GenCode';
 import {useLazyGetParametersQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {useSelector} from '@app-dev-panel/panel/store';
 import {addFavoriteUrl, changeBaseUrl, removeFavoriteUrl} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
@@ -168,13 +168,13 @@ export function IndexPage() {
     const theme = useTheme();
     const navigate = useNavigate();
     const [inspectorQuery] = useLazyGetParametersQuery();
-    const [giiQuery] = useLazyGetGeneratorsQuery();
+    const [genCodeQuery] = useLazyGetGeneratorsQuery();
     const baseUrl = useSelector((state) => state.application.baseUrl);
     const [url, setUrl] = useState<string>(String(baseUrl));
     const [status, setStatus] = useState<Record<string, 'connected' | 'disconnected' | 'loading'>>({
         debug: 'loading',
         inspector: 'loading',
-        gii: 'loading',
+        genCode: 'loading',
     });
     const favoriteUrls = useSelector((state) => state.application.favoriteUrls) as string[];
 
@@ -199,15 +199,15 @@ export function IndexPage() {
             : 'loading';
 
     async function checkStatus() {
-        setStatus((s) => ({...s, inspector: 'loading', gii: 'loading'}));
+        setStatus((s) => ({...s, inspector: 'loading', genCode: 'loading'}));
         inspectorQuery()
             .then((response) =>
                 setStatus((s) => ({...s, inspector: response.isSuccess ? 'connected' : 'disconnected'})),
             )
             .catch(() => setStatus((s) => ({...s, inspector: 'disconnected'})));
-        giiQuery()
-            .then((response) => setStatus((s) => ({...s, gii: response.isSuccess ? 'connected' : 'disconnected'})))
-            .catch(() => setStatus((s) => ({...s, gii: 'disconnected'})));
+        genCodeQuery()
+            .then((response) => setStatus((s) => ({...s, genCode: response.isSuccess ? 'connected' : 'disconnected'})))
+            .catch(() => setStatus((s) => ({...s, genCode: 'disconnected'})));
     }
 
     const handleChangeUrl = async (newUrl: string) => {
@@ -274,7 +274,7 @@ export function IndexPage() {
                     status={status.inspector}
                     onClick={() => handleChangeUrl(url)}
                 />
-                <StatusCard title="Gii" icon="build_circle" status={status.gii} onClick={() => handleChangeUrl(url)} />
+                <StatusCard title="GenCode" icon="build_circle" status={status.genCode} onClick={() => handleChangeUrl(url)} />
             </StatusGrid>
 
             <SectionLabel>Backend URL</SectionLabel>

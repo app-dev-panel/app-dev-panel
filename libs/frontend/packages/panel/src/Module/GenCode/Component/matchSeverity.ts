@@ -1,4 +1,4 @@
-import {FileStateEnum} from '@app-dev-panel/panel/Module/Gii/Types/FIle.types';
+import {FileStateEnum} from '@app-dev-panel/panel/Module/GenCode/Types/FIle.types';
 import {AlertColor} from '@mui/material';
 
 export function matchSeverityByResultStatus(status: string): AlertColor {
