@@ -100,10 +100,6 @@ export const ConnectionCard = () => {
         [setTimeoutApi],
     );
 
-    if (isLoading) {
-        return <Skeleton variant="rectangular" height={48} sx={{borderRadius: 1}} />;
-    }
-
     const provider = status?.provider;
     const connected = status?.connected ?? false;
     const isOpenRouter = provider === 'openrouter';
@@ -128,6 +124,10 @@ export const ConnectionCard = () => {
     }, [models, provider, freeOnly, isOpenRouter]);
 
     const selectedModel = popularModels.find((m) => m.id === status?.model);
+
+    if (isLoading) {
+        return <Skeleton variant="rectangular" height={48} sx={{borderRadius: 1}} />;
+    }
 
     // Connected: compact summary bar, expandable
     if (connected) {
