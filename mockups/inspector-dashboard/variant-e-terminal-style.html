@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inspector Dashboard — Variant E: Terminal / Dev Style</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace; background: #0F172A; color: #E2E8F0; }
+
+  .page { max-width: 1000px; margin: 0 auto; padding: 32px 24px; }
+
+  .header { margin-bottom: 28px; }
+  .header h1 { font-size: 16px; font-weight: 600; color: #38BDF8; }
+  .header h1 span { color: #64748B; }
+  .header .tagline { font-size: 12px; color: #475569; margin-top: 4px; }
+
+  /* System info block */
+  .sys-block {
+    background: #1E293B;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .sys-block .key { color: #64748B; }
+  .sys-block .val { color: #E2E8F0; }
+  .sys-block .val.green { color: #4ADE80; }
+  .sys-block .val.amber { color: #FBBF24; }
+  .sys-block .val.blue { color: #60A5FA; }
+  .sys-block .val.cyan { color: #22D3EE; }
+  .sys-block .sep { color: #334155; }
+
+  /* Section */
+  .section { margin-bottom: 24px; }
+  .section-title {
+    font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 8px; padding-left: 2px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: #1E293B; }
+
+  /* Tool grid */
+  .tool-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .tool-card {
+    background: #1E293B;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.12s;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .tool-card:hover { border-color: #475569; background: #253349; }
+
+  .tool-prefix { font-size: 13px; color: #475569; flex-shrink: 0; width: 20px; text-align: center; }
+  .tool-label { font-size: 13px; color: #CBD5E1; flex: 1; }
+  .tool-label .hl { color: #38BDF8; }
+  .tool-stat { font-size: 12px; color: #475569; text-align: right; }
+  .tool-stat .num { color: #FBBF24; font-weight: 600; }
+
+  /* Keyboard hint */
+  .kbd {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 5px;
+    border: 1px solid #475569;
+    border-radius: 3px;
+    color: #64748B;
+    background: #0F172A;
+    font-family: inherit;
+  }
+
+  /* Git log mini */
+  .git-log {
+    background: #1E293B;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 12px;
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+  .git-log .prompt { color: #475569; }
+  .git-log .branch { color: #4ADE80; }
+  .git-log .sha { color: #FBBF24; }
+  .git-log .msg { color: #94A3B8; }
+  .git-log .time { color: #475569; }
+
+  /* Resource meters */
+  .meters {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .meter {
+    background: #1E293B;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 14px 18px;
+  }
+  .meter-label { font-size: 11px; color: #64748B; margin-bottom: 8px; }
+  .meter-bar { height: 6px; background: #0F172A; border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+  .meter-fill { height: 100%; border-radius: 3px; }
+  .meter-fill.green { background: #4ADE80; }
+  .meter-fill.amber { background: #FBBF24; }
+  .meter-fill.blue { background: #60A5FA; }
+  .meter-val { font-size: 12px; display: flex; justify-content: space-between; }
+  .meter-val .pct { color: #E2E8F0; font-weight: 600; }
+  .meter-val .detail { color: #475569; }
+
+  /* Footer hint */
+  .footer-hint {
+    text-align: center;
+    font-size: 11px;
+    color: #334155;
+    margin-top: 32px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="header">
+    <h1>$ inspector <span>--dashboard</span></h1>
+    <div class="tagline">Application runtime inspector &middot; connected to localhost:8080</div>
+  </div>
+
+  <!-- System info -->
+  <div class="sys-block">
+    <span class="key">php</span> <span class="val green">8.4.2</span> <span class="sep">&middot;</span>
+    <span class="key">framework</span> <span class="val blue">yii3</span> <span class="sep">&middot;</span>
+    <span class="key">opcache</span> <span class="val green">on</span> <span class="sep">&middot;</span>
+    <span class="key">jit</span> <span class="val green">on</span> <span class="sep">&middot;</span>
+    <span class="key">extensions</span> <span class="val">48</span> <span class="sep">&middot;</span>
+    <span class="key">routes</span> <span class="val cyan">37</span> <span class="sep">&middot;</span>
+    <span class="key">tables</span> <span class="val cyan">12</span> <span class="sep">&middot;</span>
+    <span class="key">packages</span> <span class="val">86</span>
+  </div>
+
+  <!-- Resource meters -->
+  <div class="meters">
+    <div class="meter">
+      <div class="meter-label">OPcache Memory</div>
+      <div class="meter-bar"><div class="meter-fill green" style="width:78%"></div></div>
+      <div class="meter-val"><span class="pct">78%</span><span class="detail">94/128 MB</span></div>
+    </div>
+    <div class="meter">
+      <div class="meter-label">Interned Strings</div>
+      <div class="meter-bar"><div class="meter-fill blue" style="width:45%"></div></div>
+      <div class="meter-val"><span class="pct">45%</span><span class="detail">14/32 MB</span></div>
+    </div>
+    <div class="meter">
+      <div class="meter-label">Cache Hit Rate</div>
+      <div class="meter-bar"><div class="meter-fill green" style="width:99.7%"></div></div>
+      <div class="meter-val"><span class="pct">99.7%</span><span class="detail">hits/misses</span></div>
+    </div>
+  </div>
+
+  <!-- Git log -->
+  <div class="git-log">
+    <span class="prompt">$</span> <span class="branch">main</span><br>
+    <span class="sha">a3f2c1e</span> <span class="msg">fix: resolve middleware ordering in route dispatcher</span> <span class="time">(2h)</span><br>
+    <span class="sha">b1e9d4a</span> <span class="msg">feat: add JSON response helper for API controllers</span> <span class="time">(5h)</span><br>
+    <span class="sha">c7f3a2b</span> <span class="msg">refactor: extract validation logic into separate service</span> <span class="time">(1d)</span><br>
+    <span class="sha">d9e1c8f</span> <span class="msg">chore: update dependencies to latest versions</span> <span class="time">(2d)</span>
+  </div>
+
+  <!-- Application -->
+  <div class="section">
+    <div class="section-title">application</div>
+    <div class="tool-grid">
+      <a class="tool-card" href="/inspector/config">
+        <div class="tool-prefix">⚙</div>
+        <div class="tool-label"><span class="hl">config</span>uration</div>
+        <div class="tool-stat"><span class="num">248</span> params</div>
+      </a>
+      <a class="tool-card" href="/inspector/events">
+        <div class="tool-prefix">⚡</div>
+        <div class="tool-label"><span class="hl">event</span> listeners</div>
+        <div class="tool-stat"><span class="num">42</span> listeners</div>
+      </a>
+      <a class="tool-card" href="/inspector/routes">
+        <div class="tool-prefix">⑂</div>
+        <div class="tool-label"><span class="hl">route</span>s</div>
+        <div class="tool-stat"><span class="num">37</span> routes</div>
+      </a>
+      <a class="tool-card" href="/inspector/commands">
+        <div class="tool-prefix">▸</div>
+        <div class="tool-label"><span class="hl">command</span>s</div>
+        <div class="tool-stat"><span class="num">18</span> cmds</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Data -->
+  <div class="section">
+    <div class="section-title">data &amp; storage</div>
+    <div class="tool-grid">
+      <a class="tool-card" href="/inspector/database">
+        <div class="tool-prefix">☰</div>
+        <div class="tool-label"><span class="hl">database</span></div>
+        <div class="tool-stat"><span class="num">12</span> tables</div>
+      </a>
+      <a class="tool-card" href="/inspector/cache">
+        <div class="tool-prefix">⟳</div>
+        <div class="tool-label"><span class="hl">cache</span></div>
+        <div class="tool-stat"><span class="num">3</span> keys</div>
+      </a>
+      <a class="tool-card" href="/inspector/translations">
+        <div class="tool-prefix">文</div>
+        <div class="tool-label"><span class="hl">translation</span>s</div>
+        <div class="tool-stat"><span class="num">5</span> catalogs</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Dev tools -->
+  <div class="section">
+    <div class="section-title">dev tools</div>
+    <div class="tool-grid">
+      <a class="tool-card" href="/inspector/tests">
+        <div class="tool-prefix">🧪</div>
+        <div class="tool-label"><span class="hl">test</span>s</div>
+        <div class="tool-stat">run suite</div>
+      </a>
+      <a class="tool-card" href="/inspector/analyse">
+        <div class="tool-prefix">📊</div>
+        <div class="tool-label"><span class="hl">analyse</span></div>
+        <div class="tool-stat">psalm</div>
+      </a>
+      <a class="tool-card" href="/inspector/git">
+        <div class="tool-prefix">&lt;&gt;</div>
+        <div class="tool-label"><span class="hl">git</span></div>
+        <div class="tool-stat">main</div>
+      </a>
+      <a class="tool-card" href="/inspector/files">
+        <div class="tool-prefix">📁</div>
+        <div class="tool-label"><span class="hl">file</span> explorer</div>
+        <div class="tool-stat">browse</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Environment -->
+  <div class="section">
+    <div class="section-title">environment</div>
+    <div class="tool-grid">
+      <a class="tool-card" href="/inspector/phpinfo">
+        <div class="tool-prefix">ℹ</div>
+        <div class="tool-label"><span class="hl">php</span>info</div>
+        <div class="tool-stat">8.4.2</div>
+      </a>
+      <a class="tool-card" href="/inspector/composer">
+        <div class="tool-prefix">📦</div>
+        <div class="tool-label"><span class="hl">composer</span></div>
+        <div class="tool-stat"><span class="num">86</span> pkgs</div>
+      </a>
+      <a class="tool-card" href="/inspector/opcache">
+        <div class="tool-prefix">⚡</div>
+        <div class="tool-label"><span class="hl">opcache</span></div>
+        <div class="tool-stat"><span class="num">78%</span> mem</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-hint">Use <span class="kbd">Ctrl</span>+<span class="kbd">K</span> to search tools &middot; click any card to navigate</div>
+</div>
+
+</body>
+</html>
