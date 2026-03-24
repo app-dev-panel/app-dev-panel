@@ -164,7 +164,25 @@ export const ChatPanel = () => {
                 )}
                 {messages.map((msg, i) => (
                     <Box key={i} sx={{alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%'}}>
-                        {msg.status === 'error' ? (
+                        <Box
+                            sx={{
+                                p: 1.5,
+                                borderRadius: 2,
+                                ...(msg.role === 'user'
+                                    ? {bgcolor: 'primary.main', color: 'primary.contrastText'}
+                                    : {bgcolor: 'background.default', color: 'text.primary'}),
+                                opacity: msg.status === 'sending' ? 0.7 : 1,
+                            }}
+                        >
+                            {msg.role === 'assistant' ? (
+                                <Markdown content={msg.content} />
+                            ) : (
+                                <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
+                                    {msg.content}
+                                </Typography>
+                            )}
+                        </Box>
+                        {msg.status === 'error' && msg.error && (
                             <Alert
                                 severity="error"
                                 action={
@@ -174,35 +192,10 @@ export const ChatPanel = () => {
                                         </IconButton>
                                     </Tooltip>
                                 }
+                                sx={{mt: 0.5}}
                             >
-                                <Typography variant="body2" sx={{whiteSpace: 'pre-wrap', fontWeight: 500}}>
-                                    {msg.content}
-                                </Typography>
-                                {msg.error && (
-                                    <Typography variant="caption" sx={{display: 'block', mt: 0.5}}>
-                                        {msg.error}
-                                    </Typography>
-                                )}
+                                {msg.error}
                             </Alert>
-                        ) : (
-                            <Box
-                                sx={{
-                                    p: 1.5,
-                                    borderRadius: 2,
-                                    ...(msg.role === 'user'
-                                        ? {bgcolor: 'primary.main', color: 'primary.contrastText'}
-                                        : {bgcolor: 'background.default', color: 'text.primary'}),
-                                    opacity: msg.status === 'sending' ? 0.7 : 1,
-                                }}
-                            >
-                                {msg.role === 'assistant' ? (
-                                    <Markdown content={msg.content} />
-                                ) : (
-                                    <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
-                                        {msg.content}
-                                    </Typography>
-                                )}
-                            </Box>
                         )}
                     </Box>
                 ))}
