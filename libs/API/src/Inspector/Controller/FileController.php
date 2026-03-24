@@ -145,7 +145,14 @@ final class FileController
 
     private function readFile(string $destination, array $extra = []): ResponseInterface
     {
-        $rootPath = realpath($this->pathResolver->getRootPath()) ?: $this->pathResolver->getRootPath();
+        $rootPath = $this->pathResolver->getRootPath();
+
+        if (!str_starts_with($destination, $rootPath)) {
+            return $this->responseFactory->createJsonResponse([
+                'message' => 'Access denied: path is outside the project root.',
+            ], 403);
+        }
+
         $pattern = '/^' . preg_quote($rootPath, '/') . '/';
         $file = new SplFileInfo($destination);
         return $this->responseFactory->createJsonResponse(array_merge(

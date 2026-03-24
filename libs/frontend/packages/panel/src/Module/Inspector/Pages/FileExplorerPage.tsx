@@ -13,7 +13,7 @@ import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {scrollToAnchor} from '@app-dev-panel/sdk/Helper/scrollToAnchor';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import {Code, ContentCopy, FolderOpen, Lock, Person, Storage} from '@mui/icons-material';
-import {Box, Breadcrumbs, IconButton, Link, Paper, Tooltip, Typography} from '@mui/material';
+import {Alert, AlertTitle, Box, Breadcrumbs, IconButton, Link, Paper, Tooltip, Typography} from '@mui/material';
 import {useCallback, useEffect, useLayoutEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
@@ -172,13 +172,25 @@ export const FileExplorerPage = () => {
     const [tree, setTree] = useState<InspectorFile[]>([]);
     const [filteredTree, setFilteredTree] = useState<InspectorFile[]>([]);
     const [file, setFile] = useState<InspectorFileContent | null>(null);
+    const [error, setError] = useState<{status: number; message: string} | null>(null);
 
     useEffect(() => {
+        setError(null);
         (async () => {
             const response =
                 className !== ''
                     ? await lazyGetClassQuery({className, methodName})
                     : await lazyGetFilesQuery(parseFilePath(path));
+
+            if (response.error) {
+                const err = response.error as any;
+                const status = err?.status ?? err?.originalStatus ?? 0;
+                const message = err?.data?.data?.message ?? err?.data?.message ?? 'Unknown error';
+                setError({status, message});
+                setTree([]);
+                setFile(null);
+                return;
+            }
 
             if (Array.isArray(response.data)) {
                 const rows = sortTree(response.data);
@@ -246,7 +258,24 @@ export const FileExplorerPage = () => {
 
     return (
         <>
-            {file && (
+            {error && (
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        <PathBreadcrumbs path={path} onClick={handleBreadcrumbClick} />
+                    </Box>
+                    <Alert severity="error">
+                        <AlertTitle>
+                            {error.status === 403
+                                ? 'Access denied'
+                                : error.status === 404
+                                  ? 'Not found'
+                                  : `Error ${error.status}`}
+                        </AlertTitle>
+                        {error.message}
+                    </Alert>
+                </Box>
+            )}
+            {!error && file && (
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         <PathBreadcrumbs path={file.path} onClick={handleBreadcrumbClick} />
@@ -265,7 +294,7 @@ export const FileExplorerPage = () => {
                     </Paper>
                 </Box>
             )}
-            {!file && (
+            {!error && !file && (
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         <PathBreadcrumbs path={path} onClick={handleBreadcrumbClick} />
@@ -284,10 +313,6 @@ export const FileExplorerPage = () => {
                     </Paper>
                 </Box>
             )}
-
-            {getClassQueryInfo.error &&
-                'status' in getClassQueryInfo.error &&
-                getClassQueryInfo.error.status === 404 && <Typography>File not found</Typography>}
         </>
     );
 };
