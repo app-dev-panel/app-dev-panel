@@ -1,6 +1,33 @@
 {
     "name": "app-dev-panel/adapter-yiisoft",
     "type": "library",
+    "description": "Yii 3 framework adapter for ADP — auto-wires debug collectors, proxies, and inspector into Yiisoft applications",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "debugger",
+        "debugbar",
+        "profiler",
+        "yii",
+        "yii3",
+        "yiisoft",
+        "yii-debug",
+        "inspector",
+        "monitoring",
+        "observability",
+        "tracing",
+        "logging",
+        "performance",
+        "apm",
+        "ai",
+        "llm",
+        "developer-tools",
+        "devtools",
+        "app-dev-panel",
+        "adp",
+        "application-development-panel",
+        "development-server"
+    ],
     "require": {
         "php": "^8.4",
         "ext-mbstring": "*",
@@ -76,7 +103,10 @@
             "bootstrap": "bootstrap.php",
             "di": "di.php",
             "di-console": "di-console.php",
-            "di-web": ["di-web.php", "di-api.php"],
+            "di-web": [
+                "di-web.php",
+                "di-api.php"
+            ],
             "di-providers": "di-providers.php",
             "events-web": "events-web.php",
             "events-console": "events-console.php"

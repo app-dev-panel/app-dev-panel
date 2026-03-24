@@ -1,165 +1,205 @@
 {
-  "name": "app-dev-panel/app-dev-panel",
-  "type": "project",
-  "authors": [
-    {
-      "name": "Dmitriy Derepko",
-      "email": "xepozz@list.ru"
-    }
-  ],
-  "license": "MIT",
-  "support": {
-    "issues": "https://github.com/app-dev-panel/app-dev-panel/issues",
-    "source": "https://github.com/app-dev-panel/app-dev-panel"
-  },
-  "repositories": [
-    {
-      "type": "path",
-      "url": "libs/Adapter/*"
-    },
-    {
-      "type": "path",
-      "url": "libs/API"
-    },
-    {
-      "type": "path",
-      "url": "libs/Kernel"
-    },
-    {
-      "type": "path",
-      "url": "libs/Cli"
-    },
-    {
-      "type": "path",
-      "url": "libs/Testing"
-    }
-  ],
-  "require": {
-    "php": "^8.4",
-    "app-dev-panel/adapter-symfony": "*",
-    "app-dev-panel/adapter-yii2": "*",
-    "app-dev-panel/adapter-laravel": "*",
-    "app-dev-panel/adapter-cycle": "*",
-    "app-dev-panel/adapter-yiisoft": "*",
-    "app-dev-panel/api": "*",
-    "app-dev-panel/kernel": "*",
-    "app-dev-panel/testing": "*",
-    "yiisoft/router-fastroute": "^4.0"
-  },
-  "require-dev": {
-    "carthage-software/mago": "^1.0",
-    "egulias/email-validator": "^4.0",
-    "guzzlehttp/guzzle": "^7.5",
-    "guzzlehttp/psr7": "^2.4",
-    "illuminate/cache": "^11.0|^12.0",
-    "illuminate/config": "^11.0|^12.0",
-    "illuminate/console": "^11.0|^12.0",
-    "illuminate/contracts": "^11.0|^12.0",
-    "illuminate/database": "^11.0|^12.0",
-    "illuminate/events": "^11.0|^12.0",
-    "illuminate/http": "^11.0|^12.0",
-    "illuminate/mail": "^11.0|^12.0",
-    "illuminate/queue": "^11.0|^12.0",
-    "illuminate/routing": "^11.0|^12.0",
-    "illuminate/support": "^11.0|^12.0",
-    "nyholm/psr7": "^1.8",
-    "nyholm/psr7-server": "^1.1",
-    "open-telemetry/sdk": "^1.13",
-    "php-webdriver/webdriver": "^1.16",
-    "phpunit/phpunit": "^11.0",
-    "symfony/config": "^7.0",
-    "symfony/console": "^7.0",
-    "symfony/dependency-injection": "^7.0",
-    "symfony/event-dispatcher-contracts": "^3.6",
-    "symfony/framework-bundle": "^7.0",
-    "symfony/http-kernel": "^7.0",
-    "symfony/var-dumper": "^7.0",
-    "yiisoft/cache": "^3.2",
-    "yiisoft/db-sqlite": "^1.2",
-    "yiisoft/error-handler": "^4.3",
-    "yiisoft/event-dispatcher": "^1.1",
-    "yiisoft/translator": "^3.0",
-    "yiisoft/yii-console": "^2.4",
-    "yiisoft/yii-http": "^1.1",
-    "yiisoft/yii2": "^2.0.50"
-  },
-  "scripts-aliases": {
-    "lint": [
-      "linter"
+    "name": "app-dev-panel/app-dev-panel",
+    "type": "project",
+    "description": "The universal PHP debug panel — framework-agnostic debugging and inspection for Laravel, Symfony, Yii, and any PSR-compatible application",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "debugger",
+        "debugbar",
+        "profiler",
+        "php-profiler",
+        "php-debugging",
+        "laravel-debug",
+        "laravel-debugbar",
+        "laravel-telescope",
+        "symfony-debug",
+        "symfony-profiler",
+        "yii-debug",
+        "inspector",
+        "developer-tools",
+        "devtools",
+        "dev-panel",
+        "monitoring",
+        "observability",
+        "tracing",
+        "logging",
+        "diagnostics",
+        "performance",
+        "apm",
+        "ai",
+        "llm",
+        "ai-debugging",
+        "ai-tools",
+        "microservices",
+        "psr",
+        "clockwork",
+        "ray",
+        "xdebug",
+        "telescope",
+        "app-dev-panel",
+        "adp",
+        "application-development-panel",
+        "development-server"
     ],
-    "fix": [
-      "cs",
-      "codestyle",
-      "format"
+    "authors": [
+        {
+            "name": "Dmitriy Derepko",
+            "email": "xepozz@list.ru"
+        }
     ],
-    "test:unit": [
-      "phpunit",
-      "unit"
-    ]
-  },
-  "scripts-descriptions": {
-    "test": "Runs all tests",
-    "test:unit": "Runs unit tests only",
-    "test:coverage": "Runs unit tests with code coverage (clover format)",
-    "lint": "Runs mago linter",
-    "analyze": "Runs mago static analyzer",
-    "format:check": "Checks code formatting (dry-run)",
-    "format:fix": "Fixes code formatting",
-    "check": "Runs all checks: format, lint, analyze",
-    "fix": "Fixes code style and runs all checks",
-    "lint:baseline": "Regenerates the mago lint baseline"
-  },
-  "scripts": {
-    "test": "@test:unit",
-    "test:unit": "phpunit --testdox --exclude-group e2e --testsuite Kernel,API,Cli,Adapter-Symfony,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle",
-    "test:e2e": "phpunit --testdox --testsuite E2E",
-    "test:coverage": "phpunit --coverage-clover=coverage.xml --coverage-text",
-    "lint": "mago lint",
-    "analyze": "mago analyze",
-    "format:check": "mago fmt --check",
-    "format:fix": "mago fmt",
-    "check": [
-      "@format:check",
-      "@lint",
-      "@analyze"
-    ],
-    "fix": [
-      "@format:fix",
-      "@lint",
-      "@analyze"
-    ],
-    "lint:baseline": "mago lint --generate-baseline --baseline=mago-lint-baseline.php"
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "AppDevPanel\\Kernel\\Tests\\": "libs/Kernel/tests",
-      "AppDevPanel\\Api\\Tests\\": "libs/API/tests",
-      "AppDevPanel\\Cli\\Tests\\": "libs/Cli/tests",
-      "AppDevPanel\\Adapter\\Symfony\\Tests\\": "libs/Adapter/Symfony/tests",
-      "AppDevPanel\\Adapter\\Laravel\\Tests\\": "libs/Adapter/Laravel/tests",
-      "AppDevPanel\\Adapter\\Yii2\\Tests\\": "libs/Adapter/Yii2/tests",
-      "AppDevPanel\\Testing\\Tests\\": "libs/Testing/tests",
-      "AppDevPanel\\Tests\\": "tests"
-    }
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.x-dev",
-      "dev-main": "1.x-dev"
-    }
-  },
-  "config": {
-    "optimize-autoloader": false,
-    "preferred-install": {
-      "*": "dist"
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/app-dev-panel/app-dev-panel/issues",
+        "source": "https://github.com/app-dev-panel/app-dev-panel"
     },
-    "sort-packages": true,
-    "allow-plugins": {
-      "yiisoft/config": false,
-      "carthage-software/mago": true,
-      "yiisoft/yii2-composer": true
-    }
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true
+    "repositories": [
+        {
+            "type": "path",
+            "url": "libs/Adapter/*"
+        },
+        {
+            "type": "path",
+            "url": "libs/API"
+        },
+        {
+            "type": "path",
+            "url": "libs/Kernel"
+        },
+        {
+            "type": "path",
+            "url": "libs/Cli"
+        },
+        {
+            "type": "path",
+            "url": "libs/Testing"
+        }
+    ],
+    "require": {
+        "php": "^8.4",
+        "app-dev-panel/adapter-symfony": "*",
+        "app-dev-panel/adapter-yii2": "*",
+        "app-dev-panel/adapter-laravel": "*",
+        "app-dev-panel/adapter-cycle": "*",
+        "app-dev-panel/adapter-yiisoft": "*",
+        "app-dev-panel/api": "*",
+        "app-dev-panel/kernel": "*",
+        "app-dev-panel/testing": "*",
+        "yiisoft/router-fastroute": "^4.0"
+    },
+    "require-dev": {
+        "carthage-software/mago": "^1.0",
+        "egulias/email-validator": "^4.0",
+        "guzzlehttp/guzzle": "^7.5",
+        "guzzlehttp/psr7": "^2.4",
+        "illuminate/cache": "^11.0|^12.0",
+        "illuminate/config": "^11.0|^12.0",
+        "illuminate/console": "^11.0|^12.0",
+        "illuminate/contracts": "^11.0|^12.0",
+        "illuminate/database": "^11.0|^12.0",
+        "illuminate/events": "^11.0|^12.0",
+        "illuminate/http": "^11.0|^12.0",
+        "illuminate/mail": "^11.0|^12.0",
+        "illuminate/queue": "^11.0|^12.0",
+        "illuminate/routing": "^11.0|^12.0",
+        "illuminate/support": "^11.0|^12.0",
+        "nyholm/psr7": "^1.8",
+        "nyholm/psr7-server": "^1.1",
+        "php-webdriver/webdriver": "^1.16",
+        "phpunit/phpunit": "^11.0",
+        "symfony/config": "^7.0",
+        "symfony/console": "^7.0",
+        "symfony/dependency-injection": "^7.0",
+        "symfony/event-dispatcher-contracts": "^3.6",
+        "symfony/framework-bundle": "^7.0",
+        "symfony/http-kernel": "^7.0",
+        "symfony/var-dumper": "^7.0",
+        "yiisoft/cache": "^3.2",
+        "yiisoft/db-sqlite": "^1.2",
+        "yiisoft/error-handler": "^4.3",
+        "yiisoft/event-dispatcher": "^1.1",
+        "yiisoft/translator": "^3.0",
+        "yiisoft/yii-console": "^2.4",
+        "yiisoft/yii-http": "^1.1",
+        "yiisoft/yii2": "^2.0.50"
+    },
+    "scripts-aliases": {
+        "lint": [
+            "linter"
+        ],
+        "fix": [
+            "cs",
+            "codestyle",
+            "format"
+        ],
+        "test:unit": [
+            "phpunit",
+            "unit"
+        ]
+    },
+    "scripts-descriptions": {
+        "test": "Runs all tests",
+        "test:unit": "Runs unit tests only",
+        "test:coverage": "Runs unit tests with code coverage (clover format)",
+        "lint": "Runs mago linter",
+        "analyze": "Runs mago static analyzer",
+        "format:check": "Checks code formatting (dry-run)",
+        "format:fix": "Fixes code formatting",
+        "check": "Runs all checks: format, lint, analyze",
+        "fix": "Fixes code style and runs all checks",
+        "lint:baseline": "Regenerates the mago lint baseline"
+    },
+    "scripts": {
+        "test": "@test:unit",
+        "test:unit": "phpunit --testdox --exclude-group e2e --testsuite Kernel,API,Cli,Adapter-Symfony,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle",
+        "test:e2e": "phpunit --testdox --testsuite E2E",
+        "test:coverage": "phpunit --coverage-clover=coverage.xml --coverage-text",
+        "lint": "mago lint",
+        "analyze": "mago analyze",
+        "format:check": "mago fmt --check",
+        "format:fix": "mago fmt",
+        "check": [
+            "@format:check",
+            "@lint",
+            "@analyze"
+        ],
+        "fix": [
+            "@format:fix",
+            "@lint",
+            "@analyze"
+        ],
+        "lint:baseline": "mago lint --generate-baseline --baseline=mago-lint-baseline.php"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AppDevPanel\\Kernel\\Tests\\": "libs/Kernel/tests",
+            "AppDevPanel\\Api\\Tests\\": "libs/API/tests",
+            "AppDevPanel\\Cli\\Tests\\": "libs/Cli/tests",
+            "AppDevPanel\\Adapter\\Symfony\\Tests\\": "libs/Adapter/Symfony/tests",
+            "AppDevPanel\\Adapter\\Laravel\\Tests\\": "libs/Adapter/Laravel/tests",
+            "AppDevPanel\\Adapter\\Yii2\\Tests\\": "libs/Adapter/Yii2/tests",
+            "AppDevPanel\\Testing\\Tests\\": "libs/Testing/tests",
+            "AppDevPanel\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev",
+            "dev-main": "1.x-dev"
+        }
+    },
+    "config": {
+        "optimize-autoloader": false,
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true,
+        "allow-plugins": {
+            "yiisoft/config": false,
+            "carthage-software/mago": true,
+            "yiisoft/yii2-composer": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

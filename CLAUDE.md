@@ -331,6 +331,7 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 
 ## Coding Conventions
 
+- Documentation: **English only** — all docs, comments, commit messages, and markdown files must be written in English
 - PHP: PER-CS (PER-2) via Mago, strict types, final classes where possible
 - TypeScript: Prettier 3.8+ (single quotes, trailing commas, 120 width, objectWrap: collapse), ESLint 9 with @typescript-eslint
 - TypeScript: strict mode, functional components, Redux Toolkit patterns

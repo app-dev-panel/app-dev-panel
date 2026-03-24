@@ -1,183 +1,73 @@
-# Application Development Panel
+# @app-dev-panel/panel
 
-Application Development Panel – it is an application that aggregates a few different modules to help you develop and debug applications.
+Main SPA for the Application Development Panel — debug data viewer, live application inspector, code generation, and OpenAPI browser.
 
 ## Installation
 
-### NPM package (npmjs.com)
-
 ```shell
 npm i @app-dev-panel/panel
 ```
 
-### NPM package (GitHub Packages)
+## Modules
 
-First you need to tell `npm` to use GitHub Packages registry for @app-dev-panel scope.
-Add `@app-dev-panel:registry=https://npm.pkg.github.com` to `.npmrc` file or run the following command:
-```shell
-echo "\n@app-dev-panel:registry=https://npm.pkg.github.com" >> .npmrc
-```
-
-Then you can install the package:
-
-```shell
-npm i @app-dev-panel/panel
-```
-
-### Modules
-
-- Debug
-    - Repeating request by the only click
-    - Collectors
-        - LogCollector:
-            - All collected logs during the request
-        - EventCollector
-            - All collected events during the request
-        - ServiceCollector
-            - All called services from the container during the request
-        - ValidatorCollector
-            - All validator calls with data, rules and results
-        - QueueCollector
-            - Pushed and consumed messages
-        - WebAppInfoCollector
-            - Some info about web configuration
-        - RequestCollector
-            - Collected info about the request
-        - RouterCollector
-            - All routes have been configured
-        - MiddlewareCollector
-            - All middlewares applied to the request
-        - AssetCollector
-            - All registered assets during the request
-        - WebViewCollector
-- Inspector
-    - Routes
-        - Find and inspect groups, routes, middlewares and the action
-    - Parameters
-        - Find and inspect parameters (`params.php`)
-    - Configuration
-        - Find and inspect container configurations
-    - Container
-        - Find and inspect services, tags, etc., available in the container
-    - FileExplorer
-        - Explore the application sources
-    - Translations
-        - Explore all registered translations
-    - Commands (tests, analysis, composer scripts, any your own)
-        - Run and see the result of any available commands (phpunit, codeception, psalm, composer scripts, any other)
-    - Database
-        - Simplify view the database configured with either Active Record or Cycle ORM
-    - Git
-        - See status, current branch, remotes and branch
-        - Checkout any branch
-    - PHP Info
-        - See the whole result of `phpinfo()`
-    - Composer (requiring packages, `composer.json` and `composer.lock` inspection)
-        - Explore both `composer.json` and `composer.lock` files
-        - Switch any package version
-- GenCode
-    - Generators
-        - Controller generator
+- **Debug** — view collected runtime data
+    - Repeat requests with one click
+    - Collectors: Log, Event, Service, Validator, Queue, WebAppInfo, Request, Router, Middleware, Asset, WebView, Database, Cache, Mailer, Exception, HttpClient, Timeline, VarDumper, Filesystem, HttpStream, Environment
+- **Inspector** — live application introspection (20+ pages)
+    - Routes, Parameters, Configuration, Container, File Explorer, Translations, Commands, Database, Git, PHP Info, Composer, Cache, OPcache, Events
+- **GenCode** — code generation with preview and diff
+- **OpenAPI** — Swagger UI for the debug API
 
 ## Usage
 
-The application use HTTP API to work with the modules.
+### As a Standalone Application
 
-There are a few ways to use the App Dev Panel:
+Build the app and serve it with any web server (nginx, Apache, Node, PHP built-in server). Configure the backend URL in Settings.
 
-### Asset / Standalone application
+### As a PWA
 
-To use the application you need to build the app and specify the URL your app running on.
-Connect the apps and serve the built app any way you want: nginx, apache, node, php built-in server.
+Open [https://app-dev-panel.github.io/app-dev-panel](https://app-dev-panel.github.io/app-dev-panel)
 
-### PWA (Progressive Web Application)
+1. **Online mode** — set the backend URL and use directly in the browser
+2. **Installed app** — click "Install" in the address bar, run from Applications
 
-Online-mode or as standalone application.
+Both options work on mobile devices.
 
-Open https://app-dev-panel.github.io/app-dev-panel
+## Development
 
-1. Online-mode
-    1. There is an app. Specify the PHP app URL and use App Dev Panel.
-2. Standalone app
-    1. Click "Install" button in the URL to install PWA application
-    2. Run the application from the Applications
-    3. Make sure your API works by clicking on "check mark"
-    4. Use App Dev Panel
-
-Both options also work with mobile phones.
-
-## Contributing
-
-### Prerequisites
-
-First thing that you need is [`app-dev-panel/kernel-api`](https://github.com/app-dev-panel/app-dev-panel-api) running somewhere.
-
-For example, you can clone [`app-dev-panel/demo`](https://github.com/app-dev-panel/demo) and serve `blog-api` or `blog`.
-
-```shell
-git clone git@github.com:app-dev-panel/demo demo
-```
-
-```shell
-cd demo/blog-api
-```
-
-```shell
-composer install
-```
-
-```shell
-./yii serve
-```
-
-#### Installation
-
-```shell
-git clone git@github.com:app-dev-panel/app-dev-panel app-dev-panel
-```
 ```shell
 npm install
-```
-
-All necessary dependencies are now installed and ready to use. 
-
-Serve `app-dev-panel`
-
-```shell
-cd packages/app-dev-panel
-```
-```shell
 npm start
 ```
 
-`app-dev-panel` is now serving on http://localhost:3000
+The panel serves on `http://localhost:3000`.
 
 ## Screenshots
 
-
 <details>
   <summary>Debug</summary>
-  <img src="docs/debug.collector.event.png" alt="image-description"/>
-  <img src="docs/debug.collector.middleware.png" alt="image-description"/>
-  <img src="docs/debug.collector.request.png" alt="image-description"/>
-  <img src="docs/debug.collector.response.png" alt="image-description"/>
-  <img src="docs/debug.collector.service.png" alt="image-description"/>
-  <img src="docs/debug.logger.png" alt="image-description"/>
+  <img src="docs/debug.collector.event.png" alt="Event Collector"/>
+  <img src="docs/debug.collector.middleware.png" alt="Middleware Collector"/>
+  <img src="docs/debug.collector.request.png" alt="Request Collector"/>
+  <img src="docs/debug.collector.response.png" alt="Response Details"/>
+  <img src="docs/debug.collector.service.png" alt="Service Collector"/>
+  <img src="docs/debug.logger.png" alt="Log Viewer"/>
 </details>
 
 <details>
   <summary>Inspector</summary>
-  <img src="docs/inspector.composer.png" alt="image-description"/>
-  <img src="docs/inspector.definitions.png" alt="image-description"/>
-  <img src="docs/inspector.events.png" alt="image-description"/>
-  <img src="docs/inspector.files.png" alt="image-description"/>
-  <img src="docs/inspector.git.png" alt="image-description"/>
-  <img src="docs/inspector.parameters.png" alt="image-description"/>
-  <img src="docs/inspector.php.png" alt="image-description"/>
-  <img src="docs/inspector.router.png" alt="image-description"/>
-  <img src="docs/inspector.router2.png" alt="image-description"/>
+  <img src="docs/inspector.composer.png" alt="Composer Inspector"/>
+  <img src="docs/inspector.definitions.png" alt="Container Definitions"/>
+  <img src="docs/inspector.events.png" alt="Event Listeners"/>
+  <img src="docs/inspector.files.png" alt="File Explorer"/>
+  <img src="docs/inspector.git.png" alt="Git Inspector"/>
+  <img src="docs/inspector.parameters.png" alt="Parameters"/>
+  <img src="docs/inspector.php.png" alt="PHP Info"/>
+  <img src="docs/inspector.router.png" alt="Route Inspector"/>
+  <img src="docs/inspector.router2.png" alt="Route Details"/>
 </details>
+
 <details>
   <summary>Frames</summary>
-  <img src="docs/frames.png" alt="image-description"/>
+  <img src="docs/frames.png" alt="Frames"/>
 </details>

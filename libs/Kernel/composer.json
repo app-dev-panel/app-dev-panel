@@ -1,7 +1,31 @@
 {
     "name": "app-dev-panel/kernel",
     "type": "library",
-    "description": "Add Devp Panel Kernel",
+    "description": "ADP Kernel — core engine for the Application Development Panel: debugger lifecycle, collectors, storage, and PSR proxy system",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "debugger",
+        "profiler",
+        "php-profiler",
+        "collectors",
+        "tracing",
+        "logging",
+        "observability",
+        "monitoring",
+        "diagnostics",
+        "performance",
+        "apm",
+        "ai",
+        "llm",
+        "psr",
+        "developer-tools",
+        "devtools",
+        "app-dev-panel",
+        "adp",
+        "application-development-panel",
+        "development-server"
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
@@ -23,8 +47,7 @@
     "suggest": {
         "open-telemetry/sdk": "Required for SpanProcessorInterfaceProxy to capture OpenTelemetry spans"
     },
-    "require-dev": {
-    },
+    "require-dev": {},
     "autoload": {
         "psr-4": {
             "AppDevPanel\\Kernel\\": "src"
