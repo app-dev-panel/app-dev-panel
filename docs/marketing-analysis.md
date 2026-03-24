@@ -109,7 +109,7 @@ ADP — debugging и development панель, которая:
 | PHPInfo | Конфигурация PHP |
 
 **Инструменты разработчика:**
-- **Gii** — генерация кода с preview и diff
+- **GenCode** — генерация кода с preview и diff
 - **OpenAPI** — Swagger UI для API
 - **cURL Builder** — генерация cURL-команд из запросов
 - **Request Replay** — повторное выполнение запросов
@@ -194,7 +194,7 @@ ADP — debugging и development панель, которая:
 - Сервисы регистрируются, инспекция маршрутизируется автоматически
 - Продвижение: архитектурная диаграмма микросервисов
 
-**KF-5: Developer Toolkit (Git, Composer, Gii, cURL)**
+**KF-5: Developer Toolkit (Git, Composer, GenCode, cURL)**
 - Посыл: *"Your IDE's best friend"*
 - Генерация кода, управление пакетами, Git, cURL, повтор запросов
 - Продвижение: workflow-видео
@@ -228,7 +228,7 @@ ADP — debugging и development панель, которая:
 - S7: PWA с offline-поддержкой
 - S8: Multi-app Service Registry для микросервисов
 - S9: Real-time UDP + SSE streaming
-- S10: Комплексные dev tools (Git, Composer, Gii)
+- S10: Комплексные dev tools (Git, Composer, GenCode)
 
 ### Weaknesses (Слабые стороны)
 - W1: Нет бренда/узнаваемости → нужен маркетинг
@@ -428,13 +428,13 @@ ADP — debugging и development панель, которая:
 **Что осталось:**
 - Документация (getting-started.md) — Yii идёт первым в списках (исторический порядок)
 - Frontend README — содержит "Maintained by Yii Software", ссылки на Yii Forum
-- Gii модуль — Yii-специфичное название, незнакомое Laravel/Symfony разработчикам
-- Git history — видно происхождение из yiisoft/yii-debug
+- ~~Gii модуль — Yii-специфичное название~~ → **Выполнено**: переименован в GenCode
+- Git history — видно происхождение из yiisoft/yii-debug (неизбежно, но неважно)
 
 **Рекомендации:**
 1. В документации и маркетинге ставить Laravel и Symfony первыми (по размеру сообщества)
 2. Обновить frontend README — убрать Yii-специфичные ссылки
-3. Рассмотреть переименование Gii → Code Generator (более универсальное название)
+3. ~~Переименовать Gii → Code Generator~~ → **Выполнено**: переименован в GenCode
 4. GitHub topics: `laravel`, `symfony`, `php-debugging`, `php-profiler`
 5. Packagist keywords: `debug-panel`, `laravel-debug`, `symfony-debug`, `php-profiler`
 
