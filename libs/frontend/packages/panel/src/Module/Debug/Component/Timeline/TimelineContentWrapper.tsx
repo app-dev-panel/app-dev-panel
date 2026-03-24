@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import {PropsWithChildren} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 type TimelineContentWrapperProps = {name: string; file?: string; payload: undefined | string};
 
@@ -16,6 +17,7 @@ export const TimelineContentWrapper = React.memo((props: PropsWithChildren<Timel
     const shortName = name.split('\\').splice(-1).join('');
     const objectId = parseObjectId(payload || '');
     const debugEntry = useDebugEntry();
+    const navigate = useNavigate();
 
     return (
         <TimelineContent sx={{py: '12px', px: 2, display: 'flex', flexDirection: 'column'}}>
@@ -24,7 +26,10 @@ export const TimelineContentWrapper = React.memo((props: PropsWithChildren<Timel
                     <Typography component="span">{shortName}</Typography>
                 </Tooltip>
                 <Tooltip title="Examine an object">
-                    <IconButton size="small" href={`/debug/object?debugEntry=${debugEntry!.id}&id=${objectId}`}>
+                    <IconButton
+                        size="small"
+                        onClick={() => navigate(`/debug/object?debugEntry=${debugEntry!.id}&id=${objectId}`)}
+                    >
                         <DataObject color="secondary" fontSize="small" />
                     </IconButton>
                 </Tooltip>

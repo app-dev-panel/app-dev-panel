@@ -131,6 +131,19 @@ config/
 |--------|------|-------------|
 | GET | `/` | OPcache status + configuration |
 
+### MCP API (`/inspect/api/mcp`)
+
+JSON-RPC 2.0 endpoint for AI assistant integration via Model Context Protocol.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/` | JSON-RPC 2.0 handler (initialize, ping, tools/list, tools/call) |
+| GET | `/settings` | Get MCP enabled status: `{enabled: bool}` |
+| PUT | `/settings` | Set MCP enabled status: body `{enabled: bool}` |
+
+The MCP endpoint bypasses `ResponseDataWrapper` — JSON-RPC uses its own envelope.
+Returns -32000 error when MCP is disabled via settings.
+
 ### Ingestion API (`/debug/api/ingest`)
 
 Language-agnostic endpoints for external applications to send debug data. Defined by OpenAPI 3.1 spec at `openapi/ingestion.yaml`.

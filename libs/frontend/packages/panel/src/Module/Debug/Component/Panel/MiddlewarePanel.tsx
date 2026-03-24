@@ -5,7 +5,7 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, Link, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useState} from 'react';
 
@@ -152,8 +152,8 @@ export const MiddlewarePanel = (props: MiddlewarePanelProps) => {
                                 {objectId && debugEntry && (
                                     <Box sx={{mb: 1}}>
                                         <Chip
-                                            component="a"
                                             clickable
+                                            component={Link}
                                             href={`/debug/object?debugEntry=${debugEntry.id}&id=${objectId}`}
                                             label="Examine Object"
                                             size="small"

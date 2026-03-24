@@ -1,0 +1,19 @@
+{
+  "name": "app-dev-panel/mcp-server",
+  "type": "library",
+  "description": "MCP (Model Context Protocol) server for ADP — exposes debug data to AI assistants",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "require": {
+    "php": "^8.4",
+    "app-dev-panel/kernel": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "AppDevPanel\\McpServer\\": "src"
+    }
+  },
+  "bin": [
+    "bin/adp-mcp"
+  ]
+}

@@ -1,0 +1,72 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * ADP MCP Server — standalone entry point.
+ *
+ * Starts an MCP server over stdio that exposes ADP debug data to AI assistants.
+ *
+ * Usage:
+ *   php bin/adp-mcp --storage=/path/to/debug-data
+ *
+ * Environment variables:
+ *   ADP_STORAGE_PATH — Path to debug data storage directory
+ */
+
+// Find autoloader
+$autoloadPaths = [
+    __DIR__ . '/../../../vendor/autoload.php', // From libs/McpServer/bin/
+    __DIR__ . '/../vendor/autoload.php', // Standalone install
+];
+
+$autoloaded = false;
+foreach ($autoloadPaths as $autoloadPath) {
+    if (!file_exists($autoloadPath)) {
+        continue;
+    }
+    require $autoloadPath;
+    $autoloaded = true;
+    break;
+}
+
+if (!$autoloaded) {
+    fwrite(STDERR, "Autoloader not found. Run composer install.\n");
+    exit(1);
+}
+
+use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
+use AppDevPanel\McpServer\Transport\StdioTransport;
+
+// Parse --storage=PATH from argv
+$storagePath = getenv('ADP_STORAGE_PATH') ?: null;
+
+foreach ($argv as $arg) {
+    if (str_starts_with($arg, '--storage=')) {
+        $storagePath = substr($arg, strlen('--storage='));
+    }
+}
+
+if ($storagePath === null || $storagePath === '') {
+    $storagePath = sys_get_temp_dir() . '/adp';
+}
+
+if (!is_dir($storagePath)) {
+    fwrite(STDERR, sprintf("Storage path does not exist: %s\n", $storagePath));
+    exit(1);
+}
+
+// Bootstrap
+$storage = new FileStorage($storagePath, new DebuggerIdGenerator());
+$toolRegistry = McpToolRegistryFactory::create($storage);
+
+$transport = new StdioTransport();
+$server = new McpServer($toolRegistry, $transport);
+
+fwrite(STDERR, sprintf("ADP MCP server started (storage: %s)\n", $storagePath));
+
+$server->run();

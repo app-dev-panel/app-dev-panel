@@ -10,6 +10,15 @@
          resolveDependencies="true"
          cacheDirectory=".phpunit.cache">
 
+    <groups>
+        <exclude>
+            <group>e2e</group>
+            <group>network</group>
+            <group>playground</group>
+            <group>doctrine</group>
+        </exclude>
+    </groups>
+
     <php>
         <ini name="error_reporting" value="-1"/>
     </php>
@@ -39,6 +48,9 @@
         <testsuite name="Adapter-Cycle">
             <directory>libs/Adapter/Cycle/tests</directory>
         </testsuite>
+        <testsuite name="McpServer">
+            <directory>libs/McpServer/tests</directory>
+        </testsuite>
         <testsuite name="E2E">
             <directory>tests/E2E</directory>
         </testsuite>
@@ -59,6 +71,7 @@
             <directory>libs/Adapter/Yiisoft/src</directory>
             <directory>libs/Adapter/Laravel/src</directory>
             <directory>libs/Adapter/Yii2/src</directory>
+            <directory>libs/McpServer/src</directory>
             <directory>libs/Adapter/Cycle/src</directory>
         </include>
     </source>

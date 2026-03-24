@@ -49,6 +49,7 @@ type TopBarProps = {
     mode?: PaletteMode;
     autoRefresh?: boolean;
     showInactiveCollectors?: boolean;
+    mcpEnabled?: boolean;
     notificationCount?: number;
     editorPreset?: EditorPreset;
     editorCustomTemplate?: string;
@@ -59,6 +60,7 @@ type TopBarProps = {
     onThemeToggle?: () => void;
     onAutoRefreshToggle?: () => void;
     onShowInactiveCollectorsChange?: (value: boolean) => void;
+    onMcpEnabledChange?: (value: boolean) => void;
     onEditorPresetChange?: (preset: EditorPreset) => void;
     onEditorCustomTemplateChange?: (template: string) => void;
     onNotificationsClick?: (e: React.MouseEvent<HTMLElement>) => void;
@@ -112,6 +114,7 @@ export const TopBar = React.memo(
         mode,
         autoRefresh,
         showInactiveCollectors,
+        mcpEnabled,
         onPrevEntry,
         onNextEntry,
         onEntryClick,
@@ -119,6 +122,7 @@ export const TopBar = React.memo(
         onThemeToggle,
         onAutoRefreshToggle,
         onShowInactiveCollectorsChange,
+        onMcpEnabledChange,
         editorPreset,
         editorCustomTemplate,
         onEditorPresetChange,
@@ -260,6 +264,19 @@ export const TopBar = React.memo(
                             <Switch
                                 checked={showInactiveCollectors ?? false}
                                 onChange={(_, checked) => onShowInactiveCollectorsChange?.(checked)}
+                                sx={{ml: 2, flexShrink: 0}}
+                            />
+                        </Box>
+                        <Box sx={{display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', py: 1}}>
+                            <Box>
+                                <Typography variant="body1">MCP Server</Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Enable MCP endpoint for AI assistant integration
+                                </Typography>
+                            </Box>
+                            <Switch
+                                checked={mcpEnabled ?? true}
+                                onChange={(_, checked) => onMcpEnabledChange?.(checked)}
                                 sx={{ml: 2, flexShrink: 0}}
                             />
                         </Box>

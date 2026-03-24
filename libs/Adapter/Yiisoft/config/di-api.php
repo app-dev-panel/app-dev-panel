@@ -20,7 +20,11 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
-use AppDevPanel\Api\Ingestion\Controller\OtlpController;
+use AppDevPanel\Api\Mcp\Controller\McpController;
+use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
+use AppDevPanel\Api\Mcp\McpSettings;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\Api\NullPathMapper;
 use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
@@ -154,11 +158,6 @@ return [
         StorageInterface $storage,
     ) => new IngestionController($jsonResponseFactory, $storage),
 
-    OtlpController::class => static fn(
-        JsonResponseFactoryInterface $jsonResponseFactory,
-        StorageInterface $storage,
-    ) => new OtlpController($jsonResponseFactory, $storage),
-
     ServiceController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         ServiceRegistryInterface $serviceRegistry,
@@ -225,6 +224,26 @@ return [
         JsonResponseFactoryInterface $jsonResponseFactory,
         CollectorRepositoryInterface $collectorRepository,
     ) => new RequestController($jsonResponseFactory, $collectorRepository),
+
+    // MCP Server
+    McpSettings::class => static fn(ContainerInterface $container) => new McpSettings(
+        $container->get(Aliases::class)->get($params['app-dev-panel/yiisoft']['path'] ?? '@runtime/debug'),
+    ),
+
+    McpServer::class => static fn(StorageInterface $storage) => new McpServer(
+        McpToolRegistryFactory::create($storage),
+    ),
+
+    McpController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        McpServer $mcpServer,
+        McpSettings $mcpSettings,
+    ) => new McpController($jsonResponseFactory, $mcpServer, $mcpSettings),
+
+    McpSettingsController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        McpSettings $mcpSettings,
+    ) => new McpSettingsController($jsonResponseFactory, $mcpSettings),
 
     // ApiApplication
     ApiApplication::class => static fn(

@@ -80,8 +80,18 @@ final class FlattenExceptionTest extends TestCase
 
     public function testArguments(): void
     {
-        $this->markTestSkipped('Should be fixed');
+        $previousValue = ini_get('zend.exception_ignore_args');
+        ini_set('zend.exception_ignore_args', '0');
 
+        try {
+            $this->runArgumentsAssertions();
+        } finally {
+            ini_set('zend.exception_ignore_args', $previousValue);
+        }
+    }
+
+    private function runArgumentsAssertions(): void
+    {
         $dh = opendir(__DIR__);
         $fh = tmpfile();
 
@@ -155,42 +165,52 @@ final class FlattenExceptionTest extends TestCase
 
     public function testRecursionInArguments(): void
     {
-        $this->markTestSkipped('Should be fixed');
+        $previousValue = ini_get('zend.exception_ignore_args');
+        ini_set('zend.exception_ignore_args', '0');
 
-        $a = ['foo'];
-        $a[] = [2, &$a];
-        $exception = $this->createException($a);
+        try {
+            $a = ['foo'];
+            $a[] = [2, &$a];
+            $exception = $this->createException($a);
 
-        $flattened = new FlattenException($exception);
-        $trace = $flattened->getTrace();
-        $this->assertStringContainsString('*DEEP NESTED ARRAY*', serialize($trace));
+            $flattened = new FlattenException($exception);
+            $trace = $flattened->getTrace();
+            $this->assertStringContainsString('*DEEP NESTED ARRAY*', serialize($trace));
+        } finally {
+            ini_set('zend.exception_ignore_args', $previousValue);
+        }
     }
 
     public function testTooBigArray(): void
     {
-        $this->markTestSkipped('Should be fixed');
+        $previousValue = ini_get('zend.exception_ignore_args');
+        ini_set('zend.exception_ignore_args', '0');
 
-        $a = [];
-        for ($i = 0; $i < 20; ++$i) {
-            for ($j = 0; $j < 50; ++$j) {
-                for ($k = 0; $k < 10; ++$k) {
-                    $a[$i][$j][$k] = 'value';
+        try {
+            $a = [];
+            for ($i = 0; $i < 20; ++$i) {
+                for ($j = 0; $j < 50; ++$j) {
+                    for ($k = 0; $k < 10; ++$k) {
+                        $a[$i][$j][$k] = 'value';
+                    }
                 }
             }
+            $a[20] = 'value';
+            $a[21] = 'value1';
+            $exception = $this->createException($a);
+
+            $flattened = new FlattenException($exception);
+            $trace = $flattened->getTrace();
+
+            $this->assertSame($trace[0]['args'][0], ['array', ['array', '*SKIPPED over 10000 entries*']]);
+
+            $serializeTrace = serialize($trace);
+
+            $this->assertStringContainsString('*SKIPPED over 10000 entries*', $serializeTrace);
+            $this->assertStringNotContainsString('*value1*', $serializeTrace);
+        } finally {
+            ini_set('zend.exception_ignore_args', $previousValue);
         }
-        $a[20] = 'value';
-        $a[21] = 'value1';
-        $exception = $this->createException($a);
-
-        $flattened = new FlattenException($exception);
-        $trace = $flattened->getTrace();
-
-        $this->assertSame($trace[0]['args'][0], ['array', ['array', '*SKIPPED over 10000 entries*']]);
-
-        $serializeTrace = serialize($trace);
-
-        $this->assertStringContainsString('*SKIPPED over 10000 entries*', $serializeTrace);
-        $this->assertStringNotContainsString('*value1*', $serializeTrace);
     }
 
     private function createException($foo): Exception

@@ -1,5 +1,6 @@
+import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
-import {Icon, Link, Typography} from '@mui/material';
+import {Link, Typography} from '@mui/material';
 import {useLocation, useMatches, useNavigate} from 'react-router-dom';
 
 export const NotFoundPage = () => {
@@ -20,7 +21,7 @@ export const NotFoundPage = () => {
                     </Typography>
                 </>
             }
-            icon={<Icon sx={{fontSize: 80, color: 'error.main'}}>search_off</Icon>}
+            icon={<DuckIcon />}
             severity={'error'}
         />
     );

@@ -93,6 +93,8 @@ final class ApiApplication implements RequestHandlerInterface
     private function buildPipeline(ServerRequestInterface $request, bool $isInspector): array
     {
         $middlewares = [];
+        $path = $request->getUri()->getPath();
+        $isMcp = $path === '/inspect/api/mcp';
 
         // CORS
         $middlewares[] = new CorsMiddleware($this->responseFactory);
@@ -107,8 +109,8 @@ final class ApiApplication implements RequestHandlerInterface
             $middlewares[] = $this->container->get(TokenAuthMiddleware::class);
         }
 
-        // Response wrapper
-        if ($this->container->has(ResponseDataWrapper::class)) {
+        // Response wrapper — skip for MCP (JSON-RPC has its own response format)
+        if (!$isMcp && $this->container->has(ResponseDataWrapper::class)) {
             $middlewares[] = $this->container->get(ResponseDataWrapper::class);
         }
 

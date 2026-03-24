@@ -13,7 +13,8 @@
         fixtures fixtures-yiisoft fixtures-symfony fixtures-yii2 fixtures-laravel \
         test-fixtures test-fixtures-yiisoft test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel \
         test-scenario test-scenario-yiisoft test-scenario-symfony test-scenario-yii2 test-scenario-laravel \
-        test-playground test-playground-yiisoft test-playground-symfony test-playground-laravel
+        test-playground test-playground-yiisoft test-playground-symfony test-playground-laravel \
+        test-mcp test-mcp-yiisoft test-mcp-symfony test-mcp-yii2 test-mcp-laravel
 
 # --- Port allocation ---
 # Frontend dev server
@@ -104,6 +105,11 @@ help: ## Show this help
 	@echo "  make test-scenario-yiisoft   Scenario against Yiisoft playground"
 	@echo "  make test-scenario-symfony   Scenario against Symfony playground"
 	@echo "  make test-scenario-yii2      Scenario against Yii2 playground"
+	@echo "  make test-mcp             MCP API E2E tests against all playgrounds"
+	@echo "  make test-mcp-yiisoft     MCP API E2E against Yiisoft playground"
+	@echo "  make test-mcp-symfony     MCP API E2E against Symfony playground"
+	@echo "  make test-mcp-yii2        MCP API E2E against Yii2 playground"
+	@echo "  make test-mcp-laravel     MCP API E2E against Laravel playground"
 	@echo ""
 	@echo "$(YELLOW)Ports:$(RESET)"
 	@echo "  Frontend:  $(FRONTEND_PORT)"
@@ -389,6 +395,27 @@ test-scenario: ## Run full scenario test against all playgrounds (requires runni
 	@echo "$(CYAN)Running full scenario tests against all playgrounds...$(RESET)"
 	@$(MAKE) -j4 --output-sync=target test-scenario-yiisoft test-scenario-symfony test-scenario-yii2 test-scenario-laravel
 	@echo "$(GREEN)All scenario tests passed!$(RESET)"
+
+test-mcp-yiisoft: ## Run MCP API E2E tests against Yiisoft playground
+	@echo "$(CYAN)[MCP E2E: Yiisoft] Running MCP API tests on port $(YIISOFT_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(YIISOFT_PORT) php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox
+
+test-mcp-symfony: ## Run MCP API E2E tests against Symfony playground
+	@echo "$(CYAN)[MCP E2E: Symfony] Running MCP API tests on port $(SYMFONY_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox
+
+test-mcp-yii2: ## Run MCP API E2E tests against Yii2 playground
+	@echo "$(CYAN)[MCP E2E: Yii2] Running MCP API tests on port $(YII2_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox
+
+test-mcp-laravel: ## Run MCP API E2E tests against Laravel playground
+	@echo "$(CYAN)[MCP E2E: Laravel] Running MCP API tests on port $(LARAVEL_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox
+
+test-mcp: ## Run MCP API E2E tests against all playgrounds (requires running servers)
+	@echo "$(CYAN)Running MCP API E2E tests against all playgrounds...$(RESET)"
+	@$(MAKE) -j4 --output-sync=target test-mcp-yiisoft test-mcp-symfony test-mcp-yii2 test-mcp-laravel
+	@echo "$(GREEN)All MCP API E2E tests passed!$(RESET)"
 
 # ============================================================================
 # Playground Integration Tests (starts server, runs tests, stops server)

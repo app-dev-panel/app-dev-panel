@@ -20,7 +20,8 @@
         {"type": "path", "url": "../../libs/API"},
         {"type": "path", "url": "../../libs/Cli"},
         {"type": "path", "url": "../../libs/Testing"},
-        {"type": "path", "url": "../../libs/Adapter/Laravel"}
+        {"type": "path", "url": "../../libs/Adapter/Laravel"},
+        {"type": "path", "url": "../../libs/McpServer"}
     ],
     "autoload": {
         "psr-4": {
