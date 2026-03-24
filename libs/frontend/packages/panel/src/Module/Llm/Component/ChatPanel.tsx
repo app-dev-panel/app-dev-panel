@@ -168,20 +168,16 @@ export const ChatPanel = () => {
                             sx={{
                                 p: 1.5,
                                 borderRadius: 2,
-                                bgcolor:
-                                    msg.status === 'error'
-                                        ? 'error.light'
-                                        : msg.role === 'user'
-                                          ? 'primary.main'
-                                          : 'background.default',
-                                color:
-                                    msg.status === 'error'
-                                        ? 'error.contrastText'
-                                        : msg.role === 'user'
-                                          ? 'primary.contrastText'
-                                          : 'text.primary',
-                                border: msg.status === 'error' ? 2 : 0,
-                                borderColor: 'error.main',
+                                ...(msg.status === 'error'
+                                    ? {
+                                          bgcolor: 'error.light',
+                                          color: 'error.main',
+                                          border: 1,
+                                          borderColor: 'error.main',
+                                      }
+                                    : msg.role === 'user'
+                                      ? {bgcolor: 'primary.main', color: 'primary.contrastText'}
+                                      : {bgcolor: 'background.default', color: 'text.primary'}),
                                 opacity: msg.status === 'sending' ? 0.7 : 1,
                             }}
                         >
