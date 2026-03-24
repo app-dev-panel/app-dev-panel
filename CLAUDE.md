@@ -164,10 +164,12 @@ make fixtures             # Run CLI fixtures against all playgrounds
 make fixtures-yiisoft     # CLI fixtures against Yiisoft (port 8101)
 make fixtures-symfony     # CLI fixtures against Symfony (port 8102)
 make fixtures-yii2        # CLI fixtures against Yii2 (port 8103)
+make fixtures-laravel     # CLI fixtures against Laravel (port 8104)
 make test-fixtures        # PHPUnit E2E scenarios against all playgrounds
 make test-fixtures-yiisoft  # PHPUnit E2E against Yiisoft
 make test-fixtures-symfony  # PHPUnit E2E against Symfony
 make test-fixtures-yii2     # PHPUnit E2E against Yii2
+make test-fixtures-laravel  # PHPUnit E2E against Laravel
 
 # Frontend dev (still via npm)
 cd libs/frontend
@@ -202,6 +204,7 @@ GitHub Actions runs on every push and PR:
 | Kernel | `libs/Kernel` | 276 | 7 | 1m 21s | **85.2%** (1073/1259) |
 | API | `libs/API` | 174 | 0 | 0.1s | **76.2%** (754/990) |
 | Adapter-Symfony | `libs/Adapter/Symfony` | 150 | 9 | 0.2s | **98.9%** (905/915) |
+| Adapter-Laravel | `libs/Adapter/Laravel` | 80 | 0 | 0.1s | — |
 | Adapter-Yii2 | `libs/Adapter/Yii2` | 95 | 0 | 0.1s | **57.3%** (373/651) |
 | Adapter-Cycle | `libs/Adapter/Cycle` | 10 | 0 | 0.02s | — |
 | Cli | `libs/Cli` | 6 | 0 | 0.02s | **41.1%** (30/73) |
@@ -228,6 +231,7 @@ Playgrounds are demo/reference apps — they have **no unit tests**. Quality is 
 | `yiisoft-app` | pass | pass (3 baselined) | pass (96 baselined) | 99 |
 | `symfony-basic-app` | pass | pass | pass (11 baselined) | 11 |
 | `yii2-basic-app` | pass | pass | pass (9 baselined) | 9 |
+| `laravel-app` | pass | pass | pass | 0 |
 
 ### Running Coverage Locally
 
