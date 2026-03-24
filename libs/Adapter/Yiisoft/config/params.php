@@ -107,6 +107,7 @@ return [
             'serve',
             'debug:reset',
         ],
+        'pathMapping' => [],
         'api' => [
             'enabled' => true,
             'allowedIps' => ['127.0.0.1', '::1'],

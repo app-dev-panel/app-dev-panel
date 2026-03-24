@@ -12,6 +12,7 @@ use AppDevPanel\Adapter\Yiisoft\Api\YiiApiMiddleware;
 use AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
+use AppDevPanel\Api\Debug\Controller\SettingsController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
@@ -19,6 +20,9 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\NullPathMapper;
+use AppDevPanel\Api\PathMapper;
+use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -76,6 +80,12 @@ return [
 
     // Path resolver
     PathResolverInterface::class => static fn(Aliases $aliases) => new AliasPathResolver($aliases),
+
+    // Path mapper (remote/container ↔ local/host)
+    PathMapperInterface::class => static function () use ($params): PathMapperInterface {
+        $rules = $params['app-dev-panel/yiisoft']['pathMapping'] ?? [];
+        return $rules !== [] ? new PathMapper($rules) : new NullPathMapper();
+    },
 
     // JSON response factory
     JsonResponseFactoryInterface::class => static fn(
@@ -151,7 +161,13 @@ return [
     FileController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         PathResolverInterface $pathResolver,
-    ) => new FileController($jsonResponseFactory, $pathResolver),
+        PathMapperInterface $pathMapper,
+    ) => new FileController($jsonResponseFactory, $pathResolver, $pathMapper),
+
+    SettingsController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        PathMapperInterface $pathMapper,
+    ) => new SettingsController($jsonResponseFactory, $pathMapper),
 
     GitRepositoryProvider::class => static fn(PathResolverInterface $pathResolver) => new GitRepositoryProvider(
         $pathResolver,

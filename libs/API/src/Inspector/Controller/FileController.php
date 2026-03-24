@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Inspector\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\NullPathMapper;
+use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolverInterface;
 use FilesystemIterator;
 use Psr\Http\Message\ResponseInterface;
@@ -18,6 +20,7 @@ final class FileController
     public function __construct(
         private readonly JsonResponseFactoryInterface $responseFactory,
         private readonly PathResolverInterface $pathResolver,
+        private readonly PathMapperInterface $pathMapper = new NullPathMapper(),
     ) {}
 
     public function files(ServerRequestInterface $request): ResponseInterface
@@ -57,7 +60,8 @@ final class FileController
     private function resolvePathFile(string $path): ResponseInterface
     {
         $rootPath = realpath($this->pathResolver->getRootPath());
-        $relative = preg_replace('/^' . preg_quote($rootPath, '/') . '/', '', $path, 1);
+        $mappedPath = $this->pathMapper->mapToRemote($path);
+        $relative = preg_replace('/^' . preg_quote($rootPath, '/') . '/', '', $mappedPath, 1);
         $relative = '/' . ltrim($relative, '/');
         $destination = realpath($rootPath . $relative);
 
@@ -150,7 +154,7 @@ final class FileController
                 'directory' => preg_replace($pattern, '', dirname($destination), 1),
                 'content' => file_get_contents($destination),
                 'path' => preg_replace($pattern, '', $destination, 1),
-                'absolutePath' => $destination,
+                'absolutePath' => $this->pathMapper->mapToLocal($destination),
             ],
             $this->serializeFileInfo($file),
         ));

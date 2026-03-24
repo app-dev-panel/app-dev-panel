@@ -53,6 +53,8 @@ type GetObjectResponse = {class: string; value: any} | null;
 
 type CollectorResponseType = any;
 
+export type PanelSettings = {pathMapping: Record<string, string>};
+
 function normalizeCollectors(collectors: (string | CollectorInfo)[]): CollectorInfo[] {
     return collectors.map((c) => (typeof c === 'string' ? {id: c, name: c.split('\\').pop() || c} : c));
 }
@@ -80,6 +82,10 @@ export const debugApi = createApi({
             transformResponse: (result: SummaryResponseType) => (result.data as CollectorResponseType[]) || [],
             transformErrorResponse: (result) => result.data,
         }),
+        getSettings: builder.query<PanelSettings, void>({
+            query: () => `settings`,
+            transformResponse: (result: Response<PanelSettings>) => result.data,
+        }),
     }),
 });
 
@@ -89,4 +95,5 @@ export const {
     useGetObjectQuery,
     useLazyGetObjectQuery,
     useLazyGetCollectorInfoQuery,
+    useGetSettingsQuery,
 } = debugApi;

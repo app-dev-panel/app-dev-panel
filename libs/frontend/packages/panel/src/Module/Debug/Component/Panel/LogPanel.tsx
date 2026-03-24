@@ -6,6 +6,7 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
+import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
 import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
@@ -75,6 +76,7 @@ export const LogPanel = ({data}: LogPanelProps) => {
     const deferredFilter = useDeferredValue(filter);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
     const [activeLevels, setActiveLevels] = useState<Set<Level>>(new Set());
+    const pathMapper = usePathMapper();
 
     if (!data || data.length === 0) {
         return <EmptyState icon="description" title="No logs found" />;
@@ -204,7 +206,7 @@ export const LogPanel = ({data}: LogPanelProps) => {
                                         <Typography
                                             variant="caption"
                                             component="a"
-                                            href={`/inspector/files?path=${parseFilePathWithLineAnchor(entry.line)}`}
+                                            href={`/inspector/files?path=${parseFilePathWithLineAnchor(pathMapper.toLocalWithLine(entry.line))}`}
                                             sx={{
                                                 fontFamily: primitives.fontFamilyMono,
                                                 color: 'primary.main',
@@ -212,7 +214,7 @@ export const LogPanel = ({data}: LogPanelProps) => {
                                                 '&:hover': {textDecoration: 'underline'},
                                             }}
                                         >
-                                            {entry.line}
+                                            {pathMapper.toLocalWithLine(entry.line)}
                                         </Typography>
                                     </Box>
                                 )}

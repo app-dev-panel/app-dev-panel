@@ -16,6 +16,7 @@ use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
+use AppDevPanel\Api\Debug\Controller\SettingsController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
@@ -39,6 +40,9 @@ use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
+use AppDevPanel\Api\NullPathMapper;
+use AppDevPanel\Api\PathMapper;
+use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
@@ -98,6 +102,7 @@ final class AppDevPanelExtension extends Extension
         $container->setParameter('app_dev_panel.ignored_requests', $config['ignored_requests']);
         $container->setParameter('app_dev_panel.ignored_commands', $config['ignored_commands']);
         $container->setParameter('app_dev_panel.dumper.excluded_classes', $config['dumper']['excluded_classes']);
+        $container->setParameter('app_dev_panel.path_mapping', $config['path_mapping'] ?? []);
 
         $this->registerCoreServices($container, $config);
         $this->registerCollectors($container, $config);
@@ -374,6 +379,14 @@ final class AppDevPanelExtension extends Extension
             ->setArguments(['%kernel.project_dir%', '%kernel.project_dir%/var'])
             ->setPublic(false);
 
+        $pathMapping = $config['path_mapping'] ?? [];
+        $pathMapperClass = $pathMapping !== [] ? PathMapper::class : NullPathMapper::class;
+        $pathMapperArgs = $pathMapping !== [] ? [$pathMapping] : [];
+        $container
+            ->register(PathMapperInterface::class, $pathMapperClass)
+            ->setArguments($pathMapperArgs)
+            ->setPublic(false);
+
         $container
             ->register(JsonResponseFactoryInterface::class, JsonResponseFactory::class)
             ->setArguments([
@@ -464,6 +477,15 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
                 new Reference(PathResolverInterface::class),
+                new Reference(PathMapperInterface::class),
+            ])
+            ->setPublic(true);
+
+        $container
+            ->register(SettingsController::class, SettingsController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(PathMapperInterface::class),
             ])
             ->setPublic(true);
 

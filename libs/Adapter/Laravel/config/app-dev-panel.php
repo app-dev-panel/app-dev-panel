@@ -51,6 +51,13 @@ return [
         'excluded_classes' => [],
     ],
 
+    /*
+     * Remote-to-local path mapping for Docker/Vagrant environments.
+     * Keys are remote (container) prefixes, values are local (host) prefixes.
+     * Example: ['/app' => '/home/user/project']
+     */
+    'path_mapping' => [],
+
     'api' => [
         'enabled' => true,
         'allowed_ips' => ['127.0.0.1', '::1'],

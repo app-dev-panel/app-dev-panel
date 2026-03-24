@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Controller;
 
 use AppDevPanel\Api\Inspector\Controller\FileController;
+use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathResolverInterface;
 
 final class FileControllerTest extends ControllerTestCase
@@ -156,6 +157,37 @@ final class FileControllerTest extends ControllerTestCase
         $this->assertIsInt($data['mtime']);
         $this->assertArrayHasKey('directory', $data);
         $this->assertArrayHasKey('absolutePath', $data);
+    }
+
+    public function testReadFileWithPathMapping(): void
+    {
+        $pathResolver = $this->createMock(PathResolverInterface::class);
+        $pathResolver->method('getRootPath')->willReturn($this->fixtureDir);
+        $pathResolver->method('getRuntimePath')->willReturn($this->fixtureDir . '/runtime');
+
+        // Simulate: container has files at $this->fixtureDir, but frontend sends local paths
+        $pathMapper = new PathMapper([$this->fixtureDir => '/local/project']);
+        $controller = new FileController($this->createResponseFactory(), $pathResolver, $pathMapper);
+
+        // Frontend sends a local (host) path — should be mapped to remote (container) path for reading
+        $response = $controller->files($this->get(['path' => '/local/project/test.txt']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertSame('hello world', $data['content']);
+        // absolutePath should be mapped to local
+        $this->assertSame('/local/project/test.txt', $data['absolutePath']);
+    }
+
+    public function testReadFileWithoutPathMappingDefaultBehavior(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->files($this->get(['path' => '/test.txt']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        // absolutePath should be the real path when no mapping configured
+        $this->assertSame($this->fixtureDir . '/test.txt', $data['absolutePath']);
     }
 
     private function removeDir(string $dir): void
