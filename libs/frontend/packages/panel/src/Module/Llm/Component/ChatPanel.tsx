@@ -1,4 +1,5 @@
 import {useChatMutation, useGetStatusQuery} from '@app-dev-panel/panel/Module/Llm/API/Llm';
+import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
 import {Alert, Box, Button, CircularProgress, Paper, TextField, Typography} from '@mui/material';
 import {useCallback, useRef, useState} from 'react';
 
@@ -87,9 +88,13 @@ export const ChatPanel = () => {
                             color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
                         }}
                     >
-                        <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
-                            {msg.content}
-                        </Typography>
+                        {msg.role === 'assistant' ? (
+                            <Markdown content={msg.content} />
+                        ) : (
+                            <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
+                                {msg.content}
+                            </Typography>
+                        )}
                     </Box>
                 ))}
                 {isLoading && (

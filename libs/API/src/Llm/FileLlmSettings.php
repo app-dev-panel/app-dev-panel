@@ -6,9 +6,12 @@ namespace AppDevPanel\Api\Llm;
 
 final class FileLlmSettings implements LlmSettingsInterface
 {
+    private const int DEFAULT_TIMEOUT = 30;
+
     private ?string $apiKey = null;
     private string $provider = 'openrouter';
     private ?string $model = null;
+    private int $timeout = self::DEFAULT_TIMEOUT;
     private bool $loaded = false;
 
     public function __construct(
@@ -57,6 +60,20 @@ final class FileLlmSettings implements LlmSettingsInterface
         $this->save();
     }
 
+    public function getTimeout(): int
+    {
+        $this->load();
+
+        return $this->timeout;
+    }
+
+    public function setTimeout(int $timeout): void
+    {
+        $this->load();
+        $this->timeout = max(5, min(300, $timeout));
+        $this->save();
+    }
+
     public function isConnected(): bool
     {
         $this->load();
@@ -69,6 +86,7 @@ final class FileLlmSettings implements LlmSettingsInterface
         $this->apiKey = null;
         $this->model = null;
         $this->provider = 'openrouter';
+        $this->timeout = self::DEFAULT_TIMEOUT;
         $this->loaded = true;
 
         $file = $this->filePath();
@@ -78,7 +96,7 @@ final class FileLlmSettings implements LlmSettingsInterface
     }
 
     /**
-     * @return array{connected: bool, provider: string, model: string|null}
+     * @return array{connected: bool, provider: string, model: string|null, timeout: int}
      */
     public function toArray(): array
     {
@@ -88,6 +106,7 @@ final class FileLlmSettings implements LlmSettingsInterface
             'connected' => $this->isConnected(),
             'provider' => $this->provider,
             'model' => $this->model,
+            'timeout' => $this->timeout,
         ];
     }
 
@@ -108,12 +127,13 @@ final class FileLlmSettings implements LlmSettingsInterface
             return;
         }
 
-        /** @var array{apiKey?: string, provider?: string, model?: string} $data */
+        /** @var array{apiKey?: string, provider?: string, model?: string, timeout?: int} $data */
         $data = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
 
         $this->apiKey = isset($data['apiKey']) && is_string($data['apiKey']) ? $data['apiKey'] : null;
         $this->provider = isset($data['provider']) && is_string($data['provider']) ? $data['provider'] : 'openrouter';
         $this->model = isset($data['model']) && is_string($data['model']) ? $data['model'] : null;
+        $this->timeout = isset($data['timeout']) && is_int($data['timeout']) ? $data['timeout'] : self::DEFAULT_TIMEOUT;
     }
 
     private function save(): void
@@ -129,6 +149,7 @@ final class FileLlmSettings implements LlmSettingsInterface
                 'apiKey' => $this->apiKey,
                 'provider' => $this->provider,
                 'model' => $this->model,
+                'timeout' => $this->timeout,
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
             LOCK_EX,
         );

@@ -6,6 +6,7 @@ namespace AppDevPanel\Api\Llm\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
+use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -189,6 +190,26 @@ final class LlmController
         }
 
         $this->settings->setModel($model);
+
+        return $this->responseFactory->createJsonResponse($this->settings->toArray());
+    }
+
+    /**
+     * POST /debug/api/llm/timeout — Set request timeout.
+     *
+     * Body: { "timeout": 30 }
+     */
+    public function setTimeout(ServerRequestInterface $request): ResponseInterface
+    {
+        /** @var array<string, mixed> $body */
+        $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        $timeout = $body['timeout'] ?? null;
+        if (!is_int($timeout)) {
+            throw new InvalidArgumentException('Field "timeout" is required and must be an integer.');
+        }
+
+        $this->settings->setTimeout($timeout);
 
         return $this->responseFactory->createJsonResponse($this->settings->toArray());
     }
@@ -442,7 +463,7 @@ final class LlmController
             ->withHeader('X-Title', 'Application Development Panel')
             ->withBody($this->streamFactory->createStream($chatBody));
 
-        $chatResponse = $this->httpClient->sendRequest($chatRequest);
+        $chatResponse = $this->sendLlmRequest($chatRequest);
         $responseBody = $chatResponse->getBody()->getContents();
 
         /** @var array<string, mixed> $data */
@@ -525,7 +546,7 @@ final class LlmController
 
         $chatRequest = $this->applyAnthropicAuth($chatRequest);
 
-        $chatResponse = $this->httpClient->sendRequest($chatRequest);
+        $chatResponse = $this->sendLlmRequest($chatRequest);
         $responseBody = $chatResponse->getBody()->getContents();
 
         /** @var array<string, mixed> $anthropicData */
@@ -621,7 +642,7 @@ final class LlmController
             ->withHeader('Authorization', 'Bearer ' . $this->settings->getApiKey())
             ->withBody($this->streamFactory->createStream($chatBody));
 
-        $chatResponse = $this->httpClient->sendRequest($chatRequest);
+        $chatResponse = $this->sendLlmRequest($chatRequest);
         $responseBody = $chatResponse->getBody()->getContents();
 
         /** @var array<string, mixed> $data */
@@ -655,6 +676,22 @@ final class LlmController
         }
 
         return $request->withHeader('x-api-key', $apiKey);
+    }
+
+    /**
+     * Send an HTTP request with the configured LLM timeout.
+     *
+     * Falls back to the injected PSR-18 client if Guzzle is unavailable.
+     */
+    private function sendLlmRequest(RequestInterface $request): ResponseInterface
+    {
+        $timeout = $this->settings->getTimeout();
+
+        if (class_exists(Client::class)) {
+            return new Client(['timeout' => $timeout])->sendRequest($request);
+        }
+
+        return $this->httpClient->sendRequest($request);
     }
 
     private function generateCodeVerifier(): string

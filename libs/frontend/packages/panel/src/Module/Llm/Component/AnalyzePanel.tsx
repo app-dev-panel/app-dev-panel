@@ -1,4 +1,5 @@
 import {useAnalyzeMutation, useGetStatusQuery} from '@app-dev-panel/panel/Module/Llm/API/Llm';
+import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
 import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {HighlightedText, fuzzyMatch} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
@@ -395,9 +396,7 @@ export const AnalyzePanel = () => {
                 <Card variant="outlined" sx={{flex: 1, overflow: 'auto'}}>
                     <CardHeader title="Analysis Result" titleTypographyProps={{variant: 'subtitle1'}} />
                     <CardContent sx={{pt: 0}}>
-                        <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
-                            {result}
-                        </Typography>
+                        <Markdown content={result} />
                     </CardContent>
                 </Card>
             )}

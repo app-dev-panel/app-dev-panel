@@ -245,6 +245,7 @@ final class ApiRoutes
                 'debug/api/llm/disconnect',
             ),
             new Route('POST', '/debug/api/llm/model', [LlmController::class, 'setModel'], 'debug/api/llm/model'),
+            new Route('POST', '/debug/api/llm/timeout', [LlmController::class, 'setTimeout'], 'debug/api/llm/timeout'),
             new Route('GET', '/debug/api/llm/models', [LlmController::class, 'models'], 'debug/api/llm/models'),
             new Route('POST', '/debug/api/llm/chat', [LlmController::class, 'chat'], 'debug/api/llm/chat'),
             new Route('POST', '/debug/api/llm/analyze', [LlmController::class, 'analyze'], 'debug/api/llm/analyze'),

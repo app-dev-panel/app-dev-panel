@@ -3,7 +3,7 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 
 export type LlmProvider = 'openrouter' | 'anthropic' | 'openai';
 
-export type LlmStatus = {connected: boolean; provider: string; model: string | null};
+export type LlmStatus = {connected: boolean; provider: string; model: string | null; timeout: number};
 
 export type LlmModel = {id: string; name: string; context_length: number; pricing: Record<string, string>};
 
@@ -64,6 +64,11 @@ export const llmApi = createApi({
             transformResponse: (result: {data: LlmStatus}) => result.data,
             invalidatesTags: ['llm/status'],
         }),
+        setTimeout: builder.mutation<LlmStatus, {timeout: number}>({
+            query: (body) => ({url: '/timeout', method: 'POST', body}),
+            transformResponse: (result: {data: LlmStatus}) => result.data,
+            invalidatesTags: ['llm/status'],
+        }),
         chat: builder.mutation<ChatResponse, ChatRequest>({
             query: (body) => ({url: '/chat', method: 'POST', body}),
             transformResponse: (result: {data: ChatResponse}) => result.data,
@@ -83,6 +88,7 @@ export const {
     useDisconnectMutation,
     useGetModelsQuery,
     useSetModelMutation,
+    useSetTimeoutMutation,
     useChatMutation,
     useAnalyzeMutation,
 } = llmApi;

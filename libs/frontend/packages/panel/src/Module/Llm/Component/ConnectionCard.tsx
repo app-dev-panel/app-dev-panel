@@ -7,6 +7,7 @@ import {
     useGetStatusQuery,
     useOauthInitiateMutation,
     useSetModelMutation,
+    useSetTimeoutMutation,
 } from '@app-dev-panel/panel/Module/Llm/API/Llm';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
@@ -19,17 +20,24 @@ import {
     IconButton,
     Paper,
     Skeleton,
+    Slider,
     TextField,
     ToggleButton,
     ToggleButtonGroup,
     Typography,
 } from '@mui/material';
-import {useCallback, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 
 const providerLabels: Record<LlmProvider, string> = {
     openrouter: 'OpenRouter',
     anthropic: 'Anthropic (Claude)',
     openai: 'OpenAI',
+};
+
+const isFreeModel = (model: LlmModel): boolean => {
+    const prompt = model.pricing?.prompt;
+    const completion = model.pricing?.completion;
+    return (prompt === '0' || prompt === '0.0') && (completion === '0' || completion === '0.0');
 };
 
 export const ConnectionCard = () => {
@@ -38,11 +46,13 @@ export const ConnectionCard = () => {
     const [connect] = useConnectMutation();
     const [disconnect] = useDisconnectMutation();
     const [setModel] = useSetModelMutation();
+    const [setTimeoutApi] = useSetTimeoutMutation();
     const {data: models, isLoading: modelsLoading} = useGetModelsQuery(undefined, {skip: !status?.connected});
     const [error, setError] = useState<string | null>(null);
     const [selectedProvider, setSelectedProvider] = useState<LlmProvider>('anthropic');
     const [apiKey, setApiKey] = useState('');
     const [expanded, setExpanded] = useState(false);
+    const [freeOnly, setFreeOnly] = useState(false);
 
     const handleOpenRouterConnect = useCallback(async () => {
         setError(null);
@@ -82,25 +92,40 @@ export const ConnectionCard = () => {
         [setModel],
     );
 
+    const handleTimeoutChange = useCallback(
+        async (_: unknown, value: number | number[]) => {
+            const timeout = typeof value === 'number' ? value : value[0];
+            await setTimeoutApi({timeout});
+        },
+        [setTimeoutApi],
+    );
+
     if (isLoading) {
         return <Skeleton variant="rectangular" height={48} sx={{borderRadius: 1}} />;
     }
 
     const provider = status?.provider;
     const connected = status?.connected ?? false;
+    const isOpenRouter = provider === 'openrouter';
 
-    const popularModels = (models ?? []).filter((m: LlmModel) => {
-        if (provider === 'anthropic') return m.id.startsWith('claude-');
-        if (provider === 'openai')
-            return m.id.startsWith('gpt-') || m.id.startsWith('o') || m.id.startsWith('chatgpt-');
-        return (
-            m.id.startsWith('anthropic/') ||
-            m.id.startsWith('openai/') ||
-            m.id.startsWith('google/') ||
-            m.id.startsWith('meta-llama/') ||
-            m.id.startsWith('mistralai/')
-        );
-    });
+    const popularModels = useMemo(() => {
+        let filtered = (models ?? []).filter((m: LlmModel) => {
+            if (provider === 'anthropic') return m.id.startsWith('claude-');
+            if (provider === 'openai')
+                return m.id.startsWith('gpt-') || m.id.startsWith('o') || m.id.startsWith('chatgpt-');
+            return (
+                m.id.startsWith('anthropic/') ||
+                m.id.startsWith('openai/') ||
+                m.id.startsWith('google/') ||
+                m.id.startsWith('meta-llama/') ||
+                m.id.startsWith('mistralai/')
+            );
+        });
+        if (freeOnly && isOpenRouter) {
+            filtered = filtered.filter(isFreeModel);
+        }
+        return filtered;
+    }, [models, provider, freeOnly, isOpenRouter]);
 
     const selectedModel = popularModels.find((m) => m.id === status?.model);
 
@@ -140,6 +165,9 @@ export const ConnectionCard = () => {
                             No model selected
                         </Typography>
                     )}
+                    <Typography variant="caption" color="text.disabled">
+                        {status?.timeout ?? 30}s
+                    </Typography>
                     <IconButton
                         size="small"
                         sx={{transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s'}}
@@ -154,17 +182,62 @@ export const ConnectionCard = () => {
                                 {error}
                             </Alert>
                         )}
-                        <Autocomplete
-                            size="small"
-                            fullWidth
-                            options={popularModels}
-                            getOptionLabel={(option: LlmModel) => `${option.name} (${option.id})`}
-                            value={selectedModel ?? null}
-                            onChange={(_, option) => option && handleModelChange(option.id)}
-                            loading={modelsLoading}
-                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                            renderInput={(params) => <TextField {...params} label="Model" />}
-                        />
+                        <Box sx={{display: 'flex', gap: 1, alignItems: 'flex-start'}}>
+                            <Autocomplete
+                                size="small"
+                                fullWidth
+                                options={popularModels}
+                                getOptionLabel={(option: LlmModel) =>
+                                    isOpenRouter && isFreeModel(option)
+                                        ? `${option.name} (free) (${option.id})`
+                                        : `${option.name} (${option.id})`
+                                }
+                                value={selectedModel ?? null}
+                                onChange={(_, option) => option && handleModelChange(option.id)}
+                                loading={modelsLoading}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                renderInput={(params) => <TextField {...params} label="Model" />}
+                            />
+                            {isOpenRouter && (
+                                <ToggleButton
+                                    value="free"
+                                    selected={freeOnly}
+                                    onChange={() => setFreeOnly((prev) => !prev)}
+                                    size="small"
+                                    sx={{
+                                        whiteSpace: 'nowrap',
+                                        px: 1.5,
+                                        height: 40,
+                                        textTransform: 'none',
+                                        fontWeight: 600,
+                                        fontSize: '12px',
+                                    }}
+                                >
+                                    Free
+                                </ToggleButton>
+                            )}
+                        </Box>
+                        <Box>
+                            <Typography variant="caption" color="text.secondary" gutterBottom>
+                                Request timeout: {status?.timeout ?? 30}s
+                            </Typography>
+                            <Slider
+                                size="small"
+                                value={status?.timeout ?? 30}
+                                onChange={handleTimeoutChange}
+                                min={5}
+                                max={120}
+                                step={5}
+                                marks={[
+                                    {value: 5, label: '5s'},
+                                    {value: 30, label: '30s'},
+                                    {value: 60, label: '60s'},
+                                    {value: 120, label: '120s'},
+                                ]}
+                                valueLabelDisplay="auto"
+                                valueLabelFormat={(v) => `${v}s`}
+                            />
+                        </Box>
                         <Box>
                             <Button size="small" color="error" onClick={handleDisconnect}>
                                 Disconnect
