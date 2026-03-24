@@ -2,7 +2,7 @@ import {NavItem} from '@app-dev-panel/sdk/Component/Layout/NavItem';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Collapse, Divider, Icon, Paper, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import React from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -92,13 +92,48 @@ const SectionLabel = styled(Typography)(({theme}) => ({fontSize: theme.typograph
 
 export const UnifiedSidebar = React.memo(
     ({sections, activePath, activeChildKey, onNavigate, onChildClick}: UnifiedSidebarProps) => {
+        const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+        const prevPathRef = useRef(activePath);
+
+        // Auto-expand when navigating to a new section
+        useEffect(() => {
+            if (prevPathRef.current !== activePath) {
+                prevPathRef.current = activePath;
+                // Find the section that matches the new path and uncollapse it
+                for (const section of sections) {
+                    const isActive =
+                        section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
+                    if (isActive && section.children && section.children.length > 0 && collapsed[section.key]) {
+                        setCollapsed((prev) => ({...prev, [section.key]: false}));
+                    }
+                }
+            }
+        }, [activePath, sections, collapsed]);
+
+        const handleToggle = useCallback(
+            (section: NavSection) => {
+                const isActiveSection =
+                    section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
+
+                if (isActiveSection) {
+                    // Already on this section — just toggle collapse
+                    setCollapsed((prev) => ({...prev, [section.key]: !prev[section.key]}));
+                } else {
+                    // Navigate to the section and ensure it's expanded
+                    setCollapsed((prev) => ({...prev, [section.key]: false}));
+                    onNavigate(section.href);
+                }
+            },
+            [activePath, onNavigate],
+        );
+
         return (
             <SidebarRoot variant="outlined">
                 {sections.map((section, idx) => {
                     const isActiveSection =
                         section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
                     const hasChildren = section.children && section.children.length > 0;
-                    const isExpanded = isActiveSection && hasChildren;
+                    const isExpanded = isActiveSection && hasChildren && !collapsed[section.key];
 
                     return (
                         <React.Fragment key={section.key}>
@@ -106,8 +141,8 @@ export const UnifiedSidebar = React.memo(
                             {hasChildren ? (
                                 <>
                                     <SectionHeader
-                                        active={isActiveSection && !activeChildKey}
-                                        onClick={() => onNavigate(section.href)}
+                                        active={isActiveSection}
+                                        onClick={() => handleToggle(section)}
                                     >
                                         <Icon sx={{fontSize: 19, flexShrink: 0}}>{section.icon}</Icon>
                                         <SectionLabel>{section.label}</SectionLabel>
