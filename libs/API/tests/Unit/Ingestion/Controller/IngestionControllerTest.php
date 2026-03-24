@@ -271,6 +271,67 @@ final class IngestionControllerTest extends TestCase
         $this->assertContains('custom_metrics', $collectorIds);
     }
 
+    public function testIngestHttpDump(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->ingestHttpDump($this->post([
+            'method' => 'POST',
+            'uri' => '/api/webhook',
+            'headers' => ['Content-Type' => 'application/json', 'Authorization' => 'Bearer test'],
+            'body' => '{"event":"payment.success"}',
+            'query' => ['source' => 'stripe'],
+            'service' => 'webhook-tester',
+        ]));
+
+        $this->assertSame(201, $response->getStatusCode());
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertTrue($data['success']);
+        $this->assertNotEmpty($data['id']);
+
+        // Verify stored data
+        $dataFiles = glob($this->storagePath . '/**/**/data.json');
+        $this->assertCount(1, $dataFiles);
+        $stored = json_decode(file_get_contents($dataFiles[0]), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertArrayHasKey('http-dump', $stored);
+        $this->assertSame('POST', $stored['http-dump'][0]['method']);
+        $this->assertSame('/api/webhook', $stored['http-dump'][0]['uri']);
+    }
+
+    public function testIngestHttpDumpMissingMethod(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('method');
+        $controller->ingestHttpDump($this->post(['uri' => '/test']));
+    }
+
+    public function testIngestHttpDumpMissingUri(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('uri');
+        $controller->ingestHttpDump($this->post(['method' => 'GET']));
+    }
+
+    public function testIngestHttpDumpMinimal(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->ingestHttpDump($this->post([
+            'method' => 'GET',
+            'uri' => '/health',
+        ]));
+
+        $this->assertSame(201, $response->getStatusCode());
+
+        // Verify summary
+        $summaryFiles = glob($this->storagePath . '/**/**/summary.json');
+        $this->assertCount(1, $summaryFiles);
+        $summary = json_decode(file_get_contents($summaryFiles[0]), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(1, $summary['http-dump']['total']);
+    }
+
     private function removeDir(string $dir): void
     {
         if (!is_dir($dir)) {

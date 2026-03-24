@@ -8,6 +8,7 @@ import {EventPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/Even
 import {ExceptionPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ExceptionPanel';
 import {FilesystemPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/FilesystemPanel';
 import {HttpClientPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/HttpClientPanel';
+import {HttpDumpPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/HttpDumpPanel';
 import {LogPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/LogPanel';
 import {MailerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MailerPanel';
 import {MiddlewarePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MiddlewarePanel';
@@ -65,6 +66,10 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.ValidatorCollector]: (data: any) => <ValidatorPanel data={data} />,
         [CollectorsMap.ViewCollector]: (data: any) => <WebViewPanel data={data} />,
         [CollectorsMap.AssetBundleCollector]: (data: any) => <AssetBundlePanel data={data} />,
+        [CollectorsMap.HttpDumpCollector]: (data: any) => <HttpDumpPanel data={data} />,
+        // Ingestion shorthand keys — map to existing panels
+        logs: (data: any) => <LogPanel data={data} />,
+        'var-dumper': (data: any) => <VarDumperPanel data={data} />,
         default: (data: any) => {
             if (typeof data === 'object' && data.__isPanelRemote__) {
                 return (

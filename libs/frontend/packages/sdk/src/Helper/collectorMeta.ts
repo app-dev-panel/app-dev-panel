@@ -31,6 +31,11 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
     [CollectorsMap.WebAppInfoCollector]: {label: 'Web Info', icon: 'language', weight: 18},
     [CollectorsMap.CommandCollector]: {label: 'Command', icon: 'terminal', weight: 1},
     [CollectorsMap.ViewCollector]: {label: 'View', icon: 'visibility', weight: 20},
+    [CollectorsMap.HttpDumpCollector]: {label: 'HTTP Dump', icon: 'cloud_upload', weight: 19},
+
+    // Ingestion shorthand keys — map to existing panels
+    logs: {label: 'Log', icon: 'description', weight: 2},
+    'var-dumper': {label: 'Dump', icon: 'data_object', weight: 9},
 };
 
 const defaultMeta: CollectorMeta = {label: 'Unknown', icon: 'extension', weight: 99};

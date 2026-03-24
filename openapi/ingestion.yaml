@@ -93,6 +93,27 @@ paths:
               schema:
                 $ref: "#/components/schemas/IngestResponse"
 
+  /ingest/http-dump:
+    post:
+      operationId: ingestHttpDump
+      summary: Submit an HTTP request dump (shorthand)
+      description: |
+        Convenience endpoint for capturing an HTTP request.
+        Useful for webhook testing, API callback debugging, and third-party integration testing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HttpDumpEntry"
+      responses:
+        "201":
+          description: HTTP dump stored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
+
   /openapi.json:
     get:
       operationId: getOpenApiSpec
@@ -212,6 +233,53 @@ components:
         service:
           type: string
           description: Source service name
+
+    HttpDumpEntry:
+      type: object
+      required:
+        - method
+        - uri
+      properties:
+        method:
+          type: string
+          description: HTTP method
+          example: POST
+        uri:
+          type: string
+          description: Request URI
+          example: /api/webhook
+        headers:
+          type: object
+          additionalProperties:
+            oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+          default: {}
+        body:
+          type: string
+          description: Request body content
+          default: ""
+        query:
+          type: object
+          additionalProperties:
+            type: string
+          default: {}
+        cookies:
+          type: object
+          additionalProperties:
+            type: string
+          default: {}
+        files:
+          type: array
+          items:
+            type: object
+          default: []
+        service:
+          type: string
+          description: Source service name
+          example: webhook-tester
 
     IngestResponse:
       type: object

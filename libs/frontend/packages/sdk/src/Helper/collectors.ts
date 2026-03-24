@@ -25,4 +25,7 @@ export enum CollectorsMap {
     CacheCollector = 'AppDevPanel\\Kernel\\Collector\\CacheCollector',
     TemplateCollector = 'AppDevPanel\\Kernel\\Collector\\TemplateCollector',
     SecurityCollector = 'AppDevPanel\\Kernel\\Collector\\SecurityCollector',
+
+    // Ingestion collector keys (used by external apps via ingestion API)
+    HttpDumpCollector = 'http-dump',
 }

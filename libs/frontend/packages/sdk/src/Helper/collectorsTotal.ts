@@ -45,6 +45,8 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
             return 0;
         case CollectorsMap.TimelineCollector:
             return data.timeline?.total != null ? Number(data.timeline.total) : undefined;
+        case CollectorsMap.HttpDumpCollector:
+            return data['http-dump']?.total != null ? Number(data['http-dump'].total) : undefined;
         default:
             return undefined;
     }

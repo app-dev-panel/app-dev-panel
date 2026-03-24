@@ -73,6 +73,20 @@ final class IngestionController
     }
 
     /**
+     * Convenience endpoint: ingest an HTTP request dump.
+     */
+    public function ingestHttpDump(ServerRequestInterface $request): ResponseInterface
+    {
+        $body = $this->decodeRequestBody($request);
+        $id = $this->writeEntry($this->buildHttpDumpEntry($body));
+
+        return $this->responseFactory->createJsonResponse([
+            'id' => $id,
+            'success' => true,
+        ], 201);
+    }
+
+    /**
      * Serve the OpenAPI specification.
      */
     public function openapi(ServerRequestInterface $request): ResponseInterface
@@ -124,6 +138,37 @@ final class IngestionController
             ],
             'summary' => [
                 'logger' => ['total' => 1],
+            ],
+        ];
+    }
+
+    private function buildHttpDumpEntry(array $body): array
+    {
+        if (!array_key_exists('method', $body) || !array_key_exists('uri', $body)) {
+            throw new InvalidArgumentException('Fields "method" and "uri" are required.');
+        }
+
+        $dumpEntry = [
+            'time' => microtime(true),
+            'method' => strtoupper((string) $body['method']),
+            'uri' => $body['uri'],
+            'headers' => $body['headers'] ?? [],
+            'body' => $body['body'] ?? '',
+            'query' => $body['query'] ?? [],
+            'cookies' => $body['cookies'] ?? [],
+            'files' => $body['files'] ?? [],
+        ];
+
+        return [
+            'collectors' => [
+                'http-dump' => [$dumpEntry],
+            ],
+            'context' => [
+                'type' => 'generic',
+                'service' => $body['service'] ?? 'external',
+            ],
+            'summary' => [
+                'http-dump' => ['total' => 1],
             ],
         ];
     }

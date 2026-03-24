@@ -6,6 +6,7 @@ namespace AppDevPanel\Api;
 
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\Ingestion\Controller\RayController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -66,6 +67,12 @@ final class ApiRoutes
                 '/debug/api/ingest/log',
                 [IngestionController::class, 'ingestLog'],
                 'debug/api/ingest/log',
+            ),
+            new Route(
+                'POST',
+                '/debug/api/ingest/http-dump',
+                [IngestionController::class, 'ingestHttpDump'],
+                'debug/api/ingest/http-dump',
             ),
             new Route('GET', '/debug/api/openapi.json', [IngestionController::class, 'openapi'], 'debug/api/openapi'),
         ];
@@ -193,11 +200,29 @@ final class ApiRoutes
         ];
     }
 
+    /**
+     * @return Route[]
+     */
+    public static function rayRoutes(): array
+    {
+        return [
+            new Route(
+                'GET',
+                '/_ray/api/availability',
+                [RayController::class, 'availability'],
+                'ray/api/availability',
+            ),
+            new Route('POST', '/_ray/api/events', [RayController::class, 'event'], 'ray/api/events'),
+            new Route('GET', '/_ray/api/locks/{hash}', [RayController::class, 'lockStatus'], 'ray/api/locks'),
+        ];
+    }
+
     public static function register(Router $router): void
     {
         $router->addRoutes(self::debugRoutes());
         $router->addRoutes(self::ingestionRoutes());
         $router->addRoutes(self::serviceRoutes());
         $router->addRoutes(self::inspectorRoutes());
+        $router->addRoutes(self::rayRoutes());
     }
 }
