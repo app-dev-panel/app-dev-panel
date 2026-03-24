@@ -1,11 +1,16 @@
 {
     "name": "app-dev-panel/api",
     "type": "library",
-    "description": "Application Development Panel API",
+    "description": "ADP API — REST + SSE endpoints for debug data, live application inspection, and language-agnostic ingestion",
     "keywords": [
-        "app-dev-panel",
         "debug",
-        "api"
+        "debug-panel",
+        "debug-api",
+        "profiler",
+        "inspector",
+        "rest-api",
+        "sse",
+        "developer-tools"
     ],
     "license": "BSD-3-Clause",
     "minimum-stability": "dev",

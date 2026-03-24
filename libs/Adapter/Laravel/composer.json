@@ -1,7 +1,16 @@
 {
     "name": "app-dev-panel/adapter-laravel",
     "type": "library",
-    "description": "Laravel framework adapter for Application Development Panel (ADP)",
+    "description": "Laravel framework adapter for ADP — auto-wires debug collectors, proxies, and inspector into Laravel applications",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "profiler",
+        "laravel",
+        "laravel-debug",
+        "laravel-profiler",
+        "developer-tools"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.4",

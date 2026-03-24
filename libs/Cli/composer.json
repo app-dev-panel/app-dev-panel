@@ -1,6 +1,15 @@
 {
     "name": "app-dev-panel/cli",
     "type": "library",
+    "description": "ADP CLI — console commands for the debug server, data queries, storage reset, and standalone HTTP server",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "cli",
+        "console",
+        "debug-server",
+        "developer-tools"
+    ],
     "minimum-stability": "dev",
     "require": {
         "php": "^8.4",

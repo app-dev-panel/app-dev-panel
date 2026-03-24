@@ -1,7 +1,15 @@
 {
     "name": "app-dev-panel/testing",
     "type": "library",
-    "description": "Testing fixtures for ADP: verify that all collectors work correctly across adapters and playgrounds",
+    "description": "ADP Testing — fixture definitions and runner for verifying collectors across all framework adapters",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "testing",
+        "fixtures",
+        "e2e",
+        "developer-tools"
+    ],
     "minimum-stability": "dev",
     "require": {
         "php": "^8.4",

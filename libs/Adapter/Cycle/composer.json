@@ -1,7 +1,16 @@
 {
     "name": "app-dev-panel/adapter-cycle",
     "type": "library",
-    "description": "Cycle ORM adapter for Application Development Panel (ADP)",
+    "description": "Cycle ORM adapter for ADP — database schema inspection via Cycle ORM for the Application Development Panel",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "cycle-orm",
+        "database",
+        "schema",
+        "inspector",
+        "developer-tools"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.4",

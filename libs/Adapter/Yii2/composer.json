@@ -1,7 +1,16 @@
 {
     "name": "app-dev-panel/adapter-yii2",
     "type": "yii2-extension",
-    "description": "Yii 2 framework adapter for Application Development Panel (ADP)",
+    "description": "Yii 2 framework adapter for ADP — auto-wires debug collectors, proxies, and inspector into Yii 2 applications",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "profiler",
+        "yii2",
+        "yii2-extension",
+        "yii2-debug",
+        "developer-tools"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.4",

@@ -1,6 +1,21 @@
 {
   "name": "app-dev-panel/app-dev-panel",
   "type": "project",
+  "description": "The universal PHP debug panel — framework-agnostic debugging and inspection for Laravel, Symfony, Yii, and any PSR-compatible application",
+  "keywords": [
+    "debug",
+    "debug-panel",
+    "profiler",
+    "php-profiler",
+    "php-debugging",
+    "laravel-debug",
+    "symfony-debug",
+    "yii-debug",
+    "inspector",
+    "developer-tools",
+    "devtools",
+    "psr"
+  ],
   "authors": [
     {
       "name": "Dmitriy Derepko",

@@ -1,7 +1,16 @@
 {
     "name": "app-dev-panel/adapter-symfony",
     "type": "symfony-bundle",
-    "description": "Symfony framework adapter for Application Development Panel (ADP)",
+    "description": "Symfony framework adapter for ADP — auto-wires debug collectors, proxies, and inspector into Symfony applications",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "profiler",
+        "symfony",
+        "symfony-bundle",
+        "symfony-debug",
+        "developer-tools"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.4",

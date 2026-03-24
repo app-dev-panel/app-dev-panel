@@ -1,7 +1,16 @@
 {
     "name": "app-dev-panel/kernel",
     "type": "library",
-    "description": "Add Devp Panel Kernel",
+    "description": "ADP Kernel — core engine for the Application Development Panel: debugger lifecycle, collectors, storage, and PSR proxy system",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "profiler",
+        "php-profiler",
+        "collectors",
+        "psr",
+        "developer-tools"
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
