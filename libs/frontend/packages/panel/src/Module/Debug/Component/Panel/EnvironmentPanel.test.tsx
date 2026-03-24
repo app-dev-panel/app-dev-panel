@@ -27,7 +27,15 @@ type PhpInfo = {
 
 type OsInfo = {family: string; name: string; uname: string; hostname: string | null};
 
-type EnvironmentData = {php: PhpInfo; os: OsInfo; server: Record<string, string>; env: Record<string, string>};
+type GitInfo = {branch: string | null; commit: string | null; commitFull: string | null};
+
+type EnvironmentData = {
+    php: PhpInfo;
+    os: OsInfo;
+    git: GitInfo;
+    server: Record<string, string>;
+    env: Record<string, string>;
+};
 
 const makePhpInfo = (overrides: Partial<PhpInfo> = {}): PhpInfo => ({
     version: '8.4.1',
@@ -59,9 +67,17 @@ const makeOsInfo = (overrides: Partial<OsInfo> = {}): OsInfo => ({
     ...overrides,
 });
 
+const makeGitInfo = (overrides: Partial<GitInfo> = {}): GitInfo => ({
+    branch: 'main',
+    commit: 'abc1234',
+    commitFull: 'abc1234567890abcdef1234567890abcdef123456',
+    ...overrides,
+});
+
 const makeEnvironmentData = (overrides: Partial<EnvironmentData> = {}): EnvironmentData => ({
     php: makePhpInfo(),
     os: makeOsInfo(),
+    git: makeGitInfo(),
     server: {SERVER_NAME: 'localhost', SERVER_PORT: '8080'},
     env: {APP_ENV: 'dev', APP_DEBUG: '1'},
     ...overrides,
@@ -153,5 +169,18 @@ describe('EnvironmentPanel', () => {
         renderWithProviders(<EnvironmentPanel data={data} />);
         expect(screen.getByText('Zend Extensions')).toBeInTheDocument();
         expect(screen.getByText('Zend OPcache')).toBeInTheDocument();
+    });
+
+    it('renders git info section with branch and commit', () => {
+        renderWithProviders(<EnvironmentPanel data={makeEnvironmentData()} />);
+        expect(screen.getByText('Git')).toBeInTheDocument();
+        expect(screen.getByText('main')).toBeInTheDocument();
+        expect(screen.getByText('abc1234567890abcdef1234567890abcdef123456')).toBeInTheDocument();
+    });
+
+    it('hides git section when git info is null', () => {
+        const data = makeEnvironmentData({git: makeGitInfo({branch: null, commit: null, commitFull: null})});
+        renderWithProviders(<EnvironmentPanel data={data} />);
+        expect(screen.queryByText('Git')).not.toBeInTheDocument();
     });
 });

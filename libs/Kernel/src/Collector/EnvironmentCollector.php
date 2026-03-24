@@ -36,6 +36,7 @@ final class EnvironmentCollector implements SummaryCollectorInterface
         return [
             'php' => $this->collectPhpInfo(),
             'os' => $this->collectOsInfo(),
+            'git' => $this->collectGitInfo(),
             'server' => $this->serverParams,
             'env' => $this->envVars,
         ];
@@ -75,6 +76,8 @@ final class EnvironmentCollector implements SummaryCollectorInterface
             return [];
         }
 
+        $gitInfo = $this->collectGitInfo();
+
         return [
             'environment' => [
                 'php' => [
@@ -82,6 +85,10 @@ final class EnvironmentCollector implements SummaryCollectorInterface
                     'sapi' => PHP_SAPI,
                 ],
                 'os' => PHP_OS_FAMILY,
+                'git' => [
+                    'branch' => $gitInfo['branch'],
+                    'commit' => $gitInfo['commit'],
+                ],
             ],
         ];
     }
@@ -150,6 +157,48 @@ final class EnvironmentCollector implements SummaryCollectorInterface
             'uname' => php_uname(),
             'hostname' => gethostname() ?: null,
         ];
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    private function collectGitInfo(): array
+    {
+        $cwd = getcwd() ?: null;
+
+        return [
+            'branch' => $this->runGitCommand('git rev-parse --abbrev-ref HEAD', $cwd),
+            'commit' => $this->runGitCommand('git rev-parse --short HEAD', $cwd),
+            'commitFull' => $this->runGitCommand('git rev-parse HEAD', $cwd),
+        ];
+    }
+
+    private function runGitCommand(string $command, ?string $cwd): ?string
+    {
+        $descriptors = [
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+
+        $process = proc_open($command, $descriptors, $pipes, $cwd);
+
+        if (!is_resource($process)) {
+            return null;
+        }
+
+        $output = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+
+        $exitCode = proc_close($process);
+
+        if ($exitCode !== 0 || $output === false) {
+            return null;
+        }
+
+        $result = trim($output);
+
+        return $result !== '' ? $result : null;
     }
 
     /**

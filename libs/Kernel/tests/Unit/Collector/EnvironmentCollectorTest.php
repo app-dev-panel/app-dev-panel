@@ -38,8 +38,14 @@ final class EnvironmentCollectorTest extends AbstractCollectorTestCase
 
         $this->assertArrayHasKey('php', $data);
         $this->assertArrayHasKey('os', $data);
+        $this->assertArrayHasKey('git', $data);
         $this->assertArrayHasKey('server', $data);
         $this->assertArrayHasKey('env', $data);
+
+        $git = $data['git'];
+        $this->assertArrayHasKey('branch', $git);
+        $this->assertArrayHasKey('commit', $git);
+        $this->assertArrayHasKey('commitFull', $git);
 
         $php = $data['php'];
         $this->assertSame(PHP_VERSION, $php['version']);

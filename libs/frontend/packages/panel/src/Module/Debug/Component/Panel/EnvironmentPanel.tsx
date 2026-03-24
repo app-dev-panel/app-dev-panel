@@ -28,7 +28,15 @@ type PhpInfo = {
 
 type OsInfo = {family: string; name: string; uname: string; hostname: string | null};
 
-type EnvironmentData = {php: PhpInfo; os: OsInfo; server: Record<string, string>; env: Record<string, string>};
+type GitInfo = {branch: string | null; commit: string | null; commitFull: string | null};
+
+type EnvironmentData = {
+    php: PhpInfo;
+    os: OsInfo;
+    git: GitInfo;
+    server: Record<string, string>;
+    env: Record<string, string>;
+};
 
 type EnvironmentPanelProps = {data: EnvironmentData};
 
@@ -95,7 +103,7 @@ const KeyValueTable = ({entries, filter}: {entries: Array<{key: string; value: s
     );
 };
 
-const PhpTab = ({php, os}: {php: PhpInfo; os: OsInfo}) => {
+const PhpTab = ({php, os, git}: {php: PhpInfo; os: OsInfo; git: GitInfo}) => {
     const highlights: Array<{key: string; value: string}> = [
         {key: 'PHP Version', value: php.version},
         {key: 'SAPI', value: php.sapi},
@@ -111,6 +119,11 @@ const PhpTab = ({php, os}: {php: PhpInfo; os: OsInfo}) => {
         {key: 'Error Reporting', value: String(php.ini?.error_reporting ?? 'N/A')},
     ];
 
+    const gitEntries: Array<{key: string; value: string}> = [
+        {key: 'Branch', value: git?.branch || 'N/A'},
+        {key: 'Commit', value: git?.commitFull || 'N/A'},
+    ];
+
     const debugExtensions = [
         {name: 'Xdebug', version: php.xdebug},
         {name: 'OPcache', version: php.opcache},
@@ -121,6 +134,13 @@ const PhpTab = ({php, os}: {php: PhpInfo; os: OsInfo}) => {
         <TabPanel>
             <SectionTitle>Runtime</SectionTitle>
             <KeyValueTable entries={highlights} />
+
+            {(git?.branch || git?.commitFull) && (
+                <>
+                    <SectionTitle>Git</SectionTitle>
+                    <KeyValueTable entries={gitEntries} />
+                </>
+            )}
 
             <SectionTitle>Debug Extensions</SectionTitle>
             <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2}}>
@@ -190,7 +210,7 @@ export const EnvironmentPanel = ({data}: EnvironmentPanelProps) => {
                 </Tabs>
             </Box>
 
-            {tab === 0 && <PhpTab php={data.php} os={data.os} />}
+            {tab === 0 && <PhpTab php={data.php} os={data.os} git={data.git} />}
             {tab === 1 && <DictTab title="Server Parameters" data={data.server} />}
             {tab === 2 && <DictTab title="Environment Variables" data={data.env} />}
         </Box>
