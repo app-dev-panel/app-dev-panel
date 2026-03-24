@@ -27,10 +27,10 @@ import {DumpPage} from '@app-dev-panel/panel/Module/Debug/Pages/DumpPage';
 import {useSelector} from '@app-dev-panel/panel/store';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
-import {HelpOutline} from '@mui/icons-material';
 import {Alert, AlertTitle, Box, LinearProgress} from '@mui/material';
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
@@ -125,7 +125,7 @@ const EmptyCollectorsInfoBox = React.memo(() => (
         title="Collectors are empty"
         text="Looks like debugger was inactive or it did not have any active collectors during the request"
         severity="info"
-        icon={<HelpOutline />}
+        icon={<DuckIcon />}
     />
 ));
 

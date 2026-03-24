@@ -1,8 +1,9 @@
 import {SettingsDialog} from '@app-dev-panel/panel/Module/Frames/Component/SettingsDialog';
 import {useFramesEntries} from '@app-dev-panel/panel/Module/Frames/Context/Context';
+import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
-import {EmojiObjects, Settings} from '@mui/icons-material';
+import {Settings} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
 import {IconButton, Link, Stack, Tab, Tabs, Typography, useTheme} from '@mui/material';
 import * as React from 'react';
@@ -51,7 +52,7 @@ const ErrorResolutionBox = ({url}: ErrorResolutionBoxProps) => {
                 </>
             }
             severity="info"
-            icon={<EmojiObjects />}
+            icon={<DuckIcon />}
         />
     );
 };
@@ -71,7 +72,7 @@ const NoEntries = React.memo(() => {
                 </>
             }
             severity="info"
-            icon={<EmojiObjects />}
+            icon={<DuckIcon />}
         />
     );
 });

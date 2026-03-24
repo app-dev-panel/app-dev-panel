@@ -1,9 +1,10 @@
 import {SettingsDialog} from '@app-dev-panel/panel/Module/OpenApi/Component/SettingsDialog';
 import {useOpenApiEntries} from '@app-dev-panel/panel/Module/OpenApi/Context/Context';
 import '@app-dev-panel/panel/Module/OpenApi/Pages/dark.css';
+import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
-import {EmojiObjects, Settings} from '@mui/icons-material';
+import {Settings} from '@mui/icons-material';
 import {TabContext} from '@mui/lab';
 import {IconButton, Stack, Tab, Tabs, Typography} from '@mui/material';
 import * as React from 'react';
@@ -22,7 +23,7 @@ const NoEntries = React.memo(() => {
                 </>
             }
             severity="info"
-            icon={<EmojiObjects />}
+            icon={<DuckIcon />}
         />
     );
 });
