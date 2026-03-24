@@ -2,6 +2,7 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {useDoRequestMutation, usePostCurlBuildMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {HTTPMethod, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {BodyPreview} from '@app-dev-panel/sdk/Component/BodyPreview';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -189,12 +190,11 @@ const RequestTab = ({data}: {data: Response}) => {
             )}
 
             {requestBody && (
-                <>
-                    <SectionTitle>Body</SectionTitle>
-                    <Box sx={{borderRadius: 1, overflow: 'hidden', border: '1px solid', borderColor: 'divider'}}>
-                        <CodeHighlight code={requestBody} language="plain" showLineNumbers={false} />
-                    </Box>
-                </>
+                <BodyPreview
+                    body={requestBody}
+                    contentType={requestHeaders.find((h) => h.name.toLowerCase() === 'content-type')?.value}
+                    title="Body"
+                />
             )}
 
             {!requestHeaders.length && !queryParams.length && !requestBody && (
@@ -219,18 +219,7 @@ const ResponseTab = ({data}: {data: Response}) => {
     const {filteredHeaders: filteredResponseHeaders, filterAction: responseFilterAction} =
         useHeadersFilter(responseHeaders);
 
-    const contentTypeMatch = responseHeadersRaw.match(/Content-Type:\s*\w+\/(\w+)/);
-    const contentType = Array.isArray(contentTypeMatch) ? contentTypeMatch[1] : 'plain';
-    const isJson = /json/.test(contentType);
-
-    let parsedBody: unknown = responseBody;
-    if (isJson && responseBody) {
-        try {
-            parsedBody = JSON.parse(responseBody);
-        } catch {
-            /* keep as string */
-        }
-    }
+    const contentTypeHeader = responseHeaders.find((h) => h.name.toLowerCase() === 'content-type')?.value;
 
     return (
         <TabPanel>
@@ -241,20 +230,7 @@ const ResponseTab = ({data}: {data: Response}) => {
                 </>
             )}
 
-            {responseBody && (
-                <>
-                    <SectionTitle>Body</SectionTitle>
-                    <Box sx={{borderRadius: 1, overflow: 'hidden', border: '1px solid', borderColor: 'divider'}}>
-                        {isJson && typeof parsedBody === 'object' ? (
-                            <Box sx={{p: 1.5}}>
-                                <JsonRenderer value={parsedBody} />
-                            </Box>
-                        ) : (
-                            <CodeHighlight code={responseBody} language={contentType} showLineNumbers={false} />
-                        )}
-                    </Box>
-                </>
-            )}
+            {responseBody && <BodyPreview body={responseBody} contentType={contentTypeHeader} title="Body" />}
 
             {!responseHeaders.length && !responseBody && (
                 <>

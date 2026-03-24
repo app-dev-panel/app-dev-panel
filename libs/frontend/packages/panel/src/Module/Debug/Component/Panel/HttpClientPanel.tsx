@@ -1,6 +1,7 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {BodyPreview} from '@app-dev-panel/sdk/Component/BodyPreview';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
@@ -132,17 +133,6 @@ const HeaderTable = styled('table')(({theme}) => ({
         wordBreak: 'break-all',
     },
     '& tr:last-child th, & tr:last-child td': {borderBottom: 'none'},
-}));
-
-const StyledTabList = styled(TabList)(({theme}) => ({
-    minHeight: 36,
-    '& .MuiTab-root': {
-        minHeight: 36,
-        fontSize: '12px',
-        fontWeight: 600,
-        textTransform: 'none',
-        padding: theme.spacing(0.5, 2),
-    },
 }));
 
 // ---------------------------------------------------------------------------
@@ -433,37 +423,11 @@ const RequestDetail = ({entry}: {entry: HttpClientEntry}) => {
 
             {/* Response body */}
             {response.body && (
-                <Box>
-                    <Typography
-                        variant="caption"
-                        sx={{fontWeight: 600, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 0.5}}
-                    >
-                        Response Body
-                    </Typography>
-                    <Box
-                        sx={{mt: 0.5, borderRadius: 1, overflow: 'hidden', border: '1px solid', borderColor: 'divider'}}
-                    >
-                        {(() => {
-                            const contentTypeHeader = response.headers.find(
-                                (h) => h.name.toLowerCase() === 'content-type',
-                            );
-                            const isJson = contentTypeHeader && /json/i.test(contentTypeHeader.value);
-                            if (isJson) {
-                                try {
-                                    const parsed = JSON.parse(response.body);
-                                    return (
-                                        <Box sx={{p: 1.5}}>
-                                            <JsonRenderer value={parsed} />
-                                        </Box>
-                                    );
-                                } catch {
-                                    /* fall through */
-                                }
-                            }
-                            return <CodeHighlight code={response.body} language="plain" showLineNumbers={false} />;
-                        })()}
-                    </Box>
-                </Box>
+                <BodyPreview
+                    body={response.body}
+                    contentType={response.headers.find((h) => h.name.toLowerCase() === 'content-type')?.value}
+                    title="Response Body"
+                />
             )}
 
             {/* Raw response fallback when no parsed headers/body */}
