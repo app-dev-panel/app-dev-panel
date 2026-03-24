@@ -47,7 +47,7 @@ export const ConnectionCard = () => {
         try {
             const callbackUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/llm/callback');
             const result = await initiate({callbackUrl}).unwrap();
-            sessionStorage.setItem('llm_code_verifier', result.codeVerifier);
+            localStorage.setItem('llm_code_verifier', result.codeVerifier);
             window.open(result.authUrl, '_blank', 'width=600,height=700');
         } catch {
             setError('Failed to initiate OAuth flow.');

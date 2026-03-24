@@ -10,7 +10,7 @@ export const OAuthCallback = () => {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
-        const codeVerifier = sessionStorage.getItem('llm_code_verifier');
+        const codeVerifier = localStorage.getItem('llm_code_verifier');
 
         if (!code) {
             setStatus('error');
@@ -27,7 +27,7 @@ export const OAuthCallback = () => {
         exchange({code, codeVerifier})
             .unwrap()
             .then((result) => {
-                sessionStorage.removeItem('llm_code_verifier');
+                localStorage.removeItem('llm_code_verifier');
                 if (result.connected) {
                     setStatus('success');
                     setTimeout(() => window.close(), 2000);
@@ -36,9 +36,12 @@ export const OAuthCallback = () => {
                     setError(result.error ?? 'Failed to exchange code.');
                 }
             })
-            .catch(() => {
+            .catch((err: unknown) => {
+                localStorage.removeItem('llm_code_verifier');
+                const apiError = err as {data?: {data?: {error?: string}}};
+                const message = apiError?.data?.data?.error ?? 'Failed to exchange authorization code.';
                 setStatus('error');
-                setError('Failed to exchange authorization code.');
+                setError(message);
             });
     }, [exchange]);
 
