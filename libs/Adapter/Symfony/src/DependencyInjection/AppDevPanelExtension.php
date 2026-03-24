@@ -24,6 +24,7 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\Ingestion\Controller\OtlpController;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -57,6 +58,7 @@ use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
+use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
@@ -188,6 +190,7 @@ final class AppDevPanelExtension extends Extension
             'http_client' => HttpClientCollector::class,
             'var_dumper' => VarDumperCollector::class,
             'deprecation' => DeprecationCollector::class,
+            'opentelemetry' => OpenTelemetryCollector::class,
         ];
 
         foreach ($timelineCollectorMap as $key => $class) {
@@ -460,6 +463,14 @@ final class AppDevPanelExtension extends Extension
 
         $container
             ->register(IngestionController::class, IngestionController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(StorageInterface::class),
+            ])
+            ->setPublic(true);
+
+        $container
+            ->register(OtlpController::class, OtlpController::class)
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
                 new Reference(StorageInterface::class),

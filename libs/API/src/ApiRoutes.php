@@ -7,6 +7,7 @@ namespace AppDevPanel\Api;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\Ingestion\Controller\OtlpController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -70,6 +71,12 @@ final class ApiRoutes
                 'debug/api/ingest/log',
             ),
             new Route('GET', '/debug/api/openapi.json', [IngestionController::class, 'openapi'], 'debug/api/openapi'),
+            new Route(
+                'POST',
+                '/debug/api/otlp/v1/traces',
+                [OtlpController::class, 'traces'],
+                'debug/api/otlp/v1/traces',
+            ),
         ];
     }
 

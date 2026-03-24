@@ -47,6 +47,8 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
             return Number(data.deprecation?.total);
         case CollectorsMap.TimelineCollector:
             return data.timeline?.total != null ? Number(data.timeline.total) : undefined;
+        case CollectorsMap.OpenTelemetryCollector:
+            return Number(data.opentelemetry?.spans) || undefined;
         default:
             return undefined;
     }

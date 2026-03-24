@@ -26,4 +26,5 @@ export enum CollectorsMap {
     TemplateCollector = 'AppDevPanel\\Kernel\\Collector\\TemplateCollector',
     SecurityCollector = 'AppDevPanel\\Kernel\\Collector\\SecurityCollector',
     DeprecationCollector = 'AppDevPanel\\Kernel\\Collector\\DeprecationCollector',
+    OpenTelemetryCollector = 'AppDevPanel\\Kernel\\Collector\\OpenTelemetryCollector',
 }
