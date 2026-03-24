@@ -1,3 +1,4 @@
+import {type EditorConfig, type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 type ApplicationContext = {
@@ -10,6 +11,7 @@ type ApplicationContext = {
     selectedService: string;
     themeMode: 'light' | 'dark' | 'system';
     showInactiveCollectors: boolean;
+    editorConfig: EditorConfig;
 };
 export const ApplicationSlice = createSlice({
     name: 'application',
@@ -23,6 +25,7 @@ export const ApplicationSlice = createSlice({
         selectedService: 'local',
         themeMode: 'system',
         showInactiveCollectors: false,
+        editorConfig: defaultEditorConfig,
     } as ApplicationContext,
     reducers: {
         changeBaseUrl(state, action: PayloadAction<string>) {
@@ -58,6 +61,15 @@ export const ApplicationSlice = createSlice({
         changeShowInactiveCollectors: (state, action: PayloadAction<boolean>) => {
             state.showInactiveCollectors = action.payload;
         },
+        changeEditorPreset: (state, action: PayloadAction<EditorPreset>) => {
+            state.editorConfig = {...(state.editorConfig ?? defaultEditorConfig), editor: action.payload};
+        },
+        changeEditorCustomTemplate: (state, action: PayloadAction<string>) => {
+            state.editorConfig = {...(state.editorConfig ?? defaultEditorConfig), customUrlTemplate: action.payload};
+        },
+        changeEditorPathMapping: (state, action: PayloadAction<Record<string, string>>) => {
+            state.editorConfig = {...(state.editorConfig ?? defaultEditorConfig), pathMapping: action.payload};
+        },
     },
 });
 
@@ -72,4 +84,7 @@ export const {
     changeSelectedService,
     changeThemeMode,
     changeShowInactiveCollectors,
+    changeEditorPreset,
+    changeEditorCustomTemplate,
+    changeEditorPathMapping,
 } = ApplicationSlice.actions;

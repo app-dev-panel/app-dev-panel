@@ -1,7 +1,7 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
 import {Box, Chip, Collapse, Icon, IconButton, Tab, Typography} from '@mui/material';
@@ -71,16 +71,17 @@ const OperationView = ({items, operation}: {items: Information[]; operation: str
                     <Box key={index}>
                         <FileRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
                             <PathCell>{item.path}</PathCell>
-                            <Chip
-                                component="a"
-                                clickable
-                                href={`/inspector/files?path=${parseFilePath(item.path)}`}
-                                label="Open"
-                                size="small"
-                                icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
-                                sx={{fontSize: '10px', height: 22}}
-                                variant="outlined"
-                            />
+                            <FileLink path={item.path}>
+                                <Chip
+                                    component="span"
+                                    clickable
+                                    label="Open"
+                                    size="small"
+                                    icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
+                                    sx={{fontSize: '10px', height: 22}}
+                                    variant="outlined"
+                                />
+                            </FileLink>
                             {hasArgs && (
                                 <IconButton size="small" sx={{flexShrink: 0}}>
                                     <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>

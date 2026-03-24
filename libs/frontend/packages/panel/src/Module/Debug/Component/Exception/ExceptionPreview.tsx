@@ -1,7 +1,8 @@
 import {InspectorFileContent, useLazyGetFilesQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
+import {StackTrace} from '@app-dev-panel/sdk/Component/StackTrace';
 import {parseFilePath, parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
-import {OpenInNew} from '@mui/icons-material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     Accordion,
@@ -11,7 +12,6 @@ import {
     AlertTitle,
     Button,
     Stack,
-    Tooltip,
     Typography,
 } from '@mui/material';
 import {useEffect, useState} from 'react';
@@ -57,26 +57,16 @@ export const ExceptionPreview = (props: ExceptionPreview) => {
                             {props.message}
                         </Alert>
                         <Stack>
-                            <Tooltip title="Open in File Explorer">
-                                <Button
-                                    size="small"
-                                    fullWidth
-                                    href={`/inspector/files?class=${parseFilePath(props.class)}`}
-                                    endIcon={<OpenInNew fontSize="small" />}
-                                >
+                            <FileLink className={parseFilePath(props.class)}>
+                                <Button size="small" fullWidth>
                                     Exception
                                 </Button>
-                            </Tooltip>
-                            <Tooltip title="Open in File Explorer">
-                                <Button
-                                    size="small"
-                                    fullWidth
-                                    href={`/inspector/files?path=${parseFilePath(props.file)}#L${props.line}`}
-                                    endIcon={<OpenInNew fontSize="small" />}
-                                >
+                            </FileLink>
+                            <FileLink path={props.file} line={+props.line}>
+                                <Button size="small" fullWidth>
                                     Place
                                 </Button>
-                            </Tooltip>
+                            </FileLink>
                         </Stack>
                     </Stack>
                     {file && (
@@ -86,12 +76,13 @@ export const ExceptionPreview = (props: ExceptionPreview) => {
                             highlightLines={[lineNumber]}
                             highlightColor={'#ffcccc'}
                             wrappedLines={[lineNumber - 5, lineNumber + 5]}
+                            filePath={parseFilePath(props.file)}
                         />
                     )}
                     <Accordion>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>Trace</AccordionSummary>
                         <AccordionDetails>
-                            <CodeHighlight fontSize={10} language={'text/plain'} code={props.traceAsString || ''} />
+                            <StackTrace trace={props.traceAsString || ''} fontSize={10} />
                         </AccordionDetails>
                     </Accordion>
                 </AccordionDetails>

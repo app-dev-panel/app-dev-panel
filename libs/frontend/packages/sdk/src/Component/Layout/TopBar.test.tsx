@@ -53,4 +53,62 @@ describe('TopBar', () => {
         expect(onPrev).toHaveBeenCalledOnce();
         expect(onNext).toHaveBeenCalledOnce();
     });
+
+    it('shows editor integration section in settings dialog', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<TopBar editorPreset="none" />);
+
+        // Open more menu
+        const moreButton = screen.getAllByRole('button').find((b) => b.textContent?.includes('more_vert'));
+        expect(moreButton).toBeDefined();
+        await user.click(moreButton!);
+
+        // Click settings
+        const settingsItem = screen.getByText('Settings');
+        await user.click(settingsItem);
+
+        // Editor Integration section is visible
+        expect(screen.getByText('Editor Integration')).toBeInTheDocument();
+        // The select shows the current preset label
+        expect(screen.getByText('None (File Explorer only)')).toBeInTheDocument();
+    });
+
+    it('shows custom template field when editor is custom', async () => {
+        renderWithProviders(<TopBar editorPreset="custom" editorCustomTemplate="myeditor://{file}:{line}" />);
+
+        const user = userEvent.setup();
+        const moreButton = screen.getAllByRole('button').find((b) => b.textContent?.includes('more_vert'));
+        await user.click(moreButton!);
+        await user.click(screen.getByText('Settings'));
+
+        expect(screen.getByLabelText('Custom URL template')).toBeInTheDocument();
+        expect(screen.getByDisplayValue('myeditor://{file}:{line}')).toBeInTheDocument();
+    });
+
+    it('hides custom template field when editor is not custom', async () => {
+        renderWithProviders(<TopBar editorPreset="phpstorm" />);
+
+        const user = userEvent.setup();
+        const moreButton = screen.getAllByRole('button').find((b) => b.textContent?.includes('more_vert'));
+        await user.click(moreButton!);
+        await user.click(screen.getByText('Settings'));
+
+        expect(screen.queryByLabelText('Custom URL template')).not.toBeInTheDocument();
+    });
+
+    it('calls onEditorCustomTemplateChange when template is edited', async () => {
+        const user = userEvent.setup();
+        const onChange = vi.fn();
+        renderWithProviders(
+            <TopBar editorPreset="custom" editorCustomTemplate="" onEditorCustomTemplateChange={onChange} />,
+        );
+
+        const moreButton = screen.getAllByRole('button').find((b) => b.textContent?.includes('more_vert'));
+        await user.click(moreButton!);
+        await user.click(screen.getByText('Settings'));
+
+        const input = screen.getByLabelText('Custom URL template');
+        await user.type(input, 'x');
+        expect(onChange).toHaveBeenCalled();
+    });
 });

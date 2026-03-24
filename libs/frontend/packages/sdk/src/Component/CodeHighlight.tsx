@@ -1,5 +1,6 @@
+import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import {useTheme} from '@mui/material';
-import React from 'react';
+import React, {useCallback} from 'react';
 import {Prism} from 'react-syntax-highlighter';
 import {darcula} from 'react-syntax-highlighter/dist/esm/styles/prism';
 
@@ -11,6 +12,8 @@ type CodeHighlightProps = {
     highlightLines?: [number, number] | [number];
     highlightColor?: string;
     wrappedLines?: [number, number];
+    /** File path used for "open in editor" on line number click */
+    filePath?: string;
 };
 const isNumberInRange = (lineNumber: number, range: [number, number] | [number]) => {
     if (range.length === 1) {
@@ -27,9 +30,20 @@ export const CodeHighlight = React.memo((props: CodeHighlightProps) => {
         showLineNumbers = true,
         highlightColor = 'rgba(0,0,0, .1)',
         wrappedLines = [1, 0],
+        filePath,
     } = props;
 
     const theme = useTheme();
+    const getEditorUrl = useEditorUrl();
+
+    const handleLineClick = useCallback(
+        (lineNumber: number) => {
+            if (!filePath) return;
+            const url = getEditorUrl(filePath, lineNumber);
+            if (url) window.location.href = url;
+        },
+        [filePath, getEditorUrl],
+    );
 
     const startLine = Math.max(wrappedLines[0], 1);
     const endLine = Math.max(wrappedLines[1], 0);
@@ -51,7 +65,17 @@ export const CodeHighlight = React.memo((props: CodeHighlightProps) => {
             useInlineStyles
             lineProps={(lineNumber) => ({
                 id: `L${lineNumber}`,
-                ...(highlightLines &&
+                ...(filePath && {
+                    onClick: () => handleLineClick(lineNumber),
+                    style: {
+                        ...(highlightLines && isNumberInRange(lineNumber, highlightLines)
+                            ? {backgroundColor: highlightColor, display: 'block'}
+                            : {}),
+                        cursor: filePath ? 'pointer' : undefined,
+                    },
+                }),
+                ...(!filePath &&
+                    highlightLines &&
                     isNumberInRange(lineNumber, highlightLines) && {
                         style: {backgroundColor: highlightColor, display: 'block'},
                     }),

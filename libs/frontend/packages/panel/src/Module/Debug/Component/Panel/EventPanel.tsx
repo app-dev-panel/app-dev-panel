@@ -1,10 +1,11 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {parseFilename, parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
+import {parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
 import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
@@ -238,16 +239,17 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                                 </Typography>
 
                                 <Box sx={{display: 'flex', gap: 1, mb: 1.5}}>
-                                    <Chip
-                                        component="a"
-                                        clickable
-                                        href={`/inspector/files?path=${parseFilePathWithLineAnchor(event.line)}`}
-                                        label="Open File"
-                                        size="small"
-                                        icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
-                                        sx={{fontSize: '11px', height: 24}}
-                                        variant="outlined"
-                                    />
+                                    <FileLink path={event.line}>
+                                        <Chip
+                                            component="span"
+                                            clickable
+                                            label="Open File"
+                                            size="small"
+                                            icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
+                                            sx={{fontSize: '11px', height: 24}}
+                                            variant="outlined"
+                                        />
+                                    </FileLink>
                                     {objectId && debugEntry && (
                                         <Chip
                                             component="a"

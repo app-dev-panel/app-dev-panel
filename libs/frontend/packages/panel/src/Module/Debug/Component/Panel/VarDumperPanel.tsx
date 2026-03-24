@@ -1,7 +1,7 @@
 import {VarDumpValue} from '@app-dev-panel/panel/Module/Debug/Component/VarDumpValue';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {parseFilePathWithLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {Box, Icon, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 
@@ -58,19 +58,20 @@ export const VarDumperPanel = ({data}: VarDumperPanelProps) => {
                     <DumpHeader>
                         <IndexBadge>{index + 1}</IndexBadge>
                         <Icon sx={{fontSize: 16, color: 'text.disabled'}}>code</Icon>
-                        <Typography
-                            component="a"
-                            href={`/inspector/files?path=${parseFilePathWithLineAnchor(entry.line)}`}
-                            sx={{
-                                fontFamily: "'JetBrains Mono', monospace",
-                                fontSize: '12px',
-                                color: 'primary.main',
-                                textDecoration: 'none',
-                                '&:hover': {textDecoration: 'underline'},
-                            }}
-                        >
-                            {entry.line}
-                        </Typography>
+                        <FileLink path={entry.line}>
+                            <Typography
+                                component="span"
+                                sx={{
+                                    fontFamily: "'JetBrains Mono', monospace",
+                                    fontSize: '12px',
+                                    color: 'primary.main',
+                                    textDecoration: 'none',
+                                    '&:hover': {textDecoration: 'underline'},
+                                }}
+                            >
+                                {entry.line}
+                            </Typography>
+                        </FileLink>
                     </DumpHeader>
                     <DumpBody>
                         <VarDumpValue value={entry.variable} />

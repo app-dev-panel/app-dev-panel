@@ -1,6 +1,7 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {EventEntry, EventListenersType, useGetEventsQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
@@ -8,10 +9,9 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
-import {OpenInNew} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Box, Chip, IconButton, Tab, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Tab, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import React, {SyntheticEvent, useCallback, useMemo, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
@@ -129,13 +129,7 @@ const EventListeners = React.memo(({entries}: EventListenersProps) => {
                                     backgroundColor: 'action.selected',
                                 }}
                             />
-                            {hasClass && (
-                                <Tooltip title="Open in File Explorer">
-                                    <IconButton size="small" href={`/inspector/files?class=${entry.class}`}>
-                                        <OpenInNew sx={{fontSize: 14}} />
-                                    </IconButton>
-                                </Tooltip>
-                            )}
+                            {hasClass && <FileLink className={entry.class!} />}
                         </EventHeader>
                         {entry.listeners.map((listener, i) => {
                             const parsed = parseCallable(listener);
@@ -147,39 +141,41 @@ const EventListeners = React.memo(({entries}: EventListenersProps) => {
                             return (
                                 <ListenerRow key={i}>
                                     {parsed ? (
-                                        <Typography
-                                            component="a"
-                                            href={`/inspector/files?class=${parsed.className}&method=${parsed.methodName}`}
-                                            sx={{
-                                                flex: 1,
-                                                minWidth: 0,
-                                                fontFamily: primitives.fontFamilyMono,
-                                                fontSize: '12px',
-                                                color: 'primary.main',
-                                                textDecoration: 'none',
-                                                wordBreak: 'break-all',
-                                                '&:hover': {textDecoration: 'underline'},
-                                            }}
+                                        <FileLink
+                                            className={parsed.className}
+                                            methodName={parsed.methodName}
+                                            sx={{flex: 1, minWidth: 0}}
                                         >
-                                            {serializeCallable(listener)}
-                                        </Typography>
+                                            <Typography
+                                                component="span"
+                                                sx={{
+                                                    fontFamily: primitives.fontFamilyMono,
+                                                    fontSize: '12px',
+                                                    color: 'primary.main',
+                                                    textDecoration: 'none',
+                                                    wordBreak: 'break-all',
+                                                    '&:hover': {textDecoration: 'underline'},
+                                                }}
+                                            >
+                                                {serializeCallable(listener)}
+                                            </Typography>
+                                        </FileLink>
                                     ) : isClass ? (
-                                        <Typography
-                                            component="a"
-                                            href={`/inspector/files?class=${listener}`}
-                                            sx={{
-                                                flex: 1,
-                                                minWidth: 0,
-                                                fontFamily: primitives.fontFamilyMono,
-                                                fontSize: '12px',
-                                                color: 'primary.main',
-                                                textDecoration: 'none',
-                                                wordBreak: 'break-all',
-                                                '&:hover': {textDecoration: 'underline'},
-                                            }}
-                                        >
-                                            {listener}
-                                        </Typography>
+                                        <FileLink className={listener as string} sx={{flex: 1, minWidth: 0}}>
+                                            <Typography
+                                                component="span"
+                                                sx={{
+                                                    fontFamily: primitives.fontFamilyMono,
+                                                    fontSize: '12px',
+                                                    color: 'primary.main',
+                                                    textDecoration: 'none',
+                                                    wordBreak: 'break-all',
+                                                    '&:hover': {textDecoration: 'underline'},
+                                                }}
+                                            >
+                                                {listener}
+                                            </Typography>
+                                        </FileLink>
                                     ) : (
                                         <Typography
                                             sx={{

@@ -1,10 +1,10 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetObjectQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
-import {FilePresent} from '@mui/icons-material';
-import {Box, IconButton, Tooltip} from '@mui/material';
+import {Box} from '@mui/material';
 import {useSearchParams} from 'react-router-dom';
 
 export const ContainerEntryPage = () => {
@@ -21,11 +21,7 @@ export const ContainerEntryPage = () => {
         <pre>
             <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                 <PageHeader title={objectClass} icon="inventory_2" description="Container entry details" />
-                <Tooltip title="Examine as a file">
-                    <IconButton size="small" href={'/inspector/files?path=' + data?.path}>
-                        <FilePresent fontSize="small" />
-                    </IconButton>
-                </Tooltip>
+                {data?.path && <FileLink path={data.path} />}
             </Box>
             <JsonRenderer value={data?.object} />
         </pre>
