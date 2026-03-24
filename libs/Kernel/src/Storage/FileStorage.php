@@ -14,6 +14,7 @@ use Yiisoft\Json\Json;
 final class FileStorage implements StorageInterface
 {
     public const int DEFAULT_HISTORY_SIZE = 50;
+    public const int DEFAULT_COMPRESSION_LEVEL = 1;
 
     /**
      * @var CollectorInterface[]
@@ -26,6 +27,7 @@ final class FileStorage implements StorageInterface
         private readonly string $path,
         private readonly DebuggerIdGenerator $idGenerator,
         private readonly array $excludedClasses = [],
+        private readonly int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL,
     ) {}
 
     public function addCollector(CollectorInterface $collector): void
@@ -41,18 +43,12 @@ final class FileStorage implements StorageInterface
     public function read(string $type, ?string $id = null): array
     {
         clearstatcache();
-        $data = [];
-        $pattern = sprintf('%s/**/%s/%s.json', $this->path, $id ?? '**', $type);
-        $dataFiles = glob($pattern, GLOB_NOSORT);
-        uasort($dataFiles, static fn($a, $b) => filemtime($a) <=> filemtime($b));
 
-        foreach ($dataFiles as $file) {
-            $dir = dirname($file);
-            $entryId = substr($dir, strlen(dirname($file, 2)) + 1);
-            $data[$entryId] = Json::decode(file_get_contents($file));
+        if ($id !== null) {
+            return $this->readEntry($type, $id);
         }
 
-        return $data;
+        return $this->readAll($type);
     }
 
     public function write(string $id, array $summary, array $data, array $objects): void
@@ -61,12 +57,9 @@ final class FileStorage implements StorageInterface
 
         FileHelper::ensureDirectory($basePath);
 
-        $this->writeFileExclusive($basePath . self::TYPE_SUMMARY . '.json', Json::encode($summary));
-        $this->writeFileExclusive($basePath . self::TYPE_DATA . '.json', Dumper::create($data)->asJson(30));
-        $this->writeFileExclusive(
-            $basePath . self::TYPE_OBJECTS . '.json',
-            Dumper::create($objects)->asJsonObjectsMap(30),
-        );
+        $this->writeCompressed($basePath . self::TYPE_SUMMARY, Json::encode($summary));
+        $this->writeCompressed($basePath . self::TYPE_DATA, Dumper::create($data)->asJson(30));
+        $this->writeCompressed($basePath . self::TYPE_OBJECTS, Dumper::create($objects)->asJsonObjectsMap(30));
     }
 
     public function flush(): void
@@ -77,11 +70,11 @@ final class FileStorage implements StorageInterface
             FileHelper::ensureDirectory($basePath);
 
             $dumper = Dumper::create($this->getData(), $this->excludedClasses);
-            $this->writeFileExclusive($basePath . self::TYPE_DATA . '.json', $dumper->asJson(30));
-            $this->writeFileExclusive($basePath . self::TYPE_OBJECTS . '.json', $dumper->asJsonObjectsMap(30));
+            $this->writeCompressed($basePath . self::TYPE_DATA, $dumper->asJson(30));
+            $this->writeCompressed($basePath . self::TYPE_OBJECTS, $dumper->asJsonObjectsMap(30));
 
             $summaryData = Dumper::create($this->collectSummaryData())->asJson();
-            $this->writeFileExclusive($basePath . self::TYPE_SUMMARY . '.json', $summaryData);
+            $this->writeCompressed($basePath . self::TYPE_SUMMARY, $summaryData);
         } finally {
             $this->collectors = [];
             new FileStorageGarbageCollector($this->path, $this->historySize)->run();
@@ -123,13 +116,95 @@ final class FileStorage implements StorageInterface
     }
 
     /**
-     * Writes content to a file with an exclusive lock to prevent race conditions.
+     * Fast path: read a single entry by ID. Uses direct file existence check instead of glob+sort.
+     */
+    private function readEntry(string $type, string $id): array
+    {
+        $dirs = glob($this->path . '/*/' . $id, GLOB_ONLYDIR | GLOB_NOSORT);
+        if ($dirs === false || $dirs === []) {
+            return [];
+        }
+
+        $dir = $dirs[0];
+        $raw = $this->readFile($dir . '/' . $type);
+        if ($raw === null) {
+            return [];
+        }
+
+        return [$id => Json::decode($raw)];
+    }
+
+    /**
+     * Read all entries of given type, sorted by modification time.
+     */
+    private function readAll(string $type): array
+    {
+        $data = [];
+
+        $gzFiles = glob(sprintf('%s/**/**/%s.json.gz', $this->path, $type), GLOB_NOSORT) ?: [];
+
+        // Only scan for legacy .json files if needed
+        $jsonFiles = glob(sprintf('%s/**/**/%s.json', $this->path, $type), GLOB_NOSORT) ?: [];
+
+        if ($jsonFiles !== []) {
+            // Index gz dirs to skip legacy duplicates
+            $gzDirs = [];
+            foreach ($gzFiles as $file) {
+                $gzDirs[dirname($file)] = true;
+            }
+
+            foreach ($jsonFiles as $file) {
+                if (array_key_exists(dirname($file), $gzDirs)) {
+                    continue;
+                }
+
+                $gzFiles[] = $file;
+            }
+        }
+
+        uasort($gzFiles, static fn($a, $b) => filemtime($a) <=> filemtime($b));
+
+        foreach ($gzFiles as $file) {
+            $dir = dirname($file);
+            $entryId = substr($dir, strlen(dirname($file, 2)) + 1);
+            $raw = file_get_contents($file);
+            if (str_ends_with($file, '.gz')) {
+                $raw = gzdecode($raw);
+            }
+            $data[$entryId] = Json::decode($raw);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Reads a storage file, trying .json.gz first, then .json fallback.
+     */
+    private function readFile(string $basePath): ?string
+    {
+        $gzPath = $basePath . '.json.gz';
+        if (file_exists($gzPath)) {
+            return gzdecode(file_get_contents($gzPath));
+        }
+
+        $jsonPath = $basePath . '.json';
+        if (file_exists($jsonPath)) {
+            return file_get_contents($jsonPath);
+        }
+
+        return null;
+    }
+
+    /**
+     * Compresses content with gzip and writes to a .json.gz file with an exclusive lock.
      *
      * @throws \RuntimeException if the file cannot be written.
      */
-    private function writeFileExclusive(string $filePath, string $content): void
+    private function writeCompressed(string $baseFilePath, string $content): void
     {
-        $result = file_put_contents($filePath, $content, LOCK_EX);
+        $filePath = $baseFilePath . '.json.gz';
+        $compressed = gzencode($content, $this->compressionLevel);
+        $result = file_put_contents($filePath, $compressed, LOCK_EX);
         if ($result === false) {
             throw new \RuntimeException(sprintf('Failed to write file "%s".', $filePath));
         }

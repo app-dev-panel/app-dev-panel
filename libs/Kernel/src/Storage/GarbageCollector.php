@@ -62,8 +62,11 @@ final class GarbageCollector
 
     private function removeExcessEntries(): void
     {
-        $summaryFiles = glob($this->path . '/**/**/summary.json', GLOB_NOSORT);
-        if ($summaryFiles === false || $summaryFiles === [] || count($summaryFiles) <= $this->historySize) {
+        $summaryFiles = [
+            ...(glob($this->path . '/**/**/summary.json.gz', GLOB_NOSORT) ?: []),
+            ...(glob($this->path . '/**/**/summary.json', GLOB_NOSORT) ?: []),
+        ];
+        if ($summaryFiles === [] || count($summaryFiles) <= $this->historySize) {
             return;
         }
 
