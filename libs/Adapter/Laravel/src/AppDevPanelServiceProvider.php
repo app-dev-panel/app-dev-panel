@@ -30,7 +30,11 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
-use AppDevPanel\Api\Ingestion\Controller\OtlpController;
+use AppDevPanel\Api\Mcp\Controller\McpController;
+use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
+use AppDevPanel\Api\Mcp\McpSettings;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -66,8 +70,6 @@ use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
-use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
-use AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
@@ -211,7 +213,6 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'cache' => CacheCollector::class,
             'mailer' => MailerCollector::class,
             'queue' => QueueCollector::class,
-            'opentelemetry' => OpenTelemetryCollector::class,
         ];
 
         foreach ($timelineCollectors as $key => $class) {
@@ -457,14 +458,6 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
-            OtlpController::class,
-            fn() => new OtlpController(
-                $this->app->make(JsonResponseFactoryInterface::class),
-                $this->app->make(StorageInterface::class),
-            ),
-        );
-
-        $this->app->singleton(
             ServiceController::class,
             fn() => new ServiceController(
                 $this->app->make(JsonResponseFactoryInterface::class),
@@ -520,6 +513,35 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             fn() => new RequestController(
                 $this->app->make(JsonResponseFactoryInterface::class),
                 $this->app->make(CollectorRepositoryInterface::class),
+            ),
+        );
+
+        $this->app->singleton(
+            McpSettings::class,
+            fn() => new McpSettings($config->get('app-dev-panel.storage.path')),
+        );
+
+        $this->app->singleton(
+            McpServer::class,
+            fn() => new McpServer(
+                McpToolRegistryFactory::create($this->app->make(StorageInterface::class)),
+            ),
+        );
+
+        $this->app->singleton(
+            McpController::class,
+            fn() => new McpController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(McpServer::class),
+                $this->app->make(McpSettings::class),
+            ),
+        );
+
+        $this->app->singleton(
+            McpSettingsController::class,
+            fn() => new McpSettingsController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(McpSettings::class),
             ),
         );
     }
@@ -683,7 +705,6 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->decorateLoggerProxy($collectors);
         $this->decorateHttpClientProxy($collectors);
         $this->decorateEventDispatcherProxy($collectors);
-        $this->decorateSpanProcessorProxy($collectors);
     }
 
     /**
@@ -737,31 +758,6 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 return $dispatcher;
             }
             return new LaravelEventDispatcherProxy($dispatcher, $this->app->make(EventCollector::class));
-        });
-    }
-
-    /**
-     * @param array<string, bool> $collectors
-     */
-    private function decorateSpanProcessorProxy(array $collectors): void
-    {
-        if (!interface_exists(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class)) {
-            return;
-        }
-
-        if (!(($collectors['opentelemetry'] ?? true) && $this->app->bound(OpenTelemetryCollector::class))) {
-            return;
-        }
-
-        if (!$this->app->bound(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class)) {
-            return;
-        }
-
-        $this->app->extend(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class, function ($processor) {
-            if ($processor instanceof SpanProcessorInterfaceProxy) {
-                return $processor;
-            }
-            return new SpanProcessorInterfaceProxy($processor, $this->app->make(OpenTelemetryCollector::class));
         });
     }
 }

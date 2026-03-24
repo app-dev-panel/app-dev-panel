@@ -23,7 +23,12 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Mcp\Controller\McpController;
+use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
+use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
@@ -58,7 +63,6 @@ use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
-use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
@@ -487,6 +491,37 @@ class Module extends \yii\base\Module implements BootstrapInterface
             OpcacheController::class,
             static fn() => new OpcacheController(\Yii::$container->get(JsonResponseFactoryInterface::class)),
         );
+
+        $storagePath = \Yii::getAlias($this->storagePath);
+
+        \Yii::$container->setSingleton(
+            McpSettings::class,
+            static fn() => new McpSettings($storagePath),
+        );
+
+        \Yii::$container->setSingleton(
+            McpServer::class,
+            static fn() => new McpServer(
+                McpToolRegistryFactory::create(\Yii::$container->get(StorageInterface::class)),
+            ),
+        );
+
+        \Yii::$container->setSingleton(
+            McpController::class,
+            static fn() => new McpController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(McpServer::class),
+                \Yii::$container->get(McpSettings::class),
+            ),
+        );
+
+        \Yii::$container->setSingleton(
+            McpSettingsController::class,
+            static fn() => new McpSettingsController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(McpSettings::class),
+            ),
+        );
     }
 
     private function registerCollectors(): void
@@ -541,7 +576,6 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'router' => static fn(): array => [new RouterCollector()],
             'queue' => static fn(): array => [new QueueCollector($timeline)],
             'validator' => static fn(): array => [new ValidatorCollector()],
-            'opentelemetry' => static fn(): array => [new OpenTelemetryCollector($timeline)],
         ];
     }
 

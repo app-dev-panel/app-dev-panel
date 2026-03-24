@@ -21,6 +21,7 @@ use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Mcp\Controller\McpController;
+use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
 use AppDevPanel\Api\Router\Route;
 use AppDevPanel\Api\Router\Router;
 
@@ -49,7 +50,6 @@ final class ApiRoutes
                 'debug/api/event-stream',
             ),
             new Route('GET', '/debug/api/settings', [SettingsController::class, 'index'], 'debug/api/settings'),
-            new Route('POST', '/debug/api/mcp', [McpController::class, 'handle'], 'debug/api/mcp'),
         ];
     }
 
@@ -201,6 +201,19 @@ final class ApiRoutes
             new Route('DELETE', '/inspect/api/cache', [CacheController::class, 'delete'], 'inspect/api/cache/delete'),
             new Route('POST', '/inspect/api/cache/clear', [CacheController::class, 'clear'], 'inspect/api/cache/clear'),
             new Route('GET', '/inspect/api/opcache', [OpcacheController::class, 'index'], 'inspect/api/opcache/index'),
+            new Route('POST', '/inspect/api/mcp', [McpController::class, 'handle'], 'inspect/api/mcp'),
+            new Route(
+                'GET',
+                '/inspect/api/mcp/settings',
+                [McpSettingsController::class, 'index'],
+                'inspect/api/mcp/settings',
+            ),
+            new Route(
+                'PUT',
+                '/inspect/api/mcp/settings',
+                [McpSettingsController::class, 'update'],
+                'inspect/api/mcp/settings/update',
+            ),
         ];
     }
 

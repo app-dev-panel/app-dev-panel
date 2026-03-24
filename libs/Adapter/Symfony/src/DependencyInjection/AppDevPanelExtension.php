@@ -24,7 +24,12 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
-use AppDevPanel\Api\Ingestion\Controller\OtlpController;
+use AppDevPanel\Api\Mcp\Controller\McpController;
+use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
+use AppDevPanel\Api\Mcp\McpSettings;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
+use AppDevPanel\McpServer\Tool\ToolRegistry;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -58,7 +63,6 @@ use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
-use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
@@ -190,7 +194,6 @@ final class AppDevPanelExtension extends Extension
             'http_client' => HttpClientCollector::class,
             'var_dumper' => VarDumperCollector::class,
             'deprecation' => DeprecationCollector::class,
-            'opentelemetry' => OpenTelemetryCollector::class,
         ];
 
         foreach ($timelineCollectorMap as $key => $class) {
@@ -470,10 +473,35 @@ final class AppDevPanelExtension extends Extension
             ->setPublic(true);
 
         $container
-            ->register(OtlpController::class, OtlpController::class)
+            ->register(ToolRegistry::class, ToolRegistry::class)
+            ->setFactory([McpToolRegistryFactory::class, 'create'])
+            ->setArguments([new Reference(StorageInterface::class)])
+            ->setPublic(false);
+
+        $container
+            ->register(McpSettings::class, McpSettings::class)
+            ->setArguments(['%app_dev_panel.storage.path%'])
+            ->setPublic(true);
+
+        $container
+            ->register(McpServer::class, McpServer::class)
+            ->setArguments([new Reference(ToolRegistry::class)])
+            ->setPublic(true);
+
+        $container
+            ->register(McpController::class, McpController::class)
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
-                new Reference(StorageInterface::class),
+                new Reference(McpServer::class),
+                new Reference(McpSettings::class),
+            ])
+            ->setPublic(true);
+
+        $container
+            ->register(McpSettingsController::class, McpSettingsController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(McpSettings::class),
             ])
             ->setPublic(true);
 

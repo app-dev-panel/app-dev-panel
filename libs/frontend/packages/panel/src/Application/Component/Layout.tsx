@@ -1,5 +1,9 @@
 import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/NotificationCenter';
 
+import {
+    useGetMcpSettingsQuery,
+    useUpdateMcpSettingsMutation,
+} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {useSelector} from '@app-dev-panel/panel/store';
 import {
     changeAutoLatest,
@@ -114,6 +118,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const showInactiveCollectors = useSelector((state) => state.application.showInactiveCollectors) as boolean;
     const editorConfig = useSelector((state) => state.application.editorConfig) ?? defaultEditorConfig;
     const notificationCount = useSelector(selectUnreadCount);
+
+    // MCP settings
+    const {data: mcpSettings} = useGetMcpSettingsQuery();
+    const [updateMcpSettings] = useUpdateMcpSettingsMutation();
 
     // Notification center popover
     const [notificationAnchor, setNotificationAnchor] = useState<HTMLElement | null>(null);
@@ -237,6 +245,13 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             dispatch(changeEditorCustomTemplate(template));
         },
         [dispatch],
+    );
+
+    const handleMcpEnabledChange = useCallback(
+        (value: boolean) => {
+            updateMcpSettings({enabled: value});
+        },
+        [updateMcpSettings],
     );
 
     // TopBar debug info
@@ -369,6 +384,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onThemeToggle={handleThemeToggle}
                     onAutoRefreshToggle={autoLatestHandler}
                     onShowInactiveCollectorsChange={handleShowInactiveCollectorsChange}
+                    mcpEnabled={mcpSettings?.enabled}
+                    onMcpEnabledChange={handleMcpEnabledChange}
                     editorPreset={editorConfig.editor}
                     editorCustomTemplate={editorConfig.customUrlTemplate}
                     onEditorPresetChange={handleEditorPresetChange}

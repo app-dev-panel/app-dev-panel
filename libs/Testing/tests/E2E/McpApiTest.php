@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * E2E tests that verify the MCP (Model Context Protocol) API endpoint works correctly.
- * Tests JSON-RPC 2.0 protocol over HTTP transport at POST /debug/api/mcp.
+ * Tests JSON-RPC 2.0 protocol over HTTP transport at POST /inspect/api/mcp.
  *
  * Run: PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Fixtures --group mcp
  */
@@ -66,7 +66,7 @@ final class McpApiTest extends TestCase
 
     public function testInitializedNotificationReturns204(): void
     {
-        $response = self::$client->post('/debug/api/mcp', [
+        $response = self::$client->post('/inspect/api/mcp', [
             'json' => [
                 'jsonrpc' => '2.0',
                 'method' => 'initialized',
@@ -243,7 +243,7 @@ final class McpApiTest extends TestCase
 
     public function testEmptyBodyReturns400(): void
     {
-        $response = self::$client->post('/debug/api/mcp', [
+        $response = self::$client->post('/inspect/api/mcp', [
             'body' => '',
             'headers' => ['Content-Type' => 'application/json'],
         ]);
@@ -257,7 +257,7 @@ final class McpApiTest extends TestCase
 
     public function testInvalidJsonReturns400(): void
     {
-        $response = self::$client->post('/debug/api/mcp', [
+        $response = self::$client->post('/inspect/api/mcp', [
             'body' => '{invalid json',
             'headers' => ['Content-Type' => 'application/json'],
         ]);
@@ -277,12 +277,61 @@ final class McpApiTest extends TestCase
         self::assertSame('my-string-id', $response['body']['id']);
     }
 
+    public function testMcpSettingsReturnsEnabled(): void
+    {
+        $response = self::$client->get('/inspect/api/mcp/settings');
+
+        self::assertSame(200, $response->getStatusCode());
+
+        $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $data = $body['data'] ?? $body;
+
+        self::assertArrayHasKey('enabled', $data);
+        self::assertIsBool($data['enabled']);
+    }
+
+    public function testMcpSettingsToggle(): void
+    {
+        // Disable MCP
+        $response = self::$client->put('/inspect/api/mcp/settings', [
+            'json' => ['enabled' => false],
+        ]);
+
+        self::assertSame(200, $response->getStatusCode());
+
+        $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $data = $body['data'] ?? $body;
+        self::assertFalse($data['enabled']);
+
+        // Verify MCP endpoint returns error when disabled
+        $mcpResponse = self::jsonRpc('ping', [], 10);
+        self::assertSame(400, $mcpResponse['status']);
+        self::assertArrayHasKey('error', $mcpResponse['body']);
+        self::assertSame(-32_000, $mcpResponse['body']['error']['code']);
+
+        // Re-enable MCP
+        $response = self::$client->put('/inspect/api/mcp/settings', [
+            'json' => ['enabled' => true],
+        ]);
+
+        self::assertSame(200, $response->getStatusCode());
+
+        $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $data = $body['data'] ?? $body;
+        self::assertTrue($data['enabled']);
+
+        // Verify MCP works again
+        $mcpResponse = self::jsonRpc('ping', [], 11);
+        self::assertSame(200, $mcpResponse['status']);
+        self::assertArrayHasKey('result', $mcpResponse['body']);
+    }
+
     /**
      * @return array{status: int, body: array<string, mixed>}
      */
     private static function jsonRpc(string $method, array $params, int|string $id): array
     {
-        $response = self::$client->post('/debug/api/mcp', [
+        $response = self::$client->post('/inspect/api/mcp', [
             'json' => [
                 'jsonrpc' => '2.0',
                 'id' => $id,

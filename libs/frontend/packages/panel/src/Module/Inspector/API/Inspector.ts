@@ -178,7 +178,7 @@ type Response<T = any> = {data: T};
 export const inspectorApi = createApi({
     reducerPath: 'api.inspector',
     keepUnusedDataFor: 0,
-    tagTypes: ['inspector/composer', 'inspector/opcache'],
+    tagTypes: ['inspector/composer', 'inspector/opcache', 'inspector/mcp'],
     baseQuery: createBaseQuery('/inspect/api/'),
     endpoints: (builder) => ({
         getParameters: builder.query<Response, void>({
@@ -304,6 +304,16 @@ export const inspectorApi = createApi({
             transformResponse: (result: Response<CommandResponseType>) => result.data,
             invalidatesTags: ['inspector/composer'],
         }),
+        getMcpSettings: builder.query<{enabled: boolean}, void>({
+            query: () => `mcp/settings`,
+            transformResponse: (result: Response<{enabled: boolean}>) => result.data,
+            providesTags: ['inspector/mcp'],
+        }),
+        updateMcpSettings: builder.mutation<{enabled: boolean}, {enabled: boolean}>({
+            query: (body) => ({url: `mcp/settings`, method: 'PUT', body}),
+            transformResponse: (result: Response<{enabled: boolean}>) => result.data,
+            invalidatesTags: ['inspector/mcp'],
+        }),
     }),
 });
 
@@ -339,4 +349,6 @@ export const {
     useGetOpcacheQuery,
     useExplainQueryMutation,
     useExecuteQueryMutation,
+    useGetMcpSettingsQuery,
+    useUpdateMcpSettingsMutation,
 } = inspectorApi;

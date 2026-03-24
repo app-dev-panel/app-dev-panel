@@ -59,6 +59,8 @@ use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Mcp\Controller\McpController;
+use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
+use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
@@ -162,9 +164,15 @@ $services = [
     ComposerController::class => new ComposerController($jsonResponseFactory, $pathResolver),
     RoutingController::class => new RoutingController($jsonResponseFactory),
     RequestController::class => new RequestController($jsonResponseFactory, $collectorRepository),
+    McpSettings::class => new McpSettings($storagePath),
     McpController::class => new McpController(
         $jsonResponseFactory,
         new McpServer(McpToolRegistryFactory::create($storage)),
+        new McpSettings($storagePath),
+    ),
+    McpSettingsController::class => new McpSettingsController(
+        $jsonResponseFactory,
+        new McpSettings($storagePath),
     ),
 ];
 

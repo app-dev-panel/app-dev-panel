@@ -94,7 +94,7 @@ final class ApiApplication implements RequestHandlerInterface
     {
         $middlewares = [];
         $path = $request->getUri()->getPath();
-        $isMcp = $path === '/debug/api/mcp';
+        $isMcp = $path === '/inspect/api/mcp';
 
         // CORS
         $middlewares[] = new CorsMiddleware($this->responseFactory);

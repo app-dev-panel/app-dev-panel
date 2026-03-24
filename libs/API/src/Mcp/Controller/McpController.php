@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Mcp\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\McpServer\McpServer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,10 +21,15 @@ final class McpController
     public function __construct(
         private readonly JsonResponseFactoryInterface $responseFactory,
         private readonly McpServer $mcpServer,
+        private readonly ?McpSettings $mcpSettings = null,
     ) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        if ($this->mcpSettings !== null && !$this->mcpSettings->isEnabled()) {
+            return $this->jsonRpcError(null, -32_000, 'MCP server is disabled');
+        }
+
         $body = (string) $request->getBody();
 
         if ($body === '') {
