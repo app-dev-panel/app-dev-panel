@@ -66,6 +66,10 @@
         {
             "type": "path",
             "url": "../../libs/Cli"
+        },
+        {
+            "type": "path",
+            "url": "../../libs/McpServer"
         }
     ],
     "autoload": {
