@@ -4,6 +4,7 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilename, parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
+import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
 import {Box, Chip, Collapse, Icon, Typography} from '@mui/material';
 import {alpha, styled, useTheme} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
@@ -80,13 +81,15 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
     const theme = useTheme();
     const [lazyGetFilesQuery] = useLazyGetFilesQuery();
     const [file, setFile] = useState<InspectorFileContent | null>(null);
+    const pathMapper = usePathMapper();
+    const localFile = pathMapper.toLocal(exception.file);
 
     useEffect(() => {
         (async () => {
-            const response = await lazyGetFilesQuery(parseFilePath(exception.file));
+            const response = await lazyGetFilesQuery(parseFilePath(localFile));
             setFile(response.data as any);
         })();
-    }, [exception.file, lazyGetFilesQuery]);
+    }, [localFile, lazyGetFilesQuery]);
 
     const lineNumber = +exception.line;
 
@@ -131,7 +134,7 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
                 <Chip
                     component="a"
                     clickable
-                    href={`/inspector/files?path=${parseFilePath(exception.file)}#L${exception.line}`}
+                    href={`/inspector/files?path=${parseFilePath(localFile)}#L${exception.line}`}
                     label="Open Source Location"
                     size="small"
                     icon={<Icon sx={{fontSize: '14px !important'}}>open_in_new</Icon>}
@@ -190,6 +193,7 @@ const TraceBlock = ({trace}: {trace: string}) => {
 export const ExceptionPanel = ({exceptions}: ExceptionPanelProps) => {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
     const items = exceptions ?? [];
+    const pathMapper = usePathMapper();
 
     if (items.length === 0) {
         return <EmptyState icon="bug_report" title="No exceptions found" />;
@@ -212,7 +216,7 @@ export const ExceptionPanel = ({exceptions}: ExceptionPanelProps) => {
                                 <Message>{exception.message}</Message>
                             </Box>
                             <FileLink component="span" sx={{color: 'text.disabled'}}>
-                                {parseFilename(exception.file)}:{exception.line}
+                                {parseFilename(pathMapper.toLocal(exception.file))}:{exception.line}
                             </FileLink>
                         </ExceptionRow>
                         <Collapse in={expanded}>

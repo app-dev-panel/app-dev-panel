@@ -22,6 +22,7 @@ use AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware;
 use AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
+use AppDevPanel\Api\Debug\Controller\SettingsController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
@@ -45,6 +46,9 @@ use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
+use AppDevPanel\Api\NullPathMapper;
+use AppDevPanel\Api\PathMapper;
+use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
@@ -362,6 +366,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             static fn() => new PathResolver(base_path(), storage_path()),
         );
 
+        $this->app->singleton(PathMapperInterface::class, function (): PathMapperInterface {
+            $rules = $this->app->make('config')->get('app-dev-panel.path_mapping', []);
+            return $rules !== [] ? new PathMapper($rules) : new NullPathMapper();
+        });
+
         $this->app->singleton(
             JsonResponseFactoryInterface::class,
             fn() => new JsonResponseFactory(
@@ -454,6 +463,15 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             fn() => new FileController(
                 $this->app->make(JsonResponseFactoryInterface::class),
                 $this->app->make(PathResolverInterface::class),
+                $this->app->make(PathMapperInterface::class),
+            ),
+        );
+
+        $this->app->singleton(
+            SettingsController::class,
+            fn() => new SettingsController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(PathMapperInterface::class),
             ),
         );
 

@@ -17,6 +17,7 @@ use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteCollection;
 use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
 use AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy;
 use AppDevPanel\Api\ApiApplication;
+use AppDevPanel\Api\Debug\Controller\SettingsController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
@@ -38,6 +39,9 @@ use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
+use AppDevPanel\Api\NullPathMapper;
+use AppDevPanel\Api\PathMapper;
+use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
@@ -155,6 +159,13 @@ class Module extends \yii\base\Module implements BootstrapInterface
      */
     public string $authToken = '';
 
+    /**
+     * @var array<string, string> Remote-to-local path mapping for Docker/Vagrant.
+     *                            Keys are remote (container) prefixes, values are local (host) prefixes.
+     *                            Example: ['/app' => '/home/user/project']
+     */
+    public array $pathMapping = [];
+
     public $controllerNamespace = 'AppDevPanel\\Adapter\\Yii2\\Controller';
 
     private ?Debugger $debugger = null;
@@ -258,6 +269,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
             PathResolverInterface::class,
             static fn() => new PathResolver($basePath, $runtimePath),
         );
+
+        $pathMapping = $this->pathMapping;
+        \Yii::$container->setSingleton(PathMapperInterface::class, static fn() => $pathMapping !== []
+            ? new PathMapper($pathMapping)
+            : new NullPathMapper());
         \Yii::$container->setSingleton(
             JsonResponseFactoryInterface::class,
             static fn() => new JsonResponseFactory(
@@ -363,6 +379,15 @@ class Module extends \yii\base\Module implements BootstrapInterface
             static fn() => new FileController(
                 \Yii::$container->get(JsonResponseFactoryInterface::class),
                 \Yii::$container->get(PathResolverInterface::class),
+                \Yii::$container->get(PathMapperInterface::class),
+            ),
+        );
+
+        \Yii::$container->setSingleton(
+            SettingsController::class,
+            static fn() => new SettingsController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(PathMapperInterface::class),
             ),
         );
 
