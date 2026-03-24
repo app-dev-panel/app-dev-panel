@@ -1,14 +1,17 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetLogQuery} from '@app-dev-panel/panel/Module/Inspector/API/GitApi';
 import {
+    type CommandType,
     useGetComposerQuery,
     useGetOpcacheQuery,
     useGetRoutesQuery,
     useGetTableQuery,
+    useLazyGetCommandsQuery,
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Box, Link as MuiLink, Paper, Skeleton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
+import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 // ---------------------------------------------------------------------------
@@ -216,6 +219,17 @@ export const DashboardPage = () => {
     const opcacheQuery = useGetOpcacheQuery();
     const composerQuery = useGetComposerQuery();
     const gitLogQuery = useGetLogQuery();
+    const [getCommandsQuery] = useLazyGetCommandsQuery();
+    const [commands, setCommands] = useState<CommandType[]>([]);
+
+    useEffect(() => {
+        void (async () => {
+            const response = await getCommandsQuery();
+            if (response.data) {
+                setCommands(response.data);
+            }
+        })();
+    }, []);
 
     useBreadcrumbs(() => ['Inspector', 'Dashboard']);
 
@@ -271,6 +285,15 @@ export const DashboardPage = () => {
     const getCount = allRoutes.filter((r) => (r.method ?? '').toUpperCase() === 'GET').length;
     const postCount = allRoutes.filter((r) => (r.method ?? '').toUpperCase() === 'POST').length;
     const otherCount = totalRoutes - getCount - postCount;
+
+    // --- Commands grouped ---
+    const commandGroups: Record<string, CommandType[]> = {};
+    commands.forEach((cmd) => {
+        const group = cmd.group || 'Other';
+        if (!commandGroups[group]) commandGroups[group] = [];
+        commandGroups[group].push(cmd);
+    });
+    const commandGroupEntries = Object.entries(commandGroups).slice(0, 6);
 
     return (
         <>
@@ -474,6 +497,72 @@ export const DashboardPage = () => {
                         </Box>
                     )}
                 </PanelRoot>
+            </Columns>
+
+            {/* Commands + Tests & Analyse */}
+            <Columns>
+                <PanelRoot variant="outlined">
+                    <PanelHeader>
+                        <Typography variant="body2" sx={{fontWeight: 600}}>
+                            Commands
+                        </Typography>
+                        <MuiLink component={Link} to="/inspector/commands" underline="hover" variant="body2">
+                            View all {commands.length > 0 && commands.length} &rarr;
+                        </MuiLink>
+                    </PanelHeader>
+                    {commands.length === 0 ? (
+                        <Box sx={{p: 2.5}}>
+                            <Typography variant="body2" sx={{color: 'text.disabled'}}>
+                                No commands available
+                            </Typography>
+                        </Box>
+                    ) : (
+                        commandGroupEntries.map(([group, cmds]) => (
+                            <RowBox key={group}>
+                                <Typography variant="body2" sx={{flex: 1, fontWeight: 500}}>
+                                    {group}
+                                </Typography>
+                                <Typography variant="caption" sx={{color: 'text.disabled'}}>
+                                    {cmds.length} {cmds.length === 1 ? 'command' : 'commands'}
+                                </Typography>
+                            </RowBox>
+                        ))
+                    )}
+                </PanelRoot>
+
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2.5}}>
+                    <PanelRoot variant="outlined">
+                        <PanelHeader>
+                            <Typography variant="body2" sx={{fontWeight: 600}}>
+                                Tests
+                            </Typography>
+                            <MuiLink component={Link} to="/inspector/tests" underline="hover" variant="body2">
+                                Open &rarr;
+                            </MuiLink>
+                        </PanelHeader>
+                        <Box sx={{p: 2.5}}>
+                            <Typography variant="body2" sx={{color: 'text.secondary'}}>
+                                Run Codeception tests and inspect results with stack traces and timing data.
+                            </Typography>
+                        </Box>
+                    </PanelRoot>
+
+                    <PanelRoot variant="outlined">
+                        <PanelHeader>
+                            <Typography variant="body2" sx={{fontWeight: 600}}>
+                                Analyse
+                            </Typography>
+                            <MuiLink component={Link} to="/inspector/analyse" underline="hover" variant="body2">
+                                Open &rarr;
+                            </MuiLink>
+                        </PanelHeader>
+                        <Box sx={{p: 2.5}}>
+                            <Typography variant="body2" sx={{color: 'text.secondary'}}>
+                                Run static analysis (Psalm) to detect errors and code quality issues.
+                            </Typography>
+                        </Box>
+                    </PanelRoot>
+                </Box>
             </Columns>
 
             {/* Composer packages */}
