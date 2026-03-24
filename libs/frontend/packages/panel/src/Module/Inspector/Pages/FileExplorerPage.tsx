@@ -229,7 +229,7 @@ export const FileExplorerPage = () => {
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         <PathBreadcrumbs path={path} onClick={handleBreadcrumbClick} />
-                        <ActionButtons editorUrl={directoryEditorUrl} fullPath={path} />
+                        {path !== '/' && <ActionButtons editorUrl={directoryEditorUrl} fullPath={path} />}
                     </Box>
                     <Paper variant="outlined" sx={{borderRadius: 2}}>
                         <TreeView tree={tree} onSelect={changePath} />
