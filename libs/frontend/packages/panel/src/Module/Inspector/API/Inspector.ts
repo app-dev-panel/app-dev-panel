@@ -187,7 +187,7 @@ type Response<T = any> = {data: T};
 export const inspectorApi = createApi({
     reducerPath: 'api.inspector',
     keepUnusedDataFor: 0,
-    tagTypes: ['inspector/composer', 'inspector/opcache', 'inspector/mcp', 'inspector/elasticsearch'],
+    tagTypes: ['inspector/composer', 'inspector/opcache', 'inspector/mcp', 'inspector/elasticsearch', 'inspector/redis'],
     baseQuery: createBaseQuery('/inspect/api/'),
     endpoints: (builder) => ({
         getParameters: builder.query<Response, void>({
@@ -349,6 +349,45 @@ export const inspectorApi = createApi({
             }),
             transformResponse: (result: Response) => result.data,
         }),
+        getRedisPing: builder.query<{result: any}, void>({
+            query: () => `redis/ping`,
+            transformResponse: (result: Response<{result: any}>) => result.data,
+            providesTags: ['inspector/redis'],
+        }),
+        getRedisInfo: builder.query<Record<string, any>, string | void>({
+            query: (section) => (section ? `redis/info?section=${section}` : `redis/info`),
+            transformResponse: (result: Response<Record<string, any>>) => result.data,
+            providesTags: ['inspector/redis'],
+        }),
+        getRedisDbSize: builder.query<{size: number}, void>({
+            query: () => `redis/db-size`,
+            transformResponse: (result: Response<{size: number}>) => result.data,
+            providesTags: ['inspector/redis'],
+        }),
+        getRedisKeys: builder.query<
+            {keys: string[]; cursor: number},
+            {pattern?: string; limit?: number; cursor?: number}
+        >({
+            query: ({pattern = '*', limit = 100, cursor = 0} = {}) =>
+                `redis/keys?pattern=${encodeURIComponent(pattern)}&limit=${limit}&cursor=${cursor}`,
+            transformResponse: (result: Response<{keys: string[]; cursor: number}>) => result.data,
+            providesTags: ['inspector/redis'],
+        }),
+        getRedisKey: builder.query<{key: string; type: string; ttl: number; value: any}, string>({
+            query: (key) => `redis/get?key=${encodeURIComponent(key)}`,
+            transformResponse: (result: Response<{key: string; type: string; ttl: number; value: any}>) => result.data,
+            providesTags: ['inspector/redis'],
+        }),
+        deleteRedisKey: builder.mutation<{result: any}, string>({
+            query: (key) => ({url: `redis/delete?key=${encodeURIComponent(key)}`, method: 'DELETE'}),
+            transformResponse: (result: Response<{result: any}>) => result.data,
+            invalidatesTags: ['inspector/redis'],
+        }),
+        flushRedisDb: builder.mutation<{result: any}, void>({
+            query: () => ({url: `redis/flush-db`, method: 'POST'}),
+            transformResponse: (result: Response<{result: any}>) => result.data,
+            invalidatesTags: ['inspector/redis'],
+        }),
         getMcpSettings: builder.query<{enabled: boolean}, void>({
             query: () => `mcp/settings`,
             transformResponse: (result: Response<{enabled: boolean}>) => result.data,
@@ -401,4 +440,11 @@ export const {
     useGetElasticsearchIndexQuery,
     useSearchElasticsearchMutation,
     useExecuteElasticsearchQueryMutation,
+    useGetRedisPingQuery,
+    useGetRedisInfoQuery,
+    useGetRedisDbSizeQuery,
+    useGetRedisKeysQuery,
+    useLazyGetRedisKeyQuery,
+    useDeleteRedisKeyMutation,
+    useFlushRedisDbMutation,
 } = inspectorApi;

@@ -14,6 +14,7 @@ import {MailerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/Mai
 import {MiddlewarePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MiddlewarePanel';
 import {OpenTelemetryPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/OpenTelemetryPanel';
 import {QueuePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/QueuePanel';
+import {RedisPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RedisPanel';
 import {RequestPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RequestPanel';
 import {RouterPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RouterPanel';
 import {SecurityPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/SecurityPanel';
@@ -70,6 +71,7 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.AssetBundleCollector]: (data: any) => <AssetBundlePanel data={data} />,
         [CollectorsMap.OpenTelemetryCollector]: (data: any) => <OpenTelemetryPanel data={data} />,
         [CollectorsMap.ElasticsearchCollector]: (data: any) => <ElasticsearchPanel data={data} />,
+        [CollectorsMap.RedisCollector]: (data: any) => <RedisPanel data={data} />,
         default: (data: any) => {
             if (typeof data === 'object' && data.__isPanelRemote__) {
                 return (

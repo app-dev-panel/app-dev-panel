@@ -34,6 +34,7 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
     [CollectorsMap.DeprecationCollector]: {label: 'Deprecations', icon: 'warning_amber', weight: 5},
     [CollectorsMap.OpenTelemetryCollector]: {label: 'Traces', icon: 'account_tree', weight: 9},
     [CollectorsMap.ElasticsearchCollector]: {label: 'Elasticsearch', icon: 'search', weight: 13},
+    [CollectorsMap.RedisCollector]: {label: 'Redis', icon: 'memory', weight: 4},
 };
 
 const defaultMeta: CollectorMeta = {label: 'Unknown', icon: 'extension', weight: 99};
