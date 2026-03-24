@@ -43,6 +43,9 @@ use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Llm\Controller\LlmController;
+use AppDevPanel\Api\Llm\FileLlmSettings;
+use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
 use AppDevPanel\Api\PathMapper;
@@ -84,6 +87,7 @@ use AppDevPanel\Kernel\Storage\StorageInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
@@ -262,6 +266,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         \Yii::$container->setSingleton(DebuggerIdGenerator::class, $idGenerator);
         \Yii::$container->setSingleton(StorageInterface::class, $storage);
+        \Yii::$container->setSingleton(RequestFactoryInterface::class, $httpFactory);
         \Yii::$container->setSingleton(ResponseFactoryInterface::class, $httpFactory);
         \Yii::$container->setSingleton(StreamFactoryInterface::class, $httpFactory);
         \Yii::$container->setSingleton(UriFactoryInterface::class, $httpFactory);
@@ -521,6 +526,23 @@ class Module extends \yii\base\Module implements BootstrapInterface
             static fn() => new McpSettingsController(
                 \Yii::$container->get(JsonResponseFactoryInterface::class),
                 \Yii::$container->get(McpSettings::class),
+            ),
+        );
+
+        $resolvedStoragePath = (string) \Yii::getAlias($this->storagePath);
+        \Yii::$container->setSingleton(
+            LlmSettingsInterface::class,
+            static fn() => new FileLlmSettings($resolvedStoragePath),
+        );
+
+        \Yii::$container->setSingleton(
+            LlmController::class,
+            static fn() => new LlmController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(LlmSettingsInterface::class),
+                \Yii::$container->get(ClientInterface::class),
+                \Yii::$container->get(RequestFactoryInterface::class),
+                \Yii::$container->get(StreamFactoryInterface::class),
             ),
         );
     }

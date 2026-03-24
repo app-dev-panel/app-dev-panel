@@ -50,6 +50,9 @@ use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Llm\Controller\LlmController;
+use AppDevPanel\Api\Llm\FileLlmSettings;
+use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
 use AppDevPanel\Api\PathMapper;
@@ -94,6 +97,7 @@ use GuzzleHttp\Psr7\HttpFactory;
 use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
 use Illuminate\Support\ServiceProvider;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
@@ -359,6 +363,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
     private function registerPsrFactories(): void
     {
+        $this->app->singletonIf(RequestFactoryInterface::class, HttpFactory::class);
         $this->app->singletonIf(ResponseFactoryInterface::class, HttpFactory::class);
         $this->app->singletonIf(StreamFactoryInterface::class, HttpFactory::class);
         $this->app->singletonIf(UriFactoryInterface::class, HttpFactory::class);
@@ -544,6 +549,22 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             fn() => new McpSettingsController(
                 $this->app->make(JsonResponseFactoryInterface::class),
                 $this->app->make(McpSettings::class),
+            ),
+        );
+
+        $this->app->singleton(
+            LlmSettingsInterface::class,
+            fn() => new FileLlmSettings($this->app->make('config')->get('app-dev-panel.storage.path')),
+        );
+
+        $this->app->singleton(
+            LlmController::class,
+            fn() => new LlmController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(LlmSettingsInterface::class),
+                $this->app->make(ClientInterface::class),
+                $this->app->make(RequestFactoryInterface::class),
+                $this->app->make(StreamFactoryInterface::class),
             ),
         );
     }

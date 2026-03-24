@@ -20,6 +20,10 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\Ingestion\Controller\OtlpController;
+use AppDevPanel\Api\Llm\Controller\LlmController;
+use AppDevPanel\Api\Llm\FileLlmSettings;
+use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
 use AppDevPanel\Api\Mcp\McpSettings;
@@ -53,6 +57,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
@@ -76,6 +81,7 @@ $authToken = $apiConfig['authToken'] ?? '';
 
 return [
     // PSR-17 factories
+    RequestFactoryInterface::class => static fn() => new HttpFactory(),
     ResponseFactoryInterface::class => static fn() => new HttpFactory(),
     StreamFactoryInterface::class => static fn() => new HttpFactory(),
     UriFactoryInterface::class => static fn() => new HttpFactory(),
@@ -244,6 +250,20 @@ return [
         JsonResponseFactoryInterface $jsonResponseFactory,
         McpSettings $mcpSettings,
     ) => new McpSettingsController($jsonResponseFactory, $mcpSettings),
+
+    // LLM settings
+    LlmSettingsInterface::class => static fn(ContainerInterface $container) => new FileLlmSettings(
+        $container->get(Aliases::class)->get($params['app-dev-panel/yiisoft']['path'] ?? '@runtime/debug'),
+    ),
+
+    // LLM controller
+    LlmController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        LlmSettingsInterface $llmSettings,
+        ClientInterface $httpClient,
+        RequestFactoryInterface $requestFactory,
+        StreamFactoryInterface $streamFactory,
+    ) => new LlmController($jsonResponseFactory, $llmSettings, $httpClient, $requestFactory, $streamFactory),
 
     // ApiApplication
     ApiApplication::class => static fn(
