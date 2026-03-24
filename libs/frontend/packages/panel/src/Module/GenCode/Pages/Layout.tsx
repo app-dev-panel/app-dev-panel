@@ -52,9 +52,12 @@ const Layout = () => {
                     title="Code generators are empty"
                     text={
                         <>
-                            <Typography>Code generator is not configured or it does not have any generators.</Typography>
                             <Typography>
-                                Make sure the code generator is active and its configuration has at least one active generator.&nbsp;
+                                Code generator is not configured or it does not have any generators.
+                            </Typography>
+                            <Typography>
+                                Make sure the code generator is active and its configuration has at least one active
+                                generator.&nbsp;
                                 <Link href="/inspector/config/parameters?filter=app-dev-panel/gen-code">
                                     Open parameters.
                                 </Link>

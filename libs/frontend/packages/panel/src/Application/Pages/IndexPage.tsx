@@ -274,7 +274,12 @@ export function IndexPage() {
                     status={status.inspector}
                     onClick={() => handleChangeUrl(url)}
                 />
-                <StatusCard title="GenCode" icon="build_circle" status={status.genCode} onClick={() => handleChangeUrl(url)} />
+                <StatusCard
+                    title="GenCode"
+                    icon="build_circle"
+                    status={status.genCode}
+                    onClick={() => handleChangeUrl(url)}
+                />
             </StatusGrid>
 
             <SectionLabel>Backend URL</SectionLabel>
