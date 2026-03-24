@@ -39,6 +39,7 @@ libs/Testing/tests/
     ├── AdvancedFixturesTest.php  # Multi-collector, heavy, http-client, filesystem
     ├── DebugApiTest.php           # Debug API endpoint contract tests
     ├── InspectorApiTest.php       # Inspector API endpoint tests
+    ├── McpApiTest.php             # MCP (JSON-RPC) API endpoint tests
     └── ScenarioTest.php           # Full pipeline E2E: reset, fire all fixtures, verify API
 ```
 
@@ -112,7 +113,7 @@ PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Fixtures
 # Run specific group
 PLAYGROUND_URL=http://127.0.0.1:8102 php vendor/bin/phpunit --testsuite Fixtures --group core
 
-# Available groups: core, web, error, advanced, api, scenario
+# Available groups: core, web, error, advanced, api, mcp, scenario
 ```
 
 ### Makefile Targets
