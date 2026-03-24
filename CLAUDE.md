@@ -7,7 +7,7 @@ It collects runtime data (logs, events, requests, exceptions, database queries, 
 a web UI to inspect, analyze, and debug them.
 
 The project is currently a fork/consolidation from Yii Debug into a single monorepo, with the goal of becoming
-fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, and Yii 2.
+fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, and Cycle ORM (database schema only).
 
 ## Tech Stack
 
@@ -203,6 +203,7 @@ GitHub Actions runs on every push and PR:
 | API | `libs/API` | 174 | 0 | 0.1s | **76.2%** (754/990) |
 | Adapter-Symfony | `libs/Adapter/Symfony` | 150 | 9 | 0.2s | **98.9%** (905/915) |
 | Adapter-Yii2 | `libs/Adapter/Yii2` | 95 | 0 | 0.1s | **57.3%** (373/651) |
+| Adapter-Cycle | `libs/Adapter/Cycle` | 10 | 0 | 0.02s | — |
 | Cli | `libs/Cli` | 6 | 0 | 0.02s | **41.1%** (30/73) |
 | **Total** | **all libs** | **701** | **16** | **~1m 22s** | **66.7%** (3135/4702) |
 
@@ -321,6 +322,7 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 - `libs/Adapter/Symfony/CLAUDE.md` — Symfony adapter integration
 - `libs/Adapter/Laravel/CLAUDE.md` — Laravel adapter integration
 - `libs/Adapter/Yii2/CLAUDE.md` — Yii 2 adapter integration
+- `libs/Adapter/Cycle/CLAUDE.md` — Cycle ORM adapter (database schema only)
 - `libs/frontend/CLAUDE.md` — Frontend architecture
 
 ## Coding Conventions
