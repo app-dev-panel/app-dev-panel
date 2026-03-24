@@ -29,7 +29,11 @@ import {
 } from '@mui/material';
 import {useCallback, useState} from 'react';
 
-const providerLabels: Record<LlmProvider, string> = {openrouter: 'OpenRouter', anthropic: 'Anthropic (Claude)'};
+const providerLabels: Record<LlmProvider, string> = {
+    openrouter: 'OpenRouter',
+    anthropic: 'Anthropic (Claude)',
+    openai: 'OpenAI',
+};
 
 export const ConnectionCard = () => {
     const {data: status, isLoading} = useGetStatusQuery();
@@ -83,17 +87,20 @@ export const ConnectionCard = () => {
         return <Skeleton variant="rectangular" height={200} sx={{borderRadius: 2}} />;
     }
 
-    const isAnthropic = status?.provider === 'anthropic';
+    const provider = status?.provider;
 
-    const popularModels = (models ?? []).filter((m: LlmModel) =>
-        isAnthropic
-            ? m.id.startsWith('claude-')
-            : m.id.startsWith('anthropic/') ||
-              m.id.startsWith('openai/') ||
-              m.id.startsWith('google/') ||
-              m.id.startsWith('meta-llama/') ||
-              m.id.startsWith('mistralai/'),
-    );
+    const popularModels = (models ?? []).filter((m: LlmModel) => {
+        if (provider === 'anthropic') return m.id.startsWith('claude-');
+        if (provider === 'openai')
+            return m.id.startsWith('gpt-') || m.id.startsWith('o') || m.id.startsWith('chatgpt-');
+        return (
+            m.id.startsWith('anthropic/') ||
+            m.id.startsWith('openai/') ||
+            m.id.startsWith('google/') ||
+            m.id.startsWith('meta-llama/') ||
+            m.id.startsWith('mistralai/')
+        );
+    });
 
     return (
         <Card variant="outlined">
@@ -148,7 +155,8 @@ export const ConnectionCard = () => {
                             size="small"
                             fullWidth
                         >
-                            <ToggleButton value="anthropic">Anthropic (Claude)</ToggleButton>
+                            <ToggleButton value="anthropic">Anthropic</ToggleButton>
+                            <ToggleButton value="openai">OpenAI</ToggleButton>
                             <ToggleButton value="openrouter">OpenRouter</ToggleButton>
                         </ToggleButtonGroup>
 
@@ -168,6 +176,22 @@ export const ConnectionCard = () => {
                                     onKeyDown={(e) => e.key === 'Enter' && handleApiKeyConnect()}
                                 />
                             </Box>
+                        ) : selectedProvider === 'openai' ? (
+                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                                <Typography variant="body2" color="text.secondary">
+                                    Connect with your OpenAI API key to use GPT-4o, o1, and other models.
+                                </Typography>
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    label="API Key"
+                                    type="password"
+                                    placeholder="sk-proj-..."
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleApiKeyConnect()}
+                                />
+                            </Box>
                         ) : (
                             <Typography variant="body2" color="text.secondary">
                                 Connect your OpenRouter account to access Claude, GPT-4, Llama, Mistral, and many other
@@ -182,13 +206,13 @@ export const ConnectionCard = () => {
                     <Button size="small" color="error" onClick={handleDisconnect}>
                         Disconnect
                     </Button>
-                ) : selectedProvider === 'anthropic' ? (
-                    <Button size="small" variant="contained" onClick={handleApiKeyConnect} disabled={!apiKey.trim()}>
-                        Connect with API Key
-                    </Button>
-                ) : (
+                ) : selectedProvider === 'openrouter' ? (
                     <Button size="small" variant="contained" onClick={handleOpenRouterConnect}>
                         Connect with OpenRouter
+                    </Button>
+                ) : (
+                    <Button size="small" variant="contained" onClick={handleApiKeyConnect} disabled={!apiKey.trim()}>
+                        Connect with API Key
                     </Button>
                 )}
             </CardActions>

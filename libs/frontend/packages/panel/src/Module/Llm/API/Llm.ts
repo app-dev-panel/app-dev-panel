@@ -1,7 +1,7 @@
 import {createBaseQuery} from '@app-dev-panel/sdk/API/createBaseQuery';
 import {createApi} from '@reduxjs/toolkit/query/react';
 
-export type LlmProvider = 'openrouter' | 'anthropic';
+export type LlmProvider = 'openrouter' | 'anthropic' | 'openai';
 
 export type LlmStatus = {connected: boolean; provider: string; model: string | null};
 

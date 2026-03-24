@@ -25,6 +25,9 @@ final class LlmController
     private const string ANTHROPIC_MODELS_URL = 'https://api.anthropic.com/v1/models';
     private const string ANTHROPIC_API_VERSION = '2023-06-01';
 
+    private const string OPENAI_COMPLETIONS_URL = 'https://api.openai.com/v1/chat/completions';
+    private const string OPENAI_MODELS_URL = 'https://api.openai.com/v1/models';
+
     public function __construct(
         private readonly JsonResponseFactoryInterface $responseFactory,
         private readonly LlmSettingsInterface $settings,
@@ -202,11 +205,11 @@ final class LlmController
 
         $provider = $this->settings->getProvider();
 
-        if ($provider === 'anthropic') {
-            return $this->anthropicModels();
-        }
-
-        return $this->openRouterModels();
+        return match ($provider) {
+            'anthropic' => $this->anthropicModels(),
+            'openai' => $this->openAiModels(),
+            default => $this->openRouterModels(),
+        };
     }
 
     /**
@@ -239,6 +242,12 @@ final class LlmController
             $model ??= 'claude-sonnet-4-20250514';
 
             return $this->anthropicChat($messages, $model, $temperature);
+        }
+
+        if ($provider === 'openai') {
+            $model ??= 'gpt-4o';
+
+            return $this->openAiChat($messages, $model, $temperature);
         }
 
         $model ??= 'anthropic/claude-sonnet-4';
@@ -296,6 +305,9 @@ final class LlmController
         if ($provider === 'anthropic') {
             $model = $this->settings->getModel() ?? 'claude-sonnet-4-20250514';
             $response = $this->anthropicChat($messages, $model, 0.3);
+        } elseif ($provider === 'openai') {
+            $model = $this->settings->getModel() ?? 'gpt-4o';
+            $response = $this->openAiChat($messages, $model, 0.3);
         } else {
             $model = $this->settings->getModel() ?? 'anthropic/claude-sonnet-4';
             $response = $this->openRouterChat($messages, $model, 0.3);
@@ -476,6 +488,75 @@ final class LlmController
             'model' => $anthropicData['model'] ?? $model,
             'usage' => $anthropicData['usage'] ?? [],
         ]);
+    }
+
+    private function openAiModels(): ResponseInterface
+    {
+        $modelsRequest = $this->requestFactory->createRequest('GET', self::OPENAI_MODELS_URL)->withHeader(
+            'Authorization',
+            'Bearer ' . $this->settings->getApiKey(),
+        );
+
+        $modelsResponse = $this->httpClient->sendRequest($modelsRequest);
+        $responseBody = $modelsResponse->getBody()->getContents();
+
+        /** @var array{data?: list<array<string, mixed>>} $data */
+        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
+
+        $models = [];
+        foreach ($data['data'] ?? [] as $model) {
+            $id = $model['id'] ?? '';
+            // Only include chat-capable models
+            if (!str_starts_with($id, 'gpt-') && !str_starts_with($id, 'o') && !str_starts_with($id, 'chatgpt-')) {
+                continue;
+            }
+            $models[] = [
+                'id' => $id,
+                'name' => $id,
+                'context_length' => 0,
+                'pricing' => [],
+            ];
+        }
+
+        usort($models, static fn(array $a, array $b): int => strcmp((string) $a['id'], (string) $b['id']));
+
+        return $this->responseFactory->createJsonResponse(['models' => $models]);
+    }
+
+    /**
+     * @param list<array{role: string, content: string}> $messages
+     */
+    private function openAiChat(array $messages, string $model, float $temperature): ResponseInterface
+    {
+        $chatBody = json_encode([
+            'model' => $model,
+            'messages' => $messages,
+            'temperature' => $temperature,
+        ], JSON_THROW_ON_ERROR);
+
+        $chatRequest = $this->requestFactory
+            ->createRequest('POST', self::OPENAI_COMPLETIONS_URL)
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Authorization', 'Bearer ' . $this->settings->getApiKey())
+            ->withBody($this->streamFactory->createStream($chatBody));
+
+        $chatResponse = $this->httpClient->sendRequest($chatRequest);
+        $responseBody = $chatResponse->getBody()->getContents();
+
+        /** @var array<string, mixed> $data */
+        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
+
+        if (isset($data['error'])) {
+            $errorMessage = is_array($data['error'])
+                ? $data['error']['message'] ?? 'Unknown OpenAI API error.'
+                : (string) $data['error'];
+
+            return $this->responseFactory->createJsonResponse([
+                'error' => $errorMessage,
+            ], 502);
+        }
+
+        return $this->responseFactory->createJsonResponse($data);
     }
 
     /**
