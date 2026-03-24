@@ -1,5 +1,4 @@
-import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
-import {useTheme} from '@mui/material';
+import {Box, useTheme} from '@mui/material';
 import React, {useCallback} from 'react';
 import {Prism} from 'react-syntax-highlighter';
 import {darcula} from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -12,8 +11,10 @@ type CodeHighlightProps = {
     highlightLines?: [number, number] | [number];
     highlightColor?: string;
     wrappedLines?: [number, number];
-    /** File path used for "open in editor" on line number click */
+    /** File path (kept for backward compatibility) */
     filePath?: string;
+    /** Called when a line number is clicked. Receives line number and whether shift was held. */
+    onLineClick?: (lineNumber: number, shiftKey: boolean) => void;
 };
 const isNumberInRange = (lineNumber: number, range: [number, number] | [number]) => {
     if (range.length === 1) {
@@ -30,19 +31,22 @@ export const CodeHighlight = React.memo((props: CodeHighlightProps) => {
         showLineNumbers = true,
         highlightColor = 'rgba(0,0,0, .1)',
         wrappedLines = [1, 0],
-        filePath,
+        onLineClick,
     } = props;
 
     const theme = useTheme();
-    const getEditorUrl = useEditorUrl();
 
-    const handleLineClick = useCallback(
-        (lineNumber: number) => {
-            if (!filePath) return;
-            const url = getEditorUrl(filePath, lineNumber);
-            if (url) window.location.href = url;
+    const handleClick = useCallback(
+        (e: React.MouseEvent) => {
+            if (!onLineClick) return;
+            const target = e.target as HTMLElement;
+            if (!target.classList.contains('linenumber')) return;
+            const lineNumber = parseInt(target.textContent?.trim() ?? '', 10);
+            if (!isNaN(lineNumber)) {
+                onLineClick(lineNumber, e.shiftKey);
+            }
         },
-        [filePath, getEditorUrl],
+        [onLineClick],
     );
 
     const startLine = Math.max(wrappedLines[0], 1);
@@ -55,7 +59,7 @@ export const CodeHighlight = React.memo((props: CodeHighlightProps) => {
             .join('\n');
     }
 
-    return (
+    const prism = (
         <Prism
             style={theme.palette.mode === 'dark' ? darcula : undefined}
             startingLineNumber={startLine}
@@ -65,24 +69,23 @@ export const CodeHighlight = React.memo((props: CodeHighlightProps) => {
             useInlineStyles
             lineProps={(lineNumber) => ({
                 id: `L${lineNumber}`,
-                ...(filePath && {
-                    onClick: () => handleLineClick(lineNumber),
-                    style: {
-                        ...(highlightLines && isNumberInRange(lineNumber, highlightLines)
-                            ? {backgroundColor: highlightColor, display: 'block'}
-                            : {}),
-                        cursor: filePath ? 'pointer' : undefined,
-                    },
-                }),
-                ...(!filePath &&
-                    highlightLines &&
-                    isNumberInRange(lineNumber, highlightLines) && {
-                        style: {backgroundColor: highlightColor, display: 'block'},
-                    }),
+                style: {
+                    ...(highlightLines && isNumberInRange(lineNumber, highlightLines)
+                        ? {backgroundColor: highlightColor, display: 'block'}
+                        : {}),
+                },
             })}
             language={language}
         >
             {wrappedCode}
         </Prism>
+    );
+
+    if (!onLineClick) return prism;
+
+    return (
+        <Box onClick={handleClick} sx={{'& .linenumber': {cursor: 'pointer', '&:hover': {opacity: 0.7}}}}>
+            {prism}
+        </Box>
     );
 });

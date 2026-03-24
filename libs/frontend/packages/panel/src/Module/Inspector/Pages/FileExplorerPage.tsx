@@ -106,11 +106,10 @@ const ActionButtons = ({editorUrl, fullPath, showCopy = true}: ActionButtonsProp
     );
 };
 
-type FileMetaBarProps = {file: InspectorFileContent};
+type FileMetaBarProps = {file: InspectorFileContent; onDirectoryClick?: (path: string) => void};
 
-const FileMetaBar = ({file}: FileMetaBarProps) => {
+const FileMetaBar = ({file, onDirectoryClick}: FileMetaBarProps) => {
     const items = [
-        {icon: <FolderOpen sx={{fontSize: 16}} />, label: `@root${file.directory}`},
         {icon: <Lock sx={{fontSize: 16}} />, label: file.permissions},
         {
             icon: <Person sx={{fontSize: 16}} />,
@@ -123,6 +122,20 @@ const FileMetaBar = ({file}: FileMetaBarProps) => {
         <Box
             sx={{display: 'flex', flexWrap: 'wrap', gap: 2.5, px: 2, py: 1.5, bgcolor: 'action.hover', borderRadius: 1}}
         >
+            <Box sx={{display: 'flex', alignItems: 'center', gap: 0.75}}>
+                <Box sx={{color: 'text.disabled', display: 'flex', alignItems: 'center'}}>
+                    <FolderOpen sx={{fontSize: 16}} />
+                </Box>
+                <Link
+                    component="button"
+                    variant="body2"
+                    underline="hover"
+                    color="text.secondary"
+                    onClick={() => onDirectoryClick?.(file.directory)}
+                >
+                    @root{file.directory}
+                </Link>
+            </Box>
             {items.map((item, i) => (
                 <Box key={i} sx={{display: 'flex', alignItems: 'center', gap: 0.75}}>
                     <Box sx={{color: 'text.disabled', display: 'flex', alignItems: 'center'}}>{item.icon}</Box>
@@ -176,23 +189,41 @@ export const FileExplorerPage = () => {
         })();
     }, [path, className]);
 
-    const highlightLines: [number, number] | [number] | undefined = (() => {
-        if (file?.startLine && file?.endLine) return [file.startLine, file.endLine];
-        if (file?.startLine) return [file.startLine];
+    const [highlightLines, setHighlightLines] = useState<[number, number] | [number] | undefined>(() => {
         return parsePathLineAnchor(window.location.hash);
-    })();
+    });
 
     useLayoutEffect(() => {
         if (file) {
-            const anchor = file.startLine ? `L${file.startLine}` : undefined;
-            if (!anchor) {
-                const lines = parsePathLineAnchor(window.location.hash);
-                scrollToAnchor(25, lines && `L${lines[0]}`);
-            } else {
-                scrollToAnchor(25, anchor);
-            }
+            const initial: [number, number] | [number] | undefined = (() => {
+                if (file.startLine && file.endLine) return [file.startLine, file.endLine];
+                if (file.startLine) return [file.startLine];
+                return parsePathLineAnchor(window.location.hash);
+            })();
+            setHighlightLines(initial);
+            const anchor = initial ? `L${initial[0]}` : undefined;
+            scrollToAnchor(25, anchor);
         }
     }, [file]);
+
+    const handleLineClick = useCallback(
+        (lineNumber: number, shiftKey: boolean) => {
+            let newHighlight: [number, number] | [number];
+            if (shiftKey && highlightLines) {
+                const anchor = highlightLines[0];
+                const start = Math.min(anchor, lineNumber);
+                const end = Math.max(anchor, lineNumber);
+                newHighlight = start === end ? [start] : [start, end];
+            } else {
+                newHighlight = [lineNumber];
+            }
+            setHighlightLines(newHighlight);
+            const hash = newHighlight.length === 2 ? `#L${newHighlight[0]}-${newHighlight[1]}` : `#L${newHighlight[0]}`;
+            window.history.replaceState(null, '', hash);
+            scrollToAnchor(25, `L${newHighlight[0]}`);
+        },
+        [highlightLines],
+    );
 
     const changePath = (path: string) => {
         setSearchParams({path});
@@ -222,14 +253,14 @@ export const FileExplorerPage = () => {
                         <ActionButtons editorUrl={editorUrl} fullPath={file.path} />
                     </Box>
 
-                    <FileMetaBar file={file} />
+                    <FileMetaBar file={file} onDirectoryClick={handleBreadcrumbClick} />
 
                     <Paper variant="outlined" sx={{overflow: 'hidden', borderRadius: 2}}>
                         <CodeHighlight
                             language={file.extension}
                             code={file.content}
                             highlightLines={highlightLines}
-                            filePath={file.path}
+                            onLineClick={handleLineClick}
                         />
                     </Paper>
                 </Box>
