@@ -2,7 +2,6 @@ import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/Breadcrum
 import {AnalyzePanel} from '@app-dev-panel/panel/Module/Llm/Component/AnalyzePanel';
 import {ChatPanel} from '@app-dev-panel/panel/Module/Llm/Component/ChatPanel';
 import {ConnectionCard} from '@app-dev-panel/panel/Module/Llm/Component/ConnectionCard';
-import {McpSetupCard} from '@app-dev-panel/panel/Module/Llm/Component/McpSetupCard';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Box, Tab, Tabs} from '@mui/material';
 import {useState} from 'react';
@@ -17,7 +16,6 @@ export const Layout = () => {
             <PageHeader title="LLM Integration" icon="psychology" description="AI-powered debug analysis" />
             <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
                 <ConnectionCard />
-                <McpSetupCard />
                 <Box>
                     <Tabs value={tab} onChange={(_, v) => setTab(v)}>
                         <Tab label="Chat" />

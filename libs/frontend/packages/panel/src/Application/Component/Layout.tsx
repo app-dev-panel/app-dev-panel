@@ -314,6 +314,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             {key: 'debug', icon: 'bug_report', label: 'Debug', href: '/debug', children: debugChildren},
             {key: 'inspector', icon: 'search', label: 'Inspector', href: '/inspector', children: inspectorChildren},
             {key: 'llm', icon: 'psychology', label: 'LLM', href: '/llm'},
+            {key: 'mcp', icon: 'hub', label: 'MCP', href: '/mcp'},
             {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api'},
             {key: 'frames', icon: 'web', label: 'Frames', href: '/frames'},
         ],
