@@ -7,6 +7,7 @@ export {ContainerPage} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/
 export {DefinitionsPage} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/DefinitionsPage';
 export {ParametersPage} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/ParametersPage';
 export {ContainerEntryPage} from '@app-dev-panel/panel/Module/Inspector/Pages/ContainerEntryPage';
+export {DashboardPage} from '@app-dev-panel/panel/Module/Inspector/Pages/DashboardPage';
 export {DatabasePage} from '@app-dev-panel/panel/Module/Inspector/Pages/DatabasePage';
 export {EventsPage} from '@app-dev-panel/panel/Module/Inspector/Pages/EventsPage';
 export {FileExplorerPage} from '@app-dev-panel/panel/Module/Inspector/Pages/FileExplorerPage';

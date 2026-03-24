@@ -1,4 +1,8 @@
-import {GenCodeGenerator, usePostDiffMutation, usePostGenerateMutation} from '@app-dev-panel/panel/Module/GenCode/API/GenCode';
+import {
+    GenCodeGenerator,
+    usePostDiffMutation,
+    usePostGenerateMutation,
+} from '@app-dev-panel/panel/Module/GenCode/API/GenCode';
 import {FileDiffDialog} from '@app-dev-panel/panel/Module/GenCode/Component/FileDiffDialog';
 import {FilePreviewDialog} from '@app-dev-panel/panel/Module/GenCode/Component/FilePreviewDialog';
 import {StepProps} from '@app-dev-panel/panel/Module/GenCode/Component/GeneratorSteps/Step.types';

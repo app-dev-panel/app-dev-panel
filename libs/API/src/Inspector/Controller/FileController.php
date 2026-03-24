@@ -181,7 +181,9 @@ final class FileController
         return $this->responseFactory->createJsonResponse(array_merge(
             $extra,
             [
-                'directory' => $insideRoot ? preg_replace($pattern, '', dirname($destination), 1) : dirname($destination),
+                'directory' => $insideRoot
+                    ? preg_replace($pattern, '', dirname($destination), 1)
+                    : dirname($destination),
                 'content' => file_get_contents($destination),
                 'path' => $insideRoot ? preg_replace($pattern, '', $destination, 1) : $destination,
                 'insideRoot' => $insideRoot,

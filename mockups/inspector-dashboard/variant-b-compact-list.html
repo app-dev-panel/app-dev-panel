@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inspector Dashboard — Variant B: Compact List with Quick Actions</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F8FAFC; color: #1E293B; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+  .page h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+  .page .subtitle { font-size: 14px; color: #64748B; margin-bottom: 28px; }
+
+  /* Quick actions bar */
+  .quick-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .quick-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    background: white;
+    font-size: 13px;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    text-decoration: none;
+  }
+  .quick-btn:hover { border-color: #3B82F6; color: #2563EB; background: #EFF6FF; }
+  .quick-btn .emoji { font-size: 15px; }
+
+  /* Info cards row */
+  .info-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .info-card {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .info-card .label { font-size: 11px; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .info-card .value { font-size: 18px; font-weight: 700; }
+  .info-card .detail { font-size: 12px; color: #64748B; margin-top: 2px; }
+
+  /* Tool list */
+  .section { margin-bottom: 24px; }
+  .section-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;
+    color: #94A3B8; margin-bottom: 8px; padding-left: 4px;
+  }
+  .tool-list { background: white; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; }
+  .tool-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    gap: 14px;
+    cursor: pointer;
+    transition: background 0.1s;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid #F1F5F9;
+  }
+  .tool-row:last-child { border-bottom: none; }
+  .tool-row:hover { background: #F8FAFC; }
+  .tool-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .tool-icon.purple { background: #EDE9FE; }
+  .tool-icon.blue { background: #DBEAFE; }
+  .tool-icon.green { background: #DCFCE7; }
+  .tool-icon.amber { background: #FEF3C7; }
+  .tool-icon.red { background: #FEE2E2; }
+  .tool-icon.cyan { background: #CFFAFE; }
+  .tool-icon.pink { background: #FCE7F3; }
+  .tool-icon.slate { background: #F1F5F9; }
+
+  .tool-info { flex: 1; min-width: 0; }
+  .tool-name { font-size: 14px; font-weight: 500; }
+  .tool-desc { font-size: 12px; color: #94A3B8; }
+  .tool-badge {
+    font-size: 12px; font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 12px;
+    background: #F1F5F9;
+    color: #475569;
+  }
+  .tool-arrow { color: #CBD5E1; font-size: 18px; }
+
+  /* Git status mini card */
+  .git-status {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .git-branch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #F1F5F9;
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+  .git-sha { font-size: 12px; color: #94A3B8; font-family: monospace; }
+  .git-msg { font-size: 13px; color: #475569; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .git-time { font-size: 12px; color: #94A3B8; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <h1>Inspector</h1>
+  <p class="subtitle">Inspect and manage your application's runtime environment</p>
+
+  <!-- Quick actions -->
+  <div class="quick-actions">
+    <a class="quick-btn" href="/inspector/tests"><span class="emoji">🧪</span> Run Tests</a>
+    <a class="quick-btn" href="/inspector/analyse"><span class="emoji">📊</span> Run Analysis</a>
+    <a class="quick-btn" href="/inspector/cache"><span class="emoji">🗑</span> Clear Cache</a>
+    <a class="quick-btn" href="/inspector/database"><span class="emoji">🔍</span> Query Database</a>
+    <a class="quick-btn" href="/inspector/routes"><span class="emoji">✓</span> Check Route</a>
+  </div>
+
+  <!-- Info summary -->
+  <div class="info-row">
+    <div class="info-card">
+      <div class="label">PHP Version</div>
+      <div class="value">8.4.2</div>
+      <div class="detail">OPcache enabled, JIT on</div>
+    </div>
+    <div class="info-card">
+      <div class="label">Routes</div>
+      <div class="value">37</div>
+      <div class="detail">GET: 24 / POST: 10 / Other: 3</div>
+    </div>
+    <div class="info-card">
+      <div class="label">Composer</div>
+      <div class="value">86</div>
+      <div class="detail">packages installed</div>
+    </div>
+  </div>
+
+  <!-- Git status -->
+  <div class="git-status">
+    <div class="git-branch">&lt;&gt; main</div>
+    <div class="git-sha">a3f2c1e</div>
+    <div class="git-msg">fix: resolve middleware ordering in route dispatcher</div>
+    <div class="git-time">2 hours ago</div>
+  </div>
+
+  <!-- Application tools -->
+  <div class="section">
+    <div class="section-title">Application</div>
+    <div class="tool-list">
+      <a class="tool-row" href="/inspector/config">
+        <div class="tool-icon purple">⚙</div>
+        <div class="tool-info"><div class="tool-name">Configuration</div><div class="tool-desc">Parameters, DI definitions, container</div></div>
+        <div class="tool-badge">248 params</div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-row" href="/inspector/events">
+        <div class="tool-icon blue">⚡</div>
+        <div class="tool-info"><div class="tool-name">Event Listeners</div><div class="tool-desc">Common, web, and console event handlers</div></div>
+        <div class="tool-badge">42</div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-row" href="/inspector/routes">
+        <div class="tool-icon green">🔀</div>
+        <div class="tool-info"><div class="tool-name">Routes</div><div class="tool-desc">Registered routes, methods, middlewares</div></div>
+        <div class="tool-badge">37</div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-row" href="/inspector/commands">
+        <div class="tool-icon slate">▸</div>
+        <div class="tool-info"><div class="tool-name">Commands</div><div class="tool-desc">Console commands and composer scripts</div></div>
+        <div class="tool-badge">18</div>
+        <div class="tool-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Data & Storage -->
+  <div class="section">
+    <div class="section-title">Data &amp; Storage</div>
+    <div class="tool-list">
+      <a class="tool-row" href="/inspector/database">
+        <div class="tool-icon cyan">☰</div>
+        <div class="tool-info"><div class="tool-name">Database</div><div class="tool-desc">Browse tables, run queries, EXPLAIN plans</div></div>
+        <div class="tool-badge">12 tables</div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-row" href="/inspector/cache">
+        <div class="tool-icon amber">⟳</div>
+        <div class="tool-info"><div class="tool-name">Cache</div><div class="tool-desc">Inspect, delete, or purge cache entries</div></div>
+        <div class="tool-badge">3 keys</div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-row" href="/inspector/translations">
+        <div class="tool-icon pink">文</div>
+        <div class="tool-info"><div class="tool-name">Translations</div><div class="tool-desc">Translation catalogs with inline editing</div></div>
+        <div class="tool-badge">5 catalogs</div>
+        <div class="tool-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Dev Tools -->
+  <div class="section">
+    <div class="section-title">Dev Tools</div>
+    <div class="tool-list">
+      <a class="tool-row" href="/inspector/tests">
+        <div class="tool-icon red">🧪</div>
+        <div class="tool-info"><div class="tool-name">Tests</div><div class="tool-desc">Run and review PHPUnit / Codeception tests</div></div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-row" href="/inspector/analyse">
+        <div class="tool-icon purple">📊</div>
+        <div class="tool-info"><div class="tool-name">Analyse</div><div class="tool-desc">Psalm static analysis results</div></div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-row" href="/inspector/git">
+        <div class="tool-icon slate">&lt;&gt;</div>
+        <div class="tool-info"><div class="tool-name">Git</div><div class="tool-desc">Branches, commits, pull, fetch, checkout</div></div>
+        <div class="tool-badge">main</div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-row" href="/inspector/files">
+        <div class="tool-icon blue">📁</div>
+        <div class="tool-info"><div class="tool-name">File Explorer</div><div class="tool-desc">Browse project files with syntax highlighting</div></div>
+        <div class="tool-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Environment -->
+  <div class="section">
+    <div class="section-title">Environment</div>
+    <div class="tool-list">
+      <a class="tool-row" href="/inspector/phpinfo">
+        <div class="tool-icon blue">ℹ</div>
+        <div class="tool-info"><div class="tool-name">PHP Info</div><div class="tool-desc">Full phpinfo() output</div></div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-row" href="/inspector/composer">
+        <div class="tool-icon green">📦</div>
+        <div class="tool-info"><div class="tool-name">Composer</div><div class="tool-desc">Installed packages, require, lock file</div></div>
+        <div class="tool-badge">86 pkgs</div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-row" href="/inspector/opcache">
+        <div class="tool-icon amber">⚡</div>
+        <div class="tool-info"><div class="tool-name">OPcache</div><div class="tool-desc">Memory usage, JIT, cached scripts</div></div>
+        <div class="tool-badge">78%</div>
+        <div class="tool-arrow">›</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
