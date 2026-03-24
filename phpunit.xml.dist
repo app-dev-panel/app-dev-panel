@@ -36,6 +36,9 @@
         <testsuite name="Adapter-Yii2">
             <directory>libs/Adapter/Yii2/tests</directory>
         </testsuite>
+        <testsuite name="Adapter-Cycle">
+            <directory>libs/Adapter/Cycle/tests</directory>
+        </testsuite>
         <testsuite name="E2E">
             <directory>tests/E2E</directory>
         </testsuite>
@@ -56,6 +59,7 @@
             <directory>libs/Adapter/Yiisoft/src</directory>
             <directory>libs/Adapter/Laravel/src</directory>
             <directory>libs/Adapter/Yii2/src</directory>
+            <directory>libs/Adapter/Cycle/src</directory>
         </include>
     </source>
 </phpunit>

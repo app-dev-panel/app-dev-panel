@@ -39,6 +39,7 @@
     "app-dev-panel/adapter-symfony": "*",
     "app-dev-panel/adapter-yii2": "*",
     "app-dev-panel/adapter-laravel": "*",
+    "app-dev-panel/adapter-cycle": "*",
     "app-dev-panel/adapter-yiisoft": "*",
     "app-dev-panel/api": "*",
     "app-dev-panel/kernel": "*",
@@ -109,7 +110,7 @@
   },
   "scripts": {
     "test": "@test:unit",
-    "test:unit": "phpunit --testdox --exclude-group e2e --testsuite Kernel,API,Cli,Adapter-Symfony,Adapter-Laravel,Adapter-Yii2",
+    "test:unit": "phpunit --testdox --exclude-group e2e --testsuite Kernel,API,Cli,Adapter-Symfony,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle",
     "test:e2e": "phpunit --testdox --testsuite E2E",
     "test:coverage": "phpunit --coverage-clover=coverage.xml --coverage-text",
     "lint": "mago lint",
