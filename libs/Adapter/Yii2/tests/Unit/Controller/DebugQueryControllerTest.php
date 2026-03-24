@@ -140,6 +140,102 @@ final class DebugQueryControllerTest extends TestCase
         $this->assertSame('list', $controller->defaultAction);
     }
 
+    public function testListWithJsonOutput(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->willReturn([
+                ['id' => 'abc-123', 'request' => ['method' => 'GET', 'url' => '/test', 'responseStatusCode' => '200']],
+            ]);
+
+        $controller = $this->createController($repository);
+        $result = $controller->actionList(json: true);
+
+        $this->assertSame(ExitCode::OK, $result);
+    }
+
+    public function testViewWithJsonOutput(): void
+    {
+        $data = [
+            'AppDevPanel\\Kernel\\Collector\\LogCollector' => ['entries' => ['log1']],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getDetail')->with('abc-123')->willReturn($data);
+
+        $controller = $this->createController($repository);
+        $result = $controller->actionView('abc-123', json: true);
+
+        $this->assertSame(ExitCode::OK, $result);
+    }
+
+    public function testViewCollectorWithJsonOutput(): void
+    {
+        $collectorClass = 'AppDevPanel\\Kernel\\Collector\\LogCollector';
+        $data = [
+            $collectorClass => ['entries' => ['log1']],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getDetail')->willReturn($data);
+
+        $controller = $this->createController($repository);
+        $result = $controller->actionView('abc-123', collector: $collectorClass, json: true);
+
+        $this->assertSame(ExitCode::OK, $result);
+    }
+
+    public function testViewFullEntryWithMultipleCollectors(): void
+    {
+        $data = [
+            'AppDevPanel\\Kernel\\Collector\\LogCollector' => ['entries' => ['log1']],
+            'AppDevPanel\\Kernel\\Collector\\ExceptionCollector' => [],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getDetail')->willReturn($data);
+
+        $controller = $this->createController($repository);
+        $result = $controller->actionView('abc-123');
+
+        $this->assertSame(ExitCode::OK, $result);
+    }
+
+    public function testListWithEntriesContainingCollectorInfo(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->willReturn([
+                [
+                    'id' => 'entry-1',
+                    'request' => ['method' => 'POST', 'url' => '/api/data', 'responseStatusCode' => '201'],
+                    'logger' => ['total' => 5],
+                    'event' => ['total' => 12],
+                    'exception' => ['class' => 'RuntimeException'],
+                ],
+            ]);
+
+        $controller = $this->createController($repository);
+        $result = $controller->actionList();
+
+        $this->assertSame(ExitCode::OK, $result);
+    }
+
+    public function testListWithNonArrayEntries(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->willReturn([
+                'not-an-array',
+                ['id' => 'valid'],
+            ]);
+
+        $controller = $this->createController($repository);
+        $result = $controller->actionList();
+
+        $this->assertSame(ExitCode::OK, $result);
+    }
+
     private function createController(CollectorRepositoryInterface $repository): DebugQueryController
     {
         return new DebugQueryController('debug-query', \Yii::$app, $repository);
