@@ -7,9 +7,10 @@ import {
     useGetRoutesQuery,
     useGetTableQuery,
     useLazyGetCommandsQuery,
+    useRunCommandMutation,
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
-import {Box, Link as MuiLink, Paper, Skeleton, type Theme, Typography} from '@mui/material';
+import {Box, Button, CircularProgress, Link as MuiLink, Paper, Skeleton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
@@ -220,7 +221,13 @@ export const DashboardPage = () => {
     const composerQuery = useGetComposerQuery();
     const gitLogQuery = useGetLogQuery();
     const [getCommandsQuery] = useLazyGetCommandsQuery();
+    const [runCommandMutation] = useRunCommandMutation();
     const [commands, setCommands] = useState<CommandType[]>([]);
+    const [testsStatus, setTestsStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
+    const [testsResult, setTestsResult] = useState<{passed: number; failed: number} | null>(null);
+    const [analyseStatus, setAnalyseStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
+    const [analyseResult, setAnalyseResult] = useState<{errors: number; info: number} | null>(null);
+    const [runningCommands, setRunningCommands] = useState<Record<string, 'loading' | 'ok' | 'error'>>({});
 
     useEffect(() => {
         void (async () => {
@@ -230,6 +237,46 @@ export const DashboardPage = () => {
             }
         })();
     }, []);
+
+    const runTests = async () => {
+        setTestsStatus('loading');
+        setTestsResult(null);
+        const data = await runCommandMutation('test/codeception');
+        if ('data' in data && data.data) {
+            const results = data.data.result ?? [];
+            const passed = Array.isArray(results) ? results.filter((r: any) => r.status === 'ok').length : 0;
+            const failed = Array.isArray(results) ? results.filter((r: any) => r.status !== 'ok').length : 0;
+            setTestsResult({passed, failed});
+            setTestsStatus(data.data.status === 'ok' ? 'ok' : 'error');
+        } else {
+            setTestsStatus('error');
+        }
+    };
+
+    const runAnalyse = async () => {
+        setAnalyseStatus('loading');
+        setAnalyseResult(null);
+        const data = await runCommandMutation('analyse/psalm');
+        if ('data' in data && data.data) {
+            const results = data.data.result ?? [];
+            const errors = Array.isArray(results) ? results.filter((r: any) => r.type === 'error').length : 0;
+            const info = Array.isArray(results) ? results.filter((r: any) => r.type !== 'error').length : 0;
+            setAnalyseResult({errors, info});
+            setAnalyseStatus(data.data.status === 'ok' ? 'ok' : 'error');
+        } else {
+            setAnalyseStatus('error');
+        }
+    };
+
+    const runCommand = async (commandName: string) => {
+        setRunningCommands((prev) => ({...prev, [commandName]: 'loading'}));
+        const data = await runCommandMutation(commandName);
+        if ('data' in data && data.data) {
+            setRunningCommands((prev) => ({...prev, [commandName]: data.data!.status === 'ok' ? 'ok' : 'error'}));
+        } else {
+            setRunningCommands((prev) => ({...prev, [commandName]: 'error'}));
+        }
+    };
 
     useBreadcrumbs(() => ['Inspector', 'Dashboard']);
 
@@ -285,15 +332,6 @@ export const DashboardPage = () => {
     const getCount = allRoutes.filter((r) => (r.method ?? '').toUpperCase() === 'GET').length;
     const postCount = allRoutes.filter((r) => (r.method ?? '').toUpperCase() === 'POST').length;
     const otherCount = totalRoutes - getCount - postCount;
-
-    // --- Commands grouped ---
-    const commandGroups: Record<string, CommandType[]> = {};
-    commands.forEach((cmd) => {
-        const group = cmd.group || 'Other';
-        if (!commandGroups[group]) commandGroups[group] = [];
-        commandGroups[group].push(cmd);
-    });
-    const commandGroupEntries = Object.entries(commandGroups).slice(0, 6);
 
     return (
         <>
@@ -517,14 +555,35 @@ export const DashboardPage = () => {
                             </Typography>
                         </Box>
                     ) : (
-                        commandGroupEntries.map(([group, cmds]) => (
-                            <RowBox key={group}>
+                        commands.slice(0, 8).map((cmd) => (
+                            <RowBox key={cmd.name}>
+                                <Typography variant="caption" sx={{color: 'text.disabled', flexShrink: 0}}>
+                                    {cmd.group}
+                                </Typography>
                                 <Typography variant="body2" sx={{flex: 1, fontWeight: 500}}>
-                                    {group}
+                                    {cmd.title}
                                 </Typography>
-                                <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                    {cmds.length} {cmds.length === 1 ? 'command' : 'commands'}
-                                </Typography>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => runCommand(cmd.name)}
+                                    disabled={runningCommands[cmd.name] === 'loading'}
+                                    color={
+                                        runningCommands[cmd.name] === 'ok'
+                                            ? 'success'
+                                            : runningCommands[cmd.name] === 'error'
+                                              ? 'error'
+                                              : 'primary'
+                                    }
+                                    sx={{minWidth: 'auto', px: 1.5, py: 0.25, fontSize: 11}}
+                                    endIcon={
+                                        runningCommands[cmd.name] === 'loading' ? (
+                                            <CircularProgress size={12} color="inherit" />
+                                        ) : null
+                                    }
+                                >
+                                    Run
+                                </Button>
                             </RowBox>
                         ))
                     )}
@@ -537,13 +596,45 @@ export const DashboardPage = () => {
                                 Tests
                             </Typography>
                             <MuiLink component={Link} to="/inspector/tests" underline="hover" variant="body2">
-                                Open &rarr;
+                                Details &rarr;
                             </MuiLink>
                         </PanelHeader>
-                        <Box sx={{p: 2.5}}>
-                            <Typography variant="body2" sx={{color: 'text.secondary'}}>
-                                Run Codeception tests and inspect results with stack traces and timing data.
-                            </Typography>
+                        <Box sx={{p: 2.5, display: 'flex', alignItems: 'center', gap: 2}}>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={runTests}
+                                disabled={testsStatus === 'loading'}
+                                color={testsStatus === 'ok' ? 'success' : testsStatus === 'error' ? 'error' : 'primary'}
+                                endIcon={
+                                    testsStatus === 'loading' ? <CircularProgress size={16} color="inherit" /> : null
+                                }
+                            >
+                                Run Codeception
+                            </Button>
+                            {testsResult && (
+                                <Typography variant="body2" sx={{color: 'text.secondary'}}>
+                                    <Typography
+                                        component="span"
+                                        variant="body2"
+                                        sx={{color: 'success.main', fontWeight: 600}}
+                                    >
+                                        {testsResult.passed} passed
+                                    </Typography>
+                                    {testsResult.failed > 0 && (
+                                        <>
+                                            {' \u00b7 '}
+                                            <Typography
+                                                component="span"
+                                                variant="body2"
+                                                sx={{color: 'error.main', fontWeight: 600}}
+                                            >
+                                                {testsResult.failed} failed
+                                            </Typography>
+                                        </>
+                                    )}
+                                </Typography>
+                            )}
                         </Box>
                     </PanelRoot>
 
@@ -553,13 +644,53 @@ export const DashboardPage = () => {
                                 Analyse
                             </Typography>
                             <MuiLink component={Link} to="/inspector/analyse" underline="hover" variant="body2">
-                                Open &rarr;
+                                Details &rarr;
                             </MuiLink>
                         </PanelHeader>
-                        <Box sx={{p: 2.5}}>
-                            <Typography variant="body2" sx={{color: 'text.secondary'}}>
-                                Run static analysis (Psalm) to detect errors and code quality issues.
-                            </Typography>
+                        <Box sx={{p: 2.5, display: 'flex', alignItems: 'center', gap: 2}}>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={runAnalyse}
+                                disabled={analyseStatus === 'loading'}
+                                color={
+                                    analyseStatus === 'ok' ? 'success' : analyseStatus === 'error' ? 'error' : 'primary'
+                                }
+                                endIcon={
+                                    analyseStatus === 'loading' ? <CircularProgress size={16} color="inherit" /> : null
+                                }
+                            >
+                                Run Psalm
+                            </Button>
+                            {analyseResult && (
+                                <Typography variant="body2" sx={{color: 'text.secondary'}}>
+                                    {analyseResult.errors > 0 ? (
+                                        <Typography
+                                            component="span"
+                                            variant="body2"
+                                            sx={{color: 'error.main', fontWeight: 600}}
+                                        >
+                                            {analyseResult.errors} errors
+                                        </Typography>
+                                    ) : (
+                                        <Typography
+                                            component="span"
+                                            variant="body2"
+                                            sx={{color: 'success.main', fontWeight: 600}}
+                                        >
+                                            No errors
+                                        </Typography>
+                                    )}
+                                    {analyseResult.info > 0 && (
+                                        <>
+                                            {' \u00b7 '}
+                                            <Typography component="span" variant="body2" sx={{color: 'text.disabled'}}>
+                                                {analyseResult.info} info
+                                            </Typography>
+                                        </>
+                                    )}
+                                </Typography>
+                            )}
                         </Box>
                     </PanelRoot>
                 </Box>
