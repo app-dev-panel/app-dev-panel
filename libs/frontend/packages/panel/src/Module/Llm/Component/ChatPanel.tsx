@@ -164,50 +164,44 @@ export const ChatPanel = () => {
                 )}
                 {messages.map((msg, i) => (
                     <Box key={i} sx={{alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%'}}>
-                        <Box
-                            sx={{
-                                p: 1.5,
-                                borderRadius: 2,
-                                ...(msg.status === 'error'
-                                    ? {
-                                          bgcolor: 'error.light',
-                                          color: 'error.main',
-                                          border: 1,
-                                          borderColor: 'error.main',
-                                      }
-                                    : msg.role === 'user'
-                                      ? {bgcolor: 'primary.main', color: 'primary.contrastText'}
-                                      : {bgcolor: 'background.default', color: 'text.primary'}),
-                                opacity: msg.status === 'sending' ? 0.7 : 1,
-                            }}
-                        >
-                            {msg.role === 'assistant' ? (
-                                <Markdown content={msg.content} />
-                            ) : (
-                                <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
+                        {msg.status === 'error' ? (
+                            <Alert
+                                severity="error"
+                                action={
+                                    <Tooltip title="Retry">
+                                        <IconButton size="small" color="error" onClick={() => handleRetry(i)}>
+                                            <ReplayIcon sx={{fontSize: 16}} />
+                                        </IconButton>
+                                    </Tooltip>
+                                }
+                            >
+                                <Typography variant="body2" sx={{whiteSpace: 'pre-wrap', fontWeight: 500}}>
                                     {msg.content}
                                 </Typography>
-                            )}
-                        </Box>
-                        {msg.status === 'error' && (
+                                {msg.error && (
+                                    <Typography variant="caption" sx={{display: 'block', mt: 0.5}}>
+                                        {msg.error}
+                                    </Typography>
+                                )}
+                            </Alert>
+                        ) : (
                             <Box
                                 sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 0.5,
-                                    mt: 0.5,
-                                    justifyContent: 'flex-end',
+                                    p: 1.5,
+                                    borderRadius: 2,
+                                    ...(msg.role === 'user'
+                                        ? {bgcolor: 'primary.main', color: 'primary.contrastText'}
+                                        : {bgcolor: 'background.default', color: 'text.primary'}),
+                                    opacity: msg.status === 'sending' ? 0.7 : 1,
                                 }}
                             >
-                                <ErrorOutlineIcon sx={{fontSize: 14, color: 'error.main'}} />
-                                <Typography variant="caption" color="error.main" sx={{flex: 1}}>
-                                    {msg.error}
-                                </Typography>
-                                <Tooltip title="Retry">
-                                    <IconButton size="small" color="error" onClick={() => handleRetry(i)}>
-                                        <ReplayIcon sx={{fontSize: 16}} />
-                                    </IconButton>
-                                </Tooltip>
+                                {msg.role === 'assistant' ? (
+                                    <Markdown content={msg.content} />
+                                ) : (
+                                    <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
+                                        {msg.content}
+                                    </Typography>
+                                )}
                             </Box>
                         )}
                     </Box>
