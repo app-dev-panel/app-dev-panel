@@ -12,7 +12,11 @@
         "quality-assurance",
         "ai",
         "developer-tools",
-        "devtools"
+        "devtools",
+        "app-dev-panel",
+        "adp",
+        "application-development-panel",
+        "development-server"
     ],
     "minimum-stability": "dev",
     "require": {

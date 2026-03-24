@@ -16,7 +16,11 @@
         "ai",
         "llm",
         "developer-tools",
-        "devtools"
+        "devtools",
+        "app-dev-panel",
+        "adp",
+        "application-development-panel",
+        "development-server"
     ],
     "minimum-stability": "dev",
     "require": {
@@ -29,8 +33,7 @@
         "symfony/console": "^6.4|^7.0|^8.0",
         "symfony/process": "^6.4|^7.0|^8.0"
     },
-    "require-dev": {
-    },
+    "require-dev": {},
     "repositories": [
         {
             "type": "path",

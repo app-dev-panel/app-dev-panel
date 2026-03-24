@@ -22,7 +22,11 @@
         "ai",
         "llm",
         "developer-tools",
-        "devtools"
+        "devtools",
+        "app-dev-panel",
+        "adp",
+        "application-development-panel",
+        "development-server"
     ],
     "license": "MIT",
     "require": {

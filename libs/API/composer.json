@@ -20,7 +20,11 @@
         "ingestion",
         "microservices",
         "developer-tools",
-        "devtools"
+        "devtools",
+        "app-dev-panel",
+        "adp",
+        "application-development-panel",
+        "development-server"
     ],
     "license": "BSD-3-Clause",
     "minimum-stability": "dev",
