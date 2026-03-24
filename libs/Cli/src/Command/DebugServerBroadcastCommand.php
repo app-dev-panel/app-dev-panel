@@ -23,10 +23,12 @@ final class DebugServerBroadcastCommand extends Command
     public const COMMAND_NAME = 'dev:broadcast';
 
     private readonly LoggerInterface $logger;
+    private readonly Broadcaster $broadcaster;
 
-    public function __construct(?LoggerInterface $logger = null)
+    public function __construct(?LoggerInterface $logger = null, ?Broadcaster $broadcaster = null)
     {
         $this->logger = $logger ?? new NullLogger();
+        $this->broadcaster = $broadcaster ?? new Broadcaster();
         parent::__construct();
     }
 
@@ -48,14 +50,13 @@ final class DebugServerBroadcastCommand extends Command
             return Command::SUCCESS;
         }
 
-        $broadcaster = new Broadcaster();
         /** @var string $data */
         $data = $input->getOption('message');
 
         $this->logger->info('Starting broadcast.', ['message' => $data]);
 
-        $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, $data);
-        $broadcaster->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, json_encode([
+        $this->broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, $data);
+        $this->broadcaster->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, json_encode([
             '$data' => $data,
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
 

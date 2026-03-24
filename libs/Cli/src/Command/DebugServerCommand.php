@@ -8,6 +8,8 @@ namespace AppDevPanel\Cli\Command;
 
 use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\DebugServer\SocketReader;
+use Closure;
+use Generator;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -24,10 +26,15 @@ final class DebugServerCommand extends Command
 
     private readonly LoggerInterface $logger;
 
+    /**
+     * @param null|Closure(): array{string, Generator, Closure} $connectionFactory
+     *   Returns [uri, messageGenerator, closeCallback].
+     */
     public function __construct(
         private readonly string $address = '0.0.0.0',
         private readonly int $port = 8890,
         ?LoggerInterface $logger = null,
+        private readonly ?Closure $connectionFactory = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
         parent::__construct();
@@ -55,30 +62,35 @@ final class DebugServerCommand extends Command
         }
 
         try {
-            $connection = Connection::create();
-            $connection->bind();
+            if ($this->connectionFactory !== null) {
+                [$uri, $messages, $close] = ($this->connectionFactory)();
+            } else {
+                $connection = Connection::create();
+                $connection->bind();
+                $uri = $connection->getUri();
+                $messages = new SocketReader($connection->getSocket())->read();
+                $close = $connection->close(...);
+            }
         } catch (\RuntimeException $e) {
             $this->logger->error('Failed to start debug server.', ['error' => $e->getMessage()]);
             $io->error('Failed to start debug server: ' . $e->getMessage());
             return Command::FAILURE;
         }
 
-        $this->logger->info('Debug server started.', ['address' => $connection->getUri()]);
-        $io->success(sprintf('Listening on "%s".', $connection->getUri()));
+        $this->logger->info('Debug server started.', ['address' => $uri]);
+        $io->success(sprintf('Listening on "%s".', $uri));
 
         if (\function_exists('pcntl_signal')) {
             $io->success('Quit the server with CTRL-C or COMMAND-C.');
 
-            \pcntl_signal(\SIGINT, function () use ($connection): void {
+            \pcntl_signal(\SIGINT, function () use ($close): void {
                 $this->logger->info('Debug server shutting down.');
-                $connection->close();
+                $close();
                 exit(1);
             });
         }
 
-        $reader = new SocketReader($connection->getSocket());
-
-        foreach ($reader->read() as $message) {
+        foreach ($messages as $message) {
             if ($message[0] === Connection::TYPE_ERROR) {
                 $this->logger->error('Connection closed with error.', ['error' => $message[1]]);
                 $io->error('Connection closed with error: ' . $message[1]);
