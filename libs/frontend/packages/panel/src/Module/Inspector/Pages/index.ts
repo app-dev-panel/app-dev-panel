@@ -10,6 +10,7 @@ export {ParametersPage} from '@app-dev-panel/panel/Module/Inspector/Pages/Config
 export {ContainerEntryPage} from '@app-dev-panel/panel/Module/Inspector/Pages/ContainerEntryPage';
 export {DashboardPage} from '@app-dev-panel/panel/Module/Inspector/Pages/DashboardPage';
 export {DatabasePage} from '@app-dev-panel/panel/Module/Inspector/Pages/DatabasePage';
+export {ElasticsearchPage} from '@app-dev-panel/panel/Module/Inspector/Pages/ElasticsearchPage';
 export {EventsPage} from '@app-dev-panel/panel/Module/Inspector/Pages/EventsPage';
 export {FileExplorerPage} from '@app-dev-panel/panel/Module/Inspector/Pages/FileExplorerPage';
 export * as GitPages from '@app-dev-panel/panel/Module/Inspector/Pages/Git';

@@ -13,6 +13,7 @@ use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Controller\ElasticsearchController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
@@ -208,6 +209,30 @@ final class ApiRoutes
                 '/inspect/api/authorization',
                 [AuthorizationController::class, 'index'],
                 'inspect/api/authorization/index',
+            ),
+            new Route(
+                'GET',
+                '/inspect/api/elasticsearch',
+                [ElasticsearchController::class, 'health'],
+                'inspect/api/elasticsearch',
+            ),
+            new Route(
+                'GET',
+                '/inspect/api/elasticsearch/{name}',
+                [ElasticsearchController::class, 'getIndex'],
+                'inspect/api/elasticsearch/index',
+            ),
+            new Route(
+                'POST',
+                '/inspect/api/elasticsearch/search',
+                [ElasticsearchController::class, 'search'],
+                'inspect/api/elasticsearch/search',
+            ),
+            new Route(
+                'POST',
+                '/inspect/api/elasticsearch/query',
+                [ElasticsearchController::class, 'query'],
+                'inspect/api/elasticsearch/query',
             ),
             new Route('POST', '/inspect/api/mcp', [McpController::class, 'handle'], 'inspect/api/mcp'),
             new Route(

@@ -61,6 +61,13 @@ export type DebugEntry = {
         duplicateGroups?: number;
         totalDuplicatedCount?: number;
     };
+    elasticsearch?: {
+        total: number;
+        errors: number;
+        totalTime: number;
+        duplicateGroups?: number;
+        totalDuplicatedCount?: number;
+    };
     [name: string]: any;
 };
 type SummaryResponseType = {data: DebugEntry[]};
