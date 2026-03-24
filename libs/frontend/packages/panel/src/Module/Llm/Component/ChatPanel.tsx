@@ -1,10 +1,13 @@
 import {useChatMutation, useGetStatusQuery} from '@app-dev-panel/panel/Module/Llm/API/Llm';
 import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
 import {SendButton} from '@app-dev-panel/panel/Module/Llm/Component/SendButton';
-import {Alert, Box, CircularProgress, Paper, TextField, Typography} from '@mui/material';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ReplayIcon from '@mui/icons-material/Replay';
+import {Alert, Box, CircularProgress, IconButton, Paper, TextField, Tooltip, Typography} from '@mui/material';
 import {useCallback, useRef, useState} from 'react';
 
-type Message = {role: 'user' | 'assistant'; content: string};
+type MessageStatus = 'ok' | 'error' | 'sending';
+type Message = {role: 'user' | 'assistant'; content: string; status: MessageStatus; error?: string};
 
 const extractErrorMessage = (err: unknown): string | null => {
     if (typeof err === 'object' && err !== null && 'data' in err) {
@@ -26,32 +29,72 @@ export const ChatPanel = () => {
     const [chat, {isLoading}] = useChatMutation();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
-    const [error, setError] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = useCallback(() => {
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({behavior: 'smooth'}), 100);
+    }, []);
+
+    const sendMessages = useCallback(
+        async (outgoing: Message[]) => {
+            try {
+                const result = await chat({
+                    messages: outgoing
+                        .filter((m) => m.status !== 'error')
+                        .map((m) => ({role: m.role, content: m.content})),
+                }).unwrap();
+
+                const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
+                setMessages((prev) => {
+                    // Mark the sending message as ok
+                    const updated = prev.map((m) => (m.status === 'sending' ? {...m, status: 'ok' as const} : m));
+                    return [...updated, {role: 'assistant', content: assistantContent, status: 'ok'}];
+                });
+            } catch (err: unknown) {
+                const errorMsg = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
+                setMessages((prev) =>
+                    prev.map((m) => (m.status === 'sending' ? {...m, status: 'error' as const, error: errorMsg} : m)),
+                );
+                // Restore text to input so user can edit and retry
+                const lastSending = outgoing.find((m) => m.status === 'sending');
+                if (lastSending) {
+                    setInput(lastSending.content);
+                }
+            }
+            scrollToBottom();
+        },
+        [chat, scrollToBottom],
+    );
 
     const handleSend = useCallback(async () => {
         if (!input.trim() || isLoading) return;
 
-        const userMessage: Message = {role: 'user', content: input.trim()};
-        const newMessages = [...messages, userMessage];
+        const userMessage: Message = {role: 'user', content: input.trim(), status: 'sending'};
+        const newMessages = [...messages.filter((m) => m.status !== 'error'), userMessage];
         setMessages(newMessages);
         setInput('');
-        setError(null);
+        scrollToBottom();
 
-        try {
-            const result = await chat({
-                messages: newMessages.map((m) => ({role: m.role, content: m.content})),
-            }).unwrap();
+        await sendMessages(newMessages);
+    }, [input, messages, isLoading, sendMessages, scrollToBottom]);
 
-            const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
-            setMessages((prev) => [...prev, {role: 'assistant', content: assistantContent}]);
-        } catch (err: unknown) {
-            const message = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
-            setError(message);
-        }
+    const handleRetry = useCallback(
+        async (index: number) => {
+            const msg = messages[index];
+            if (!msg || msg.status !== 'error') return;
 
-        setTimeout(() => messagesEndRef.current?.scrollIntoView({behavior: 'smooth'}), 100);
-    }, [input, messages, chat, isLoading]);
+            // Remove the errored message, re-add as sending
+            const retryMessage: Message = {role: 'user', content: msg.content, status: 'sending'};
+            const cleaned = messages.filter((_, i) => i !== index);
+            const newMessages = [...cleaned, retryMessage];
+            setMessages(newMessages);
+            setInput('');
+            scrollToBottom();
+
+            await sendMessages(newMessages);
+        },
+        [messages, sendMessages, scrollToBottom],
+    );
 
     if (!status?.connected) {
         return <Alert severity="info">Connect an LLM provider first to use the chat feature.</Alert>;
@@ -78,23 +121,56 @@ export const ChatPanel = () => {
                     </Typography>
                 )}
                 {messages.map((msg, i) => (
-                    <Box
-                        key={i}
-                        sx={{
-                            alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                            maxWidth: '80%',
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: msg.role === 'user' ? 'primary.main' : 'background.default',
-                            color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
-                        }}
-                    >
-                        {msg.role === 'assistant' ? (
-                            <Markdown content={msg.content} />
-                        ) : (
-                            <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
-                                {msg.content}
-                            </Typography>
+                    <Box key={i} sx={{alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%'}}>
+                        <Box
+                            sx={{
+                                p: 1.5,
+                                borderRadius: 2,
+                                bgcolor:
+                                    msg.status === 'error'
+                                        ? 'error.light'
+                                        : msg.role === 'user'
+                                          ? 'primary.main'
+                                          : 'background.default',
+                                color:
+                                    msg.status === 'error'
+                                        ? 'error.contrastText'
+                                        : msg.role === 'user'
+                                          ? 'primary.contrastText'
+                                          : 'text.primary',
+                                border: msg.status === 'error' ? 2 : 0,
+                                borderColor: 'error.main',
+                                opacity: msg.status === 'sending' ? 0.7 : 1,
+                            }}
+                        >
+                            {msg.role === 'assistant' ? (
+                                <Markdown content={msg.content} />
+                            ) : (
+                                <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
+                                    {msg.content}
+                                </Typography>
+                            )}
+                        </Box>
+                        {msg.status === 'error' && (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 0.5,
+                                    mt: 0.5,
+                                    justifyContent: 'flex-end',
+                                }}
+                            >
+                                <ErrorOutlineIcon sx={{fontSize: 14, color: 'error.main'}} />
+                                <Typography variant="caption" color="error.main" sx={{flex: 1}}>
+                                    {msg.error}
+                                </Typography>
+                                <Tooltip title="Retry">
+                                    <IconButton size="small" color="error" onClick={() => handleRetry(i)}>
+                                        <ReplayIcon sx={{fontSize: 16}} />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
                         )}
                     </Box>
                 ))}
@@ -108,11 +184,6 @@ export const ChatPanel = () => {
                 )}
                 <div ref={messagesEndRef} />
             </Paper>
-            {error && (
-                <Alert severity="error" onClose={() => setError(null)}>
-                    {error}
-                </Alert>
-            )}
             <Box sx={{display: 'flex', gap: 1}}>
                 <TextField
                     fullWidth
