@@ -34,10 +34,12 @@ export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNew
         mode === 'dark' ? {...semanticTokens.palette, ...darkSemanticTokens.palette} : semanticTokens.palette;
 
     // Build MUI shadows array (25 entries required)
-    const shadows: [string, ...string[]] = ['none', ...Array(24).fill(semanticTokens.shadows.sm)] as [
+    // 0=none, 1=sm (cards), 2-3=md (popovers), 4+=lg (menus, dialogs)
+    const shadows: [string, ...string[]] = ['none', ...Array(24).fill(semanticTokens.shadows.lg)] as [
         string,
         ...string[],
     ];
+    shadows[1] = semanticTokens.shadows.sm;
     shadows[2] = semanticTokens.shadows.md;
     shadows[3] = semanticTokens.shadows.md;
 
@@ -68,6 +70,21 @@ export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNew
             },
             MuiPaper: {
                 styleOverrides: {outlined: {borderColor: palette.divider, boxShadow: semanticTokens.shadows.sm}},
+            },
+            MuiMenu: {
+                styleOverrides: {
+                    paper: {border: `1px solid ${palette.divider}`, backgroundImage: 'none'},
+                },
+            },
+            MuiPopover: {
+                styleOverrides: {
+                    paper: {border: `1px solid ${palette.divider}`, backgroundImage: 'none'},
+                },
+            },
+            MuiAutocomplete: {
+                styleOverrides: {
+                    paper: {border: `1px solid ${palette.divider}`, backgroundImage: 'none'},
+                },
             },
             MuiButton: {styleOverrides: {root: {textTransform: 'none', fontWeight: 500}}},
         },
