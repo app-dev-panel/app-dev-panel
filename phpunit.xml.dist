@@ -10,6 +10,15 @@
          resolveDependencies="true"
          cacheDirectory=".phpunit.cache">
 
+    <groups>
+        <exclude>
+            <group>e2e</group>
+            <group>network</group>
+            <group>playground</group>
+            <group>doctrine</group>
+        </exclude>
+    </groups>
+
     <php>
         <ini name="error_reporting" value="-1"/>
     </php>

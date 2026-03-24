@@ -6,6 +6,7 @@ namespace AppDevPanel\Api\Tests\Unit;
 
 use AppDevPanel\Api\ApiRoutes;
 use AppDevPanel\Api\Debug\Controller\DebugController;
+use AppDevPanel\Api\Debug\Controller\SettingsController;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Ingestion\Controller\OtlpController;
 use AppDevPanel\Api\Router\Route;
@@ -67,6 +68,8 @@ final class ApiRoutesTest extends TestCase
         $this->assertContains('/inspect/api/composer', $paths);
         $this->assertContains('/inspect/api/cache', $paths);
         $this->assertContains('/inspect/api/opcache', $paths);
+        $this->assertContains('/inspect/api/mcp', $paths);
+        $this->assertContains('/inspect/api/mcp/settings', $paths);
     }
 
     public function testAllRoutesHaveNames(): void
@@ -97,10 +100,19 @@ final class ApiRoutesTest extends TestCase
         $this->assertCount($expected, $router->getRoutes());
     }
 
-    public function testDebugRoutesUseDebugController(): void
+    public function testDebugRoutesUseExpectedControllers(): void
     {
+        $allowedControllers = [
+            DebugController::class,
+            SettingsController::class,
+        ];
+
         foreach (ApiRoutes::debugRoutes() as $route) {
-            $this->assertSame(DebugController::class, $route->handler[0]);
+            $this->assertContains(
+                $route->handler[0],
+                $allowedControllers,
+                sprintf('Route %s uses unexpected controller %s', $route->pattern, $route->handler[0]),
+            );
         }
     }
 

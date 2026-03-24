@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\Tests\Integration;
 
 use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,6 +21,7 @@ use PHPUnit\Framework\TestCase;
  * Requires: playground/symfony-basic-app with `composer install` completed.
  */
 #[CoversNothing]
+#[Group('playground')]
 final class ConsoleProcessIntegrationTest extends TestCase
 {
     private const string PLAYGROUND_DIR = __DIR__ . '/../../../../../playground/symfony-basic-app';
