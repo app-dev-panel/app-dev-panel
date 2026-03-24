@@ -68,9 +68,9 @@ const PathBreadcrumbs = ({path, onClick}: PathBreadcrumbsProps) => {
     );
 };
 
-type ActionButtonsProps = {editorUrl: string | null; fullPath: string};
+type ActionButtonsProps = {editorUrl: string | null; fullPath: string; showCopy?: boolean};
 
-const ActionButtons = ({editorUrl, fullPath}: ActionButtonsProps) => {
+const ActionButtons = ({editorUrl, fullPath, showCopy = true}: ActionButtonsProps) => {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = useCallback(() => {
@@ -81,11 +81,13 @@ const ActionButtons = ({editorUrl, fullPath}: ActionButtonsProps) => {
 
     return (
         <Box sx={{display: 'flex', alignItems: 'center', flexShrink: 0}}>
-            <Tooltip title={copied ? 'Copied!' : 'Copy path'}>
-                <IconButton size="small" onClick={handleCopy} sx={{color: copied ? 'success.main' : undefined}}>
-                    <ContentCopy sx={{fontSize: 16}} />
-                </IconButton>
-            </Tooltip>
+            {showCopy && (
+                <Tooltip title={copied ? 'Copied!' : 'Copy path'}>
+                    <IconButton size="small" onClick={handleCopy} sx={{color: copied ? 'success.main' : undefined}}>
+                        <ContentCopy sx={{fontSize: 16}} />
+                    </IconButton>
+                </Tooltip>
+            )}
             {editorUrl && (
                 <Tooltip title="Open in Editor">
                     <IconButton
@@ -229,7 +231,7 @@ export const FileExplorerPage = () => {
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         <PathBreadcrumbs path={path} onClick={handleBreadcrumbClick} />
-                        {path !== '/' && <ActionButtons editorUrl={directoryEditorUrl} fullPath={path} />}
+                        <ActionButtons editorUrl={directoryEditorUrl} fullPath={path} showCopy={path !== '/'} />
                     </Box>
                     <Paper variant="outlined" sx={{borderRadius: 2}}>
                         <TreeView tree={tree} onSelect={changePath} />
