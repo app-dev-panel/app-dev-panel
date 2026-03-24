@@ -9,6 +9,7 @@ use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use InvalidArgumentException;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -311,9 +312,8 @@ final class LlmController
             ], 502);
         }
 
-        $content = $provider === 'anthropic'
-            ? $data['content'][0]['text'] ?? ''
-            : $data['choices'][0]['message']['content'] ?? '';
+        // Both providers return normalized OpenAI-compatible format
+        $content = $data['choices'][0]['message']['content'] ?? '';
 
         return $this->responseFactory->createJsonResponse([
             'analysis' => $content,
@@ -349,10 +349,12 @@ final class LlmController
 
     private function anthropicModels(): ResponseInterface
     {
-        $modelsRequest = $this->requestFactory
-            ->createRequest('GET', self::ANTHROPIC_MODELS_URL)
-            ->withHeader('x-api-key', (string) $this->settings->getApiKey())
-            ->withHeader('anthropic-version', self::ANTHROPIC_API_VERSION);
+        $modelsRequest = $this->requestFactory->createRequest('GET', self::ANTHROPIC_MODELS_URL)->withHeader(
+            'anthropic-version',
+            self::ANTHROPIC_API_VERSION,
+        );
+
+        $modelsRequest = $this->applyAnthropicAuth($modelsRequest);
 
         $modelsResponse = $this->httpClient->sendRequest($modelsRequest);
         $responseBody = $modelsResponse->getBody()->getContents();
@@ -438,9 +440,10 @@ final class LlmController
         $chatRequest = $this->requestFactory
             ->createRequest('POST', self::ANTHROPIC_MESSAGES_URL)
             ->withHeader('Content-Type', 'application/json')
-            ->withHeader('x-api-key', (string) $this->settings->getApiKey())
             ->withHeader('anthropic-version', self::ANTHROPIC_API_VERSION)
             ->withBody($this->streamFactory->createStream($chatBody));
+
+        $chatRequest = $this->applyAnthropicAuth($chatRequest);
 
         $chatResponse = $this->httpClient->sendRequest($chatRequest);
         $responseBody = $chatResponse->getBody()->getContents();
@@ -473,6 +476,23 @@ final class LlmController
             'model' => $anthropicData['model'] ?? $model,
             'usage' => $anthropicData['usage'] ?? [],
         ]);
+    }
+
+    /**
+     * Apply the correct authentication header based on the API key type.
+     *
+     * OAuth tokens (sk-ant-oat*) from Claude subscriptions use Authorization: Bearer.
+     * Standard API keys use x-api-key header.
+     */
+    private function applyAnthropicAuth(RequestInterface $request): RequestInterface
+    {
+        $apiKey = (string) $this->settings->getApiKey();
+
+        if (str_starts_with($apiKey, 'sk-ant-oat')) {
+            return $request->withHeader('Authorization', 'Bearer ' . $apiKey);
+        }
+
+        return $request->withHeader('x-api-key', $apiKey);
     }
 
     private function generateCodeVerifier(): string
