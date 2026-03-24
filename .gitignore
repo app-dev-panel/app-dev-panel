@@ -1,6 +1,6 @@
-/vendor/
+vendor/
 /node_modules/
 */**/composer.lock
-/.phpunit.cache/
+.phpunit.cache/
 /coverage.xml
 .claude/worktrees/
