@@ -36,6 +36,41 @@ describe('buildEditorUrl', () => {
         expect(buildEditorUrl(config, '/src/app.php', 3)).toBe('zed://file/%2Fsrc%2Fapp.php:3');
     });
 
+    it('builds idea URL', () => {
+        const config: EditorConfig = {...defaultEditorConfig, editor: 'idea'};
+        expect(buildEditorUrl(config, '/src/app.php', 10)).toBe('idea://open?file=%2Fsrc%2Fapp.php&line=10');
+    });
+
+    it('builds webstorm URL', () => {
+        const config: EditorConfig = {...defaultEditorConfig, editor: 'webstorm'};
+        expect(buildEditorUrl(config, '/src/app.ts', 5)).toBe('webstorm://open?file=%2Fsrc%2Fapp.ts&line=5');
+    });
+
+    it('builds goland URL', () => {
+        const config: EditorConfig = {...defaultEditorConfig, editor: 'goland'};
+        expect(buildEditorUrl(config, '/src/main.go', 20)).toBe('goland://open?file=%2Fsrc%2Fmain.go&line=20');
+    });
+
+    it('builds pycharm URL', () => {
+        const config: EditorConfig = {...defaultEditorConfig, editor: 'pycharm'};
+        expect(buildEditorUrl(config, '/src/app.py', 8)).toBe('pycharm://open?file=%2Fsrc%2Fapp.py&line=8');
+    });
+
+    it('builds rubymine URL', () => {
+        const config: EditorConfig = {...defaultEditorConfig, editor: 'rubymine'};
+        expect(buildEditorUrl(config, '/src/app.rb', 3)).toBe('rubymine://open?file=%2Fsrc%2Fapp.rb&line=3');
+    });
+
+    it('builds rider URL', () => {
+        const config: EditorConfig = {...defaultEditorConfig, editor: 'rider'};
+        expect(buildEditorUrl(config, '/src/Program.cs', 12)).toBe('rider://open?file=%2Fsrc%2FProgram.cs&line=12');
+    });
+
+    it('builds clion URL', () => {
+        const config: EditorConfig = {...defaultEditorConfig, editor: 'clion'};
+        expect(buildEditorUrl(config, '/src/main.cpp', 1)).toBe('clion://open?file=%2Fsrc%2Fmain.cpp&line=1');
+    });
+
     it('defaults line to 1 when not provided', () => {
         const config: EditorConfig = {...defaultEditorConfig, editor: 'phpstorm'};
         expect(buildEditorUrl(config, '/src/app.php')).toBe('phpstorm://open?file=%2Fsrc%2Fapp.php&line=1');
@@ -107,6 +142,13 @@ describe('editorPresetLabels', () => {
         expect(Object.keys(editorPresetLabels)).toEqual([
             'none',
             'phpstorm',
+            'idea',
+            'webstorm',
+            'goland',
+            'pycharm',
+            'rubymine',
+            'rider',
+            'clion',
             'vscode',
             'vscode-insiders',
             'cursor',
@@ -118,6 +160,7 @@ describe('editorPresetLabels', () => {
 
     it('has human-readable labels', () => {
         expect(editorPresetLabels.phpstorm).toBe('PhpStorm');
+        expect(editorPresetLabels.idea).toBe('IntelliJ IDEA');
         expect(editorPresetLabels.vscode).toBe('VS Code');
         expect(editorPresetLabels.none).toContain('None');
         expect(editorPresetLabels.custom).toContain('Custom');
