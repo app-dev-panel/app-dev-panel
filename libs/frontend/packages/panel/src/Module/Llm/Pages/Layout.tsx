@@ -21,7 +21,12 @@ export const Layout = () => {
                         <Tab label="Chat" />
                         <Tab label="Analyze Debug Entry" />
                     </Tabs>
-                    <Box sx={{mt: 2}}>{tab === 0 ? <ChatPanel /> : <AnalyzePanel />}</Box>
+                    <Box sx={{mt: 2, display: tab === 0 ? 'block' : 'none'}}>
+                        <ChatPanel />
+                    </Box>
+                    <Box sx={{mt: 2, display: tab === 1 ? 'block' : 'none'}}>
+                        <AnalyzePanel />
+                    </Box>
                 </Box>
             </Box>
         </>

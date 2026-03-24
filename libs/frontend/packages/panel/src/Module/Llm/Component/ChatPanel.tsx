@@ -1,13 +1,30 @@
 import {useChatMutation, useGetStatusQuery} from '@app-dev-panel/panel/Module/Llm/API/Llm';
 import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
 import {SendButton} from '@app-dev-panel/panel/Module/Llm/Component/SendButton';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import HistoryIcon from '@mui/icons-material/History';
 import ReplayIcon from '@mui/icons-material/Replay';
-import {Alert, Box, CircularProgress, IconButton, Paper, TextField, Tooltip, Typography} from '@mui/material';
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Alert,
+    Box,
+    CircularProgress,
+    IconButton,
+    Paper,
+    TextField,
+    Tooltip,
+    Typography,
+} from '@mui/material';
 import {useCallback, useRef, useState} from 'react';
 
 type MessageStatus = 'ok' | 'error' | 'sending';
 type Message = {role: 'user' | 'assistant'; content: string; status: MessageStatus; error?: string};
+
+type HistoryEntry = {query: string; response: string; timestamp: number; error?: string};
 
 const extractErrorMessage = (err: unknown): string | null => {
     if (typeof err === 'object' && err !== null && 'data' in err) {
@@ -24,11 +41,17 @@ const extractErrorMessage = (err: unknown): string | null => {
     return null;
 };
 
+const formatTime = (ts: number): string => {
+    const d = new Date(ts);
+    return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+};
+
 export const ChatPanel = () => {
     const {data: status} = useGetStatusQuery();
     const [chat, {isLoading}] = useChatMutation();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
+    const [history, setHistory] = useState<HistoryEntry[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = useCallback(() => {
@@ -37,6 +60,7 @@ export const ChatPanel = () => {
 
     const sendMessages = useCallback(
         async (outgoing: Message[]) => {
+            const sendingMsg = outgoing.find((m) => m.status === 'sending');
             try {
                 const result = await chat({
                     messages: outgoing
@@ -46,19 +70,32 @@ export const ChatPanel = () => {
 
                 const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
                 setMessages((prev) => {
-                    // Mark the sending message as ok
                     const updated = prev.map((m) => (m.status === 'sending' ? {...m, status: 'ok' as const} : m));
                     return [...updated, {role: 'assistant', content: assistantContent, status: 'ok'}];
                 });
+
+                // Add to history
+                if (sendingMsg) {
+                    setHistory((prev) => [
+                        {query: sendingMsg.content, response: assistantContent, timestamp: Date.now()},
+                        ...prev,
+                    ]);
+                }
             } catch (err: unknown) {
                 const errorMsg = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
                 setMessages((prev) =>
                     prev.map((m) => (m.status === 'sending' ? {...m, status: 'error' as const, error: errorMsg} : m)),
                 );
+                // Add failed request to history
+                if (sendingMsg) {
+                    setHistory((prev) => [
+                        {query: sendingMsg.content, response: '', timestamp: Date.now(), error: errorMsg},
+                        ...prev,
+                    ]);
+                }
                 // Restore text to input so user can edit and retry
-                const lastSending = outgoing.find((m) => m.status === 'sending');
-                if (lastSending) {
-                    setInput(lastSending.content);
+                if (sendingMsg) {
+                    setInput(sendingMsg.content);
                 }
             }
             scrollToBottom();
@@ -83,7 +120,6 @@ export const ChatPanel = () => {
             const msg = messages[index];
             if (!msg || msg.status !== 'error') return;
 
-            // Remove the errored message, re-add as sending
             const retryMessage: Message = {role: 'user', content: msg.content, status: 'sending'};
             const cleaned = messages.filter((_, i) => i !== index);
             const newMessages = [...cleaned, retryMessage];
@@ -95,6 +131,14 @@ export const ChatPanel = () => {
         },
         [messages, sendMessages, scrollToBottom],
     );
+
+    const handleDeleteHistory = useCallback((index: number) => {
+        setHistory((prev) => prev.filter((_, i) => i !== index));
+    }, []);
+
+    const handleClearHistory = useCallback(() => {
+        setHistory([]);
+    }, []);
 
     if (!status?.connected) {
         return <Alert severity="info">Connect an LLM provider first to use the chat feature.</Alert>;
@@ -202,6 +246,102 @@ export const ChatPanel = () => {
                 />
                 <SendButton label="Send" onClick={handleSend} disabled={!input.trim()} loading={isLoading} />
             </Box>
+
+            {/* History */}
+            {history.length > 0 && (
+                <Accordion
+                    disableGutters
+                    sx={{
+                        '&:before': {display: 'none'},
+                        border: 1,
+                        borderColor: 'divider',
+                        borderRadius: '8px !important',
+                        overflow: 'hidden',
+                    }}
+                >
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flex: 1}}>
+                            <HistoryIcon sx={{fontSize: 18, color: 'text.secondary'}} />
+                            <Typography variant="subtitle2">History</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                ({history.length})
+                            </Typography>
+                            <Box sx={{flex: 1}} />
+                            <Tooltip title="Clear history">
+                                <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleClearHistory();
+                                    }}
+                                    sx={{mr: 1}}
+                                >
+                                    <DeleteOutlineIcon sx={{fontSize: 16}} />
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{p: 0}}>
+                        {history.map((entry, i) => (
+                            <Accordion
+                                key={`${entry.timestamp}-${i}`}
+                                disableGutters
+                                sx={{
+                                    '&:before': {display: 'none'},
+                                    boxShadow: 'none',
+                                    borderTop: 1,
+                                    borderColor: 'divider',
+                                }}
+                            >
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{minHeight: 40}}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0}}>
+                                        {entry.error && (
+                                            <ErrorOutlineIcon sx={{fontSize: 14, color: 'error.main', flexShrink: 0}} />
+                                        )}
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap',
+                                                flex: 1,
+                                                color: entry.error ? 'error.main' : 'text.primary',
+                                            }}
+                                        >
+                                            {entry.query}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.disabled" sx={{flexShrink: 0, mr: 1}}>
+                                            {formatTime(entry.timestamp)}
+                                        </Typography>
+                                        <Tooltip title="Delete">
+                                            <IconButton
+                                                size="small"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteHistory(i);
+                                                }}
+                                            >
+                                                <DeleteOutlineIcon sx={{fontSize: 14}} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Box>
+                                </AccordionSummary>
+                                <AccordionDetails sx={{pt: 0}}>
+                                    {entry.error ? (
+                                        <Alert severity="error" sx={{mb: 1}}>
+                                            {entry.error}
+                                        </Alert>
+                                    ) : (
+                                        <Box sx={{bgcolor: 'background.default', borderRadius: 1, p: 1.5}}>
+                                            <Markdown content={entry.response} />
+                                        </Box>
+                                    )}
+                                </AccordionDetails>
+                            </Accordion>
+                        ))}
+                    </AccordionDetails>
+                </Accordion>
+            )}
         </Box>
     );
 };
