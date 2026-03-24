@@ -12,6 +12,7 @@ use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
+use AppDevPanel\Kernel\Collector\DeprecationCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
@@ -57,6 +58,7 @@ return [
             FilesystemStreamCollector::class,
             HttpStreamCollector::class,
             ExceptionCollector::class,
+            DeprecationCollector::class,
             VarDumperCollector::class,
             TimelineCollector::class,
             ValidatorCollector::class,

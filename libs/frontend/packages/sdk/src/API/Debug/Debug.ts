@@ -45,6 +45,7 @@ export type DebugEntry = {
     };
     middleware?: {total: number};
     asset?: {bundles: {total: number}};
+    deprecation?: {total: number};
     exception?: {class: string; message: string; line: string; file: string; code: string};
     db?: {
         queries: {error: number; total: number};

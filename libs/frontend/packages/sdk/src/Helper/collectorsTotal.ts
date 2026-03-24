@@ -43,6 +43,8 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
             return Object.values(data.fs_stream ?? []).reduce((acc, value) => acc + value, 0);
         case CollectorsMap.ConsoleAppInfoCollector:
             return 0;
+        case CollectorsMap.DeprecationCollector:
+            return Number(data.deprecation?.total);
         case CollectorsMap.TimelineCollector:
             return data.timeline?.total != null ? Number(data.timeline.total) : undefined;
         default:

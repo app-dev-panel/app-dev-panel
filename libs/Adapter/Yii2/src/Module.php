@@ -50,6 +50,7 @@ use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\DeprecationCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -121,6 +122,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         'http_client' => true,
         'timeline' => true,
         'var_dumper' => true,
+        'deprecation' => true,
         'filesystem_stream' => true,
         'http_stream' => true,
         'command' => true,
@@ -514,6 +516,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 new WebAppInfoCollector($timeline, 'Yii2'),
             ],
             'exception' => static fn(): array => [new ExceptionCollector($timeline)],
+            'deprecation' => static fn(): array => [new DeprecationCollector($timeline)],
             'log' => static fn(): array => [new LogCollector($timeline)],
             'event' => static fn(): array => [new EventCollector($timeline)],
             'service' => static fn(): array => [new ServiceCollector($timeline)],
