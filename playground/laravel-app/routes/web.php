@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TestFixtures\CacheAction;
 use App\Http\Controllers\TestFixtures\CacheHeavyAction;
+use App\Http\Controllers\TestFixtures\CoverageAction;
 use App\Http\Controllers\TestFixtures\DatabaseAction;
 use App\Http\Controllers\TestFixtures\DumpAction;
 use App\Http\Controllers\TestFixtures\ElasticsearchAction;
@@ -65,4 +66,5 @@ Route::prefix('test/fixtures')->group(function (): void {
     Route::get('/security', SecurityAction::class);
     Route::get('/elasticsearch', ElasticsearchAction::class);
     Route::get('/redis', RedisAction::class);
+    Route::get('/coverage', CoverageAction::class);
 });

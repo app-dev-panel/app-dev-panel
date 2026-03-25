@@ -44,6 +44,7 @@ return [
                 'test-elasticsearch',
             ),
             Route::get('/redis')->action(Web\TestFixtures\RedisAction::class)->name('test-redis'),
+            Route::get('/coverage')->action(Web\TestFixtures\CoverageAction::class)->name('test-coverage'),
             Route::methods(['GET', 'POST'], '/reset')
                 ->action(Web\TestFixtures\ResetAction::class)
                 ->name('test-reset'),
