@@ -315,6 +315,16 @@ final class FixtureRegistry
                     Expectation::summaryGte('opentelemetry.errors', 1),
                 ],
             ]),
+
+            // === Elasticsearch ===
+            new Fixture(name: 'elasticsearch:basic', endpoint: '/test/fixtures/elasticsearch', expectations: [
+                'elasticsearch' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryHasKey('elasticsearch'),
+                    Expectation::summaryGte('elasticsearch.total', 3),
+                    Expectation::summaryGte('elasticsearch.totalTime', 0),
+                ],
+            ]),
         ];
     }
 }
