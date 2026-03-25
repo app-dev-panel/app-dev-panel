@@ -152,7 +152,10 @@ final class OtlpTraceParserTest extends TestCase
                                             'name' => 'exception',
                                             'timeUnixNano' => '1700000000500000000',
                                             'attributes' => [
-                                                ['key' => 'exception.message', 'value' => ['stringValue' => 'test error']],
+                                                [
+                                                    'key' => 'exception.message',
+                                                    'value' => ['stringValue' => 'test error'],
+                                                ],
                                             ],
                                         ],
                                     ],

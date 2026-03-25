@@ -170,10 +170,7 @@ $services = [
         new McpServer(McpToolRegistryFactory::create($storage)),
         new McpSettings($storagePath),
     ),
-    McpSettingsController::class => new McpSettingsController(
-        $jsonResponseFactory,
-        new McpSettings($storagePath),
-    ),
+    McpSettingsController::class => new McpSettingsController($jsonResponseFactory, new McpSettings($storagePath)),
 ];
 
 // Lazy-loaded controllers that need container

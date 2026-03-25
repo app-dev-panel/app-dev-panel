@@ -30,11 +30,6 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
-use AppDevPanel\Api\Mcp\Controller\McpController;
-use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
-use AppDevPanel\Api\Mcp\McpSettings;
-use AppDevPanel\McpServer\McpServer;
-use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -50,6 +45,9 @@ use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Mcp\Controller\McpController;
+use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
+use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
 use AppDevPanel\Api\PathMapper;
@@ -70,8 +68,8 @@ use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
-use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
@@ -89,6 +87,8 @@ use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
@@ -518,16 +518,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
-        $this->app->singleton(
-            McpSettings::class,
-            fn() => new McpSettings($config->get('app-dev-panel.storage.path')),
-        );
+        $this->app->singleton(McpSettings::class, fn() => new McpSettings($config->get('app-dev-panel.storage.path')));
 
         $this->app->singleton(
             McpServer::class,
-            fn() => new McpServer(
-                McpToolRegistryFactory::create($this->app->make(StorageInterface::class)),
-            ),
+            fn() => new McpServer(McpToolRegistryFactory::create($this->app->make(StorageInterface::class))),
         );
 
         $this->app->singleton(
