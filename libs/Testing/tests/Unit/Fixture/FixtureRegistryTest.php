@@ -86,6 +86,34 @@ final class FixtureRegistryTest extends TestCase
         $this->assertSame($allNames, $taggedNames);
     }
 
+    public function testFilesystemBasicFixtureExists(): void
+    {
+        $fixtures = FixtureRegistry::byTag('advanced');
+        $fsFixtures = array_filter($fixtures, static fn(Fixture $f) => $f->name === 'filesystem:basic');
+
+        $this->assertCount(1, $fsFixtures);
+
+        $fs = array_values($fsFixtures)[0];
+        $this->assertSame('/test/fixtures/filesystem', $fs->endpoint);
+        $this->assertSame('GET', $fs->method);
+        $this->assertArrayHasKey('fs_stream', $fs->expectations);
+        $this->assertCount(2, $fs->expectations['fs_stream']);
+    }
+
+    public function testFilesystemStreamsFixtureExists(): void
+    {
+        $fixtures = FixtureRegistry::byTag('advanced');
+        $fsFixtures = array_filter($fixtures, static fn(Fixture $f) => $f->name === 'filesystem:streams');
+
+        $this->assertCount(1, $fsFixtures);
+
+        $fs = array_values($fsFixtures)[0];
+        $this->assertSame('/test/fixtures/filesystem-streams', $fs->endpoint);
+        $this->assertSame('GET', $fs->method);
+        $this->assertArrayHasKey('fs_stream', $fs->expectations);
+        $this->assertCount(2, $fs->expectations['fs_stream']);
+    }
+
     public function testCacheFixtureExists(): void
     {
         $fixtures = FixtureRegistry::byTag('advanced');
