@@ -5,7 +5,7 @@ import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Box, Chip, Typography} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
-import {useEffect, useState} from 'react';
+import {useMemo} from 'react';
 
 const healthColor = (health: string): 'success' | 'warning' | 'error' | 'default' => {
     switch (health) {
@@ -88,23 +88,16 @@ type HealthData = {
 
 export const ElasticsearchPage = () => {
     const {data, isLoading} = useGetElasticsearchHealthQuery();
-    const [indices, setIndices] = useState<GridValidRowModel[]>([]);
 
     const typedData = data as HealthData | undefined;
-
-    useEffect(() => {
-        if (typedData?.indices) {
-            setIndices(typedData.indices);
-        }
-    }, [typedData]);
+    const health = typedData?.health;
+    const indices = useMemo(() => (typedData?.indices ?? []) as GridValidRowModel[], [typedData]);
 
     useBreadcrumbs(() => ['Inspector', 'Elasticsearch']);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
     }
-
-    const health = typedData?.health;
 
     return (
         <>

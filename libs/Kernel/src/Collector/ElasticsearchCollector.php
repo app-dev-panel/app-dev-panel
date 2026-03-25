@@ -24,6 +24,7 @@ final class ElasticsearchCollector implements SummaryCollectorInterface
     use DuplicateDetectionTrait;
 
     private array $requests = [];
+    private ?array $cachedDuplicates = null;
 
     public function __construct(
         private readonly TimelineCollector $timelineCollector,
@@ -130,14 +131,9 @@ final class ElasticsearchCollector implements SummaryCollectorInterface
             return [];
         }
 
-        $requests = array_values($this->requests);
-
         return [
-            'requests' => $requests,
-            'duplicates' => $this->detectDuplicates(
-                $requests,
-                static fn(array $request) => $request['method'] . ' ' . $request['endpoint'],
-            ),
+            'requests' => array_values($this->requests),
+            'duplicates' => $this->getDuplicates(),
         ];
     }
 
@@ -147,11 +143,7 @@ final class ElasticsearchCollector implements SummaryCollectorInterface
             return [];
         }
 
-        $requests = array_values($this->requests);
-        $duplicates = $this->detectDuplicates(
-            $requests,
-            static fn(array $request) => $request['method'] . ' ' . $request['endpoint'],
-        );
+        $duplicates = $this->getDuplicates();
 
         return [
             'elasticsearch' => [
@@ -167,9 +159,18 @@ final class ElasticsearchCollector implements SummaryCollectorInterface
         ];
     }
 
+    private function getDuplicates(): array
+    {
+        return $this->cachedDuplicates ??= $this->detectDuplicates(
+            array_values($this->requests),
+            static fn(array $request) => $request['method'] . ' ' . $request['endpoint'],
+        );
+    }
+
     protected function reset(): void
     {
         $this->requests = [];
+        $this->cachedDuplicates = null;
     }
 
     /**

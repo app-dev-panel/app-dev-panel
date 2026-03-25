@@ -47,6 +47,7 @@ src/
 │   │   ├── CacheController.php          # view/delete/clear cache
 │   │   ├── OpcacheController.php        # OPcache status
 │   │   ├── AuthorizationController.php  # live auth config (guards, role hierarchy, voters)
+│   │   ├── ElasticsearchController.php  # Elasticsearch cluster health, indices, search, raw query
 │   │   └── ServiceController.php        # Service registration (register, heartbeat, list, deregister)
 │   ├── Middleware/
 │   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services
@@ -56,6 +57,9 @@ src/
 │   ├── Database/
 │   │   ├── SchemaProviderInterface.php  # Interface for database schema inspection
 │   │   └── NullSchemaProvider.php       # Default no-op fallback
+│   ├── Elasticsearch/
+│   │   ├── ElasticsearchProviderInterface.php  # Interface for ES cluster inspection
+│   │   └── NullElasticsearchProvider.php       # Default no-op fallback
 │   ├── Command/
 │   │   ├── CommandInterface.php
 │   │   ├── CommandResponse.php
@@ -182,6 +186,17 @@ src/
 | GET | `/` | Guards, role hierarchy, voters/policies, security config |
 
 Requires `AuthorizationConfigProviderInterface` implementation from adapter. Falls back to `NullAuthorizationConfigProvider` (empty arrays).
+
+### Elasticsearch API (`/inspect/api/elasticsearch`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Cluster health + indices list |
+| GET | `/{name}` | Index detail (mappings, settings, stats) |
+| POST | `/search` | Execute search query against an index |
+| POST | `/query` | Execute raw Elasticsearch query |
+
+Backed by `ElasticsearchProviderInterface`. Default: `NullElasticsearchProvider` (returns empty data). Adapters provide concrete implementations.
 
 ### MCP API (`/inspect/api/mcp`)
 

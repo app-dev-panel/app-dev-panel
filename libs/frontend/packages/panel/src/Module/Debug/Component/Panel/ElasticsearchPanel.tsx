@@ -110,12 +110,12 @@ const RequestDetail = ({entry}: {entry: ElasticsearchRequest}) => {
     try {
         if (entry.body) parsedBody = JSON.parse(entry.body);
     } catch {
-        /* not JSON */
+        // Falls through to raw text rendering below
     }
     try {
         if (entry.responseBody) parsedResponse = JSON.parse(entry.responseBody);
     } catch {
-        /* not JSON */
+        // Falls through to raw text rendering below
     }
 
     return (
