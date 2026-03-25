@@ -10,7 +10,7 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
 
     private ?string $driver = null;
 
-    /** @var array<string, array{lines: array<int, int>, coveredLines: int, executableLines: int, percentage: float}> */
+    /** @var array<string, array{coveredLines: int, executableLines: int, percentage: float}> */
     private array $files = [];
 
     private int $coveredLines = 0;
@@ -26,7 +26,7 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
     {
         $this->isActive = true;
 
-        $this->driver = $this->detectDriver();
+        $this->driver = CodeCoverageHelper::detectDriver();
         if ($this->driver === null) {
             return;
         }
@@ -50,26 +50,14 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
                 'driver' => null,
                 'error' => 'No code coverage driver available (install pcov or xdebug)',
                 'files' => [],
-                'summary' => [
-                    'totalFiles' => 0,
-                    'coveredLines' => 0,
-                    'executableLines' => 0,
-                    'percentage' => 0.0,
-                ],
+                'summary' => CodeCoverageHelper::buildSummary([], 0, 0),
             ];
         }
 
         return [
             'driver' => $this->driver,
             'files' => $this->files,
-            'summary' => [
-                'totalFiles' => count($this->files),
-                'coveredLines' => $this->coveredLines,
-                'executableLines' => $this->executableLines,
-                'percentage' => $this->executableLines > 0
-                    ? round(($this->coveredLines / $this->executableLines) * 100, 2)
-                    : 0.0,
-            ],
+            'summary' => CodeCoverageHelper::buildSummary($this->files, $this->coveredLines, $this->executableLines),
         ];
     }
 
@@ -79,17 +67,10 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
             return [];
         }
 
-        return [
-            'codeCoverage' => [
-                'totalFiles' => count($this->files),
-                'coveredLines' => $this->coveredLines,
-                'executableLines' => $this->executableLines,
-                'percentage' => $this->executableLines > 0
-                    ? round(($this->coveredLines / $this->executableLines) * 100, 2)
-                    : 0.0,
-                'driver' => $this->driver,
-            ],
-        ];
+        $summary = CodeCoverageHelper::buildSummary($this->files, $this->coveredLines, $this->executableLines);
+        $summary['driver'] = $this->driver;
+
+        return ['codeCoverage' => $summary];
     }
 
     private function reset(): void
@@ -100,24 +81,11 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
         $this->executableLines = 0;
     }
 
-    private function detectDriver(): ?string
-    {
-        if (\extension_loaded('pcov') && \ini_get('pcov.enabled')) {
-            return 'pcov';
-        }
-
-        if (\extension_loaded('xdebug') && \in_array('coverage', \xdebug_info('mode'), true)) {
-            return 'xdebug';
-        }
-
-        return null;
-    }
-
     private function startCoverage(): void
     {
         match ($this->driver) {
-            'pcov' => $this->startPcov(),
-            'xdebug' => $this->startXdebug(),
+            'pcov' => \pcov\start(),
+            'xdebug' => \xdebug_start_code_coverage(\XDEBUG_CC_UNUSED | \XDEBUG_CC_DEAD_CODE),
             default => null,
         };
     }
@@ -130,13 +98,11 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
             default => [],
         };
 
-        $this->processCoverage($rawCoverage);
+        $result = CodeCoverageHelper::processCoverage($rawCoverage, $this->includePaths, $this->excludePaths);
+        $this->files = $result['files'];
+        $this->coveredLines = $result['coveredLines'];
+        $this->executableLines = $result['executableLines'];
         $this->timelineCollector->collect($this, count($this->files) . ' files');
-    }
-
-    private function startPcov(): void
-    {
-        \pcov\start();
     }
 
     /**
@@ -146,16 +112,8 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
     {
         \pcov\stop();
 
-        $includes = $this->includePaths !== [] ? $this->includePaths : ['.'];
-        $excludes = $this->excludePaths;
-
         /** @var array<string, array<int, int>> */
-        return \pcov\collect(\pcov\inclusive, ...$includes !== [] ? [$includes[0]] : ['.']);
-    }
-
-    private function startXdebug(): void
-    {
-        \xdebug_start_code_coverage(\XDEBUG_CC_UNUSED | \XDEBUG_CC_DEAD_CODE);
+        return \pcov\collect(\pcov\inclusive, $this->includePaths !== [] ? $this->includePaths[0] : '.');
     }
 
     /**
@@ -168,74 +126,5 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
         \xdebug_stop_code_coverage();
 
         return $coverage;
-    }
-
-    /**
-     * @param array<string, array<int, int>> $rawCoverage
-     */
-    private function processCoverage(array $rawCoverage): void
-    {
-        $this->files = [];
-        $this->coveredLines = 0;
-        $this->executableLines = 0;
-
-        foreach ($rawCoverage as $file => $lines) {
-            if (!$this->shouldIncludeFile($file)) {
-                continue;
-            }
-
-            $coveredLines = 0;
-            $executableLines = 0;
-
-            foreach ($lines as $line => $status) {
-                // Status: 1 = executed, -1 = not executed, -2 = dead code (xdebug)
-                if ($status === 1) {
-                    $coveredLines++;
-                    $executableLines++;
-                } elseif ($status === -1) {
-                    $executableLines++;
-                }
-
-                // -2 (dead code) and 0 (not executable) are skipped
-            }
-
-            if ($executableLines === 0) {
-                continue;
-            }
-
-            $this->files[$file] = [
-                'lines' => $lines,
-                'coveredLines' => $coveredLines,
-                'executableLines' => $executableLines,
-                'percentage' => round(($coveredLines / $executableLines) * 100, 2),
-            ];
-
-            $this->coveredLines += $coveredLines;
-            $this->executableLines += $executableLines;
-        }
-    }
-
-    private function shouldIncludeFile(string $file): bool
-    {
-        foreach ($this->excludePaths as $excludePath) {
-            if (
-                str_contains($file, DIRECTORY_SEPARATOR . $excludePath . DIRECTORY_SEPARATOR)
-                || str_contains($file, '/' . $excludePath . '/')
-            ) {
-                return false;
-            }
-        }
-
-        if ($this->includePaths === []) {
-            return true;
-        }
-
-        foreach ($this->includePaths as $includePath) {
-            if (str_contains($file, $includePath)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

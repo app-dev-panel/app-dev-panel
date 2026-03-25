@@ -20,11 +20,7 @@ final class CodeCoverageControllerTest extends ControllerTestCase
 
     private function createController(): CodeCoverageController
     {
-        return new CodeCoverageController(
-            $this->createResponseFactory(),
-            $this->createPathResolver(),
-            excludePaths: ['vendor'],
-        );
+        return new CodeCoverageController($this->createResponseFactory(), $this->createPathResolver());
     }
 
     public function testIndex(): void

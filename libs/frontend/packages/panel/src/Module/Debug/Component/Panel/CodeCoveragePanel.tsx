@@ -6,7 +6,7 @@ import {Box, Chip, LinearProgress, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
 
-type FileInfo = {lines: Record<string, number>; coveredLines: number; executableLines: number; percentage: number};
+type FileInfo = {coveredLines: number; executableLines: number; percentage: number};
 
 type CoverageData = {
     driver: string | null;
@@ -81,22 +81,66 @@ const coverageColor = (percentage: number): 'success' | 'warning' | 'error' => {
     return 'error';
 };
 
-type FileSortEntry = {path: string; info: FileInfo};
-
 // ---------------------------------------------------------------------------
-// CodeCoveragePanel
+// CoverageSummary
 // ---------------------------------------------------------------------------
 
-export const CodeCoveragePanel = ({data}: CodeCoveragePanelProps) => {
+export const CoverageSummary = ({data}: {data: CoverageData}) => {
+    const theme = useTheme();
+    const {summary} = data;
+    const color = coverageColor(summary.percentage);
+
+    return (
+        <SummaryGrid>
+            <SummaryCard>
+                <SummaryLabel>Coverage</SummaryLabel>
+                <SummaryValue sx={{color: `${color}.main`}}>{summary.percentage}%</SummaryValue>
+                <LinearProgress
+                    variant="determinate"
+                    value={summary.percentage}
+                    sx={{
+                        mt: 1,
+                        height: 4,
+                        borderRadius: 2,
+                        backgroundColor: theme.palette.action.hover,
+                        '& .MuiLinearProgress-bar': {backgroundColor: theme.palette[color].main, borderRadius: 2},
+                    }}
+                />
+            </SummaryCard>
+            <SummaryCard>
+                <SummaryLabel>Files</SummaryLabel>
+                <SummaryValue sx={{color: 'primary.main'}}>{summary.totalFiles}</SummaryValue>
+            </SummaryCard>
+            <SummaryCard>
+                <SummaryLabel>Covered Lines</SummaryLabel>
+                <SummaryValue sx={{color: 'success.main'}}>{summary.coveredLines}</SummaryValue>
+            </SummaryCard>
+            <SummaryCard>
+                <SummaryLabel>Executable Lines</SummaryLabel>
+                <SummaryValue sx={{color: 'text.primary'}}>{summary.executableLines}</SummaryValue>
+            </SummaryCard>
+            <SummaryCard>
+                <SummaryLabel>Driver</SummaryLabel>
+                <SummaryValue sx={{color: 'text.secondary', fontSize: '16px'}}>{data.driver}</SummaryValue>
+            </SummaryCard>
+        </SummaryGrid>
+    );
+};
+
+// ---------------------------------------------------------------------------
+// CoverageFileList
+// ---------------------------------------------------------------------------
+
+export const CoverageFileList = ({files}: {files: Record<string, FileInfo>}) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
 
-    const fileEntries = useMemo((): FileSortEntry[] => {
-        const entries = Object.entries(data.files).map(([path, info]) => ({path, info}));
+    const fileEntries = useMemo(() => {
+        const entries = Object.entries(files).map(([path, info]) => ({path, info}));
         entries.sort((a, b) => a.info.percentage - b.info.percentage);
         return entries;
-    }, [data.files]);
+    }, [files]);
 
     const filtered = useMemo(() => {
         if (!deferredFilter) return fileEntries;
@@ -104,57 +148,8 @@ export const CodeCoveragePanel = ({data}: CodeCoveragePanelProps) => {
         return fileEntries.filter((entry) => entry.path.toLowerCase().includes(lower));
     }, [fileEntries, deferredFilter]);
 
-    if (!data || data.driver === null) {
-        return (
-            <EmptyState
-                icon="shield"
-                title="No coverage data"
-                description={data?.error ?? 'No code coverage driver available (install pcov or xdebug).'}
-            />
-        );
-    }
-
-    const {summary} = data;
-    const color = coverageColor(summary.percentage);
-
     return (
-        <Box>
-            {/* Summary cards */}
-            <SummaryGrid>
-                <SummaryCard>
-                    <SummaryLabel>Coverage</SummaryLabel>
-                    <SummaryValue sx={{color: `${color}.main`}}>{summary.percentage}%</SummaryValue>
-                    <LinearProgress
-                        variant="determinate"
-                        value={summary.percentage}
-                        sx={{
-                            mt: 1,
-                            height: 4,
-                            borderRadius: 2,
-                            backgroundColor: theme.palette.action.hover,
-                            '& .MuiLinearProgress-bar': {backgroundColor: theme.palette[color].main, borderRadius: 2},
-                        }}
-                    />
-                </SummaryCard>
-                <SummaryCard>
-                    <SummaryLabel>Files</SummaryLabel>
-                    <SummaryValue sx={{color: 'primary.main'}}>{summary.totalFiles}</SummaryValue>
-                </SummaryCard>
-                <SummaryCard>
-                    <SummaryLabel>Covered Lines</SummaryLabel>
-                    <SummaryValue sx={{color: 'success.main'}}>{summary.coveredLines}</SummaryValue>
-                </SummaryCard>
-                <SummaryCard>
-                    <SummaryLabel>Executable Lines</SummaryLabel>
-                    <SummaryValue sx={{color: 'text.primary'}}>{summary.executableLines}</SummaryValue>
-                </SummaryCard>
-                <SummaryCard>
-                    <SummaryLabel>Driver</SummaryLabel>
-                    <SummaryValue sx={{color: 'text.secondary', fontSize: '16px'}}>{data.driver}</SummaryValue>
-                </SummaryCard>
-            </SummaryGrid>
-
-            {/* Files table */}
+        <>
             <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter files..." />}>
                 {`${filtered.length} files`}
             </SectionTitle>
@@ -198,6 +193,29 @@ export const CodeCoveragePanel = ({data}: CodeCoveragePanelProps) => {
                     </FileRow>
                 );
             })}
+        </>
+    );
+};
+
+// ---------------------------------------------------------------------------
+// CodeCoveragePanel
+// ---------------------------------------------------------------------------
+
+export const CodeCoveragePanel = ({data}: CodeCoveragePanelProps) => {
+    if (!data || data.driver === null) {
+        return (
+            <EmptyState
+                icon="shield"
+                title="No coverage data"
+                description={data?.error ?? 'No code coverage driver available (install pcov or xdebug).'}
+            />
+        );
+    }
+
+    return (
+        <Box>
+            <CoverageSummary data={data} />
+            <CoverageFileList files={data.files} />
         </Box>
     );
 };
