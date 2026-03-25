@@ -21,6 +21,7 @@ use App\Http\Controllers\TestFixtures\MailerAction;
 use App\Http\Controllers\TestFixtures\MessengerAction;
 use App\Http\Controllers\TestFixtures\MultiAction;
 use App\Http\Controllers\TestFixtures\OpenTelemetryAction;
+use App\Http\Controllers\TestFixtures\RedisAction;
 use App\Http\Controllers\TestFixtures\RequestInfoAction;
 use App\Http\Controllers\TestFixtures\ResetAction;
 use App\Http\Controllers\TestFixtures\ResetCliAction;
@@ -61,4 +62,5 @@ Route::prefix('test/fixtures')->group(function (): void {
     Route::get('/opentelemetry', OpenTelemetryAction::class);
     Route::get('/security', SecurityAction::class);
     Route::get('/elasticsearch', ElasticsearchAction::class);
+    Route::get('/redis', RedisAction::class);
 });
