@@ -112,13 +112,9 @@ export const UnifiedSidebar = React.memo(
                 // Find the section that matches the new path and uncollapse it
                 for (const section of sections) {
                     const isActive = section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
-                    if (
-                        isActive &&
-                        section.children &&
-                        section.children.length > 0 &&
-                        collapsed[section.key] === true
-                    ) {
+                    if (isActive && section.children && section.children.length > 0) {
                         setCollapsed((prev) => {
+                            if (prev[section.key] !== true) return prev;
                             const next = {...prev};
                             delete next[section.key];
                             return next;
@@ -126,7 +122,7 @@ export const UnifiedSidebar = React.memo(
                     }
                 }
             }
-        }, [activePath, sections, collapsed]);
+        }, [activePath, sections]);
 
         const handleToggleExpand = useCallback(
             (sectionKey: string) => {

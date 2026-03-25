@@ -1,6 +1,8 @@
 import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
+import {useSelector} from '@app-dev-panel/panel/store';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import {
     Box,
@@ -17,8 +19,7 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import {useCallback, useMemo, useState} from 'react';
-import {useSelector} from 'react-redux';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 type ConfigTab = 'url' | 'stdio' | 'cli';
 
@@ -69,9 +70,12 @@ const buildConfig = (tab: ConfigTab, mcpUrl: string): string => {
 };
 
 export const McpPage = () => {
-    const baseUrl = useSelector((state) => (state as {application: {baseUrl: string}}).application.baseUrl) as string;
+    const baseUrl = useSelector((state) => state.application.baseUrl) as string;
     const [tab, setTab] = useState<ConfigTab>('url');
     const [copied, setCopied] = useState(false);
+    const copyTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+    useEffect(() => () => clearTimeout(copyTimerRef.current), []);
 
     useBreadcrumbs(() => ['MCP']);
 
@@ -85,7 +89,8 @@ export const McpPage = () => {
     const handleCopy = useCallback(async () => {
         await navigator.clipboard.writeText(config);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        clearTimeout(copyTimerRef.current);
+        copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     }, [config]);
 
     return (
@@ -99,7 +104,7 @@ export const McpPage = () => {
                         </Typography>
                         <Typography
                             variant="body2"
-                            sx={{fontFamily: "'JetBrains Mono', monospace", wordBreak: 'break-all'}}
+                            sx={{fontFamily: primitives.fontFamilyMono, wordBreak: 'break-all'}}
                         >
                             {mcpUrl}
                         </Typography>
@@ -153,7 +158,7 @@ export const McpPage = () => {
                                     <TableRow key={tool.name}>
                                         <TableCell
                                             sx={{
-                                                fontFamily: "'JetBrains Mono', monospace",
+                                                fontFamily: primitives.fontFamilyMono,
                                                 fontSize: '12px',
                                                 whiteSpace: 'nowrap',
                                             }}
