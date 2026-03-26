@@ -24,6 +24,9 @@ YIISOFT_PORT  ?= 8101
 SYMFONY_PORT  ?= 8102
 YII2_PORT     ?= 8103
 LARAVEL_PORT  ?= 8104
+# TaskBus infrastructure
+TASKBUS_PORT  ?= 9800
+TASKBUS_DB    ?= $(ROOT_DIR)/var/task-bus.sqlite
 
 # --- Binaries ---
 # Use vendor/bin/mago locally (absolute path); CI installs mago globally via setup-mago action
@@ -312,19 +315,39 @@ serve-laravel: ## Start Laravel playground server (port $(LARAVEL_PORT))
 	@echo "$(CYAN)[Playground: Laravel] Starting server on port $(LARAVEL_PORT)...$(RESET)"
 	cd $(PLAYGROUND_DIR)/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:$(LARAVEL_PORT) -t public
 
-serve: ## Start all playground servers in background
-	@echo "$(CYAN)Starting all playground servers...$(RESET)"
+serve-taskbus-rpc: ## Start TaskBus JSON-RPC server (port $(TASKBUS_PORT))
+	@echo "$(CYAN)[TaskBus: RPC] Starting JSON-RPC server on port $(TASKBUS_PORT)...$(RESET)"
+	@mkdir -p $(dir $(TASKBUS_DB))
+	php vendor/bin/adp taskbus:serve --host=127.0.0.1 --port=$(TASKBUS_PORT) --db=$(TASKBUS_DB)
+
+serve-taskbus-worker: ## Start TaskBus background worker
+	@echo "$(CYAN)[TaskBus: Worker] Starting worker (db: $(TASKBUS_DB))...$(RESET)"
+	@mkdir -p $(dir $(TASKBUS_DB))
+	php vendor/bin/adp taskbus:worker --db=$(TASKBUS_DB)
+
+serve-taskbus: ## Start TaskBus RPC server + worker
+	@$(MAKE) serve-taskbus-rpc &
+	@sleep 0.5
+	@$(MAKE) serve-taskbus-worker &
+	@wait
+
+serve: ## Start all playground servers + TaskBus in background
+	@echo "$(CYAN)Starting all playground servers + TaskBus...$(RESET)"
+	@$(MAKE) serve-taskbus-rpc &
+	@$(MAKE) serve-taskbus-worker &
 	@$(MAKE) serve-yiisoft &
 	@$(MAKE) serve-symfony &
 	@$(MAKE) serve-yii2 &
 	@$(MAKE) serve-laravel &
 	@sleep 1
 	@echo ""
-	@echo "$(GREEN)Playground servers started:$(RESET)"
-	@echo "  Yiisoft:  http://127.0.0.1:$(YIISOFT_PORT)"
-	@echo "  Symfony:  http://127.0.0.1:$(SYMFONY_PORT)"
-	@echo "  Yii2:     http://127.0.0.1:$(YII2_PORT)"
-	@echo "  Laravel:  http://127.0.0.1:$(LARAVEL_PORT)"
+	@echo "$(GREEN)Services started:$(RESET)"
+	@echo "  TaskBus RPC:    tcp://127.0.0.1:$(TASKBUS_PORT)"
+	@echo "  TaskBus Worker:  active (db: $(TASKBUS_DB))"
+	@echo "  Yiisoft:         http://127.0.0.1:$(YIISOFT_PORT)"
+	@echo "  Symfony:         http://127.0.0.1:$(SYMFONY_PORT)"
+	@echo "  Yii2:            http://127.0.0.1:$(YII2_PORT)"
+	@echo "  Laravel:         http://127.0.0.1:$(LARAVEL_PORT)"
 	@echo ""
 	@echo "$(YELLOW)Press Ctrl+C to stop all servers$(RESET)"
 	@wait
