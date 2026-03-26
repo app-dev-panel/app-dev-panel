@@ -51,6 +51,9 @@
         <testsuite name="McpServer">
             <directory>libs/McpServer/tests</directory>
         </testsuite>
+        <testsuite name="TaskBus">
+            <directory>libs/TaskBus/tests</directory>
+        </testsuite>
         <testsuite name="E2E">
             <directory>tests/E2E</directory>
         </testsuite>
@@ -72,6 +75,7 @@
             <directory>libs/Adapter/Laravel/src</directory>
             <directory>libs/Adapter/Yii2/src</directory>
             <directory>libs/McpServer/src</directory>
+            <directory>libs/TaskBus/src</directory>
             <directory>libs/Adapter/Cycle/src</directory>
         </include>
     </source>

@@ -36,6 +36,10 @@
     {
       "type": "path",
       "url": "libs/Testing"
+    },
+    {
+      "type": "path",
+      "url": "libs/TaskBus"
     }
   ],
   "require": {
@@ -48,6 +52,7 @@
     "app-dev-panel/api": "*",
     "app-dev-panel/kernel": "*",
     "app-dev-panel/mcp-server": "*",
+    "app-dev-panel/task-bus": "*",
     "app-dev-panel/testing": "*",
     "yiisoft/router-fastroute": "^4.0"
   },
@@ -116,7 +121,7 @@
   },
   "scripts": {
     "test": "@test:unit",
-    "test:unit": "phpunit --testdox --testsuite Kernel,API,Cli,McpServer,Adapter-Symfony,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle",
+    "test:unit": "phpunit --testdox --testsuite Kernel,API,Cli,McpServer,TaskBus,Adapter-Symfony,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle",
     "test:e2e": "phpunit --testdox --testsuite E2E",
     "test:coverage": "phpunit --coverage-clover=coverage.xml --coverage-text",
     "lint": "mago lint",
@@ -144,6 +149,7 @@
       "AppDevPanel\\Adapter\\Symfony\\Tests\\": "libs/Adapter/Symfony/tests",
       "AppDevPanel\\Adapter\\Laravel\\Tests\\": "libs/Adapter/Laravel/tests",
       "AppDevPanel\\Adapter\\Yii2\\Tests\\": "libs/Adapter/Yii2/tests",
+      "AppDevPanel\\TaskBus\\Tests\\": "libs/TaskBus/tests",
       "AppDevPanel\\Testing\\Tests\\": "libs/Testing/tests",
       "AppDevPanel\\Tests\\": "tests"
     }

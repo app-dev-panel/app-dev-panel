@@ -16,6 +16,8 @@ paths = [
     "libs/Adapter/Cycle/src",
     "libs/Testing/src",
     "libs/Testing/tests",
+    "libs/TaskBus/src",
+    "libs/TaskBus/tests",
 ]
 includes = ["vendor"]
 excludes = [
@@ -58,6 +60,8 @@ ignore = [
     "possibly-null-argument",
     "possibly-false-operand",
     "possibly-null-operand",
+    "possibly-null-property-access",
+    "possibly-null-array-access",
     "possibly-false-iterator",
     "possibly-null-array-index",
     "possibly-undefined-variable",
@@ -173,6 +177,7 @@ too-many-methods = { level = "warning", exclude = [
     "libs/Adapter/Yii2/tests",
     "libs/Adapter/Laravel/tests",
     "libs/Testing/tests",
+    "libs/TaskBus/tests",
     # Interface proxies — method count dictated by the interface they implement
     "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php",
     "libs/Kernel/src/Helper/StreamWrapper/StreamWrapperInterface.php",
@@ -197,6 +202,10 @@ too-many-methods = { level = "warning", exclude = [
     "libs/Kernel/src/DumpContext.php",
     # Storage — methods cover read/write/flush/gc lifecycle
     "libs/Kernel/src/Storage/FileStorage.php",
+    # TaskBus — JSON-RPC handler dispatches many methods, TaskBus facade has many convenience methods
+    "libs/TaskBus/src/Transport/JsonRpcHandler.php",
+    "libs/TaskBus/src/TaskBus.php",
+    "libs/TaskBus/src/Storage/SqliteTaskRepository.php",
 ] }
 excessive-parameter-list = { level = "warning", exclude = [
     # Test files — test helpers may need many params for setting up test scenarios
@@ -206,6 +215,7 @@ excessive-parameter-list = { level = "warning", exclude = [
     "libs/Adapter/Yii2/tests",
     "libs/Adapter/Laravel/tests",
     "libs/Testing/tests",
+    "libs/TaskBus/tests",
     # Interface proxies — parameter lists dictated by the interface
     "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php",
     # DTOs / value objects — all params are distinct fields of the record
@@ -223,6 +233,12 @@ excessive-parameter-list = { level = "warning", exclude = [
     # Internal recursive methods thread context through call stack
     "libs/Kernel/src/Dumper.php",
     "libs/Kernel/src/DumpContext.php",
+    # TaskBus — Task entity has many distinct fields, messages need specific params
+    "libs/TaskBus/src/Task.php",
+    "libs/TaskBus/src/TaskBus.php",
+    "libs/TaskBus/src/Message/RunCommand.php",
+    "libs/TaskBus/src/Storage/SqliteTaskRepository.php",
+    "libs/TaskBus/src/Transport/JsonRpcHandler.php",
 ] }
 cyclomatic-complexity = { level = "warning", threshold = 15, exclude = [
     "libs/Testing/tests",

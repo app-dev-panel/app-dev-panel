@@ -1,0 +1,43 @@
+{
+    "name": "app-dev-panel/task-bus",
+    "type": "library",
+    "description": "ADP TaskBus — durable task queue and workflow engine: command execution, test runners, scheduled tasks, LLM agent jobs",
+    "keywords": [
+        "task-bus",
+        "queue",
+        "messenger",
+        "scheduler",
+        "json-rpc",
+        "worker",
+        "async",
+        "app-dev-panel",
+        "adp"
+    ],
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.4",
+        "ext-pdo": "*",
+        "ext-pdo_sqlite": "*",
+        "symfony/messenger": "^7.0|^8.0",
+        "symfony/process": "^7.0|^8.0",
+        "symfony/scheduler": "^7.0|^8.0",
+        "symfony/uid": "^7.0|^8.0",
+        "psr/log": "^1.0|^2.0|^3.0"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "AppDevPanel\\TaskBus\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AppDevPanel\\TaskBus\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --testdox --no-interaction"
+    }
+}

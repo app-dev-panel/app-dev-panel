@@ -1,0 +1,42 @@
+services:
+  # TaskBus JSON-RPC server
+  task-bus-server:
+    build:
+      context: ../../
+      dockerfile: libs/TaskBus/Dockerfile
+    command: php libs/TaskBus/examples/json_rpc_server.php tcp://0.0.0.0:9800
+    ports:
+      - "9800:9800"
+    volumes:
+      - ../../:/app
+      - task-bus-data:/app/data
+    environment:
+      TASK_BUS_DB_PATH: /app/data/task-bus.sqlite
+      TASK_BUS_TIMEOUT: "300"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "echo '{\"jsonrpc\":\"2.0\",\"method\":\"task.list\",\"params\":{},\"id\":1}' | nc -w1 localhost 9800 | grep -q result"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # TaskBus worker (consumes async tasks)
+  task-bus-worker:
+    build:
+      context: ../../
+      dockerfile: libs/TaskBus/Dockerfile
+    command: php libs/TaskBus/bin/worker.php
+    volumes:
+      - ../../:/app
+      - task-bus-data:/app/data
+    environment:
+      TASK_BUS_DB_PATH: /app/data/task-bus.sqlite
+      TASK_BUS_MAX_CONCURRENT: "4"
+      TASK_BUS_POLL_INTERVAL: "200000"
+    restart: unless-stopped
+    depends_on:
+      task-bus-server:
+        condition: service_healthy
+
+volumes:
+  task-bus-data:
