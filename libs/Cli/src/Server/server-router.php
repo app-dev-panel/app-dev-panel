@@ -56,6 +56,7 @@ use AppDevPanel\Api\Inspector\Controller\OpcacheController;
 use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
+use AppDevPanel\Api\Inspector\Controller\TaskBusController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Mcp\Controller\McpController;
@@ -71,6 +72,11 @@ use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
+use AppDevPanel\TaskBus\Scheduler\ScheduleRegistry;
+use AppDevPanel\TaskBus\Storage\PdoFactory;
+use AppDevPanel\TaskBus\TaskBusConfig;
+use AppDevPanel\TaskBus\TaskBusFactory;
+use AppDevPanel\TaskBus\Transport\JsonRpcHandler;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\ServerRequest;
@@ -164,6 +170,17 @@ $services = [
     ComposerController::class => new ComposerController($jsonResponseFactory, $pathResolver),
     RoutingController::class => new RoutingController($jsonResponseFactory),
     RequestController::class => new RequestController($jsonResponseFactory, $collectorRepository),
+    // TaskBus
+    TaskBusController::class => (static function () use ($storagePath): TaskBusController {
+        $taskBusDbPath = $storagePath . '/task-bus.sqlite';
+        $config = new TaskBusConfig(databasePath: $taskBusDbPath);
+        $bus = TaskBusFactory::create($config);
+        $pdo = PdoFactory::create($taskBusDbPath);
+        $scheduleRegistry = new ScheduleRegistry($pdo);
+        $rpcHandler = new JsonRpcHandler($bus, $scheduleRegistry);
+        return new TaskBusController($jsonResponseFactory, $rpcHandler);
+    })(),
+
     McpSettings::class => new McpSettings($storagePath),
     McpController::class => new McpController(
         $jsonResponseFactory,

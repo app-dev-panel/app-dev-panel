@@ -315,25 +315,13 @@ serve-laravel: ## Start Laravel playground server (port $(LARAVEL_PORT))
 	@echo "$(CYAN)[Playground: Laravel] Starting server on port $(LARAVEL_PORT)...$(RESET)"
 	cd $(PLAYGROUND_DIR)/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:$(LARAVEL_PORT) -t public
 
-serve-taskbus-rpc: ## Start TaskBus JSON-RPC server (port $(TASKBUS_PORT))
-	@echo "$(CYAN)[TaskBus: RPC] Starting JSON-RPC server on port $(TASKBUS_PORT)...$(RESET)"
-	@mkdir -p $(dir $(TASKBUS_DB))
-	php vendor/bin/adp taskbus:serve --host=127.0.0.1 --port=$(TASKBUS_PORT) --db=$(TASKBUS_DB)
-
 serve-taskbus-worker: ## Start TaskBus background worker
 	@echo "$(CYAN)[TaskBus: Worker] Starting worker (db: $(TASKBUS_DB))...$(RESET)"
 	@mkdir -p $(dir $(TASKBUS_DB))
 	php vendor/bin/adp taskbus:worker --db=$(TASKBUS_DB)
 
-serve-taskbus: ## Start TaskBus RPC server + worker
-	@$(MAKE) serve-taskbus-rpc &
-	@sleep 0.5
-	@$(MAKE) serve-taskbus-worker &
-	@wait
-
-serve: ## Start all playground servers + TaskBus in background
-	@echo "$(CYAN)Starting all playground servers + TaskBus...$(RESET)"
-	@$(MAKE) serve-taskbus-rpc &
+serve: ## Start all playground servers + TaskBus worker in background
+	@echo "$(CYAN)Starting all playground servers + TaskBus worker...$(RESET)"
 	@$(MAKE) serve-taskbus-worker &
 	@$(MAKE) serve-yiisoft &
 	@$(MAKE) serve-symfony &
@@ -342,8 +330,8 @@ serve: ## Start all playground servers + TaskBus in background
 	@sleep 1
 	@echo ""
 	@echo "$(GREEN)Services started:$(RESET)"
-	@echo "  TaskBus RPC:    tcp://127.0.0.1:$(TASKBUS_PORT)"
 	@echo "  TaskBus Worker:  active (db: $(TASKBUS_DB))"
+	@echo "  TaskBus RPC:     POST http://127.0.0.1:{port}/inspect/api/taskbus (on each playground)"
 	@echo "  Yiisoft:         http://127.0.0.1:$(YIISOFT_PORT)"
 	@echo "  Symfony:         http://127.0.0.1:$(SYMFONY_PORT)"
 	@echo "  Yii2:            http://127.0.0.1:$(YII2_PORT)"

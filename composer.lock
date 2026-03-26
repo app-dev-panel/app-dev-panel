@@ -480,12 +480,13 @@
             "dist": {
                 "type": "path",
                 "url": "libs/API",
-                "reference": "4a82fc87e593f06af6488a6ee78b4fc1292832f8"
+                "reference": "f78eb0be8b00db0bed8e433327659988e06b1148"
             },
             "require": {
                 "alexkart/curl-builder": "^1.0",
                 "app-dev-panel/kernel": "*",
                 "app-dev-panel/mcp-server": "*",
+                "app-dev-panel/task-bus": "*",
                 "gitonomy/gitlib": "^1.3",
                 "guzzlehttp/guzzle": "^7.5",
                 "guzzlehttp/psr7": "^2.4",
@@ -559,12 +560,13 @@
             "dist": {
                 "type": "path",
                 "url": "libs/Cli",
-                "reference": "cf351e47fd7e13960c0ec31290a44c6018a895d1"
+                "reference": "a51f9560e8141e1fa6b3011d53091729be97f14d"
             },
             "require": {
                 "app-dev-panel/api": "*",
                 "app-dev-panel/kernel": "*",
                 "app-dev-panel/mcp-server": "*",
+                "app-dev-panel/task-bus": "*",
                 "guzzlehttp/guzzle": "^7.5",
                 "guzzlehttp/psr7": "^2.4",
                 "php": "^8.4",

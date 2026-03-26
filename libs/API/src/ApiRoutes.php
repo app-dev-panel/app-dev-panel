@@ -20,6 +20,7 @@ use AppDevPanel\Api\Inspector\Controller\OpcacheController;
 use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
+use AppDevPanel\Api\Inspector\Controller\TaskBusController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Mcp\Controller\McpController;
@@ -208,6 +209,18 @@ final class ApiRoutes
                 '/inspect/api/authorization',
                 [AuthorizationController::class, 'index'],
                 'inspect/api/authorization/index',
+            ),
+            new Route(
+                'POST',
+                '/inspect/api/taskbus',
+                [TaskBusController::class, 'handle'],
+                'inspect/api/taskbus',
+            ),
+            new Route(
+                'GET',
+                '/inspect/api/taskbus/status',
+                [TaskBusController::class, 'status'],
+                'inspect/api/taskbus/status',
             ),
             new Route('POST', '/inspect/api/mcp', [McpController::class, 'handle'], 'inspect/api/mcp'),
             new Route(
