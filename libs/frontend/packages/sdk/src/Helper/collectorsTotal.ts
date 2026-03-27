@@ -36,7 +36,7 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
         case CollectorsMap.HttpStreamCollector:
             return Number(data.http_stream?.length);
         case CollectorsMap.MailerCollector:
-            return data.mailer?.total != null ? Number(data.mailer.total) : undefined;
+            return data.mailer?.total != null ? Number(data.mailer.total) : 0;
         case CollectorsMap.CacheCollector:
             return Number(data.cache?.totalOperations);
         case CollectorsMap.FilesystemStreamCollector:
@@ -46,9 +46,9 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
         case CollectorsMap.DeprecationCollector:
             return Number(data.deprecation?.total);
         case CollectorsMap.TimelineCollector:
-            return data.timeline?.total != null ? Number(data.timeline.total) : undefined;
+            return data.timeline?.total != null ? Number(data.timeline.total) : 0;
         case CollectorsMap.OpenTelemetryCollector:
-            return Number(data.opentelemetry?.spans) || undefined;
+            return Number(data.opentelemetry?.spans) || 0;
         default:
             return undefined;
     }
