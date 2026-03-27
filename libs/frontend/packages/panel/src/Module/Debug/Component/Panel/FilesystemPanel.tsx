@@ -6,7 +6,7 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Box, Chip, Collapse, Icon, IconButton, Tab, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Icon, IconButton, Tab, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {SyntheticEvent, useDeferredValue, useMemo, useState} from 'react';
 
@@ -114,8 +114,11 @@ const operationMeta = (op: string): {icon: string; color: string} => {
 // Sub-components
 // ---------------------------------------------------------------------------
 
+const PAGE_SIZE = 100;
+
 const OperationView = ({items, operation, filter}: {items: Information[]; operation: string; filter: string}) => {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
     const deferredFilter = useDeferredValue(filter);
 
     const filtered = useMemo(() => {
@@ -133,6 +136,9 @@ const OperationView = ({items, operation, filter}: {items: Information[]; operat
         return <EmptyState icon="search_off" title="No matching paths" />;
     }
 
+    const visible = filtered.slice(0, visibleCount);
+    const hasMore = visibleCount < filtered.length;
+
     return (
         <Box>
             <Box sx={{display: 'flex', alignItems: 'center', gap: 1, py: 1, px: 2}}>
@@ -142,7 +148,7 @@ const OperationView = ({items, operation, filter}: {items: Information[]; operat
                         : `${filtered.length} of ${items.length} operations`}
                 </Typography>
             </Box>
-            {filtered.map((item, index) => {
+            {visible.map((item, index) => {
                 const expanded = expandedIndex === index;
                 const hasArgs = Object.keys(item.args).length > 0;
 
@@ -167,21 +173,28 @@ const OperationView = ({items, operation, filter}: {items: Information[]; operat
                                 </IconButton>
                             )}
                         </FileRow>
-                        {hasArgs && (
-                            <Collapse in={expanded}>
-                                <DetailBox>
-                                    <Typography
-                                        sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}
-                                    >
-                                        Arguments
-                                    </Typography>
-                                    <JsonRenderer value={item.args} />
-                                </DetailBox>
-                            </Collapse>
+                        {expanded && hasArgs && (
+                            <DetailBox>
+                                <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                                    Arguments
+                                </Typography>
+                                <JsonRenderer value={item.args} />
+                            </DetailBox>
                         )}
                     </Box>
                 );
             })}
+            {hasMore && (
+                <Box sx={{display: 'flex', justifyContent: 'center', py: 1.5, borderBottom: 1, borderColor: 'divider'}}>
+                    <Chip
+                        label={`Show ${Math.min(PAGE_SIZE, filtered.length - visibleCount)} more (${filtered.length - visibleCount} remaining)`}
+                        onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                        clickable
+                        variant="outlined"
+                        size="small"
+                    />
+                </Box>
+            )}
         </Box>
     );
 };
