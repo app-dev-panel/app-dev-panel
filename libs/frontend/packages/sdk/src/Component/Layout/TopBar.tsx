@@ -168,10 +168,10 @@ export const TopBar = React.memo(
                     <DuckIcon sx={{fontSize: 22}} /> App Dev Panel
                 </Logo>
                 <CenterGroup>
-                    <IconButton size="small" onClick={onPrevEntry} disabled={!method}>
+                    <IconButton size="small" onClick={onPrevEntry} disabled={!method} aria-label="Previous entry">
                         <Icon sx={{fontSize: 18}}>chevron_left</Icon>
                     </IconButton>
-                    <IconButton size="small" onClick={onNextEntry} disabled={!method}>
+                    <IconButton size="small" onClick={onNextEntry} disabled={!method} aria-label="Next entry">
                         <Icon sx={{fontSize: 18}}>chevron_right</Icon>
                     </IconButton>
                     <PillContainer>
@@ -198,10 +198,10 @@ export const TopBar = React.memo(
                     </IconButton>
                 </CenterGroup>
                 <SearchTrigger onClick={onSearchClick} />
-                <IconButton size="small" onClick={onThemeToggle}>
+                <IconButton size="small" onClick={onThemeToggle} aria-label="Toggle theme">
                     <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
                 </IconButton>
-                <IconButton size="small" onClick={onNotificationsClick}>
+                <IconButton size="small" onClick={onNotificationsClick} aria-label="Notifications">
                     <Badge
                         badgeContent={notificationCount}
                         color="error"
@@ -226,7 +226,7 @@ export const TopBar = React.memo(
                         </Icon>
                     </Badge>
                 </IconButton>
-                <IconButton size="small" onClick={handleMenuOpen}>
+                <IconButton size="small" onClick={handleMenuOpen} aria-label="More options">
                     <Icon sx={{fontSize: 18}}>more_vert</Icon>
                 </IconButton>
 
