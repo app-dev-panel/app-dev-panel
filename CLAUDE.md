@@ -30,7 +30,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
 │   ├── API/                      # HTTP API: debug endpoints, inspector endpoints, SSE
 │   ├── McpServer/                # MCP server: AI assistant integration (stdio + HTTP)
-│   ├── Cli/                      # CLI commands: debug server, reset, broadcast, query
+│   ├── Cli/                      # CLI commands: debug server, reset, broadcast, query, serve, mcp
 │   ├── Testing/                  # Test fixtures: definitions, runner, CLI command
 │   ├── Adapter/
 │   │   ├── Yiisoft/              # Yii 3 framework adapter
@@ -54,7 +54,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 ADP follows a **layered architecture**:
 
 1. **Kernel** — Core engine. Manages debugger lifecycle, data collectors, storage, and proxy system. Framework-independent.
-2. **API** — HTTP layer. Exposes debug data and inspector endpoints via REST + SSE + MCP. Framework-independent.
+2. **API** — HTTP layer. Exposes debug data, inspector, ingestion, MCP, and LLM endpoints via REST + SSE. Framework-independent.
 3. **McpServer** — MCP (Model Context Protocol) server. Exposes debug data tools to AI assistants via stdio and HTTP transports.
 4. **Adapter** — Framework bridge. Wires Kernel collectors into a specific framework's DI, events, and middleware.
 5. **Frontend** — React SPA. Consumes the API and renders debug/inspector UI.

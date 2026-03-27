@@ -52,14 +52,18 @@ only depend on `yiisoft/var-dumper` (core infra).
 src/
 ├── Debugger.php                  # Main debugger class
 ├── DebuggerIdGenerator.php       # ID generation
+├── DebuggerIgnoreConfig.php      # Ignore patterns for debugger
 ├── Dumper.php                    # Object serialization with depth/circular-ref control
+├── DumpContext.php               # Context for dump operations
 ├── FlattenException.php          # Serializable exception representation
+├── IgnoreConfig.php              # General ignore configuration
 ├── ProxyDecoratedCalls.php       # Trait for proxy delegation (__call, __get, __set)
 ├── StartupContext.php            # Debugger startup context
 ├── Collector/                    # Collectors and colocated PSR proxies
 │   ├── CollectorInterface.php
 │   ├── CollectorTrait.php
 │   ├── SummaryCollectorInterface.php
+│   ├── DuplicateDetectionTrait.php       # Shared utility for duplicate entry detection
 │   ├── LogCollector.php
 │   ├── LoggerInterfaceProxy.php          # PSR-3 proxy (feeds LogCollector)
 │   ├── EventCollector.php
@@ -68,13 +72,28 @@ src/
 │   ├── ExceptionCollector.php
 │   ├── HttpClientCollector.php
 │   ├── HttpClientInterfaceProxy.php      # PSR-18 proxy (feeds HttpClientCollector)
+│   ├── SpanProcessorInterfaceProxy.php   # OpenTelemetry proxy (feeds OpenTelemetryCollector)
 │   ├── VarDumperCollector.php
 │   ├── TimelineCollector.php
 │   ├── CacheCollector.php               # Cache operations: get/set/delete (fed by adapter hooks)
+│   ├── CacheOperationRecord.php         # Value object for cache operation
 │   ├── DatabaseCollector.php            # SQL queries + transactions (fed by adapter hooks)
+│   ├── QueryRecord.php                  # Value object for DB query
+│   ├── MessageRecord.php               # Value object for mailer message
 │   ├── MailerCollector.php              # Email messages (fed by adapter hooks)
 │   ├── AssetBundleCollector.php         # Asset bundles (fed by adapter hooks)
+│   ├── DeprecationCollector.php         # PHP deprecation warnings
 │   ├── EnvironmentCollector.php
+│   ├── MiddlewareCollector.php          # HTTP middleware stack execution
+│   ├── OpenTelemetryCollector.php       # OpenTelemetry spans
+│   ├── OtlpTraceParser.php             # OTLP trace data parser
+│   ├── SpanRecord.php                  # Value object for OTel span
+│   ├── QueueCollector.php              # Message queue/bus operations
+│   ├── RouterCollector.php             # HTTP route matching data
+│   ├── SecurityCollector.php           # Authentication/authorization
+│   ├── TemplateCollector.php           # Template rendering
+│   ├── ValidatorCollector.php          # Validation operations
+│   ├── ViewCollector.php               # View rendering with output
 │   ├── Web/
 │   │   ├── RequestCollector.php
 │   │   └── WebAppInfoCollector.php
@@ -85,7 +104,8 @@ src/
 │       ├── FilesystemStreamCollector.php
 │       ├── FilesystemStreamProxy.php
 │       ├── HttpStreamCollector.php
-│       └── HttpStreamProxy.php
+│       ├── HttpStreamProxy.php
+│       └── StreamProxyTrait.php         # Shared delegation for stream wrappers
 ├── Service/                      # Service registry for multi-app inspection
 │   ├── ServiceDescriptor.php
 │   ├── ServiceRegistryInterface.php
@@ -93,9 +113,11 @@ src/
 ├── Storage/
 │   ├── StorageInterface.php
 │   ├── FileStorage.php
+│   ├── FileStorageGarbageCollector.php  # Automatic cleanup of old entries
 │   └── MemoryStorage.php
 ├── Event/                        # Debugger lifecycle events
-│   └── ProxyMethodCallEvent.php
+│   ├── ProxyMethodCallEvent.php
+│   └── MethodCallRecord.php
 ├── Helper/                       # Utilities
 │   ├── BacktraceIgnoreMatcher.php
 │   └── StreamWrapper/
@@ -134,6 +156,12 @@ The application code is completely unaware of the interception.
 - `LoggerInterfaceProxy` (PSR-3) — feeds `LogCollector`
 - `EventDispatcherInterfaceProxy` (PSR-14) — feeds `EventCollector`
 - `HttpClientInterfaceProxy` (PSR-18) — feeds `HttpClientCollector`
+- `SpanProcessorInterfaceProxy` (OpenTelemetry) — feeds `OpenTelemetryCollector` (optional, requires `open-telemetry/sdk`)
+
+**Stream proxies** (PHP stream wrapper interception):
+- `FilesystemStreamProxy` — wraps `file://` stream wrapper, feeds `FilesystemStreamCollector`
+- `HttpStreamProxy` — wraps `http://` and `https://` stream wrappers, feeds `HttpStreamCollector`
+- `StreamProxyTrait` — shared delegation logic for both stream wrappers
 
 **Proxies moved to Yii adapter** (`libs/Adapter/Yiisoft/src/Proxy/`):
 - `ContainerInterfaceProxy` (PSR-11), `ContainerProxyConfig`, `ProxyLogTrait`

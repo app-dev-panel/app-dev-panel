@@ -1,42 +1,52 @@
 # API Module
 
-HTTP layer for ADP. Three domains: **Debug** (stored debug entries), **Inspector** (live app state), **Ingestion** (external data intake).
+HTTP layer for ADP. Five domains: **Debug** (stored debug entries), **Inspector** (live app state), **Ingestion** (external data intake), **MCP** (AI assistant integration), **LLM** (AI chat and analysis).
 
 ## Package
 
 - Composer: `app-dev-panel/api`
 - Namespace: `AppDevPanel\Api\`
 - PHP: 8.4+
-- Dependencies: `app-dev-panel/kernel`
+- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/mcp-server`, `gitonomy/gitlib`, `guzzlehttp/guzzle`, `zircote/swagger-php`
 
 ## Directory Structure
 
 ```
 src/
+├── ApiApplication.php                   # Main application bootstrap
+├── ApiConfig.php                        # Core API configuration
+├── ApiExtensionsConfig.php              # Extension points configuration
+├── ApiSecurityConfig.php                # Security configuration (IP, token auth)
+├── ApiRoutes.php                        # All route definitions (debug, inspector, ingestion, mcp, llm, service)
 ├── Debug/
 │   ├── Controller/
-│   │   └── DebugController.php          # Debug data endpoints (Debugger mode)
+│   │   ├── DebugController.php          # Debug data endpoints (list, summary, view, dump, object, SSE)
+│   │   └── SettingsController.php       # Debug settings (path mapping)
 │   ├── Middleware/
 │   │   ├── ResponseDataWrapper.php      # Wraps responses in {id, data, error, success, status}
 │   │   ├── DebugHeaders.php             # Adds X-Debug-Id, X-Debug-Link headers
-│   │   └── MiddlewareDispatcherMiddleware.php
-│   └── Repository/
-│       ├── CollectorRepositoryInterface.php
-│       └── CollectorRepository.php      # Reads debug data from storage
+│   │   └── TokenAuthMiddleware.php      # Token-based authentication
+│   ├── Repository/
+│   │   ├── CollectorRepositoryInterface.php
+│   │   └── CollectorRepository.php      # Reads debug data from storage
+│   ├── HtmlViewProviderInterface.php
+│   ├── ModuleFederationAssetBundle.php  # Remote panel support
+│   └── ModuleFederationProviderInterface.php
 ├── Inspector/
 │   ├── Controller/                      # Inspector mode — live app state
 │   │   ├── InspectController.php        # config, params, classes, object, phpinfo, events
 │   │   ├── RoutingController.php        # routes, route check
-│   │   ├── DatabaseController.php       # table list, table data with pagination
+│   │   ├── DatabaseController.php       # table list, table data, explain, query
 │   │   ├── FileController.php           # file explorer, file read
 │   │   ├── TranslationController.php    # translation catalogs, update
 │   │   ├── RequestController.php        # re-execute request, build cURL
 │   │   ├── GitController.php            # git summary, log, checkout, commands
+│   │   ├── GitRepositoryProvider.php    # Git repository instance factory
 │   │   ├── CommandController.php        # list/execute commands + composer scripts
 │   │   ├── ComposerController.php       # composer.json/lock, inspect, require
 │   │   ├── CacheController.php          # view/delete/clear cache
 │   │   ├── OpcacheController.php        # OPcache status
-│   │   └── ServiceController.php       # Service registration (register, heartbeat, list, deregister)
+│   │   └── ServiceController.php        # Service registration (register, heartbeat, list, deregister)
 │   ├── Middleware/
 │   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services
 │   ├── Database/
@@ -44,20 +54,47 @@ src/
 │   │   └── NullSchemaProvider.php       # Default no-op fallback
 │   ├── Command/
 │   │   ├── CommandInterface.php
+│   │   ├── CommandResponse.php
 │   │   ├── BashCommand.php
 │   │   ├── PHPUnitCommand.php
 │   │   ├── CodeceptionCommand.php
 │   │   └── PsalmCommand.php
+│   ├── Test/
+│   │   ├── CodeceptionJSONReporter.php
+│   │   └── PHPUnitJSONReporter.php
 │   └── ApplicationState.php
 ├── Ingestion/
 │   └── Controller/
-│       └── IngestionController.php      # External data intake (any language)
-├── ServerSentEventsStream.php           # SSE implementation
-└── ModuleFederationAssetBundle.php      # Remote panel support
-config/
-├── routes.php                           # All route definitions
-├── di-web.php                           # DI configuration
-└── params.php                           # Default parameters
+│       ├── IngestionController.php      # External data intake (any language)
+│       └── OtlpController.php           # OpenTelemetry trace ingestion (OTLP format)
+├── Mcp/
+│   ├── Controller/
+│   │   ├── McpController.php            # JSON-RPC 2.0 MCP handler
+│   │   └── McpSettingsController.php    # MCP enabled/disabled settings
+│   └── McpSettings.php                  # File-based MCP settings persistence
+├── Llm/
+│   ├── Controller/
+│   │   └── LlmController.php           # LLM integration (connect, chat, analyze, history, OAuth)
+│   ├── FileLlmHistoryStorage.php        # File-based chat history
+│   ├── FileLlmSettings.php              # File-based LLM settings
+│   ├── LlmHistoryStorageInterface.php
+│   └── LlmSettingsInterface.php
+├── Http/
+│   ├── JsonResponseFactory.php          # JSON response creation
+│   └── JsonResponseFactoryInterface.php
+├── Middleware/
+│   ├── IpFilterMiddleware.php           # IP whitelist validation
+│   ├── CorsMiddleware.php               # Permissive CORS headers
+│   └── MiddlewarePipeline.php           # Middleware chain executor
+├── Router/
+│   ├── Route.php                        # Route definition
+│   └── Router.php                       # Request-to-route matching
+├── PathMapper.php                       # IDE file path mapping
+├── PathMapperInterface.php
+├── NullPathMapper.php
+├── PathResolver.php                     # Path resolution
+├── PathResolverInterface.php
+└── ServerSentEventsStream.php           # SSE implementation
 ```
 
 ## API Endpoints
@@ -72,6 +109,7 @@ config/
 | GET | `/dump/{id}` | Dump objects for entry |
 | GET | `/object/{id}/{objectId}` | Specific object from dump |
 | GET | `/event-stream` | SSE stream for real-time updates |
+| GET | `/settings` | Debug settings (path mapping) |
 
 ### Inspector API (`/inspect/api`)
 
@@ -89,6 +127,8 @@ config/
 | PUT | `/translations` | Update translation |
 | GET | `/table` | Database tables list |
 | GET | `/table/{name}` | Table schema + records |
+| POST | `/table/explain` | Explain SQL query |
+| POST | `/table/query` | Execute raw SQL query |
 | PUT | `/request` | Re-execute a request |
 | POST | `/curl/build` | Build cURL command from request |
 | GET | `/phpinfo` | PHP info output |
@@ -151,11 +191,39 @@ Language-agnostic endpoints for external applications to send debug data. Define
 | Method | Path | Description |
 |--------|------|-------------|
 | POST | `/` | Ingest single debug entry (collectors + optional context/summary) |
-| POST | `/batch` | Ingest multiple entries at once |
+| POST | `/batch` | Ingest multiple entries at once (max 100) |
 | POST | `/log` | Shorthand: ingest a single log entry |
 | GET | `/openapi.json` | Serve the OpenAPI spec |
 
+### OTLP Trace Ingestion (`/debug/api/otlp`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/v1/traces` | Ingest OpenTelemetry traces in OTLP format |
+
 Pre-built clients: Python (`clients/python/`), TypeScript (`clients/typescript/`).
+
+### LLM API (`/debug/api/llm`)
+
+AI-powered chat and analysis integration.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/status` | LLM connection status |
+| POST | `/connect` | Connect to LLM provider (API key) |
+| POST | `/oauth/initiate` | Start OAuth flow for LLM provider |
+| POST | `/oauth/exchange` | Exchange OAuth code for token |
+| POST | `/disconnect` | Disconnect from LLM provider |
+| POST | `/model` | Set active model |
+| POST | `/timeout` | Set request timeout |
+| POST | `/custom-prompt` | Set custom system prompt |
+| GET | `/models` | List available models |
+| POST | `/chat` | Send chat message |
+| POST | `/analyze` | Analyze debug entry with AI |
+| GET | `/history` | Get chat history |
+| POST | `/history` | Add history entry |
+| DELETE | `/history/{index}` | Delete specific history entry |
+| DELETE | `/history` | Clear all history |
 
 ### Service Registry API (`/debug/api/services`)
 
@@ -184,8 +252,8 @@ Capability checking: the middleware maps inspector path prefixes to capability n
 
 All API requests pass through:
 
-1. **IpFilter** — Validates request IP against `allowedIPs` (default: `127.0.0.1`, `::1`)
-2. **CorsAllowAll** — Adds permissive CORS headers
+1. **IpFilterMiddleware** — Validates request IP against `allowedIPs` (default: `127.0.0.1`, `::1`)
+2. **CorsMiddleware** — Adds permissive CORS headers (`Access-Control-Allow-Origin: *`)
 3. **ResponseDataWrapper** — Wraps all responses in `{id, data, error, success, status}`
 4. **DebugHeaders** — Adds `X-Debug-Id` and `X-Debug-Link` response headers
 
