@@ -41,7 +41,9 @@ const SummaryLabel = styled(Typography)(({theme}) => ({
     textTransform: 'uppercase' as const,
     letterSpacing: '0.5px',
     color: theme.palette.text.disabled,
-}));
+})) as typeof Typography;
+
+SummaryLabel.defaultProps = {component: 'div'};
 
 const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 700, fontSize: '20px'});
 

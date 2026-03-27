@@ -12,7 +12,7 @@ import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Box, Chip, Collapse, Icon, IconButton, Tab, type Theme, Typography} from '@mui/material';
+import {Box, Chip, Icon, IconButton, Tab, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {type SyntheticEvent, useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
 
@@ -210,8 +210,7 @@ const HttpStreamView = ({data}: {data: HttpStreamData}) => {
                                             </IconButton>
                                         )}
                                     </StreamOperationRow>
-                                    {hasArgs && (
-                                        <Collapse in={expanded}>
+                                    {expanded && hasArgs && (
                                             <DetailBox>
                                                 <Typography
                                                     sx={{
@@ -225,7 +224,6 @@ const HttpStreamView = ({data}: {data: HttpStreamData}) => {
                                                 </Typography>
                                                 <JsonRenderer value={item.args} />
                                             </DetailBox>
-                                        </Collapse>
                                     )}
                                 </Box>
                             );
@@ -739,9 +737,7 @@ const HttpClientTabContent = ({data}: HttpClientPanelProps) => {
                                 <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
                             </IconButton>
                         </RequestRow>
-                        <Collapse in={expanded}>
-                            <RequestDetail entry={entry} />
-                        </Collapse>
+                        {expanded && <RequestDetail entry={entry} />}
                     </Box>
                 );
             })}
