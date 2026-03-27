@@ -172,65 +172,76 @@ const HttpStreamView = ({data}: {data: HttpStreamData}) => {
         return <EmptyState icon="stream" title="No HTTP stream operations found" />;
     }
 
-    let globalIndex = 0;
+    const flatItems = useMemo(() => {
+        const result: Array<{operation: string; item: HttpStreamEntry; index: number}> = [];
+        let idx = 0;
+        for (const op of operations) {
+            for (const item of data[op] ?? []) {
+                result.push({operation: op, item, index: idx++});
+            }
+        }
+        return result;
+    }, [data, operations]);
+
+    const groupedOps = useMemo(() => {
+        const groups: Array<{operation: string; items: typeof flatItems}> = [];
+        let current: (typeof groups)[0] | null = null;
+        for (const entry of flatItems) {
+            if (!current || current.operation !== entry.operation) {
+                current = {operation: entry.operation, items: []};
+                groups.push(current);
+            }
+            current.items.push(entry);
+        }
+        return groups;
+    }, [flatItems]);
+
     return (
         <Box>
             <SectionTitle>{[`${totalCount} stream operations`]}</SectionTitle>
-            {operations.map((operation) => {
-                const items = data[operation] ?? [];
-                if (items.length === 0) return null;
-                return (
-                    <Box key={operation}>
-                        <Box sx={{px: 1.5, py: 1, backgroundColor: 'action.hover'}}>
-                            <Typography sx={{fontSize: '12px', fontWeight: 600, color: 'text.secondary'}}>
-                                {operation}
-                                <Chip
-                                    label={items.length}
-                                    size="small"
-                                    sx={{ml: 1, fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
-                                />
-                            </Typography>
-                        </Box>
-                        {items.map((item) => {
-                            const idx = globalIndex++;
-                            const expanded = expandedIndex === idx;
-                            const hasArgs = item.args && Object.keys(item.args).length > 0;
-                            return (
-                                <Box key={idx}>
-                                    <StreamOperationRow
-                                        expanded={expanded}
-                                        onClick={() => setExpandedIndex(expanded ? null : idx)}
-                                    >
-                                        <StreamUriCell>{item.uri}</StreamUriCell>
-                                        {hasArgs && (
-                                            <IconButton size="small" sx={{flexShrink: 0}}>
-                                                <Icon sx={{fontSize: 16}}>
-                                                    {expanded ? 'expand_less' : 'expand_more'}
-                                                </Icon>
-                                            </IconButton>
-                                        )}
-                                    </StreamOperationRow>
-                                    {expanded && hasArgs && (
-                                        <DetailBox>
-                                            <Typography
-                                                sx={{
-                                                    fontSize: '11px',
-                                                    fontWeight: 600,
-                                                    color: 'text.disabled',
-                                                    mb: 0.5,
-                                                }}
-                                            >
-                                                Arguments
-                                            </Typography>
-                                            <JsonRenderer value={item.args} />
-                                        </DetailBox>
-                                    )}
-                                </Box>
-                            );
-                        })}
+            {groupedOps.map(({operation, items}) => (
+                <Box key={operation}>
+                    <Box sx={{px: 1.5, py: 1, backgroundColor: 'action.hover'}}>
+                        <Typography sx={{fontSize: '12px', fontWeight: 600, color: 'text.secondary'}}>
+                            {operation}
+                            <Chip
+                                label={items.length}
+                                size="small"
+                                sx={{ml: 1, fontSize: '10px', height: 18, minWidth: 24, borderRadius: 1}}
+                            />
+                        </Typography>
                     </Box>
-                );
-            })}
+                    {items.map(({item, index: idx}) => {
+                        const expanded = expandedIndex === idx;
+                        const hasArgs = item.args && Object.keys(item.args).length > 0;
+                        return (
+                            <Box key={idx}>
+                                <StreamOperationRow
+                                    expanded={expanded}
+                                    onClick={() => setExpandedIndex(expanded ? null : idx)}
+                                >
+                                    <StreamUriCell>{item.uri}</StreamUriCell>
+                                    {hasArgs && (
+                                        <IconButton size="small" sx={{flexShrink: 0}}>
+                                            <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                                        </IconButton>
+                                    )}
+                                </StreamOperationRow>
+                                {expanded && hasArgs && (
+                                    <DetailBox>
+                                        <Typography
+                                            sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}
+                                        >
+                                            Arguments
+                                        </Typography>
+                                        <JsonRenderer value={item.args} />
+                                    </DetailBox>
+                                )}
+                            </Box>
+                        );
+                    })}
+                </Box>
+            ))}
         </Box>
     );
 };
@@ -285,10 +296,10 @@ function extractPath(uri: string): string {
 // Detail view
 // ---------------------------------------------------------------------------
 
-const RequestDetail = ({entry}: {entry: HttpClientEntry}) => {
+const RequestDetail = memo(({entry}: {entry: HttpClientEntry}) => {
     const theme = useTheme();
-    const requestHeaders = Object.entries(entry.headers || {});
-    const response = parseRawResponse(entry.responseRaw);
+    const requestHeaders = useMemo(() => Object.entries(entry.headers || {}), [entry.headers]);
+    const response = useMemo(() => parseRawResponse(entry.responseRaw), [entry.responseRaw]);
 
     return (
         <DetailBox>
@@ -446,7 +457,7 @@ const RequestDetail = ({entry}: {entry: HttpClientEntry}) => {
             )}
         </DetailBox>
     );
-};
+});
 
 // ---------------------------------------------------------------------------
 // Helpers: status group
@@ -540,16 +551,25 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
     );
 };
 
-type RequestRowItemProps = {entry: HttpClientEntry; expanded: boolean; onToggle: () => void};
+type RequestRowItemProps = {
+    entry: HttpClientEntry;
+    index: number;
+    expanded: boolean;
+    onToggle: (index: number) => void;
+};
 
-const RequestRowItem = memo(({entry, expanded, onToggle}: RequestRowItemProps) => {
+const RequestRowItem = memo(({entry, index, expanded, onToggle}: RequestRowItemProps) => {
     const theme = useTheme();
-    const [wasExpanded, setWasExpanded] = useState(expanded);
-    if (expanded && !wasExpanded) setWasExpanded(true);
+    const [wasExpanded, setWasExpanded] = useState(false);
+    useEffect(() => {
+        if (expanded) setWasExpanded(true);
+    }, [expanded]);
+
+    const handleClick = useCallback(() => onToggle(index), [onToggle, index]);
 
     return (
         <Box>
-            <RequestRow expanded={expanded} onClick={onToggle}>
+            <RequestRow expanded={expanded} onClick={handleClick}>
                 <Chip
                     label={entry.method}
                     size="small"
@@ -590,9 +610,7 @@ const RequestRowItem = memo(({entry, expanded, onToggle}: RequestRowItemProps) =
                     <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
                 </IconButton>
             </RequestRow>
-            <Collapse in={expanded}>
-                {wasExpanded && <RequestDetail entry={entry} />}
-            </Collapse>
+            <Collapse in={expanded}>{wasExpanded && <RequestDetail entry={entry} />}</Collapse>
         </Box>
     );
 });
@@ -603,6 +621,10 @@ const HttpClientTabContent = ({data}: HttpClientPanelProps) => {
     const deferredFilter = useDeferredValue(filter);
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+    const handleRowToggle = useCallback((index: number) => {
+        setExpandedIndex((prev) => (prev === index ? null : index));
+    }, []);
 
     const toggleFilter = useCallback((name: string) => {
         setActiveFilters((prev) => {
@@ -753,8 +775,9 @@ const HttpClientTabContent = ({data}: HttpClientPanelProps) => {
                 <RequestRowItem
                     key={index}
                     entry={entry}
+                    index={index}
                     expanded={expandedIndex === index}
-                    onToggle={() => setExpandedIndex(expandedIndex === index ? null : index)}
+                    onToggle={handleRowToggle}
                 />
             ))}
         </Box>
