@@ -45,7 +45,7 @@ final class ServerSentEventsStreamTest extends TestCase
         $stream = new ServerSentEventsStream(static function (array &$buffer) use (&$callCount) {
             $callCount++;
             return $callCount < 3;
-        });
+        }, pollIntervalMicros: 0);
 
         $stream->read(1024);
         $this->assertFalse($stream->eof());
@@ -158,6 +158,54 @@ final class ServerSentEventsStreamTest extends TestCase
         $this->assertStringContainsString("data: second\n", $output);
     }
 
+    public function testReadReturnsEmptyAfterClose(): void
+    {
+        $stream = new ServerSentEventsStream(static function (array &$buffer) {
+            $buffer[] = 'data';
+            return true;
+        }, pollIntervalMicros: 0);
+
+        $stream->close();
+        $this->assertSame('', $stream->read(1024));
+    }
+
+    public function testCloseStopsInterruptibleSleep(): void
+    {
+        $callCount = 0;
+        $stream = new ServerSentEventsStream(
+            static function (array &$buffer) use (&$callCount) {
+                $callCount++;
+                return true;
+            },
+            pollIntervalMicros: 1_000_000,
+            sleepChunkMicros: 10_000,
+        );
+
+        // Close immediately after first read starts — the interruptible sleep should exit early
+        $stream->close();
+        $output = $stream->read(1024);
+
+        $this->assertSame('', $output);
+        $this->assertTrue($stream->eof());
+    }
+
+    public function testCustomPollInterval(): void
+    {
+        $callCount = 0;
+        $stream = new ServerSentEventsStream(static function (array &$buffer) use (&$callCount) {
+            $callCount++;
+            $buffer[] = "call-$callCount";
+            return $callCount < 3;
+        }, pollIntervalMicros: 0);
+
+        $stream->read(1024);
+        $stream->read(1024);
+        $output = $stream->read(1024);
+
+        $this->assertStringContainsString('data: call-3', $output);
+        $this->assertTrue($stream->eof());
+    }
+
     public function testBufferIsClearedAfterRead(): void
     {
         $callCount = 0;
@@ -167,7 +215,7 @@ final class ServerSentEventsStreamTest extends TestCase
                 $buffer[] = 'first-call';
             }
             return $callCount < 2;
-        });
+        }, pollIntervalMicros: 0);
 
         $output1 = $stream->read(1024);
         $this->assertStringContainsString('data: first-call', $output1);
