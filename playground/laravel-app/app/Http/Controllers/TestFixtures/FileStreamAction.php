@@ -12,22 +12,17 @@ final class FileStreamAction
     {
         $tmpDir = sys_get_temp_dir() . '/adp-test-stream-' . uniqid();
         $tmpFile = $tmpDir . '/stream-test.txt';
+        $renamedFile = $tmpDir . '/stream-test-renamed.txt';
 
-        // mkdir
         mkdir($tmpDir, 0o777, true);
 
-        // fopen + fwrite + fread + fclose
         $stream = fopen($tmpFile, 'w+');
         fwrite($stream, 'ADP file stream test');
         fseek($stream, 0);
         fread($stream, 20);
         fclose($stream);
 
-        // rename
-        $renamedFile = $tmpDir . '/stream-test-renamed.txt';
         rename($tmpFile, $renamedFile);
-
-        // unlink + rmdir (cleanup)
         unlink($renamedFile);
         rmdir($tmpDir);
 

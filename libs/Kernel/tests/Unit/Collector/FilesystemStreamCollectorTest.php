@@ -411,6 +411,19 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         $this->assertCount(1, $collected['readdir']);
     }
 
+    public function testStreamIsLocalReturnsTrueWhileProxyActive(): void
+    {
+        $collector = new FilesystemStreamCollector();
+        $collector->startup();
+
+        try {
+            $this->assertTrue(stream_is_local(__FILE__));
+            $this->assertTrue(stream_is_local(__DIR__));
+        } finally {
+            $collector->shutdown();
+        }
+    }
+
     public function testFileStreamFixtureScenario(): void
     {
         $collector = new FilesystemStreamCollector();
@@ -453,15 +466,13 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             }
         }
 
-        // Verify all operation types are present
         $this->assertArrayHasKey('mkdir', $collected);
         $this->assertArrayHasKey('write', $collected);
-        $this->assertArrayHasKey('read', $collected, 'read operations should be collected');
-        $this->assertArrayHasKey('rename', $collected, 'rename operations should be collected');
-        $this->assertArrayHasKey('unlink', $collected, 'unlink operations should be collected');
-        $this->assertArrayHasKey('rmdir', $collected, 'rmdir operations should be collected');
+        $this->assertArrayHasKey('read', $collected);
+        $this->assertArrayHasKey('rename', $collected);
+        $this->assertArrayHasKey('unlink', $collected);
+        $this->assertArrayHasKey('rmdir', $collected);
 
-        // Verify operation counts
         $this->assertCount(1, $collected['mkdir']);
         $this->assertCount(1, $collected['write']);
         $this->assertCount(1, $collected['read']);
@@ -469,14 +480,13 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         $this->assertCount(1, $collected['unlink']);
         $this->assertCount(1, $collected['rmdir']);
 
-        // Verify summary
         $this->assertArrayHasKey('fs_stream', $summary);
-        $this->assertEquals(1, $summary['fs_stream']['mkdir']);
-        $this->assertEquals(1, $summary['fs_stream']['write']);
-        $this->assertEquals(1, $summary['fs_stream']['read']);
-        $this->assertEquals(1, $summary['fs_stream']['rename']);
-        $this->assertEquals(1, $summary['fs_stream']['unlink']);
-        $this->assertEquals(1, $summary['fs_stream']['rmdir']);
+        $this->assertSame(1, $summary['fs_stream']['mkdir']);
+        $this->assertSame(1, $summary['fs_stream']['write']);
+        $this->assertSame(1, $summary['fs_stream']['read']);
+        $this->assertSame(1, $summary['fs_stream']['rename']);
+        $this->assertSame(1, $summary['fs_stream']['unlink']);
+        $this->assertSame(1, $summary['fs_stream']['rmdir']);
     }
 
     protected function getCollector(): CollectorInterface

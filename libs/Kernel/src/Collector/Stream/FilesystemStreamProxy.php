@@ -37,7 +37,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
         class_exists(StreamWrapper::class);
         class_exists(CombinedRegexp::class);
         stream_wrapper_unregister('file');
-        stream_wrapper_register('file', self::class, STREAM_IS_URL);
+        stream_wrapper_register('file', self::class);
         self::$registered = true;
     }
 
