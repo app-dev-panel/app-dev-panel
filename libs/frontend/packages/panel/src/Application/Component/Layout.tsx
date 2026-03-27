@@ -291,7 +291,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     badgeVariant: (isException ? 'error' : 'default') as 'error' | 'default',
                 };
             })
-            .filter((c) => showInactiveCollectors || (c.badge != null && c.badge > 0));
+            .filter((c) => showInactiveCollectors || c.badge == null || c.badge > 0);
         return [...collectors, ...entriesList];
     }, [debugEntry, showInactiveCollectors]);
 
