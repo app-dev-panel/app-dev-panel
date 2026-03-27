@@ -2,7 +2,7 @@ import {NavItem} from '@app-dev-panel/sdk/Component/Layout/NavItem';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Collapse, Divider, Icon, Paper, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -97,6 +97,97 @@ const SectionHeader = styled('div', {shouldForwardProp: (p) => p !== 'active'})<
 const SectionLabel = styled(Typography)(({theme}) => ({fontSize: theme.typography.body2.fontSize}));
 
 // ---------------------------------------------------------------------------
+// Memoized section item — avoids inline arrows breaking NavItem.memo
+// ---------------------------------------------------------------------------
+
+const iconSx = {fontSize: 19, flexShrink: 0} as const;
+const expandedIconSx = {transform: 'rotate(180deg)'} as const;
+const collapsedIconSx = {transform: 'rotate(0deg)'} as const;
+const dividerSx = {mx: 1.25, my: 0.75} as const;
+
+type SidebarSectionProps = {
+    section: NavSection;
+    isActiveSection: boolean;
+    isExpanded: boolean;
+    activeChildKey?: string;
+    onNavigate: (href: string) => void;
+    onChildClick?: (sectionKey: string, childKey: string) => void;
+    onToggleExpand: (sectionKey: string) => void;
+};
+
+const SidebarSection = React.memo(
+    ({
+        section,
+        isActiveSection,
+        isExpanded,
+        activeChildKey,
+        onNavigate,
+        onChildClick,
+        onToggleExpand,
+    }: SidebarSectionProps) => {
+        const hasChildren = section.children && section.children.length > 0;
+
+        const handleHeaderClick = useCallback(() => onNavigate(section.href), [onNavigate, section.href]);
+        const handleExpandClick = useCallback(
+            (e: React.MouseEvent) => {
+                e.stopPropagation();
+                onToggleExpand(section.key);
+            },
+            [onToggleExpand, section.key],
+        );
+
+        const childClickHandlers = useMemo(() => {
+            if (!section.children) return {};
+            const handlers: Record<string, () => void> = {};
+            for (const child of section.children) {
+                handlers[child.key] = onChildClick
+                    ? () => onChildClick(section.key, child.key)
+                    : () => onNavigate(section.href);
+            }
+            return handlers;
+        }, [section.children, section.key, section.href, onChildClick, onNavigate]);
+
+        if (!hasChildren) {
+            return (
+                <NavItem
+                    icon={section.icon}
+                    label={section.label}
+                    active={isActiveSection}
+                    onClick={handleHeaderClick}
+                />
+            );
+        }
+
+        return (
+            <>
+                <SectionHeader active={isActiveSection} onClick={handleHeaderClick}>
+                    <Icon sx={iconSx}>{section.icon}</Icon>
+                    <SectionLabel>{section.label}</SectionLabel>
+                    <ExpandButton onClick={handleExpandClick}>
+                        <ExpandIcon sx={isExpanded ? expandedIconSx : collapsedIconSx}>expand_more</ExpandIcon>
+                    </ExpandButton>
+                </SectionHeader>
+                <Collapse in={isExpanded} timeout={150}>
+                    <ChildList>
+                        {section.children!.map((child) => (
+                            <NavItem
+                                key={child.key}
+                                icon={child.icon}
+                                label={child.label}
+                                badge={child.badge}
+                                badgeVariant={child.badgeVariant}
+                                active={activeChildKey === child.key}
+                                onClick={childClickHandlers[child.key]}
+                            />
+                        ))}
+                    </ChildList>
+                </Collapse>
+            </>
+        );
+    },
+);
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -109,7 +200,6 @@ export const UnifiedSidebar = React.memo(
         useEffect(() => {
             if (prevPathRef.current !== activePath) {
                 prevPathRef.current = activePath;
-                // Find the section that matches the new path and uncollapse it
                 for (const section of sections) {
                     const isActive = section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
                     if (isActive && section.children && section.children.length > 0) {
@@ -134,7 +224,6 @@ export const UnifiedSidebar = React.memo(
                             : activePath.startsWith(section.href)
                         : false;
                     const current = prev[sectionKey];
-                    // Determine current visual state
                     const currentlyExpanded = current === false || (current === undefined && isActive);
                     return {...prev, [sectionKey]: currentlyExpanded};
                 });
@@ -159,53 +248,16 @@ export const UnifiedSidebar = React.memo(
 
                     return (
                         <React.Fragment key={section.key}>
-                            {idx > 0 && idx === sections.length - 3 && <Divider sx={{mx: 1.25, my: 0.75}} />}
-                            {hasChildren ? (
-                                <>
-                                    <SectionHeader active={isActiveSection} onClick={() => onNavigate(section.href)}>
-                                        <Icon sx={{fontSize: 19, flexShrink: 0}}>{section.icon}</Icon>
-                                        <SectionLabel>{section.label}</SectionLabel>
-                                        <ExpandButton
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleToggleExpand(section.key);
-                                            }}
-                                        >
-                                            <ExpandIcon
-                                                sx={{transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'}}
-                                            >
-                                                expand_more
-                                            </ExpandIcon>
-                                        </ExpandButton>
-                                    </SectionHeader>
-                                    <Collapse in={isExpanded} timeout={150}>
-                                        <ChildList>
-                                            {section.children!.map((child) => (
-                                                <NavItem
-                                                    key={child.key}
-                                                    icon={child.icon}
-                                                    label={child.label}
-                                                    badge={child.badge}
-                                                    badgeVariant={child.badgeVariant}
-                                                    active={activeChildKey === child.key}
-                                                    onClick={() =>
-                                                        onChildClick
-                                                            ? onChildClick(section.key, child.key)
-                                                            : onNavigate(section.href)
-                                                    }
-                                                />
-                                            ))}
-                                        </ChildList>
-                                    </Collapse>
-                                </>
-                            ) : (
-                                <NavItem
-                                    icon={section.icon}
-                                    label={section.label}
-                                    active={isActiveSection}
-                                    onClick={() => onNavigate(section.href)}
-                                />
-                            )}
+                            {idx > 0 && idx === sections.length - 3 && <Divider sx={dividerSx} />}
+                            <SidebarSection
+                                section={section}
+                                isActiveSection={isActiveSection}
+                                isExpanded={isExpanded}
+                                activeChildKey={activeChildKey}
+                                onNavigate={onNavigate}
+                                onChildClick={onChildClick}
+                                onToggleExpand={handleToggleExpand}
+                            />
                         </React.Fragment>
                     );
                 })}

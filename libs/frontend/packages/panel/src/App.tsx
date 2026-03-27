@@ -7,7 +7,7 @@ import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {RouterOptionsContextProvider} from '@app-dev-panel/sdk/Component/RouterOptions';
 import {DefaultThemeProvider} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {CrossWindowEventType, dispatchWindowEvent} from '@app-dev-panel/sdk/Helper/dispatchWindowEvent';
-import {useEffect} from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {Provider} from 'react-redux';
 import {RouterProvider} from 'react-router-dom';
@@ -21,16 +21,23 @@ type AppProps = {
     };
 };
 export default function App({config}: AppProps) {
-    const router = createRouter(modules, config.router, config.modules);
-    const {store, persistor} = createStore({
-        application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []},
-    });
+    const router = useMemo(() => createRouter(modules, config.router, config.modules), [config.router, config.modules]);
+    const {store, persistor} = useMemo(
+        () =>
+            createStore({
+                application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []},
+            }),
+        [config.backend.baseUrl, config.backend.favoriteUrls],
+    );
+
+    const storeRef = useRef(store);
+    storeRef.current = store;
 
     useEffect(() => {
         if (config.backend.usePreferredUrl) {
-            store.dispatch(changeBaseUrl(config.backend.baseUrl));
+            storeRef.current.dispatch(changeBaseUrl(config.backend.baseUrl));
         }
-    }, [config.backend.usePreferredUrl, config.backend.baseUrl, store]);
+    }, [config.backend.usePreferredUrl, config.backend.baseUrl]);
 
     useEffect(() => {
         dispatchWindowEvent(window.parent, 'panel.loaded', true);

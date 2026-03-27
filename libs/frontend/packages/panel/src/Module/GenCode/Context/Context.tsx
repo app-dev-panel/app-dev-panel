@@ -1,7 +1,7 @@
 import {GenCodeFile} from '@app-dev-panel/panel/Module/GenCode/Types/FIle.types';
 import {GenCodeResult} from '@app-dev-panel/panel/Module/GenCode/Types/Result.types';
 import {createAction, createReducer} from '@reduxjs/toolkit';
-import React, {createContext, PropsWithChildren} from 'react';
+import React, {createContext, PropsWithChildren, useCallback, useMemo} from 'react';
 import {FieldValues} from 'react-hook-form';
 
 type State = {
@@ -62,27 +62,26 @@ export const Context = createContext<ContextValue>(initialContextValue);
 export const ContextProvider = ({children}: PropsWithChildren) => {
     const [state, dispatch] = React.useReducer(Reducer, initialState);
 
-    const value: ContextValue = {
-        parameters: state.parameters,
-        setParameters: (parameters: FieldValues) => {
-            dispatch(setParameters(parameters));
-        },
-        files: state.files,
-        setFiles: (files: GenCodeFile[]) => {
-            dispatch(setFiles(files));
-        },
-        operations: state.operations,
-        setOperations: (operations: Record<string, string>) => {
-            dispatch(setOperations(operations));
-        },
-        results: state.results,
-        setResults: (results: GenCodeResult[]) => {
-            dispatch(setResults(results));
-        },
-        reset: () => {
-            dispatch(reset());
-        },
-    };
+    const setFilesCallback = useCallback((files: GenCodeFile[]) => dispatch(setFiles(files)), []);
+    const setOperationsCallback = useCallback(
+        (operations: Record<string, string>) => dispatch(setOperations(operations)),
+        [],
+    );
+    const setParametersCallback = useCallback((parameters: FieldValues) => dispatch(setParameters(parameters)), []);
+    const setResultsCallback = useCallback((results: GenCodeResult[]) => dispatch(setResults(results)), []);
+    const resetCallback = useCallback(() => dispatch(reset()), []);
+
+    const value = useMemo<ContextValue>(
+        () => ({
+            ...state,
+            setFiles: setFilesCallback,
+            setOperations: setOperationsCallback,
+            setParameters: setParametersCallback,
+            setResults: setResultsCallback,
+            reset: resetCallback,
+        }),
+        [state, setFilesCallback, setOperationsCallback, setParametersCallback, setResultsCallback, resetCallback],
+    );
 
     return <Context.Provider value={value}>{children}</Context.Provider>;
 };
