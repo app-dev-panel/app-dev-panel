@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetTranslationsQuery, usePutTranslationsMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {
     TranslationUpdaterContext,
@@ -75,8 +74,6 @@ export const TranslationsPage = () => {
         },
         [],
     );
-
-    useBreadcrumbs(() => ['Inspector', 'Translations']);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;

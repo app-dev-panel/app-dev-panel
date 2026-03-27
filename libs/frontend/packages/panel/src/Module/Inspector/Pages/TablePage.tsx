@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetTableDataQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {setPreferredPageSize} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
@@ -55,8 +54,6 @@ export const TablePage = () => {
         },
         [dispatch, setSearchParams],
     );
-
-    useBreadcrumbs(() => ['Inspector', 'Database', table]);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;

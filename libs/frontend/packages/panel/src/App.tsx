@@ -1,5 +1,4 @@
 import '@app-dev-panel/panel/App.css';
-import {BreadcrumbsContextProvider} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {modules} from '@app-dev-panel/panel/modules';
 import {createRouter} from '@app-dev-panel/panel/router';
 import {createStore} from '@app-dev-panel/panel/store';
@@ -65,9 +64,7 @@ export default function App({config}: AppProps) {
                 <PersistGate persistor={persistor}>
                     <DefaultThemeProvider>
                         <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[window.location.pathname]}>
-                            <BreadcrumbsContextProvider>
-                                <RouterProvider router={router} />
-                            </BreadcrumbsContextProvider>
+                            <RouterProvider router={router} />
                         </ErrorBoundary>
                     </DefaultThemeProvider>
                 </PersistGate>

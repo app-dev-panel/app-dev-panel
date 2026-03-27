@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetConfigurationQuery, useLazyGetObjectQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {DataContext} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
 import {LoaderContext, LoaderContextProvider} from '@app-dev-panel/panel/Module/Inspector/Context/LoaderContext';
@@ -94,7 +93,6 @@ export const DefinitionsPage = () => {
         setSearchParams({filter: value});
     }, []);
 
-    useBreadcrumbs(() => ['Inspector', 'Definitions']);
     if (isLoading) {
         return <FullScreenCircularProgress />;
     }

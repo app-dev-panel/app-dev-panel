@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useRunCommandMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
@@ -98,8 +97,6 @@ export const TestsPage = () => {
     }
 
     const getRowIdCallback = useCallback((row: any) => row.id, []);
-
-    useBreadcrumbs(() => ['Inspector', 'Tests']);
 
     return (
         <>

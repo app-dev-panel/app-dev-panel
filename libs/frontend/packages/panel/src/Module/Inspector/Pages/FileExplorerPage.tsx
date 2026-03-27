@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {
     InspectorFile,
     InspectorFileContent,
@@ -22,8 +21,6 @@ type PathBreadcrumbsProps = {onClick: (nodeId: string) => void; path: string; in
 const PathBreadcrumbs = ({path, onClick, insideRoot = true}: PathBreadcrumbsProps) => {
     const paths = path.split('/').filter((s) => !!s.length);
     const fullPath: string[] = [];
-
-    useBreadcrumbs(() => ['Inspector', 'File Explorer']);
 
     return (
         <Breadcrumbs sx={{minWidth: 0}}>

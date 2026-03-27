@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetComposerQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {SwitchDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Composer/SwitchDialog';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
@@ -65,8 +64,6 @@ export const ComposerPage = () => {
         setShowSwitchDialog(true);
         setIsDev(true);
     };
-
-    useBreadcrumbs(() => ['Inspector', 'Composer']);
 
     return (
         <Box sx={{width: '100%'}}>

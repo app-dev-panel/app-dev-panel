@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {DataContextProvider} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
 import * as Pages from '@app-dev-panel/panel/Module/Inspector/Pages';
 import {ContainerPage} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/ContainerPage';
@@ -17,8 +16,6 @@ export const ConfigurationPage = () => {
         setTabValue(newValue);
         navigate(`/inspector/config/${newValue}`);
     };
-
-    useBreadcrumbs(() => ['Inspector', 'Config']);
 
     return (
         <>

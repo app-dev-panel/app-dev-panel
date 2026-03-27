@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetTableQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
@@ -64,8 +63,6 @@ export const DatabasePage = () => {
             setTables(tables);
         }
     }, [isLoading]);
-
-    useBreadcrumbs(() => ['Inspector', 'Database']);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;

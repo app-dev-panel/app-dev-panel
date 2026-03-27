@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {
     useCheckoutMutation,
     useCommandMutation,
@@ -38,8 +37,6 @@ export const GitPage = () => {
     const onPullHandler = useCallback(() => commandMutation({command: 'pull'}), []);
     const onFetchHandler = useCallback(() => commandMutation({command: 'fetch'}), []);
     const onRefreshHandler = () => getSummaryQuery.refetch();
-
-    useBreadcrumbs(() => ['Inspector', 'Git']);
 
     return (
         <>

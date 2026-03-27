@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import ModuleLoader from '@app-dev-panel/panel/Application/Pages/RemoteComponent';
 import {AssetBundlePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/AssetBundlePanel';
 import {CachePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CachePanel';
@@ -165,9 +164,6 @@ const Layout = () => {
             })
             .catch(clearCollectorAndData);
     }, [searchParams, debugEntry, collectorInfo, clearCollectorAndData]);
-
-    const collectorName = useMemo(() => selectedCollector.split('\\').pop(), [selectedCollector]);
-    useBreadcrumbs(() => ['Debug', collectorName]);
 
     if (!debugEntry) {
         return <Outlet />;

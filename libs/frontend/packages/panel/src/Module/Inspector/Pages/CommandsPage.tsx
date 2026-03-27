@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {
     CommandType,
     useLazyGetCommandsQuery,
@@ -41,8 +40,6 @@ export const CommandsPage = () => {
             }
         })();
     }, []);
-
-    useBreadcrumbs(() => ['Inspector', 'Commands']);
 
     const runCommand = async (command: CommandType) => {
         setCommandStatus((prev) => ({...prev, [command.name]: {...prev[command.name], isLoading: true}}));

@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useRunCommandMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
@@ -125,8 +124,6 @@ export const AnalysePage = () => {
     const handleChange = (panel: string) => (event: React.SyntheticEvent) => {
         setExpanded((v) => (v.includes(panel) ? v.filter((v) => v !== panel) : v.concat(panel)));
     };
-
-    useBreadcrumbs(() => ['Inspector', 'Analyze']);
 
     return (
         <>

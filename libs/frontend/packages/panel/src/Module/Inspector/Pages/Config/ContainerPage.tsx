@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetClassesQuery, useLazyGetObjectQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {DataContext} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
 import {LoaderContext, LoaderContextProvider} from '@app-dev-panel/panel/Module/Inspector/Context/LoaderContext';
@@ -83,8 +82,6 @@ export const ContainerPage = () => {
         const patterns = searchVariants(searchString).map((v) => new RegExp(regexpQuote(v), 'i'));
         return objects.filter((object: any) => patterns.some((re) => object.id.match(re)));
     }, [objects, searchString]);
-
-    useBreadcrumbs(() => ['Inspector', 'Container']);
 
     const onChangeHandler = useCallback(async (value: string) => {
         setSearchParams({filter: value});

@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {GenCodeGenerator, useGetGeneratorsQuery} from '@app-dev-panel/panel/Module/GenCode/API/GenCode';
 import {GeneratorStepper} from '@app-dev-panel/panel/Module/GenCode/Component/GeneratorSteps/GeneratorStepper';
 import {ContextProvider} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
@@ -37,8 +36,6 @@ const Layout = () => {
             })),
         [data],
     );
-
-    useBreadcrumbs(() => ['GenCode', !!selectedGenerator ? selectedGenerator.name : null]);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;

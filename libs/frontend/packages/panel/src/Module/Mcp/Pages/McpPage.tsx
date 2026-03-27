@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useSelector} from '@app-dev-panel/panel/store';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
@@ -76,8 +75,6 @@ export const McpPage = () => {
     const copyTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
     useEffect(() => () => clearTimeout(copyTimerRef.current), []);
-
-    useBreadcrumbs(() => ['MCP']);
 
     const mcpUrl = useMemo(() => {
         const base = (baseUrl || window.location.origin).replace(/\/$/, '');

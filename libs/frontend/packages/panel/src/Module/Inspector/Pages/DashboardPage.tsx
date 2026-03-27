@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetLogQuery} from '@app-dev-panel/panel/Module/Inspector/API/GitApi';
 import {
     type CommandType,
@@ -277,8 +276,6 @@ export const DashboardPage = () => {
             setRunningCommands((prev) => ({...prev, [commandName]: 'error'}));
         }
     };
-
-    useBreadcrumbs(() => ['Inspector', 'Dashboard']);
 
     // --- Derived data ---
 
