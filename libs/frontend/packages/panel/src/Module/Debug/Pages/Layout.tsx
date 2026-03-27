@@ -32,7 +32,7 @@ import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {Alert, AlertTitle, Box, LinearProgress} from '@mui/material';
 import * as React from 'react';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {Outlet} from 'react-router';
 import {useSearchParams} from 'react-router-dom';
