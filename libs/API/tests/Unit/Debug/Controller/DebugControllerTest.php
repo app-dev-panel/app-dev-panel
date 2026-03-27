@@ -177,6 +177,123 @@ final class DebugControllerTest extends TestCase
         $controller->object($request);
     }
 
+    public function testEventStreamReturnsCorrectHeaders(): void
+    {
+        $storage = $this->createMock(StorageInterface::class);
+        $storage->method('read')->willReturn([]);
+
+        $controller = $this->createController(storage: $storage);
+        $request = new ServerRequest('GET', '/debug/api/event-stream');
+        $response = $controller->eventStream($request);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('text/event-stream', $response->getHeaderLine('Content-Type'));
+        $this->assertSame('no-cache', $response->getHeaderLine('Cache-Control'));
+        $this->assertSame('keep-alive', $response->getHeaderLine('Connection'));
+    }
+
+    public function testEventStreamBodyIsServerSentEventsStream(): void
+    {
+        $storage = $this->createMock(StorageInterface::class);
+        $storage->method('read')->willReturn([]);
+
+        $controller = $this->createController(storage: $storage);
+        $request = new ServerRequest('GET', '/debug/api/event-stream');
+        $response = $controller->eventStream($request);
+
+        $this->assertInstanceOf(\AppDevPanel\Api\ServerSentEventsStream::class, $response->getBody());
+    }
+
+    public function testEventStreamEmitsEventWhenStorageChanges(): void
+    {
+        $callCount = 0;
+        $storage = $this->createMock(StorageInterface::class);
+        $storage
+            ->method('read')
+            ->willReturnCallback(static function () use (&$callCount): array {
+                $callCount++;
+                // Call 1: initial hash captured in eventStream()
+                // Call 2: first read() — data changed
+                if ($callCount === 1) {
+                    return ['entry1' => ['id' => '1']];
+                }
+                return ['entry1' => ['id' => '1'], 'entry2' => ['id' => '2']];
+            });
+
+        $controller = $this->createController(storage: $storage);
+        $request = new ServerRequest('GET', '/debug/api/event-stream');
+        $response = $controller->eventStream($request);
+
+        $body = $response->getBody();
+        $output = $body->read(8192);
+        $body->close();
+
+        $this->assertStringContainsString('data: ', $output);
+        $this->assertStringContainsString('"type":"debug-updated"', $output);
+    }
+
+    public function testEventStreamNoEventWhenStorageUnchanged(): void
+    {
+        $storage = $this->createMock(StorageInterface::class);
+        $storage->method('read')->willReturn(['entry1' => ['id' => '1']]);
+
+        $controller = $this->createController(storage: $storage);
+        $request = new ServerRequest('GET', '/debug/api/event-stream');
+        $response = $controller->eventStream($request);
+
+        $body = $response->getBody();
+        $output = $body->read(8192);
+        $body->close();
+
+        $this->assertStringNotContainsString('"type":"debug-updated"', $output);
+    }
+
+    public function testEventStreamCallbackReadsSummaryType(): void
+    {
+        $storage = $this->createMock(StorageInterface::class);
+        $storage
+            ->expects($this->atLeast(2))
+            ->method('read')
+            ->with(StorageInterface::TYPE_SUMMARY, null)
+            ->willReturn([]);
+
+        $controller = $this->createController(storage: $storage);
+        $request = new ServerRequest('GET', '/debug/api/event-stream');
+        $response = $controller->eventStream($request);
+
+        $body = $response->getBody();
+        $body->read(8192);
+        $body->close();
+    }
+
+    public function testEventStreamPayloadFormat(): void
+    {
+        $callCount = 0;
+        $storage = $this->createMock(StorageInterface::class);
+        $storage
+            ->method('read')
+            ->willReturnCallback(static function () use (&$callCount): array {
+                $callCount++;
+                return ['entry' => ['id' => (string) $callCount]];
+            });
+
+        $controller = $this->createController(storage: $storage);
+        $request = new ServerRequest('GET', '/debug/api/event-stream');
+        $response = $controller->eventStream($request);
+
+        $body = $response->getBody();
+        $output = $body->read(8192);
+        $body->close();
+
+        // Extract JSON from "data: {...}\n"
+        preg_match('/^data: (.+)$/m', $output, $matches);
+        $this->assertNotEmpty($matches);
+
+        $payload = json_decode($matches[1], true);
+        $this->assertSame('debug-updated', $payload['type']);
+        $this->assertSame([], $payload['payload']);
+    }
+
     private function createJsonResponseFactory(): JsonResponseFactoryInterface
     {
         $factory = $this->createMock(JsonResponseFactoryInterface::class);
@@ -188,10 +305,12 @@ final class DebugControllerTest extends TestCase
         return $factory;
     }
 
-    private function createController(?CollectorRepositoryInterface $repository = null): DebugController
-    {
+    private function createController(
+        ?CollectorRepositoryInterface $repository = null,
+        ?StorageInterface $storage = null,
+    ): DebugController {
         $repository ??= $this->createMock(CollectorRepositoryInterface::class);
-        $storage = $this->createMock(StorageInterface::class);
+        $storage ??= $this->createMock(StorageInterface::class);
         $psr17 = new Psr17Factory();
 
         return new DebugController($this->createJsonResponseFactory(), $repository, $storage, $psr17);

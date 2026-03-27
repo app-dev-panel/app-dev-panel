@@ -169,24 +169,80 @@ final class ServerSentEventsStreamTest extends TestCase
         $this->assertSame('', $stream->read(1024));
     }
 
+    public function testReadReturnsEmptyOnSubsequentCallsAfterEof(): void
+    {
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
+
+        $stream->read(1024);
+        $this->assertTrue($stream->eof());
+
+        $this->assertSame('', $stream->read(1024));
+        $this->assertSame('', $stream->read(1024));
+    }
+
     public function testCloseStopsInterruptibleSleep(): void
     {
-        $callCount = 0;
         $stream = new ServerSentEventsStream(
-            static function (array &$buffer) use (&$callCount) {
-                $callCount++;
+            static function (array &$buffer) {
                 return true;
             },
             pollIntervalMicros: 1_000_000,
             sleepChunkMicros: 10_000,
         );
 
-        // Close immediately after first read starts — the interruptible sleep should exit early
         $stream->close();
         $output = $stream->read(1024);
 
         $this->assertSame('', $output);
         $this->assertTrue($stream->eof());
+    }
+
+    public function testDetachStopsSubsequentReads(): void
+    {
+        $stream = new ServerSentEventsStream(static function (array &$buffer) {
+            $buffer[] = 'data';
+            return true;
+        }, pollIntervalMicros: 0);
+
+        $result = $stream->detach();
+
+        $this->assertNull($result);
+        $this->assertTrue($stream->eof());
+        $this->assertSame('', $stream->read(1024));
+    }
+
+    public function testCallbackNotCalledAfterEof(): void
+    {
+        $callCount = 0;
+        $stream = new ServerSentEventsStream(static function (array &$buffer) use (&$callCount) {
+            $callCount++;
+            return false;
+        });
+
+        $stream->read(1024);
+        $this->assertSame(1, $callCount);
+
+        $stream->read(1024);
+        $stream->read(1024);
+        $this->assertSame(1, $callCount);
+    }
+
+    public function testZeroPollIntervalSkipsSleep(): void
+    {
+        $callCount = 0;
+        $stream = new ServerSentEventsStream(static function (array &$buffer) use (&$callCount) {
+            $callCount++;
+            return $callCount < 100;
+        }, pollIntervalMicros: 0);
+
+        $start = hrtime(true);
+        for ($i = 0; $i < 50; $i++) {
+            $stream->read(1024);
+        }
+        $elapsedMs = (hrtime(true) - $start) / 1_000_000;
+
+        $this->assertLessThan(50, $elapsedMs);
+        $this->assertSame(50, $callCount);
     }
 
     public function testCustomPollInterval(): void
@@ -206,6 +262,73 @@ final class ServerSentEventsStreamTest extends TestCase
         $this->assertTrue($stream->eof());
     }
 
+    public function testOutputFormatSseCompliant(): void
+    {
+        $stream = new ServerSentEventsStream(static function (array &$buffer) {
+            $buffer[] = json_encode(['type' => 'test', 'payload' => []]);
+            return false;
+        });
+
+        $output = $stream->read(1024);
+
+        $this->assertStringStartsWith('data: ', $output);
+        $this->assertStringEndsWith("\n\n", $output);
+
+        $lines = explode("\n", trim($output));
+        $this->assertCount(1, $lines);
+        $this->assertStringStartsWith('data: ', $lines[0]);
+
+        $jsonData = json_decode(substr($lines[0], 6), true);
+        $this->assertSame('test', $jsonData['type']);
+    }
+
+    public function testEmptyBufferProducesOnlyNewline(): void
+    {
+        $stream = new ServerSentEventsStream(static function (array &$buffer) {
+            return false;
+        });
+
+        $output = $stream->read(1024);
+        $this->assertSame("\n", $output);
+    }
+
+    public function testMultipleBufferItemsFormattedAsSeparateDataLines(): void
+    {
+        $stream = new ServerSentEventsStream(static function (array &$buffer) {
+            $buffer[] = 'event-a';
+            $buffer[] = 'event-b';
+            $buffer[] = 'event-c';
+            return false;
+        });
+
+        $output = $stream->read(1024);
+        $lines = explode("\n", $output);
+
+        $this->assertSame('data: event-a', $lines[0]);
+        $this->assertSame('data: event-b', $lines[1]);
+        $this->assertSame('data: event-c', $lines[2]);
+    }
+
+    public function testStreamContinuesAcrossMultipleReads(): void
+    {
+        $callCount = 0;
+        $stream = new ServerSentEventsStream(static function (array &$buffer) use (&$callCount) {
+            $callCount++;
+            $buffer[] = "event-$callCount";
+            return $callCount < 5;
+        }, pollIntervalMicros: 0);
+
+        $outputs = [];
+        while (!$stream->eof()) {
+            $outputs[] = $stream->read(1024);
+        }
+
+        $this->assertCount(5, $outputs);
+        $this->assertStringContainsString('data: event-1', $outputs[0]);
+        $this->assertStringContainsString('data: event-5', $outputs[4]);
+        $this->assertTrue($stream->eof());
+    }
+
     public function testBufferIsClearedAfterRead(): void
     {
         $callCount = 0;
@@ -222,5 +345,36 @@ final class ServerSentEventsStreamTest extends TestCase
 
         $output2 = $stream->read(1024);
         $this->assertStringNotContainsString('first-call', $output2);
+    }
+
+    public function testLastCallDataIsReturnedWhenClosureReturnsFalse(): void
+    {
+        $stream = new ServerSentEventsStream(static function (array &$buffer) {
+            $buffer[] = 'final-event';
+            return false;
+        });
+
+        $output = $stream->read(1024);
+
+        $this->assertStringContainsString('data: final-event', $output);
+        $this->assertTrue($stream->eof());
+    }
+
+    public function testInterruptibleSleepRespectsChunkSize(): void
+    {
+        $stream = new ServerSentEventsStream(
+            static function (array &$buffer) {
+                return true;
+            },
+            pollIntervalMicros: 100_000,
+            sleepChunkMicros: 20_000,
+        );
+
+        $start = hrtime(true);
+        $stream->read(1024);
+        $elapsedMs = (hrtime(true) - $start) / 1_000_000;
+
+        $this->assertGreaterThan(80, $elapsedMs);
+        $this->assertLessThan(250, $elapsedMs);
     }
 }
