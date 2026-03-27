@@ -72,7 +72,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $mkdirAfter,
             [
                 'mkdir' => [
-                    ['path' => $path, 'args' => ['mode' => 0o777, 'options' => 9]], // 9 for some reason
+                    ['path' => $path, 'args' => ['mode' => '0777', 'options' => 'recursive, report_errors']],
                 ],
             ],
         ];
@@ -165,7 +165,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $rmdirAfter,
             [
                 'rmdir' => [
-                    ['path' => $path, 'args' => ['options' => 8]], // 8 for some reason
+                    ['path' => $path, 'args' => ['options' => 'report_errors']],
                 ],
             ],
         ];

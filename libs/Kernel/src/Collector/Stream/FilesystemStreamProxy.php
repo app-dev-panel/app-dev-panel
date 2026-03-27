@@ -81,9 +81,16 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     public function mkdir(string $path, int $mode, int $options): bool
     {
         if (!$this->isIgnored()) {
+            $flags = [];
+            if ($options & STREAM_MKDIR_RECURSIVE) {
+                $flags[] = 'recursive';
+            }
+            if ($options & STREAM_REPORT_ERRORS) {
+                $flags[] = 'report_errors';
+            }
             self::$collector?->collect(operation: 'mkdir', path: $path, args: [
-                'mode' => $mode,
-                'options' => $options,
+                'mode' => '0' . decoct($mode),
+                'options' => $flags === [] ? (string) $options : implode(', ', $flags),
             ]);
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -102,8 +109,15 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     public function rmdir(string $path, int $options): bool
     {
         if (!$this->isIgnored()) {
+            $flags = [];
+            if ($options & STREAM_MKDIR_RECURSIVE) {
+                $flags[] = 'recursive';
+            }
+            if ($options & STREAM_REPORT_ERRORS) {
+                $flags[] = 'report_errors';
+            }
             self::$collector?->collect(operation: 'rmdir', path: $path, args: [
-                'options' => $options,
+                'options' => $flags === [] ? (string) $options : implode(', ', $flags),
             ]);
         }
         return $this->__call(__FUNCTION__, func_get_args());
