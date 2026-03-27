@@ -1,5 +1,3 @@
-import '@app-dev-panel/panel/wdyr';
-
 import App from '@app-dev-panel/panel/App';
 import '@app-dev-panel/panel/index.css';
 import {Config} from '@app-dev-panel/sdk/Config';
