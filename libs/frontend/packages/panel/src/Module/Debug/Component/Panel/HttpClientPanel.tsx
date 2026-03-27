@@ -14,7 +14,7 @@ import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
 import {Box, Chip, Icon, IconButton, Tab, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {type SyntheticEvent, useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
+import {type SyntheticEvent, memo, useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
 
 type HttpClientEntry = {
     startTime: number;
@@ -211,19 +211,19 @@ const HttpStreamView = ({data}: {data: HttpStreamData}) => {
                                         )}
                                     </StreamOperationRow>
                                     {expanded && hasArgs && (
-                                            <DetailBox>
-                                                <Typography
-                                                    sx={{
-                                                        fontSize: '11px',
-                                                        fontWeight: 600,
-                                                        color: 'text.disabled',
-                                                        mb: 0.5,
-                                                    }}
-                                                >
-                                                    Arguments
-                                                </Typography>
-                                                <JsonRenderer value={item.args} />
-                                            </DetailBox>
+                                        <DetailBox>
+                                            <Typography
+                                                sx={{
+                                                    fontSize: '11px',
+                                                    fontWeight: 600,
+                                                    color: 'text.disabled',
+                                                    mb: 0.5,
+                                                }}
+                                            >
+                                                Arguments
+                                            </Typography>
+                                            <JsonRenderer value={item.args} />
+                                        </DetailBox>
                                     )}
                                 </Box>
                             );
@@ -540,6 +540,58 @@ export const HttpClientPanel = ({data}: HttpClientPanelProps) => {
     );
 };
 
+type RequestRowItemProps = {entry: HttpClientEntry; expanded: boolean; onToggle: () => void};
+
+const RequestRowItem = memo(({entry, expanded, onToggle}: RequestRowItemProps) => {
+    const theme = useTheme();
+    return (
+        <Box>
+            <RequestRow expanded={expanded} onClick={onToggle}>
+                <Chip
+                    label={entry.method}
+                    size="small"
+                    sx={{
+                        fontWeight: 700,
+                        fontSize: '10px',
+                        height: 22,
+                        minWidth: 52,
+                        backgroundColor: methodColor(entry.method, theme),
+                        color: 'common.white',
+                        borderRadius: 1,
+                    }}
+                />
+                <Chip
+                    label={entry.responseStatus}
+                    size="small"
+                    sx={{
+                        fontWeight: 700,
+                        fontSize: '10px',
+                        height: 22,
+                        minWidth: 36,
+                        backgroundColor: statusColor(entry.responseStatus, theme),
+                        color: 'common.white',
+                        borderRadius: 1,
+                    }}
+                />
+                <UriCell>
+                    <Box component="span" sx={{color: 'text.disabled'}}>
+                        {extractHost(entry.uri)}
+                    </Box>
+                    {extractPath(entry.uri)}
+                </UriCell>
+                <DurationCell sx={{color: durationColor(entry.totalTime, theme)}}>
+                    {formatDuration(entry.totalTime)}
+                </DurationCell>
+                <TimeCell sx={{color: 'text.disabled'}}>{formatMicrotime(entry.startTime)}</TimeCell>
+                <IconButton size="small" sx={{flexShrink: 0}}>
+                    <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                </IconButton>
+            </RequestRow>
+            {expanded && <RequestDetail entry={entry} />}
+        </Box>
+    );
+});
+
 const HttpClientTabContent = ({data}: HttpClientPanelProps) => {
     const theme = useTheme();
     const [filter, setFilter] = useState('');
@@ -692,55 +744,14 @@ const HttpClientTabContent = ({data}: HttpClientPanelProps) => {
                 </Box>
             )}
 
-            {filtered.map((entry, index) => {
-                const expanded = expandedIndex === index;
-                return (
-                    <Box key={index}>
-                        <RequestRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
-                            <Chip
-                                label={entry.method}
-                                size="small"
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: '10px',
-                                    height: 22,
-                                    minWidth: 52,
-                                    backgroundColor: methodColor(entry.method, theme),
-                                    color: 'common.white',
-                                    borderRadius: 1,
-                                }}
-                            />
-                            <Chip
-                                label={entry.responseStatus}
-                                size="small"
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: '10px',
-                                    height: 22,
-                                    minWidth: 36,
-                                    backgroundColor: statusColor(entry.responseStatus, theme),
-                                    color: 'common.white',
-                                    borderRadius: 1,
-                                }}
-                            />
-                            <UriCell>
-                                <Box component="span" sx={{color: 'text.disabled'}}>
-                                    {extractHost(entry.uri)}
-                                </Box>
-                                {extractPath(entry.uri)}
-                            </UriCell>
-                            <DurationCell sx={{color: durationColor(entry.totalTime, theme)}}>
-                                {formatDuration(entry.totalTime)}
-                            </DurationCell>
-                            <TimeCell sx={{color: 'text.disabled'}}>{formatMicrotime(entry.startTime)}</TimeCell>
-                            <IconButton size="small" sx={{flexShrink: 0}}>
-                                <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
-                            </IconButton>
-                        </RequestRow>
-                        {expanded && <RequestDetail entry={entry} />}
-                    </Box>
-                );
-            })}
+            {filtered.map((entry, index) => (
+                <RequestRowItem
+                    key={index}
+                    entry={entry}
+                    expanded={expandedIndex === index}
+                    onToggle={() => setExpandedIndex(expandedIndex === index ? null : index)}
+                />
+            ))}
         </Box>
     );
 };
