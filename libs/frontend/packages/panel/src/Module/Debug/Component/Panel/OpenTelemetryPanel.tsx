@@ -166,7 +166,7 @@ function buildTree(spans: SpanEntry[]): SpanNode[] {
 
     for (const node of byId.values()) {
         if (node.span.parentSpanId && byId.has(node.span.parentSpanId)) {
-            byId.get(node.span.parentSpanId)!.children.push(node);
+            byId.get(node.span.parentSpanId)?.children.push(node);
         } else {
             roots.push(node);
         }

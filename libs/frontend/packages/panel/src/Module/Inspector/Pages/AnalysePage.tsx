@@ -16,7 +16,7 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import {GridColDef, GridColumns, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
+import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import clipboardCopy from 'clipboard-copy';
 import * as React from 'react';
 import {useState} from 'react';
@@ -63,7 +63,7 @@ const columns: GridColDef[] = [
 ];
 
 function renderGrid(data: AnalyseRow[]) {
-    return <DataTable rows={data as GridValidRowModel[]} columns={columns as GridColumns} />;
+    return <DataTable rows={data as GridValidRowModel[]} columns={columns} />;
 }
 
 type AnalyseRow = {

@@ -271,7 +271,10 @@ export const DashboardPage = () => {
         setRunningCommands((prev) => ({...prev, [commandName]: 'loading'}));
         const data = await runCommandMutation(commandName);
         if ('data' in data && data.data) {
-            setRunningCommands((prev) => ({...prev, [commandName]: data.data!.status === 'ok' ? 'ok' : 'error'}));
+            setRunningCommands((prev) => ({
+                ...prev,
+                [commandName]: (data.data as {status: string}).status === 'ok' ? 'ok' : 'error',
+            }));
         } else {
             setRunningCommands((prev) => ({...prev, [commandName]: 'error'}));
         }

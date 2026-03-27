@@ -7,7 +7,7 @@ import {Check, ContentCopy, Error} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import {Box, Button, CircularProgress, IconButton, styled, Tooltip} from '@mui/material';
-import {GridColDef, GridColumns, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
+import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useState} from 'react';
 
@@ -119,11 +119,7 @@ export const TestsPage = () => {
             </Box>
 
             {commandQueryInfo.isSuccess && (
-                <DataTable
-                    rows={rows as GridValidRowModel[]}
-                    getRowId={getRowIdCallback}
-                    columns={columns as GridColumns}
-                />
+                <DataTable rows={rows as GridValidRowModel[]} getRowId={getRowIdCallback} columns={columns} />
             )}
         </>
     );

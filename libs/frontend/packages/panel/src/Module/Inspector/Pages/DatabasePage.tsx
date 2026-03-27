@@ -54,15 +54,14 @@ export const DatabasePage = () => {
     const [tables, setTables] = useState<GridValidRowModel[]>([]);
 
     useEffect(() => {
-        if (data) {
-            const tables = [];
-            // @ts-ignore
-            for (const table of data) {
-                tables.push({name: table.table, columns: table.columns.length, records: table.records});
+        if (data && Array.isArray(data)) {
+            const rows = [];
+            for (const table of data as {table: string; columns: unknown[]; records: number}[]) {
+                rows.push({name: table.table, columns: table.columns.length, records: table.records});
             }
-            setTables(tables);
+            setTables(rows);
         }
-    }, [isLoading]);
+    }, [data]);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;

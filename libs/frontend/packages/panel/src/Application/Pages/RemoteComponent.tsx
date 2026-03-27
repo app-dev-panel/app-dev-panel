@@ -22,7 +22,6 @@ const useDynamicScript = ({url}: UseDynamicScriptProps) => {
         setFailed(false);
 
         element.onload = () => {
-            console.debug(`Dynamic Script Loaded: ${url}`);
             setReady(true);
         };
 
@@ -35,7 +34,6 @@ const useDynamicScript = ({url}: UseDynamicScriptProps) => {
         document.head.appendChild(element);
 
         return () => {
-            console.debug(`Dynamic Script Unloaded: ${url}`);
             document.head.removeChild(element);
         };
     }, [url]);

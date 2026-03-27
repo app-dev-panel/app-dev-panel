@@ -12,8 +12,9 @@ const rowsPerPageOptions = [20, 50, 100];
 export const TablePage = () => {
     const {table} = useParams();
     const dispatch = useDispatch();
-    // @ts-ignore
-    const preferredPageSize = useSelector((state) => state.application.preferredPageSize) as number;
+    const preferredPageSize = useSelector(
+        (state: {application: {preferredPageSize: number}}) => state.application.preferredPageSize,
+    );
 
     const [searchParams, setSearchParams] = useSearchParams({page: '0'});
     const [pageSize, setPageSize] = useState(preferredPageSize || rowsPerPageOptions[0]);

@@ -31,9 +31,7 @@ export const GeneratorStepper = ({generator}: GeneratorStepperProps) => {
     };
     useEffect(() => {
         handleReset();
-        // @ts-ignore
         context.reset();
-        // dispatch(context.reset())
     }, [generator]);
 
     return (

@@ -148,7 +148,7 @@ self.addEventListener('fetch', (event) => {
                 return response;
             })
             .catch((error) => {
-                console.log('sw fetch error', error);
+                console.warn('sw fetch error', error);
                 throw error;
             }),
     );

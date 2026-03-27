@@ -1,5 +1,5 @@
 import {setPreferredPageSize} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
-import {DataGrid, GridColumns, GridValidRowModel} from '@mui/x-data-grid';
+import {DataGrid, GridColDef, GridValidRowModel} from '@mui/x-data-grid';
 import {GridSortModel} from '@mui/x-data-grid/models/gridSortModel';
 import {useCallback, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
@@ -7,9 +7,9 @@ import {useSearchParams} from 'react-router-dom';
 
 type GridProps = {
     rows: GridValidRowModel[];
-    columns: GridColumns;
+    columns: GridColDef[];
     rowsPerPage?: number[];
-    getRowId?: (row: any) => string | number;
+    getRowId?: (row: GridValidRowModel) => string | number;
     pageSize?: number;
     rowHeight?: number | 'auto';
     sortModel?: GridSortModel;
@@ -29,8 +29,9 @@ export function DataTable(props: GridProps) {
     } = props;
 
     const dispatch = useDispatch();
-    // @ts-ignore
-    const preferredPageSize = useSelector((state) => state.application.preferredPageSize) as number;
+    const preferredPageSize = useSelector(
+        (state: {application: {preferredPageSize: number}}) => state.application.preferredPageSize,
+    );
 
     const [searchParams, setSearchParams] = useSearchParams({page: '0'});
     const [pageSize, setPageSize] = useState(preferredPageSize || Math.min(...rowsPerPage));
