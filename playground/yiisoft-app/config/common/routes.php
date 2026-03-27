@@ -38,6 +38,7 @@ return [
             Route::get('/opentelemetry')->action(Web\TestFixtures\OpenTelemetryAction::class)->name(
                 'test-opentelemetry',
             ),
+            Route::get('/security')->action(Web\TestFixtures\SecurityAction::class)->name('test-security'),
             Route::methods(['GET', 'POST'], '/reset')
                 ->action(Web\TestFixtures\ResetAction::class)
                 ->name('test-reset'),

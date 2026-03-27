@@ -77,6 +77,7 @@ use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
+use AppDevPanel\Kernel\Collector\SecurityCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -190,6 +191,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'filesystem_stream' => FilesystemStreamCollector::class,
             'http_stream' => HttpStreamCollector::class,
             'validator' => ValidatorCollector::class,
+            'security' => SecurityCollector::class,
         ];
 
         foreach ($simpleCollectors as $key => $class) {

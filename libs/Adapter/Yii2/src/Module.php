@@ -69,6 +69,7 @@ use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
+use AppDevPanel\Kernel\Collector\SecurityCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -602,6 +603,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'router' => static fn(): array => [new RouterCollector()],
             'queue' => static fn(): array => [new QueueCollector($timeline)],
             'validator' => static fn(): array => [new ValidatorCollector()],
+            'security' => static fn(): array => [new SecurityCollector()],
             'opentelemetry' => static fn(): array => [new OpenTelemetryCollector($timeline)],
         ];
     }
