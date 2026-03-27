@@ -23,9 +23,9 @@ const Layout = () => {
 
     useEffect(() => {
         const selectedGeneratorId = searchParams.get('generator') || '';
-        const selectedGenerator = (data || []).find((v) => v.id === selectedGeneratorId) || null;
-        setSelectedGenerator(selectedGenerator);
-    }, [searchParams, isLoading]);
+        const found = (data || []).find((v) => v.id === selectedGeneratorId) || null;
+        setSelectedGenerator(found);
+    }, [searchParams, data]);
 
     const links: LinkProps[] = useMemo(
         () =>

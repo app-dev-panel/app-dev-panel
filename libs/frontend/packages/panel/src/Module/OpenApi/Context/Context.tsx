@@ -5,14 +5,15 @@ export const openApiSlice = createSlice({
     name: 'store.openApi',
     initialState: {entries: {} as Record<string, string>},
     reducers: {
-        addApiEntry: (state, action) => {
-            state.entries = {...state.entries, [action.payload]: action.payload};
+        addApiEntry: (state, action: {payload: string; type: string}) => {
+            const url = action.payload;
+            state.entries = {...state.entries, [url]: url};
         },
-        updateApiEntry: (state, action) => {
+        updateApiEntry: (state, action: {payload: Record<string, string>; type: string}) => {
             state.entries = action.payload;
         },
-        deleteApiEntry: (state, action) => {
-            const entries = Object.entries(state.entries).filter(([name, url]) => name != action.payload);
+        deleteApiEntry: (state, action: {payload: string; type: string}) => {
+            const entries = Object.entries(state.entries).filter(([name]) => name !== action.payload);
             state.entries = Object.fromEntries(entries);
         },
     },

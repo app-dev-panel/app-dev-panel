@@ -3,10 +3,10 @@ import React, {createContext, PropsWithChildren, useContext, useEffect, useMemo}
 
 const setItems = createAction<Breadcrumb[]>('setItems');
 
-type Breadcrumb = {title: string; href: any} | string | null;
-type State = {breadcrumbs: Breadcrumb[]; setBreadcrumbs: typeof setItems};
+type Breadcrumb = {title: string; href: string} | string | null;
+type State = {breadcrumbs: Breadcrumb[]; setBreadcrumbs: (items: Breadcrumb[]) => void};
 
-const initialState: State = {breadcrumbs: [], setBreadcrumbs: setItems};
+const initialState: State = {breadcrumbs: [], setBreadcrumbs: () => {}};
 export const Reducer = createReducer(initialState, (builder) => {
     builder.addCase(setItems, (state, {payload}) => {
         state.breadcrumbs = payload;
@@ -19,9 +19,11 @@ export const useBreadcrumbsContext = () => useContext(BreadcrumbsContext);
 export const useBreadcrumbs = (breadcrumbs: () => Breadcrumb[]) => {
     const context = useContext(BreadcrumbsContext);
     useEffect(() => {
-        console.log('hook update', breadcrumbs);
         context.setBreadcrumbs(breadcrumbs());
-    }, []);
+        return () => {
+            context.setBreadcrumbs([]);
+        };
+    }, [breadcrumbs, context]);
 };
 export const BreadcrumbsContextProvider = ({children}: PropsWithChildren) => {
     const [state, dispatch] = React.useReducer(Reducer, initialState);
@@ -33,7 +35,7 @@ export const BreadcrumbsContextProvider = ({children}: PropsWithChildren) => {
                 setBreadcrumbs: (items: Breadcrumb[]) => {
                     dispatch(setItems(items));
                 },
-            }) as State,
+            }) satisfies State,
         [state.breadcrumbs],
     );
 

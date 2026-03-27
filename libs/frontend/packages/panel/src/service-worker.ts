@@ -148,32 +148,26 @@ self.addEventListener('fetch', (event) => {
                 return response;
             })
             .catch((error) => {
-                console.log('sw fetch error', error);
                 throw error;
             }),
     );
 });
 
-function notify(clientId, request, response) {
-    // console.log('notify', request, response);
+function notify(clientId: string, request: Request, response: Response) {
     const events = [
         {
-            type: 'FETCH',
+            type: 'FETCH' as const,
             payload: {
                 headers: Object.fromEntries(response.headers),
                 url: request.url,
                 method: request.method,
-                status: request.status,
+                status: response.status,
             },
         },
     ];
-    events.map((event) => {
+    for (const event of events) {
         self.clients.get(clientId).then((client) => {
-            // console.log('client', client);
-            client.postMessage(event);
+            client?.postMessage(event);
         });
-        // self.clients.matchAll().then((all) => {
-        //     all.map((client) => client.postMessage(eventToSend));
-        // });
-    });
+    }
 }

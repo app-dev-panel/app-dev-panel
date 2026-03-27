@@ -39,7 +39,6 @@ export const SwitchDialog = ({
 
     const onSwitchHandler = async (packageName: string, selectedVersion: string | null) => {
         const result = await postComposerRequirePackage({packageName, version: selectedVersion, isDev});
-        console.log(result);
         onSwitch();
     };
     const onDevChanged = () => {

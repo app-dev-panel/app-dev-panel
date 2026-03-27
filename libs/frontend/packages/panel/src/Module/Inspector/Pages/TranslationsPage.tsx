@@ -71,7 +71,6 @@ export const TranslationsPage = () => {
     const updateTranslationHandler = useCallback(
         (category: string, locale: string, translation: string, message: string) => {
             const object = {category, locale, translation, message};
-            console.log(object);
             putTranslationsMutation(object);
         },
         [],

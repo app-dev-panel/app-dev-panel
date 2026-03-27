@@ -49,7 +49,6 @@ export const CommandsPage = () => {
         const response = await runCommandQuery(command.name);
         setCommandStatus((prev) => ({...prev, [command.name]: {...prev[command.name], isLoading: false}}));
         setShowResultDialog(true);
-        console.log(response);
     };
     const commandEntries = Object.entries(groupedCommands as GroupedCommands);
 
@@ -82,7 +81,6 @@ export const CommandsPage = () => {
         );
     }
 
-    console.log(runCommandQueryInfo.data?.result);
     return (
         <>
             <PageHeader title="Commands" icon="terminal" description="Run application commands" />

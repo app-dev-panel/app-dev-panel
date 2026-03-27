@@ -29,10 +29,9 @@ export default function App({config}: AppProps) {
 
     useEffect(() => {
         if (config.backend.usePreferredUrl) {
-            console.log('Override backend url', config.backend.baseUrl);
             store.dispatch(changeBaseUrl(config.backend.baseUrl));
         }
-    }, []);
+    }, [config.backend.usePreferredUrl, config.backend.baseUrl, store]);
 
     useEffect(() => {
         dispatchWindowEvent(window.parent, 'panel.loaded', true);
@@ -56,9 +55,9 @@ export default function App({config}: AppProps) {
         window.addEventListener('message', listener);
 
         return () => {
-            window?.removeEventListener('message', listener);
+            window.removeEventListener('message', listener);
         };
-    }, []);
+    }, [router]);
 
     return (
         <RouterOptionsContextProvider baseUrl="" openLinksInNewWindow={false}>

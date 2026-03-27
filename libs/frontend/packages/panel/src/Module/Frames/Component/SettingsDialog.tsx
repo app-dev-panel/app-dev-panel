@@ -28,11 +28,6 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
 
     const frames = useFramesEntries();
 
-    // const handleSave = () => {
-    //     console.log('save');
-    //     props.onClose();
-    // };
-
     const handleClose = () => {
         props.onClose();
     };
@@ -52,8 +47,8 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                 <DialogContentText>Create, edit or delete frames.</DialogContentText>
 
                 <List>
-                    {Object.entries(frames).map(([name, url], index) => (
-                        <ListItem key={index}>
+                    {Object.entries(frames).map(([name, url]) => (
+                        <ListItem key={name}>
                             <ListItemButton
                                 onClick={() => {
                                     setSelectedEntry(url);
@@ -61,7 +56,7 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                             >
                                 <ListItemText primary={url} secondary={name} />
                                 <ListItemSecondaryAction>
-                                    <IconButton onClick={onDeleteHandler(name)} sx={{p: 2}}>
+                                    <IconButton onClick={onDeleteHandler(name)} sx={{p: 2}} aria-label="Delete frame">
                                         <Remove />
                                     </IconButton>
                                 </ListItemSecondaryAction>
@@ -84,15 +79,12 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                         value={selectedEntry}
                         onChange={(event) => setSelectedEntry(event.target.value)}
                     />
-                    <IconButton onClick={onAddHandler} sx={{p: 2}}>
+                    <IconButton onClick={onAddHandler} sx={{p: 2}} aria-label="Add frame">
                         <CheckIcon />
                     </IconButton>
                 </Box>
             </DialogContent>
             <DialogActions>
-                {/*<Button onClick={handleSave} color="success">*/}
-                {/*    Save*/}
-                {/*</Button>*/}
                 <Button onClick={handleClose} color="primary">
                     Close
                 </Button>

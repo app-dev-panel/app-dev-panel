@@ -22,14 +22,12 @@ export function PreviewStep({generator, onComplete}: StepProps) {
 
     useEffect(() => {
         form.reset();
-    }, [generator]);
+    }, [generator, form]);
 
     const [previewQuery] = usePostPreviewMutation();
 
     async function previewHandler(data: FieldValues) {
-        console.log('preview', data);
         const response = await previewQuery({generator: generator.id, parameters: data});
-        console.log(response);
         if ('error' in response) {
             mapErrorsToForm(response, form);
             return;

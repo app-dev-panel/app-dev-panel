@@ -70,16 +70,15 @@ const SectionLabel = styled(Typography)(({theme}) => ({
 // ---------------------------------------------------------------------------
 
 export function IndexPage() {
-    const defaultBackendUrl = useSelector((state) => state.application.baseUrl) as string;
     const dispatch = useDispatch();
     const [inspectorQuery] = useLazyGetParametersQuery();
     const baseUrl = useSelector((state) => state.application.baseUrl);
-    const [url, setUrl] = useState<string>(String(baseUrl));
+    const [url, setUrl] = useState<string>(baseUrl ?? '');
     const [status, setStatus] = useState<Record<string, 'connected' | 'disconnected' | 'loading'>>({
         debug: 'loading',
         inspector: 'loading',
     });
-    const favoriteUrls = useSelector((state) => state.application.favoriteUrls) as string[];
+    const favoriteUrls = useSelector((state) => state.application.favoriteUrls) ?? [];
 
     // Debug query — used for status card
     const {
@@ -112,9 +111,9 @@ export function IndexPage() {
         dispatch(changeBaseUrl(newUrl));
     };
 
-    const onSubmitHandler = async (event: {preventDefault: () => void}) => {
+    const onSubmitHandler = (event: React.FormEvent) => {
         event.preventDefault();
-        await handleChangeUrl(url);
+        handleChangeUrl(url);
     };
 
     useEffect(() => {
@@ -131,7 +130,7 @@ export function IndexPage() {
 
             <CurrentUrl>
                 <Icon sx={{fontSize: 18, color: 'text.disabled'}}>link</Icon>
-                <span style={{flex: 1}}>{String(defaultBackendUrl)}</span>
+                <span style={{flex: 1}}>{baseUrl}</span>
                 <IconButton
                     size="small"
                     onClick={() => {
@@ -175,13 +174,13 @@ export function IndexPage() {
                 <>
                     <SectionLabel>Favorites</SectionLabel>
                     <FavoritesRow>
-                        {favoriteUrls.map((favUrl, index) => (
+                        {favoriteUrls.map((favUrl) => (
                             <Chip
-                                key={index}
+                                key={favUrl}
                                 icon={<Icon sx={{fontSize: '14px !important', color: 'warning.main'}}>star</Icon>}
                                 label={favUrl}
                                 size="small"
-                                variant={favUrl === String(baseUrl) ? 'filled' : 'outlined'}
+                                variant={favUrl === baseUrl ? 'filled' : 'outlined'}
                                 onClick={() => handleChangeUrl(favUrl)}
                                 onDelete={() => dispatch(removeFavoriteUrl(favUrl))}
                                 deleteIcon={<Icon sx={{fontSize: '14px !important'}}>close</Icon>}
@@ -190,7 +189,7 @@ export function IndexPage() {
                                     fontSize: '12px',
                                     height: 28,
                                     borderRadius: 1,
-                                    ...(favUrl === String(baseUrl) && {
+                                    ...(favUrl === baseUrl && {
                                         backgroundColor: 'primary.light',
                                         borderColor: 'primary.main',
                                         color: 'primary.main',

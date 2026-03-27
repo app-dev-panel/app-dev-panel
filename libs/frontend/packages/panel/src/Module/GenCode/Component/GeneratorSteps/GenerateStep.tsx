@@ -77,7 +77,6 @@ function FileAction({file, generator}: {file: GenCodeFile; generator: GenCodeGen
 
     const handleDiff = async () => {
         const response = await diffQuery({generator: generator.id, parameters: context.parameters, fileId: file.id});
-        console.log('response', response);
         // @ts-ignore
         setDiff(response.data.diff);
         handleDiffDialogOpen();
@@ -146,10 +145,8 @@ export function GenerateStep({generator, onComplete}: StepProps) {
     const [generateQuery] = usePostGenerateMutation();
 
     async function generateHandler(data: FieldValues) {
-        console.log('generate', data, context.parameters);
         const response = await generateQuery({generator: generator.id, parameters: context.parameters, answers: data});
         if ('error' in response) {
-            console.log(response);
             mapErrorsToForm(response, form);
             return;
         }

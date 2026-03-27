@@ -63,15 +63,25 @@ const columns: GridColDef[] = [
     },
 ];
 
-function renderGrid(data: any) {
+function renderGrid(data: AnalyseRow[]) {
     return <DataTable rows={data as GridValidRowModel[]} columns={columns as GridColumns} />;
 }
 
+type AnalyseRow = {
+    id: number;
+    file_name: string;
+    file_path: string;
+    line_from: string;
+    line_to: string;
+    type: string;
+    message: string;
+    link: string;
+};
 type CommandResponseType = {isSuccessful: boolean | undefined; errors: string[]};
 export const AnalysePage = () => {
     const [commandQuery, commandQueryInfo] = useRunCommandMutation();
-    const [errorRows, setErrorRows] = useState<any[]>([]);
-    const [infoRows, setInfoRows] = useState<any[]>([]);
+    const [errorRows, setErrorRows] = useState<AnalyseRow[]>([]);
+    const [infoRows, setInfoRows] = useState<AnalyseRow[]>([]);
     const [commandResponse, setCommandResponse] = useState<CommandResponseType | null>(null);
 
     async function runPsalmHandler() {
@@ -81,23 +91,13 @@ export const AnalysePage = () => {
             return;
         }
 
-        const resultInfoRows: any = [];
-        const resultErrorRows: any = [];
+        const resultInfoRows: AnalyseRow[] = [];
+        const resultErrorRows: AnalyseRow[] = [];
 
-        let tempObject = {
-            id: 0,
-            file_name: '',
-            file_path: '',
-            line_from: '',
-            line_to: '',
-            type: '',
-            message: '',
-            link: '',
-        };
         let id = 0;
         for (const event of data.data.result) {
             id++;
-            tempObject = {
+            const row: AnalyseRow = {
                 id,
                 file_name: event.file_name,
                 file_path: event.file_path,
@@ -108,11 +108,11 @@ export const AnalysePage = () => {
                 link: event.link,
             };
             if (event.severity === 'info') {
-                resultInfoRows.push(tempObject);
+                resultInfoRows.push(row);
                 continue;
             }
             if (event.severity === 'error') {
-                resultErrorRows.push(tempObject);
+                resultErrorRows.push(row);
             }
         }
         setCommandResponse({isSuccessful: data.data.status === 'ok', errors: data.data.errors});

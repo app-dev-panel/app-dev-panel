@@ -510,9 +510,7 @@ const PushItemRow = ({
                         <JsonRenderer value={push.message} />
                         {push.middlewares.length > 0 && (
                             <Box sx={{mt: 1.5}}>
-                                <Typography
-                                    sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}
-                                >
+                                <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
                                     Middlewares
                                 </Typography>
                                 <JsonRenderer value={push.middlewares} />
