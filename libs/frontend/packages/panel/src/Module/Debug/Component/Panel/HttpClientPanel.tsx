@@ -12,7 +12,7 @@ import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {Box, Chip, Icon, IconButton, Tab, type Theme, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, Tab, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {type SyntheticEvent, memo, useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
 
@@ -544,6 +544,9 @@ type RequestRowItemProps = {entry: HttpClientEntry; expanded: boolean; onToggle:
 
 const RequestRowItem = memo(({entry, expanded, onToggle}: RequestRowItemProps) => {
     const theme = useTheme();
+    const [wasExpanded, setWasExpanded] = useState(expanded);
+    if (expanded && !wasExpanded) setWasExpanded(true);
+
     return (
         <Box>
             <RequestRow expanded={expanded} onClick={onToggle}>
@@ -587,7 +590,9 @@ const RequestRowItem = memo(({entry, expanded, onToggle}: RequestRowItemProps) =
                     <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
                 </IconButton>
             </RequestRow>
-            {expanded && <RequestDetail entry={entry} />}
+            <Collapse in={expanded} unmountOnExit>
+                {wasExpanded && <RequestDetail entry={entry} />}
+            </Collapse>
         </Box>
     );
 });
