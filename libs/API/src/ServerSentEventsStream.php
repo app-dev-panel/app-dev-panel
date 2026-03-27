@@ -12,8 +12,13 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
     public array $buffer = [];
     private bool $eof = false;
 
+    /**
+     * @param Closure $stream Callback that populates buffer and returns true to continue
+     */
     public function __construct(
         private Closure $stream,
+        private int $pollIntervalMicros = 500_000,
+        private int $sleepChunkMicros = 50_000,
     ) {}
 
     public function close(): void
@@ -77,11 +82,11 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
      */
     public function read(int $length): string
     {
-        $continue = ($this->stream)($this->buffer);
-
-        if (!$continue) {
-            $this->eof = true;
+        if ($this->eof) {
+            return '';
         }
+
+        $continue = ($this->stream)($this->buffer);
 
         $output = '';
         foreach ($this->buffer as $key => $value) {
@@ -89,6 +94,27 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
             $output .= sprintf("data: %s\n", $value);
         }
         $output .= "\n";
+
+        if (!$continue || $this->eof) {
+            $this->eof = true;
+            return $output;
+        }
+
+        if ($this->pollIntervalMicros <= 0) {
+            return $output;
+        }
+
+        // Interruptible sleep: split into small chunks so connection abort is detected quickly
+        $slept = 0;
+        while ($slept < $this->pollIntervalMicros) {
+            if ($this->eof || connection_aborted()) {
+                $this->eof = true;
+                return $output;
+            }
+            usleep($this->sleepChunkMicros);
+            $slept += $this->sleepChunkMicros;
+        }
+
         return $output;
     }
 
