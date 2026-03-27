@@ -37,7 +37,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
         class_exists(StreamWrapper::class);
         class_exists(CombinedRegexp::class);
         stream_wrapper_unregister('file');
-        stream_wrapper_register('file', self::class, STREAM_IS_URL);
+        stream_wrapper_register('file', self::class);
         self::$registered = true;
     }
 
@@ -81,13 +81,17 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     public function mkdir(string $path, int $mode, int $options): bool
     {
         if (!$this->isIgnored()) {
-            $this->operations['mkdir'] = [
-                'path' => $path,
-                'args' => [
-                    'mode' => $mode,
-                    'options' => $options,
-                ],
-            ];
+            $flags = [];
+            if ($options & STREAM_MKDIR_RECURSIVE) {
+                $flags[] = 'recursive';
+            }
+            if ($options & STREAM_REPORT_ERRORS) {
+                $flags[] = 'report_errors';
+            }
+            self::$collector?->collect(operation: 'mkdir', path: $path, args: [
+                'mode' => '0' . decoct($mode),
+                'options' => $flags === [] ? (string) $options : implode(', ', $flags),
+            ]);
         }
         return $this->__call(__FUNCTION__, func_get_args());
     }
@@ -95,12 +99,9 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     public function rename(string $path_from, string $path_to): bool
     {
         if (!$this->isIgnored()) {
-            $this->operations['rename'] = [
-                'path' => $path_from,
-                'args' => [
-                    'path_to' => $path_to,
-                ],
-            ];
+            self::$collector?->collect(operation: 'rename', path: $path_from, args: [
+                'path_to' => $path_to,
+            ]);
         }
         return $this->__call(__FUNCTION__, func_get_args());
     }
@@ -108,12 +109,16 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     public function rmdir(string $path, int $options): bool
     {
         if (!$this->isIgnored()) {
-            $this->operations['rmdir'] = [
-                'path' => $path,
-                'args' => [
-                    'options' => $options,
-                ],
-            ];
+            $flags = [];
+            if ($options & STREAM_MKDIR_RECURSIVE) {
+                $flags[] = 'recursive';
+            }
+            if ($options & STREAM_REPORT_ERRORS) {
+                $flags[] = 'report_errors';
+            }
+            self::$collector?->collect(operation: 'rmdir', path: $path, args: [
+                'options' => $flags === [] ? (string) $options : implode(', ', $flags),
+            ]);
         }
         return $this->__call(__FUNCTION__, func_get_args());
     }
@@ -133,10 +138,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     public function unlink(string $path): bool
     {
         if (!$this->isIgnored()) {
-            $this->operations['unlink'] = [
-                'path' => $path,
-                'args' => [],
-            ];
+            self::$collector?->collect(operation: 'unlink', path: $path, args: []);
         }
         return $this->__call(__FUNCTION__, func_get_args());
     }

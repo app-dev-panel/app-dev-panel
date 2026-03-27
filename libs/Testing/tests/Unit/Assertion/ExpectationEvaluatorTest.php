@@ -217,6 +217,38 @@ final class ExpectationEvaluatorTest extends TestCase
         $this->assertTrue($results[0]->passed);
     }
 
+    public function testFilesystemStreamExpectationsAgainstMockData(): void
+    {
+        $evaluator = new ExpectationEvaluator();
+        $data = [
+            'write' => [['path' => '/tmp/test.txt', 'args' => []]],
+            'read' => [['path' => '/tmp/test.txt', 'args' => []]],
+            'mkdir' => [['path' => '/tmp/dir', 'args' => ['mode' => 0o777, 'options' => 9]]],
+            'unlink' => [['path' => '/tmp/test.txt', 'args' => []]],
+        ];
+
+        $expectations = [
+            Expectation::notEmpty(),
+            Expectation::countGte(4),
+        ];
+
+        $results = $evaluator->evaluate('fs_stream', $data, $expectations);
+
+        $this->assertCount(2, $results);
+        foreach ($results as $result) {
+            $this->assertTrue($result->passed, $result->message);
+        }
+    }
+
+    public function testFilesystemStreamExpectationsFailOnEmpty(): void
+    {
+        $evaluator = new ExpectationEvaluator();
+        $results = $evaluator->evaluate('fs_stream', [], [Expectation::notEmpty()]);
+
+        $this->assertCount(1, $results);
+        $this->assertFalse($results[0]->passed);
+    }
+
     public function testCacheFixtureExpectationsAgainstMockData(): void
     {
         $evaluator = new ExpectationEvaluator();

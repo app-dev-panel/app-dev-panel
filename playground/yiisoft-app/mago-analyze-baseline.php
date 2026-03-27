@@ -481,6 +481,18 @@ message = "Property `$responseFactory` is never used."
 count = 1
 
 [[issues]]
+file = "src/Web/TestFixtures/FileStreamAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\FileStreamAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/FileStreamAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
 file = "src/Web/TestFixtures/HttpClientAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\HttpClientAction` cannot implement unknown type `RequestHandlerInterface`'

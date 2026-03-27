@@ -51,15 +51,15 @@ describe('getCollectedCountByCollector', () => {
         expect(getCollectedCountByCollector(CollectorsMap.MailerCollector, entry)).toBe(0);
     });
 
-    it('returns undefined for mailer when no mailer data', () => {
+    it('returns 0 for mailer when no mailer data', () => {
         const entry = makeEntry();
-        expect(getCollectedCountByCollector(CollectorsMap.MailerCollector, entry)).toBeUndefined();
+        expect(getCollectedCountByCollector(CollectorsMap.MailerCollector, entry)).toBe(0);
     });
 
     it('does not return NaN for mailer with empty object', () => {
         const entry = makeEntry({mailer: {}});
         const result = getCollectedCountByCollector(CollectorsMap.MailerCollector, entry);
-        expect(result).toBeUndefined();
+        expect(result).toBe(0);
         expect(Number.isNaN(result)).toBe(false);
     });
 

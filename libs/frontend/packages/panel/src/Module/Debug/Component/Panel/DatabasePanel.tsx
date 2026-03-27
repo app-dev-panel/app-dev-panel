@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {type GridColDef, type GridRenderCellParams} from '@mui/x-data-grid';
-import {useCallback, useDeferredValue, useMemo, useState} from 'react';
+import {useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
 
 type QueryAction = {action: 'query.start' | 'query.end'; time: number};
 type Query = {
@@ -224,6 +224,10 @@ const DuplicateQueryGroup = ({
 }) => {
     const theme = useTheme();
     const [expanded, setExpanded] = useState(false);
+    const [wasExpanded, setWasExpanded] = useState(false);
+    useEffect(() => {
+        if (expanded) setWasExpanded(true);
+    }, [expanded]);
 
     const sqlPreview = group.key;
     const verb = sqlPreview.trim().split(/\s/)[0]?.toUpperCase();
@@ -261,26 +265,28 @@ const DuplicateQueryGroup = ({
                 </IconButton>
             </GroupHeader>
             <Collapse in={expanded}>
-                <Box sx={{pl: 2}}>
-                    {group.indices.map((originalIndex) => {
-                        const query = queries[originalIndex];
-                        if (!query) return null;
-                        const isExpanded = expandedIndex === originalIndex;
-                        const ms = getQueryTime(query.actions);
-                        const color = durationColor(ms, theme);
-                        return (
-                            <QueryRowWithExplain
-                                key={originalIndex}
-                                query={query}
-                                expanded={isExpanded}
-                                ms={ms}
-                                color={color}
-                                onToggle={() => onToggleExpand(isExpanded ? null : originalIndex)}
-                                onExpand={() => onToggleExpand(originalIndex)}
-                            />
-                        );
-                    })}
-                </Box>
+                {wasExpanded && (
+                    <Box sx={{pl: 2}}>
+                        {group.indices.map((originalIndex) => {
+                            const query = queries[originalIndex];
+                            if (!query) return null;
+                            const isExpanded = expandedIndex === originalIndex;
+                            const ms = getQueryTime(query.actions);
+                            const color = durationColor(ms, theme);
+                            return (
+                                <QueryRowWithExplain
+                                    key={originalIndex}
+                                    query={query}
+                                    expanded={isExpanded}
+                                    ms={ms}
+                                    color={color}
+                                    onToggle={() => onToggleExpand(isExpanded ? null : originalIndex)}
+                                    onExpand={() => onToggleExpand(originalIndex)}
+                                />
+                            );
+                        })}
+                    </Box>
+                )}
             </Collapse>
         </Box>
     );
@@ -366,6 +372,10 @@ const QueryRowWithExplain = ({
     onToggle: () => void;
     onExpand: () => void;
 }) => {
+    const [wasExpanded, setWasExpanded] = useState(false);
+    useEffect(() => {
+        if (expanded) setWasExpanded(true);
+    }, [expanded]);
     const [explainQuery, {data, isLoading, error}] = useExplainQueryMutation({fixedCacheKey: undefined});
     const [analyzeQuery, {data: analyzeData, isLoading: analyzeLoading, error: analyzeError}] = useExplainQueryMutation(
         {fixedCacheKey: undefined},
@@ -440,51 +450,55 @@ const QueryRowWithExplain = ({
                 </IconButton>
             </QueryRow>
             <Collapse in={expanded}>
-                <DetailBox>
-                    <Box sx={{mb: 1.5}}>
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5}}>
-                            <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled'}}>
-                                Raw SQL
-                            </Typography>
-                            <CopyButton
-                                text={typeof query.rawSql === 'string' ? query.rawSql : JSON.stringify(query.rawSql)}
-                            />
-                        </Box>
-                        <Typography
-                            sx={{
-                                fontFamily: primitives.fontFamilyMono,
-                                fontSize: '12px',
-                                color: 'text.secondary',
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word',
-                            }}
-                        >
-                            {typeof query.rawSql === 'string' ? query.rawSql : JSON.stringify(query.rawSql)}
-                        </Typography>
-                    </Box>
-                    {Object.keys(query.params).length > 0 && (
+                {wasExpanded && (
+                    <DetailBox>
                         <Box sx={{mb: 1.5}}>
-                            <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
-                                Parameters
+                            <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5}}>
+                                <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled'}}>
+                                    Raw SQL
+                                </Typography>
+                                <CopyButton
+                                    text={
+                                        typeof query.rawSql === 'string' ? query.rawSql : JSON.stringify(query.rawSql)
+                                    }
+                                />
+                            </Box>
+                            <Typography
+                                sx={{
+                                    fontFamily: primitives.fontFamilyMono,
+                                    fontSize: '12px',
+                                    color: 'text.secondary',
+                                    whiteSpace: 'pre-wrap',
+                                    wordBreak: 'break-word',
+                                }}
+                            >
+                                {typeof query.rawSql === 'string' ? query.rawSql : JSON.stringify(query.rawSql)}
                             </Typography>
-                            <JsonRenderer value={query.params} />
                         </Box>
-                    )}
-                    <ExplainResult
-                        data={data}
-                        error={error}
-                        isLoading={isLoading}
-                        analyzeData={analyzeData}
-                        analyzeError={analyzeError}
-                        analyzeLoading={analyzeLoading}
-                        queryData={queryData}
-                        queryError={queryError}
-                        queryLoading={queryLoading}
-                        onExplain={handleExplain}
-                        onAnalyze={handleAnalyze}
-                        onQuery={handleQuery}
-                    />
-                </DetailBox>
+                        {Object.keys(query.params).length > 0 && (
+                            <Box sx={{mb: 1.5}}>
+                                <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                                    Parameters
+                                </Typography>
+                                <JsonRenderer value={query.params} />
+                            </Box>
+                        )}
+                        <ExplainResult
+                            data={data}
+                            error={error}
+                            isLoading={isLoading}
+                            analyzeData={analyzeData}
+                            analyzeError={analyzeError}
+                            analyzeLoading={analyzeLoading}
+                            queryData={queryData}
+                            queryError={queryError}
+                            queryLoading={queryLoading}
+                            onExplain={handleExplain}
+                            onAnalyze={handleAnalyze}
+                            onQuery={handleQuery}
+                        />
+                    </DetailBox>
+                )}
             </Collapse>
         </Box>
     );

@@ -25,6 +25,9 @@ return [
             Route::get('/logs-heavy')->action(Web\TestFixtures\LogsHeavyAction::class)->name('test-logs-heavy'),
             Route::get('/http-client')->action(Web\TestFixtures\HttpClientAction::class)->name('test-http-client'),
             Route::get('/filesystem')->action(Web\TestFixtures\FilesystemAction::class)->name('test-filesystem'),
+            Route::get('/filesystem-streams')->action(Web\TestFixtures\FileStreamAction::class)->name(
+                'test-filesystem-streams',
+            ),
             Route::get('/database')->action(Web\TestFixtures\DatabaseAction::class)->name('test-database'),
             Route::get('/mailer')->action(Web\TestFixtures\MailerAction::class)->name('test-mailer'),
             Route::get('/messenger')->action(Web\TestFixtures\MessengerAction::class)->name('test-messenger'),
@@ -32,7 +35,9 @@ return [
             Route::get('/router')->action(Web\TestFixtures\RouterAction::class)->name('test-router'),
             Route::get('/cache')->action(Web\TestFixtures\CacheAction::class)->name('test-cache'),
             Route::get('/cache-heavy')->action(Web\TestFixtures\CacheHeavyAction::class)->name('test-cache-heavy'),
-            Route::get('/opentelemetry')->action(Web\TestFixtures\OpenTelemetryAction::class)->name('test-opentelemetry'),
+            Route::get('/opentelemetry')->action(Web\TestFixtures\OpenTelemetryAction::class)->name(
+                'test-opentelemetry',
+            ),
             Route::methods(['GET', 'POST'], '/reset')
                 ->action(Web\TestFixtures\ResetAction::class)
                 ->name('test-reset'),

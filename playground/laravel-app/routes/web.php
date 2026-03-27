@@ -10,6 +10,7 @@ use App\Http\Controllers\TestFixtures\DumpAction;
 use App\Http\Controllers\TestFixtures\EventsAction;
 use App\Http\Controllers\TestFixtures\ExceptionAction;
 use App\Http\Controllers\TestFixtures\ExceptionChainedAction;
+use App\Http\Controllers\TestFixtures\FileStreamAction;
 use App\Http\Controllers\TestFixtures\FilesystemAction;
 use App\Http\Controllers\TestFixtures\HttpClientAction;
 use App\Http\Controllers\TestFixtures\LogsAction;
@@ -54,5 +55,6 @@ Route::prefix('test/fixtures')->group(function (): void {
     Route::get('/validator', ValidatorAction::class);
     Route::get('/router', RouterAction::class);
     Route::get('/filesystem', FilesystemAction::class);
+    Route::get('/filesystem-streams', FileStreamAction::class);
     Route::get('/opentelemetry', OpenTelemetryAction::class);
 });

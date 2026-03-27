@@ -20,7 +20,7 @@ import {
     Typography,
 } from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {SyntheticEvent, useDeferredValue, useMemo, useState} from 'react';
+import {SyntheticEvent, useDeferredValue, useEffect, useMemo, useState} from 'react';
 
 type Message = {
     messageClass: string;
@@ -156,6 +156,10 @@ const MessageDurationCell = styled(Typography)({
 const MessageItem = ({message, expanded, onToggle}: {message: Message; expanded: boolean; onToggle: () => void}) => {
     const theme = useTheme();
     const color = messageDurationColor(message.duration, theme);
+    const [wasExpanded, setWasExpanded] = useState(false);
+    useEffect(() => {
+        if (expanded) setWasExpanded(true);
+    }, [expanded]);
     return (
         <Box>
             <ItemRow expanded={expanded} onClick={onToggle}>
@@ -238,29 +242,31 @@ const MessageItem = ({message, expanded, onToggle}: {message: Message; expanded:
                 </IconButton>
             </ItemRow>
             <Collapse in={expanded}>
-                <DetailBox>
-                    <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
-                        Full Class Name
-                    </Typography>
-                    <Typography
-                        sx={{
-                            fontFamily: primitives.fontFamilyMono,
-                            fontSize: '12px',
-                            color: 'text.secondary',
-                            wordBreak: 'break-all',
-                        }}
-                    >
-                        {message.messageClass}
-                    </Typography>
-                    {message.message != null && (
-                        <Box sx={{mt: 1.5}}>
-                            <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
-                                Message Data
-                            </Typography>
-                            <JsonRenderer value={message.message} />
-                        </Box>
-                    )}
-                </DetailBox>
+                {wasExpanded && (
+                    <DetailBox>
+                        <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                            Full Class Name
+                        </Typography>
+                        <Typography
+                            sx={{
+                                fontFamily: primitives.fontFamilyMono,
+                                fontSize: '12px',
+                                color: 'text.secondary',
+                                wordBreak: 'break-all',
+                            }}
+                        >
+                            {message.messageClass}
+                        </Typography>
+                        {message.message != null && (
+                            <Box sx={{mt: 1.5}}>
+                                <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                                    Message Data
+                                </Typography>
+                                <JsonRenderer value={message.message} />
+                            </Box>
+                        )}
+                    </DetailBox>
+                )}
             </Collapse>
         </Box>
     );
@@ -279,6 +285,10 @@ const DuplicateMessageGroup = ({
 }) => {
     const theme = useTheme();
     const [expanded, setExpanded] = useState(false);
+    const [wasExpanded, setWasExpanded] = useState(false);
+    useEffect(() => {
+        if (expanded) setWasExpanded(true);
+    }, [expanded]);
     const totalDuration = group.indices.reduce((sum, i) => sum + (messages[i]?.duration ?? 0), 0);
 
     return (
@@ -299,20 +309,24 @@ const DuplicateMessageGroup = ({
                 </IconButton>
             </GroupHeader>
             <Collapse in={expanded}>
-                <Box sx={{pl: 2}}>
-                    {group.indices.map((originalIndex) => {
-                        const message = messages[originalIndex];
-                        if (!message) return null;
-                        return (
-                            <MessageItem
-                                key={originalIndex}
-                                message={message}
-                                expanded={expandedIndex === originalIndex}
-                                onToggle={() => onToggleExpand(expandedIndex === originalIndex ? null : originalIndex)}
-                            />
-                        );
-                    })}
-                </Box>
+                {wasExpanded && (
+                    <Box sx={{pl: 2}}>
+                        {group.indices.map((originalIndex) => {
+                            const message = messages[originalIndex];
+                            if (!message) return null;
+                            return (
+                                <MessageItem
+                                    key={originalIndex}
+                                    message={message}
+                                    expanded={expandedIndex === originalIndex}
+                                    onToggle={() =>
+                                        onToggleExpand(expandedIndex === originalIndex ? null : originalIndex)
+                                    }
+                                />
+                            );
+                        })}
+                    </Box>
+                )}
             </Collapse>
         </Box>
     );
@@ -326,10 +340,6 @@ const MessagesView = ({messages, duplicates}: {messages: Message[]; duplicates: 
 
     const hasDuplicates = duplicates.groups.length > 0;
 
-    if (!messages || messages.length === 0) {
-        return <EmptyState icon="send" title="No messages found" />;
-    }
-
     const filtered = deferredFilter
         ? messages.filter((m) => m.messageClass.toLowerCase().includes(deferredFilter.toLowerCase()))
         : messages;
@@ -341,6 +351,10 @@ const MessagesView = ({messages, duplicates}: {messages: Message[]; duplicates: 
             .filter((group) => !deferredFilter || group.key.toLowerCase().includes(filterLower))
             .map((group) => ({...group, items: group.indices.map((i) => messages[i]).filter(Boolean)}));
     }, [hasDuplicates, viewMode, duplicates.groups, messages, deferredFilter]);
+
+    if (!messages || messages.length === 0) {
+        return <EmptyState icon="send" title="No messages found" />;
+    }
 
     return (
         <Box>
@@ -425,7 +439,7 @@ const PushesView = ({pushes}: {pushes: Record<string, {message: any; middlewares
             {queueNames.map((queueName) => (
                 <Box key={queueName}>
                     <Box sx={{px: 1.5, py: 1, backgroundColor: 'action.selected'}}>
-                        <Typography sx={{fontSize: '12px', fontWeight: 600}}>
+                        <Typography component="span" sx={{fontSize: '12px', fontWeight: 600}}>
                             {queueName}
                             <Chip
                                 label={pushes[queueName].length}
@@ -438,53 +452,75 @@ const PushesView = ({pushes}: {pushes: Record<string, {message: any; middlewares
                         const key = `${queueName}-${index}`;
                         const expanded = expandedKey === key;
                         return (
-                            <Box key={key}>
-                                <ItemRow expanded={expanded} onClick={() => setExpandedKey(expanded ? null : key)}>
-                                    <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', flex: 1}}>
-                                        Message #{index + 1}
-                                    </Typography>
-                                    {push.middlewares.length > 0 && (
-                                        <Chip
-                                            label={`${push.middlewares.length} middleware${push.middlewares.length !== 1 ? 's' : ''}`}
-                                            size="small"
-                                            variant="outlined"
-                                            sx={{fontSize: '10px', height: 20, borderRadius: 1, flexShrink: 0}}
-                                        />
-                                    )}
-                                    <IconButton size="small" sx={{flexShrink: 0}}>
-                                        <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
-                                    </IconButton>
-                                </ItemRow>
-                                <Collapse in={expanded}>
-                                    <DetailBox>
-                                        <Typography
-                                            sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}
-                                        >
-                                            Message
-                                        </Typography>
-                                        <JsonRenderer value={push.message} />
-                                        {push.middlewares.length > 0 && (
-                                            <Box sx={{mt: 1.5}}>
-                                                <Typography
-                                                    sx={{
-                                                        fontSize: '11px',
-                                                        fontWeight: 600,
-                                                        color: 'text.disabled',
-                                                        mb: 0.5,
-                                                    }}
-                                                >
-                                                    Middlewares
-                                                </Typography>
-                                                <JsonRenderer value={push.middlewares} />
-                                            </Box>
-                                        )}
-                                    </DetailBox>
-                                </Collapse>
-                            </Box>
+                            <PushItemRow
+                                key={key}
+                                push={push}
+                                index={index}
+                                expanded={expanded}
+                                onToggle={() => setExpandedKey(expanded ? null : key)}
+                            />
                         );
                     })}
                 </Box>
             ))}
+        </Box>
+    );
+};
+
+const PushItemRow = ({
+    push,
+    index,
+    expanded,
+    onToggle,
+}: {
+    push: {message: any; middlewares: any[]};
+    index: number;
+    expanded: boolean;
+    onToggle: () => void;
+}) => {
+    const [wasExpanded, setWasExpanded] = useState(false);
+    useEffect(() => {
+        if (expanded) setWasExpanded(true);
+    }, [expanded]);
+
+    return (
+        <Box>
+            <ItemRow expanded={expanded} onClick={onToggle}>
+                <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', flex: 1}}>
+                    Message #{index + 1}
+                </Typography>
+                {push.middlewares.length > 0 && (
+                    <Chip
+                        label={`${push.middlewares.length} middleware${push.middlewares.length !== 1 ? 's' : ''}`}
+                        size="small"
+                        variant="outlined"
+                        sx={{fontSize: '10px', height: 20, borderRadius: 1, flexShrink: 0}}
+                    />
+                )}
+                <IconButton size="small" sx={{flexShrink: 0}}>
+                    <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                </IconButton>
+            </ItemRow>
+            <Collapse in={expanded}>
+                {wasExpanded && (
+                    <DetailBox>
+                        <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
+                            Message
+                        </Typography>
+                        <JsonRenderer value={push.message} />
+                        {push.middlewares.length > 0 && (
+                            <Box sx={{mt: 1.5}}>
+                                <Typography
+                                    sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}
+                                >
+                                    Middlewares
+                                </Typography>
+                                <JsonRenderer value={push.middlewares} />
+                            </Box>
+                        )}
+                    </DetailBox>
+                )}
+            </Collapse>
         </Box>
     );
 };
@@ -522,6 +558,43 @@ const StatusesView = ({statuses}: {statuses: {id: string; status: string}[]}) =>
     );
 };
 
+const ProcessingItemRow = ({
+    msg,
+    index,
+    expanded,
+    onToggle,
+}: {
+    msg: any;
+    index: number;
+    expanded: boolean;
+    onToggle: () => void;
+}) => {
+    const [wasExpanded, setWasExpanded] = useState(false);
+    useEffect(() => {
+        if (expanded) setWasExpanded(true);
+    }, [expanded]);
+
+    return (
+        <Box>
+            <ItemRow expanded={expanded} onClick={onToggle}>
+                <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', flex: 1}}>
+                    Processing #{index + 1}
+                </Typography>
+                <IconButton size="small" sx={{flexShrink: 0}}>
+                    <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                </IconButton>
+            </ItemRow>
+            <Collapse in={expanded}>
+                {wasExpanded && (
+                    <DetailBox>
+                        <JsonRenderer value={msg} />
+                    </DetailBox>
+                )}
+            </Collapse>
+        </Box>
+    );
+};
+
 const ProcessingView = ({processingMessages}: {processingMessages: Record<string, any[]>}) => {
     const [expandedKey, setExpandedKey] = useState<string | null>(null);
     const queueNames = Object.keys(processingMessages);
@@ -538,7 +611,7 @@ const ProcessingView = ({processingMessages}: {processingMessages: Record<string
             {queueNames.map((queueName) => (
                 <Box key={queueName}>
                     <Box sx={{px: 1.5, py: 1, backgroundColor: 'action.selected'}}>
-                        <Typography sx={{fontSize: '12px', fontWeight: 600}}>
+                        <Typography component="span" sx={{fontSize: '12px', fontWeight: 600}}>
                             {queueName}
                             <Chip
                                 label={processingMessages[queueName].length}
@@ -549,23 +622,14 @@ const ProcessingView = ({processingMessages}: {processingMessages: Record<string
                     </Box>
                     {processingMessages[queueName].map((msg, index) => {
                         const key = `${queueName}-${index}`;
-                        const expanded = expandedKey === key;
                         return (
-                            <Box key={key}>
-                                <ItemRow expanded={expanded} onClick={() => setExpandedKey(expanded ? null : key)}>
-                                    <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', flex: 1}}>
-                                        Processing #{index + 1}
-                                    </Typography>
-                                    <IconButton size="small" sx={{flexShrink: 0}}>
-                                        <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
-                                    </IconButton>
-                                </ItemRow>
-                                <Collapse in={expanded}>
-                                    <DetailBox>
-                                        <JsonRenderer value={msg} />
-                                    </DetailBox>
-                                </Collapse>
-                            </Box>
+                            <ProcessingItemRow
+                                key={key}
+                                msg={msg}
+                                index={index}
+                                expanded={expandedKey === key}
+                                onToggle={() => setExpandedKey(expandedKey === key ? null : key)}
+                            />
                         );
                     })}
                 </Box>

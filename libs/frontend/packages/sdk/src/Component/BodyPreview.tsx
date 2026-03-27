@@ -51,17 +51,23 @@ function tryPrettyPrint(body: string, language: string): string {
 export const BodyPreview = ({body, contentType, title = 'Body', defaultCollapsed}: BodyPreviewProps) => {
     const autoCollapse = defaultCollapsed ?? body.length > 500;
     const [collapsed, setCollapsed] = useState(autoCollapse);
+    const [wasOpened, setWasOpened] = useState(!autoCollapse);
     const language = detectLanguage(contentType);
     const isJson = language === 'json';
 
+    const handleToggle = () => {
+        if (collapsed) setWasOpened(true);
+        setCollapsed(!collapsed);
+    };
+
     // For JSON, try to render as interactive JsonRenderer
-    const parsedJson = isJson ? tryParseJson(body) : null;
-    const displayBody = tryPrettyPrint(body, language);
+    const parsedJson = isJson && wasOpened ? tryParseJson(body) : null;
+    const displayBody = wasOpened ? tryPrettyPrint(body, language) : '';
 
     return (
         <Box>
             <Box
-                onClick={() => setCollapsed(!collapsed)}
+                onClick={handleToggle}
                 sx={{display: 'flex', alignItems: 'center', cursor: 'pointer', gap: 0.5, '&:hover': {opacity: 0.8}}}
             >
                 <IconButton size="small" sx={{p: 0.25}}>
@@ -83,25 +89,27 @@ export const BodyPreview = ({body, contentType, title = 'Body', defaultCollapsed
                 </Typography>
             </Box>
             <Collapse in={!collapsed}>
-                <Box
-                    sx={{
-                        mt: 0.5,
-                        borderRadius: 1,
-                        overflow: 'hidden',
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        maxHeight: 600,
-                        overflowY: 'auto',
-                    }}
-                >
-                    {parsedJson !== null && typeof parsedJson === 'object' ? (
-                        <Box sx={{p: 1.5}}>
-                            <JsonRenderer value={parsedJson} />
-                        </Box>
-                    ) : (
-                        <CodeHighlight code={displayBody} language={language} showLineNumbers={false} />
-                    )}
-                </Box>
+                {wasOpened && (
+                    <Box
+                        sx={{
+                            mt: 0.5,
+                            borderRadius: 1,
+                            overflow: 'hidden',
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            maxHeight: 600,
+                            overflowY: 'auto',
+                        }}
+                    >
+                        {parsedJson !== null && typeof parsedJson === 'object' ? (
+                            <Box sx={{p: 1.5}}>
+                                <JsonRenderer value={parsedJson} />
+                            </Box>
+                        ) : (
+                            <CodeHighlight code={displayBody} language={language} showLineNumbers={false} />
+                        )}
+                    </Box>
+                )}
             </Collapse>
         </Box>
     );

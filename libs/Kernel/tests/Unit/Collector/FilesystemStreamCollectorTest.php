@@ -72,7 +72,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $mkdirAfter,
             [
                 'mkdir' => [
-                    ['path' => $path, 'args' => ['mode' => 0o777, 'options' => 9]], // 9 for some reason
+                    ['path' => $path, 'args' => ['mode' => '0777', 'options' => 'recursive, report_errors']],
                 ],
             ],
         ];
@@ -165,7 +165,7 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $rmdirAfter,
             [
                 'rmdir' => [
-                    ['path' => $path, 'args' => ['options' => 8]], // 8 for some reason
+                    ['path' => $path, 'args' => ['options' => 'report_errors']],
                 ],
             ],
         ];
@@ -293,6 +293,200 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
             $fileStreamAfter,
             [],
         ];
+    }
+
+    public function testFilePutContentsAndGetContentsCollected(): void
+    {
+        $collector = new FilesystemStreamCollector();
+        $collector->startup();
+
+        $tmpFile = __DIR__ . DIRECTORY_SEPARATOR . 'stub' . DIRECTORY_SEPARATOR . 'put-get-' . uniqid() . '.txt';
+
+        try {
+            (static function () use ($tmpFile): void {
+                file_put_contents($tmpFile, 'ADP filesystem test');
+                file_get_contents($tmpFile);
+                unlink($tmpFile);
+            })();
+
+            $collected = $collector->getCollected();
+            $summary = $collector->getSummary();
+        } finally {
+            $collector->shutdown();
+            if (is_file($tmpFile)) {
+                @unlink($tmpFile);
+            }
+        }
+
+        $this->assertArrayHasKey('write', $collected);
+        $this->assertArrayHasKey('read', $collected);
+        $this->assertArrayHasKey('unlink', $collected);
+        $this->assertCount(1, $collected['write']);
+        $this->assertCount(1, $collected['read']);
+        $this->assertCount(1, $collected['unlink']);
+
+        $this->assertArrayHasKey('fs_stream', $summary);
+        $this->assertSame(1, $summary['fs_stream']['write']);
+        $this->assertSame(1, $summary['fs_stream']['read']);
+        $this->assertSame(1, $summary['fs_stream']['unlink']);
+    }
+
+    public function testProxyRemainsRegisteredAcrossMultipleOperations(): void
+    {
+        $collector = new FilesystemStreamCollector();
+        $collector->startup();
+
+        $baseDir = __DIR__ . DIRECTORY_SEPARATOR . 'stub' . DIRECTORY_SEPARATOR . 'multi-op-' . uniqid();
+        $file1 = $baseDir . DIRECTORY_SEPARATOR . 'file1.txt';
+        $file2 = $baseDir . DIRECTORY_SEPARATOR . 'file2.txt';
+
+        try {
+            (static function () use ($baseDir, $file1, $file2): void {
+                mkdir($baseDir, 0o777, true);
+                file_put_contents($file1, 'first');
+                file_put_contents($file2, 'second');
+                file_get_contents($file1);
+                file_get_contents($file2);
+                unlink($file1);
+                unlink($file2);
+                rmdir($baseDir);
+            })();
+
+            $collected = $collector->getCollected();
+        } finally {
+            $collector->shutdown();
+            if (is_file($file1)) {
+                @unlink($file1);
+            }
+            if (is_file($file2)) {
+                @unlink($file2);
+            }
+            if (is_dir($baseDir)) {
+                @rmdir($baseDir);
+            }
+        }
+
+        $this->assertArrayHasKey('mkdir', $collected);
+        $this->assertArrayHasKey('write', $collected);
+        $this->assertArrayHasKey('read', $collected);
+        $this->assertArrayHasKey('unlink', $collected);
+        $this->assertArrayHasKey('rmdir', $collected);
+        $this->assertCount(1, $collected['mkdir']);
+        $this->assertCount(2, $collected['write']);
+        $this->assertCount(2, $collected['read']);
+        $this->assertCount(2, $collected['unlink']);
+        $this->assertCount(1, $collected['rmdir']);
+    }
+
+    public function testReaddirCollected(): void
+    {
+        $collector = new FilesystemStreamCollector();
+        $collector->startup();
+
+        $tmpDir = __DIR__ . DIRECTORY_SEPARATOR . 'stub' . DIRECTORY_SEPARATOR . 'readdir-' . uniqid();
+
+        try {
+            (static function () use ($tmpDir): void {
+                mkdir($tmpDir, 0o777, true);
+                file_put_contents($tmpDir . '/a.txt', 'a');
+                $handle = opendir($tmpDir);
+                readdir($handle);
+                closedir($handle);
+                unlink($tmpDir . '/a.txt');
+                rmdir($tmpDir);
+            })();
+
+            $collected = $collector->getCollected();
+        } finally {
+            $collector->shutdown();
+            if (is_file($tmpDir . '/a.txt')) {
+                @unlink($tmpDir . '/a.txt');
+            }
+            if (is_dir($tmpDir)) {
+                @rmdir($tmpDir);
+            }
+        }
+
+        $this->assertArrayHasKey('readdir', $collected);
+        $this->assertCount(1, $collected['readdir']);
+    }
+
+    public function testStreamIsLocalReturnsTrueWhileProxyActive(): void
+    {
+        $collector = new FilesystemStreamCollector();
+        $collector->startup();
+
+        try {
+            $this->assertTrue(stream_is_local(__FILE__));
+            $this->assertTrue(stream_is_local(__DIR__));
+        } finally {
+            $collector->shutdown();
+        }
+    }
+
+    public function testFileStreamFixtureScenario(): void
+    {
+        $collector = new FilesystemStreamCollector();
+        $collector->startup();
+
+        $tmpDir = __DIR__ . DIRECTORY_SEPARATOR . 'stub' . DIRECTORY_SEPARATOR . 'stream-fixture-' . uniqid();
+        $tmpFile = $tmpDir . DIRECTORY_SEPARATOR . 'stream-test.txt';
+        $renamedFile = $tmpDir . DIRECTORY_SEPARATOR . 'stream-test-renamed.txt';
+
+        try {
+            // Run all operations in a closure so $stream goes out of scope
+            // and the proxy flushes its buffered operations via __destruct
+            (static function () use ($tmpDir, $tmpFile, $renamedFile): void {
+                mkdir($tmpDir, 0o777, true);
+
+                $stream = fopen($tmpFile, 'w+');
+                fwrite($stream, 'ADP file stream test');
+                fseek($stream, 0);
+                fread($stream, 20);
+                fclose($stream);
+                unset($stream);
+
+                rename($tmpFile, $renamedFile);
+                unlink($renamedFile);
+                rmdir($tmpDir);
+            })();
+
+            $collected = $collector->getCollected();
+            $summary = $collector->getSummary();
+        } finally {
+            $collector->shutdown();
+            if (is_file($tmpFile)) {
+                @unlink($tmpFile);
+            }
+            if (is_file($renamedFile)) {
+                @unlink($renamedFile);
+            }
+            if (is_dir($tmpDir)) {
+                @rmdir($tmpDir);
+            }
+        }
+
+        $this->assertArrayHasKey('mkdir', $collected);
+        $this->assertArrayHasKey('write', $collected);
+        $this->assertArrayHasKey('read', $collected);
+        $this->assertArrayHasKey('rename', $collected);
+        $this->assertArrayHasKey('unlink', $collected);
+        $this->assertArrayHasKey('rmdir', $collected);
+
+        $this->assertCount(1, $collected['mkdir']);
+        $this->assertCount(1, $collected['write']);
+        $this->assertCount(1, $collected['read']);
+        $this->assertCount(1, $collected['rename']);
+        $this->assertCount(1, $collected['unlink']);
+        $this->assertCount(1, $collected['rmdir']);
+
+        $this->assertArrayHasKey('fs_stream', $summary);
+        $this->assertSame(1, $summary['fs_stream']['mkdir']);
+        $this->assertSame(1, $summary['fs_stream']['write']);
+        $this->assertSame(1, $summary['fs_stream']['read']);
+        $this->assertSame(1, $summary['fs_stream']['rename']);
+        $this->assertSame(1, $summary['fs_stream']['unlink']);
+        $this->assertSame(1, $summary['fs_stream']['rmdir']);
     }
 
     protected function getCollector(): CollectorInterface

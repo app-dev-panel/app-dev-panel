@@ -25,7 +25,15 @@ export type DebugEntry = {
         totalDuplicatedCount?: number;
     };
     http?: {count: number; totalTime: number};
-    fs_stream?: {read?: number; write?: number; mkdir?: number};
+    fs_stream?: {
+        read?: number;
+        write?: number;
+        mkdir?: number;
+        readdir?: number;
+        unlink?: number;
+        rmdir?: number;
+        rename?: number;
+    };
     http_stream?: [];
     environment?: {php: {version: string; sapi: string}; os: string};
     web?: {adapter?: string; request: {startTime: number; processingTime: number}; memory: {peakUsage: number}};

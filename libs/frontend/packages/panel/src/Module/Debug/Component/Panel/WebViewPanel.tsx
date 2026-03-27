@@ -35,7 +35,10 @@ function dirname(filePath: string): string {
     return parts.join('/');
 }
 
-function normalizeData(data: WebViewPanelProps['data']): {renders: WebViewEntry[]; duplicates: DuplicatesData} {
+function normalizeData(
+    data: WebViewPanelProps['data'],
+): {renders: WebViewEntry[]; duplicates: DuplicatesData} | null {
+    if (!data) return null;
     if (Array.isArray(data)) {
         return {renders: data, duplicates: {groups: [], totalDuplicatedCount: 0}};
     }
@@ -168,7 +171,9 @@ const RenderItem = ({
 };
 
 export const WebViewPanel = ({data}: WebViewPanelProps) => {
-    const {renders, duplicates} = normalizeData(data);
+    const normalized = normalizeData(data);
+    const renders = normalized?.renders ?? [];
+    const duplicates = normalized?.duplicates ?? {groups: [], totalDuplicatedCount: 0};
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
