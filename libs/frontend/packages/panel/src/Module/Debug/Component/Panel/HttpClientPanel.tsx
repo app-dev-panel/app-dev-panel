@@ -590,7 +590,7 @@ const RequestRowItem = memo(({entry, expanded, onToggle}: RequestRowItemProps) =
                     <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
                 </IconButton>
             </RequestRow>
-            <Collapse in={expanded} unmountOnExit>
+            <Collapse in={expanded}>
                 {wasExpanded && <RequestDetail entry={entry} />}
             </Collapse>
         </Box>
