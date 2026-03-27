@@ -1,5 +1,5 @@
 import {renderWithProviders} from '@app-dev-panel/sdk/test-utils';
-import {screen} from '@testing-library/react';
+import {screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it} from 'vitest';
 import {FilesystemPanel} from './FilesystemPanel';
@@ -23,13 +23,13 @@ describe('FilesystemPanel', () => {
 
     it('renders tabs for each operation type', () => {
         renderWithProviders(<FilesystemPanel data={makeData() as any} />);
-        expect(screen.getByText('read')).toBeInTheDocument();
-        expect(screen.getByText('readdir')).toBeInTheDocument();
+        const tablist = screen.getByRole('tablist');
+        expect(within(tablist).getByText('read')).toBeInTheDocument();
+        expect(within(tablist).getByText('readdir')).toBeInTheDocument();
     });
 
     it('renders count chips on tabs', () => {
         renderWithProviders(<FilesystemPanel data={makeData() as any} />);
-        // Each tab should show its item count
         expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(2);
     });
 
@@ -45,13 +45,14 @@ describe('FilesystemPanel', () => {
 
     it('renders operations count', () => {
         renderWithProviders(<FilesystemPanel data={makeData() as any} />);
-        expect(screen.getByText('1 operations')).toBeInTheDocument();
+        expect(screen.getByText('1 operation')).toBeInTheDocument();
     });
 
     it('switches tab on click', async () => {
         const user = userEvent.setup();
         renderWithProviders(<FilesystemPanel data={makeData() as any} />);
-        await user.click(screen.getByText('readdir'));
+        const tablist = screen.getByRole('tablist');
+        await user.click(within(tablist).getByText('readdir'));
         expect(screen.getByText('/var/www/uploads')).toBeInTheDocument();
     });
 
@@ -66,7 +67,31 @@ describe('FilesystemPanel', () => {
         const user = userEvent.setup();
         const data = makeData({readdir: [], mkdir: []});
         renderWithProviders(<FilesystemPanel data={data as any} />);
-        await user.click(screen.getByText('readdir'));
+        const tablist = screen.getByRole('tablist');
+        await user.click(within(tablist).getByText('readdir'));
         expect(screen.getByText(/No readdir operations found/)).toBeInTheDocument();
+    });
+
+    it('renders summary cards with total operations', () => {
+        renderWithProviders(<FilesystemPanel data={makeData() as any} />);
+        expect(screen.getByText('Total Operations')).toBeInTheDocument();
+    });
+
+    it('renders section title', () => {
+        renderWithProviders(<FilesystemPanel data={makeData() as any} />);
+        expect(screen.getByText('Operations')).toBeInTheDocument();
+    });
+
+    it('renders filter input', () => {
+        renderWithProviders(<FilesystemPanel data={makeData() as any} />);
+        expect(screen.getByPlaceholderText('Filter by path...')).toBeInTheDocument();
+    });
+
+    it('filters operations by path', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<FilesystemPanel data={makeData() as any} />);
+        const input = screen.getByPlaceholderText('Filter by path...');
+        await user.type(input, 'nonexistent');
+        expect(screen.getByText(/No matching paths/)).toBeInTheDocument();
     });
 });
