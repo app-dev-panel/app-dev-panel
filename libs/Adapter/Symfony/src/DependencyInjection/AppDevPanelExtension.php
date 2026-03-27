@@ -24,12 +24,6 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
-use AppDevPanel\Api\Mcp\Controller\McpController;
-use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
-use AppDevPanel\Api\Mcp\McpSettings;
-use AppDevPanel\McpServer\McpServer;
-use AppDevPanel\McpServer\McpToolRegistryFactory;
-use AppDevPanel\McpServer\Tool\ToolRegistry;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -45,6 +39,14 @@ use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Llm\Controller\LlmController;
+use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
+use AppDevPanel\Api\Llm\FileLlmSettings;
+use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
+use AppDevPanel\Api\Llm\LlmSettingsInterface;
+use AppDevPanel\Api\Mcp\Controller\McpController;
+use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
+use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
 use AppDevPanel\Api\PathMapper;
@@ -63,8 +65,8 @@ use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
-use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\SecurityCollector;
@@ -83,9 +85,13 @@ use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
+use AppDevPanel\McpServer\Tool\ToolRegistry;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
@@ -371,6 +377,9 @@ final class AppDevPanelExtension extends Extension
         if (!$container->has(StreamFactoryInterface::class)) {
             $container->register(StreamFactoryInterface::class, HttpFactory::class)->setPublic(false);
         }
+        if (!$container->has(RequestFactoryInterface::class)) {
+            $container->register(RequestFactoryInterface::class, HttpFactory::class)->setPublic(false);
+        }
         if (!$container->has(UriFactoryInterface::class)) {
             $container->register(UriFactoryInterface::class, HttpFactory::class)->setPublic(false);
         }
@@ -577,6 +586,31 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
                 new Reference(CollectorRepositoryInterface::class),
+            ])
+            ->setPublic(true);
+
+        // LLM settings
+        $container
+            ->register(LlmSettingsInterface::class, FileLlmSettings::class)
+            ->setArguments(['%app_dev_panel.storage.path%'])
+            ->setPublic(true);
+
+        // LLM history storage
+        $container
+            ->register(LlmHistoryStorageInterface::class, FileLlmHistoryStorage::class)
+            ->setArguments(['%app_dev_panel.storage.path%'])
+            ->setPublic(true);
+
+        // LLM controller
+        $container
+            ->register(LlmController::class, LlmController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(LlmSettingsInterface::class),
+                new Reference(ClientInterface::class),
+                new Reference(RequestFactoryInterface::class),
+                new Reference(StreamFactoryInterface::class),
+                new Reference(LlmHistoryStorageInterface::class),
             ])
             ->setPublic(true);
     }

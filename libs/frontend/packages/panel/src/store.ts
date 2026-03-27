@@ -4,6 +4,7 @@ import {
     middlewares as InspectorMiddlewares,
     reducers as InspectorReducers,
 } from '@app-dev-panel/panel/Module/Inspector/api';
+import {middlewares as LlmMiddlewares, reducers as LlmReducers} from '@app-dev-panel/panel/Module/Llm/api';
 import {middlewares as OpenApiMiddlewares, reducers as OpenApiReducers} from '@app-dev-panel/panel/Module/OpenApi/api';
 import {
     middlewares as ApplicationMiddlewares,
@@ -25,6 +26,7 @@ const rootReducer = combineReducers({
     ...InspectorReducers,
     ...DebugReducers,
     ...GenCodeReducers,
+    ...LlmReducers,
     ...OpenApiReducers,
     ...FramesReducers,
     // ...ToolbarApiReducers,
@@ -43,6 +45,7 @@ export const createStore = (preloadedState: PreloadedStateShapeFromReducersMapOb
                     ...InspectorMiddlewares,
                     ...DebugMiddlewares,
                     ...GenCodeMiddlewares,
+                    ...LlmMiddlewares,
                     ...OpenApiMiddlewares,
                     ...FramesMiddlewares,
                     // ...ToolbarApiMiddlewares,

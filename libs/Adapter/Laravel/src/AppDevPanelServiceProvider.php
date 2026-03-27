@@ -30,11 +30,6 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
-use AppDevPanel\Api\Mcp\Controller\McpController;
-use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
-use AppDevPanel\Api\Mcp\McpSettings;
-use AppDevPanel\McpServer\McpServer;
-use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -50,6 +45,14 @@ use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Llm\Controller\LlmController;
+use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
+use AppDevPanel\Api\Llm\FileLlmSettings;
+use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
+use AppDevPanel\Api\Llm\LlmSettingsInterface;
+use AppDevPanel\Api\Mcp\Controller\McpController;
+use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
+use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
 use AppDevPanel\Api\PathMapper;
@@ -70,8 +73,8 @@ use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
-use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
@@ -89,11 +92,14 @@ use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
 use Illuminate\Support\ServiceProvider;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
@@ -359,6 +365,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
     private function registerPsrFactories(): void
     {
+        $this->app->singletonIf(RequestFactoryInterface::class, HttpFactory::class);
         $this->app->singletonIf(ResponseFactoryInterface::class, HttpFactory::class);
         $this->app->singletonIf(StreamFactoryInterface::class, HttpFactory::class);
         $this->app->singletonIf(UriFactoryInterface::class, HttpFactory::class);
@@ -518,16 +525,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
-        $this->app->singleton(
-            McpSettings::class,
-            fn() => new McpSettings($config->get('app-dev-panel.storage.path')),
-        );
+        $this->app->singleton(McpSettings::class, fn() => new McpSettings($config->get('app-dev-panel.storage.path')));
 
         $this->app->singleton(
             McpServer::class,
-            fn() => new McpServer(
-                McpToolRegistryFactory::create($this->app->make(StorageInterface::class)),
-            ),
+            fn() => new McpServer(McpToolRegistryFactory::create($this->app->make(StorageInterface::class))),
         );
 
         $this->app->singleton(
@@ -544,6 +546,28 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             fn() => new McpSettingsController(
                 $this->app->make(JsonResponseFactoryInterface::class),
                 $this->app->make(McpSettings::class),
+            ),
+        );
+
+        $this->app->singleton(
+            LlmSettingsInterface::class,
+            fn() => new FileLlmSettings($this->app->make('config')->get('app-dev-panel.storage.path')),
+        );
+
+        $this->app->singleton(
+            LlmHistoryStorageInterface::class,
+            fn() => new FileLlmHistoryStorage($this->app->make('config')->get('app-dev-panel.storage.path')),
+        );
+
+        $this->app->singleton(
+            LlmController::class,
+            fn() => new LlmController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(LlmSettingsInterface::class),
+                $this->app->make(ClientInterface::class),
+                $this->app->make(RequestFactoryInterface::class),
+                $this->app->make(StreamFactoryInterface::class),
+                $this->app->make(LlmHistoryStorageInterface::class),
             ),
         );
     }

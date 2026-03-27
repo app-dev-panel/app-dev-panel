@@ -136,7 +136,6 @@ describe('IndexPage (Settings)', () => {
         renderIndexPage();
         expect(screen.getByText('Debug')).toBeInTheDocument();
         expect(screen.getByText('Inspector')).toBeInTheDocument();
-        expect(screen.getByText('GenCode')).toBeInTheDocument();
     });
 
     it('renders backend URL input', () => {

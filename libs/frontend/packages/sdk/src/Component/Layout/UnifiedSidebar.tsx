@@ -2,7 +2,7 @@ import {NavItem} from '@app-dev-panel/sdk/Component/Layout/NavItem';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Collapse, Divider, Icon, Paper, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import React from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -43,12 +43,22 @@ const ChildList = styled('div')(({theme}) => ({
     gap: theme.spacing(0.25),
 }));
 
-const ExpandIcon = styled(Icon)(({theme}) => ({
-    fontSize: 16,
+const ExpandButton = styled('span')(({theme}) => ({
     marginLeft: 'auto',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 24,
+    height: 24,
+    borderRadius: theme.shape.borderRadius,
+    flexShrink: 0,
+    cursor: 'pointer',
     color: theme.palette.text.disabled,
-    transition: 'transform 0.15s ease',
+    transition: 'background-color 0.12s ease, color 0.12s ease',
+    '&:hover': {backgroundColor: theme.palette.action.hover, color: theme.palette.text.primary},
 }));
+
+const ExpandIcon = styled(Icon)({fontSize: 16, transition: 'transform 0.15s ease'});
 
 const SectionHeader = styled('div', {shouldForwardProp: (p) => p !== 'active'})<{active: boolean}>(
     ({theme, active}) => ({
@@ -92,28 +102,81 @@ const SectionLabel = styled(Typography)(({theme}) => ({fontSize: theme.typograph
 
 export const UnifiedSidebar = React.memo(
     ({sections, activePath, activeChildKey, onNavigate, onChildClick}: UnifiedSidebarProps) => {
+        const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+        const prevPathRef = useRef(activePath);
+
+        // Auto-expand when navigating to a new section
+        useEffect(() => {
+            if (prevPathRef.current !== activePath) {
+                prevPathRef.current = activePath;
+                // Find the section that matches the new path and uncollapse it
+                for (const section of sections) {
+                    const isActive = section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
+                    if (isActive && section.children && section.children.length > 0) {
+                        setCollapsed((prev) => {
+                            if (prev[section.key] !== true) return prev;
+                            const next = {...prev};
+                            delete next[section.key];
+                            return next;
+                        });
+                    }
+                }
+            }
+        }, [activePath, sections]);
+
+        const handleToggleExpand = useCallback(
+            (sectionKey: string) => {
+                setCollapsed((prev) => {
+                    const section = sections.find((s) => s.key === sectionKey);
+                    const isActive = section
+                        ? section.href === '/'
+                            ? activePath === '/'
+                            : activePath.startsWith(section.href)
+                        : false;
+                    const current = prev[sectionKey];
+                    // Determine current visual state
+                    const currentlyExpanded = current === false || (current === undefined && isActive);
+                    return {...prev, [sectionKey]: currentlyExpanded};
+                });
+            },
+            [sections, activePath],
+        );
+
         return (
             <SidebarRoot variant="outlined">
                 {sections.map((section, idx) => {
-                    const isActiveSection =
+                    const isSectionMatch =
                         section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
                     const hasChildren = section.children && section.children.length > 0;
-                    const isExpanded = isActiveSection && hasChildren;
+                    const hasActiveChild =
+                        hasChildren &&
+                        activeChildKey != null &&
+                        section.children!.some((c) => c.key === activeChildKey);
+                    const isActiveSection = isSectionMatch && !hasActiveChild;
+                    const manualState = collapsed[section.key];
+                    const isExpanded =
+                        hasChildren && (manualState === false || (manualState === undefined && isSectionMatch));
 
                     return (
                         <React.Fragment key={section.key}>
                             {idx > 0 && idx === sections.length - 3 && <Divider sx={{mx: 1.25, my: 0.75}} />}
                             {hasChildren ? (
                                 <>
-                                    <SectionHeader
-                                        active={isActiveSection && !activeChildKey}
-                                        onClick={() => onNavigate(section.href)}
-                                    >
+                                    <SectionHeader active={isActiveSection} onClick={() => onNavigate(section.href)}>
                                         <Icon sx={{fontSize: 19, flexShrink: 0}}>{section.icon}</Icon>
                                         <SectionLabel>{section.label}</SectionLabel>
-                                        <ExpandIcon sx={{transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'}}>
-                                            expand_more
-                                        </ExpandIcon>
+                                        <ExpandButton
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleToggleExpand(section.key);
+                                            }}
+                                        >
+                                            <ExpandIcon
+                                                sx={{transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'}}
+                                            >
+                                                expand_more
+                                            </ExpandIcon>
+                                        </ExpandButton>
                                     </SectionHeader>
                                     <Collapse in={isExpanded} timeout={150}>
                                         <ChildList>

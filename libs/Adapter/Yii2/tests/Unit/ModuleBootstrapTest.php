@@ -292,6 +292,7 @@ final class ModuleBootstrapTest extends TestCase
     {
         $logDispatcher = null;
         $app = $this->createWebApp([], $logDispatcher);
+        $this->assertNotNull($logDispatcher);
 
         $module = new Module('debug-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
@@ -307,6 +308,7 @@ final class ModuleBootstrapTest extends TestCase
     {
         $logDispatcher = null;
         $app = $this->createWebApp([], $logDispatcher);
+        $this->assertNotNull($logDispatcher);
 
         $module = new Module('debug-panel', null, [
             'storagePath' => $this->storagePath . '/debug',

@@ -42,9 +42,9 @@ final class SpanProcessorInterfaceProxyTest extends TestCase
         $spanData->method('getAttributes')->willReturn(Attributes::create(['http.method' => 'GET']));
         $spanData->method('getEvents')->willReturn([]);
         $spanData->method('getLinks')->willReturn([]);
-        $spanData->method('getResource')->willReturn(
-            ResourceInfo::create(Attributes::create(['service.name' => 'test-service'])),
-        );
+        $spanData
+            ->method('getResource')
+            ->willReturn(ResourceInfo::create(Attributes::create(['service.name' => 'test-service'])));
 
         $readableSpan = $this->createMock(ReadableSpanInterface::class);
         $readableSpan->method('toSpanData')->willReturn($spanData);

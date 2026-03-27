@@ -269,7 +269,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const debugChildren = useMemo(() => {
         const entriesList = [{key: '__entries__', icon: 'list', label: 'All Entries'}];
         if (!debugEntry) return entriesList;
-        const overview = [{key: '__overview__', icon: 'grid_view', label: 'Overview'}];
         const isWeb = isDebugEntryAboutWeb(debugEntry);
         const isConsole = isDebugEntryAboutConsole(debugEntry);
         const collectors = [...debugEntry.collectors]
@@ -293,7 +292,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 };
             })
             .filter((c) => showInactiveCollectors || (c.badge != null && c.badge > 0));
-        return [...overview, ...collectors, ...entriesList];
+        return [...collectors, ...entriesList];
     }, [debugEntry, showInactiveCollectors]);
 
     // Build extra items for CommandPalette from current debug entry's collectors
@@ -314,7 +313,13 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             {key: 'home', icon: 'home', label: 'Home', href: '/'},
             {key: 'debug', icon: 'bug_report', label: 'Debug', href: '/debug', children: debugChildren},
             {key: 'inspector', icon: 'search', label: 'Inspector', href: '/inspector', children: inspectorChildren},
-            {key: 'gen-code', icon: 'build_circle', label: 'GenCode', href: '/gen-code'},
+            {
+                key: 'llm',
+                icon: 'psychology',
+                label: 'LLM',
+                href: '/llm',
+                children: [{key: '/llm/mcp', icon: 'hub', label: 'MCP'}],
+            },
             {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api'},
             {key: 'frames', icon: 'web', label: 'Frames', href: '/frames'},
         ],
@@ -327,12 +332,15 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             return '__entries__';
         }
         if (location.pathname.startsWith('/debug')) {
-            return selectedCollector || '__overview__';
+            return selectedCollector || undefined;
         }
         if (location.pathname.startsWith('/inspector')) {
             // Find matching inspector child
             const match = inspectorChildren.find((c) => location.pathname.startsWith(c.key));
             return match?.key;
+        }
+        if (location.pathname.startsWith('/llm/mcp')) {
+            return '/llm/mcp';
         }
         return undefined;
     }, [location.pathname, selectedCollector]);
@@ -347,10 +355,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const handleChildClick = useCallback(
         (sectionKey: string, childKey: string) => {
             if (sectionKey === 'debug') {
-                if (childKey === '__overview__') {
-                    navigate('/debug');
-                    return;
-                }
                 if (childKey === '__entries__') {
                     navigate('/debug/list');
                     return;
@@ -359,7 +363,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 if (debugEntry) {
                     navigate(`/debug?collector=${encodeURIComponent(childKey)}&debugEntry=${debugEntry.id}`);
                 }
-            } else if (sectionKey === 'inspector') {
+            } else if (sectionKey === 'inspector' || sectionKey === 'llm') {
                 navigate(childKey);
             }
         },

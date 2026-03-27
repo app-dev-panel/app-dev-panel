@@ -2,5 +2,6 @@ vendor/
 /node_modules/
 */**/composer.lock
 .phpunit.cache/
+.vite/
 /coverage.xml
 .claude/worktrees/

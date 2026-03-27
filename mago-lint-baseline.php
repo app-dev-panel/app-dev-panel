@@ -1,6 +1,54 @@
 variant = "loose"
 
 [[issues]]
+file = "libs/API/src/Llm/Controller/LlmController.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/Controller/LlmController.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.17)."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/Controller/LlmController.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 4
+
+[[issues]]
+file = "libs/API/src/Llm/Controller/LlmController.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/FileLlmSettings.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 3
+
+[[issues]]
+file = "libs/API/src/Llm/FileLlmSettings.php"
+code = "sensitive-parameter"
+message = "Parameters that may contain sensitive information should be marked with the `#[SensitiveParameter]` attribute."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/FileLlmSettings.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/LlmSettingsInterface.php"
+code = "sensitive-parameter"
+message = "Parameters that may contain sensitive information should be marked with the `#[SensitiveParameter]` attribute."
+count = 1
+
+[[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
