@@ -75,6 +75,7 @@ use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -276,6 +277,7 @@ final class AppDevPanelExtension extends Extension
         $simpleCollectorMap = [
             'security' => SecurityCollector::class,
             'validator' => ValidatorCollector::class,
+            'translator' => TranslatorCollector::class,
         ];
 
         foreach ($simpleCollectorMap as $key => $class) {

@@ -73,6 +73,7 @@ use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -146,6 +147,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         'router' => true,
         'queue' => true,
         'validator' => true,
+        'translator' => true,
     ];
 
     /**
@@ -602,6 +604,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'router' => static fn(): array => [new RouterCollector()],
             'queue' => static fn(): array => [new QueueCollector($timeline)],
             'validator' => static fn(): array => [new ValidatorCollector()],
+            'translator' => static fn(): array => [new TranslatorCollector()],
             'opentelemetry' => static fn(): array => [new OpenTelemetryCollector($timeline)],
         ];
     }

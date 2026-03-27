@@ -26,6 +26,7 @@ use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -63,6 +64,7 @@ return [
             VarDumperCollector::class,
             TimelineCollector::class,
             ValidatorCollector::class,
+            TranslatorCollector::class,
             OpenTelemetryCollector::class,
         ],
         'collectors.web' => [

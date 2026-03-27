@@ -66,7 +66,10 @@ final readonly class OpenTelemetryAction implements RequestHandlerInterface
             duration: 50.0,
             status: 'OK',
             kind: 'CLIENT',
-            attributes: ['db.system' => 'postgresql', 'db.statement' => 'INSERT INTO orders (user_id, total) VALUES ($1, $2)'],
+            attributes: [
+                'db.system' => 'postgresql',
+                'db.statement' => 'INSERT INTO orders (user_id, total) VALUES ($1, $2)',
+            ],
         ));
 
         $notifySpanId = bin2hex(random_bytes(8));
@@ -87,11 +90,18 @@ final readonly class OpenTelemetryAction implements RequestHandlerInterface
                 [
                     'name' => 'exception',
                     'timestamp' => $now + 0.228,
-                    'attributes' => ['exception.type' => 'SmtpException', 'exception.message' => 'Connection timed out after 5s'],
+                    'attributes' => [
+                        'exception.type' => 'SmtpException',
+                        'exception.message' => 'Connection timed out after 5s',
+                    ],
                 ],
             ],
         ));
 
-        return $this->responseFactory->createResponse(['fixture' => 'opentelemetry', 'status' => 'ok', 'traceId' => $traceId]);
+        return $this->responseFactory->createResponse([
+            'fixture' => 'opentelemetry',
+            'status' => 'ok',
+            'traceId' => $traceId,
+        ]);
     }
 }

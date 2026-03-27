@@ -49,6 +49,8 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
             return data.timeline?.total != null ? Number(data.timeline.total) : 0;
         case CollectorsMap.OpenTelemetryCollector:
             return Number(data.opentelemetry?.spans) || 0;
+        case CollectorsMap.TranslatorCollector:
+            return Number(data.translator?.total) || 0;
         default:
             return undefined;
     }

@@ -81,6 +81,7 @@ use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -190,6 +191,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'filesystem_stream' => FilesystemStreamCollector::class,
             'http_stream' => HttpStreamCollector::class,
             'validator' => ValidatorCollector::class,
+            'translator' => TranslatorCollector::class,
         ];
 
         foreach ($simpleCollectors as $key => $class) {
