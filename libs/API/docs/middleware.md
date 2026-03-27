@@ -5,7 +5,7 @@
 Every API request passes through the following middleware chain:
 
 ```
-Request → IpFilter → CorsAllowAll → ResponseDataWrapper → DebugHeaders → Controller
+Request → IpFilterMiddleware → CorsMiddleware → ResponseDataWrapper → DebugHeaders → Controller
 ```
 
 ## IpFilter
@@ -22,10 +22,11 @@ Configuration:
 
 If the IP is not allowed, the request is rejected before reaching any controller.
 
-## CorsAllowAll
+## CorsMiddleware
 
-Adds permissive CORS headers to all responses. Allows requests from any origin.
-This is appropriate for a development tool.
+Adds permissive CORS headers to all responses: `Access-Control-Allow-Origin: *`,
+methods GET/POST/PUT/DELETE/PATCH/OPTIONS, headers Content-Type/Authorization/X-Debug-Token/X-Requested-With.
+Responds to OPTIONS with 204. Max-Age: 86400.
 
 ## ResponseDataWrapper
 

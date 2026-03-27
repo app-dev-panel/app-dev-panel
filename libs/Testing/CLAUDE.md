@@ -16,15 +16,22 @@ libs/Testing/src/
 ├── Fixture/
 │   ├── Fixture.php             # Single test fixture definition
 │   ├── Expectation.php          # Assertion about collector data
+│   ├── RequestOptions.php       # HTTP request options for fixtures
 │   └── FixtureRegistry.php     # Central registry of ALL fixtures
 ├── Assertion/
 │   ├── AssertionResult.php      # Pass/fail result
-│   └── ExpectationEvaluator.php # Evaluates expectations against data
+│   ├── ExpectationEvaluator.php # Evaluates expectations against data
+│   ├── FieldAssertionEvaluator.php # Evaluates field-level assertions
+│   ├── CollectionFieldEvaluator.php # Evaluates collection field assertions
+│   └── PathResolver.php         # Resolves dot-notation paths in data
 ├── Runner/
 │   ├── FixtureRunner.php       # HTTP-based fixture executor
-│   └── FixtureResult.php       # Result of running one fixture
+│   ├── FixtureResult.php       # Result of running one fixture
+│   ├── CollectorDataResolver.php # Resolves collector data from debug entries
+│   └── DebugDataFetcher.php    # Fetches debug data from API
 └── Command/
-    └── DebugFixturesCommand.php # CLI command to run fixtures
+    ├── DebugFixturesCommand.php # CLI command to run fixtures
+    └── FixtureResultRenderer.php # Renders fixture results to console
 libs/Testing/tests/
 ├── Unit/
 │   ├── Fixture/

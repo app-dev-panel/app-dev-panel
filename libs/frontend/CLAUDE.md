@@ -28,10 +28,11 @@ packages/
 │   │   ├── modules.ts      # Module registry (all ModuleInterface imports)
 │   │   ├── Application/    # App shell (Layout, NotFoundPage, Settings)
 │   │   └── Module/         # Feature modules
-│   │       ├── Debug/      # Debug data viewer
-│   │       ├── Inspector/  # Application inspector (20+ pages)
-│   │       ├── Llm/        # LLM chat and AI-powered analysis
-│   │       ├── Mcp/        # MCP server setup and configuration
+│   │       ├── Debug/      # Debug data viewer (collector panels, timeline, exceptions)
+│   │       ├── Inspector/  # Application inspector (20+ pages: routes, DB, git, cache, etc.)
+│   │       ├── Llm/        # LLM chat and AI-powered analysis (connect, chat, analyze, history)
+│   │       ├── Mcp/        # MCP server setup and configuration page
+│   │       ├── GenCode/    # Code generation wizard (stepper: generate, preview, result)
 │   │       ├── OpenApi/    # Swagger UI integration
 │   │       └── Frames/     # iFrame support for remote panels
 │   └── vite.config.ts
@@ -129,7 +130,7 @@ All pages share a single unified layout (`Application/Component/Layout.tsx`):
 **Debug Layout** (`Module/Debug/Pages/Layout.tsx`) is a thin wrapper that handles collector data loading — reads `collector` from URL params, fetches collector info, and renders the appropriate panel component. It has no shell (TopBar, sidebar) of its own.
 
 **UnifiedSidebar** sections:
-- Home, Debug (expandable: collectors + All Entries), Inspector (expandable: 14 sub-pages), LLM (expandable: MCP), Open API, Frames
+- Home, Debug (expandable: collectors + All Entries), Inspector (expandable: 14 sub-pages), LLM (expandable: MCP), GenCode, Open API, Frames
 - Debug sub-items are dynamic (built from current entry's collectors)
 - Inspector sub-items are static (config, events, routes, etc.)
 
@@ -220,7 +221,8 @@ Reducers:
 ├── api.debug            # RTK Query cache (debug endpoints)
 ├── api.inspector        # RTK Query cache (inspector endpoints)
 ├── api.inspector.git    # RTK Query cache (git endpoints)
-└── api.llm              # RTK Query cache (LLM endpoints)
+├── api.llm              # RTK Query cache (LLM endpoints)
+└── api.genCode          # RTK Query cache (code generation endpoints)
 ```
 
 Key features:
