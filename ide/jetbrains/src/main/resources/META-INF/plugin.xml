@@ -1,0 +1,142 @@
+<idea-plugin>
+    <id>com.adp.jetbrains</id>
+    <name>ADP — Application Development Panel</name>
+    <vendor email="support@adp.dev" url="https://github.com/app-dev-panel">ADP</vendor>
+
+    <description><![CDATA[
+    Integrates ADP (Application Development Panel) debugging data directly into JetBrains IDEs.
+
+    Features:
+    <ul>
+        <li>Live debug entries feed via SSE</li>
+        <li>Gutter icons for logs, SQL queries, exceptions, events at their source lines</li>
+        <li>Inlay hints with query timing, log counts, cache hit/miss</li>
+        <li>Inspections for N+1 queries, slow queries, deprecations</li>
+        <li>Status bar widget with last request summary</li>
+        <li>Real-time notifications for errors and exceptions</li>
+        <li>Navigate from code to ADP web panel and back</li>
+        <li>Request replay and cURL export</li>
+        <li>Deep link protocol handler (adp://)</li>
+    </ul>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends optional="true" config-file="php-support.xml">com.jetbrains.php</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Settings -->
+        <applicationConfigurable
+            parentId="tools"
+            instance="com.adp.jetbrains.settings.AdpSettingsConfigurable"
+            id="com.adp.jetbrains.settings"
+            displayName="ADP — Application Development Panel"/>
+        <applicationService
+            serviceImplementation="com.adp.jetbrains.settings.AdpSettingsState"/>
+
+        <!-- Tool Window -->
+        <toolWindow
+            id="ADP"
+            secondary="false"
+            icon="/icons/adp-13.svg"
+            anchor="bottom"
+            factoryClass="com.adp.jetbrains.toolwindow.AdpToolWindowFactory"/>
+
+        <!-- Gutter Icons (Line Markers) -->
+        <codeInsight.lineMarkerProvider
+            language=""
+            implementationClass="com.adp.jetbrains.gutter.AdpGutterIconProvider"/>
+
+        <!-- Inlay Hints -->
+        <codeInsight.inlayProvider
+            language=""
+            implementationClass="com.adp.jetbrains.inlay.AdpInlayHintsProvider"/>
+
+        <!-- Inspections -->
+        <localInspection
+            language="PHP"
+            groupName="ADP"
+            displayName="N+1 query detection"
+            enabledByDefault="true"
+            level="WARNING"
+            implementationClass="com.adp.jetbrains.inspections.NplusOneQueryInspection"/>
+        <localInspection
+            language="PHP"
+            groupName="ADP"
+            displayName="Slow SQL query detection"
+            enabledByDefault="true"
+            level="WARNING"
+            implementationClass="com.adp.jetbrains.inspections.SlowQueryInspection"/>
+        <localInspection
+            language="PHP"
+            groupName="ADP"
+            displayName="Runtime deprecation detection"
+            enabledByDefault="true"
+            level="WEAK WARNING"
+            implementationClass="com.adp.jetbrains.inspections.DeprecationInspection"/>
+
+        <!-- Status Bar -->
+        <statusBarWidgetFactory
+            id="AdpStatusBar"
+            implementation="com.adp.jetbrains.statusbar.AdpStatusBarWidgetFactory"/>
+
+        <!-- Notifications -->
+        <notificationGroup
+            id="ADP Notifications"
+            displayType="BALLOON"
+            toolWindowId="ADP"/>
+        <notificationGroup
+            id="ADP Errors"
+            displayType="STICKY_BALLOON"
+            toolWindowId="ADP"/>
+
+        <!-- Deep Link Protocol Handler -->
+        <protocolHandler
+            implementation="com.adp.jetbrains.deeplink.AdpProtocolHandler"/>
+    </extensions>
+
+    <actions>
+        <!-- Navigation Actions -->
+        <group id="Adp.NavigationGroup" text="ADP" description="ADP actions" popup="true">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <action
+                id="Adp.OpenInPanel"
+                class="com.adp.jetbrains.navigation.OpenInAdpPanelAction"
+                text="Open in ADP Panel"
+                description="Open this location in ADP web panel"
+                icon="/icons/adp-13.svg"/>
+            <action
+                id="Adp.OpenDebugEntry"
+                class="com.adp.jetbrains.navigation.OpenDebugEntryAction"
+                text="Open Debug Entry"
+                description="Open the last debug entry touching this line"
+                icon="/icons/adp-13.svg"/>
+        </group>
+
+        <!-- Request Actions -->
+        <action
+            id="Adp.ReplayRequest"
+            class="com.adp.jetbrains.actions.ReplayRequestAction"
+            text="Replay Last Request"
+            description="Re-execute the last HTTP request via ADP"/>
+        <action
+            id="Adp.CopyCurl"
+            class="com.adp.jetbrains.actions.CopyCurlAction"
+            text="Copy as cURL"
+            description="Copy the last HTTP request as a cURL command"/>
+
+        <!-- Tool Window Actions -->
+        <action
+            id="Adp.RefreshEntries"
+            class="com.adp.jetbrains.toolwindow.RefreshEntriesAction"
+            text="Refresh"
+            description="Refresh debug entries list"
+            icon="AllIcons.Actions.Refresh"/>
+        <action
+            id="Adp.ClearEntries"
+            class="com.adp.jetbrains.toolwindow.ClearEntriesAction"
+            text="Clear"
+            description="Clear debug entries from view"
+            icon="AllIcons.Actions.GC"/>
+    </actions>
+</idea-plugin>
