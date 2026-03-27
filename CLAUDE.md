@@ -273,7 +273,7 @@ make frontend-fix                   # Frontend only
 make test-php                       # PHP tests only
 make test-frontend                  # Frontend tests only
 ```
-All checks must be green. Fix any failures before proceeding.
+All checks must be green. Fix any failures before proceeding — **including pre-existing test failures from other branches**. If tests were broken before your branch, fix them anyway.
 
 ### Step 3: Review Documentation
 ```bash
