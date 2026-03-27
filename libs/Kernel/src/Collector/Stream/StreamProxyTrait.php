@@ -123,17 +123,4 @@ trait StreamProxyTrait
     {
         return $this->__call(__FUNCTION__, func_get_args());
     }
-
-    /**
-     * Flushes collected operations to the collector on destruction.
-     *
-     * Does NOT unregister the stream wrapper — the wrapper must remain active
-     * for subsequent operations until the collector's shutdown() is called.
-     */
-    protected function flushOperationsToCollector(): void
-    {
-        foreach ($this->operations as $name => $operation) {
-            static::$collector->collect(operation: $name, path: $operation['path'], args: $operation['args']);
-        }
-    }
 }

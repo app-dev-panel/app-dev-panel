@@ -75,11 +75,9 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
         if (!$this->isActive()) {
             return [];
         }
-        gc_collect_cycles();
+
         return [
-            'fs_stream' => array_merge(...array_map(fn(string $operation) => [$operation => count(
-                $this->operations[$operation],
-            )], array_keys($this->operations))),
+            'fs_stream' => array_merge(...array_map(fn(array $operations) => count($operations), $this->operations)),
         ];
     }
 

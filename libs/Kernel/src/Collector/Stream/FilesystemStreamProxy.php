@@ -17,14 +17,6 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     public static array $ignoredPathPatterns = [];
     public static array $ignoredClasses = [];
 
-    public function __destruct()
-    {
-        if (self::$collector === null) {
-            return;
-        }
-        $this->flushOperationsToCollector();
-    }
-
     public static function register(): void
     {
         if (self::$registered) {
@@ -59,10 +51,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     public function stream_read(int $count): string|false
     {
         if (!$this->ignored) {
-            $this->operations['read'] = [
-                'path' => $this->decorated->filename,
-                'args' => [],
-            ];
+            self::$collector?->collect(operation: 'read', path: $this->decorated->filename, args: []);
         }
         return $this->__call(__FUNCTION__, func_get_args());
     }
@@ -70,10 +59,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     public function dir_readdir(): false|string
     {
         if (!$this->ignored) {
-            $this->operations['readdir'] = [
-                'path' => $this->decorated->filename,
-                'args' => [],
-            ];
+            self::$collector?->collect(operation: 'readdir', path: $this->decorated->filename, args: []);
         }
         return $this->__call(__FUNCTION__, func_get_args());
     }
@@ -126,10 +112,7 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     public function stream_write(string $data): int
     {
         if (!$this->ignored) {
-            $this->operations['write'] = [
-                'path' => $this->decorated->filename,
-                'args' => [],
-            ];
+            self::$collector?->collect(operation: 'write', path: $this->decorated->filename, args: []);
         }
 
         return $this->__call(__FUNCTION__, func_get_args());
