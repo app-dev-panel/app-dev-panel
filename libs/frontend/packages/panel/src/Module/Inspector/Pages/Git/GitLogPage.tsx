@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useCommandMutation, useGetLogQuery} from '@app-dev-panel/panel/Module/Inspector/API/GitApi';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {GetApp, Refresh, Sync} from '@mui/icons-material';
@@ -12,8 +11,6 @@ export const GitLogPage = () => {
     const onPullHandler = useCallback(() => commandMutation({command: 'pull'}), []);
     const onFetchHandler = useCallback(() => commandMutation({command: 'fetch'}), []);
     const onRefreshHandler = () => getLogQuery.refetch();
-
-    useBreadcrumbs(() => [{title: 'Inspector', href: 'inspector'}, {title: 'Git', href: 'git'}, 'Log']);
 
     return (
         <>

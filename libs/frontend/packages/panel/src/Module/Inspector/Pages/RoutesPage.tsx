@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetRoutesQuery, useLazyGetCheckRouteQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
@@ -327,8 +326,6 @@ export const RoutesPage = () => {
         if (!url.trim()) return;
         await checkRouteQuery(url);
     };
-
-    useBreadcrumbs(() => ['Inspector', 'Routes']);
 
     const toggleFilter = useCallback((name: string) => {
         setActiveFilters((prev) => {

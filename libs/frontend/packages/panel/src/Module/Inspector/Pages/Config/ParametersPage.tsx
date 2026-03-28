@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetParametersQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -223,8 +222,6 @@ export const ParametersPage = () => {
         },
         [setSearchParams],
     );
-
-    useBreadcrumbs(() => ['Inspector', 'Parameters']);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;

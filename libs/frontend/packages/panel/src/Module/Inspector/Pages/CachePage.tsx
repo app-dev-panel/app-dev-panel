@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {
     useClearCacheMutation,
     useDeleteCacheMutation,
@@ -36,8 +35,6 @@ export const CachePage = () => {
         await clearCacheMutation();
         await getCacheQuery.refetch();
     };
-
-    useBreadcrumbs(() => ['Inspector', 'Cache']);
 
     return (
         <>

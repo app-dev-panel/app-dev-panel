@@ -1,12 +1,10 @@
 import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {Link, Typography} from '@mui/material';
-import {useLocation, useMatches, useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 export const NotFoundPage = () => {
     const navigate = useNavigate();
-    const location = useLocation();
-    const matches = useMatches();
 
     return (
         <InfoBox

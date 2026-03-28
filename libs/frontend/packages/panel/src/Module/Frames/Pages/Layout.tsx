@@ -79,7 +79,7 @@ const NoEntries = React.memo(() => {
 export const Layout = () => {
     const [tab, setTab] = useState<string>('');
     const [settingsPopupOpen, setSettingsPopupOpen] = useState<boolean>(false);
-    const handleChange = (event: any, value: string) => setTab(value);
+    const handleChange = (_event: React.SyntheticEvent, value: string) => setTab(value);
     const theme = useTheme();
 
     const frames = useFramesEntries();
@@ -104,11 +104,11 @@ export const Layout = () => {
                             allowScrollButtonsMobile
                             sx={{maxWidth: '100%'}}
                         >
-                            {Object.keys(frames).map((name, index) => (
-                                <Tab key={index} label={name} value={name} wrapped />
+                            {Object.keys(frames).map((name) => (
+                                <Tab key={name} label={name} value={name} wrapped />
                             ))}
                         </Tabs>
-                        <IconButton onClick={() => setSettingsPopupOpen(true)}>
+                        <IconButton onClick={() => setSettingsPopupOpen(true)} aria-label="Frames settings">
                             <Settings />
                         </IconButton>
                     </Stack>
@@ -116,8 +116,8 @@ export const Layout = () => {
                         <NoEntries />
                     ) : (
                         <>
-                            {Object.entries(frames).map(([name, url], index) => (
-                                <TabPanel key={index} value={name} className={theme.palette.mode}>
+                            {Object.entries(frames).map(([name, url]) => (
+                                <TabPanel key={name} value={name} className={theme.palette.mode}>
                                     {/*<iframe src={url} width="100%" height="1000px" />*/}
                                     <object data={url} width="100%" height="1000px" type="text/html">
                                         <ErrorResolutionBox url={url} />

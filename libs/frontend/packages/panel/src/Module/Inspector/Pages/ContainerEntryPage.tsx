@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetObjectQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
@@ -11,7 +10,6 @@ export const ContainerEntryPage = () => {
     const [searchParams] = useSearchParams();
     const objectClass = searchParams.get('class') || '';
     const {data, isLoading} = useGetObjectQuery(objectClass);
-    useBreadcrumbs(() => ['Inspector', 'Container Entry']);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;

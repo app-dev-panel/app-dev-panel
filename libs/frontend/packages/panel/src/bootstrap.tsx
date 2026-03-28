@@ -13,9 +13,7 @@ try {
 
 (function AppDevPanelWidget(scope) {
     scope.init = function () {
-        console.debug('AppDevPanelWidget initialization', this);
         const container = document.getElementById(this.config.containerId) as HTMLElement;
-        console.debug('AppDevPanelWidget mounting into', container);
 
         const root = ReactDOM.createRoot(container);
         root.render(

@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {
     CommandType,
     useLazyGetCommandsQuery,
@@ -42,14 +41,11 @@ export const CommandsPage = () => {
         })();
     }, []);
 
-    useBreadcrumbs(() => ['Inspector', 'Commands']);
-
     const runCommand = async (command: CommandType) => {
         setCommandStatus((prev) => ({...prev, [command.name]: {...prev[command.name], isLoading: true}}));
         const response = await runCommandQuery(command.name);
         setCommandStatus((prev) => ({...prev, [command.name]: {...prev[command.name], isLoading: false}}));
         setShowResultDialog(true);
-        console.log(response);
     };
     const commandEntries = Object.entries(groupedCommands as GroupedCommands);
 
@@ -82,7 +78,6 @@ export const CommandsPage = () => {
         );
     }
 
-    console.log(runCommandQueryInfo.data?.result);
     return (
         <>
             <PageHeader title="Commands" icon="terminal" description="Run application commands" />

@@ -15,19 +15,23 @@ const columns: GridColDef[] = [
     },
 ];
 
-export const DumpPage = ({data}: any) => {
+export const DumpPage = ({data}: {data: unknown}) => {
     const isArray = Array.isArray(data);
     const rows = useMemo(() => {
-        const rows = Object.entries(data || []);
-        return rows.map((el) => ({0: el[0], 1: Array.isArray(el[1]) ? Object.assign({}, el[1]) : el[1]})) as any;
+        const entries = Object.entries(data || []);
+        return entries.map((el) => ({
+            0: el[0],
+            1: Array.isArray(el[1]) ? Object.assign({}, el[1]) : el[1],
+        })) as GridValidRowModel[];
     }, [data]);
+
+    const displayColumns = useMemo(() => (isArray ? [columns[columns.length - 1]] : columns), [isArray]);
 
     return (
         <DataTable
-            getRowId={() => Math.random() * 1000}
-            rows={rows as GridValidRowModel[]}
-            // @ts-ignore
-            columns={isArray ? [[...columns].pop()] : columns}
+            getRowId={(row: GridValidRowModel) => String(row[0])}
+            rows={rows}
+            columns={displayColumns as GridColDef[]}
         />
     );
 };

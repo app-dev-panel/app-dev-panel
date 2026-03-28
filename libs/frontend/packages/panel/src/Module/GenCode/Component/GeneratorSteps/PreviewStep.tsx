@@ -3,6 +3,7 @@ import {FormInput} from '@app-dev-panel/panel/Module/GenCode/Component/FormInput
 import {StepProps} from '@app-dev-panel/panel/Module/GenCode/Component/GeneratorSteps/Step.types';
 import {mapErrorsToForm} from '@app-dev-panel/panel/Module/GenCode/Component/errorMapper';
 import {Context} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
+import {GenCodeFile} from '@app-dev-panel/panel/Module/GenCode/Types/FIle.types';
 import {createYupValidationSchema} from '@app-dev-panel/sdk/Adapter/yup/yii.validator';
 import {yupResolver} from '@hookform/resolvers/yup/dist/yup';
 import {Box, Button, ButtonGroup} from '@mui/material';
@@ -22,33 +23,30 @@ export function PreviewStep({generator, onComplete}: StepProps) {
 
     useEffect(() => {
         form.reset();
-    }, [generator]);
+    }, [generator, form]);
 
     const [previewQuery] = usePostPreviewMutation();
 
     async function previewHandler(data: FieldValues) {
-        console.log('preview', data);
         const response = await previewQuery({generator: generator.id, parameters: data});
-        console.log(response);
         if ('error' in response) {
             mapErrorsToForm(response, form);
             return;
         }
 
-        // TODO: fix types
-        // @ts-ignore
-        context.setFiles(response.data.files);
-        // @ts-ignore
-        context.setParameters(data);
-        // @ts-ignore
-        context.setOperations(response.data.operations);
+        if ('data' in response && response.data) {
+            const result = response.data as {files: GenCodeFile[]; operations: Record<string, string>};
+            context.setFiles(result.files);
+            context.setParameters(data);
+            context.setOperations(result.operations);
+        }
         onComplete();
     }
 
     return (
         <FormProvider {...form}>
-            <Box component="form" onReset={form.reset} onSubmit={form.handleSubmit(previewHandler)} my={2}>
-                {Object.entries(attributes).map(([attributeName, attribute], index) => (
+            <Box component="form" onReset={() => form.reset()} onSubmit={form.handleSubmit(previewHandler)} my={2}>
+                {Object.entries(attributes).map(([attributeName, attribute]) => (
                     <Box mb={1} key={attributeName}>
                         <FormInput attributeName={attributeName} attribute={attribute} />
                     </Box>

@@ -5,14 +5,15 @@ export const framesSlice = createSlice({
     name: 'store.frames2',
     initialState: {frames: {} as Record<string, string>},
     reducers: {
-        addFrame: (state, action) => {
-            state.frames = {...state.frames, [action.payload]: action.payload};
+        addFrame: (state, action: {payload: string; type: string}) => {
+            const url = action.payload;
+            state.frames = {...state.frames, [url]: url};
         },
-        updateFrame: (state, action) => {
+        updateFrame: (state, action: {payload: Record<string, string>; type: string}) => {
             state.frames = action.payload;
         },
-        deleteFrame: (state, action) => {
-            const frames = Object.entries(state.frames).filter(([name, url]) => name != action.payload);
+        deleteFrame: (state, action: {payload: string; type: string}) => {
+            const frames = Object.entries(state.frames).filter(([name]) => name !== action.payload);
             state.frames = Object.fromEntries(frames);
         },
     },

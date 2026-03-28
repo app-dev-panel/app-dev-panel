@@ -31,11 +31,6 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
 
     const apiEntries = useOpenApiEntries();
 
-    // const handleSave = () => {
-    //     console.log('save');
-    //     props.onClose();
-    // };
-
     const handleClose = () => {
         props.onClose();
     };
@@ -55,8 +50,8 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                 <DialogContentText>Create, edit or delete Open API entries.</DialogContentText>
 
                 <List>
-                    {Object.entries(apiEntries).map(([name, url], index) => (
-                        <ListItem key={index}>
+                    {Object.entries(apiEntries).map(([name, url]) => (
+                        <ListItem key={name}>
                             <ListItemButton
                                 onClick={() => {
                                     setSelectedEntry(url);
@@ -64,7 +59,7 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                             >
                                 <ListItemText primary={url} secondary={name} />
                                 <ListItemSecondaryAction>
-                                    <IconButton onClick={onDeleteHandler(name)} sx={{p: 2}}>
+                                    <IconButton onClick={onDeleteHandler(name)} sx={{p: 2}} aria-label="Delete entry">
                                         <Remove />
                                     </IconButton>
                                 </ListItemSecondaryAction>
@@ -87,7 +82,7 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                         value={selectedEntry}
                         onChange={(event) => setSelectedEntry(event.target.value)}
                     />
-                    <IconButton onClick={onAddHandler} sx={{p: 2}}>
+                    <IconButton onClick={onAddHandler} sx={{p: 2}} aria-label="Add entry">
                         <CheckIcon />
                     </IconButton>
                 </Box>
@@ -97,9 +92,6 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                 </FormHelperText>
             </DialogContent>
             <DialogActions>
-                {/*<Button onClick={handleSave} color="success">*/}
-                {/*    Save*/}
-                {/*</Button>*/}
                 <Button onClick={handleClose} color="primary">
                     Close
                 </Button>

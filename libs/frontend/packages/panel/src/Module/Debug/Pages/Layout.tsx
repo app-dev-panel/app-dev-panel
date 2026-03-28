@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import ModuleLoader from '@app-dev-panel/panel/Application/Pages/RemoteComponent';
 import {AssetBundlePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/AssetBundlePanel';
 import {CachePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CachePanel';
@@ -33,7 +32,7 @@ import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {Alert, AlertTitle, Box, LinearProgress} from '@mui/material';
 import * as React from 'react';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {Outlet} from 'react-router';
 import {useSearchParams} from 'react-router-dom';
@@ -165,9 +164,6 @@ const Layout = () => {
             })
             .catch(clearCollectorAndData);
     }, [searchParams, debugEntry, collectorInfo, clearCollectorAndData]);
-
-    const collectorName = useMemo(() => selectedCollector.split('\\').pop(), [selectedCollector]);
-    useBreadcrumbs(() => ['Debug', collectorName]);
 
     if (!debugEntry) {
         return <Outlet />;

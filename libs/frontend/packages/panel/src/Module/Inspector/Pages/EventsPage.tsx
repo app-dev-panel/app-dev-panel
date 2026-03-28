@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {EventEntry, EventListenersType, useGetEventsQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
@@ -253,8 +252,6 @@ export const EventsPage = () => {
     }, [allEntries, filterValue]);
 
     const totalCount = filtered.common.length + filtered.web.length + filtered.console.length;
-
-    useBreadcrumbs(() => ['Inspector', 'Event Listeners']);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
