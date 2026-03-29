@@ -51,7 +51,11 @@ app_dev_panel:
 
 ## Collectors
 
-Supports all Kernel collectors plus Symfony-specific ones: Twig templates, Security (user/roles/firewall), Cache, Messenger, and Doctrine database queries.
+Supports all Kernel collectors plus Symfony-specific ones: Twig templates, Security (user/roles/firewall), Cache, Messenger, Translator, and Doctrine database queries.
+
+## Translator Integration
+
+The adapter automatically decorates Symfony's `TranslatorInterface` with `SymfonyTranslatorProxy` via the compiler pass. All `trans()` calls are intercepted and logged to `TranslatorCollector` — no code changes needed.
 
 ## Database Inspector
 

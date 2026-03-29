@@ -39,7 +39,11 @@ Configure the module in your application config:
 
 ## Collectors
 
-Supports all Kernel collectors plus Yii 2-specific data capture: database queries via `DbProfilingTarget` (Yii logger), real-time log capture via `DebugLogTarget`, mailer events, and asset bundle profiling.
+Supports all Kernel collectors plus Yii 2-specific data capture: database queries via `DbProfilingTarget` (Yii logger), real-time log capture via `DebugLogTarget`, mailer events, asset bundle profiling, and translator interception.
+
+## Translator Integration
+
+The adapter replaces Yii 2's `i18n` application component with `I18NProxy` — an extended `yii\i18n\I18N` that overrides `translate()`. All `Yii::t()` calls are intercepted and logged to `TranslatorCollector` automatically.
 
 ## Database Inspector
 

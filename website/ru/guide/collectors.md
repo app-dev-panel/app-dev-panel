@@ -22,6 +22,8 @@ title: Коллекторы
 | `CacheCollector` | Операции кеша: get/set/delete |
 | `MailerCollector` | Отправленные email-сообщения |
 | `TimelineCollector` | События временной шкалы производительности |
+| `TranslatorCollector` | Обращения к переводам, отсутствующие переводы |
+| `ValidatorCollector` | Вызовы валидации и результаты |
 | `EnvironmentCollector` | Информация об окружении PHP и ОС |
 
 ## CollectorInterface
@@ -100,3 +102,45 @@ final class MetricsCollector implements CollectorInterface
 ## SummaryCollectorInterface
 
 Коллекторы также могут реализовать `SummaryCollectorInterface` для предоставления сводных данных, отображаемых в списке отладочных записей без загрузки полных данных коллектора.
+
+## TranslatorCollector
+
+Захватывает обращения к переводам во время выполнения запроса. Каждый вызов перевода записывается как `TranslationRecord` со следующими полями:
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `category` | `string` | Домен/категория перевода (напр. `messages`, `app`, `validation`) |
+| `locale` | `string` | Целевая локаль (напр. `en`, `de`, `fr`) |
+| `message` | `string` | Идентификатор сообщения / ключ перевода |
+| `translation` | `?string` | Переведённый текст или `null`, если перевод не найден |
+| `missing` | `bool` | Найден ли перевод |
+| `fallbackLocale` | `?string` | Использованная резервная локаль, если применимо |
+
+### Собранные данные
+
+`getCollected()` возвращает:
+
+```php
+[
+    'translations' => [...],  // список массивов TranslationRecord
+    'missingCount' => 1,      // количество отсутствующих переводов
+    'totalCount' => 4,        // всего обращений к переводам
+    'locales' => ['en', 'de'], // уникальные использованные локали
+    'categories' => ['messages'], // уникальные использованные категории
+]
+```
+
+### Сводка
+
+`getSummary()` возвращает `['translator' => ['total' => N, 'missing' => N]]`.
+
+### Автоматический перехват
+
+При установленных прокси-адаптерах вызовы переводов перехватываются автоматически — ручная инструментация не требуется. См. [Прокси](/ru/guide/proxies) для описания прокси переводчика в каждом фреймворке:
+
+| Фреймворк | Прокси | Перехватываемый интерфейс |
+|-----------|--------|--------------------------|
+| Symfony | `SymfonyTranslatorProxy` | `Symfony\Contracts\Translation\TranslatorInterface` |
+| Laravel | `LaravelTranslatorProxy` | `Illuminate\Contracts\Translation\Translator` |
+| Yiisoft | `TranslatorInterfaceProxy` | `Yiisoft\Translator\TranslatorInterface` |
+| Yii 2 | `I18NProxy` | `yii\i18n\I18N` |

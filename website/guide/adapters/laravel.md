@@ -50,7 +50,11 @@ return [
 
 ## Collectors
 
-Supports all Kernel collectors plus Laravel-specific data capture via event listeners: Eloquent queries, cache operations, mail, queue jobs, and HTTP client requests.
+Supports all Kernel collectors plus Laravel-specific data capture via event listeners: Eloquent queries, cache operations, mail, queue jobs, HTTP client requests, and translator lookups.
+
+## Translator Integration
+
+The adapter automatically decorates Laravel's `Translator` service with `LaravelTranslatorProxy` via `$app->extend('translator')`. All `__('key')`, `trans()`, and `Lang::get()` calls are intercepted. Laravel's dot-notation keys (`group.key`) are parsed into category and message.
 
 ## Database Inspector
 
