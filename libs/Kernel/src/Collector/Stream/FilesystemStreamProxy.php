@@ -17,6 +17,10 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
     public static array $ignoredPathPatterns = [];
     public static array $ignoredClasses = [];
 
+    private bool $readCollected = false;
+    private bool $writeCollected = false;
+    private bool $readdirCollected = false;
+
     public static function register(): void
     {
         if (self::$registered) {
@@ -50,7 +54,8 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
 
     public function stream_read(int $count): string|false
     {
-        if (!$this->ignored) {
+        if (!$this->ignored && !$this->readCollected) {
+            $this->readCollected = true;
             self::$collector?->collect(operation: 'read', path: $this->decorated->filename, args: []);
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -58,7 +63,8 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
 
     public function dir_readdir(): false|string
     {
-        if (!$this->ignored) {
+        if (!$this->ignored && !$this->readdirCollected) {
+            $this->readdirCollected = true;
             self::$collector?->collect(operation: 'readdir', path: $this->decorated->filename, args: []);
         }
         return $this->__call(__FUNCTION__, func_get_args());
@@ -111,7 +117,8 @@ final class FilesystemStreamProxy implements StreamWrapperInterface
 
     public function stream_write(string $data): int
     {
-        if (!$this->ignored) {
+        if (!$this->ignored && !$this->writeCollected) {
+            $this->writeCollected = true;
             self::$collector?->collect(operation: 'write', path: $this->decorated->filename, args: []);
         }
 

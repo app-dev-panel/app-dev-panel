@@ -32,9 +32,6 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
         if (!$this->isActive()) {
             return [];
         }
-        // Force GC to flush buffered operations from stream proxy instances
-        // whose __destruct hasn't fired yet (read/write/readdir are buffered per-handle)
-        gc_collect_cycles();
         return array_map('array_values', $this->operations);
     }
 
@@ -77,7 +74,7 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
         }
 
         return [
-            'fs_stream' => array_merge(...array_map(fn(array $operations) => count($operations), $this->operations)),
+            'fs_stream' => array_map(fn(array $operations) => count($operations), $this->operations),
         ];
     }
 

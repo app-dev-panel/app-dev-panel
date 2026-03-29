@@ -26,7 +26,6 @@ trait StreamProxyTrait
     public $context;
     public StreamWrapper $decorated;
     public bool $ignored = false;
-    public array $operations = [];
 
     public function __construct()
     {
