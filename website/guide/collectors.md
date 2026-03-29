@@ -14,6 +14,7 @@ Collectors are the core data-gathering mechanism in ADP. Each collector implemen
 | `EventCollector` | PSR-14 dispatched events and listeners |
 | `HttpClientCollector` | PSR-18 outgoing HTTP requests and responses |
 | `DatabaseCollector` | SQL queries, execution time, transactions |
+| `ElasticsearchCollector` | Elasticsearch requests, timing, hits count |
 | `ExceptionCollector` | Uncaught exceptions with stack traces |
 | `RequestCollector` | Incoming HTTP request and response details |
 | `ServiceCollector` | DI container service resolutions |

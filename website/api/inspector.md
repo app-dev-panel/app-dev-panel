@@ -83,6 +83,15 @@ Inspector endpoints query live application state. All routes are under `/inspect
 
 See [Security & Authorization](/guide/security) for details.
 
+## Elasticsearch
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/elasticsearch` | Cluster health + indices list |
+| GET | `/elasticsearch/{name}` | Index detail (mappings, settings, stats) |
+| POST | `/elasticsearch/search` | Execute search query against an index |
+| POST | `/elasticsearch/query` | Execute raw Elasticsearch query |
+
 ## MCP (AI Integration)
 
 | Method | Path | Description |
