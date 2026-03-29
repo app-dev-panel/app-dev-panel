@@ -16,7 +16,7 @@ You are the sole owner of the ADP documentation website. You know VitePress insi
 ```
 website/
 ├── .vitepress/
-│   ├── config.ts                    # Main VitePress config (locales, nav, sidebar, search, sitemap)
+│   ├── config.ts                    # Main VitePress config (locales, nav, sidebar, search, sitemap, llms plugin)
 │   └── theme/
 │       ├── index.ts                 # Theme entry: extends DefaultTheme, registers Vue components
 │       ├── style.css                # Brand styles: colors, fonts, dark mode, blog, animations
@@ -297,9 +297,27 @@ All registered globally in `theme/index.ts` via `app.component()`:
 ```bash
 cd website
 npm run dev        # Local dev server with HMR
-npm run build      # Production build to .vitepress/dist/
+npm run build      # Production build to .vitepress/dist/ + generates llms.txt, llms-full.txt
 npm run preview    # Preview production build locally
 ```
+
+## llms.txt Generation
+
+[`vitepress-plugin-llms`](https://github.com/okineadev/vitepress-plugin-llms) generates files in `dist/` at build time:
+
+| File | Content |
+|------|---------|
+| `llms.txt` | Concise TOC with links to per-page `.md` files |
+| `llms-full.txt` | All docs concatenated (frontmatter/Vue/HTML stripped via remark AST) |
+| `*.md` (per-page) | Clean markdown copy alongside each `.html` page |
+
+Configured in `config.ts` under `vite.plugins`. Russian pages excluded via `ignoreFiles: ['ru/**']`.
+
+**Content control tags** (use in any markdown page):
+- `<llm-only>content</llm-only>` — content appears only in LLM output, not on the HTML site
+- `<llm-exclude>content</llm-exclude>` — content appears on the HTML site but excluded from LLM output
+
+Use `/review-llms-txt` to verify output after changes.
 
 ## Content Quality Rules
 
