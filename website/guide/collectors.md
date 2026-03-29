@@ -136,3 +136,65 @@ Collectors can also implement `SummaryCollectorInterface` to provide summary dat
 Captures translation lookups during request execution, including missing translation detection. Implements `SummaryCollectorInterface`.
 
 See the dedicated [Translator](/guide/translator) page for full details: TranslationRecord fields, collected data structure, missing detection logic, framework proxy integrations, and configuration examples.
+
+## Code Coverage Collector
+
+`CodeCoverageCollector` captures per-request PHP line coverage using [pcov](https://github.com/krakjoe/pcov) or [xdebug](https://xdebug.org/) as the coverage driver.
+
+::: warning Prerequisites
+Requires the **pcov** extension (recommended) or **xdebug** with coverage mode enabled. Without either, the collector returns an empty result with `driver: null`.
+:::
+
+### How It Works
+
+1. On `startup()`, the collector detects the available driver and starts coverage collection
+2. Your application code runs normally — every executed PHP line is tracked
+3. On `shutdown()`, coverage is stopped and raw data is processed into per-file statistics
+4. Files matching `excludePaths` (default: `vendor`) are filtered out
+
+### Enabling
+
+Code coverage is **opt-in** (disabled by default) due to performance overhead.
+
+::: code-group
+
+```yaml [Symfony]
+# config/packages/app_dev_panel.yaml
+app_dev_panel:
+    collectors:
+        code_coverage: true
+```
+
+```php [Laravel]
+// config/app-dev-panel.php
+'collectors' => [
+    'code_coverage' => true,
+],
+```
+
+:::
+
+### Output Format
+
+```json
+{
+    "driver": "pcov",
+    "files": {
+        "/app/src/Controller/HomeController.php": {
+            "coveredLines": 12,
+            "executableLines": 15,
+            "percentage": 80.0
+        }
+    },
+    "summary": {
+        "totalFiles": 42,
+        "coveredLines": 340,
+        "executableLines": 500,
+        "percentage": 68.0
+    }
+}
+```
+
+### Inspector Endpoint
+
+The inspector also provides a live coverage endpoint at `GET /inspect/api/coverage` that performs a one-shot coverage collection. See [Inspector Endpoints](/api/inspector) for details.
