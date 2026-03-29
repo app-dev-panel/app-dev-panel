@@ -1,8 +1,15 @@
 import { defineConfig } from 'vitepress';
-import { generateLlmsTxt } from './plugins/llms-txt';
+import llmstxt from 'vitepress-plugin-llms';
 
 export default defineConfig({
-    buildEnd: generateLlmsTxt,
+    vite: {
+        plugins: [
+            llmstxt({
+                ignoreFiles: ['ru/**'],
+                domain: 'https://app-dev-panel.github.io',
+            }),
+        ],
+    },
     title: 'ADP',
     description: 'Application Development Panel — framework-agnostic debugging and development panel',
     base: '/app-dev-panel/',
