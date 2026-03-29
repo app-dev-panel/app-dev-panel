@@ -8,6 +8,7 @@ use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Ingestion\Controller\OtlpController;
+use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -202,6 +203,12 @@ final class ApiRoutes
             new Route('DELETE', '/inspect/api/cache', [CacheController::class, 'delete'], 'inspect/api/cache/delete'),
             new Route('POST', '/inspect/api/cache/clear', [CacheController::class, 'clear'], 'inspect/api/cache/clear'),
             new Route('GET', '/inspect/api/opcache', [OpcacheController::class, 'index'], 'inspect/api/opcache/index'),
+            new Route(
+                'GET',
+                '/inspect/api/authorization',
+                [AuthorizationController::class, 'index'],
+                'inspect/api/authorization/index',
+            ),
             new Route('POST', '/inspect/api/mcp', [McpController::class, 'handle'], 'inspect/api/mcp'),
             new Route(
                 'GET',

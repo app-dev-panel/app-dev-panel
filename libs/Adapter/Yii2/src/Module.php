@@ -37,6 +37,9 @@ use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
+use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Controller\LlmController;
@@ -70,6 +73,7 @@ use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
+use AppDevPanel\Kernel\Collector\SecurityCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -317,6 +321,16 @@ class Module extends \yii\base\Module implements BootstrapInterface
         } else {
             \Yii::$container->setSingleton(SchemaProviderInterface::class, NullSchemaProvider::class);
         }
+
+        // Authorization provider
+        \Yii::$container->setSingleton(AuthorizationConfigProviderInterface::class, NullAuthorizationConfigProvider::class);
+        \Yii::$container->setSingleton(
+            AuthorizationController::class,
+            static fn() => new AuthorizationController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(AuthorizationConfigProviderInterface::class),
+            ),
+        );
 
         // Config provider
         \Yii::$container->setSingleton(Yii2ConfigProvider::class, static fn() => new Yii2ConfigProvider(\Yii::$app));
@@ -606,6 +620,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'queue' => static fn(): array => [new QueueCollector($timeline)],
             'validator' => static fn(): array => [new ValidatorCollector()],
             'translator' => static fn(): array => [new TranslatorCollector()],
+            'security' => static fn(): array => [new SecurityCollector()],
             'opentelemetry' => static fn(): array => [new OpenTelemetryCollector($timeline)],
         ];
     }
@@ -626,6 +641,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         $this->registerApplicationListeners($app);
         $this->registerCollectorProfiling($app);
+        $this->registerSecurityListeners($app);
     }
 
     private function registerApplicationListeners(Application $app): void
@@ -711,6 +727,31 @@ class Module extends \yii\base\Module implements BootstrapInterface
         if ($translatorCollector instanceof TranslatorCollector) {
             $this->registerTranslatorProfiling($app, $translatorCollector);
         }
+    }
+
+    private function registerSecurityListeners(Application $app): void
+    {
+        $securityCollector = $this->getCollector(SecurityCollector::class);
+        if (!$securityCollector instanceof SecurityCollector) {
+            return;
+        }
+
+        if (!$app instanceof WebApplication) {
+            return;
+        }
+
+        $listener = new \AppDevPanel\Adapter\Yii2\EventListener\SecurityListener($securityCollector);
+        $listener->register();
+
+        // Collect current user after request initialization
+        Event::on(WebApplication::class, WebApplication::EVENT_BEFORE_REQUEST, static function () use (
+            $app,
+            $listener,
+        ): void {
+            if ($app->has('user')) {
+                $listener->collectCurrentUser($app->getUser());
+            }
+        });
     }
 
     private function hookErrorHandler(WebApplication $app, WebListener $listener): void

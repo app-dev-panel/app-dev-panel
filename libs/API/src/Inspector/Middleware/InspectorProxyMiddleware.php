@@ -40,6 +40,7 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
         '/opcache' => 'opcache',
         '/request' => 'request',
         '/curl/build' => 'request',
+        '/authorization' => 'authorization',
     ];
 
     public function __construct(

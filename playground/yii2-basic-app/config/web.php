@@ -54,6 +54,7 @@ return [
                 'GET /test/fixtures/opentelemetry' => 'test-fixtures/opentelemetry',
                 'GET /test/fixtures/messenger' => 'test-fixtures/messenger',
                 'GET /test/fixtures/translator' => 'test-fixtures/translator',
+                'GET /test/fixtures/security' => 'test-fixtures/security',
                 '/test/fixtures/reset' => 'test-fixtures/reset',
                 '/test/fixtures/reset-cli' => 'test-fixtures/reset-cli',
             ],
@@ -99,6 +100,7 @@ return [
                 'router' => true,
                 'queue' => true,
                 'validator' => true,
+                'security' => true,
                 'opentelemetry' => true,
             ],
             'ignoredRequests' => [
