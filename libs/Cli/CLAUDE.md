@@ -7,7 +7,7 @@ Provides console commands for managing the ADP debug system.
 - Composer: `app-dev-panel/cli`
 - Namespace: `AppDevPanel\Cli\`
 - PHP: 8.4+
-- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/api`, `app-dev-panel/mcp-server`, Symfony Console, Symfony Process
+- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/api`, `app-dev-panel/mcp-server`, `app-dev-panel/task-bus`, Symfony Console, Symfony Process
 
 ## Directory Structure
 
@@ -19,7 +19,9 @@ src/
 │   ├── DebugServerBroadcastCommand.php # Broadcast test messages (dev:broadcast)
 │   ├── DebugQueryCommand.php           # Query stored debug data (debug:query)
 │   ├── ServeCommand.php                # Start HTTP debug server (serve)
-│   └── McpServeCommand.php             # Start MCP server for AI integration (mcp:serve)
+│   ├── McpServeCommand.php             # Start MCP server for AI integration (mcp:serve)
+│   ├── TaskBusServeCommand.php         # Start TaskBus JSON-RPC server (taskbus:serve)
+│   └── TaskBusWorkerCommand.php        # Start TaskBus background worker (taskbus:worker)
 └── Server/
     └── server-router.php               # Router for built-in PHP server (bootstraps API)
 tests/
@@ -105,6 +107,26 @@ mcp:serve --storage-path=/path/to/debug/data    # Required: path to debug storag
 ```
 
 Creates `FileStorage` and `McpToolRegistry`, then runs `McpServer` over `StdioTransport`.
+
+### `taskbus:serve` — TaskBus JSON-RPC Server
+
+Starts a standalone TCP JSON-RPC 2.0 server for TaskBus. Typically not needed — RPC is available at `POST /inspect/api/taskbus` on any running ADP server.
+
+```bash
+taskbus:serve --port=9800 --db=task-bus.sqlite
+taskbus:serve --socket=/tmp/task-bus.sock      # Unix socket
+```
+
+### `taskbus:worker` — TaskBus Background Worker
+
+Polls SQLite for scheduled/deferred tasks and executes them. Also checks cron schedules every 60 seconds.
+
+```bash
+taskbus:worker --db=task-bus.sqlite
+taskbus:worker --poll-interval=500 --max-tasks=8
+```
+
+Required for `scheduleCommand()` and cron-based recurring tasks. Not needed for synchronous dispatch.
 
 ## Testing
 

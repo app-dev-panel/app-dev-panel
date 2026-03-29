@@ -103,8 +103,24 @@ src/
 Three tables: `tasks` (task state + payload + result), `task_logs` (per-task log entries),
 `schedules` (cron-based recurring task definitions). WAL mode enabled for concurrent read access.
 
+## HTTP Endpoint (primary)
+
+JSON-RPC 2.0 is exposed via the API inspector at `POST /inspect/api/taskbus` — no separate port.
+Health check at `GET /inspect/api/taskbus/status`. See `libs/API/src/Inspector/Controller/TaskBusController.php`.
+
+## Standalone TCP Server (optional)
+
+`JsonRpcServer` can run as a standalone TCP server on a dedicated port via `taskbus:serve`.
+Only needed when running TaskBus outside the API server context.
+
+## Worker
+
+Background worker polls SQLite for scheduled/deferred tasks: `taskbus:worker`.
+Required for `scheduleCommand()` and cron-based schedules. Not needed for synchronous dispatch.
+Started automatically with `make serve`.
+
 ## Docker
 
 `docker-compose.yml` provides two services:
-- `task-bus-server` — JSON-RPC server on port 9800
-- `task-bus-worker` — Polling worker that processes scheduled/deferred tasks
+- `task-bus-server` — Standalone JSON-RPC server on port 9800
+- `task-bus-worker` — Polling worker for scheduled/deferred tasks

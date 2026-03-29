@@ -125,11 +125,25 @@ foreach ($logs as $log) {
 
 ---
 
-## JSON-RPC API (remote)
+## JSON-RPC API (HTTP — primary)
 
-The TaskBus exposes a JSON-RPC 2.0 server over TCP or Unix socket. This is the primary interface for external clients (panel frontend, LLM agents, CLI tools).
+The JSON-RPC 2.0 endpoint is embedded in the ADP API at `POST /inspect/api/taskbus`. No separate server needed — it runs on the same port as the debug panel.
 
-### Start the server
+```bash
+# Submit a task via HTTP
+curl -X POST http://127.0.0.1:8888/inspect/api/taskbus \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","method":"task.submit","params":{"type":"run_command","command":"echo hi"},"id":1}'
+
+# Health check
+curl http://127.0.0.1:8888/inspect/api/taskbus/status
+```
+
+## JSON-RPC API (standalone TCP — optional)
+
+A standalone TCP JSON-RPC server is available for environments without the API server.
+
+### Start the standalone server
 
 ```bash
 # TCP (default)

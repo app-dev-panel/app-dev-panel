@@ -7,7 +7,7 @@ HTTP layer for ADP. Five domains: **Debug** (stored debug entries), **Inspector*
 - Composer: `app-dev-panel/api`
 - Namespace: `AppDevPanel\Api\`
 - PHP: 8.4+
-- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/mcp-server`, `gitonomy/gitlib`, `guzzlehttp/guzzle`, `zircote/swagger-php`
+- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/mcp-server`, `app-dev-panel/task-bus`, `gitonomy/gitlib`, `guzzlehttp/guzzle`, `zircote/swagger-php`
 
 ## Directory Structure
 
@@ -47,6 +47,7 @@ src/
 │   │   ├── CacheController.php          # view/delete/clear cache
 │   │   ├── OpcacheController.php        # OPcache status
 │   │   ├── AuthorizationController.php  # live auth config (guards, role hierarchy, voters)
+│   │   ├── TaskBusController.php        # TaskBus JSON-RPC 2.0 (task submit/cancel/list, schedules)
 │   │   └── ServiceController.php        # Service registration (register, heartbeat, list, deregister)
 │   ├── Middleware/
 │   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services
@@ -182,6 +183,18 @@ src/
 | GET | `/` | Guards, role hierarchy, voters/policies, security config |
 
 Requires `AuthorizationConfigProviderInterface` implementation from adapter. Falls back to `NullAuthorizationConfigProvider` (empty arrays).
+
+### TaskBus API (`/inspect/api/taskbus`)
+
+JSON-RPC 2.0 endpoint for task queue management. Same protocol as MCP endpoint.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/` | JSON-RPC 2.0 handler (task.submit, task.cancel, task.status, task.list, task.logs, schedule.*) |
+| GET | `/status` | Health check: `{active: bool, total: int}` |
+
+Bypasses `ResponseDataWrapper` — JSON-RPC uses its own envelope.
+Worker process (`taskbus:worker`) required for scheduled/deferred tasks.
 
 ### MCP API (`/inspect/api/mcp`)
 

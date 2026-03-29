@@ -31,6 +31,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │   ├── API/                      # HTTP API: debug endpoints, inspector endpoints, SSE
 │   ├── McpServer/                # MCP server: AI assistant integration (stdio + HTTP)
 │   ├── Cli/                      # CLI commands: debug server, reset, broadcast, query, serve, mcp
+│   ├── TaskBus/                  # Task queue: command execution, tests, analyzers, scheduling
 │   ├── Testing/                  # Test fixtures: definitions, runner, CLI command
 │   ├── Adapter/
 │   │   ├── Yiisoft/              # Yii 3 framework adapter
@@ -64,7 +65,8 @@ ADP follows a **layered architecture**:
 1. **Kernel** — Core engine. Manages debugger lifecycle, data collectors, storage, and proxy system. Framework-independent.
 2. **API** — HTTP layer. Exposes debug data, inspector, ingestion, MCP, and LLM endpoints via REST + SSE. Framework-independent.
 3. **McpServer** — MCP (Model Context Protocol) server. Exposes debug data tools to AI assistants via stdio and HTTP transports.
-4. **Adapter** — Framework bridge. Wires Kernel collectors into a specific framework's DI, events, and middleware.
+4. **TaskBus** — Task queue engine. Runs commands, tests, analyzers, scheduled tasks, and LLM agent jobs. Symfony Messenger + SQLite. JSON-RPC 2.0 exposed via API inspector endpoint.
+5. **Adapter** — Framework bridge. Wires Kernel collectors into a specific framework's DI, events, and middleware.
 5. **Frontend** — React SPA. Consumes the API and renders debug/inspector UI.
 
 ```
@@ -355,6 +357,7 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 - `libs/Adapter/Symfony/CLAUDE.md` — Symfony adapter integration
 - `libs/Adapter/Laravel/CLAUDE.md` — Laravel adapter integration
 - `libs/Adapter/Yii2/CLAUDE.md` — Yii 2 adapter integration
+- `libs/TaskBus/CLAUDE.md` — Task queue engine (Messenger + SQLite + JSON-RPC)
 - `libs/Adapter/Cycle/CLAUDE.md` — Cycle ORM adapter (database schema only)
 - `libs/frontend/CLAUDE.md` — Frontend architecture
 
