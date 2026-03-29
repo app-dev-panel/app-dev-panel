@@ -95,16 +95,22 @@ Provided by `app-dev-panel/kernel`, reused by all adapters. The Symfony adapter 
 - **Summary**: `{twig: {renderCount, totalTime}}`
 
 ### SecurityCollector
-- **ID**: `AppDevPanel\Adapter\Symfony\Collector\SecurityCollector`
-- **Fed by**: Security event listener
+- **ID**: `AppDevPanel\Kernel\Collector\SecurityCollector`
+- **Fed by**: `SecuritySubscriber` listening to Symfony Security events (`LoginSuccessEvent`, `LoginFailureEvent`, `LogoutEvent`, `SwitchUserEvent`, `VoteEvent`)
+- **Requires**: `symfony/security-http`
 - **Data**:
   ```
   {
-    username, roles, firewallName, authenticated,
-    accessDecisions: [{attribute, subject, result, voters}]
+    username, roles, effectiveRoles, firewallName, authenticated,
+    token: {type, attributes, expiresAt},
+    impersonation: {originalUser, impersonatedUser},
+    guards: [{name, provider, config}],
+    roleHierarchy: {ROLE_A: [ROLE_B, ROLE_C]},
+    authenticationEvents: [{type, provider, result, time, details}],
+    accessDecisions: [{attribute, subject, result, voters: [{voter, result}], duration, context}]
   }
   ```
-- **Summary**: `{security: {username, authenticated, roles}}`
+- **Summary**: `{security: {username, authenticated, roles, accessDecisions: {total, granted, denied}, authEvents}}`
 
 ### CacheCollector
 - **ID**: `AppDevPanel\Adapter\Symfony\Collector\CacheCollector`

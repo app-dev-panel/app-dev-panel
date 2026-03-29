@@ -46,9 +46,13 @@ src/
 │   │   ├── ComposerController.php       # composer.json/lock, inspect, require
 │   │   ├── CacheController.php          # view/delete/clear cache
 │   │   ├── OpcacheController.php        # OPcache status
+│   │   ├── AuthorizationController.php  # live auth config (guards, role hierarchy, voters)
 │   │   └── ServiceController.php        # Service registration (register, heartbeat, list, deregister)
 │   ├── Middleware/
 │   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services
+│   ├── Authorization/
+│   │   ├── AuthorizationConfigProviderInterface.php  # Interface for live auth config
+│   │   └── NullAuthorizationConfigProvider.php       # Default no-op fallback
 │   ├── Database/
 │   │   ├── SchemaProviderInterface.php  # Interface for database schema inspection
 │   │   └── NullSchemaProvider.php       # Default no-op fallback
@@ -171,6 +175,14 @@ src/
 |--------|------|-------------|
 | GET | `/` | OPcache status + configuration |
 
+### Authorization API (`/inspect/api/authorization`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Guards, role hierarchy, voters/policies, security config |
+
+Requires `AuthorizationConfigProviderInterface` implementation from adapter. Falls back to `NullAuthorizationConfigProvider` (empty arrays).
+
 ### MCP API (`/inspect/api/mcp`)
 
 JSON-RPC 2.0 endpoint for AI assistant integration via Model Context Protocol.
@@ -246,7 +258,7 @@ Capability checking: the middleware maps inspector path prefixes to capability n
 
 ### Inspector OpenAPI Spec
 
-`openapi/inspector.yaml` defines the Inspector API contract (OpenAPI 3.1) that external applications must implement to be proxied. Capabilities map to endpoint groups: `config`, `routes`, `files`, `cache`, `database`, `translations`, `events`, `commands`, `git`, `classes`, `object`, `phpinfo`, `opcache`, `request`, `composer`.
+`openapi/inspector.yaml` defines the Inspector API contract (OpenAPI 3.1) that external applications must implement to be proxied. Capabilities map to endpoint groups: `config`, `routes`, `files`, `cache`, `database`, `translations`, `events`, `commands`, `git`, `classes`, `object`, `phpinfo`, `opcache`, `request`, `composer`, `authorization`.
 
 ## Middleware Chain
 
