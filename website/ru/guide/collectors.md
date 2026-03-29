@@ -38,6 +38,7 @@ title: Коллекторы
 | `AssetBundleCollector` | Бандлы фронтенд-ассетов (Yii) |
 | `FilesystemStreamCollector` | Операции файловых потоков |
 | `HttpStreamCollector` | Операции HTTP-потоков |
+| `CodeCoverageCollector` | Построчное покрытие PHP-кода за запрос (требуется pcov или xdebug) |
 
 ### Веб-специфичные
 

@@ -106,6 +106,13 @@ See [Security & Authorization](/guide/security) for details.
 
 Requires `\Redis` (phpredis extension) in the DI container.
 
+## Code Coverage
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/coverage/` | Collect and return PHP code coverage data (requires pcov or xdebug) |
+| GET | `/coverage/file` | Read a source file (query param: `path`) |
+
 ## MCP (AI Integration)
 
 | Method | Path | Description |

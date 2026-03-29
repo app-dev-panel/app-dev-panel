@@ -38,6 +38,7 @@ Collectors are the core data-gathering mechanism in ADP. Each collector implemen
 | `AssetBundleCollector` | Frontend asset bundles (Yii) |
 | `FilesystemStreamCollector` | Filesystem stream operations |
 | `HttpStreamCollector` | HTTP stream wrapper operations |
+| `CodeCoverageCollector` | Per-request PHP line coverage (requires pcov or xdebug) |
 
 ### Web-Specific
 

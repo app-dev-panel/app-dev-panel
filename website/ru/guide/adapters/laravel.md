@@ -36,6 +36,7 @@ return [
         'cache' => true,
         'mailer' => true,
         'queue' => true,
+        'code_coverage' => false,  // opt-in; требуется pcov или xdebug
         // ... все коллекторы включены по умолчанию
     ],
     'ignored_requests' => ['/debug/api/**', '/inspect/api/**'],
