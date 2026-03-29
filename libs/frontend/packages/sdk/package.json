@@ -66,6 +66,7 @@
     "react-syntax-highlighter": "^15.5.0",
     "redux-persist": "^6.0.0",
     "redux-state-sync": "^3.1.4",
+    "sql-formatter": "^15.7.2",
     "swagger-ui-react": "^5.17.14",
     "yup": "^1.2.0"
   },

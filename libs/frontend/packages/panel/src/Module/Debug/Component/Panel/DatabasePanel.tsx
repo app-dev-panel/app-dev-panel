@@ -1,9 +1,11 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {useExecuteQueryMutation, useExplainQueryMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {ExplainPlanVisualizer} from '@app-dev-panel/sdk/Component/ExplainPlanVisualizer';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {SqlHighlight} from '@app-dev-panel/sdk/Component/SqlHighlight';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {
@@ -63,14 +65,6 @@ const QueryRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expa
         '&:hover': {backgroundColor: theme.palette.action.hover},
     }),
 );
-
-const SqlCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
-    fontSize: '12px',
-    flex: 1,
-    wordBreak: 'break-word',
-    lineHeight: 1.6,
-});
 
 const DurationCell = styled(Typography)({
     fontFamily: primitives.fontFamilyMono,
@@ -250,7 +244,9 @@ const DuplicateQueryGroup = ({
                         mt: '2px',
                     }}
                 />
-                <SqlCell sx={{color: 'text.primary'}}>{sqlPreview}</SqlCell>
+                <Box sx={{flex: 1, wordBreak: 'break-word', lineHeight: 1.6, color: 'text.primary'}}>
+                    <SqlHighlight sql={sqlPreview} inline />
+                </Box>
                 <Chip
                     label={`${group.count}x`}
                     size="small"
@@ -427,7 +423,9 @@ const QueryRowWithExplain = ({
                         mt: '2px',
                     }}
                 />
-                <SqlCell>{query.sql}</SqlCell>
+                <Box sx={{flex: 1, wordBreak: 'break-word', lineHeight: 1.6}}>
+                    <SqlHighlight sql={query.sql} inline />
+                </Box>
                 {query.rowsNumber != null && (
                     <Typography sx={{fontSize: '11px', color: 'text.disabled', flexShrink: 0, whiteSpace: 'nowrap'}}>
                         {query.rowsNumber} row{query.rowsNumber !== 1 ? 's' : ''}
@@ -463,17 +461,11 @@ const QueryRowWithExplain = ({
                                     }
                                 />
                             </Box>
-                            <Typography
-                                sx={{
-                                    fontFamily: primitives.fontFamilyMono,
-                                    fontSize: '12px',
-                                    color: 'text.secondary',
-                                    whiteSpace: 'pre-wrap',
-                                    wordBreak: 'break-word',
-                                }}
-                            >
-                                {typeof query.rawSql === 'string' ? query.rawSql : JSON.stringify(query.rawSql)}
-                            </Typography>
+                            <SqlHighlight
+                                sql={typeof query.rawSql === 'string' ? query.rawSql : JSON.stringify(query.rawSql)}
+                                formatted
+                                showLineNumbers
+                            />
                         </Box>
                         {Object.keys(query.params).length > 0 && (
                             <Box sx={{mb: 1.5}}>
@@ -515,19 +507,7 @@ const ExplainDataView = ({data, error, label}: {data: any[] | undefined; error: 
         );
     }
     if (data && Array.isArray(data) && data.length > 0) {
-        const hasDetail = data.every((row) => typeof row === 'object' && 'detail' in row);
-        if (hasDetail) {
-            return (
-                <Box sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'text.secondary'}}>
-                    {data.map((row, i) => (
-                        <Box key={i} sx={{py: 0.25}}>
-                            {row.detail}
-                        </Box>
-                    ))}
-                </Box>
-            );
-        }
-        return <JsonRenderer value={data} />;
+        return <ExplainPlanVisualizer data={data} />;
     }
     if (data && Array.isArray(data) && data.length === 0) {
         return (
