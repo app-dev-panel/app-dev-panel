@@ -22,23 +22,9 @@ type SqlHighlightProps = {
     inline?: boolean;
 };
 
-const dialectMap: Record<
-    string,
-    'sql' | 'mysql' | 'mariadb' | 'postgresql' | 'sqlite' | 'bigquery' | 'plsql' | 'transactsql'
-> = {
-    sql: 'sql',
-    mysql: 'mysql',
-    mariadb: 'mariadb',
-    postgresql: 'postgresql',
-    sqlite: 'sqlite',
-    bigquery: 'bigquery',
-    plsql: 'plsql',
-    transactsql: 'transactsql',
-};
-
-function tryFormatSql(sql: string, dialect: string): string {
+function tryFormatSql(sql: string, dialect: SqlHighlightProps['dialect'] = 'sql'): string {
     try {
-        return formatSql(sql, {language: dialectMap[dialect] ?? 'sql', tabWidth: 2, keywordCase: 'upper'});
+        return formatSql(sql, {language: dialect, tabWidth: 2, keywordCase: 'upper'});
     } catch {
         return sql;
     }
@@ -94,7 +80,12 @@ export const SqlHighlight = React.memo(
                 {allowToggle && isMultiLine && (
                     <Box sx={{position: 'absolute', top: 4, right: 4, zIndex: 1, display: 'flex', gap: 0.5}}>
                         <Tooltip title={isFormatted ? 'Show raw SQL' : 'Format SQL'} placement="top">
-                            <IconButton size="small" onClick={handleToggle} sx={{padding: '2px'}}>
+                            <IconButton
+                                size="small"
+                                onClick={handleToggle}
+                                aria-label={isFormatted ? 'Show raw SQL' : 'Format SQL'}
+                                sx={{padding: '2px'}}
+                            >
                                 <Icon sx={{fontSize: 14, color: 'text.disabled'}}>
                                     {isFormatted ? 'code_off' : 'code'}
                                 </Icon>

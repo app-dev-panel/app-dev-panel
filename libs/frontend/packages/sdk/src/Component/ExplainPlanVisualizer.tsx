@@ -1,7 +1,7 @@
 import {Box, Chip, LinearProgress, Tooltip, Typography} from '@mui/material';
 import Icon from '@mui/material/Icon';
-import {useTheme} from '@mui/material/styles';
-import React, {useMemo, useState} from 'react';
+import {alpha, useTheme} from '@mui/material/styles';
+import React, {useCallback, useMemo, useState} from 'react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -108,17 +108,17 @@ function isDetailExplain(data: unknown[]): data is DetailRow[] {
 // Normalization
 // ---------------------------------------------------------------------------
 
-let nodeIdCounter = 0;
+type Counter = {value: number};
 
-function normalizePgNode(node: PgPlanNode, parentTotalTime?: number): PlanTreeNode {
+function normalizePgNode(node: PgPlanNode, counter: Counter): PlanTreeNode {
     const totalTime = node['Actual Total Time'] ?? 0;
     const childrenTime = (node.Plans ?? []).reduce((sum, child) => sum + (child['Actual Total Time'] ?? 0), 0);
     const exclusive = Math.max(0, totalTime - childrenTime);
 
-    const children = (node.Plans ?? []).map((child) => normalizePgNode(child, totalTime));
+    const children = (node.Plans ?? []).map((child) => normalizePgNode(child, counter));
 
     return {
-        id: String(++nodeIdCounter),
+        id: String(++counter.value),
         nodeType: node['Node Type'],
         table: node['Relation Name'] ?? node.Alias,
         index: node['Index Name'],
@@ -140,9 +140,9 @@ function normalizePgNode(node: PgPlanNode, parentTotalTime?: number): PlanTreeNo
     };
 }
 
-function normalizeMySqlRows(rows: MySqlExplainRow[]): PlanTreeNode[] {
-    return rows.map((row, i) => ({
-        id: String(++nodeIdCounter),
+function normalizeMySqlRows(rows: MySqlExplainRow[], counter: Counter): PlanTreeNode[] {
+    return rows.map((row) => ({
+        id: String(++counter.value),
         nodeType: row.type ?? 'unknown',
         table: row.table,
         index: row.key ?? undefined,
@@ -172,9 +172,9 @@ function normalizeMySqlRows(rows: MySqlExplainRow[]): PlanTreeNode[] {
     }));
 }
 
-function parseDetailRows(rows: DetailRow[]): PlanTreeNode[] {
-    return rows.map((row, i) => ({
-        id: String(++nodeIdCounter),
+function parseDetailRows(rows: DetailRow[], counter: Counter): PlanTreeNode[] {
+    return rows.map((row) => ({
+        id: String(++counter.value),
         nodeType: row.detail.replace(/^[->\s]+/, '').split(/\s+/)[0] ?? 'Step',
         table: undefined,
         index: undefined,
@@ -252,9 +252,9 @@ function getNodeSeverity(node: PlanTreeNode): Severity {
 
 function severityColor(severity: Severity, palette: 'main' | 'bg', theme: ReturnType<typeof useTheme>): string {
     const map = {
-        good: {main: theme.palette.success.main, bg: theme.palette.mode === 'dark' ? '#064e3b' : '#ecfdf5'},
-        warning: {main: theme.palette.warning.main, bg: theme.palette.mode === 'dark' ? '#78350f' : '#fffbeb'},
-        bad: {main: theme.palette.error.main, bg: theme.palette.mode === 'dark' ? '#7f1d1d' : '#fef2f2'},
+        good: {main: theme.palette.success.main, bg: alpha(theme.palette.success.main, 0.08)},
+        warning: {main: theme.palette.warning.main, bg: alpha(theme.palette.warning.main, 0.08)},
+        bad: {main: theme.palette.error.main, bg: alpha(theme.palette.error.main, 0.08)},
     };
     return map[severity][palette];
 }
@@ -319,6 +319,20 @@ const PlanNodeCard = ({
     const hasDetails = Object.keys(node.raw).length > 0;
     const hasActuals = node.actualTime !== undefined;
 
+    const toggleExpanded = useCallback(() => {
+        if (hasDetails) setExpanded((prev) => !prev);
+    }, [hasDetails]);
+
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if (hasDetails && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                setExpanded((prev) => !prev);
+            }
+        },
+        [hasDetails],
+    );
+
     return (
         <Box sx={{ml: depth > 0 ? 3 : 0, position: 'relative'}}>
             {depth > 0 && (
@@ -347,9 +361,14 @@ const PlanNodeCard = ({
             )}
 
             <Box
-                onClick={() => hasDetails && setExpanded(!expanded)}
+                role={hasDetails ? 'button' : undefined}
+                tabIndex={hasDetails ? 0 : undefined}
+                aria-expanded={hasDetails ? expanded : undefined}
+                aria-label={`${node.nodeType}${node.table ? ` on ${node.table}` : ''}`}
+                onClick={toggleExpanded}
+                onKeyDown={handleKeyDown}
                 sx={{
-                    border: `1px solid ${sColor}40`,
+                    border: `1px solid ${alpha(sColor, 0.25)}`,
                     borderLeft: `3px solid ${sColor}`,
                     borderRadius: 1,
                     backgroundColor: bgColor,
@@ -357,7 +376,8 @@ const PlanNodeCard = ({
                     mb: 1,
                     cursor: hasDetails ? 'pointer' : 'default',
                     transition: 'box-shadow 0.15s',
-                    '&:hover': hasDetails ? {boxShadow: `0 0 0 1px ${sColor}40`} : {},
+                    '&:hover': hasDetails ? {boxShadow: `0 0 0 1px ${alpha(sColor, 0.25)}`} : {},
+                    '&:focus-visible': {outline: `2px solid ${theme.palette.primary.main}`, outlineOffset: 2},
                 }}
             >
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap'}}>
@@ -633,15 +653,15 @@ const MySqlExplainTable = ({nodes}: {nodes: PlanTreeNode[]}) => {
             >
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Type</th>
-                        <th>Table</th>
-                        <th>Access</th>
-                        <th>Key</th>
-                        <th>Rows</th>
-                        <th style={{minWidth: 80}}></th>
-                        <th>Filtered</th>
-                        <th>Extra</th>
+                        <th scope="col">ID</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Table</th>
+                        <th scope="col">Access</th>
+                        <th scope="col">Key</th>
+                        <th scope="col">Rows</th>
+                        <th scope="col" style={{minWidth: 80}} aria-label="Rows proportion" />
+                        <th scope="col">Filtered</th>
+                        <th scope="col">Extra</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -709,11 +729,11 @@ const MySqlExplainTable = ({nodes}: {nodes: PlanTreeNode[]}) => {
 
 export const ExplainPlanVisualizer = React.memo(({data}: ExplainPlanVisualizerProps) => {
     const plan = useMemo(() => {
-        nodeIdCounter = 0;
+        const counter: Counter = {value: 0};
 
         if (isPgJsonExplain(data)) {
             const result = data[0];
-            const rootNode = normalizePgNode(result.Plan);
+            const rootNode = normalizePgNode(result.Plan, counter);
             return {
                 type: 'pg' as const,
                 rootNode,
@@ -725,12 +745,12 @@ export const ExplainPlanVisualizer = React.memo(({data}: ExplainPlanVisualizerPr
         }
 
         if (isMySqlExplain(data)) {
-            const nodes = normalizeMySqlRows(data);
+            const nodes = normalizeMySqlRows(data, counter);
             return {type: 'mysql' as const, nodes};
         }
 
         if (isDetailExplain(data)) {
-            const nodes = parseDetailRows(data);
+            const nodes = parseDetailRows(data, counter);
             return {type: 'detail' as const, nodes};
         }
 
