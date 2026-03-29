@@ -1,6 +1,7 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {useExecuteQueryMutation, useExplainQueryMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {ExplainPlanVisualizer} from '@app-dev-panel/sdk/Component/ExplainPlanVisualizer';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
@@ -506,19 +507,7 @@ const ExplainDataView = ({data, error, label}: {data: any[] | undefined; error: 
         );
     }
     if (data && Array.isArray(data) && data.length > 0) {
-        const hasDetail = data.every((row) => typeof row === 'object' && 'detail' in row);
-        if (hasDetail) {
-            return (
-                <Box sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'text.secondary'}}>
-                    {data.map((row, i) => (
-                        <Box key={i} sx={{py: 0.25}}>
-                            {row.detail}
-                        </Box>
-                    ))}
-                </Box>
-            );
-        }
-        return <JsonRenderer value={data} />;
+        return <ExplainPlanVisualizer data={data} />;
     }
     if (data && Array.isArray(data) && data.length === 0) {
         return (
