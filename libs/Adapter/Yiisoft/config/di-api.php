@@ -47,6 +47,9 @@ use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
+use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
@@ -127,6 +130,15 @@ return [
         JsonResponseFactoryInterface $jsonResponseFactory,
         SchemaProviderInterface $schemaProvider,
     ) => new DatabaseController($jsonResponseFactory, $schemaProvider),
+
+    // Authorization provider
+    AuthorizationConfigProviderInterface::class => static fn() => new NullAuthorizationConfigProvider(),
+
+    // Authorization controller
+    AuthorizationController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        AuthorizationConfigProviderInterface $authorizationConfigProvider,
+    ) => new AuthorizationController($jsonResponseFactory, $authorizationConfigProvider),
 
     // Collector repository
     CollectorRepositoryInterface::class => static fn(StorageInterface $storage) => new CollectorRepository($storage),

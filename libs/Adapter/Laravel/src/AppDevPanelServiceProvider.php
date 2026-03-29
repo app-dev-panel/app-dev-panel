@@ -18,6 +18,9 @@ use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelUrlMatcherAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\NullSchemaProvider;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
+use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugCollectors;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware;
 use AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy;
@@ -596,6 +599,15 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             fn() => new DatabaseController(
                 $this->app->make(JsonResponseFactoryInterface::class),
                 $this->app->make(SchemaProviderInterface::class),
+            ),
+        );
+
+        $this->app->singleton(AuthorizationConfigProviderInterface::class, fn() => new NullAuthorizationConfigProvider());
+        $this->app->singleton(
+            AuthorizationController::class,
+            fn() => new AuthorizationController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(AuthorizationConfigProviderInterface::class),
             ),
         );
 

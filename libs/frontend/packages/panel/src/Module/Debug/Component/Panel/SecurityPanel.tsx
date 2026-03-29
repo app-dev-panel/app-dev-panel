@@ -5,11 +5,12 @@ import {Box, Chip, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useState} from 'react';
 
+type VoterEntry = string | {voter: string; result: string};
 type AccessDecision = {
     attribute: string;
     subject: string;
     result: string;
-    voters: string[];
+    voters: VoterEntry[];
     duration?: number | null;
     context?: Record<string, unknown>;
 };
@@ -373,7 +374,11 @@ export const SecurityPanel = ({data}: SecurityPanelProps) => {
                                                     {decision.voters.map((voter, i) => (
                                                         <Chip
                                                             key={i}
-                                                            label={voter}
+                                                            label={
+                                                                typeof voter === 'string'
+                                                                    ? voter
+                                                                    : `${voter.voter}: ${voter.result}`
+                                                            }
                                                             size="small"
                                                             variant="outlined"
                                                             sx={{

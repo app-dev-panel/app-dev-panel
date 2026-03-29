@@ -4,11 +4,12 @@ import userEvent from '@testing-library/user-event';
 import {describe, expect, it} from 'vitest';
 import {SecurityPanel} from './SecurityPanel';
 
+type VoterEntry = string | {voter: string; result: string};
 type AccessDecision = {
     attribute: string;
     subject: string;
     result: string;
-    voters: string[];
+    voters: VoterEntry[];
     duration?: number | null;
     context?: Record<string, unknown>;
 };
@@ -125,6 +126,24 @@ describe('SecurityPanel', () => {
         expect(screen.getByText('Voters')).toBeInTheDocument();
         expect(screen.getByText('RoleVoter')).toBeInTheDocument();
         expect(screen.getByText('SecurityVoter')).toBeInTheDocument();
+    });
+
+    it('expands decision row on click to show object voters', async () => {
+        const user = userEvent.setup();
+        const decisions = [
+            makeDecision({
+                attribute: 'CAN_DELETE',
+                voters: [
+                    {voter: 'RoleVoter', result: 'ACCESS_GRANTED'},
+                    {voter: 'PostVoter', result: 'ACCESS_DENIED'},
+                ],
+            }),
+        ];
+        renderWithProviders(<SecurityPanel data={makeSecurityData({accessDecisions: decisions})} />);
+        await user.click(screen.getByText('CAN_DELETE'));
+        expect(screen.getByText('Voters')).toBeInTheDocument();
+        expect(screen.getByText('RoleVoter: ACCESS_GRANTED')).toBeInTheDocument();
+        expect(screen.getByText('PostVoter: ACCESS_DENIED')).toBeInTheDocument();
     });
 
     it('renders impersonation banner', () => {
