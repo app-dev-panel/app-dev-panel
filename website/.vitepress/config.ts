@@ -37,6 +37,7 @@ export default defineConfig({
                 nav: [
                     { text: 'Guide', link: '/guide/getting-started' },
                     { text: 'API', link: '/api/' },
+                    { text: 'llms.txt', link: '/guide/llms-txt' },
                     {
                         text: 'Blog',
                         link: '/blog/',
@@ -92,6 +93,7 @@ export default defineConfig({
                             items: [
                                 { text: 'MCP Server', link: '/guide/mcp-server' },
                                 { text: 'CLI', link: '/guide/cli' },
+                                { text: 'llms.txt', link: '/guide/llms-txt' },
                                 { text: 'Contributing', link: '/guide/contributing' },
                             ],
                         },
@@ -126,6 +128,7 @@ export default defineConfig({
                 nav: [
                     { text: 'Руководство', link: '/ru/guide/getting-started' },
                     { text: 'API', link: '/ru/api/' },
+                    { text: 'llms.txt', link: '/ru/guide/llms-txt' },
                     {
                         text: 'Блог',
                         link: '/ru/blog/',
@@ -181,6 +184,7 @@ export default defineConfig({
                             items: [
                                 { text: 'MCP Сервер', link: '/ru/guide/mcp-server' },
                                 { text: 'CLI', link: '/ru/guide/cli' },
+                                { text: 'llms.txt', link: '/ru/guide/llms-txt' },
                                 { text: 'Участие в разработке', link: '/ru/guide/contributing' },
                             ],
                         },
