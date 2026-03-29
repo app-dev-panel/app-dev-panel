@@ -43,7 +43,7 @@ Supports all Kernel collectors plus Yii 2-specific data capture: database querie
 
 ## Translator Integration
 
-The adapter replaces Yii 2's `i18n` application component with `I18NProxy` — an extended `yii\i18n\I18N` that overrides `translate()`. All `Yii::t()` calls are intercepted and logged to `TranslatorCollector` automatically.
+The adapter replaces Yii 2's `i18n` application component with `I18NProxy` — an extended `yii\i18n\I18N` that overrides `translate()`. All `Yii::t()` calls are intercepted and logged to `TranslatorCollector` automatically. See [Translator](/guide/translator) for details.
 
 ## Database Inspector
 

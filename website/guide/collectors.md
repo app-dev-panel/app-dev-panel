@@ -105,42 +105,6 @@ Collectors can also implement `SummaryCollectorInterface` to provide summary dat
 
 ## TranslatorCollector
 
-Captures translation lookups during request execution. Each translation call is recorded as a `TranslationRecord` with the following fields:
+Captures translation lookups during request execution, including missing translation detection. Implements `SummaryCollectorInterface`.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `category` | `string` | Translation domain/category (e.g. `messages`, `app`, `validation`) |
-| `locale` | `string` | Target locale (e.g. `en`, `de`, `fr`) |
-| `message` | `string` | Message ID / translation key |
-| `translation` | `?string` | Translated text, or `null` if missing |
-| `missing` | `bool` | Whether the translation was not found |
-| `fallbackLocale` | `?string` | Fallback locale used, if any |
-
-### Collected Data
-
-`getCollected()` returns:
-
-```php
-[
-    'translations' => [...],  // list of TranslationRecord arrays
-    'missingCount' => 1,      // number of missing translations
-    'totalCount' => 4,        // total translation lookups
-    'locales' => ['en', 'de'], // unique locales used
-    'categories' => ['messages'], // unique categories used
-]
-```
-
-### Summary
-
-`getSummary()` returns `['translator' => ['total' => N, 'missing' => N]]`.
-
-### Automatic Interception
-
-When framework adapter proxies are installed, translation calls are captured automatically — no manual instrumentation needed. See [Proxies](/guide/proxies) for the translator proxy in each framework:
-
-| Framework | Proxy | Intercepted Interface |
-|-----------|-------|-----------------------|
-| Symfony | `SymfonyTranslatorProxy` | `Symfony\Contracts\Translation\TranslatorInterface` |
-| Laravel | `LaravelTranslatorProxy` | `Illuminate\Contracts\Translation\Translator` |
-| Yiisoft | `TranslatorInterfaceProxy` | `Yiisoft\Translator\TranslatorInterface` |
-| Yii 2 | `I18NProxy` | `yii\i18n\I18N` |
+See the dedicated [Translator](/guide/translator) page for full details: TranslationRecord fields, collected data structure, missing detection logic, framework proxy integrations, and configuration examples.

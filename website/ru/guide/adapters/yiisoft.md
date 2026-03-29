@@ -52,7 +52,7 @@ DebugHeaders → ErrorCatcher → YiiApiMiddleware → ... → Router
 
 ## Интеграция с переводчиком
 
-При установленном пакете `yiisoft/translator` адаптер регистрирует `TranslatorInterfaceProxy` в `trackedServices`. Все вызовы `translate()` на `Yiisoft\Translator\TranslatorInterface` перехватываются автоматически.
+При установленном пакете `yiisoft/translator` адаптер регистрирует `TranslatorInterfaceProxy` в `trackedServices`. Все вызовы `translate()` на `Yiisoft\Translator\TranslatorInterface` перехватываются автоматически. Подробности на странице [Переводчик](/ru/guide/translator).
 
 ## Инспектор базы данных
 

@@ -105,42 +105,6 @@ final class MetricsCollector implements CollectorInterface
 
 ## TranslatorCollector
 
-Захватывает обращения к переводам во время выполнения запроса. Каждый вызов перевода записывается как `TranslationRecord` со следующими полями:
+Захватывает обращения к переводам во время выполнения запроса, включая обнаружение отсутствующих переводов. Реализует `SummaryCollectorInterface`.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `category` | `string` | Домен/категория перевода (напр. `messages`, `app`, `validation`) |
-| `locale` | `string` | Целевая локаль (напр. `en`, `de`, `fr`) |
-| `message` | `string` | Идентификатор сообщения / ключ перевода |
-| `translation` | `?string` | Переведённый текст или `null`, если перевод не найден |
-| `missing` | `bool` | Найден ли перевод |
-| `fallbackLocale` | `?string` | Использованная резервная локаль, если применимо |
-
-### Собранные данные
-
-`getCollected()` возвращает:
-
-```php
-[
-    'translations' => [...],  // список массивов TranslationRecord
-    'missingCount' => 1,      // количество отсутствующих переводов
-    'totalCount' => 4,        // всего обращений к переводам
-    'locales' => ['en', 'de'], // уникальные использованные локали
-    'categories' => ['messages'], // уникальные использованные категории
-]
-```
-
-### Сводка
-
-`getSummary()` возвращает `['translator' => ['total' => N, 'missing' => N]]`.
-
-### Автоматический перехват
-
-При установленных прокси-адаптерах вызовы переводов перехватываются автоматически — ручная инструментация не требуется. См. [Прокси](/ru/guide/proxies) для описания прокси переводчика в каждом фреймворке:
-
-| Фреймворк | Прокси | Перехватываемый интерфейс |
-|-----------|--------|--------------------------|
-| Symfony | `SymfonyTranslatorProxy` | `Symfony\Contracts\Translation\TranslatorInterface` |
-| Laravel | `LaravelTranslatorProxy` | `Illuminate\Contracts\Translation\Translator` |
-| Yiisoft | `TranslatorInterfaceProxy` | `Yiisoft\Translator\TranslatorInterface` |
-| Yii 2 | `I18NProxy` | `yii\i18n\I18N` |
+Подробности на странице [Переводчик](/ru/guide/translator): поля TranslationRecord, структура собранных данных, логика определения отсутствующих переводов, интеграции proxy фреймворков и примеры конфигурации.

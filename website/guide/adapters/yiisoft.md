@@ -52,7 +52,7 @@ Includes Yii-specific collectors for database queries, mailer, queue, router, va
 
 ## Translator Integration
 
-When `yiisoft/translator` is installed, the adapter registers `TranslatorInterfaceProxy` in `trackedServices`. All `translate()` calls on `Yiisoft\Translator\TranslatorInterface` are intercepted automatically.
+When `yiisoft/translator` is installed, the adapter registers `TranslatorInterfaceProxy` in `trackedServices`. All `translate()` calls on `Yiisoft\Translator\TranslatorInterface` are intercepted automatically. See [Translator](/guide/translator) for details.
 
 ## Database Inspector
 

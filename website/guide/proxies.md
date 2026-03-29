@@ -62,7 +62,7 @@ Framework adapters provide additional proxies for interfaces that are not PSR-st
 
 ### Translator Proxies
 
-Each framework has its own translator interface. ADP provides a dedicated proxy for each, all feeding the same `TranslatorCollector`:
+Each framework has its own translator interface. ADP provides a dedicated proxy for each, all feeding the same `TranslatorCollector`. See the [Translator](/guide/translator) page for full details.
 
 **Symfony** -- decorates `Symfony\Contracts\Translation\TranslatorInterface` via `setDecoratedService()` in the compiler pass. Intercepts `trans()` calls.
 

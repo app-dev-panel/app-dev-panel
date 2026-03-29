@@ -55,7 +55,7 @@ Supports all Kernel collectors plus Symfony-specific ones: Twig templates, Secur
 
 ## Translator Integration
 
-The adapter automatically decorates Symfony's `TranslatorInterface` with `SymfonyTranslatorProxy` via the compiler pass. All `trans()` calls are intercepted and logged to `TranslatorCollector` — no code changes needed.
+The adapter automatically decorates Symfony's `TranslatorInterface` with `SymfonyTranslatorProxy` via the compiler pass. All `trans()` calls are intercepted and logged to `TranslatorCollector` — no code changes needed. See [Translator](/guide/translator) for details.
 
 ## Database Inspector
 
