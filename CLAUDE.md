@@ -43,10 +43,18 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │           ├── panel/                # Main SPA (debug panel)
 │           ├── toolbar/              # Embeddable toolbar widget
 │           └── sdk/                  # Shared SDK (components, API clients, helpers)
+├── website/                       # VitePress documentation site (source of truth for user-facing docs)
+│   ├── .vitepress/
+│   │   ├── config.ts             # VitePress config (sidebar, nav, locales, vitepress-plugin-llms)
+│   │   └── theme/                # Custom theme (blog components, styles)
+│   ├── guide/                    # User-facing guides (EN)
+│   ├── api/                      # API reference docs (EN)
+│   ├── blog/                     # Blog posts (EN)
+│   └── ru/                       # Russian translations (guide/, api/, blog/)
 ├── CLAUDE.md                     # This file
 └── docs/
     ├── mcp-server-plan.md        # MCP server design plan (phases, tools, resources)
-    └── ...                       # Other global documentation
+    └── ...                       # Internal design documents
 ```
 
 ## Architecture
@@ -287,10 +295,21 @@ Update CLAUDE.md and docs/ for any changed modules. Documentation is LLM-optimiz
 ```
 Verify no dependency violations introduced. Modules must follow the dependency graph strictly.
 
-### Step 5: Iterate
+### Step 5: Update VitePress Documentation & llms.txt
+If changes affect user-facing behavior (new features, API changes, new collectors, adapter changes):
+```bash
+/docs-expert <describe what changed>
+```
+Update VitePress pages in `website/`. Then verify llms.txt generation:
+```bash
+/review-llms-txt
+```
+Skip this step for internal-only changes (refactoring, test fixes, CI tweaks).
+
+### Step 6: Iterate
 If any step produces changes, go back to Step 2 and re-run checks. Continue until stable.
 
-### Step 6: Final Verification
+### Step 7: Final Verification
 ```bash
 make all                            # Run everything: all checks + all tests
 ```
@@ -314,12 +333,14 @@ composer lint:baseline
 | Skill | Command | Purpose |
 |-------|---------|---------|
 | Test Writer | `/test <file or class>` | Write tests in consistent style, inline mocks, no test environment |
-| Doc Reviewer | `/review-docs [module]` | Review/update docs for LLM consumption, remove fluff |
+| Doc Reviewer | `/review-docs [module]` | Review/update CLAUDE.md and docs/ for LLM consumption |
 | Arch Reviewer | `/review-arch [module]` | Check dependency rules, abstraction leaks, circular deps |
+| Docs Expert | `/docs-expert [page or task]` | Write/update VitePress pages, i18n, blog posts, config |
+| llms.txt Reviewer | `/review-llms-txt` | Verify llms.txt/llms-full.txt generation after doc changes |
 | Frontend Dev | `/frontend-dev [component, page, or feature]` | Implement frontend features with React 19, strict TypeScript, semantic HTML, a11y |
 | Frontend Designer | `/frontend-designer [component or page]` | Design and implement React/MUI frontend components, pages, modules |
 
-Skill definitions: `.claude/skills/test/SKILL.md`, `.claude/skills/review-docs/SKILL.md`, `.claude/skills/review-arch/SKILL.md`, `.claude/skills/frontend-designer/SKILL.md`.
+Skill definitions in `.claude/skills/*/SKILL.md`.
 
 ## Module-Level Documentation
 
@@ -336,6 +357,36 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 - `libs/Adapter/Yii2/CLAUDE.md` — Yii 2 adapter integration
 - `libs/Adapter/Cycle/CLAUDE.md` — Cycle ORM adapter (database schema only)
 - `libs/frontend/CLAUDE.md` — Frontend architecture
+
+## Documentation Site
+
+VitePress site in `website/`. Single source of truth for user-facing docs.
+
+```bash
+cd website
+npm run dev                         # Local dev server
+npm run build                       # Build site + generate llms.txt, llms-full.txt
+```
+
+### llms.txt Generation
+
+[`vitepress-plugin-llms`](https://github.com/okineadev/vitepress-plugin-llms) auto-generates files in `dist/` at build time:
+
+| File | Content |
+|------|---------|
+| `llms.txt` | Concise TOC with links to per-page `.md` files |
+| `llms-full.txt` | All docs concatenated (frontmatter/Vue/HTML stripped via remark AST) |
+| `*.md` (per-page) | Clean markdown copy alongside each `.html` page |
+
+Configured in `website/.vitepress/config.ts` under `vite.plugins`. Russian pages excluded via `ignoreFiles: ['ru/**']`.
+
+### Documentation Scope
+
+| Location | Audience | Content |
+|----------|----------|---------|
+| `website/` | Users, LLM agents (via llms.txt) | Guides, API reference, blog, adapters |
+| `libs/*/CLAUDE.md` | Claude Code (local dev) | Internal architecture, dependency rules, test commands |
+| `docs/` | Internal | Design documents, plans, roadmaps |
 
 ## Coding Conventions
 
