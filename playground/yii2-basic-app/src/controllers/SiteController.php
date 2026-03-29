@@ -12,6 +12,11 @@ final class SiteController extends Controller
     {
         \Yii::info('Home page accessed', 'application');
 
+        // Demo translations — makes TranslatorCollector visible in the panel
+        \Yii::t('app', 'welcome', [], 'en');
+        \Yii::t('app', 'welcome', [], 'de');
+        \Yii::t('app', 'goodbye', [], 'fr'); // missing
+
         return [
             'message' => 'Welcome to the ADP Yii 2 Playground!',
             'debug_panel' => '/debug/api/',

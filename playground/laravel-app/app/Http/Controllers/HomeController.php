@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Http\JsonResponse;
 use Psr\Log\LoggerInterface;
 
@@ -11,11 +12,17 @@ final class HomeController
 {
     public function __construct(
         private readonly LoggerInterface $logger,
+        private readonly Translator $translator,
     ) {}
 
     public function index(): JsonResponse
     {
         $this->logger->info('Home page accessed');
+
+        // Demo translations — makes TranslatorCollector visible in the panel
+        $this->translator->get('messages.welcome', [], 'en');
+        $this->translator->get('messages.welcome', [], 'de');
+        $this->translator->get('messages.goodbye', [], 'fr'); // missing
 
         return new JsonResponse([
             'message' => 'Welcome to the ADP Laravel Playground!',
