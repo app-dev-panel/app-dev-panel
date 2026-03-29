@@ -99,6 +99,7 @@ return [
                 'router' => true,
                 'queue' => true,
                 'validator' => true,
+                'security' => true,
                 'opentelemetry' => true,
             ],
             'ignoredRequests' => [
