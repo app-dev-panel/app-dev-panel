@@ -26,10 +26,47 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import {useCallback, useRef, useState} from 'react';
+import {useCallback, useMemo, useRef, useState} from 'react';
 
 type MessageStatus = 'ok' | 'error' | 'sending';
 type Message = {role: 'user' | 'assistant'; content: string; status: MessageStatus; error?: string};
+
+const containerSx = {display: 'flex', flexDirection: 'column', gap: 2, height: '100%'} as const;
+const paperSx = {
+    flex: 1,
+    minHeight: 300,
+    maxHeight: 500,
+    overflow: 'auto',
+    p: 2,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 1.5,
+} as const;
+const emptyMsgSx = {textAlign: 'center', mt: 4} as const;
+const userMsgSx = {alignSelf: 'flex-end', maxWidth: '80%'} as const;
+const assistantMsgSx = {alignSelf: 'flex-start', maxWidth: '80%'} as const;
+const userBubbleSx = {p: 1.5, borderRadius: 2, bgcolor: 'primary.main', color: 'primary.contrastText'} as const;
+const assistantBubbleSx = {p: 1.5, borderRadius: 2, bgcolor: 'background.default', color: 'text.primary'} as const;
+const sendingOpacity = {opacity: 0.7} as const;
+const loadingSx = {display: 'flex', alignItems: 'center', gap: 1} as const;
+const inputRowSx = {display: 'flex', gap: 1} as const;
+const errorCaptionSx = {mt: 0.5, display: 'block'} as const;
+const replayIconSx = {fontSize: 16} as const;
+const historySx = {
+    '&:before': {display: 'none'},
+    border: 1,
+    borderColor: 'divider',
+    borderRadius: '8px !important',
+    overflow: 'hidden',
+} as const;
+const historyHeaderSx = {display: 'flex', alignItems: 'center', gap: 1, flex: 1} as const;
+const historyIconSx = {fontSize: 18, color: 'text.secondary'} as const;
+const clearBtnSx = {mr: 1} as const;
+const deleteIconSx = {fontSize: 14} as const;
+const historyItemSx = {'&:before': {display: 'none'}, boxShadow: 'none', borderTop: 1, borderColor: 'divider'} as const;
+const historyItemHeaderSx = {display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0} as const;
+const historyErrorIconSx = {fontSize: 14, color: 'error.main', flexShrink: 0} as const;
+const historyResponseSx = {bgcolor: 'background.default', borderRadius: 1, p: 1.5} as const;
 
 const extractErrorMessage = (err: unknown): string | null => {
     if (typeof err === 'object' && err !== null && 'data' in err) {
@@ -62,8 +99,10 @@ export const ChatPanel = () => {
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>();
     const scrollToBottom = useCallback(() => {
-        setTimeout(() => messagesEndRef.current?.scrollIntoView({behavior: 'smooth'}), 100);
+        clearTimeout(scrollTimerRef.current);
+        scrollTimerRef.current = setTimeout(() => messagesEndRef.current?.scrollIntoView({behavior: 'smooth'}), 100);
     }, []);
 
     const sendMessages = useCallback(
@@ -109,25 +148,30 @@ export const ChatPanel = () => {
         [chat, scrollToBottom, addHistory],
     );
 
-    const handleSend = useCallback(async () => {
-        if (!input.trim() || isLoading) return;
+    const inputRef = useRef(input);
+    inputRef.current = input;
+    const messagesRef = useRef(messages);
+    messagesRef.current = messages;
 
-        const userMessage: Message = {role: 'user', content: input.trim(), status: 'sending'};
-        const newMessages = [...messages.filter((m) => m.status !== 'error'), userMessage];
+    const handleSend = useCallback(async () => {
+        if (!inputRef.current.trim() || isLoading) return;
+
+        const userMessage: Message = {role: 'user', content: inputRef.current.trim(), status: 'sending'};
+        const newMessages = [...messagesRef.current.filter((m) => m.status !== 'error'), userMessage];
         setMessages(newMessages);
         setInput('');
         scrollToBottom();
 
         await sendMessages(newMessages);
-    }, [input, messages, isLoading, sendMessages, scrollToBottom]);
+    }, [isLoading, sendMessages, scrollToBottom]);
 
     const handleRetry = useCallback(
         async (index: number) => {
-            const msg = messages[index];
+            const msg = messagesRef.current[index];
             if (!msg || msg.status !== 'error') return;
 
             const retryMessage: Message = {role: 'user', content: msg.content, status: 'sending'};
-            const cleaned = messages.filter((_, i) => i !== index);
+            const cleaned = messagesRef.current.filter((_, i) => i !== index);
             const newMessages = [...cleaned, retryMessage];
             setMessages(newMessages);
             setInput('');
@@ -135,35 +179,53 @@ export const ChatPanel = () => {
 
             await sendMessages(newMessages);
         },
-        [messages, sendMessages, scrollToBottom],
+        [sendMessages, scrollToBottom],
     );
 
     if (!status?.connected) {
         return <Alert severity="info">Connect an LLM provider first to use the chat feature.</Alert>;
     }
 
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+            }
+        },
+        [handleSend],
+    );
+
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value), []);
+
+    const handleClearHistory = useCallback(
+        (e: React.MouseEvent) => {
+            e.stopPropagation();
+            clearHistory();
+        },
+        [clearHistory],
+    );
+
+    const bubbleSx = useMemo(
+        () => ({
+            user: userBubbleSx,
+            userSending: {...userBubbleSx, ...sendingOpacity},
+            assistant: assistantBubbleSx,
+            assistantSending: {...assistantBubbleSx, ...sendingOpacity},
+        }),
+        [],
+    );
+
     return (
-        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, height: '100%'}}>
-            <Paper
-                variant="outlined"
-                sx={{
-                    flex: 1,
-                    minHeight: 300,
-                    maxHeight: 500,
-                    overflow: 'auto',
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 1.5,
-                }}
-            >
+        <Box sx={containerSx}>
+            <Paper variant="outlined" sx={paperSx}>
                 {messages.length === 0 && (
-                    <Typography variant="body2" color="text.secondary" sx={{textAlign: 'center', mt: 4}}>
+                    <Typography variant="body2" color="text.secondary" sx={emptyMsgSx}>
                         Ask questions about your application, debug data, or get development advice.
                     </Typography>
                 )}
                 {messages.map((msg, i) => (
-                    <Box key={i} sx={{alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%'}}>
+                    <Box key={i} sx={msg.role === 'user' ? userMsgSx : assistantMsgSx}>
                         {msg.status === 'error' ? (
                             <>
                                 <Alert
@@ -171,7 +233,7 @@ export const ChatPanel = () => {
                                     action={
                                         <Tooltip title="Retry">
                                             <IconButton size="small" color="error" onClick={() => handleRetry(i)}>
-                                                <ReplayIcon sx={{fontSize: 16}} />
+                                                <ReplayIcon sx={replayIconSx} />
                                             </IconButton>
                                         </Tooltip>
                                     }
@@ -179,25 +241,22 @@ export const ChatPanel = () => {
                                     {msg.content}
                                 </Alert>
                                 {msg.error && (
-                                    <Typography
-                                        variant="caption"
-                                        color="text.secondary"
-                                        sx={{mt: 0.5, display: 'block'}}
-                                    >
+                                    <Typography variant="caption" color="text.secondary" sx={errorCaptionSx}>
                                         {msg.error}
                                     </Typography>
                                 )}
                             </>
                         ) : (
                             <Box
-                                sx={{
-                                    p: 1.5,
-                                    borderRadius: 2,
-                                    ...(msg.role === 'user'
-                                        ? {bgcolor: 'primary.main', color: 'primary.contrastText'}
-                                        : {bgcolor: 'background.default', color: 'text.primary'}),
-                                    opacity: msg.status === 'sending' ? 0.7 : 1,
-                                }}
+                                sx={
+                                    msg.role === 'user'
+                                        ? msg.status === 'sending'
+                                            ? bubbleSx.userSending
+                                            : bubbleSx.user
+                                        : msg.status === 'sending'
+                                          ? bubbleSx.assistantSending
+                                          : bubbleSx.assistant
+                                }
                             >
                                 {msg.role === 'assistant' ? (
                                     <Markdown content={msg.content} />
@@ -211,7 +270,7 @@ export const ChatPanel = () => {
                     </Box>
                 ))}
                 {isLoading && (
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                    <Box sx={loadingSx}>
                         <CircularProgress size={16} />
                         <Typography variant="body2" color="text.secondary">
                             Thinking...
@@ -220,19 +279,14 @@ export const ChatPanel = () => {
                 )}
                 <div ref={messagesEndRef} />
             </Paper>
-            <Box sx={{display: 'flex', gap: 1}}>
+            <Box sx={inputRowSx}>
                 <TextField
                     fullWidth
                     size="small"
                     placeholder="Ask about your application..."
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSend();
-                        }
-                    }}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
                     multiline
                     maxRows={3}
                 />
@@ -241,55 +295,28 @@ export const ChatPanel = () => {
 
             {/* History */}
             {history.length > 0 && (
-                <Accordion
-                    disableGutters
-                    sx={{
-                        '&:before': {display: 'none'},
-                        border: 1,
-                        borderColor: 'divider',
-                        borderRadius: '8px !important',
-                        overflow: 'hidden',
-                    }}
-                >
+                <Accordion disableGutters sx={historySx}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flex: 1}}>
-                            <HistoryIcon sx={{fontSize: 18, color: 'text.secondary'}} />
+                        <Box sx={historyHeaderSx}>
+                            <HistoryIcon sx={historyIconSx} />
                             <Typography variant="subtitle2">History</Typography>
                             <Typography variant="caption" color="text.secondary">
                                 ({history.length})
                             </Typography>
                             <Box sx={{flex: 1}} />
                             <Tooltip title="Clear history">
-                                <IconButton
-                                    size="small"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        clearHistory();
-                                    }}
-                                    sx={{mr: 1}}
-                                >
-                                    <DeleteOutlineIcon sx={{fontSize: 16}} />
+                                <IconButton size="small" onClick={handleClearHistory} sx={clearBtnSx}>
+                                    <DeleteOutlineIcon sx={replayIconSx} />
                                 </IconButton>
                             </Tooltip>
                         </Box>
                     </AccordionSummary>
                     <AccordionDetails sx={{p: 0}}>
                         {history.map((entry, i) => (
-                            <Accordion
-                                key={`${entry.timestamp}-${i}`}
-                                disableGutters
-                                sx={{
-                                    '&:before': {display: 'none'},
-                                    boxShadow: 'none',
-                                    borderTop: 1,
-                                    borderColor: 'divider',
-                                }}
-                            >
+                            <Accordion key={`${entry.timestamp}-${i}`} disableGutters sx={historyItemSx}>
                                 <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{minHeight: 40}}>
-                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0}}>
-                                        {entry.error && (
-                                            <ErrorOutlineIcon sx={{fontSize: 14, color: 'error.main', flexShrink: 0}} />
-                                        )}
+                                    <Box sx={historyItemHeaderSx}>
+                                        {entry.error && <ErrorOutlineIcon sx={historyErrorIconSx} />}
                                         <Typography
                                             variant="body2"
                                             sx={{
@@ -313,7 +340,7 @@ export const ChatPanel = () => {
                                                     deleteHistory(i);
                                                 }}
                                             >
-                                                <DeleteOutlineIcon sx={{fontSize: 14}} />
+                                                <DeleteOutlineIcon sx={deleteIconSx} />
                                             </IconButton>
                                         </Tooltip>
                                     </Box>
@@ -324,7 +351,7 @@ export const ChatPanel = () => {
                                             {entry.error}
                                         </Alert>
                                     ) : (
-                                        <Box sx={{bgcolor: 'background.default', borderRadius: 1, p: 1.5}}>
+                                        <Box sx={historyResponseSx}>
                                             <Markdown content={entry.response} />
                                         </Box>
                                     )}

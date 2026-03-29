@@ -4,45 +4,28 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\TranslationRecord;
-use AppDevPanel\Kernel\Collector\TranslatorCollector;
+use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Http\JsonResponse;
 
 final readonly class TranslatorAction
 {
     public function __construct(
-        private TranslatorCollector $translatorCollector,
+        private Translator $translator,
     ) {}
 
     public function __invoke(): JsonResponse
     {
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'app',
-            locale: 'en',
-            message: 'welcome',
-            translation: 'Welcome!',
-        ));
+        // Found: en → "Welcome!"
+        $this->translator->get('messages.welcome', [], 'en');
 
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'app',
-            locale: 'de',
-            message: 'welcome',
-            translation: 'Willkommen!',
-        ));
+        // Found: de → "Willkommen!"
+        $this->translator->get('messages.welcome', [], 'de');
 
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'app',
-            locale: 'en',
-            message: 'goodbye',
-            translation: 'Goodbye!',
-        ));
+        // Found: en → "Goodbye!"
+        $this->translator->get('messages.goodbye', [], 'en');
 
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'app',
-            locale: 'fr',
-            message: 'welcome',
-            missing: true,
-        ));
+        // Missing: fr has no translations file
+        $this->translator->get('messages.welcome', [], 'fr');
 
         return new JsonResponse(['fixture' => 'translator:basic', 'status' => 'ok']);
     }

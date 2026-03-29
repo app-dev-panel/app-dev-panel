@@ -20,6 +20,7 @@ use AppDevPanel\Adapter\Laravel\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugCollectors;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware;
 use AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy;
+use AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
@@ -733,6 +734,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->decorateLoggerProxy($collectors);
         $this->decorateHttpClientProxy($collectors);
         $this->decorateEventDispatcherProxy($collectors);
+        $this->decorateTranslatorProxy($collectors);
     }
 
     /**
@@ -786,6 +788,26 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 return $dispatcher;
             }
             return new LaravelEventDispatcherProxy($dispatcher, $this->app->make(EventCollector::class));
+        });
+    }
+
+    /**
+     * @param array<string, bool> $collectors
+     */
+    private function decorateTranslatorProxy(array $collectors): void
+    {
+        if (!(($collectors['translator'] ?? true) && $this->app->bound(TranslatorCollector::class))) {
+            return;
+        }
+        if (!$this->app->bound('translator')) {
+            return;
+        }
+
+        $this->app->extend('translator', function ($translator) {
+            if ($translator instanceof LaravelTranslatorProxy) {
+                return $translator;
+            }
+            return new LaravelTranslatorProxy($translator, $this->app->make(TranslatorCollector::class));
         });
     }
 }

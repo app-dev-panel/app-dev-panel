@@ -7,24 +7,29 @@ Provides console commands for managing the ADP debug system.
 - Composer: `app-dev-panel/cli`
 - Namespace: `AppDevPanel\Cli\`
 - PHP: 8.4+
-- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/api`, Symfony Console
+- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/api`, `app-dev-panel/mcp-server`, Symfony Console, Symfony Process
 
 ## Directory Structure
 
 ```
 src/
 ├── Command/
-│   ├── DebugServerCommand.php          # Start debug socket server
-│   ├── DebugResetCommand.php           # Clear debug data
-│   ├── DebugServerBroadcastCommand.php # Broadcast test messages
-│   ├── DebugQueryCommand.php           # Query stored debug data (list, view, collector)
-│   └── ServeCommand.php                # Start HTTP debug server (PHP built-in)
+│   ├── DebugServerCommand.php          # Start debug socket server (dev)
+│   ├── DebugResetCommand.php           # Clear debug data (debug:reset)
+│   ├── DebugServerBroadcastCommand.php # Broadcast test messages (dev:broadcast)
+│   ├── DebugQueryCommand.php           # Query stored debug data (debug:query)
+│   ├── ServeCommand.php                # Start HTTP debug server (serve)
+│   └── McpServeCommand.php             # Start MCP server for AI integration (mcp:serve)
 └── Server/
     └── server-router.php               # Router for built-in PHP server (bootstraps API)
 tests/
 └── Unit/
     └── Command/
-        └── ResetCommandTest.php
+        ├── DebugQueryCommandTest.php
+        ├── DebugServerBroadcastCommandTest.php
+        ├── DebugServerCommandTest.php
+        ├── ResetCommandTest.php
+        └── ServeCommandTest.php
 ```
 
 ## Commands
@@ -90,6 +95,16 @@ debug:serve --host=0.0.0.0 --port=9000            # Custom host/port
 debug:serve --storage-path=/path/to/debug/data    # Custom storage
 debug:serve --frontend-path=/path/to/built/assets # Serve frontend
 ```
+
+### `mcp:serve` — MCP Server
+
+Starts an MCP (Model Context Protocol) server over stdio, exposing ADP debug data to AI assistants.
+
+```bash
+mcp:serve --storage-path=/path/to/debug/data    # Required: path to debug storage
+```
+
+Creates `FileStorage` and `McpToolRegistry`, then runs `McpServer` over `StdioTransport`.
 
 ## Testing
 

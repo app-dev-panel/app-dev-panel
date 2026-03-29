@@ -7,6 +7,7 @@ namespace AppDevPanel\Adapter\Symfony\Tests\Unit\DependencyInjection;
 use AppDevPanel\Adapter\Symfony\DependencyInjection\AppDevPanelExtension;
 use AppDevPanel\Adapter\Symfony\DependencyInjection\CollectorProxyCompilerPass;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy;
+use AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
@@ -185,6 +186,42 @@ final class CollectorProxyCompilerPassTest extends TestCase
         $this->assertIsArray($resolvedParams);
         $this->assertArrayHasKey('kernel.project_dir', $resolvedParams);
         $this->assertArrayHasKey('database_url', $resolvedParams);
+    }
+
+    public function testDecoratesTranslator(): void
+    {
+        $container = $this->createLoadedContainer();
+
+        $container->register('translator', \Symfony\Contracts\Translation\TranslatorInterface::class);
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $this->assertTrue($container->hasDefinition(SymfonyTranslatorProxy::class));
+    }
+
+    public function testSkipsTranslatorDecorationWhenCollectorDisabled(): void
+    {
+        $container = $this->createLoadedContainer(['translator' => false]);
+
+        $container->register('translator', \Symfony\Contracts\Translation\TranslatorInterface::class);
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $this->assertFalse($container->hasDefinition(SymfonyTranslatorProxy::class));
+    }
+
+    public function testSkipsTranslatorDecorationWhenServiceMissing(): void
+    {
+        $container = $this->createLoadedContainer();
+
+        // Don't register translator service
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $this->assertFalse($container->hasDefinition(SymfonyTranslatorProxy::class));
     }
 
     private function createLoadedContainer(array $collectorOverrides = []): ContainerBuilder

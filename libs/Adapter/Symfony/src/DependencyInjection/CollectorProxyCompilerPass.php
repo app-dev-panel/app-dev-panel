@@ -6,6 +6,7 @@ namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy;
+use AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Kernel\Collector\EventCollector;
@@ -15,6 +16,7 @@ use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy;
+use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
@@ -25,6 +27,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Compiler pass that:
@@ -43,6 +46,7 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
         $this->decorateLogger($container);
         $this->decorateEventDispatcher($container);
         $this->decorateHttpClient($container);
+        $this->decorateTranslator($container);
         $this->decorateSpanProcessor($container);
         $this->upgradeSchemaProvider($container);
         $this->collectContainerParameters($container);
@@ -135,6 +139,34 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
             ->setArguments([
                 new Reference(HttpClientInterfaceProxy::class . '.inner'),
                 new Reference(HttpClientCollector::class),
+            ]);
+    }
+
+    private function decorateTranslator(ContainerBuilder $container): void
+    {
+        if (!$container->has(TranslatorCollector::class)) {
+            return;
+        }
+
+        // Symfony registers the translator as 'translator' service ID.
+        // Decorate whichever is available: prefer 'translator' (Symfony canonical),
+        // fall back to TranslatorInterface FQCN.
+        $serviceId = match (true) {
+            $container->has('translator') => 'translator',
+            $container->has(TranslatorInterface::class) => TranslatorInterface::class,
+            default => null,
+        };
+
+        if ($serviceId === null) {
+            return;
+        }
+
+        $container
+            ->register(SymfonyTranslatorProxy::class, SymfonyTranslatorProxy::class)
+            ->setDecoratedService($serviceId)
+            ->setArguments([
+                new Reference(SymfonyTranslatorProxy::class . '.inner'),
+                new Reference(TranslatorCollector::class),
             ]);
     }
 

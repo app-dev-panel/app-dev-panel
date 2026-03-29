@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetTableDataQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {setPreferredPageSize} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
@@ -13,8 +12,9 @@ const rowsPerPageOptions = [20, 50, 100];
 export const TablePage = () => {
     const {table} = useParams();
     const dispatch = useDispatch();
-    // @ts-ignore
-    const preferredPageSize = useSelector((state) => state.application.preferredPageSize) as number;
+    const preferredPageSize = useSelector(
+        (state: {application: {preferredPageSize: number}}) => state.application.preferredPageSize,
+    );
 
     const [searchParams, setSearchParams] = useSearchParams({page: '0'});
     const [pageSize, setPageSize] = useState(preferredPageSize || rowsPerPageOptions[0]);
@@ -55,8 +55,6 @@ export const TablePage = () => {
         },
         [dispatch, setSearchParams],
     );
-
-    useBreadcrumbs(() => ['Inspector', 'Database', table]);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;

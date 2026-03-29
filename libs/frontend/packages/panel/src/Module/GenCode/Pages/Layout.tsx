@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {GenCodeGenerator, useGetGeneratorsQuery} from '@app-dev-panel/panel/Module/GenCode/API/GenCode';
 import {GeneratorStepper} from '@app-dev-panel/panel/Module/GenCode/Component/GeneratorSteps/GeneratorStepper';
 import {ContextProvider} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
@@ -23,9 +22,9 @@ const Layout = () => {
 
     useEffect(() => {
         const selectedGeneratorId = searchParams.get('generator') || '';
-        const selectedGenerator = (data || []).find((v) => v.id === selectedGeneratorId) || null;
-        setSelectedGenerator(selectedGenerator);
-    }, [searchParams, isLoading]);
+        const found = (data || []).find((v) => v.id === selectedGeneratorId) || null;
+        setSelectedGenerator(found);
+    }, [searchParams, data]);
 
     const links: LinkProps[] = useMemo(
         () =>
@@ -37,8 +36,6 @@ const Layout = () => {
             })),
         [data],
     );
-
-    useBreadcrumbs(() => ['GenCode', !!selectedGenerator ? selectedGenerator.name : null]);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;

@@ -25,14 +25,16 @@ export const TimelineContentWrapper = React.memo((props: PropsWithChildren<Timel
                 <Tooltip title={name}>
                     <Typography component="span">{shortName}</Typography>
                 </Tooltip>
-                <Tooltip title="Examine an object">
-                    <IconButton
-                        size="small"
-                        onClick={() => navigate(`/debug/object?debugEntry=${debugEntry!.id}&id=${objectId}`)}
-                    >
-                        <DataObject color="secondary" fontSize="small" />
-                    </IconButton>
-                </Tooltip>
+                {debugEntry && (
+                    <Tooltip title="Examine an object">
+                        <IconButton
+                            size="small"
+                            onClick={() => navigate(`/debug/object?debugEntry=${debugEntry.id}&id=${objectId}`)}
+                        >
+                            <DataObject color="secondary" fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                )}
                 {file && <FileLink path={file} />}
             </Box>
             <Box>{children}</Box>

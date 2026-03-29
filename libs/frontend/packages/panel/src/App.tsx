@@ -1,5 +1,4 @@
 import '@app-dev-panel/panel/App.css';
-import {BreadcrumbsContextProvider} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {modules} from '@app-dev-panel/panel/modules';
 import {createRouter} from '@app-dev-panel/panel/router';
 import {createStore} from '@app-dev-panel/panel/store';
@@ -8,7 +7,7 @@ import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {RouterOptionsContextProvider} from '@app-dev-panel/sdk/Component/RouterOptions';
 import {DefaultThemeProvider} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {CrossWindowEventType, dispatchWindowEvent} from '@app-dev-panel/sdk/Helper/dispatchWindowEvent';
-import {useEffect} from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {Provider} from 'react-redux';
 import {RouterProvider} from 'react-router-dom';
@@ -22,17 +21,23 @@ type AppProps = {
     };
 };
 export default function App({config}: AppProps) {
-    const router = createRouter(modules, config.router, config.modules);
-    const {store, persistor} = createStore({
-        application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []},
-    });
+    const router = useMemo(() => createRouter(modules, config.router, config.modules), [config.router, config.modules]);
+    const {store, persistor} = useMemo(
+        () =>
+            createStore({
+                application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []},
+            }),
+        [config.backend.baseUrl, config.backend.favoriteUrls],
+    );
+
+    const storeRef = useRef(store);
+    storeRef.current = store;
 
     useEffect(() => {
         if (config.backend.usePreferredUrl) {
-            console.log('Override backend url', config.backend.baseUrl);
-            store.dispatch(changeBaseUrl(config.backend.baseUrl));
+            storeRef.current.dispatch(changeBaseUrl(config.backend.baseUrl));
         }
-    }, []);
+    }, [config.backend.usePreferredUrl, config.backend.baseUrl]);
 
     useEffect(() => {
         dispatchWindowEvent(window.parent, 'panel.loaded', true);
@@ -56,9 +61,9 @@ export default function App({config}: AppProps) {
         window.addEventListener('message', listener);
 
         return () => {
-            window?.removeEventListener('message', listener);
+            window.removeEventListener('message', listener);
         };
-    }, []);
+    }, [router]);
 
     return (
         <RouterOptionsContextProvider baseUrl="" openLinksInNewWindow={false}>
@@ -66,9 +71,7 @@ export default function App({config}: AppProps) {
                 <PersistGate persistor={persistor}>
                     <DefaultThemeProvider>
                         <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[window.location.pathname]}>
-                            <BreadcrumbsContextProvider>
-                                <RouterProvider router={router} />
-                            </BreadcrumbsContextProvider>
+                            <RouterProvider router={router} />
                         </ErrorBoundary>
                     </DefaultThemeProvider>
                 </PersistGate>

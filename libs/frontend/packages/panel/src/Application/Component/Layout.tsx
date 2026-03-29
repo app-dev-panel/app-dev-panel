@@ -110,12 +110,11 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     // Debug entry state
     const debugEntry = useDebugEntry();
     const [getDebugQuery, getDebugQueryInfo] = useLazyGetDebugQuery();
-    const backendUrl = useSelector((state) => state.application.baseUrl) as string;
-    const autoLatestState = useSelector((state) => state.application.autoLatest);
-    const [autoLatest, setAutoLatest] = useState<boolean>(false);
-    const themeMode = useSelector((state) => state.application.themeMode) as string | undefined;
+    const backendUrl = useSelector((state) => state.application.baseUrl);
+    const autoLatest = useSelector((state) => state.application.autoLatest);
+    const themeMode = useSelector((state) => state.application.themeMode);
     const currentMode = themeMode || 'system';
-    const showInactiveCollectors = useSelector((state) => state.application.showInactiveCollectors) as boolean;
+    const showInactiveCollectors = useSelector((state) => state.application.showInactiveCollectors);
     const editorConfig = useSelector((state) => state.application.editorConfig) ?? defaultEditorConfig;
     const notificationCount = useSelector(selectUnreadCount);
 
@@ -136,10 +135,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         dispatch(debugApi.util.resetApiState());
         getDebugQuery();
     }, [getDebugQuery, backendUrl, dispatch]);
-
-    useEffect(() => {
-        setAutoLatest(autoLatestState);
-    }, [autoLatestState]);
 
     // Auto-select first entry when data loads
     useEffect(() => {
@@ -220,11 +215,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     }, []);
 
     const autoLatestHandler = useCallback(() => {
-        setAutoLatest((prev) => {
-            dispatch(changeAutoLatest(!prev));
-            return !prev;
-        });
-    }, [dispatch]);
+        dispatch(changeAutoLatest(!autoLatest));
+    }, [dispatch, autoLatest]);
 
     const handleShowInactiveCollectorsChange = useCallback(
         (value: boolean) => {

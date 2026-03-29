@@ -86,6 +86,86 @@ interface CollectorInterface
 - **Summary**: `{assets: {bundleCount}}`
 - **Fed by**: Adapter hooks (Yii 2 View::EVENT_END_PAGE)
 
+#### CacheCollector
+- **Collects**: Cache operations (get, set, delete, clear, has)
+- **Depends on**: `TimelineCollector`
+- **API**: `collectGet(...)`, `collectSet(...)`, `collectDelete(...)`, `collectClear()`, `collectHas(...)`
+- **Data**: `{operations: [CacheOperationRecord]}` — type, key, hit/miss, duration
+- **Summary**: `{cache: {hits, misses, writes, deletes}}`
+- **Fed by**: Adapter hooks (Symfony CacheListener, Laravel CacheListener, Yiisoft cache proxy)
+
+#### EnvironmentCollector
+- **Collects**: PHP environment information
+- **Data**: PHP version, extensions, ini settings, server info
+
+#### DeprecationCollector
+- **Collects**: PHP deprecation warnings
+- **API**: `collect(string $message, string $file, int $line)`
+- **Data**: `{deprecations: [{message, file, line, count}]}`
+- **Summary**: `{deprecations: {total}}`
+- **Fed by**: PHP error handler registration in adapter
+
+#### MiddlewareCollector
+- **Collects**: HTTP middleware stack execution and timing
+- **Depends on**: `TimelineCollector`
+- **API**: `collectBefore(string $middleware)`, `collectAfter(string $middleware)`
+- **Data**: `{middlewares: [{name, duration, memory}]}`
+- **Summary**: `{middleware: {total}}`
+- **Fed by**: Adapter middleware event listeners
+
+#### OpenTelemetryCollector
+- **Collects**: OpenTelemetry spans (requires `open-telemetry/sdk`)
+- **API**: `collectSpan(SpanRecord $span)`
+- **Data**: `{spans: [SpanRecord]}` — traceId, spanId, operationName, timing, status, attributes, events, links
+- **Summary**: `{otel: {total}}`
+- **Fed by**: `SpanProcessorInterfaceProxy`
+
+#### QueueCollector
+- **Collects**: Message queue/bus operations (push, consume)
+- **Depends on**: `TimelineCollector`
+- **API**: `collectPush(...)`, `collectConsume(...)`
+- **Data**: `{messages: [{type, name, data, status, duration}]}`
+- **Summary**: `{queue: {pushed, consumed, failed}}`
+- **Fed by**: Adapter hooks (Symfony Messenger, Laravel Queue, Yiisoft QueueDecorator)
+
+#### RouterCollector
+- **Collects**: HTTP route matching data
+- **API**: `collectMatchedRoute(...)`, `collectRoutes(...)`
+- **Data**: `{matchedRoute: {pattern, handler, arguments}, routes: [...]}`
+- **Summary**: `{router: {matchedRoute}}`
+- **Fed by**: Adapter hooks (Symfony router, Laravel router, Yiisoft UrlMatcherInterfaceProxy)
+
+#### SecurityCollector
+- **Collects**: Authentication and authorization data
+- **API**: `collectIdentity(...)`, `collectAccess(...)`
+- **Data**: `{identity: {...}, accessChecks: [...]}`
+- **Summary**: `{security: {identity, checks}}`
+- **Fed by**: Adapter hooks (Symfony security events, Yiisoft security proxy)
+
+#### TemplateCollector
+- **Collects**: Template rendering data (Twig, Blade, etc.)
+- **Depends on**: `TimelineCollector`
+- **API**: `collectRender(string $template, float $duration, array $context)`
+- **Data**: `{renders: [{template, duration, context}]}`
+- **Summary**: `{templates: {total}}`
+- **Fed by**: Adapter hooks (Symfony Twig profiler, Yiisoft ViewEventListener)
+
+#### ValidatorCollector
+- **Collects**: Validation operations and results
+- **Depends on**: `TimelineCollector`
+- **API**: `collectValidation(...)` — data, rules, results, duration
+- **Data**: `{validations: [{data, rules, errors, duration}]}`
+- **Summary**: `{validator: {total, failed}}`
+- **Fed by**: Adapter hooks (Symfony validator, Yiisoft ValidatorInterfaceProxy)
+
+#### ViewCollector
+- **Collects**: View/template rendering with captured output
+- **Depends on**: `TimelineCollector`
+- **API**: `collectView(string $view, array $params, float $duration)`
+- **Data**: `{views: [{view, params, duration}]}`
+- **Summary**: `{views: {total}}`
+- **Fed by**: Adapter hooks (Yii2 View events, Yiisoft ViewEventListener)
+
 ### Web-Specific Collectors
 
 #### RequestCollector

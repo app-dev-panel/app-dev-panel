@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetOpcacheQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
@@ -468,8 +467,6 @@ const ConfigurationTab = ({configuration}: {configuration: Record<string, unknow
 export const OpcachePage = () => {
     const {data, isLoading} = useGetOpcacheQuery();
     const [tab, setTab] = useState(0);
-
-    useBreadcrumbs(() => ['Inspector', 'Opcache']);
 
     const {status, jit, scripts, configuration} = useMemo(() => {
         if (!data) return {status: null, jit: null, scripts: null, configuration: null};

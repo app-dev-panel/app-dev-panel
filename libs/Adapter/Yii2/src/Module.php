@@ -14,6 +14,7 @@ use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2DbSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteCollection;
+use AppDevPanel\Adapter\Yii2\Proxy\I18NProxy;
 use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
 use AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy;
 use AppDevPanel\Api\ApiApplication;
@@ -704,6 +705,12 @@ class Module extends \yii\base\Module implements BootstrapInterface
         if ($logCollector instanceof LogCollector) {
             $this->registerDebugLogTarget($logCollector);
         }
+
+        // Register translator profiling if TranslatorCollector is active
+        $translatorCollector = $this->getCollector(TranslatorCollector::class);
+        if ($translatorCollector instanceof TranslatorCollector) {
+            $this->registerTranslatorProfiling($app, $translatorCollector);
+        }
     }
 
     private function hookErrorHandler(WebApplication $app, WebListener $listener): void
@@ -864,6 +871,18 @@ class Module extends \yii\base\Module implements BootstrapInterface
         }
 
         return [(string) $addresses => ''];
+    }
+
+    private function registerTranslatorProfiling(Application $app, TranslatorCollector $collector): void
+    {
+        $i18n = $app->getI18n();
+        $proxy = new I18NProxy();
+
+        // Copy existing translations config from the original I18N
+        $proxy->translations = $i18n->translations;
+        $proxy->setCollector($collector);
+
+        $app->set('i18n', $proxy);
     }
 
     private function registerAssetProfiling(): void

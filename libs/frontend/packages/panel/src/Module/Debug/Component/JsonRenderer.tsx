@@ -16,8 +16,12 @@ export const JsonRenderer = React.memo((props: JsonRendererProps) => {
     const navigate = useNavigate();
     const [data, setData] = useState(props.value);
 
+    if (!debugEntry) {
+        return <OriginalJsonRenderer value={data} />;
+    }
+
     const objectLoader = async (objectString: string, pathes: (string | number)[]) => {
-        const response = await objectQuery({debugEntryId: debugEntry!.id, objectId: parseObjectId(objectString)});
+        const response = await objectQuery({debugEntryId: debugEntry.id, objectId: parseObjectId(objectString)});
         let pointer = deepUpdate(data);
 
         for (const path of pathes) {
@@ -28,7 +32,7 @@ export const JsonRenderer = React.memo((props: JsonRendererProps) => {
     };
     const valueTypes: DataType<string>[] = [
         {
-            is: (value: any) => typeof value === 'string' && !!value.match(/object@[\w\\]+#\d/),
+            is: (value: unknown) => typeof value === 'string' && !!value.match(/object@[\w\\]+#\d/),
             Component: (props) => {
                 return (
                     <Typography
@@ -39,7 +43,7 @@ export const JsonRenderer = React.memo((props: JsonRendererProps) => {
                         <Link
                             component="button"
                             onClick={() =>
-                                navigate(`/debug/object?debugEntry=${debugEntry!.id}&id=${parseObjectId(props.value)}`)
+                                navigate(`/debug/object?debugEntry=${debugEntry.id}&id=${parseObjectId(props.value)}`)
                             }
                             underline="hover"
                             color="primary"

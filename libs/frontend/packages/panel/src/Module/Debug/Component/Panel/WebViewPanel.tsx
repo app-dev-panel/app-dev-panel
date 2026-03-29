@@ -35,9 +35,7 @@ function dirname(filePath: string): string {
     return parts.join('/');
 }
 
-function normalizeData(
-    data: WebViewPanelProps['data'],
-): {renders: WebViewEntry[]; duplicates: DuplicatesData} | null {
+function normalizeData(data: WebViewPanelProps['data']): {renders: WebViewEntry[]; duplicates: DuplicatesData} | null {
     if (!data) return null;
     if (Array.isArray(data)) {
         return {renders: data, duplicates: {groups: [], totalDuplicatedCount: 0}};

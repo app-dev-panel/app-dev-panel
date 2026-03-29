@@ -18,8 +18,7 @@ export const parseFilePathWithLineAnchor = (path: string): string => {
 export const parsePathLineAnchor = (path: string): [number] | [number, number] | undefined => {
     const lineNumberMatches = path.match(/#?L([0-9]+)(?:-([0-9]+))?$/);
     if (lineNumberMatches && lineNumberMatches.length) {
-        // @ts-ignore
-        return parseTwoLineNumber(lineNumberMatches);
+        return parseTwoLineNumber(lineNumberMatches) as [number] | [number, number];
     }
     return undefined;
 };

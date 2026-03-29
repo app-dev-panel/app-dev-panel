@@ -30,7 +30,7 @@ const NoEntries = React.memo(() => {
 export const Layout = () => {
     const [tab, setTab] = useState<string>('');
     const [settingsPopupOpen, setSettingsPopupOpen] = useState<boolean>(false);
-    const handleChange = (event: any, value: string) => setTab(value);
+    const handleChange = (_event: React.SyntheticEvent, value: string) => setTab(value);
 
     const apiEntries = useOpenApiEntries();
 
@@ -54,11 +54,11 @@ export const Layout = () => {
                             allowScrollButtonsMobile
                             sx={{maxWidth: '100%'}}
                         >
-                            {Object.keys(apiEntries).map((name, index) => (
-                                <Tab key={index} label={name} value={name} wrapped />
+                            {Object.keys(apiEntries).map((name) => (
+                                <Tab key={name} label={name} value={name} wrapped />
                             ))}
                         </Tabs>
-                        <IconButton onClick={() => setSettingsPopupOpen(true)}>
+                        <IconButton onClick={() => setSettingsPopupOpen(true)} aria-label="Open API settings">
                             <Settings />
                         </IconButton>
                     </Stack>

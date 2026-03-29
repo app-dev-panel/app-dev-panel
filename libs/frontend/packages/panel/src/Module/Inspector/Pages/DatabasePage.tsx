@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetTableQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
@@ -55,17 +54,14 @@ export const DatabasePage = () => {
     const [tables, setTables] = useState<GridValidRowModel[]>([]);
 
     useEffect(() => {
-        if (data) {
-            const tables = [];
-            // @ts-ignore
-            for (const table of data) {
-                tables.push({name: table.table, columns: table.columns.length, records: table.records});
+        if (data && Array.isArray(data)) {
+            const rows = [];
+            for (const table of data as {table: string; columns: unknown[]; records: number}[]) {
+                rows.push({name: table.table, columns: table.columns.length, records: table.records});
             }
-            setTables(tables);
+            setTables(rows);
         }
-    }, [isLoading]);
-
-    useBreadcrumbs(() => ['Inspector', 'Database']);
+    }, [data]);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;

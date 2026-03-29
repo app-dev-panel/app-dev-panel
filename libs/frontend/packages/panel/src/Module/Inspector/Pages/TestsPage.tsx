@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useRunCommandMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
@@ -8,7 +7,7 @@ import {Check, ContentCopy, Error} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import {Box, Button, CircularProgress, IconButton, styled, Tooltip} from '@mui/material';
-import {GridColDef, GridColumns, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
+import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useState} from 'react';
 
@@ -99,8 +98,6 @@ export const TestsPage = () => {
 
     const getRowIdCallback = useCallback((row: any) => row.id, []);
 
-    useBreadcrumbs(() => ['Inspector', 'Tests']);
-
     return (
         <>
             <PageHeader title="Tests" icon="science" description="Run and inspect test results" />
@@ -122,11 +119,7 @@ export const TestsPage = () => {
             </Box>
 
             {commandQueryInfo.isSuccess && (
-                <DataTable
-                    rows={rows as GridValidRowModel[]}
-                    getRowId={getRowIdCallback}
-                    columns={columns as GridColumns}
-                />
+                <DataTable rows={rows as GridValidRowModel[]} getRowId={getRowIdCallback} columns={columns} />
             )}
         </>
     );

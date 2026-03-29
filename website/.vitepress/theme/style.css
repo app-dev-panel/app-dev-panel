@@ -1,0 +1,529 @@
+/**
+ * ADP Custom Theme — matching Application Development Panel design system
+ *
+ * Colors from libs/frontend/packages/sdk/src/Component/Theme/tokens.ts
+ * Typography: Inter (UI), JetBrains Mono (code)
+ */
+
+:root {
+    /* ADP Brand Colors */
+    --vp-c-brand-1: #2563EB;
+    --vp-c-brand-2: #3B82F6;
+    --vp-c-brand-3: #60A5FA;
+    --vp-c-brand-soft: rgba(37, 99, 235, 0.12);
+
+    /* Typography */
+    --vp-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Monaco, Consolas, monospace;
+
+    /* ADP Surfaces — Light */
+    --vp-c-bg: #FFFFFF;
+    --vp-c-bg-alt: #F3F4F6;
+    --vp-c-bg-elv: #FFFFFF;
+    --vp-c-bg-soft: #F3F4F6;
+
+    /* ADP Status Colors */
+    --adp-success: #16A34A;
+    --adp-success-light: #DCFCE7;
+    --adp-warning: #D97706;
+    --adp-warning-light: #FEF3C7;
+    --adp-error: #DC2626;
+    --adp-error-light: #FEE2E2;
+    --adp-info: #2563EB;
+    --adp-info-light: #EFF6FF;
+
+    /* ADP Spacing */
+    --adp-space: 8px;
+    --adp-radius: 8px;
+    --adp-radius-lg: 16px;
+
+    /* Shadows */
+    --adp-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --adp-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --adp-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+
+    /* Tips/Warnings custom colors */
+    --vp-custom-block-tip-border: var(--adp-success);
+    --vp-custom-block-tip-bg: var(--adp-success-light);
+    --vp-custom-block-warning-border: var(--adp-warning);
+    --vp-custom-block-warning-bg: var(--adp-warning-light);
+    --vp-custom-block-danger-border: var(--adp-error);
+    --vp-custom-block-danger-bg: var(--adp-error-light);
+    --vp-custom-block-info-border: var(--adp-info);
+    --vp-custom-block-info-bg: var(--adp-info-light);
+}
+
+.dark {
+    --vp-c-brand-1: #60A5FA;
+    --vp-c-brand-2: #3B82F6;
+    --vp-c-brand-3: #2563EB;
+    --vp-c-brand-soft: rgba(96, 165, 250, 0.12);
+
+    --vp-c-bg: #0F172A;
+    --vp-c-bg-alt: #1E293B;
+    --vp-c-bg-elv: #1E293B;
+    --vp-c-bg-soft: #1E293B;
+
+    --adp-success: #4ADE80;
+    --adp-success-light: #14532D;
+    --adp-warning: #FBBF24;
+    --adp-warning-light: #713F12;
+    --adp-error: #F87171;
+    --adp-error-light: #7F1D1D;
+    --adp-info: #60A5FA;
+    --adp-info-light: #1E3A5F;
+}
+
+/* ========================================================================
+   Layout Overrides
+   ======================================================================== */
+
+.VPNav {
+    backdrop-filter: blur(12px);
+}
+
+.VPNavBar {
+    border-bottom: 1px solid var(--vp-c-divider);
+}
+
+/* Hero section styling */
+.VPHero .name {
+    background: linear-gradient(135deg, #2563EB 0%, #60A5FA 50%, #2563EB 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dark .VPHero .name {
+    background: linear-gradient(135deg, #60A5FA 0%, #93C5FD 50%, #60A5FA 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.VPHero .tagline {
+    font-size: 20px !important;
+    line-height: 1.5;
+    opacity: 0.85;
+}
+
+/* Feature cards */
+.VPFeature {
+    border-radius: var(--adp-radius-lg) !important;
+    box-shadow: var(--adp-shadow-sm);
+    transition: all 0.25s ease;
+}
+
+.VPFeature:hover {
+    box-shadow: var(--adp-shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Sidebar styling */
+.VPSidebar {
+    border-right: 1px solid var(--vp-c-divider);
+}
+
+.VPSidebarItem .text {
+    font-size: 14px;
+}
+
+.VPSidebarItem.is-active > .item > .link > .text {
+    color: var(--vp-c-brand-1);
+    font-weight: 600;
+}
+
+/* Content styling */
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.vp-doc h1 {
+    font-size: 28px;
+}
+
+/* Code blocks */
+.vp-doc div[class*='language-'] {
+    border-radius: var(--adp-radius) !important;
+    box-shadow: var(--adp-shadow-sm);
+}
+
+.vp-doc :not(pre) > code {
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.9em;
+    background-color: var(--vp-c-bg-soft);
+    color: var(--vp-c-brand-1);
+}
+
+/* Custom blocks */
+.vp-doc .custom-block {
+    border-radius: var(--adp-radius);
+}
+
+/* ========================================================================
+   Duck Mascot
+   ======================================================================== */
+
+.duck-hero {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.duck-hero svg,
+.duck-hero img {
+    width: 160px;
+    height: 160px;
+    filter: drop-shadow(0 4px 12px rgba(37, 99, 235, 0.2));
+    animation: duck-float 3s ease-in-out infinite;
+}
+
+@keyframes duck-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.duck-inline {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    margin: 0 4px;
+}
+
+/* ========================================================================
+   Blog Styles
+   ======================================================================== */
+
+.blog-index {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.blog-index h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+.blog-index .blog-description {
+    color: var(--vp-c-text-2);
+    font-size: 16px;
+    margin-bottom: 32px;
+}
+
+.blog-post-card {
+    display: block;
+    padding: 24px;
+    margin-bottom: 16px;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: var(--adp-radius-lg);
+    background: var(--vp-c-bg-elv);
+    transition: all 0.25s ease;
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+.blog-post-card:hover {
+    box-shadow: var(--adp-shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--vp-c-brand-1);
+}
+
+.blog-post-card h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: var(--vp-c-text-1);
+    border-top: none;
+    padding-top: 0;
+}
+
+.blog-post-card .blog-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--vp-c-text-3);
+    margin-bottom: 8px;
+}
+
+.blog-post-card .blog-excerpt {
+    font-size: 14px;
+    color: var(--vp-c-text-2);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.blog-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.blog-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 100px;
+    background: var(--vp-c-brand-soft);
+    color: var(--vp-c-brand-1);
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+}
+
+.blog-tag:hover {
+    background: var(--vp-c-brand-1);
+    color: white;
+}
+
+/* Blog post layout */
+.blog-post-header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.blog-post-header h1 {
+    font-size: 32px;
+    line-height: 1.3;
+    margin-bottom: 16px;
+}
+
+.blog-post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+    color: var(--vp-c-text-2);
+}
+
+.blog-post-meta .author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.blog-post-meta .author img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.blog-post-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--vp-c-divider);
+}
+
+.blog-post-nav a {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: var(--adp-radius);
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+    max-width: 48%;
+}
+
+.blog-post-nav a:hover {
+    border-color: var(--vp-c-brand-1);
+    box-shadow: var(--adp-shadow-sm);
+}
+
+.blog-post-nav .label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--vp-c-text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.blog-post-nav .title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--vp-c-brand-1);
+}
+
+/* Blog archive */
+.blog-archive {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.blog-archive-year {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--vp-c-text-1);
+    margin: 32px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--vp-c-brand-1);
+}
+
+.blog-archive-item {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 8px 0;
+}
+
+.blog-archive-date {
+    font-size: 13px;
+    font-family: var(--vp-font-family-mono);
+    color: var(--vp-c-text-3);
+    flex-shrink: 0;
+    width: 90px;
+}
+
+.blog-archive-title a {
+    font-size: 15px;
+    color: var(--vp-c-text-1);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.blog-archive-title a:hover {
+    color: var(--vp-c-brand-1);
+}
+
+/* Tags page */
+.blog-tags-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.blog-tags-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 24px 0 40px;
+}
+
+.blog-tags-cloud .blog-tag {
+    font-size: 14px;
+    padding: 4px 14px;
+}
+
+.blog-tags-section h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 32px 0 12px;
+    color: var(--vp-c-text-1);
+}
+
+/* RSS icon */
+.blog-rss {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--vp-c-text-3);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.blog-rss:hover {
+    color: #f26522;
+}
+
+/* Reading time */
+.reading-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Table of Contents for blog */
+.blog-toc {
+    position: sticky;
+    top: 80px;
+    padding: 16px;
+    border-left: 2px solid var(--vp-c-divider);
+    font-size: 13px;
+}
+
+.blog-toc a {
+    display: block;
+    padding: 4px 0;
+    color: var(--vp-c-text-2);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.blog-toc a:hover,
+.blog-toc a.active {
+    color: var(--vp-c-brand-1);
+}
+
+/* ========================================================================
+   Responsive
+   ======================================================================== */
+
+@media (max-width: 768px) {
+    .blog-post-card {
+        padding: 16px;
+    }
+
+    .blog-post-nav {
+        flex-direction: column;
+    }
+
+    .blog-post-nav a {
+        max-width: 100%;
+    }
+
+    .duck-hero svg,
+    .duck-hero img {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+/* ========================================================================
+   Fancy extras
+   ======================================================================== */
+
+/* Animated gradient background for hero */
+.VPHero .VPImage {
+    animation: duck-float 3s ease-in-out infinite;
+    filter: drop-shadow(0 4px 16px rgba(37, 99, 235, 0.25));
+}
+
+/* Smooth page transitions */
+.VPContent {
+    transition: opacity 0.2s ease;
+}
+
+/* Better scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--vp-c-divider);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--vp-c-text-3);
+}

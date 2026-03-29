@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {AnalyzePanel} from '@app-dev-panel/panel/Module/Llm/Component/AnalyzePanel';
 import {ChatPanel} from '@app-dev-panel/panel/Module/Llm/Component/ChatPanel';
 import {ConnectionCard} from '@app-dev-panel/panel/Module/Llm/Component/ConnectionCard';
@@ -8,8 +7,6 @@ import {useState} from 'react';
 
 export const Layout = () => {
     const [tab, setTab] = useState(0);
-
-    useBreadcrumbs(() => ['LLM']);
 
     return (
         <>

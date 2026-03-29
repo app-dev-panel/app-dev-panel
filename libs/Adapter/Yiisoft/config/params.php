@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use AppDevPanel\Adapter\Yiisoft\Collector\Router\UrlMatcherInterfaceProxy;
+use AppDevPanel\Adapter\Yiisoft\Collector\Translator\TranslatorInterfaceProxy;
+use AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy;
 use AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
@@ -9,15 +12,13 @@ use AppDevPanel\Cli\Command\DebugServerBroadcastCommand;
 use AppDevPanel\Cli\Command\DebugServerCommand;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
+use AppDevPanel\Kernel\Collector\DeprecationCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
-use AppDevPanel\Kernel\Collector\DeprecationCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
-use AppDevPanel\Adapter\Yiisoft\Collector\Router\UrlMatcherInterfaceProxy;
-use AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
@@ -37,6 +38,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Yiisoft\Injector\Injector;
 use Yiisoft\Router\UrlMatcherInterface;
+use Yiisoft\Translator\TranslatorInterface as YiisoftTranslatorInterface;
 use Yiisoft\Validator\ValidatorInterface;
 
 /**
@@ -83,6 +85,7 @@ return [
             ClientInterface::class => [HttpClientInterfaceProxy::class, HttpClientCollector::class],
             UrlMatcherInterface::class => [UrlMatcherInterfaceProxy::class, RouterCollector::class],
             ValidatorInterface::class => [ValidatorInterfaceProxy::class, ValidatorCollector::class],
+            YiisoftTranslatorInterface::class => [TranslatorInterfaceProxy::class, TranslatorCollector::class],
         ],
         'dumper.excludedClasses' => [
             'PhpParser\\Parser\\Php7',

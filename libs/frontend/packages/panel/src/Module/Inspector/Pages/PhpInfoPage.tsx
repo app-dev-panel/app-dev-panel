@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetPhpInfoQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {Box} from '@mui/material';
 import {useEffect, useRef} from 'react';
@@ -17,8 +16,6 @@ export const PhpInfoPage = () => {
             shadowContainer?.appendChild(shadowRootElement);
         }
     }, [getPhpInfoQuery.data]);
-
-    useBreadcrumbs(() => ['Inspector', 'PHP Info']);
 
     return (
         <>{!getPhpInfoQuery.isLoading && getPhpInfoQuery.data && <Box ref={containerRef} sx={{overflow: 'auto'}} />}</>

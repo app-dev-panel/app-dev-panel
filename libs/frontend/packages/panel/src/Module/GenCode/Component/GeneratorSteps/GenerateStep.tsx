@@ -10,6 +10,7 @@ import {mapErrorsToForm} from '@app-dev-panel/panel/Module/GenCode/Component/err
 import {matchSeverityByFileState} from '@app-dev-panel/panel/Module/GenCode/Component/matchSeverity';
 import {Context} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
 import {FileOperationEnum, FileStateEnum, GenCodeFile} from '@app-dev-panel/panel/Module/GenCode/Types/FIle.types';
+import {GenCodeResult} from '@app-dev-panel/panel/Module/GenCode/Types/Result.types';
 import {yup} from '@app-dev-panel/sdk/Adapter/yup';
 import {
     Box,
@@ -45,8 +46,8 @@ function getStateLabel(state: FileStateEnum) {
 }
 
 function createValidationSchema(files: GenCodeFile[]) {
-    const rulesSet: Record<string, any> = {};
-    files.map(({id}, index) => {
+    const rulesSet: Record<string, ReturnType<typeof yup.number>> = {};
+    files.forEach(({id}) => {
         rulesSet[id] = yup.number().required().oneOf([5, 6, 7]);
     });
 
@@ -77,9 +78,9 @@ function FileAction({file, generator}: {file: GenCodeFile; generator: GenCodeGen
 
     const handleDiff = async () => {
         const response = await diffQuery({generator: generator.id, parameters: context.parameters, fileId: file.id});
-        console.log('response', response);
-        // @ts-ignore
-        setDiff(response.data.diff);
+        if ('data' in response && response.data) {
+            setDiff((response.data as {diff: string}).diff);
+        }
         handleDiffDialogOpen();
     };
 
@@ -146,26 +147,25 @@ export function GenerateStep({generator, onComplete}: StepProps) {
     const [generateQuery] = usePostGenerateMutation();
 
     async function generateHandler(data: FieldValues) {
-        console.log('generate', data, context.parameters);
         const response = await generateQuery({generator: generator.id, parameters: context.parameters, answers: data});
         if ('error' in response) {
-            console.log(response);
             mapErrorsToForm(response, form);
             return;
         }
 
-        // @ts-ignore
-        context.setResults(response.data);
+        if ('data' in response && response.data) {
+            context.setResults(response.data as GenCodeResult[]);
+        }
 
         onComplete();
     }
 
     return (
         <FormProvider {...form}>
-            <Box component="form" onReset={form.reset as any} onSubmit={form.handleSubmit(generateHandler)} my={2}>
+            <Box component="form" onReset={() => form.reset()} onSubmit={form.handleSubmit(generateHandler)} my={2}>
                 <List subheader={<ListSubheader>Operations</ListSubheader>}>
-                    {context.files.map((file, index) => (
-                        <FileAction key={index} file={file} generator={generator} />
+                    {context.files.map((file) => (
+                        <FileAction key={file.id} file={file} generator={generator} />
                     ))}
                 </List>
 

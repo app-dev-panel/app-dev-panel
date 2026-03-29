@@ -4,47 +4,30 @@ declare(strict_types=1);
 
 namespace App\Controller\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\TranslationRecord;
-use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/test/fixtures/translator', name: 'test_translator', methods: ['GET'])]
 final readonly class TranslatorAction
 {
     public function __construct(
-        private TranslatorCollector $translatorCollector,
+        private TranslatorInterface $translator,
     ) {}
 
     public function __invoke(): JsonResponse
     {
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'messages',
-            locale: 'en',
-            message: 'welcome',
-            translation: 'Welcome!',
-        ));
+        // Found: en → "Welcome!"
+        $this->translator->trans('welcome', [], 'messages', 'en');
 
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'messages',
-            locale: 'de',
-            message: 'welcome',
-            translation: 'Willkommen!',
-        ));
+        // Found: de → "Willkommen!"
+        $this->translator->trans('welcome', [], 'messages', 'de');
 
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'messages',
-            locale: 'en',
-            message: 'goodbye',
-            translation: 'Goodbye!',
-        ));
+        // Found: en → "Goodbye!"
+        $this->translator->trans('goodbye', [], 'messages', 'en');
 
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'messages',
-            locale: 'fr',
-            message: 'welcome',
-            missing: true,
-        ));
+        // Missing: fr has no translations file
+        $this->translator->trans('welcome', [], 'messages', 'fr');
 
         return new JsonResponse(['fixture' => 'translator:basic', 'status' => 'ok']);
     }

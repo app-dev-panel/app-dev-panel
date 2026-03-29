@@ -20,12 +20,7 @@ function createYupValidationRules(rules: GenCodeGeneratorAttributeRule[]) {
                 const lastSlashPosition = originalPattern.lastIndexOf('/');
 
                 const flags = originalPattern.slice(lastSlashPosition + 1);
-                const regex = originalPattern.slice(0, lastSlashPosition - originalPattern.length).slice(1);
-                // console.log(
-                //     'orig', originalPattern,
-                //     'new', regex,
-                //     'flags', flags
-                // )
+                const regex = originalPattern.slice(1, lastSlashPosition);
                 currentSet.push(yup.string().matches(new RegExp(regex, flags), {message: rule.message.message}));
 
                 break;
@@ -36,8 +31,8 @@ function createYupValidationRules(rules: GenCodeGeneratorAttributeRule[]) {
 }
 
 export function createYupValidationSchema(attributes: Record<string, GenCodeGeneratorAttribute>): Yup.AnyObjectSchema {
-    const rulesSet: any = {};
-    Object.entries(attributes).map(([attributeName, attribute], index) => {
+    const rulesSet: Record<string, Schema> = {};
+    Object.entries(attributes).forEach(([attributeName, attribute]) => {
         rulesSet[attributeName] = createYupValidationRules(attribute.rules);
     });
 
