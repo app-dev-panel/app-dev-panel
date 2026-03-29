@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FBBF24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="wingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F59E0B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D97706;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="beakGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FB923C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EA580C;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Water ripples -->
+  <ellipse cx="100" cy="175" rx="65" ry="8" fill="#2563EB" opacity="0.1"/>
+  <ellipse cx="100" cy="175" rx="50" ry="6" fill="#2563EB" opacity="0.15"/>
+
+  <!-- Body -->
+  <ellipse cx="100" cy="130" rx="55" ry="42" fill="url(#bodyGrad)" filter="url(#shadow)"/>
+
+  <!-- Tail feathers -->
+  <path d="M 145 115 Q 165 100 160 85 Q 155 95 148 105 Q 155 90 150 78 Q 148 92 142 105" fill="url(#wingGrad)"/>
+
+  <!-- Wing -->
+  <ellipse cx="115" cy="128" rx="30" ry="22" fill="url(#wingGrad)" transform="rotate(-10, 115, 128)"/>
+  <!-- Wing detail lines -->
+  <path d="M 95 122 Q 115 118 135 125" fill="none" stroke="#D97706" stroke-width="1" opacity="0.5"/>
+  <path d="M 98 128 Q 118 124 138 130" fill="none" stroke="#D97706" stroke-width="1" opacity="0.4"/>
+
+  <!-- Neck -->
+  <ellipse cx="72" cy="105" rx="22" ry="30" fill="url(#bodyGrad)"/>
+
+  <!-- Head -->
+  <circle cx="68" cy="72" r="26" fill="url(#bodyGrad)" filter="url(#shadow)"/>
+
+  <!-- Eye white -->
+  <ellipse cx="60" cy="67" rx="8" ry="9" fill="white"/>
+  <!-- Eye pupil -->
+  <circle cx="58" cy="66" r="5" fill="#1A1A1A"/>
+  <!-- Eye highlight -->
+  <circle cx="56" cy="64" r="2" fill="white"/>
+  <!-- Eye sparkle -->
+  <circle cx="61" cy="64" r="1" fill="white" opacity="0.8"/>
+
+  <!-- Eyebrow (happy) -->
+  <path d="M 50 58 Q 58 54 66 57" fill="none" stroke="#D97706" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Beak -->
+  <path d="M 42 72 Q 32 70 28 75 Q 32 80 42 78 Z" fill="url(#beakGrad)"/>
+  <!-- Beak smile line -->
+  <path d="M 42 75 Q 35 74 30 75" fill="none" stroke="#EA580C" stroke-width="0.8" opacity="0.6"/>
+
+  <!-- Head tuft / crest -->
+  <path d="M 75 48 Q 80 35 72 30 Q 68 38 65 46" fill="#FBBF24"/>
+  <path d="M 70 50 Q 73 38 66 34 Q 63 42 62 49" fill="#F59E0B"/>
+
+  <!-- Cheek blush -->
+  <circle cx="50" cy="78" r="5" fill="#FB923C" opacity="0.3"/>
+
+  <!-- Debugging goggles strap -->
+  <path d="M 48 63 Q 68 55 88 63" fill="none" stroke="#2563EB" stroke-width="2.5" opacity="0.8"/>
+
+  <!-- Goggle lens (left) -->
+  <circle cx="58" cy="66" r="11" fill="none" stroke="#2563EB" stroke-width="2" opacity="0.6"/>
+  <circle cx="58" cy="66" r="11" fill="#EFF6FF" opacity="0.15"/>
+
+  <!-- Code badge on chest -->
+  <rect x="82" y="120" rx="4" ry="4" width="28" height="16" fill="#2563EB" opacity="0.9"/>
+  <text x="96" y="132" font-family="'JetBrains Mono', monospace" font-size="9" fill="white" text-anchor="middle" font-weight="600">&lt;/&gt;</text>
+
+  <!-- Feet -->
+  <path d="M 80 168 L 72 178 L 68 172 L 64 178 L 60 172 L 56 178 L 50 168 Z" fill="url(#beakGrad)"/>
+  <path d="M 120 168 L 112 178 L 108 172 L 104 178 L 100 172 L 96 178 L 90 168 Z" fill="url(#beakGrad)"/>
+</svg>
