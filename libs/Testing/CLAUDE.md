@@ -95,6 +95,7 @@ All playgrounds must implement these endpoints under `/test/fixtures/`:
 | `/test/fixtures/security` | security:basic | SecurityCollector |
 | `/test/fixtures/opentelemetry` | opentelemetry:basic | OpenTelemetryCollector |
 | `/test/fixtures/elasticsearch` | elasticsearch:basic | ElasticsearchCollector |
+| `/test/fixtures/redis` | redis:basic | RedisCollector |
 | `/test/fixtures/request-info` | web:app-info | WebAppInfoCollector |
 | `/test/fixtures/reset` | (setup) | Clears debug storage directly |
 | `/test/fixtures/reset-cli` | (setup) | Clears debug storage via `debug:reset` CLI command |

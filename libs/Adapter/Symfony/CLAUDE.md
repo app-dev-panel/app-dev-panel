@@ -179,6 +179,7 @@ Conditionally registered only when `symfony/security-http` is installed and the 
 | `CacheCollector` | Decorated cache adapter calling `logCacheOperation()` | Cache operations, hits/misses |
 | `MailerCollector` (Kernel) | Mailer MessageEvent listener calling `collectMessage()` | Emails sent |
 | `MessengerCollector` | Messenger middleware calling `logMessage()` | Messages dispatched/handled/failed |
+| `RedisCollector` (Kernel) | Predis plugin or phpredis decorator calling `logCommand()` | Redis commands, timing, errors |
 
 ## Configuration Reference
 

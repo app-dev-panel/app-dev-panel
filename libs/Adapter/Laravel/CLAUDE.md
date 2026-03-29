@@ -99,6 +99,7 @@ Wires in `boot()`:
 | `Illuminate\Auth\Events\Logout` | `SecurityCollector` | Logout auth event |
 | `Illuminate\Auth\Events\Failed` | `SecurityCollector` | Failed auth event |
 | `Illuminate\Auth\Events\OtherDeviceLogout` | `SecurityCollector` | Other device logout event |
+| `Illuminate\Redis\Events\CommandExecuted` | `RedisCollector` | Redis command, timing, connection |
 | `Illuminate\Console\Events\CommandStarting` | `Debugger` | Console lifecycle start |
 | `Illuminate\Console\Events\CommandFinished` | `Debugger` | Console lifecycle end |
 
