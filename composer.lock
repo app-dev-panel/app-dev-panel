@@ -55,7 +55,7 @@
         },
         {
             "name": "app-dev-panel/adapter-cycle",
-            "version": "dev-claude/review-op-branch-aBtjg",
+            "version": "dev-claude/optimize-sse-endpoint-nVscD",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Cycle",
@@ -112,7 +112,7 @@
         },
         {
             "name": "app-dev-panel/adapter-laravel",
-            "version": "dev-claude/review-op-branch-aBtjg",
+            "version": "dev-claude/optimize-sse-endpoint-nVscD",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Laravel",
@@ -198,7 +198,7 @@
         },
         {
             "name": "app-dev-panel/adapter-symfony",
-            "version": "dev-claude/review-op-branch-aBtjg",
+            "version": "dev-claude/optimize-sse-endpoint-nVscD",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Symfony",
@@ -283,7 +283,7 @@
         },
         {
             "name": "app-dev-panel/adapter-yii2",
-            "version": "dev-claude/review-op-branch-aBtjg",
+            "version": "dev-claude/optimize-sse-endpoint-nVscD",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Yii2",
@@ -358,7 +358,7 @@
         },
         {
             "name": "app-dev-panel/adapter-yiisoft",
-            "version": "dev-claude/review-op-branch-aBtjg",
+            "version": "dev-claude/optimize-sse-endpoint-nVscD",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Yiisoft",
@@ -476,7 +476,7 @@
         },
         {
             "name": "app-dev-panel/api",
-            "version": "dev-claude/review-op-branch-aBtjg",
+            "version": "dev-claude/optimize-sse-endpoint-nVscD",
             "dist": {
                 "type": "path",
                 "url": "libs/API",
@@ -555,7 +555,7 @@
         },
         {
             "name": "app-dev-panel/cli",
-            "version": "dev-claude/review-op-branch-aBtjg",
+            "version": "dev-claude/optimize-sse-endpoint-nVscD",
             "dist": {
                 "type": "path",
                 "url": "libs/Cli",
@@ -615,7 +615,7 @@
         },
         {
             "name": "app-dev-panel/kernel",
-            "version": "dev-claude/review-op-branch-aBtjg",
+            "version": "dev-claude/optimize-sse-endpoint-nVscD",
             "dist": {
                 "type": "path",
                 "url": "libs/Kernel",
@@ -687,7 +687,7 @@
         },
         {
             "name": "app-dev-panel/mcp-server",
-            "version": "dev-claude/review-op-branch-aBtjg",
+            "version": "dev-claude/optimize-sse-endpoint-nVscD",
             "dist": {
                 "type": "path",
                 "url": "libs/McpServer",
@@ -716,7 +716,7 @@
         },
         {
             "name": "app-dev-panel/testing",
-            "version": "dev-claude/review-op-branch-aBtjg",
+            "version": "dev-claude/optimize-sse-endpoint-nVscD",
             "dist": {
                 "type": "path",
                 "url": "libs/Testing",
