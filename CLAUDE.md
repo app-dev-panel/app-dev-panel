@@ -43,10 +43,19 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │           ├── panel/                # Main SPA (debug panel)
 │           ├── toolbar/              # Embeddable toolbar widget
 │           └── sdk/                  # Shared SDK (components, API clients, helpers)
+├── website/                       # VitePress documentation site (source of truth for user-facing docs)
+│   ├── .vitepress/
+│   │   ├── config.ts             # VitePress config (sidebar, nav, locales, buildEnd hook)
+│   │   ├── plugins/llms-txt.ts   # buildEnd hook: generates llms.txt + llms-full.txt in dist/
+│   │   └── theme/                # Custom theme (blog components, styles)
+│   ├── guide/                    # User-facing guides (EN)
+│   ├── api/                      # API reference docs (EN)
+│   ├── blog/                     # Blog posts (EN)
+│   └── ru/                       # Russian translations (guide/, api/, blog/)
 ├── CLAUDE.md                     # This file
 └── docs/
     ├── mcp-server-plan.md        # MCP server design plan (phases, tools, resources)
-    └── ...                       # Other global documentation
+    └── ...                       # Internal design documents
 ```
 
 ## Architecture
@@ -336,6 +345,35 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 - `libs/Adapter/Yii2/CLAUDE.md` — Yii 2 adapter integration
 - `libs/Adapter/Cycle/CLAUDE.md` — Cycle ORM adapter (database schema only)
 - `libs/frontend/CLAUDE.md` — Frontend architecture
+
+## Documentation Site
+
+VitePress site in `website/`. Single source of truth for user-facing docs.
+
+```bash
+cd website
+npm run dev                         # Local dev server
+npm run build                       # Build site + generate llms.txt, llms-full.txt
+```
+
+### llms.txt Generation
+
+`buildEnd` hook in `website/.vitepress/plugins/llms-txt.ts` auto-generates two files in `dist/`:
+
+| File | Content | Source |
+|------|---------|--------|
+| `llms.txt` | Concise TOC with section links | Sidebar config in `config.ts` |
+| `llms-full.txt` | All docs concatenated (frontmatter/Vue stripped) | English markdown files |
+
+No manual maintenance — both files regenerate on every build from the same markdown sources that produce the HTML site.
+
+### Documentation Scope
+
+| Location | Audience | Content |
+|----------|----------|---------|
+| `website/` | Users, LLM agents (via llms.txt) | Guides, API reference, blog, adapters |
+| `libs/*/CLAUDE.md` | Claude Code (local dev) | Internal architecture, dependency rules, test commands |
+| `docs/` | Internal | Design documents, plans, roadmaps |
 
 ## Coding Conventions
 
