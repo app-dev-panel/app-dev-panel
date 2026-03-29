@@ -55,7 +55,7 @@
         },
         {
             "name": "app-dev-panel/adapter-cycle",
-            "version": "dev-claude/optimize-sse-endpoint-nVscD",
+            "version": "dev-claude/auth-collector-inspector-BWqkg",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Cycle",
@@ -112,7 +112,7 @@
         },
         {
             "name": "app-dev-panel/adapter-laravel",
-            "version": "dev-claude/optimize-sse-endpoint-nVscD",
+            "version": "dev-claude/auth-collector-inspector-BWqkg",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Laravel",
@@ -198,7 +198,7 @@
         },
         {
             "name": "app-dev-panel/adapter-symfony",
-            "version": "dev-claude/optimize-sse-endpoint-nVscD",
+            "version": "dev-claude/auth-collector-inspector-BWqkg",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Symfony",
@@ -283,7 +283,7 @@
         },
         {
             "name": "app-dev-panel/adapter-yii2",
-            "version": "dev-claude/optimize-sse-endpoint-nVscD",
+            "version": "dev-claude/auth-collector-inspector-BWqkg",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Yii2",
@@ -358,7 +358,7 @@
         },
         {
             "name": "app-dev-panel/adapter-yiisoft",
-            "version": "dev-claude/optimize-sse-endpoint-nVscD",
+            "version": "dev-claude/auth-collector-inspector-BWqkg",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Yiisoft",
@@ -476,7 +476,7 @@
         },
         {
             "name": "app-dev-panel/api",
-            "version": "dev-claude/optimize-sse-endpoint-nVscD",
+            "version": "dev-claude/auth-collector-inspector-BWqkg",
             "dist": {
                 "type": "path",
                 "url": "libs/API",
@@ -555,7 +555,7 @@
         },
         {
             "name": "app-dev-panel/cli",
-            "version": "dev-claude/optimize-sse-endpoint-nVscD",
+            "version": "dev-claude/auth-collector-inspector-BWqkg",
             "dist": {
                 "type": "path",
                 "url": "libs/Cli",
@@ -615,7 +615,7 @@
         },
         {
             "name": "app-dev-panel/kernel",
-            "version": "dev-claude/optimize-sse-endpoint-nVscD",
+            "version": "dev-claude/auth-collector-inspector-BWqkg",
             "dist": {
                 "type": "path",
                 "url": "libs/Kernel",
@@ -687,7 +687,7 @@
         },
         {
             "name": "app-dev-panel/mcp-server",
-            "version": "dev-claude/optimize-sse-endpoint-nVscD",
+            "version": "dev-claude/auth-collector-inspector-BWqkg",
             "dist": {
                 "type": "path",
                 "url": "libs/McpServer",
@@ -716,7 +716,7 @@
         },
         {
             "name": "app-dev-panel/testing",
-            "version": "dev-claude/optimize-sse-endpoint-nVscD",
+            "version": "dev-claude/auth-collector-inspector-BWqkg",
             "dist": {
                 "type": "path",
                 "url": "libs/Testing",
@@ -1689,7 +1689,7 @@
         },
         {
             "name": "illuminate/collections",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/collections.git",
@@ -1749,7 +1749,7 @@
         },
         {
             "name": "illuminate/conditionable",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/conditionable.git",
@@ -1795,7 +1795,7 @@
         },
         {
             "name": "illuminate/container",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/container.git",
@@ -1857,7 +1857,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -1905,7 +1905,7 @@
         },
         {
             "name": "illuminate/filesystem",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/filesystem.git",
@@ -1972,7 +1972,7 @@
         },
         {
             "name": "illuminate/http",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/http.git",
@@ -2034,7 +2034,7 @@
         },
         {
             "name": "illuminate/macroable",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/macroable.git",
@@ -2080,7 +2080,7 @@
         },
         {
             "name": "illuminate/pipeline",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/pipeline.git",
@@ -2132,7 +2132,7 @@
         },
         {
             "name": "illuminate/reflection",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/reflection.git",
@@ -2183,7 +2183,7 @@
         },
         {
             "name": "illuminate/routing",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/routing.git",
@@ -2249,7 +2249,7 @@
         },
         {
             "name": "illuminate/session",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/session.git",
@@ -2306,7 +2306,7 @@
         },
         {
             "name": "illuminate/support",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
@@ -7903,16 +7903,16 @@
         },
         {
             "name": "carthage-software/mago",
-            "version": "1.16.0",
+            "version": "1.15.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/carthage-software/mago.git",
-                "reference": "bf44827df56a0321075c1a6d17ecc1efbb67b45d"
+                "reference": "fe9ed0b20fd1ad40083348c8f8e408cee10a9cb0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/carthage-software/mago/zipball/bf44827df56a0321075c1a6d17ecc1efbb67b45d",
-                "reference": "bf44827df56a0321075c1a6d17ecc1efbb67b45d",
+                "url": "https://api.github.com/repos/carthage-software/mago/zipball/fe9ed0b20fd1ad40083348c8f8e408cee10a9cb0",
+                "reference": "fe9ed0b20fd1ad40083348c8f8e408cee10a9cb0",
                 "shasum": ""
             },
             "require": {
@@ -7947,7 +7947,7 @@
             ],
             "support": {
                 "issues": "https://github.com/carthage-software/mago/issues",
-                "source": "https://github.com/carthage-software/mago/tree/1.16.0"
+                "source": "https://github.com/carthage-software/mago/tree/1.15.3"
             },
             "funding": [
                 {
@@ -7955,7 +7955,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-03-26T20:46:03+00:00"
+            "time": "2026-03-20T19:19:36+00:00"
         },
         {
             "name": "composer/semver",
@@ -8255,7 +8255,7 @@
         },
         {
             "name": "illuminate/bus",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/bus.git",
@@ -8308,7 +8308,7 @@
         },
         {
             "name": "illuminate/cache",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/cache.git",
@@ -8370,7 +8370,7 @@
         },
         {
             "name": "illuminate/config",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/config.git",
@@ -8418,16 +8418,16 @@
         },
         {
             "name": "illuminate/console",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/console.git",
-                "reference": "91732d7ae739c86dd9055c4dc850c2b4efccb47f"
+                "reference": "55508f214a538599235935fa018824900f68b5bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/console/zipball/91732d7ae739c86dd9055c4dc850c2b4efccb47f",
-                "reference": "91732d7ae739c86dd9055c4dc850c2b4efccb47f",
+                "url": "https://api.github.com/repos/illuminate/console/zipball/55508f214a538599235935fa018824900f68b5bb",
+                "reference": "55508f214a538599235935fa018824900f68b5bb",
                 "shasum": ""
             },
             "require": {
@@ -8480,11 +8480,11 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2026-03-21T11:33:57+00:00"
+            "time": "2026-03-14T17:21:24+00:00"
         },
         {
             "name": "illuminate/database",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/database.git",
@@ -8556,7 +8556,7 @@
         },
         {
             "name": "illuminate/events",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/events.git",
@@ -8611,7 +8611,7 @@
         },
         {
             "name": "illuminate/mail",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/mail.git",
@@ -8674,7 +8674,7 @@
         },
         {
             "name": "illuminate/queue",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/queue.git",
@@ -8741,7 +8741,7 @@
         },
         {
             "name": "illuminate/view",
-            "version": "v12.56.0",
+            "version": "v12.55.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/view.git",
@@ -9467,16 +9467,16 @@
         },
         {
             "name": "open-telemetry/api",
-            "version": "1.9.0",
+            "version": "1.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opentelemetry-php/api.git",
-                "reference": "6f8d237ce2c304ca85f31970f788e7f074d147be"
+                "reference": "df5197c6fd0ddd8e9883b87de042d9341300e2ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opentelemetry-php/api/zipball/6f8d237ce2c304ca85f31970f788e7f074d147be",
-                "reference": "6f8d237ce2c304ca85f31970f788e7f074d147be",
+                "url": "https://api.github.com/repos/opentelemetry-php/api/zipball/df5197c6fd0ddd8e9883b87de042d9341300e2ad",
+                "reference": "df5197c6fd0ddd8e9883b87de042d9341300e2ad",
                 "shasum": ""
             },
             "require": {
@@ -9533,20 +9533,20 @@
                 "issues": "https://github.com/open-telemetry/opentelemetry-php/issues",
                 "source": "https://github.com/open-telemetry/opentelemetry-php"
             },
-            "time": "2026-02-25T13:24:05+00:00"
+            "time": "2026-01-21T04:14:03+00:00"
         },
         {
             "name": "open-telemetry/context",
-            "version": "1.5.0",
+            "version": "1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opentelemetry-php/context.git",
-                "reference": "3c414b246e0dabb7d6145404e6a5e4536ca18d07"
+                "reference": "d4c4470b541ce72000d18c339cfee633e4c8e0cf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opentelemetry-php/context/zipball/3c414b246e0dabb7d6145404e6a5e4536ca18d07",
-                "reference": "3c414b246e0dabb7d6145404e6a5e4536ca18d07",
+                "url": "https://api.github.com/repos/opentelemetry-php/context/zipball/d4c4470b541ce72000d18c339cfee633e4c8e0cf",
+                "reference": "d4c4470b541ce72000d18c339cfee633e4c8e0cf",
                 "shasum": ""
             },
             "require": {
@@ -9588,30 +9588,30 @@
             ],
             "support": {
                 "chat": "https://app.slack.com/client/T08PSQ7BQ/C01NFPCV44V",
-                "docs": "https://opentelemetry.io/docs/languages/php",
+                "docs": "https://opentelemetry.io/docs/php",
                 "issues": "https://github.com/open-telemetry/opentelemetry-php/issues",
                 "source": "https://github.com/open-telemetry/opentelemetry-php"
             },
-            "time": "2025-10-19T06:44:33+00:00"
+            "time": "2025-09-19T00:05:49+00:00"
         },
         {
             "name": "open-telemetry/sdk",
-            "version": "1.14.0",
+            "version": "1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opentelemetry-php/sdk.git",
-                "reference": "6e3d0ce93e76555dd5e2f1d19443ff45b990e410"
+                "reference": "c76f91203bf7ef98ab3f4e0a82ca21699af185e1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opentelemetry-php/sdk/zipball/6e3d0ce93e76555dd5e2f1d19443ff45b990e410",
-                "reference": "6e3d0ce93e76555dd5e2f1d19443ff45b990e410",
+                "url": "https://api.github.com/repos/opentelemetry-php/sdk/zipball/c76f91203bf7ef98ab3f4e0a82ca21699af185e1",
+                "reference": "c76f91203bf7ef98ab3f4e0a82ca21699af185e1",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "nyholm/psr7-server": "^1.1",
-                "open-telemetry/api": "^1.8",
+                "open-telemetry/api": "^1.7",
                 "open-telemetry/context": "^1.4",
                 "open-telemetry/sem-conv": "^1.0",
                 "php": "^8.1",
@@ -9689,7 +9689,7 @@
                 "issues": "https://github.com/open-telemetry/opentelemetry-php/issues",
                 "source": "https://github.com/open-telemetry/opentelemetry-php"
             },
-            "time": "2026-03-21T11:50:01+00:00"
+            "time": "2026-01-28T11:38:11+00:00"
         },
         {
             "name": "open-telemetry/sem-conv",

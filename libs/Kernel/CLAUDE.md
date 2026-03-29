@@ -81,6 +81,12 @@ src/
 │   ├── QueryRecord.php                  # Value object for DB query
 │   ├── MessageRecord.php               # Value object for mailer message
 │   ├── MailerCollector.php              # Email messages (fed by adapter hooks)
+│   ├── SecurityCollector.php            # Auth: user, token, guards, role hierarchy, access decisions, auth events
+│   ├── ValidatorCollector.php           # Validation results (fed by adapter hooks)
+│   ├── QueueCollector.php               # Queue messages: dispatched/handled/failed (fed by adapter hooks)
+│   ├── RouterCollector.php              # Route matching data (fed by adapter hooks)
+│   ├── OpenTelemetryCollector.php       # OpenTelemetry spans (fed by OTLP ingestion)
+│   ├── DeprecationCollector.php         # PHP deprecation notices
 │   ├── AssetBundleCollector.php         # Asset bundles (fed by adapter hooks)
 │   ├── DeprecationCollector.php         # PHP deprecation warnings
 │   ├── EnvironmentCollector.php

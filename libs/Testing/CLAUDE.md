@@ -44,8 +44,10 @@ libs/Testing/tests/
     ├── WebFixturesTest.php       # Web context tests (request, app info)
     ├── ErrorFixturesTest.php     # Exception tests (runtime, chained)
     ├── AdvancedFixturesTest.php  # Multi-collector, heavy, http-client, filesystem
+    ├── SecurityFixturesTest.php   # SecurityCollector fixture tests
     ├── DebugApiTest.php           # Debug API endpoint contract tests
-    ├── InspectorApiTest.php       # Inspector API endpoint tests
+    ├── InspectorApiTest.php       # Inspector API endpoint tests (database)
+    ├── AuthorizationInspectorTest.php # Authorization inspector endpoint tests
     ├── McpApiTest.php             # MCP (JSON-RPC) API endpoint tests
     └── ScenarioTest.php           # Full pipeline E2E: reset, fire all fixtures, verify API
 ```
@@ -90,6 +92,8 @@ All playgrounds must implement these endpoints under `/test/fixtures/`:
 | `/test/fixtures/router` | router:basic | RouterCollector |
 | `/test/fixtures/cache` | cache:basic | CacheCollector |
 | `/test/fixtures/cache-heavy` | cache:heavy | CacheCollector |
+| `/test/fixtures/security` | security:basic | SecurityCollector |
+| `/test/fixtures/opentelemetry` | opentelemetry:basic | OpenTelemetryCollector |
 | `/test/fixtures/request-info` | web:app-info | WebAppInfoCollector |
 | `/test/fixtures/reset` | (setup) | Clears debug storage directly |
 | `/test/fixtures/reset-cli` | (setup) | Clears debug storage via `debug:reset` CLI command |

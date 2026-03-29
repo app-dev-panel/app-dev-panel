@@ -18,7 +18,7 @@ app_dev_panel:
         command: true
         doctrine: true
         twig: false           # Enable when twig/twig is installed
-        security: false       # Enable when symfony/security-bundle is installed
+        security: true
         cache: true
         mailer: true
         messenger: true

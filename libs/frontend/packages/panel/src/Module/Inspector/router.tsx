@@ -31,6 +31,7 @@ export const routes = [
                     {path: 'log', element: <Pages.GitPages.GitLogPage />},
                 ],
             },
+            {path: 'authorization', element: <Pages.AuthorizationPage />},
             {path: 'cache', element: <Pages.CachePage />},
             {path: 'config', element: <Pages.ConfigurationPage />},
             {path: 'config/:page', element: <Pages.ConfigurationPage />},

@@ -1,4 +1,5 @@
 export {AnalysePage} from '@app-dev-panel/panel/Module/Inspector/Pages/AnalysePage';
+export {AuthorizationPage} from '@app-dev-panel/panel/Module/Inspector/Pages/AuthorizationPage';
 export {CachePage} from '@app-dev-panel/panel/Module/Inspector/Pages/CachePage';
 export {CommandsPage} from '@app-dev-panel/panel/Module/Inspector/Pages/CommandsPage';
 export {ComposerPage} from '@app-dev-panel/panel/Module/Inspector/Pages/ComposerPage';

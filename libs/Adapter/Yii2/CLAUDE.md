@@ -19,6 +19,7 @@ src/
 ├── Module.php                                 # Core module: DI, collectors, event wiring, routes
 ├── EventListener/
 │   ├── WebListener.php                        # beforeRequest/afterRequest → Debugger lifecycle
+│   ├── SecurityListener.php                   # User::EVENT_AFTER_LOGIN/LOGOUT → SecurityCollector
 │   └── ConsoleListener.php                    # Console beforeRequest/afterRequest → Debugger lifecycle
 ├── Collector/
 │   ├── DbProfilingTarget.php                  # Yii 2 log target feeding Kernel DatabaseCollector

@@ -12,11 +12,15 @@ use AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener;
 use AppDevPanel\Adapter\Laravel\EventListener\HttpClientListener;
 use AppDevPanel\Adapter\Laravel\EventListener\MailListener;
 use AppDevPanel\Adapter\Laravel\EventListener\QueueListener;
+use AppDevPanel\Adapter\Laravel\EventListener\SecurityListener;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelConfigProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelUrlMatcherAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\NullSchemaProvider;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
+use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugCollectors;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware;
 use AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy;
@@ -77,6 +81,7 @@ use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
+use AppDevPanel\Kernel\Collector\SecurityCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -190,6 +195,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'filesystem_stream' => FilesystemStreamCollector::class,
             'http_stream' => HttpStreamCollector::class,
             'validator' => ValidatorCollector::class,
+            'security' => SecurityCollector::class,
         ];
 
         foreach ($simpleCollectors as $key => $class) {
@@ -596,6 +602,15 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
+        $this->app->singleton(AuthorizationConfigProviderInterface::class, fn() => new NullAuthorizationConfigProvider());
+        $this->app->singleton(
+            AuthorizationController::class,
+            fn() => new AuthorizationController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(AuthorizationConfigProviderInterface::class),
+            ),
+        );
+
         $this->app->singleton(LaravelConfigProvider::class, fn() => new LaravelConfigProvider($this->app));
         $this->app->alias(LaravelConfigProvider::class, 'config.adp');
 
@@ -709,6 +724,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 continue;
             }
             $listener = new $listenerClass(fn() => $this->app->make($collectorClass));
+            $listener->register($events);
+        }
+
+        if ($collectors['security'] ?? true) {
+            $listener = new SecurityListener(fn() => $this->app->make(SecurityCollector::class));
             $listener->register($events);
         }
 

@@ -36,7 +36,7 @@ All 17 Kernel collectors are available to all adapters. Adapters wire framework-
 | Validator | ✅ `ValidatorCollector` | — | — | — | `ValidatorPanel` |
 | WebView | ✅ `WebViewCollector` | — | — | — | `WebViewPanel` |
 | Twig templates | — | ✅ `TwigCollector` | — | — | `TwigPanel` |
-| Security | — | ✅ `SecurityCollector` | — | — | `SecurityPanel` |
+| Security | ✅ (manual) | ✅ `SecuritySubscriber` | ✅ `SecurityListener` | ✅ `SecurityListener` | `SecurityPanel` |
 | Cache | — | ✅ `CacheCollector` | ✅ `CacheListener` | — | `CachePanel` |
 | Messenger | — | ✅ `MessengerCollector` | — | — | `MessengerPanel` |
 
@@ -50,6 +50,7 @@ All 17 Kernel collectors are available to all adapters. Adapters wire framework-
 | `CacheCollector` | — | decorated `CacheAdapter` | `CacheListener` (CacheHit/CacheMissed/KeyWritten/KeyForgotten) | — |
 | `QueueCollector` | `QueueProviderInterfaceProxy` + `QueueWorkerInterfaceProxy` | — | `QueueListener` (JobProcessing/JobProcessed/JobFailed) | — |
 | `HttpClientCollector` | `HttpClientInterfaceProxy` | `HttpClientInterfaceProxy` | `HttpClientListener` (RequestSending/ResponseReceived/ConnectionFailed) | `HttpClientInterfaceProxy` |
+| `SecurityCollector` | Manual calls only | `SecuritySubscriber` (LoginSuccess/Failure, Logout, SwitchUser, Vote) | `SecurityListener` (Authenticated, Login, Logout, Failed) | `SecurityListener` (User::AFTER_LOGIN/LOGOUT + session user) |
 
 ### Totals
 

@@ -10,6 +10,7 @@ use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriberCollectors;
+use AppDevPanel\Adapter\Symfony\EventSubscriber\SecuritySubscriber;
 use AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
@@ -24,6 +25,7 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -37,6 +39,8 @@ use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Controller\LlmController;
@@ -345,6 +349,18 @@ final class AppDevPanelExtension extends Extension
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
+
+        // Security subscriber — only when symfony/security-http is available and collector is enabled
+        if (
+            $container->has(SecurityCollector::class)
+            && class_exists(\Symfony\Component\Security\Http\Event\LoginSuccessEvent::class)
+        ) {
+            $container
+                ->register(SecuritySubscriber::class, SecuritySubscriber::class)
+                ->setArguments([new Reference(SecurityCollector::class)])
+                ->addTag('kernel.event_subscriber')
+                ->setPublic(false);
+        }
     }
 
     private function registerApiServices(ContainerBuilder $container, array $config): void
@@ -565,6 +581,19 @@ final class AppDevPanelExtension extends Extension
         $container
             ->register(OpcacheController::class, OpcacheController::class)
             ->setArguments([new Reference(JsonResponseFactoryInterface::class)])
+            ->setPublic(true);
+
+        // Authorization inspector: register NullAuthorizationConfigProvider as default.
+        if (!$container->has(AuthorizationConfigProviderInterface::class)) {
+            $container->register(AuthorizationConfigProviderInterface::class, NullAuthorizationConfigProvider::class)->setPublic(false);
+        }
+
+        $container
+            ->register(AuthorizationController::class, AuthorizationController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(AuthorizationConfigProviderInterface::class),
+            ])
             ->setPublic(true);
 
         // Database inspector: register NullSchemaProvider as default.

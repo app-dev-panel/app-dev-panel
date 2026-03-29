@@ -290,6 +290,21 @@ final class FixtureRegistry
                 ],
             ]),
 
+            // === Security ===
+            new Fixture(name: 'security:basic', endpoint: '/test/fixtures/security', expectations: [
+                'security' => [
+                    Expectation::notEmpty(),
+                    Expectation::fieldEquals('username', 'admin@example.com'),
+                    Expectation::fieldEquals('authenticated', true),
+                    Expectation::fieldEquals('firewallName', 'main'),
+                    Expectation::summaryHasKey('security'),
+                    Expectation::summaryGte('security.accessDecisions.total', 2),
+                    Expectation::summaryGte('security.accessDecisions.granted', 1),
+                    Expectation::summaryGte('security.accessDecisions.denied', 1),
+                    Expectation::summaryGte('security.authEvents', 1),
+                ],
+            ]),
+
             // === OpenTelemetry ===
             new Fixture(name: 'opentelemetry:basic', endpoint: '/test/fixtures/opentelemetry', expectations: [
                 'opentelemetry' => [

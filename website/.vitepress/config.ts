@@ -70,6 +70,7 @@ export default defineConfig({
                                 { text: 'Storage', link: '/guide/storage' },
                                 { text: 'Proxies', link: '/guide/proxies' },
                                 { text: 'Data Flow', link: '/guide/data-flow' },
+                                { text: 'Security & Authorization', link: '/guide/security' },
                             ],
                         },
                         {
@@ -158,6 +159,7 @@ export default defineConfig({
                                 { text: 'Хранилище', link: '/ru/guide/storage' },
                                 { text: 'Прокси', link: '/ru/guide/proxies' },
                                 { text: 'Поток данных', link: '/ru/guide/data-flow' },
+                                { text: 'Безопасность и авторизация', link: '/ru/guide/security' },
                             ],
                         },
                         {

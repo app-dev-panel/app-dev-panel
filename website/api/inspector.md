@@ -75,6 +75,14 @@ Inspector endpoints query live application state. All routes are under `/inspect
 |--------|------|-------------|
 | GET | `/opcache/` | OPcache status and configuration |
 
+## Authorization
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/authorization` | Guards, role hierarchy, voters, security config |
+
+See [Security & Authorization](/guide/security) for details.
+
 ## MCP (AI Integration)
 
 | Method | Path | Description |
