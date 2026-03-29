@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e1589afb6e80986b9728f24dae47ce10",
+    "content-hash": "a43c1e7bae8604a3cc87103ec272eb0f",
     "packages": [
         {
             "name": "alexkart/curl-builder",
@@ -55,11 +55,11 @@
         },
         {
             "name": "app-dev-panel/adapter-cycle",
-            "version": "dev-claude/msp-server-planning-HiGNa",
+            "version": "dev-claude/review-op-branch-aBtjg",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Cycle",
-                "reference": "4a38f6443731bc01a47e538449c56749fb9193b0"
+                "reference": "845741a66146ed19893330b4d4d60c8d6549701d"
             },
             "require": {
                 "app-dev-panel/api": "*",
@@ -83,18 +83,40 @@
             "license": [
                 "MIT"
             ],
-            "description": "Cycle ORM adapter for Application Development Panel (ADP)",
+            "description": "Cycle ORM adapter for ADP — database schema inspection via Cycle ORM for the Application Development Panel",
+            "keywords": [
+                "adp",
+                "ai",
+                "app-dev-panel",
+                "application-development-panel",
+                "cycle",
+                "cycle-orm",
+                "database",
+                "database-inspector",
+                "debug",
+                "debug-panel",
+                "debugger",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "inspector",
+                "llm",
+                "monitoring",
+                "observability",
+                "profiler",
+                "schema"
+            ],
             "transport-options": {
                 "relative": true
             }
         },
         {
             "name": "app-dev-panel/adapter-laravel",
-            "version": "dev-claude/msp-server-planning-HiGNa",
+            "version": "dev-claude/review-op-branch-aBtjg",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Laravel",
-                "reference": "0ed7c8792063bcfcc1b13fbdff8cff699db823e7"
+                "reference": "db890746b596b4a74ad28d40ef1ca07075cfcb85"
             },
             "require": {
                 "app-dev-panel/api": "*",
@@ -140,18 +162,47 @@
             "license": [
                 "MIT"
             ],
-            "description": "Laravel framework adapter for Application Development Panel (ADP)",
+            "description": "Laravel framework adapter for ADP — auto-wires debug collectors, proxies, and inspector into Laravel applications",
+            "keywords": [
+                "adp",
+                "ai",
+                "ai-debugging",
+                "apm",
+                "app-dev-panel",
+                "application-development-panel",
+                "debug",
+                "debug-panel",
+                "debugbar",
+                "debugger",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "inspector",
+                "laravel",
+                "laravel-debug",
+                "laravel-debugbar",
+                "laravel-profiler",
+                "laravel-telescope",
+                "llm",
+                "logging",
+                "monitoring",
+                "observability",
+                "performance",
+                "profiler",
+                "telescope",
+                "tracing"
+            ],
             "transport-options": {
                 "relative": true
             }
         },
         {
             "name": "app-dev-panel/adapter-symfony",
-            "version": "dev-claude/msp-server-planning-HiGNa",
+            "version": "dev-claude/review-op-branch-aBtjg",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Symfony",
-                "reference": "d46c5ac3f4219d9c88824dc82ce3782a1e79d901"
+                "reference": "f296e0c54f945d1cf638415425ec717b4c461cef"
             },
             "require": {
                 "app-dev-panel/api": "*",
@@ -197,18 +248,46 @@
             "license": [
                 "MIT"
             ],
-            "description": "Symfony framework adapter for Application Development Panel (ADP)",
+            "description": "Symfony framework adapter for ADP — auto-wires debug collectors, proxies, and inspector into Symfony applications",
+            "keywords": [
+                "adp",
+                "ai",
+                "ai-debugging",
+                "apm",
+                "app-dev-panel",
+                "application-development-panel",
+                "debug",
+                "debug-panel",
+                "debugbar",
+                "debugger",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "inspector",
+                "llm",
+                "logging",
+                "monitoring",
+                "observability",
+                "performance",
+                "profiler",
+                "symfony",
+                "symfony-bundle",
+                "symfony-debug",
+                "symfony-profiler",
+                "tracing",
+                "web-profiler"
+            ],
             "transport-options": {
                 "relative": true
             }
         },
         {
             "name": "app-dev-panel/adapter-yii2",
-            "version": "dev-claude/msp-server-planning-HiGNa",
+            "version": "dev-claude/review-op-branch-aBtjg",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Yii2",
-                "reference": "269f78df38300a021e2aaea9662e8da2974dacfa"
+                "reference": "839b85a0bd8bd0328877eb29af83ce2f4a9e8e17"
             },
             "require": {
                 "app-dev-panel/api": "*",
@@ -246,18 +325,44 @@
             "license": [
                 "MIT"
             ],
-            "description": "Yii 2 framework adapter for Application Development Panel (ADP)",
+            "description": "Yii 2 framework adapter for ADP — auto-wires debug collectors, proxies, and inspector into Yii 2 applications",
+            "keywords": [
+                "adp",
+                "ai",
+                "apm",
+                "app-dev-panel",
+                "application-development-panel",
+                "debug",
+                "debug-panel",
+                "debugbar",
+                "debugger",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "inspector",
+                "llm",
+                "logging",
+                "monitoring",
+                "observability",
+                "performance",
+                "profiler",
+                "tracing",
+                "yii-debug-toolbar",
+                "yii2",
+                "yii2-debug",
+                "yii2-extension"
+            ],
             "transport-options": {
                 "relative": true
             }
         },
         {
             "name": "app-dev-panel/adapter-yiisoft",
-            "version": "dev-claude/msp-server-planning-HiGNa",
+            "version": "dev-claude/review-op-branch-aBtjg",
             "dist": {
                 "type": "path",
                 "url": "libs/Adapter/Yiisoft",
-                "reference": "3b719d15149b8afec9fc58de827af21b37ed41fa"
+                "reference": "cec874de33a63f714a083d8c2229bc4e083ac1fb"
             },
             "require": {
                 "app-dev-panel/api": "*",
@@ -338,17 +443,44 @@
                     "phpunit-watcher watch"
                 ]
             },
+            "description": "Yii 3 framework adapter for ADP — auto-wires debug collectors, proxies, and inspector into Yiisoft applications",
+            "keywords": [
+                "adp",
+                "ai",
+                "apm",
+                "app-dev-panel",
+                "application-development-panel",
+                "debug",
+                "debug-panel",
+                "debugbar",
+                "debugger",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "inspector",
+                "llm",
+                "logging",
+                "monitoring",
+                "observability",
+                "performance",
+                "profiler",
+                "tracing",
+                "yii",
+                "yii-debug",
+                "yii3",
+                "yiisoft"
+            ],
             "transport-options": {
                 "relative": true
             }
         },
         {
             "name": "app-dev-panel/api",
-            "version": "dev-claude/msp-server-planning-HiGNa",
+            "version": "dev-claude/review-op-branch-aBtjg",
             "dist": {
                 "type": "path",
                 "url": "libs/API",
-                "reference": "87a39166789c219775212a2f480e6b90481dcf53"
+                "reference": "4a82fc87e593f06af6488a6ee78b4fc1292832f8"
             },
             "require": {
                 "alexkart/curl-builder": "^1.0",
@@ -392,11 +524,30 @@
             "license": [
                 "BSD-3-Clause"
             ],
-            "description": "Application Development Panel API",
+            "description": "ADP API — REST + SSE endpoints for debug data, live application inspection, and language-agnostic ingestion",
             "keywords": [
-                "api",
+                "adp",
+                "ai",
+                "ai-debugging",
                 "app-dev-panel",
-                "debug"
+                "application-development-panel",
+                "debug",
+                "debug-api",
+                "debug-panel",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "ingestion",
+                "inspector",
+                "llm",
+                "microservices",
+                "monitoring",
+                "observability",
+                "openapi",
+                "profiler",
+                "rest-api",
+                "sse",
+                "tracing"
             ],
             "transport-options": {
                 "relative": true
@@ -404,11 +555,11 @@
         },
         {
             "name": "app-dev-panel/cli",
-            "version": "dev-claude/msp-server-planning-HiGNa",
+            "version": "dev-claude/review-op-branch-aBtjg",
             "dist": {
                 "type": "path",
                 "url": "libs/Cli",
-                "reference": "05c387ca4685fd93d702094f6d84486c2c97ee0e"
+                "reference": "cf351e47fd7e13960c0ec31290a44c6018a895d1"
             },
             "require": {
                 "app-dev-panel/api": "*",
@@ -437,17 +588,38 @@
                     "phpunit --testdox --no-interaction"
                 ]
             },
+            "description": "ADP CLI — console commands for the debug server, data queries, storage reset, and standalone HTTP server",
+            "keywords": [
+                "adp",
+                "ai",
+                "app-dev-panel",
+                "application-development-panel",
+                "cli",
+                "console",
+                "debug",
+                "debug-panel",
+                "debug-server",
+                "debugger",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "diagnostics",
+                "llm",
+                "monitoring",
+                "observability",
+                "profiler"
+            ],
             "transport-options": {
                 "relative": true
             }
         },
         {
             "name": "app-dev-panel/kernel",
-            "version": "dev-claude/msp-server-planning-HiGNa",
+            "version": "dev-claude/review-op-branch-aBtjg",
             "dist": {
                 "type": "path",
                 "url": "libs/Kernel",
-                "reference": "079285bfa10ffbf21407bb06440dee6d5e77bb48"
+                "reference": "5ba6139a3914137d63ccac12dbc9935b1b791262"
             },
             "require": {
                 "ext-mbstring": "*",
@@ -465,6 +637,9 @@
                 "yiisoft/strings": "^2.2",
                 "yiisoft/var-dumper": "^1.7"
             },
+            "suggest": {
+                "open-telemetry/sdk": "Required for SpanProcessorInterfaceProxy to capture OpenTelemetry spans"
+            },
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -481,14 +656,38 @@
                     "phpunit --testdox --no-interaction"
                 ]
             },
-            "description": "Add Devp Panel Kernel",
+            "description": "ADP Kernel — core engine for the Application Development Panel: debugger lifecycle, collectors, storage, and PSR proxy system",
+            "keywords": [
+                "adp",
+                "ai",
+                "apm",
+                "app-dev-panel",
+                "application-development-panel",
+                "collectors",
+                "debug",
+                "debug-panel",
+                "debugger",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "diagnostics",
+                "llm",
+                "logging",
+                "monitoring",
+                "observability",
+                "performance",
+                "php-profiler",
+                "profiler",
+                "psr",
+                "tracing"
+            ],
             "transport-options": {
                 "relative": true
             }
         },
         {
             "name": "app-dev-panel/mcp-server",
-            "version": "dev-claude/msp-server-planning-HiGNa",
+            "version": "dev-claude/review-op-branch-aBtjg",
             "dist": {
                 "type": "path",
                 "url": "libs/McpServer",
@@ -517,11 +716,11 @@
         },
         {
             "name": "app-dev-panel/testing",
-            "version": "dev-claude/msp-server-planning-HiGNa",
+            "version": "dev-claude/review-op-branch-aBtjg",
             "dist": {
                 "type": "path",
                 "url": "libs/Testing",
-                "reference": "4550865c71aa1c9a7b9b9131e24bfbe991bf9020"
+                "reference": "cae61e8300cfd8902a9b4c52b81ed1b627ee25a6"
             },
             "require": {
                 "guzzlehttp/guzzle": "^7.5",
@@ -535,7 +734,23 @@
                     "AppDevPanel\\Testing\\": "src"
                 }
             },
-            "description": "Testing fixtures for ADP: verify that all collectors work correctly across adapters and playgrounds",
+            "description": "ADP Testing — fixture definitions and runner for verifying collectors across all framework adapters",
+            "keywords": [
+                "adp",
+                "ai",
+                "app-dev-panel",
+                "application-development-panel",
+                "debug",
+                "debug-panel",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "e2e",
+                "fixtures",
+                "integration-testing",
+                "quality-assurance",
+                "testing"
+            ],
             "transport-options": {
                 "relative": true
             }
@@ -1474,7 +1689,7 @@
         },
         {
             "name": "illuminate/collections",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/collections.git",
@@ -1534,7 +1749,7 @@
         },
         {
             "name": "illuminate/conditionable",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/conditionable.git",
@@ -1580,7 +1795,7 @@
         },
         {
             "name": "illuminate/container",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/container.git",
@@ -1642,7 +1857,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -1690,7 +1905,7 @@
         },
         {
             "name": "illuminate/filesystem",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/filesystem.git",
@@ -1757,7 +1972,7 @@
         },
         {
             "name": "illuminate/http",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/http.git",
@@ -1819,7 +2034,7 @@
         },
         {
             "name": "illuminate/macroable",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/macroable.git",
@@ -1865,7 +2080,7 @@
         },
         {
             "name": "illuminate/pipeline",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/pipeline.git",
@@ -1917,7 +2132,7 @@
         },
         {
             "name": "illuminate/reflection",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/reflection.git",
@@ -1968,7 +2183,7 @@
         },
         {
             "name": "illuminate/routing",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/routing.git",
@@ -2034,7 +2249,7 @@
         },
         {
             "name": "illuminate/session",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/session.git",
@@ -2091,7 +2306,7 @@
         },
         {
             "name": "illuminate/support",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
@@ -7688,16 +7903,16 @@
         },
         {
             "name": "carthage-software/mago",
-            "version": "1.15.3",
+            "version": "1.16.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/carthage-software/mago.git",
-                "reference": "fe9ed0b20fd1ad40083348c8f8e408cee10a9cb0"
+                "reference": "bf44827df56a0321075c1a6d17ecc1efbb67b45d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/carthage-software/mago/zipball/fe9ed0b20fd1ad40083348c8f8e408cee10a9cb0",
-                "reference": "fe9ed0b20fd1ad40083348c8f8e408cee10a9cb0",
+                "url": "https://api.github.com/repos/carthage-software/mago/zipball/bf44827df56a0321075c1a6d17ecc1efbb67b45d",
+                "reference": "bf44827df56a0321075c1a6d17ecc1efbb67b45d",
                 "shasum": ""
             },
             "require": {
@@ -7732,7 +7947,7 @@
             ],
             "support": {
                 "issues": "https://github.com/carthage-software/mago/issues",
-                "source": "https://github.com/carthage-software/mago/tree/1.15.3"
+                "source": "https://github.com/carthage-software/mago/tree/1.16.0"
             },
             "funding": [
                 {
@@ -7740,7 +7955,84 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-03-20T19:19:36+00:00"
+            "time": "2026-03-26T20:46:03+00:00"
+        },
+        {
+            "name": "composer/semver",
+            "version": "3.4.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/composer/semver.git",
+                "reference": "198166618906cb2de69b95d7d47e5fa8aa1b2b95"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/composer/semver/zipball/198166618906cb2de69b95d7d47e5fa8aa1b2b95",
+                "reference": "198166618906cb2de69b95d7d47e5fa8aa1b2b95",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.3.2 || ^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.11",
+                "symfony/phpunit-bridge": "^3 || ^7"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Composer\\Semver\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nils Adermann",
+                    "email": "naderman@naderman.de",
+                    "homepage": "http://www.naderman.de"
+                },
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "http://seld.be"
+                },
+                {
+                    "name": "Rob Bast",
+                    "email": "rob.bast@gmail.com",
+                    "homepage": "http://robbast.nl"
+                }
+            ],
+            "description": "Semver library that offers utilities, version constraint parsing and validation.",
+            "keywords": [
+                "semantic",
+                "semver",
+                "validation",
+                "versioning"
+            ],
+            "support": {
+                "irc": "ircs://irc.libera.chat:6697/composer",
+                "issues": "https://github.com/composer/semver/issues",
+                "source": "https://github.com/composer/semver/tree/3.4.4"
+            },
+            "funding": [
+                {
+                    "url": "https://packagist.com",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/composer",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-08-20T19:15:30+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
@@ -7963,7 +8255,7 @@
         },
         {
             "name": "illuminate/bus",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/bus.git",
@@ -8016,7 +8308,7 @@
         },
         {
             "name": "illuminate/cache",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/cache.git",
@@ -8078,7 +8370,7 @@
         },
         {
             "name": "illuminate/config",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/config.git",
@@ -8126,16 +8418,16 @@
         },
         {
             "name": "illuminate/console",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/console.git",
-                "reference": "55508f214a538599235935fa018824900f68b5bb"
+                "reference": "91732d7ae739c86dd9055c4dc850c2b4efccb47f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/console/zipball/55508f214a538599235935fa018824900f68b5bb",
-                "reference": "55508f214a538599235935fa018824900f68b5bb",
+                "url": "https://api.github.com/repos/illuminate/console/zipball/91732d7ae739c86dd9055c4dc850c2b4efccb47f",
+                "reference": "91732d7ae739c86dd9055c4dc850c2b4efccb47f",
                 "shasum": ""
             },
             "require": {
@@ -8188,11 +8480,11 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2026-03-14T17:21:24+00:00"
+            "time": "2026-03-21T11:33:57+00:00"
         },
         {
             "name": "illuminate/database",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/database.git",
@@ -8264,7 +8556,7 @@
         },
         {
             "name": "illuminate/events",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/events.git",
@@ -8319,7 +8611,7 @@
         },
         {
             "name": "illuminate/mail",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/mail.git",
@@ -8382,7 +8674,7 @@
         },
         {
             "name": "illuminate/queue",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/queue.git",
@@ -8449,7 +8741,7 @@
         },
         {
             "name": "illuminate/view",
-            "version": "v12.55.1",
+            "version": "v12.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/view.git",
@@ -8503,16 +8795,16 @@
         },
         {
             "name": "laravel/prompts",
-            "version": "v0.3.15",
+            "version": "v0.3.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/prompts.git",
-                "reference": "4bb8107ec97651fd3f17f897d6489dbc4d8fb999"
+                "reference": "11e7d5f93803a2190b00e145142cb00a33d17ad2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/prompts/zipball/4bb8107ec97651fd3f17f897d6489dbc4d8fb999",
-                "reference": "4bb8107ec97651fd3f17f897d6489dbc4d8fb999",
+                "url": "https://api.github.com/repos/laravel/prompts/zipball/11e7d5f93803a2190b00e145142cb00a33d17ad2",
+                "reference": "11e7d5f93803a2190b00e145142cb00a33d17ad2",
                 "shasum": ""
             },
             "require": {
@@ -8556,9 +8848,9 @@
             "description": "Add beautiful and user-friendly forms to your command-line applications.",
             "support": {
                 "issues": "https://github.com/laravel/prompts/issues",
-                "source": "https://github.com/laravel/prompts/tree/v0.3.15"
+                "source": "https://github.com/laravel/prompts/tree/v0.3.16"
             },
-            "time": "2026-03-17T13:45:17+00:00"
+            "time": "2026-03-23T14:35:33+00:00"
         },
         {
             "name": "laravel/serializable-closure",
@@ -9174,6 +9466,289 @@
             "time": "2026-02-16T23:10:27+00:00"
         },
         {
+            "name": "open-telemetry/api",
+            "version": "1.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opentelemetry-php/api.git",
+                "reference": "6f8d237ce2c304ca85f31970f788e7f074d147be"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opentelemetry-php/api/zipball/6f8d237ce2c304ca85f31970f788e7f074d147be",
+                "reference": "6f8d237ce2c304ca85f31970f788e7f074d147be",
+                "shasum": ""
+            },
+            "require": {
+                "open-telemetry/context": "^1.4",
+                "php": "^8.1",
+                "psr/log": "^1.1|^2.0|^3.0",
+                "symfony/polyfill-php82": "^1.26"
+            },
+            "conflict": {
+                "open-telemetry/sdk": "<=1.11"
+            },
+            "type": "library",
+            "extra": {
+                "spi": {
+                    "OpenTelemetry\\API\\Instrumentation\\AutoInstrumentation\\HookManagerInterface": [
+                        "OpenTelemetry\\API\\Instrumentation\\AutoInstrumentation\\ExtensionHookManager"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "1.8.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "Trace/functions.php"
+                ],
+                "psr-4": {
+                    "OpenTelemetry\\API\\": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "opentelemetry-php contributors",
+                    "homepage": "https://github.com/open-telemetry/opentelemetry-php/graphs/contributors"
+                }
+            ],
+            "description": "API for OpenTelemetry PHP.",
+            "keywords": [
+                "Metrics",
+                "api",
+                "apm",
+                "logging",
+                "opentelemetry",
+                "otel",
+                "tracing"
+            ],
+            "support": {
+                "chat": "https://app.slack.com/client/T08PSQ7BQ/C01NFPCV44V",
+                "docs": "https://opentelemetry.io/docs/languages/php",
+                "issues": "https://github.com/open-telemetry/opentelemetry-php/issues",
+                "source": "https://github.com/open-telemetry/opentelemetry-php"
+            },
+            "time": "2026-02-25T13:24:05+00:00"
+        },
+        {
+            "name": "open-telemetry/context",
+            "version": "1.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opentelemetry-php/context.git",
+                "reference": "3c414b246e0dabb7d6145404e6a5e4536ca18d07"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opentelemetry-php/context/zipball/3c414b246e0dabb7d6145404e6a5e4536ca18d07",
+                "reference": "3c414b246e0dabb7d6145404e6a5e4536ca18d07",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "symfony/polyfill-php82": "^1.26"
+            },
+            "suggest": {
+                "ext-ffi": "To allow context switching in Fibers"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "fiber/initialize_fiber_handler.php"
+                ],
+                "psr-4": {
+                    "OpenTelemetry\\Context\\": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "opentelemetry-php contributors",
+                    "homepage": "https://github.com/open-telemetry/opentelemetry-php/graphs/contributors"
+                }
+            ],
+            "description": "Context implementation for OpenTelemetry PHP.",
+            "keywords": [
+                "Context",
+                "opentelemetry",
+                "otel"
+            ],
+            "support": {
+                "chat": "https://app.slack.com/client/T08PSQ7BQ/C01NFPCV44V",
+                "docs": "https://opentelemetry.io/docs/languages/php",
+                "issues": "https://github.com/open-telemetry/opentelemetry-php/issues",
+                "source": "https://github.com/open-telemetry/opentelemetry-php"
+            },
+            "time": "2025-10-19T06:44:33+00:00"
+        },
+        {
+            "name": "open-telemetry/sdk",
+            "version": "1.14.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opentelemetry-php/sdk.git",
+                "reference": "6e3d0ce93e76555dd5e2f1d19443ff45b990e410"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opentelemetry-php/sdk/zipball/6e3d0ce93e76555dd5e2f1d19443ff45b990e410",
+                "reference": "6e3d0ce93e76555dd5e2f1d19443ff45b990e410",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "nyholm/psr7-server": "^1.1",
+                "open-telemetry/api": "^1.8",
+                "open-telemetry/context": "^1.4",
+                "open-telemetry/sem-conv": "^1.0",
+                "php": "^8.1",
+                "php-http/discovery": "^1.14",
+                "psr/http-client": "^1.0",
+                "psr/http-client-implementation": "^1.0",
+                "psr/http-factory-implementation": "^1.0",
+                "psr/http-message": "^1.0.1|^2.0",
+                "psr/log": "^1.1|^2.0|^3.0",
+                "ramsey/uuid": "^3.0 || ^4.0",
+                "symfony/polyfill-mbstring": "^1.23",
+                "symfony/polyfill-php82": "^1.26",
+                "tbachert/spi": "^1.0.5"
+            },
+            "suggest": {
+                "ext-gmp": "To support unlimited number of synchronous metric readers",
+                "ext-mbstring": "To increase performance of string operations",
+                "open-telemetry/sdk-configuration": "File-based OpenTelemetry SDK configuration"
+            },
+            "type": "library",
+            "extra": {
+                "spi": {
+                    "OpenTelemetry\\API\\Configuration\\ConfigEnv\\EnvComponentLoader": [
+                        "OpenTelemetry\\API\\Instrumentation\\Configuration\\General\\ConfigEnv\\EnvComponentLoaderHttpConfig",
+                        "OpenTelemetry\\API\\Instrumentation\\Configuration\\General\\ConfigEnv\\EnvComponentLoaderPeerConfig"
+                    ],
+                    "OpenTelemetry\\SDK\\Common\\Configuration\\Resolver\\ResolverInterface": [
+                        "OpenTelemetry\\SDK\\Common\\Configuration\\Resolver\\SdkConfigurationResolver"
+                    ],
+                    "OpenTelemetry\\API\\Instrumentation\\AutoInstrumentation\\HookManagerInterface": [
+                        "OpenTelemetry\\API\\Instrumentation\\AutoInstrumentation\\ExtensionHookManager"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "1.12.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "Common/Util/functions.php",
+                    "Logs/Exporter/_register.php",
+                    "Metrics/MetricExporter/_register.php",
+                    "Propagation/_register.php",
+                    "Trace/SpanExporter/_register.php",
+                    "Common/Dev/Compatibility/_load.php",
+                    "_autoload.php"
+                ],
+                "psr-4": {
+                    "OpenTelemetry\\SDK\\": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "opentelemetry-php contributors",
+                    "homepage": "https://github.com/open-telemetry/opentelemetry-php/graphs/contributors"
+                }
+            ],
+            "description": "SDK for OpenTelemetry PHP.",
+            "keywords": [
+                "Metrics",
+                "apm",
+                "logging",
+                "opentelemetry",
+                "otel",
+                "sdk",
+                "tracing"
+            ],
+            "support": {
+                "chat": "https://app.slack.com/client/T08PSQ7BQ/C01NFPCV44V",
+                "docs": "https://opentelemetry.io/docs/languages/php",
+                "issues": "https://github.com/open-telemetry/opentelemetry-php/issues",
+                "source": "https://github.com/open-telemetry/opentelemetry-php"
+            },
+            "time": "2026-03-21T11:50:01+00:00"
+        },
+        {
+            "name": "open-telemetry/sem-conv",
+            "version": "1.38.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opentelemetry-php/sem-conv.git",
+                "reference": "e613bc640a407def4991b8a936a9b27edd9a3240"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opentelemetry-php/sem-conv/zipball/e613bc640a407def4991b8a936a9b27edd9a3240",
+                "reference": "e613bc640a407def4991b8a936a9b27edd9a3240",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "OpenTelemetry\\SemConv\\": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "opentelemetry-php contributors",
+                    "homepage": "https://github.com/open-telemetry/opentelemetry-php/graphs/contributors"
+                }
+            ],
+            "description": "Semantic conventions for OpenTelemetry PHP.",
+            "keywords": [
+                "Metrics",
+                "apm",
+                "logging",
+                "opentelemetry",
+                "otel",
+                "semantic conventions",
+                "semconv",
+                "tracing"
+            ],
+            "support": {
+                "chat": "https://app.slack.com/client/T08PSQ7BQ/C01NFPCV44V",
+                "docs": "https://opentelemetry.io/docs/languages/php",
+                "issues": "https://github.com/open-telemetry/opentelemetry-php/issues",
+                "source": "https://github.com/open-telemetry/opentelemetry-php"
+            },
+            "time": "2026-01-21T04:14:03+00:00"
+        },
+        {
             "name": "phar-io/manifest",
             "version": "2.0.4",
             "source": {
@@ -9290,6 +9865,85 @@
                 "source": "https://github.com/phar-io/version/tree/3.2.1"
             },
             "time": "2022-02-21T01:04:05+00:00"
+        },
+        {
+            "name": "php-http/discovery",
+            "version": "1.20.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-http/discovery.git",
+                "reference": "82fe4c73ef3363caed49ff8dd1539ba06044910d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-http/discovery/zipball/82fe4c73ef3363caed49ff8dd1539ba06044910d",
+                "reference": "82fe4c73ef3363caed49ff8dd1539ba06044910d",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^1.0|^2.0",
+                "php": "^7.1 || ^8.0"
+            },
+            "conflict": {
+                "nyholm/psr7": "<1.0",
+                "zendframework/zend-diactoros": "*"
+            },
+            "provide": {
+                "php-http/async-client-implementation": "*",
+                "php-http/client-implementation": "*",
+                "psr/http-client-implementation": "*",
+                "psr/http-factory-implementation": "*",
+                "psr/http-message-implementation": "*"
+            },
+            "require-dev": {
+                "composer/composer": "^1.0.2|^2.0",
+                "graham-campbell/phpspec-skip-example-extension": "^5.0",
+                "php-http/httplug": "^1.0 || ^2.0",
+                "php-http/message-factory": "^1.0",
+                "phpspec/phpspec": "^5.1 || ^6.1 || ^7.3",
+                "sebastian/comparator": "^3.0.5 || ^4.0.8",
+                "symfony/phpunit-bridge": "^6.4.4 || ^7.0.1"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Http\\Discovery\\Composer\\Plugin",
+                "plugin-optional": true
+            },
+            "autoload": {
+                "psr-4": {
+                    "Http\\Discovery\\": "src/"
+                },
+                "exclude-from-classmap": [
+                    "src/Composer/Plugin.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Márk Sági-Kazár",
+                    "email": "mark.sagikazar@gmail.com"
+                }
+            ],
+            "description": "Finds and installs PSR-7, PSR-17, PSR-18 and HTTPlug implementations",
+            "homepage": "http://php-http.org",
+            "keywords": [
+                "adapter",
+                "client",
+                "discovery",
+                "factory",
+                "http",
+                "message",
+                "psr17",
+                "psr7"
+            ],
+            "support": {
+                "issues": "https://github.com/php-http/discovery/issues",
+                "source": "https://github.com/php-http/discovery/tree/1.20.0"
+            },
+            "time": "2024-10-02T11:20:13+00:00"
         },
         {
             "name": "php-webdriver/webdriver",
@@ -11541,6 +12195,138 @@
                 }
             ],
             "time": "2026-02-25T16:50:00+00:00"
+        },
+        {
+            "name": "symfony/polyfill-php82",
+            "version": "v1.33.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php82.git",
+                "reference": "5d2ed36f7734637dacc025f179698031951b1692"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php82/zipball/5d2ed36f7734637dacc025f179698031951b1692",
+                "reference": "5d2ed36f7734637dacc025f179698031951b1692",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php82\\": ""
+                },
+                "classmap": [
+                    "Resources/stubs"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill backporting some PHP 8.2+ features to lower PHP versions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php82/tree/v1.33.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-09-09T11:45:10+00:00"
+        },
+        {
+            "name": "tbachert/spi",
+            "version": "v1.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Nevay/spi.git",
+                "reference": "e7078767866d0a9e0f91d3f9d42a832df5e39002"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Nevay/spi/zipball/e7078767866d0a9e0f91d3f9d42a832df5e39002",
+                "reference": "e7078767866d0a9e0f91d3f9d42a832df5e39002",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^2.0",
+                "composer/semver": "^1.0 || ^2.0 || ^3.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "composer/composer": "^2.0",
+                "infection/infection": "^0.27.9",
+                "phpunit/phpunit": "^10.5",
+                "psalm/phar": "^5.18"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Nevay\\SPI\\Composer\\Plugin",
+                "branch-alias": {
+                    "dev-main": "1.0.x-dev"
+                },
+                "plugin-optional": true
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nevay\\SPI\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "description": "Service provider loading facility",
+            "keywords": [
+                "service provider"
+            ],
+            "support": {
+                "issues": "https://github.com/Nevay/spi/issues",
+                "source": "https://github.com/Nevay/spi/tree/v1.0.5"
+            },
+            "time": "2025-06-29T15:42:06+00:00"
         },
         {
             "name": "theseer/tokenizer",
