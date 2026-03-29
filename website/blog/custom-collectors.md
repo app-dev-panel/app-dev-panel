@@ -6,7 +6,7 @@ tags: [tutorial, collectors, php]
 ---
 
 <script setup>
-import BlogPost from '../../.vitepress/theme/components/BlogPost.vue';
+import BlogPost from '../.vitepress/theme/components/BlogPost.vue';
 </script>
 
 <BlogPost

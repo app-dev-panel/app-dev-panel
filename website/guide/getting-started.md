@@ -66,7 +66,7 @@ ADP follows a layered architecture:
 
 ## What's Next?
 
-- [What is ADP?](/en/guide/what-is-adp) — Learn about the project philosophy
-- [Architecture](/en/guide/architecture) — Deep dive into the system design
-- [Collectors](/en/guide/collectors) — Understand how data is collected
-- [Data Flow](/en/guide/data-flow) — Follow data from your app to the panel
+- [What is ADP?](/guide/what-is-adp) — Learn about the project philosophy
+- [Architecture](/guide/architecture) — Deep dive into the system design
+- [Collectors](/guide/collectors) — Understand how data is collected
+- [Data Flow](/guide/data-flow) — Follow data from your app to the panel

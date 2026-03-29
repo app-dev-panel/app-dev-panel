@@ -6,7 +6,7 @@ tags: [ai, mcp, deep-dive]
 ---
 
 <script setup>
-import BlogPost from '../../.vitepress/theme/components/BlogPost.vue';
+import BlogPost from '../.vitepress/theme/components/BlogPost.vue';
 </script>
 
 <BlogPost

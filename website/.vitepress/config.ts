@@ -28,80 +28,79 @@ export default defineConfig({
     ],
 
     locales: {
-        en: {
+        root: {
             label: 'English',
             lang: 'en',
-            link: '/en/',
             themeConfig: {
                 nav: [
-                    { text: 'Guide', link: '/en/guide/getting-started' },
-                    { text: 'API', link: '/en/api/' },
+                    { text: 'Guide', link: '/guide/getting-started' },
+                    { text: 'API', link: '/api/' },
                     {
                         text: 'Blog',
-                        link: '/en/blog/',
-                        activeMatch: '/en/blog/',
+                        link: '/blog/',
+                        activeMatch: '/blog/',
                     },
                     {
                         text: 'Ecosystem',
                         items: [
-                            { text: 'Yii 3 Adapter', link: '/en/guide/adapters/yiisoft' },
-                            { text: 'Symfony Adapter', link: '/en/guide/adapters/symfony' },
-                            { text: 'Laravel Adapter', link: '/en/guide/adapters/laravel' },
-                            { text: 'Yii 2 Adapter', link: '/en/guide/adapters/yii2' },
-                            { text: 'Cycle ORM Adapter', link: '/en/guide/adapters/cycle' },
+                            { text: 'Yii 3 Adapter', link: '/guide/adapters/yiisoft' },
+                            { text: 'Symfony Adapter', link: '/guide/adapters/symfony' },
+                            { text: 'Laravel Adapter', link: '/guide/adapters/laravel' },
+                            { text: 'Yii 2 Adapter', link: '/guide/adapters/yii2' },
+                            { text: 'Cycle ORM Adapter', link: '/guide/adapters/cycle' },
                         ],
                     },
                 ],
                 sidebar: {
-                    '/en/guide/': [
+                    '/guide/': [
                         {
                             text: 'Introduction',
                             collapsed: false,
                             items: [
-                                { text: 'What is ADP?', link: '/en/guide/what-is-adp' },
-                                { text: 'Getting Started', link: '/en/guide/getting-started' },
-                                { text: 'Architecture', link: '/en/guide/architecture' },
+                                { text: 'What is ADP?', link: '/guide/what-is-adp' },
+                                { text: 'Getting Started', link: '/guide/getting-started' },
+                                { text: 'Architecture', link: '/guide/architecture' },
                             ],
                         },
                         {
                             text: 'Core Concepts',
                             collapsed: false,
                             items: [
-                                { text: 'Collectors', link: '/en/guide/collectors' },
-                                { text: 'Storage', link: '/en/guide/storage' },
-                                { text: 'Proxies', link: '/en/guide/proxies' },
-                                { text: 'Data Flow', link: '/en/guide/data-flow' },
+                                { text: 'Collectors', link: '/guide/collectors' },
+                                { text: 'Storage', link: '/guide/storage' },
+                                { text: 'Proxies', link: '/guide/proxies' },
+                                { text: 'Data Flow', link: '/guide/data-flow' },
                             ],
                         },
                         {
                             text: 'Adapters',
                             collapsed: false,
                             items: [
-                                { text: 'Yii 3 (Yiisoft)', link: '/en/guide/adapters/yiisoft' },
-                                { text: 'Symfony', link: '/en/guide/adapters/symfony' },
-                                { text: 'Laravel', link: '/en/guide/adapters/laravel' },
-                                { text: 'Yii 2', link: '/en/guide/adapters/yii2' },
-                                { text: 'Cycle ORM', link: '/en/guide/adapters/cycle' },
+                                { text: 'Yii 3 (Yiisoft)', link: '/guide/adapters/yiisoft' },
+                                { text: 'Symfony', link: '/guide/adapters/symfony' },
+                                { text: 'Laravel', link: '/guide/adapters/laravel' },
+                                { text: 'Yii 2', link: '/guide/adapters/yii2' },
+                                { text: 'Cycle ORM', link: '/guide/adapters/cycle' },
                             ],
                         },
                         {
                             text: 'Advanced',
                             collapsed: true,
                             items: [
-                                { text: 'MCP Server', link: '/en/guide/mcp-server' },
-                                { text: 'CLI', link: '/en/guide/cli' },
-                                { text: 'Contributing', link: '/en/guide/contributing' },
+                                { text: 'MCP Server', link: '/guide/mcp-server' },
+                                { text: 'CLI', link: '/guide/cli' },
+                                { text: 'Contributing', link: '/guide/contributing' },
                             ],
                         },
                     ],
-                    '/en/api/': [
+                    '/api/': [
                         {
                             text: 'API Reference',
                             items: [
-                                { text: 'Overview', link: '/en/api/' },
-                                { text: 'REST Endpoints', link: '/en/api/rest' },
-                                { text: 'SSE', link: '/en/api/sse' },
-                                { text: 'Inspector', link: '/en/api/inspector' },
+                                { text: 'Overview', link: '/api/' },
+                                { text: 'REST Endpoints', link: '/api/rest' },
+                                { text: 'SSE', link: '/api/sse' },
+                                { text: 'Inspector', link: '/api/inspector' },
                             ],
                         },
                     ],
