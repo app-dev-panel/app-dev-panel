@@ -211,6 +211,7 @@ app_dev_panel:
         mailer: true                       # MailerCollector from Kernel (requires symfony/mailer)
         messenger: true                    # MessengerCollector (requires symfony/messenger)
         translator: true                   # TranslatorCollector (Kernel, via SymfonyTranslatorProxy)
+        code_coverage: false               # CodeCoverageCollector (opt-in, requires pcov or xdebug)
     ignored_requests:
         - '/_wdt/*'
         - '/_profiler/*'
