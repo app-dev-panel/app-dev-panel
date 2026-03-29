@@ -1,27 +1,20 @@
-# Cloud Sample Analysis — Architecture & Feature Design
+# Cloud Sample Analysis
 
-## Overview
+Asynchronous background analysis of debug samples. Runs analyzers against stored collector data,
+produces structured findings with severity and suggestions. Initially local PHP processes, later remote cloud.
 
-Cloud Sample Analysis extends ADP with **asynchronous, background analysis** of debug samples.
-Users send collected samples to an analysis backend (initially local processes, later a real cloud service)
-that runs CPU-intensive or AI-powered analyzers and returns structured insights.
+## Design Goals
 
-Results are stored alongside the original sample and surfaced in the ADP frontend as an "Analysis" tab
-with per-analyzer cards, severity badges, and actionable recommendations.
-
-## Goals
-
-1. **Decouple analysis from collection** — collectors stay fast; analysis runs asynchronously
-2. **Pluggable analyzers** — easy to add new analysis types without changing core
-3. **Local-first** — runs as local child processes initially; same interface works with a remote cloud later
-4. **Non-blocking** — analysis never slows down the target application or the ADP panel
-5. **Incremental** — results stream in as each analyzer finishes; no need to wait for all
+- **Decouple analysis from collection** — collectors stay fast; analysis runs after flush
+- **Pluggable analyzers** — new analyzers require no core changes
+- **Local-first** — `LocalProcessRunner` (child processes) initially; `HttpRunner` (cloud) later; same interface
+- **Incremental** — results stream via SSE as each analyzer finishes
 
 ---
 
-## What Can Be Analyzed
+## Analyzers
 
-### 1. Performance Analysis
+### Performance
 
 | Analyzer | Input Collectors | Output |
 |----------|-----------------|--------|
@@ -33,7 +26,7 @@ with per-analyzer cards, severity badges, and actionable recommendations.
 | **MemoryLeakHint** | `WebAppInfoCollector` | Peak memory vs baseline comparison, growth pattern detection |
 | **HttpClientLatency** | `HttpClientCollector` | External API calls ranked by latency, timeout risk scoring |
 
-### 2. Security Analysis
+### Security
 
 | Analyzer | Input Collectors | Output |
 |----------|-----------------|--------|
@@ -42,7 +35,7 @@ with per-analyzer cards, severity badges, and actionable recommendations.
 | **InsecureHeaderCheck** | `RequestCollector` | Missing security headers (CSP, HSTS, X-Frame-Options) |
 | **ExceptionInfoLeak** | `ExceptionCollector` | Stack traces exposing internal paths in non-debug mode |
 
-### 3. Quality Analysis
+### Quality
 
 | Analyzer | Input Collectors | Output |
 |----------|-----------------|--------|
@@ -52,7 +45,7 @@ with per-analyzer cards, severity badges, and actionable recommendations.
 | **CacheEfficiency** | `CacheCollector` | Hit ratio analysis, cold-cache patterns, key entropy |
 | **ViewRenderCost** | `ViewCollector`, `TemplateCollector` | Render time distribution, duplicate render elimination opportunities |
 
-### 4. Behavioral Analysis
+### Behavioral
 
 | Analyzer | Input Collectors | Output |
 |----------|-----------------|--------|
@@ -61,7 +54,7 @@ with per-analyzer cards, severity badges, and actionable recommendations.
 | **TimelineGapAnalyzer** | `TimelineCollector` | Unexplained gaps in the request timeline |
 | **QueueReliability** | `QueueCollector` | Failed message patterns, retry storms, duplicate dispatch |
 
-### 5. AI-Powered Analysis (Future)
+### AI-Powered (Future)
 
 | Analyzer | Input | Output |
 |----------|-------|--------|
@@ -113,7 +106,7 @@ with per-analyzer cards, severity badges, and actionable recommendations.
 └─────────────┘  └─────────────┘  └─────────────┘
 ```
 
-### Key Abstractions
+### Proposed Directory Structure
 
 ```
 libs/Kernel/src/Analysis/
@@ -341,6 +334,8 @@ storage/YYYY-MM-DD/{id}/
 
 **GET `/debug/api/analysis/{id}`**
 
+Wrapped by `ResponseDataWrapper` (`{id, data, error, success}`):
+
 ```json
 {
   "id": "5f4a9e8c3b2a1",
@@ -357,12 +352,12 @@ storage/YYYY-MM-DD/{id}/
     },
     "results": { ... }
   },
-  "success": true,
-  "status": 200
+  "error": null,
+  "success": true
 }
 ```
 
-**POST `/debug/api/analysis/{id}/run`**
+**POST `/debug/api/analysis/{id}/run`** (HTTP 202)
 
 ```json
 {
@@ -374,25 +369,23 @@ storage/YYYY-MM-DD/{id}/
       {"analyzer": "security.sensitive-data", "status": "pending"}
     ]
   },
-  "success": true,
-  "status": 202
+  "error": null,
+  "success": true
 }
 ```
 
 **SSE `/debug/api/analysis/{id}/stream`**
 
+Follows existing SSE convention (`ServerSentEventsStream`): event type is embedded in JSON `data` payload, not in the SSE `event:` field.
+
 ```
-event: analysis.started
-data: {"analyzer": "performance.slow-query", "status": "running"}
+data: {"type": "analysis.started", "payload": {"analyzer": "performance.slow-query", "status": "running"}}
 
-event: analysis.completed
-data: {"analyzer": "performance.slow-query", "status": "warning", "findingCount": 2}
+data: {"type": "analysis.completed", "payload": {"analyzer": "performance.slow-query", "status": "warning", "findingCount": 2}}
 
-event: analysis.completed
-data: {"analyzer": "performance.n-plus-one", "status": "critical", "findingCount": 1}
+data: {"type": "analysis.completed", "payload": {"analyzer": "performance.n-plus-one", "status": "critical", "findingCount": 1}}
 
-event: analysis.done
-data: {"status": "warning", "total": 8, "duration": 2.45}
+data: {"type": "analysis.done", "payload": {"status": "warning", "total": 8, "duration": 2.45}}
 ```
 
 ---
@@ -538,45 +531,28 @@ Configurable via settings:
 
 ## Cloud Backend (Future)
 
-The `HttpRunner` sends samples to a remote analysis service:
+`HttpRunner` sends sample data to a remote analysis endpoint via POST with Bearer token auth.
+Request body: `{sampleId, analyzers[], data, config}`. Response: via webhook or polling.
 
-```
-POST https://cloud.appdevpanel.com/api/v1/analyze
-Content-Type: application/json
-Authorization: Bearer <api-key>
+Cloud-specific capabilities:
+- AI-powered analyzers (query optimization, root cause analysis)
+- Cross-sample correlation and trend detection
+- Optional anonymized sample retention for benchmarking
 
-{
-  "sampleId": "5f4a9e8c3b2a1",
-  "analyzers": ["performance.*", "security.*"],
-  "data": { <summary + data from storage> },
-  "config": { <user thresholds> }
-}
-```
-
-The cloud backend:
-1. Receives sample data
-2. Runs heavier analyzers (AI-powered, cross-sample correlation)
-3. Returns results via webhook or polling
-4. Optional: retains anonymized samples for training/benchmarking
-
-The `AnalysisRunnerInterface` abstraction means switching from `LocalProcessRunner` to `HttpRunner`
-requires zero changes in `AnalysisManager`, the API, or the frontend.
+`AnalysisRunnerInterface` abstraction: switching `LocalProcessRunner` to `HttpRunner`
+requires zero changes in `AnalysisManager`, API, or frontend.
 
 ---
 
-## Integration with User's ADP
+## Integration Points
 
-### How It Connects
+- **Storage**: `analysis.json.gz` colocated with `summary/data/objects` in `storage/YYYY-MM-DD/{id}/`
+- **API**: `/debug/api/analysis/*` endpoints use `ResponseDataWrapper`, `IpFilterMiddleware`, `CorsMiddleware`
+- **Frontend**: "Analysis" tab reuses SDK components; summary badges in debug list
+- **SSE**: analysis events via existing `ServerSentEventsStream` (type embedded in JSON payload)
+- **MCP**: new tools expose analysis to AI assistants
 
-1. **Storage-level**: Analysis results live in the same directory as the sample (`analysis.json.gz`)
-2. **API-level**: New `/debug/api/analysis/*` endpoints follow existing conventions (same middleware, same response wrapper)
-3. **Frontend-level**: New "Analysis" tab reuses existing SDK components (cards, badges, code blocks)
-4. **SSE-level**: Analysis completion events use the existing `event-stream` infrastructure
-5. **MCP-level**: New MCP tools expose analysis results to AI assistants
-
-### MCP Integration
-
-New MCP tools for AI assistant access:
+### MCP Tools
 
 | Tool | Description |
 |------|-------------|
