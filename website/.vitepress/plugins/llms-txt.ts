@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { resolve, relative } from 'node:path';
+import { resolve } from 'node:path';
 import type { SiteConfig } from 'vitepress';
 import matter from 'gray-matter';
 
@@ -11,7 +11,7 @@ interface SidebarItem {
 }
 
 /**
- * Strip frontmatter, Vue <script setup> blocks, and custom VitePress containers
+ * Strip frontmatter, Vue <script> blocks, Vue custom components, and VitePress containers
  * to produce clean markdown for LLM consumption.
  */
 function cleanMarkdown(raw: string): string {
@@ -114,7 +114,7 @@ export async function generateLlmsTxt(siteConfig: SiteConfig): Promise<void> {
 
     const allSections: { title: string; links: { text: string; link: string }[] }[] = [];
 
-    for (const [prefix, items] of Object.entries(sidebar)) {
+    for (const items of Object.values(sidebar)) {
         const sections = collectSections(items);
         allSections.push(...sections);
     }
@@ -149,15 +149,22 @@ export async function generateLlmsTxt(siteConfig: SiteConfig): Promise<void> {
             seen.add(link);
 
             const mdPath = resolveMarkdownPath(srcDir, link);
-            if (!mdPath) continue;
+            if (!mdPath) {
+                console.warn(`[llms-txt] No markdown file found for link: ${link}`);
+                continue;
+            }
 
-            const raw = readFileSync(mdPath, 'utf-8');
-            const cleaned = cleanMarkdown(raw);
-            if (cleaned) {
-                fullLines.push(cleaned);
-                fullLines.push('');
-                fullLines.push('---');
-                fullLines.push('');
+            try {
+                const raw = readFileSync(mdPath, 'utf-8');
+                const cleaned = cleanMarkdown(raw);
+                if (cleaned) {
+                    fullLines.push(cleaned);
+                    fullLines.push('');
+                    fullLines.push('---');
+                    fullLines.push('');
+                }
+            } catch (err) {
+                console.warn(`[llms-txt] Failed to read ${mdPath}: ${err}`);
             }
         }
     }

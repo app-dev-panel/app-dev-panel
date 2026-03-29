@@ -296,10 +296,21 @@ Update CLAUDE.md and docs/ for any changed modules. Documentation is LLM-optimiz
 ```
 Verify no dependency violations introduced. Modules must follow the dependency graph strictly.
 
-### Step 5: Iterate
+### Step 5: Update VitePress Documentation & llms.txt
+If changes affect user-facing behavior (new features, API changes, new collectors, adapter changes):
+```bash
+/docs-expert <describe what changed>
+```
+Update VitePress pages in `website/`. Then verify llms.txt generation:
+```bash
+/review-llms-txt
+```
+Skip this step for internal-only changes (refactoring, test fixes, CI tweaks).
+
+### Step 6: Iterate
 If any step produces changes, go back to Step 2 and re-run checks. Continue until stable.
 
-### Step 6: Final Verification
+### Step 7: Final Verification
 ```bash
 make all                            # Run everything: all checks + all tests
 ```
@@ -323,12 +334,14 @@ composer lint:baseline
 | Skill | Command | Purpose |
 |-------|---------|---------|
 | Test Writer | `/test <file or class>` | Write tests in consistent style, inline mocks, no test environment |
-| Doc Reviewer | `/review-docs [module]` | Review/update docs for LLM consumption, remove fluff |
+| Doc Reviewer | `/review-docs [module]` | Review/update CLAUDE.md and docs/ for LLM consumption |
 | Arch Reviewer | `/review-arch [module]` | Check dependency rules, abstraction leaks, circular deps |
+| Docs Expert | `/docs-expert [page or task]` | Write/update VitePress pages, i18n, blog posts, config |
+| llms.txt Reviewer | `/review-llms-txt` | Verify llms.txt/llms-full.txt generation after doc changes |
 | Frontend Dev | `/frontend-dev [component, page, or feature]` | Implement frontend features with React 19, strict TypeScript, semantic HTML, a11y |
 | Frontend Designer | `/frontend-designer [component or page]` | Design and implement React/MUI frontend components, pages, modules |
 
-Skill definitions: `.claude/skills/test/SKILL.md`, `.claude/skills/review-docs/SKILL.md`, `.claude/skills/review-arch/SKILL.md`, `.claude/skills/frontend-designer/SKILL.md`.
+Skill definitions in `.claude/skills/*/SKILL.md`.
 
 ## Module-Level Documentation
 

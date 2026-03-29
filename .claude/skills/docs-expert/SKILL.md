@@ -17,6 +17,8 @@ You are the sole owner of the ADP documentation website. You know VitePress insi
 website/
 ├── .vitepress/
 │   ├── config.ts                    # Main VitePress config (locales, nav, sidebar, search, sitemap)
+│   ├── plugins/
+│   │   └── llms-txt.ts             # buildEnd hook: generates llms.txt + llms-full.txt in dist/
 │   └── theme/
 │       ├── index.ts                 # Theme entry: extends DefaultTheme, registers Vue components
 │       ├── style.css                # Brand styles: colors, fonts, dark mode, blog, animations
@@ -297,9 +299,22 @@ All registered globally in `theme/index.ts` via `app.component()`:
 ```bash
 cd website
 npm run dev        # Local dev server with HMR
-npm run build      # Production build to .vitepress/dist/
+npm run build      # Production build to .vitepress/dist/ + generates llms.txt, llms-full.txt
 npm run preview    # Preview production build locally
 ```
+
+## llms.txt Generation
+
+`buildEnd` hook in `.vitepress/plugins/llms-txt.ts` auto-generates two files in `dist/`:
+
+| File | Content | Source |
+|------|---------|--------|
+| `llms.txt` | Concise TOC with section links | English sidebar config |
+| `llms-full.txt` | All English docs concatenated (frontmatter/Vue stripped) | English markdown files |
+
+No manual maintenance — both regenerate on every build. Only English pages are included.
+
+When adding/removing pages, the sidebar config is the single source of truth. Any page in the sidebar will appear in llms.txt. Use `/review-llms-txt` to verify output after changes.
 
 ## Content Quality Rules
 
