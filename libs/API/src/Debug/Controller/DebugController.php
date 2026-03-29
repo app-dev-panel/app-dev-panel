@@ -106,13 +106,12 @@ final class DebugController
     public function eventStream(ServerRequestInterface $request): ResponseInterface
     {
         $storage = $this->storage;
-        $compareFunction = static function () use ($storage) {
+        $compareFunction = static function () use ($storage): string {
             $read = $storage->read(StorageInterface::TYPE_SUMMARY, null);
             return md5(json_encode($read, JSON_THROW_ON_ERROR));
         };
         $hash = $compareFunction();
-        $maxRetries = 30;
-        $retries = 0;
+        $deadline = time() + 60;
 
         return $this->psrResponseFactory
             ->createResponse()
@@ -122,29 +121,21 @@ final class DebugController
             ->withBody(new ServerSentEventsStream(static function (array &$buffer) use (
                 $compareFunction,
                 &$hash,
-                &$retries,
-                $maxRetries,
-            ) {
+                $deadline,
+            ): bool {
+                if (time() > $deadline) {
+                    return false;
+                }
+
                 $newHash = $compareFunction();
 
                 if ($hash !== $newHash) {
-                    $response = [
+                    $buffer[] = json_encode([
                         'type' => 'debug-updated',
                         'payload' => [],
-                    ];
-
-                    $buffer[] = json_encode($response);
+                    ]);
                     $hash = $newHash;
                 }
-
-                if (connection_aborted()) {
-                    return false;
-                }
-                if ($retries++ > $maxRetries) {
-                    return false;
-                }
-
-                usleep(500_000);
 
                 return true;
             }));
