@@ -10,6 +10,7 @@ use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriberCollectors;
+use AppDevPanel\Adapter\Symfony\EventSubscriber\SecuritySubscriber;
 use AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
@@ -345,6 +346,18 @@ final class AppDevPanelExtension extends Extension
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
+
+        // Security subscriber — only when symfony/security-http is available and collector is enabled
+        if (
+            $container->has(SecurityCollector::class)
+            && class_exists(\Symfony\Component\Security\Http\Event\LoginSuccessEvent::class)
+        ) {
+            $container
+                ->register(SecuritySubscriber::class, SecuritySubscriber::class)
+                ->setArguments([new Reference(SecurityCollector::class)])
+                ->addTag('kernel.event_subscriber')
+                ->setPublic(false);
+        }
     }
 
     private function registerApiServices(ContainerBuilder $container, array $config): void

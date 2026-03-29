@@ -12,6 +12,7 @@ use AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener;
 use AppDevPanel\Adapter\Laravel\EventListener\HttpClientListener;
 use AppDevPanel\Adapter\Laravel\EventListener\MailListener;
 use AppDevPanel\Adapter\Laravel\EventListener\QueueListener;
+use AppDevPanel\Adapter\Laravel\EventListener\SecurityListener;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelConfigProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider;
@@ -711,6 +712,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 continue;
             }
             $listener = new $listenerClass(fn() => $this->app->make($collectorClass));
+            $listener->register($events);
+        }
+
+        if ($collectors['security'] ?? true) {
+            $listener = new SecurityListener(fn() => $this->app->make(SecurityCollector::class));
             $listener->register($events);
         }
 

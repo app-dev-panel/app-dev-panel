@@ -624,6 +624,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         $this->registerApplicationListeners($app);
         $this->registerCollectorProfiling($app);
+        $this->registerSecurityListeners($app);
     }
 
     private function registerApplicationListeners(Application $app): void
@@ -703,6 +704,31 @@ class Module extends \yii\base\Module implements BootstrapInterface
         if ($logCollector instanceof LogCollector) {
             $this->registerDebugLogTarget($logCollector);
         }
+    }
+
+    private function registerSecurityListeners(Application $app): void
+    {
+        $securityCollector = $this->getCollector(SecurityCollector::class);
+        if (!$securityCollector instanceof SecurityCollector) {
+            return;
+        }
+
+        if (!$app instanceof WebApplication) {
+            return;
+        }
+
+        $listener = new \AppDevPanel\Adapter\Yii2\EventListener\SecurityListener($securityCollector);
+        $listener->register();
+
+        // Collect current user after request initialization
+        Event::on(WebApplication::class, WebApplication::EVENT_BEFORE_REQUEST, static function () use (
+            $app,
+            $listener,
+        ): void {
+            if ($app->has('user')) {
+                $listener->collectCurrentUser($app->getUser());
+            }
+        });
     }
 
     private function hookErrorHandler(WebApplication $app, WebListener $listener): void
