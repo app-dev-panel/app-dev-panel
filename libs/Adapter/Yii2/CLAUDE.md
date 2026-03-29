@@ -24,6 +24,10 @@ src/
 ├── Collector/
 │   ├── DbProfilingTarget.php                  # Yii 2 log target feeding Kernel DatabaseCollector
 │   └── DebugLogTarget.php                     # Real-time log target feeding LogCollector
+├── Proxy/
+│   ├── I18NProxy.php                          # Extends yii\i18n\I18N, feeds TranslatorCollector
+│   ├── RouterMatchRecorder.php                # Records route matching data
+│   └── UrlRuleProxy.php                       # Wraps UrlRule for route profiling
 ├── Inspector/
 │   ├── Yii2ConfigProvider.php                 # Components, params, modules, events for inspector
 │   ├── Yii2DbSchemaProvider.php               # Database schema via yii\db\Schema
@@ -69,6 +73,8 @@ It registers the `debug-panel` module if enabled (auto-enables in YII_DEBUG mode
             'db' => true,
             'mailer' => true,
             'assets' => true,
+            'translator' => true,
+            'security' => true,
         ],
         'ignoredRequests' => ['/debug/api/**', '/inspect/api/**'],
         'ignoredCommands' => ['help', 'list', 'cache/*', 'asset/*'],
@@ -189,6 +195,8 @@ Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: n
 | `DatabaseCollector` | `DbProfilingTarget` (Yii Logger) | SQL queries, params, row count, execution time |
 | `MailerCollector` | `BaseMailer::EVENT_AFTER_SEND` (normalized in Module) | From, to, cc, bcc, subject, body, charset |
 | `AssetBundleCollector` | `View::EVENT_END_PAGE` (normalized in Module) | Asset bundles: class, source/base paths, CSS/JS files, dependencies |
+| `TranslatorCollector` | `I18NProxy` replacing `Yii::$app->i18n` | Translation lookups, missing translations |
+| `SecurityCollector` | `SecurityListener` on `User::EVENT_AFTER_LOGIN/LOGOUT` | Auth events: login, logout, user identity |
 
 ## Architecture Comparison: Symfony vs Yii 2
 

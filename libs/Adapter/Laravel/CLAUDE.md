@@ -26,7 +26,8 @@ src/
 │   ├── SecurityListener.php                    # Authenticated/Login/Logout/Failed → SecurityCollector
 │   └── ConsoleListener.php                     # CommandStarting/CommandFinished → Debugger lifecycle
 ├── Proxy/
-│   └── LaravelEventDispatcherProxy.php         # Wraps Illuminate\Contracts\Events\Dispatcher
+│   ├── LaravelEventDispatcherProxy.php         # Wraps Illuminate\Contracts\Events\Dispatcher
+│   └── LaravelTranslatorProxy.php              # Wraps Illuminate\Contracts\Translation\Translator
 ├── Collector/
 │   └── RouterDataExtractor.php                 # Extracts route data from Laravel router
 ├── Inspector/
@@ -109,6 +110,7 @@ Wires in `boot()`:
 | `Psr\Log\LoggerInterface` | `LoggerInterfaceProxy` | `$app->extend()` |
 | `Psr\Http\Client\ClientInterface` | `HttpClientInterfaceProxy` | `$app->extend()` |
 | `events` (event dispatcher) | `LaravelEventDispatcherProxy` | `$app->extend()` |
+| `translator` | `LaravelTranslatorProxy` | `$app->extend()` |
 
 **VarDumper:**
 - Custom handler registered via `VarDumper::setHandler()` in `DebugMiddleware`
@@ -162,6 +164,8 @@ return [
         'queue' => true,
         'validator' => true,
         'router' => true,
+        'translator' => true,
+        'security' => true,
     ],
     'ignored_requests' => ['/debug/api/**', '/inspect/api/**'],
     'ignored_commands' => ['completion', 'help', 'list', 'debug:*', 'cache:*'],
