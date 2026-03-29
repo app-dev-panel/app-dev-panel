@@ -1,5 +1,5 @@
 ---
-name: test
+name: testing-expert
 description: Write tests for new or modified PHP code. Use after implementing features or fixes to ensure test coverage. Follows project conventions — inline mocks, AbstractCollectorTestCase for collectors, strict assertions, data providers via attributes.
 argument-hint: "[file or class to test]"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Agent
