@@ -77,12 +77,18 @@ export default defineConfig({
                             collapsed: false,
                             items: [
                                 { text: 'Collectors', link: '/guide/collectors' },
-                                { text: 'Redis', link: '/guide/redis' },
                                 { text: 'Storage', link: '/guide/storage' },
                                 { text: 'Proxies', link: '/guide/proxies' },
                                 { text: 'Elasticsearch', link: '/guide/elasticsearch' },
                                 { text: 'Data Flow', link: '/guide/data-flow' },
                                 { text: 'Security & Authorization', link: '/guide/security' },
+                            ],
+                        },
+                        {
+                            text: 'Collector Guides',
+                            collapsed: false,
+                            items: [
+                                { text: 'Redis', link: '/guide/redis' },
                             ],
                         },
                         {
@@ -170,12 +176,18 @@ export default defineConfig({
                             collapsed: false,
                             items: [
                                 { text: 'Коллекторы', link: '/ru/guide/collectors' },
-                                { text: 'Redis', link: '/ru/guide/redis' },
                                 { text: 'Хранилище', link: '/ru/guide/storage' },
                                 { text: 'Прокси', link: '/ru/guide/proxies' },
                                 { text: 'Elasticsearch', link: '/ru/guide/elasticsearch' },
                                 { text: 'Поток данных', link: '/ru/guide/data-flow' },
                                 { text: 'Безопасность и авторизация', link: '/ru/guide/security' },
+                            ],
+                        },
+                        {
+                            text: 'Руководства по коллекторам',
+                            collapsed: false,
+                            items: [
+                                { text: 'Redis', link: '/ru/guide/redis' },
                             ],
                         },
                         {

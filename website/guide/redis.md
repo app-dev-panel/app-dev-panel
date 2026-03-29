@@ -8,11 +8,15 @@ The `RedisCollector` captures all Redis commands executed during a request — S
 
 ## What It Captures
 
-- **Command**: name, arguments, return value
-- **Timing**: execution duration in seconds
-- **Errors**: error message when a command fails
-- **Connection**: which Redis connection was used
-- **Source**: file and line where the command was called
+| Field | Description |
+|-------|-------------|
+| `connection` | Redis connection name (e.g., `default`, `cache`) |
+| `command` | Command name (e.g., `SET`, `GET`, `DEL`) |
+| `arguments` | Command arguments array |
+| `result` | Return value |
+| `duration` | Execution time in seconds |
+| `error` | Error message (or `null` on success) |
+| `line` | Source file and line (optional) |
 
 ## Data Schema
 
@@ -50,7 +54,7 @@ The `RedisCollector` captures all Redis commands executed during a request — S
 
 ## How It Works
 
-The collector is **framework-agnostic**. It accepts normalized data via `logCommand()`:
+The collector is framework-agnostic. It accepts normalized data via `logCommand()`:
 
 ```php
 use AppDevPanel\Kernel\Collector\RedisCollector;
@@ -67,19 +71,23 @@ $collector->logCommand(new RedisCommandRecord(
 ));
 ```
 
-Framework adapters are responsible for intercepting Redis calls and feeding data to the collector.
+::: info
+`RedisCollector` implements `SummaryCollectorInterface` and uses `CollectorTrait` for the standard lifecycle methods. It depends on `TimelineCollector` for cross-collector timeline integration.
+:::
+
+Framework adapters are responsible for intercepting Redis calls and feeding data to the collector. There is no PSR standard for Redis, so each framework uses its own interception mechanism.
 
 ## Framework Integration
 
 ### Laravel
 
-Laravel is the simplest — it provides `Redis::listen()` out of the box:
+Laravel provides `Redis::listen()` out of the box — no decorator needed:
 
 ```php
 use Illuminate\Redis\Events\CommandExecuted;
 use Illuminate\Support\Facades\Redis;
 
-// In your AppDevPanelServiceProvider
+// In your service provider
 Redis::enableEvents();
 Redis::listen(function (CommandExecuted $event) {
     app(RedisCollector::class)->logCommand(new RedisCommandRecord(
@@ -91,6 +99,10 @@ Redis::listen(function (CommandExecuted $event) {
     ));
 });
 ```
+
+::: tip
+Laravel's `CommandExecuted` event does not expose the command result. If you need result tracking, use a phpredis decorator instead.
+:::
 
 ### Symfony
 
@@ -165,10 +177,9 @@ final class TrackedRedis
 
 :::
 
-Register as a Symfony service decorator:
+Register the phpredis decorator in `services.yaml`:
 
 ```yaml
-# services.yaml
 App\Redis\TrackedRedis:
     decorates: Redis
     arguments:
@@ -196,7 +207,7 @@ return [
 ];
 ```
 
-Add to the collectors list in `config/params.php`:
+Add to collectors list in `config/params.php`:
 
 ```php
 'app-dev-panel' => [
@@ -228,22 +239,26 @@ Event::on(Connection::class, Connection::EVENT_AFTER_EXECUTE, function ($event) 
 
 ## Redis Inspector
 
-ADP also provides a **live Redis inspector** at `/inspector/redis` with two tabs:
+ADP provides a live Redis inspector at `/inspector/redis`. See the full endpoint reference in [Inspector API](/api/inspector#redis).
 
-**Keys** — browse, search, view, and delete Redis keys:
-- Pattern-based search (e.g., `user:*`)
+**Keys tab** — browse, search, view, and delete Redis keys:
+- Pattern-based search (e.g., `user:*`) using Redis SCAN
 - Type-aware value display (string, list, set, zset, hash, stream)
-- TTL information
+- TTL information for each key
 - Delete individual keys or flush the entire database
 
-**Server Info** — full Redis server information from the `INFO` command.
+**Server Info tab** — full Redis server information from the `INFO` command.
 
-The inspector requires `\Redis` (phpredis extension) registered in the DI container.
+::: warning
+The inspector requires `\Redis` (phpredis extension) registered in the DI container. It does not support Predis for live inspection.
+:::
 
-## Frontend Panel
+## Debug Panel
 
-The debug panel shows Redis data with:
-- **Summary cards**: total commands, total time, error count, connections
-- **Connection breakdown**: per-connection statistics (when multiple connections are used)
-- **Command list**: filterable, with expandable details for each command
-- **Color coding**: read commands (blue), write commands (green), delete commands (yellow), errors (red)
+The debug panel shows Redis data collected during a request:
+
+- **Summary cards** — total commands, total time, error count, connections
+- **Connection breakdown** — per-connection statistics when multiple connections are used
+- **Filterable command list** — search by command name, connection, or arguments
+- **Expandable details** — arguments, result, error message, source location
+- **Color coding** — reads (blue), writes (green), deletes (yellow), errors (red)
