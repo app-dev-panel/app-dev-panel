@@ -92,6 +92,20 @@
 | POST | `/elasticsearch/search` | Выполнение поискового запроса по индексу |
 | POST | `/elasticsearch/query` | Выполнение произвольного запроса к Elasticsearch |
 
+## Redis
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| GET | `/redis/ping` | Проверка соединения с Redis |
+| GET | `/redis/info` | Информация о сервере (команда `INFO`, опционально `?section=`) |
+| GET | `/redis/db-size` | Количество ключей в текущей БД |
+| GET | `/redis/keys` | Просмотр ключей через SCAN (`?pattern=*&limit=100&cursor=0`) |
+| GET | `/redis/get` | Получение значения ключа (с учётом типа) с TTL |
+| DELETE | `/redis/delete` | Удаление ключа |
+| POST | `/redis/flush-db` | Очистка текущей базы данных |
+
+Требует `\Redis` (расширение phpredis) в DI-контейнере.
+
 ## MCP (интеграция с AI)
 
 | Метод | Путь | Описание |

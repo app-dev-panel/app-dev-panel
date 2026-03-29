@@ -21,6 +21,7 @@ title: Коллекторы
 | `AssetBundleCollector` | Зарегистрированные бандлы ассетов |
 | `CommandCollector` | Выполнение консольных команд |
 | `CacheCollector` | Операции кеша: get/set/delete |
+| [`RedisCollector`](/ru/guide/redis) | Redis-команды (SET, GET, DEL и др.) с таймингом |
 | `MailerCollector` | Отправленные email-сообщения |
 | `TimelineCollector` | События временной шкалы производительности |
 | `EnvironmentCollector` | Информация об окружении PHP и ОС |

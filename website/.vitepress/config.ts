@@ -77,6 +77,7 @@ export default defineConfig({
                             collapsed: false,
                             items: [
                                 { text: 'Collectors', link: '/guide/collectors' },
+                                { text: 'Redis', link: '/guide/redis' },
                                 { text: 'Storage', link: '/guide/storage' },
                                 { text: 'Proxies', link: '/guide/proxies' },
                                 { text: 'Elasticsearch', link: '/guide/elasticsearch' },
@@ -169,6 +170,7 @@ export default defineConfig({
                             collapsed: false,
                             items: [
                                 { text: 'Коллекторы', link: '/ru/guide/collectors' },
+                                { text: 'Redis', link: '/ru/guide/redis' },
                                 { text: 'Хранилище', link: '/ru/guide/storage' },
                                 { text: 'Прокси', link: '/ru/guide/proxies' },
                                 { text: 'Elasticsearch', link: '/ru/guide/elasticsearch' },

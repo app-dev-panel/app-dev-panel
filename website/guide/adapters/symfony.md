@@ -51,7 +51,7 @@ app_dev_panel:
 
 ## Collectors
 
-Supports all Kernel collectors plus Symfony-specific ones: Twig templates, Security (user/roles/firewall), Cache, Messenger, and Doctrine database queries.
+Supports all Kernel collectors plus Symfony-specific ones: Twig templates, Security (user/roles/firewall), Cache, Messenger, Doctrine database queries, and [Redis commands](/guide/redis) (via Predis plugin or phpredis decorator).
 
 ## Database Inspector
 

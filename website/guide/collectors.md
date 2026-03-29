@@ -21,6 +21,7 @@ Collectors are the core data-gathering mechanism in ADP. Each collector implemen
 | `AssetBundleCollector` | Registered frontend asset bundles |
 | `CommandCollector` | Console command executions |
 | `CacheCollector` | Cache get/set/delete operations |
+| [`RedisCollector`](/guide/redis) | Redis commands (SET, GET, DEL, etc.) with timing |
 | `MailerCollector` | Sent email messages |
 | `TimelineCollector` | Performance timeline events |
 | `EnvironmentCollector` | PHP and OS environment info |
