@@ -45,8 +45,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │           └── sdk/                  # Shared SDK (components, API clients, helpers)
 ├── website/                       # VitePress documentation site (source of truth for user-facing docs)
 │   ├── .vitepress/
-│   │   ├── config.ts             # VitePress config (sidebar, nav, locales, buildEnd hook)
-│   │   ├── plugins/llms-txt.ts   # buildEnd hook: generates llms.txt + llms-full.txt in dist/
+│   │   ├── config.ts             # VitePress config (sidebar, nav, locales, vitepress-plugin-llms)
 │   │   └── theme/                # Custom theme (blog components, styles)
 │   ├── guide/                    # User-facing guides (EN)
 │   ├── api/                      # API reference docs (EN)
@@ -371,14 +370,15 @@ npm run build                       # Build site + generate llms.txt, llms-full.
 
 ### llms.txt Generation
 
-`buildEnd` hook in `website/.vitepress/plugins/llms-txt.ts` auto-generates two files in `dist/`:
+[`vitepress-plugin-llms`](https://github.com/okineadev/vitepress-plugin-llms) auto-generates files in `dist/` at build time:
 
-| File | Content | Source |
-|------|---------|--------|
-| `llms.txt` | Concise TOC with section links | Sidebar config in `config.ts` |
-| `llms-full.txt` | All docs concatenated (frontmatter/Vue stripped) | English markdown files |
+| File | Content |
+|------|---------|
+| `llms.txt` | Concise TOC with links to per-page `.md` files |
+| `llms-full.txt` | All docs concatenated (frontmatter/Vue/HTML stripped via remark AST) |
+| `*.md` (per-page) | Clean markdown copy alongside each `.html` page |
 
-No manual maintenance — both files regenerate on every build from the same markdown sources that produce the HTML site.
+Configured in `website/.vitepress/config.ts` under `vite.plugins`. Russian pages excluded via `ignoreFiles: ['ru/**']`.
 
 ### Documentation Scope
 

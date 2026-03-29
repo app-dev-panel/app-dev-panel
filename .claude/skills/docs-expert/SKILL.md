@@ -16,9 +16,7 @@ You are the sole owner of the ADP documentation website. You know VitePress insi
 ```
 website/
 ├── .vitepress/
-│   ├── config.ts                    # Main VitePress config (locales, nav, sidebar, search, sitemap)
-│   ├── plugins/
-│   │   └── llms-txt.ts             # buildEnd hook: generates llms.txt + llms-full.txt in dist/
+│   ├── config.ts                    # Main VitePress config (locales, nav, sidebar, search, sitemap, llms plugin)
 │   └── theme/
 │       ├── index.ts                 # Theme entry: extends DefaultTheme, registers Vue components
 │       ├── style.css                # Brand styles: colors, fonts, dark mode, blog, animations
@@ -305,16 +303,21 @@ npm run preview    # Preview production build locally
 
 ## llms.txt Generation
 
-`buildEnd` hook in `.vitepress/plugins/llms-txt.ts` auto-generates two files in `dist/`:
+[`vitepress-plugin-llms`](https://github.com/okineadev/vitepress-plugin-llms) generates files in `dist/` at build time:
 
-| File | Content | Source |
-|------|---------|--------|
-| `llms.txt` | Concise TOC with section links | English sidebar config |
-| `llms-full.txt` | All English docs concatenated (frontmatter/Vue stripped) | English markdown files |
+| File | Content |
+|------|---------|
+| `llms.txt` | Concise TOC with links to per-page `.md` files |
+| `llms-full.txt` | All docs concatenated (frontmatter/Vue/HTML stripped via remark AST) |
+| `*.md` (per-page) | Clean markdown copy alongside each `.html` page |
 
-No manual maintenance — both regenerate on every build. Only English pages are included.
+Configured in `config.ts` under `vite.plugins`. Russian pages excluded via `ignoreFiles: ['ru/**']`.
 
-When adding/removing pages, the sidebar config is the single source of truth. Any page in the sidebar will appear in llms.txt. Use `/review-llms-txt` to verify output after changes.
+**Content control tags** (use in any markdown page):
+- `<llm-only>content</llm-only>` — content appears only in LLM output, not on the HTML site
+- `<llm-exclude>content</llm-exclude>` — content appears on the HTML site but excluded from LLM output
+
+Use `/review-llms-txt` to verify output after changes.
 
 ## Content Quality Rules
 

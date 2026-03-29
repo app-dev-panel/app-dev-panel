@@ -1,6 +1,6 @@
 ---
 name: review-llms-txt
-description: "Review and regenerate llms.txt after documentation changes. Verifies the VitePress buildEnd hook produces correct llms.txt and llms-full.txt from sidebar config and markdown sources."
+description: "Review and regenerate llms.txt after documentation changes. Verifies vitepress-plugin-llms produces correct llms.txt, llms-full.txt, and per-page .md files."
 argument-hint: "[optional: specific concern or check]"
 allowed-tools: Read, Edit, Bash, Grep, Glob
 ---
@@ -13,91 +13,102 @@ You maintain the llms.txt generation pipeline for the ADP documentation site.
 
 ## What llms.txt Is
 
-Two files auto-generated at VitePress build time into `website/.vitepress/dist/`:
+Files auto-generated at VitePress build time into `website/.vitepress/dist/` by [`vitepress-plugin-llms`](https://github.com/okineadev/vitepress-plugin-llms):
 
 | File | Content | Spec |
 |------|---------|------|
-| `llms.txt` | Concise TOC — H1, blockquote summary, H2 sections with `- [Title](URL)` links | https://llmstxt.org/ |
-| `llms-full.txt` | All English docs concatenated, frontmatter/Vue stripped | Full context for large-window LLMs |
+| `llms.txt` | Concise TOC with `- [Title](URL)` links to per-page `.md` files | https://llmstxt.org/ |
+| `llms-full.txt` | All English docs concatenated, cleaned via remark AST | Full context for large-window LLMs |
+| `*.md` (per-page) | Clean markdown copy alongside each `.html` page | Individual page access |
 
 ## Source of Truth
 
 ```
-website/.vitepress/plugins/llms-txt.ts    # buildEnd hook (generator)
-website/.vitepress/config.ts              # sidebar config → sections and links
+website/.vitepress/config.ts              # Plugin config under vite.plugins
 website/guide/*.md                        # English docs → content
 website/api/*.md                          # English API docs → content
 ```
 
-Russian pages (`website/ru/`) are excluded — only English content goes into llms.txt.
+Russian pages (`website/ru/`) are excluded via `ignoreFiles: ['ru/**']`.
 
-## Generator Architecture
+## Plugin Configuration
 
-`generateLlmsTxt(siteConfig)` runs as VitePress `buildEnd` hook:
+In `website/.vitepress/config.ts`:
 
-1. Reads English sidebar from `siteConfig.site.locales.root.themeConfig.sidebar`
-2. Extracts section groups via `collectSections()` (H2 = group `text`, links = child items)
-3. **llms.txt**: Writes H1 + blockquote + sections with `- [text](siteUrl + link)` entries
-4. **llms-full.txt**: For each unique link, reads source `.md`, strips frontmatter/Vue/containers via `cleanMarkdown()`, concatenates with `---` separators
+```typescript
+import llmstxt from 'vitepress-plugin-llms';
 
-### cleanMarkdown() strips
+export default defineConfig({
+    vite: {
+        plugins: [
+            llmstxt({
+                ignoreFiles: ['ru/**'],
+                domain: 'https://app-dev-panel.github.io',
+            }),
+        ],
+    },
+});
+```
 
-- YAML frontmatter (via `gray-matter`)
-- `<script setup>` blocks
-- Self-closing Vue components (`<Component />`)
-- Vue component blocks (`<Component>...</Component>`)
-- VitePress containers (`:::`)
-- Excess blank lines
+## Content Control Tags
+
+Use in any markdown page:
+- `<llm-only>content</llm-only>` — content appears only in LLM output, not on HTML site
+- `<llm-exclude>content</llm-exclude>` — content appears on HTML site but excluded from LLM output
+
+## Plugin Architecture
+
+Operates as two Vite plugins (`enforce: 'pre'` + `enforce: 'post'`):
+
+1. **Transform phase**: collects all `.md` files, strips `<llm-only>`/`<llm-exclude>` tags, injects hidden LLM hints on HTML pages
+2. **generateBundle phase** (client build only): processes collected markdown through remark pipeline (strips frontmatter, HTML, Vue components), generates `llms.txt`, `llms-full.txt`, and per-page `.md` files
 
 ## Review Checklist
 
-### 1. Sidebar Completeness
-Every page in `website/guide/` and `website/api/` must appear in the English sidebar in `config.ts`. Orphan pages (exist on disk but not in sidebar) will be missing from llms.txt.
-
-```bash
-# Find orphan pages
-comm -23 \
-  <(find website/guide website/api -name '*.md' -not -path '*/ru/*' | sed 's|website/||;s|\.md$||;s|/index$||' | sort) \
-  <(grep -oP "link: '/[^']*'" website/.vitepress/config.ts | sed "s|link: '||;s|'||" | sort)
-```
-
-### 2. Build Succeeds
+### 1. Build Succeeds
 ```bash
 cd website && npm run build
 ```
-Must print `[llms-txt] Generated llms.txt` and `[llms-txt] Generated llms-full.txt`.
+Must print `Generated llms.txt` and `Generated llms-full.txt` with file counts.
 
-### 3. Output Validation
+### 2. Output Validation
 
 **llms.txt format:**
-- Starts with `# Application Development Panel (ADP)`
-- Has `>` blockquote summary
-- Has `## Section` headings matching sidebar groups
+- Starts with `# ADP`
+- Has `>` blockquote description
+- Has `## Table of Contents` with all page links
 - Links use full site URL (`https://app-dev-panel.github.io/app-dev-panel/...`)
-- No empty sections
+- Links point to `.md` files (not `.html`)
+- No Russian pages included
 
 **llms-full.txt content:**
-- Starts with same H1 + blockquote
-- Contains all page content (check page count matches sidebar link count)
-- No frontmatter (`---\ntitle:...`) remnants
+- Contains all English page content
+- No frontmatter remnants
 - No `<script setup>` or Vue component tags
-- No `:::` container markers
-- Pages separated by `---`
+- No raw HTML tags (stripped by plugin)
+- File count matches llms.txt link count
 
-### 4. URL Correctness
-Site URL is derived from `sitemap.hostname` in config. Currently: `https://app-dev-panel.github.io/app-dev-panel`
+**Per-page .md files:**
+- Exist alongside `.html` files in dist
+- Clean markdown, no frontmatter
 
-### 5. cleanMarkdown Quality
-Check edge cases:
-- Blog posts with `<BlogPost>` wrapper → must be stripped
-- Code groups (`::: code-group`) → `:::` markers stripped, code blocks preserved
-- Nested containers → all `:::` lines removed
-- Vue `<script setup>` with multiline imports → fully removed
+### 3. URL Correctness
+Domain from plugin config + VitePress `base`. Currently: `https://app-dev-panel.github.io` + `/app-dev-panel/`.
+
+### 4. Page Coverage
+All English pages should be included (except index.md and blog pages which are excluded by default):
+```bash
+# Count source pages (excluding ru/ and index.md)
+find website/guide website/api -name '*.md' -not -path '*/ru/*' | wc -l
+
+# Compare with plugin output
+grep -c '^\- \[' website/.vitepress/dist/llms.txt
+```
 
 ## After Review
 
-1. If sidebar has new pages not reflected in llms.txt output — no code change needed, just rebuild
-2. If `cleanMarkdown()` misses patterns — edit `website/.vitepress/plugins/llms-txt.ts`
-3. Run `cd website && npm run build` to verify
-4. Check generated files: `cat website/.vitepress/dist/llms.txt` and `wc -l website/.vitepress/dist/llms-full.txt`
-5. Report: sections found, pages included, any orphans or stripping issues
+1. Run `cd website && npm run build` to verify
+2. Check generated files: `cat website/.vitepress/dist/llms.txt` and `wc -l website/.vitepress/dist/llms-full.txt`
+3. If content control is needed — use `<llm-only>` / `<llm-exclude>` tags in source markdown
+4. If plugin config needs changes — edit `vite.plugins` in `website/.vitepress/config.ts`
+5. Report: pages included, token count, any missing pages or stripping issues

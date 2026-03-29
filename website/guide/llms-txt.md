@@ -14,12 +14,15 @@ llms.txt is an open standard proposed by Jeremy Howard (fast.ai). It provides a 
 
 | File | URL | Content |
 |------|-----|---------|
-| `llms.txt` | [/llms.txt](/llms.txt) | Concise table of contents with links to each documentation page |
+| `llms.txt` | [/llms.txt](/llms.txt) | Concise table of contents with links to per-page `.md` files |
 | `llms-full.txt` | [/llms-full.txt](/llms-full.txt) | All documentation pages concatenated into a single file |
+| `*.md` (per-page) | e.g. [/guide/collectors.md](/guide/collectors.md) | Clean markdown for any individual page |
 
-**`llms.txt`** is a lightweight index — section headings and links. Use it when your AI tool has limited context or you need a quick overview.
+**`llms.txt`** is a lightweight index — titles and links. Use it when your AI tool has limited context or you need a quick overview.
 
-**`llms-full.txt`** contains the complete documentation in one file. Use it when your AI tool has a large context window and you want comprehensive answers.
+**`llms-full.txt`** contains the complete documentation in one file (~13K tokens). Use it when your AI tool has a large context window and you want comprehensive answers.
+
+**Per-page `.md` files** are available for every documentation page. Use them when you need information about a specific topic without loading the entire documentation.
 
 ## How to Use
 
@@ -75,12 +78,15 @@ Content stays in sync automatically — when a documentation page is updated, th
 
 ## How It Works
 
-The generation pipeline is a VitePress `buildEnd` hook:
+Powered by [`vitepress-plugin-llms`](https://github.com/okineadev/vitepress-plugin-llms) — the same plugin used by Vite, Vue.js, and Vitest.
 
-1. Reads the sidebar configuration from `config.ts`
-2. For `llms.txt` — outputs section headings and links
-3. For `llms-full.txt` — reads each linked markdown file, strips frontmatter and Vue components, concatenates with `---` separators
+The plugin operates as a Vite plugin during the build:
 
-Only English pages are included. Russian translations are not part of the llms.txt output.
+1. **Collects** all markdown files during Vite's transform phase
+2. **Cleans** content via remark AST — strips frontmatter, HTML, Vue components
+3. **Generates** `llms.txt` (TOC), `llms-full.txt` (concatenated), and per-page `.md` files
+4. **Injects** hidden hints on HTML pages pointing LLMs to the `.md` versions
 
-Source: [`website/.vitepress/plugins/llms-txt.ts`](https://github.com/app-dev-panel/app-dev-panel/blob/master/website/.vitepress/plugins/llms-txt.ts)
+Only English pages are included. Russian translations are excluded via `ignoreFiles: ['ru/**']`.
+
+Source: [plugin config in `config.ts`](https://github.com/app-dev-panel/app-dev-panel/blob/master/website/.vitepress/config.ts)
