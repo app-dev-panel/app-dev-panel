@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {
     useDeleteRedisKeyMutation,
     useFlushRedisDbMutation,
@@ -143,8 +142,6 @@ export const RedisPage = () => {
         keysQuery.refetch();
         dbSizeQuery.refetch();
     }, [flushDbMutation, keysQuery, dbSizeQuery]);
-
-    useBreadcrumbs(() => ['Inspector', 'Redis']);
 
     const isConnected = pingQuery.isSuccess && !pingQuery.data?.error;
     const isLoading = pingQuery.isLoading || dbSizeQuery.isLoading;
