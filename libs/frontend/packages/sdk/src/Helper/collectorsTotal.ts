@@ -40,7 +40,7 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
         case CollectorsMap.CacheCollector:
             return Number(data.cache?.totalOperations);
         case CollectorsMap.FilesystemStreamCollector:
-            return Object.values(data.fs_stream ?? []).reduce((acc, value) => acc + value, 0);
+            return Object.values(data.fs_stream ?? []).reduce((acc, value) => acc + Number(value), 0);
         case CollectorsMap.ConsoleAppInfoCollector:
             return 0;
         case CollectorsMap.DeprecationCollector:
