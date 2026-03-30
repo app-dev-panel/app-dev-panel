@@ -4,7 +4,7 @@ variant = "loose"
 file = "config/reference.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Config\Loader\ParamConfigurator`.'
-count = 1599
+count = 1620
 
 [[issues]]
 file = "config/reference.php"
@@ -157,6 +157,30 @@ message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\
 count = 1
 
 [[issues]]
+file = "src/Controller/TestFixtures/CoverageAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CoverageAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CoverageAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CoverageAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/DatabaseAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`).'
@@ -229,6 +253,48 @@ message = 'Could not find definition for function `App\Controller\TestFixtures\d
 count = 1
 
 [[issues]]
+file = "src/Controller/TestFixtures/ElasticsearchAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\ElasticsearchCollector)`).'
+count = 3
+
+[[issues]]
+file = "src/Controller/TestFixtures/ElasticsearchAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ElasticsearchAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ElasticsearchAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\ElasticsearchRequestRecord` not found.'
+count = 3
+
+[[issues]]
+file = "src/Controller/TestFixtures/ElasticsearchAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ElasticsearchAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\ElasticsearchCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ElasticsearchAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/EventsAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\EventDispatcher\EventDispatcherInterface)`).'
@@ -274,6 +340,30 @@ count = 1
 file = "src/Controller/TestFixtures/ExceptionChainedAction.php"
 code = "non-existent-attribute-class"
 message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/FileStreamAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/FileStreamAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/FileStreamAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/FileStreamAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
 count = 1
 
 [[issues]]
@@ -625,6 +715,90 @@ message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\
 count = 1
 
 [[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\OpenTelemetryCollector)`).'
+count = 4
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\SpanRecord` not found.'
+count = 4
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\OpenTelemetryCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/RedisAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\RedisCollector)`).'
+count = 6
+
+[[issues]]
+file = "src/Controller/TestFixtures/RedisAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/RedisAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/RedisAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\RedisCommandRecord` not found.'
+count = 6
+
+[[issues]]
+file = "src/Controller/TestFixtures/RedisAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/RedisAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\RedisCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/RedisAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/RequestInfoAction.php"
 code = "never-return"
 message = "Cannot return value with type 'never' from this function."
@@ -775,6 +949,42 @@ message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\
 count = 1
 
 [[issues]]
+file = "src/Controller/TestFixtures/SecurityAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\AuthorizationCollector)`).'
+count = 9
+
+[[issues]]
+file = "src/Controller/TestFixtures/SecurityAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/SecurityAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/SecurityAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/SecurityAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\AuthorizationCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/SecurityAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/TimelineAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
@@ -808,6 +1018,42 @@ count = 1
 file = "src/Controller/TestFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/TranslatorAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Contracts\Translation\TranslatorInterface)`).'
+count = 4
+
+[[issues]]
+file = "src/Controller/TestFixtures/TranslatorAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/TranslatorAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/TranslatorAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/TranslatorAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/TranslatorAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Contracts\Translation\TranslatorInterface`.'
 count = 1
 
 [[issues]]

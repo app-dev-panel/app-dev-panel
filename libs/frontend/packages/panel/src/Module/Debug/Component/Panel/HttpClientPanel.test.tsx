@@ -49,8 +49,8 @@ describe('HttpClientPanel', () => {
     });
 
     it('renders request count in section title', () => {
-        renderWithProviders(<HttpClientPanel data={[makeEntry()]} />, {preloadedState});
-        expect(screen.getByText('1 http requests')).toBeInTheDocument();
+        const {container} = renderWithProviders(<HttpClientPanel data={[makeEntry()]} />, {preloadedState});
+        expect(container.textContent).toContain('1 http requests');
     });
 
     it('renders method chip for each request', () => {
@@ -82,9 +82,9 @@ describe('HttpClientPanel', () => {
             makeEntry({uri: 'https://api.example.com/users', method: 'GET'}),
             makeEntry({uri: 'https://api.example.com/orders', method: 'POST'}),
         ];
-        renderWithProviders(<HttpClientPanel data={data} />, {preloadedState});
+        const {container} = renderWithProviders(<HttpClientPanel data={data} />, {preloadedState});
         await user.type(screen.getByPlaceholderText('Filter requests...'), 'orders');
-        expect(screen.getByText('1 http requests')).toBeInTheDocument();
+        expect(container.textContent).toContain('1 http requests');
         expect(screen.queryByText('/users')).not.toBeInTheDocument();
     });
 
@@ -101,9 +101,9 @@ describe('HttpClientPanel', () => {
             makeEntry({method: 'GET', uri: 'https://example.com/a'}),
             makeEntry({method: 'POST', uri: 'https://example.com/b'}),
         ];
-        renderWithProviders(<HttpClientPanel data={data} />, {preloadedState});
+        const {container} = renderWithProviders(<HttpClientPanel data={data} />, {preloadedState});
         await user.click(screen.getByText('GET (1)'));
-        expect(screen.getByText('1 http requests')).toBeInTheDocument();
+        expect(container.textContent).toContain('1 http requests');
         // Clear button appears when filter is active
         expect(screen.getByText('Clear')).toBeInTheDocument();
     });

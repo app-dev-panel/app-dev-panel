@@ -3,6 +3,12 @@ variant = "loose"
 [[issues]]
 file = "app/Http/Controllers/HomeController.php"
 code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Translation\Translator)`).'
+count = 3
+
+[[issues]]
+file = "app/Http/Controllers/HomeController.php"
+code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
 count = 5
 
@@ -17,6 +23,12 @@ file = "app/Http/Controllers/HomeController.php"
 code = "non-existent-class"
 message = 'Class `Illuminate\Http\JsonResponse` not found.'
 count = 2
+
+[[issues]]
+file = "app/Http/Controllers/HomeController.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Translation\Translator`.'
+count = 1
 
 [[issues]]
 file = "app/Http/Controllers/HomeController.php"
@@ -103,6 +115,24 @@ message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Js
 count = 1
 
 [[issues]]
+file = "app/Http/Controllers/TestFixtures/CoverageAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/CoverageAction.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Http\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/CoverageAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+count = 1
+
+[[issues]]
 file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`).'
@@ -163,6 +193,42 @@ message = 'Could not find definition for function `App\Http\Controllers\TestFixt
 count = 1
 
 [[issues]]
+file = "app/Http/Controllers/TestFixtures/ElasticsearchAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\ElasticsearchCollector)`).'
+count = 3
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/ElasticsearchAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/ElasticsearchAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\ElasticsearchRequestRecord` not found.'
+count = 3
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/ElasticsearchAction.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Http\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/ElasticsearchAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\ElasticsearchCollector`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/ElasticsearchAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+count = 1
+
+[[issues]]
 file = "app/Http/Controllers/TestFixtures/EventsAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Events\Dispatcher)`).'
@@ -188,6 +254,24 @@ count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/EventsAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/FileStreamAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/FileStreamAction.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Http\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/FileStreamAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
@@ -487,6 +571,78 @@ message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInte
 count = 1
 
 [[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\OpenTelemetryCollector)`).'
+count = 4
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\SpanRecord` not found.'
+count = 4
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Http\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\OpenTelemetryCollector`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/RedisAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\RedisCollector)`).'
+count = 6
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/RedisAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/RedisAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\RedisCommandRecord` not found.'
+count = 6
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/RedisAction.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Http\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/RedisAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\RedisCollector`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/RedisAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+count = 1
+
+[[issues]]
 file = "app/Http/Controllers/TestFixtures/RequestInfoAction.php"
 code = "never-return"
 message = "Cannot return value with type 'never' from this function."
@@ -607,6 +763,36 @@ message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Js
 count = 1
 
 [[issues]]
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\AuthorizationCollector)`).'
+count = 9
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Http\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\AuthorizationCollector`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+count = 1
+
+[[issues]]
 file = "app/Http/Controllers/TestFixtures/TimelineAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
@@ -634,6 +820,36 @@ count = 1
 file = "app/Http/Controllers/TestFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/TranslatorAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Translation\Translator)`).'
+count = 4
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/TranslatorAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/TranslatorAction.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Http\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/TranslatorAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\Translation\Translator`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/TranslatorAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
 
 [[issues]]
@@ -814,7 +1030,7 @@ count = 1
 file = "routes/web.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Illuminate\Support\Facades\Route`.'
-count = 22
+count = 29
 
 [[issues]]
 file = "routes/web.php"

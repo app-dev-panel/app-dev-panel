@@ -70,7 +70,7 @@ count = 6
 file = "config/common/routes.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 47
+count = 61
 
 [[issues]]
 file = "config/common/routes.php"
@@ -82,7 +82,7 @@ count = 2
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Yiisoft\Router\Route`.'
-count = 20
+count = 27
 
 [[issues]]
 file = "config/common/routes.php"
@@ -409,6 +409,18 @@ message = "Property `$responseFactory` is never used."
 count = 1
 
 [[issues]]
+file = "src/Web/TestFixtures/CoverageAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\CoverageAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/CoverageAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
 file = "src/Web/TestFixtures/DatabaseAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\DatabaseAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -434,6 +446,24 @@ count = 1
 
 [[issues]]
 file = "src/Web/TestFixtures/DumpAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ElasticsearchAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\ElasticsearchAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ElasticsearchAction.php"
+code = "unused-property"
+message = "Property `$elasticsearchCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ElasticsearchAction.php"
 code = "unused-property"
 message = "Property `$responseFactory` is never used."
 count = 1
@@ -469,18 +499,6 @@ message = 'Class `App\Web\TestFixtures\ExceptionChainedAction` cannot implement 
 count = 1
 
 [[issues]]
-file = "src/Web/TestFixtures/FilesystemAction.php"
-code = "non-existent-class-like"
-message = 'Class `App\Web\TestFixtures\FilesystemAction` cannot implement unknown type `RequestHandlerInterface`'
-count = 1
-
-[[issues]]
-file = "src/Web/TestFixtures/FilesystemAction.php"
-code = "unused-property"
-message = "Property `$responseFactory` is never used."
-count = 1
-
-[[issues]]
 file = "src/Web/TestFixtures/FileStreamAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\FileStreamAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -488,6 +506,18 @@ count = 1
 
 [[issues]]
 file = "src/Web/TestFixtures/FileStreamAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/FilesystemAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\FilesystemAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/FilesystemAction.php"
 code = "unused-property"
 message = "Property `$responseFactory` is never used."
 count = 1
@@ -625,6 +655,42 @@ message = "Property `$responseFactory` is never used."
 count = 1
 
 [[issues]]
+file = "src/Web/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\OpenTelemetryAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/OpenTelemetryAction.php"
+code = "unused-property"
+message = "Property `$collector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/OpenTelemetryAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/RedisAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\RedisAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/RedisAction.php"
+code = "unused-property"
+message = "Property `$redisCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/RedisAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
 file = "src/Web/TestFixtures/RequestInfoAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\RequestInfoAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -685,6 +751,24 @@ message = "Property `$routerCollector` is never used."
 count = 1
 
 [[issues]]
+file = "src/Web/TestFixtures/SecurityAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\SecurityAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/SecurityAction.php"
+code = "unused-property"
+message = "Property `$authorizationCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/SecurityAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
 file = "src/Web/TestFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\TimelineAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -700,6 +784,24 @@ count = 1
 file = "src/Web/TestFixtures/TimelineAction.php"
 code = "unused-property"
 message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/TranslatorAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\TranslatorAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/TranslatorAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/TranslatorAction.php"
+code = "unused-property"
+message = "Property `$translatorCollector` is never used."
 count = 1
 
 [[issues]]

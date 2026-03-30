@@ -112,8 +112,10 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
     {
         \pcov\stop();
 
+        $filter = $this->includePaths !== [] ? $this->includePaths : ['.'];
+
         /** @var array<string, array<int, int>> */
-        return \pcov\collect(\pcov\inclusive, $this->includePaths !== [] ? $this->includePaths[0] : '.');
+        return \pcov\collect(\pcov\inclusive, $filter);
     }
 
     /**

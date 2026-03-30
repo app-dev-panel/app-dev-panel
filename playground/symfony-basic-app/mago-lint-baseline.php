@@ -1,6 +1,24 @@
 variant = "loose"
 
 [[issues]]
+file = "config/reference.php"
+code = "inline-variable-return"
+message = "Variable assignment can be inlined into the return statement."
+count = 1
+
+[[issues]]
+file = "config/reference.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CoverageAction.php"
+code = "prefer-static-closure"
+message = "This arrow function does not use `$this` and should be declared static."
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/DumpAction.php"
 code = "no-debug-symbols"
 message = "Do not commit debug functions."

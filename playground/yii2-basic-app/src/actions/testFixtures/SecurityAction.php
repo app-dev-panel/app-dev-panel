@@ -18,7 +18,11 @@ final class SecurityAction extends Action
         $authorizationCollector = $module->getCollector(AuthorizationCollector::class);
 
         if ($authorizationCollector === null) {
-            return ['fixture' => 'security:basic', 'status' => 'error', 'message' => 'AuthorizationCollector not found'];
+            return [
+                'fixture' => 'security:basic',
+                'status' => 'error',
+                'message' => 'AuthorizationCollector not found',
+            ];
         }
 
         $authorizationCollector->collectUser('admin@example.com', ['ROLE_ADMIN', 'ROLE_USER'], true);
