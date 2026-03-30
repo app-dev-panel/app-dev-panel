@@ -53,8 +53,11 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │   └── ru/                       # Russian translations (guide/, api/, blog/)
 ├── CLAUDE.md                     # This file
 └── docs/
-    ├── mcp-server-plan.md        # MCP server design plan (phases, tools, resources)
-    └── ...                       # Internal design documents
+    ├── mcp-server-plan.md        # MCP server remaining phases (3-6)
+    ├── strategic-analysis.md     # Competitive position, development vectors
+    ├── ideas.md                  # Feature ideas (not committed)
+    ├── editor-integration-opportunities.md  # Editor integration remaining work
+    └── design/                   # UI design specs (Variant D: Minimal Zen)
 ```
 
 ## Architecture
@@ -344,7 +347,7 @@ Skill definitions in `.claude/skills/*/SKILL.md`.
 
 ## Module-Level Documentation
 
-Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
+Each module under `libs/` has its own `CLAUDE.md` with internal architecture details:
 
 - `libs/Kernel/CLAUDE.md` — Core engine internals
 - `libs/API/CLAUDE.md` — HTTP API endpoints and middleware
@@ -357,6 +360,8 @@ Each module under `libs/` has its own `CLAUDE.md` and `docs/` directory:
 - `libs/Adapter/Yii2/CLAUDE.md` — Yii 2 adapter integration
 - `libs/Adapter/Cycle/CLAUDE.md` — Cycle ORM adapter (database schema only)
 - `libs/frontend/CLAUDE.md` — Frontend architecture
+
+User-facing documentation lives in `website/` — see Documentation Site below.
 
 ## Documentation Site
 
@@ -384,9 +389,9 @@ Configured in `website/.vitepress/config.ts` under `vite.plugins`. Russian pages
 
 | Location | Audience | Content |
 |----------|----------|---------|
-| `website/` | Users, LLM agents (via llms.txt) | Guides, API reference, blog, adapters |
+| `website/` | Users, LLM agents (via llms.txt) | Guides, API reference, blog, adapters (source of truth) |
 | `libs/*/CLAUDE.md` | Claude Code (local dev) | Internal architecture, dependency rules, test commands |
-| `docs/` | Internal | Design documents, plans, roadmaps |
+| `docs/` | Internal | UI design specs, strategic plans, feature ideas |
 
 ## Coding Conventions
 

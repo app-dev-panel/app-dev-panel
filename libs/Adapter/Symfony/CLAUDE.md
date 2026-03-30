@@ -55,10 +55,6 @@ tests/
     ├── Collector/                                  # Symfony-specific collector tests
     ├── Inspector/                                  # ConfigProvider, SchemaProvider, Route tests
     └── Proxy/                                      # SymfonyEventDispatcherProxy tests
-docs/
-├── integration-flow.md                             # Boot sequence and lifecycle mapping
-├── collectors.md                                   # All collectors with data schemas
-└── configuration.md                                # Configuration reference
 ```
 
 ## How It Works

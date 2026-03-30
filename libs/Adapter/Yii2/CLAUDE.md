@@ -36,11 +36,6 @@ src/
 │   └── NullSchemaProvider.php                 # Fallback when no database configured
 └── Controller/
     └── AdpApiController.php                   # Yii 2 controller bridging to ADP ApiApplication
-docs/
-├── integration-flow.md                        # Boot sequence and lifecycle mapping
-├── collectors.md                              # All collectors with data schemas
-├── configuration.md                           # Configuration reference
-└── interception-analysis.md                   # Yii 2 interception strategy and status
 ```
 
 ## How It Works
