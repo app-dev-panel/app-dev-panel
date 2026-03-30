@@ -13,8 +13,50 @@ defaults:
     working-directory: libs/frontend
 
 jobs:
+  build:
+    name: Build frontend packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: libs/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build SDK
+        run: npm run build -w packages/sdk
+
+      - name: Build panel and toolbar
+        run: npm run build -w packages/panel && npm run build -w packages/toolbar
+
+      - name: Package panel build
+        run: cd packages/panel && tar -czf ../../panel-dist.tar.gz dist/
+
+      - name: Package toolbar build
+        run: cd packages/toolbar && tar -czf ../../toolbar-dist.tar.gz dist/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-builds
+          path: |
+            libs/frontend/packages/sdk/dist/
+            libs/frontend/packages/panel/dist/
+            libs/frontend/packages/toolbar/dist/
+            libs/frontend/panel-dist.tar.gz
+            libs/frontend/toolbar-dist.tar.gz
+          retention-days: 1
+
   publish:
     name: Publish to GitHub Packages
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,11 +74,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build SDK first
-        run: npm run build -w packages/sdk
-
-      - name: Build panel and toolbar
-        run: npm run build -w packages/panel && npm run build -w packages/toolbar
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-builds
+          path: libs/frontend/
 
       - name: Set package versions from git tag
         run: npx lerna version "$GITHUB_REF_NAME" --no-git-tag-version --no-push --yes
@@ -47,37 +89,19 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release-assets:
-    name: Upload frontend builds to GitHub Release
+    name: Upload builds to GitHub Release
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: libs/frontend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build SDK first
-        run: npm run build -w packages/sdk
-
-      - name: Build panel and toolbar
-        run: npm run build -w packages/panel && npm run build -w packages/toolbar
-
-      - name: Package panel build
-        run: cd packages/panel && tar -czf ../../panel-dist.tar.gz dist/
-
-      - name: Package toolbar build
-        run: cd packages/toolbar && tar -czf ../../toolbar-dist.tar.gz dist/
+          name: frontend-builds
+          path: artifacts/
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            libs/frontend/panel-dist.tar.gz
-            libs/frontend/toolbar-dist.tar.gz
+            artifacts/panel-dist.tar.gz
+            artifacts/toolbar-dist.tar.gz
