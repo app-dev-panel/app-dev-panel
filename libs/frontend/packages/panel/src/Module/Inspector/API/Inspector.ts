@@ -187,7 +187,7 @@ type Response<T = any> = {data: T};
 export const inspectorApi = createApi({
     reducerPath: 'api.inspector',
     keepUnusedDataFor: 0,
-    tagTypes: ['inspector/composer', 'inspector/opcache', 'inspector/mcp'],
+    tagTypes: ['inspector/composer', 'inspector/opcache', 'inspector/mcp', 'inspector/elasticsearch'],
     baseQuery: createBaseQuery('/inspect/api/'),
     endpoints: (builder) => ({
         getParameters: builder.query<Response, void>({
@@ -317,6 +317,38 @@ export const inspectorApi = createApi({
             query: () => `authorization`,
             transformResponse: (result: Response<AuthorizationResponse>) => result.data,
         }),
+        getElasticsearchHealth: builder.query<Response, void>({
+            query: () => `elasticsearch`,
+            transformResponse: (result: Response) => result.data || [],
+            providesTags: ['inspector/elasticsearch'],
+        }),
+        getElasticsearchIndex: builder.query<Response, string>({
+            query: (name) => `elasticsearch/${name}`,
+            transformResponse: (result: Response) => result.data,
+            providesTags: ['inspector/elasticsearch'],
+        }),
+        searchElasticsearch: builder.mutation<
+            Response,
+            {index: string; query?: Record<string, any>; limit?: number; offset?: number}
+        >({
+            query: ({index, query, limit, offset}) => ({
+                url: `elasticsearch/search`,
+                method: 'POST',
+                body: {index, query: query ?? {}, limit: limit ?? 50, offset: offset ?? 0},
+            }),
+            transformResponse: (result: Response) => result.data,
+        }),
+        executeElasticsearchQuery: builder.mutation<
+            Response,
+            {method: string; endpoint: string; body?: Record<string, any>}
+        >({
+            query: ({method, endpoint, body}) => ({
+                url: `elasticsearch/query`,
+                method: 'POST',
+                body: {method, endpoint, body: body ?? {}},
+            }),
+            transformResponse: (result: Response) => result.data,
+        }),
         getMcpSettings: builder.query<{enabled: boolean}, void>({
             query: () => `mcp/settings`,
             transformResponse: (result: Response<{enabled: boolean}>) => result.data,
@@ -365,4 +397,8 @@ export const {
     useGetMcpSettingsQuery,
     useGetAuthorizationQuery,
     useUpdateMcpSettingsMutation,
+    useGetElasticsearchHealthQuery,
+    useGetElasticsearchIndexQuery,
+    useSearchElasticsearchMutation,
+    useExecuteElasticsearchQueryMutation,
 } = inspectorApi;

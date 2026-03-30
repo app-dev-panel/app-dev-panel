@@ -61,6 +61,7 @@ const inspectorChildren = [
     {key: '/inspector/commands', icon: 'terminal', label: 'Commands'},
     {key: '/inspector/database', icon: 'storage', label: 'Database'},
     {key: '/inspector/authorization', icon: 'shield', label: 'Authorization'},
+    {key: '/inspector/elasticsearch', icon: 'search', label: 'Elasticsearch'},
     {key: '/inspector/cache', icon: 'cached', label: 'Cache'},
     {key: '/inspector/git', icon: 'code', label: 'Git'},
     {key: '/inspector/phpinfo', icon: 'info', label: 'PHP Info'},
