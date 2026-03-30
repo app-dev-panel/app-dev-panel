@@ -481,8 +481,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
         $this->app->singleton(PanelConfig::class, function () {
             $staticUrl = config('app-dev-panel.panel.static_url', '');
-            $dev = (bool) config('app-dev-panel.panel.dev', false);
-            return new PanelConfig($staticUrl !== '' ? $staticUrl : PanelConfig::DEFAULT_STATIC_URL, '/debug', $dev);
+            return new PanelConfig($staticUrl !== '' ? $staticUrl : PanelConfig::DEFAULT_STATIC_URL);
         });
 
         $this->app->singleton(

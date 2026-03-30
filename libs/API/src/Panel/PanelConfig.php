@@ -15,6 +15,8 @@ final class PanelConfig
         /**
          * Base URL where the panel's static assets (bundle.js, bundle.css) are served from.
          * Defaults to the GitHub Pages deployment.
+         * When pointing to a Vite dev server (e.g. http://localhost:3000),
+         * the panel auto-detects it and loads with HMR support.
          */
         public readonly string $staticUrl = self::DEFAULT_STATIC_URL,
         /**
@@ -22,10 +24,17 @@ final class PanelConfig
          * Used as the React Router basename so client-side routing works.
          */
         public readonly string $viewerBasePath = '/debug',
-        /**
-         * When true, loads from a Vite dev server (HMR, @vite/client, src/index.tsx).
-         * Set staticUrl to the Vite dev server URL (e.g. http://localhost:3000).
-         */
-        public readonly bool $dev = false,
     ) {}
+
+    /**
+     * Detect whether staticUrl points to a Vite dev server.
+     * Vite dev servers run on localhost/127.0.0.1 with a port.
+     */
+    public function isDevServer(): bool
+    {
+        $host = parse_url($this->staticUrl, PHP_URL_HOST);
+        $port = parse_url($this->staticUrl, PHP_URL_PORT);
+
+        return $port !== null && ($host === 'localhost' || $host === '127.0.0.1');
+    }
 }

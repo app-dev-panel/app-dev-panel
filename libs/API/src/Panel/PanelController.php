@@ -33,7 +33,7 @@ final class PanelController
         $uri = $request->getUri();
         $backendUrl = sprintf('%s://%s', $uri->getScheme(), $uri->getAuthority());
 
-        $html = $this->panelConfig->dev
+        $html = $this->panelConfig->isDevServer()
             ? $this->renderDevHtml($staticUrl, $basePath, $backendUrl)
             : $this->renderHtml($staticUrl, $basePath, $backendUrl);
 

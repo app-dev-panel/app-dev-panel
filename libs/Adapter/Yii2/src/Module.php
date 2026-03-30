@@ -191,13 +191,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
     /**
      * @var string Base URL for panel static assets (empty = GitHub Pages default).
+     *             Use http://localhost:3000 for Vite dev server with HMR.
      */
     public string $panelStaticUrl = '';
-
-    /**
-     * @var bool Load from Vite dev server (HMR). Set panelStaticUrl to http://localhost:3000.
-     */
-    public bool $panelDev = false;
 
     public $controllerNamespace = 'AppDevPanel\\Adapter\\Yii2\\Controller';
 
@@ -407,14 +403,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
     private function registerApiApplication(\Psr\Container\ContainerInterface $containerBridge): void
     {
         $panelStaticUrl = $this->panelStaticUrl;
-        $panelDev = $this->panelDev;
         \Yii::$container->setSingleton(
             PanelConfig::class,
-            static fn() => new PanelConfig(
-                $panelStaticUrl !== '' ? $panelStaticUrl : PanelConfig::DEFAULT_STATIC_URL,
-                '/debug',
-                $panelDev,
-            ),
+            static fn() => new PanelConfig($panelStaticUrl !== '' ? $panelStaticUrl : PanelConfig::DEFAULT_STATIC_URL),
         );
         \Yii::$container->setSingleton(
             PanelController::class,

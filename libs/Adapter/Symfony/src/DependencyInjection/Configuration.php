@@ -153,11 +153,9 @@ final class Configuration implements ConfigurationInterface
             ->children()
             ->scalarNode('static_url')
             ->defaultValue('')
-            ->info('Base URL for panel static assets (empty = GitHub Pages default)')
-            ->end()
-            ->booleanNode('dev')
-            ->defaultFalse()
-            ->info('Load from Vite dev server (HMR). Set static_url to http://localhost:3000')
+            ->info(
+                'Base URL for panel static assets (empty = GitHub Pages default). Use http://localhost:3000 for Vite dev server with HMR.',
+            )
             ->end()
             ->end()
             ->end()
