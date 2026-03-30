@@ -1,11 +1,11 @@
 import {useSelector} from '@app-dev-panel/panel/store';
 import {dismissNotificationById, selectNotifications} from '@app-dev-panel/sdk/Component/Notifications';
 import {Alert, AlertTitle, Snackbar} from '@mui/material';
-import Slide from '@mui/material/Slide';
+import Slide, {type SlideProps} from '@mui/material/Slide';
 import * as React from 'react';
 import {useDispatch} from 'react-redux';
 
-const TransitionUp = (props: object) => <Slide {...props} direction="up" />;
+const TransitionUp = (props: SlideProps) => <Slide {...props} direction="up" />;
 
 export const NotificationSnackbar = React.memo(() => {
     const notifications = useSelector(selectNotifications);

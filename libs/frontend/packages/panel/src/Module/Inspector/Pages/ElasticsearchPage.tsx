@@ -88,7 +88,7 @@ type HealthData = {
 export const ElasticsearchPage = () => {
     const {data, isLoading} = useGetElasticsearchHealthQuery();
 
-    const typedData = data as HealthData | undefined;
+    const typedData = data as unknown as HealthData | undefined;
     const health = typedData?.health;
     const indices = useMemo(() => (typedData?.indices ?? []) as GridValidRowModel[], [typedData]);
 

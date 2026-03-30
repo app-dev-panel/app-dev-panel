@@ -17,7 +17,7 @@ type AppProps = {
     config: {
         modules: {toolbar: boolean};
         router: {basename: string; useHashRouter: boolean};
-        backend: {baseUrl: string; favoriteUrls: string; usePreferredUrl: boolean};
+        backend: {baseUrl: string; favoriteUrls: string[]; usePreferredUrl: boolean};
     };
 };
 export default function App({config}: AppProps) {
@@ -25,7 +25,7 @@ export default function App({config}: AppProps) {
     const {store, persistor} = useMemo(
         () =>
             createStore({
-                application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []},
+                application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []} as any,
             }),
         [config.backend.baseUrl, config.backend.favoriteUrls],
     );

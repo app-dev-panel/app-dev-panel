@@ -3,7 +3,7 @@ import {FormControl, IconButton, Input, InputAdornment, InputLabel} from '@mui/m
 import * as React from 'react';
 import {useRef} from 'react';
 
-export type FilterInputProps = {value?: string; onChange: (value: string) => void};
+export type FilterInputProps = {value?: string; onChange: (value: string) => void; placeholder?: string};
 export const FilterInput = React.memo(
     (props: FilterInputProps) => {
         const {onChange, value = ''} = props;

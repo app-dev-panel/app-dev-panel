@@ -10,7 +10,7 @@ export type GenCodeGenerator = {
     [name: string]: any;
 };
 type SummaryResponseType = {generators: GenCodeGenerator[]};
-type PreviewResponseType = {files: any[]; operations: any[]; errors: {[name: string]: any} | undefined};
+type PreviewResponseType = {files: any[]; operations: any[]; errors: {[name: string]: any} | undefined; diff?: string};
 
 type GenCodePreviewType = {generator: string; parameters: any};
 type GenCodeGenerateType = {generator: string; parameters: any; answers: any};
