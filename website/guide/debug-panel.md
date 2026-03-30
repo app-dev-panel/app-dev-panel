@@ -6,6 +6,10 @@ title: Debug Panel
 
 The ADP debug panel is a React SPA that provides a web UI for inspecting debug data collected from your application. When you install an adapter, the panel is automatically available at `/debug` on your application.
 
+::: tip Live Demo
+Try the panel without installing anything: [Live Demo](https://app-dev-panel.github.io/app-dev-panel/demo/). Enter your application's URL in the backend field to connect.
+:::
+
 ## How It Works
 
 Each adapter registers a `/debug` route that serves a minimal HTML page. This page:

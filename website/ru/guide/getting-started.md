@@ -101,7 +101,9 @@ PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 
 ## Попробуйте демо
 
-ADP поставляется с [playground-приложениями](/ru/guide/playgrounds) для каждого поддерживаемого фреймворка:
+Попробуйте UI панели прямо сейчас с [Live Demo](https://app-dev-panel.github.io/app-dev-panel/demo/) — установка не требуется. Введите URL бэкенда вашего приложения для подключения.
+
+ADP также поставляется с [playground-приложениями](/ru/guide/playgrounds) для каждого поддерживаемого фреймворка:
 
 ```bash
 git clone https://github.com/app-dev-panel/app-dev-panel.git

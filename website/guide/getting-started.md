@@ -101,7 +101,9 @@ PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 
 ## Try the Demo
 
-ADP ships with [playground applications](/guide/playgrounds) for each supported framework:
+You can try the panel UI right away with the [Live Demo](https://app-dev-panel.github.io/app-dev-panel/demo/) — no installation required. Enter your application's backend URL to connect.
+
+ADP also ships with [playground applications](/guide/playgrounds) for each supported framework:
 
 ```bash
 git clone https://github.com/app-dev-panel/app-dev-panel.git
