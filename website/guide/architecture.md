@@ -1,3 +1,7 @@
+---
+title: Architecture
+---
+
 # Architecture
 
 ADP follows a strict layered architecture where each layer has clear responsibilities and dependencies flow in one direction.
@@ -6,45 +10,32 @@ ADP follows a strict layered architecture where each layer has clear responsibil
 
 ### 1. Kernel
 
-The core engine. Framework-independent. Manages:
+The core engine. **Framework-independent** — depends only on PSR interfaces and generic PHP libraries. Manages:
 
 - **Debugger** — Lifecycle management (start, collect, flush)
 - **Collectors** — Gather runtime data via `CollectorInterface`
-- **Storage** — Persist debug data (JSON files by default)
+- **Storage** — Persist debug data (JSON files by default) via `StorageInterface`
 - **Proxies** — Intercept PSR interfaces transparently
-
-```php
-// Example: LogCollector implementing CollectorInterface
-final class LogCollector implements CollectorInterface
-{
-    public function collect(mixed $data): void
-    {
-        // Store log entries
-    }
-
-    public function getData(): array
-    {
-        // Return collected data
-    }
-}
-```
 
 ### 2. API
 
 HTTP layer built on PSR-7/15. Provides:
 
-- **REST endpoints** — Fetch debug entries, collectors data
+- **REST endpoints** — Fetch debug entries, collector data
 - **SSE** — Real-time notifications for new entries
-- **Inspector** — Runtime inspection endpoints
-- **MCP** — AI assistant integration
+- **Inspector** — Runtime inspection endpoints (config, routes, database schema, etc.)
+- **MCP** — AI assistant integration via Model Context Protocol
+- **Ingestion** — Accept debug data from external (non-PHP) applications
 
 ### 3. Adapters
 
 Framework bridges. Each adapter:
 
 - Registers proxy services in the framework's DI container
-- Wires framework-specific events to collectors
-- Configures middleware pipeline
+- Maps framework lifecycle events to `Debugger::startup()` / `Debugger::shutdown()`
+- Configures collectors and storage with framework-appropriate settings
+- Registers API routes (`/debug/api/*`, `/inspect/api/*`)
+- Implements framework-specific inspector providers (config, routes, database schema)
 
 ### 4. Frontend
 
@@ -57,13 +48,50 @@ React 18 SPA with:
 ## Dependency Graph
 
 ```
-Frontend → API → Kernel ← Adapter ← Target App
+┌────────────────────────────────────────────────────────┐
+│                  Dependency Direction                    │
+│                                                         │
+│   Adapter ──▶ API ──▶ Kernel                            │
+│      │                   ▲                              │
+│      └───────────────────┘                              │
+│                                                         │
+│   Cli ──▶ API ──▶ Kernel                                │
+│                                                         │
+│   Frontend ──▶ API (via HTTP only)                      │
+└────────────────────────────────────────────────────────┘
 ```
 
-- Frontend depends only on API (via HTTP)
-- API depends only on Kernel
-- Adapter depends on Kernel and the target framework
-- Kernel depends on nothing (PSR interfaces only)
+- **Kernel** depends on nothing (PSR interfaces only)
+- **API** depends only on Kernel
+- **Cli** depends on Kernel and API
+- **Adapter** depends on Kernel, API, and the target framework
+- **Frontend** communicates via HTTP — no PHP dependencies
+
+## Dependency Rules
+
+The core principle: **common modules must never depend on framework-specific code**.
+
+| Module | Can depend on | Cannot depend on |
+|--------|--------------|-----------------|
+| **Kernel** | PSR interfaces only | API, Cli, Adapter, any framework |
+| **API** | Kernel, PSR interfaces | Adapter, any framework |
+| **Cli** | Kernel, API, Symfony Console | Adapter, any framework |
+| **Adapter** | Kernel, API, Cli, framework packages | Other adapters |
+| **Frontend** | Nothing (HTTP only) | Any PHP package |
+
+::: warning
+Adapters must not depend on other adapters. Each adapter is an independent bridge between the Kernel and a specific framework.
+:::
+
+## Abstractions
+
+Storage and serialization remain behind interfaces to ensure pluggability:
+
+| Concern | Abstraction | Implementations |
+|---------|-------------|-----------------|
+| Debug data storage | `StorageInterface` | `FileStorage`, `MemoryStorage` |
+| Object serialization | `Dumper` class | JSON-based (built-in) |
+| Database inspection | `SchemaProviderInterface` | Per-adapter: `DbSchemaProvider`, `DoctrineSchemaProvider`, `LaravelSchemaProvider`, `Yii2DbSchemaProvider`, `CycleSchemaProvider` |
 
 ## Data Flow
 
@@ -74,7 +102,9 @@ Frontend → API → Kernel ← Adapter ← Target App
 5. API serves stored data; SSE notifies the frontend
 6. Frontend renders the data
 
-## Module System
+See [Data Flow](/guide/data-flow) for the full lifecycle details.
+
+## Frontend Module System
 
 The frontend uses a module system where each module implements `ModuleInterface`:
 
@@ -88,3 +118,45 @@ interface ModuleInterface {
 ```
 
 Current modules: Debug, Inspector, LLM, MCP, OpenAPI, Frames.
+
+## Creating a New Adapter
+
+When creating an adapter for a new framework:
+
+1. Create `libs/Adapter/<FrameworkName>/`
+2. The adapter **must** depend on `app-dev-panel/kernel`
+3. The adapter **may** depend on `app-dev-panel/api` (for route and inspector registration)
+4. The adapter **may** depend on `app-dev-panel/cli` (for CLI commands)
+5. The adapter **must not** depend on other adapters
+6. The adapter **must not** modify Kernel or API code — only wire into them via configuration
+
+### Adapter Responsibilities
+
+| Responsibility | Description |
+|----------------|-------------|
+| Lifecycle mapping | Map framework events → `Debugger::startup()` / `Debugger::shutdown()` |
+| Proxy wiring | Register Kernel PSR proxies as service decorators in the framework's DI |
+| Framework-specific proxies | Create proxies for non-PSR APIs (e.g., `SymfonyEventDispatcherProxy`) |
+| Collector configuration | Configure active collectors and pass framework-specific settings |
+| Storage setup | Wire `StorageInterface` with framework-appropriate paths |
+| Route registration | Register API routes for `/debug/api/*` and `/inspect/api/*` |
+| Inspector providers | Implement `SchemaProviderInterface`, `ConfigProviderInterface`, etc. |
+
+### Reference Implementations
+
+| Adapter | Framework | Pattern |
+|---------|-----------|---------|
+| Symfony | Symfony 6.4–8.x | Bundle + Extension + CompilerPass |
+| Laravel | Laravel 11.x–12.x | ServiceProvider (register + boot) |
+| Yiisoft | Yii 3 | Config plugin + ServiceProvider |
+| Yii2 | Yii 2 | Module + BootstrapInterface |
+| Cycle | Cycle ORM | Standalone (API only, no Kernel) |
+
+### Minimal Checklist
+
+1. `composer.json` with `app-dev-panel/kernel` + `app-dev-panel/api` dependencies
+2. Lifecycle event mapping → `Debugger::startup()` / `Debugger::shutdown()`
+3. Register Kernel PSR proxies as service decorators (logger, events, HTTP client)
+4. Wire `FileStorage` with a framework-appropriate path
+5. Register API controller routes
+6. Create a [playground](/guide/playgrounds) for testing and demo
