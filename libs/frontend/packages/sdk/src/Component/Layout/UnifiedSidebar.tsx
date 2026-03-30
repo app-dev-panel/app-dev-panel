@@ -30,6 +30,7 @@ const SidebarRoot = styled(Paper)(({theme}) => ({
     flexDirection: 'column',
     padding: theme.spacing(1.5, 1),
     gap: theme.spacing(0.25),
+    height: 'min-content',
     minHeight: 0,
     overflowY: 'auto',
 }));
