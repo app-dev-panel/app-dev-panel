@@ -66,6 +66,7 @@ use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\DeprecationCollector;
+use AppDevPanel\Kernel\Collector\ElasticsearchCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -74,6 +75,7 @@ use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RedisCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\SecurityCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
@@ -217,6 +219,8 @@ final class AppDevPanelExtension extends Extension
             'var_dumper' => VarDumperCollector::class,
             'deprecation' => DeprecationCollector::class,
             'opentelemetry' => OpenTelemetryCollector::class,
+            'elasticsearch' => ElasticsearchCollector::class,
+            'redis' => RedisCollector::class,
         ];
 
         foreach ($timelineCollectorMap as $key => $class) {
