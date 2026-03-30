@@ -2,8 +2,6 @@ name: Monorepo Split
 
 on:
   push:
-    branches:
-      - master
     tags:
       - '*'
 
@@ -36,23 +34,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      # no tag
-      - if: "!startsWith(github.ref, 'refs/tags/')"
-        name: Monorepo Split of ${{ matrix.package.split_repository }}
-        uses: danharrin/monorepo-split-github-action@v2.4.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
-        with:
-          branch: "master"
-          package_directory: '${{ matrix.package.local_path }}'
-          repository_organization: 'app-dev-panel'
-          repository_name: '${{ matrix.package.split_repository }}'
-          user_name: "xepozz"
-          user_email: "xepozz@list.ru"
-
-      # with tag
-      - if: "startsWith(github.ref, 'refs/tags/')"
-        name: Monorepo Tagged Split of ${{ matrix.package.split_repository }}
+      - name: Monorepo Tagged Split of ${{ matrix.package.split_repository }}
         uses: danharrin/monorepo-split-github-action@v2.4.4
         env:
           GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
