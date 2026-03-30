@@ -143,7 +143,7 @@ export const RedisPage = () => {
         dbSizeQuery.refetch();
     }, [flushDbMutation, keysQuery, dbSizeQuery]);
 
-    const isConnected = pingQuery.isSuccess && !pingQuery.data?.error;
+    const isConnected = pingQuery.isSuccess && !(pingQuery.data as any)?.error;
     const isLoading = pingQuery.isLoading || dbSizeQuery.isLoading;
 
     return (

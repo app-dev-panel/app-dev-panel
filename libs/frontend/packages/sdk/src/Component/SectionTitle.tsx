@@ -2,7 +2,7 @@ import {Box, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import React from 'react';
 
-type SectionTitleProps = {children: string | string[]; action?: React.ReactNode};
+type SectionTitleProps = {children: React.ReactNode; action?: React.ReactNode};
 
 const StyledTitle = styled(Typography)(({theme}) => ({
     fontSize: theme.typography.overline.fontSize,
@@ -24,12 +24,9 @@ const Container = styled(Box)(({theme}) => ({
 }));
 
 export const SectionTitle = ({children, action}: SectionTitleProps) => {
-    const labels = Array.isArray(children) ? children : [children];
     return (
         <Container>
-            {labels.map((label) => (
-                <StyledTitle key={label}>{label}</StyledTitle>
-            ))}
+            <StyledTitle>{children}</StyledTitle>
             {action && <Box sx={{ml: 'auto', display: 'flex', alignItems: 'center'}}>{action}</Box>}
         </Container>
     );

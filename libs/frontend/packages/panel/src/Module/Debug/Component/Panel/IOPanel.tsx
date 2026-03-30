@@ -34,10 +34,10 @@ export const IOPanel = ({filesystem, http}: IOPanelProps) => {
     const hasFilesystem = filesystem != null;
     const hasHttp = http != null;
 
-    const filesystemCount = useMemo(() => {
+    const filesystemCount = useMemo((): number => {
         if (!filesystem || typeof filesystem !== 'object') return 0;
-        return Object.values(filesystem).reduce(
-            (sum: number, entries: any) => sum + (Array.isArray(entries) ? entries.length : 0),
+        return Object.values(filesystem).reduce<number>(
+            (sum, entries: any) => sum + (Array.isArray(entries) ? entries.length : 0),
             0,
         );
     }, [filesystem]);

@@ -35,7 +35,7 @@ jobs:
           persist-credentials: false
 
       - name: Monorepo Tagged Split of ${{ matrix.package.split_repository }}
-        uses: danharrin/monorepo-split-github-action@v2.3.0
+        uses: danharrin/monorepo-split-github-action@v2.4.4
         env:
           GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
         with:

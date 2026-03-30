@@ -12,14 +12,14 @@ import {RouterProvider} from 'react-router-dom';
 type AppProps = {
     config: {
         router: {basename: string; useHashRouter: boolean};
-        backend: {baseUrl: string; favoriteUrls: string; usePreferredUrl: boolean};
+        backend: {baseUrl: string; favoriteUrls: string[]; usePreferredUrl: boolean};
     };
 };
 
 export default function App({config}: AppProps) {
     const router = createRouter(modules, config.router);
     const {store} = createStore({
-        application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []},
+        application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []} as any,
     });
 
     useEffect(() => {

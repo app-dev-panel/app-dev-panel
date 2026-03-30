@@ -24,7 +24,7 @@
     "start": "vite",
     "build": "npm run build:prod",
     "build:dev": "tsc --build tsconfig.build.json && VITE_BUILD_ID=${VITE_BUILD_ID:-`git rev-parse --short HEAD`} VITE_ENV=${VITE_ENV:-dev} vite build",
-    "build:prod": "rm -r dist; tsc && VITE_BUILD_ID=${VITE_BUILD_ID:-`git rev-parse --short HEAD`} VITE_ENV=${VITE_ENV:-github} vite build",
+    "build:prod": "rm -rf dist; tsc --build tsconfig.build.json && VITE_BUILD_ID=${VITE_BUILD_ID:-`git rev-parse --short HEAD`} VITE_ENV=${VITE_ENV:-github} vite build",
     "test": "vite test",
     "serve:dev": "vite preview --host",
     "serve:prod": "VITE_ENV=github vite preview --host",

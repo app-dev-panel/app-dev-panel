@@ -98,7 +98,7 @@ const IdCell = styled(Typography)({
     minWidth: 0,
 });
 
-function statusColor(status: string, theme: ReturnType<typeof useTheme>): string {
+function statusColor(status: string, theme: Theme): string {
     switch (status.toLowerCase()) {
         case 'done':
         case 'completed':

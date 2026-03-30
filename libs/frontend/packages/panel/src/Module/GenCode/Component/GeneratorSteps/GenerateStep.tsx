@@ -79,7 +79,7 @@ function FileAction({file, generator}: {file: GenCodeFile; generator: GenCodeGen
     const handleDiff = async () => {
         const response = await diffQuery({generator: generator.id, parameters: context.parameters, fileId: file.id});
         if ('data' in response && response.data) {
-            setDiff((response.data as {diff: string}).diff);
+            setDiff(response.data.diff ?? '');
         }
         handleDiffDialogOpen();
     };
@@ -154,7 +154,7 @@ export function GenerateStep({generator, onComplete}: StepProps) {
         }
 
         if ('data' in response && response.data) {
-            context.setResults(response.data as GenCodeResult[]);
+            context.setResults(response.data as unknown as GenCodeResult[]);
         }
 
         onComplete();

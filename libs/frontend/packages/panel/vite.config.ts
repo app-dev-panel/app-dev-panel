@@ -38,6 +38,9 @@ export default defineConfig(() => ({
                 navigateFallback: '/index.html',
             },
             registerType: 'autoUpdate',
+            injectManifest: {
+                maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+            },
             workbox: {
                 sourcemap: true,
             },
