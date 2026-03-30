@@ -54,11 +54,6 @@ Beyond the shared Kernel collectors, each adapter provides framework-specific co
 | Symfony | 17 | 4 | **21** |
 | Laravel | 17 | 2 | **19** |
 | Yii2 | 17 | 0 | **17** |
-| Cycle | 0 | 0 | **0** |
-
-::: info
-Cycle ORM adapter provides database schema inspection only — it has no Kernel dependency and no collectors.
-:::
 
 ## Proxy / Interception Mechanisms
 

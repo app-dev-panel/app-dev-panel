@@ -1,5 +1,6 @@
 import DefaultTheme from 'vitepress/theme';
 import type { Theme } from 'vitepress';
+import { enhanceAppWithTabs } from 'vitepress-plugin-tabs/client';
 import BlogIndex from './components/BlogIndex.vue';
 import BlogPost from './components/BlogPost.vue';
 import BlogTags from './components/BlogTags.vue';
@@ -10,6 +11,7 @@ import './style.css';
 export default {
     extends: DefaultTheme,
     enhanceApp({ app }) {
+        enhanceAppWithTabs(app);
         app.component('BlogIndex', BlogIndex);
         app.component('BlogPost', BlogPost);
         app.component('BlogTags', BlogTags);

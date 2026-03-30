@@ -147,10 +147,9 @@ interface ModuleInterface {
 | Адаптер | Фреймворк | Паттерн |
 |---------|-----------|---------|
 | Symfony | Symfony 6.4–8.x | Bundle + Extension + CompilerPass |
-| Laravel | Laravel 11.x–12.x | ServiceProvider (register + boot) |
-| Yiisoft | Yii 3 | Config plugin + ServiceProvider |
 | Yii2 | Yii 2 | Module + BootstrapInterface |
-| Cycle | Cycle ORM | Standalone (только API, без Kernel) |
+| Yiisoft | Yii 3 | Config plugin + ServiceProvider |
+| Laravel | Laravel 11.x–12.x | ServiceProvider (register + boot) |
 
 ### Минимальный чеклист
 

@@ -156,22 +156,21 @@ Requires the **pcov** extension (recommended) or **xdebug** with coverage mode e
 
 Code coverage is **opt-in** (disabled by default) due to performance overhead.
 
-::: code-group
-
-```yaml [Symfony]
+:::tabs key:framework
+== Symfony
+```yaml
 # config/packages/app_dev_panel.yaml
 app_dev_panel:
     collectors:
         code_coverage: true
 ```
-
-```php [Laravel]
+== Laravel
+```php
 // config/app-dev-panel.php
 'collectors' => [
     'code_coverage' => true,
 ],
 ```
-
 :::
 
 ### Output Format

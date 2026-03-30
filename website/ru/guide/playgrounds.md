@@ -27,24 +27,23 @@ make install-playgrounds
 
 Каждый playground работает на своём порту. Запускайте в отдельных терминалах:
 
-::: code-group
-
-```bash [Yiisoft]
-cd playground/yiisoft-app && ./yii serve --port=8101
-```
-
-```bash [Symfony]
+:::tabs key:framework
+== Symfony
+```bash
 cd playground/symfony-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t public
 ```
-
-```bash [Laravel]
-cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
-```
-
-```bash [Yii2]
+== Yii 2
+```bash
 cd playground/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8103 -t public
 ```
-
+== Yii 3
+```bash
+cd playground/yiisoft-app && ./yii serve --port=8101
+```
+== Laravel
+```bash
+cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
+```
 :::
 
 ::: tip

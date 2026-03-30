@@ -70,7 +70,7 @@ Both files are auto-generated at build time from the same markdown sources that 
 - **Architecture** — layers, data flow, proxy system
 - **Collectors** — all 28 collectors with descriptions
 - **API Reference** — REST endpoints, SSE, Inspector API
-- **Adapters** — Symfony, Laravel, Yii 3, Yii 2, Cycle ORM
+- **Adapters** — Symfony, Yii 2, Yii 3, Laravel
 - **MCP Server** — AI integration setup
 - **CLI** — commands and options
 

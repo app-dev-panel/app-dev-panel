@@ -15,55 +15,40 @@ ADP (Application Development Panel) — это фреймворк-независ
 
 ### 1. Установите адаптер для вашего фреймворка
 
-::: code-group
-
-```bash [Yii 3]
-composer require app-dev-panel/adapter-yiisoft
-```
-
-```bash [Symfony]
+:::tabs key:framework
+== Symfony
+```bash
 composer require app-dev-panel/adapter-symfony
 ```
-
-```bash [Laravel]
-composer require app-dev-panel/adapter-laravel
-```
-
-```bash [Yii 2]
+== Yii 2
+```bash
 composer require app-dev-panel/adapter-yii2
 ```
-
-```bash [Cycle ORM]
-composer require app-dev-panel/adapter-cycle
+== Yii 3
+```bash
+composer require app-dev-panel/adapter-yiisoft
 ```
-
+== Laravel
+```bash
+composer require app-dev-panel/adapter-laravel
+```
 :::
 
 Каждый адаптер автоматически подтягивает `app-dev-panel/kernel` и `app-dev-panel/api` как зависимости.
 
 ### 2. Сконфигурируйте приложение
 
-::: code-group
-
-```php [Yii 3]
-// Конфигурация не нужна — авторегистрация через yiisoft/config plugin
-```
-
-```php [Symfony]
+:::tabs key:framework
+== Symfony
+```php
 // config/bundles.php
 return [
     // ...
     AppDevPanel\Adapter\Symfony\AppDevPanelBundle::class => ['dev' => true, 'test' => true],
 ];
 ```
-
-```php [Laravel]
-// Авторегистрация через package discovery
-// Опционально опубликуйте конфиг:
-// php artisan vendor:publish --tag=app-dev-panel-config
-```
-
-```php [Yii 2]
+== Yii 2
+```php
 // config/web.php
 return [
     'bootstrap' => ['debug-panel'],
@@ -74,7 +59,16 @@ return [
     ],
 ];
 ```
-
+== Yii 3
+```php
+// Конфигурация не нужна — авторегистрация через yiisoft/config plugin
+```
+== Laravel
+```php
+// Авторегистрация через package discovery
+// Опционально опубликуйте конфиг:
+// php artisan vendor:publish --tag=app-dev-panel-config
+```
 :::
 
 ### 3. Начинайте отладку
@@ -101,24 +95,23 @@ make install              # Установить все зависимости
 
 Запустите playground-сервер:
 
-::: code-group
-
-```bash [Yii 3]
-cd playground/yiisoft-app && ./yii serve --port=8101
-```
-
-```bash [Symfony]
+:::tabs key:framework
+== Symfony
+```bash
 cd playground/symfony-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t public
 ```
-
-```bash [Laravel]
-cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
-```
-
-```bash [Yii 2]
+== Yii 2
+```bash
 cd playground/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8103 -t public
 ```
-
+== Yii 3
+```bash
+cd playground/yiisoft-app && ./yii serve --port=8101
+```
+== Laravel
+```bash
+cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
+```
 :::
 
 ## Обзор архитектуры

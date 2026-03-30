@@ -24,7 +24,7 @@ features:
     details: Inspect logs, events, requests, exceptions, database queries, and more — regardless of which PHP framework you use.
   - icon: 🔌
     title: Framework Adapters
-    details: Out-of-the-box support for Yii 3, Symfony, Laravel, Yii 2, and Cycle ORM. Easy to add your own adapter.
+    details: Out-of-the-box support for Symfony, Yii 2, Yii 3, and Laravel. Easy to add your own adapter.
   - icon: 📡
     title: Real-time SSE
     details: Live updates via Server-Sent Events. See debug data appear in real-time as your application runs.
