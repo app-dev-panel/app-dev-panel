@@ -127,6 +127,8 @@ final class PanelControllerTest extends TestCase
         $response = $controller->index($request);
         $body = (string) $response->getBody();
 
+        $this->assertStringContainsString('http://localhost:3000/@react-refresh', $body);
+        $this->assertStringContainsString('__vite_plugin_react_preamble_installed__', $body);
         $this->assertStringContainsString('http://localhost:3000/@vite/client', $body);
         $this->assertStringContainsString('http://localhost:3000/src/index.tsx', $body);
         $this->assertStringNotContainsString('bundle.js', $body);

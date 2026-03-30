@@ -65,10 +65,18 @@ final class PanelController
      */
     private function renderDevHtml(string $staticUrl, string $basePath, string $backendUrl): string
     {
+        $escapedStaticUrl = $this->esc($staticUrl);
         $assets = '';
         $scripts = <<<HTML
-                <script type="module" src="{$this->esc($staticUrl)}/@vite/client"></script>
-                <script type="module" src="{$this->esc($staticUrl)}/src/index.tsx"></script>
+                <script type="module">
+                    import RefreshRuntime from '{$escapedStaticUrl}/@react-refresh';
+                    RefreshRuntime.injectIntoGlobalHook(window);
+                    window.\$RefreshReg\$ = () => {};
+                    window.\$RefreshSig\$ = () => (type) => type;
+                    window.__vite_plugin_react_preamble_installed__ = true;
+                </script>
+                <script type="module" src="{$escapedStaticUrl}/@vite/client"></script>
+                <script type="module" src="{$escapedStaticUrl}/src/index.tsx"></script>
             HTML;
 
         return $this->renderPage($staticUrl, $basePath, $backendUrl, $assets, $scripts);
