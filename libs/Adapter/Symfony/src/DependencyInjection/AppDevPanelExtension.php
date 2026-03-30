@@ -398,7 +398,7 @@ final class AppDevPanelExtension extends Extension
         $this->registerPsrFactories($container);
         $this->registerApiCoreServices($container);
         $this->registerApiMiddleware($container);
-        $this->registerApiControllers($container);
+        $this->registerApiControllers($container, $config);
         $this->registerInspectorServices($container);
         $this->registerApiApplication($container);
     }
@@ -497,7 +497,7 @@ final class AppDevPanelExtension extends Extension
             ->setPublic(true);
     }
 
-    private function registerApiControllers(ContainerBuilder $container): void
+    private function registerApiControllers(ContainerBuilder $container, array $config): void
     {
         $container
             ->register(DebugController::class, DebugController::class)

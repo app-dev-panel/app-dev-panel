@@ -7,6 +7,8 @@ namespace AppDevPanel\Adapter\Symfony\Tests\Integration;
 use AppDevPanel\Adapter\Symfony\AppDevPanelBundle;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
+use AppDevPanel\Api\Panel\PanelConfig;
+use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
@@ -339,6 +341,35 @@ final class BundleBootstrapTest extends TestCase
             $request,
             $response,
         ));
+    }
+
+    public function testPanelConfigUsesDefaultStaticUrl(): void
+    {
+        $container = $this->buildContainer();
+
+        $panelConfig = $container->get(PanelConfig::class);
+        $this->assertInstanceOf(PanelConfig::class, $panelConfig);
+        $this->assertSame(PanelConfig::DEFAULT_STATIC_URL, $panelConfig->staticUrl);
+        $this->assertFalse($panelConfig->isDevServer());
+    }
+
+    public function testPanelConfigUsesCustomStaticUrl(): void
+    {
+        $container = $this->buildContainer([
+            'panel' => ['static_url' => 'http://localhost:3000'],
+        ]);
+
+        $panelConfig = $container->get(PanelConfig::class);
+        $this->assertSame('http://localhost:3000', $panelConfig->staticUrl);
+        $this->assertTrue($panelConfig->isDevServer());
+    }
+
+    public function testPanelControllerResolvesFromContainer(): void
+    {
+        $container = $this->buildContainer();
+
+        $controller = $container->get(PanelController::class);
+        $this->assertInstanceOf(PanelController::class, $controller);
     }
 
     /**
