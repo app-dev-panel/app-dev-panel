@@ -210,12 +210,7 @@ final class ApiRoutes
                 [AuthorizationController::class, 'index'],
                 'inspect/api/authorization/index',
             ),
-            new Route(
-                'POST',
-                '/inspect/api/taskbus',
-                [TaskBusController::class, 'handle'],
-                'inspect/api/taskbus',
-            ),
+            new Route('POST', '/inspect/api/taskbus', [TaskBusController::class, 'handle'], 'inspect/api/taskbus'),
             new Route(
                 'GET',
                 '/inspect/api/taskbus/status',

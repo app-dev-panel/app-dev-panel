@@ -297,7 +297,16 @@ Update CLAUDE.md and docs/ for any changed modules. Documentation is LLM-optimiz
 ```
 Verify no dependency violations introduced. Modules must follow the dependency graph strictly.
 
-### Step 5: Update VitePress Documentation & llms.txt
+### Step 5: Review Backend & Frontend
+Run backend and frontend review agents in parallel:
+```bash
+/review-arch <changed modules>    # Backend: dependency violations, abstraction leaks, circular deps
+/review-docs <changed modules>    # Backend: docs accuracy, file paths, interface signatures
+/frontend-dev <changed pages>     # Frontend: if frontend files were changed
+```
+Fix any issues found before proceeding.
+
+### Step 6: Update VitePress Documentation & llms.txt
 If changes affect user-facing behavior (new features, API changes, new collectors, adapter changes):
 ```bash
 /docs-expert <describe what changed>
@@ -308,10 +317,10 @@ Update VitePress pages in `website/`. Then verify llms.txt generation:
 ```
 Skip this step for internal-only changes (refactoring, test fixes, CI tweaks).
 
-### Step 6: Iterate
+### Step 7: Iterate
 If any step produces changes, go back to Step 2 and re-run checks. Continue until stable.
 
-### Step 7: Final Verification
+### Step 8: Final Verification
 ```bash
 make all                            # Run everything: all checks + all tests
 ```

@@ -18,9 +18,6 @@ use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelUrlMatcherAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\NullSchemaProvider;
-use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
-use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugCollectors;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware;
 use AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy;
@@ -34,6 +31,9 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
+use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -602,7 +602,10 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
-        $this->app->singleton(AuthorizationConfigProviderInterface::class, fn() => new NullAuthorizationConfigProvider());
+        $this->app->singleton(
+            AuthorizationConfigProviderInterface::class,
+            fn() => new NullAuthorizationConfigProvider(),
+        );
         $this->app->singleton(
             AuthorizationController::class,
             fn() => new AuthorizationController(

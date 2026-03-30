@@ -171,7 +171,7 @@ $services = [
     RoutingController::class => new RoutingController($jsonResponseFactory),
     RequestController::class => new RequestController($jsonResponseFactory, $collectorRepository),
     // TaskBus
-    TaskBusController::class => (static function () use ($storagePath): TaskBusController {
+    TaskBusController::class => (static function () use ($storagePath, $jsonResponseFactory): TaskBusController {
         $taskBusDbPath = $storagePath . '/task-bus.sqlite';
         $config = new TaskBusConfig(databasePath: $taskBusDbPath);
         $bus = TaskBusFactory::create($config);
