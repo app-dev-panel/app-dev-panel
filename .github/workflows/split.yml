@@ -36,35 +36,31 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Split ${{ matrix.package.name }}
+      # no tag
+      - if: "!startsWith(github.ref, 'refs/tags/')"
+        name: Monorepo Split of ${{ matrix.package.split_repository }}
+        uses: danharrin/monorepo-split-github-action@v2.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
-        run: |
-          set -euo pipefail
+        with:
+          branch: "master"
+          package_directory: '${{ matrix.package.local_path }}'
+          repository_organization: 'app-dev-panel'
+          repository_name: '${{ matrix.package.split_repository }}'
+          user_name: "xepozz"
+          user_email: "xepozz@list.ru"
 
-          PACKAGE_DIR="${{ matrix.package.local_path }}"
-          REMOTE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/app-dev-panel/${{ matrix.package.split_repository }}.git"
-          BRANCH="master"
-
-          # Extract subtree
-          SHA=$(git subtree split --prefix="$PACKAGE_DIR" HEAD)
-          echo "Subtree SHA: $SHA"
-
-          # Clone target repo
-          CLONE_DIR=$(mktemp -d)
-          git clone --bare "$REMOTE_URL" "$CLONE_DIR" 2>/dev/null || git init --bare "$CLONE_DIR"
-
-          # Push subtree to target
-          git push "$REMOTE_URL" "$SHA:refs/heads/$BRANCH" --force
-          echo "✅ Pushed $BRANCH to ${{ matrix.package.split_repository }}"
-
-          # Push tag if this is a tag event
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            TAG="${{ github.ref_name }}"
-            # Create a lightweight tag on the split SHA
-            GIT_DIR="$CLONE_DIR" git tag "$TAG" "$SHA" 2>/dev/null || true
-            git push "$REMOTE_URL" "$SHA:refs/tags/$TAG" --force
-            echo "✅ Pushed tag $TAG to ${{ matrix.package.split_repository }}"
-          fi
-
-          rm -rf "$CLONE_DIR"
+      # with tag
+      - if: "startsWith(github.ref, 'refs/tags/')"
+        name: Monorepo Tagged Split of ${{ matrix.package.split_repository }}
+        uses: danharrin/monorepo-split-github-action@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+        with:
+          tag: ${{ github.ref_name }}
+          branch: "master"
+          package_directory: '${{ matrix.package.local_path }}'
+          repository_organization: 'app-dev-panel'
+          repository_name: '${{ matrix.package.split_repository }}'
+          user_name: "xepozz"
+          user_email: "xepozz@list.ru"
