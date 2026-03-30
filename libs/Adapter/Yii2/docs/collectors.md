@@ -47,6 +47,37 @@ SQL queries via `DbProfilingTarget` feeding Kernel's `DatabaseCollector::logQuer
 
 **Summary**: `{db: {queries: {error, total}, transactions: {error, total}}}`
 
+### RedisCollector (Kernel)
+
+Redis commands via Kernel's `RedisCollector::logCommand()`.
+
+**Fed by**: Event listener on `yii\redis\Connection` (if `yiisoft/yii2-redis` is installed), or manual decorator wrapping the Redis client.
+
+**Data schema**:
+```json
+{
+    "commands": [
+        {
+            "connection": "default",
+            "command": "SET",
+            "arguments": ["user:42", "{\"name\":\"John\"}"],
+            "result": true,
+            "duration": 0.0012,
+            "error": null,
+            "line": "/app/controllers/UserController.php:42"
+        }
+    ],
+    "totalTime": 0.0012,
+    "errorCount": 0,
+    "totalCommands": 1,
+    "connections": ["default"]
+}
+```
+
+**Summary**: `{redis: {commandCount: 1, errorCount: 0, totalTime: 0.0012}}`
+
+See [Redis Integration Guide](../../../Kernel/docs/redis-integration.md) for full integration instructions.
+
 ## Yii 2-Specific Helpers
 
 ### DebugLogTarget

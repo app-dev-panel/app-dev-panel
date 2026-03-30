@@ -70,6 +70,9 @@ final class ApiRoutesTest extends TestCase
         $this->assertContains('/inspect/api/opcache', $paths);
         $this->assertContains('/inspect/api/mcp', $paths);
         $this->assertContains('/inspect/api/mcp/settings', $paths);
+        $this->assertContains('/inspect/api/redis/ping', $paths);
+        $this->assertContains('/inspect/api/redis/info', $paths);
+        $this->assertContains('/inspect/api/redis/keys', $paths);
     }
 
     public function testAllRoutesHaveNames(): void

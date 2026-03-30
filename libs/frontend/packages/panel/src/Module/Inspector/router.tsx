@@ -34,6 +34,7 @@ export const routes = [
             {path: 'authorization', element: <Pages.AuthorizationPage />},
             {path: 'elasticsearch', element: <Pages.ElasticsearchPage />},
             {path: 'cache', element: <Pages.CachePage />},
+            {path: 'redis', element: <Pages.RedisPage />},
             {path: 'config', element: <Pages.ConfigurationPage />},
             {path: 'config/:page', element: <Pages.ConfigurationPage />},
         ],

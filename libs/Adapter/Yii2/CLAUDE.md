@@ -197,6 +197,7 @@ Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: n
 | `AssetBundleCollector` | `View::EVENT_END_PAGE` (normalized in Module) | Asset bundles: class, source/base paths, CSS/JS files, dependencies |
 | `TranslatorCollector` | `I18NProxy` replacing `Yii::$app->i18n` | Translation lookups, missing translations |
 | `SecurityCollector` | `SecurityListener` on `User::EVENT_AFTER_LOGIN/LOGOUT` | Auth events: login, logout, user identity |
+| `RedisCollector` | `yii\redis\Connection` events or decorator | Redis commands, timing, errors |
 
 ## Architecture Comparison: Symfony vs Yii 2
 

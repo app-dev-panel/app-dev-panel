@@ -92,6 +92,20 @@ See [Security & Authorization](/guide/security) for details.
 | POST | `/elasticsearch/search` | Execute search query against an index |
 | POST | `/elasticsearch/query` | Execute raw Elasticsearch query |
 
+## Redis
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/redis/ping` | Test Redis connection |
+| GET | `/redis/info` | Server info (`INFO` command, optional `?section=`) |
+| GET | `/redis/db-size` | Number of keys in current DB |
+| GET | `/redis/keys` | Browse keys via SCAN (`?pattern=*&limit=100&cursor=0`) |
+| GET | `/redis/get` | Get key value (type-aware) with TTL |
+| DELETE | `/redis/delete` | Delete a key |
+| POST | `/redis/flush-db` | Flush current database |
+
+Requires `\Redis` (phpredis extension) in the DI container.
+
 ## MCP (AI Integration)
 
 | Method | Path | Description |

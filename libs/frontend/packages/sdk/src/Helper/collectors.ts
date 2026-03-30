@@ -29,4 +29,5 @@ export enum CollectorsMap {
     OpenTelemetryCollector = 'AppDevPanel\\Kernel\\Collector\\OpenTelemetryCollector',
     TranslatorCollector = 'AppDevPanel\\Kernel\\Collector\\TranslatorCollector',
     ElasticsearchCollector = 'AppDevPanel\\Kernel\\Collector\\ElasticsearchCollector',
+    RedisCollector = 'AppDevPanel\\Kernel\\Collector\\RedisCollector',
 }

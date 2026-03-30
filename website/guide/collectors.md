@@ -8,24 +8,50 @@ Collectors are the core data-gathering mechanism in ADP. Each collector implemen
 
 ## Built-in Collectors
 
+### Core Collectors
+
 | Collector | Data Collected |
 |-----------|---------------|
 | `LogCollector` | PSR-3 log messages (level, message, context) |
 | `EventCollector` | PSR-14 dispatched events and listeners |
+| `ExceptionCollector` | Uncaught exceptions with stack traces |
 | `HttpClientCollector` | PSR-18 outgoing HTTP requests and responses |
 | `DatabaseCollector` | SQL queries, execution time, transactions |
 | `ElasticsearchCollector` | Elasticsearch requests, timing, hits count |
-| `ExceptionCollector` | Uncaught exceptions with stack traces |
-| `RequestCollector` | Incoming HTTP request and response details |
-| `ServiceCollector` | DI container service resolutions |
-| `AssetBundleCollector` | Registered frontend asset bundles |
-| `CommandCollector` | Console command executions |
-| `CacheCollector` | Cache get/set/delete operations |
+| `CacheCollector` | Cache get/set/delete operations with hit/miss rates |
+| [`RedisCollector`](/guide/redis) | Redis commands with timing and error tracking |
 | `MailerCollector` | Sent email messages |
-| `TimelineCollector` | Performance timeline events |
 | `TranslatorCollector` | Translation lookups, missing translations |
-| `ValidatorCollector` | Validation calls and results |
+| `QueueCollector` | Message queue operations (push, consume, fail) |
+| `ServiceCollector` | DI container service resolutions |
+| `RouterCollector` | HTTP route matching data |
+| `MiddlewareCollector` | Middleware stack execution and timing |
+| `ValidatorCollector` | Validation operations and results |
+| `SecurityCollector` | Authentication and authorization data |
+| `TemplateCollector` | Template rendering (Twig, Blade, etc.) |
+| `ViewCollector` | View rendering with captured output |
+| `VarDumperCollector` | Manual `dump()` / `dd()` calls |
+| `TimelineCollector` | Cross-collector performance timeline |
 | `EnvironmentCollector` | PHP and OS environment info |
+| `DeprecationCollector` | PHP deprecation warnings |
+| `OpenTelemetryCollector` | OpenTelemetry spans and traces |
+| `AssetBundleCollector` | Frontend asset bundles (Yii) |
+| `FilesystemStreamCollector` | Filesystem stream operations |
+| `HttpStreamCollector` | HTTP stream wrapper operations |
+
+### Web-Specific
+
+| Collector | Data Collected |
+|-----------|---------------|
+| `RequestCollector` | Incoming HTTP request and response details |
+| `WebAppInfoCollector` | PHP version, memory, execution time |
+
+### Console-Specific
+
+| Collector | Data Collected |
+|-----------|---------------|
+| `CommandCollector` | Console command executions |
+| `ConsoleAppInfoCollector` | Console application metadata |
 
 ## CollectorInterface
 

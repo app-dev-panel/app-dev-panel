@@ -18,6 +18,7 @@ use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Controller\OpcacheController;
+use AppDevPanel\Api\Inspector\Controller\RedisController;
 use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
@@ -233,6 +234,28 @@ final class ApiRoutes
                 '/inspect/api/elasticsearch/query',
                 [ElasticsearchController::class, 'query'],
                 'inspect/api/elasticsearch/query',
+            ),
+            new Route('GET', '/inspect/api/redis/ping', [RedisController::class, 'ping'], 'inspect/api/redis/ping'),
+            new Route('GET', '/inspect/api/redis/info', [RedisController::class, 'info'], 'inspect/api/redis/info'),
+            new Route(
+                'GET',
+                '/inspect/api/redis/db-size',
+                [RedisController::class, 'dbSize'],
+                'inspect/api/redis/db-size',
+            ),
+            new Route('GET', '/inspect/api/redis/keys', [RedisController::class, 'keys'], 'inspect/api/redis/keys'),
+            new Route('GET', '/inspect/api/redis/get', [RedisController::class, 'get'], 'inspect/api/redis/get'),
+            new Route(
+                'DELETE',
+                '/inspect/api/redis/delete',
+                [RedisController::class, 'delete'],
+                'inspect/api/redis/delete',
+            ),
+            new Route(
+                'POST',
+                '/inspect/api/redis/flush-db',
+                [RedisController::class, 'flushDb'],
+                'inspect/api/redis/flush-db',
             ),
             new Route('POST', '/inspect/api/mcp', [McpController::class, 'handle'], 'inspect/api/mcp'),
             new Route(

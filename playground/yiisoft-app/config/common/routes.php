@@ -43,6 +43,7 @@ return [
             Route::get('/elasticsearch')->action(Web\TestFixtures\ElasticsearchAction::class)->name(
                 'test-elasticsearch',
             ),
+            Route::get('/redis')->action(Web\TestFixtures\RedisAction::class)->name('test-redis'),
             Route::methods(['GET', 'POST'], '/reset')
                 ->action(Web\TestFixtures\ResetAction::class)
                 ->name('test-reset'),

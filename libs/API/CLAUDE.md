@@ -48,6 +48,7 @@ src/
 │   │   ├── OpcacheController.php        # OPcache status
 │   │   ├── AuthorizationController.php  # live auth config (guards, role hierarchy, voters)
 │   │   ├── ElasticsearchController.php  # Elasticsearch cluster health, indices, search, raw query
+│   │   ├── RedisController.php          # Redis inspection (ping, info, keys, get, delete, flush)
 │   │   └── ServiceController.php        # Service registration (register, heartbeat, list, deregister)
 │   ├── Middleware/
 │   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services
@@ -197,6 +198,20 @@ Requires `AuthorizationConfigProviderInterface` implementation from adapter. Fal
 | POST | `/query` | Execute raw Elasticsearch query |
 
 Backed by `ElasticsearchProviderInterface`. Default: `NullElasticsearchProvider` (returns empty data). Adapters provide concrete implementations.
+
+### Redis API (`/inspect/api/redis`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/ping` | Test Redis connection |
+| GET | `/info` | Server info (`INFO` command, optional `?section=`) |
+| GET | `/db-size` | Number of keys in current DB |
+| GET | `/keys` | Browse keys via SCAN (`?pattern=*&limit=100&cursor=0`) |
+| GET | `/get` | Get key value (type-aware: string/list/set/zset/hash/stream) with TTL |
+| DELETE | `/delete` | Delete a key |
+| POST | `/flush-db` | Flush current database |
+
+Requires `\Redis` (phpredis extension) in the DI container.
 
 ### MCP API (`/inspect/api/mcp`)
 

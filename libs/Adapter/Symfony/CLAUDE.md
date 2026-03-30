@@ -182,6 +182,7 @@ Conditionally registered only when `symfony/security-http` is installed and the 
 | `MailerCollector` (Kernel) | Mailer MessageEvent listener calling `collectMessage()` | Emails sent |
 | `MessengerCollector` | Messenger middleware calling `logMessage()` | Messages dispatched/handled/failed |
 | `TranslatorCollector` (Kernel) | `SymfonyTranslatorProxy` decorating `TranslatorInterface` | Translation lookups, missing translations |
+| `RedisCollector` (Kernel) | Predis plugin or phpredis decorator calling `logCommand()` | Redis commands, timing, errors |
 
 ## Configuration Reference
 

@@ -8,24 +8,50 @@ title: Коллекторы
 
 ## Встроенные коллекторы
 
+### Основные коллекторы
+
 | Коллектор | Собираемые данные |
 |-----------|-------------------|
 | `LogCollector` | PSR-3 сообщения логов (уровень, текст, контекст) |
 | `EventCollector` | PSR-14 отправленные события и слушатели |
+| `ExceptionCollector` | Необработанные исключения со стектрейсами |
 | `HttpClientCollector` | PSR-18 исходящие HTTP-запросы и ответы |
 | `DatabaseCollector` | SQL-запросы, время выполнения, транзакции |
 | `ElasticsearchCollector` | Запросы к Elasticsearch, тайминг, количество hits |
-| `ExceptionCollector` | Необработанные исключения со стектрейсами |
-| `RequestCollector` | Входящие HTTP-запросы и ответы |
-| `ServiceCollector` | Разрешение сервисов DI-контейнера |
-| `AssetBundleCollector` | Зарегистрированные бандлы ассетов |
-| `CommandCollector` | Выполнение консольных команд |
-| `CacheCollector` | Операции кеша: get/set/delete |
+| `CacheCollector` | Операции кеша с отслеживанием hit/miss |
+| [`RedisCollector`](/ru/guide/redis) | Redis-команды с таймингом и отслеживанием ошибок |
 | `MailerCollector` | Отправленные email-сообщения |
-| `TimelineCollector` | События временной шкалы производительности |
 | `TranslatorCollector` | Обращения к переводам, отсутствующие переводы |
-| `ValidatorCollector` | Вызовы валидации и результаты |
+| `QueueCollector` | Операции очереди сообщений (push, consume, fail) |
+| `ServiceCollector` | Разрешение сервисов DI-контейнера |
+| `RouterCollector` | Данные маршрутизации HTTP-запросов |
+| `MiddlewareCollector` | Выполнение и тайминг стека middleware |
+| `ValidatorCollector` | Операции валидации и результаты |
+| `SecurityCollector` | Аутентификация и авторизация |
+| `TemplateCollector` | Рендеринг шаблонов (Twig, Blade и др.) |
+| `ViewCollector` | Рендеринг представлений с захватом вывода |
+| `VarDumperCollector` | Ручные вызовы `dump()` / `dd()` |
+| `TimelineCollector` | Кросс-коллекторная временная шкала производительности |
 | `EnvironmentCollector` | Информация об окружении PHP и ОС |
+| `DeprecationCollector` | Предупреждения PHP о депрекациях |
+| `OpenTelemetryCollector` | Спаны и трейсы OpenTelemetry |
+| `AssetBundleCollector` | Бандлы фронтенд-ассетов (Yii) |
+| `FilesystemStreamCollector` | Операции файловых потоков |
+| `HttpStreamCollector` | Операции HTTP-потоков |
+
+### Веб-специфичные
+
+| Коллектор | Собираемые данные |
+|-----------|-------------------|
+| `RequestCollector` | Входящие HTTP-запросы и ответы |
+| `WebAppInfoCollector` | Версия PHP, память, время выполнения |
+
+### Консольные
+
+| Коллектор | Собираемые данные |
+|-----------|-------------------|
+| `CommandCollector` | Выполнение консольных команд |
+| `ConsoleAppInfoCollector` | Метаданные консольного приложения |
 
 ## CollectorInterface
 

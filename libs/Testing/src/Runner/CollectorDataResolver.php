@@ -34,6 +34,7 @@ final class CollectorDataResolver
         'assets' => 'AssetBundleCollector',
         'opentelemetry' => 'OpenTelemetryCollector',
         'elasticsearch' => 'ElasticsearchCollector',
+        'redis' => 'RedisCollector',
     ];
 
     /**

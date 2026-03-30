@@ -94,6 +94,15 @@ interface CollectorInterface
 - **Summary**: `{cache: {hits, misses, writes, deletes}}`
 - **Fed by**: Adapter hooks (Symfony CacheListener, Laravel CacheListener, Yiisoft cache proxy)
 
+#### RedisCollector
+- **Collects**: Redis commands across any Redis client (phpredis, Predis, etc.)
+- **Depends on**: `TimelineCollector`
+- **API**: `logCommand(RedisCommandRecord $record)` — accepts normalized command record
+- **Record**: `RedisCommandRecord(connection, command, arguments, result, duration, ?error, line)`
+- **Data**: `{commands: [{connection, command, arguments, result, duration, error, line}], totalTime, errorCount, totalCommands, connections}`
+- **Summary**: `{redis: {commandCount, errorCount, totalTime}}`
+- **Fed by**: Adapter hooks — see [Redis Integration Guide](redis-integration.md)
+
 #### EnvironmentCollector
 - **Collects**: PHP environment information
 - **Data**: PHP version, extensions, ini settings, server info
