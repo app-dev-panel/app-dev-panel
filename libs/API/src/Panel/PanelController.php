@@ -33,9 +33,7 @@ final class PanelController
         $uri = $request->getUri();
         $backendUrl = sprintf('%s://%s', $uri->getScheme(), $uri->getAuthority());
 
-        $html = $this->panelConfig->isDevServer()
-            ? $this->renderDevHtml($staticUrl, $basePath, $backendUrl)
-            : $this->renderHtml($staticUrl, $basePath, $backendUrl);
+        $html = $this->renderHtml($staticUrl, $basePath, $backendUrl);
 
         $body = $this->streamFactory->createStream($html);
 
@@ -45,51 +43,9 @@ final class PanelController
             ->withBody($body);
     }
 
-    /**
-     * Production mode: loads pre-built bundle.js + bundle.css.
-     */
     private function renderHtml(string $staticUrl, string $basePath, string $backendUrl): string
     {
-        $assets = <<<HTML
-                <link rel="stylesheet" href="{$this->esc($staticUrl)}/bundle.css" />
-            HTML;
-        $scripts = <<<HTML
-                <script type="module" crossorigin src="{$this->esc($staticUrl)}/bundle.js"></script>
-            HTML;
-
-        return $this->renderPage($staticUrl, $basePath, $backendUrl, $assets, $scripts);
-    }
-
-    /**
-     * Dev mode: loads from Vite dev server with HMR support.
-     */
-    private function renderDevHtml(string $staticUrl, string $basePath, string $backendUrl): string
-    {
-        $escapedStaticUrl = $this->esc($staticUrl);
-        $assets = '';
-        $scripts = <<<HTML
-                <script type="module">
-                    import RefreshRuntime from '{$escapedStaticUrl}/@react-refresh';
-                    RefreshRuntime.injectIntoGlobalHook(window);
-                    window.\$RefreshReg\$ = () => {};
-                    window.\$RefreshSig\$ = () => (type) => type;
-                    window.__vite_plugin_react_preamble_installed__ = true;
-                </script>
-                <script type="module" src="{$escapedStaticUrl}/@vite/client"></script>
-                <script type="module" src="{$escapedStaticUrl}/src/index.tsx"></script>
-            HTML;
-
-        return $this->renderPage($staticUrl, $basePath, $backendUrl, $assets, $scripts);
-    }
-
-    private function renderPage(
-        string $staticUrl,
-        string $basePath,
-        string $backendUrl,
-        string $headAssets,
-        string $bodyScripts,
-    ): string {
-        $escapedStaticUrl = $this->esc($staticUrl);
+        $escapedStaticUrl = htmlspecialchars($staticUrl, ENT_QUOTES, 'UTF-8');
         $jsBackendUrl = addslashes($backendUrl);
         $jsBasePath = addslashes($basePath);
 
@@ -111,7 +67,7 @@ final class PanelController
                 <meta name="msapplication-TileColor" content="#2563EB" />
                 <meta name="theme-color" content="#2563EB" />
                 <title>App Dev Panel</title>
-            {$headAssets}
+                <link rel="stylesheet" href="{$escapedStaticUrl}/bundle.css" />
             </head>
             <body style="display: flex; flex-direction: column; min-height: 100vh; justify-content: space-between">
                 <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -132,14 +88,9 @@ final class PanelController
                         },
                     };
                 </script>
-            {$bodyScripts}
+                <script type="module" crossorigin src="{$escapedStaticUrl}/bundle.js"></script>
             </body>
             </html>
             HTML;
-    }
-
-    private function esc(string $value): string
-    {
-        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     }
 }

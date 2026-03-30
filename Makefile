@@ -152,15 +152,23 @@ install-playgrounds: ## Install playground deps
 PANEL_DIST    := $(FRONTEND_DIR)/packages/panel/dist
 TOOLBAR_DIST  := $(FRONTEND_DIR)/packages/toolbar/dist
 SYMFONY_ASSETS := $(ROOT_DIR)/libs/Adapter/Symfony/Resources/public
+LARAVEL_ASSETS := $(ROOT_DIR)/libs/Adapter/Laravel/resources/dist
+YII2_ASSETS    := $(ROOT_DIR)/libs/Adapter/Yii2/resources/dist
+YIISOFT_ASSETS := $(ROOT_DIR)/libs/Adapter/Yiisoft/resources/dist
 
-build-panel: ## Build panel + toolbar and copy to Symfony adapter assets
+build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 	@echo "$(CYAN)Building frontend panel...$(RESET)"
 	cd $(FRONTEND_DIR) && npx lerna run build --scope=@app-dev-panel/panel --scope=@app-dev-panel/toolbar
-	@echo "$(CYAN)Copying assets to Symfony adapter...$(RESET)"
-	rm -rf $(SYMFONY_ASSETS)/bundle.js $(SYMFONY_ASSETS)/bundle*.css $(SYMFONY_ASSETS)/assets
-	cp -r $(PANEL_DIST)/bundle.js $(PANEL_DIST)/bundle*.css $(SYMFONY_ASSETS)/
-	@if [ -d "$(PANEL_DIST)/assets" ]; then cp -r $(PANEL_DIST)/assets $(SYMFONY_ASSETS)/assets; fi
-	@echo "$(GREEN)Done. Run 'php bin/console assets:install' in your Symfony app to publish.$(RESET)"
+	@echo "$(CYAN)Copying assets to adapters...$(RESET)"
+	@for dir in $(SYMFONY_ASSETS) $(LARAVEL_ASSETS) $(YII2_ASSETS) $(YIISOFT_ASSETS); do \
+		rm -rf $$dir/bundle.js $$dir/bundle*.css $$dir/assets; \
+		cp -r $(PANEL_DIST)/bundle.js $(PANEL_DIST)/bundle*.css $$dir/; \
+		if [ -d "$(PANEL_DIST)/assets" ]; then cp -r $(PANEL_DIST)/assets $$dir/assets; fi; \
+	done
+	@echo "$(GREEN)Done. Publish assets in your framework:$(RESET)"
+	@echo "  Symfony: php bin/console assets:install"
+	@echo "  Laravel: php artisan vendor:publish --tag=app-dev-panel-assets --force"
+	@echo "  Yii2/Yiisoft: assets auto-detected from vendor"
 
 # ============================================================================
 # Tests

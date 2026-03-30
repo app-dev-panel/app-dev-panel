@@ -72,15 +72,15 @@ final class PanelControllerTest extends TestCase
 
     public function testIndexUsesCustomStaticUrl(): void
     {
-        $config = new PanelConfig(staticUrl: 'https://cdn.example.com/panel');
+        $config = new PanelConfig(staticUrl: '/bundles/appdevpanel');
         $controller = $this->createController($config);
         $request = new ServerRequest('GET', 'http://localhost:8080/debug');
 
         $response = $controller->index($request);
         $body = (string) $response->getBody();
 
-        $this->assertStringContainsString('https://cdn.example.com/panel/bundle.js', $body);
-        $this->assertStringContainsString('https://cdn.example.com/panel/bundle.css', $body);
+        $this->assertStringContainsString('/bundles/appdevpanel/bundle.js', $body);
+        $this->assertStringContainsString('/bundles/appdevpanel/bundle.css', $body);
     }
 
     public function testIndexUsesCustomViewerBasePath(): void
@@ -116,50 +116,6 @@ final class PanelControllerTest extends TestCase
         $response = $controller->index($request);
 
         $this->assertSame(200, $response->getStatusCode());
-    }
-
-    public function testViteDevServerLoadsHmrClient(): void
-    {
-        $config = new PanelConfig(staticUrl: 'http://localhost:3000');
-        $controller = $this->createController($config);
-        $request = new ServerRequest('GET', 'http://localhost:8080/debug');
-
-        $response = $controller->index($request);
-        $body = (string) $response->getBody();
-
-        $this->assertStringContainsString('http://localhost:3000/@react-refresh', $body);
-        $this->assertStringContainsString('__vite_plugin_react_preamble_installed__', $body);
-        $this->assertStringContainsString('http://localhost:3000/@vite/client', $body);
-        $this->assertStringContainsString('http://localhost:3000/src/index.tsx', $body);
-        $this->assertStringNotContainsString('bundle.js', $body);
-        $this->assertStringNotContainsString('bundle.css', $body);
-    }
-
-    public function testViteDevServerStillInjectsConfig(): void
-    {
-        $config = new PanelConfig(staticUrl: 'http://localhost:3000');
-        $controller = $this->createController($config);
-        $request = new ServerRequest('GET', 'http://localhost:8080/debug');
-
-        $response = $controller->index($request);
-        $body = (string) $response->getBody();
-
-        $this->assertStringContainsString("window['AppDevPanelWidget']", $body);
-        $this->assertStringContainsString("baseUrl: 'http://localhost:8080'", $body);
-        $this->assertStringContainsString("basename: '/debug'", $body);
-    }
-
-    public function testProductionModeDoesNotLoadViteClient(): void
-    {
-        $controller = $this->createController();
-        $request = new ServerRequest('GET', 'http://localhost:8080/debug');
-
-        $response = $controller->index($request);
-        $body = (string) $response->getBody();
-
-        $this->assertStringNotContainsString('@vite/client', $body);
-        $this->assertStringNotContainsString('src/index.tsx', $body);
-        $this->assertStringContainsString('bundle.js', $body);
     }
 
     private function createController(?PanelConfig $config = null): PanelController

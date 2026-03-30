@@ -148,6 +148,13 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             __DIR__ . '/../config/app-dev-panel.php' => $this->app->configPath('app-dev-panel.php'),
         ], 'app-dev-panel-config');
 
+        $assetSource = __DIR__ . '/../resources/dist';
+        if (is_dir($assetSource) && file_exists($assetSource . '/bundle.js')) {
+            $this->publishes([
+                $assetSource => $this->app->publicPath('vendor/app-dev-panel'),
+            ], 'app-dev-panel-assets');
+        }
+
         $this->loadRoutesFrom(__DIR__ . '/../routes/adp.php');
 
         $this->registerMiddleware();
@@ -481,7 +488,13 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
         $this->app->singleton(PanelConfig::class, function () {
             $staticUrl = config('app-dev-panel.panel.static_url', '');
-            return new PanelConfig($staticUrl !== '' ? $staticUrl : PanelConfig::DEFAULT_STATIC_URL);
+            if ($staticUrl === '') {
+                // Auto-detect: if assets were published locally, use them
+                $staticUrl = file_exists($this->app->publicPath('vendor/app-dev-panel/bundle.js'))
+                    ? '/vendor/app-dev-panel'
+                    : PanelConfig::DEFAULT_STATIC_URL;
+            }
+            return new PanelConfig($staticUrl);
         });
 
         $this->app->singleton(

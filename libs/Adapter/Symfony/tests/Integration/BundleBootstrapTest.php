@@ -355,18 +355,16 @@ final class BundleBootstrapTest extends TestCase
         $bundleAssetsExist = file_exists($adapterRoot . '/Resources/public/bundle.js');
         $expected = $bundleAssetsExist ? '/bundles/appdevpanel' : PanelConfig::DEFAULT_STATIC_URL;
         $this->assertSame($expected, $panelConfig->staticUrl);
-        $this->assertFalse($panelConfig->isDevServer());
     }
 
     public function testPanelConfigUsesCustomStaticUrl(): void
     {
         $container = $this->buildContainer([
-            'panel' => ['static_url' => 'http://localhost:3000'],
+            'panel' => ['static_url' => '/my-custom-path'],
         ]);
 
         $panelConfig = $container->get(PanelConfig::class);
-        $this->assertSame('http://localhost:3000', $panelConfig->staticUrl);
-        $this->assertTrue($panelConfig->isDevServer());
+        $this->assertSame('/my-custom-path', $panelConfig->staticUrl);
     }
 
     public function testPanelControllerResolvesFromContainer(): void
