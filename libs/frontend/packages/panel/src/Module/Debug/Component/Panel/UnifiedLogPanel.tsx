@@ -256,6 +256,9 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
         [kindCounts],
     );
 
+    const hasLogs = kindCounts.log > 0;
+    const hasDeprecations = kindCounts.deprecation > 0;
+
     // Toggle helpers
     const toggleKind = (kind: EntryKind) => {
         setActiveKinds((prev) => {
