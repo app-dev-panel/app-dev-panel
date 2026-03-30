@@ -35,6 +35,9 @@ final class ConfigurationTest extends TestCase
         $this->assertContains('completion', $config['ignored_commands']);
 
         $this->assertSame([], $config['dumper']['excluded_classes']);
+
+        // Panel defaults
+        $this->assertSame('', $config['panel']['static_url']);
     }
 
     public function testDisabled(): void

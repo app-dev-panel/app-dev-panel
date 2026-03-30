@@ -168,7 +168,10 @@ return [
     ) => new InspectorProxyMiddleware($serviceRegistry, $httpClient, $responseFactory, $streamFactory, $uriFactory),
 
     // Panel
-    PanelConfig::class => static fn() => new PanelConfig(),
+    PanelConfig::class => static function () use ($params): PanelConfig {
+        $staticUrl = $params['app-dev-panel/yiisoft']['panel']['staticUrl'] ?? '';
+        return new PanelConfig($staticUrl !== '' ? $staticUrl : PanelConfig::DEFAULT_STATIC_URL);
+    },
     PanelController::class => static fn(
         ResponseFactoryInterface $responseFactory,
         StreamFactoryInterface $streamFactory,

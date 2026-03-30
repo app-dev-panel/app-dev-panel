@@ -189,6 +189,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
      */
     public array $pathMapping = [];
 
+    /**
+     * @var string Base URL for panel static assets (empty = GitHub Pages default).
+     */
+    public string $panelStaticUrl = '';
+
     public $controllerNamespace = 'AppDevPanel\\Adapter\\Yii2\\Controller';
 
     private ?Debugger $debugger = null;
@@ -396,7 +401,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
     private function registerApiApplication(\Psr\Container\ContainerInterface $containerBridge): void
     {
-        \Yii::$container->setSingleton(PanelConfig::class, static fn() => new PanelConfig());
+        $panelStaticUrl = $this->panelStaticUrl;
+        \Yii::$container->setSingleton(
+            PanelConfig::class,
+            static fn() => new PanelConfig($panelStaticUrl !== '' ? $panelStaticUrl : PanelConfig::DEFAULT_STATIC_URL),
+        );
         \Yii::$container->setSingleton(
             PanelController::class,
             static fn() => new PanelController(

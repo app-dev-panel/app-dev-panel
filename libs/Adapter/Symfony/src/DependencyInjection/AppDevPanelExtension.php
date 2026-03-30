@@ -509,7 +509,11 @@ final class AppDevPanelExtension extends Extension
             ])
             ->setPublic(true);
 
-        $container->register(PanelConfig::class, PanelConfig::class)->setPublic(false);
+        $panelStaticUrl = $config['panel']['static_url'] ?? '';
+        $container
+            ->register(PanelConfig::class, PanelConfig::class)
+            ->setArguments([$panelStaticUrl !== '' ? $panelStaticUrl : PanelConfig::DEFAULT_STATIC_URL])
+            ->setPublic(false);
 
         $container
             ->register(PanelController::class, PanelController::class)

@@ -89,7 +89,7 @@ return [
 
 ### 3. Start debugging
 
-Run your application and access the debug API at `http://your-app/debug/api/`. The ADP panel shows debug data collected from your application in real-time.
+Run your application and open `http://your-app/debug` in your browser. The ADP [debug panel](/guide/debug-panel) shows debug data collected from your application in real-time.
 
 ::: tip PHP Built-in Server
 When using PHP's built-in server, always set `PHP_CLI_SERVER_WORKERS=3` or higher. ADP makes concurrent requests (SSE + data fetching); single-worker mode causes timeouts.
@@ -157,6 +157,7 @@ ADP follows a layered architecture:
 ## What's Next?
 
 - [What is ADP?](/guide/what-is-adp) — Learn about the project philosophy
+- [Debug Panel](/guide/debug-panel) — Configure the embedded debug panel UI
 - [Architecture](/guide/architecture) — Deep dive into the system design
 - [Collectors](/guide/collectors) — Understand how data is collected
 - [Data Flow](/guide/data-flow) — Follow data from your app to the panel

@@ -109,6 +109,7 @@ export default defineConfig({
                             text: 'Frontend',
                             collapsed: false,
                             items: [
+                                { text: 'Debug Panel', link: '/guide/debug-panel' },
                                 { text: 'Frontend Packages', link: '/guide/frontend-packages' },
                             ],
                         },
@@ -220,6 +221,7 @@ export default defineConfig({
                             text: 'Фронтенд',
                             collapsed: false,
                             items: [
+                                { text: 'Панель отладки', link: '/ru/guide/debug-panel' },
                                 { text: 'Фронтенд-пакеты', link: '/ru/guide/frontend-packages' },
                             ],
                         },
