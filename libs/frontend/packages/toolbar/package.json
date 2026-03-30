@@ -18,7 +18,8 @@
     "directory": "packages/toolbar"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
     "@welldone-software/why-did-you-render": "^8.0.3",

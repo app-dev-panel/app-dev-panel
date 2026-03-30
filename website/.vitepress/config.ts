@@ -106,6 +106,13 @@ export default defineConfig({
                             ],
                         },
                         {
+                            text: 'Frontend',
+                            collapsed: false,
+                            items: [
+                                { text: 'Frontend Packages', link: '/guide/frontend-packages' },
+                            ],
+                        },
+                        {
                             text: 'Advanced',
                             collapsed: true,
                             items: [
@@ -207,6 +214,13 @@ export default defineConfig({
                                 { text: 'Yii 2', link: '/ru/guide/adapters/yii2' },
                                 { text: 'Yii 3 (Yiisoft)', link: '/ru/guide/adapters/yiisoft' },
                                 { text: 'Laravel', link: '/ru/guide/adapters/laravel' },
+                            ],
+                        },
+                        {
+                            text: 'Фронтенд',
+                            collapsed: false,
+                            items: [
+                                { text: 'Фронтенд-пакеты', link: '/ru/guide/frontend-packages' },
                             ],
                         },
                         {

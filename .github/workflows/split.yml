@@ -16,16 +16,16 @@ jobs:
       fail-fast: false
       matrix:
         package:
-          - { name: "kernel",           local_path: "libs/Kernel",           remote_repository: "app-dev-panel/kernel" }
-          - { name: "api",              local_path: "libs/API",              remote_repository: "app-dev-panel/api" }
-          - { name: "cli",              local_path: "libs/Cli",              remote_repository: "app-dev-panel/cli" }
-          - { name: "mcp-server",       local_path: "libs/McpServer",        remote_repository: "app-dev-panel/mcp-server" }
-          - { name: "testing",          local_path: "libs/Testing",          remote_repository: "app-dev-panel/testing" }
-          - { name: "adapter-symfony",  local_path: "libs/Adapter/Symfony",  remote_repository: "app-dev-panel/adapter-symfony" }
-          - { name: "adapter-laravel",  local_path: "libs/Adapter/Laravel",  remote_repository: "app-dev-panel/adapter-laravel" }
-          - { name: "adapter-yii2",     local_path: "libs/Adapter/Yii2",     remote_repository: "app-dev-panel/adapter-yii2" }
-          - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",    remote_repository: "app-dev-panel/adapter-cycle" }
-          - { name: "adapter-yiisoft",  local_path: "libs/Adapter/Yiisoft",  remote_repository: "app-dev-panel/adapter-yiisoft" }
+          - { name: "kernel",           local_path: "libs/Kernel",           target_repo: "app-dev-panel/kernel" }
+          - { name: "api",              local_path: "libs/API",              target_repo: "app-dev-panel/api" }
+          - { name: "cli",              local_path: "libs/Cli",              target_repo: "app-dev-panel/cli" }
+          - { name: "mcp-server",       local_path: "libs/McpServer",        target_repo: "app-dev-panel/mcp-server" }
+          - { name: "testing",          local_path: "libs/Testing",          target_repo: "app-dev-panel/testing" }
+          - { name: "adapter-symfony",  local_path: "libs/Adapter/Symfony",  target_repo: "app-dev-panel/adapter-symfony" }
+          - { name: "adapter-laravel",  local_path: "libs/Adapter/Laravel",  target_repo: "app-dev-panel/adapter-laravel" }
+          - { name: "adapter-yii2",     local_path: "libs/Adapter/Yii2",     target_repo: "app-dev-panel/adapter-yii2" }
+          - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",    target_repo: "app-dev-panel/adapter-cycle" }
+          - { name: "adapter-yiisoft",  local_path: "libs/Adapter/Yiisoft",  target_repo: "app-dev-panel/adapter-yiisoft" }
 
     steps:
       - name: Checkout
@@ -34,10 +34,12 @@ jobs:
           fetch-depth: 0
 
       - name: Split ${{ matrix.package.name }}
-        uses: claudiodekker/monorepo-split-action@v1
+        uses: danharrin/monorepo-split-github-action@v2.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
         with:
-          local_path: ${{ matrix.package.local_path }}
-          remote_repository: ${{ matrix.package.remote_repository }}
-          remote_branch: main
+          package_directory: ${{ matrix.package.local_path }}
+          repository_organization: app-dev-panel
+          repository_name: ${{ matrix.package.name }}
+          branch: main
+          tag: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
