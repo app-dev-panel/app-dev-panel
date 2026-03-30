@@ -60,7 +60,7 @@
     "eslint": "^9.9.0",
     "eslint-config-prettier": "^9.1.0",
     "msw": "^2.12.11",
-    "playwright": "^1.52.0",
+    "webdriverio": "^9.15.0",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.0.0",
     "vitest": "^2.1.9"

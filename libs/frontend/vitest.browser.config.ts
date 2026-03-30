@@ -13,10 +13,21 @@ export default defineConfig({
         include: ['packages/*/src/**/*.browser.test.{ts,tsx}'],
         browser: {
             enabled: true,
-            name: 'chromium',
-            provider: 'playwright',
+            name: 'chrome',
+            provider: 'webdriverio',
             headless: true,
-            providerOptions: {launch: {executablePath: '/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome'}},
+            providerOptions: {
+                capabilities: {
+                    'goog:chromeOptions': {
+                        args: [
+                            '--no-sandbox',
+                            '--disable-gpu',
+                            '--disable-dev-shm-usage',
+                            `--user-data-dir=/tmp/vitest-chrome-${process.pid}`,
+                        ],
+                    },
+                },
+            },
         },
         globals: true,
         testTimeout: 15000,
