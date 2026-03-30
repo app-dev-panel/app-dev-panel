@@ -45,7 +45,36 @@ Kernel provides framework-independent PSR proxies:
 | `EventDispatcherInterfaceProxy` | PSR-14 `EventDispatcherInterface` | `EventCollector` |
 | `HttpClientInterfaceProxy` | PSR-18 `ClientInterface` | `HttpClientCollector` |
 
-Additional proxies exist in framework adapters (e.g., `ContainerInterfaceProxy` for PSR-11 in the Yii adapter).
+### Framework-Specific Proxies
+
+Framework adapters provide additional proxies for interfaces that are not PSR-standardized:
+
+| Proxy | Framework | Interface | Paired Collector |
+|-------|-----------|-----------|-----------------|
+| `SymfonyTranslatorProxy` | Symfony | `TranslatorInterface` | `TranslatorCollector` |
+| `SymfonyEventDispatcherProxy` | Symfony | `EventDispatcherInterface` | `EventCollector` |
+| `LaravelTranslatorProxy` | Laravel | `Translator` | `TranslatorCollector` |
+| `LaravelEventDispatcherProxy` | Laravel | `Dispatcher` | `EventCollector` |
+| `TranslatorInterfaceProxy` | Yiisoft | `TranslatorInterface` | `TranslatorCollector` |
+| `ValidatorInterfaceProxy` | Yiisoft | `ValidatorInterface` | `ValidatorCollector` |
+| `ContainerInterfaceProxy` | Yiisoft | PSR-11 `ContainerInterface` | `ServiceCollector` |
+| `I18NProxy` | Yii 2 | `yii\i18n\I18N` | `TranslatorCollector` |
+
+### Translator Proxies
+
+Each framework has its own translator interface. ADP provides a dedicated proxy for each, all feeding the same `TranslatorCollector`. See the [Translator](/guide/translator) page for full details.
+
+**Symfony** -- decorates `Symfony\Contracts\Translation\TranslatorInterface` via `setDecoratedService()` in the compiler pass. Intercepts `trans()` calls.
+
+**Laravel** -- decorates `Illuminate\Contracts\Translation\Translator` via `$app->extend('translator')`. Intercepts `get()` and `choice()` calls. Parses Laravel's dot-notation keys (`group.key`) into category and message.
+
+**Yiisoft** -- registered in `trackedServices` alongside `ValidatorInterfaceProxy`. Intercepts `translate()` calls. Supports `withDefaultCategory()` and `withLocale()` immutable methods.
+
+**Yii 2** -- extends `yii\i18n\I18N` and overrides `translate()`. Replaces the `i18n` application component during module bootstrap.
+
+::: tip Missing translation detection
+All proxies detect missing translations by comparing the translator's return value with the original message ID. If they are identical, the translation is marked as `missing`.
+:::
 
 ## ProxyDecoratedCalls Trait
 

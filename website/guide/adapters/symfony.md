@@ -51,7 +51,11 @@ app_dev_panel:
 
 ## Collectors
 
-Supports all Kernel collectors plus Symfony-specific ones: Twig templates, Security (user/roles/firewall), Cache, Messenger, Doctrine database queries, and [Redis commands](/guide/redis) (via Predis plugin or phpredis decorator).
+Supports all Kernel collectors plus Symfony-specific ones: Twig templates, Security (user/roles/firewall), Cache, Messenger, Translator, Doctrine database queries, and [Redis commands](/guide/redis) (via Predis plugin or phpredis decorator).
+
+## Translator Integration
+
+The adapter automatically decorates Symfony's `TranslatorInterface` with `SymfonyTranslatorProxy` via the compiler pass. All `trans()` calls are intercepted and logged to `TranslatorCollector` — no code changes needed. See [Translator](/guide/translator) for details.
 
 ## Database Inspector
 

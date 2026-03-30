@@ -31,6 +31,7 @@ return [
         'validator' => true,
         'router' => true,
         'opentelemetry' => true,
+        'translator' => true,
     ],
 
     'ignored_requests' => [

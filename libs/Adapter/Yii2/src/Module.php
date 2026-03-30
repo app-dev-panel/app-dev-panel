@@ -14,6 +14,7 @@ use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2DbSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteCollection;
+use AppDevPanel\Adapter\Yii2\Proxy\I18NProxy;
 use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
 use AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy;
 use AppDevPanel\Api\ApiApplication;
@@ -23,6 +24,9 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
+use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -36,9 +40,6 @@ use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
-use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
-use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Controller\LlmController;
@@ -77,6 +78,7 @@ use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -150,6 +152,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         'router' => true,
         'queue' => true,
         'validator' => true,
+        'translator' => true,
     ];
 
     /**
@@ -320,7 +323,10 @@ class Module extends \yii\base\Module implements BootstrapInterface
         }
 
         // Authorization provider
-        \Yii::$container->setSingleton(AuthorizationConfigProviderInterface::class, NullAuthorizationConfigProvider::class);
+        \Yii::$container->setSingleton(
+            AuthorizationConfigProviderInterface::class,
+            NullAuthorizationConfigProvider::class,
+        );
         \Yii::$container->setSingleton(
             AuthorizationController::class,
             static fn() => new AuthorizationController(
@@ -616,6 +622,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'router' => static fn(): array => [new RouterCollector()],
             'queue' => static fn(): array => [new QueueCollector($timeline)],
             'validator' => static fn(): array => [new ValidatorCollector()],
+            'translator' => static fn(): array => [new TranslatorCollector()],
             'security' => static fn(): array => [new SecurityCollector()],
             'opentelemetry' => static fn(): array => [new OpenTelemetryCollector($timeline)],
         ];
@@ -716,6 +723,12 @@ class Module extends \yii\base\Module implements BootstrapInterface
         $logCollector = $this->getCollector(LogCollector::class);
         if ($logCollector instanceof LogCollector) {
             $this->registerDebugLogTarget($logCollector);
+        }
+
+        // Register translator profiling if TranslatorCollector is active
+        $translatorCollector = $this->getCollector(TranslatorCollector::class);
+        if ($translatorCollector instanceof TranslatorCollector) {
+            $this->registerTranslatorProfiling($app, $translatorCollector);
         }
     }
 
@@ -902,6 +915,18 @@ class Module extends \yii\base\Module implements BootstrapInterface
         }
 
         return [(string) $addresses => ''];
+    }
+
+    private function registerTranslatorProfiling(Application $app, TranslatorCollector $collector): void
+    {
+        $i18n = $app->getI18n();
+        $proxy = new I18NProxy();
+
+        // Copy existing translations config from the original I18N
+        $proxy->translations = $i18n->translations;
+        $proxy->setCollector($collector);
+
+        $app->set('i18n', $proxy);
     }
 
     private function registerAssetProfiling(): void

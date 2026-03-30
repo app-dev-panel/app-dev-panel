@@ -25,6 +25,8 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
@@ -39,8 +41,6 @@ use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
-use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Controller\LlmController;
@@ -79,6 +79,7 @@ use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -280,6 +281,7 @@ final class AppDevPanelExtension extends Extension
         $simpleCollectorMap = [
             'security' => SecurityCollector::class,
             'validator' => ValidatorCollector::class,
+            'translator' => TranslatorCollector::class,
         ];
 
         foreach ($simpleCollectorMap as $key => $class) {
@@ -585,7 +587,9 @@ final class AppDevPanelExtension extends Extension
 
         // Authorization inspector: register NullAuthorizationConfigProvider as default.
         if (!$container->has(AuthorizationConfigProviderInterface::class)) {
-            $container->register(AuthorizationConfigProviderInterface::class, NullAuthorizationConfigProvider::class)->setPublic(false);
+            $container
+                ->register(AuthorizationConfigProviderInterface::class, NullAuthorizationConfigProvider::class)
+                ->setPublic(false);
         }
 
         $container

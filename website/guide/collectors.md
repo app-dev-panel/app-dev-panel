@@ -21,6 +21,7 @@ Collectors are the core data-gathering mechanism in ADP. Each collector implemen
 | `CacheCollector` | Cache get/set/delete operations with hit/miss rates |
 | [`RedisCollector`](/guide/redis) | Redis commands with timing and error tracking |
 | `MailerCollector` | Sent email messages |
+| `TranslatorCollector` | Translation lookups, missing translations |
 | `QueueCollector` | Message queue operations (push, consume, fail) |
 | `ServiceCollector` | DI container service resolutions |
 | `RouterCollector` | HTTP route matching data |
@@ -128,3 +129,9 @@ Collectors receive data in two ways:
 ## SummaryCollectorInterface
 
 Collectors can also implement `SummaryCollectorInterface` to provide summary data displayed in the debug entry list without loading full collector data.
+
+## TranslatorCollector
+
+Captures translation lookups during request execution, including missing translation detection. Implements `SummaryCollectorInterface`.
+
+See the dedicated [Translator](/guide/translator) page for full details: TranslationRecord fields, collected data structure, missing detection logic, framework proxy integrations, and configuration examples.

@@ -51,7 +51,11 @@ app_dev_panel:
 
 ## Коллекторы
 
-Поддерживает все коллекторы Kernel, а также специфичные для Symfony: шаблоны Twig, Security (пользователь/роли/файрвол), кеш, Messenger и запросы к БД через Doctrine.
+Поддерживает все коллекторы Kernel, а также специфичные для Symfony: шаблоны Twig, Security (пользователь/роли/файрвол), кеш, Messenger, переводчик и запросы к БД через Doctrine.
+
+## Интеграция с переводчиком
+
+Адаптер автоматически декорирует `TranslatorInterface` Symfony через `SymfonyTranslatorProxy` в compiler pass. Все вызовы `trans()` перехватываются и записываются в `TranslatorCollector` — изменения кода не требуются. Подробности на странице [Переводчик](/ru/guide/translator).
 
 ## Инспектор базы данных
 

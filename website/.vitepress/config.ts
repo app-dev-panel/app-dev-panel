@@ -78,6 +78,7 @@ export default defineConfig({
                             collapsed: false,
                             items: [
                                 { text: 'Collectors', link: '/guide/collectors' },
+                                { text: 'Translator', link: '/guide/translator' },
                                 { text: 'Storage', link: '/guide/storage' },
                                 { text: 'Proxies', link: '/guide/proxies' },
                                 { text: 'Elasticsearch', link: '/guide/elasticsearch' },
@@ -182,6 +183,7 @@ export default defineConfig({
                             collapsed: false,
                             items: [
                                 { text: 'Коллекторы', link: '/ru/guide/collectors' },
+                                { text: 'Переводчик', link: '/ru/guide/translator' },
                                 { text: 'Хранилище', link: '/ru/guide/storage' },
                                 { text: 'Прокси', link: '/ru/guide/proxies' },
                                 { text: 'Elasticsearch', link: '/ru/guide/elasticsearch' },

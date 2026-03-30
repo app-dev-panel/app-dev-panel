@@ -45,7 +45,36 @@ ADP использует паттерн прокси для прозрачног
 | `EventDispatcherInterfaceProxy` | PSR-14 `EventDispatcherInterface` | `EventCollector` |
 | `HttpClientInterfaceProxy` | PSR-18 `ClientInterface` | `HttpClientCollector` |
 
-Дополнительные прокси существуют в адаптерах фреймворков (например, `ContainerInterfaceProxy` для PSR-11 в адаптере Yii).
+### Прокси фреймворков
+
+Адаптеры фреймворков предоставляют дополнительные прокси для интерфейсов, не стандартизированных PSR:
+
+| Прокси | Фреймворк | Интерфейс | Парный коллектор |
+|--------|-----------|-----------|-----------------|
+| `SymfonyTranslatorProxy` | Symfony | `TranslatorInterface` | `TranslatorCollector` |
+| `SymfonyEventDispatcherProxy` | Symfony | `EventDispatcherInterface` | `EventCollector` |
+| `LaravelTranslatorProxy` | Laravel | `Translator` | `TranslatorCollector` |
+| `LaravelEventDispatcherProxy` | Laravel | `Dispatcher` | `EventCollector` |
+| `TranslatorInterfaceProxy` | Yiisoft | `TranslatorInterface` | `TranslatorCollector` |
+| `ValidatorInterfaceProxy` | Yiisoft | `ValidatorInterface` | `ValidatorCollector` |
+| `ContainerInterfaceProxy` | Yiisoft | PSR-11 `ContainerInterface` | `ServiceCollector` |
+| `I18NProxy` | Yii 2 | `yii\i18n\I18N` | `TranslatorCollector` |
+
+### Прокси переводчика
+
+У каждого фреймворка свой интерфейс переводчика. ADP предоставляет выделенный прокси для каждого, все они передают данные в один `TranslatorCollector`. Подробности на странице [Переводчик](/ru/guide/translator).
+
+**Symfony** -- декорирует `Symfony\Contracts\Translation\TranslatorInterface` через `setDecoratedService()` в compiler pass. Перехватывает вызовы `trans()`.
+
+**Laravel** -- декорирует `Illuminate\Contracts\Translation\Translator` через `$app->extend('translator')`. Перехватывает вызовы `get()` и `choice()`. Разбирает точечную нотацию ключей Laravel (`group.key`) на категорию и сообщение.
+
+**Yiisoft** -- регистрируется в `trackedServices` наряду с `ValidatorInterfaceProxy`. Перехватывает вызовы `translate()`. Поддерживает иммутабельные методы `withDefaultCategory()` и `withLocale()`.
+
+**Yii 2** -- наследует `yii\i18n\I18N` и переопределяет `translate()`. Заменяет компонент приложения `i18n` при загрузке модуля.
+
+::: tip Обнаружение отсутствующих переводов
+Все прокси определяют отсутствие перевода, сравнивая возвращённое значение переводчика с исходным идентификатором сообщения. Если они совпадают, перевод помечается как `missing`.
+:::
 
 ## Трейт ProxyDecoratedCalls
 

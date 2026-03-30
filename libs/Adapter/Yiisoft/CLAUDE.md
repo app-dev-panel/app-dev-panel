@@ -43,6 +43,8 @@ src/
 │   ├── Router/
 │   │   ├── RouterCollector.php
 │   │   └── UrlMatcherInterfaceProxy.php
+│   ├── Translator/
+│   │   └── TranslatorInterfaceProxy.php
 │   ├── Validator/
 │   │   ├── ValidatorCollector.php
 │   │   └── ValidatorInterfaceProxy.php

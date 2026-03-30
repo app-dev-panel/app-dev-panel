@@ -326,6 +326,16 @@ final class FixtureRegistry
                 ],
             ]),
 
+            // === Translator ===
+            new Fixture(name: 'translator:basic', endpoint: '/test/fixtures/translator', expectations: [
+                'translator' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryHasKey('translator'),
+                    Expectation::summaryGte('translator.total', 4),
+                    Expectation::summaryGte('translator.missing', 1),
+                ],
+            ]),
+
             // === Elasticsearch ===
             new Fixture(name: 'elasticsearch:basic', endpoint: '/test/fixtures/elasticsearch', expectations: [
                 'elasticsearch' => [

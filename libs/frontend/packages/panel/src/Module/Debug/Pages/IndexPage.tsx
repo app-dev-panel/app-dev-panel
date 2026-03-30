@@ -41,6 +41,7 @@ const iconColors: Record<string, {bg: string; fg: string}> = {
     [CollectorsMap.SecurityCollector]: {bg: '#FEF2F2', fg: '#DC2626'},
     [CollectorsMap.DeprecationCollector]: {bg: '#FFF3E0', fg: '#E65100'},
     [CollectorsMap.EnvironmentCollector]: {bg: '#E8F5E9', fg: '#2E7D32'},
+    [CollectorsMap.TranslatorCollector]: {bg: '#E3F2FD', fg: '#1565C0'},
 };
 const defaultIconColor = {bg: '#F5F5F5', fg: '#666666'};
 

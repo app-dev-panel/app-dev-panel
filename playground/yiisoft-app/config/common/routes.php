@@ -38,6 +38,7 @@ return [
             Route::get('/opentelemetry')->action(Web\TestFixtures\OpenTelemetryAction::class)->name(
                 'test-opentelemetry',
             ),
+            Route::get('/translator')->action(Web\TestFixtures\TranslatorAction::class)->name('test-translator'),
             Route::get('/security')->action(Web\TestFixtures\SecurityAction::class)->name('test-security'),
             Route::get('/elasticsearch')->action(Web\TestFixtures\ElasticsearchAction::class)->name(
                 'test-elasticsearch',

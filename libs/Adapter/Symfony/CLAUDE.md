@@ -26,7 +26,8 @@ src/
 │   ├── SecuritySubscriber.php                      # Symfony Security events → SecurityCollector
 │   └── CorsSubscriber.php                          # CORS headers for debug API responses
 ├── Proxy/
-│   └── SymfonyEventDispatcherProxy.php             # Wraps event_dispatcher, implements Component interface
+│   ├── SymfonyEventDispatcherProxy.php             # Wraps event_dispatcher, implements Component interface
+│   └── SymfonyTranslatorProxy.php                  # Wraps TranslatorInterface, feeds TranslatorCollector
 ├── Collector/
 │   ├── TwigCollector.php                           # Template renders, timing (requires twig/twig)
 │   ├── CacheCollector.php                          # Cache hits/misses, operations
@@ -90,6 +91,7 @@ Runs after all extensions. Responsibilities:
 - Decorates `logger` or `LoggerInterface` → `LoggerInterfaceProxy` (checks `logger` first, then FQCN)
 - Decorates `event_dispatcher` → `SymfonyEventDispatcherProxy` (implements `Symfony\Component\EventDispatcher\EventDispatcherInterface`)
 - Decorates `ClientInterface` (PSR-18) → `HttpClientInterfaceProxy`
+- Decorates `translator` → `SymfonyTranslatorProxy` (feeds `TranslatorCollector`)
 - Collects all container parameters (excluding `app_dev_panel.*`) → passes to `InspectController` and `SymfonyConfigProvider`
 
 ### 5. Event Wiring
@@ -179,6 +181,7 @@ Conditionally registered only when `symfony/security-http` is installed and the 
 | `CacheCollector` | Decorated cache adapter calling `logCacheOperation()` | Cache operations, hits/misses |
 | `MailerCollector` (Kernel) | Mailer MessageEvent listener calling `collectMessage()` | Emails sent |
 | `MessengerCollector` | Messenger middleware calling `logMessage()` | Messages dispatched/handled/failed |
+| `TranslatorCollector` (Kernel) | `SymfonyTranslatorProxy` decorating `TranslatorInterface` | Translation lookups, missing translations |
 | `RedisCollector` (Kernel) | Predis plugin or phpredis decorator calling `logCommand()` | Redis commands, timing, errors |
 
 ## Configuration Reference
@@ -207,6 +210,7 @@ app_dev_panel:
         cache: true                        # CacheCollector
         mailer: true                       # MailerCollector from Kernel (requires symfony/mailer)
         messenger: true                    # MessengerCollector (requires symfony/messenger)
+        translator: true                   # TranslatorCollector (Kernel, via SymfonyTranslatorProxy)
     ignored_requests:
         - '/_wdt/*'
         - '/_profiler/*'

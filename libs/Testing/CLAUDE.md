@@ -92,6 +92,7 @@ All playgrounds must implement these endpoints under `/test/fixtures/`:
 | `/test/fixtures/router` | router:basic | RouterCollector |
 | `/test/fixtures/cache` | cache:basic | CacheCollector |
 | `/test/fixtures/cache-heavy` | cache:heavy | CacheCollector |
+| `/test/fixtures/translator` | translator:basic | TranslatorCollector |
 | `/test/fixtures/security` | security:basic | SecurityCollector |
 | `/test/fixtures/opentelemetry` | opentelemetry:basic | OpenTelemetryCollector |
 | `/test/fixtures/elasticsearch` | elasticsearch:basic | ElasticsearchCollector |

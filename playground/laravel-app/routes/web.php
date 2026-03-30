@@ -28,6 +28,7 @@ use App\Http\Controllers\TestFixtures\ResetCliAction;
 use App\Http\Controllers\TestFixtures\RouterAction;
 use App\Http\Controllers\TestFixtures\TimelineAction;
 use App\Http\Controllers\TestFixtures\SecurityAction;
+use App\Http\Controllers\TestFixtures\TranslatorAction;
 use App\Http\Controllers\TestFixtures\ValidatorAction;
 use Illuminate\Support\Facades\Route;
 
@@ -60,6 +61,7 @@ Route::prefix('test/fixtures')->group(function (): void {
     Route::get('/filesystem', FilesystemAction::class);
     Route::get('/filesystem-streams', FileStreamAction::class);
     Route::get('/opentelemetry', OpenTelemetryAction::class);
+    Route::get('/translator', TranslatorAction::class);
     Route::get('/security', SecurityAction::class);
     Route::get('/elasticsearch', ElasticsearchAction::class);
     Route::get('/redis', RedisAction::class);

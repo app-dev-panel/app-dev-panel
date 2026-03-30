@@ -9,13 +9,19 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class HomeController extends AbstractController
 {
     #[Route('/', name: 'home', methods: ['GET'])]
-    public function index(LoggerInterface $logger): JsonResponse
+    public function index(LoggerInterface $logger, TranslatorInterface $translator): JsonResponse
     {
         $logger->info('Home page accessed');
+
+        // Demo translations — makes TranslatorCollector visible in the panel
+        $translator->trans('welcome', [], 'messages', 'en');
+        $translator->trans('welcome', [], 'messages', 'de');
+        $translator->trans('goodbye', [], 'messages', 'fr'); // missing
 
         return $this->json([
             'message' => 'Welcome to the ADP Symfony Playground!',

@@ -33,6 +33,7 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
     [CollectorsMap.ViewCollector]: {label: 'View', icon: 'visibility', weight: 20},
     [CollectorsMap.DeprecationCollector]: {label: 'Deprecations', icon: 'warning_amber', weight: 5},
     [CollectorsMap.OpenTelemetryCollector]: {label: 'Traces', icon: 'account_tree', weight: 9},
+    [CollectorsMap.TranslatorCollector]: {label: 'Translator', icon: 'translate', weight: 17},
     [CollectorsMap.ElasticsearchCollector]: {label: 'Elasticsearch', icon: 'search', weight: 13},
     [CollectorsMap.RedisCollector]: {label: 'Redis', icon: 'memory', weight: 4},
 };

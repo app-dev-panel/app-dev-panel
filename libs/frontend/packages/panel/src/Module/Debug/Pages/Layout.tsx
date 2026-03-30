@@ -20,6 +20,7 @@ import {RouterPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/Rou
 import {SecurityPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/SecurityPanel';
 import {ServicesPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ServicesPanel';
 import {TimelinePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelinePanel';
+import {TranslatorPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TranslatorPanel';
 import {TwigPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TwigPanel';
 import {ValidatorPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ValidatorPanel';
 import {VarDumperPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/VarDumperPanel';
@@ -70,6 +71,7 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.ViewCollector]: (data: any) => <WebViewPanel data={data} />,
         [CollectorsMap.AssetBundleCollector]: (data: any) => <AssetBundlePanel data={data} />,
         [CollectorsMap.OpenTelemetryCollector]: (data: any) => <OpenTelemetryPanel data={data} />,
+        [CollectorsMap.TranslatorCollector]: (data: any) => <TranslatorPanel data={data} />,
         [CollectorsMap.ElasticsearchCollector]: (data: any) => <ElasticsearchPanel data={data} />,
         [CollectorsMap.RedisCollector]: (data: any) => <RedisPanel data={data} />,
         default: (data: any) => {

@@ -21,6 +21,7 @@ title: Коллекторы
 | `CacheCollector` | Операции кеша с отслеживанием hit/miss |
 | [`RedisCollector`](/ru/guide/redis) | Redis-команды с таймингом и отслеживанием ошибок |
 | `MailerCollector` | Отправленные email-сообщения |
+| `TranslatorCollector` | Обращения к переводам, отсутствующие переводы |
 | `QueueCollector` | Операции очереди сообщений (push, consume, fail) |
 | `ServiceCollector` | Разрешение сервисов DI-контейнера |
 | `RouterCollector` | Данные маршрутизации HTTP-запросов |
@@ -128,3 +129,9 @@ final class MetricsCollector implements CollectorInterface
 ## SummaryCollectorInterface
 
 Коллекторы также могут реализовать `SummaryCollectorInterface` для предоставления сводных данных, отображаемых в списке отладочных записей без загрузки полных данных коллектора.
+
+## TranslatorCollector
+
+Захватывает обращения к переводам во время выполнения запроса, включая обнаружение отсутствующих переводов. Реализует `SummaryCollectorInterface`.
+
+Подробности на странице [Переводчик](/ru/guide/translator): поля TranslationRecord, структура собранных данных, логика определения отсутствующих переводов, интеграции proxy фреймворков и примеры конфигурации.

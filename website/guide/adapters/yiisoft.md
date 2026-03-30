@@ -48,7 +48,11 @@ DebugHeaders → ErrorCatcher → YiiApiMiddleware → ... → Router
 
 ## Collectors
 
-Includes Yii-specific collectors for database queries, mailer, queue, router, validator, and views — in addition to all Kernel collectors (logs, events, exceptions, HTTP client, etc.).
+Includes Yii-specific collectors for database queries, mailer, queue, router, validator, translator, and views — in addition to all Kernel collectors (logs, events, exceptions, HTTP client, etc.).
+
+## Translator Integration
+
+When `yiisoft/translator` is installed, the adapter registers `TranslatorInterfaceProxy` in `trackedServices`. All `translate()` calls on `Yiisoft\Translator\TranslatorInterface` are intercepted automatically. See [Translator](/guide/translator) for details.
 
 ## Database Inspector
 

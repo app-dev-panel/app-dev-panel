@@ -18,12 +18,10 @@ use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelUrlMatcherAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\NullSchemaProvider;
-use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
-use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugCollectors;
 use AppDevPanel\Adapter\Laravel\Middleware\DebugMiddleware;
 use AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy;
+use AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
@@ -34,6 +32,9 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
+use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -86,6 +87,7 @@ use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -195,6 +197,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'filesystem_stream' => FilesystemStreamCollector::class,
             'http_stream' => HttpStreamCollector::class,
             'validator' => ValidatorCollector::class,
+            'translator' => TranslatorCollector::class,
             'security' => SecurityCollector::class,
         ];
 
@@ -602,7 +605,10 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
-        $this->app->singleton(AuthorizationConfigProviderInterface::class, fn() => new NullAuthorizationConfigProvider());
+        $this->app->singleton(
+            AuthorizationConfigProviderInterface::class,
+            fn() => new NullAuthorizationConfigProvider(),
+        );
         $this->app->singleton(
             AuthorizationController::class,
             fn() => new AuthorizationController(
@@ -751,6 +757,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->decorateLoggerProxy($collectors);
         $this->decorateHttpClientProxy($collectors);
         $this->decorateEventDispatcherProxy($collectors);
+        $this->decorateTranslatorProxy($collectors);
     }
 
     /**
@@ -804,6 +811,26 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 return $dispatcher;
             }
             return new LaravelEventDispatcherProxy($dispatcher, $this->app->make(EventCollector::class));
+        });
+    }
+
+    /**
+     * @param array<string, bool> $collectors
+     */
+    private function decorateTranslatorProxy(array $collectors): void
+    {
+        if (!(($collectors['translator'] ?? true) && $this->app->bound(TranslatorCollector::class))) {
+            return;
+        }
+        if (!$this->app->bound('translator')) {
+            return;
+        }
+
+        $this->app->extend('translator', function ($translator) {
+            if ($translator instanceof LaravelTranslatorProxy) {
+                return $translator;
+            }
+            return new LaravelTranslatorProxy($translator, $this->app->make(TranslatorCollector::class));
         });
     }
 }

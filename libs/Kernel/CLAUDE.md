@@ -102,6 +102,8 @@ src/
 │   ├── RouterCollector.php             # HTTP route matching data
 │   ├── SecurityCollector.php           # Authentication/authorization
 │   ├── TemplateCollector.php           # Template rendering
+│   ├── TranslatorCollector.php         # Translation lookups + missing detection
+│   ├── TranslationRecord.php           # Value object for translation lookup
 │   ├── ValidatorCollector.php          # Validation operations
 │   ├── ViewCollector.php               # View rendering with output
 │   ├── Web/
