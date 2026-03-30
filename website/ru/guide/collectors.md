@@ -14,6 +14,7 @@ title: Коллекторы
 | `EventCollector` | PSR-14 отправленные события и слушатели |
 | `HttpClientCollector` | PSR-18 исходящие HTTP-запросы и ответы |
 | `DatabaseCollector` | SQL-запросы, время выполнения, транзакции |
+| `ElasticsearchCollector` | Запросы к Elasticsearch, тайминг, количество hits |
 | `ExceptionCollector` | Необработанные исключения со стектрейсами |
 | `RequestCollector` | Входящие HTTP-запросы и ответы |
 | `ServiceCollector` | Разрешение сервисов DI-контейнера |

@@ -33,6 +33,7 @@ final class CollectorDataResolver
         'view' => 'WebViewCollector',
         'assets' => 'AssetBundleCollector',
         'opentelemetry' => 'OpenTelemetryCollector',
+        'elasticsearch' => 'ElasticsearchCollector',
     ];
 
     /**

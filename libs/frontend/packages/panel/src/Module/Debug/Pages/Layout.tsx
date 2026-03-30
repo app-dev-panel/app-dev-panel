@@ -3,6 +3,7 @@ import {AssetBundlePanel} from '@app-dev-panel/panel/Module/Debug/Component/Pane
 import {CachePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CachePanel';
 import {DatabasePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DatabasePanel';
 import {DeprecationPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DeprecationPanel';
+import {ElasticsearchPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ElasticsearchPanel';
 import {EnvironmentPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EnvironmentPanel';
 import {EventPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EventPanel';
 import {ExceptionPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ExceptionPanel';
@@ -70,6 +71,7 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.AssetBundleCollector]: (data: any) => <AssetBundlePanel data={data} />,
         [CollectorsMap.OpenTelemetryCollector]: (data: any) => <OpenTelemetryPanel data={data} />,
         [CollectorsMap.TranslatorCollector]: (data: any) => <TranslatorPanel data={data} />,
+        [CollectorsMap.ElasticsearchCollector]: (data: any) => <ElasticsearchPanel data={data} />,
         default: (data: any) => {
             if (typeof data === 'object' && data.__isPanelRemote__) {
                 return (

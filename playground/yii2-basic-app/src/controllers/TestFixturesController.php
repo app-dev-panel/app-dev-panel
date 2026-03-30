@@ -44,6 +44,7 @@ final class TestFixturesController extends Controller
             'messenger' => \App\actions\testFixtures\MessengerAction::class,
             'opentelemetry' => \App\actions\testFixtures\OpenTelemetryAction::class,
             'translator' => \App\actions\testFixtures\TranslatorAction::class,
+            'elasticsearch' => \App\actions\testFixtures\ElasticsearchAction::class,
             'reset' => \App\actions\testFixtures\ResetAction::class,
             'reset-cli' => \App\actions\testFixtures\ResetCliAction::class,
         ];

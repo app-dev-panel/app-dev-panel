@@ -79,6 +79,8 @@ src/
 │   ├── CacheOperationRecord.php         # Value object for cache operation
 │   ├── DatabaseCollector.php            # SQL queries + transactions (fed by adapter hooks)
 │   ├── QueryRecord.php                  # Value object for DB query
+│   ├── ElasticsearchCollector.php       # Elasticsearch requests (fed by adapter hooks)
+│   ├── ElasticsearchRequestRecord.php   # Immutable DTO for logRequest() pattern
 │   ├── MessageRecord.php               # Value object for mailer message
 │   ├── MailerCollector.php              # Email messages (fed by adapter hooks)
 │   ├── SecurityCollector.php            # Auth: user, token, guards, role hierarchy, access decisions, auth events

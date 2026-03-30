@@ -51,6 +51,8 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
             return Number(data.opentelemetry?.spans) || 0;
         case CollectorsMap.TranslatorCollector:
             return Number(data.translator?.total) || 0;
+        case CollectorsMap.ElasticsearchCollector:
+            return Number(data.elasticsearch?.total) || 0;
         default:
             return undefined;
     }

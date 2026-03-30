@@ -40,6 +40,9 @@ return [
             ),
             Route::get('/translator')->action(Web\TestFixtures\TranslatorAction::class)->name('test-translator'),
             Route::get('/security')->action(Web\TestFixtures\SecurityAction::class)->name('test-security'),
+            Route::get('/elasticsearch')->action(Web\TestFixtures\ElasticsearchAction::class)->name(
+                'test-elasticsearch',
+            ),
             Route::methods(['GET', 'POST'], '/reset')
                 ->action(Web\TestFixtures\ResetAction::class)
                 ->name('test-reset'),
