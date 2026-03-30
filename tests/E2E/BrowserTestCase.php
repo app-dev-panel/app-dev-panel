@@ -261,7 +261,6 @@ abstract class BrowserTestCase extends TestCase
         }
 
         $candidates = [
-            '/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome',
             '/usr/bin/chromium',
             '/usr/bin/chromium-browser',
             '/usr/bin/google-chrome',
@@ -272,12 +271,6 @@ abstract class BrowserTestCase extends TestCase
             if (is_executable($candidate)) {
                 return $candidate;
             }
-        }
-
-        // Try to find via glob
-        $playwrightChrome = glob('/root/.cache/ms-playwright/chromium-*/chrome-linux/chrome');
-        if ($playwrightChrome !== [] && is_executable($playwrightChrome[0])) {
-            return $playwrightChrome[0];
         }
 
         throw new RuntimeException(

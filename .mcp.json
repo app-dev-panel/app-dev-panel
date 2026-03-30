@@ -1,14 +1,3 @@
 {
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@playwright/mcp",
-        "--headless",
-        "--executable-path",
-        "/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome"
-      ],
-      "cwd": "/home/user/app-dev-panel/libs/frontend"
-    }
-  }
+  "mcpServers": {}
 }

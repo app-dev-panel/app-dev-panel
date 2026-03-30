@@ -144,7 +144,7 @@ The project uses a **top-level Makefile** as the single entry point for all task
 make test                           # Run ALL tests in parallel (PHP + frontend)
 make test-php                       # Run PHP unit tests (PHPUnit)
 make test-frontend                  # Run frontend unit tests (Vitest)
-make test-frontend-e2e              # Run frontend browser tests (Vitest + Playwright)
+make test-frontend-e2e              # Run frontend browser tests (Vitest + WebDriverIO + ChromeDriver)
 
 # Code quality — PHP (Mago)
 make mago                           # Run all Mago checks on core (format + lint + analyze)

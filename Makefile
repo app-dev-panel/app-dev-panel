@@ -53,7 +53,7 @@ help: ## Show this help
 	@echo "  make test                  Run ALL tests in parallel (PHP unit + frontend unit)"
 	@echo "  make test-php              Run PHP unit tests (PHPUnit)"
 	@echo "  make test-frontend         Run frontend unit tests (Vitest)"
-	@echo "  make test-frontend-e2e     Run frontend browser tests (Vitest + Playwright)"
+	@echo "  make test-frontend-e2e     Run frontend browser tests (Vitest + WebDriverIO + ChromeDriver)"
 	@echo "  make test-ci               Run all tests for CI (parallel, GitHub Actions)"
 	@echo ""
 	@echo "$(YELLOW)Code Quality — Core:$(RESET)"
