@@ -6,6 +6,8 @@ title: Getting Started
 
 ADP (Application Development Panel) is a framework-agnostic debugging panel for PHP applications. It collects runtime data and provides a web UI to inspect and debug your application.
 
+[![php](https://img.shields.io/packagist/dependency-v/app-dev-panel/kernel/php?style=flat-square)](https://packagist.org/packages/app-dev-panel/kernel) [![packagist](https://img.shields.io/packagist/v/app-dev-panel/kernel?style=flat-square)](https://packagist.org/packages/app-dev-panel/kernel) [![license](https://img.shields.io/github/license/app-dev-panel/app-dev-panel?style=flat-square)](https://github.com/app-dev-panel/app-dev-panel/blob/master/LICENSE) [![downloads](https://img.shields.io/packagist/dt/app-dev-panel/kernel?style=flat-square)](https://packagist.org/packages/app-dev-panel/kernel) [![github stars](https://img.shields.io/github/stars/app-dev-panel/app-dev-panel?style=flat-square)](https://github.com/app-dev-panel/app-dev-panel)
+
 ## Prerequisites
 
 - PHP 8.4 or higher

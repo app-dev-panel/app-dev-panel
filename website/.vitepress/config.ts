@@ -46,6 +46,7 @@ export default defineConfig({
                     { text: 'Guide', link: '/guide/getting-started' },
                     { text: 'API', link: '/api/' },
                     { text: 'llms.txt', link: '/guide/llms-txt' },
+                    { text: 'Sponsor', link: '/sponsor' },
                     {
                         text: 'Blog',
                         link: '/blog/',
@@ -149,6 +150,7 @@ export default defineConfig({
                     { text: 'Руководство', link: '/ru/guide/getting-started' },
                     { text: 'API', link: '/ru/api/' },
                     { text: 'llms.txt', link: '/ru/guide/llms-txt' },
+                    { text: 'Спонсоры', link: '/ru/sponsor' },
                     {
                         text: 'Блог',
                         link: '/ru/blog/',
