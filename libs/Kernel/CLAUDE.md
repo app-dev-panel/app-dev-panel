@@ -97,6 +97,8 @@ src/
 │   ├── OtlpTraceParser.php             # OTLP trace data parser
 │   ├── SpanRecord.php                  # Value object for OTel span
 │   ├── QueueCollector.php              # Message queue/bus operations
+│   ├── RedisCollector.php              # Redis commands (fed by adapter hooks)
+│   ├── RedisCommandRecord.php          # Value object for Redis command
 │   ├── RouterCollector.php             # HTTP route matching data
 │   ├── SecurityCollector.php           # Authentication/authorization
 │   ├── TemplateCollector.php           # Template rendering

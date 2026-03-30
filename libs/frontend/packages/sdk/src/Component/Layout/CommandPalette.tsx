@@ -177,6 +177,7 @@ const defaultPages: PaletteItem[] = [
         section: 'Inspector',
     },
     {icon: 'cached', label: 'Inspector > Cache', path: '/inspector/cache', shortcut: '/cache', section: 'Inspector'},
+    {icon: 'memory', label: 'Inspector > Redis', path: '/inspector/redis', shortcut: '/redis', section: 'Inspector'},
     {icon: 'code', label: 'Inspector > Git', path: '/inspector/git', shortcut: '/git', section: 'Inspector'},
     {
         icon: 'info',

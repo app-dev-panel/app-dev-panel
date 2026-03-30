@@ -189,6 +189,7 @@ Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: n
 | `DatabaseCollector` | `DbProfilingTarget` (Yii Logger) | SQL queries, params, row count, execution time |
 | `MailerCollector` | `BaseMailer::EVENT_AFTER_SEND` (normalized in Module) | From, to, cc, bcc, subject, body, charset |
 | `AssetBundleCollector` | `View::EVENT_END_PAGE` (normalized in Module) | Asset bundles: class, source/base paths, CSS/JS files, dependencies |
+| `RedisCollector` | `yii\redis\Connection` events or decorator | Redis commands, timing, errors |
 
 ## Architecture Comparison: Symfony vs Yii 2
 

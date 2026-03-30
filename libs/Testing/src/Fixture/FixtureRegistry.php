@@ -305,6 +305,16 @@ final class FixtureRegistry
                 ],
             ]),
 
+            // === Redis ===
+            new Fixture(name: 'redis:basic', endpoint: '/test/fixtures/redis', expectations: [
+                'redis' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryHasKey('redis'),
+                    Expectation::summaryGte('redis.commandCount', 5),
+                    Expectation::summaryGte('redis.errorCount', 1),
+                ],
+            ]),
+
             // === OpenTelemetry ===
             new Fixture(name: 'opentelemetry:basic', endpoint: '/test/fixtures/opentelemetry', expectations: [
                 'opentelemetry' => [

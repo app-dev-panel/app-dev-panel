@@ -16,6 +16,7 @@ export {FileExplorerPage} from '@app-dev-panel/panel/Module/Inspector/Pages/File
 export * as GitPages from '@app-dev-panel/panel/Module/Inspector/Pages/Git';
 export {OpcachePage} from '@app-dev-panel/panel/Module/Inspector/Pages/OpcachePage';
 export {PhpInfoPage} from '@app-dev-panel/panel/Module/Inspector/Pages/PhpInfoPage';
+export {RedisPage} from '@app-dev-panel/panel/Module/Inspector/Pages/RedisPage';
 export {RoutesPage} from '@app-dev-panel/panel/Module/Inspector/Pages/RoutesPage';
 export {TablePage} from '@app-dev-panel/panel/Module/Inspector/Pages/TablePage';
 export {TestsPage} from '@app-dev-panel/panel/Module/Inspector/Pages/TestsPage';

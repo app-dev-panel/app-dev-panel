@@ -85,6 +85,17 @@ Provided by `app-dev-panel/kernel`, reused by all adapters. The Symfony adapter 
 - **Data**: `{messages: [{from, to, cc, bcc, replyTo, subject, textBody, htmlBody, raw, charset, date}]}`
 - **Summary**: `{mailer: {total}}`
 
+### RedisCollector
+- **ID**: `AppDevPanel\Kernel\Collector\RedisCollector`
+- **Depends on**: `TimelineCollector`
+- **Data**: `{commands: [{connection, command, arguments, result, duration, error, line}], totalTime, errorCount, totalCommands, connections}`
+- **Summary**: `{redis: {commandCount, errorCount, totalTime}}`
+- **Fed by**: Adapter-provided decorator or event listener. See [Redis Integration Guide](../../../Kernel/docs/redis-integration.md)
+- **Integration options**:
+  - Predis: custom `PluginInterface` intercepting commands
+  - phpredis: decorator wrapping `\Redis` methods
+  - Symfony Redis adapter: decorate `RedisAdapter` or use `CacheCollector` for cache-level tracking
+
 ## Symfony-Specific Collectors
 
 ### TwigCollector

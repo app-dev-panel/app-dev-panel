@@ -85,6 +85,13 @@ export default defineConfig({
                             ],
                         },
                         {
+                            text: 'Collector Guides',
+                            collapsed: false,
+                            items: [
+                                { text: 'Redis', link: '/guide/redis' },
+                            ],
+                        },
+                        {
                             text: 'Adapters',
                             collapsed: false,
                             items: [
@@ -174,6 +181,13 @@ export default defineConfig({
                                 { text: 'Elasticsearch', link: '/ru/guide/elasticsearch' },
                                 { text: 'Поток данных', link: '/ru/guide/data-flow' },
                                 { text: 'Безопасность и авторизация', link: '/ru/guide/security' },
+                            ],
+                        },
+                        {
+                            text: 'Руководства по коллекторам',
+                            collapsed: false,
+                            items: [
+                                { text: 'Redis', link: '/ru/guide/redis' },
                             ],
                         },
                         {
