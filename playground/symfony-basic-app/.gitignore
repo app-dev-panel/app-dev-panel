@@ -6,3 +6,4 @@
 .env.*.local
 composer.lock
 /config/reference.php
+public/bundles/

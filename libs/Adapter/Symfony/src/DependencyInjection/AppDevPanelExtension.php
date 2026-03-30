@@ -510,10 +510,12 @@ final class AppDevPanelExtension extends Extension
             ->setPublic(true);
 
         $panelStaticUrl = $config['panel']['static_url'] ?? '';
-        $container
-            ->register(PanelConfig::class, PanelConfig::class)
-            ->setArguments([$panelStaticUrl !== '' ? $panelStaticUrl : PanelConfig::DEFAULT_STATIC_URL])
-            ->setPublic(false);
+        if ($panelStaticUrl === '') {
+            // Auto-detect: if bundle assets were installed locally, use them
+            $bundleAssetsPath = \dirname(__DIR__, 2) . '/Resources/public/bundle.js';
+            $panelStaticUrl = file_exists($bundleAssetsPath) ? '/bundles/appdevpanel' : PanelConfig::DEFAULT_STATIC_URL;
+        }
+        $container->register(PanelConfig::class, PanelConfig::class)->setArguments([$panelStaticUrl])->setPublic(false);
 
         $container
             ->register(PanelController::class, PanelController::class)

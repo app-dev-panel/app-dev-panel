@@ -343,13 +343,18 @@ final class BundleBootstrapTest extends TestCase
         ));
     }
 
-    public function testPanelConfigUsesDefaultStaticUrl(): void
+    public function testPanelConfigAutoDetectsLocalAssets(): void
     {
         $container = $this->buildContainer();
 
         $panelConfig = $container->get(PanelConfig::class);
         $this->assertInstanceOf(PanelConfig::class, $panelConfig);
-        $this->assertSame(PanelConfig::DEFAULT_STATIC_URL, $panelConfig->staticUrl);
+
+        // If bundle.js was built locally, auto-detects /bundles/appdevpanel; otherwise GitHub Pages
+        $adapterRoot = \dirname(__DIR__, 2); // libs/Adapter/Symfony
+        $bundleAssetsExist = file_exists($adapterRoot . '/Resources/public/bundle.js');
+        $expected = $bundleAssetsExist ? '/bundles/appdevpanel' : PanelConfig::DEFAULT_STATIC_URL;
+        $this->assertSame($expected, $panelConfig->staticUrl);
         $this->assertFalse($panelConfig->isDevServer());
     }
 

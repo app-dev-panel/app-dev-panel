@@ -3,7 +3,7 @@
 # Top-level Makefile for running all tests, code quality checks, and CI tasks
 # ============================================================================
 
-.PHONY: help test test-php test-frontend test-frontend-e2e test-ci \
+.PHONY: help build-panel test test-php test-frontend test-frontend-e2e test-ci \
         mago mago-format mago-lint mago-analyze mago-fix \
         mago-playgrounds mago-playground-yiisoft mago-playground-symfony mago-playground-yii2 mago-playground-laravel \
         mago-playgrounds-fix mago-playground-yiisoft-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix \
@@ -55,6 +55,9 @@ help: ## Show this help
 	@echo "  make test-frontend         Run frontend unit tests (Vitest)"
 	@echo "  make test-frontend-e2e     Run frontend browser tests (Vitest + WebDriverIO + ChromeDriver)"
 	@echo "  make test-ci               Run all tests for CI (parallel, GitHub Actions)"
+	@echo ""
+	@echo "$(YELLOW)Build:$(RESET)"
+	@echo "  make build-panel           Build panel + toolbar, copy to Symfony adapter assets"
 	@echo ""
 	@echo "$(YELLOW)Code Quality — Core:$(RESET)"
 	@echo "  make mago                  Run Mago checks on core libs (format + lint + analyze)"
@@ -141,6 +144,23 @@ install-playgrounds: ## Install playground deps
 	cd $(PLAYGROUND_DIR)/symfony-basic-app && composer install --prefer-dist --no-progress --no-interaction
 	cd $(PLAYGROUND_DIR)/yii2-basic-app && composer install --prefer-dist --no-progress --no-interaction
 	cd $(PLAYGROUND_DIR)/laravel-app && composer install --prefer-dist --no-progress --no-interaction
+
+# ============================================================================
+# Build
+# ============================================================================
+
+PANEL_DIST    := $(FRONTEND_DIR)/packages/panel/dist
+TOOLBAR_DIST  := $(FRONTEND_DIR)/packages/toolbar/dist
+SYMFONY_ASSETS := $(ROOT_DIR)/libs/Adapter/Symfony/Resources/public
+
+build-panel: ## Build panel + toolbar and copy to Symfony adapter assets
+	@echo "$(CYAN)Building frontend panel...$(RESET)"
+	cd $(FRONTEND_DIR) && npx lerna run build --scope=@app-dev-panel/panel --scope=@app-dev-panel/toolbar
+	@echo "$(CYAN)Copying assets to Symfony adapter...$(RESET)"
+	rm -rf $(SYMFONY_ASSETS)/bundle.js $(SYMFONY_ASSETS)/bundle*.css $(SYMFONY_ASSETS)/assets
+	cp -r $(PANEL_DIST)/bundle.js $(PANEL_DIST)/bundle*.css $(SYMFONY_ASSETS)/
+	@if [ -d "$(PANEL_DIST)/assets" ]; then cp -r $(PANEL_DIST)/assets $(SYMFONY_ASSETS)/assets; fi
+	@echo "$(GREEN)Done. Run 'php bin/console assets:install' in your Symfony app to publish.$(RESET)"
 
 # ============================================================================
 # Tests
