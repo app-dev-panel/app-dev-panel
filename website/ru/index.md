@@ -45,7 +45,7 @@ features:
     <p class="home-sponsors-empty">Ваш логотип здесь</p>
   </div>
   <div class="home-sponsors-cta">
-    <a href="/ru/sponsor">Стать спонсором</a>
+    <a href="/app-dev-panel/ru/sponsor">Стать спонсором</a>
     <span class="home-sponsors-sep">|</span>
     <a href="https://github.com/app-dev-panel/app-dev-panel" target="_blank" rel="noopener">Star на GitHub</a>
   </div>
