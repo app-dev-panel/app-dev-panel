@@ -38,7 +38,7 @@ const categoryLabel = (category: Category): string => {
         case 'php':
             return 'PHP';
         default:
-            return category.toUpperCase();
+            return (category as string).toUpperCase();
     }
 };
 

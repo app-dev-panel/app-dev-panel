@@ -10,7 +10,7 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
-import {fuzzyMatch} from '@app-dev-panel/sdk/Helper/fuzzyMatch';
+import {fuzzyMatch, type FuzzyMatch} from '@app-dev-panel/sdk/Helper/fuzzyMatch';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {Box, Chip, Icon, Popover, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';

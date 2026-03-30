@@ -68,7 +68,7 @@ const DetailBox = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
-const DeltaChip = styled(Typography)(({theme}) => ({
+const DeltaChip = styled(Typography)<{component?: string}>(({theme}) => ({
     fontFamily: primitives.fontFamilyMono,
     fontSize: '10px',
     color: theme.palette.text.disabled,
@@ -112,7 +112,7 @@ export const EventPanel = ({events}: EventTimelineProps) => {
         (shortName: string): string => {
             const idx = getEventColorIndex(shortName);
             const entry = EVENT_PALETTE[idx];
-            return (theme.palette[entry.paletteKey] as Record<string, string>)[entry.shade];
+            return (theme.palette[entry.paletteKey] as unknown as Record<string, string>)[entry.shade];
         },
         [theme],
     );

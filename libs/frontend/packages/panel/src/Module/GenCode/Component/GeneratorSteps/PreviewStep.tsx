@@ -35,7 +35,7 @@ export function PreviewStep({generator, onComplete}: StepProps) {
         }
 
         if ('data' in response && response.data) {
-            const result = response.data as {files: GenCodeFile[]; operations: Record<string, string>};
+            const result = response.data as unknown as {files: GenCodeFile[]; operations: Record<string, string>};
             context.setFiles(result.files);
             context.setParameters(data);
             context.setOperations(result.operations);
