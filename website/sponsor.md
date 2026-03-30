@@ -67,7 +67,7 @@ Want your company logo on the ADP homepage and documentation? Company sponsorshi
 - Mention in release announcements
 - Priority feature requests
 
-Contact **xepozz@gmail.com** for details.
+Contact **xepozzd@gmail.com** for details.
 
 ## Current Sponsors
 
