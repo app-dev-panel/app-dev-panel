@@ -181,14 +181,12 @@ export function SearchFilter<T>({
             placeholder={placeholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            slotProps={{
-                input: {
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <FilterList sx={{fontSize: 14, color: 'text.disabled'}} />
-                        </InputAdornment>
-                    ),
-                },
+            InputProps={{
+                startAdornment: (
+                    <InputAdornment position="start">
+                        <FilterList sx={{fontSize: 14, color: 'text.disabled'}} />
+                    </InputAdornment>
+                ),
             }}
             sx={{
                 width: 180,

@@ -49,6 +49,7 @@ src/
 │   │   ├── AuthorizationController.php  # live auth config (guards, role hierarchy, voters)
 │   │   ├── ElasticsearchController.php  # Elasticsearch cluster health, indices, search, raw query
 │   │   ├── RedisController.php          # Redis inspection (ping, info, keys, get, delete, flush)
+│   │   ├── CodeCoverageController.php   # Code coverage (pcov/xdebug)
 │   │   └── ServiceController.php        # Service registration (register, heartbeat, list, deregister)
 │   ├── Middleware/
 │   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services
@@ -212,6 +213,13 @@ Backed by `ElasticsearchProviderInterface`. Default: `NullElasticsearchProvider`
 | POST | `/flush-db` | Flush current database |
 
 Requires `\Redis` (phpredis extension) in the DI container.
+
+### Code Coverage API (`/inspect/api/coverage`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Collect and return PHP code coverage data (requires pcov or xdebug) |
+| GET | `/file` | Read a source file (`?path=`) |
 
 ### MCP API (`/inspect/api/mcp`)
 

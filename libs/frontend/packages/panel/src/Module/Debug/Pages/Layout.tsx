@@ -1,6 +1,7 @@
 import ModuleLoader from '@app-dev-panel/panel/Application/Pages/RemoteComponent';
 import {AssetBundlePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/AssetBundlePanel';
 import {CachePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CachePanel';
+import {CodeCoveragePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CodeCoveragePanel';
 import {DatabasePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DatabasePanel';
 import {DeprecationPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DeprecationPanel';
 import {ElasticsearchPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ElasticsearchPanel';
@@ -74,6 +75,7 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.TranslatorCollector]: (data: any) => <TranslatorPanel data={data} />,
         [CollectorsMap.ElasticsearchCollector]: (data: any) => <ElasticsearchPanel data={data} />,
         [CollectorsMap.RedisCollector]: (data: any) => <RedisPanel data={data} />,
+        [CollectorsMap.CodeCoverageCollector]: (data: any) => <CodeCoveragePanel data={data} />,
         default: (data: any) => {
             if (typeof data === 'object' && data.__isPanelRemote__) {
                 return (

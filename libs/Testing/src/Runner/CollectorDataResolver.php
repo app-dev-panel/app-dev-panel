@@ -35,6 +35,7 @@ final class CollectorDataResolver
         'opentelemetry' => 'OpenTelemetryCollector',
         'elasticsearch' => 'ElasticsearchCollector',
         'redis' => 'RedisCollector',
+        'coverage' => 'CodeCoverageCollector',
     ];
 
     /**

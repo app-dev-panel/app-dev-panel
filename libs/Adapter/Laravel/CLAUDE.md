@@ -167,6 +167,7 @@ return [
         'router' => true,
         'translator' => true,
         'security' => true,
+        'code_coverage' => false,          // opt-in, requires pcov or xdebug
     ],
     'ignored_requests' => ['/debug/api/**', '/inspect/api/**'],
     'ignored_commands' => ['completion', 'help', 'list', 'debug:*', 'cache:*'],

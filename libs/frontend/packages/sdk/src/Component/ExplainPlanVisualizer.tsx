@@ -1,6 +1,6 @@
 import {Box, Chip, LinearProgress, Tooltip, Typography} from '@mui/material';
 import Icon from '@mui/material/Icon';
-import {alpha, useTheme} from '@mui/material/styles';
+import {Theme, alpha, useTheme} from '@mui/material/styles';
 import React, {useCallback, useMemo, useState} from 'react';
 
 // ---------------------------------------------------------------------------
@@ -250,7 +250,7 @@ function getNodeSeverity(node: PlanTreeNode): Severity {
     return 'warning';
 }
 
-function severityColor(severity: Severity, palette: 'main' | 'bg', theme: ReturnType<typeof useTheme>): string {
+function severityColor(severity: Severity, palette: 'main' | 'bg', theme: Theme): string {
     const map = {
         good: {main: theme.palette.success.main, bg: alpha(theme.palette.success.main, 0.08)},
         warning: {main: theme.palette.warning.main, bg: alpha(theme.palette.warning.main, 0.08)},

@@ -168,6 +168,14 @@ export type AuthorizationResponse = {
     config: Record<string, unknown>;
 };
 
+type CoverageFileInfo = {coveredLines: number; executableLines: number; percentage: number};
+type CoverageResponse = {
+    driver: string | null;
+    error?: string;
+    files: Record<string, CoverageFileInfo>;
+    summary: {totalFiles: number; coveredLines: number; executableLines: number; percentage: number};
+};
+
 type CurlBuilderResponse = {command: string};
 
 type CheckRouteResponse = {result: boolean; action: string[]};
@@ -187,7 +195,13 @@ type Response<T = any> = {data: T};
 export const inspectorApi = createApi({
     reducerPath: 'api.inspector',
     keepUnusedDataFor: 0,
-    tagTypes: ['inspector/composer', 'inspector/opcache', 'inspector/mcp', 'inspector/elasticsearch', 'inspector/redis'],
+    tagTypes: [
+        'inspector/composer',
+        'inspector/opcache',
+        'inspector/mcp',
+        'inspector/elasticsearch',
+        'inspector/redis',
+    ],
     baseQuery: createBaseQuery('/inspect/api/'),
     endpoints: (builder) => ({
         getParameters: builder.query<Response, void>({
@@ -388,6 +402,10 @@ export const inspectorApi = createApi({
             transformResponse: (result: Response<{result: any}>) => result.data,
             invalidatesTags: ['inspector/redis'],
         }),
+        getCoverage: builder.query<CoverageResponse, void>({
+            query: () => `coverage`,
+            transformResponse: (result: Response<CoverageResponse>) => result.data,
+        }),
         getMcpSettings: builder.query<{enabled: boolean}, void>({
             query: () => `mcp/settings`,
             transformResponse: (result: Response<{enabled: boolean}>) => result.data,
@@ -447,4 +465,5 @@ export const {
     useLazyGetRedisKeyQuery,
     useDeleteRedisKeyMutation,
     useFlushRedisDbMutation,
+    useGetCoverageQuery,
 } = inspectorApi;

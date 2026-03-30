@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {
     AuthorizationGuard,
     AuthorizationVoter,
@@ -143,8 +142,6 @@ const VotersTable = ({voters}: {voters: AuthorizationVoter[]}) => (
 
 export const AuthorizationPage = () => {
     const {data, isLoading, error} = useGetAuthorizationQuery();
-
-    useBreadcrumbs(() => ['Inspector', 'Authorization']);
 
     if (isLoading) {
         return <LinearProgress />;

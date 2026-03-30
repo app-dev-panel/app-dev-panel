@@ -345,6 +345,14 @@ final class FixtureRegistry
                     Expectation::summaryGte('elasticsearch.totalTime', 0),
                 ],
             ]),
+
+            // === Code Coverage ===
+            new Fixture(name: 'coverage:basic', endpoint: '/test/fixtures/coverage', expectations: [
+                'coverage' => [
+                    Expectation::notEmpty(),
+                    Expectation::fieldEquals('driver', null),
+                ],
+            ]),
         ];
     }
 }

@@ -36,6 +36,7 @@ use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface
 use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
+use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
@@ -67,6 +68,7 @@ use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
 use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\CodeCoverageCollector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
@@ -238,6 +240,14 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             }
             $this->app->singleton($class, fn() => new $class($this->app->make(TimelineCollector::class)));
             $this->collectorClasses[] = $class;
+        }
+
+        if ($collectors['code_coverage'] ?? false) {
+            $this->app->singleton(
+                CodeCoverageCollector::class,
+                fn() => new CodeCoverageCollector($this->app->make(TimelineCollector::class), [], ['vendor']),
+            );
+            $this->collectorClasses[] = CodeCoverageCollector::class;
         }
     }
 
@@ -524,6 +534,14 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->app->singleton(
             OpcacheController::class,
             fn() => new OpcacheController($this->app->make(JsonResponseFactoryInterface::class)),
+        );
+
+        $this->app->singleton(
+            CodeCoverageController::class,
+            fn() => new CodeCoverageController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(PathResolverInterface::class),
+            ),
         );
 
         $this->app->singleton(

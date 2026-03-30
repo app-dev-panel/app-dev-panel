@@ -40,6 +40,7 @@ app_dev_panel:
         cache: true
         mailer: true           # requires symfony/mailer
         messenger: true        # requires symfony/messenger
+        code_coverage: false   # opt-in; requires pcov or xdebug
     ignored_requests:
         - '/_wdt/*'
         - '/_profiler/*'

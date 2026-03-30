@@ -68,6 +68,7 @@ const inspectorChildren = [
     {key: '/inspector/phpinfo', icon: 'info', label: 'PHP Info'},
     {key: '/inspector/composer', icon: 'inventory_2', label: 'Composer'},
     {key: '/inspector/opcache', icon: 'speed', label: 'Opcache'},
+    {key: '/inspector/coverage', icon: 'shield', label: 'Coverage'},
 ];
 
 // ---------------------------------------------------------------------------

@@ -36,6 +36,7 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
     [CollectorsMap.TranslatorCollector]: {label: 'Translator', icon: 'translate', weight: 17},
     [CollectorsMap.ElasticsearchCollector]: {label: 'Elasticsearch', icon: 'search', weight: 13},
     [CollectorsMap.RedisCollector]: {label: 'Redis', icon: 'memory', weight: 4},
+    [CollectorsMap.CodeCoverageCollector]: {label: 'Coverage', icon: 'shield', weight: 10},
 };
 
 const defaultMeta: CollectorMeta = {label: 'Unknown', icon: 'extension', weight: 99};

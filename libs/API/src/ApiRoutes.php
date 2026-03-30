@@ -10,6 +10,7 @@ use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Ingestion\Controller\OtlpController;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
+use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
@@ -256,6 +257,18 @@ final class ApiRoutes
                 '/inspect/api/redis/flush-db',
                 [RedisController::class, 'flushDb'],
                 'inspect/api/redis/flush-db',
+            ),
+            new Route(
+                'GET',
+                '/inspect/api/coverage',
+                [CodeCoverageController::class, 'index'],
+                'inspect/api/coverage/index',
+            ),
+            new Route(
+                'GET',
+                '/inspect/api/coverage/file',
+                [CodeCoverageController::class, 'file'],
+                'inspect/api/coverage/file',
             ),
             new Route('POST', '/inspect/api/mcp', [McpController::class, 'handle'], 'inspect/api/mcp'),
             new Route(

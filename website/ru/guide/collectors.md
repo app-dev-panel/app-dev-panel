@@ -38,6 +38,7 @@ title: Коллекторы
 | `AssetBundleCollector` | Бандлы фронтенд-ассетов (Yii) |
 | `FilesystemStreamCollector` | Операции файловых потоков |
 | `HttpStreamCollector` | Операции HTTP-потоков |
+| `CodeCoverageCollector` | Построчное покрытие PHP-кода за запрос (требуется pcov или xdebug) |
 
 ### Веб-специфичные
 
@@ -135,3 +136,65 @@ final class MetricsCollector implements CollectorInterface
 Захватывает обращения к переводам во время выполнения запроса, включая обнаружение отсутствующих переводов. Реализует `SummaryCollectorInterface`.
 
 Подробности на странице [Переводчик](/ru/guide/translator): поля TranslationRecord, структура собранных данных, логика определения отсутствующих переводов, интеграции proxy фреймворков и примеры конфигурации.
+
+## Code Coverage Collector
+
+`CodeCoverageCollector` собирает построчное покрытие PHP-кода за каждый HTTP-запрос, используя [pcov](https://github.com/krakjoe/pcov) или [xdebug](https://xdebug.org/) в качестве драйвера.
+
+::: warning Предварительные требования
+Необходимо расширение **pcov** (рекомендуется) или **xdebug** с включённым режимом coverage. Без них коллектор возвращает пустой результат с `driver: null`.
+:::
+
+### Как это работает
+
+1. При `startup()` коллектор определяет доступный драйвер и запускает сбор покрытия
+2. Код приложения выполняется в обычном режиме — каждая выполненная строка PHP отслеживается
+3. При `shutdown()` сбор останавливается, и сырые данные обрабатываются в постатистику по файлам
+4. Файлы, соответствующие `excludePaths` (по умолчанию: `vendor`), отфильтровываются
+
+### Включение
+
+Покрытие кода — **opt-in** (по умолчанию отключено) из-за влияния на производительность.
+
+::: code-group
+
+```yaml [Symfony]
+# config/packages/app_dev_panel.yaml
+app_dev_panel:
+    collectors:
+        code_coverage: true
+```
+
+```php [Laravel]
+// config/app-dev-panel.php
+'collectors' => [
+    'code_coverage' => true,
+],
+```
+
+:::
+
+### Формат вывода
+
+```json
+{
+    "driver": "pcov",
+    "files": {
+        "/app/src/Controller/HomeController.php": {
+            "coveredLines": 12,
+            "executableLines": 15,
+            "percentage": 80.0
+        }
+    },
+    "summary": {
+        "totalFiles": 42,
+        "coveredLines": 340,
+        "executableLines": 500,
+        "percentage": 68.0
+    }
+}
+```
+
+### Эндпоинт Inspector
+
+Inspector также предоставляет эндпоинт `GET /inspect/api/coverage` для разового сбора покрытия. Подробнее — в разделе [Эндпоинты Inspector](/ru/api/inspector).

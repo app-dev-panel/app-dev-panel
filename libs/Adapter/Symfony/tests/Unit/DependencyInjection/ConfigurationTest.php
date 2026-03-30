@@ -18,9 +18,14 @@ final class ConfigurationTest extends TestCase
         $this->assertSame('%kernel.project_dir%/var/debug', $config['storage']['path']);
         $this->assertSame(50, $config['storage']['history_size']);
 
-        // All collectors enabled by default
+        // All collectors enabled by default (except opt-in collectors)
+        $optInCollectors = ['code_coverage'];
         foreach ($config['collectors'] as $name => $enabled) {
-            $this->assertTrue($enabled, "Collector '{$name}' should be enabled by default");
+            if (in_array($name, $optInCollectors, true)) {
+                $this->assertFalse($enabled, "Collector '{$name}' should be disabled by default (opt-in)");
+            } else {
+                $this->assertTrue($enabled, "Collector '{$name}' should be enabled by default");
+            }
         }
 
         // Default ignored patterns

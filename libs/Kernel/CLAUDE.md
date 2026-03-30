@@ -77,6 +77,8 @@ src/
 │   ├── TimelineCollector.php
 │   ├── CacheCollector.php               # Cache operations: get/set/delete (fed by adapter hooks)
 │   ├── CacheOperationRecord.php         # Value object for cache operation
+│   ├── CodeCoverageCollector.php        # Per-request PHP line coverage (pcov/xdebug)
+│   ├── CodeCoverageHelper.php           # Shared coverage utilities (driver detection, processing)
 │   ├── DatabaseCollector.php            # SQL queries + transactions (fed by adapter hooks)
 │   ├── QueryRecord.php                  # Value object for DB query
 │   ├── ElasticsearchCollector.php       # Elasticsearch requests (fed by adapter hooks)
