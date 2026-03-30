@@ -10,7 +10,7 @@ and LLM agent jobs. Built on Symfony Messenger with SQLite storage and JSON-RPC 
 - `symfony/scheduler` — Cron-based recurring task scheduling
 - `symfony/uid` — UUID v7 generation for task IDs
 - `psr/log` — Logging interface
-- `ext-pdo_sqlite` — SQLite storage
+- `ext-pdo` + `ext-pdo_sqlite` — SQLite storage
 
 ## Package
 

@@ -30,7 +30,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
 │   ├── API/                      # HTTP API: debug endpoints, inspector endpoints, SSE
 │   ├── McpServer/                # MCP server: AI assistant integration (stdio + HTTP)
-│   ├── Cli/                      # CLI commands: debug server, reset, broadcast, query, serve, mcp
+│   ├── Cli/                      # CLI commands: debug server, reset, broadcast, query, serve, mcp, taskbus
 │   ├── TaskBus/                  # Task queue: command execution, tests, analyzers, scheduling
 │   ├── Testing/                  # Test fixtures: definitions, runner, CLI command
 │   ├── Adapter/
@@ -67,7 +67,7 @@ ADP follows a **layered architecture**:
 3. **McpServer** — MCP (Model Context Protocol) server. Exposes debug data tools to AI assistants via stdio and HTTP transports.
 4. **TaskBus** — Task queue engine. Runs commands, tests, analyzers, scheduled tasks, and LLM agent jobs. Symfony Messenger + SQLite. JSON-RPC 2.0 exposed via API inspector endpoint.
 5. **Adapter** — Framework bridge. Wires Kernel collectors into a specific framework's DI, events, and middleware.
-5. **Frontend** — React SPA. Consumes the API and renders debug/inspector UI.
+6. **Frontend** — React SPA. Consumes the API and renders debug/inspector UI.
 
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
