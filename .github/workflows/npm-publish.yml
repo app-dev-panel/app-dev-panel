@@ -1,0 +1,75 @@
+name: npm Publish
+
+on:
+  push:
+    tags: ['*']
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    working-directory: libs/frontend
+
+jobs:
+  publish:
+    name: Publish npm packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+          cache-dependency-path: libs/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build all packages
+        run: npm run build
+
+      - name: Set package versions from git tag
+        run: npx lerna version "$GITHUB_REF_NAME" --no-git-tag-version --no-push --yes
+
+      - name: Publish to npm
+        run: npx lerna publish from-package --yes
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  release-assets:
+    name: Upload frontend build to GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21'
+          cache: 'npm'
+          cache-dependency-path: libs/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build all packages
+        run: npm run build
+
+      - name: Package panel build
+        run: cd packages/panel && tar -czf ../../panel-dist.tar.gz dist/
+
+      - name: Package toolbar build
+        run: cd packages/toolbar && tar -czf ../../toolbar-dist.tar.gz dist/
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            libs/frontend/panel-dist.tar.gz
+            libs/frontend/toolbar-dist.tar.gz
