@@ -25,13 +25,14 @@ type UnifiedSidebarProps = {
 // ---------------------------------------------------------------------------
 
 const SidebarRoot = styled(Paper)(({theme}) => ({
+    width: componentTokens.sidebar.width,
     borderRadius: componentTokens.sidebar.borderRadius,
     display: 'flex',
     flexDirection: 'column',
     padding: theme.spacing(1.5, 1),
     gap: theme.spacing(0.25),
+    flexShrink: 0,
     height: 'min-content',
-    minHeight: 0,
     overflowY: 'auto',
 }));
 
