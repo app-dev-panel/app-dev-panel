@@ -88,7 +88,8 @@ const MainArea = styled(Box)({
 });
 
 const MainInner = styled(Box)({
-    display: 'flex',
+    display: 'grid',
+    gridTemplateColumns: `${componentTokens.sidebar.width}px 1fr`,
     width: '100%',
     maxWidth: componentTokens.mainMaxWidth,
     gap: componentTokens.mainGap,
