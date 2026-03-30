@@ -101,6 +101,7 @@ export default defineConfig({
                             items: [
                                 { text: 'MCP Server', link: '/guide/mcp-server' },
                                 { text: 'CLI', link: '/guide/cli' },
+                                { text: 'Playgrounds', link: '/guide/playgrounds' },
                                 { text: 'llms.txt', link: '/guide/llms-txt' },
                                 { text: 'Contributing', link: '/guide/contributing' },
                             ],
@@ -193,6 +194,7 @@ export default defineConfig({
                             items: [
                                 { text: 'MCP Сервер', link: '/ru/guide/mcp-server' },
                                 { text: 'CLI', link: '/ru/guide/cli' },
+                                { text: 'Playground-приложения', link: '/ru/guide/playgrounds' },
                                 { text: 'llms.txt', link: '/ru/guide/llms-txt' },
                                 { text: 'Участие в разработке', link: '/ru/guide/contributing' },
                             ],
