@@ -53,7 +53,7 @@ export default defineConfig({
                         activeMatch: '/blog/',
                     },
                     {
-                        text: 'Ecosystem',
+                        text: 'Framework',
                         items: [
                             { text: 'Symfony Adapter', link: '/guide/adapters/symfony' },
                             { text: 'Yii 2 Adapter', link: '/guide/adapters/yii2' },
@@ -157,7 +157,7 @@ export default defineConfig({
                         activeMatch: '/ru/blog/',
                     },
                     {
-                        text: 'Экосистема',
+                        text: 'Фреймворки',
                         items: [
                             { text: 'Адаптер Symfony', link: '/ru/guide/adapters/symfony' },
                             { text: 'Адаптер Yii 2', link: '/ru/guide/adapters/yii2' },
