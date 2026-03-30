@@ -53,11 +53,10 @@ Documentation is **optimized for LLM consumption**. Every sentence must carry in
 ```
 CLAUDE.md
 docs/*.md
-libs/Kernel/CLAUDE.md, libs/Kernel/docs/*.md
-libs/API/CLAUDE.md, libs/API/docs/*.md
-libs/Cli/CLAUDE.md, libs/Cli/docs/*.md
-libs/Adapter/Yiisoft/CLAUDE.md, libs/Adapter/Yiisoft/docs/*.md
+libs/*/CLAUDE.md
+libs/Adapter/*/CLAUDE.md
 libs/frontend/CLAUDE.md, libs/frontend/docs/*.md
+website/guide/*.md, website/api/*.md
 ```
 
 ## After Review
