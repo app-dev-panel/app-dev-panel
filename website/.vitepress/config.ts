@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress';
 import llmstxt from 'vitepress-plugin-llms';
+import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs';
 
 export default defineConfig({
     vite: {
@@ -42,22 +43,22 @@ export default defineConfig({
             lang: 'en',
             themeConfig: {
                 nav: [
-                    { text: 'Guide', link: '/guide/getting-started' },
-                    { text: 'API', link: '/api/' },
-                    { text: 'llms.txt', link: '/guide/llms-txt' },
+                    { text: 'Sponsor', link: '/sponsor' },
                     {
                         text: 'Blog',
                         link: '/blog/',
                         activeMatch: '/blog/',
                     },
+                    { text: 'Guide', link: '/guide/getting-started' },
+                    { text: 'API', link: '/api/' },
+                    { text: 'llms.txt', link: '/guide/llms-txt' },
                     {
-                        text: 'Ecosystem',
+                        text: 'Framework',
                         items: [
-                            { text: 'Yii 3 Adapter', link: '/guide/adapters/yiisoft' },
                             { text: 'Symfony Adapter', link: '/guide/adapters/symfony' },
-                            { text: 'Laravel Adapter', link: '/guide/adapters/laravel' },
                             { text: 'Yii 2 Adapter', link: '/guide/adapters/yii2' },
-                            { text: 'Cycle ORM Adapter', link: '/guide/adapters/cycle' },
+                            { text: 'Yii 3 Adapter', link: '/guide/adapters/yiisoft' },
+                            { text: 'Laravel Adapter', link: '/guide/adapters/laravel' },
                         ],
                     },
                 ],
@@ -98,11 +99,10 @@ export default defineConfig({
                             text: 'Adapters',
                             collapsed: false,
                             items: [
-                                { text: 'Yii 3 (Yiisoft)', link: '/guide/adapters/yiisoft' },
                                 { text: 'Symfony', link: '/guide/adapters/symfony' },
-                                { text: 'Laravel', link: '/guide/adapters/laravel' },
                                 { text: 'Yii 2', link: '/guide/adapters/yii2' },
-                                { text: 'Cycle ORM', link: '/guide/adapters/cycle' },
+                                { text: 'Yii 3 (Yiisoft)', link: '/guide/adapters/yiisoft' },
+                                { text: 'Laravel', link: '/guide/adapters/laravel' },
                             ],
                         },
                         {
@@ -147,22 +147,22 @@ export default defineConfig({
             link: '/ru/',
             themeConfig: {
                 nav: [
-                    { text: 'Руководство', link: '/ru/guide/getting-started' },
-                    { text: 'API', link: '/ru/api/' },
-                    { text: 'llms.txt', link: '/ru/guide/llms-txt' },
+                    { text: 'Спонсоры', link: '/ru/sponsor' },
                     {
                         text: 'Блог',
                         link: '/ru/blog/',
                         activeMatch: '/ru/blog/',
                     },
+                    { text: 'Руководство', link: '/ru/guide/getting-started' },
+                    { text: 'API', link: '/ru/api/' },
+                    { text: 'llms.txt', link: '/ru/guide/llms-txt' },
                     {
-                        text: 'Экосистема',
+                        text: 'Фреймворки',
                         items: [
-                            { text: 'Адаптер Yii 3', link: '/ru/guide/adapters/yiisoft' },
                             { text: 'Адаптер Symfony', link: '/ru/guide/adapters/symfony' },
-                            { text: 'Адаптер Laravel', link: '/ru/guide/adapters/laravel' },
                             { text: 'Адаптер Yii 2', link: '/ru/guide/adapters/yii2' },
-                            { text: 'Адаптер Cycle ORM', link: '/ru/guide/adapters/cycle' },
+                            { text: 'Адаптер Yii 3', link: '/ru/guide/adapters/yiisoft' },
+                            { text: 'Адаптер Laravel', link: '/ru/guide/adapters/laravel' },
                         ],
                     },
                 ],
@@ -203,11 +203,10 @@ export default defineConfig({
                             text: 'Адаптеры',
                             collapsed: false,
                             items: [
-                                { text: 'Yii 3 (Yiisoft)', link: '/ru/guide/adapters/yiisoft' },
                                 { text: 'Symfony', link: '/ru/guide/adapters/symfony' },
-                                { text: 'Laravel', link: '/ru/guide/adapters/laravel' },
                                 { text: 'Yii 2', link: '/ru/guide/adapters/yii2' },
-                                { text: 'Cycle ORM', link: '/ru/guide/adapters/cycle' },
+                                { text: 'Yii 3 (Yiisoft)', link: '/ru/guide/adapters/yiisoft' },
+                                { text: 'Laravel', link: '/ru/guide/adapters/laravel' },
                             ],
                         },
                         {
@@ -265,9 +264,7 @@ export default defineConfig({
     themeConfig: {
         logo: '/duck.svg',
         siteTitle: 'ADP',
-        socialLinks: [
-            { icon: 'github', link: 'https://github.com/app-dev-panel/app-dev-panel' },
-        ],
+        socialLinks: [],
         search: {
             provider: 'local',
             options: {
@@ -300,6 +297,9 @@ export default defineConfig({
         lineNumbers: true,
         image: {
             lazyLoading: true,
+        },
+        config(md) {
+            md.use(tabsMarkdownPlugin);
         },
     },
 

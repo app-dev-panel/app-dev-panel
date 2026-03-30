@@ -131,23 +131,27 @@ Yii::t('app', 'welcome', [], 'de');
 
 Перехват переводов включён по умолчанию, когда активен `TranslatorCollector`. Дополнительная настройка не требуется.
 
-::: code-group
-
-```yaml [Symfony]
+:::tabs key:framework
+== Symfony
+```yaml
 # config/packages/app_dev_panel.yaml
 app_dev_panel:
     collectors:
         translator: true    # включён по умолчанию
 ```
-
-```php [Laravel]
-// config/app-dev-panel.php
-'collectors' => [
-    'translator' => true,   // включён по умолчанию
+== Yii 2
+```php
+// конфигурация приложения
+'modules' => [
+    'debug-panel' => [
+        'collectors' => [
+            'translator' => true,   // включён по умолчанию
+        ],
+    ],
 ],
 ```
-
-```php [Yii 3]
+== Yii 3
+```php
 // config/params.php
 'app-dev-panel/yiisoft' => [
     'collectors' => [
@@ -158,18 +162,13 @@ app_dev_panel:
     ],
 ],
 ```
-
-```php [Yii 2]
-// конфигурация приложения
-'modules' => [
-    'debug-panel' => [
-        'collectors' => [
-            'translator' => true,   // включён по умолчанию
-        ],
-    ],
+== Laravel
+```php
+// config/app-dev-panel.php
+'collectors' => [
+    'translator' => true,   // включён по умолчанию
 ],
 ```
-
 :::
 
 ## Панель во фронтенде

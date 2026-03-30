@@ -50,11 +50,10 @@ Multi-framework support:
 
 | Adapter | Status |
 |---------|--------|
-| Yii 3 (Yiisoft) | ✅ Complete |
 | Symfony | ✅ Complete |
-| Laravel | ✅ Complete |
 | Yii 2 | ✅ Complete |
-| Cycle ORM | ✅ Complete (schema only) |
+| Yii 3 (Yiisoft) | ✅ Complete |
+| Laravel | ✅ Complete |
 
 See [Feature Matrix](/guide/feature-matrix) for detailed adapter capabilities.
 

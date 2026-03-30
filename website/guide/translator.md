@@ -131,23 +131,27 @@ Yii::t('app', 'welcome', [], 'de');
 
 Translation interception is enabled by default when the `TranslatorCollector` is active. No additional configuration is needed.
 
-::: code-group
-
-```yaml [Symfony]
+:::tabs key:framework
+== Symfony
+```yaml
 # config/packages/app_dev_panel.yaml
 app_dev_panel:
     collectors:
         translator: true    # enabled by default
 ```
-
-```php [Laravel]
-// config/app-dev-panel.php
-'collectors' => [
-    'translator' => true,   // enabled by default
+== Yii 2
+```php
+// application config
+'modules' => [
+    'debug-panel' => [
+        'collectors' => [
+            'translator' => true,   // enabled by default
+        ],
+    ],
 ],
 ```
-
-```php [Yii 3]
+== Yii 3
+```php
 // config/params.php
 'app-dev-panel/yiisoft' => [
     'collectors' => [
@@ -158,18 +162,13 @@ app_dev_panel:
     ],
 ],
 ```
-
-```php [Yii 2]
-// application config
-'modules' => [
-    'debug-panel' => [
-        'collectors' => [
-            'translator' => true,   // enabled by default
-        ],
-    ],
+== Laravel
+```php
+// config/app-dev-panel.php
+'collectors' => [
+    'translator' => true,   // enabled by default
 ],
 ```
-
 :::
 
 ## Frontend Panel
