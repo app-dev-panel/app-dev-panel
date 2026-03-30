@@ -83,6 +83,17 @@ jobs:
       - name: Set package versions from git tag
         run: npx lerna version "$GITHUB_REF_NAME" --no-git-tag-version --no-push --yes
 
+      - name: Clean up build artifacts from working tree
+        run: rm -f panel-dist.tar.gz toolbar-dist.tar.gz
+
+      - name: Commit version bump for clean working tree
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: bump package versions to $GITHUB_REF_NAME" --allow-empty
+        working-directory: .
+
       - name: Publish to GitHub Packages
         run: npx lerna publish from-package --yes --registry https://npm.pkg.github.com
         env:
