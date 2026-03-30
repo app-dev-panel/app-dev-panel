@@ -264,9 +264,7 @@ export default defineConfig({
     themeConfig: {
         logo: '/duck.svg',
         siteTitle: 'ADP',
-        socialLinks: [
-            { icon: 'github', link: 'https://github.com/app-dev-panel/app-dev-panel' },
-        ],
+        socialLinks: [],
         search: {
             provider: 'local',
             options: {
