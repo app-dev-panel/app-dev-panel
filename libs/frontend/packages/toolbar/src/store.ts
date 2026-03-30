@@ -10,14 +10,13 @@ import {
 import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import {setupListeners} from '@reduxjs/toolkit/query';
 import {TypedUseSelectorHook, useSelector} from 'react-redux';
-import type {PreloadedStateShapeFromReducersMapObject} from 'redux';
 import {FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, persistStore} from 'redux-persist';
 import {initMessageListener} from 'redux-state-sync';
 
 // TODO: get reducers and middlewares from modules.ts
 const rootReducer = combineReducers({...ToolbarApiReducers, ...DebugReducers, ...ApplicationReducers});
 
-export const createStore = (preloadedState: PreloadedStateShapeFromReducersMapObject<typeof rootReducer>) => {
+export const createStore = (preloadedState: Partial<ReturnType<typeof rootReducer>> = {}) => {
     const store = configureStore({
         reducer: rootReducer,
         middleware: (getDefaultMiddleware) =>

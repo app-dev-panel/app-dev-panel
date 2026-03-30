@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '21'
+          node-version: '22'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@app-dev-panel'
           cache: 'npm'
@@ -32,8 +32,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build all packages
-        run: npm run build
+      - name: Build SDK first
+        run: npm run build -w packages/sdk
+
+      - name: Build panel and toolbar
+        run: npm run build -w packages/panel && npm run build -w packages/toolbar
 
       - name: Set package versions from git tag
         run: npx lerna version "$GITHUB_REF_NAME" --no-git-tag-version --no-push --yes
@@ -53,15 +56,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '21'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: libs/frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build all packages
-        run: npm run build
+      - name: Build SDK first
+        run: npm run build -w packages/sdk
+
+      - name: Build panel and toolbar
+        run: npm run build -w packages/panel && npm run build -w packages/toolbar
 
       - name: Package panel build
         run: cd packages/panel && tar -czf ../../panel-dist.tar.gz dist/

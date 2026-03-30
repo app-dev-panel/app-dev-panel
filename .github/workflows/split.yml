@@ -2,11 +2,14 @@ name: Monorepo Split
 
 on:
   push:
-    branches: [main]
-    tags: ['*']
+    branches:
+      - master
+    tags:
+      - '*'
 
-permissions:
-  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   split:
@@ -16,30 +19,45 @@ jobs:
       fail-fast: false
       matrix:
         package:
-          - { name: "kernel",           local_path: "libs/Kernel",           target_repo: "app-dev-panel/kernel" }
-          - { name: "api",              local_path: "libs/API",              target_repo: "app-dev-panel/api" }
-          - { name: "cli",              local_path: "libs/Cli",              target_repo: "app-dev-panel/cli" }
-          - { name: "mcp-server",       local_path: "libs/McpServer",        target_repo: "app-dev-panel/mcp-server" }
-          - { name: "testing",          local_path: "libs/Testing",          target_repo: "app-dev-panel/testing" }
-          - { name: "adapter-symfony",  local_path: "libs/Adapter/Symfony",  target_repo: "app-dev-panel/adapter-symfony" }
-          - { name: "adapter-laravel",  local_path: "libs/Adapter/Laravel",  target_repo: "app-dev-panel/adapter-laravel" }
-          - { name: "adapter-yii2",     local_path: "libs/Adapter/Yii2",     target_repo: "app-dev-panel/adapter-yii2" }
-          - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",    target_repo: "app-dev-panel/adapter-cycle" }
-          - { name: "adapter-yiisoft",  local_path: "libs/Adapter/Yiisoft",  target_repo: "app-dev-panel/adapter-yiisoft" }
+          - { name: "kernel",           local_path: "libs/Kernel",          split_repository: "kernel" }
+          - { name: "api",              local_path: "libs/API",             split_repository: "api" }
+          - { name: "cli",              local_path: "libs/Cli",             split_repository: "cli" }
+          - { name: "mcp-server",       local_path: "libs/McpServer",       split_repository: "mcp-server" }
+          - { name: "testing",          local_path: "libs/Testing",         split_repository: "testing" }
+          - { name: "adapter-symfony",  local_path: "libs/Adapter/Symfony", split_repository: "adapter-symfony" }
+          - { name: "adapter-laravel",  local_path: "libs/Adapter/Laravel", split_repository: "adapter-laravel" }
+          - { name: "adapter-yii2",     local_path: "libs/Adapter/Yii2",    split_repository: "adapter-yii2" }
+          - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",   split_repository: "adapter-cycle" }
+          - { name: "adapter-yiisoft",  local_path: "libs/Adapter/Yiisoft", split_repository: "adapter-yiisoft" }
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Split ${{ matrix.package.name }}
+      # no tag
+      - if: "!startsWith(github.ref, 'refs/tags/')"
+        name: Monorepo Split of ${{ matrix.package.split_repository }}
         uses: danharrin/monorepo-split-github-action@v2.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
         with:
-          package_directory: ${{ matrix.package.local_path }}
-          repository_organization: app-dev-panel
-          repository_name: ${{ matrix.package.name }}
-          branch: main
-          tag: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          branch: "master"
+          package_directory: '${{ matrix.package.local_path }}'
+          repository_organization: 'app-dev-panel'
+          repository_name: '${{ matrix.package.split_repository }}'
+          user_name: "xepozz"
+          user_email: "xepozz@list.ru"
+
+      # with tag
+      - if: "startsWith(github.ref, 'refs/tags/')"
+        name: Monorepo Tagged Split of ${{ matrix.package.split_repository }}
+        uses: danharrin/monorepo-split-github-action@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+        with:
+          tag: ${GITHUB_REF#refs/tags/}
+          branch: "master"
+          package_directory: '${{ matrix.package.local_path }}'
+          repository_organization: 'app-dev-panel'
+          repository_name: '${{ matrix.package.split_repository }}'
+          user_name: "xepozz"
+          user_email: "xepozz@list.ru"
