@@ -169,8 +169,14 @@ return [
 
     // Panel
     PanelConfig::class => static function () use ($params): PanelConfig {
-        $staticUrl = $params['app-dev-panel/yiisoft']['panel']['staticUrl'] ?? '';
-        return new PanelConfig($staticUrl !== '' ? $staticUrl : PanelConfig::DEFAULT_STATIC_URL);
+        $panel = $params['app-dev-panel/yiisoft']['panel'] ?? [];
+        $staticUrl = $panel['staticUrl'] ?? '';
+        $dev = (bool) ($panel['dev'] ?? false);
+        return new PanelConfig(
+            $staticUrl !== '' ? $staticUrl : PanelConfig::DEFAULT_STATIC_URL,
+            '/debug',
+            $dev,
+        );
     },
     PanelController::class => static fn(
         ResponseFactoryInterface $responseFactory,

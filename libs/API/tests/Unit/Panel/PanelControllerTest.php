@@ -118,6 +118,48 @@ final class PanelControllerTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
     }
 
+    public function testDevModeLoadsViteClient(): void
+    {
+        $config = new PanelConfig(staticUrl: 'http://localhost:3000', dev: true);
+        $controller = $this->createController($config);
+        $request = new ServerRequest('GET', 'http://localhost:8080/debug');
+
+        $response = $controller->index($request);
+        $body = (string) $response->getBody();
+
+        $this->assertStringContainsString('http://localhost:3000/@vite/client', $body);
+        $this->assertStringContainsString('http://localhost:3000/src/index.tsx', $body);
+        $this->assertStringNotContainsString('bundle.js', $body);
+        $this->assertStringNotContainsString('bundle.css', $body);
+    }
+
+    public function testDevModeStillInjectsConfig(): void
+    {
+        $config = new PanelConfig(staticUrl: 'http://localhost:3000', dev: true);
+        $controller = $this->createController($config);
+        $request = new ServerRequest('GET', 'http://localhost:8080/debug');
+
+        $response = $controller->index($request);
+        $body = (string) $response->getBody();
+
+        $this->assertStringContainsString("window['AppDevPanelWidget']", $body);
+        $this->assertStringContainsString("baseUrl: 'http://localhost:8080'", $body);
+        $this->assertStringContainsString("basename: '/debug'", $body);
+    }
+
+    public function testProductionModeDoesNotLoadViteClient(): void
+    {
+        $controller = $this->createController();
+        $request = new ServerRequest('GET', 'http://localhost:8080/debug');
+
+        $response = $controller->index($request);
+        $body = (string) $response->getBody();
+
+        $this->assertStringNotContainsString('@vite/client', $body);
+        $this->assertStringNotContainsString('src/index.tsx', $body);
+        $this->assertStringContainsString('bundle.js', $body);
+    }
+
     private function createController(?PanelConfig $config = null): PanelController
     {
         $factory = new HttpFactory();

@@ -22,5 +22,10 @@ final class PanelConfig
          * Used as the React Router basename so client-side routing works.
          */
         public readonly string $viewerBasePath = '/debug',
+        /**
+         * When true, loads from a Vite dev server (HMR, @vite/client, src/index.tsx).
+         * Set staticUrl to the Vite dev server URL (e.g. http://localhost:3000).
+         */
+        public readonly bool $dev = false,
     ) {}
 }

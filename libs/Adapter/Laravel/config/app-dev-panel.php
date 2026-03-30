@@ -63,7 +63,8 @@ return [
     'path_mapping' => [],
 
     'panel' => [
-        'static_url' => '',  // Base URL for panel assets (empty = GitHub Pages default)
+        'static_url' => '',     // Base URL for panel assets (empty = GitHub Pages default)
+        'dev' => false,         // Load from Vite dev server (HMR). Set static_url to http://localhost:3000
     ],
 
     'api' => [

@@ -15,13 +15,15 @@ final class PanelConfigTest extends TestCase
 
         $this->assertSame(PanelConfig::DEFAULT_STATIC_URL, $config->staticUrl);
         $this->assertSame('/debug', $config->viewerBasePath);
+        $this->assertFalse($config->dev);
     }
 
     public function testCustomValues(): void
     {
-        $config = new PanelConfig(staticUrl: 'http://localhost:3000', viewerBasePath: '/my-debug');
+        $config = new PanelConfig(staticUrl: 'http://localhost:3000', viewerBasePath: '/my-debug', dev: true);
 
         $this->assertSame('http://localhost:3000', $config->staticUrl);
         $this->assertSame('/my-debug', $config->viewerBasePath);
+        $this->assertTrue($config->dev);
     }
 }

@@ -510,9 +510,14 @@ final class AppDevPanelExtension extends Extension
             ->setPublic(true);
 
         $panelStaticUrl = $config['panel']['static_url'] ?? '';
+        $panelDev = $config['panel']['dev'] ?? false;
         $container
             ->register(PanelConfig::class, PanelConfig::class)
-            ->setArguments([$panelStaticUrl !== '' ? $panelStaticUrl : PanelConfig::DEFAULT_STATIC_URL])
+            ->setArguments([
+                $panelStaticUrl !== '' ? $panelStaticUrl : PanelConfig::DEFAULT_STATIC_URL,
+                '/debug',
+                $panelDev,
+            ])
             ->setPublic(false);
 
         $container
