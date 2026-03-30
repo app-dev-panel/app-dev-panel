@@ -80,7 +80,6 @@ const inspectorChildren = [
 
 const MainArea = styled(Box)({
     flex: 1,
-    overflow: 'hidden',
     display: 'flex',
     justifyContent: 'center',
     padding: componentTokens.mainGap,
