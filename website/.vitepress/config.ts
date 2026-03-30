@@ -43,15 +43,15 @@ export default defineConfig({
             lang: 'en',
             themeConfig: {
                 nav: [
-                    { text: 'Guide', link: '/guide/getting-started' },
-                    { text: 'API', link: '/api/' },
-                    { text: 'llms.txt', link: '/guide/llms-txt' },
                     { text: 'Sponsor', link: '/sponsor' },
                     {
                         text: 'Blog',
                         link: '/blog/',
                         activeMatch: '/blog/',
                     },
+                    { text: 'Guide', link: '/guide/getting-started' },
+                    { text: 'API', link: '/api/' },
+                    { text: 'llms.txt', link: '/guide/llms-txt' },
                     {
                         text: 'Framework',
                         items: [
@@ -147,15 +147,15 @@ export default defineConfig({
             link: '/ru/',
             themeConfig: {
                 nav: [
-                    { text: 'Руководство', link: '/ru/guide/getting-started' },
-                    { text: 'API', link: '/ru/api/' },
-                    { text: 'llms.txt', link: '/ru/guide/llms-txt' },
                     { text: 'Спонсоры', link: '/ru/sponsor' },
                     {
                         text: 'Блог',
                         link: '/ru/blog/',
                         activeMatch: '/ru/blog/',
                     },
+                    { text: 'Руководство', link: '/ru/guide/getting-started' },
+                    { text: 'API', link: '/ru/api/' },
+                    { text: 'llms.txt', link: '/ru/guide/llms-txt' },
                     {
                         text: 'Фреймворки',
                         items: [
