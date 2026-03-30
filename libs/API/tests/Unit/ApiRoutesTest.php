@@ -99,7 +99,8 @@ final class ApiRoutesTest extends TestCase
             + count(ApiRoutes::ingestionRoutes())
             + count(ApiRoutes::serviceRoutes())
             + count(ApiRoutes::inspectorRoutes())
-            + count(ApiRoutes::llmRoutes());
+            + count(ApiRoutes::llmRoutes())
+            + count(ApiRoutes::panelRoutes());
 
         $this->assertCount($expected, $router->getRoutes());
     }

@@ -6,6 +6,7 @@ use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 return static function (RoutingConfigurator $routes): void {
+    // API routes (must be registered before the panel catch-all)
     $routes
         ->add('adp_debug_api', '/debug/api/{path}')
         ->controller(AdpApiController::class)
@@ -29,4 +30,17 @@ return static function (RoutingConfigurator $routes): void {
         ->add('adp_inspect_api_root', '/inspect/api')
         ->controller(AdpApiController::class)
         ->methods(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']);
+
+    // Panel routes — serves the embedded SPA (catch-all for client-side routing)
+    $routes
+        ->add('adp_panel', '/debug/{path}')
+        ->controller(AdpApiController::class)
+        ->requirements(['path' => '(?!api(/|$)).+'])
+        ->defaults(['path' => ''])
+        ->methods(['GET']);
+
+    $routes
+        ->add('adp_panel_root', '/debug')
+        ->controller(AdpApiController::class)
+        ->methods(['GET']);
 };

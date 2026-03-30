@@ -13,6 +13,8 @@ use AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
+use AppDevPanel\Api\Panel\PanelConfig;
+use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
@@ -164,6 +166,14 @@ return [
         StreamFactoryInterface $streamFactory,
         UriFactoryInterface $uriFactory,
     ) => new InspectorProxyMiddleware($serviceRegistry, $httpClient, $responseFactory, $streamFactory, $uriFactory),
+
+    // Panel
+    PanelConfig::class => static fn() => new PanelConfig(),
+    PanelController::class => static fn(
+        ResponseFactoryInterface $responseFactory,
+        StreamFactoryInterface $streamFactory,
+        PanelConfig $panelConfig,
+    ) => new PanelController($responseFactory, $streamFactory, $panelConfig),
 
     // Controllers
     DebugController::class => static fn(

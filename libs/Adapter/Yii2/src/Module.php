@@ -52,11 +52,14 @@ use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
 use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
+use AppDevPanel\Api\Panel\PanelConfig;
+use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
@@ -73,7 +76,6 @@ use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
-use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -394,6 +396,16 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
     private function registerApiApplication(\Psr\Container\ContainerInterface $containerBridge): void
     {
+        \Yii::$container->setSingleton(PanelConfig::class, static fn() => new PanelConfig());
+        \Yii::$container->setSingleton(
+            PanelController::class,
+            static fn() => new PanelController(
+                \Yii::$container->get(ResponseFactoryInterface::class),
+                \Yii::$container->get(StreamFactoryInterface::class),
+                \Yii::$container->get(PanelConfig::class),
+            ),
+        );
+
         \Yii::$container->setSingleton(ApiApplication::class, static function () use ($containerBridge) {
             return new ApiApplication(
                 $containerBridge,
@@ -1006,29 +1018,47 @@ class Module extends \yii\base\Module implements BootstrapInterface
             return;
         }
 
-        $app->getUrlManager()->addRules([
+        $app->getUrlManager()->addRules(
             [
-                'class' => \yii\web\UrlRule::class,
-                'pattern' => 'debug/api/<path:.*>',
-                'route' => 'debug-panel/adp-api/handle',
-                'defaults' => ['path' => ''],
+                // API routes (must be before the panel catch-all)
+                [
+                    'class' => \yii\web\UrlRule::class,
+                    'pattern' => 'debug/api/<path:.*>',
+                    'route' => 'debug-panel/adp-api/handle',
+                    'defaults' => ['path' => ''],
+                ],
+                [
+                    'class' => \yii\web\UrlRule::class,
+                    'pattern' => 'debug/api',
+                    'route' => 'debug-panel/adp-api/handle',
+                ],
+                [
+                    'class' => \yii\web\UrlRule::class,
+                    'pattern' => 'inspect/api/<path:.*>',
+                    'route' => 'debug-panel/adp-api/handle',
+                    'defaults' => ['path' => ''],
+                ],
+                [
+                    'class' => \yii\web\UrlRule::class,
+                    'pattern' => 'inspect/api',
+                    'route' => 'debug-panel/adp-api/handle',
+                ],
+                // Panel SPA routes (catch-all for client-side routing)
+                [
+                    'class' => \yii\web\UrlRule::class,
+                    'pattern' => 'debug/<path:(?!api(/|$)).+>',
+                    'route' => 'debug-panel/adp-api/handle',
+                    'defaults' => ['path' => ''],
+                    'verb' => ['GET'],
+                ],
+                [
+                    'class' => \yii\web\UrlRule::class,
+                    'pattern' => 'debug',
+                    'route' => 'debug-panel/adp-api/handle',
+                    'verb' => ['GET'],
+                ],
             ],
-            [
-                'class' => \yii\web\UrlRule::class,
-                'pattern' => 'debug/api',
-                'route' => 'debug-panel/adp-api/handle',
-            ],
-            [
-                'class' => \yii\web\UrlRule::class,
-                'pattern' => 'inspect/api/<path:.*>',
-                'route' => 'debug-panel/adp-api/handle',
-                'defaults' => ['path' => ''],
-            ],
-            [
-                'class' => \yii\web\UrlRule::class,
-                'pattern' => 'inspect/api',
-                'route' => 'debug-panel/adp-api/handle',
-            ],
-        ], false);
+            false,
+        );
     }
 }

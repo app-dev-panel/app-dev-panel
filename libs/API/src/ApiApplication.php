@@ -73,7 +73,8 @@ final class ApiApplication implements RequestHandlerInterface
 
         // Build middleware pipeline based on route prefix
         $isInspector = str_starts_with($path, '/inspect/api');
-        $pipeline = $this->buildPipeline($request, $isInspector);
+        $isPanel = $path === '/debug' || str_starts_with($path, '/debug') && !str_starts_with($path, '/debug/api');
+        $pipeline = $this->buildPipeline($request, $isInspector, $isPanel);
 
         // The final handler resolves and calls the controller
         $controllerHandler = $this->createControllerHandler($route->handler, $request);
@@ -90,7 +91,7 @@ final class ApiApplication implements RequestHandlerInterface
     /**
      * @return \Psr\Http\Server\MiddlewareInterface[]
      */
-    private function buildPipeline(ServerRequestInterface $request, bool $isInspector): array
+    private function buildPipeline(ServerRequestInterface $request, bool $isInspector, bool $isPanel): array
     {
         $middlewares = [];
         $path = $request->getUri()->getPath();
@@ -98,6 +99,15 @@ final class ApiApplication implements RequestHandlerInterface
 
         // CORS
         $middlewares[] = new CorsMiddleware($this->responseFactory);
+
+        // Panel routes only need CORS and IP filter — no JSON wrapping, no token auth
+        if ($isPanel) {
+            if ($this->container->has(IpFilterMiddleware::class)) {
+                $middlewares[] = $this->container->get(IpFilterMiddleware::class);
+            }
+
+            return $middlewares;
+        }
 
         // IP filter
         if ($this->container->has(IpFilterMiddleware::class)) {

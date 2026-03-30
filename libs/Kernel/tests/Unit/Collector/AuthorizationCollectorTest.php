@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
-use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
+use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
 
 final class AuthorizationCollectorTest extends AbstractCollectorTestCase
