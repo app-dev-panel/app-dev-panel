@@ -45,6 +45,9 @@ const hiddenCollectors = new Set<string>([
     CollectorsMap.WebAppInfoCollector,
     CollectorsMap.ConsoleAppInfoCollector,
     CollectorsMap.HttpStreamCollector,
+    CollectorsMap.DeprecationCollector,
+    CollectorsMap.VarDumperCollector,
+    CollectorsMap.HttpClientCollector,
 ]);
 
 // ---------------------------------------------------------------------------

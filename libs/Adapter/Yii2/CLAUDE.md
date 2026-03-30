@@ -19,7 +19,7 @@ src/
 ├── Module.php                                 # Core module: DI, collectors, event wiring, routes
 ├── EventListener/
 │   ├── WebListener.php                        # beforeRequest/afterRequest → Debugger lifecycle
-│   ├── SecurityListener.php                   # User::EVENT_AFTER_LOGIN/LOGOUT → SecurityCollector
+│   ├── AuthorizationListener.php                   # User::EVENT_AFTER_LOGIN/LOGOUT → AuthorizationCollector
 │   └── ConsoleListener.php                    # Console beforeRequest/afterRequest → Debugger lifecycle
 ├── Collector/
 │   ├── DbProfilingTarget.php                  # Yii 2 log target feeding Kernel DatabaseCollector
@@ -191,7 +191,7 @@ Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: n
 | `MailerCollector` | `BaseMailer::EVENT_AFTER_SEND` (normalized in Module) | From, to, cc, bcc, subject, body, charset |
 | `AssetBundleCollector` | `View::EVENT_END_PAGE` (normalized in Module) | Asset bundles: class, source/base paths, CSS/JS files, dependencies |
 | `TranslatorCollector` | `I18NProxy` replacing `Yii::$app->i18n` | Translation lookups, missing translations |
-| `SecurityCollector` | `SecurityListener` on `User::EVENT_AFTER_LOGIN/LOGOUT` | Auth events: login, logout, user identity |
+| `AuthorizationCollector` | `AuthorizationListener` on `User::EVENT_AFTER_LOGIN/LOGOUT` | Auth events: login, logout, user identity |
 | `RedisCollector` | `yii\redis\Connection` events or decorator | Redis commands, timing, errors |
 
 ## Architecture Comparison: Symfony vs Yii 2

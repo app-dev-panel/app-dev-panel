@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\actions\testFixtures;
 
-use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use yii\base\Action;
 
 final class SecurityAction extends Action
@@ -14,22 +14,22 @@ final class SecurityAction extends Action
         /** @var \AppDevPanel\Adapter\Yii2\Module $module */
         $module = \Yii::$app->getModule('debug-panel');
 
-        /** @var SecurityCollector|null $securityCollector */
-        $securityCollector = $module->getCollector(SecurityCollector::class);
+        /** @var AuthorizationCollector|null $authorizationCollector */
+        $authorizationCollector = $module->getCollector(AuthorizationCollector::class);
 
-        if ($securityCollector === null) {
-            return ['fixture' => 'security:basic', 'status' => 'error', 'message' => 'SecurityCollector not found'];
+        if ($authorizationCollector === null) {
+            return ['fixture' => 'security:basic', 'status' => 'error', 'message' => 'AuthorizationCollector not found'];
         }
 
-        $securityCollector->collectUser('admin@example.com', ['ROLE_ADMIN', 'ROLE_USER'], true);
-        $securityCollector->collectFirewall('main');
-        $securityCollector->collectToken('jwt', ['sub' => '123', 'iss' => 'app'], '2026-12-31T23:59:59Z');
-        $securityCollector->collectGuard('web', 'users', ['driver' => 'session']);
-        $securityCollector->collectRoleHierarchy(['ROLE_ADMIN' => ['ROLE_USER', 'ROLE_EDITOR']]);
-        $securityCollector->collectEffectiveRoles(['ROLE_ADMIN', 'ROLE_USER', 'ROLE_EDITOR']);
-        $securityCollector->collectAuthenticationEvent('login', 'form_login', 'success', ['ip' => '127.0.0.1']);
+        $authorizationCollector->collectUser('admin@example.com', ['ROLE_ADMIN', 'ROLE_USER'], true);
+        $authorizationCollector->collectFirewall('main');
+        $authorizationCollector->collectToken('jwt', ['sub' => '123', 'iss' => 'app'], '2026-12-31T23:59:59Z');
+        $authorizationCollector->collectGuard('web', 'users', ['driver' => 'session']);
+        $authorizationCollector->collectRoleHierarchy(['ROLE_ADMIN' => ['ROLE_USER', 'ROLE_EDITOR']]);
+        $authorizationCollector->collectEffectiveRoles(['ROLE_ADMIN', 'ROLE_USER', 'ROLE_EDITOR']);
+        $authorizationCollector->collectAuthenticationEvent('login', 'form_login', 'success', ['ip' => '127.0.0.1']);
 
-        $securityCollector->logAccessDecision(
+        $authorizationCollector->logAccessDecision(
             'ROLE_ADMIN',
             'App\\Entity\\User',
             'ACCESS_GRANTED',
@@ -37,7 +37,7 @@ final class SecurityAction extends Action
             0.002,
             ['route' => '/admin'],
         );
-        $securityCollector->logAccessDecision(
+        $authorizationCollector->logAccessDecision(
             'EDIT',
             'App\\Entity\\Post',
             'ACCESS_DENIED',

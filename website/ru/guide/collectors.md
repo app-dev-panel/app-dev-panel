@@ -27,7 +27,7 @@ title: Коллекторы
 | `RouterCollector` | Данные маршрутизации HTTP-запросов |
 | `MiddlewareCollector` | Выполнение и тайминг стека middleware |
 | `ValidatorCollector` | Операции валидации и результаты |
-| `SecurityCollector` | Аутентификация и авторизация |
+| `AuthorizationCollector` | Аутентификация и авторизация |
 | `TemplateCollector` | Рендеринг шаблонов (Twig, Blade и др.) |
 | `ViewCollector` | Рендеринг представлений с захватом вывода |
 | `VarDumperCollector` | Ручные вызовы `dump()` / `dd()` |

@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\EventListener;
 
-use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use yii\base\Event;
 use yii\web\User;
 use yii\web\UserEvent;
 
 /**
- * Listens for Yii 2 User component events and feeds SecurityCollector.
+ * Listens for Yii 2 User component events and feeds AuthorizationCollector.
  *
  * Captures:
  * - afterLogin → user identity + authentication event
  * - afterLogout → authentication event
  * - afterLogin with identity → impersonation detection (via switchIdentity)
  *
- * Registered via Event::on() in Module::registerSecurityListeners().
+ * Registered via Event::on() in Module::registerAuthorizationListeners().
  */
-final class SecurityListener
+final class AuthorizationListener
 {
     public function __construct(
-        private readonly SecurityCollector $collector,
+        private readonly AuthorizationCollector $collector,
     ) {}
 
     public function onAfterLogin(UserEvent $event): void

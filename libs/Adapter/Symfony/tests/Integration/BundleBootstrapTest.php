@@ -18,7 +18,7 @@ use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
-use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -102,7 +102,7 @@ final class BundleBootstrapTest extends TestCase
             ConsoleAppInfoCollector::class,
             DatabaseCollector::class,
             TemplateCollector::class,
-            SecurityCollector::class,
+            AuthorizationCollector::class,
             CacheCollector::class,
             MailerCollector::class,
             QueueCollector::class,
@@ -251,7 +251,7 @@ final class BundleBootstrapTest extends TestCase
         // Disabled collectors should not exist
         $this->assertFalse($container->has(DatabaseCollector::class));
         $this->assertFalse($container->has(TemplateCollector::class));
-        $this->assertFalse($container->has(SecurityCollector::class));
+        $this->assertFalse($container->has(AuthorizationCollector::class));
         $this->assertFalse($container->has(CacheCollector::class));
         $this->assertFalse($container->has(MailerCollector::class));
         $this->assertFalse($container->has(QueueCollector::class));

@@ -44,7 +44,7 @@ libs/Testing/tests/
     ├── WebFixturesTest.php       # Web context tests (request, app info)
     ├── ErrorFixturesTest.php     # Exception tests (runtime, chained)
     ├── AdvancedFixturesTest.php  # Multi-collector, heavy, http-client, filesystem
-    ├── SecurityFixturesTest.php   # SecurityCollector fixture tests
+    ├── SecurityFixturesTest.php   # AuthorizationCollector fixture tests
     ├── DebugApiTest.php           # Debug API endpoint contract tests
     ├── InspectorApiTest.php       # Inspector API endpoint tests (database)
     ├── AuthorizationInspectorTest.php # Authorization inspector endpoint tests
@@ -93,7 +93,7 @@ All playgrounds must implement these endpoints under `/test/fixtures/`:
 | `/test/fixtures/cache` | cache:basic | CacheCollector |
 | `/test/fixtures/cache-heavy` | cache:heavy | CacheCollector |
 | `/test/fixtures/translator` | translator:basic | TranslatorCollector |
-| `/test/fixtures/security` | security:basic | SecurityCollector |
+| `/test/fixtures/security` | security:basic | AuthorizationCollector |
 | `/test/fixtures/opentelemetry` | opentelemetry:basic | OpenTelemetryCollector |
 | `/test/fixtures/elasticsearch` | elasticsearch:basic | ElasticsearchCollector |
 | `/test/fixtures/redis` | redis:basic | RedisCollector |

@@ -2,9 +2,10 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {Box, Chip, Icon, Typography} from '@mui/material';
+import {Box, Chip, Icon, Link as MuiLink, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
+import {Link} from 'react-router-dom';
 
 type Translation = {
     category: string;
@@ -92,17 +93,11 @@ export const TranslatorPanel = ({data}: TranslatorPanelProps) => {
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
 
-    if (!data || data.totalCount === 0) {
-        return (
-            <EmptyState
-                icon="translate"
-                title="No translations"
-                description="No translation lookups were recorded during this request."
-            />
-        );
-    }
-
-    const {translations, missingCount, totalCount, locales, categories} = data;
+    const translations = data?.translations ?? [];
+    const missingCount = data?.missingCount ?? 0;
+    const totalCount = data?.totalCount ?? 0;
+    const locales = data?.locales ?? [];
+    const categories = data?.categories ?? [];
 
     const filtered = useMemo(() => {
         if (!deferredFilter.trim()) return translations;
@@ -116,8 +111,26 @@ export const TranslatorPanel = ({data}: TranslatorPanelProps) => {
         );
     }, [translations, deferredFilter]);
 
+    if (!data || totalCount === 0) {
+        return (
+            <EmptyState
+                icon="translate"
+                title="No translations"
+                description="No translation lookups were recorded during this request."
+            />
+        );
+    }
+
     return (
         <Box>
+            {/* Inspector link */}
+            <Box sx={{mb: 2, display: 'flex', alignItems: 'center', gap: 1}}>
+                <Icon sx={{fontSize: 18, color: 'text.secondary'}}>open_in_new</Icon>
+                <MuiLink component={Link} to="/inspector/translations" underline="hover" variant="body2">
+                    Open Translations Inspector &rarr;
+                </MuiLink>
+            </Box>
+
             {/* Summary cards */}
             <SummaryGrid>
                 <SummaryCard>
@@ -139,6 +152,9 @@ export const TranslatorPanel = ({data}: TranslatorPanelProps) => {
                                 label={locale}
                                 size="small"
                                 variant="outlined"
+                                component={Link}
+                                to={`/inspector/translations?filter=${encodeURIComponent(locale)}`}
+                                clickable
                                 sx={{fontSize: '11px', height: 22, borderRadius: 0.75, fontWeight: 600}}
                             />
                         ))}
@@ -153,6 +169,9 @@ export const TranslatorPanel = ({data}: TranslatorPanelProps) => {
                                 label={cat}
                                 size="small"
                                 variant="outlined"
+                                component={Link}
+                                to={`/inspector/translations?filter=${encodeURIComponent(cat)}`}
+                                clickable
                                 sx={{fontSize: '11px', height: 22, borderRadius: 0.75, fontWeight: 600}}
                             />
                         ))}

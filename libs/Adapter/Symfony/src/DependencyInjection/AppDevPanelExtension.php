@@ -10,7 +10,7 @@ use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriberCollectors;
-use AppDevPanel\Adapter\Symfony\EventSubscriber\SecuritySubscriber;
+use AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber;
 use AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
@@ -77,7 +77,7 @@ use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RedisCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
-use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -293,7 +293,7 @@ final class AppDevPanelExtension extends Extension
 
         /** @var array<string, class-string> $simpleCollectorMap */
         $simpleCollectorMap = [
-            'security' => SecurityCollector::class,
+            'security' => AuthorizationCollector::class,
             'validator' => ValidatorCollector::class,
             'translator' => TranslatorCollector::class,
         ];
@@ -366,14 +366,14 @@ final class AppDevPanelExtension extends Extension
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
 
-        // Security subscriber — only when symfony/security-http is available and collector is enabled
+        // Authorization subscriber — only when symfony/security-http is available and collector is enabled
         if (
-            $container->has(SecurityCollector::class)
+            $container->has(AuthorizationCollector::class)
             && class_exists(\Symfony\Component\Security\Http\Event\LoginSuccessEvent::class)
         ) {
             $container
-                ->register(SecuritySubscriber::class, SecuritySubscriber::class)
-                ->setArguments([new Reference(SecurityCollector::class)])
+                ->register(AuthorizationSubscriber::class, AuthorizationSubscriber::class)
+                ->setArguments([new Reference(AuthorizationCollector::class)])
                 ->addTag('kernel.event_subscriber')
                 ->setPublic(false);
         }

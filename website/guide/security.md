@@ -6,9 +6,9 @@ title: Security & Authorization
 
 ADP captures authentication and authorization data from your application: user identity, roles, tokens, login/logout events, access decisions, and impersonation. The inspector also provides a live view of your security configuration.
 
-## SecurityCollector
+## AuthorizationCollector
 
-`AppDevPanel\Kernel\Collector\SecurityCollector` captures runtime security data. It implements `SummaryCollectorInterface` for summary display in the debug entry list.
+`AppDevPanel\Kernel\Collector\AuthorizationCollector` captures runtime security data. It implements `SummaryCollectorInterface` for summary display in the debug entry list.
 
 ### Collected Data
 
@@ -42,11 +42,11 @@ $collector->logAccessDecision('EDIT', 'App\\Entity\\Post', 'ACCESS_DENIED', $vot
 
 ## Adapter Wiring
 
-Each adapter automatically feeds SecurityCollector from the framework's native auth system.
+Each adapter automatically feeds AuthorizationCollector from the framework's native auth system.
 
 ### Symfony
 
-`SecuritySubscriber` listens to Symfony Security events. Requires `symfony/security-http`.
+`AuthorizationSubscriber` listens to Symfony Security events. Requires `symfony/security-http`.
 
 | Event | Data Captured |
 |-------|---------------|
@@ -67,7 +67,7 @@ app_dev_panel:
 
 ### Laravel
 
-`SecurityListener` listens to Laravel Auth events.
+`AuthorizationListener` listens to Laravel Auth events.
 
 | Event | Data Captured |
 |-------|---------------|
@@ -79,7 +79,7 @@ app_dev_panel:
 
 ### Yii 2
 
-`SecurityListener` hooks into `yii\web\User` events.
+`AuthorizationListener` hooks into `yii\web\User` events.
 
 | Event | Data Captured |
 |-------|---------------|
@@ -89,7 +89,7 @@ app_dev_panel:
 
 ### Yiisoft (Yii 3)
 
-SecurityCollector is registered in DI but requires manual calls — Yii 3 has no standardized auth event system.
+AuthorizationCollector is registered in DI but requires manual calls — Yii 3 has no standardized auth event system.
 
 ## Authorization Inspector
 
@@ -118,7 +118,7 @@ Adapters implement `AuthorizationConfigProviderInterface` to supply this data. D
 
 ## Frontend
 
-### SecurityPanel (Debug)
+### AuthorizationPanel (Debug)
 
 Displays per-request security data in the debug view:
 

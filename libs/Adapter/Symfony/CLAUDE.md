@@ -23,7 +23,7 @@ src/
 ├── EventSubscriber/
 │   ├── HttpSubscriber.php                          # kernel.request/response/exception/terminate → Debugger
 │   ├── ConsoleSubscriber.php                       # console.command/error/terminate → Debugger
-│   ├── SecuritySubscriber.php                      # Symfony Security events → SecurityCollector
+│   ├── AuthorizationSubscriber.php                      # Symfony Security events → AuthorizationCollector
 │   └── CorsSubscriber.php                          # CORS headers for debug API responses
 ├── Proxy/
 │   ├── SymfonyEventDispatcherProxy.php             # Wraps event_dispatcher, implements Component interface
@@ -109,15 +109,15 @@ Runs after all extensions. Responsibilities:
 | `console.error` | 0 | `ExceptionCollector`, `CommandCollector` |
 | `console.terminate` | -2048 | `CommandCollector`, `Debugger::shutdown()` |
 
-**Security events (`SecuritySubscriber`, requires `symfony/security-http`):**
+**Security events (`AuthorizationSubscriber`, requires `symfony/security-http`):**
 
 | Symfony Event | ADP Action |
 |---------------|------------|
-| `LoginSuccessEvent` | `SecurityCollector`: user identity, roles, firewall, token, impersonation (if SwitchUserToken) |
-| `LoginFailureEvent` | `SecurityCollector`: failed auth event with exception details |
-| `LogoutEvent` | `SecurityCollector`: logout auth event |
-| `SwitchUserEvent` | `SecurityCollector`: impersonation data + switch_user auth event |
-| `VoteEvent` | `SecurityCollector`: access decisions with voter results |
+| `LoginSuccessEvent` | `AuthorizationCollector`: user identity, roles, firewall, token, impersonation (if SwitchUserToken) |
+| `LoginFailureEvent` | `AuthorizationCollector`: failed auth event with exception details |
+| `LogoutEvent` | `AuthorizationCollector`: logout auth event |
+| `SwitchUserEvent` | `AuthorizationCollector`: impersonation data + switch_user auth event |
+| `VoteEvent` | `AuthorizationCollector`: access decisions with voter results |
 
 Conditionally registered only when `symfony/security-http` is installed and the `security` collector is enabled.
 
@@ -173,7 +173,7 @@ Conditionally registered only when `symfony/security-http` is installed and the 
 |-----------|--------|------|
 | `DatabaseCollector` (Kernel) | DBAL middleware calling `logQuery()` | SQL queries, params, time, backtrace |
 | `TwigCollector` | Profiler extension calling `logRender()` | Template names, render times |
-| `SecurityCollector` (Kernel) | `SecuritySubscriber` listening to Symfony Security events | User, roles, firewall, token, impersonation, auth events, access decisions with voters |
+| `AuthorizationCollector` (Kernel) | `AuthorizationSubscriber` listening to Symfony Security events | User, roles, firewall, token, impersonation, auth events, access decisions with voters |
 | `CacheCollector` | Decorated cache adapter calling `logCacheOperation()` | Cache operations, hits/misses |
 | `MailerCollector` (Kernel) | Mailer MessageEvent listener calling `collectMessage()` | Emails sent |
 | `MessengerCollector` | Messenger middleware calling `logMessage()` | Messages dispatched/handled/failed |
@@ -202,7 +202,7 @@ app_dev_panel:
         command: true                      # CommandCollector
         doctrine: true                     # DatabaseCollector (requires doctrine/dbal)
         twig: true                         # TwigCollector (requires twig/twig)
-        security: true                     # SecurityCollector (requires symfony/security-bundle)
+        security: true                     # AuthorizationCollector (requires symfony/security-bundle)
         cache: true                        # CacheCollector
         mailer: true                       # MailerCollector from Kernel (requires symfony/mailer)
         messenger: true                    # MessengerCollector (requires symfony/messenger)

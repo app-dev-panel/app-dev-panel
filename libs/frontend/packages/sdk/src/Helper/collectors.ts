@@ -24,7 +24,7 @@ export enum CollectorsMap {
     RouterCollector = 'AppDevPanel\\Kernel\\Collector\\RouterCollector',
     CacheCollector = 'AppDevPanel\\Kernel\\Collector\\CacheCollector',
     TemplateCollector = 'AppDevPanel\\Kernel\\Collector\\TemplateCollector',
-    SecurityCollector = 'AppDevPanel\\Kernel\\Collector\\SecurityCollector',
+    AuthorizationCollector = 'AppDevPanel\\Kernel\\Collector\\AuthorizationCollector',
     DeprecationCollector = 'AppDevPanel\\Kernel\\Collector\\DeprecationCollector',
     OpenTelemetryCollector = 'AppDevPanel\\Kernel\\Collector\\OpenTelemetryCollector',
     TranslatorCollector = 'AppDevPanel\\Kernel\\Collector\\TranslatorCollector',

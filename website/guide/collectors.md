@@ -27,7 +27,7 @@ Collectors are the core data-gathering mechanism in ADP. Each collector implemen
 | `RouterCollector` | HTTP route matching data |
 | `MiddlewareCollector` | Middleware stack execution and timing |
 | `ValidatorCollector` | Validation operations and results |
-| `SecurityCollector` | Authentication and authorization data |
+| `AuthorizationCollector` | Authentication and authorization data |
 | `TemplateCollector` | Template rendering (Twig, Blade, etc.) |
 | `ViewCollector` | View rendering with captured output |
 | `VarDumperCollector` | Manual `dump()` / `dd()` calls |

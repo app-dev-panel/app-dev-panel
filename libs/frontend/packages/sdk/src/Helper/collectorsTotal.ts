@@ -53,6 +53,14 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
             return Number(data.translator?.total) || 0;
         case CollectorsMap.ElasticsearchCollector:
             return Number(data.elasticsearch?.total) || 0;
+        case CollectorsMap.RedisCollector:
+            return Number(data.redis?.total) || 0;
+        case CollectorsMap.RouterCollector:
+            return Number(data.router?.total) || 0;
+        case CollectorsMap.AuthorizationCollector:
+            return Number(data.authorization?.total ?? data.security?.total) || 0;
+        case CollectorsMap.CodeCoverageCollector:
+            return Number(data.coverage?.total) || 0;
         default:
             return undefined;
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Laravel\EventListener;
 
-use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
@@ -14,7 +14,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Events\Dispatcher;
 
 /**
- * Listens for Laravel Auth events and feeds the SecurityCollector.
+ * Listens for Laravel Auth events and feeds AuthorizationCollector.
  *
  * Captures:
  * - Login → user identity + authentication event
@@ -23,13 +23,13 @@ use Illuminate\Contracts\Events\Dispatcher;
  * - Authenticated → user identity (session-based)
  * - OtherDeviceLogout → authentication event
  */
-final class SecurityListener
+final class AuthorizationListener
 {
-    /** @var \Closure(): SecurityCollector */
+    /** @var \Closure(): AuthorizationCollector */
     private \Closure $collectorFactory;
 
     /**
-     * @param \Closure(): SecurityCollector $collectorFactory
+     * @param \Closure(): AuthorizationCollector $collectorFactory
      */
     public function __construct(\Closure $collectorFactory)
     {

@@ -21,7 +21,7 @@ final class CollectorDataResolver
         'fs_stream' => 'FilesystemStreamCollector',
         'http_stream' => 'HttpStreamCollector',
         'cache' => 'CacheCollector',
-        'security' => 'SecurityCollector',
+        'security' => 'AuthorizationCollector',
         'twig' => 'TwigCollector',
         'doctrine' => 'DoctrineCollector',
         'mailer' => 'MailerCollector',

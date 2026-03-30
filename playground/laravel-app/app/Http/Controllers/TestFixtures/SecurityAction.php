@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use Illuminate\Http\JsonResponse;
 
 final readonly class SecurityAction
 {
     public function __construct(
-        private SecurityCollector $securityCollector,
+        private AuthorizationCollector $authorizationCollector,
     ) {}
 
     public function __invoke(): JsonResponse
     {
-        $this->securityCollector->collectUser('admin@example.com', ['ROLE_ADMIN', 'ROLE_USER'], true);
-        $this->securityCollector->collectFirewall('main');
-        $this->securityCollector->collectToken('jwt', ['sub' => '123', 'iss' => 'app'], '2026-12-31T23:59:59Z');
-        $this->securityCollector->collectGuard('web', 'users', ['driver' => 'session']);
-        $this->securityCollector->collectRoleHierarchy(['ROLE_ADMIN' => ['ROLE_USER', 'ROLE_EDITOR']]);
-        $this->securityCollector->collectEffectiveRoles(['ROLE_ADMIN', 'ROLE_USER', 'ROLE_EDITOR']);
-        $this->securityCollector->collectAuthenticationEvent('login', 'form_login', 'success', ['ip' => '127.0.0.1']);
+        $this->authorizationCollector->collectUser('admin@example.com', ['ROLE_ADMIN', 'ROLE_USER'], true);
+        $this->authorizationCollector->collectFirewall('main');
+        $this->authorizationCollector->collectToken('jwt', ['sub' => '123', 'iss' => 'app'], '2026-12-31T23:59:59Z');
+        $this->authorizationCollector->collectGuard('web', 'users', ['driver' => 'session']);
+        $this->authorizationCollector->collectRoleHierarchy(['ROLE_ADMIN' => ['ROLE_USER', 'ROLE_EDITOR']]);
+        $this->authorizationCollector->collectEffectiveRoles(['ROLE_ADMIN', 'ROLE_USER', 'ROLE_EDITOR']);
+        $this->authorizationCollector->collectAuthenticationEvent('login', 'form_login', 'success', ['ip' => '127.0.0.1']);
 
-        $this->securityCollector->logAccessDecision(
+        $this->authorizationCollector->logAccessDecision(
             'ROLE_ADMIN',
             'App\\Entity\\User',
             'ACCESS_GRANTED',
@@ -31,7 +31,7 @@ final readonly class SecurityAction
             0.002,
             ['route' => '/admin'],
         );
-        $this->securityCollector->logAccessDecision(
+        $this->authorizationCollector->logAccessDecision(
             'EDIT',
             'App\\Entity\\Post',
             'ACCESS_DENIED',

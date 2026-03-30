@@ -38,7 +38,7 @@ const iconColors: Record<string, {bg: string; fg: string}> = {
     [CollectorsMap.FilesystemStreamCollector]: {bg: '#FFF7ED', fg: '#EA580C'},
     [CollectorsMap.CacheCollector]: {bg: '#ECFDF5', fg: '#059669'},
     [CollectorsMap.TemplateCollector]: {bg: '#FEF3C7', fg: '#B45309'},
-    [CollectorsMap.SecurityCollector]: {bg: '#FEF2F2', fg: '#DC2626'},
+    [CollectorsMap.AuthorizationCollector]: {bg: '#FEF2F2', fg: '#DC2626'},
     [CollectorsMap.DeprecationCollector]: {bg: '#FFF3E0', fg: '#E65100'},
     [CollectorsMap.EnvironmentCollector]: {bg: '#E8F5E9', fg: '#2E7D32'},
     [CollectorsMap.TranslatorCollector]: {bg: '#E3F2FD', fg: '#1565C0'},
