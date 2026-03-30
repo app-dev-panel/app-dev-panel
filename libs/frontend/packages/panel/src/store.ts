@@ -16,7 +16,6 @@ import {setupListeners} from '@reduxjs/toolkit/query';
 // import {middlewares as ToolbarApiMiddlewares, reducers as ToolbarApiReducers} from './Module/Toolbar/api';
 import {errorNotificationMiddleware} from '@app-dev-panel/sdk/API/errorNotificationMiddleware';
 import {TypedUseSelectorHook, useSelector} from 'react-redux';
-import type {PreloadedStateShapeFromReducersMapObject} from 'redux';
 import {FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, persistStore} from 'redux-persist';
 import {initMessageListener} from 'redux-state-sync';
 
@@ -32,7 +31,7 @@ const rootReducer = combineReducers({
     // ...ToolbarApiReducers,
 });
 
-export const createStore = (preloadedState: PreloadedStateShapeFromReducersMapObject<typeof rootReducer>) => {
+export const createStore = (preloadedState: Partial<ReturnType<typeof rootReducer>> = {}) => {
     const store = configureStore({
         reducer: rootReducer,
         middleware: (getDefaultMiddleware) =>

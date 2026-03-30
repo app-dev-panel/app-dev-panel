@@ -2,7 +2,7 @@ name: Monorepo Split
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     tags: ['*']
 
 permissions:
@@ -43,3 +43,5 @@ jobs:
           repository_name: ${{ matrix.package.name }}
           branch: main
           tag: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'

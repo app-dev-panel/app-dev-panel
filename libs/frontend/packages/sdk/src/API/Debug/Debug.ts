@@ -21,6 +21,7 @@ export type DebugEntry = {
         countPushes: number;
         countStatuses: number;
         countProcessingMessages: number;
+        messageCount?: number;
         duplicateGroups?: number;
         totalDuplicatedCount?: number;
     };
@@ -50,6 +51,7 @@ export type DebugEntry = {
         uri: string;
         action: string | string[];
         middlewares: any[];
+        total?: number;
     };
     middleware?: {total: number};
     asset?: {bundles: {total: number}};
@@ -58,6 +60,7 @@ export type DebugEntry = {
     db?: {
         queries: {error: number; total: number};
         transactions: {error: number; total: number};
+        queryCount?: number;
         duplicateGroups?: number;
         totalDuplicatedCount?: number;
     };
