@@ -81,6 +81,7 @@ export default defineConfig({
                                 { text: 'Proxies', link: '/guide/proxies' },
                                 { text: 'Data Flow', link: '/guide/data-flow' },
                                 { text: 'Security & Authorization', link: '/guide/security' },
+                                { text: 'Feature Matrix', link: '/guide/feature-matrix' },
                             ],
                         },
                         {
@@ -172,6 +173,7 @@ export default defineConfig({
                                 { text: 'Прокси', link: '/ru/guide/proxies' },
                                 { text: 'Поток данных', link: '/ru/guide/data-flow' },
                                 { text: 'Безопасность и авторизация', link: '/ru/guide/security' },
+                                { text: 'Матрица возможностей', link: '/ru/guide/feature-matrix' },
                             ],
                         },
                         {
