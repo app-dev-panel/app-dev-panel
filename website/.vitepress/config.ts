@@ -70,6 +70,7 @@ export default defineConfig({
                                 { text: 'What is ADP?', link: '/guide/what-is-adp' },
                                 { text: 'Getting Started', link: '/guide/getting-started' },
                                 { text: 'Architecture', link: '/guide/architecture' },
+                                { text: 'Roadmap', link: '/guide/roadmap' },
                             ],
                         },
                         {
@@ -82,6 +83,7 @@ export default defineConfig({
                                 { text: 'Elasticsearch', link: '/guide/elasticsearch' },
                                 { text: 'Data Flow', link: '/guide/data-flow' },
                                 { text: 'Security & Authorization', link: '/guide/security' },
+                                { text: 'Feature Matrix', link: '/guide/feature-matrix' },
                             ],
                         },
                         {
@@ -108,6 +110,9 @@ export default defineConfig({
                             items: [
                                 { text: 'MCP Server', link: '/guide/mcp-server' },
                                 { text: 'CLI', link: '/guide/cli' },
+                                { text: 'Playgrounds', link: '/guide/playgrounds' },
+                                { text: 'CI & Tooling', link: '/guide/ci-and-tooling' },
+                                { text: 'Editor Integration', link: '/guide/editor-integration' },
                                 { text: 'llms.txt', link: '/guide/llms-txt' },
                                 { text: 'Contributing', link: '/guide/contributing' },
                             ],
@@ -169,6 +174,7 @@ export default defineConfig({
                                 { text: 'Что такое ADP?', link: '/ru/guide/what-is-adp' },
                                 { text: 'Начало работы', link: '/ru/guide/getting-started' },
                                 { text: 'Архитектура', link: '/ru/guide/architecture' },
+                                { text: 'Дорожная карта', link: '/ru/guide/roadmap' },
                             ],
                         },
                         {
@@ -181,6 +187,7 @@ export default defineConfig({
                                 { text: 'Elasticsearch', link: '/ru/guide/elasticsearch' },
                                 { text: 'Поток данных', link: '/ru/guide/data-flow' },
                                 { text: 'Безопасность и авторизация', link: '/ru/guide/security' },
+                                { text: 'Матрица возможностей', link: '/ru/guide/feature-matrix' },
                             ],
                         },
                         {
@@ -207,6 +214,9 @@ export default defineConfig({
                             items: [
                                 { text: 'MCP Сервер', link: '/ru/guide/mcp-server' },
                                 { text: 'CLI', link: '/ru/guide/cli' },
+                                { text: 'Playground-приложения', link: '/ru/guide/playgrounds' },
+                                { text: 'CI и инструменты', link: '/ru/guide/ci-and-tooling' },
+                                { text: 'Интеграция с редакторами', link: '/ru/guide/editor-integration' },
                                 { text: 'llms.txt', link: '/ru/guide/llms-txt' },
                                 { text: 'Участие в разработке', link: '/ru/guide/contributing' },
                             ],

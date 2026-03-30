@@ -1,3 +1,7 @@
+---
+title: Начало работы
+---
+
 # Начало работы
 
 ADP (Application Development Panel) — это фреймворк-независимая панель отладки для PHP-приложений. Она собирает данные во время выполнения и предоставляет веб-интерфейс для их анализа.
@@ -6,7 +10,6 @@ ADP (Application Development Panel) — это фреймворк-независ
 
 - PHP 8.4 или выше
 - Composer
-- Node.js 21+ (для разработки фронтенда)
 
 ## Установка
 
@@ -15,30 +18,108 @@ ADP (Application Development Panel) — это фреймворк-независ
 ::: code-group
 
 ```bash [Yii 3]
-composer require app-dev-panel/yiisoft-adapter
+composer require app-dev-panel/adapter-yiisoft
 ```
 
 ```bash [Symfony]
-composer require app-dev-panel/symfony-adapter
+composer require app-dev-panel/adapter-symfony
 ```
 
 ```bash [Laravel]
-composer require app-dev-panel/laravel-adapter
+composer require app-dev-panel/adapter-laravel
 ```
 
 ```bash [Yii 2]
-composer require app-dev-panel/yii2-adapter
+composer require app-dev-panel/adapter-yii2
+```
+
+```bash [Cycle ORM]
+composer require app-dev-panel/adapter-cycle
 ```
 
 :::
 
+Каждый адаптер автоматически подтягивает `app-dev-panel/kernel` и `app-dev-panel/api` как зависимости.
+
 ### 2. Сконфигурируйте приложение
 
-Каждый адаптер автоматически регистрируется в DI-контейнере вашего фреймворка. Обычно ручная настройка не требуется.
+::: code-group
+
+```php [Yii 3]
+// Конфигурация не нужна — авторегистрация через yiisoft/config plugin
+```
+
+```php [Symfony]
+// config/bundles.php
+return [
+    // ...
+    AppDevPanel\Adapter\Symfony\AppDevPanelBundle::class => ['dev' => true, 'test' => true],
+];
+```
+
+```php [Laravel]
+// Авторегистрация через package discovery
+// Опционально опубликуйте конфиг:
+// php artisan vendor:publish --tag=app-dev-panel-config
+```
+
+```php [Yii 2]
+// config/web.php
+return [
+    'bootstrap' => ['debug-panel'],
+    'modules' => [
+        'debug-panel' => [
+            'class' => \AppDevPanel\Adapter\Yii2\Module::class,
+        ],
+    ],
+];
+```
+
+:::
 
 ### 3. Начинайте отладку
 
-Запустите приложение и откройте панель ADP в браузере. Вы увидите данные отладки, собранные из вашего приложения в реальном времени.
+Запустите приложение и откройте debug API по адресу `http://your-app/debug/api/`. Панель ADP покажет данные отладки, собранные из вашего приложения в реальном времени.
+
+::: tip Встроенный сервер PHP
+При использовании встроенного сервера PHP всегда устанавливайте `PHP_CLI_SERVER_WORKERS=3` или выше. ADP выполняет параллельные запросы (SSE + получение данных); однопоточный режим вызывает таймауты.
+
+```bash
+PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
+```
+:::
+
+## Попробуйте демо
+
+ADP поставляется с [playground-приложениями](/ru/guide/playgrounds) для каждого поддерживаемого фреймворка:
+
+```bash
+git clone https://github.com/app-dev-panel/app-dev-panel.git
+cd app-dev-panel
+make install              # Установить все зависимости
+```
+
+Запустите playground-сервер:
+
+::: code-group
+
+```bash [Yii 3]
+cd playground/yiisoft-app && ./yii serve --port=8101
+```
+
+```bash [Symfony]
+cd playground/symfony-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t public
+```
+
+```bash [Laravel]
+cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
+```
+
+```bash [Yii 2]
+cd playground/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8103 -t public
+```
+
+:::
 
 ## Обзор архитектуры
 
@@ -70,3 +151,5 @@ ADP использует многослойную архитектуру:
 - [Архитектура](/ru/guide/architecture) — Глубокое погружение в дизайн системы
 - [Коллекторы](/ru/guide/collectors) — Как собираются данные
 - [Поток данных](/ru/guide/data-flow) — Путь данных от приложения до панели
+- [Матрица возможностей](/ru/guide/feature-matrix) — Что поддерживается в каждом фреймворке
+- [Playground-приложения](/ru/guide/playgrounds) — Попробуйте демо-приложения
