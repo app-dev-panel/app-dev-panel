@@ -54,7 +54,17 @@ produces structured findings with severity and suggestions. Initially local PHP 
 | **TimelineGapAnalyzer** | `TimelineCollector` | Unexplained gaps in the request timeline |
 | **QueueReliability** | `QueueCollector` | Failed message patterns, retry storms, duplicate dispatch |
 
+### Observability
+
+| Analyzer | Input Collectors | Output |
+|----------|-----------------|--------|
+| **SpanAnomalyDetector** | `OpenTelemetryCollector` | Spans with abnormal duration, missing parent spans, broken trace chains |
+| **TraceBottleneck** | `OpenTelemetryCollector` | Critical path analysis across distributed spans |
+
 ### AI-Powered (Future)
+
+Leverages the existing LLM domain (`/debug/api/llm/*` — `LlmController`) for AI-powered analysis.
+Analyzers send structured prompts to the connected LLM provider via `LlmController::analyze()`.
 
 | Analyzer | Input | Output |
 |----------|-------|--------|
@@ -138,6 +148,9 @@ libs/Kernel/src/Analysis/
     │   ├── CacheEfficiencyAnalyzer.php
     │   ├── DeprecationImpactAnalyzer.php
     │   └── EventListenerAuditAnalyzer.php
+    ├── Observability/
+    │   ├── SpanAnomalyAnalyzer.php
+    │   └── TraceBottleneckAnalyzer.php
     └── Behavioral/
         ├── RequestAnomalyAnalyzer.php
         ├── ErrorCorrelationAnalyzer.php
@@ -547,10 +560,11 @@ requires zero changes in `AnalysisManager`, API, or frontend.
 ## Integration Points
 
 - **Storage**: `analysis.json.gz` colocated with `summary/data/objects` in `storage/YYYY-MM-DD/{id}/`
-- **API**: `/debug/api/analysis/*` endpoints use `ResponseDataWrapper`, `IpFilterMiddleware`, `CorsMiddleware`
+- **API**: `/debug/api/analysis/*` endpoints use `ResponseDataWrapper`, `IpFilterMiddleware`, `CorsMiddleware`, `TokenAuthMiddleware`
+- **LLM**: AI-powered analyzers delegate to existing `/debug/api/llm/analyze` endpoint (`LlmController`)
 - **Frontend**: "Analysis" tab reuses SDK components; summary badges in debug list
 - **SSE**: analysis events via existing `ServerSentEventsStream` (type embedded in JSON payload)
-- **MCP**: new tools expose analysis to AI assistants
+- **MCP**: new tools expose analysis to AI assistants via `/inspect/api/mcp`
 
 ### MCP Tools
 
@@ -595,9 +609,10 @@ Analysis works with the existing service registry:
 - Full performance suite (slow routes, middleware bottlenecks, HTTP latency)
 - Security suite (SQL injection risk, sensitive data, headers)
 - Quality suite (deprecations, events, views)
+- Observability suite (OpenTelemetry span anomalies, trace bottlenecks)
 
 ### Phase 5: Cloud & AI
 - `HttpRunner` for remote analysis
-- AI-powered analyzers (query optimization, root cause, summaries)
+- AI-powered analyzers via existing LLM domain (`LlmController::analyze()`)
 - Cross-sample trend analysis
 - Anomaly detection with historical baselines
