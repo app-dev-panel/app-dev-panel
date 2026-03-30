@@ -27,7 +27,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.4",
-        "app-dev-panel/api": "*",
+        "app-dev-panel/api": "^1.0",
         "cycle/database": "^2.0"
     },
     "require-dev": {

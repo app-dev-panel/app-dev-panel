@@ -148,6 +148,18 @@
       "AppDevPanel\\Tests\\": "tests"
     }
   },
+  "replace": {
+    "app-dev-panel/kernel": "self.version",
+    "app-dev-panel/api": "self.version",
+    "app-dev-panel/cli": "self.version",
+    "app-dev-panel/mcp-server": "self.version",
+    "app-dev-panel/testing": "self.version",
+    "app-dev-panel/adapter-symfony": "self.version",
+    "app-dev-panel/adapter-laravel": "self.version",
+    "app-dev-panel/adapter-yii2": "self.version",
+    "app-dev-panel/adapter-cycle": "self.version",
+    "app-dev-panel/adapter-yiisoft": "self.version"
+  },
   "extra": {
     "branch-alias": {
       "dev-master": "1.x-dev",

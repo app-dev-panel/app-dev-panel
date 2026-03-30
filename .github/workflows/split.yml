@@ -1,0 +1,43 @@
+name: Monorepo Split
+
+on:
+  push:
+    branches: [main]
+    tags: ['*']
+
+permissions:
+  contents: read
+
+jobs:
+  split:
+    name: "Split ${{ matrix.package.name }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - { name: "kernel",           local_path: "libs/Kernel",           remote_repository: "app-dev-panel/kernel" }
+          - { name: "api",              local_path: "libs/API",              remote_repository: "app-dev-panel/api" }
+          - { name: "cli",              local_path: "libs/Cli",              remote_repository: "app-dev-panel/cli" }
+          - { name: "mcp-server",       local_path: "libs/McpServer",        remote_repository: "app-dev-panel/mcp-server" }
+          - { name: "testing",          local_path: "libs/Testing",          remote_repository: "app-dev-panel/testing" }
+          - { name: "adapter-symfony",  local_path: "libs/Adapter/Symfony",  remote_repository: "app-dev-panel/adapter-symfony" }
+          - { name: "adapter-laravel",  local_path: "libs/Adapter/Laravel",  remote_repository: "app-dev-panel/adapter-laravel" }
+          - { name: "adapter-yii2",     local_path: "libs/Adapter/Yii2",     remote_repository: "app-dev-panel/adapter-yii2" }
+          - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",    remote_repository: "app-dev-panel/adapter-cycle" }
+          - { name: "adapter-yiisoft",  local_path: "libs/Adapter/Yiisoft",  remote_repository: "app-dev-panel/adapter-yiisoft" }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Split ${{ matrix.package.name }}
+        uses: claudiodekker/monorepo-split-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+        with:
+          local_path: ${{ matrix.package.local_path }}
+          remote_repository: ${{ matrix.package.remote_repository }}
+          remote_branch: main
