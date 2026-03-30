@@ -195,7 +195,13 @@ type Response<T = any> = {data: T};
 export const inspectorApi = createApi({
     reducerPath: 'api.inspector',
     keepUnusedDataFor: 0,
-    tagTypes: ['inspector/composer', 'inspector/opcache', 'inspector/mcp', 'inspector/elasticsearch', 'inspector/redis'],
+    tagTypes: [
+        'inspector/composer',
+        'inspector/opcache',
+        'inspector/mcp',
+        'inspector/elasticsearch',
+        'inspector/redis',
+    ],
     baseQuery: createBaseQuery('/inspect/api/'),
     endpoints: (builder) => ({
         getParameters: builder.query<Response, void>({

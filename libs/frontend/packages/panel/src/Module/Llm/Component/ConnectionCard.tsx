@@ -195,40 +195,38 @@ export const ConnectionCard = () => {
                                 <TextField
                                     {...params}
                                     label="Model"
-                                    slotProps={{
-                                        input: {
-                                            ...params.InputProps,
-                                            endAdornment: (
-                                                <>
-                                                    {isOpenRouter && (
-                                                        <InputAdornment position="end" sx={{mr: -0.5}}>
-                                                            <ToggleButton
-                                                                value="free"
-                                                                selected={freeOnly}
-                                                                onChange={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setFreeOnly((prev) => !prev);
-                                                                }}
-                                                                size="small"
-                                                                sx={{
-                                                                    px: 1,
-                                                                    py: 0,
-                                                                    height: 24,
-                                                                    textTransform: 'none',
-                                                                    fontWeight: 600,
-                                                                    fontSize: '11px',
-                                                                    lineHeight: 1,
-                                                                    borderRadius: 1,
-                                                                }}
-                                                            >
-                                                                Free
-                                                            </ToggleButton>
-                                                        </InputAdornment>
-                                                    )}
-                                                    {params.InputProps.endAdornment}
-                                                </>
-                                            ),
-                                        },
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                            <>
+                                                {isOpenRouter && (
+                                                    <InputAdornment position="end" sx={{mr: -0.5}}>
+                                                        <ToggleButton
+                                                            value="free"
+                                                            selected={freeOnly}
+                                                            onChange={(e) => {
+                                                                e.stopPropagation();
+                                                                setFreeOnly((prev) => !prev);
+                                                            }}
+                                                            size="small"
+                                                            sx={{
+                                                                px: 1,
+                                                                py: 0,
+                                                                height: 24,
+                                                                textTransform: 'none',
+                                                                fontWeight: 600,
+                                                                fontSize: '11px',
+                                                                lineHeight: 1,
+                                                                borderRadius: 1,
+                                                            }}
+                                                        >
+                                                            Free
+                                                        </ToggleButton>
+                                                    </InputAdornment>
+                                                )}
+                                                {params.InputProps.endAdornment}
+                                            </>
+                                        ),
                                     }}
                                 />
                             )}

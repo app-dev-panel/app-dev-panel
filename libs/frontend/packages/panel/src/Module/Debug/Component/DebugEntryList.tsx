@@ -171,21 +171,19 @@ export const DebugEntryList = () => {
                     placeholder="Search by URL, method, status, command, or ID..."
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    slotProps={{
-                        input: {
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <Icon sx={{fontSize: 18, color: 'text.disabled'}}>search</Icon>
-                                </InputAdornment>
-                            ),
-                            endAdornment: filter ? (
-                                <InputAdornment position="end">
-                                    <IconButton size="small" onClick={() => setFilter('')} sx={{p: 0.25}}>
-                                        <Icon sx={{fontSize: 16}}>close</Icon>
-                                    </IconButton>
-                                </InputAdornment>
-                            ) : null,
-                        },
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Icon sx={{fontSize: 18, color: 'text.disabled'}}>search</Icon>
+                            </InputAdornment>
+                        ),
+                        endAdornment: filter ? (
+                            <InputAdornment position="end">
+                                <IconButton size="small" onClick={() => setFilter('')} sx={{p: 0.25}}>
+                                    <Icon sx={{fontSize: 16}}>close</Icon>
+                                </IconButton>
+                            </InputAdornment>
+                        ) : null,
                     }}
                     sx={{'& .MuiOutlinedInput-root': {fontSize: '13px', borderRadius: 1}}}
                 />

@@ -1,4 +1,3 @@
-import {useBreadcrumbs} from '@app-dev-panel/panel/Application/Context/BreadcrumbsContext';
 import {useGetElasticsearchHealthQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
@@ -92,8 +91,6 @@ export const ElasticsearchPage = () => {
     const typedData = data as HealthData | undefined;
     const health = typedData?.health;
     const indices = useMemo(() => (typedData?.indices ?? []) as GridValidRowModel[], [typedData]);
-
-    useBreadcrumbs(() => ['Inspector', 'Elasticsearch']);
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
