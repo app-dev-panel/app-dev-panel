@@ -1,4 +1,4 @@
-name: npm Publish
+name: Frontend Publish
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 defaults:
   run:
@@ -13,7 +14,7 @@ defaults:
 
 jobs:
   publish:
-    name: Publish npm packages
+    name: Publish to GitHub Packages
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,7 +24,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '21'
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@app-dev-panel'
           cache: 'npm'
           cache-dependency-path: libs/frontend/package-lock.json
 
@@ -36,13 +38,13 @@ jobs:
       - name: Set package versions from git tag
         run: npx lerna version "$GITHUB_REF_NAME" --no-git-tag-version --no-push --yes
 
-      - name: Publish to npm
-        run: npx lerna publish from-package --yes
+      - name: Publish to GitHub Packages
+        run: npx lerna publish from-package --yes --registry https://npm.pkg.github.com
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release-assets:
-    name: Upload frontend build to GitHub Release
+    name: Upload frontend builds to GitHub Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
