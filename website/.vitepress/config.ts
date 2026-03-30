@@ -70,6 +70,7 @@ export default defineConfig({
                                 { text: 'What is ADP?', link: '/guide/what-is-adp' },
                                 { text: 'Getting Started', link: '/guide/getting-started' },
                                 { text: 'Architecture', link: '/guide/architecture' },
+                                { text: 'Roadmap', link: '/guide/roadmap' },
                             ],
                         },
                         {
@@ -164,6 +165,7 @@ export default defineConfig({
                                 { text: 'Что такое ADP?', link: '/ru/guide/what-is-adp' },
                                 { text: 'Начало работы', link: '/ru/guide/getting-started' },
                                 { text: 'Архитектура', link: '/ru/guide/architecture' },
+                                { text: 'Дорожная карта', link: '/ru/guide/roadmap' },
                             ],
                         },
                         {
