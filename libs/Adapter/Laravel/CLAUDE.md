@@ -23,7 +23,7 @@ src/
 │   ├── MailListener.php                        # MessageSent → MailerCollector
 │   ├── QueueListener.php                       # JobProcessing/JobProcessed/JobFailed → QueueCollector
 │   ├── HttpClientListener.php                  # RequestSending/ResponseReceived/ConnectionFailed → HttpClientCollector
-│   ├── SecurityListener.php                    # Authenticated/Login/Logout/Failed → SecurityCollector
+│   ├── AuthorizationListener.php                    # Authenticated/Login/Logout/Failed → AuthorizationCollector
 │   └── ConsoleListener.php                     # CommandStarting/CommandFinished → Debugger lifecycle
 ├── Proxy/
 │   ├── LaravelEventDispatcherProxy.php         # Wraps Illuminate\Contracts\Events\Dispatcher
@@ -95,11 +95,11 @@ Wires in `boot()`:
 | `Illuminate\Http\Client\Events\RequestSending` | `HttpClientCollector` | Outgoing HTTP request |
 | `Illuminate\Http\Client\Events\ResponseReceived` | `HttpClientCollector` | HTTP response |
 | `Illuminate\Http\Client\Events\ConnectionFailed` | `HttpClientCollector` | Connection failure |
-| `Illuminate\Auth\Events\Authenticated` | `SecurityCollector` | User identity + guard (session-based) |
-| `Illuminate\Auth\Events\Login` | `SecurityCollector` | Login auth event + user identity |
-| `Illuminate\Auth\Events\Logout` | `SecurityCollector` | Logout auth event |
-| `Illuminate\Auth\Events\Failed` | `SecurityCollector` | Failed auth event |
-| `Illuminate\Auth\Events\OtherDeviceLogout` | `SecurityCollector` | Other device logout event |
+| `Illuminate\Auth\Events\Authenticated` | `AuthorizationCollector` | User identity + guard (session-based) |
+| `Illuminate\Auth\Events\Login` | `AuthorizationCollector` | Login auth event + user identity |
+| `Illuminate\Auth\Events\Logout` | `AuthorizationCollector` | Logout auth event |
+| `Illuminate\Auth\Events\Failed` | `AuthorizationCollector` | Failed auth event |
+| `Illuminate\Auth\Events\OtherDeviceLogout` | `AuthorizationCollector` | Other device logout event |
 | `Illuminate\Redis\Events\CommandExecuted` | `RedisCollector` | Redis command, timing, connection |
 | `Illuminate\Console\Events\CommandStarting` | `Debugger` | Console lifecycle start |
 | `Illuminate\Console\Events\CommandFinished` | `Debugger` | Console lifecycle end |

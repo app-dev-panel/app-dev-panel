@@ -45,6 +45,9 @@ const hiddenCollectors = new Set<string>([
     CollectorsMap.WebAppInfoCollector,
     CollectorsMap.ConsoleAppInfoCollector,
     CollectorsMap.HttpStreamCollector,
+    CollectorsMap.DeprecationCollector,
+    CollectorsMap.VarDumperCollector,
+    CollectorsMap.HttpClientCollector,
 ]);
 
 // ---------------------------------------------------------------------------
@@ -77,7 +80,6 @@ const inspectorChildren = [
 
 const MainArea = styled(Box)({
     flex: 1,
-    overflow: 'hidden',
     display: 'flex',
     justifyContent: 'center',
     padding: componentTokens.mainGap,

@@ -12,7 +12,7 @@ use AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener;
 use AppDevPanel\Adapter\Laravel\EventListener\HttpClientListener;
 use AppDevPanel\Adapter\Laravel\EventListener\MailListener;
 use AppDevPanel\Adapter\Laravel\EventListener\QueueListener;
-use AppDevPanel\Adapter\Laravel\EventListener\SecurityListener;
+use AppDevPanel\Adapter\Laravel\EventListener\AuthorizationListener;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelConfigProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider;
@@ -84,7 +84,7 @@ use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
-use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -200,7 +200,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'http_stream' => HttpStreamCollector::class,
             'validator' => ValidatorCollector::class,
             'translator' => TranslatorCollector::class,
-            'security' => SecurityCollector::class,
+            'security' => AuthorizationCollector::class,
         ];
 
         foreach ($simpleCollectors as $key => $class) {
@@ -752,7 +752,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         }
 
         if ($collectors['security'] ?? true) {
-            $listener = new SecurityListener(fn() => $this->app->make(SecurityCollector::class));
+            $listener = new AuthorizationListener(fn() => $this->app->make(AuthorizationCollector::class));
             $listener->register($events);
         }
 

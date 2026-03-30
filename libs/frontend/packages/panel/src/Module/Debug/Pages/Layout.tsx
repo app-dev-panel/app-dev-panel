@@ -1,16 +1,14 @@
 import ModuleLoader from '@app-dev-panel/panel/Application/Pages/RemoteComponent';
 import {AssetBundlePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/AssetBundlePanel';
+import {AuthorizationPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/AuthorizationPanel';
 import {CachePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CachePanel';
 import {CodeCoveragePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CodeCoveragePanel';
 import {DatabasePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DatabasePanel';
-import {DeprecationPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DeprecationPanel';
 import {ElasticsearchPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ElasticsearchPanel';
 import {EnvironmentPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EnvironmentPanel';
 import {EventPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EventPanel';
 import {ExceptionPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ExceptionPanel';
-import {FilesystemPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/FilesystemPanel';
-import {HttpClientPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/HttpClientPanel';
-import {LogPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/LogPanel';
+import {IOPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/IOPanel';
 import {MailerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MailerPanel';
 import {MiddlewarePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MiddlewarePanel';
 import {OpenTelemetryPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/OpenTelemetryPanel';
@@ -18,13 +16,12 @@ import {QueuePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/Queu
 import {RedisPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RedisPanel';
 import {RequestPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RequestPanel';
 import {RouterPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RouterPanel';
-import {SecurityPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/SecurityPanel';
 import {ServicesPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ServicesPanel';
 import {TimelinePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelinePanel';
 import {TranslatorPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TranslatorPanel';
 import {TwigPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TwigPanel';
+import {UnifiedLogPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/UnifiedLogPanel';
 import {ValidatorPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ValidatorPanel';
-import {VarDumperPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/VarDumperPanel';
 import {WebViewPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/WebViewPanel';
 import {DumpPage} from '@app-dev-panel/panel/Module/Debug/Pages/DumpPage';
 import {useSelector} from '@app-dev-panel/panel/store';
@@ -36,10 +33,90 @@ import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {Alert, AlertTitle, Box, LinearProgress} from '@mui/material';
 import * as React from 'react';
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {Outlet} from 'react-router';
 import {useSearchParams} from 'react-router-dom';
+
+// ---------------------------------------------------------------------------
+// Collector data renderer
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// UnifiedLogWrapper — fetches deprecation & dump data alongside log data
+// ---------------------------------------------------------------------------
+
+const UnifiedLogWrapper = ({logs}: {logs: any}) => {
+    const debugEntry = useDebugEntry();
+    const [fetchCollector] = useLazyGetCollectorInfoQuery();
+    const [deprecations, setDeprecations] = useState<any[]>([]);
+    const [dumps, setDumps] = useState<any[]>([]);
+
+    const collectors = useMemo(() => {
+        if (!debugEntry) return new Set<string>();
+        return new Set(debugEntry.collectors.map((c: any) => (typeof c === 'string' ? c : c.id)));
+    }, [debugEntry]);
+
+    useEffect(() => {
+        if (!debugEntry) return;
+        if (collectors.has(CollectorsMap.DeprecationCollector)) {
+            fetchCollector({id: debugEntry.id, collector: CollectorsMap.DeprecationCollector}).then(({data}) => {
+                setDeprecations(Array.isArray(data) ? data : []);
+            });
+        } else {
+            setDeprecations([]);
+        }
+        if (collectors.has(CollectorsMap.VarDumperCollector)) {
+            fetchCollector({id: debugEntry.id, collector: CollectorsMap.VarDumperCollector}).then(({data}) => {
+                setDumps(Array.isArray(data) ? data : []);
+            });
+        } else {
+            setDumps([]);
+        }
+    }, [debugEntry, collectors, fetchCollector]);
+
+    return <UnifiedLogPanel logs={logs} deprecations={deprecations} dumps={dumps} />;
+};
+
+// ---------------------------------------------------------------------------
+// IOWrapper — fetches both filesystem and HTTP data for the unified I/O panel
+// ---------------------------------------------------------------------------
+
+const IOWrapper = ({primaryCollector, primaryData}: {primaryCollector: string; primaryData: any}) => {
+    const debugEntry = useDebugEntry();
+    const [fetchCollector] = useLazyGetCollectorInfoQuery();
+    const [secondaryData, setSecondaryData] = useState<any>(null);
+
+    const isFilesystemPrimary = primaryCollector === CollectorsMap.FilesystemStreamCollector;
+    const secondaryCollector = isFilesystemPrimary
+        ? CollectorsMap.HttpClientCollector
+        : CollectorsMap.FilesystemStreamCollector;
+
+    const collectors = useMemo(() => {
+        if (!debugEntry) return new Set<string>();
+        return new Set(debugEntry.collectors.map((c: any) => (typeof c === 'string' ? c : c.id)));
+    }, [debugEntry]);
+
+    useEffect(() => {
+        if (!debugEntry) return;
+        if (collectors.has(secondaryCollector)) {
+            fetchCollector({id: debugEntry.id, collector: secondaryCollector}).then(({data, isError}) => {
+                if (!isError && data) {
+                    setSecondaryData(data);
+                } else {
+                    setSecondaryData(null);
+                }
+            });
+        } else {
+            setSecondaryData(null);
+        }
+    }, [debugEntry, collectors, secondaryCollector, fetchCollector]);
+
+    const filesystem = isFilesystemPrimary ? primaryData : secondaryData;
+    const http = isFilesystemPrimary ? secondaryData : primaryData;
+
+    return <IOPanel filesystem={filesystem} http={http} />;
+};
 
 // ---------------------------------------------------------------------------
 // Collector data renderer
@@ -52,20 +129,26 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.MailerCollector]: (data: any) => <MailerPanel data={data} />,
         [CollectorsMap.ServiceCollector]: (data: any) => <ServicesPanel data={data} />,
         [CollectorsMap.TimelineCollector]: (data: any) => <TimelinePanel data={data} />,
-        [CollectorsMap.LogCollector]: (data: any) => <LogPanel data={data} />,
+        [CollectorsMap.LogCollector]: (data: any) => <UnifiedLogWrapper logs={data} />,
         [CollectorsMap.DatabaseCollector]: (data: any) => <DatabasePanel data={data} />,
-        [CollectorsMap.FilesystemStreamCollector]: (data: any) => <FilesystemPanel data={data} />,
-        [CollectorsMap.HttpClientCollector]: (data: any) => <HttpClientPanel data={data} />,
+        [CollectorsMap.FilesystemStreamCollector]: (data: any) => (
+            <IOWrapper primaryCollector={CollectorsMap.FilesystemStreamCollector} primaryData={data} />
+        ),
+        [CollectorsMap.HttpClientCollector]: (data: any) => (
+            <IOWrapper primaryCollector={CollectorsMap.HttpClientCollector} primaryData={data} />
+        ),
         [CollectorsMap.RequestCollector]: (data: any) => <RequestPanel data={data} />,
         [CollectorsMap.MiddlewareCollector]: (data: any) => <MiddlewarePanel {...data} />,
         [CollectorsMap.EventCollector]: (data: any) => <EventPanel events={data} />,
         [CollectorsMap.ExceptionCollector]: (data: any) => <ExceptionPanel exceptions={data} />,
-        [CollectorsMap.DeprecationCollector]: (data: any) => <DeprecationPanel data={data} />,
-        [CollectorsMap.VarDumperCollector]: (data: any) => <VarDumperPanel data={data} />,
+        [CollectorsMap.DeprecationCollector]: (data: any) => (
+            <UnifiedLogPanel logs={[]} deprecations={data} dumps={[]} />
+        ),
+        [CollectorsMap.VarDumperCollector]: (data: any) => <UnifiedLogPanel logs={[]} deprecations={[]} dumps={data} />,
         [CollectorsMap.CacheCollector]: (data: any) => <CachePanel data={data} />,
         [CollectorsMap.EnvironmentCollector]: (data: any) => <EnvironmentPanel data={data} />,
         [CollectorsMap.TemplateCollector]: (data: any) => <TwigPanel data={data} />,
-        [CollectorsMap.SecurityCollector]: (data: any) => <SecurityPanel data={data} />,
+        [CollectorsMap.AuthorizationCollector]: (data: any) => <AuthorizationPanel data={data} />,
         [CollectorsMap.QueueCollector]: (data: any) => <QueuePanel data={data} />,
         [CollectorsMap.RouterCollector]: (data: any) => <RouterPanel data={data} />,
         [CollectorsMap.ValidatorCollector]: (data: any) => <ValidatorPanel data={data} />,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
-use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
@@ -16,7 +16,7 @@ use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\Security\Http\Event\TokenDeauthenticatedEvent;
 
 /**
- * Listens to Symfony Security events and feeds SecurityCollector.
+ * Listens to Symfony Security events and feeds AuthorizationCollector.
  *
  * Captures:
  * - Login success/failure → authentication events + user identity
@@ -27,13 +27,13 @@ use Symfony\Component\Security\Http\Event\TokenDeauthenticatedEvent;
  * Requires symfony/security-bundle. When not installed, the subscriber
  * is not registered (guarded by class_exists check in AppDevPanelExtension).
  */
-final class SecuritySubscriber implements EventSubscriberInterface
+final class AuthorizationSubscriber implements EventSubscriberInterface
 {
     /** @var array<string, array{attribute: string, subject: string, voters: list<array{voter: string, result: string}>}> */
     private array $pendingDecisions = [];
 
     public function __construct(
-        private readonly SecurityCollector $collector,
+        private readonly AuthorizationCollector $collector,
     ) {}
 
     public static function getSubscribedEvents(): array

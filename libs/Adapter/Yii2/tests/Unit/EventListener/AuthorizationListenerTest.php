@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Tests\Unit\EventListener;
 
-use AppDevPanel\Adapter\Yii2\EventListener\SecurityListener;
-use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Adapter\Yii2\EventListener\AuthorizationListener;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use PHPUnit\Framework\TestCase;
 use yii\web\User;
 use yii\web\UserEvent;
 
-final class SecurityListenerTest extends TestCase
+final class AuthorizationListenerTest extends TestCase
 {
     public function testRegisterDoesNotThrow(): void
     {
-        $collector = new SecurityCollector();
+        $collector = new AuthorizationCollector();
         $collector->startup();
 
-        $listener = new SecurityListener($collector);
+        $listener = new AuthorizationListener($collector);
         $listener->register();
 
         // If we got here without exception, event binding succeeded
@@ -26,10 +26,10 @@ final class SecurityListenerTest extends TestCase
 
     public function testOnAfterLoginCollectsUser(): void
     {
-        $collector = new SecurityCollector();
+        $collector = new AuthorizationCollector();
         $collector->startup();
 
-        $listener = new SecurityListener($collector);
+        $listener = new AuthorizationListener($collector);
 
         $identity = $this->createMock(\yii\web\IdentityInterface::class);
         $identity->method('getId')->willReturn(42);
@@ -51,10 +51,10 @@ final class SecurityListenerTest extends TestCase
 
     public function testOnAfterLogoutCollectsEvent(): void
     {
-        $collector = new SecurityCollector();
+        $collector = new AuthorizationCollector();
         $collector->startup();
 
-        $listener = new SecurityListener($collector);
+        $listener = new AuthorizationListener($collector);
 
         $identity = $this->createMock(\yii\web\IdentityInterface::class);
         $identity->method('getId')->willReturn(42);
@@ -73,10 +73,10 @@ final class SecurityListenerTest extends TestCase
 
     public function testOnAfterLoginSkipsWhenNoIdentity(): void
     {
-        $collector = new SecurityCollector();
+        $collector = new AuthorizationCollector();
         $collector->startup();
 
-        $listener = new SecurityListener($collector);
+        $listener = new AuthorizationListener($collector);
 
         $event = new UserEvent();
         $event->identity = null;

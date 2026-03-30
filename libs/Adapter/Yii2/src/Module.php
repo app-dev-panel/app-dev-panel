@@ -73,7 +73,7 @@ use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
-use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -623,7 +623,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'queue' => static fn(): array => [new QueueCollector($timeline)],
             'validator' => static fn(): array => [new ValidatorCollector()],
             'translator' => static fn(): array => [new TranslatorCollector()],
-            'security' => static fn(): array => [new SecurityCollector()],
+            'security' => static fn(): array => [new AuthorizationCollector()],
             'opentelemetry' => static fn(): array => [new OpenTelemetryCollector($timeline)],
         ];
     }
@@ -644,7 +644,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         $this->registerApplicationListeners($app);
         $this->registerCollectorProfiling($app);
-        $this->registerSecurityListeners($app);
+        $this->registerAuthorizationListeners($app);
     }
 
     private function registerApplicationListeners(Application $app): void
@@ -732,10 +732,10 @@ class Module extends \yii\base\Module implements BootstrapInterface
         }
     }
 
-    private function registerSecurityListeners(Application $app): void
+    private function registerAuthorizationListeners(Application $app): void
     {
-        $securityCollector = $this->getCollector(SecurityCollector::class);
-        if (!$securityCollector instanceof SecurityCollector) {
+        $securityCollector = $this->getCollector(AuthorizationCollector::class);
+        if (!$securityCollector instanceof AuthorizationCollector) {
             return;
         }
 
@@ -743,7 +743,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             return;
         }
 
-        $listener = new \AppDevPanel\Adapter\Yii2\EventListener\SecurityListener($securityCollector);
+        $listener = new \AppDevPanel\Adapter\Yii2\EventListener\AuthorizationListener($securityCollector);
         $listener->register();
 
         // Collect current user after request initialization

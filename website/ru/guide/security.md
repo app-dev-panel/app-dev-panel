@@ -6,9 +6,9 @@ title: Безопасность и авторизация
 
 ADP собирает данные аутентификации и авторизации из вашего приложения: идентификацию пользователя, роли, токены, события входа/выхода, решения по доступу и имперсонацию. Инспектор также предоставляет просмотр конфигурации безопасности в реальном времени.
 
-## SecurityCollector
+## AuthorizationCollector
 
-`AppDevPanel\Kernel\Collector\SecurityCollector` собирает данные безопасности во время выполнения. Реализует `SummaryCollectorInterface` для отображения в списке debug-записей.
+`AppDevPanel\Kernel\Collector\AuthorizationCollector` собирает данные безопасности во время выполнения. Реализует `SummaryCollectorInterface` для отображения в списке debug-записей.
 
 ### Собираемые данные
 
@@ -42,11 +42,11 @@ $collector->logAccessDecision('EDIT', 'App\\Entity\\Post', 'ACCESS_DENIED', $vot
 
 ## Интеграция с адаптерами
 
-Каждый адаптер автоматически передаёт данные в SecurityCollector из нативной системы аутентификации фреймворка.
+Каждый адаптер автоматически передаёт данные в AuthorizationCollector из нативной системы аутентификации фреймворка.
 
 ### Symfony
 
-`SecuritySubscriber` слушает события Symfony Security. Требуется `symfony/security-http`.
+`AuthorizationSubscriber` слушает события Symfony Security. Требуется `symfony/security-http`.
 
 | Событие | Собираемые данные |
 |---------|-------------------|
@@ -67,7 +67,7 @@ app_dev_panel:
 
 ### Laravel
 
-`SecurityListener` слушает события Laravel Auth.
+`AuthorizationListener` слушает события Laravel Auth.
 
 | Событие | Собираемые данные |
 |---------|-------------------|
@@ -79,7 +79,7 @@ app_dev_panel:
 
 ### Yii 2
 
-`SecurityListener` подключается к событиям `yii\web\User`.
+`AuthorizationListener` подключается к событиям `yii\web\User`.
 
 | Событие | Собираемые данные |
 |---------|-------------------|
@@ -89,7 +89,7 @@ app_dev_panel:
 
 ### Yiisoft (Yii 3)
 
-SecurityCollector зарегистрирован в DI, но требует ручных вызовов — в Yii 3 нет стандартизированной системы событий аутентификации.
+AuthorizationCollector зарегистрирован в DI, но требует ручных вызовов — в Yii 3 нет стандартизированной системы событий аутентификации.
 
 ## Инспектор авторизации
 
@@ -118,7 +118,7 @@ SecurityCollector зарегистрирован в DI, но требует ру
 
 ## Frontend
 
-### SecurityPanel (Debug)
+### AuthorizationPanel (Debug)
 
 Отображает данные безопасности для каждого запроса в debug-панели:
 

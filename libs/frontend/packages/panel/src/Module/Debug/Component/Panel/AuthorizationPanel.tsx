@@ -24,7 +24,7 @@ type AuthenticationEvent = {
 type TokenInfo = {type: string; attributes: Record<string, unknown>; expiresAt: string | null};
 type ImpersonationInfo = {originalUser: string; impersonatedUser: string};
 type GuardInfo = {name: string; provider: string; config: Record<string, unknown>};
-type SecurityData = {
+type AuthorizationData = {
     username: string | null;
     roles: string[];
     effectiveRoles?: string[];
@@ -37,7 +37,7 @@ type SecurityData = {
     authenticationEvents?: AuthenticationEvent[];
     accessDecisions: AccessDecision[];
 };
-type SecurityPanelProps = {data: SecurityData};
+type AuthorizationPanelProps = {data: AuthorizationData};
 
 const InfoCard = styled(Box)(({theme}) => ({
     padding: theme.spacing(2.5),
@@ -130,12 +130,12 @@ const DetailLabel = ({children}: {children: React.ReactNode}) => (
     <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>{children}</Typography>
 );
 
-export const SecurityPanel = ({data}: SecurityPanelProps) => {
+export const AuthorizationPanel = ({data}: AuthorizationPanelProps) => {
     const theme = useTheme();
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
     if (!data) {
-        return <EmptyState icon="security" title="No security data found" />;
+        return <EmptyState icon="shield" title="No authorization data found" />;
     }
 
     const grantedCount = data.accessDecisions?.filter((d) => d.result.includes('GRANTED')).length ?? 0;

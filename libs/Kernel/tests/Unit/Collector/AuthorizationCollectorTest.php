@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
 use AppDevPanel\Kernel\Collector\CollectorInterface;
-use AppDevPanel\Kernel\Collector\SecurityCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
 
-final class SecurityCollectorTest extends AbstractCollectorTestCase
+final class AuthorizationCollectorTest extends AbstractCollectorTestCase
 {
     protected function getCollector(): CollectorInterface
     {
-        return new SecurityCollector();
+        return new AuthorizationCollector();
     }
 
     protected function collectTestData(CollectorInterface $collector): void
     {
-        assert($collector instanceof SecurityCollector, 'Expected SecurityCollector instance');
+        assert($collector instanceof AuthorizationCollector, 'Expected AuthorizationCollector instance');
         $collector->collectUser('admin@example.com', ['ROLE_ADMIN', 'ROLE_USER'], true);
         $collector->collectFirewall('main');
         $collector->collectToken('jwt', ['sub' => '123', 'iss' => 'app'], '2026-12-31T23:59:59Z');
@@ -85,23 +85,23 @@ final class SecurityCollectorTest extends AbstractCollectorTestCase
     {
         parent::checkSummaryData($data);
 
-        $this->assertArrayHasKey('security', $data);
-        $this->assertSame('admin@example.com', $data['security']['username']);
-        $this->assertTrue($data['security']['authenticated']);
-        $this->assertSame(['ROLE_ADMIN', 'ROLE_USER'], $data['security']['roles']);
+        $this->assertArrayHasKey('authorization', $data);
+        $this->assertSame('admin@example.com', $data['authorization']['username']);
+        $this->assertTrue($data['authorization']['authenticated']);
+        $this->assertSame(['ROLE_ADMIN', 'ROLE_USER'], $data['authorization']['roles']);
 
         // Summary access decisions
-        $this->assertSame(1, $data['security']['accessDecisions']['total']);
-        $this->assertSame(1, $data['security']['accessDecisions']['granted']);
-        $this->assertSame(0, $data['security']['accessDecisions']['denied']);
+        $this->assertSame(1, $data['authorization']['accessDecisions']['total']);
+        $this->assertSame(1, $data['authorization']['accessDecisions']['granted']);
+        $this->assertSame(0, $data['authorization']['accessDecisions']['denied']);
 
         // Auth events count
-        $this->assertSame(1, $data['security']['authEvents']);
+        $this->assertSame(1, $data['authorization']['authEvents']);
     }
 
     public function testImpersonation(): void
     {
-        $collector = new SecurityCollector();
+        $collector = new AuthorizationCollector();
         $collector->startup();
         $collector->collectUser('impersonated@example.com', ['ROLE_USER'], true);
         $collector->collectImpersonation('admin@example.com', 'impersonated@example.com');
@@ -115,7 +115,7 @@ final class SecurityCollectorTest extends AbstractCollectorTestCase
 
     public function testMultipleAuthenticationEvents(): void
     {
-        $collector = new SecurityCollector();
+        $collector = new AuthorizationCollector();
         $collector->startup();
         $collector->collectAuthenticationEvent('failure', 'form_login', 'failure', ['reason' => 'bad_credentials']);
         $collector->collectAuthenticationEvent('login', 'form_login', 'success');
@@ -129,7 +129,7 @@ final class SecurityCollectorTest extends AbstractCollectorTestCase
 
     public function testMultipleGuards(): void
     {
-        $collector = new SecurityCollector();
+        $collector = new AuthorizationCollector();
         $collector->startup();
         $collector->collectGuard('web', 'users', ['driver' => 'session']);
         $collector->collectGuard('api', 'tokens', ['driver' => 'token']);
@@ -143,7 +143,7 @@ final class SecurityCollectorTest extends AbstractCollectorTestCase
 
     public function testAccessDecisionSummaryCounts(): void
     {
-        $collector = new SecurityCollector();
+        $collector = new AuthorizationCollector();
         $collector->startup();
         $collector->logAccessDecision('VIEW', 'Post', 'ACCESS_GRANTED');
         $collector->logAccessDecision('EDIT', 'Post', 'ACCESS_DENIED');
@@ -159,7 +159,7 @@ final class SecurityCollectorTest extends AbstractCollectorTestCase
 
     public function testTokenWithoutExpiry(): void
     {
-        $collector = new SecurityCollector();
+        $collector = new AuthorizationCollector();
         $collector->startup();
         $collector->collectToken('api_key', ['key_id' => 'abc']);
 

@@ -11,7 +11,7 @@ namespace AppDevPanel\Kernel\Collector;
  * from their security systems: user info, tokens, access decisions,
  * authentication events, guards, role hierarchy, and impersonation.
  */
-final class SecurityCollector implements SummaryCollectorInterface
+final class AuthorizationCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
 
@@ -231,7 +231,7 @@ final class SecurityCollector implements SummaryCollectorInterface
         }
 
         return [
-            'security' => [
+            'authorization' => [
                 'username' => $this->identity['username'],
                 'authenticated' => $this->identity['authenticated'],
                 'roles' => $this->identity['roles'],

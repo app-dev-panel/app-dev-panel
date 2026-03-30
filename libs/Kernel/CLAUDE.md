@@ -85,7 +85,7 @@ src/
 │   ├── ElasticsearchRequestRecord.php   # Immutable DTO for logRequest() pattern
 │   ├── MessageRecord.php               # Value object for mailer message
 │   ├── MailerCollector.php              # Email messages (fed by adapter hooks)
-│   ├── SecurityCollector.php            # Auth: user, token, guards, role hierarchy, access decisions, auth events
+│   ├── AuthorizationCollector.php            # Auth: user, token, guards, role hierarchy, access decisions, auth events
 │   ├── ValidatorCollector.php           # Validation results (fed by adapter hooks)
 │   ├── QueueCollector.php               # Queue messages: dispatched/handled/failed (fed by adapter hooks)
 │   ├── RouterCollector.php              # Route matching data (fed by adapter hooks)
@@ -102,7 +102,7 @@ src/
 │   ├── RedisCollector.php              # Redis commands (fed by adapter hooks)
 │   ├── RedisCommandRecord.php          # Value object for Redis command
 │   ├── RouterCollector.php             # HTTP route matching data
-│   ├── SecurityCollector.php           # Authentication/authorization
+│   ├── AuthorizationCollector.php           # Authentication/authorization
 │   ├── TemplateCollector.php           # Template rendering
 │   ├── TranslatorCollector.php         # Translation lookups + missing detection
 │   ├── TranslationRecord.php           # Value object for translation lookup
