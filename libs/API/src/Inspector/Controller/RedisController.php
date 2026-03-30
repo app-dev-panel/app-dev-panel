@@ -179,15 +179,17 @@ final class RedisController
         return $this->container->get(\Redis::class);
     }
 
+    private const int VALUE_LIMIT = 1000;
+
     private function getValueByType(\Redis $redis, string $key, int $type): mixed
     {
         return match ($type) {
             \Redis::REDIS_STRING => $redis->get($key),
-            \Redis::REDIS_LIST => $redis->lRange($key, 0, -1),
-            \Redis::REDIS_SET => $redis->sMembers($key),
-            \Redis::REDIS_ZSET => $redis->zRange($key, 0, -1, true),
+            \Redis::REDIS_LIST => $redis->lRange($key, 0, self::VALUE_LIMIT - 1),
+            \Redis::REDIS_SET => array_slice($redis->sMembers($key) ?: [], 0, self::VALUE_LIMIT),
+            \Redis::REDIS_ZSET => $redis->zRange($key, 0, self::VALUE_LIMIT - 1, true),
             \Redis::REDIS_HASH => $redis->hGetAll($key),
-            \Redis::REDIS_STREAM => $redis->xRange($key, '-', '+', 100),
+            \Redis::REDIS_STREAM => $redis->xRange($key, '-', '+', self::VALUE_LIMIT),
             default => null,
         };
     }

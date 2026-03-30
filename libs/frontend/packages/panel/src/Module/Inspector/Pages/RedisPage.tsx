@@ -93,11 +93,11 @@ export const RedisPage = () => {
     const [tab, setTab] = useState(0);
     const pattern = searchParams.get('pattern') || '*';
     const [expandedKey, setExpandedKey] = useState<string | null>(null);
-    const [keyData, setKeyData] = useState<any>(null);
+    const [keyData, setKeyData] = useState<{key: string; type: string; ttl: number; value: unknown} | null>(null);
 
     const pingQuery = useGetRedisPingQuery();
     const dbSizeQuery = useGetRedisDbSizeQuery();
-    const infoQuery = useGetRedisInfoQuery();
+    const infoQuery = useGetRedisInfoQuery(undefined, {skip: tab !== 1});
     const keysQuery = useGetRedisKeysQuery({pattern, limit: 100});
     const [getRedisKey] = useLazyGetRedisKeyQuery();
     const [deleteKeyMutation, deleteKeyInfo] = useDeleteRedisKeyMutation();

@@ -4,7 +4,7 @@ import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, Collapse, Icon, Tooltip, Typography} from '@mui/material';
-import {styled, useTheme} from '@mui/material/styles';
+import {styled, type Theme, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
 
 type RedisCommand = {
@@ -117,11 +117,15 @@ const formatDuration = (seconds: number): string => {
     return `${seconds.toFixed(3)} s`;
 };
 
+const READ_COMMANDS = ['GET', 'MGET', 'HGET', 'HGETALL', 'LRANGE', 'SMEMBERS', 'ZRANGE'];
+const WRITE_COMMANDS = ['SET', 'MSET', 'HSET', 'LPUSH', 'RPUSH', 'SADD', 'ZADD', 'SETEX', 'SETNX'];
+const DELETE_COMMANDS = ['DEL', 'HDEL', 'LREM', 'SREM', 'ZREM', 'UNLINK'];
+
 const commandIcon = (cmd: string): string => {
     const upper = cmd.toUpperCase();
-    if (['GET', 'MGET', 'HGET', 'HGETALL', 'LRANGE', 'SMEMBERS', 'ZRANGE'].includes(upper)) return 'search';
-    if (['SET', 'MSET', 'HSET', 'LPUSH', 'RPUSH', 'SADD', 'ZADD', 'SETEX', 'SETNX'].includes(upper)) return 'edit';
-    if (['DEL', 'HDEL', 'LREM', 'SREM', 'ZREM', 'UNLINK'].includes(upper)) return 'delete';
+    if (READ_COMMANDS.includes(upper)) return 'search';
+    if (WRITE_COMMANDS.includes(upper)) return 'edit';
+    if (DELETE_COMMANDS.includes(upper)) return 'delete';
     if (['EXISTS', 'HEXISTS', 'SISMEMBER', 'TYPE', 'TTL', 'PTTL'].includes(upper)) return 'help_outline';
     if (['SUBSCRIBE', 'PUBLISH', 'PSUBSCRIBE'].includes(upper)) return 'campaign';
     if (['EXPIRE', 'EXPIREAT', 'PERSIST', 'PEXPIRE'].includes(upper)) return 'timer';
@@ -132,15 +136,12 @@ const commandIcon = (cmd: string): string => {
     return 'memory';
 };
 
-const commandColor = (cmd: RedisCommand, theme: any): {bg: string; fg: string} => {
+const commandColor = (cmd: RedisCommand, theme: Theme): {bg: string; fg: string} => {
     if (cmd.error) return {bg: theme.palette.error.light, fg: theme.palette.error.main};
     const upper = cmd.command.toUpperCase();
-    if (['GET', 'MGET', 'HGET', 'HGETALL', 'LRANGE', 'SMEMBERS', 'ZRANGE'].includes(upper))
-        return {bg: theme.palette.info.light, fg: theme.palette.info.main};
-    if (['SET', 'MSET', 'HSET', 'LPUSH', 'RPUSH', 'SADD', 'ZADD', 'SETEX', 'SETNX'].includes(upper))
-        return {bg: theme.palette.success.light, fg: theme.palette.success.main};
-    if (['DEL', 'HDEL', 'LREM', 'SREM', 'ZREM', 'UNLINK'].includes(upper))
-        return {bg: theme.palette.warning.light, fg: theme.palette.warning.main};
+    if (READ_COMMANDS.includes(upper)) return {bg: theme.palette.info.light, fg: theme.palette.info.main};
+    if (WRITE_COMMANDS.includes(upper)) return {bg: theme.palette.success.light, fg: theme.palette.success.main};
+    if (DELETE_COMMANDS.includes(upper)) return {bg: theme.palette.warning.light, fg: theme.palette.warning.main};
     return {bg: theme.palette.action.hover, fg: theme.palette.text.secondary};
 };
 
@@ -226,16 +227,20 @@ export const RedisPanel = ({data}: RedisPanelProps) => {
 
     const {commands, totalTime, errorCount, totalCommands} = data;
 
-    const filtered = deferredFilter
-        ? commands.filter((cmd) => {
-              const lower = deferredFilter.toLowerCase();
-              return (
-                  cmd.command.toLowerCase().includes(lower) ||
-                  cmd.connection.toLowerCase().includes(lower) ||
-                  formatArgsSummary(cmd.arguments).toLowerCase().includes(lower)
-              );
-          })
-        : commands;
+    const filtered = useMemo(
+        () =>
+            deferredFilter
+                ? commands.filter((cmd) => {
+                      const lower = deferredFilter.toLowerCase();
+                      return (
+                          cmd.command.toLowerCase().includes(lower) ||
+                          cmd.connection.toLowerCase().includes(lower) ||
+                          formatArgsSummary(cmd.arguments).toLowerCase().includes(lower)
+                      );
+                  })
+                : commands,
+        [commands, deferredFilter],
+    );
 
     return (
         <Box>
