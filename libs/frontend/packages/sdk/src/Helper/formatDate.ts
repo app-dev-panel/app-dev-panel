@@ -4,6 +4,10 @@ export function formatDate(unixTimeStamp: number) {
     return format(fromUnixTime(unixTimeStamp), 'do MMM HH:mm:ss');
 }
 
+export function formatTime(unixTimeStamp: number) {
+    return format(fromUnixTime(unixTimeStamp), 'HH:mm:ss');
+}
+
 export function formatMicrotime(unixTimeStamp: number) {
     if (!unixTimeStamp) {
         return '0.000000';

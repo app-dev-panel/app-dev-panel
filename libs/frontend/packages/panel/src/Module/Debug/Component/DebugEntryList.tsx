@@ -3,7 +3,7 @@ import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {getEntrySearchText, isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
-import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
+import {formatDate, formatTime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {
     Alert,
@@ -20,6 +20,7 @@ import {
     type Theme,
 } from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import React, {useCallback, useDeferredValue, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
@@ -122,6 +123,7 @@ function matchesFilter(entry: DebugEntry, query: string): boolean {
 
 export const DebugEntryList = () => {
     const theme = useTheme();
+    const compact = useMediaQuery(theme.breakpoints.down('md'));
     const {data: entries, isLoading, isFetching, refetch} = useGetDebugQuery();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -276,9 +278,13 @@ export const DebugEntryList = () => {
                                     backgroundColor: statusBg(entry.response.statusCode, theme),
                                 }}
                             />
-                            <MetaLabel sx={{color: 'text.disabled', minWidth: 55}}>
-                                {formatDate(entry.web.request.startTime)}
-                            </MetaLabel>
+                            <Tooltip title={compact ? formatDate(entry.web.request.startTime) : ''} arrow>
+                                <MetaLabel sx={{color: 'text.disabled'}}>
+                                    {compact
+                                        ? formatTime(entry.web.request.startTime)
+                                        : formatDate(entry.web.request.startTime)}
+                                </MetaLabel>
+                            </Tooltip>
                         </EntryRow>
                     );
                 }
@@ -334,9 +340,13 @@ export const DebugEntryList = () => {
                                 size="small"
                                 color={exitOk ? 'success' : 'error'}
                             />
-                            <MetaLabel sx={{color: 'text.disabled', minWidth: 55}}>
-                                {formatDate(entry.console.request.startTime)}
-                            </MetaLabel>
+                            <Tooltip title={compact ? formatDate(entry.console.request.startTime) : ''} arrow>
+                                <MetaLabel sx={{color: 'text.disabled'}}>
+                                    {compact
+                                        ? formatTime(entry.console.request.startTime)
+                                        : formatDate(entry.console.request.startTime)}
+                                </MetaLabel>
+                            </Tooltip>
                         </EntryRow>
                     );
                 }
