@@ -5,5 +5,5 @@ export function isDebugEntryAboutConsole(entry: DebugEntry): boolean {
 }
 
 export function isDebugEntryAboutWeb(entry: DebugEntry): boolean {
-    return entry != null && entry.request != null && entry.request.method != null;
+    return entry != null && entry.request != null && !!entry.request.method;
 }

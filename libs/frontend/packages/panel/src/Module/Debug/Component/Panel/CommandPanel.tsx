@@ -1,7 +1,7 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {Box, Chip, Icon, Tab, Tabs, Typography, type Theme} from '@mui/material';
+import {Box, Chip, Collapse, Icon, Tab, Tabs, Typography, type Theme} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import React, {useCallback, useState} from 'react';
 
@@ -232,20 +232,162 @@ const OutputTab = ({data}: {data: Record<string, CommandEvent>}) => {
 };
 
 // ---------------------------------------------------------------------------
-// Events Tab (raw data view per event type)
+// Events Tab — structured view per event type
 // ---------------------------------------------------------------------------
+
+const NullChip = () => (
+    <Chip
+        label="null"
+        size="small"
+        sx={{fontSize: '10px', height: 18, color: 'text.disabled', borderRadius: 1}}
+        variant="outlined"
+    />
+);
+
+const EventCard = ({eventClass, eventData}: {eventClass: string; eventData: CommandEvent}) => {
+    const theme = useTheme();
+    const [expanded, setExpanded] = useState(true);
+    const shortName = eventClass.includes('\\') ? eventClass.split('\\').pop() : eventClass;
+    const exitCode = eventData.exitCode;
+    const args = eventData.arguments;
+    const opts = eventData.options;
+
+    return (
+        <Box sx={{mb: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden'}}>
+            <Box
+                onClick={() => setExpanded(!expanded)}
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    px: 2,
+                    py: 1,
+                    cursor: 'pointer',
+                    backgroundColor: 'action.hover',
+                    '&:hover': {backgroundColor: 'action.selected'},
+                }}
+            >
+                <Icon sx={{fontSize: 16, color: 'text.disabled'}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
+                <Typography sx={{fontWeight: 600, fontSize: '13px', flex: 1}}>{shortName}</Typography>
+                {exitCode != null && (
+                    <Chip
+                        label={exitCode === 0 ? 'OK' : `exit ${exitCode}`}
+                        size="small"
+                        sx={{
+                            fontWeight: 600,
+                            fontSize: '10px',
+                            height: 20,
+                            borderRadius: 1,
+                            backgroundColor: exitCodeColor(exitCode, theme),
+                            color: theme.palette.common.white,
+                        }}
+                    />
+                )}
+            </Box>
+            <Collapse in={expanded}>
+                <Box sx={{p: 0}}>
+                    <InfoTable>
+                        <tbody>
+                            <tr>
+                                <th>Name</th>
+                                <td>{eventData.name || <NullChip />}</td>
+                            </tr>
+                            <tr>
+                                <th>Input</th>
+                                <td>
+                                    {eventData.input ? (
+                                        <Typography
+                                            component="span"
+                                            sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px'}}
+                                        >
+                                            {eventData.input}
+                                        </Typography>
+                                    ) : (
+                                        <NullChip />
+                                    )}
+                                </td>
+                            </tr>
+                            {eventData.output !== undefined && (
+                                <tr>
+                                    <th>Output</th>
+                                    <td>{eventData.output ? eventData.output : <NullChip />}</td>
+                                </tr>
+                            )}
+                            {eventData.command !== undefined && (
+                                <tr>
+                                    <th>Command</th>
+                                    <td>
+                                        {eventData.command ? <JsonRenderer value={eventData.command} /> : <NullChip />}
+                                    </td>
+                                </tr>
+                            )}
+                            {eventData.error && (
+                                <tr>
+                                    <th>Error</th>
+                                    <td>
+                                        <Typography component="span" sx={{color: 'error.main', fontSize: '12px'}}>
+                                            {eventData.error}
+                                        </Typography>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </InfoTable>
+
+                    {args && Object.keys(args).length > 0 && (
+                        <Box sx={{px: 2, pb: 1.5}}>
+                            <SectionTitle>Arguments</SectionTitle>
+                            <Box
+                                sx={{borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden'}}
+                            >
+                                <InfoTable>
+                                    <tbody>
+                                        {Object.entries(args).map(([name, value]) => (
+                                            <tr key={name}>
+                                                <th>{name}</th>
+                                                <td>
+                                                    <JsonRenderer value={value} />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </InfoTable>
+                            </Box>
+                        </Box>
+                    )}
+
+                    {opts && Object.keys(opts).length > 0 && (
+                        <Box sx={{px: 2, pb: 1.5}}>
+                            <SectionTitle>Options</SectionTitle>
+                            <Box
+                                sx={{borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden'}}
+                            >
+                                <InfoTable>
+                                    <tbody>
+                                        {Object.entries(opts).map(([name, value]) => (
+                                            <tr key={name}>
+                                                <th>--{name}</th>
+                                                <td>
+                                                    <JsonRenderer value={value} />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </InfoTable>
+                            </Box>
+                        </Box>
+                    )}
+                </Box>
+            </Collapse>
+        </Box>
+    );
+};
 
 const EventsTab = ({data}: {data: Record<string, CommandEvent>}) => (
     <TabPanel>
-        {Object.entries(data).map(([eventClass, eventData]) => {
-            const shortName = eventClass.includes('\\') ? eventClass.split('\\').pop() : eventClass;
-            return (
-                <Box key={eventClass} sx={{mb: 3}}>
-                    <SectionTitle>{shortName}</SectionTitle>
-                    <JsonRenderer value={eventData} />
-                </Box>
-            );
-        })}
+        {Object.entries(data).map(([eventClass, eventData]) => (
+            <EventCard key={eventClass} eventClass={eventClass} eventData={eventData} />
+        ))}
     </TabPanel>
 );
 
