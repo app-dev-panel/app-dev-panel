@@ -3,6 +3,7 @@ import {AssetBundlePanel} from '@app-dev-panel/panel/Module/Debug/Component/Pane
 import {AuthorizationPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/AuthorizationPanel';
 import {CachePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CachePanel';
 import {CodeCoveragePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CodeCoveragePanel';
+import {CommandPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/CommandPanel';
 import {DatabasePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DatabasePanel';
 import {ElasticsearchPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ElasticsearchPanel';
 import {EnvironmentPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EnvironmentPanel';
@@ -138,6 +139,7 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
             <IOWrapper primaryCollector={CollectorsMap.HttpClientCollector} primaryData={data} />
         ),
         [CollectorsMap.RequestCollector]: (data: any) => <RequestPanel data={data} />,
+        [CollectorsMap.CommandCollector]: (data: any) => <CommandPanel data={data} />,
         [CollectorsMap.MiddlewareCollector]: (data: any) => <MiddlewarePanel {...data} />,
         [CollectorsMap.EventCollector]: (data: any) => <EventPanel events={data} />,
         [CollectorsMap.ExceptionCollector]: (data: any) => <ExceptionPanel exceptions={data} />,

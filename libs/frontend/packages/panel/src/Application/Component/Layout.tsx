@@ -190,6 +190,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         if (currentIndex < entries.length - 1) changeEntry(entries[currentIndex + 1]);
     }, [currentIndex, entries, changeEntry]);
 
+    const handleRefresh = useCallback(() => {
+        getDebugQuery();
+    }, [getDebugQuery]);
+
     // Entry selector popover
     const [entrySelectorAnchor, setEntrySelectorAnchor] = useState<HTMLElement | null>(null);
     const handleEntryClick = useCallback((e?: React.MouseEvent) => {
@@ -394,6 +398,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     status={topBarStatus}
                     duration={topBarDuration}
                     autoRefresh={autoLatest}
+                    isRefreshing={getDebugQueryInfo.isFetching}
                     showInactiveCollectors={showInactiveCollectors}
                     onPrevEntry={handlePrevEntry}
                     onNextEntry={handleNextEntry}
@@ -401,6 +406,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onSearchClick={handleSearchClick}
                     onThemeToggle={handleThemeToggle}
                     onAutoRefreshToggle={autoLatestHandler}
+                    onRefresh={handleRefresh}
                     onShowInactiveCollectorsChange={handleShowInactiveCollectorsChange}
                     mcpEnabled={mcpSettings?.enabled}
                     onMcpEnabledChange={handleMcpEnabledChange}

@@ -48,6 +48,7 @@ type TopBarProps = {
     duration?: string;
     mode?: PaletteMode;
     autoRefresh?: boolean;
+    isRefreshing?: boolean;
     showInactiveCollectors?: boolean;
     mcpEnabled?: boolean;
     notificationCount?: number;
@@ -59,6 +60,7 @@ type TopBarProps = {
     onSearchClick?: () => void;
     onThemeToggle?: () => void;
     onAutoRefreshToggle?: () => void;
+    onRefresh?: () => void;
     onShowInactiveCollectorsChange?: (value: boolean) => void;
     onMcpEnabledChange?: (value: boolean) => void;
     onEditorPresetChange?: (preset: EditorPreset) => void;
@@ -113,6 +115,7 @@ export const TopBar = React.memo(
         duration,
         mode,
         autoRefresh,
+        isRefreshing,
         showInactiveCollectors,
         mcpEnabled,
         onPrevEntry,
@@ -121,6 +124,7 @@ export const TopBar = React.memo(
         onSearchClick,
         onThemeToggle,
         onAutoRefreshToggle,
+        onRefresh,
         onShowInactiveCollectorsChange,
         onMcpEnabledChange,
         editorPreset,
@@ -168,29 +172,34 @@ export const TopBar = React.memo(
                     <DuckIcon sx={{fontSize: 22}} /> App Dev Panel
                 </Logo>
                 <CenterGroup>
-                    <IconButton size="small" onClick={onPrevEntry} disabled={!method} aria-label="Previous entry">
+                    <IconButton size="small" onClick={onPrevEntry} disabled={!onPrevEntry} aria-label="Previous entry">
                         <Icon sx={{fontSize: 18}}>chevron_left</Icon>
                     </IconButton>
-                    <IconButton size="small" onClick={onNextEntry} disabled={!method} aria-label="Next entry">
+                    <IconButton size="small" onClick={onNextEntry} disabled={!onNextEntry} aria-label="Next entry">
                         <Icon sx={{fontSize: 18}}>chevron_right</Icon>
                     </IconButton>
                     <PillContainer>
-                        {method && path && status != null && duration ? (
+                        {method && path != null && status != null ? (
                             <RequestPill
                                 method={method}
                                 path={path}
                                 status={status}
-                                duration={duration}
+                                duration={duration ?? ''}
                                 onClick={onEntryClick}
                             />
                         ) : (
                             <div style={{height: 32}} />
                         )}
                     </PillContainer>
+                    <IconButton size="small" onClick={onRefresh} disabled={isRefreshing} title="Refresh entries">
+                        <Icon sx={{fontSize: 18}}>{isRefreshing ? 'hourglass_empty' : 'refresh'}</Icon>
+                    </IconButton>
                     <IconButton
                         size="small"
                         onClick={onAutoRefreshToggle}
-                        title={autoRefresh ? 'Auto-refresh on' : 'Auto-refresh off'}
+                        title={
+                            autoRefresh ? 'Auto-latest: on (switch to newest entry automatically)' : 'Auto-latest: off'
+                        }
                     >
                         <Icon sx={{fontSize: 18, color: autoRefresh ? 'success.main' : undefined}}>
                             {autoRefresh ? 'sync' : 'sync_disabled'}
