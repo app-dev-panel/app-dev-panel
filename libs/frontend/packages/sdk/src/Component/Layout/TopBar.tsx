@@ -10,6 +10,7 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
+    Divider,
     Icon,
     IconButton,
     ListItemIcon,
@@ -22,6 +23,7 @@ import {
     type PaletteMode,
 } from '@mui/material';
 import {keyframes, styled, useTheme} from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 const bellShake = keyframes`
@@ -89,14 +91,15 @@ const Logo = styled('div')(({theme}) => ({
     fontWeight: 700,
     fontSize: 15,
     color: theme.palette.primary.main,
-    display: 'flex',
+    display: 'none',
     alignItems: 'center',
     gap: theme.spacing(0.75),
     flexShrink: 0,
     cursor: 'pointer',
     userSelect: 'none',
+    [theme.breakpoints.up('md')]: {display: 'flex'},
     '&:hover': {opacity: 0.8},
-    '& .logo-text': {display: 'none', [theme.breakpoints.up('md')]: {display: 'inline'}},
+    '& .logo-text': {display: 'none', [theme.breakpoints.up('lg')]: {display: 'inline'}},
 }));
 
 const CenterGroup = styled('div')(({theme}) => ({
@@ -106,6 +109,7 @@ const CenterGroup = styled('div')(({theme}) => ({
     justifyContent: 'center',
     gap: theme.spacing(0.5),
     minWidth: 0,
+    overflow: 'hidden',
 }));
 
 const PillContainer = styled('div')({maxWidth: 700, width: '100%', minWidth: 0});
@@ -140,6 +144,7 @@ export const TopBar = React.memo(
         onLogoClick,
     }: TopBarProps) => {
         const theme = useTheme();
+        const compact = useMediaQuery(theme.breakpoints.down('md'));
         const resolvedMode = mode ?? theme.palette.mode;
 
         // More menu state
@@ -243,36 +248,58 @@ export const TopBar = React.memo(
                     </IconButton>
                 </CenterGroup>
                 <SearchTrigger onClick={onSearchClick} />
-                <IconButton size="small" onClick={onThemeToggle} aria-label="Toggle theme">
-                    <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
-                </IconButton>
-                <IconButton size="small" onClick={onNotificationsClick} aria-label="Notifications">
-                    <Badge
-                        badgeContent={notificationCount}
-                        color="error"
-                        max={99}
-                        sx={{
-                            '& .MuiBadge-badge': {
-                                fontSize: 10,
-                                height: 16,
-                                minWidth: 16,
-                                animation: bellAnimating ? `${badgePulse} 0.4s ease-out` : 'none',
-                            },
-                        }}
-                    >
-                        <Icon
+                {!compact && (
+                    <>
+                        <IconButton size="small" onClick={onThemeToggle} aria-label="Toggle theme">
+                            <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
+                        </IconButton>
+                        <IconButton size="small" onClick={onNotificationsClick} aria-label="Notifications">
+                            <Badge
+                                badgeContent={notificationCount}
+                                color="error"
+                                max={99}
+                                sx={{
+                                    '& .MuiBadge-badge': {
+                                        fontSize: 10,
+                                        height: 16,
+                                        minWidth: 16,
+                                        animation: bellAnimating ? `${badgePulse} 0.4s ease-out` : 'none',
+                                    },
+                                }}
+                            >
+                                <Icon
+                                    sx={{
+                                        fontSize: 18,
+                                        animation: bellAnimating ? `${bellShake} 0.5s ease-in-out` : 'none',
+                                        transformOrigin: 'top center',
+                                    }}
+                                >
+                                    notifications
+                                </Icon>
+                            </Badge>
+                        </IconButton>
+                    </>
+                )}
+                <IconButton size="small" onClick={handleMenuOpen} aria-label="More options">
+                    {compact && notificationCount ? (
+                        <Badge
+                            badgeContent={notificationCount}
+                            color="error"
+                            max={99}
                             sx={{
-                                fontSize: 18,
-                                animation: bellAnimating ? `${bellShake} 0.5s ease-in-out` : 'none',
-                                transformOrigin: 'top center',
+                                '& .MuiBadge-badge': {
+                                    fontSize: 10,
+                                    height: 16,
+                                    minWidth: 16,
+                                    animation: bellAnimating ? `${badgePulse} 0.4s ease-out` : 'none',
+                                },
                             }}
                         >
-                            notifications
-                        </Icon>
-                    </Badge>
-                </IconButton>
-                <IconButton size="small" onClick={handleMenuOpen} aria-label="More options">
-                    <Icon sx={{fontSize: 18}}>more_vert</Icon>
+                            <Icon sx={{fontSize: 18}}>more_vert</Icon>
+                        </Badge>
+                    ) : (
+                        <Icon sx={{fontSize: 18}}>more_vert</Icon>
+                    )}
                 </IconButton>
 
                 <Menu
@@ -283,6 +310,35 @@ export const TopBar = React.memo(
                     transformOrigin={{vertical: 'top', horizontal: 'right'}}
                     slotProps={{paper: {sx: {minWidth: 160}}}}
                 >
+                    {compact && (
+                        <MenuItem
+                            onClick={() => {
+                                handleMenuClose();
+                                onThemeToggle?.();
+                            }}
+                        >
+                            <ListItemIcon>
+                                <Icon sx={{fontSize: 20}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
+                            </ListItemIcon>
+                            <ListItemText>{resolvedMode === 'dark' ? 'Dark mode' : 'Light mode'}</ListItemText>
+                        </MenuItem>
+                    )}
+                    {compact && (
+                        <MenuItem
+                            onClick={(e) => {
+                                handleMenuClose();
+                                onNotificationsClick?.(e);
+                            }}
+                        >
+                            <ListItemIcon>
+                                <Badge badgeContent={notificationCount} color="error" max={99}>
+                                    <Icon sx={{fontSize: 20}}>notifications</Icon>
+                                </Badge>
+                            </ListItemIcon>
+                            <ListItemText>Notifications</ListItemText>
+                        </MenuItem>
+                    )}
+                    {compact && <Divider />}
                     <MenuItem onClick={handleSettingsOpen}>
                         <ListItemIcon>
                             <Icon sx={{fontSize: 20}}>settings</Icon>

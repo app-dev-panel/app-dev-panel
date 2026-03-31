@@ -1,5 +1,6 @@
-import {Icon} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {Icon, IconButton} from '@mui/material';
+import {styled, useTheme} from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 type SearchTriggerProps = {onClick?: () => void};
 
@@ -28,6 +29,17 @@ const Kbd = styled('kbd')(({theme}) => ({
 }));
 
 export const SearchTrigger = ({onClick}: SearchTriggerProps) => {
+    const theme = useTheme();
+    const compact = useMediaQuery(theme.breakpoints.down('md'));
+
+    if (compact) {
+        return (
+            <IconButton size="small" onClick={onClick} aria-label="Search">
+                <Icon sx={{fontSize: 18}}>search</Icon>
+            </IconButton>
+        );
+    }
+
     return (
         <TriggerRoot onClick={onClick}>
             <Icon sx={{fontSize: 16}}>search</Icon>
