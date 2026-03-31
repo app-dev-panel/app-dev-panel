@@ -32,6 +32,7 @@ import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
+import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {Alert, AlertTitle, Box, LinearProgress} from '@mui/material';
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
@@ -246,13 +247,25 @@ const Layout = () => {
         if (!debugEntry) {
             return;
         }
-        collectorInfo({id: debugEntry.id, collector})
+        // Resolve virtual EntryCollector to the real collector based on entry type
+        let resolvedCollector = collector;
+        if (collector === CollectorsMap.EntryCollector) {
+            if (isDebugEntryAboutWeb(debugEntry)) {
+                resolvedCollector = CollectorsMap.RequestCollector;
+            } else if (isDebugEntryAboutConsole(debugEntry)) {
+                resolvedCollector = CollectorsMap.CommandCollector;
+            } else {
+                clearCollectorAndData();
+                return;
+            }
+        }
+        collectorInfo({id: debugEntry.id, collector: resolvedCollector})
             .then(({data, isError}) => {
                 if (isError) {
                     clearCollectorAndData();
                     return;
                 }
-                setSelectedCollector(collector);
+                setSelectedCollector(resolvedCollector);
                 setCollectorData(data);
             })
             .catch(clearCollectorAndData);

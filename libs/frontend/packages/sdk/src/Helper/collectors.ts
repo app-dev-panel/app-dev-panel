@@ -31,4 +31,7 @@ export enum CollectorsMap {
     ElasticsearchCollector = 'AppDevPanel\\Kernel\\Collector\\ElasticsearchCollector',
     RedisCollector = 'AppDevPanel\\Kernel\\Collector\\RedisCollector',
     CodeCoverageCollector = 'AppDevPanel\\Kernel\\Collector\\CodeCoverageCollector',
+
+    // Virtual collector (frontend-only): unified entry point for Request + Command
+    EntryCollector = '__entry__',
 }

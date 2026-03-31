@@ -359,17 +359,9 @@ type CollectorCardData = {
 };
 
 function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
-    const isWeb = isDebugEntryAboutWeb(entry);
-    const isConsole = isDebugEntryAboutConsole(entry);
-
     return [...entry.collectors]
         .map((c) => (typeof c === 'string' ? c : c.id))
         .filter((c) => !hiddenCollectors.has(c))
-        .filter((c) => {
-            if (c === CollectorsMap.CommandCollector && isWeb) return false;
-            if (c === CollectorsMap.RequestCollector && isConsole) return false;
-            return true;
-        })
         .sort(compareCollectorWeight)
         .map((collector) => {
             const count = getCollectedCountByCollector(collector as CollectorsMap, entry);
@@ -476,10 +468,7 @@ export const IndexPage = () => {
             {/* Request summary — click opens Request or Command panel */}
             <SummaryBar
                 onClick={() => {
-                    const collector = isDebugEntryAboutConsole(entry)
-                        ? CollectorsMap.CommandCollector
-                        : CollectorsMap.RequestCollector;
-                    handleCardClick(collector);
+                    handleCardClick(CollectorsMap.EntryCollector);
                 }}
             >
                 {method && path && (
