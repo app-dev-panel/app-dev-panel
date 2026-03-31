@@ -50,6 +50,8 @@ const hiddenCollectors = new Set<string>([
     CollectorsMap.DeprecationCollector,
     CollectorsMap.VarDumperCollector,
     CollectorsMap.HttpClientCollector,
+    CollectorsMap.RequestCollector,
+    CollectorsMap.CommandCollector,
 ]);
 
 // ---------------------------------------------------------------------------
@@ -300,15 +302,16 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         const entriesList = [{key: '__entries__', icon: 'list', label: 'All Entries'}];
         if (!debugEntry) return entriesList;
         const entryIsWeb = isDebugEntryAboutWeb(debugEntry);
-        const entryIsConsole = isDebugEntryAboutConsole(debugEntry);
+        const hasRequestOrCommand = debugEntry.collectors.some((c) => {
+            const id = typeof c === 'string' ? c : c.id;
+            return id === CollectorsMap.RequestCollector || id === CollectorsMap.CommandCollector;
+        });
+        const entryItem = hasRequestOrCommand
+            ? [{key: CollectorsMap.EntryCollector, icon: entryIsWeb ? 'http' : 'terminal', label: 'Request'}]
+            : [];
         const collectors = [...debugEntry.collectors]
             .map((c) => (typeof c === 'string' ? c : c.id))
             .filter((c) => !hiddenCollectors.has(c))
-            .filter((c) => {
-                if (entryIsWeb && c === CollectorsMap.CommandCollector) return false;
-                if (entryIsConsole && c === CollectorsMap.RequestCollector) return false;
-                return true;
-            })
             .sort(compareCollectorWeight)
             .map((collector) => {
                 const count = getCollectedCountByCollector(collector as CollectorsMap, debugEntry);
@@ -322,7 +325,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 };
             })
             .filter((c) => showInactiveCollectors || c.badge == null || c.badge > 0);
-        return [...collectors, ...entriesList];
+        return [...entryItem, ...collectors, ...entriesList];
     }, [debugEntry, showInactiveCollectors]);
 
     // Build extra items for CommandPalette from current debug entry's collectors
@@ -362,6 +365,13 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             return '__entries__';
         }
         if (location.pathname.startsWith('/debug')) {
+            // Map raw Request/Command collectors to the virtual Entry collector for sidebar highlight
+            if (
+                selectedCollector === CollectorsMap.RequestCollector ||
+                selectedCollector === CollectorsMap.CommandCollector
+            ) {
+                return CollectorsMap.EntryCollector;
+            }
             return selectedCollector || undefined;
         }
         if (location.pathname.startsWith('/inspector')) {
