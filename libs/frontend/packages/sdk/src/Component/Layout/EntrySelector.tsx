@@ -7,7 +7,7 @@ import {
     saveFilterState,
 } from '@app-dev-panel/sdk/Component/Layout/EntryFilterConfig';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {getEntrySearchText, isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
 import {fuzzyMatch, type FuzzyMatch} from '@app-dev-panel/sdk/Helper/fuzzyMatch';
@@ -233,13 +233,7 @@ const CountLabel = styled(Typography)(({theme}) => ({
 // ---------------------------------------------------------------------------
 
 function getSearchText(entry: DebugEntry): string {
-    if (isDebugEntryAboutWeb(entry)) {
-        return `${entry.request.method} ${entry.request.path}`;
-    }
-    if (isDebugEntryAboutConsole(entry)) {
-        return entry.command?.input ?? entry.command?.name ?? '';
-    }
-    return entry.id;
+    return getEntrySearchText(entry);
 }
 
 // ---------------------------------------------------------------------------
@@ -568,7 +562,16 @@ export const EntrySelector = ({
                                 highlighted={isHighlighted}
                                 onClick={() => handleSelect(entry)}
                             >
-                                <Icon sx={{fontSize: 14, color: 'text.disabled'}}>terminal</Icon>
+                                <MethodLabel
+                                    sx={{
+                                        color: 'info.main',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <Icon sx={{fontSize: 14}}>terminal</Icon>
+                                </MethodLabel>
                                 <PathLabel>
                                     <HighlightedText text={commandText} indices={indices} />
                                 </PathLabel>

@@ -1,7 +1,7 @@
 import {changeEntryAction} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {getEntrySearchText, isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
@@ -111,12 +111,9 @@ const statusBg = (status: number, theme: Theme): string => {
 
 function matchesFilter(entry: DebugEntry, query: string): boolean {
     const variants = searchVariants(query);
-    const path = (entry.request?.path ?? entry.command?.input ?? '').toLowerCase();
-    const method = (entry.request?.method ?? '').toLowerCase();
+    const text = getEntrySearchText(entry).toLowerCase();
     const id = entry.id.toLowerCase();
-    const status = String(entry.response?.statusCode ?? '');
-
-    return variants.some((q) => path.includes(q) || method.includes(q) || id.includes(q) || status.includes(q));
+    return variants.some((q) => text.includes(q) || id.includes(q));
 }
 
 // ---------------------------------------------------------------------------
@@ -285,7 +282,16 @@ export const DebugEntryList = () => {
                     const exitOk = entry.command?.exitCode === 0;
                     return (
                         <EntryRow key={entry.id} onClick={() => handleEntryClick(entry)}>
-                            <Icon sx={{fontSize: 16, color: 'text.disabled', flexShrink: 0}}>terminal</Icon>
+                            <MethodLabel
+                                sx={{
+                                    color: theme.palette.info.main,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <Icon sx={{fontSize: 14}}>terminal</Icon>
+                            </MethodLabel>
                             <PathLabel>{entry.command?.input ?? 'Unknown command'}</PathLabel>
                             {duration != null && (
                                 <MetaLabel sx={{color: 'primary.main'}}>{(duration * 1000).toFixed(0)}ms</MetaLabel>
