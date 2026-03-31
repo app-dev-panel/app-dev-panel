@@ -307,7 +307,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             return id === CollectorsMap.RequestCollector || id === CollectorsMap.CommandCollector;
         });
         const entryItem = hasRequestOrCommand
-            ? [{key: CollectorsMap.EntryCollector, icon: entryIsWeb ? 'http' : 'terminal', label: 'Entry'}]
+            ? [{key: CollectorsMap.EntryCollector, icon: entryIsWeb ? 'http' : 'terminal', label: 'Request'}]
             : [];
         const collectors = [...debugEntry.collectors]
             .map((c) => (typeof c === 'string' ? c : c.id))
