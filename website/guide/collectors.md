@@ -12,47 +12,47 @@ Collectors are the core data-gathering mechanism in ADP. Each collector implemen
 
 | Collector | Data Collected |
 |-----------|---------------|
-| `LogCollector` | PSR-3 log messages (level, message, context) |
-| `EventCollector` | PSR-14 dispatched events and listeners |
-| `ExceptionCollector` | Uncaught exceptions with stack traces |
-| `HttpClientCollector` | PSR-18 outgoing HTTP requests and responses |
-| `DatabaseCollector` | SQL queries, execution time, transactions |
-| `ElasticsearchCollector` | Elasticsearch requests, timing, hits count |
-| `CacheCollector` | Cache get/set/delete operations with hit/miss rates |
-| [`RedisCollector`](/guide/redis) | Redis commands with timing and error tracking |
-| `MailerCollector` | Sent email messages |
-| `TranslatorCollector` | Translation lookups, missing translations |
-| `QueueCollector` | Message queue operations (push, consume, fail) |
-| `ServiceCollector` | DI container service resolutions |
-| `RouterCollector` | HTTP route matching data |
-| `MiddlewareCollector` | Middleware stack execution and timing |
-| `ValidatorCollector` | Validation operations and results |
-| `AuthorizationCollector` | Authentication and authorization data |
-| `TemplateCollector` | Template rendering (Twig, Blade, etc.) |
-| `ViewCollector` | View rendering with captured output |
-| `VarDumperCollector` | Manual `dump()` / `dd()` calls |
-| `TimelineCollector` | Cross-collector performance timeline |
-| `EnvironmentCollector` | PHP and OS environment info |
-| `DeprecationCollector` | PHP deprecation warnings |
-| `OpenTelemetryCollector` | OpenTelemetry spans and traces |
-| `AssetBundleCollector` | Frontend asset bundles (Yii) |
-| `FilesystemStreamCollector` | Filesystem stream operations |
-| `HttpStreamCollector` | HTTP stream wrapper operations |
+| [`LogCollector`](/guide/collectors/log) | PSR-3 log messages (level, message, context) |
+| [`EventCollector`](/guide/collectors/event) | PSR-14 dispatched events and listeners |
+| [`ExceptionCollector`](/guide/collectors/exception) | Uncaught exceptions with stack traces |
+| [`HttpClientCollector`](/guide/collectors/http-client) | PSR-18 outgoing HTTP requests and responses |
+| [`DatabaseCollector`](/guide/collectors/database) | SQL queries, execution time, transactions |
+| [`ElasticsearchCollector`](/guide/collectors/elasticsearch) | Elasticsearch requests, timing, hits count |
+| [`CacheCollector`](/guide/collectors/cache) | Cache get/set/delete operations with hit/miss rates |
+| [`RedisCollector`](/guide/collectors/redis) | Redis commands with timing and error tracking |
+| [`MailerCollector`](/guide/collectors/mailer) | Sent email messages |
+| [`TranslatorCollector`](/guide/collectors/translator) | Translation lookups, missing translations |
+| [`QueueCollector`](/guide/collectors/queue) | Message queue operations (push, consume, fail) |
+| [`ServiceCollector`](/guide/collectors/service) | DI container service resolutions |
+| [`RouterCollector`](/guide/collectors/router) | HTTP route matching data |
+| [`MiddlewareCollector`](/guide/collectors/middleware) | Middleware stack execution and timing |
+| [`ValidatorCollector`](/guide/collectors/validator) | Validation operations and results |
+| [`AuthorizationCollector`](/guide/collectors/authorization) | Authentication and authorization data |
+| [`TemplateCollector`](/guide/collectors/template) | Template rendering (Twig, Blade, etc.) |
+| [`ViewCollector`](/guide/collectors/view) | View rendering with captured output |
+| [`VarDumperCollector`](/guide/collectors/var-dumper) | Manual `dump()` / `dd()` calls |
+| [`TimelineCollector`](/guide/collectors/timeline) | Cross-collector performance timeline |
+| [`EnvironmentCollector`](/guide/collectors/environment) | PHP and OS environment info |
+| [`DeprecationCollector`](/guide/collectors/deprecation) | PHP deprecation warnings |
+| [`OpenTelemetryCollector`](/guide/collectors/opentelemetry) | OpenTelemetry spans and traces |
+| [`AssetBundleCollector`](/guide/collectors/asset-bundle) | Frontend asset bundles (Yii) |
+| [`FilesystemStreamCollector`](/guide/collectors/filesystem-stream) | Filesystem stream operations |
+| [`HttpStreamCollector`](/guide/collectors/http-stream) | HTTP stream wrapper operations |
 | `CodeCoverageCollector` | Per-request PHP line coverage (requires pcov or xdebug) |
 
 ### Web-Specific
 
 | Collector | Data Collected |
 |-----------|---------------|
-| `RequestCollector` | Incoming HTTP request and response details |
-| `WebAppInfoCollector` | PHP version, memory, execution time |
+| [`RequestCollector`](/guide/collectors/request) | Incoming HTTP request and response details |
+| [`WebAppInfoCollector`](/guide/collectors/web-app-info) | PHP version, memory, execution time |
 
 ### Console-Specific
 
 | Collector | Data Collected |
 |-----------|---------------|
-| `CommandCollector` | Console command executions |
-| `ConsoleAppInfoCollector` | Console application metadata |
+| [`CommandCollector`](/guide/collectors/command) | Console command executions |
+| [`ConsoleAppInfoCollector`](/guide/collectors/console-app-info) | Console application metadata |
 
 ## CollectorInterface
 

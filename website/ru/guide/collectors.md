@@ -19,7 +19,7 @@ title: Коллекторы
 | `DatabaseCollector` | SQL-запросы, время выполнения, транзакции |
 | `ElasticsearchCollector` | Запросы к Elasticsearch, тайминг, количество hits |
 | `CacheCollector` | Операции кеша с отслеживанием hit/miss |
-| [`RedisCollector`](/ru/guide/redis) | Redis-команды с таймингом и отслеживанием ошибок |
+| [`RedisCollector`](/guide/collectors/redis) | Redis-команды с таймингом и отслеживанием ошибок |
 | `MailerCollector` | Отправленные email-сообщения |
 | `TranslatorCollector` | Обращения к переводам, отсутствующие переводы |
 | `QueueCollector` | Операции очереди сообщений (push, consume, fail) |

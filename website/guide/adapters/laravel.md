@@ -51,7 +51,7 @@ return [
 
 ## Collectors
 
-Supports all Kernel collectors plus Laravel-specific data capture via event listeners: Eloquent queries, cache operations, mail, queue jobs, HTTP client requests, translator lookups, and [Redis commands](/guide/redis) (via `Redis::listen()`).
+Supports all Kernel collectors plus Laravel-specific data capture via event listeners: Eloquent queries, cache operations, mail, queue jobs, HTTP client requests, translator lookups, and [Redis commands](/guide/collectors/redis) (via `Redis::listen()`).
 
 ## Translator Integration
 
