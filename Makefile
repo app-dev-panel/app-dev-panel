@@ -162,7 +162,7 @@ build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 	@echo "$(CYAN)Copying assets to adapters...$(RESET)"
 	@for dir in $(SYMFONY_ASSETS) $(LARAVEL_ASSETS) $(YII2_ASSETS) $(YIISOFT_ASSETS); do \
 		mkdir -p $$dir; \
-		find $$dir -maxdepth 1 -not -name '.gitignore' -not -name '.gitkeep' -not -name '.' -not -name '..' -exec rm -rf {} + 2>/dev/null; \
+		find $$dir -mindepth 1 -maxdepth 1 -not -name '.gitignore' -not -name '.gitkeep' -exec rm -rf {} + 2>/dev/null; \
 		cp $(PANEL_DIST)/bundle.js $(PANEL_DIST)/bundle*.css $$dir/; \
 		if [ -d "$(PANEL_DIST)/assets" ]; then cp -r $(PANEL_DIST)/assets $$dir/assets; fi; \
 	done
