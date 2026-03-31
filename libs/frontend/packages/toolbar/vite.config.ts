@@ -31,7 +31,13 @@ export default defineConfig(async () => ({
     build: {
         rollupOptions: {
             output: {
-                assetFileNames: 'bundle.css',
+                assetFileNames: (assetInfo) => {
+                    const name = assetInfo.names?.[0] ?? '';
+                    if (/\.(woff2?|ttf|eot)$/.test(name)) {
+                        return 'assets/[name][extname]';
+                    }
+                    return 'bundle[extname]';
+                },
                 entryFileNames: 'bundle.js',
             },
         },
