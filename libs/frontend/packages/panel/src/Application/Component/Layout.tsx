@@ -252,14 +252,30 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         [updateMcpSettings],
     );
 
-    // TopBar debug info
-    const topBarMethod = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.request?.method : undefined;
-    const topBarPath = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.request?.path : undefined;
-    const topBarStatus = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.response?.statusCode : undefined;
-    const topBarDuration =
-        debugEntry && isDebugEntryAboutWeb(debugEntry) && debugEntry.web?.request?.processingTime
-            ? formatMillisecondsAsDuration(debugEntry.web.request.processingTime)
-            : undefined;
+    // TopBar debug info — support both web requests and console commands
+    const isWeb = debugEntry ? isDebugEntryAboutWeb(debugEntry) : false;
+    const isConsole = debugEntry ? isDebugEntryAboutConsole(debugEntry) : false;
+
+    const topBarMethod = isWeb ? debugEntry!.request?.method : isConsole ? 'CLI' : undefined;
+    const topBarPath = isWeb
+        ? debugEntry!.request?.path
+        : isConsole
+          ? (debugEntry!.command?.input ?? debugEntry!.command?.name ?? 'Unknown command')
+          : undefined;
+    const topBarStatus = isWeb
+        ? debugEntry!.response?.statusCode
+        : isConsole
+          ? (debugEntry!.command?.exitCode ?? 0)
+          : undefined;
+    const topBarDuration = isWeb
+        ? debugEntry!.web?.request?.processingTime
+            ? formatMillisecondsAsDuration(debugEntry!.web.request.processingTime)
+            : undefined
+        : isConsole
+          ? debugEntry!.console?.request?.processingTime
+              ? formatMillisecondsAsDuration(debugEntry!.console.request.processingTime)
+              : undefined
+          : undefined;
 
     // Build sidebar sections
     const selectedCollector = searchParams.get('collector') || '';
