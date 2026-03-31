@@ -8,7 +8,7 @@ type RequestPillProps = {
     path: string;
     status: number;
     duration: string;
-    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    onClick?: (e: React.MouseEvent) => void;
 };
 
 const PillRoot = styled('button')(({theme}) => ({
@@ -71,12 +71,12 @@ const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px'});
 
 const DurationLabel = styled('span')(({theme}) => ({color: theme.palette.text.disabled, fontSize: '12px'}));
 
-export const RequestPill = ({method, path, status, duration, onClick}: RequestPillProps) => {
+export const RequestPill = React.memo(({method, path, status, duration, onClick}: RequestPillProps) => {
     const theme = useTheme();
     const isCli = method.toUpperCase() === 'CLI';
     const statusLabel = isCli ? (status === 0 ? 'OK' : `exit ${status}`) : String(status);
     return (
-        <PillRoot onClick={onClick}>
+        <PillRoot onClick={onClick} aria-label={`${method} ${path} — ${statusLabel}`}>
             {isCli && <Icon sx={{fontSize: 14, color: 'info.main', flexShrink: 0}}>terminal</Icon>}
             <MethodLabel sx={{color: methodColor(method, theme)}}>{method}</MethodLabel>
             <PathLabel>{path}</PathLabel>
@@ -87,4 +87,4 @@ export const RequestPill = ({method, path, status, duration, onClick}: RequestPi
             <Icon sx={{fontSize: 16, color: 'text.disabled'}}>expand_more</Icon>
         </PillRoot>
     );
-};
+});

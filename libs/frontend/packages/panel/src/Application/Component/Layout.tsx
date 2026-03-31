@@ -111,7 +111,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
 
     // Debug entry state
     const debugEntry = useDebugEntry();
@@ -212,6 +212,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const handleSearchClick = useCallback(() => setPaletteOpen(true), []);
     const handleLogoClick = useCallback(() => navigate('/'), [navigate]);
     const handlePaletteClose = useCallback(() => setPaletteOpen(false), []);
+    const handleEntrySelectorClose = useCallback(() => setEntrySelectorAnchor(null), []);
+    const handleAllEntriesClick = useCallback(() => navigate('/debug/list'), [navigate]);
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
@@ -287,14 +289,14 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const debugChildren = useMemo(() => {
         const entriesList = [{key: '__entries__', icon: 'list', label: 'All Entries'}];
         if (!debugEntry) return entriesList;
-        const isWeb = isDebugEntryAboutWeb(debugEntry);
-        const isConsole = isDebugEntryAboutConsole(debugEntry);
+        const entryIsWeb = isDebugEntryAboutWeb(debugEntry);
+        const entryIsConsole = isDebugEntryAboutConsole(debugEntry);
         const collectors = [...debugEntry.collectors]
             .map((c) => (typeof c === 'string' ? c : c.id))
             .filter((c) => !hiddenCollectors.has(c))
             .filter((c) => {
-                if (isWeb && c === CollectorsMap.CommandCollector) return false;
-                if (isConsole && c === CollectorsMap.RequestCollector) return false;
+                if (entryIsWeb && c === CollectorsMap.CommandCollector) return false;
+                if (entryIsConsole && c === CollectorsMap.RequestCollector) return false;
                 return true;
             })
             .sort(compareCollectorWeight)
@@ -421,11 +423,11 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 <EntrySelector
                     anchorEl={entrySelectorAnchor}
                     open={Boolean(entrySelectorAnchor)}
-                    onClose={() => setEntrySelectorAnchor(null)}
+                    onClose={handleEntrySelectorClose}
                     entries={entries}
                     currentEntryId={debugEntry?.id}
                     onSelect={changeEntry}
-                    onAllClick={() => navigate('/debug/list')}
+                    onAllClick={handleAllEntriesClick}
                 />
                 <NotificationCenter
                     anchorEl={notificationAnchor}

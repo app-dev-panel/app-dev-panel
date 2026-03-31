@@ -3,7 +3,7 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, Icon, Tab, Tabs, Typography, type Theme} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {useCallback, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 
 type CommandEvent = {
     name?: string;
@@ -258,7 +258,7 @@ export const CommandPanel = ({data}: CommandPanelProps) => {
     const [tab, setTab] = useState(0);
     const terminateEvent = getTerminateEvent(data);
 
-    const handleTabChange = useCallback((_: unknown, newValue: number) => {
+    const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
         setTab(newValue);
     }, []);
 

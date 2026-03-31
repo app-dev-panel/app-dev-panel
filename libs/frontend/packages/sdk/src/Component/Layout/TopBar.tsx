@@ -96,14 +96,14 @@ const Logo = styled('div')(({theme}) => ({
     '&:hover': {opacity: 0.8},
 }));
 
-const CenterGroup = styled('div')({
+const CenterGroup = styled('div')(({theme}) => ({
     flex: 1,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: theme.spacing(0.5),
     minWidth: 0,
-});
+}));
 
 const PillContainer = styled('div')({maxWidth: 700, width: '100%', minWidth: 0});
 
@@ -188,15 +188,24 @@ export const TopBar = React.memo(
                                 onClick={onEntryClick}
                             />
                         ) : (
-                            <div style={{height: 32}} />
+                            <Box sx={{height: 32}} />
                         )}
                     </PillContainer>
-                    <IconButton size="small" onClick={onRefresh} disabled={isRefreshing} title="Refresh entries">
+                    <IconButton
+                        size="small"
+                        onClick={onRefresh}
+                        disabled={isRefreshing}
+                        aria-label="Refresh entries"
+                        title="Refresh entries"
+                    >
                         <Icon sx={{fontSize: 18}}>{isRefreshing ? 'hourglass_empty' : 'refresh'}</Icon>
                     </IconButton>
                     <IconButton
                         size="small"
                         onClick={onAutoRefreshToggle}
+                        aria-label={
+                            autoRefresh ? 'Auto-latest: on (switch to newest entry automatically)' : 'Auto-latest: off'
+                        }
                         title={
                             autoRefresh ? 'Auto-latest: on (switch to newest entry automatically)' : 'Auto-latest: off'
                         }
