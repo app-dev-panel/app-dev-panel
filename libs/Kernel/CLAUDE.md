@@ -85,28 +85,22 @@ src/
 │   ├── ElasticsearchRequestRecord.php   # Immutable DTO for logRequest() pattern
 │   ├── MessageRecord.php               # Value object for mailer message
 │   ├── MailerCollector.php              # Email messages (fed by adapter hooks)
-│   ├── AuthorizationCollector.php            # Auth: user, token, guards, role hierarchy, access decisions, auth events
-│   ├── ValidatorCollector.php           # Validation results (fed by adapter hooks)
-│   ├── QueueCollector.php               # Queue messages: dispatched/handled/failed (fed by adapter hooks)
-│   ├── RouterCollector.php              # Route matching data (fed by adapter hooks)
-│   ├── OpenTelemetryCollector.php       # OpenTelemetry spans (fed by OTLP ingestion)
-│   ├── DeprecationCollector.php         # PHP deprecation notices
 │   ├── AssetBundleCollector.php         # Asset bundles (fed by adapter hooks)
-│   ├── DeprecationCollector.php         # PHP deprecation warnings
-│   ├── EnvironmentCollector.php
+│   ├── AuthorizationCollector.php       # Auth: user, token, guards, role hierarchy, access decisions, auth events
+│   ├── DeprecationCollector.php         # PHP deprecation notices
+│   ├── EnvironmentCollector.php         # PHP environment info (extensions, ini settings)
 │   ├── MiddlewareCollector.php          # HTTP middleware stack execution
-│   ├── OpenTelemetryCollector.php       # OpenTelemetry spans
+│   ├── OpenTelemetryCollector.php       # OpenTelemetry spans (fed by OTLP ingestion)
 │   ├── OtlpTraceParser.php             # OTLP trace data parser
 │   ├── SpanRecord.php                  # Value object for OTel span
-│   ├── QueueCollector.php              # Message queue/bus operations
+│   ├── QueueCollector.php               # Queue messages: dispatched/handled/failed (fed by adapter hooks)
 │   ├── RedisCollector.php              # Redis commands (fed by adapter hooks)
 │   ├── RedisCommandRecord.php          # Value object for Redis command
-│   ├── RouterCollector.php             # HTTP route matching data
-│   ├── AuthorizationCollector.php           # Authentication/authorization
+│   ├── RouterCollector.php              # Route matching data (fed by adapter hooks)
 │   ├── TemplateCollector.php           # Template rendering
 │   ├── TranslatorCollector.php         # Translation lookups + missing detection
 │   ├── TranslationRecord.php           # Value object for translation lookup
-│   ├── ValidatorCollector.php          # Validation operations
+│   ├── ValidatorCollector.php           # Validation results (fed by adapter hooks)
 │   ├── ViewCollector.php               # View rendering with output
 │   ├── Web/
 │   │   ├── RequestCollector.php
@@ -128,6 +122,7 @@ src/
 │   ├── StorageInterface.php
 │   ├── FileStorage.php
 │   ├── FileStorageGarbageCollector.php  # Automatic cleanup of old entries
+│   ├── GarbageCollector.php             # GC interface
 │   └── MemoryStorage.php
 ├── Event/                        # Debugger lifecycle events
 │   ├── ProxyMethodCallEvent.php

@@ -35,7 +35,9 @@ src/
 │   ├── Yii2RouteAdapter.php                   # Wraps single UrlRule with __debugInfo()
 │   └── NullSchemaProvider.php                 # Fallback when no database configured
 └── Controller/
-    └── AdpApiController.php                   # Yii 2 controller bridging to ADP ApiApplication
+    ├── AdpApiController.php                   # Yii 2 controller bridging to ADP ApiApplication
+    ├── DebugQueryController.php               # Direct SQL query execution for inspector
+    └── DebugResetController.php               # Reset/clear debug storage
 ```
 
 ## How It Works
@@ -95,7 +97,7 @@ Executes in order:
 |---|---|
 | `Application::EVENT_BEFORE_REQUEST` | Convert Yii Request → PSR-7, `Debugger::startup()`, `RequestCollector`, `WebAppInfoCollector` |
 | `Application::EVENT_AFTER_REQUEST` | Convert Yii Response → PSR-7, `RequestCollector` captures response, adds `X-Debug-Id` header, `Debugger::shutdown()` |
-| `afterAction` | `ExceptionCollector` captures error handler exceptions |
+| `User::EVENT_AFTER_LOGIN` / `EVENT_AFTER_LOGOUT` | `AuthorizationListener` → `AuthorizationCollector` |
 
 **Console events (`ConsoleListener`):**
 
@@ -163,8 +165,8 @@ Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: n
 | Collector | Fed By | Data |
 |---|---|---|
 | `RequestCollector` | `WebListener` | PSR-7 request/response |
-| `LogCollector` | PSR-3 proxy (if configured) | PSR-3 log entries |
-| `EventCollector` | PSR-14 proxy (if configured) | Dispatched events |
+| `LogCollector` | `DebugLogTarget` (Yii log target) | Log entries captured in real-time |
+| `EventCollector` | Yii 2 global event listener (`Event::on('*', '*', ...)`) | Dispatched events |
 | `ExceptionCollector` | `WebListener` / `ConsoleListener` | Uncaught exceptions |
 | `HttpClientCollector` | PSR-18 proxy (if configured) | HTTP client requests |
 | `ServiceCollector` | — | Service method calls |

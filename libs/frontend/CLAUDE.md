@@ -69,10 +69,24 @@ packages/
     │   │   ├── SearchFilter.tsx             # Reusable search filter (hook + component)
     │   │   ├── EmptyState.tsx              # Generic empty state (icon + title + desc)
     │   │   ├── SectionTitle.tsx            # Section heading component
+    │   │   ├── SqlHighlight.tsx            # SQL syntax highlighting (Prism, inline/formatted modes)
+    │   │   ├── FilterInput.tsx             # Reusable filter text input with debounce
+    │   │   ├── BodyPreview.tsx             # HTTP body preview (JSON, HTML, text)
+    │   │   ├── ExplainPlanVisualizer.tsx   # SQL EXPLAIN plan tree visualizer
+    │   │   ├── FileLink.tsx               # Clickable file path link (IDE integration)
+    │   │   ├── StackTrace.tsx             # Exception stack trace renderer
+    │   │   ├── KeyValueTable.tsx          # Key-value pair table display
+    │   │   ├── StatusCard.tsx             # Status indicator card
+    │   │   ├── InfoBox.tsx                # Info message box
+    │   │   ├── DebugChip.tsx              # Debug status chip
+    │   │   ├── ErrorFallback.tsx          # Error boundary fallback UI
+    │   │   ├── ServiceSelector.tsx        # Multi-app service selector
     │   │   ├── ServerSentEventsObserver.ts  # SSE connection manager
     │   │   ├── useServerSentEvents.ts       # SSE React hook
     │   │   ├── JsonRenderer.tsx             # JSON display component
     │   │   ├── CodeHighlight.tsx            # Syntax highlighting
+    │   │   ├── Form/
+    │   │   │   └── FilterInput.tsx          # Form-integrated filter input
     │   │   └── Grid.tsx                     # Data grid wrapper
     │   ├── Adapter/        # Framework adapters
     │   │   ├── mui/        # MUI type extensions

@@ -29,9 +29,15 @@ src/
 │   ├── Repository/
 │   │   ├── CollectorRepositoryInterface.php
 │   │   └── CollectorRepository.php      # Reads debug data from storage
+│   ├── Exception/
+│   │   ├── NotFoundException.php            # Debug entry not found
+│   │   └── PackageNotInstalledException.php # Required package missing
 │   ├── HtmlViewProviderInterface.php
 │   ├── ModuleFederationAssetBundle.php  # Remote panel support
 │   └── ModuleFederationProviderInterface.php
+├── Panel/
+│   ├── PanelConfig.php                      # Panel display configuration
+│   └── PanelController.php                  # Serves embedded debug panel SPA
 ├── Inspector/
 │   ├── Controller/                      # Inspector mode — live app state
 │   │   ├── InspectController.php        # config, params, classes, object, phpinfo, events
@@ -108,6 +114,13 @@ src/
 ```
 
 ## API Endpoints
+
+### Panel (`/debug`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Serve debug panel SPA |
+| GET | `/{path+}` | SPA catch-all routing |
 
 ### Debug API (`/debug/api`)
 
