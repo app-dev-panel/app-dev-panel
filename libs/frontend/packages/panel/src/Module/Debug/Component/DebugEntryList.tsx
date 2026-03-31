@@ -20,7 +20,7 @@ import {
     type Theme,
 } from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {useCallback, useDeferredValue, useMemo, useState} from 'react';
+import React, {useCallback, useDeferredValue, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
 
@@ -127,6 +127,8 @@ export const DebugEntryList = () => {
     const navigate = useNavigate();
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
+    const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setFilter(e.target.value), []);
+    const handleFilterClear = useCallback(() => setFilter(''), []);
 
     const handleEntryClick = useCallback(
         (entry: DebugEntry) => {
@@ -167,7 +169,7 @@ export const DebugEntryList = () => {
                     size="small"
                     placeholder="Search by URL, method, status, command, or ID..."
                     value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
+                    onChange={handleFilterChange}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -176,7 +178,12 @@ export const DebugEntryList = () => {
                         ),
                         endAdornment: filter ? (
                             <InputAdornment position="end">
-                                <IconButton size="small" onClick={() => setFilter('')} sx={{p: 0.25}}>
+                                <IconButton
+                                    size="small"
+                                    onClick={handleFilterClear}
+                                    aria-label="Clear search"
+                                    sx={{p: 0.25}}
+                                >
                                     <Icon sx={{fontSize: 16}}>close</Icon>
                                 </IconButton>
                             </InputAdornment>
@@ -196,7 +203,7 @@ export const DebugEntryList = () => {
                     {filtered.length}/{entries.length}
                 </Typography>
                 <Tooltip title={isFetching ? 'Refreshing...' : 'Refresh'}>
-                    <IconButton size="small" onClick={() => refetch()} disabled={isFetching}>
+                    <IconButton size="small" onClick={refetch} disabled={isFetching} aria-label="Refresh entries">
                         <Icon sx={{fontSize: 18}}>{isFetching ? 'hourglass_empty' : 'refresh'}</Icon>
                     </IconButton>
                 </Tooltip>

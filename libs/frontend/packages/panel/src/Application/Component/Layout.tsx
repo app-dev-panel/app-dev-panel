@@ -400,6 +400,22 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         [navigate, debugEntry],
     );
 
+    const handleMobileNavigate = useCallback(
+        (href: string) => {
+            handleNavigate(href);
+            handleMenuClose();
+        },
+        [handleNavigate, handleMenuClose],
+    );
+
+    const handleMobileChildClick = useCallback(
+        (sectionKey: string, childKey: string) => {
+            handleChildClick(sectionKey, childKey);
+            handleMenuClose();
+        },
+        [handleChildClick, handleMenuClose],
+    );
+
     return (
         <>
             <CssBaseline />
@@ -457,14 +473,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                             sections={sidebarSections}
                             activePath={location.pathname}
                             activeChildKey={activeChildKey}
-                            onNavigate={(href) => {
-                                handleNavigate(href);
-                                handleMenuClose();
-                            }}
-                            onChildClick={(sectionKey, childKey) => {
-                                handleChildClick(sectionKey, childKey);
-                                handleMenuClose();
-                            }}
+                            onNavigate={handleMobileNavigate}
+                            onChildClick={handleMobileChildClick}
                         />
                     </Drawer>
                 )}

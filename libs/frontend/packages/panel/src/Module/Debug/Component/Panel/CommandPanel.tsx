@@ -249,6 +249,7 @@ const NullChip = () => (
 const EventCard = ({eventClass, eventData}: {eventClass: string; eventData: CommandEvent}) => {
     const theme = useTheme();
     const [expanded, setExpanded] = useState(true);
+    const toggleExpanded = useCallback(() => setExpanded((prev) => !prev), []);
     const shortName = eventClass.includes('\\') ? eventClass.split('\\').pop() : eventClass;
     const exitCode = eventData.exitCode;
     const args = eventData.arguments;
@@ -257,7 +258,17 @@ const EventCard = ({eventClass, eventData}: {eventClass: string; eventData: Comm
     return (
         <Box sx={{mb: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden'}}>
             <Box
-                onClick={() => setExpanded(!expanded)}
+                role="button"
+                tabIndex={0}
+                aria-expanded={expanded}
+                aria-label={`Toggle ${shortName ?? eventClass} details`}
+                onClick={toggleExpanded}
+                onKeyDown={(e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleExpanded();
+                    }
+                }}
                 sx={{
                     display: 'flex',
                     alignItems: 'center',
