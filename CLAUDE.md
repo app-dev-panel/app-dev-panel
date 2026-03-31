@@ -342,6 +342,8 @@ composer lint:baseline
 | llms.txt Reviewer | `/review-llms-txt` | Verify llms.txt/llms-full.txt generation after doc changes |
 | Frontend Dev | `/frontend-dev [component, page, or feature]` | Implement frontend features with React 19, strict TypeScript, semantic HTML, a11y |
 | Frontend Designer | `/frontend-designer [component or page]` | Design and implement React/MUI frontend components, pages, modules |
+| Screenshot | `/screenshot [URL or page path]` | Take screenshots of frontend pages using Playwright for visual verification |
+| Selenium E2E | `/selenium-e2e [test file or feature]` | Write and debug E2E browser tests (Vitest + WebDriverIO, PHPUnit + php-webdriver) |
 
 Skill definitions in `.claude/skills/*/SKILL.md`.
 
