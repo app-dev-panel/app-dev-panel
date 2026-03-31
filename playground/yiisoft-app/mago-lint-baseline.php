@@ -17,3 +17,9 @@ file = "src/Environment.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/CoverageAction.php"
+code = "prefer-static-closure"
+message = "This arrow function does not use `$this` and should be declared static."
+count = 1

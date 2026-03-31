@@ -25,7 +25,9 @@ final readonly class SecurityAction implements RequestHandlerInterface
         $this->authorizationCollector->collectGuard('web', 'users', ['driver' => 'session']);
         $this->authorizationCollector->collectRoleHierarchy(['ROLE_ADMIN' => ['ROLE_USER', 'ROLE_EDITOR']]);
         $this->authorizationCollector->collectEffectiveRoles(['ROLE_ADMIN', 'ROLE_USER', 'ROLE_EDITOR']);
-        $this->authorizationCollector->collectAuthenticationEvent('login', 'form_login', 'success', ['ip' => '127.0.0.1']);
+        $this->authorizationCollector->collectAuthenticationEvent('login', 'form_login', 'success', [
+            'ip' => '127.0.0.1',
+        ]);
 
         $this->authorizationCollector->logAccessDecision(
             'ROLE_ADMIN',

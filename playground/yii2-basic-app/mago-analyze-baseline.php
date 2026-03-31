@@ -55,6 +55,12 @@ message = 'Class `App\actions\testFixtures\CacheHeavyAction` cannot extend unkno
 count = 1
 
 [[issues]]
+file = "src/actions/testFixtures/CoverageAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\CoverageAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
 file = "src/actions/testFixtures/DatabaseAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\DatabaseAction` cannot extend unknown type `Action`'
@@ -64,6 +70,12 @@ count = 1
 file = "src/actions/testFixtures/DumpAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\DumpAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
+file = "src/actions/testFixtures/ElasticsearchAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\ElasticsearchAction` cannot extend unknown type `Action`'
 count = 1
 
 [[issues]]
@@ -82,6 +94,12 @@ count = 1
 file = "src/actions/testFixtures/ExceptionChainedAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\ExceptionChainedAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
+file = "src/actions/testFixtures/FileStreamAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\FileStreamAction` cannot extend unknown type `Action`'
 count = 1
 
 [[issues]]
@@ -133,6 +151,18 @@ message = 'Class `App\actions\testFixtures\MultiAction` cannot extend unknown ty
 count = 1
 
 [[issues]]
+file = "src/actions/testFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\OpenTelemetryAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
+file = "src/actions/testFixtures/RedisAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\RedisAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
 file = "src/actions/testFixtures/RequestInfoAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\RequestInfoAction` cannot extend unknown type `Action`'
@@ -157,9 +187,21 @@ message = 'Class `App\actions\testFixtures\RouterAction` cannot extend unknown t
 count = 1
 
 [[issues]]
+file = "src/actions/testFixtures/SecurityAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\SecurityAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
 file = "src/actions/testFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\TimelineAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
+file = "src/actions/testFixtures/TranslatorAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\TranslatorAction` cannot extend unknown type `Action`'
 count = 1
 
 [[issues]]

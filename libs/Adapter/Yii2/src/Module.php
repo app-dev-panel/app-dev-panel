@@ -956,6 +956,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
     private function registerTranslatorProfiling(Application $app, TranslatorCollector $collector): void
     {
         $i18n = $app->getI18n();
+        if ($i18n === null) {
+            return;
+        }
         $proxy = new I18NProxy();
 
         // Copy existing translations config from the original I18N

@@ -106,7 +106,7 @@ final class CodeCoverageController
     {
         \pcov\stop();
         /** @var array<string, array<int, int>> */
-        return \pcov\collect(\pcov\inclusive, '.');
+        return \pcov\collect(\pcov\inclusive, ['.']);
     }
 
     /**
