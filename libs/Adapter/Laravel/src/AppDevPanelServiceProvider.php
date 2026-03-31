@@ -6,13 +6,13 @@ namespace AppDevPanel\Adapter\Laravel;
 
 use AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor;
 use AppDevPanel\Adapter\Laravel\Controller\AdpApiController;
+use AppDevPanel\Adapter\Laravel\EventListener\AuthorizationListener;
 use AppDevPanel\Adapter\Laravel\EventListener\CacheListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ConsoleListener;
 use AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener;
 use AppDevPanel\Adapter\Laravel\EventListener\HttpClientListener;
 use AppDevPanel\Adapter\Laravel\EventListener\MailListener;
 use AppDevPanel\Adapter\Laravel\EventListener\QueueListener;
-use AppDevPanel\Adapter\Laravel\EventListener\AuthorizationListener;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelConfigProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider;
@@ -61,12 +61,15 @@ use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
 use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
+use AppDevPanel\Api\Panel\PanelConfig;
+use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CodeCoverageCollector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
@@ -84,7 +87,6 @@ use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
-use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -145,6 +147,13 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../config/app-dev-panel.php' => $this->app->configPath('app-dev-panel.php'),
         ], 'app-dev-panel-config');
+
+        $assetSource = __DIR__ . '/../resources/dist';
+        if (is_dir($assetSource) && file_exists($assetSource . '/bundle.js')) {
+            $this->publishes([
+                $assetSource => $this->app->publicPath('vendor/app-dev-panel'),
+            ], 'app-dev-panel-assets');
+        }
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/adp.php');
 
@@ -474,6 +483,26 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 $this->app->make(CollectorRepositoryInterface::class),
                 $this->app->make(StorageInterface::class),
                 $this->app->make(ResponseFactoryInterface::class),
+            ),
+        );
+
+        $this->app->singleton(PanelConfig::class, function () {
+            $staticUrl = config('app-dev-panel.panel.static_url', '');
+            if ($staticUrl === '') {
+                // Auto-detect: if assets were published locally, use them
+                $staticUrl = file_exists($this->app->publicPath('vendor/app-dev-panel/bundle.js'))
+                    ? '/vendor/app-dev-panel'
+                    : PanelConfig::DEFAULT_STATIC_URL;
+            }
+            return new PanelConfig($staticUrl);
+        });
+
+        $this->app->singleton(
+            PanelController::class,
+            fn() => new PanelController(
+                $this->app->make(ResponseFactoryInterface::class),
+                $this->app->make(StreamFactoryInterface::class),
+                $this->app->make(PanelConfig::class),
             ),
         );
 

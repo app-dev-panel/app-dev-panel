@@ -119,6 +119,9 @@ return [
             'debug:reset',
         ],
         'pathMapping' => [],
+        'panel' => [
+            'staticUrl' => '', // Base URL for panel assets (empty = GitHub Pages default). Use http://localhost:3000 for Vite dev with HMR.
+        ],
         'api' => [
             'enabled' => true,
             'allowedIps' => ['127.0.0.1', '::1'],

@@ -12,11 +12,11 @@ hero:
       text: Get Started
       link: /guide/getting-started
     - theme: alt
+      text: Live Demo
+      link: /demo/
+    - theme: alt
       text: View on GitHub
       link: https://github.com/app-dev-panel/app-dev-panel
-    - theme: alt
-      text: Blog
-      link: /blog/
 
 features:
   - icon: 🔍

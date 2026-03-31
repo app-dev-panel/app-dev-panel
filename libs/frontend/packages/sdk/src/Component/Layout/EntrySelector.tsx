@@ -7,7 +7,7 @@ import {
     saveFilterState,
 } from '@app-dev-panel/sdk/Component/Layout/EntryFilterConfig';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {getEntrySearchText, isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
 import {fuzzyMatch, type FuzzyMatch} from '@app-dev-panel/sdk/Helper/fuzzyMatch';
@@ -233,13 +233,7 @@ const CountLabel = styled(Typography)(({theme}) => ({
 // ---------------------------------------------------------------------------
 
 function getSearchText(entry: DebugEntry): string {
-    if (isDebugEntryAboutWeb(entry)) {
-        return `${entry.request.method} ${entry.request.path}`;
-    }
-    if (isDebugEntryAboutConsole(entry)) {
-        return entry.command?.input ?? entry.command?.name ?? '';
-    }
-    return entry.id;
+    return getEntrySearchText(entry);
 }
 
 // ---------------------------------------------------------------------------
@@ -424,6 +418,13 @@ export const EntrySelector = ({
 
     const hasConditions = filterState.conditions.length > 0;
 
+    const handleFilterConfigClose = useCallback(() => setFilterConfigAnchor(null), []);
+
+    const handleAllClickAndClose = useCallback(() => {
+        onAllClick?.();
+        handleClose();
+    }, [onAllClick, handleClose]);
+
     return (
         <Popover
             open={open}
@@ -453,37 +454,38 @@ export const EntrySelector = ({
                 <FilterInput
                     ref={inputRef}
                     placeholder="Search by URL, method, or command..."
+                    aria-label="Search debug entries"
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
                     onKeyDown={handleKeyDown}
                 />
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mr: 1}}>
-                    {currentIsWeb && (
+                    {currentIsWeb && currentEntry && (
                         <GearButton
                             onClick={handleQuickFilter}
-                            title={`Filter: ${currentEntry!.request.method} ${currentEntry!.request.path}`}
+                            title={`Filter: ${currentEntry.request.method} ${currentEntry.request.path}`}
+                            aria-label="Quick filter by current URL"
                         >
                             <Icon sx={{fontSize: 16}}>filter_alt</Icon>
                         </GearButton>
                     )}
                     {hasConditions && (
-                        <ToolbarButton active={filterState.enabled} onClick={toggleFilter}>
+                        <ToolbarButton
+                            active={filterState.enabled}
+                            onClick={toggleFilter}
+                            aria-label={filterState.enabled ? 'Disable filter' : 'Enable filter'}
+                        >
                             Filter
                             {filterState.enabled && (
                                 <span style={{fontSize: '10px', opacity: 0.8}}>({filterState.conditions.length})</span>
                             )}
                         </ToolbarButton>
                     )}
-                    <GearButton onClick={handleFilterConfigOpen} title="Configure filter">
+                    <GearButton onClick={handleFilterConfigOpen} title="Configure filter" aria-label="Configure filter">
                         <Icon sx={{fontSize: 16}}>tune</Icon>
                     </GearButton>
                     {onAllClick && (
-                        <ListButton
-                            onClick={() => {
-                                onAllClick();
-                                handleClose();
-                            }}
-                        >
+                        <ListButton onClick={handleAllClickAndClose} aria-label="View all entries">
                             List
                         </ListButton>
                     )}
@@ -492,7 +494,7 @@ export const EntrySelector = ({
             <EntryFilterConfig
                 anchorEl={filterConfigAnchor}
                 open={Boolean(filterConfigAnchor)}
-                onClose={() => setFilterConfigAnchor(null)}
+                onClose={handleFilterConfigClose}
                 filterState={filterState}
                 onChange={setFilterState}
             />
@@ -502,7 +504,7 @@ export const EntrySelector = ({
                         <Typography variant="body2">No entries match "{filter}"</Typography>
                     </Box>
                 )}
-                {matched.map(({entry, indices, searchText}, idx) => {
+                {matched.map(({entry, indices}, idx) => {
                     const active = entry.id === currentEntryId;
                     const isHighlighted = idx === highlightedIndex;
                     if (isDebugEntryAboutWeb(entry)) {
@@ -568,7 +570,16 @@ export const EntrySelector = ({
                                 highlighted={isHighlighted}
                                 onClick={() => handleSelect(entry)}
                             >
-                                <Icon sx={{fontSize: 14, color: 'text.disabled'}}>terminal</Icon>
+                                <MethodLabel
+                                    sx={{
+                                        color: 'info.main',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <Icon sx={{fontSize: 14}}>terminal</Icon>
+                                </MethodLabel>
                                 <PathLabel>
                                     <HighlightedText text={commandText} indices={indices} />
                                 </PathLabel>

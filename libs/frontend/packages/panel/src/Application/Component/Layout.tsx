@@ -31,7 +31,9 @@ import {type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
-import {styled} from '@mui/material/styles';
+import Drawer from '@mui/material/Drawer';
+import {styled, useTheme as useMuiTheme} from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
@@ -78,13 +80,15 @@ const inspectorChildren = [
 // Styled components
 // ---------------------------------------------------------------------------
 
-const MainArea = styled(Box)({
+const MainArea = styled(Box)(({theme}) => ({
     flex: 1,
     display: 'flex',
     justifyContent: 'center',
-    padding: componentTokens.mainGap,
-    gap: componentTokens.mainGap,
-});
+    padding: theme.spacing(1),
+    gap: theme.spacing(1),
+    overflow: 'auto',
+    [theme.breakpoints.up('sm')]: {padding: componentTokens.mainGap, gap: componentTokens.mainGap},
+}));
 
 const MainInner = styled(Box)({
     display: 'flex',
@@ -99,8 +103,9 @@ const ContentArea = styled(Box)(({theme}) => ({
     borderRadius: componentTokens.contentPanel.borderRadius,
     backgroundColor: theme.palette.background.paper,
     border: `1px solid ${theme.palette.divider}`,
-    padding: theme.spacing(3.5, 4.5),
+    padding: theme.spacing(2, 1.5),
     overflowY: 'auto',
+    [theme.breakpoints.up('sm')]: {padding: theme.spacing(3.5, 4.5)},
 }));
 
 // ---------------------------------------------------------------------------
@@ -111,7 +116,12 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
+    const muiTheme = useMuiTheme();
+    const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const handleMenuClick = useCallback(() => setMobileMenuOpen(true), []);
+    const handleMenuClose = useCallback(() => setMobileMenuOpen(false), []);
 
     // Debug entry state
     const debugEntry = useDebugEntry();
@@ -190,6 +200,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         if (currentIndex < entries.length - 1) changeEntry(entries[currentIndex + 1]);
     }, [currentIndex, entries, changeEntry]);
 
+    const handleRefresh = useCallback(() => {
+        getDebugQuery();
+    }, [getDebugQuery]);
+
     // Entry selector popover
     const [entrySelectorAnchor, setEntrySelectorAnchor] = useState<HTMLElement | null>(null);
     const handleEntryClick = useCallback((e?: React.MouseEvent) => {
@@ -208,6 +222,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const handleSearchClick = useCallback(() => setPaletteOpen(true), []);
     const handleLogoClick = useCallback(() => navigate('/'), [navigate]);
     const handlePaletteClose = useCallback(() => setPaletteOpen(false), []);
+    const handleEntrySelectorClose = useCallback(() => setEntrySelectorAnchor(null), []);
+    const handleAllEntriesClick = useCallback(() => navigate('/debug/list'), [navigate]);
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
@@ -252,14 +268,30 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         [updateMcpSettings],
     );
 
-    // TopBar debug info
-    const topBarMethod = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.request?.method : undefined;
-    const topBarPath = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.request?.path : undefined;
-    const topBarStatus = debugEntry && isDebugEntryAboutWeb(debugEntry) ? debugEntry.response?.statusCode : undefined;
-    const topBarDuration =
-        debugEntry && isDebugEntryAboutWeb(debugEntry) && debugEntry.web?.request?.processingTime
-            ? formatMillisecondsAsDuration(debugEntry.web.request.processingTime)
-            : undefined;
+    // TopBar debug info — support both web requests and console commands
+    const isWeb = debugEntry ? isDebugEntryAboutWeb(debugEntry) : false;
+    const isConsole = debugEntry ? isDebugEntryAboutConsole(debugEntry) : false;
+
+    const topBarMethod = isWeb ? debugEntry!.request?.method : isConsole ? 'CLI' : undefined;
+    const topBarPath = isWeb
+        ? debugEntry!.request?.path
+        : isConsole
+          ? (debugEntry!.command?.input ?? debugEntry!.command?.name ?? 'Unknown command')
+          : undefined;
+    const topBarStatus = isWeb
+        ? debugEntry!.response?.statusCode
+        : isConsole
+          ? (debugEntry!.command?.exitCode ?? 0)
+          : undefined;
+    const topBarDuration = isWeb
+        ? debugEntry!.web?.request?.processingTime
+            ? formatMillisecondsAsDuration(debugEntry!.web.request.processingTime)
+            : undefined
+        : isConsole
+          ? debugEntry!.console?.request?.processingTime
+              ? formatMillisecondsAsDuration(debugEntry!.console.request.processingTime)
+              : undefined
+          : undefined;
 
     // Build sidebar sections
     const selectedCollector = searchParams.get('collector') || '';
@@ -267,14 +299,14 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const debugChildren = useMemo(() => {
         const entriesList = [{key: '__entries__', icon: 'list', label: 'All Entries'}];
         if (!debugEntry) return entriesList;
-        const isWeb = isDebugEntryAboutWeb(debugEntry);
-        const isConsole = isDebugEntryAboutConsole(debugEntry);
+        const entryIsWeb = isDebugEntryAboutWeb(debugEntry);
+        const entryIsConsole = isDebugEntryAboutConsole(debugEntry);
         const collectors = [...debugEntry.collectors]
             .map((c) => (typeof c === 'string' ? c : c.id))
             .filter((c) => !hiddenCollectors.has(c))
             .filter((c) => {
-                if (isWeb && c === CollectorsMap.CommandCollector) return false;
-                if (isConsole && c === CollectorsMap.RequestCollector) return false;
+                if (entryIsWeb && c === CollectorsMap.CommandCollector) return false;
+                if (entryIsConsole && c === CollectorsMap.RequestCollector) return false;
                 return true;
             })
             .sort(compareCollectorWeight)
@@ -368,16 +400,34 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         [navigate, debugEntry],
     );
 
+    const handleMobileNavigate = useCallback(
+        (href: string) => {
+            handleNavigate(href);
+            handleMenuClose();
+        },
+        [handleNavigate, handleMenuClose],
+    );
+
+    const handleMobileChildClick = useCallback(
+        (sectionKey: string, childKey: string) => {
+            handleChildClick(sectionKey, childKey);
+            handleMenuClose();
+        },
+        [handleChildClick, handleMenuClose],
+    );
+
     return (
         <>
             <CssBaseline />
             <Box sx={{display: 'flex', flexDirection: 'column', height: '100vh'}}>
                 <TopBar
+                    onMenuClick={isMobile ? handleMenuClick : undefined}
                     method={topBarMethod}
                     path={topBarPath}
                     status={topBarStatus}
                     duration={topBarDuration}
                     autoRefresh={autoLatest}
+                    isRefreshing={getDebugQueryInfo.isFetching}
                     showInactiveCollectors={showInactiveCollectors}
                     onPrevEntry={handlePrevEntry}
                     onNextEntry={handleNextEntry}
@@ -385,6 +435,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onSearchClick={handleSearchClick}
                     onThemeToggle={handleThemeToggle}
                     onAutoRefreshToggle={autoLatestHandler}
+                    onRefresh={handleRefresh}
                     onShowInactiveCollectorsChange={handleShowInactiveCollectorsChange}
                     mcpEnabled={mcpSettings?.enabled}
                     onMcpEnabledChange={handleMcpEnabledChange}
@@ -399,11 +450,11 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 <EntrySelector
                     anchorEl={entrySelectorAnchor}
                     open={Boolean(entrySelectorAnchor)}
-                    onClose={() => setEntrySelectorAnchor(null)}
+                    onClose={handleEntrySelectorClose}
                     entries={entries}
                     currentEntryId={debugEntry?.id}
                     onSelect={changeEntry}
-                    onAllClick={() => navigate('/debug/list')}
+                    onAllClick={handleAllEntriesClick}
                 />
                 <NotificationCenter
                     anchorEl={notificationAnchor}
@@ -411,15 +462,33 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onClose={handleNotificationsClose}
                 />
 
-                <MainArea>
-                    <MainInner>
+                {isMobile && (
+                    <Drawer
+                        open={mobileMenuOpen}
+                        onClose={handleMenuClose}
+                        ModalProps={{keepMounted: true}}
+                        sx={{'& .MuiDrawer-paper': {width: 240, pt: 1}}}
+                    >
                         <UnifiedSidebar
                             sections={sidebarSections}
                             activePath={location.pathname}
                             activeChildKey={activeChildKey}
-                            onNavigate={handleNavigate}
-                            onChildClick={handleChildClick}
+                            onNavigate={handleMobileNavigate}
+                            onChildClick={handleMobileChildClick}
                         />
+                    </Drawer>
+                )}
+                <MainArea>
+                    <MainInner>
+                        {!isMobile && (
+                            <UnifiedSidebar
+                                sections={sidebarSections}
+                                activePath={location.pathname}
+                                activeChildKey={activeChildKey}
+                                onNavigate={handleNavigate}
+                                onChildClick={handleChildClick}
+                            />
+                        )}
                         <ContentArea>
                             <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[location.pathname]}>
                                 <Outlet />

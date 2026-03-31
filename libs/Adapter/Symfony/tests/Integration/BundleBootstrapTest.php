@@ -7,6 +7,9 @@ namespace AppDevPanel\Adapter\Symfony\Tests\Integration;
 use AppDevPanel\Adapter\Symfony\AppDevPanelBundle;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
+use AppDevPanel\Api\Panel\PanelConfig;
+use AppDevPanel\Api\Panel\PanelController;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
@@ -18,7 +21,6 @@ use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
-use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -339,6 +341,38 @@ final class BundleBootstrapTest extends TestCase
             $request,
             $response,
         ));
+    }
+
+    public function testPanelConfigAutoDetectsLocalAssets(): void
+    {
+        $container = $this->buildContainer();
+
+        $panelConfig = $container->get(PanelConfig::class);
+        $this->assertInstanceOf(PanelConfig::class, $panelConfig);
+
+        // If bundle.js was built locally, auto-detects /bundles/appdevpanel; otherwise GitHub Pages
+        $adapterRoot = \dirname(__DIR__, 2); // libs/Adapter/Symfony
+        $bundleAssetsExist = file_exists($adapterRoot . '/Resources/public/bundle.js');
+        $expected = $bundleAssetsExist ? '/bundles/appdevpanel' : PanelConfig::DEFAULT_STATIC_URL;
+        $this->assertSame($expected, $panelConfig->staticUrl);
+    }
+
+    public function testPanelConfigUsesCustomStaticUrl(): void
+    {
+        $container = $this->buildContainer([
+            'panel' => ['static_url' => '/my-custom-path'],
+        ]);
+
+        $panelConfig = $container->get(PanelConfig::class);
+        $this->assertSame('/my-custom-path', $panelConfig->staticUrl);
+    }
+
+    public function testPanelControllerResolvesFromContainer(): void
+    {
+        $container = $this->buildContainer();
+
+        $controller = $container->get(PanelController::class);
+        $this->assertInstanceOf(PanelController::class, $controller);
     }
 
     /**

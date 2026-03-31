@@ -34,6 +34,11 @@ final class YiiApiMiddleware implements MiddlewareInterface
             }
         }
 
+        // Panel SPA: /debug and /debug/* (but not /debug/api)
+        if ($path === '/debug' || str_starts_with($path, '/debug/')) {
+            return $this->apiApplication->handle($request);
+        }
+
         return $handler->handle($request);
     }
 }

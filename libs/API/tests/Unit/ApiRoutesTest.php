@@ -9,6 +9,7 @@ use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Ingestion\Controller\OtlpController;
+use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\Router\Route;
 use AppDevPanel\Api\Router\Router;
 use PHPUnit\Framework\TestCase;
@@ -99,7 +100,8 @@ final class ApiRoutesTest extends TestCase
             + count(ApiRoutes::ingestionRoutes())
             + count(ApiRoutes::serviceRoutes())
             + count(ApiRoutes::inspectorRoutes())
-            + count(ApiRoutes::llmRoutes());
+            + count(ApiRoutes::llmRoutes())
+            + count(ApiRoutes::panelRoutes());
 
         $this->assertCount($expected, $router->getRoutes());
     }
@@ -126,5 +128,55 @@ final class ApiRoutesTest extends TestCase
         foreach (ApiRoutes::ingestionRoutes() as $route) {
             $this->assertContains($route->handler[0], $allowedControllers);
         }
+    }
+
+    public function testPanelRoutesReturnRoutes(): void
+    {
+        $routes = ApiRoutes::panelRoutes();
+
+        $this->assertNotEmpty($routes);
+        $this->assertContainsOnlyInstancesOf(Route::class, $routes);
+
+        $paths = array_map(static fn(Route $r) => $r->pattern, $routes);
+        $this->assertContains('/debug', $paths);
+    }
+
+    public function testPanelRoutesAreGetOnly(): void
+    {
+        foreach (ApiRoutes::panelRoutes() as $route) {
+            $this->assertSame('GET', $route->method, "Panel route {$route->pattern} should be GET");
+        }
+    }
+
+    public function testPanelRoutesUsePanelController(): void
+    {
+        foreach (ApiRoutes::panelRoutes() as $route) {
+            $this->assertSame(
+                PanelController::class,
+                $route->handler[0],
+                "Panel route {$route->pattern} should use PanelController",
+            );
+        }
+    }
+
+    public function testPanelCatchallDoesNotMatchApiPaths(): void
+    {
+        $routes = ApiRoutes::panelRoutes();
+        $catchall = null;
+        foreach ($routes as $route) {
+            if ($route->name === 'debug/panel/catchall') {
+                $catchall = $route;
+                break;
+            }
+        }
+        $this->assertNotNull($catchall, 'Panel catchall route should exist');
+
+        $this->assertNull($catchall->match('GET', '/debug/api'));
+        $this->assertNull($catchall->match('GET', '/debug/api/summary'));
+        $this->assertNull($catchall->match('GET', '/debug/api/view/123'));
+
+        $this->assertNotNull($catchall->match('GET', '/debug/logs'));
+        $this->assertNotNull($catchall->match('GET', '/debug/inspector/routes'));
+        $this->assertNotNull($catchall->match('GET', '/debug/llm'));
     }
 }

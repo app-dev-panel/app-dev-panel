@@ -126,6 +126,79 @@ final class ApiApplicationTest extends TestCase
         $this->assertNotEmpty($routes);
     }
 
+    public function testPanelRouteSkipsResponseDataWrapper(): void
+    {
+        $controller = new class {
+            public function index(ServerRequestInterface $request): ResponseInterface
+            {
+                return new Response(200, ['Content-Type' => 'text/html'], '<html>panel</html>');
+            }
+        };
+
+        $router = new Router();
+        $router->addRoute(new Route('GET', '/debug', [$controller::class, 'index']));
+
+        $container = $this->createContainer([$controller::class => $controller]);
+        $app = new ApiApplication($container, new HttpFactory(), new HttpFactory(), $router);
+
+        $response = $app->handle(new ServerRequest('GET', '/debug'));
+
+        // Panel routes should NOT be wrapped in {data, success, error} JSON envelope
+        $body = (string) $response->getBody();
+        $this->assertSame('<html>panel</html>', $body);
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testPanelSubPathSkipsResponseDataWrapper(): void
+    {
+        $controller = new class {
+            public function index(ServerRequestInterface $request): ResponseInterface
+            {
+                return new Response(200, ['Content-Type' => 'text/html'], '<html>panel</html>');
+            }
+        };
+
+        $router = new Router();
+        $router->addRoute(new Route('GET', '/debug/logs', [$controller::class, 'index']));
+
+        $container = $this->createContainer([$controller::class => $controller]);
+        $app = new ApiApplication($container, new HttpFactory(), new HttpFactory(), $router);
+
+        $response = $app->handle(new ServerRequest('GET', '/debug/logs'));
+
+        $body = (string) $response->getBody();
+        $this->assertSame('<html>panel</html>', $body);
+    }
+
+    public function testDebugApiRouteStillWrapsResponse(): void
+    {
+        $controller = new class {
+            public function index(ServerRequestInterface $request): ResponseInterface
+            {
+                return new Response(200, ['Content-Type' => 'application/json'], '[]');
+            }
+        };
+
+        $router = new Router();
+        $router->addRoute(new Route('GET', '/debug/api', [$controller::class, 'index']));
+
+        $wrapper = new \AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper(
+            new \AppDevPanel\Api\Http\JsonResponseFactory(new HttpFactory(), new HttpFactory()),
+        );
+        $container = $this->createContainer([
+            $controller::class => $controller,
+            \AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper::class => $wrapper,
+        ]);
+        $app = new ApiApplication($container, new HttpFactory(), new HttpFactory(), $router);
+
+        $response = $app->handle(new ServerRequest('GET', '/debug/api'));
+
+        // API routes SHOULD be wrapped
+        $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertArrayHasKey('data', $body);
+        $this->assertArrayHasKey('success', $body);
+    }
+
     private function createContainer(array $services = []): ContainerInterface
     {
         $container = $this->createMock(ContainerInterface::class);

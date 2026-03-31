@@ -71,4 +71,42 @@ final class RouteTest extends TestCase
 
         $this->assertNull($route->name);
     }
+
+    public function testWildcardParameterMatchesMultipleSegments(): void
+    {
+        $route = new Route('GET', '/debug/{path+}', ['Controller', 'index']);
+
+        $params = $route->match('GET', '/debug/logs/detail/123');
+
+        $this->assertSame(['path' => 'logs/detail/123'], $params);
+    }
+
+    public function testWildcardParameterMatchesSingleSegment(): void
+    {
+        $route = new Route('GET', '/debug/{path+}', ['Controller', 'index']);
+
+        $params = $route->match('GET', '/debug/overview');
+
+        $this->assertSame(['path' => 'overview'], $params);
+    }
+
+    public function testWildcardParameterDoesNotMatchEmpty(): void
+    {
+        $route = new Route('GET', '/debug/{path+}', ['Controller', 'index']);
+
+        $this->assertNull($route->match('GET', '/debug/'));
+    }
+
+    public function testWildcardWithCustomRegex(): void
+    {
+        $route = new Route('GET', '/debug/{path+:(?!api(/|$)).+}', ['Controller', 'index']);
+
+        // Matches non-api paths
+        $this->assertSame(['path' => 'overview'], $route->match('GET', '/debug/overview'));
+        $this->assertSame(['path' => 'logs/detail'], $route->match('GET', '/debug/logs/detail'));
+
+        // Does not match api paths
+        $this->assertNull($route->match('GET', '/debug/api'));
+        $this->assertNull($route->match('GET', '/debug/api/summary'));
+    }
 }

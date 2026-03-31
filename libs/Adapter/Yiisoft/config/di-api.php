@@ -13,6 +13,8 @@ use AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
+use AppDevPanel\Api\Panel\PanelConfig;
+use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
@@ -164,6 +166,32 @@ return [
         StreamFactoryInterface $streamFactory,
         UriFactoryInterface $uriFactory,
     ) => new InspectorProxyMiddleware($serviceRegistry, $httpClient, $responseFactory, $streamFactory, $uriFactory),
+
+    // Panel
+    PanelConfig::class => static function (ContainerInterface $container) use ($params): PanelConfig {
+        $staticUrl = $params['app-dev-panel/yiisoft']['panel']['staticUrl'] ?? '';
+        if ($staticUrl === '') {
+            // Auto-detect: if built assets exist in adapter package, symlink them
+            $adapterDist = \dirname(__DIR__) . '/resources/dist/bundle.js';
+            if (file_exists($adapterDist)) {
+                $aliases = $container->get(Aliases::class);
+                $webroot = $aliases->get('@public');
+                $targetDir = $webroot . '/app-dev-panel';
+                if (!is_dir($targetDir)) {
+                    @symlink(\dirname($adapterDist), $targetDir);
+                }
+                if (is_dir($targetDir)) {
+                    $staticUrl = '/app-dev-panel';
+                }
+            }
+        }
+        return new PanelConfig($staticUrl !== '' ? $staticUrl : PanelConfig::DEFAULT_STATIC_URL);
+    },
+    PanelController::class => static fn(
+        ResponseFactoryInterface $responseFactory,
+        StreamFactoryInterface $streamFactory,
+        PanelConfig $panelConfig,
+    ) => new PanelController($responseFactory, $streamFactory, $panelConfig),
 
     // Controllers
     DebugController::class => static fn(

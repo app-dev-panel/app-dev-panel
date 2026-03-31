@@ -12,11 +12,11 @@ hero:
       text: Начать работу
       link: /ru/guide/getting-started
     - theme: alt
+      text: Live Demo
+      link: /demo/
+    - theme: alt
       text: GitHub
       link: https://github.com/app-dev-panel/app-dev-panel
-    - theme: alt
-      text: Блог
-      link: /ru/blog/
 
 features:
   - icon: 🔍

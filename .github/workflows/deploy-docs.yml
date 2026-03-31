@@ -5,6 +5,7 @@ on:
     branches: [master, main]
     paths:
       - 'website/**'
+      - 'libs/frontend/**'
       - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
@@ -19,7 +20,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build VitePress
+    name: Build VitePress + Panel
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,15 +33,51 @@ jobs:
         with:
           node-version: 21
           cache: npm
-          cache-dependency-path: website/package-lock.json
+          cache-dependency-path: |
+            website/package-lock.json
+            libs/frontend/package-lock.json
 
-      - name: Install dependencies
+      # Build the panel SPA (bundle.js + bundle.css)
+      - name: Install frontend dependencies
+        working-directory: libs/frontend
+        run: npm ci
+
+      - name: Build panel
+        working-directory: libs/frontend
+        run: npx lerna run build --scope=@app-dev-panel/panel
+        env:
+          VITE_ENV: github
+
+      # Build VitePress docs
+      - name: Install website dependencies
         working-directory: website
         run: npm ci
 
       - name: Build VitePress
         working-directory: website
         run: npm run build
+
+      # Build toolbar (needed for demo)
+      - name: Build toolbar
+        working-directory: libs/frontend
+        run: npx lerna run build --scope=@app-dev-panel/toolbar
+        env:
+          VITE_ENV: github
+
+      # Copy panel assets into the VitePress dist so they are served from GitHub Pages
+      - name: Copy panel assets to dist
+        run: |
+          cp libs/frontend/packages/panel/dist/bundle.js website/.vitepress/dist/bundle.js
+          cp libs/frontend/packages/panel/dist/bundle.css website/.vitepress/dist/bundle.css
+
+      # Deploy the full panel SPA as a live demo at /demo/
+      - name: Copy live demo
+        run: |
+          mkdir -p website/.vitepress/dist/demo
+          cp -r libs/frontend/packages/panel/dist/* website/.vitepress/dist/demo/
+          mkdir -p website/.vitepress/dist/demo/toolbar
+          cp libs/frontend/packages/toolbar/dist/bundle.js website/.vitepress/dist/demo/toolbar/bundle.js
+          cp libs/frontend/packages/toolbar/dist/bundle.css website/.vitepress/dist/demo/toolbar/bundle.css
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

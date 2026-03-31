@@ -36,7 +36,16 @@ final class Route
         }
 
         // Build regex from pattern
-        $regex = preg_replace('/\{(\w+)\}/', '(?P<$1>[^/]+)', $pattern);
+        // {param+:regex} matches one or more path segments with a custom pattern
+        $regex = preg_replace_callback(
+            '/\{(\w+)\+:([^}]+)\}/',
+            static fn(array $m) => '(?P<' . $m[1] . '>' . $m[2] . ')',
+            $pattern,
+        );
+        // {param+} matches one or more path segments (including slashes)
+        $regex = preg_replace('/\{(\w+)\+\}/', '(?P<$1>.+)', $regex);
+        // {param} matches a single path segment (no slashes)
+        $regex = preg_replace('/\{(\w+)\}/', '(?P<$1>[^/]+)', $regex);
         $regex = '#^' . $regex . '$#';
 
         if (preg_match($regex, $path, $matches)) {

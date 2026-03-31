@@ -31,9 +31,9 @@
     "license": "MIT",
     "require": {
         "php": "^8.4",
-        "app-dev-panel/api": "^1.0",
-        "app-dev-panel/kernel": "^1.0",
-        "app-dev-panel/cli": "^1.0",
+        "app-dev-panel/api": "*",
+        "app-dev-panel/kernel": "*",
+        "app-dev-panel/cli": "*",
         "guzzlehttp/guzzle": "^7.5",
         "guzzlehttp/psr7": "^2.4",
         "nyholm/psr7": "^1.8",

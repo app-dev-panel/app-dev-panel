@@ -147,6 +147,18 @@ final class Configuration implements ConfigurationInterface
             ->defaultValue([])
             ->info('Remote-to-local path mapping for Docker/Vagrant (e.g. /app: /home/user/project)')
             ->end()
+            ->arrayNode('panel')
+            ->addDefaultsIfNotSet()
+            ->info('Debug panel (SPA) configuration')
+            ->children()
+            ->scalarNode('static_url')
+            ->defaultValue('')
+            ->info(
+                'Base URL for panel static assets (empty = GitHub Pages default). Use http://localhost:3000 for Vite dev server with HMR.',
+            )
+            ->end()
+            ->end()
+            ->end()
             ->arrayNode('api')
             ->addDefaultsIfNotSet()
             ->info('ADP API bridge configuration')

@@ -6,11 +6,11 @@ namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Collector\RouterDataExtractor;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
+use AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriberCollectors;
-use AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber;
 use AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
@@ -54,12 +54,15 @@ use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
 use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
+use AppDevPanel\Api\Panel\PanelConfig;
+use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CodeCoverageCollector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
@@ -77,7 +80,6 @@ use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RedisCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
-use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
@@ -396,7 +398,7 @@ final class AppDevPanelExtension extends Extension
         $this->registerPsrFactories($container);
         $this->registerApiCoreServices($container);
         $this->registerApiMiddleware($container);
-        $this->registerApiControllers($container);
+        $this->registerApiControllers($container, $config);
         $this->registerInspectorServices($container);
         $this->registerApiApplication($container);
     }
@@ -495,7 +497,7 @@ final class AppDevPanelExtension extends Extension
             ->setPublic(true);
     }
 
-    private function registerApiControllers(ContainerBuilder $container): void
+    private function registerApiControllers(ContainerBuilder $container, array $config): void
     {
         $container
             ->register(DebugController::class, DebugController::class)
@@ -504,6 +506,23 @@ final class AppDevPanelExtension extends Extension
                 new Reference(CollectorRepositoryInterface::class),
                 new Reference(StorageInterface::class),
                 new Reference(ResponseFactoryInterface::class),
+            ])
+            ->setPublic(true);
+
+        $panelStaticUrl = $config['panel']['static_url'] ?? '';
+        if ($panelStaticUrl === '') {
+            // Auto-detect: if bundle assets were installed locally, use them
+            $bundleAssetsPath = \dirname(__DIR__, 2) . '/Resources/public/bundle.js';
+            $panelStaticUrl = file_exists($bundleAssetsPath) ? '/bundles/appdevpanel' : PanelConfig::DEFAULT_STATIC_URL;
+        }
+        $container->register(PanelConfig::class, PanelConfig::class)->setArguments([$panelStaticUrl])->setPublic(false);
+
+        $container
+            ->register(PanelController::class, PanelController::class)
+            ->setArguments([
+                new Reference(ResponseFactoryInterface::class),
+                new Reference(StreamFactoryInterface::class),
+                new Reference(PanelConfig::class),
             ])
             ->setPublic(true);
 

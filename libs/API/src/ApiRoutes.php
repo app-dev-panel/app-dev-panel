@@ -27,6 +27,7 @@ use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
+use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\Router\Route;
 use AppDevPanel\Api\Router\Router;
 
@@ -345,6 +346,23 @@ final class ApiRoutes
         ];
     }
 
+    /**
+     * @return Route[]
+     */
+    public static function panelRoutes(): array
+    {
+        return [
+            new Route('GET', '/debug', [PanelController::class, 'index'], 'debug/panel'),
+            // Catch-all for SPA client-side routing. Excludes /debug/api/* paths.
+            new Route(
+                'GET',
+                '/debug/{path+:(?!api(/|$)).+}',
+                [PanelController::class, 'index'],
+                'debug/panel/catchall',
+            ),
+        ];
+    }
+
     public static function register(Router $router): void
     {
         $router->addRoutes(self::debugRoutes());
@@ -352,5 +370,6 @@ final class ApiRoutes
         $router->addRoutes(self::serviceRoutes());
         $router->addRoutes(self::inspectorRoutes());
         $router->addRoutes(self::llmRoutes());
+        $router->addRoutes(self::panelRoutes());
     }
 }

@@ -3,7 +3,7 @@
 # Top-level Makefile for running all tests, code quality checks, and CI tasks
 # ============================================================================
 
-.PHONY: help test test-php test-frontend test-frontend-e2e test-ci \
+.PHONY: help build-panel install-panel build-install-panel test test-php test-frontend test-frontend-e2e test-ci \
         mago mago-format mago-lint mago-analyze mago-fix \
         mago-playgrounds mago-playground-yiisoft mago-playground-symfony mago-playground-yii2 mago-playground-laravel \
         mago-playgrounds-fix mago-playground-yiisoft-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix \
@@ -55,6 +55,11 @@ help: ## Show this help
 	@echo "  make test-frontend         Run frontend unit tests (Vitest)"
 	@echo "  make test-frontend-e2e     Run frontend browser tests (Vitest + WebDriverIO + ChromeDriver)"
 	@echo "  make test-ci               Run all tests for CI (parallel, GitHub Actions)"
+	@echo ""
+	@echo "$(YELLOW)Build:$(RESET)"
+	@echo "  make build-panel           Build panel + toolbar, copy to all adapter assets"
+	@echo "  make install-panel         Publish built assets to playground apps"
+	@echo "  make build-install-panel   Build + publish in one step"
 	@echo ""
 	@echo "$(YELLOW)Code Quality — Core:$(RESET)"
 	@echo "  make mago                  Run Mago checks on core libs (format + lint + analyze)"
@@ -141,6 +146,36 @@ install-playgrounds: ## Install playground deps
 	cd $(PLAYGROUND_DIR)/symfony-basic-app && composer install --prefer-dist --no-progress --no-interaction
 	cd $(PLAYGROUND_DIR)/yii2-basic-app && composer install --prefer-dist --no-progress --no-interaction
 	cd $(PLAYGROUND_DIR)/laravel-app && composer install --prefer-dist --no-progress --no-interaction
+
+# ============================================================================
+# Build
+# ============================================================================
+
+PANEL_DIST    := $(FRONTEND_DIR)/packages/panel/dist
+TOOLBAR_DIST  := $(FRONTEND_DIR)/packages/toolbar/dist
+SYMFONY_ASSETS := $(ROOT_DIR)/libs/Adapter/Symfony/Resources/public
+LARAVEL_ASSETS := $(ROOT_DIR)/libs/Adapter/Laravel/resources/dist
+YII2_ASSETS    := $(ROOT_DIR)/libs/Adapter/Yii2/resources/dist
+YIISOFT_ASSETS := $(ROOT_DIR)/libs/Adapter/Yiisoft/resources/dist
+
+build-panel: ## Build panel + toolbar and copy to all adapter asset directories
+	@echo "$(CYAN)Building frontend panel...$(RESET)"
+	cd $(FRONTEND_DIR) && npx lerna run build --scope=@app-dev-panel/panel --scope=@app-dev-panel/toolbar
+	@echo "$(CYAN)Copying assets to adapters...$(RESET)"
+	@for dir in $(SYMFONY_ASSETS) $(LARAVEL_ASSETS) $(YII2_ASSETS) $(YIISOFT_ASSETS); do \
+		mkdir -p $$dir; \
+		find $$dir -mindepth 1 -maxdepth 1 -not -name '.gitignore' -not -name '.gitkeep' -exec rm -rf {} + 2>/dev/null; \
+		cp $(PANEL_DIST)/bundle.js $(PANEL_DIST)/bundle*.css $$dir/; \
+		if [ -d "$(PANEL_DIST)/assets" ]; then cp -r $(PANEL_DIST)/assets $$dir/assets; fi; \
+	done
+	@echo "$(GREEN)Done. Run 'make install-panel' to publish assets to playgrounds.$(RESET)"
+
+install-panel: ## Publish built panel assets into playground applications
+	@echo "$(CYAN)Publishing panel assets to playgrounds...$(RESET)"
+	cd $(PLAYGROUND_DIR)/symfony-basic-app && rm -rf public/bundles/appdevpanel && php bin/console assets:install public --symlink
+	@echo "$(GREEN)Done. Panel available at /debug on each playground.$(RESET)"
+
+build-install-panel: build-panel install-panel ## Build panel + publish to all playgrounds
 
 # ============================================================================
 # Tests

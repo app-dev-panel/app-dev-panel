@@ -48,17 +48,20 @@ type TopBarProps = {
     duration?: string;
     mode?: PaletteMode;
     autoRefresh?: boolean;
+    isRefreshing?: boolean;
     showInactiveCollectors?: boolean;
     mcpEnabled?: boolean;
     notificationCount?: number;
     editorPreset?: EditorPreset;
     editorCustomTemplate?: string;
+    onMenuClick?: () => void;
     onPrevEntry?: () => void;
     onNextEntry?: () => void;
     onEntryClick?: (e: React.MouseEvent) => void;
     onSearchClick?: () => void;
     onThemeToggle?: () => void;
     onAutoRefreshToggle?: () => void;
+    onRefresh?: () => void;
     onShowInactiveCollectorsChange?: (value: boolean) => void;
     onMcpEnabledChange?: (value: boolean) => void;
     onEditorPresetChange?: (preset: EditorPreset) => void;
@@ -73,8 +76,9 @@ const BarRoot = styled('header')(({theme}) => ({
     borderBottom: `1px solid ${theme.palette.divider}`,
     display: 'flex',
     alignItems: 'center',
-    padding: theme.spacing(0, 2.5),
-    gap: theme.spacing(1),
+    padding: theme.spacing(0, 1.5),
+    gap: theme.spacing(0.5),
+    [theme.breakpoints.up('sm')]: {padding: theme.spacing(0, 2.5), gap: theme.spacing(1)},
     flexShrink: 0,
     position: 'sticky',
     top: 0,
@@ -92,16 +96,17 @@ const Logo = styled('div')(({theme}) => ({
     cursor: 'pointer',
     userSelect: 'none',
     '&:hover': {opacity: 0.8},
+    '& .logo-text': {display: 'none', [theme.breakpoints.up('md')]: {display: 'inline'}},
 }));
 
-const CenterGroup = styled('div')({
+const CenterGroup = styled('div')(({theme}) => ({
     flex: 1,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: theme.spacing(0.5),
     minWidth: 0,
-});
+}));
 
 const PillContainer = styled('div')({maxWidth: 700, width: '100%', minWidth: 0});
 
@@ -113,14 +118,17 @@ export const TopBar = React.memo(
         duration,
         mode,
         autoRefresh,
+        isRefreshing,
         showInactiveCollectors,
         mcpEnabled,
+        onMenuClick,
         onPrevEntry,
         onNextEntry,
         onEntryClick,
         onSearchClick,
         onThemeToggle,
         onAutoRefreshToggle,
+        onRefresh,
         onShowInactiveCollectorsChange,
         onMcpEnabledChange,
         editorPreset,
@@ -164,33 +172,70 @@ export const TopBar = React.memo(
 
         return (
             <BarRoot>
+                {onMenuClick && (
+                    <IconButton
+                        size="small"
+                        onClick={onMenuClick}
+                        aria-label="Open menu"
+                        sx={{display: {xs: 'inline-flex', md: 'none'}}}
+                    >
+                        <Icon sx={{fontSize: 20}}>menu</Icon>
+                    </IconButton>
+                )}
                 <Logo onClick={onLogoClick}>
-                    <DuckIcon sx={{fontSize: 22}} /> App Dev Panel
+                    <DuckIcon sx={{fontSize: 22}} />
+                    <span className="logo-text">App Dev Panel</span>
                 </Logo>
                 <CenterGroup>
-                    <IconButton size="small" onClick={onPrevEntry} disabled={!method} aria-label="Previous entry">
+                    <IconButton
+                        size="small"
+                        onClick={onPrevEntry}
+                        disabled={!onPrevEntry}
+                        aria-label="Previous entry"
+                        sx={{display: {xs: 'none', sm: 'inline-flex'}}}
+                    >
                         <Icon sx={{fontSize: 18}}>chevron_left</Icon>
                     </IconButton>
-                    <IconButton size="small" onClick={onNextEntry} disabled={!method} aria-label="Next entry">
+                    <IconButton
+                        size="small"
+                        onClick={onNextEntry}
+                        disabled={!onNextEntry}
+                        aria-label="Next entry"
+                        sx={{display: {xs: 'none', sm: 'inline-flex'}}}
+                    >
                         <Icon sx={{fontSize: 18}}>chevron_right</Icon>
                     </IconButton>
                     <PillContainer>
-                        {method && path && status != null && duration ? (
+                        {method && path != null && status != null ? (
                             <RequestPill
                                 method={method}
                                 path={path}
                                 status={status}
-                                duration={duration}
+                                duration={duration ?? ''}
                                 onClick={onEntryClick}
                             />
                         ) : (
-                            <div style={{height: 32}} />
+                            <Box sx={{height: 32}} />
                         )}
                     </PillContainer>
                     <IconButton
                         size="small"
+                        onClick={onRefresh}
+                        disabled={isRefreshing}
+                        aria-label="Refresh entries"
+                        title="Refresh entries"
+                    >
+                        <Icon sx={{fontSize: 18}}>{isRefreshing ? 'hourglass_empty' : 'refresh'}</Icon>
+                    </IconButton>
+                    <IconButton
+                        size="small"
                         onClick={onAutoRefreshToggle}
-                        title={autoRefresh ? 'Auto-refresh on' : 'Auto-refresh off'}
+                        aria-label={
+                            autoRefresh ? 'Auto-latest: on (switch to newest entry automatically)' : 'Auto-latest: off'
+                        }
+                        title={
+                            autoRefresh ? 'Auto-latest: on (switch to newest entry automatically)' : 'Auto-latest: off'
+                        }
                     >
                         <Icon sx={{fontSize: 18, color: autoRefresh ? 'success.main' : undefined}}>
                             {autoRefresh ? 'sync' : 'sync_disabled'}
