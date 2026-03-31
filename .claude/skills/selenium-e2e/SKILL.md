@@ -165,6 +165,12 @@ The `setup-env.sh` script installs both automatically.
 3. **ChromeDriver issues**: Check `chromedriver --version` matches `chromium --version` major version. If mismatch, reinstall ChromeDriver.
 4. **Timeout issues**: Increase `testTimeout` in vitest config or `$timeoutSeconds` in PHP wait methods. React rendering can be slow with MSW.
 
+## Standalone Screenshots (Playwright)
+
+For **ad-hoc screenshots** outside of test suites (visual verification, debugging, documentation), use the `/screenshot` skill instead. It uses Playwright which bundles its own Chromium and avoids ChromeDriver version mismatch issues.
+
+Selenium `takeScreenshot()` in PHP E2E tests remains the correct approach for capturing browser state **during test execution**.
+
 ## Anti-Patterns
 
 - Don't use `page.locator()` — use `page.getByText()`, `page.getByRole()` for semantic queries.

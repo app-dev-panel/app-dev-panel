@@ -284,6 +284,33 @@ npm run build            # Production build all packages (via Lerna)
 npm run build:dev        # Development build with toolbar bundled
 ```
 
+## Screenshots
+
+Take screenshots of the running frontend using Playwright (not Selenium — version mismatch issues with ChromeDriver).
+
+**Quick CLI**:
+```bash
+npx playwright screenshot --browser chromium --wait-for-timeout 5000 --full-page \
+  --viewport-size "1920,1080" http://localhost:5173/ /tmp/screenshot.png
+```
+
+**Node.js script** (for React SPA — waits for render):
+```bash
+NODE_PATH=/opt/node22/lib/node_modules node -e "
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+  await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(3000);
+  await page.screenshot({ path: '/tmp/screenshot.png', fullPage: true });
+  await browser.close();
+})();
+"
+```
+
+View with `Read /tmp/screenshot.png`. See `/screenshot` skill for full documentation.
+
 ## PWA Support
 
 Service Worker via Workbox provides offline caching and background sync.
