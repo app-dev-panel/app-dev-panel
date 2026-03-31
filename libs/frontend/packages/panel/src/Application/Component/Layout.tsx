@@ -31,7 +31,9 @@ import {type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
-import {styled} from '@mui/material/styles';
+import Drawer from '@mui/material/Drawer';
+import {styled, useTheme as useMuiTheme} from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
@@ -78,13 +80,15 @@ const inspectorChildren = [
 // Styled components
 // ---------------------------------------------------------------------------
 
-const MainArea = styled(Box)({
+const MainArea = styled(Box)(({theme}) => ({
     flex: 1,
     display: 'flex',
     justifyContent: 'center',
-    padding: componentTokens.mainGap,
-    gap: componentTokens.mainGap,
-});
+    padding: theme.spacing(1),
+    gap: theme.spacing(1),
+    overflow: 'auto',
+    [theme.breakpoints.up('sm')]: {padding: componentTokens.mainGap, gap: componentTokens.mainGap},
+}));
 
 const MainInner = styled(Box)({
     display: 'flex',
@@ -99,8 +103,9 @@ const ContentArea = styled(Box)(({theme}) => ({
     borderRadius: componentTokens.contentPanel.borderRadius,
     backgroundColor: theme.palette.background.paper,
     border: `1px solid ${theme.palette.divider}`,
-    padding: theme.spacing(3.5, 4.5),
+    padding: theme.spacing(2, 1.5),
     overflowY: 'auto',
+    [theme.breakpoints.up('sm')]: {padding: theme.spacing(3.5, 4.5)},
 }));
 
 // ---------------------------------------------------------------------------
@@ -112,6 +117,11 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [searchParams] = useSearchParams();
+    const muiTheme = useMuiTheme();
+    const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const handleMenuClick = useCallback(() => setMobileMenuOpen(true), []);
+    const handleMenuClose = useCallback(() => setMobileMenuOpen(false), []);
 
     // Debug entry state
     const debugEntry = useDebugEntry();
@@ -395,6 +405,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             <CssBaseline />
             <Box sx={{display: 'flex', flexDirection: 'column', height: '100vh'}}>
                 <TopBar
+                    onMenuClick={isMobile ? handleMenuClick : undefined}
                     method={topBarMethod}
                     path={topBarPath}
                     status={topBarStatus}
@@ -435,15 +446,39 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onClose={handleNotificationsClose}
                 />
 
-                <MainArea>
-                    <MainInner>
+                {isMobile && (
+                    <Drawer
+                        open={mobileMenuOpen}
+                        onClose={handleMenuClose}
+                        ModalProps={{keepMounted: true}}
+                        sx={{'& .MuiDrawer-paper': {width: 240, pt: 1}}}
+                    >
                         <UnifiedSidebar
                             sections={sidebarSections}
                             activePath={location.pathname}
                             activeChildKey={activeChildKey}
-                            onNavigate={handleNavigate}
-                            onChildClick={handleChildClick}
+                            onNavigate={(href) => {
+                                handleNavigate(href);
+                                handleMenuClose();
+                            }}
+                            onChildClick={(sectionKey, childKey) => {
+                                handleChildClick(sectionKey, childKey);
+                                handleMenuClose();
+                            }}
                         />
+                    </Drawer>
+                )}
+                <MainArea>
+                    <MainInner>
+                        {!isMobile && (
+                            <UnifiedSidebar
+                                sections={sidebarSections}
+                                activePath={location.pathname}
+                                activeChildKey={activeChildKey}
+                                onNavigate={handleNavigate}
+                                onChildClick={handleChildClick}
+                            />
+                        )}
                         <ContentArea>
                             <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[location.pathname]}>
                                 <Outlet />

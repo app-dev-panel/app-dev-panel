@@ -66,7 +66,8 @@ const exitCodeColor = (code: number | undefined, theme: Theme): string => {
     return code === 0 ? theme.palette.success.main : theme.palette.error.main;
 };
 
-function getTerminateEvent(data: Record<string, CommandEvent>): CommandEvent | null {
+function getTerminateEvent(data: Record<string, CommandEvent> | null | undefined): CommandEvent | null {
+    if (!data || typeof data !== 'object') return null;
     // Prefer terminate event, then error, then generic, then framework-agnostic
     for (const suffix of ['ConsoleTerminateEvent', 'ConsoleErrorEvent', 'ConsoleCommandEvent', 'command']) {
         const match = Object.entries(data).find(([key]) => key.endsWith(suffix));
@@ -77,7 +78,8 @@ function getTerminateEvent(data: Record<string, CommandEvent>): CommandEvent | n
     return values.length > 0 ? values[0] : null;
 }
 
-function getCommandEvent(data: Record<string, CommandEvent>): CommandEvent | null {
+function getCommandEvent(data: Record<string, CommandEvent> | null | undefined): CommandEvent | null {
+    if (!data || typeof data !== 'object') return null;
     for (const suffix of ['ConsoleCommandEvent', 'command']) {
         const match = Object.entries(data).find(([key]) => key.endsWith(suffix));
         if (match) return match[1];
@@ -398,7 +400,8 @@ const EventsTab = ({data}: {data: Record<string, CommandEvent>}) => (
 export const CommandPanel = ({data}: CommandPanelProps) => {
     const theme = useTheme();
     const [tab, setTab] = useState(0);
-    const terminateEvent = getTerminateEvent(data);
+    const safeData = data && typeof data === 'object' ? data : {};
+    const terminateEvent = getTerminateEvent(safeData);
 
     const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
         setTab(newValue);
@@ -407,8 +410,8 @@ export const CommandPanel = ({data}: CommandPanelProps) => {
     const commandName = terminateEvent?.name || 'Unknown command';
     const commandInput = terminateEvent?.input || commandName;
     const exitCode = terminateEvent?.exitCode;
-    const hasOutput = Object.values(data).some((e) => e.output);
-    const hasError = Object.values(data).some((e) => e.error);
+    const hasOutput = Object.values(safeData).some((e) => e.output);
+    const hasError = Object.values(safeData).some((e) => e.error);
 
     return (
         <Box>

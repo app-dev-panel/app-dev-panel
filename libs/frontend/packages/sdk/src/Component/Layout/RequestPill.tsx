@@ -53,23 +53,29 @@ const methodColor = (method: string, theme: Theme): string => {
     }
 };
 
-const Separator = styled('span')(({theme}) => ({color: theme.palette.divider}));
+const Separator = styled('span')(({theme}) => ({color: theme.palette.divider, flexShrink: 0}));
 
-const MethodLabel = styled('span')({fontWeight: 600, fontSize: '11px'});
+const MethodLabel = styled('span')({fontWeight: 600, fontSize: '11px', flexShrink: 0, whiteSpace: 'nowrap'});
 
 const PathLabel = styled('span')({
     fontFamily: primitives.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
+    minWidth: 0,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     textAlign: 'left',
 });
 
-const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px'});
+const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px', flexShrink: 0, whiteSpace: 'nowrap'});
 
-const DurationLabel = styled('span')(({theme}) => ({color: theme.palette.text.disabled, fontSize: '12px'}));
+const DurationLabel = styled('span')(({theme}) => ({
+    color: theme.palette.text.disabled,
+    fontSize: '12px',
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
+}));
 
 export const RequestPill = React.memo(({method, path, status, duration, onClick}: RequestPillProps) => {
     const theme = useTheme();

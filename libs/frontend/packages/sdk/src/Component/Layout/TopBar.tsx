@@ -54,6 +54,7 @@ type TopBarProps = {
     notificationCount?: number;
     editorPreset?: EditorPreset;
     editorCustomTemplate?: string;
+    onMenuClick?: () => void;
     onPrevEntry?: () => void;
     onNextEntry?: () => void;
     onEntryClick?: (e: React.MouseEvent) => void;
@@ -75,8 +76,9 @@ const BarRoot = styled('header')(({theme}) => ({
     borderBottom: `1px solid ${theme.palette.divider}`,
     display: 'flex',
     alignItems: 'center',
-    padding: theme.spacing(0, 2.5),
-    gap: theme.spacing(1),
+    padding: theme.spacing(0, 1.5),
+    gap: theme.spacing(0.5),
+    [theme.breakpoints.up('sm')]: {padding: theme.spacing(0, 2.5), gap: theme.spacing(1)},
     flexShrink: 0,
     position: 'sticky',
     top: 0,
@@ -94,6 +96,7 @@ const Logo = styled('div')(({theme}) => ({
     cursor: 'pointer',
     userSelect: 'none',
     '&:hover': {opacity: 0.8},
+    '& .logo-text': {display: 'none', [theme.breakpoints.up('md')]: {display: 'inline'}},
 }));
 
 const CenterGroup = styled('div')(({theme}) => ({
@@ -118,6 +121,7 @@ export const TopBar = React.memo(
         isRefreshing,
         showInactiveCollectors,
         mcpEnabled,
+        onMenuClick,
         onPrevEntry,
         onNextEntry,
         onEntryClick,
@@ -168,14 +172,37 @@ export const TopBar = React.memo(
 
         return (
             <BarRoot>
+                {onMenuClick && (
+                    <IconButton
+                        size="small"
+                        onClick={onMenuClick}
+                        aria-label="Open menu"
+                        sx={{display: {xs: 'inline-flex', md: 'none'}}}
+                    >
+                        <Icon sx={{fontSize: 20}}>menu</Icon>
+                    </IconButton>
+                )}
                 <Logo onClick={onLogoClick}>
-                    <DuckIcon sx={{fontSize: 22}} /> App Dev Panel
+                    <DuckIcon sx={{fontSize: 22}} />
+                    <span className="logo-text">App Dev Panel</span>
                 </Logo>
                 <CenterGroup>
-                    <IconButton size="small" onClick={onPrevEntry} disabled={!onPrevEntry} aria-label="Previous entry">
+                    <IconButton
+                        size="small"
+                        onClick={onPrevEntry}
+                        disabled={!onPrevEntry}
+                        aria-label="Previous entry"
+                        sx={{display: {xs: 'none', sm: 'inline-flex'}}}
+                    >
                         <Icon sx={{fontSize: 18}}>chevron_left</Icon>
                     </IconButton>
-                    <IconButton size="small" onClick={onNextEntry} disabled={!onNextEntry} aria-label="Next entry">
+                    <IconButton
+                        size="small"
+                        onClick={onNextEntry}
+                        disabled={!onNextEntry}
+                        aria-label="Next entry"
+                        sx={{display: {xs: 'none', sm: 'inline-flex'}}}
+                    >
                         <Icon sx={{fontSize: 18}}>chevron_right</Icon>
                     </IconButton>
                     <PillContainer>
