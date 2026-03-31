@@ -233,7 +233,7 @@ InspectorProxyMiddleware
 Консольные команды следуют тому же жизненному циклу, что и веб-запросы, с отличиями:
 
 - `ConsoleAppInfoCollector` заменяет `WebAppInfoCollector`
-- `CommandCollector` заменяет `RequestCollector`
+- `CommandCollector` заменяет `RequestCollector` (оба отображаются в единой панели "Request" в UI)
 - Нет middleware, маршрутизатора или коллекторов ассетов
 - События: `ConsoleCommandEvent` запускает startup, `ConsoleTerminateEvent` запускает shutdown
 

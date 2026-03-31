@@ -22,9 +22,9 @@ All 17 Kernel collectors are available to every adapter. Adapters wire framework
 | `EnvironmentCollector` | Environment | PHP and OS environment info |
 | `FilesystemStreamCollector` | Filesystem | File system stream operations |
 | `HttpStreamCollector` | _(hidden)_ | Raw HTTP stream data (sub-view of HTTP Client) |
-| `RequestCollector` | Request | Incoming HTTP request/response (web only) |
+| `RequestCollector` | Request | Incoming HTTP request/response (web entries) |
+| `CommandCollector` | Request | Console command details (console entries) |
 | `WebAppInfoCollector` | _(meta)_ | Web app summary for entry list |
-| `CommandCollector` | _(meta)_ | Console command summary |
 | `ConsoleAppInfoCollector` | _(meta)_ | Console app summary for entry list |
 | `DatabaseCollector` | Database | SQL queries, execution time, transactions |
 | `MailerCollector` | Mailer | Sent email messages |

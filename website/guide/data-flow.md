@@ -233,7 +233,7 @@ External App                              ADP
 Console commands follow the same lifecycle as web requests, with these differences:
 
 - `ConsoleAppInfoCollector` replaces `WebAppInfoCollector`
-- `CommandCollector` replaces `RequestCollector`
+- `CommandCollector` replaces `RequestCollector` (both render under the unified "Request" panel in the UI)
 - No middleware, router, or asset collectors
 - Events: `ConsoleCommandEvent` triggers startup, `ConsoleTerminateEvent` triggers shutdown
 
