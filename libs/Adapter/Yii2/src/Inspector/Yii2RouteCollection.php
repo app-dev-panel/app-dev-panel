@@ -32,7 +32,8 @@ final class Yii2RouteCollection
             $innerRule = $rule instanceof UrlRuleProxy ? $rule->getInnerRule() : $rule;
 
             if ($innerRule instanceof UrlRule) {
-                $routes[] = new Yii2RouteAdapter($innerRule);
+                $resolved = $innerRule->route !== null ? Yii2ActionResolver::resolve($innerRule->route) : null;
+                $routes[] = new Yii2RouteAdapter($innerRule, '', $resolved);
             } elseif ($innerRule instanceof CompositeUrlRule) {
                 foreach ($this->extractCompositeSubRules($innerRule) as $adapter) {
                     $routes[] = $adapter;
@@ -75,7 +76,8 @@ final class Yii2RouteCollection
         $adapters = [];
         foreach ($subRules as $subRule) {
             if ($subRule instanceof UrlRule) {
-                $adapters[] = new Yii2RouteAdapter($subRule);
+                $resolved = $subRule->route !== null ? Yii2ActionResolver::resolve($subRule->route) : null;
+                $adapters[] = new Yii2RouteAdapter($subRule, '', $resolved);
             } elseif ($subRule instanceof UrlRuleInterface) {
                 $adapters[] = new Yii2RouteAdapter(null, $subRule::class);
             }

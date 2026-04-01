@@ -14,6 +14,7 @@ use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2DbSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteCollection;
+use AppDevPanel\Adapter\Yii2\Inspector\Yii2UrlMatcherAdapter;
 use AppDevPanel\Adapter\Yii2\Proxy\I18NProxy;
 use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
 use AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy;
@@ -476,11 +477,13 @@ class Module extends \yii\base\Module implements BootstrapInterface
         );
 
         $routeCollection = $app instanceof WebApplication ? new Yii2RouteCollection($app->getUrlManager()) : null;
+        $urlMatcher = $app instanceof WebApplication ? new Yii2UrlMatcherAdapter($app->getUrlManager()) : null;
         \Yii::$container->setSingleton(
             RoutingController::class,
             static fn() => new RoutingController(
                 \Yii::$container->get(JsonResponseFactoryInterface::class),
                 $routeCollection,
+                $urlMatcher,
             ),
         );
 
