@@ -6,7 +6,7 @@ paths = [
     "libs/API/tests",
     "libs/Cli/src",
     "libs/Cli/tests",
-    "libs/Adapter/Yiisoft/src",
+    "libs/Adapter/Yii3/src",
     "libs/Adapter/Symfony/src",
     "libs/Adapter/Symfony/tests",
     "libs/Adapter/Yii2/src",
@@ -181,8 +181,8 @@ too-many-methods = { level = "warning", exclude = [
     "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php",
     "libs/API/src/Inspector/Test/PHPUnitJSONReporter.php",
     "libs/API/src/ServerSentEventsStream.php",
-    "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php",
-    "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php",
+    "libs/Adapter/Yii3/src/Collector/Db/CommandInterfaceProxy.php",
+    "libs/Adapter/Yii3/src/Collector/Db/ConnectionInterfaceProxy.php",
     "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php",
     # Trait centralizes passthrough methods from stream wrapper protocol
     "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php",
@@ -191,7 +191,7 @@ too-many-methods = { level = "warning", exclude = [
     "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php",
     "libs/Adapter/Yii2/src/Module.php",
     # Config value object — getters and withers for each config property
-    "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php",
+    "libs/Adapter/Yii3/src/Proxy/ContainerProxyConfig.php",
     # Recursive tree-walking dumper — method count inherent to object/array/resource type dispatch
     "libs/Kernel/src/Dumper.php",
     "libs/Kernel/src/DumpContext.php",
@@ -207,7 +207,7 @@ excessive-parameter-list = { level = "warning", exclude = [
     "libs/Adapter/Laravel/tests",
     "libs/Testing/tests",
     # Interface proxies — parameter lists dictated by the interface
-    "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php",
+    "libs/Adapter/Yii3/src/Collector/Db/CommandInterfaceProxy.php",
     # DTOs / value objects — all params are distinct fields of the record
     "libs/Kernel/src/Event/MethodCallRecord.php",
     "libs/Kernel/src/Collector/CacheOperationRecord.php",
@@ -217,9 +217,9 @@ excessive-parameter-list = { level = "warning", exclude = [
     "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriberCollectors.php",
     "libs/Adapter/Laravel/src/Middleware/DebugCollectors.php",
     # Config value object — all params are distinct config fields
-    "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php",
+    "libs/Adapter/Yii3/src/Proxy/ContainerProxyConfig.php",
     # Internal trait method threading context through call stack
-    "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php",
+    "libs/Adapter/Yii3/src/Proxy/ProxyLogTrait.php",
     # Internal recursive methods thread context through call stack
     "libs/Kernel/src/Dumper.php",
     "libs/Kernel/src/DumpContext.php",
@@ -238,7 +238,7 @@ cyclomatic-complexity = { level = "warning", threshold = 15, exclude = [
     "libs/Cli/src/Command/DebugQueryCommand.php",
     "libs/Adapter/Yii2/src/Controller/DebugQueryController.php",
     # Container proxy — complexity from multiple proxy creation strategies
-    "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php",
+    "libs/Adapter/Yii3/src/Proxy/ContainerInterfaceProxy.php",
     # Debugger — complexity from startup/shutdown lifecycle with ignore checks
     "libs/Kernel/src/Debugger.php",
     # Recursive tree-walking dumper — complexity inherent to type dispatch

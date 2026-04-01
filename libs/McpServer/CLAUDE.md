@@ -144,7 +144,7 @@ Content-Type: application/json
 ```
 
 Replace `localhost:8080` with your application's actual address and port.
-For playground servers: Yiisoft `:8101`, Symfony `:8102`, Yii2 `:8103`, Laravel `:8104`.
+For playground servers: Yii3 `:8101`, Symfony `:8102`, Yii2 `:8103`, Laravel `:8104`.
 
 The HTTP endpoint:
 - Bypasses `ResponseDataWrapper` (JSON-RPC has its own envelope)

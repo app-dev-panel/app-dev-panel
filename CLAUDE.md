@@ -22,8 +22,8 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 ```
 /
 ├── playground/                    # Demo/reference applications per framework
-│   ├── yiisoft-app/              # Yii 3 (Yiisoft) reference application
-│   ├── symfony-basic-app/        # Symfony 7 minimal demo
+│   ├── yii3-app/                 # Yii 3 reference application
+│   ├── symfony-app/        # Symfony 7 minimal demo
 │   ├── laravel-app/              # Laravel 12 minimal demo
 │   └── yii2-basic-app/          # Yii 2 minimal demo
 ├── libs/
@@ -33,7 +33,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │   ├── Cli/                      # CLI commands: debug server, reset, broadcast, query, serve, mcp
 │   ├── Testing/                  # Test fixtures: definitions, runner, CLI command
 │   ├── Adapter/
-│   │   ├── Yiisoft/              # Yii 3 framework adapter
+│   │   ├── Yii3/                 # Yii 3 framework adapter
 │   │   ├── Symfony/              # Symfony framework adapter
 │   │   ├── Laravel/              # Laravel framework adapter
 │   │   ├── Yii2/                 # Yii 2 framework adapter
@@ -176,12 +176,12 @@ make test-ci                        # CI tests only
 
 # Testing fixtures (requires running playground servers)
 make fixtures             # Run CLI fixtures against all playgrounds
-make fixtures-yiisoft     # CLI fixtures against Yiisoft (port 8101)
+make fixtures-yii3        # CLI fixtures against Yii 3 (port 8101)
 make fixtures-symfony     # CLI fixtures against Symfony (port 8102)
 make fixtures-yii2        # CLI fixtures against Yii2 (port 8103)
 make fixtures-laravel     # CLI fixtures against Laravel (port 8104)
 make test-fixtures        # PHPUnit E2E scenarios against all playgrounds
-make test-fixtures-yiisoft  # PHPUnit E2E against Yiisoft
+make test-fixtures-yii3     # PHPUnit E2E against Yii 3
 make test-fixtures-symfony  # PHPUnit E2E against Symfony
 make test-fixtures-yii2     # PHPUnit E2E against Yii2
 make test-fixtures-laravel  # PHPUnit E2E against Laravel
@@ -245,8 +245,8 @@ Playgrounds are demo/reference apps — they have **no unit tests**. Quality is 
 
 | Playground | Format | Lint | Analyze | Baseline (suppressed) |
 |------------|:------:|:----:|:-------:|----------------------:|
-| `yiisoft-app` | pass | pass (3 baselined) | pass (96 baselined) | 99 |
-| `symfony-basic-app` | pass | pass | pass (11 baselined) | 11 |
+| `yii3-app` | pass | pass (3 baselined) | pass (96 baselined) | 99 |
+| `symfony-app` | pass | pass | pass (11 baselined) | 11 |
 | `yii2-basic-app` | pass | pass | pass (9 baselined) | 9 |
 | `laravel-app` | pass | pass | pass | 0 |
 
@@ -356,7 +356,7 @@ Each module under `libs/` has its own `CLAUDE.md` with internal architecture det
 - `libs/McpServer/CLAUDE.md` — MCP server (AI assistant integration)
 - `libs/Cli/CLAUDE.md` — CLI commands
 - `libs/Testing/CLAUDE.md` — Test fixtures and runner
-- `libs/Adapter/Yiisoft/CLAUDE.md` — Yii 3 adapter integration
+- `libs/Adapter/Yii3/CLAUDE.md` — Yii 3 adapter integration
 - `libs/Adapter/Symfony/CLAUDE.md` — Symfony adapter integration
 - `libs/Adapter/Laravel/CLAUDE.md` — Laravel adapter integration
 - `libs/Adapter/Yii2/CLAUDE.md` — Yii 2 adapter integration

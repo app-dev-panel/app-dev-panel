@@ -18,13 +18,13 @@ use PHPUnit\Framework\TestCase;
  *  3. Debugger starts and stops
  *  4. Data is flushed to FileStorage as JSON
  *
- * Requires: playground/symfony-basic-app with `composer install` completed.
+ * Requires: playground/symfony-app with `composer install` completed.
  */
 #[CoversNothing]
 #[Group('playground')]
 final class ConsoleProcessIntegrationTest extends TestCase
 {
-    private const string PLAYGROUND_DIR = __DIR__ . '/../../../../../playground/symfony-basic-app';
+    private const string PLAYGROUND_DIR = __DIR__ . '/../../../../../playground/symfony-app';
 
     private string $debugStoragePath;
 
@@ -38,7 +38,7 @@ final class ConsoleProcessIntegrationTest extends TestCase
         $vendorPath = realpath(self::PLAYGROUND_DIR . '/vendor/autoload.php');
         if ($vendorPath === false) {
             $this->markTestSkipped(
-                'Playground vendor not installed. Run: cd playground/symfony-basic-app && composer install',
+                'Playground vendor not installed. Run: cd playground/symfony-app && composer install',
             );
         }
 

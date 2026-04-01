@@ -149,7 +149,7 @@ When creating an adapter for a new framework:
 |---------|-----------|---------|
 | Symfony | Symfony 6.4–8.x | Bundle + Extension + CompilerPass |
 | Yii2 | Yii 2 | Module + BootstrapInterface |
-| Yiisoft | Yii 3 | Config plugin + ServiceProvider |
+| Yii 3 | Yii 3 | Config plugin + ServiceProvider |
 | Laravel | Laravel 11.x–12.x | ServiceProvider (register + boot) |
 
 ### Minimal Checklist

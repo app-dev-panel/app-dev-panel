@@ -127,7 +127,7 @@ All checks must pass before merging.
 2. Implement `startup()`, `shutdown()`, `getCollected()`
 3. Optionally implement <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> for entry list metadata
 4. Write a test extending `AbstractCollectorTestCase`
-5. Register in adapter configs (e.g., `libs/Adapter/Yiisoft/config/params.php`)
+5. Register in adapter configs (e.g., `libs/Adapter/Yii3/config/params.php`)
 
 See [Collectors](/guide/collectors) for the interface contract.
 

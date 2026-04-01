@@ -26,7 +26,7 @@ jobs:
           - { name: "adapter-laravel",  local_path: "libs/Adapter/Laravel", split_repository: "adapter-laravel" }
           - { name: "adapter-yii2",     local_path: "libs/Adapter/Yii2",    split_repository: "adapter-yii2" }
           - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",   split_repository: "adapter-cycle" }
-          - { name: "adapter-yiisoft",  local_path: "libs/Adapter/Yiisoft", split_repository: "adapter-yiisoft" }
+          - { name: "adapter-yii3",  local_path: "libs/Adapter/Yii3", split_repository: "adapter-yii3" }
 
     steps:
       - uses: actions/checkout@v4

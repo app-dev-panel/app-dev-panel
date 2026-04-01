@@ -142,8 +142,8 @@ jobs:
       fail-fast: false
       matrix:
         playground:
-          - { name: "Yiisoft",  path: "playground/yiisoft-app" }
-          - { name: "Symfony", path: "playground/symfony-basic-app" }
+          - { name: "Yii3",  path: "playground/yii3-app" }
+          - { name: "Symfony", path: "playground/symfony-app" }
           - { name: "Yii2",    path: "playground/yii2-basic-app" }
           - { name: "Laravel", path: "playground/laravel-app" }
         check: [format, lint, analyze]

@@ -30,7 +30,7 @@ REPOS=(
   adapter-laravel
   adapter-yii2
   adapter-cycle
-  adapter-yiisoft
+  adapter-yii3
 )
 
 usage() {

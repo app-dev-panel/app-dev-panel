@@ -1,6 +1,6 @@
 # Symfony Adapter
 
-Bridges ADP Kernel and API into Symfony. Second adapter after Yii 3; reference implementation for creating new adapters.
+Bridges ADP Kernel and API into Symfony. Second adapter after Yii 3 (Yii3); reference implementation for creating new adapters.
 
 ## Package
 
@@ -239,7 +239,7 @@ app_dev_panel:
 | Request collector | Kernel's `RequestCollector` (native PSR-7) | Kernel's `RequestCollector` (converted from HttpFoundation) |
 | PSR-7 bridge | Native (Yii uses PSR-7) | `nyholm/psr7-server` conversion for request + response |
 | Inspector config | Application config service | `SymfonyConfigProvider` as `config` alias |
-| Database inspector | `DbSchemaProvider` in Yiisoft adapter | `DoctrineSchemaProvider` (DBAL) or `NullSchemaProvider` |
+| Database inspector | `DbSchemaProvider` in Yii3 adapter | `DoctrineSchemaProvider` (DBAL) or `NullSchemaProvider` |
 
 ## Creating a New Adapter
 

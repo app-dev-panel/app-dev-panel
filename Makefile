@@ -5,22 +5,22 @@
 
 .PHONY: help build-panel install-panel build-install-panel test test-php test-frontend test-frontend-e2e test-ci \
         mago mago-format mago-lint mago-analyze mago-fix \
-        mago-playgrounds mago-playground-yiisoft mago-playground-symfony mago-playground-yii2 mago-playground-laravel \
-        mago-playgrounds-fix mago-playground-yiisoft-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix \
+        mago-playgrounds mago-playground-yii3 mago-playground-symfony mago-playground-yii2 mago-playground-laravel \
+        mago-playgrounds-fix mago-playground-yii3-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix \
         check check-ci fix \
         install install-php install-frontend install-playgrounds \
-        serve-yiisoft serve-symfony serve-yii2 serve-laravel serve \
-        fixtures fixtures-yiisoft fixtures-symfony fixtures-yii2 fixtures-laravel \
-        test-fixtures test-fixtures-yiisoft test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel \
-        test-scenario test-scenario-yiisoft test-scenario-symfony test-scenario-yii2 test-scenario-laravel \
-        test-playground test-playground-yiisoft test-playground-symfony test-playground-laravel \
-        test-mcp test-mcp-yiisoft test-mcp-symfony test-mcp-yii2 test-mcp-laravel
+        serve-yii3 serve-symfony serve-yii2 serve-laravel serve \
+        fixtures fixtures-yii3 fixtures-symfony fixtures-yii2 fixtures-laravel \
+        test-fixtures test-fixtures-yii3 test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel \
+        test-scenario test-scenario-yii3 test-scenario-symfony test-scenario-yii2 test-scenario-laravel \
+        test-playground test-playground-yii3 test-playground-symfony test-playground-laravel \
+        test-mcp test-mcp-yii3 test-mcp-symfony test-mcp-yii2 test-mcp-laravel
 
 # --- Port allocation ---
 # Frontend dev server
 FRONTEND_PORT ?= 8100
 # Playground adapter servers (different ports to avoid conflicts)
-YIISOFT_PORT  ?= 8101
+YII3_PORT  ?= 8101
 SYMFONY_PORT  ?= 8102
 YII2_PORT     ?= 8103
 LARAVEL_PORT  ?= 8104
@@ -71,7 +71,7 @@ help: ## Show this help
 	@echo "$(YELLOW)Code Quality — Playgrounds:$(RESET)"
 	@echo "  make mago-playgrounds      Run Mago checks on all playgrounds (parallel)"
 	@echo "  make mago-playgrounds-fix  Fix formatting in all playgrounds (parallel)"
-	@echo "  make mago-playground-yiisoft   Mago checks for Yiisoft playground"
+	@echo "  make mago-playground-yii3   Mago checks for Yii 3 playground"
 	@echo "  make mago-playground-symfony   Mago checks for Symfony playground"
 	@echo "  make mago-playground-yii2      Mago checks for Yii2 playground"
 	@echo "  make mago-playground-laravel   Mago checks for Laravel playground"
@@ -89,36 +89,36 @@ help: ## Show this help
 	@echo ""
 	@echo "$(YELLOW)Playground Servers:$(RESET)"
 	@echo "  make serve                 Start all playground servers in background"
-	@echo "  make serve-yiisoft         Start Yiisoft server (port $(YIISOFT_PORT))"
+	@echo "  make serve-yii3         Start Yii 3 server (port $(YII3_PORT))"
 	@echo "  make serve-symfony         Start Symfony server (port $(SYMFONY_PORT))"
 	@echo "  make serve-yii2            Start Yii2 server (port $(YII2_PORT))"
 	@echo "  make serve-laravel         Start Laravel server (port $(LARAVEL_PORT))"
 	@echo ""
 	@echo "$(YELLOW)Testing Fixtures:$(RESET)"
 	@echo "  make fixtures             Run test fixtures against all playgrounds"
-	@echo "  make fixtures-yiisoft     Run fixtures against Yiisoft playground"
+	@echo "  make fixtures-yii3     Run fixtures against Yii 3 playground"
 	@echo "  make fixtures-symfony     Run fixtures against Symfony playground"
 	@echo "  make fixtures-yii2        Run fixtures against Yii2 playground"
 	@echo "  make fixtures-laravel     Run fixtures against Laravel playground"
 	@echo ""
 	@echo "$(YELLOW)E2E Fixture Tests (PHPUnit):$(RESET)"
 	@echo "  make test-fixtures        Run PHPUnit E2E fixtures against all playgrounds"
-	@echo "  make test-fixtures-yiisoft   PHPUnit E2E against Yiisoft playground"
+	@echo "  make test-fixtures-yii3   PHPUnit E2E against Yii 3 playground"
 	@echo "  make test-fixtures-symfony   PHPUnit E2E against Symfony playground"
 	@echo "  make test-fixtures-yii2      PHPUnit E2E against Yii2 playground"
 	@echo "  make test-scenario        Full scenario: clear, fire all, verify pipeline"
-	@echo "  make test-scenario-yiisoft   Scenario against Yiisoft playground"
+	@echo "  make test-scenario-yii3   Scenario against Yii 3 playground"
 	@echo "  make test-scenario-symfony   Scenario against Symfony playground"
 	@echo "  make test-scenario-yii2      Scenario against Yii2 playground"
 	@echo "  make test-mcp             MCP API E2E tests against all playgrounds"
-	@echo "  make test-mcp-yiisoft     MCP API E2E against Yiisoft playground"
+	@echo "  make test-mcp-yii3     MCP API E2E against Yii 3 playground"
 	@echo "  make test-mcp-symfony     MCP API E2E against Symfony playground"
 	@echo "  make test-mcp-yii2        MCP API E2E against Yii2 playground"
 	@echo "  make test-mcp-laravel     MCP API E2E against Laravel playground"
 	@echo ""
 	@echo "$(YELLOW)Ports:$(RESET)"
 	@echo "  Frontend:  $(FRONTEND_PORT)"
-	@echo "  Yiisoft:   $(YIISOFT_PORT)"
+	@echo "  Yii3:   $(YII3_PORT)"
 	@echo "  Symfony:   $(SYMFONY_PORT)"
 	@echo "  Yii2:      $(YII2_PORT)"
 	@echo "  Laravel:   $(LARAVEL_PORT)"
@@ -142,8 +142,8 @@ install-frontend: ## Install frontend deps
 
 install-playgrounds: ## Install playground deps
 	@echo "$(CYAN)Installing playground dependencies...$(RESET)"
-	cd $(PLAYGROUND_DIR)/yiisoft-app && composer install --prefer-dist --no-progress --no-interaction
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && composer install --prefer-dist --no-progress --no-interaction
+	cd $(PLAYGROUND_DIR)/yii3-app && composer install --prefer-dist --no-progress --no-interaction
+	cd $(PLAYGROUND_DIR)/symfony-app && composer install --prefer-dist --no-progress --no-interaction
 	cd $(PLAYGROUND_DIR)/yii2-basic-app && composer install --prefer-dist --no-progress --no-interaction
 	cd $(PLAYGROUND_DIR)/laravel-app && composer install --prefer-dist --no-progress --no-interaction
 
@@ -156,13 +156,13 @@ TOOLBAR_DIST  := $(FRONTEND_DIR)/packages/toolbar/dist
 SYMFONY_ASSETS := $(ROOT_DIR)/libs/Adapter/Symfony/Resources/public
 LARAVEL_ASSETS := $(ROOT_DIR)/libs/Adapter/Laravel/resources/dist
 YII2_ASSETS    := $(ROOT_DIR)/libs/Adapter/Yii2/resources/dist
-YIISOFT_ASSETS := $(ROOT_DIR)/libs/Adapter/Yiisoft/resources/dist
+YII3_ASSETS := $(ROOT_DIR)/libs/Adapter/Yii3/resources/dist
 
 build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 	@echo "$(CYAN)Building frontend panel...$(RESET)"
 	cd $(FRONTEND_DIR) && npx lerna run build --scope=@app-dev-panel/panel --scope=@app-dev-panel/toolbar
 	@echo "$(CYAN)Copying assets to adapters...$(RESET)"
-	@for dir in $(SYMFONY_ASSETS) $(LARAVEL_ASSETS) $(YII2_ASSETS) $(YIISOFT_ASSETS); do \
+	@for dir in $(SYMFONY_ASSETS) $(LARAVEL_ASSETS) $(YII2_ASSETS) $(YII3_ASSETS); do \
 		mkdir -p $$dir; \
 		find $$dir -mindepth 1 -maxdepth 1 -not -name '.gitignore' -not -name '.gitkeep' -exec rm -rf {} + 2>/dev/null; \
 		cp $(PANEL_DIST)/bundle.js $(PANEL_DIST)/bundle*.css $$dir/; \
@@ -172,7 +172,7 @@ build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 
 install-panel: ## Publish built panel assets into playground applications
 	@echo "$(CYAN)Publishing panel assets to playgrounds...$(RESET)"
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && rm -rf public/bundles/appdevpanel && php bin/console assets:install public --symlink
+	cd $(PLAYGROUND_DIR)/symfony-app && rm -rf public/bundles/appdevpanel && php bin/console assets:install public --symlink
 	@echo "$(GREEN)Done. Panel available at /debug on each playground.$(RESET)"
 
 build-install-panel: build-panel install-panel ## Build panel + publish to all playgrounds
@@ -233,17 +233,17 @@ mago-fix: ## Fix core formatting, then lint + analyze
 # Code Quality — Playgrounds
 # ============================================================================
 
-mago-playground-yiisoft: ## Mago checks for Yiisoft playground
-	@echo "$(CYAN)[Playground: Yiisoft] Running Mago checks...$(RESET)"
-	cd $(PLAYGROUND_DIR)/yiisoft-app && $(MAGO) fmt --check
-	cd $(PLAYGROUND_DIR)/yiisoft-app && $(MAGO) lint
-	cd $(PLAYGROUND_DIR)/yiisoft-app && $(MAGO) analyze
+mago-playground-yii3: ## Mago checks for Yii 3 playground
+	@echo "$(CYAN)[Playground: Yii3] Running Mago checks...$(RESET)"
+	cd $(PLAYGROUND_DIR)/yii3-app && $(MAGO) fmt --check
+	cd $(PLAYGROUND_DIR)/yii3-app && $(MAGO) lint
+	cd $(PLAYGROUND_DIR)/yii3-app && $(MAGO) analyze
 
 mago-playground-symfony: ## Mago checks for Symfony playground
 	@echo "$(CYAN)[Playground: Symfony] Running Mago checks...$(RESET)"
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) fmt --check
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) lint
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) analyze
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) fmt --check
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) lint
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) analyze
 
 mago-playground-yii2: ## Mago checks for Yii2 playground
 	@echo "$(CYAN)[Playground: Yii2] Running Mago checks...$(RESET)"
@@ -259,20 +259,20 @@ mago-playground-laravel: ## Mago checks for Laravel playground
 
 mago-playgrounds: ## Run Mago checks on all playgrounds (parallel)
 	@echo "$(CYAN)Running Mago checks on all playgrounds...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target mago-playground-yiisoft mago-playground-symfony mago-playground-yii2 mago-playground-laravel
+	@$(MAKE) -j4 --output-sync=target mago-playground-yii3 mago-playground-symfony mago-playground-yii2 mago-playground-laravel
 	@echo "$(GREEN)All playground Mago checks passed!$(RESET)"
 
-mago-playground-yiisoft-fix: ## Fix Yiisoft playground formatting
-	@echo "$(CYAN)[Playground: Yiisoft] Fixing formatting...$(RESET)"
-	cd $(PLAYGROUND_DIR)/yiisoft-app && $(MAGO) fmt
-	cd $(PLAYGROUND_DIR)/yiisoft-app && $(MAGO) lint
-	cd $(PLAYGROUND_DIR)/yiisoft-app && $(MAGO) analyze
+mago-playground-yii3-fix: ## Fix Yii 3 playground formatting
+	@echo "$(CYAN)[Playground: Yii3] Fixing formatting...$(RESET)"
+	cd $(PLAYGROUND_DIR)/yii3-app && $(MAGO) fmt
+	cd $(PLAYGROUND_DIR)/yii3-app && $(MAGO) lint
+	cd $(PLAYGROUND_DIR)/yii3-app && $(MAGO) analyze
 
 mago-playground-symfony-fix: ## Fix Symfony playground formatting
 	@echo "$(CYAN)[Playground: Symfony] Fixing formatting...$(RESET)"
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) fmt
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) lint
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) analyze
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) fmt
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) lint
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) analyze
 
 mago-playground-yii2-fix: ## Fix Yii2 playground formatting
 	@echo "$(CYAN)[Playground: Yii2] Fixing formatting...$(RESET)"
@@ -288,7 +288,7 @@ mago-playground-laravel-fix: ## Fix Laravel playground formatting
 
 mago-playgrounds-fix: ## Fix formatting in all playgrounds (parallel)
 	@echo "$(CYAN)Fixing formatting in all playgrounds...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target mago-playground-yiisoft-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix
+	@$(MAKE) -j4 --output-sync=target mago-playground-yii3-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix
 	@echo "$(GREEN)All playground formatting fixed!$(RESET)"
 
 # ============================================================================
@@ -331,13 +331,13 @@ fix: ## Fix all code (core + playgrounds + frontend)
 # Playground Servers
 # ============================================================================
 
-serve-yiisoft: ## Start Yiisoft playground server (port $(YIISOFT_PORT))
-	@echo "$(CYAN)[Playground: Yiisoft] Starting server on port $(YIISOFT_PORT)...$(RESET)"
-	cd $(PLAYGROUND_DIR)/yiisoft-app && php ./yii serve --port=$(YIISOFT_PORT)
+serve-yii3: ## Start Yii 3 playground server (port $(YII3_PORT))
+	@echo "$(CYAN)[Playground: Yii3] Starting server on port $(YII3_PORT)...$(RESET)"
+	cd $(PLAYGROUND_DIR)/yii3-app && php ./yii serve --port=$(YII3_PORT)
 
 serve-symfony: ## Start Symfony playground server (port $(SYMFONY_PORT))
 	@echo "$(CYAN)[Playground: Symfony] Starting server on port $(SYMFONY_PORT)...$(RESET)"
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && bash ../../bin/serve.sh $(SYMFONY_PORT)
+	cd $(PLAYGROUND_DIR)/symfony-app && bash ../../bin/serve.sh $(SYMFONY_PORT)
 
 serve-yii2: ## Start Yii2 playground server (port $(YII2_PORT))
 	@echo "$(CYAN)[Playground: Yii2] Starting server on port $(YII2_PORT)...$(RESET)"
@@ -349,14 +349,14 @@ serve-laravel: ## Start Laravel playground server (port $(LARAVEL_PORT))
 
 serve: ## Start all playground servers in background
 	@echo "$(CYAN)Starting all playground servers...$(RESET)"
-	@$(MAKE) serve-yiisoft &
+	@$(MAKE) serve-yii3 &
 	@$(MAKE) serve-symfony &
 	@$(MAKE) serve-yii2 &
 	@$(MAKE) serve-laravel &
 	@sleep 1
 	@echo ""
 	@echo "$(GREEN)Playground servers started:$(RESET)"
-	@echo "  Yiisoft:  http://127.0.0.1:$(YIISOFT_PORT)"
+	@echo "  Yii3:  http://127.0.0.1:$(YII3_PORT)"
 	@echo "  Symfony:  http://127.0.0.1:$(SYMFONY_PORT)"
 	@echo "  Yii2:     http://127.0.0.1:$(YII2_PORT)"
 	@echo "  Laravel:  http://127.0.0.1:$(LARAVEL_PORT)"
@@ -368,9 +368,9 @@ serve: ## Start all playground servers in background
 # Testing Fixtures
 # ============================================================================
 
-fixtures-yiisoft: ## Run test fixtures against Yiisoft playground
-	@echo "$(CYAN)[Scenarios: Yiisoft] Running test fixtures on port $(YIISOFT_PORT)...$(RESET)"
-	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(YIISOFT_PORT)
+fixtures-yii3: ## Run test fixtures against Yii 3 playground
+	@echo "$(CYAN)[Scenarios: Yii3] Running test fixtures on port $(YII3_PORT)...$(RESET)"
+	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(YII3_PORT)
 
 fixtures-symfony: ## Run test fixtures against Symfony playground
 	@echo "$(CYAN)[Scenarios: Symfony] Running test fixtures on port $(SYMFONY_PORT)...$(RESET)"
@@ -386,12 +386,12 @@ fixtures-laravel: ## Run test fixtures against Laravel playground
 
 fixtures: ## Run test fixtures against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running test fixtures against all playgrounds...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target fixtures-yiisoft fixtures-symfony fixtures-yii2 fixtures-laravel
+	@$(MAKE) -j4 --output-sync=target fixtures-yii3 fixtures-symfony fixtures-yii2 fixtures-laravel
 	@echo "$(GREEN)All test fixtures passed!$(RESET)"
 
-test-fixtures-yiisoft: ## Run PHPUnit E2E fixtures against Yiisoft playground
-	@echo "$(CYAN)[E2E Fixtures: Yiisoft] Running PHPUnit E2E tests on port $(YIISOFT_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YIISOFT_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox
+test-fixtures-yii3: ## Run PHPUnit E2E fixtures against Yii 3 playground
+	@echo "$(CYAN)[E2E Fixtures: Yii3] Running PHPUnit E2E tests on port $(YII3_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox
 
 test-fixtures-symfony: ## Run PHPUnit E2E fixtures against Symfony playground
 	@echo "$(CYAN)[E2E Fixtures: Symfony] Running PHPUnit E2E tests on port $(SYMFONY_PORT)...$(RESET)"
@@ -407,12 +407,12 @@ test-fixtures-laravel: ## Run PHPUnit E2E fixtures against Laravel playground
 
 test-fixtures: ## Run PHPUnit E2E fixtures against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running PHPUnit E2E fixtures against all playgrounds...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target test-fixtures-yiisoft test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel
+	@$(MAKE) -j4 --output-sync=target test-fixtures-yii3 test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel
 	@echo "$(GREEN)All E2E fixture tests passed!$(RESET)"
 
-test-scenario-yiisoft: ## Run full scenario test against Yiisoft playground
-	@echo "$(CYAN)[Scenario: Yiisoft] Running full scenario on port $(YIISOFT_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YIISOFT_PORT) php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox
+test-scenario-yii3: ## Run full scenario test against Yii 3 playground
+	@echo "$(CYAN)[Scenario: Yii3] Running full scenario on port $(YII3_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox
 
 test-scenario-symfony: ## Run full scenario test against Symfony playground
 	@echo "$(CYAN)[Scenario: Symfony] Running full scenario on port $(SYMFONY_PORT)...$(RESET)"
@@ -428,12 +428,12 @@ test-scenario-laravel: ## Run full scenario test against Laravel playground
 
 test-scenario: ## Run full scenario test against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running full scenario tests against all playgrounds...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target test-scenario-yiisoft test-scenario-symfony test-scenario-yii2 test-scenario-laravel
+	@$(MAKE) -j4 --output-sync=target test-scenario-yii3 test-scenario-symfony test-scenario-yii2 test-scenario-laravel
 	@echo "$(GREEN)All scenario tests passed!$(RESET)"
 
-test-mcp-yiisoft: ## Run MCP API E2E tests against Yiisoft playground
-	@echo "$(CYAN)[MCP E2E: Yiisoft] Running MCP API tests on port $(YIISOFT_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YIISOFT_PORT) php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox
+test-mcp-yii3: ## Run MCP API E2E tests against Yii 3 playground
+	@echo "$(CYAN)[MCP E2E: Yii3] Running MCP API tests on port $(YII3_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox
 
 test-mcp-symfony: ## Run MCP API E2E tests against Symfony playground
 	@echo "$(CYAN)[MCP E2E: Symfony] Running MCP API tests on port $(SYMFONY_PORT)...$(RESET)"
@@ -449,27 +449,27 @@ test-mcp-laravel: ## Run MCP API E2E tests against Laravel playground
 
 test-mcp: ## Run MCP API E2E tests against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running MCP API E2E tests against all playgrounds...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target test-mcp-yiisoft test-mcp-symfony test-mcp-yii2 test-mcp-laravel
+	@$(MAKE) -j4 --output-sync=target test-mcp-yii3 test-mcp-symfony test-mcp-yii2 test-mcp-laravel
 	@echo "$(GREEN)All MCP API E2E tests passed!$(RESET)"
 
 # ============================================================================
 # Playground Integration Tests (starts server, runs tests, stops server)
 # ============================================================================
 
-test-playground-yiisoft: ## Start Yiisoft server, run E2E fixtures + scenario, stop server
-	@echo "$(CYAN)[Playground: Yiisoft] Starting server on port $(YIISOFT_PORT)...$(RESET)"
-	@cd $(PLAYGROUND_DIR)/yiisoft-app && composer serve &>/dev/null & echo $$! > /tmp/adp-yiisoft.pid
+test-playground-yii3: ## Start Yii 3 server, run E2E fixtures + scenario, stop server
+	@echo "$(CYAN)[Playground: Yii3] Starting server on port $(YII3_PORT)...$(RESET)"
+	@cd $(PLAYGROUND_DIR)/yii3-app && composer serve &>/dev/null & echo $$! > /tmp/adp-yii3.pid
 	@sleep 3
-	@echo "$(CYAN)[Playground: Yiisoft] Running E2E fixture tests...$(RESET)"
-	@PLAYGROUND_URL=http://127.0.0.1:$(YIISOFT_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox; \
+	@echo "$(CYAN)[Playground: Yii3] Running E2E fixture tests...$(RESET)"
+	@PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox; \
 		EXIT_CODE=$$?; \
-		kill $$(cat /tmp/adp-yiisoft.pid) 2>/dev/null || true; rm -f /tmp/adp-yiisoft.pid; \
-		pkill -f "127.0.0.1:$(YIISOFT_PORT)" 2>/dev/null || true; \
+		kill $$(cat /tmp/adp-yii3.pid) 2>/dev/null || true; rm -f /tmp/adp-yii3.pid; \
+		pkill -f "127.0.0.1:$(YII3_PORT)" 2>/dev/null || true; \
 		exit $$EXIT_CODE
 
 test-playground-symfony: ## Start Symfony server, run E2E fixtures + scenario, stop server
 	@echo "$(CYAN)[Playground: Symfony] Starting server on port $(SYMFONY_PORT)...$(RESET)"
-	@cd $(PLAYGROUND_DIR)/symfony-basic-app && composer serve &>/dev/null & echo $$! > /tmp/adp-symfony.pid
+	@cd $(PLAYGROUND_DIR)/symfony-app && composer serve &>/dev/null & echo $$! > /tmp/adp-symfony.pid
 	@sleep 3
 	@echo "$(CYAN)[Playground: Symfony] Running E2E fixture tests...$(RESET)"
 	@PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox; \
@@ -491,7 +491,7 @@ test-playground-laravel: ## Start Laravel server, run E2E fixtures + scenario, s
 
 test-playground: ## Run playground integration tests (starts servers, runs E2E, stops servers)
 	@echo "$(CYAN)Running playground integration tests...$(RESET)"
-	@$(MAKE) test-playground-yiisoft
+	@$(MAKE) test-playground-yii3
 	@$(MAKE) test-playground-symfony
 	@$(MAKE) test-playground-laravel
 	@echo "$(GREEN)All playground integration tests passed!$(RESET)"

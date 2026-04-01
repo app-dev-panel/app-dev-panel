@@ -88,7 +88,7 @@ app_dev_panel:
 == Yii 3
 ```php
 // config/params.php
-'app-dev-panel/yiisoft' => [
+'app-dev-panel/yii3' => [
     'panel' => [
         'staticUrl' => '/adp-panel',
     ],
@@ -132,7 +132,7 @@ app_dev_panel:
 ```
 == Yii 3
 ```php
-'app-dev-panel/yiisoft' => [
+'app-dev-panel/yii3' => [
     'panel' => [
         'staticUrl' => 'http://localhost:3000',
     ],

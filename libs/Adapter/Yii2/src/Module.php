@@ -456,7 +456,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         \Psr\Container\ContainerInterface $containerBridge,
     ): void {
         // Inspector controllers — explicit registration to avoid auto-wiring issues.
-        // Each adapter must register these (same pattern as Yiisoft/Symfony adapters).
+        // Each adapter must register these (same pattern as Yii3/Symfony adapters).
         \Yii::$container->setSingleton(
             FileController::class,
             static fn() => new FileController(

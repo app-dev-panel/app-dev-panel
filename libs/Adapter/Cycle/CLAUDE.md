@@ -1,7 +1,7 @@
 # Cycle ORM Adapter
 
 Database schema provider for ADP via Cycle ORM. Lightweight adapter — only provides `SchemaProviderInterface` implementation.
-Unlike full adapters (Yiisoft, Symfony, Laravel, Yii2), this adapter has no collectors, event listeners, or lifecycle wiring.
+Unlike full adapters (Yii3, Symfony, Laravel, Yii2), this adapter has no collectors, event listeners, or lifecycle wiring.
 
 ## Package
 
@@ -51,7 +51,7 @@ SchemaProviderInterface::class => static fn (DatabaseProviderInterface $db) => n
 
 ## Architecture Comparison
 
-| Aspect | Full Adapters (Yiisoft/Symfony/Laravel/Yii2) | Cycle Adapter |
+| Aspect | Full Adapters (Yii3/Symfony/Laravel/Yii2) | Cycle Adapter |
 |--------|----------------------------------------------|---------------|
 | Scope | Full framework bridge | Database inspector only |
 | Collectors | Multiple (log, event, request, etc.) | None |

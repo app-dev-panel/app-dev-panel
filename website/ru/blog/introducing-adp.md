@@ -82,7 +82,7 @@ composer require --dev adp/adapter-symfony
 composer require --dev adp/adapter-laravel
 
 # Yii 3
-composer require --dev adp/adapter-yiisoft
+composer require --dev adp/adapter-yii3
 
 # Yii 2
 composer require --dev adp/adapter-yii2

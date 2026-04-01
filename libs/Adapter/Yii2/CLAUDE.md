@@ -1,6 +1,6 @@
 # Yii 2 Adapter
 
-Bridges ADP Kernel and API into Yii 2. Third adapter after Yii 3 and Symfony.
+Bridges ADP Kernel and API into Yii 2. Third adapter after Yii 3 (Yii3) and Symfony.
 
 ## Package
 
@@ -155,7 +155,7 @@ times internally and calls `DatabaseCollector::logQuery()` (from Kernel) on prof
 ### 7. Inspector Integration
 
 All inspector controllers are explicitly registered in `Module::registerServices()`.
-This follows the same pattern as Yiisoft and Symfony adapters (no auto-wiring for controllers).
+This follows the same pattern as Yii3 and Symfony adapters (no auto-wiring for controllers).
 
 **Registered controllers:**
 `FileController`, `RoutingController`, `InspectController`, `DatabaseController`,

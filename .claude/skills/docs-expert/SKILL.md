@@ -39,7 +39,7 @@ website/
 │   ├── mcp-server.md
 │   ├── contributing.md
 │   └── adapters/
-│       ├── yiisoft.md
+│       ├── yii3.md
 │       ├── symfony.md
 │       ├── laravel.md
 │       ├── yii2.md
@@ -98,7 +98,7 @@ Each locale defines its own `nav` and `sidebar` in `themeConfig`. When adding a 
 |-------|-------|-----------|
 | Introduction | what-is-adp, getting-started, architecture | No |
 | Core Concepts | collectors, storage, proxies, data-flow | No |
-| Adapters | yiisoft, symfony, laravel, yii2, cycle | No |
+| Adapters | yii3, symfony, laravel, yii2, cycle | No |
 | Advanced | mcp-server, cli, contributing | Yes |
 | API Reference | overview, rest, sse, inspector | No |
 

@@ -39,7 +39,7 @@ These collectors are registered in **all four adapters**:
 
 ### Collector Availability Matrix
 
-| Collector | Yiisoft | Symfony | Laravel | Yii2 | Frontend Panel |
+| Collector | Yii 3 | Symfony | Laravel | Yii2 | Frontend Panel |
 |-----------|:-------:|:-------:|:-------:|:----:|---------------|
 | Database | ✅ | ✅ | ✅ | ✅ | Database |
 | Cache | ✅ | ✅ | ✅ | ✅ | Cache |
@@ -58,7 +58,7 @@ These collectors are registered in **all four adapters**:
 
 | Adapter | Universal | Additional | Total |
 |---------|:---------:|:----------:|:-----:|
-| Yiisoft | 20 | 8 | **28** |
+| Yii 3 | 20 | 8 | **28** |
 | Symfony | 20 | 9 | **29** |
 | Yii2 | 20 | 10 | **30** |
 | Laravel | 20 | 7 | **27** |
@@ -67,7 +67,7 @@ These collectors are registered in **all four adapters**:
 
 Each adapter uses different strategies to intercept framework internals and feed data into collectors:
 
-| Interface | Yiisoft | Symfony | Laravel | Yii2 |
+| Interface | Yii 3 | Symfony | Laravel | Yii2 |
 |-----------|---------|---------|---------|------|
 | PSR-3 Logger | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget</class> |
 | PSR-14 Events | <class>AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy</class> | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy</class> | Wildcard `Event::on('*')` |
@@ -88,7 +88,7 @@ Each adapter uses different strategies to intercept framework internals and feed
 
 Inspector provides live application introspection (not tied to debug entries). All API-based features are adapter-independent:
 
-| Feature | Yiisoft | Symfony | Laravel | Yii2 | Cycle |
+| Feature | Yii 3 | Symfony | Laravel | Yii2 | Cycle |
 |---------|:-------:|:-------:|:-------:|:----:|:-----:|
 | Configuration | ✅ | ✅ | ✅ | ✅ | — |
 | Database Schema | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -107,7 +107,7 @@ Inspector provides live application introspection (not tied to debug entries). A
 
 Current differences between adapters:
 
-| Feature | Yiisoft | Symfony | Laravel | Yii2 |
+| Feature | Yii 3 | Symfony | Laravel | Yii2 |
 |---------|:-------:|:-------:|:-------:|:----:|
 | View/template debugging | ✅ | ✅ | ❌ | ✅ |
 | Code coverage | ❌ | ✅ | ✅ | ✅ |

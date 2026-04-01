@@ -50,7 +50,7 @@ AppDevPanel\Adapter\Symfony\AppDevPanelBundle::class => ['dev' => true, 'test' =
 ### Yii 3
 
 ```bash
-composer require app-dev-panel/adapter-yiisoft --dev
+composer require app-dev-panel/adapter-yii3 --dev
 ```
 
 Auto-registered via Yii config plugin. No manual setup needed.
@@ -185,7 +185,7 @@ libs/
 ├── Adapter/
 │   ├── Laravel/         # Laravel adapter
 │   ├── Symfony/         # Symfony adapter
-│   ├── Yiisoft/         # Yii 3 adapter
+│   ├── Yii3/            # Yii 3 adapter
 │   ├── Yii2/            # Yii 2 adapter
 │   └── Cycle/           # Cycle ORM (DB schema only)
 └── frontend/            # React/TypeScript frontend

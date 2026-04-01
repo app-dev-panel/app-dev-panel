@@ -44,7 +44,7 @@
     "app-dev-panel/adapter-yii2": "*",
     "app-dev-panel/adapter-laravel": "*",
     "app-dev-panel/adapter-cycle": "*",
-    "app-dev-panel/adapter-yiisoft": "*",
+    "app-dev-panel/adapter-yii3": "*",
     "app-dev-panel/api": "*",
     "app-dev-panel/kernel": "*",
     "app-dev-panel/mcp-server": "*",
@@ -158,7 +158,7 @@
     "app-dev-panel/adapter-laravel": "self.version",
     "app-dev-panel/adapter-yii2": "self.version",
     "app-dev-panel/adapter-cycle": "self.version",
-    "app-dev-panel/adapter-yiisoft": "self.version"
+    "app-dev-panel/adapter-yii3": "self.version"
   },
   "extra": {
     "branch-alias": {
