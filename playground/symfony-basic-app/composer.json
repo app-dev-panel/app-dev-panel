@@ -52,7 +52,7 @@
         "post-update-cmd": ["php bin/console cache:clear --no-warmup || true"],
         "serve": [
             "Composer\\Config::disableProcessTimeout",
-            "if lsof -ti :8102 >/dev/null 2>&1; then printf '\\n  Port 8102 is already in use.\\n  Kill and restart? [y/N] ' && read answer && if [ \"$answer\" = y ] || [ \"$answer\" = Y ]; then kill -9 $(lsof -ti :8102) && sleep 1; else exit 0; fi; fi && trap 'kill 0 2>/dev/null; exit 0' INT TERM && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t public & wait"
+            "bash ../../bin/serve.sh 8102"
         ]
     },
     "config": {
