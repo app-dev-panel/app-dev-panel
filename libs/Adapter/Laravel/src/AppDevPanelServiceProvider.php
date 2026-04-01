@@ -69,8 +69,15 @@ use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Cli\Command\DebugDumpCommand;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Cli\Command\DebugSummaryCommand;
+use AppDevPanel\Cli\Command\DebugTailCommand;
+use AppDevPanel\Cli\Command\FrontendUpdateCommand;
+use AppDevPanel\Cli\Command\InspectConfigCommand;
+use AppDevPanel\Cli\Command\InspectDatabaseCommand;
+use AppDevPanel\Cli\Command\InspectRoutesCommand;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -753,12 +760,38 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->commands([
             DebugResetCommand::class,
             DebugQueryCommand::class,
+            DebugDumpCommand::class,
+            DebugSummaryCommand::class,
+            DebugTailCommand::class,
+            InspectDatabaseCommand::class,
+            InspectRoutesCommand::class,
+            InspectConfigCommand::class,
+            FrontendUpdateCommand::class,
         ]);
 
         $this->app
             ->when(DebugResetCommand::class)
             ->needs(Debugger::class)
             ->give(fn() => $this->app->make(Debugger::class));
+
+        $this->app
+            ->when(InspectRoutesCommand::class)
+            ->needs('$routeCollection')
+            ->give(fn() => $this->app->bound(LaravelRouteCollectionAdapter::class)
+                ? $this->app->make(LaravelRouteCollectionAdapter::class)
+                : null);
+
+        $this->app
+            ->when(InspectRoutesCommand::class)
+            ->needs('$urlMatcher')
+            ->give(fn() => $this->app->bound(LaravelUrlMatcherAdapter::class)
+                ? $this->app->make(LaravelUrlMatcherAdapter::class)
+                : null);
+
+        $this->app
+            ->when(InspectConfigCommand::class)
+            ->needs('$params')
+            ->give(fn() => config()->all());
     }
 
     private function registerMiddleware(): void
