@@ -4,7 +4,7 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {StackTrace} from '@app-dev-panel/sdk/Component/StackTrace';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {parseFilename, parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
 import {BugReport, FmdGood} from '@mui/icons-material';
@@ -53,7 +53,7 @@ const IndexBadge = styled(Box)(({theme}) => ({
 }));
 
 const ClassName = styled(Typography)(({theme}) => ({
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '13px',
     fontWeight: 600,
     color: theme.palette.error.main,
@@ -96,7 +96,7 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
                     label={exception.class}
                     size="small"
                     sx={{
-                        fontFamily: primitives.fontFamilyMono,
+                        fontFamily: monoFontFamily,
                         fontSize: '11px',
                         fontWeight: 600,
                         backgroundColor: 'error.light',
@@ -209,13 +209,13 @@ export const ExceptionPanel = ({exceptions}: ExceptionPanelProps) => {
                             <FileLink path={pathMapper.toLocal(exception.file)} line={+exception.line}>
                                 <Typography
                                     component="span"
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
+                                    sx={(theme) => ({
+                                        fontFamily: theme.adp.fontFamilyMono,
                                         fontSize: '11px',
                                         flexShrink: 0,
                                         whiteSpace: 'nowrap',
                                         color: 'text.disabled',
-                                    }}
+                                    })}
                                 >
                                     {parseFilename(pathMapper.toLocal(exception.file))}:{exception.line}
                                 </Typography>

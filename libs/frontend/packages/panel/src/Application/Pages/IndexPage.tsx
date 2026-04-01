@@ -5,7 +5,6 @@ import {addFavoriteUrl, changeBaseUrl, removeFavoriteUrl} from '@app-dev-panel/s
 import {useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {StatusCard} from '@app-dev-panel/sdk/Component/StatusCard';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Chip, Icon, IconButton, InputBase, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
@@ -50,7 +49,7 @@ const CurrentUrl = styled('div')(({theme}) => ({
     borderRadius: theme.shape.borderRadius * 1.5,
     backgroundColor: theme.palette.action.hover,
     marginBottom: theme.spacing(3),
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '13px',
 }));
 
@@ -157,7 +156,7 @@ export function IndexPage() {
             <UrlForm onSubmit={onSubmitHandler}>
                 <Icon sx={{fontSize: 18, color: 'text.disabled'}}>language</Icon>
                 <InputBase
-                    sx={{flex: 1, fontSize: '13px', fontFamily: primitives.fontFamilyMono}}
+                    sx={(theme) => ({flex: 1, fontSize: '13px', fontFamily: theme.adp.fontFamilyMono})}
                     placeholder="http://localhost:8080"
                     value={url}
                     onChange={(event) => setUrl(event.target.value)}
@@ -184,8 +183,8 @@ export function IndexPage() {
                                 onClick={() => handleChangeUrl(favUrl)}
                                 onDelete={() => dispatch(removeFavoriteUrl(favUrl))}
                                 deleteIcon={<Icon sx={{fontSize: '14px !important'}}>close</Icon>}
-                                sx={{
-                                    fontFamily: primitives.fontFamilyMono,
+                                sx={(theme) => ({
+                                    fontFamily: theme.adp.fontFamilyMono,
                                     fontSize: '12px',
                                     height: 28,
                                     borderRadius: 1,
@@ -195,7 +194,7 @@ export function IndexPage() {
                                         color: 'primary.main',
                                         fontWeight: 600,
                                     }),
-                                }}
+                                })}
                             />
                         ))}
                     </FavoritesRow>

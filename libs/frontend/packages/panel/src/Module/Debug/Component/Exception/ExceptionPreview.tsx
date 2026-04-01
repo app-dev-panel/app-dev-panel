@@ -74,7 +74,6 @@ export const ExceptionPreview = (props: ExceptionPreview) => {
                             language={file.extension}
                             code={file.content}
                             highlightLines={[lineNumber]}
-                            highlightColor={'#ffcccc'}
                             wrappedLines={[lineNumber - 5, lineNumber + 5]}
                             filePath={parseFilePath(props.file)}
                         />

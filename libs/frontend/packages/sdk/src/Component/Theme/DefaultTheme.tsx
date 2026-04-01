@@ -6,6 +6,49 @@ import React, {PropsWithChildren, useContext, useMemo} from 'react';
 import {useSelector} from 'react-redux';
 import {Link as RouterLink, LinkProps as RouterLinkProps, useHref} from 'react-router-dom';
 
+// ---------------------------------------------------------------------------
+// MUI module augmentation — extend theme with ADP custom properties
+// ---------------------------------------------------------------------------
+
+type CollectorColorsMap = typeof semanticTokens.collectorColors;
+
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
+declare module '@mui/material/styles' {
+    interface Theme {
+        adp: {
+            fontFamilyMono: string;
+            chartColors: readonly string[];
+            collectorColors: CollectorColorsMap;
+            highlightColor: string;
+        };
+    }
+    interface ThemeOptions {
+        adp?: {
+            fontFamilyMono?: string;
+            chartColors?: readonly string[];
+            collectorColors?: CollectorColorsMap;
+            highlightColor?: string;
+        };
+    }
+    interface TypographyVariants {
+        micro: React.CSSProperties;
+    }
+    interface TypographyVariantsOptions {
+        micro?: React.CSSProperties;
+    }
+}
+
+declare module '@mui/material/Typography' {
+    interface TypographyPropsVariantOverrides {
+        micro: true;
+    }
+}
+/* eslint-enable @typescript-eslint/consistent-type-definitions */
+
+// ---------------------------------------------------------------------------
+// Link behavior
+// ---------------------------------------------------------------------------
+
 const LinkBehavior = (routerOptions: {openLinksInNewWindow: boolean; baseUrl: string}) =>
     React.forwardRef<HTMLAnchorElement, Omit<RouterLinkProps, 'to'> & {href: RouterLinkProps['to']}>((props, ref) => {
         let {href, ...other} = props;
@@ -28,10 +71,14 @@ const LinkBehavior = (routerOptions: {openLinksInNewWindow: boolean; baseUrl: st
         return <RouterLink ref={ref} to={href} {...other} />;
     });
 
+// ---------------------------------------------------------------------------
+// Theme factory
+// ---------------------------------------------------------------------------
+
 export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNewWindow: boolean; baseUrl: string}) => {
     const linkComponent = LinkBehavior(routerOptions);
-    const palette =
-        mode === 'dark' ? {...semanticTokens.palette, ...darkSemanticTokens.palette} : semanticTokens.palette;
+    const isDark = mode === 'dark';
+    const palette = isDark ? {...semanticTokens.palette, ...darkSemanticTokens.palette} : semanticTokens.palette;
 
     // Build MUI shadows array (25 entries required)
     // 0=none, 1=sm (cards), 2-3=md (popovers), 4+=lg (menus, dialogs)
@@ -51,6 +98,7 @@ export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNew
             body1: semanticTokens.typography.body1,
             body2: semanticTokens.typography.body2,
             caption: semanticTokens.typography.caption,
+            micro: semanticTokens.typography.micro,
             overline: semanticTokens.typography.overline,
         },
         shape: semanticTokens.shape,
@@ -59,6 +107,12 @@ export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNew
                 ? S
                 : never
             : never,
+        adp: {
+            fontFamilyMono: semanticTokens.typography.fontFamilyMono,
+            chartColors: isDark ? darkSemanticTokens.chartColors : semanticTokens.chartColors,
+            collectorColors: isDark ? darkSemanticTokens.collectorColors : semanticTokens.collectorColors,
+            highlightColor: isDark ? darkSemanticTokens.highlightColor : semanticTokens.highlightColor,
+        },
         components: {
             MuiLink: {defaultProps: {component: linkComponent} as LinkProps},
             MuiButtonBase: {defaultProps: {LinkComponent: linkComponent}},
@@ -94,3 +148,6 @@ export const DefaultThemeProvider = ({children}: PropsWithChildren) => {
 };
 
 export {darkSemanticTokens, primitives, semanticTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
+
+/** Monospace font family — safe to use directly in sx props (does not change between themes). */
+export const monoFontFamily = semanticTokens.typography.fontFamilyMono;

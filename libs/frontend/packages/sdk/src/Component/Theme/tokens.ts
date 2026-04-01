@@ -61,10 +61,12 @@ export const semanticTokens = {
     },
     typography: {
         fontFamily: primitives.fontFamily,
+        fontFamilyMono: primitives.fontFamilyMono,
         h4: {fontSize: '18px', fontWeight: 600, lineHeight: 1.4},
         body1: {fontSize: '14px', fontWeight: 400, lineHeight: 1.5},
         body2: {fontSize: '13px', fontWeight: 400, lineHeight: 1.5},
         caption: {fontSize: '11px', fontWeight: 600, lineHeight: 1.3},
+        micro: {fontSize: '10px', fontWeight: 600, lineHeight: 1.3},
         overline: {
             fontSize: '12px',
             fontWeight: 600,
@@ -79,6 +81,39 @@ export const semanticTokens = {
         md: '0 4px 12px rgba(0,0,0,0.08)',
         lg: '0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08)',
     },
+    chartColors: [
+        '#42A5F5', // blue
+        '#AB47BC', // purple
+        '#66BB6A', // green
+        '#FFA726', // orange
+        '#26C6DA', // cyan
+        '#EC407A', // pink
+        '#8D6E63', // brown
+        '#78909C', // blue-gray
+        '#FFCA28', // yellow (adjusted from #FFEE58 for better contrast)
+        '#7C3AED', // violet
+    ],
+    collectorColors: {
+        request: {bg: '#EFF6FF', fg: '#2563EB'},
+        log: {bg: '#FEF3C7', fg: '#D97706'},
+        event: {bg: '#F3E8FF', fg: '#9333EA'},
+        database: {bg: '#ECFDF5', fg: '#16A34A'},
+        middleware: {bg: '#FFF7ED', fg: '#EA580C'},
+        exception: {bg: '#FEF2F2', fg: '#DC2626'},
+        service: {bg: '#F0F9FF', fg: '#0284C7'},
+        timeline: {bg: '#F5F3FF', fg: '#7C3AED'},
+        varDumper: {bg: '#F5F5F5', fg: '#666666'},
+        mailer: {bg: '#FDF4FF', fg: '#A855F7'},
+        filesystem: {bg: '#FFF7ED', fg: '#EA580C'},
+        cache: {bg: '#ECFDF5', fg: '#059669'},
+        template: {bg: '#FEF3C7', fg: '#B45309'},
+        authorization: {bg: '#FEF2F2', fg: '#DC2626'},
+        deprecation: {bg: '#FFF3E0', fg: '#E65100'},
+        environment: {bg: '#E8F5E9', fg: '#2E7D32'},
+        translator: {bg: '#E3F2FD', fg: '#1565C0'},
+        default: {bg: '#F5F5F5', fg: '#666666'},
+    },
+    highlightColor: '#ffcccc',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -95,6 +130,39 @@ export const darkSemanticTokens = {
         text: {primary: '#F1F5F9', secondary: '#94A3B8', disabled: '#64748B'},
         divider: '#334155',
     },
+    chartColors: [
+        '#64B5F6', // blue (brighter)
+        '#CE93D8', // purple (brighter)
+        '#81C784', // green (brighter)
+        '#FFB74D', // orange (brighter)
+        '#4DD0E1', // cyan (brighter)
+        '#F06292', // pink (brighter)
+        '#A1887F', // brown (brighter)
+        '#90A4AE', // blue-gray (brighter)
+        '#FFD54F', // yellow (brighter)
+        '#B39DDB', // violet (brighter)
+    ],
+    collectorColors: {
+        request: {bg: '#1E3A5F', fg: '#60A5FA'},
+        log: {bg: '#713F12', fg: '#FBBF24'},
+        event: {bg: '#3B1F6E', fg: '#C084FC'},
+        database: {bg: '#14532D', fg: '#4ADE80'},
+        middleware: {bg: '#7C2D12', fg: '#FB923C'},
+        exception: {bg: '#7F1D1D', fg: '#F87171'},
+        service: {bg: '#0C4A6E', fg: '#38BDF8'},
+        timeline: {bg: '#2E1065', fg: '#A78BFA'},
+        varDumper: {bg: '#334155', fg: '#94A3B8'},
+        mailer: {bg: '#4A044E', fg: '#D946EF'},
+        filesystem: {bg: '#7C2D12', fg: '#FB923C'},
+        cache: {bg: '#14532D', fg: '#34D399'},
+        template: {bg: '#713F12', fg: '#F59E0B'},
+        authorization: {bg: '#7F1D1D', fg: '#F87171'},
+        deprecation: {bg: '#7C2D12', fg: '#FB923C'},
+        environment: {bg: '#14532D', fg: '#4ADE80'},
+        translator: {bg: '#1E3A5F', fg: '#60A5FA'},
+        default: {bg: '#334155', fg: '#94A3B8'},
+    },
+    highlightColor: '#5C2020',
 } as const;
 
 // ---------------------------------------------------------------------------

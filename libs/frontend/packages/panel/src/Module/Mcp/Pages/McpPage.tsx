@@ -1,7 +1,6 @@
 import {useSelector} from '@app-dev-panel/panel/store';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import {
     Box,
@@ -101,7 +100,7 @@ export const McpPage = () => {
                         </Typography>
                         <Typography
                             variant="body2"
-                            sx={{fontFamily: primitives.fontFamilyMono, wordBreak: 'break-all'}}
+                            sx={(theme) => ({fontFamily: theme.adp.fontFamilyMono, wordBreak: 'break-all'})}
                         >
                             {mcpUrl}
                         </Typography>
@@ -154,11 +153,11 @@ export const McpPage = () => {
                                 {mcpTools.map((tool) => (
                                     <TableRow key={tool.name}>
                                         <TableCell
-                                            sx={{
-                                                fontFamily: primitives.fontFamilyMono,
+                                            sx={(theme) => ({
+                                                fontFamily: theme.adp.fontFamilyMono,
                                                 fontSize: '12px',
                                                 whiteSpace: 'nowrap',
-                                            }}
+                                            })}
                                         >
                                             {tool.name}
                                         </TableCell>

@@ -1,4 +1,3 @@
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Icon, IconButton, MenuItem, Popover, Select, TextField, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 
@@ -85,13 +84,13 @@ const AddRow = styled(Box)(({theme}) => ({
 
 const SmallSelect = styled(Select)(({theme}) => ({
     fontSize: '12px',
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     '& .MuiSelect-select': {padding: theme.spacing(0.5, 1), paddingRight: '24px !important'},
     '& .MuiOutlinedInput-notchedOutline': {borderColor: theme.palette.divider},
 }));
 
 const SmallTextField = styled(TextField)(({theme}) => ({
-    '& .MuiInputBase-input': {fontSize: '12px', fontFamily: primitives.fontFamilyMono, padding: theme.spacing(0.5, 1)},
+    '& .MuiInputBase-input': {fontSize: '12px', fontFamily: theme.adp.fontFamilyMono, padding: theme.spacing(0.5, 1)},
     '& .MuiOutlinedInput-notchedOutline': {borderColor: theme.palette.divider},
 }));
 

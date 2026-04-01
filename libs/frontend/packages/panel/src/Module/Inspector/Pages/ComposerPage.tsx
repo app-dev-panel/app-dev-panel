@@ -6,7 +6,6 @@ import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScree
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import {Code, ContentCopy, FolderOpen, OpenInNew, SwapHoriz} from '@mui/icons-material';
 import {Box, Chip, IconButton, Tab, Tabs, Tooltip, Typography} from '@mui/material';
@@ -54,8 +53,8 @@ const PackageRow = styled(Box)(({theme}) => ({
     '&:hover .copy-btn': {opacity: 1},
 }));
 
-const PackageName = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const PackageName = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     fontWeight: 500,
     flex: 1,
@@ -64,12 +63,12 @@ const PackageName = styled(Typography)({
     display: 'flex',
     alignItems: 'center',
     gap: 4,
-});
+}));
 
 const VersionText = styled(Typography)(({theme}) => ({
     fontSize: '11px',
     color: theme.palette.text.secondary,
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     flexShrink: 0,
     whiteSpace: 'nowrap',
 }));

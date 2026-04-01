@@ -4,7 +4,6 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {ContentCopy, DataObject, Download, ErrorOutline} from '@mui/icons-material';
@@ -50,19 +49,19 @@ const NameCell = styled(Box)({
     paddingTop: 4,
 });
 
-const NameText = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const NameText = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     fontWeight: 600,
     wordBreak: 'break-word',
     flex: 1,
     paddingTop: 2,
-});
+}));
 
 const ValueCell = styled(Box)({flex: 1, minWidth: 0, overflow: 'hidden'});
 
 const ClassValue = styled(Typography)(({theme}) => ({
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     color: theme.palette.text.secondary,
     wordBreak: 'break-word',

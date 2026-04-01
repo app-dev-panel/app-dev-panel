@@ -10,7 +10,6 @@ import {
 import {FilterInput} from '@app-dev-panel/sdk/Component/Form/FilterInput';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {
     Alert,
     Box,
@@ -56,7 +55,11 @@ const SummaryLabel = styled(Typography)(({theme}) => ({
     marginBottom: theme.spacing(0.5),
 }));
 
-const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 700, fontSize: '22px'});
+const SummaryValue = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontWeight: 700,
+    fontSize: '22px',
+}));
 
 const KeyRow = styled(Box)(({theme}) => ({
     display: 'flex',
@@ -69,13 +72,13 @@ const KeyRow = styled(Box)(({theme}) => ({
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const KeyName = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const KeyName = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
     minWidth: 0,
-});
+}));
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(1.5, 2, 1.5, 5.5),

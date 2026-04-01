@@ -7,7 +7,7 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
@@ -82,27 +82,27 @@ const RequestRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{ex
     }),
 );
 
-const UriCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const UriCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
-});
+}));
 
-const DurationCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const DurationCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     textAlign: 'right',
     width: 80,
-});
+}));
 
-const TimeCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const TimeCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     width: 110,
-});
+}));
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(2, 2, 2, 6),
@@ -114,7 +114,7 @@ const DetailBox = styled(Box)(({theme}) => ({
 const HeaderTable = styled('table')(({theme}) => ({
     width: '100%',
     borderCollapse: 'collapse',
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     '& th': {
         textAlign: 'left',
@@ -156,12 +156,12 @@ const StreamOperationRow = styled(Box, {shouldForwardProp: (p) => p !== 'expande
     }),
 );
 
-const StreamUriCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const StreamUriCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
-});
+}));
 
 const HttpStreamView = ({data}: {data: HttpStreamData}) => {
     const operations = Object.keys(data);
@@ -318,7 +318,7 @@ const RequestDetail = memo(({entry}: {entry: HttpClientEntry}) => {
                                 variant="caption"
                                 component="span"
                                 sx={{
-                                    fontFamily: primitives.fontFamilyMono,
+                                    fontFamily: monoFontFamily,
                                     color: 'primary.main',
                                     textDecoration: 'none',
                                     '&:hover': {textDecoration: 'underline'},
@@ -340,13 +340,13 @@ const RequestDetail = memo(({entry}: {entry: HttpClientEntry}) => {
                     Timing
                 </Typography>
                 <Box sx={{mt: 0.5, display: 'flex', gap: 3}}>
-                    <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px'}}>
+                    <Typography sx={{fontFamily: monoFontFamily, fontSize: '12px'}}>
                         <Box component="span" sx={{color: 'text.disabled'}}>
                             Start:{' '}
                         </Box>
                         {formatMicrotime(entry.startTime)}
                     </Typography>
-                    <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px'}}>
+                    <Typography sx={{fontFamily: monoFontFamily, fontSize: '12px'}}>
                         <Box component="span" sx={{color: 'text.disabled'}}>
                             End:{' '}
                         </Box>
@@ -354,7 +354,7 @@ const RequestDetail = memo(({entry}: {entry: HttpClientEntry}) => {
                     </Typography>
                     <Typography
                         sx={{
-                            fontFamily: primitives.fontFamilyMono,
+                            fontFamily: monoFontFamily,
                             fontSize: '12px',
                             color: durationColor(entry.totalTime, theme),
                         }}
@@ -405,7 +405,7 @@ const RequestDetail = memo(({entry}: {entry: HttpClientEntry}) => {
                     {response.statusLine && (
                         <Typography
                             sx={{
-                                fontFamily: primitives.fontFamilyMono,
+                                fontFamily: monoFontFamily,
                                 fontSize: '12px',
                                 color: 'text.secondary',
                                 mt: 0.5,

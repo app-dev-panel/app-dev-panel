@@ -3,7 +3,6 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {
     Box,
@@ -80,13 +79,13 @@ const DetailBox = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
-const OutputPreview = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const OutputPreview = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
     lineHeight: 1.5,
-});
+}));
 
 const GroupHeader = styled(Box)(({theme}) => ({
     display: 'flex',
@@ -100,13 +99,13 @@ const GroupHeader = styled(Box)(({theme}) => ({
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const DurationCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const DurationCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     textAlign: 'right',
     width: 80,
-});
+}));
 
 const RenderItem = ({
     render,
@@ -144,26 +143,34 @@ const RenderItem = ({
                             <FileLink path={render.template}>
                                 <Typography
                                     component="span"
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
+                                    sx={(theme) => ({
+                                        fontFamily: theme.adp.fontFamilyMono,
                                         fontSize: '13px',
                                         fontWeight: 500,
                                         color: 'primary.main',
                                         '&:hover': {textDecoration: 'underline'},
-                                    }}
+                                    })}
                                 >
                                     {basename(render.template)}
                                 </Typography>
                             </FileLink>
                             <Typography
-                                sx={{fontFamily: primitives.fontFamilyMono, fontSize: '10px', color: 'text.disabled'}}
+                                sx={(theme) => ({
+                                    fontFamily: theme.adp.fontFamilyMono,
+                                    fontSize: '10px',
+                                    color: 'text.disabled',
+                                })}
                             >
                                 {dirname(render.template)}
                             </Typography>
                         </>
                     ) : (
                         <Typography
-                            sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', wordBreak: 'break-all'}}
+                            sx={(theme) => ({
+                                fontFamily: theme.adp.fontFamilyMono,
+                                fontSize: '12px',
+                                wordBreak: 'break-all',
+                            })}
                         >
                             {render.template}
                         </Typography>
@@ -270,18 +277,24 @@ const DuplicateGroupView = ({
                     <FileLink path={group.key}>
                         <Typography
                             component="span"
-                            sx={{
-                                fontFamily: primitives.fontFamilyMono,
+                            sx={(theme) => ({
+                                fontFamily: theme.adp.fontFamilyMono,
                                 fontSize: '13px',
                                 fontWeight: 500,
                                 color: 'primary.main',
                                 '&:hover': {textDecoration: 'underline'},
-                            }}
+                            })}
                         >
                             {basename(group.key)}
                         </Typography>
                     </FileLink>
-                    <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '10px', color: 'text.disabled'}}>
+                    <Typography
+                        sx={(theme) => ({
+                            fontFamily: theme.adp.fontFamilyMono,
+                            fontSize: '10px',
+                            color: 'text.disabled',
+                        })}
+                    >
                         {dirname(group.key)}
                     </Typography>
                 </Box>

@@ -2,7 +2,6 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {concatClassMethod} from '@app-dev-panel/sdk/Helper/classMethodConcater';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
@@ -49,12 +48,12 @@ const ServiceRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{ex
     }),
 );
 
-const MethodCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const MethodCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-word',
-});
+}));
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(1.5, 1.5, 1.5, 6),
@@ -111,14 +110,14 @@ const SummaryView = ({summaryRows}: {summaryRows: Record<string, SummaryItemType
                                 />
                             )}
                             <Typography
-                                sx={{
-                                    fontFamily: primitives.fontFamilyMono,
+                                sx={(theme) => ({
+                                    fontFamily: theme.adp.fontFamilyMono,
                                     fontSize: '11px',
                                     color: 'text.disabled',
                                     flexShrink: 0,
                                     width: 80,
                                     textAlign: 'right',
-                                }}
+                                })}
                             >
                                 {formatMillisecondsAsDuration(total)}
                             </Typography>
@@ -196,14 +195,14 @@ const AllView = ({rows}: {rows: AllRow[]}) => {
                                 }}
                             />
                             <Typography
-                                sx={{
-                                    fontFamily: primitives.fontFamilyMono,
+                                sx={(theme) => ({
+                                    fontFamily: theme.adp.fontFamilyMono,
                                     fontSize: '11px',
                                     color: 'text.disabled',
                                     flexShrink: 0,
                                     width: 80,
                                     textAlign: 'right',
-                                }}
+                                })}
                             >
                                 {formatMillisecondsAsDuration(row.time)}
                             </Typography>

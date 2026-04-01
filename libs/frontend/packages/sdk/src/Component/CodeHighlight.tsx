@@ -29,12 +29,13 @@ export const CodeHighlight = React.memo((props: CodeHighlightProps) => {
         highlightLines,
         fontSize = 12,
         showLineNumbers = true,
-        highlightColor = 'rgba(0,0,0, .1)',
+        highlightColor: highlightColorProp,
         wrappedLines = [1, 0],
         onLineClick,
     } = props;
 
     const theme = useTheme();
+    const highlightColor = highlightColorProp ?? theme.adp.highlightColor;
 
     const handleClick = useCallback(
         (e: React.MouseEvent) => {

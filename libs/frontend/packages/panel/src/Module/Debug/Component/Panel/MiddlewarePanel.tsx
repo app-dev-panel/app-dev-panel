@@ -2,7 +2,6 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
 import {Box, Chip, Collapse, Icon, IconButton, Link, Tooltip, Typography} from '@mui/material';
@@ -41,13 +40,13 @@ const MiddlewareRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<
     }),
 );
 
-const TimeCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const TimeCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     width: 110,
     paddingTop: 2,
-});
+}));
 
 const NameCell = styled(Typography)({fontSize: '13px', flex: 1, wordBreak: 'break-word'});
 
@@ -139,12 +138,12 @@ export const MiddlewarePanel = (props: MiddlewarePanelProps) => {
                             <DetailBox>
                                 <Typography
                                     variant="caption"
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
+                                    sx={(theme) => ({
+                                        fontFamily: theme.adp.fontFamilyMono,
                                         color: 'text.secondary',
                                         display: 'block',
                                         mb: 1,
-                                    }}
+                                    })}
                                 >
                                     {row.name}
                                 </Typography>

@@ -1,4 +1,3 @@
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {styled} from '@mui/material/styles';
 import React, {useMemo, useState} from 'react';
@@ -19,7 +18,11 @@ const Td = styled('td')(({theme}) => ({
 
 const LabelTd = styled(Td)(({theme}) => ({color: theme.palette.text.disabled, fontWeight: 500, fontSize: '12px'}));
 
-const ValueTd = styled(Td)({fontFamily: primitives.fontFamilyMono, fontSize: '12px', wordBreak: 'break-all'});
+const ValueTd = styled(Td)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontSize: '12px',
+    wordBreak: 'break-all',
+}));
 
 const matchesFilter = (row: KeyValueRow, filter: string): boolean => {
     const variants = searchVariants(filter.toLowerCase());
