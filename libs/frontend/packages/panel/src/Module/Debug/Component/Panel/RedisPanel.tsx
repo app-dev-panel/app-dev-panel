@@ -40,7 +40,7 @@ const SummaryGrid = styled(Box)(({theme}) => ({
 
 const SummaryCard = styled(Box)(({theme}) => ({
     padding: theme.spacing(2),
-    borderRadius: theme.shape.borderRadius * 1.5,
+    borderRadius: Number(theme.shape.borderRadius) * 1.5,
     border: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
 }));
@@ -94,7 +94,7 @@ const ConnectionChip = styled(Chip)(({theme}) => ({
     fontWeight: 600,
     fontSize: '10px',
     height: 20,
-    borderRadius: theme.shape.borderRadius * 0.5,
+    borderRadius: Number(theme.shape.borderRadius) * 0.5,
 }));
 
 const DetailBox = styled(Box)(({theme}) => ({

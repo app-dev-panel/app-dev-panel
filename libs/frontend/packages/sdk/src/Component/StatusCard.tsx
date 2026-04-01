@@ -14,7 +14,7 @@ const Root = styled('div', {shouldForwardProp: (p) => p !== 'status'})<{status: 
         alignItems: 'center',
         gap: theme.spacing(2),
         padding: theme.spacing(2, 2.5),
-        borderRadius: theme.shape.borderRadius * 1.5,
+        borderRadius: Number(theme.shape.borderRadius) * 1.5,
         border: `1px solid ${theme.palette.divider}`,
         backgroundColor: theme.palette.background.paper,
         cursor: 'pointer',

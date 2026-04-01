@@ -15,7 +15,7 @@ type GridProps = {
     sortModel?: GridSortModel;
 };
 const defaultRowsPerPage = [20, 50, 100];
-const voidCallback = () => null;
+const voidCallback = () => {};
 const defaultStyle = {'& .MuiDataGrid-cell': {alignItems: 'flex-start', flexDirection: 'column'}};
 const defaultGetRowId = (row: GridValidRowModel) => row.id as string | number;
 
@@ -49,26 +49,20 @@ export function DataTable(props: GridProps) {
 
     return (
         <DataGrid
-            onCellClick={voidCallback}
-            onCellDoubleClick={voidCallback}
-            onCellFocusOut={voidCallback}
-            onRowClick={voidCallback}
-            onColumnHeaderClick={voidCallback}
             disableDensitySelector
             disableColumnSelector
             disableVirtualization
-            disableSelectionOnClick
+            disableRowSelectionOnClick
             sortModel={sortModel}
             rows={rows}
             getRowId={getRowId}
             columns={columns}
-            rowsPerPageOptions={rowsPerPage}
-            pageSize={pageSize}
-            page={Number(searchParams.get('page'))}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            rowBuffer={0}
-            rowThreshold={0}
+            pageSizeOptions={rowsPerPage}
+            paginationModel={{page: Number(searchParams.get('page')), pageSize}}
+            onPaginationModelChange={(model) => {
+                if (model.page !== Number(searchParams.get('page'))) handlePageChange(model.page);
+                if (model.pageSize !== pageSize) handlePageSizeChange(model.pageSize);
+            }}
             hideFooterSelectedRowCount
             autoHeight
             sx={defaultStyle}

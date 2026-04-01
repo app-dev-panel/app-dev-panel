@@ -70,13 +70,14 @@ export const TablePage = () => {
                 loading={isFetching}
                 paginationMode="server"
                 rowCount={data?.totalCount ?? 0}
-                page={page}
-                pageSize={pageSize}
-                rowsPerPageOptions={rowsPerPageOptions}
-                onPageChange={handlePageChange}
-                onPageSizeChange={handlePageSizeChange}
+                paginationModel={{page, pageSize}}
+                pageSizeOptions={rowsPerPageOptions}
+                onPaginationModelChange={(model) => {
+                    if (model.page !== page) handlePageChange(model.page);
+                    if (model.pageSize !== pageSize) handlePageSizeChange(model.pageSize);
+                }}
                 autoHeight
-                disableSelectionOnClick
+                disableRowSelectionOnClick
                 disableDensitySelector
                 disableColumnSelector
                 hideFooterSelectedRowCount

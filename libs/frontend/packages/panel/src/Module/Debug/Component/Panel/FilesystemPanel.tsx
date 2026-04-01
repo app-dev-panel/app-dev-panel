@@ -26,7 +26,7 @@ const SummaryGrid = styled(Box)(({theme}) => ({
 
 const SummaryCard = styled(Box)(({theme}) => ({
     padding: theme.spacing(1.5, 2),
-    borderRadius: theme.shape.borderRadius * 1.5,
+    borderRadius: Number(theme.shape.borderRadius) * 1.5,
     border: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
     display: 'flex',
