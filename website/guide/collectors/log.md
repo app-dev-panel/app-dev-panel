@@ -61,7 +61,7 @@ $collector->collect(
 
 ## How It Works
 
-The collector is fed by <class>\AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> — a PSR-3 `LoggerInterface` decorator. When the proxy is registered as the application's logger, every `$logger->info(...)`, `$logger->error(...)`, etc. call is automatically intercepted and forwarded to the collector.
+The collector is fed by <class>\AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> — a PSR-3 <class>Psr\Log\LoggerInterface</class> decorator. When the proxy is registered as the application's logger, every `$logger->info(...)`, `$logger->error(...)`, etc. call is automatically intercepted and forwarded to the collector.
 
 No manual wiring is needed if you use an adapter (Symfony, Laravel, Yii) — the proxy is registered automatically.
 

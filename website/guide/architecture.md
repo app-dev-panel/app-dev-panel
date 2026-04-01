@@ -125,9 +125,9 @@ Current modules: Debug, Inspector, LLM, MCP, OpenAPI, Frames.
 When creating an adapter for a new framework:
 
 1. Create `libs/Adapter/<FrameworkName>/`
-2. The adapter **must** depend on [`app-dev-panel/kernel`](https://packagist.org/packages/app-dev-panel/kernel)
-3. The adapter **may** depend on [`app-dev-panel/api`](https://packagist.org/packages/app-dev-panel/api) (for route and inspector registration)
-4. The adapter **may** depend on [`app-dev-panel/cli`](https://packagist.org/packages/app-dev-panel/cli) (for CLI commands)
+2. The adapter **must** depend on <pkg>app-dev-panel/kernel</pkg>
+3. The adapter **may** depend on <pkg>app-dev-panel/api</pkg> (for route and inspector registration)
+4. The adapter **may** depend on <pkg>app-dev-panel/cli</pkg> (for CLI commands)
 5. The adapter **must not** depend on other adapters
 6. The adapter **must not** modify Kernel or API code — only wire into them via configuration
 
@@ -154,7 +154,7 @@ When creating an adapter for a new framework:
 
 ### Minimal Checklist
 
-1. `composer.json` with [`app-dev-panel/kernel`](https://packagist.org/packages/app-dev-panel/kernel) + [`app-dev-panel/api`](https://packagist.org/packages/app-dev-panel/api) dependencies
+1. `composer.json` with <pkg>app-dev-panel/kernel</pkg> + <pkg>app-dev-panel/api</pkg> dependencies
 2. Lifecycle event mapping → <class>AppDevPanel\Kernel\Debugger</class>`::startup()` / `::shutdown()`
 3. Register Kernel PSR proxies as service decorators (logger, events, HTTP client)
 4. Wire <class>AppDevPanel\Kernel\Storage\FileStorage</class> with a framework-appropriate path

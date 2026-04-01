@@ -81,8 +81,8 @@ $collector->collectRoutes(routes: $allRoutes, routesTree: $routeTree);
 
 Each framework adapter has a `RouterDataExtractor` that normalizes framework-specific route data into the common format:
 - **Symfony**: Extracts from `RouterInterface` and request attributes
-- **Laravel**: Extracts from `Router` facade and matched `Route` object
-- **Yii 3**: Extracts from `UrlMatcherInterface` result
+- **Laravel**: Extracts from <class>Illuminate\Routing\Router</class> facade and matched `Route` object
+- **Yii 3**: Extracts from <class>Symfony\Component\Routing\Matcher\UrlMatcherInterface</class> result
 
 ## Debug Panel
 

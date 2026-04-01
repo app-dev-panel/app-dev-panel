@@ -76,7 +76,7 @@ $collector->collectTotalTime(
 
 ## How It Works
 
-The collector is fed by <class>\AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> — a PSR-18 `ClientInterface` decorator. Every `$client->sendRequest($request)` call is automatically intercepted, timed, and recorded.
+The collector is fed by <class>\AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> — a PSR-18 <class>Psr\Http\Client\ClientInterface</class> decorator. Every `$client->sendRequest($request)` call is automatically intercepted, timed, and recorded.
 
 ## Debug Panel
 

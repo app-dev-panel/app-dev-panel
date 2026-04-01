@@ -9,7 +9,7 @@ composer require app-dev-panel/adapter-symfony
 ```
 
 ::: info Package
-[`app-dev-panel/adapter-symfony`](https://packagist.org/packages/app-dev-panel/adapter-symfony)
+<pkg>app-dev-panel/adapter-symfony</pkg>
 :::
 
 ## Bundle Registration
@@ -60,7 +60,7 @@ Supports all Kernel collectors plus Symfony-specific ones: Twig templates, Secur
 
 ## Translator Integration
 
-The adapter automatically decorates Symfony's `TranslatorInterface` with <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> via the compiler pass. All `trans()` calls are intercepted and logged to <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> — no code changes needed. See [Translator](/guide/translator) for details.
+The adapter automatically decorates Symfony's <class>Symfony\Contracts\Translation\TranslatorInterface</class> with <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> via the compiler pass. All `trans()` calls are intercepted and logged to <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> — no code changes needed. See [Translator](/guide/translator) for details.
 
 ## Database Inspector
 

@@ -10,10 +10,10 @@ Playground-приложения — это минимальные рабочие
 
 | Playground | Фреймворк | Порт | Адаптер |
 |------------|-----------|------|---------|
-| `yiisoft-app` | Yii 3 | 8101 | `app-dev-panel/adapter-yiisoft` |
-| `symfony-basic-app` | Symfony 7 | 8102 | `app-dev-panel/adapter-symfony` |
-| `yii2-basic-app` | Yii 2 | 8103 | `app-dev-panel/adapter-yii2` |
-| `laravel-app` | Laravel 12 | 8104 | `app-dev-panel/adapter-laravel` |
+| `yiisoft-app` | Yii 3 | 8101 | <pkg>app-dev-panel/adapter-yiisoft</pkg> |
+| `symfony-basic-app` | Symfony 7 | 8102 | <pkg>app-dev-panel/adapter-symfony</pkg> |
+| `yii2-basic-app` | Yii 2 | 8103 | <pkg>app-dev-panel/adapter-yii2</pkg> |
+| `laravel-app` | Laravel 12 | 8104 | <pkg>app-dev-panel/adapter-laravel</pkg> |
 
 ## Запуск playground-приложений
 

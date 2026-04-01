@@ -9,7 +9,7 @@ composer require app-dev-panel/adapter-yiisoft
 ```
 
 ::: info Package
-[`app-dev-panel/adapter-yiisoft`](https://packagist.org/packages/app-dev-panel/adapter-yiisoft)
+<pkg>app-dev-panel/adapter-yiisoft</pkg>
 :::
 
 The package auto-registers via Yii 3's config plugin system — no manual wiring needed.

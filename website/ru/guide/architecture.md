@@ -125,9 +125,9 @@ interface ModuleInterface {
 При создании адаптера для нового фреймворка:
 
 1. Создайте `libs/Adapter/<FrameworkName>/`
-2. Адаптер **должен** зависеть от [`app-dev-panel/kernel`](https://packagist.org/packages/app-dev-panel/kernel)
-3. Адаптер **может** зависеть от [`app-dev-panel/api`](https://packagist.org/packages/app-dev-panel/api) (для маршрутов и инспектора)
-4. Адаптер **может** зависеть от [`app-dev-panel/cli`](https://packagist.org/packages/app-dev-panel/cli) (для CLI-команд)
+2. Адаптер **должен** зависеть от <pkg>app-dev-panel/kernel</pkg>
+3. Адаптер **может** зависеть от <pkg>app-dev-panel/api</pkg> (для маршрутов и инспектора)
+4. Адаптер **может** зависеть от <pkg>app-dev-panel/cli</pkg> (для CLI-команд)
 5. Адаптер **не должен** зависеть от других адаптеров
 6. Адаптер **не должен** модифицировать код Kernel или API — только подключаться через конфигурацию
 
@@ -154,7 +154,7 @@ interface ModuleInterface {
 
 ### Минимальный чеклист
 
-1. `composer.json` с зависимостями [`app-dev-panel/kernel`](https://packagist.org/packages/app-dev-panel/kernel) + [`app-dev-panel/api`](https://packagist.org/packages/app-dev-panel/api)
+1. `composer.json` с зависимостями <pkg>app-dev-panel/kernel</pkg> + <pkg>app-dev-panel/api</pkg>
 2. Маппинг событий жизненного цикла → <class>AppDevPanel\Kernel\Debugger</class>`::startup()` / `::shutdown()`
 3. Регистрация PSR-прокси Kernel как декораторов сервисов (логгер, события, HTTP-клиент)
 4. Подключение <class>AppDevPanel\Kernel\Storage\FileStorage</class> с путём, подходящим для фреймворка

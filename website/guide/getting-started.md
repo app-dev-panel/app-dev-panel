@@ -50,7 +50,7 @@ composer require app-dev-panel/adapter-laravel
 ```
 :::
 
-Each adapter pulls in [`app-dev-panel/kernel`](https://packagist.org/packages/app-dev-panel/kernel) and [`app-dev-panel/api`](https://packagist.org/packages/app-dev-panel/api) as dependencies automatically.
+Each adapter pulls in <pkg>app-dev-panel/kernel</pkg> and <pkg>app-dev-panel/api</pkg> as dependencies automatically.
 
 ### 2. Configure your application
 

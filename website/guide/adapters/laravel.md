@@ -9,7 +9,7 @@ composer require app-dev-panel/adapter-laravel
 ```
 
 ::: info Package
-[`app-dev-panel/adapter-laravel`](https://packagist.org/packages/app-dev-panel/adapter-laravel)
+<pkg>app-dev-panel/adapter-laravel</pkg>
 :::
 
 The package is auto-discovered via `extra.laravel.providers` in composer.json — no manual registration needed.
