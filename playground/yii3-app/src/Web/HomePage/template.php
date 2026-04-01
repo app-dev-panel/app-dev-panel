@@ -2,25 +2,54 @@
 
 declare(strict_types=1);
 
-use App\Shared\ApplicationParams;
 use Yiisoft\View\WebView;
 
 /**
  * @var WebView $this
- * @var ApplicationParams $applicationParams
+ * @var Yiisoft\Router\UrlGeneratorInterface $urlGenerator
  */
 
-$this->setTitle($applicationParams->name);
+$this->setTitle('ADP Yii 3 Playground');
 ?>
 
-<div class="text-center">
-    <h1>Hello!</h1>
+<div class="page-header">
+    <h1>ADP Yii 3 Playground</h1>
+    <p>A demo application for testing the Application Development Panel</p>
+</div>
 
-    <p>Let's start something great with <strong>Yii3</strong>!</p>
+<div class="grid grid-2">
+    <a href="<?= $urlGenerator->generate('users') ?>" class="feature-card">
+        <div>
+            <h3>Users</h3>
+            <p>Browse the user directory with server-rendered table.</p>
+        </div>
+    </a>
 
-    <p>
-        <a href="https://yiisoft.github.io/docs/" target="_blank" rel="noopener">
-            <i>Don't forget to check the guide.</i>
-        </a>
-    </p>
+    <a href="<?= $urlGenerator->generate('contact') ?>" class="feature-card">
+        <div>
+            <h3>Contact Form</h3>
+            <p>Submit a form with server-side validation.</p>
+        </div>
+    </a>
+
+    <a href="<?= $urlGenerator->generate('api-playground') ?>" class="feature-card">
+        <div>
+            <h3>API Playground</h3>
+            <p>Send requests to API endpoints and inspect responses.</p>
+        </div>
+    </a>
+
+    <a href="<?= $urlGenerator->generate('error-demo') ?>" class="feature-card">
+        <div>
+            <h3>Error Demo</h3>
+            <p>Trigger an exception to test the error collector.</p>
+        </div>
+    </a>
+
+    <a href="/debug/api/" class="feature-card">
+        <div>
+            <h3>Debug Panel</h3>
+            <p>View collected debug data in the ADP panel.</p>
+        </div>
+    </a>
 </div>

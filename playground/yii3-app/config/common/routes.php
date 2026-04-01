@@ -8,7 +8,22 @@ use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 
 return [
-    Group::create()->routes(Route::get('/')->action(Web\HomePage\Action::class)->name('home')),
+    Group::create()->routes(
+        Route::get('/')->action(Web\HomePage\Action::class)->name('home'),
+        Route::get('/users')->action(Web\UsersPage\Action::class)->name('users'),
+        Route::methods(['GET', 'POST'], '/contact')
+            ->action(Web\ContactPage\Action::class)
+            ->name('contact'),
+        Route::get('/api-playground')->action(Web\ApiPlaygroundPage\Action::class)->name('api-playground'),
+        Route::get('/error')->action(Web\ErrorPage\Action::class)->name('error-demo'),
+    ),
+    Group::create('/api')
+        ->routes(
+            Route::get('/')->action(Web\Api\IndexAction::class)->name('api-index'),
+            Route::get('/users')->action(Web\Api\UsersAction::class)->name('api-users'),
+            Route::get('/error')->action(Web\Api\ErrorAction::class)->name('api-error'),
+        )
+        ->prependMiddleware(FormatDataResponseAsJson::class),
     Group::create('/test/fixtures')
         ->routes(
             Route::get('/logs')->action(Web\TestFixtures\LogsAction::class)->name('test-logs'),

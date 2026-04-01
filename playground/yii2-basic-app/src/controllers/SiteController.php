@@ -5,43 +5,68 @@ declare(strict_types=1);
 namespace App\controllers;
 
 use yii\web\Controller;
+use yii\web\Response;
 
 final class SiteController extends Controller
 {
-    public function actionIndex(): array
+    public string $layout = 'main';
+
+    public function actionIndex(): string
     {
         \Yii::info('Home page accessed', 'application');
 
-        // Demo translations — makes TranslatorCollector visible in the panel
-        \Yii::t('app', 'welcome', [], 'en');
-        \Yii::t('app', 'welcome', [], 'de');
-        \Yii::t('app', 'goodbye', [], 'fr'); // missing
-
-        return [
-            'message' => 'Welcome to the ADP Yii 2 Playground!',
-            'debug_panel' => '/debug/api/',
-            'endpoints' => [
-                'GET /' => 'This page',
-                'GET /api/users' => 'List users (demo)',
-                'GET /api/error' => 'Trigger an exception (demo)',
-            ],
-        ];
+        return $this->render('index');
     }
 
-    public function actionUsers(): array
+    public function actionUsers(): string
     {
-        \Yii::info('Users API called', 'application');
-        \Yii::debug('Fetching users from database', 'application');
+        \Yii::info('Users page accessed', 'application');
 
         $users = [
-            ['id' => 1, 'name' => 'Alice', 'email' => 'alice@example.com'],
-            ['id' => 2, 'name' => 'Bob', 'email' => 'bob@example.com'],
-            ['id' => 3, 'name' => 'Charlie', 'email' => 'charlie@example.com'],
+            ['id' => 1, 'name' => 'Alice', 'email' => 'alice@example.com', 'role' => 'Admin'],
+            ['id' => 2, 'name' => 'Bob', 'email' => 'bob@example.com', 'role' => 'Editor'],
+            ['id' => 3, 'name' => 'Charlie', 'email' => 'charlie@example.com', 'role' => 'Viewer'],
         ];
 
-        \Yii::info('Users fetched: ' . count($users), 'application');
+        return $this->render('users', ['users' => $users]);
+    }
 
-        return ['users' => $users];
+    public function actionContact(): string
+    {
+        $errors = [];
+        $success = false;
+        $data = [];
+
+        if (\Yii::$app->request->isPost) {
+            $data = \Yii::$app->request->post();
+
+            if (empty($data['name'])) {
+                $errors['name'] = 'Name is required.';
+            }
+            if (empty($data['email']) || !filter_var($data['email'] ?? '', FILTER_VALIDATE_EMAIL)) {
+                $errors['email'] = 'A valid email is required.';
+            }
+            if (empty($data['message'])) {
+                $errors['message'] = 'Message is required.';
+            }
+
+            if (empty($errors)) {
+                \Yii::info('Contact form submitted', 'application');
+                $success = true;
+                $data = [];
+            }
+        }
+
+        return $this->render('contact', [
+            'errors' => $errors,
+            'success' => $success,
+            'data' => $data,
+        ]);
+    }
+
+    public function actionApiPlayground(): string
+    {
+        return $this->render('api-playground');
     }
 
     public function actionErrorDemo(): never
@@ -51,20 +76,12 @@ final class SiteController extends Controller
         throw new \RuntimeException('This is a demo exception for ADP debugging');
     }
 
-    public function actionError(): array
+    public function actionError(): string
     {
         $exception = \Yii::$app->getErrorHandler()->exception;
 
-        return [
-            'error' => $exception?->getMessage() ?? 'Unknown error',
-            'code' => $exception?->getCode() ?? 500,
-        ];
-    }
-
-    public function beforeAction($action): bool
-    {
-        // Return JSON for all actions
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        return parent::beforeAction($action);
+        return $this->render('error', [
+            'exception' => $exception,
+        ]);
     }
 }

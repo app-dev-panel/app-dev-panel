@@ -13,21 +13,20 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class HomeController extends AbstractController
 {
-    #[Route('/', name: 'home', methods: ['GET'])]
-    public function index(LoggerInterface $logger, TranslatorInterface $translator): JsonResponse
+    #[Route('/api', name: 'api_index', methods: ['GET'])]
+    public function apiIndex(LoggerInterface $logger, TranslatorInterface $translator): JsonResponse
     {
-        $logger->info('Home page accessed');
+        $logger->info('API index accessed');
 
-        // Demo translations — makes TranslatorCollector visible in the panel
         $translator->trans('welcome', [], 'messages', 'en');
         $translator->trans('welcome', [], 'messages', 'de');
         $translator->trans('goodbye', [], 'messages', 'fr'); // missing
 
         return $this->json([
-            'message' => 'Welcome to the ADP Symfony Playground!',
+            'message' => 'Welcome to the ADP Symfony Playground API!',
             'debug_panel' => '/debug/api/',
             'endpoints' => [
-                'GET /' => 'This page',
+                'GET /api' => 'This page',
                 'GET /api/users' => 'List users (demo)',
                 'GET /api/error' => 'Trigger an exception (demo)',
             ],

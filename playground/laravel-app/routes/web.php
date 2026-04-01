@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\TestFixtures\CacheAction;
 use App\Http\Controllers\TestFixtures\CacheHeavyAction;
 use App\Http\Controllers\TestFixtures\CoverageAction;
@@ -35,7 +36,15 @@ use App\Http\Controllers\TestFixtures\ValidatorAction;
 use App\Http\Controllers\TestFixtures\ViewAction;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [HomeController::class, 'index']);
+// Web pages
+Route::get('/', [PageController::class, 'home']);
+Route::get('/users', [PageController::class, 'users']);
+Route::match(['GET', 'POST'], '/contact', [PageController::class, 'contact']);
+Route::get('/api-playground', [PageController::class, 'apiPlayground']);
+Route::get('/error', [PageController::class, 'errorDemo']);
+
+// API
+Route::get('/api', [HomeController::class, 'index']);
 Route::get('/api/users', [HomeController::class, 'users']);
 Route::get('/api/error', [HomeController::class, 'error']);
 

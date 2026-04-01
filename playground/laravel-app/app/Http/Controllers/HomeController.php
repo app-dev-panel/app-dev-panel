@@ -28,7 +28,7 @@ final class HomeController
             'message' => 'Welcome to the ADP Laravel Playground!',
             'debug_panel' => '/debug/api/',
             'endpoints' => [
-                'GET /' => 'This page',
+                'GET /api' => 'This page',
                 'GET /api/users' => 'List users (demo)',
                 'GET /api/error' => 'Trigger an exception (demo)',
             ],
