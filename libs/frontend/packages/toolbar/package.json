@@ -1,6 +1,6 @@
 {
   "name": "@app-dev-panel/toolbar",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "src/index.tsx",
   "homepage": ".",
   "keywords": [
@@ -22,8 +22,8 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
+    "@app-dev-panel/sdk": "^0.0.2",
     "@welldone-software/why-did-you-render": "^8.0.3",
-    "@app-dev-panel/sdk": "^0.0.1",
     "react-dev-utils": "^12.0.1",
     "react-resizable-layout": "^0.7.2",
     "redux-state-sync": "^3.1.4"
