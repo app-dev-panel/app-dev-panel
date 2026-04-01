@@ -94,28 +94,44 @@ final class TemplateCollectorTest extends AbstractCollectorTestCase
         $this->assertSame(0.005, $data['totalTime']);
     }
 
-    public function testNestingDepthTracking(): void
+    public function testBeginEndRenderNesting(): void
     {
         $timeline = new TimelineCollector();
         $timeline->startup();
         $collector = new TemplateCollector($timeline);
         $collector->startup();
 
-        $collector->beginRender();
-        $collector->beginRender();
-        $collector->endRender();
-        $collector->collectRender('/views/layout.php', '<html>...</html>');
-        $collector->beginRender();
-        $collector->endRender();
-        $collector->collectRender('/views/index.php', '<div>content</div>');
-        $collector->endRender();
-        $collector->collectRender('/views/other.php', '<p>other</p>');
+        // Simulate: layout > view-with-partials > _sidebar, _content-block
+        $collector->beginRender('/views/layout.php'); // depth 0
+        $collector->beginRender('/views/view-with-partials.php'); // depth 1
+        $collector->beginRender('/views/_sidebar.php'); // depth 2
+        $collector->endRender('<nav>...</nav>', [], 0.003);
+        $collector->beginRender('/views/_content-block.php'); // depth 2
+        $collector->endRender('<section>...</section>', [], 0.002);
+        $collector->endRender('<div>...</div>', ['title' => 'Test'], 0.010);
+        $collector->endRender('<html>...</html>', ['content' => '...'], 0.015);
 
         $data = $collector->getCollected();
 
-        $this->assertSame(1, $data['renders'][0]['depth']);
+        // Parent-first order: layout, view-with-partials, _sidebar, _content-block
+        $this->assertCount(4, $data['renders']);
+
+        $this->assertSame('/views/layout.php', $data['renders'][0]['template']);
+        $this->assertSame(0, $data['renders'][0]['depth']);
+        $this->assertSame('<html>...</html>', $data['renders'][0]['output']);
+        $this->assertSame(0.015, $data['renders'][0]['renderTime']);
+
+        $this->assertSame('/views/view-with-partials.php', $data['renders'][1]['template']);
         $this->assertSame(1, $data['renders'][1]['depth']);
-        $this->assertSame(0, $data['renders'][2]['depth']);
+        $this->assertSame(['title' => 'Test'], $data['renders'][1]['parameters']);
+
+        $this->assertSame('/views/_sidebar.php', $data['renders'][2]['template']);
+        $this->assertSame(2, $data['renders'][2]['depth']);
+
+        $this->assertSame('/views/_content-block.php', $data['renders'][3]['template']);
+        $this->assertSame(2, $data['renders'][3]['depth']);
+
+        $this->assertSame(0.030, $data['totalTime']);
     }
 
     public function testExplicitDepthParameter(): void

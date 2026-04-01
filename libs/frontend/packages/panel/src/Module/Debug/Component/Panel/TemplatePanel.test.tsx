@@ -5,15 +5,15 @@ import {describe, expect, it} from 'vitest';
 import {TemplatePanel} from './TemplatePanel';
 
 const makeRender = (
-    overrides: Partial<{template: string; renderTime: number; output: string; parameters: any[]}> = {},
-) => ({template: 'home/index.html.twig', renderTime: 5.2, output: '', parameters: [], ...overrides});
+    overrides: Partial<{template: string; renderTime: number; output: string; parameters: unknown[]}> = {},
+) => ({template: 'home/index.html.twig', renderTime: 5.2, output: '', parameters: [] as unknown[], ...overrides});
 
 const makeData = (
     overrides: Partial<{
-        renders: any[];
+        renders: ReturnType<typeof makeRender>[];
         totalTime: number;
         renderCount: number;
-        duplicates: {groups: any[]; totalDuplicatedCount: number};
+        duplicates: {groups: {key: string; count: number; indices: number[]}[]; totalDuplicatedCount: number};
     }> = {},
 ) => ({
     renders: [makeRender()],

@@ -20,7 +20,7 @@ import {
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
 
-type Render = {template: string; renderTime: number; output: string; parameters: any[]; depth?: number};
+type Render = {template: string; renderTime: number; output: string; parameters: unknown[]; depth?: number};
 type DuplicateGroup = {key: string; count: number; indices: number[]};
 type DuplicatesData = {groups: DuplicateGroup[]; totalDuplicatedCount: number};
 type TemplatePanelProps = {
@@ -55,7 +55,7 @@ function hasTiming(renders: Render[]): boolean {
 }
 
 function isFilePath(template: string): boolean {
-    return template.includes('/') && (template.endsWith('.php') || template.includes('/views/'));
+    return template.includes('/') && /\.\w+$/.test(template);
 }
 
 const RenderRow = styled(Box, {shouldForwardProp: (p) => p !== 'expandable' && p !== 'expanded'})<{
@@ -131,12 +131,12 @@ const RenderItem = ({
     const showAsPath = isFilePath(render.template);
 
     return (
-        <Box key={index}>
+        <Box>
             <RenderRow
                 expandable={expandable}
                 expanded={expanded}
                 onClick={expandable ? onToggle : undefined}
-                sx={render.depth ? {pl: 1.5 + render.depth * 3} : undefined}
+                sx={render.depth != null && render.depth > 0 ? {pl: 1.5 + render.depth * 3} : undefined}
             >
                 <Box sx={{flex: 1, minWidth: 0}}>
                     {showAsPath ? (
@@ -172,13 +172,18 @@ const RenderItem = ({
                     </DurationCell>
                 )}
                 {expandable && (
-                    <IconButton size="small" sx={{flexShrink: 0}}>
+                    <IconButton
+                        size="small"
+                        aria-expanded={expanded}
+                        aria-label={expanded ? 'Collapse' : 'Expand'}
+                        sx={{flexShrink: 0}}
+                    >
                         <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
                     </IconButton>
                 )}
             </RenderRow>
             {expandable && (
-                <Collapse in={expanded}>
+                <Collapse in={expanded} unmountOnExit>
                     <DetailBox>
                         {render.output && (
                             <Box sx={{mb: 1.5}}>
@@ -192,7 +197,8 @@ const RenderItem = ({
                                 </OutputPreview>
                                 {isTruncated && (
                                     <Typography
-                                        onClick={(e) => {
+                                        component="button"
+                                        onClick={(e: React.MouseEvent) => {
                                             e.stopPropagation();
                                             onToggleFullOutput(index);
                                         }}
@@ -201,6 +207,9 @@ const RenderItem = ({
                                             color: 'primary.main',
                                             cursor: 'pointer',
                                             mt: 0.5,
+                                            p: 0,
+                                            border: 'none',
+                                            background: 'none',
                                             '&:hover': {textDecoration: 'underline'},
                                         }}
                                     >
@@ -264,11 +273,16 @@ const DuplicateGroupView = ({
                     color="warning"
                     sx={{fontWeight: 700, fontSize: '11px', height: 22, borderRadius: 1, flexShrink: 0}}
                 />
-                <IconButton size="small" sx={{flexShrink: 0}}>
+                <IconButton
+                    size="small"
+                    aria-expanded={expanded}
+                    aria-label={expanded ? 'Collapse group' : 'Expand group'}
+                    sx={{flexShrink: 0}}
+                >
                     <Icon sx={{fontSize: 16}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
                 </IconButton>
             </GroupHeader>
-            <Collapse in={expanded}>
+            <Collapse in={expanded} unmountOnExit>
                 <Box sx={{pl: 2}}>
                     {group.indices.map((originalIndex) => {
                         const entry = renders[originalIndex];
@@ -299,12 +313,8 @@ export const TemplatePanel = ({data}: TemplatePanelProps) => {
     const [showFullOutput, setShowFullOutput] = useState<Set<number>>(new Set());
     const [viewMode, setViewMode] = useState<'flat' | 'grouped'>('flat');
 
-    if (!data || !data.renders || data.renders.length === 0) {
-        return <EmptyState icon="code" title="No template renders found" />;
-    }
-
-    const renders = data.renders;
-    const duplicates = data.duplicates ?? {groups: [], totalDuplicatedCount: 0};
+    const renders = data?.renders ?? [];
+    const duplicates = data?.duplicates ?? {groups: [], totalDuplicatedCount: 0};
     const showTiming = hasTiming(renders);
     const hasDuplicates = duplicates.groups.length > 0;
 
@@ -320,6 +330,10 @@ export const TemplatePanel = ({data}: TemplatePanelProps) => {
             .filter((group) => !deferredFilter || group.key.toLowerCase().includes(filterLower))
             .map((group) => ({...group, items: group.indices.map((i) => renders[i]).filter(Boolean)}));
     }, [hasDuplicates, viewMode, duplicates.groups, renders, deferredFilter]);
+
+    if (renders.length === 0) {
+        return <EmptyState icon="code" title="No template renders found" />;
+    }
 
     const toggleFullOutput = (index: number) => {
         setShowFullOutput((prev) => {

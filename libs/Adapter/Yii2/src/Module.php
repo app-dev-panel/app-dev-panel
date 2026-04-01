@@ -1044,8 +1044,8 @@ class Module extends \yii\base\Module implements BootstrapInterface
     private function registerTemplateProfiling(TemplateCollector $collector): void
     {
         // Track render start times using a stack to handle nested renders correctly.
-        // The same view file can be rendered recursively, so we use a stack per file path.
-        // beginRender/endRender track nesting depth for hierarchy display.
+        // beginRender() creates a placeholder in parent-first order with correct depth.
+        // endRender() fills in output, params, and timing when the render completes.
         $timers = [];
 
         Event::on(
@@ -1053,7 +1053,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             \yii\base\View::EVENT_BEFORE_RENDER,
             static function (\yii\base\ViewEvent $event) use ($collector, &$timers): void {
                 $timers[$event->viewFile][] = microtime(true);
-                $collector->beginRender();
+                $collector->beginRender($event->viewFile);
             },
         );
 
@@ -1070,8 +1070,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 }
 
                 $renderTime = $startTime > 0 ? microtime(true) - $startTime : 0.0;
-                $collector->endRender();
-                $collector->collectRender($event->viewFile, $event->output, $event->params, $renderTime);
+                $collector->endRender($event->output, $event->params, $renderTime);
             },
         );
     }
