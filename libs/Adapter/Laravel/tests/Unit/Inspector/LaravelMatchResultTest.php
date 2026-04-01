@@ -106,4 +106,49 @@ final class LaravelMatchResultTest extends TestCase
         $this->assertSame(['ClosureHandler'], $result->route()->middlewares);
         $this->assertTrue($result->route()->isSuccess());
     }
+
+    public function testMiddlewaresPropertyAccessibleViaReflection(): void
+    {
+        // RoutingController::checkRoute() uses reflection to read the middlewares property.
+        // Verify the property exists and is accessible.
+        $result = new LaravelMatchResult(true, 'App\\Controller@action');
+        $route = $result->route();
+
+        $reflection = new \ReflectionObject($route);
+        $this->assertTrue($reflection->hasProperty('middlewares'));
+
+        $property = $reflection->getProperty('middlewares');
+        $middlewares = $property->getValue($route);
+        $this->assertSame(['App\\Controller@action'], $middlewares);
+    }
+
+    public function testMiddlewaresEmptyWhenNoController(): void
+    {
+        $result = new LaravelMatchResult(true);
+        $route = $result->route();
+
+        $reflection = new \ReflectionObject($route);
+        $property = $reflection->getProperty('middlewares');
+        $middlewares = $property->getValue($route);
+        $this->assertSame([], $middlewares);
+    }
+
+    public function testMultipleRouteCallsReturnSameInstance(): void
+    {
+        $result = new LaravelMatchResult(true, 'Controller@show');
+
+        $route1 = $result->route();
+        $route2 = $result->route();
+
+        $this->assertSame($route1, $route2);
+    }
+
+    public function testSuccessWithNullControllerExplicitMiddlewares(): void
+    {
+        $result = new LaravelMatchResult(false, null);
+
+        $this->assertFalse($result->isSuccess());
+        $this->assertSame([], $result->middlewares);
+        $this->assertSame($result, $result->route());
+    }
 }

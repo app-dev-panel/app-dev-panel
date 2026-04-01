@@ -252,4 +252,63 @@ final class Psr7ConverterTest extends TestCase
 
         $this->assertNotEmpty($psrRequest->getServerParams());
     }
+
+    public function testConvertResponseStreamedResponsePreservesHeaders(): void
+    {
+        $response = new StreamedResponse(
+            function (): void {
+                echo 'data';
+            },
+            201,
+            ['X-Custom-Header' => 'streamed-value', 'Content-Type' => 'text/event-stream'],
+        );
+
+        $converter = new Psr7Converter();
+        $psrResponse = $converter->convertResponse($response);
+
+        $this->assertSame(201, $psrResponse->getStatusCode());
+        $this->assertSame('streamed-value', $psrResponse->getHeaderLine('x-custom-header'));
+        $this->assertStringContainsString('text/event-stream', $psrResponse->getHeaderLine('content-type'));
+        // StreamedResponse::getContent() returns false, so body remains empty
+        $this->assertSame('', (string) $psrResponse->getBody());
+    }
+
+    public function testConvertResponseWithHtmlContent(): void
+    {
+        $html = '<html><body><h1>Hello</h1></body></html>';
+        $response = new Response($html, 200, ['Content-Type' => 'text/html']);
+
+        $converter = new Psr7Converter();
+        $psrResponse = $converter->convertResponse($response);
+
+        $this->assertSame(200, $psrResponse->getStatusCode());
+        $this->assertSame($html, (string) $psrResponse->getBody());
+        $this->assertStringContainsString('text/html', $psrResponse->getHeaderLine('content-type'));
+    }
+
+    public function testConvertResponseWith301Redirect(): void
+    {
+        $response = new Response('', 301, ['Location' => 'https://example.com/new']);
+
+        $converter = new Psr7Converter();
+        $psrResponse = $converter->convertResponse($response);
+
+        $this->assertSame(301, $psrResponse->getStatusCode());
+        $this->assertSame('https://example.com/new', $psrResponse->getHeaderLine('location'));
+    }
+
+    public function testConvertRequestWithMultipleHeaders(): void
+    {
+        $request = Request::create('https://example.com/api/test', 'POST', content: '{}');
+        $request->headers->set('Accept', 'application/json');
+        $request->headers->set('Authorization', 'Bearer token123');
+        $request->headers->set('X-Request-Id', 'req-42');
+
+        $converter = new Psr7Converter();
+        $psrRequest = $converter->convertRequest($request);
+
+        $this->assertSame('application/json', $psrRequest->getHeaderLine('accept'));
+        $this->assertSame('Bearer token123', $psrRequest->getHeaderLine('authorization'));
+        $this->assertSame('req-42', $psrRequest->getHeaderLine('x-request-id'));
+    }
 }

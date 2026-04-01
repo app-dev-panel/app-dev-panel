@@ -216,4 +216,83 @@ final class RoutingControllerTest extends ControllerTestCase
         $data = $this->responseData($response);
         $this->assertCount(3, $data);
     }
+
+    public function testCheckRouteWithHeadMethod(): void
+    {
+        $route = Route::get('/status')->name('status')->middleware('handler');
+        $result = MatchingResult::fromSuccess($route, []);
+
+        $matcher = $this->createMock(UrlMatcherInterface::class);
+        $matcher->method('match')->willReturn($result);
+
+        $controller = $this->createController(urlMatcher: $matcher);
+        $response = $controller->checkRoute($this->get(['route' => 'HEAD /status']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertTrue($data['result']);
+    }
+
+    public function testCheckRouteWithOptionsMethod(): void
+    {
+        $route = Route::options('/api/resource')->name('options')->middleware('cors');
+        $result = MatchingResult::fromSuccess($route, []);
+
+        $matcher = $this->createMock(UrlMatcherInterface::class);
+        $matcher->method('match')->willReturn($result);
+
+        $controller = $this->createController(urlMatcher: $matcher);
+        $response = $controller->checkRoute($this->get(['route' => 'OPTIONS /api/resource']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertTrue($data['result']);
+    }
+
+    public function testCheckRoutePathWithoutSpaceDefaultsToGet(): void
+    {
+        $route = Route::get('/simple')->name('simple')->middleware('handler');
+        $result = MatchingResult::fromSuccess($route, []);
+
+        $matcher = $this->createMock(UrlMatcherInterface::class);
+        $matcher->method('match')->willReturn($result);
+
+        $controller = $this->createController(urlMatcher: $matcher);
+        $response = $controller->checkRoute($this->get(['route' => '/simple']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertTrue($data['result']);
+    }
+
+    public function testCheckRouteTrimsWhitespace(): void
+    {
+        $route = Route::get('/trimmed')->name('trimmed')->middleware('handler');
+        $result = MatchingResult::fromSuccess($route, []);
+
+        $matcher = $this->createMock(UrlMatcherInterface::class);
+        $matcher->method('match')->willReturn($result);
+
+        $controller = $this->createController(urlMatcher: $matcher);
+        $response = $controller->checkRoute($this->get(['route' => '  /trimmed  ']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertTrue($data['result']);
+    }
+
+    public function testCheckRouteWithPathContainingSpaces(): void
+    {
+        // "NOTMETHOD /path" should NOT split into method/path since NOTMETHOD is not HTTP method
+        // The entire string (after trim) becomes the path with default GET method
+        $matcher = $this->createMock(UrlMatcherInterface::class);
+        $matcher->method('match')->willReturn(MatchingResult::fromFailure([405]));
+
+        $controller = $this->createController(urlMatcher: $matcher);
+        $response = $controller->checkRoute($this->get(['route' => 'some path with spaces']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertFalse($data['result']);
+    }
 }

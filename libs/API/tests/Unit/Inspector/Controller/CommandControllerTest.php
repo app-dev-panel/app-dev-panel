@@ -417,10 +417,7 @@ final class CommandControllerTest extends ControllerTestCase
         file_put_contents($tmpDir . '/composer.json', $composerJson);
 
         try {
-            $controller = $this->createController(
-                commandMap: [],
-                pathResolver: $this->pathResolver($tmpDir),
-            );
+            $controller = $this->createController(commandMap: [], pathResolver: $this->pathResolver($tmpDir));
 
             // First verify the script appears in the index
             $indexResponse = $controller->index($this->get());
@@ -476,10 +473,7 @@ final class CommandControllerTest extends ControllerTestCase
         $mock->expects($this->once())->method('run')->willReturn($result);
 
         // PHPUnitCommand is a built-in that IS available
-        $controller = $this->createController(
-            commandMap: [],
-            containerServices: [PHPUnitCommand::class => $mock],
-        );
+        $controller = $this->createController(commandMap: [], containerServices: [PHPUnitCommand::class => $mock]);
 
         $response = $controller->run($this->get(['command' => 'test/phpunit']));
         $data = $this->responseData($response);
@@ -502,19 +496,13 @@ final class CommandControllerTest extends ControllerTestCase
         file_put_contents($tmpDir . '/composer.json', $composerJson);
 
         try {
-            $controller = $this->createController(
-                commandMap: [],
-                pathResolver: $this->pathResolver($tmpDir),
-            );
+            $controller = $this->createController(commandMap: [], pathResolver: $this->pathResolver($tmpDir));
 
             $response = $controller->index($this->get());
             $data = $this->responseData($response);
 
             // Verify the multi-step script appears with joined description
-            $multiCmd = array_values(array_filter(
-                $data,
-                static fn(array $item) => $item['name'] === 'composer/multi',
-            ));
+            $multiCmd = array_values(array_filter($data, static fn(array $item) => $item['name'] === 'composer/multi'));
             $this->assertCount(1, $multiCmd);
             $this->assertStringContainsString('echo step1', $multiCmd[0]['description']);
             $this->assertStringContainsString('echo step2', $multiCmd[0]['description']);
@@ -538,10 +526,7 @@ final class CommandControllerTest extends ControllerTestCase
         file_put_contents($tmpDir . '/composer.json', $composerJson);
 
         try {
-            $controller = $this->createController(
-                commandMap: [],
-                pathResolver: $this->pathResolver($tmpDir),
-            );
+            $controller = $this->createController(commandMap: [], pathResolver: $this->pathResolver($tmpDir));
 
             // Run the composer/greet command
             $response = $controller->run($this->get(['command' => 'composer/greet']));
@@ -573,16 +558,108 @@ final class CommandControllerTest extends ControllerTestCase
         file_put_contents($tmpDir . '/composer.json', $composerJson);
 
         try {
-            $controller = $this->createController(
-                commandMap: [],
-                pathResolver: $this->pathResolver($tmpDir),
-            );
+            $controller = $this->createController(commandMap: [], pathResolver: $this->pathResolver($tmpDir));
 
             $response = $controller->index($this->get());
             $data = $this->responseData($response);
 
             $composerCommands = array_filter($data, static fn(array $item) => $item['group'] === 'composer');
             $this->assertEmpty($composerCommands);
+        } finally {
+            @unlink($tmpDir . '/composer.json');
+            @rmdir($tmpDir);
+        }
+    }
+
+    public function testRunBuiltInCommandFallsBackToBashWhenNotInContainer(): void
+    {
+        $tmpDir = sys_get_temp_dir() . '/adp-cmd-fallback-' . uniqid();
+        mkdir($tmpDir, 0755, true);
+        file_put_contents($tmpDir . '/composer.json', json_encode(['scripts' => []], JSON_THROW_ON_ERROR));
+
+        try {
+            $controller = $this->createController(
+                commandMap: [
+                    'testing' => [
+                        'my-bash' => BashCommand::class,
+                    ],
+                ],
+                containerServices: [],
+                pathResolver: $this->pathResolver($tmpDir),
+            );
+
+            $response = $controller->run($this->get(['command' => 'my-bash']));
+            $data = $this->responseData($response);
+
+            $this->assertArrayHasKey('status', $data);
+            $this->assertContains($data['status'], [
+                CommandResponse::STATUS_OK,
+                CommandResponse::STATUS_ERROR,
+                CommandResponse::STATUS_FAIL,
+            ]);
+        } finally {
+            @unlink($tmpDir . '/composer.json');
+            @rmdir($tmpDir);
+        }
+    }
+
+    public function testRunComposerScriptResolvesAsArrayCommand(): void
+    {
+        $tmpDir = sys_get_temp_dir() . '/adp-cmd-arr-resolve-' . uniqid();
+        mkdir($tmpDir, 0755, true);
+        file_put_contents($tmpDir . '/composer.json', json_encode([
+            'scripts' => ['test-script' => 'echo ok'],
+        ], JSON_THROW_ON_ERROR));
+
+        try {
+            $controller = $this->createController(
+                commandMap: [],
+                containerServices: [],
+                pathResolver: $this->pathResolver($tmpDir),
+            );
+
+            $response = $controller->run($this->get(['command' => 'composer/test-script']));
+            $data = $this->responseData($response);
+
+            $this->assertArrayHasKey('status', $data);
+            $this->assertArrayHasKey('result', $data);
+            $this->assertArrayHasKey('error', $data);
+        } finally {
+            @unlink($tmpDir . '/composer.json');
+            @rmdir($tmpDir);
+        }
+    }
+
+    public function testRunComposerScriptIsNotResolvedFromContainer(): void
+    {
+        $tmpDir = sys_get_temp_dir() . '/adp-cmd-composer-nocontainer-' . uniqid();
+        mkdir($tmpDir, 0755, true);
+        file_put_contents($tmpDir . '/composer.json', json_encode([
+            'scripts' => ['lint' => 'echo lint'],
+        ], JSON_THROW_ON_ERROR));
+
+        try {
+            $containerCallCount = 0;
+            $container = $this->createMock(\Psr\Container\ContainerInterface::class);
+            $container
+                ->method('has')
+                ->willReturnCallback(function () use (&$containerCallCount) {
+                    $containerCallCount++;
+                    return false;
+                });
+
+            $controller = new CommandController(
+                $this->createResponseFactory(),
+                $this->pathResolver($tmpDir),
+                $container,
+            );
+
+            $response = $controller->run($this->get(['command' => 'composer/lint']));
+            $data = $this->responseData($response);
+
+            // Container::has() should NOT be called for array commands
+            $this->assertSame(0, $containerCallCount);
+            $this->assertArrayHasKey('status', $data);
         } finally {
             @unlink($tmpDir . '/composer.json');
             @rmdir($tmpDir);

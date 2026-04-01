@@ -314,4 +314,112 @@ final class CodeCoverageHelperTest extends TestCase
 
         $this->assertSame(33.33, $summary['percentage']);
     }
+
+    public function testDetectDriverReturnsPcovWhenEnabled(): void
+    {
+        if (!\extension_loaded('pcov') || !\ini_get('pcov.enabled')) {
+            $this->markTestSkipped('pcov extension is not loaded or not enabled.');
+        }
+
+        $this->assertSame('pcov', CodeCoverageHelper::detectDriver());
+    }
+
+    public function testDetectDriverReturnsStringOrNull(): void
+    {
+        $result = CodeCoverageHelper::detectDriver();
+
+        // The result must be one of the known drivers or null
+        $this->assertContains($result, [null, 'pcov', 'xdebug']);
+    }
+
+    public function testDetectDriverPrefersExistingDriver(): void
+    {
+        $result = CodeCoverageHelper::detectDriver();
+
+        // If any driver extension is loaded and active, result should not be null
+        if (\extension_loaded('pcov') && \ini_get('pcov.enabled')) {
+            $this->assertSame('pcov', $result);
+        } elseif (\extension_loaded('xdebug')) {
+            $this->assertContains($result, [null, 'xdebug']);
+        } else {
+            $this->assertNull($result);
+        }
+    }
+
+    public function testProcessCoverageWithEmptyLinesArray(): void
+    {
+        $rawCoverage = [
+            '/app/src/Empty.php' => [],
+        ];
+
+        $result = CodeCoverageHelper::processCoverage($rawCoverage, excludePaths: []);
+
+        // File with no lines should be skipped (0 executable lines)
+        $this->assertSame([], $result['files']);
+        $this->assertSame(0, $result['coveredLines']);
+        $this->assertSame(0, $result['executableLines']);
+    }
+
+    public function testProcessCoverageSingleCoveredLine(): void
+    {
+        $rawCoverage = [
+            '/app/src/One.php' => [
+                1 => 1,
+            ],
+        ];
+
+        $result = CodeCoverageHelper::processCoverage($rawCoverage, excludePaths: []);
+
+        $file = $result['files']['/app/src/One.php'];
+        $this->assertSame(1, $file['coveredLines']);
+        $this->assertSame(1, $file['executableLines']);
+        $this->assertSame(100.0, $file['percentage']);
+    }
+
+    public function testProcessCoverageSingleUncoveredLine(): void
+    {
+        $rawCoverage = [
+            '/app/src/One.php' => [
+                1 => -1,
+            ],
+        ];
+
+        $result = CodeCoverageHelper::processCoverage($rawCoverage, excludePaths: []);
+
+        $file = $result['files']['/app/src/One.php'];
+        $this->assertSame(0, $file['coveredLines']);
+        $this->assertSame(1, $file['executableLines']);
+        $this->assertSame(0.0, $file['percentage']);
+    }
+
+    public function testBuildSummaryWithManyFiles(): void
+    {
+        $files = [];
+        $totalCovered = 0;
+        $totalExecutable = 0;
+        for ($i = 0; $i < 100; $i++) {
+            $covered = $i;
+            $executable = 100;
+            $files["/app/src/File{$i}.php"] = [
+                'coveredLines' => $covered,
+                'executableLines' => $executable,
+                'percentage' => (float) $covered,
+            ];
+            $totalCovered += $covered;
+            $totalExecutable += $executable;
+        }
+
+        $summary = CodeCoverageHelper::buildSummary($files, $totalCovered, $totalExecutable);
+
+        $this->assertSame(100, $summary['totalFiles']);
+        $this->assertSame($totalCovered, $summary['coveredLines']);
+        $this->assertSame($totalExecutable, $summary['executableLines']);
+        $this->assertSame(round(($totalCovered / $totalExecutable) * 100, 2), $summary['percentage']);
+    }
+
+    public function testShouldIncludeFileWithMultipleExcludePathsPartialMatch(): void
+    {
+        // File path contains 'vendor' as substring but not as a directory segment
+        $this->assertTrue(CodeCoverageHelper::shouldIncludeFile('/app/src/VendorHelper.php', [], ['vendor']));
+    }
 }

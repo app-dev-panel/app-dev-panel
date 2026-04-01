@@ -246,4 +246,125 @@ final class RequestControllerTest extends ControllerTestCase
         $response = $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']));
         $this->assertSame(200, $response->getStatusCode());
     }
+
+    public function testRequestParsesRawHttpRequestAndAttemptsSend(): void
+    {
+        // Test that request() parses the raw HTTP request and tries to send via Guzzle.
+        // We use an unreachable IP so Guzzle throws a ConnectException.
+        $rawRequest = "GET / HTTP/1.1\r\nHost: 127.0.0.254\r\n\r\n";
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getDetail')
+            ->with('entry-1')
+            ->willReturn([
+                self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
+            ]);
+
+        $controller = new RequestController($this->createResponseFactory(), $repository, []);
+
+        try {
+            $controller->request($this->get(['debugEntryId' => 'entry-1']));
+            $this->fail('Expected a Guzzle exception for unreachable host.');
+        } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+            // request() successfully parsed the raw HTTP request and attempted to send it
+            $this->assertStringContainsString('127.0.0.254', $e->getMessage());
+        }
+    }
+
+    public function testRequestWithAllowedHostSucceedsValidation(): void
+    {
+        // Verify request() passes host validation when host is in allowed list
+        $rawRequest = "GET / HTTP/1.1\r\nHost: 127.0.0.254\r\n\r\n";
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getDetail')
+            ->willReturn([
+                self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
+            ]);
+
+        $controller = new RequestController($this->createResponseFactory(), $repository, ['127.0.0.254']);
+
+        try {
+            $controller->request($this->get(['debugEntryId' => 'entry-1']));
+            $this->fail('Expected a Guzzle exception.');
+        } catch (\GuzzleHttp\Exception\GuzzleException) {
+            // Host validation passed, Guzzle attempted the connection
+            $this->addToAssertionCount(1);
+        }
+    }
+
+    public function testRequestUsesDebugEntryIdFromQueryParams(): void
+    {
+        $rawRequest = "GET / HTTP/1.1\r\nHost: 127.0.0.254\r\n\r\n";
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->expects($this->once())
+            ->method('getDetail')
+            ->with('my-entry-id')
+            ->willReturn([
+                self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
+            ]);
+
+        $controller = new RequestController($this->createResponseFactory(), $repository);
+
+        try {
+            $controller->request($this->get(['debugEntryId' => 'my-entry-id']));
+        } catch (\GuzzleHttp\Exception\GuzzleException) {
+            // Expected — the important assertion is that getDetail received 'my-entry-id'
+        }
+    }
+
+    public function testRequestWithMultipleAllowedHostsRejectsUnlisted(): void
+    {
+        $rawRequest = "GET / HTTP/1.1\r\nHost: blocked.com\r\n\r\n";
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getDetail')
+            ->willReturn([
+                self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
+            ]);
+
+        $controller = new RequestController(
+            $this->createResponseFactory(),
+            $repository,
+            ['localhost', '127.0.0.1', 'example.com'],
+        );
+
+        try {
+            $controller->request($this->get(['debugEntryId' => 'entry-1']));
+            $this->fail('Expected InvalidArgumentException');
+        } catch (InvalidArgumentException $e) {
+            $this->assertStringContainsString('blocked.com', $e->getMessage());
+            $this->assertStringContainsString('localhost', $e->getMessage());
+            $this->assertStringContainsString('127.0.0.1', $e->getMessage());
+            $this->assertStringContainsString('example.com', $e->getMessage());
+        }
+    }
+
+    public function testRequestParsesPostRequestWithBody(): void
+    {
+        // Verify request() can parse a POST request with body
+        $rawRequest = "POST /api/submit HTTP/1.1\r\nHost: 127.0.0.254\r\nContent-Type: application/json\r\n\r\n{\"data\":1}";
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getDetail')
+            ->willReturn([
+                self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
+            ]);
+
+        $controller = new RequestController($this->createResponseFactory(), $repository);
+
+        try {
+            $controller->request($this->get(['debugEntryId' => 'entry-1']));
+            $this->fail('Expected a Guzzle exception for unreachable host.');
+        } catch (\GuzzleHttp\Exception\GuzzleException) {
+            // POST request was successfully parsed and Guzzle attempted to send it
+            $this->addToAssertionCount(1);
+        }
+    }
 }

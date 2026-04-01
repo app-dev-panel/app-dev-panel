@@ -6,9 +6,6 @@ namespace AppDevPanel\Api\Tests\Unit\Inspector\Command;
 
 use AppDevPanel\Api\Inspector\Command\CodeceptionCommand;
 use AppDevPanel\Api\Inspector\CommandInterface;
-use AppDevPanel\Api\Inspector\CommandResponse;
-use AppDevPanel\Api\Inspector\Test\CodeceptionJSONReporter;
-use AppDevPanel\Api\PathResolverInterface;
 use PHPUnit\Framework\TestCase;
 
 final class CodeceptionCommandTest extends TestCase
