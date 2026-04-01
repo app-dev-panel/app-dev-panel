@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bc07cd4b0972f7dcf430450ace921604",
+    "content-hash": "0573f059e8c093d7004e3df4eb05d9bb",
     "packages": [
         {
             "name": "alexkart/curl-builder",
@@ -54,12 +54,12 @@
             "time": "2025-06-03T23:28:32+00:00"
         },
         {
-            "name": "app-dev-panel/adapter-yiisoft",
-            "version": "dev-claude/architect-skill-review-k3Nym",
+            "name": "app-dev-panel/adapter-yii3",
+            "version": "dev-claude/improve-playgrounds-api-pFqYT",
             "dist": {
                 "type": "path",
-                "url": "../../libs/Adapter/Yiisoft",
-                "reference": "3b719d15149b8afec9fc58de827af21b37ed41fa"
+                "url": "../../libs/Adapter/Yii3",
+                "reference": "7773fa673613e6db850488f16c7c18f6de0fddf6"
             },
             "require": {
                 "app-dev-panel/api": "*",
@@ -124,12 +124,12 @@
             },
             "autoload": {
                 "psr-4": {
-                    "AppDevPanel\\Adapter\\Yiisoft\\": "src"
+                    "AppDevPanel\\Adapter\\Yii3\\": "src"
                 }
             },
             "autoload-dev": {
                 "psr-4": {
-                    "AppDevPanel\\Adapter\\Yiisoft\\Tests\\": "tests"
+                    "AppDevPanel\\Adapter\\Yii3\\Tests\\": "tests"
                 }
             },
             "scripts": {
@@ -140,21 +140,49 @@
                     "phpunit-watcher watch"
                 ]
             },
+            "description": "Yii 3 framework adapter for ADP — auto-wires debug collectors, proxies, and inspector into Yii 3 applications",
+            "keywords": [
+                "adp",
+                "ai",
+                "apm",
+                "app-dev-panel",
+                "application-development-panel",
+                "debug",
+                "debug-panel",
+                "debugbar",
+                "debugger",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "inspector",
+                "llm",
+                "logging",
+                "monitoring",
+                "observability",
+                "performance",
+                "profiler",
+                "tracing",
+                "yii",
+                "yii-debug",
+                "yii3",
+                "yiisoft"
+            ],
             "transport-options": {
                 "relative": true
             }
         },
         {
             "name": "app-dev-panel/api",
-            "version": "dev-claude/architect-skill-review-k3Nym",
+            "version": "dev-claude/improve-playgrounds-api-pFqYT",
             "dist": {
                 "type": "path",
                 "url": "../../libs/API",
-                "reference": "5a54f2b6467b5f77d93be9c4dff2b46dd857ee79"
+                "reference": "4a82fc87e593f06af6488a6ee78b4fc1292832f8"
             },
             "require": {
                 "alexkart/curl-builder": "^1.0",
                 "app-dev-panel/kernel": "*",
+                "app-dev-panel/mcp-server": "*",
                 "gitonomy/gitlib": "^1.3",
                 "guzzlehttp/guzzle": "^7.5",
                 "guzzlehttp/psr7": "^2.4",
@@ -193,11 +221,30 @@
             "license": [
                 "BSD-3-Clause"
             ],
-            "description": "Application Development Panel API",
+            "description": "ADP API — REST + SSE endpoints for debug data, live application inspection, and language-agnostic ingestion",
             "keywords": [
-                "api",
+                "adp",
+                "ai",
+                "ai-debugging",
                 "app-dev-panel",
-                "debug"
+                "application-development-panel",
+                "debug",
+                "debug-api",
+                "debug-panel",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "ingestion",
+                "inspector",
+                "llm",
+                "microservices",
+                "monitoring",
+                "observability",
+                "openapi",
+                "profiler",
+                "rest-api",
+                "sse",
+                "tracing"
             ],
             "transport-options": {
                 "relative": true
@@ -205,15 +252,16 @@
         },
         {
             "name": "app-dev-panel/cli",
-            "version": "dev-claude/architect-skill-review-k3Nym",
+            "version": "dev-claude/improve-playgrounds-api-pFqYT",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Cli",
-                "reference": "11dced696f4b9d5ca177b0b67d4efd793fd9b436"
+                "reference": "cf351e47fd7e13960c0ec31290a44c6018a895d1"
             },
             "require": {
                 "app-dev-panel/api": "*",
                 "app-dev-panel/kernel": "*",
+                "app-dev-panel/mcp-server": "*",
                 "guzzlehttp/guzzle": "^7.5",
                 "guzzlehttp/psr7": "^2.4",
                 "php": "^8.4",
@@ -237,17 +285,38 @@
                     "phpunit --testdox --no-interaction"
                 ]
             },
+            "description": "ADP CLI — console commands for the debug server, data queries, storage reset, and standalone HTTP server",
+            "keywords": [
+                "adp",
+                "ai",
+                "app-dev-panel",
+                "application-development-panel",
+                "cli",
+                "console",
+                "debug",
+                "debug-panel",
+                "debug-server",
+                "debugger",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "diagnostics",
+                "llm",
+                "monitoring",
+                "observability",
+                "profiler"
+            ],
             "transport-options": {
                 "relative": true
             }
         },
         {
             "name": "app-dev-panel/kernel",
-            "version": "dev-claude/architect-skill-review-k3Nym",
+            "version": "dev-claude/improve-playgrounds-api-pFqYT",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Kernel",
-                "reference": "079285bfa10ffbf21407bb06440dee6d5e77bb48"
+                "reference": "5ba6139a3914137d63ccac12dbc9935b1b791262"
             },
             "require": {
                 "ext-mbstring": "*",
@@ -265,6 +334,9 @@
                 "yiisoft/strings": "^2.2",
                 "yiisoft/var-dumper": "^1.7"
             },
+            "suggest": {
+                "open-telemetry/sdk": "Required for SpanProcessorInterfaceProxy to capture OpenTelemetry spans"
+            },
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -281,7 +353,60 @@
                     "phpunit --testdox --no-interaction"
                 ]
             },
-            "description": "Add Devp Panel Kernel",
+            "description": "ADP Kernel — core engine for the Application Development Panel: debugger lifecycle, collectors, storage, and PSR proxy system",
+            "keywords": [
+                "adp",
+                "ai",
+                "apm",
+                "app-dev-panel",
+                "application-development-panel",
+                "collectors",
+                "debug",
+                "debug-panel",
+                "debugger",
+                "developer-tools",
+                "development-server",
+                "devtools",
+                "diagnostics",
+                "llm",
+                "logging",
+                "monitoring",
+                "observability",
+                "performance",
+                "php-profiler",
+                "profiler",
+                "psr",
+                "tracing"
+            ],
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "app-dev-panel/mcp-server",
+            "version": "dev-claude/improve-playgrounds-api-pFqYT",
+            "dist": {
+                "type": "path",
+                "url": "../../libs/McpServer",
+                "reference": "212a57e32cb92b093699a622221ae00e5ec9b2ca"
+            },
+            "require": {
+                "app-dev-panel/kernel": "*",
+                "php": "^8.4"
+            },
+            "bin": [
+                "bin/adp-mcp"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "AppDevPanel\\McpServer\\": "src"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "MCP (Model Context Protocol) server for ADP — exposes debug data to AI assistants",
             "transport-options": {
                 "relative": true
             }
@@ -1440,12 +1565,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "e1e6770440fb9c9b0cf725f81d1361ad1835329d"
+                "reference": "1e92e39c51f95b88e3d66fa2d9f06d1fb45dd707"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/e1e6770440fb9c9b0cf725f81d1361ad1835329d",
-                "reference": "e1e6770440fb9c9b0cf725f81d1361ad1835329d",
+                "url": "https://api.github.com/repos/symfony/console/zipball/1e92e39c51f95b88e3d66fa2d9f06d1fb45dd707",
+                "reference": "1e92e39c51f95b88e3d66fa2d9f06d1fb45dd707",
                 "shasum": ""
             },
             "require": {
@@ -1530,7 +1655,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-03-06T14:06:20+00:00"
+            "time": "2026-03-30T13:54:39+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -1691,12 +1816,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/finder.git",
-                "reference": "e4b85e3592033f41426e61995f515cec73c9613b"
+                "reference": "a1a99d550e91c83be59247cca6a55d37ef905284"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/finder/zipball/e4b85e3592033f41426e61995f515cec73c9613b",
-                "reference": "e4b85e3592033f41426e61995f515cec73c9613b",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/a1a99d550e91c83be59247cca6a55d37ef905284",
+                "reference": "a1a99d550e91c83be59247cca6a55d37ef905284",
                 "shasum": ""
             },
             "require": {
@@ -1752,7 +1877,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-01-30T22:08:33+00:00"
+            "time": "2026-03-30T15:21:58+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -2099,12 +2224,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/process.git",
-                "reference": "6826d46e277c48833fc34e010bea77945c81b6fb"
+                "reference": "609a71fa1f4dcccc0c4aeda14bca725a0083d4c9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/6826d46e277c48833fc34e010bea77945c81b6fb",
-                "reference": "6826d46e277c48833fc34e010bea77945c81b6fb",
+                "url": "https://api.github.com/repos/symfony/process/zipball/609a71fa1f4dcccc0c4aeda14bca725a0083d4c9",
+                "reference": "609a71fa1f4dcccc0c4aeda14bca725a0083d4c9",
                 "shasum": ""
             },
             "require": {
@@ -2157,7 +2282,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-03-18T16:18:42+00:00"
+            "time": "2026-03-30T15:21:58+00:00"
         },
         {
             "name": "symfony/service-contracts",
@@ -2165,12 +2290,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/service-contracts.git",
-                "reference": "d714f7788dd07a4a93cd0d6cc63fbf487ba67014"
+                "reference": "d25d82433a80eba6aa0e6c24b61d7370d99e444a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/d714f7788dd07a4a93cd0d6cc63fbf487ba67014",
-                "reference": "d714f7788dd07a4a93cd0d6cc63fbf487ba67014",
+                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/d25d82433a80eba6aa0e6c24b61d7370d99e444a",
+                "reference": "d25d82433a80eba6aa0e6c24b61d7370d99e444a",
                 "shasum": ""
             },
             "require": {
@@ -2245,7 +2370,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-03-15T18:28:19+00:00"
+            "time": "2026-03-28T09:44:51+00:00"
         },
         {
             "name": "symfony/string",
@@ -2253,12 +2378,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/string.git",
-                "reference": "38ef56ae8e4d5ada76d807638689f135059dc648"
+                "reference": "59d447e2ec5d46c5e26176c3020614aa6b43042e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/string/zipball/38ef56ae8e4d5ada76d807638689f135059dc648",
-                "reference": "38ef56ae8e4d5ada76d807638689f135059dc648",
+                "url": "https://api.github.com/repos/symfony/string/zipball/59d447e2ec5d46c5e26176c3020614aa6b43042e",
+                "reference": "59d447e2ec5d46c5e26176c3020614aa6b43042e",
                 "shasum": ""
             },
             "require": {
@@ -2336,7 +2461,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-02-09T10:17:21+00:00"
+            "time": "2026-03-30T15:21:58+00:00"
         },
         {
             "name": "symfony/var-dumper",
@@ -2344,12 +2469,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-dumper.git",
-                "reference": "bbd278a21804938c65829163f5fba96e05233e38"
+                "reference": "cccd39d1d18f011219fb118e42aa7e4e26ab21a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/bbd278a21804938c65829163f5fba96e05233e38",
-                "reference": "bbd278a21804938c65829163f5fba96e05233e38",
+                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/cccd39d1d18f011219fb118e42aa7e4e26ab21a8",
+                "reference": "cccd39d1d18f011219fb118e42aa7e4e26ab21a8",
                 "shasum": ""
             },
             "require": {
@@ -2424,7 +2549,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-03-17T15:35:01+00:00"
+            "time": "2026-03-31T07:18:09+00:00"
         },
         {
             "name": "symfony/yaml",
@@ -2432,12 +2557,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "c486b83e049b97dad9c8d2d700916000b8bd4899"
+                "reference": "5ec80d6a525aed818ff7b7ba5a84288fbe678c3c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/c486b83e049b97dad9c8d2d700916000b8bd4899",
-                "reference": "c486b83e049b97dad9c8d2d700916000b8bd4899",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/5ec80d6a525aed818ff7b7ba5a84288fbe678c3c",
+                "reference": "5ec80d6a525aed818ff7b7ba5a84288fbe678c3c",
                 "shasum": ""
             },
             "require": {
@@ -2501,7 +2626,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-02-24T18:10:12+00:00"
+            "time": "2026-03-30T15:21:58+00:00"
         },
         {
             "name": "yiisoft/aliases",
@@ -4348,16 +4473,16 @@
         },
         {
             "name": "yiisoft/log",
-            "version": "2.2.0",
+            "version": "2.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/log.git",
-                "reference": "8c2775436442d5a74339fa2ae9df33788a190de3"
+                "reference": "e98e881d7ff0f00521a713a1852cbbffbaf279d5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/log/zipball/8c2775436442d5a74339fa2ae9df33788a190de3",
-                "reference": "8c2775436442d5a74339fa2ae9df33788a190de3",
+                "url": "https://api.github.com/repos/yiisoft/log/zipball/e98e881d7ff0f00521a713a1852cbbffbaf279d5",
+                "reference": "e98e881d7ff0f00521a713a1852cbbffbaf279d5",
                 "shasum": ""
             },
             "require": {
@@ -4372,12 +4497,15 @@
                 "psr/log-implementation": "1.0.0"
             },
             "require-dev": {
-                "maglnet/composer-require-checker": "^4.4",
+                "bamarni/composer-bin-plugin": "^1.8.3",
+                "friendsofphp/php-cs-fixer": "^3.93",
+                "phpbench/phpbench": "^1.0",
                 "phpunit/phpunit": "^9.6.23",
                 "rector/rector": "^2.0.17",
                 "roave/infection-static-analysis-plugin": "^1.25",
                 "spatie/phpunit-watcher": "^1.23.6",
-                "vimeo/psalm": "^4.30 || ^5.26.1 || ^6.12"
+                "vimeo/psalm": "^4.30 || ^5.26.1 || ^6.12",
+                "yiisoft/code-style": "^1.0"
             },
             "suggest": {
                 "yiisoft/log-target-db": "Allows writing log messages to the database",
@@ -4387,6 +4515,11 @@
             },
             "type": "library",
             "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": true,
+                    "target-directory": "tools"
+                },
                 "config-plugin": {
                     "events-web": "events-web.php",
                     "events-console": "events-console.php"
@@ -4431,7 +4564,7 @@
                     "type": "opencollective"
                 }
             ],
-            "time": "2025-12-13T10:17:37+00:00"
+            "time": "2026-03-22T16:33:56+00:00"
         },
         {
             "name": "yiisoft/log-target-file",
@@ -7480,12 +7613,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "6f4b7be66e85cbb132054d602bf77ae170be409c"
+                "reference": "a94dc89de1a257b75eaf1aa095ea8f6d42c91772"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/6f4b7be66e85cbb132054d602bf77ae170be409c",
-                "reference": "6f4b7be66e85cbb132054d602bf77ae170be409c",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/a94dc89de1a257b75eaf1aa095ea8f6d42c91772",
+                "reference": "a94dc89de1a257b75eaf1aa095ea8f6d42c91772",
                 "shasum": ""
             },
             "require": {
@@ -7566,7 +7699,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-03-18T16:02:14+00:00"
+            "time": "2026-04-01T11:57:58+00:00"
         },
         {
             "name": "react/cache",
@@ -9261,12 +9394,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/event-dispatcher.git",
-                "reference": "bd57b0a5c68c9a59f3f7c71583f0829110feee5d"
+                "reference": "d1dafae23d6c030db415b251f6157caf36fe206c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/bd57b0a5c68c9a59f3f7c71583f0829110feee5d",
-                "reference": "bd57b0a5c68c9a59f3f7c71583f0829110feee5d",
+                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/d1dafae23d6c030db415b251f6157caf36fe206c",
+                "reference": "d1dafae23d6c030db415b251f6157caf36fe206c",
                 "shasum": ""
             },
             "require": {
@@ -9339,7 +9472,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-01-14T14:51:52+00:00"
+            "time": "2026-03-30T15:21:58+00:00"
         },
         {
             "name": "symfony/filesystem",
@@ -9347,12 +9480,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "887783fbf51c9a30ac67bf751a3a8829e4d7f2db"
+                "reference": "acc1d4369638a5cc0ef70fcca90cd9fae0f78caf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/887783fbf51c9a30ac67bf751a3a8829e4d7f2db",
-                "reference": "887783fbf51c9a30ac67bf751a3a8829e4d7f2db",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/acc1d4369638a5cc0ef70fcca90cd9fae0f78caf",
+                "reference": "acc1d4369638a5cc0ef70fcca90cd9fae0f78caf",
                 "shasum": ""
             },
             "require": {
@@ -9411,7 +9544,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-03-02T09:38:43+00:00"
+            "time": "2026-03-30T15:21:58+00:00"
         },
         {
             "name": "symfony/options-resolver",
@@ -9419,12 +9552,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/options-resolver.git",
-                "reference": "65cb797d37506875e78f7988724e817ecae28657"
+                "reference": "aa391e3972c913848d9abec42c86f275f2f0976b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/options-resolver/zipball/65cb797d37506875e78f7988724e817ecae28657",
-                "reference": "65cb797d37506875e78f7988724e817ecae28657",
+                "url": "https://api.github.com/repos/symfony/options-resolver/zipball/aa391e3972c913848d9abec42c86f275f2f0976b",
+                "reference": "aa391e3972c913848d9abec42c86f275f2f0976b",
                 "shasum": ""
             },
             "require": {
@@ -9483,7 +9616,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-01-29T09:42:44+00:00"
+            "time": "2026-03-30T15:21:58+00:00"
         },
         {
             "name": "symfony/polyfill-php80",
@@ -9738,12 +9871,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/stopwatch.git",
-                "reference": "67df1914c6ccd2d7b52f70d40cf2aea02159d942"
+                "reference": "85954ed72d5440ea4dc9a10b7e49e01df766ffa3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/stopwatch/zipball/67df1914c6ccd2d7b52f70d40cf2aea02159d942",
-                "reference": "67df1914c6ccd2d7b52f70d40cf2aea02159d942",
+                "url": "https://api.github.com/repos/symfony/stopwatch/zipball/85954ed72d5440ea4dc9a10b7e49e01df766ffa3",
+                "reference": "85954ed72d5440ea4dc9a10b7e49e01df766ffa3",
                 "shasum": ""
             },
             "require": {
@@ -9777,7 +9910,7 @@
             "description": "Provides a way to profile code",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/stopwatch/tree/v8.0.0-RC1"
+                "source": "https://github.com/symfony/stopwatch/tree/8.0"
             },
             "funding": [
                 {
@@ -9797,7 +9930,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-08-04T07:36:47+00:00"
+            "time": "2026-03-30T15:14:47+00:00"
         },
         {
             "name": "theseer/tokenizer",

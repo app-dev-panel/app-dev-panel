@@ -151,15 +151,10 @@ final class PlaygroundPagesTest extends TestCase
 
     public function testContactFormValidationShowsErrors(): void
     {
-        $formParams = $this->extractCsrfAndBuildParams('/contact', [
+        $response = $this->submitContactForm([
             'name' => '',
             'email' => '',
             'message' => '',
-        ]);
-
-        $response = self::$client->post('/contact', [
-            'form_params' => $formParams,
-            'headers' => ['Cookie' => $this->getSessionCookies('/contact')],
         ]);
         $body = (string) $response->getBody();
 
@@ -169,15 +164,10 @@ final class PlaygroundPagesTest extends TestCase
 
     public function testContactFormValidationRejectsInvalidEmail(): void
     {
-        $formParams = $this->extractCsrfAndBuildParams('/contact', [
+        $response = $this->submitContactForm([
             'name' => 'Test User',
             'email' => 'not-an-email',
             'message' => 'Hello',
-        ]);
-
-        $response = self::$client->post('/contact', [
-            'form_params' => $formParams,
-            'headers' => ['Cookie' => $this->getSessionCookies('/contact')],
         ]);
         $body = (string) $response->getBody();
 
@@ -187,15 +177,10 @@ final class PlaygroundPagesTest extends TestCase
 
     public function testContactFormSuccessfulSubmission(): void
     {
-        $formParams = $this->extractCsrfAndBuildParams('/contact', [
+        $response = $this->submitContactForm([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'message' => 'Hello from E2E test',
-        ]);
-
-        $response = self::$client->post('/contact', [
-            'form_params' => $formParams,
-            'headers' => ['Cookie' => $this->getSessionCookies('/contact')],
         ]);
         $body = (string) $response->getBody();
 
@@ -246,7 +231,11 @@ final class PlaygroundPagesTest extends TestCase
 
     public function testApiIndexReturnsJson(): void
     {
+        // Try /api first, fall back to /api/ (Yii3 uses trailing slash)
         $response = self::$client->get('/api');
+        if ($response->getStatusCode() === 404) {
+            $response = self::$client->get('/api/');
+        }
         $body = (string) $response->getBody();
 
         self::assertSame(200, $response->getStatusCode());
@@ -335,40 +324,34 @@ final class PlaygroundPagesTest extends TestCase
     // ── Helpers ──
 
     /**
-     * Fetch the contact page, extract CSRF hidden fields, and merge with form data.
+     * Submit the contact form with proper CSRF token and session handling.
+     *
+     * Uses a dedicated client with cookie jar to maintain session between
+     * GET (fetch CSRF token) and POST (submit form).
      *
      * @param array<string, string> $formData
-     * @return array<string, string>
      */
-    private function extractCsrfAndBuildParams(string $url, array $formData): array
+    private function submitContactForm(array $formData): \Psr\Http\Message\ResponseInterface
     {
-        $html = (string) self::$client->get($url)->getBody();
+        $jar = new \GuzzleHttp\Cookie\CookieJar();
+        $client = new Client([
+            'base_uri' => self::$baseUrl,
+            'http_errors' => false,
+            'timeout' => 5,
+            'cookies' => $jar,
+        ]);
 
-        // Extract all hidden inputs from the form (CSRF tokens)
-        if (preg_match_all('/<input\s+type="hidden"\s+name="([^"]+)"\s+value="([^"]*)"/i', $html, $matches, PREG_SET_ORDER)) {
+        // GET the form page to extract CSRF token and establish session
+        $html = (string) $client->get('/contact')->getBody();
+
+        // Extract hidden input name/value pairs (CSRF tokens)
+        if (preg_match_all('/<input[^>]+type="hidden"[^>]+name="([^"]+)"[^>]+value="([^"]*)"/i', $html, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $formData[$match[1]] = $match[2];
             }
         }
 
-        return $formData;
-    }
-
-    /**
-     * Get session cookies from a GET request to use in subsequent POST.
-     */
-    private function getSessionCookies(string $url): string
-    {
-        $response = self::$client->get($url);
-        $cookies = $response->getHeader('Set-Cookie');
-
-        $cookieParts = [];
-        foreach ($cookies as $cookie) {
-            // Extract cookie name=value (before the first ;)
-            $parts = explode(';', $cookie);
-            $cookieParts[] = trim($parts[0]);
-        }
-
-        return implode('; ', $cookieParts);
+        // POST the form with same session
+        return $client->post('/contact', ['form_params' => $formData]);
     }
 }

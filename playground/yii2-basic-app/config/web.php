@@ -30,7 +30,8 @@ return [
             'rules' => [
                 'GET /' => 'site/index',
                 'GET /users' => 'site/users',
-                ['pattern' => 'contact', 'route' => 'site/contact', 'verb' => 'GET,POST'],
+                'GET /contact' => 'site/contact',
+                'POST /contact' => 'site/contact',
                 'GET /api-playground' => 'site/api-playground',
                 'GET /error' => 'site/error-demo',
                 'GET /api' => 'api/index',

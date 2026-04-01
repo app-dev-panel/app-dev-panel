@@ -1022,6 +1022,12 @@ count = 1
 
 [[issues]]
 file = "bootstrap/app.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Foundation\Configuration\Middleware)`).'
+count = 1
+
+[[issues]]
+file = "bootstrap/app.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
 count = 5

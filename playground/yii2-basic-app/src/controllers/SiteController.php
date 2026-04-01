@@ -9,7 +9,7 @@ use yii\web\Response;
 
 final class SiteController extends Controller
 {
-    public string $layout = 'main';
+    public $layout = 'main';
 
     public function actionIndex(): string
     {

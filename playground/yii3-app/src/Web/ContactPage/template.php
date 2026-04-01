@@ -29,7 +29,7 @@ $this->setTitle('Contact');
 <div class="card">
     <div class="card-title">Send a Message</div>
     <form method="post" action="">
-        <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf ?? '') ?>">
+        <input type="hidden" name="_csrf" value="<?= htmlspecialchars((string) ($csrf ?? '')) ?>">
 
         <div class="form-group">
             <label for="contact-name">Name</label>
