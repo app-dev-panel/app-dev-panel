@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Laravel\Inspector;
 
 use Illuminate\Contracts\Foundation\Application;
+use Yiisoft\VarDumper\ClosureExporter;
 
 /**
  * Provides configuration data from Laravel's container for the ADP inspector.
@@ -13,6 +14,8 @@ use Illuminate\Contracts\Foundation\Application;
  */
 final class LaravelConfigProvider
 {
+    private static ?ClosureExporter $closureExporter = null;
+
     public function __construct(
         private readonly Application $app,
     ) {}
@@ -134,13 +137,7 @@ final class LaravelConfigProvider
             return $class . '::' . $listener[1];
         }
         if ($listener instanceof \Closure) {
-            $ref = new \ReflectionFunction($listener);
-            $class = $ref->getClosureScopeClass();
-            if ($class !== null) {
-                $name = $ref->getName() !== '{closure}' ? $ref->getName() : '{closure}';
-                return $class->getName() . '::' . $name;
-            }
-            return $ref->getName();
+            return (self::$closureExporter ??= new ClosureExporter())->export($listener);
         }
         if (is_object($listener) && method_exists($listener, '__invoke')) {
             return $listener::class . '::__invoke';

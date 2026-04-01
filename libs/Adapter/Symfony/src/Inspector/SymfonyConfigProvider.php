@@ -6,6 +6,7 @@ namespace AppDevPanel\Adapter\Symfony\Inspector;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Yiisoft\VarDumper\ClosureExporter;
 
 /**
  * Provides configuration data from Symfony's container for the ADP inspector.
@@ -15,6 +16,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 final class SymfonyConfigProvider
 {
+    private static ?ClosureExporter $closureExporter = null;
+
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly array $containerParameters = [],
@@ -127,12 +130,7 @@ final class SymfonyConfigProvider
             return $class . '::' . $listener[1];
         }
         if ($listener instanceof \Closure) {
-            $ref = new \ReflectionFunction($listener);
-            $class = $ref->getClosureScopeClass();
-            if ($class !== null) {
-                return $class->getName() . '::' . ($ref->getName() !== '{closure}' ? $ref->getName() : '{closure}');
-            }
-            return $ref->getName();
+            return (self::$closureExporter ??= new ClosureExporter())->export($listener);
         }
         if (is_object($listener) && method_exists($listener, '__invoke')) {
             return $listener::class . '::__invoke';

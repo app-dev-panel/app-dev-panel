@@ -155,6 +155,43 @@ final class SymfonyConfigProviderTest extends TestCase
         $this->assertCount(1, $result);
         $this->assertSame('app.event', $result[0]['name']);
         $this->assertNotEmpty($result[0]['listeners'][0]);
+        $this->assertStringContainsString('static function', $result[0]['listeners'][0]);
+        $this->assertStringContainsString('void', $result[0]['listeners'][0]);
+    }
+
+    public function testGetEventsWithClosureListenerRendersBody(): void
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener('app.event', static function (object $event): string {
+            return $event::class;
+        });
+
+        $container = new Container();
+        $container->set('event_dispatcher', $dispatcher);
+
+        $provider = new SymfonyConfigProvider($container);
+        $result = $provider->get('events');
+
+        $listener = $result[0]['listeners'][0];
+        $this->assertStringContainsString('static function', $listener);
+        $this->assertStringContainsString('object $event', $listener);
+        $this->assertStringContainsString('return $event::class', $listener);
+    }
+
+    public function testGetEventsWithArrowFunctionListener(): void
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener('app.event', static fn(object $e): string => $e::class);
+
+        $container = new Container();
+        $container->set('event_dispatcher', $dispatcher);
+
+        $provider = new SymfonyConfigProvider($container);
+        $result = $provider->get('events');
+
+        $listener = $result[0]['listeners'][0];
+        $this->assertStringContainsString('fn', $listener);
+        $this->assertStringContainsString('$e', $listener);
     }
 
     public function testGetEventsWhenDispatcherIsNotEventDispatcherInterface(): void

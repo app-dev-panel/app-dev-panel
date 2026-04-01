@@ -87,6 +87,212 @@ final class LaravelConfigProviderTest extends TestCase
         $this->assertSame([], $result);
     }
 
+    public function testGetEventsWithClosureListenerRendersSourceCode(): void
+    {
+        $closure = static function (): void {};
+
+        $mockDispatcher = new class($closure) {
+            /** @var array<string, list<\Closure>> */
+            private array $listeners;
+
+            public function __construct(\Closure $closure)
+            {
+                $this->listeners = ['app.event' => [$closure]];
+            }
+
+            /** @return array<string, list<\Closure>> */
+            public function getRawListeners(): array
+            {
+                return $this->listeners;
+            }
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($mockDispatcher): mixed {
+            if ($abstract === 'events') {
+                return $mockDispatcher;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+        $result = $provider->get('events');
+
+        $this->assertCount(1, $result);
+        $this->assertSame('app.event', $result[0]['name']);
+        $this->assertCount(1, $result[0]['listeners']);
+        $this->assertStringContainsString('static function', $result[0]['listeners'][0]);
+        $this->assertStringContainsString('void', $result[0]['listeners'][0]);
+    }
+
+    public function testGetEventsWithClosureBodyRendered(): void
+    {
+        $closure = static function (object $event): string {
+            return $event::class;
+        };
+
+        $mockDispatcher = new class($closure) {
+            private array $listeners;
+
+            public function __construct(\Closure $closure)
+            {
+                $this->listeners = ['app.event' => [$closure]];
+            }
+
+            public function getRawListeners(): array
+            {
+                return $this->listeners;
+            }
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($mockDispatcher): mixed {
+            if ($abstract === 'events') {
+                return $mockDispatcher;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+        $result = $provider->get('events');
+
+        $listener = $result[0]['listeners'][0];
+        $this->assertStringContainsString('static function', $listener);
+        $this->assertStringContainsString('object $event', $listener);
+        $this->assertStringContainsString('return $event::class', $listener);
+    }
+
+    public function testGetEventsWithArrowFunctionListener(): void
+    {
+        $closure = static fn(object $e): string => $e::class;
+
+        $mockDispatcher = new class($closure) {
+            private array $listeners;
+
+            public function __construct(\Closure $closure)
+            {
+                $this->listeners = ['app.event' => [$closure]];
+            }
+
+            public function getRawListeners(): array
+            {
+                return $this->listeners;
+            }
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($mockDispatcher): mixed {
+            if ($abstract === 'events') {
+                return $mockDispatcher;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+        $result = $provider->get('events');
+
+        $listener = $result[0]['listeners'][0];
+        $this->assertStringContainsString('fn', $listener);
+        $this->assertStringContainsString('$e', $listener);
+    }
+
+    public function testGetEventsWithCallableArrayListener(): void
+    {
+        $handler = new class {
+            public function onEvent(): void {}
+        };
+
+        $mockDispatcher = new class($handler) {
+            private array $listeners;
+
+            public function __construct(object $handler)
+            {
+                $this->listeners = ['app.event' => [[$handler, 'onEvent']]];
+            }
+
+            public function getRawListeners(): array
+            {
+                return $this->listeners;
+            }
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($mockDispatcher): mixed {
+            if ($abstract === 'events') {
+                return $mockDispatcher;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+        $result = $provider->get('events');
+
+        $this->assertStringContainsString('::onEvent', $result[0]['listeners'][0]);
+    }
+
+    public function testGetEventsWithInvokableListener(): void
+    {
+        $handler = new class {
+            public function __invoke(): void {}
+        };
+
+        $mockDispatcher = new class($handler) {
+            private array $listeners;
+
+            public function __construct(object $handler)
+            {
+                $this->listeners = ['app.event' => [$handler]];
+            }
+
+            public function getRawListeners(): array
+            {
+                return $this->listeners;
+            }
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($mockDispatcher): mixed {
+            if ($abstract === 'events') {
+                return $mockDispatcher;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+        $result = $provider->get('events');
+
+        $this->assertStringContainsString('::__invoke', $result[0]['listeners'][0]);
+    }
+
+    public function testGetEventsWithStringListener(): void
+    {
+        $mockDispatcher = new class {
+            public function getRawListeners(): array
+            {
+                return ['app.event' => ['App\\Listeners\\MyListener']];
+            }
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($mockDispatcher): mixed {
+            if ($abstract === 'events') {
+                return $mockDispatcher;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+        $result = $provider->get('events');
+
+        $this->assertSame('App\\Listeners\\MyListener', $result[0]['listeners'][0]);
+    }
+
     /**
      * @return Application&\PHPUnit\Framework\MockObject\MockObject
      */

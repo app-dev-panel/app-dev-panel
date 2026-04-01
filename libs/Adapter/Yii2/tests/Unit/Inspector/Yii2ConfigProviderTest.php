@@ -229,6 +229,27 @@ final class Yii2ConfigProviderTest extends TestCase
         $this->assertStringContainsString('void', $result);
     }
 
+    public function testDescribeHandlerWithClosureBody(): void
+    {
+        $method = new \ReflectionMethod(Yii2ConfigProvider::class, 'describeHandler');
+
+        $result = $method->invoke(null, static function (object $event): string {
+            return $event::class;
+        });
+        $this->assertStringContainsString('static function', $result);
+        $this->assertStringContainsString('object $event', $result);
+        $this->assertStringContainsString('return $event::class', $result);
+    }
+
+    public function testDescribeHandlerWithArrowFunction(): void
+    {
+        $method = new \ReflectionMethod(Yii2ConfigProvider::class, 'describeHandler');
+
+        $result = $method->invoke(null, static fn(object $e): string => $e::class);
+        $this->assertStringContainsString('fn', $result);
+        $this->assertStringContainsString('$e', $result);
+    }
+
     public function testDescribeHandlerWithInvokableObject(): void
     {
         $method = new \ReflectionMethod(Yii2ConfigProvider::class, 'describeHandler');
