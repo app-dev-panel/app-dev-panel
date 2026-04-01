@@ -56,6 +56,9 @@ $collector->logRender(
 
 Framework adapters hook into the template engine to measure render time. The collector is engine-agnostic — it only records template name and render duration.
 
+- **Symfony**: Twig profiler extension
+- **Yii 2**: `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` with per-file timer stack (handles nested renders)
+
 ## Debug Panel
 
 - **Template list** — all rendered templates with render time
