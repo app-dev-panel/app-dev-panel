@@ -218,8 +218,8 @@ GitHub Actions runs on every push and PR:
 |-------|---------|------:|--------:|-----:|--------------:|
 | Kernel | `libs/Kernel` | 276 | 7 | 1m 21s | **85.2%** (1073/1259) |
 | API | `libs/API` | 174 | 0 | 0.1s | **76.2%** (754/990) |
-| Adapter-Symfony | `libs/Adapter/Symfony` | 150 | 9 | 0.2s | **98.9%** (905/915) |
-| Adapter-Laravel | `libs/Adapter/Laravel` | 80 | 0 | 0.1s | — |
+| Adapter-Symfony | `libs/Adapter/Symfony` | 151 | 9 | 0.2s | **98.9%** (905/915) |
+| Adapter-Laravel | `libs/Adapter/Laravel` | 86 | 0 | 0.1s | — |
 | Adapter-Yii2 | `libs/Adapter/Yii2` | 95 | 0 | 0.1s | **57.3%** (373/651) |
 | Adapter-Cycle | `libs/Adapter/Cycle` | 10 | 0 | 0.02s | — |
 | Cli | `libs/Cli` | 6 | 0 | 0.02s | **41.1%** (30/73) |

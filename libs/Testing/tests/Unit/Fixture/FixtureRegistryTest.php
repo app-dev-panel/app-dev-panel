@@ -114,6 +114,20 @@ final class FixtureRegistryTest extends TestCase
         $this->assertCount(2, $fs->expectations['fs_stream']);
     }
 
+    public function testAssetsFixtureExists(): void
+    {
+        $fixtures = FixtureRegistry::byTag('advanced');
+        $assetsFixtures = array_filter($fixtures, static fn(Fixture $f) => $f->name === 'assets:basic');
+
+        $this->assertCount(1, $assetsFixtures);
+
+        $assets = array_values($assetsFixtures)[0];
+        $this->assertSame('/test/fixtures/assets', $assets->endpoint);
+        $this->assertSame('GET', $assets->method);
+        $this->assertArrayHasKey('assets', $assets->expectations);
+        $this->assertCount(3, $assets->expectations['assets']);
+    }
+
     public function testCacheFixtureExists(): void
     {
         $fixtures = FixtureRegistry::byTag('advanced');

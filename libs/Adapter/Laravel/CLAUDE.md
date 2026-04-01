@@ -23,13 +23,15 @@ src/
 │   ├── MailListener.php                        # MessageSent → MailerCollector
 │   ├── QueueListener.php                       # JobProcessing/JobProcessed/JobFailed → QueueCollector
 │   ├── HttpClientListener.php                  # RequestSending/ResponseReceived/ConnectionFailed → HttpClientCollector
-│   ├── AuthorizationListener.php                    # Authenticated/Login/Logout/Failed → AuthorizationCollector
+│   ├── AuthorizationListener.php               # Authenticated/Login/Logout/Failed → AuthorizationCollector
+│   ├── ViteAssetListener.php                   # Vite preloadedAssets() → AssetBundleCollector
 │   └── ConsoleListener.php                     # CommandStarting/CommandFinished → Debugger lifecycle
 ├── Proxy/
 │   ├── LaravelEventDispatcherProxy.php         # Wraps Illuminate\Contracts\Events\Dispatcher
 │   └── LaravelTranslatorProxy.php              # Wraps Illuminate\Contracts\Translation\Translator
 ├── Collector/
-│   └── RouterDataExtractor.php                 # Extracts route data from Laravel router
+│   ├── RouterDataExtractor.php                 # Extracts route data from Laravel router
+│   └── TemplateCollectorCompilerEngine.php     # Wraps Blade CompilerEngine → TemplateCollector
 ├── Inspector/
 │   ├── LaravelConfigProvider.php               # Config, services, event listeners, providers
 │   ├── LaravelSchemaProvider.php               # Database schema via Illuminate\Database\Connection
@@ -112,6 +114,8 @@ Wires in `boot()`:
 | `Psr\Http\Client\ClientInterface` | `HttpClientInterfaceProxy` | `$app->extend()` |
 | `events` (event dispatcher) | `LaravelEventDispatcherProxy` | `$app->extend()` |
 | `translator` | `LaravelTranslatorProxy` | `$app->extend()` |
+| `SpanProcessorInterface` (OTel) | `SpanProcessorInterfaceProxy` | `$app->extend()` |
+| Blade engine (`blade`) | `TemplateCollectorCompilerEngine` | `EngineResolver::register()` |
 
 **VarDumper:**
 - Custom handler registered via `VarDumper::setHandler()` in `DebugMiddleware`
@@ -167,6 +171,9 @@ return [
         'router' => true,
         'translator' => true,
         'security' => true,
+        'assets' => true,
+        'template' => true,
+        'opentelemetry' => true,
         'code_coverage' => false,          // opt-in, requires pcov or xdebug
     ],
     'ignored_requests' => ['/debug/api/**', '/inspect/api/**'],

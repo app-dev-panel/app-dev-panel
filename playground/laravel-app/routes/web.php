@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\TestFixtures\AssetAction;
 use App\Http\Controllers\TestFixtures\CacheAction;
 use App\Http\Controllers\TestFixtures\CacheHeavyAction;
 use App\Http\Controllers\TestFixtures\CoverageAction;
@@ -80,4 +81,5 @@ Route::prefix('test/fixtures')->group(function (): void {
     Route::get('/coverage', CoverageAction::class);
     Route::get('/view', ViewAction::class);
     Route::get('/template', TemplateAction::class);
+    Route::get('/assets', AssetAction::class);
 });

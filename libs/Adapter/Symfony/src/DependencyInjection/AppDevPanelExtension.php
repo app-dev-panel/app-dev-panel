@@ -6,6 +6,7 @@ namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Collector\RouterDataExtractor;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
+use AppDevPanel\Adapter\Symfony\EventSubscriber\AssetMapperSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
@@ -62,6 +63,7 @@ use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CodeCoverageCollector;
@@ -310,6 +312,14 @@ final class AppDevPanelExtension extends Extension
         if ($collectors['router']) {
             $this->registerRouterCollector($container);
         }
+
+        if ($collectors['assets']) {
+            $container
+                ->register(AssetBundleCollector::class, AssetBundleCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
+                ->setPublic(false)
+                ->addTag('app_dev_panel.collector');
+        }
     }
 
     private function registerRouterCollector(ContainerBuilder $container): void
@@ -367,6 +377,21 @@ final class AppDevPanelExtension extends Extension
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
+
+        // Asset mapper subscriber — only when symfony/asset-mapper is available and collector is enabled
+        if (
+            $container->has(AssetBundleCollector::class)
+            && interface_exists(\Symfony\Component\AssetMapper\AssetMapperInterface::class)
+        ) {
+            $container
+                ->register(AssetMapperSubscriber::class, AssetMapperSubscriber::class)
+                ->setArguments([
+                    new Reference(AssetBundleCollector::class),
+                    new Reference(\Symfony\Component\AssetMapper\AssetMapperInterface::class),
+                ])
+                ->addTag('kernel.event_subscriber')
+                ->setPublic(false);
+        }
 
         // Authorization subscriber — only when symfony/security-http is available and collector is enabled
         if (

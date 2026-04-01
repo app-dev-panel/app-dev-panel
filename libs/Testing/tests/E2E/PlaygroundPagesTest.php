@@ -345,7 +345,12 @@ final class PlaygroundPagesTest extends TestCase
         $html = (string) $client->get('/contact')->getBody();
 
         // Extract hidden input name/value pairs (CSRF tokens)
-        if (preg_match_all('/<input[^>]+type="hidden"[^>]+name="([^"]+)"[^>]+value="([^"]*)"/i', $html, $matches, PREG_SET_ORDER)) {
+        if (preg_match_all(
+            '/<input[^>]+type="hidden"[^>]+name="([^"]+)"[^>]+value="([^"]*)"/i',
+            $html,
+            $matches,
+            PREG_SET_ORDER,
+        )) {
             foreach ($matches as $match) {
                 $formData[$match[1]] = $match[2];
             }

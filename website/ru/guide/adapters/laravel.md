@@ -36,6 +36,9 @@ return [
         'cache' => true,
         'mailer' => true,
         'queue' => true,
+        'assets' => true,
+        'template' => true,
+        'opentelemetry' => true,
         'code_coverage' => false,  // opt-in; требуется pcov или xdebug
         // ... все коллекторы включены по умолчанию
     ],
@@ -52,6 +55,12 @@ return [
 ## Коллекторы
 
 Поддерживает все коллекторы Kernel, а также сбор данных через слушатели событий Laravel: запросы Eloquent, операции с кешем, почта, задачи очереди, запросы HTTP-клиента и обращения к переводчику.
+
+Дополнительно:
+
+- **Шаблоны Blade** — <class>AppDevPanel\Adapter\Laravel\Collector\TemplateCollectorCompilerEngine</class> оборачивает `CompilerEngine` Blade для автоматического замера времени рендеринга и глубины вложенности.
+- **Asset bundles** — <class>AppDevPanel\Adapter\Laravel\EventListener\ViteAssetListener</class> собирает отрендеренные Vite-ассеты (`preloadedAssets()`) после каждого ответа.
+- **OpenTelemetry** — <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> декорирует `SpanProcessorInterface` через `$app->extend()` при установленном `open-telemetry/sdk`.
 
 ## Интеграция с переводчиком
 
