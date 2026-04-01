@@ -522,9 +522,7 @@ export const RoutesPage = () => {
                         const expanded = expandedId === route.id;
                         const hasDetails = route.action !== null || (route.middlewares && route.middlewares.length > 0);
                         const actionShort = route.action
-                            ? (route.action.className.split('\\').pop() as string) +
-                              '::' +
-                              route.action.methodName
+                            ? (route.action.className.split('\\').pop() as string) + '::' + route.action.methodName
                             : null;
                         const firstClassMw =
                             !route.action && route.middlewares?.length > 0

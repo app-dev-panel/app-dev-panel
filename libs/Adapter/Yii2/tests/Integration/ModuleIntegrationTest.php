@@ -17,7 +17,6 @@ use AppDevPanel\Kernel\Collector\QueryRecord;
 use AppDevPanel\Kernel\Collector\RedisCollector;
 use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
-use AppDevPanel\Kernel\Collector\ViewCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
@@ -57,7 +56,6 @@ final class ModuleIntegrationTest extends Yii2IntegrationTestCase
             AssetBundleCollector::class,
             RedisCollector::class,
             ElasticsearchCollector::class,
-            ViewCollector::class,
             TemplateCollector::class,
         ];
 

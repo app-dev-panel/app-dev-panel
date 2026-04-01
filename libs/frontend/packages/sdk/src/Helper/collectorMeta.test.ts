@@ -29,7 +29,6 @@ describe('getCollectorMeta', () => {
             CollectorsMap.ConsoleAppInfoCollector,
             CollectorsMap.WebAppInfoCollector,
             CollectorsMap.CommandCollector,
-            CollectorsMap.ViewCollector,
         ];
         for (const collector of knownCollectors) {
             const meta = getCollectorMeta(collector);

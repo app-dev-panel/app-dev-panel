@@ -110,7 +110,6 @@ return [
                 'translator' => true,
                 'redis' => true,
                 'elasticsearch' => true,
-                'view' => true,
                 'template' => true,
                 'code_coverage' => true,
             ],

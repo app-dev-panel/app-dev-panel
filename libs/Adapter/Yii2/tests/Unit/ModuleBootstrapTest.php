@@ -26,7 +26,6 @@ use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
-use AppDevPanel\Kernel\Collector\ViewCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
@@ -125,7 +124,6 @@ final class ModuleBootstrapTest extends TestCase
             AssetBundleCollector::class,
             RouterCollector::class,
             RedisCollector::class,
-            ViewCollector::class,
             TemplateCollector::class,
             ValidatorCollector::class,
         ];

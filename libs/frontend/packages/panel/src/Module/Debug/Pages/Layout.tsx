@@ -18,12 +18,11 @@ import {RedisPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/Redi
 import {RequestPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RequestPanel';
 import {RouterPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RouterPanel';
 import {ServicesPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ServicesPanel';
+import {TemplatePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TemplatePanel';
 import {TimelinePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelinePanel';
 import {TranslatorPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TranslatorPanel';
-import {TwigPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TwigPanel';
 import {UnifiedLogPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/UnifiedLogPanel';
 import {ValidatorPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ValidatorPanel';
-import {WebViewPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/WebViewPanel';
 import {DumpPage} from '@app-dev-panel/panel/Module/Debug/Pages/DumpPage';
 import {useSelector} from '@app-dev-panel/panel/store';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
@@ -150,12 +149,11 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.VarDumperCollector]: (data: any) => <UnifiedLogPanel logs={[]} deprecations={[]} dumps={data} />,
         [CollectorsMap.CacheCollector]: (data: any) => <CachePanel data={data} />,
         [CollectorsMap.EnvironmentCollector]: (data: any) => <EnvironmentPanel data={data} />,
-        [CollectorsMap.TemplateCollector]: (data: any) => <TwigPanel data={data} />,
+        [CollectorsMap.TemplateCollector]: (data: any) => <TemplatePanel data={data} />,
         [CollectorsMap.AuthorizationCollector]: (data: any) => <AuthorizationPanel data={data} />,
         [CollectorsMap.QueueCollector]: (data: any) => <QueuePanel data={data} />,
         [CollectorsMap.RouterCollector]: (data: any) => <RouterPanel data={data} />,
         [CollectorsMap.ValidatorCollector]: (data: any) => <ValidatorPanel data={data} />,
-        [CollectorsMap.ViewCollector]: (data: any) => <WebViewPanel data={data} />,
         [CollectorsMap.AssetBundleCollector]: (data: any) => <AssetBundlePanel data={data} />,
         [CollectorsMap.OpenTelemetryCollector]: (data: any) => <OpenTelemetryPanel data={data} />,
         [CollectorsMap.TranslatorCollector]: (data: any) => <TranslatorPanel data={data} />,

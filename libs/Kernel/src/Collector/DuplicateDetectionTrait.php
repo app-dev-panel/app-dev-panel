@@ -11,7 +11,7 @@ use function count;
 /**
  * Detects duplicate items in collector data by grouping them by a key.
  *
- * Used by ViewCollector (file path), DatabaseCollector (SQL), and QueueCollector (message class)
+ * Used by TemplateCollector (template path), DatabaseCollector (SQL), and QueueCollector (message class)
  * to detect N+1 patterns where the same operation is repeated many times.
  */
 trait DuplicateDetectionTrait

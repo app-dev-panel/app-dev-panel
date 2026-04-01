@@ -263,3 +263,15 @@ file = "src/views/test-fixtures/template-parent.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `yii\base\View`.'
 count = 1
+
+[[issues]]
+file = "src/views/test-fixtures/view-with-partials.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 2
+
+[[issues]]
+file = "src/views/test-fixtures/view-with-partials.php"
+code = "undefined-variable"
+message = "Undefined variable: `$this`."
+count = 2
