@@ -15,7 +15,7 @@ import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
-import {ContentCopy, ExpandMore} from '@mui/icons-material';
+import {ContentCopy, Description, ExpandMore} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
 import {
@@ -198,21 +198,36 @@ const EventName = React.memo(({name, eventClass}: {name: string; eventClass: str
 // Listener rendering
 // ---------------------------------------------------------------------------
 
+const ClosureActions = React.memo(({listener}: {listener: ClosureDescriptor}) => (
+    <Box
+        className="copy-btn"
+        sx={{display: 'flex', alignItems: 'center', gap: 0.25, flexShrink: 0, alignSelf: 'flex-start', mt: 0.5}}
+    >
+        <Tooltip title="Copy code">
+            <IconButton size="small" onClick={() => clipboardCopy(listener.source)} sx={{p: 0.25}}>
+                <ContentCopy sx={{fontSize: 14}} />
+            </IconButton>
+        </Tooltip>
+        {listener.file && (
+            <FileLink path={listener.file} line={listener.startLine ?? undefined}>
+                <Tooltip title="Open in File Inspector">
+                    <IconButton size="small" component="span" aria-label="Open File" sx={{p: 0.25}}>
+                        <Description sx={{fontSize: 14}} />
+                    </IconButton>
+                </Tooltip>
+            </FileLink>
+        )}
+    </Box>
+));
+
 const ListenerItem = React.memo(({listener}: {listener: EventListener}) => {
     if (isClosureDescriptor(listener)) {
         return (
             <ListenerRow>
-                <Box sx={{flex: 1, minWidth: 0}}>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                        <CodeHighlight
-                            language="php"
-                            code={`<?php\n${listener.source}`}
-                            showLineNumbers={false}
-                            fontSize={9}
-                        />
-                        {listener.file && <FileLink path={listener.file} line={listener.startLine ?? undefined} />}
-                    </Box>
+                <Box sx={{flex: 1, minWidth: 0, overflow: 'auto'}}>
+                    <CodeHighlight language="php" code={listener.source} showLineNumbers={false} fontSize={9} />
                 </Box>
+                <ClosureActions listener={listener} />
             </ListenerRow>
         );
     }
@@ -228,7 +243,6 @@ const ListenerItem = React.memo(({listener}: {listener: EventListener}) => {
                             fontFamily: primitives.fontFamilyMono,
                             fontSize: '12px',
                             color: 'primary.main',
-                            textDecoration: 'none',
                             wordBreak: 'break-all',
                             '&:hover': {textDecoration: 'underline'},
                         }}
@@ -250,7 +264,6 @@ const ListenerItem = React.memo(({listener}: {listener: EventListener}) => {
                             fontFamily: primitives.fontFamilyMono,
                             fontSize: '12px',
                             color: 'primary.main',
-                            textDecoration: 'none',
                             wordBreak: 'break-all',
                             '&:hover': {textDecoration: 'underline'},
                         }}

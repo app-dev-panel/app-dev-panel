@@ -266,7 +266,7 @@ export const VarDumpValue = ({value, depth = 0, defaultExpanded = true}: VarDump
         if (isClosure(value)) {
             return (
                 <Box sx={{display: 'inline-block'}}>
-                    <CodeHighlight language="php" code={`<?php\n${value}`} showLineNumbers={false} fontSize={10} />
+                    <CodeHighlight language="php" code={value} showLineNumbers={false} fontSize={10} />
                 </Box>
             );
         }
