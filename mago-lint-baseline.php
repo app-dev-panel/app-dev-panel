@@ -1,6 +1,48 @@
 variant = "loose"
 
 [[issues]]
+file = "libs/API/src/ApiApplication.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Ingestion/Controller/OtlpController.php"
+code = "no-redundant-nullsafe"
+message = "The nullsafe operator (`?->`) is redundant when used with `??`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/CodeCoverageController.php"
+code = "inline-variable-return"
+message = "Variable assignment can be inlined into the return statement."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/CodeCoverageController.php"
+code = "no-debug-symbols"
+message = "Do not commit debug functions."
+count = 3
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/FileController.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RedisController.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Inspector/Controller/RedisController.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
 file = "libs/API/src/Llm/Controller/LlmController.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -8,15 +50,33 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Llm/Controller/LlmController.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/Controller/LlmController.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.17)."
+message = "Class has a high kan defect score (4.23)."
 count = 1
 
 [[issues]]
 file = "libs/API/src/Llm/Controller/LlmController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 4
+count = 11
+
+[[issues]]
+file = "libs/API/src/Llm/Controller/LlmController.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/Controller/LlmController.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
 
 [[issues]]
 file = "libs/API/src/Llm/Controller/LlmController.php"
@@ -25,10 +85,22 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/API/src/Llm/FileLlmHistoryStorage.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/FileLlmSettings.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
 file = "libs/API/src/Llm/FileLlmSettings.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 3
+count = 5
 
 [[issues]]
 file = "libs/API/src/Llm/FileLlmSettings.php"
@@ -49,9 +121,63 @@ message = "Parameters that may contain sensitive information should be marked wi
 count = 1
 
 [[issues]]
+file = "libs/API/src/Llm/LlmSettingsInterface.php"
+code = "too-many-methods"
+message = "Interface has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/ApiRoutesTest.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/PathMapperTest.php"
+code = "no-redundant-use"
+message = "Unused import: `DataProvider`."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/ServerSentEventsStreamTest.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "prefer-static-closure"
+message = "This arrow function does not use `$this` and should be declared static."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/CollectorProxyCompilerPass.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/CollectorProxyCompilerPass.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.1)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/AuthorizationSubscriber.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/AuthorizationSubscriber.php"
+code = "no-redundant-use"
+message = "Unused import: `TokenDeauthenticatedEvent`."
 count = 1
 
 [[issues]]
@@ -85,9 +211,111 @@ message = "Class has a high kan defect score (1.86)."
 count = 1
 
 [[issues]]
+file = "libs/Adapter/Yii2/src/Inspector/Yii2RouteCollection.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/EventListener/AuthorizationListenerTest.php"
+code = "no-redundant-use"
+message = "Unused import: `User`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleBootstrapTest.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.17)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleBootstrapTest.php"
+code = "no-redundant-use"
+message = "Unused import: `Dispatcher`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/ModuleBootstrapTest.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/tests/Unit/Proxy/fixtures/messages/de/app.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
 file = "libs/Cli/tests/Unit/Command/DebugQueryCommandTest.php"
 code = "too-many-methods"
 message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Cli/tests/Unit/Command/DebugServerCommandTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Cli/tests/Unit/Command/ServeCommandTest.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/AuthorizationCollector.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/AuthorizationCollector.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/CodeCoverageCollector.php"
+code = "no-debug-symbols"
+message = "Do not commit debug functions."
+count = 3
+
+[[issues]]
+file = "libs/Kernel/src/Collector/CodeCoverageHelper.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/CodeCoverageHelper.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.6300000000000001)."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/CodeCoverageHelper.php"
+code = "no-debug-symbols"
+message = "Do not commit debug functions."
 count = 1
 
 [[issues]]
@@ -103,6 +331,120 @@ message = "Use of the `isset` construct."
 count = 1
 
 [[issues]]
+file = "libs/Kernel/src/Collector/DeprecationCollector.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/DuplicateDetectionTrait.php"
+code = "no-redundant-use"
+message = "Unused import: `array_keys`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/DuplicateDetectionTrait.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/ElasticsearchCollector.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/ElasticsearchCollector.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Collector/ElasticsearchCollector.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/ElasticsearchRequestRecord.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/EnvironmentCollector.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/EnvironmentCollector.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/OtlpTraceParser.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/OtlpTraceParser.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.5300000000000002)."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/OtlpTraceParser.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/OtlpTraceParser.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 7
+
+[[issues]]
+file = "libs/Kernel/src/Collector/OtlpTraceParser.php"
+code = "prefer-first-class-callable"
+message = "Use first-class callable syntax `...` instead of a arrow function."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/RedisCommandRecord.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/SpanProcessorInterfaceProxy.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.11)."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/SpanRecord.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/FilesystemStreamCollector.php"
+code = "prefer-static-closure"
+message = "This arrow function does not use `$this` and should be declared static."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/src/Collector/Stream/FilesystemStreamProxy.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
@@ -113,6 +455,12 @@ file = "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
 count = 2
+
+[[issues]]
+file = "libs/Kernel/src/Collector/TranslationRecord.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
 
 [[issues]]
 file = "libs/Kernel/src/DebugServer/Broadcaster.php"
@@ -139,13 +487,103 @@ message = "Unsafe use of error control operator `@`."
 count = 1
 
 [[issues]]
+file = "libs/Kernel/src/Storage/FileStorage.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.77)."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/tests/Support/Stub/PhpStreamProxy.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
 count = 1
 
 [[issues]]
+file = "libs/Kernel/tests/Unit/Collector/CodeCoverageCollectorTest.php"
+code = "prefer-static-closure"
+message = "This arrow function does not use `$this` and should be declared static."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/DeprecationCollectorTest.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 6
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/DeprecationCollectorTest.php"
+code = "prefer-static-closure"
+message = "This closure does not use `$this` and should be declared static."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/FilesystemStreamCollectorTest.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 9
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/OpenTelemetryCollectorTest.php"
+code = "assert-description"
+message = "Missing description in assert function."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/OpenTelemetryCollectorTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 6
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/OtlpTraceParserTest.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/SpanProcessorInterfaceProxyTest.php"
+code = "no-redundant-use"
+message = "Unused import: `CancellationInterface`."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/SpanProcessorInterfaceProxyTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 3
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Collector/SpanRecordTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 5
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/FlattenExceptionTest.php"
+code = "no-ini-set"
+message = "ini_set should not be used."
+count = 6
+
+[[issues]]
 file = "libs/Kernel/tests/Unit/Helper/BacktraceIgnoreMatcherTest.php"
 code = "require-preg-quote-delimiter"
 message = "Missing delimiter argument in `preg_quote()` call"
 count = 5
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/Storage/FileStorageTest.php"
+code = "explicit-octal"
+message = "Use explicit octal numeral notation."
+count = 1
+
+[[issues]]
+file = "libs/Testing/tests/E2E/SecurityFixturesTest.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1

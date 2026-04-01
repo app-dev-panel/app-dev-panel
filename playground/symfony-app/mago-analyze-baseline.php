@@ -4,7 +4,7 @@ variant = "loose"
 file = "config/reference.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Config\Loader\ParamConfigurator`.'
-count = 1620
+count = 1623
 
 [[issues]]
 file = "config/reference.php"
