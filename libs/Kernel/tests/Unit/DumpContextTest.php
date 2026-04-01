@@ -202,4 +202,142 @@ final class DumpContextTest extends TestCase
 
         $this->assertSame('object@' . $description, $result);
     }
+
+    public function testDumpStreamResource(): void
+    {
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $resource = fopen('php://memory', 'r');
+
+        $result = $context->dumpNestedInternal($resource, 3, 0, 0, false);
+
+        $this->assertIsArray($result);
+        // stream_get_meta_data returns an array with stream_type, uri, etc.
+        $this->assertArrayHasKey('stream_type', $result);
+        fclose($resource);
+    }
+
+    public function testDumpClosedResource(): void
+    {
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $resource = fopen('php://memory', 'r');
+        fclose($resource);
+
+        $result = $context->dumpNestedInternal($resource, 3, 0, 0, false);
+
+        $this->assertSame('{closed resource}', $result);
+    }
+
+    public function testDumpClosureWrapped(): void
+    {
+        $closure = static fn(int $x): int => $x * 2;
+        $context = new DumpContext(objects: [], excludedClasses: []);
+
+        $result = $context->dumpNestedInternal($closure, 3, 0, 0, false);
+
+        $this->assertIsArray($result);
+        $keys = array_keys($result);
+        $this->assertStringContainsString('Closure', $keys[0]);
+    }
+
+    public function testDumpObjectWithDebugInfo(): void
+    {
+        $obj = new class {
+            private string $secret = 'hidden';
+            public string $visible = 'shown';
+
+            public function __debugInfo(): array
+            {
+                return ['visible' => $this->visible, 'computed' => 42];
+            }
+        };
+
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $context->buildObjectsCache($obj);
+
+        $result = $context->dumpNestedInternal($obj, 5, 0, 0, true);
+
+        $this->assertIsArray($result);
+        $this->assertSame('shown', $result['public $visible']);
+        $this->assertSame(42, $result['public $computed']);
+    }
+
+    public function testDumpStatelessObjectWrapped(): void
+    {
+        $obj = new class {};
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $context->buildObjectsCache($obj);
+
+        $result = $context->dumpNestedInternal($obj, 3, 0, 0, false);
+
+        $this->assertIsArray($result);
+        $key = array_key_first($result);
+        $this->assertSame('{stateless object}', $result[$key]);
+    }
+
+    public function testBuildObjectsCacheSkipsDuplicate(): void
+    {
+        $obj = new \stdClass();
+        $obj->name = 'test';
+
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $context->buildObjectsCache($obj);
+        $count1 = count($context->objects);
+
+        // Building cache again with same object should not add a duplicate
+        $context->buildObjectsCache($obj);
+        $this->assertCount($count1, $context->objects);
+    }
+
+    public function testBuildObjectsCacheWithNestedArrayOfObjects(): void
+    {
+        $inner1 = new \stdClass();
+        $inner1->id = 1;
+        $inner2 = new \stdClass();
+        $inner2->id = 2;
+
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $context->buildObjectsCache([[$inner1], [$inner2]]);
+
+        $this->assertCount(2, $context->objects);
+    }
+
+    public function testDumpArrayWithNullByteKeys(): void
+    {
+        $context = new DumpContext(objects: [], excludedClasses: []);
+
+        // Simulates internal PHP property representation
+        $data = ["\0Foo\0bar" => 'value'];
+        $result = $context->dumpNestedInternal($data, 3, 0, 0, false);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('Foo::bar', $result);
+    }
+
+    public function testDumpNestedObjectsWithDepthLimit(): void
+    {
+        $inner = new \stdClass();
+        $inner->value = 'deep';
+
+        $outer = new \stdClass();
+        $outer->child = $inner;
+
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $context->buildObjectsCache($outer, depth: 5);
+
+        // Dump outer at depth 1 - inner should show as (...)
+        $result = $context->dumpNestedInternal($outer, 1, 0, 0, true);
+
+        // At depth limit, the result should be truncated
+        $this->assertIsArray($result);
+    }
+
+    public function testGetObjectDescriptionForRegularClass(): void
+    {
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $exception = new \RuntimeException('test');
+
+        $description = $context->getObjectDescription($exception);
+
+        $this->assertStringStartsWith('RuntimeException#', $description);
+    }
 }

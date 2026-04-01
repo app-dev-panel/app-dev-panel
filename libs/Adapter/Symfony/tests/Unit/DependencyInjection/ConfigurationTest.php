@@ -127,6 +127,124 @@ final class ConfigurationTest extends TestCase
         $this->assertSame('/bundles/appdevpanel', $config['panel']['static_url']);
     }
 
+    public function testToolbarDefaults(): void
+    {
+        $config = $this->processConfiguration([]);
+
+        $this->assertArrayHasKey('toolbar', $config);
+        $this->assertTrue($config['toolbar']['enabled']);
+        $this->assertSame('', $config['toolbar']['static_url']);
+    }
+
+    public function testToolbarCustomConfiguration(): void
+    {
+        $config = $this->processConfiguration([
+            [
+                'toolbar' => [
+                    'enabled' => false,
+                    'static_url' => 'http://localhost:3001',
+                ],
+            ],
+        ]);
+
+        $this->assertFalse($config['toolbar']['enabled']);
+        $this->assertSame('http://localhost:3001', $config['toolbar']['static_url']);
+    }
+
+    public function testApiDefaults(): void
+    {
+        $config = $this->processConfiguration([]);
+
+        $this->assertArrayHasKey('api', $config);
+        $this->assertTrue($config['api']['enabled']);
+        $this->assertSame(['127.0.0.1', '::1'], $config['api']['allowed_ips']);
+        $this->assertSame('', $config['api']['auth_token']);
+    }
+
+    public function testApiCustomConfiguration(): void
+    {
+        $config = $this->processConfiguration([
+            [
+                'api' => [
+                    'enabled' => false,
+                    'allowed_ips' => ['10.0.0.1', '192.168.1.0'],
+                    'auth_token' => 'secret-token',
+                ],
+            ],
+        ]);
+
+        $this->assertFalse($config['api']['enabled']);
+        $this->assertSame(['10.0.0.1', '192.168.1.0'], $config['api']['allowed_ips']);
+        $this->assertSame('secret-token', $config['api']['auth_token']);
+    }
+
+    public function testPathMappingDefaults(): void
+    {
+        $config = $this->processConfiguration([]);
+
+        $this->assertArrayHasKey('path_mapping', $config);
+        $this->assertSame([], $config['path_mapping']);
+    }
+
+    public function testPathMappingCustomConfiguration(): void
+    {
+        $config = $this->processConfiguration([
+            [
+                'path_mapping' => [
+                    '/app' => '/home/user/project',
+                    '/var/www' => '/Users/dev/sites/myapp',
+                ],
+            ],
+        ]);
+
+        $this->assertSame('/home/user/project', $config['path_mapping']['/app']);
+        $this->assertSame('/Users/dev/sites/myapp', $config['path_mapping']['/var/www']);
+    }
+
+    public function testEnableCodeCoverageCollector(): void
+    {
+        $config = $this->processConfiguration([
+            [
+                'collectors' => [
+                    'code_coverage' => true,
+                ],
+            ],
+        ]);
+
+        $this->assertTrue($config['collectors']['code_coverage']);
+    }
+
+    public function testPanelCustomViteDevServerUrl(): void
+    {
+        $config = $this->processConfiguration([
+            [
+                'panel' => ['static_url' => 'http://localhost:3000'],
+            ],
+        ]);
+
+        $this->assertSame('http://localhost:3000', $config['panel']['static_url']);
+    }
+
+    public function testMultipleConfigsMerged(): void
+    {
+        $config = $this->processConfiguration([
+            [
+                'storage' => ['path' => '/tmp/debug1'],
+                'collectors' => ['doctrine' => false],
+            ],
+            [
+                'storage' => ['path' => '/tmp/debug2'],
+                'collectors' => ['twig' => false],
+            ],
+        ]);
+
+        // Last config wins for scalars
+        $this->assertSame('/tmp/debug2', $config['storage']['path']);
+        // Both collector changes should be present
+        $this->assertFalse($config['collectors']['doctrine']);
+        $this->assertFalse($config['collectors']['twig']);
+    }
+
     private function processConfiguration(array $configs): array
     {
         return new Processor()->processConfiguration(new Configuration(), $configs);

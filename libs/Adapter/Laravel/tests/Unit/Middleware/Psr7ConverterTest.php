@@ -82,4 +82,111 @@ final class Psr7ConverterTest extends TestCase
         $this->assertSame('abc123', $psrResponse->getHeaderLine('x-request-id'));
         $this->assertSame('debug-456', $psrResponse->getHeaderLine('x-debug-id'));
     }
+
+    public function testConvertRequestWithEmptyBody(): void
+    {
+        $request = Request::create('https://example.com/api/data', 'POST', content: '');
+
+        $converter = new Psr7Converter();
+        $psrRequest = $converter->convertRequest($request);
+
+        $this->assertSame('POST', $psrRequest->getMethod());
+        // Empty body should not be set
+        $this->assertSame('', (string) $psrRequest->getBody());
+    }
+
+    public function testConvertRequestPutMethod(): void
+    {
+        $request = Request::create('https://example.com/api/users/1', 'PUT', content: '{"name":"Jane"}');
+        $request->headers->set('Content-Type', 'application/json');
+
+        $converter = new Psr7Converter();
+        $psrRequest = $converter->convertRequest($request);
+
+        $this->assertSame('PUT', $psrRequest->getMethod());
+        $this->assertSame('{"name":"Jane"}', (string) $psrRequest->getBody());
+    }
+
+    public function testConvertRequestDeleteMethod(): void
+    {
+        $request = Request::create('https://example.com/api/users/1', 'DELETE');
+
+        $converter = new Psr7Converter();
+        $psrRequest = $converter->convertRequest($request);
+
+        $this->assertSame('DELETE', $psrRequest->getMethod());
+    }
+
+    public function testConvertRequestPatchMethod(): void
+    {
+        $request = Request::create('https://example.com/api/users/1', 'PATCH', content: '{"status":"active"}');
+
+        $converter = new Psr7Converter();
+        $psrRequest = $converter->convertRequest($request);
+
+        $this->assertSame('PATCH', $psrRequest->getMethod());
+        $this->assertSame('{"status":"active"}', (string) $psrRequest->getBody());
+    }
+
+    public function testConvertRequestPreservesMultipleQueryParams(): void
+    {
+        $request = Request::create('https://example.com/api/search?q=test&page=2&limit=10');
+
+        $converter = new Psr7Converter();
+        $psrRequest = $converter->convertRequest($request);
+
+        $queryParams = $psrRequest->getQueryParams();
+        $this->assertSame('test', $queryParams['q']);
+        $this->assertSame('2', $queryParams['page']);
+        $this->assertSame('10', $queryParams['limit']);
+    }
+
+    public function testConvertRequestPreservesUri(): void
+    {
+        $request = Request::create('https://example.com/api/v2/users?active=1');
+
+        $converter = new Psr7Converter();
+        $psrRequest = $converter->convertRequest($request);
+
+        $uri = $psrRequest->getUri();
+        $this->assertSame('/api/v2/users', $uri->getPath());
+        $this->assertSame('active=1', $uri->getQuery());
+    }
+
+    public function testConvertResponseWithEmptyContent(): void
+    {
+        $response = new Response('', 204);
+
+        $converter = new Psr7Converter();
+        $psrResponse = $converter->convertResponse($response);
+
+        $this->assertSame(204, $psrResponse->getStatusCode());
+        $this->assertSame('', (string) $psrResponse->getBody());
+    }
+
+    public function testConvertResponseWithServerError(): void
+    {
+        $response = new Response('Internal Server Error', 500, [
+            'Content-Type' => 'text/plain',
+        ]);
+
+        $converter = new Psr7Converter();
+        $psrResponse = $converter->convertResponse($response);
+
+        $this->assertSame(500, $psrResponse->getStatusCode());
+        $this->assertSame('Internal Server Error', (string) $psrResponse->getBody());
+    }
+
+    public function testConvertResponseRedirect(): void
+    {
+        $response = new Response('', 302, [
+            'Location' => 'https://example.com/login',
+        ]);
+
+        $converter = new Psr7Converter();
+        $psrResponse = $converter->convertResponse($response);
+
+        $this->assertSame(302, $psrResponse->getStatusCode());
+        $this->assertSame('https://example.com/login', $psrResponse->getHeaderLine('location'));
+    }
 }

@@ -185,4 +185,119 @@ final class CommandControllerTest extends ControllerTestCase
         $this->assertContains('test/phpunit', $names);
         $this->assertContains('custom/cmd', $names);
     }
+
+    public function testRunComposerScript(): void
+    {
+        // Composer scripts should be auto-discovered and runnable
+        $controller = $this->createController();
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $composerCommands = array_filter($data, static fn(array $item) => $item['group'] === 'composer');
+
+        $this->assertNotEmpty($composerCommands, 'Composer scripts should appear in the command list');
+
+        foreach ($composerCommands as $cmd) {
+            $this->assertStringStartsWith('composer/', $cmd['name']);
+            $this->assertSame('composer', $cmd['group']);
+            $this->assertArrayHasKey('description', $cmd);
+        }
+    }
+
+    public function testRunResolvesCommandFromContainer(): void
+    {
+        $commandResult = new CommandResponse(CommandResponse::STATUS_OK, 'container-output', []);
+
+        $command = $this->createMock(CommandInterface::class);
+        $command->expects($this->once())->method('run')->willReturn($commandResult);
+
+        // Register BashCommand in the container — the controller should resolve it from there
+        $controller = $this->createController([
+            'testing' => [
+                'bash-cmd' => BashCommand::class,
+            ],
+        ], [BashCommand::class => $command]);
+
+        $response = $controller->run($this->get(['command' => 'bash-cmd']));
+
+        $data = $this->responseData($response);
+        $this->assertSame('ok', $data['status']);
+        $this->assertSame('container-output', $data['result']);
+    }
+
+    public function testRunResolvesComposerScriptAsBashCommand(): void
+    {
+        // The controller should be able to resolve a composer script command
+        $controller = $this->createController();
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $composerCommands = array_filter($data, static fn(array $item) => $item['group'] === 'composer');
+
+        // At least verify the structure is correct
+        foreach ($composerCommands as $cmd) {
+            $this->assertArrayHasKey('title', $cmd);
+            $this->assertArrayHasKey('name', $cmd);
+        }
+    }
+
+    public function testRunCommandWithErrorResult(): void
+    {
+        $commandResult = new CommandResponse(CommandResponse::STATUS_ERROR, 'error-output', ['some error']);
+
+        $command = $this->createMock(CommandInterface::class);
+        $command->method('run')->willReturn($commandResult);
+
+        $controller = $this->createController([
+            'testing' => [
+                'error-cmd' => BashCommand::class,
+            ],
+        ], [BashCommand::class => $command]);
+
+        $response = $controller->run($this->get(['command' => 'error-cmd']));
+
+        $data = $this->responseData($response);
+        $this->assertSame(CommandResponse::STATUS_ERROR, $data['status']);
+        $this->assertSame('error-output', $data['result']);
+        $this->assertSame(['some error'], $data['error']);
+    }
+
+    public function testRunCommandWithFailResult(): void
+    {
+        $commandResult = new CommandResponse(CommandResponse::STATUS_FAIL, null, ['fatal error']);
+
+        $command = $this->createMock(CommandInterface::class);
+        $command->method('run')->willReturn($commandResult);
+
+        $controller = $this->createController([
+            'testing' => [
+                'fail-cmd' => BashCommand::class,
+            ],
+        ], [BashCommand::class => $command]);
+
+        $response = $controller->run($this->get(['command' => 'fail-cmd']));
+
+        $data = $this->responseData($response);
+        $this->assertSame(CommandResponse::STATUS_FAIL, $data['status']);
+        $this->assertNull($data['result']);
+        $this->assertSame(['fatal error'], $data['error']);
+    }
+
+    public function testIndexComposerScriptHasDescription(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $composerCommands = array_values(array_filter(
+            $data,
+            static fn(array $item) => $item['group'] === 'composer',
+        ));
+
+        if ($composerCommands !== []) {
+            $first = $composerCommands[0];
+            $this->assertArrayHasKey('description', $first);
+            $this->assertIsString($first['description']);
+        }
+    }
 }

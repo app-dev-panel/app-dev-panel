@@ -91,6 +91,72 @@ final class GarbageCollectorTest extends TestCase
         }
     }
 
+    public function testRunWithGzipFiles(): void
+    {
+        $dir = $this->storagePath . '/aa/01';
+        mkdir($dir, 0o777, true);
+        $file = $dir . '/summary.json.gz';
+        file_put_contents($file, gzencode(json_encode(['id' => '01'])));
+
+        $gc = new GarbageCollector($this->storagePath, 50);
+        $gc->run();
+
+        $this->assertFileExists($file);
+    }
+
+    public function testRunRemovesExcessGzipEntries(): void
+    {
+        // Create old gzip entry
+        $dir1 = $this->storagePath . '/aa/old';
+        mkdir($dir1, 0o777, true);
+        $file1 = $dir1 . '/summary.json.gz';
+        file_put_contents($file1, gzencode(json_encode(['id' => 'old'])));
+        touch($file1, time() - 100);
+
+        // Create new entry
+        $dir2 = $this->storagePath . '/bb/new';
+        mkdir($dir2, 0o777, true);
+        $file2 = $dir2 . '/summary.json.gz';
+        file_put_contents($file2, gzencode(json_encode(['id' => 'new'])));
+
+        $gc = new GarbageCollector($this->storagePath, 1);
+        $gc->run();
+
+        $this->assertFileDoesNotExist($file1);
+        $this->assertFileExists($file2);
+    }
+
+    public function testRunWithMixedGzipAndJsonEntries(): void
+    {
+        // Create old json entry
+        $this->createEntry('aa', 'old-json', time() - 200);
+
+        // Create new gzip entry
+        $dir = $this->storagePath . '/bb/new-gz';
+        mkdir($dir, 0o777, true);
+        $file = $dir . '/summary.json.gz';
+        file_put_contents($file, gzencode(json_encode(['id' => 'new-gz'])));
+
+        $gc = new GarbageCollector($this->storagePath, 1);
+        $gc->run();
+
+        $this->assertFileExists($file);
+        $this->assertFileDoesNotExist($this->storagePath . '/aa/old-json/summary.json');
+    }
+
+    public function testRunWithExactlyHistorySizeEntries(): void
+    {
+        $this->createEntry('aa', '01');
+        $this->createEntry('bb', '02');
+
+        $gc = new GarbageCollector($this->storagePath, 2);
+        $gc->run();
+
+        // Both should be preserved (count <= historySize)
+        $this->assertFileExists($this->storagePath . '/aa/01/summary.json');
+        $this->assertFileExists($this->storagePath . '/bb/02/summary.json');
+    }
+
     private function removeDirectory(string $path): void
     {
         if (!is_dir($path)) {

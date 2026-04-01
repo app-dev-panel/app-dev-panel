@@ -56,6 +56,60 @@ final class FileStorageGarbageCollectorTest extends TestCase
         $this->assertFileDoesNotExist($this->storagePath . '/aa/old/summary.json');
     }
 
+    public function testRunCleansEmptyGroupDirectories(): void
+    {
+        $this->createEntry('aa', 'old', time() - 100);
+        $this->createEntry('bb', 'new', time());
+
+        $gc = new FileStorageGarbageCollector($this->storagePath, 1);
+        $gc->run();
+
+        $this->assertDirectoryDoesNotExist($this->storagePath . '/aa');
+        $this->assertDirectoryExists($this->storagePath . '/bb');
+    }
+
+    public function testRunCleansUpLockFile(): void
+    {
+        $this->createEntry('aa', '01');
+
+        $gc = new FileStorageGarbageCollector($this->storagePath, 50);
+        $gc->run();
+
+        $this->assertFileDoesNotExist($this->storagePath . '/.gc.lock');
+    }
+
+    public function testRunWithGzipSummaries(): void
+    {
+        $dir1 = $this->storagePath . '/aa/gz-old';
+        mkdir($dir1, 0o777, true);
+        $file1 = $dir1 . '/summary.json.gz';
+        file_put_contents($file1, gzencode(json_encode(['id' => 'gz-old'])));
+        touch($file1, time() - 200);
+
+        $dir2 = $this->storagePath . '/bb/gz-new';
+        mkdir($dir2, 0o777, true);
+        $file2 = $dir2 . '/summary.json.gz';
+        file_put_contents($file2, gzencode(json_encode(['id' => 'gz-new'])));
+
+        $gc = new FileStorageGarbageCollector($this->storagePath, 1);
+        $gc->run();
+
+        $this->assertFileDoesNotExist($file1);
+        $this->assertFileExists($file2);
+    }
+
+    public function testRunWithExactHistorySize(): void
+    {
+        $this->createEntry('aa', '01', time() - 10);
+        $this->createEntry('bb', '02', time());
+
+        $gc = new FileStorageGarbageCollector($this->storagePath, 2);
+        $gc->run();
+
+        $this->assertFileExists($this->storagePath . '/aa/01/summary.json');
+        $this->assertFileExists($this->storagePath . '/bb/02/summary.json');
+    }
+
     private function createEntry(string $group, string $id, ?int $mtime = null): void
     {
         $dir = $this->storagePath . '/' . $group . '/' . $id;

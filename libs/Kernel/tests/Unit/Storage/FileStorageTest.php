@@ -136,6 +136,107 @@ final class FileStorageTest extends AbstractStorageTestCase
         $this->assertSame(1, FileStorage::DEFAULT_COMPRESSION_LEVEL);
     }
 
+    public function testReadEmptyDirectory(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        // No data written yet
+        $result = $storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertSame([], $result);
+    }
+
+    public function testReadNonExistentId(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $result = $storage->read(StorageInterface::TYPE_DATA, 'non-existent-id');
+        $this->assertSame([], $result);
+    }
+
+    public function testReadByIdReturnsSpecificEntry(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $storage->write('test-id-1', ['id' => 'test-id-1'], ['key' => 'value1'], []);
+        $storage->write('test-id-2', ['id' => 'test-id-2'], ['key' => 'value2'], []);
+
+        $result = $storage->read(StorageInterface::TYPE_SUMMARY, 'test-id-1');
+        $this->assertCount(1, $result);
+        $this->assertArrayHasKey('test-id-1', $result);
+        $this->assertSame('test-id-1', $result['test-id-1']['id']);
+    }
+
+    public function testFlushCollectsSummaryData(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $summaryCollector = $this->createFakeSummaryCollector(['test' => 'data']);
+        $storage->addCollector($summaryCollector);
+        $storage->flush();
+
+        $summaries = $storage->read(StorageInterface::TYPE_SUMMARY, $idGenerator->getId());
+        $this->assertCount(1, $summaries);
+        $summary = $summaries[$idGenerator->getId()];
+        $this->assertSame($idGenerator->getId(), $summary['id']);
+        $this->assertArrayHasKey('collectors', $summary);
+    }
+
+    public function testGzipAndLegacyFilesCoexist(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        // Write a gzip entry
+        $storage->write('gz-entry', ['id' => 'gz-entry'], ['data' => 'gz'], []);
+
+        // Write a legacy JSON entry manually
+        $legacyDir = $this->path . '/' . date('Y-m-d') . '/legacy-entry/';
+        mkdir($legacyDir, 0777, true);
+        file_put_contents($legacyDir . 'summary.json', json_encode(['id' => 'legacy-entry']));
+
+        $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(2, $summaries);
+        $this->assertArrayHasKey('gz-entry', $summaries);
+        $this->assertArrayHasKey('legacy-entry', $summaries);
+    }
+
+    public function testReadAllSortsChronologically(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        // Write entries and manipulate timestamps
+        $storage->write('entry-a', ['id' => 'entry-a'], [], []);
+        $storage->write('entry-b', ['id' => 'entry-b'], [], []);
+
+        // Touch entry-a to be newer
+        $gzFiles = glob($this->path . '/**/entry-a/summary.json.gz');
+        if ($gzFiles) {
+            touch($gzFiles[0], time() + 10);
+        }
+
+        $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
+        $ids = array_keys($summaries);
+        // entry-b should come first (older), entry-a last (newer)
+        $this->assertSame('entry-b', $ids[0]);
+        $this->assertSame('entry-a', $ids[1]);
+    }
+
+    public function testWriteAndReadObjects(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $storage->write('obj-test', ['id' => 'obj-test'], [], ['SomeClass#1' => ['prop' => 'value']]);
+
+        $result = $storage->read(StorageInterface::TYPE_OBJECTS, 'obj-test');
+        $this->assertArrayHasKey('obj-test', $result);
+    }
+
     public function getStorage(DebuggerIdGenerator $idGenerator): FileStorage
     {
         return new FileStorage(new Aliases()->get($this->path), $idGenerator);

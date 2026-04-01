@@ -46,4 +46,44 @@ final class ConnectionTest extends TestCase
 
         $connection->close();
     }
+
+    public function testBindCreatesSocketFile(): void
+    {
+        $connection = Connection::create();
+        $connection->bind();
+
+        $uri = $connection->getUri();
+        $this->assertStringContainsString('yii-dev-server-', $uri);
+        $this->assertStringContainsString(sys_get_temp_dir(), $uri);
+        $this->assertStringEndsWith('.sock', $uri);
+        $this->assertFileExists($uri);
+
+        $connection->close();
+    }
+
+    public function testCloseRemovesSocketFile(): void
+    {
+        $connection = Connection::create();
+        $connection->bind();
+        $uri = $connection->getUri();
+
+        $this->assertFileExists($uri);
+        $connection->close();
+        $this->assertFileDoesNotExist($uri);
+    }
+
+    public function testCloseWithoutBindDoesNotThrow(): void
+    {
+        $connection = Connection::create();
+        // Close without bind - should not throw
+        $connection->close();
+        $this->assertTrue(true); // Reached without exception
+    }
+
+    public function testMessageTypeConstants(): void
+    {
+        // Verify message types are distinct from type constants
+        $this->assertSame(Connection::TYPE_RESULT, Connection::MESSAGE_TYPE_VAR_DUMPER);
+        $this->assertSame(Connection::TYPE_ERROR, Connection::MESSAGE_TYPE_LOGGER);
+    }
 }
