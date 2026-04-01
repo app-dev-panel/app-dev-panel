@@ -1,5 +1,3 @@
-import '@app-dev-panel/toolbar/wdyr';
-
 import {Config} from '@app-dev-panel/sdk/Config';
 import App from '@app-dev-panel/toolbar/App';
 import '@app-dev-panel/toolbar/index.css';
