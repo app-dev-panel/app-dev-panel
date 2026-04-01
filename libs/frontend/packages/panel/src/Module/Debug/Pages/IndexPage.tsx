@@ -9,7 +9,7 @@ import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate
 import {Box, Icon, LinearProgress, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 // Collectors hidden from the card grid (data shown elsewhere in overview)
 const hiddenCollectors = new Set<string>([

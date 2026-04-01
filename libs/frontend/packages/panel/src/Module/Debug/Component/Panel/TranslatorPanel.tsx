@@ -4,7 +4,7 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {Box, Chip, Icon, Link as MuiLink, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link} from 'react-router';
 
 type Translation = {
     category: string;

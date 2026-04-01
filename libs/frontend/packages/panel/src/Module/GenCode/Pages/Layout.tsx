@@ -12,7 +12,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import {Link, Typography} from '@mui/material';
 import {useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 const Layout = () => {
     const [selectedGenerator, setSelectedGenerator] = useState<GenCodeGenerator | null>(null);

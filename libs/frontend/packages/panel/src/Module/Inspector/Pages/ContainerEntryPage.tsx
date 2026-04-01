@@ -4,7 +4,7 @@ import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScree
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Box} from '@mui/material';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 export const ContainerEntryPage = () => {
     const [searchParams] = useSearchParams();

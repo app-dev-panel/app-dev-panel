@@ -12,7 +12,7 @@ import {Box, Chip, Icon, IconButton, Tab, Tabs, type Theme, Tooltip, Typography}
 import {styled, useTheme} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useMemo, useState} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 type Response = {
     content: string;

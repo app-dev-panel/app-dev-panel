@@ -8,7 +8,7 @@ import {DataType} from '@textea/json-viewer';
 import {deepUpdate} from 'immupdate';
 import * as React from 'react';
 import {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router';
 
 export const JsonRenderer = React.memo((props: JsonRendererProps) => {
     const [objectQuery] = useLazyGetObjectQuery();

@@ -10,7 +10,7 @@ import {CrossWindowEventType, dispatchWindowEvent} from '@app-dev-panel/sdk/Help
 import {useEffect, useMemo, useRef} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {Provider} from 'react-redux';
-import {RouterProvider} from 'react-router-dom';
+import {RouterProvider} from 'react-router';
 import {PersistGate} from 'redux-persist/integration/react';
 
 type AppProps = {

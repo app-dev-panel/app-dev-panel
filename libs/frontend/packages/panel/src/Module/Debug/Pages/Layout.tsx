@@ -36,8 +36,7 @@ import {Alert, AlertTitle, Box, LinearProgress} from '@mui/material';
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
-import {Outlet} from 'react-router';
-import {useSearchParams} from 'react-router-dom';
+import {Outlet, useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Collector data renderer

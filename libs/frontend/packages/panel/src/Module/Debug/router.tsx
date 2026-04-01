@@ -1,5 +1,5 @@
 import * as Pages from '@app-dev-panel/panel/Module/Debug/Pages';
-import {RouteObject} from 'react-router-dom';
+import {RouteObject} from 'react-router';
 
 export const routes = [
     {

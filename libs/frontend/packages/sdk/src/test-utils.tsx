@@ -4,7 +4,7 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 import {render, RenderOptions} from '@testing-library/react';
 import React, {PropsWithChildren} from 'react';
 import {Provider} from 'react-redux';
-import {MemoryRouter} from 'react-router-dom';
+import {MemoryRouter} from 'react-router';
 import {debugSlice} from './API/Debug/Context';
 import {debugApi} from './API/Debug/Debug';
 import {createAdpTheme} from './Component/Theme/DefaultTheme';

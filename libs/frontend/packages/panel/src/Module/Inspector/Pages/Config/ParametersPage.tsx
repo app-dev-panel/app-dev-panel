@@ -9,7 +9,7 @@ import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/m
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useMemo, useState} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Types

@@ -14,7 +14,7 @@ import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import {Code, ContentCopy, FolderOpen, Lock, Person, Storage} from '@mui/icons-material';
 import {Alert, AlertTitle, Box, Breadcrumbs, IconButton, Link, Paper, Tooltip, Typography} from '@mui/material';
 import {useCallback, useEffect, useLayoutEffect, useState} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 type PathBreadcrumbsProps = {onClick: (nodeId: string) => void; path: string; insideRoot?: boolean};
 

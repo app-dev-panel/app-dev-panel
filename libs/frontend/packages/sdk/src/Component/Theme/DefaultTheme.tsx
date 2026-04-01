@@ -4,7 +4,7 @@ import {PaletteMode, ThemeProvider, createTheme, useMediaQuery} from '@mui/mater
 import {LinkProps} from '@mui/material/Link';
 import React, {PropsWithChildren, useContext, useMemo} from 'react';
 import {useSelector} from 'react-redux';
-import {Link as RouterLink, LinkProps as RouterLinkProps, useHref} from 'react-router-dom';
+import {Link as RouterLink, LinkProps as RouterLinkProps, useHref} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // MUI module augmentation — extend theme with ADP custom properties
@@ -111,7 +111,9 @@ export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNew
         adp: {
             fontFamilyMono: semanticTokens.typography.fontFamilyMono,
             chartColors: isDark ? darkSemanticTokens.chartColors : semanticTokens.chartColors,
-            collectorColors: (isDark ? darkSemanticTokens.collectorColors : semanticTokens.collectorColors) as CollectorColorsMap,
+            collectorColors: (isDark
+                ? darkSemanticTokens.collectorColors
+                : semanticTokens.collectorColors) as CollectorColorsMap,
             highlightColor: isDark ? darkSemanticTokens.highlightColor : semanticTokens.highlightColor,
         },
         components: {

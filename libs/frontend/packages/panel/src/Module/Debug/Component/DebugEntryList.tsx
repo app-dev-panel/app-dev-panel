@@ -22,7 +22,7 @@ import {styled, useTheme} from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import React, {useCallback, useDeferredValue, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Styled components

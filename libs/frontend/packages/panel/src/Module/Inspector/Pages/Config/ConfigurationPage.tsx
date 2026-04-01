@@ -5,7 +5,7 @@ import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
 import {Box, Tab} from '@mui/material';
 import {SyntheticEvent, useState} from 'react';
-import {useNavigate, useParams} from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router';
 
 type TabValue = 'container' | 'parameters' | 'definitions';
 export const ConfigurationPage = () => {

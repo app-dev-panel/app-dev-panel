@@ -1,5 +1,5 @@
 import * as Pages from '@app-dev-panel/panel/Module/Llm/Pages';
-import {RouteObject} from 'react-router-dom';
+import {RouteObject} from 'react-router';
 
 export const routes = [
     {path: '/llm', element: <Pages.Layout />},

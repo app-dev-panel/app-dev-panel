@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import {PropsWithChildren} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router';
 
 type TimelineContentWrapperProps = {name: string; file?: string; payload: undefined | string};
 

@@ -4,7 +4,7 @@ import {TestsPage} from '@app-dev-panel/panel/Module/Inspector/Pages/TestsPage';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Box, Tab, Tabs} from '@mui/material';
 import {useCallback} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 const tabs = ['tests', 'analyse', 'coverage'] as const;
 type TabKey = (typeof tabs)[number];

@@ -12,7 +12,10 @@ export const InfoBox = ({text, title, icon, severity}: InfoBoxProps) => {
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%'}}>
             <>
-                {React.cloneElement(icon as React.ReactElement<Record<string, unknown>>, {sx: {my: 3, fontSize: 150}, color: severity})}
+                {React.cloneElement(icon as React.ReactElement<Record<string, unknown>>, {
+                    sx: {my: 3, fontSize: 150},
+                    color: severity,
+                })}
                 <Typography component="h5" variant="h5" my={3}>
                     {title}
                 </Typography>

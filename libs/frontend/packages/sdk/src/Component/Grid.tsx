@@ -3,7 +3,7 @@ import {DataGrid, GridColDef, GridValidRowModel} from '@mui/x-data-grid';
 import {GridSortModel} from '@mui/x-data-grid/models/gridSortModel';
 import {useCallback, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 type GridProps = {
     rows: GridValidRowModel[];

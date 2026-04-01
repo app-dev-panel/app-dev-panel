@@ -12,7 +12,7 @@ import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Box, Button, CircularProgress, Link as MuiLink, Paper, Skeleton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Types

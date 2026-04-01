@@ -38,7 +38,7 @@ import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
-import {Outlet, useLocation, useNavigate, useSearchParams} from 'react-router-dom';
+import {Outlet, useLocation, useNavigate, useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Collectors hidden from sidebar (shown in overview instead)

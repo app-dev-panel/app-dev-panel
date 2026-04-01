@@ -12,7 +12,7 @@ import {Box, Chip, IconButton, Tab, Tabs, Tooltip, Typography} from '@mui/materi
 import {styled, useTheme} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import React, {type SyntheticEvent, useCallback, useDeferredValue, useMemo, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Types

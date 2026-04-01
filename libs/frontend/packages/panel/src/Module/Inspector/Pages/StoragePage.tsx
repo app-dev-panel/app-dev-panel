@@ -5,7 +5,7 @@ import {RedisPage} from '@app-dev-panel/panel/Module/Inspector/Pages/RedisPage';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Box, Tab, Tabs} from '@mui/material';
 import {useCallback} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 const tabs = ['database', 'cache', 'redis', 'elasticsearch'] as const;
 type TabKey = (typeof tabs)[number];

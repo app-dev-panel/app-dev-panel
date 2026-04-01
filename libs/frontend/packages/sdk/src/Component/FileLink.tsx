@@ -3,7 +3,7 @@ import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import {Code} from '@mui/icons-material';
 import {IconButton, Tooltip} from '@mui/material';
 import {type ReactNode} from 'react';
-import {Link as RouterLink} from 'react-router-dom';
+import {Link as RouterLink} from 'react-router';
 
 type FileLinkProps = {
     /** File path, optionally with :line suffix (e.g. "/app/src/Foo.php:42") */

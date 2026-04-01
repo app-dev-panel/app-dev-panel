@@ -4,7 +4,7 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {Typography} from '@mui/material';
 import Box from '@mui/material/Box';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 export const ObjectPage = () => {
     const [searchParams] = useSearchParams();

@@ -11,7 +11,7 @@ import {Box, CircularProgress, IconButton, TablePagination, Tooltip, Typography}
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Types
