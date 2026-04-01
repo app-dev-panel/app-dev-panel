@@ -203,4 +203,110 @@ final class InspectDatabaseCommandTest extends TestCase
         $this->assertSame(1, $tester->getStatusCode());
         $this->assertStringContainsString('Unknown action', $tester->getDisplay());
     }
+
+    public function testQueryJsonOutput(): void
+    {
+        $result = ['rows' => [['id' => 1]], 'count' => 1];
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider->method('executeQuery')->willReturn($result);
+
+        $tester = new CommandTester(new InspectDatabaseCommand($provider));
+        $tester->execute(['action' => 'query', 'target' => 'SELECT 1', '--json' => true]);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $decoded = json_decode($tester->getDisplay(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(1, $decoded['count']);
+    }
+
+    public function testExplainJsonOutput(): void
+    {
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider->method('explainQuery')->willReturn(['plan' => 'Seq Scan']);
+
+        $tester = new CommandTester(new InspectDatabaseCommand($provider));
+        $tester->execute(['action' => 'explain', 'target' => 'SELECT 1', '--json' => true]);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $decoded = json_decode($tester->getDisplay(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('Seq Scan', $decoded['plan']);
+    }
+
+    public function testExplainError(): void
+    {
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider->method('explainQuery')->willThrowException(new \RuntimeException('Query error'));
+
+        $tester = new CommandTester(new InspectDatabaseCommand($provider));
+        $tester->execute(['action' => 'explain', 'target' => 'BAD SQL']);
+
+        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertStringContainsString('Query error', $tester->getDisplay());
+    }
+
+    public function testQueryWithNonArrayFirstRow(): void
+    {
+        $result = ['rows' => ['scalar-value'], 'count' => 1];
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider->method('executeQuery')->willReturn($result);
+
+        $tester = new CommandTester(new InspectDatabaseCommand($provider));
+        $tester->execute(['action' => 'query', 'target' => 'SELECT 1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+    }
+
+    public function testQueryWithEmptyResult(): void
+    {
+        $result = ['rows' => [], 'count' => 0];
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider->method('executeQuery')->willReturn($result);
+
+        $tester = new CommandTester(new InspectDatabaseCommand($provider));
+        $tester->execute(['action' => 'query', 'target' => 'DELETE FROM temp']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('Rows affected: 0', $tester->getDisplay());
+    }
+
+    public function testViewTableWithLimitAndOffset(): void
+    {
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->method('getTable')
+            ->with('users', 10, 5)
+            ->willReturn([
+                'columns' => [
+                    [
+                        'name' => 'id',
+                        'type' => 'int',
+                        'allowNull' => false,
+                        'defaultValue' => null,
+                        'isPrimaryKey' => true,
+                    ],
+                ],
+                'records' => [['id' => 6]],
+            ]);
+
+        $tester = new CommandTester(new InspectDatabaseCommand($provider));
+        $tester->execute(['action' => 'table', 'target' => 'users', '--limit' => '10', '--offset' => '5']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('limit: 10', $display);
+        $this->assertStringContainsString('offset: 5', $display);
+    }
+
+    public function testQueryWithNullValues(): void
+    {
+        $result = ['rows' => [['id' => 1, 'name' => null, 'data' => ['nested' => true]]], 'count' => 1];
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider->method('executeQuery')->willReturn($result);
+
+        $tester = new CommandTester(new InspectDatabaseCommand($provider));
+        $tester->execute(['action' => 'query', 'target' => 'SELECT * FROM t']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('NULL', $display);
+    }
 }

@@ -120,4 +120,106 @@ final class DebugSummaryCommandTest extends TestCase
         $this->assertStringContainsString('15', $display);
         $this->assertStringContainsString('Cache Operations', $display);
     }
+
+    public function testSummaryWithMailerAndQueue(): void
+    {
+        $data = [
+            'request' => ['method' => 'POST', 'url' => '/send', 'responseStatusCode' => '200'],
+            'mailer' => ['total' => 2],
+            'queue' => ['total' => 5],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('Emails', $display);
+        $this->assertStringContainsString('Queue Jobs', $display);
+    }
+
+    public function testSummaryWithSmallMemory(): void
+    {
+        $data = [
+            'request' => ['method' => 'GET', 'url' => '/', 'responseStatusCode' => '200'],
+            'timeline' => ['duration' => 1.5, 'memory' => 512, 'memoryPeak' => 800],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('512 B', $display);
+        $this->assertStringContainsString('800 B', $display);
+    }
+
+    public function testSummaryWithKBMemory(): void
+    {
+        $data = [
+            'request' => ['method' => 'GET', 'url' => '/', 'responseStatusCode' => '200'],
+            'timeline' => ['memory' => 51200],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('50.0 KB', $tester->getDisplay());
+    }
+
+    public function testSummaryWithoutRequestInfo(): void
+    {
+        $data = ['logger' => ['total' => 5]];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('Log entries', $display);
+    }
+
+    public function testSummaryExceptionWithoutFile(): void
+    {
+        $data = [
+            'request' => ['method' => 'GET', 'url' => '/', 'responseStatusCode' => '500'],
+            'exception' => ['class' => 'LogicException', 'message' => 'Bad logic'],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('LogicException', $display);
+        $this->assertStringContainsString('Bad logic', $display);
+    }
+
+    public function testSummaryWebKey(): void
+    {
+        $data = [
+            'web' => ['method' => 'PUT', 'url' => '/update', 'responseStatusCode' => '200', 'duration' => 50.0],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('PUT', $display);
+        $this->assertStringContainsString('/update', $display);
+    }
 }

@@ -25,6 +25,7 @@ final class DebugTailCommand extends Command
     {
         $this
             ->addOption('interval', 'i', InputOption::VALUE_OPTIONAL, 'Poll interval in seconds', '1')
+            ->addOption('count', 'c', InputOption::VALUE_OPTIONAL, 'Stop after N new entries (0 = unlimited)', '0')
             ->addOption('json', null, InputOption::VALUE_NONE, 'Output raw JSON')
             ->setHelp(<<<'HELP'
                 Watch for new debug entries in real-time (like tail -f).
@@ -35,6 +36,9 @@ final class DebugTailCommand extends Command
                 Custom poll interval (2 seconds):
                   <info>debug:tail --interval=2</info>
 
+                Stop after 5 new entries:
+                  <info>debug:tail --count=5</info>
+
                 Press Ctrl+C to stop.
                 HELP);
     }
@@ -43,6 +47,7 @@ final class DebugTailCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $interval = max(1, (int) $input->getOption('interval'));
+        $maxCount = max(0, (int) $input->getOption('count'));
         $json = (bool) $input->getOption('json');
 
         $io->title('Watching debug entries (Ctrl+C to stop)');
@@ -50,6 +55,7 @@ final class DebugTailCommand extends Command
         $io->newLine();
 
         $knownIds = $this->getEntryIds();
+        $seen = 0;
 
         while (true) {
             sleep($interval);
@@ -63,6 +69,11 @@ final class DebugTailCommand extends Command
 
             foreach ($newIds as $id) {
                 $this->renderEntry($output, $io, $id, $json);
+                $seen++;
+
+                if ($maxCount > 0 && $seen >= $maxCount) {
+                    return Command::SUCCESS;
+                }
             }
 
             $knownIds = $currentIds;

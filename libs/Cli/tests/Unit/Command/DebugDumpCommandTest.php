@@ -145,4 +145,54 @@ final class DebugDumpCommandTest extends TestCase
         $this->assertSame(1, $tester->getStatusCode());
         $this->assertStringContainsString('Object "missing" not found', $tester->getDisplay());
     }
+
+    public function testViewObjectError(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getObject')->willThrowException(new \RuntimeException('Storage error'));
+
+        $tester = new CommandTester(new DebugDumpCommand($repository));
+        $tester->execute(['id' => 'entry-1', 'objectId' => 'obj-1']);
+
+        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertStringContainsString('Storage error', $tester->getDisplay());
+    }
+
+    public function testViewDumpWithEmptyCollectorValue(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getDumpObject')
+            ->willReturn([
+                'EmptyCollector' => [],
+            ]);
+
+        $tester = new CommandTester(new DebugDumpCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('EmptyCollector', $display);
+        $this->assertStringContainsString('(empty)', $display);
+    }
+
+    public function testViewDumpFilteredJson(): void
+    {
+        $collectorClass = 'LogCollector';
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getDumpObject')
+            ->willReturn([
+                $collectorClass => ['messages' => ['hello']],
+                'OtherCollector' => ['data' => true],
+            ]);
+
+        $tester = new CommandTester(new DebugDumpCommand($repository));
+        $tester->execute(['id' => 'entry-1', '--collector' => $collectorClass, '--json' => true]);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $decoded = json_decode($tester->getDisplay(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertArrayHasKey($collectorClass, $decoded);
+        $this->assertArrayNotHasKey('OtherCollector', $decoded);
+    }
 }
