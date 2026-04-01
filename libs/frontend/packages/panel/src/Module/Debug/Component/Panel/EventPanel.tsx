@@ -227,11 +227,7 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                                 <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mb: 1}}>
                                     <Typography
                                         variant="caption"
-                                        sx={{
-                                            fontFamily: primitives.fontFamilyMono,
-                                            color: 'text.secondary',
-                                            flex: 1,
-                                        }}
+                                        sx={{fontFamily: primitives.fontFamilyMono, color: 'text.secondary', flex: 1}}
                                     >
                                         {event.name}
                                     </Typography>
