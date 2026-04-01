@@ -14,6 +14,7 @@ import {
     AlertTitle,
     Box,
     Chip,
+    CircularProgress,
     Collapse,
     Icon,
     IconButton,
@@ -307,7 +308,7 @@ const RouteDetail = ({route}: {route: RouteType}) => {
 
 export const RoutesPage = () => {
     const theme = useTheme();
-    const {data, isLoading, isSuccess} = useGetRoutesQuery();
+    const {data, isLoading, isSuccess, isError, error} = useGetRoutesQuery();
     const [checkRouteQuery, checkRouteQueryInfo] = useLazyGetCheckRouteQuery();
     const [routes, setRoutes] = useState<RouteType[]>([]);
     const [url, setUrl] = useState('');
@@ -374,9 +375,25 @@ export const RoutesPage = () => {
         return <FullScreenCircularProgress />;
     }
 
+    const errorMessage =
+        isError && error
+            ? 'status' in error && typeof (error as any).data === 'object' && (error as any).data?.data?.error
+                ? (error as any).data.data.error
+                : 'status' in error && (error as any).status === 'FETCH_ERROR'
+                  ? 'Unable to connect to the server. Make sure the application is running.'
+                  : 'Failed to load routes.'
+            : null;
+
     return (
         <>
             <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
+
+            {isError && (
+                <Alert severity="error" sx={{mb: 2}}>
+                    <AlertTitle>Error loading routes</AlertTitle>
+                    {errorMessage}
+                </Alert>
+            )}
 
             {/* Route checker — compact inline form */}
             <CheckerBox onSubmit={onSubmitHandler}>
@@ -389,12 +406,27 @@ export const RoutesPage = () => {
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                 />
-                <IconButton type="submit" size="small" disabled={!url.trim()}>
-                    <Icon sx={{fontSize: 18}}>check</Icon>
-                </IconButton>
+                {checkRouteQueryInfo.isFetching ? (
+                    <CircularProgress size={18} sx={{mx: 0.5}} />
+                ) : (
+                    <IconButton type="submit" size="small" disabled={!url.trim()}>
+                        <Icon sx={{fontSize: 18}}>check</Icon>
+                    </IconButton>
+                )}
             </CheckerBox>
 
-            {checkRouteQueryInfo.data && (
+            {checkRouteQueryInfo.isError && (
+                <Alert severity="error" sx={{mb: 2}}>
+                    <AlertTitle>Failed to check route</AlertTitle>
+                    {'status' in (checkRouteQueryInfo.error ?? {}) &&
+                    typeof (checkRouteQueryInfo.error as any)?.data === 'object' &&
+                    (checkRouteQueryInfo.error as any)?.data?.data?.error
+                        ? (checkRouteQueryInfo.error as any).data.data.error
+                        : 'An error occurred while checking the route.'}
+                </Alert>
+            )}
+
+            {checkRouteQueryInfo.data && !checkRouteQueryInfo.isError && (
                 <Alert severity={checkRouteQueryInfo.data.result ? 'success' : 'error'} sx={{mb: 2}} onClose={() => {}}>
                     {checkRouteQueryInfo.data.result ? (
                         <AlertTitle>{serializeCallable(checkRouteQueryInfo.data.action)}</AlertTitle>
@@ -405,7 +437,7 @@ export const RoutesPage = () => {
             )}
 
             {/* Routes list */}
-            {routes.length === 0 ? (
+            {!isError && routes.length === 0 ? (
                 <EmptyState icon="alt_route" title="No routes found" />
             ) : (
                 <Box>
