@@ -167,7 +167,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     return (
         <Portal>
-            {!getDebugQuery.isLoading && selectedEntry && (
+            {!getDebugQuery.isLoading && (
                 <Paper
                     component={Box}
                     elevation={10}
@@ -212,22 +212,24 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                             boxSizing: 'border-box',
                         }}
                     >
-                        <Box sx={{display: isToolbarOpened ? 'inline-block' : 'none'}}>
-                            <ButtonGroup disableElevation>
-                                {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
-                                {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
+                        <Box sx={{display: isToolbarOpened && selectedEntry ? 'inline-block' : 'none'}}>
+                            {selectedEntry && (
+                                <ButtonGroup disableElevation>
+                                    {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
+                                    {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
 
-                                <RequestTimeItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                                <MemoryItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                    <RequestTimeItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                    <MemoryItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
-                                {isDebugEntryAboutWeb(selectedEntry) && <RouterItem data={selectedEntry} />}
+                                    {isDebugEntryAboutWeb(selectedEntry) && <RouterItem data={selectedEntry} />}
 
-                                <LogsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                                <EventsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                                <ValidatorItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                    <LogsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                    <EventsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                    <ValidatorItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
-                                <DateItem data={selectedEntry} />
-                            </ButtonGroup>
+                                    <DateItem data={selectedEntry} />
+                                </ButtonGroup>
+                            )}
                         </Box>
 
                         <Box>

@@ -79,7 +79,8 @@ describe('EventPanel', () => {
         const elements = screen.getAllByText('Click');
         await user.click(elements[0]);
         expect(screen.getByLabelText('Open File')).toBeInTheDocument();
-        expect(screen.getByText('App\\Event\\Click')).toBeInTheDocument();
+        // Full class name may appear in both detail and tooltip
+        expect(screen.getAllByText('App\\Event\\Click').length).toBeGreaterThanOrEqual(1);
     });
 
     it('shows filter input', () => {

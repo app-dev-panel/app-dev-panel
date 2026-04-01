@@ -8,6 +8,7 @@ declare(strict_types=1);
  */
 
 use AppDevPanel\Adapter\Yii3\Api\AliasPathResolver;
+use AppDevPanel\Adapter\Yii3\Api\ToolbarMiddleware;
 use AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware;
 use AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider;
 use AppDevPanel\Api\ApiApplication;
@@ -15,6 +16,8 @@ use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
 use AppDevPanel\Api\Panel\PanelConfig;
 use AppDevPanel\Api\Panel\PanelController;
+use AppDevPanel\Api\Toolbar\ToolbarConfig;
+use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
@@ -57,6 +60,7 @@ use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
@@ -192,6 +196,24 @@ return [
         StreamFactoryInterface $streamFactory,
         PanelConfig $panelConfig,
     ) => new PanelController($responseFactory, $streamFactory, $panelConfig),
+
+    // Toolbar
+    ToolbarConfig::class => static function () use ($params): ToolbarConfig {
+        $toolbarParams = $params['app-dev-panel/yii3']['toolbar'] ?? [];
+        return new ToolbarConfig(
+            enabled: $toolbarParams['enabled'] ?? true,
+            staticUrl: $toolbarParams['staticUrl'] ?? '',
+        );
+    },
+    ToolbarInjector::class => static fn(
+        PanelConfig $panelConfig,
+        ToolbarConfig $toolbarConfig,
+    ) => new ToolbarInjector($panelConfig, $toolbarConfig),
+    ToolbarMiddleware::class => static fn(
+        ToolbarInjector $toolbarInjector,
+        DebuggerIdGenerator $idGenerator,
+        StreamFactoryInterface $streamFactory,
+    ) => new ToolbarMiddleware($toolbarInjector, $idGenerator, $streamFactory),
 
     // Controllers
     DebugController::class => static fn(

@@ -62,6 +62,8 @@ use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
+use AppDevPanel\Api\Toolbar\ToolbarConfig;
+use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
 use AppDevPanel\Cli\Command\DebugSummaryCommand;
@@ -369,6 +371,7 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([
                 new Reference(Debugger::class),
                 new Reference(HttpSubscriberCollectors::class),
+                new Reference(ToolbarInjector::class),
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
@@ -548,6 +551,20 @@ final class AppDevPanelExtension extends Extension
             $panelStaticUrl = file_exists($bundleAssetsPath) ? '/bundles/appdevpanel' : PanelConfig::DEFAULT_STATIC_URL;
         }
         $container->register(PanelConfig::class, PanelConfig::class)->setArguments([$panelStaticUrl])->setPublic(false);
+
+        $toolbarEnabled = $config['toolbar']['enabled'] ?? true;
+        $toolbarStaticUrl = $config['toolbar']['static_url'] ?? '';
+        $container
+            ->register(ToolbarConfig::class, ToolbarConfig::class)
+            ->setArguments([$toolbarEnabled, $toolbarStaticUrl])
+            ->setPublic(false);
+        $container
+            ->register(ToolbarInjector::class, ToolbarInjector::class)
+            ->setArguments([
+                new Reference(PanelConfig::class),
+                new Reference(ToolbarConfig::class),
+            ])
+            ->setPublic(false);
 
         $container
             ->register(PanelController::class, PanelController::class)

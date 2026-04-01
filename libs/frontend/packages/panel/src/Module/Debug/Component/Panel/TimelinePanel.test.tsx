@@ -92,8 +92,8 @@ describe('TimelinePanel', () => {
         // Click on the row label (getAllByText since name appears in legend too)
         const elements = screen.getAllByText('AuthMiddleware');
         await user.click(elements[elements.length - 1]);
-        // Expanded detail shows full class name
-        expect(screen.getByText('App\\Middleware\\AuthMiddleware')).toBeInTheDocument();
+        // Expanded detail shows full class name (may also appear in tooltip)
+        expect(screen.getAllByText('App\\Middleware\\AuthMiddleware').length).toBeGreaterThanOrEqual(1);
         // Shows reference value
         expect(screen.getByText(/Ref: 42/)).toBeInTheDocument();
     });

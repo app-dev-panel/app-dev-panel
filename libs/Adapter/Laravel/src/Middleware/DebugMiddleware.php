@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Laravel\Middleware;
 
+use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ final class DebugMiddleware
     public function __construct(
         private readonly Debugger $debugger,
         private readonly DebugCollectors $collectors = new DebugCollectors(),
+        private readonly ?ToolbarInjector $toolbarInjector = null,
     ) {
         $this->psr7Converter = new Psr7Converter();
     }
@@ -53,6 +55,8 @@ final class DebugMiddleware
         $this->collectAfterResponse($request, $response);
 
         $response->headers->set('X-Debug-Id', $this->debugger->getId());
+
+        $this->injectToolbar($request, $response);
 
         return $response;
     }
@@ -93,6 +97,27 @@ final class DebugMiddleware
         $this->collectors->routerDataExtractor?->extract($request);
 
         $this->collectViteAssets();
+    }
+
+    private function injectToolbar(Request $request, SymfonyResponse $response): void
+    {
+        if ($this->toolbarInjector === null || !$this->toolbarInjector->isEnabled()) {
+            return;
+        }
+
+        $contentType = $response->headers->get('Content-Type', '');
+        if (!$this->toolbarInjector->isHtmlResponse($contentType)) {
+            return;
+        }
+
+        $content = $response->getContent();
+        if ($content === false || $content === '') {
+            return;
+        }
+
+        $backendUrl = $request->getSchemeAndHttpHost();
+        $injected = $this->toolbarInjector->inject($content, $backendUrl, $this->debugger->getId());
+        $response->setContent($injected);
     }
 
     private function registerVarDumperHandler(): void
