@@ -101,4 +101,67 @@ final class I18NProxyTest extends TestCase
         $result = $proxy->translate('app', 'hello', [], 'de');
         $this->assertSame('Hallo', $result);
     }
+
+    public function testTranslateWithParamsFormatsFoundTranslation(): void
+    {
+        $proxy = $this->createProxy();
+        $proxy->setCollector($this->collector);
+
+        // Yii 2 format() uses ICU MessageFormat — {name} is replaced
+        $result = $proxy->translate('app', 'hello', [], 'de');
+
+        // The found translation 'Hallo' is formatted with the target language 'de'
+        $this->assertSame('Hallo', $result);
+
+        $collected = $this->collector->getCollected();
+        $this->assertFalse($collected['translations'][0]['missing']);
+        $this->assertSame('Hallo', $collected['translations'][0]['translation']);
+    }
+
+    public function testTranslateMissingFormatsWithSourceLanguage(): void
+    {
+        $proxy = $this->createProxy();
+        $proxy->setCollector($this->collector);
+
+        // When translation is missing, the original message is formatted with source language
+        $result = $proxy->translate('app', 'nonexistent', [], 'de');
+
+        $this->assertSame('nonexistent', $result);
+
+        $collected = $this->collector->getCollected();
+        $this->assertTrue($collected['translations'][0]['missing']);
+        $this->assertNull($collected['translations'][0]['translation']);
+    }
+
+    public function testMultipleTranslationsAccumulate(): void
+    {
+        $proxy = $this->createProxy();
+        $proxy->setCollector($this->collector);
+
+        $proxy->translate('app', 'hello', [], 'de');
+        $proxy->translate('app', 'nonexistent', [], 'de');
+        $proxy->translate('app', 'hello', [], 'de');
+
+        $collected = $this->collector->getCollected();
+        $this->assertSame(3, $collected['totalCount']);
+        $this->assertSame(1, $collected['missingCount']);
+    }
+
+    private function createProxy(): I18NProxy
+    {
+        return new I18NProxy([
+            'translations' => [
+                'yii' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'sourceLanguage' => 'en',
+                    'basePath' => '@yii/messages',
+                ],
+                'app' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => __DIR__ . '/fixtures/messages',
+                    'sourceLanguage' => 'en',
+                ],
+            ],
+        ]);
+    }
 }

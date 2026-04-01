@@ -224,6 +224,124 @@ final class CollectorProxyCompilerPassTest extends TestCase
         $this->assertFalse($container->hasDefinition(SymfonyTranslatorProxy::class));
     }
 
+    public function testSkipsEventDispatcherDecorationWhenCollectorDisabled(): void
+    {
+        $container = $this->createLoadedContainer(['event' => false]);
+
+        $container->register('event_dispatcher', \Symfony\Component\EventDispatcher\EventDispatcher::class);
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $this->assertFalse($container->hasDefinition(SymfonyEventDispatcherProxy::class));
+    }
+
+    public function testSkipsHttpClientDecorationWhenCollectorDisabled(): void
+    {
+        $container = $this->createLoadedContainer(['http_client' => false]);
+
+        $container->register(ClientInterface::class, ClientInterface::class);
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        // HttpClientInterfaceProxy should NOT be registered when HttpClientCollector is disabled
+        // However registerApiServices may register its own ClientInterface. Check that
+        // the proxy isn't decorating the user-provided one.
+        // With http_client disabled, HttpClientCollector isn't registered, so proxy is skipped
+        $this->assertFalse($container->hasDefinition(HttpClientInterfaceProxy::class));
+    }
+
+    public function testDecoratesTranslatorViaFqcnFallback(): void
+    {
+        $container = $this->createLoadedContainer();
+
+        // Register translator via FQCN, not 'translator' service ID
+        $container->register(
+            \Symfony\Contracts\Translation\TranslatorInterface::class,
+            \Symfony\Contracts\Translation\TranslatorInterface::class,
+        );
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $this->assertTrue($container->hasDefinition(SymfonyTranslatorProxy::class));
+    }
+
+    public function testCollectsContainerParametersSorted(): void
+    {
+        $container = $this->createLoadedContainer();
+
+        $container->setParameter('zebra', 'z-value');
+        $container->setParameter('alpha', 'a-value');
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $resolvedParams = $container->getParameter('app_dev_panel.container_parameters');
+        $keys = array_keys($resolvedParams);
+
+        // Verify alphabetical sorting: 'alpha' should come before 'zebra'
+        $alphaIndex = array_search('alpha', $keys);
+        $zebraIndex = array_search('zebra', $keys);
+        $this->assertLessThan($zebraIndex, $alphaIndex);
+    }
+
+    public function testCollectsContainerParametersSkipsWhenNoInspectController(): void
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('app_dev_panel.enabled', true);
+        $container->setParameter('app_dev_panel.ignored_requests', []);
+        $container->setParameter('app_dev_panel.ignored_commands', []);
+        $container->setParameter('custom_param', 'value');
+
+        // No InspectController registered, but the pass should not fail
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        // Parameters should still be collected even without InspectController
+        $this->assertTrue($container->hasParameter('app_dev_panel.container_parameters'));
+    }
+
+    public function testDecoratesLoggerPrefersSymfonyCanonical(): void
+    {
+        $container = $this->createLoadedContainer();
+
+        // Register both 'logger' and Psr\Log\LoggerInterface
+        $container->register('logger', \Psr\Log\NullLogger::class);
+        $container->register(LoggerInterface::class, LoggerInterface::class);
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $this->assertTrue($container->hasDefinition(LoggerInterfaceProxy::class));
+
+        // The proxy should decorate 'logger' (preferred), not LoggerInterface FQCN
+        $proxyDef = $container->getDefinition(LoggerInterfaceProxy::class);
+        $this->assertSame('logger', $proxyDef->getDecoratedService()[0]);
+    }
+
+    public function testDecoratesTranslatorPrefersCanonicalServiceId(): void
+    {
+        $container = $this->createLoadedContainer();
+
+        // Register both 'translator' and TranslatorInterface FQCN
+        $container->register('translator', \Symfony\Contracts\Translation\TranslatorInterface::class);
+        $container->register(
+            \Symfony\Contracts\Translation\TranslatorInterface::class,
+            \Symfony\Contracts\Translation\TranslatorInterface::class,
+        );
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $this->assertTrue($container->hasDefinition(SymfonyTranslatorProxy::class));
+
+        // Should decorate 'translator' (preferred), not the FQCN
+        $proxyDef = $container->getDefinition(SymfonyTranslatorProxy::class);
+        $this->assertSame('translator', $proxyDef->getDecoratedService()[0]);
+    }
+
     private function createLoadedContainer(array $collectorOverrides = []): ContainerBuilder
     {
         $container = new ContainerBuilder();

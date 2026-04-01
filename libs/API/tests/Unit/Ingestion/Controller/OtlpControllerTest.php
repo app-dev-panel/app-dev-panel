@@ -196,6 +196,161 @@ final class OtlpControllerTest extends TestCase
         $this->assertCount(2, $files);
     }
 
+    public function testTracesWithErrorSpanCountsErrors(): void
+    {
+        $controller = $this->createController();
+
+        $response = $controller->traces($this->post([
+            'resourceSpans' => [
+                [
+                    'resource' => [
+                        'attributes' => [
+                            ['key' => 'service.name', 'value' => ['stringValue' => 'error-service']],
+                        ],
+                    ],
+                    'scopeSpans' => [
+                        [
+                            'spans' => [
+                                [
+                                    'traceId' => 'trace-err-1',
+                                    'spanId' => 'span-root',
+                                    'name' => 'GET /fail',
+                                    'startTimeUnixNano' => '1700000000000000000',
+                                    'endTimeUnixNano' => '1700000000500000000',
+                                    'kind' => 2,
+                                    'status' => ['code' => 2, 'message' => 'Internal error'],
+                                ],
+                                [
+                                    'traceId' => 'trace-err-1',
+                                    'spanId' => 'span-child',
+                                    'parentSpanId' => 'span-root',
+                                    'name' => 'DB query',
+                                    'startTimeUnixNano' => '1700000000100000000',
+                                    'endTimeUnixNano' => '1700000000400000000',
+                                    'kind' => 3,
+                                    'status' => ['code' => 1],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]));
+
+        $this->assertSame(200, $response->getStatusCode());
+
+        // Should have created one entry
+        $files = glob($this->storagePath . '/**/**/summary.json.gz');
+        $this->assertCount(1, $files);
+
+        // Read summary and verify error count is recorded
+        $summaryGz = file_get_contents($files[0]);
+        $summary = json_decode(gzdecode($summaryGz), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(1, $summary['opentelemetry']['errors']);
+        $this->assertSame(2, $summary['opentelemetry']['spans']);
+    }
+
+    public function testTracesWithNoRootSpanUsesFirstSpan(): void
+    {
+        $controller = $this->createController();
+
+        // All spans have parentSpanId — no root span
+        $response = $controller->traces($this->post([
+            'resourceSpans' => [
+                [
+                    'resource' => [
+                        'attributes' => [
+                            ['key' => 'service.name', 'value' => ['stringValue' => 'orphan-service']],
+                        ],
+                    ],
+                    'scopeSpans' => [
+                        [
+                            'spans' => [
+                                [
+                                    'traceId' => 'trace-orphan',
+                                    'spanId' => 'span-a',
+                                    'parentSpanId' => 'span-external',
+                                    'name' => 'child-op-1',
+                                    'startTimeUnixNano' => '1700000000000000000',
+                                    'endTimeUnixNano' => '1700000000100000000',
+                                    'kind' => 3,
+                                ],
+                                [
+                                    'traceId' => 'trace-orphan',
+                                    'spanId' => 'span-b',
+                                    'parentSpanId' => 'span-external',
+                                    'name' => 'child-op-2',
+                                    'startTimeUnixNano' => '1700000000100000000',
+                                    'endTimeUnixNano' => '1700000000200000000',
+                                    'kind' => 3,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]));
+
+        $this->assertSame(200, $response->getStatusCode());
+
+        $files = glob($this->storagePath . '/**/**/summary.json.gz');
+        $this->assertCount(1, $files);
+
+        // Verify the first span's operation was used as the context operation
+        $summaryGz = file_get_contents($files[0]);
+        $summary = json_decode(gzdecode($summaryGz), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('child-op-1', $summary['context']['operation']);
+    }
+
+    public function testTracesWithAttributesAndEvents(): void
+    {
+        $controller = $this->createController();
+
+        $response = $controller->traces($this->post([
+            'resourceSpans' => [
+                [
+                    'resource' => [
+                        'attributes' => [
+                            ['key' => 'service.name', 'value' => ['stringValue' => 'rich-service']],
+                            ['key' => 'service.version', 'value' => ['stringValue' => '1.0.0']],
+                        ],
+                    ],
+                    'scopeSpans' => [
+                        [
+                            'spans' => [
+                                [
+                                    'traceId' => 'trace-rich',
+                                    'spanId' => 'span-rich',
+                                    'name' => 'POST /api/submit',
+                                    'startTimeUnixNano' => '1700000000000000000',
+                                    'endTimeUnixNano' => '1700000000300000000',
+                                    'kind' => 2,
+                                    'attributes' => [
+                                        ['key' => 'http.method', 'value' => ['stringValue' => 'POST']],
+                                        ['key' => 'http.status_code', 'value' => ['intValue' => '201']],
+                                    ],
+                                    'events' => [
+                                        [
+                                            'timeUnixNano' => '1700000000100000000',
+                                            'name' => 'request.received',
+                                            'attributes' => [],
+                                        ],
+                                    ],
+                                    'status' => ['code' => 1],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]));
+
+        $this->assertSame(200, $response->getStatusCode());
+
+        $files = glob($this->storagePath . '/**/**/summary.json.gz');
+        $this->assertCount(1, $files);
+    }
+
     private function removeDir(string $dir): void
     {
         if (!is_dir($dir)) {
