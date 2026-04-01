@@ -9,9 +9,9 @@ use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\PathResolverInterface;
 use Symfony\Component\Process\Process;
 
-class PsalmCommand implements CommandInterface
+class MagoCommand implements CommandInterface
 {
-    public const COMMAND_NAME = 'analyse/psalm';
+    public const COMMAND_NAME = 'analyse/mago';
 
     public function __construct(
         private readonly PathResolverInterface $pathResolver,
@@ -19,12 +19,18 @@ class PsalmCommand implements CommandInterface
 
     public static function isAvailable(): bool
     {
-        return \Composer\InstalledVersions::isInstalled('vimeo/psalm');
+        if (\Composer\InstalledVersions::isInstalled('carthage-software/mago')) {
+            return true;
+        }
+
+        $check = DIRECTORY_SEPARATOR === '\\' ? 'where mago 2>NUL' : 'command -v mago 2>/dev/null';
+
+        return !empty(trim((string) @shell_exec($check)));
     }
 
     public static function getTitle(): string
     {
-        return 'Psalm';
+        return 'Mago';
     }
 
     public static function getDescription(): string
@@ -35,27 +41,26 @@ class PsalmCommand implements CommandInterface
     public function run(): CommandResponse
     {
         $projectDirectory = $this->pathResolver->getRootPath();
-        $debugDirectory = $this->pathResolver->getRuntimePath() . '/debug';
 
-        $outputFilePath = $debugDirectory . DIRECTORY_SEPARATOR . 'psalm-report.json';
+        $binary = \Composer\InstalledVersions::isInstalled('carthage-software/mago')
+            ? $projectDirectory . '/vendor/bin/mago'
+            : 'mago';
 
         $params = [
-            'vendor/bin/psalm',
-            '--report=' . $outputFilePath,
+            $binary,
+            'lint',
         ];
 
         $process = new Process($params);
 
         $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
 
-        $processOutput = json_decode(file_get_contents($outputFilePath), true, 512, JSON_THROW_ON_ERROR);
+        $processOutput = rtrim($process->getOutput() . $process->getErrorOutput());
 
         if ($process->getExitCode() > 1) {
-            return new CommandResponse(
-                status: CommandResponse::STATUS_FAIL,
-                result: null,
-                errors: array_filter([$processOutput, $process->getErrorOutput()]),
-            );
+            return new CommandResponse(status: CommandResponse::STATUS_FAIL, result: null, errors: array_filter([trim(
+                $processOutput,
+            )]));
         }
 
         return new CommandResponse(

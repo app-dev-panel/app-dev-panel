@@ -6,6 +6,13 @@ namespace AppDevPanel\Api\Inspector\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Command\BashCommand;
+use AppDevPanel\Api\Inspector\Command\CodeceptionCommand;
+use AppDevPanel\Api\Inspector\Command\MagoCommand;
+use AppDevPanel\Api\Inspector\Command\PestCommand;
+use AppDevPanel\Api\Inspector\Command\PHPStanCommand;
+use AppDevPanel\Api\Inspector\Command\PHPUnitCommand;
+use AppDevPanel\Api\Inspector\Command\PsalmCommand;
+use AppDevPanel\Api\Inspector\Command\TestoCommand;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\PathResolverInterface;
 use InvalidArgumentException;
@@ -19,7 +26,27 @@ use function is_string;
 class CommandController
 {
     /**
-     * @param array<string, array<string, class-string>> $commandMap
+     * Built-in commands grouped by category.
+     * These are auto-discovered via {@see CommandInterface::isAvailable()}.
+     *
+     * @var array<string, array<string, class-string<CommandInterface>>>
+     */
+    private const BUILT_IN_COMMANDS = [
+        'analyse' => [
+            PsalmCommand::COMMAND_NAME => PsalmCommand::class,
+            PHPStanCommand::COMMAND_NAME => PHPStanCommand::class,
+            MagoCommand::COMMAND_NAME => MagoCommand::class,
+        ],
+        'test' => [
+            PHPUnitCommand::COMMAND_NAME => PHPUnitCommand::class,
+            CodeceptionCommand::COMMAND_NAME => CodeceptionCommand::class,
+            PestCommand::COMMAND_NAME => PestCommand::class,
+            TestoCommand::COMMAND_NAME => TestoCommand::class,
+        ],
+    ];
+
+    /**
+     * @param array<string, array<string, class-string>> $commandMap Additional commands beyond built-ins
      */
     public function __construct(
         private readonly JsonResponseFactoryInterface $responseFactory,
@@ -69,11 +96,13 @@ class CommandController
     private function getValidCommands(): array
     {
         $result = [];
-        foreach ($this->commandMap as $groupName => $commands) {
-            $valid = array_filter($commands, static fn(string $class) => is_subclass_of(
-                $class,
-                CommandInterface::class,
-            ));
+        $merged = array_merge_recursive(self::BUILT_IN_COMMANDS, $this->commandMap);
+        foreach ($merged as $groupName => $commands) {
+            $valid = array_filter(
+                $commands,
+                static fn(string $class) => is_subclass_of($class, CommandInterface::class)
+                    && $class::isAvailable(),
+            );
             foreach ($valid as $name => $command) {
                 $result[$name] = ['group' => $groupName, 'class' => $command];
             }

@@ -9,37 +9,46 @@ use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\PathResolverInterface;
 use Symfony\Component\Process\Process;
 
-final class BashCommand implements CommandInterface
+class PHPStanCommand implements CommandInterface
 {
+    public const COMMAND_NAME = 'analyse/phpstan';
+
     public function __construct(
         private readonly PathResolverInterface $pathResolver,
-        private readonly array $command,
     ) {}
 
     public static function isAvailable(): bool
     {
-        return true;
+        return \Composer\InstalledVersions::isInstalled('phpstan/phpstan');
     }
 
     public static function getTitle(): string
     {
-        return 'Bash';
+        return 'PHPStan';
     }
 
     public static function getDescription(): string
     {
-        return 'Runs any commands from the project root.';
+        return '';
     }
 
     public function run(): CommandResponse
     {
         $projectDirectory = $this->pathResolver->getRootPath();
 
-        $process = new Process($this->command);
+        $params = [
+            'vendor/bin/phpstan',
+            'analyse',
+            '--error-format=json',
+            '--no-progress',
+        ];
+
+        $process = new Process($params);
 
         $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
 
-        $processOutput = rtrim($process->getOutput());
+        $output = $process->getOutput();
+        $processOutput = json_decode($output, true, 512, JSON_THROW_ON_ERROR);
 
         if ($process->getExitCode() > 1) {
             return new CommandResponse(
@@ -51,7 +60,7 @@ final class BashCommand implements CommandInterface
 
         return new CommandResponse(
             status: $process->isSuccessful() ? CommandResponse::STATUS_OK : CommandResponse::STATUS_ERROR,
-            result: $processOutput . $process->getErrorOutput(),
+            result: $processOutput,
         );
     }
 }
