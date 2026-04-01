@@ -11,7 +11,7 @@
         <option value="$PROJECT_DIR$/libs/Adapter/Yii2/tests" />
         <option value="$PROJECT_DIR$/tests" />
         <option value="$PROJECT_DIR$/libs/Testing" />
-        <option value="$PROJECT_DIR$/libs/Adapter/Yiisoft/tests" />
+        <option value="$PROJECT_DIR$/libs/Adapter/Yii3/tests" />
         <option value="$PROJECT_DIR$/libs/API/tests" />
       </list>
     </option>

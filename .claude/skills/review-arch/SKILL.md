@@ -26,7 +26,7 @@ Frontend ──▶ API (HTTP only)
 | Kernel | PSR interfaces, generic PHP libs | API, Cli, Adapter, any framework |
 | API | Kernel, PSR interfaces | Adapter, Cli |
 | Cli | Kernel, API, Symfony Console | Adapter |
-| Adapter/Yiisoft | Kernel, API, Cli, Yii 3 | Other adapters |
+| Adapter/Yii3 | Kernel, API, Cli, Yii 3 | Other adapters |
 | Adapter/Cycle | API, Cycle ORM packages | Other adapters |
 | Adapter/Symfony | Kernel, API, Cli, Symfony packages | Other adapters |
 | Adapter/Yii2 | Kernel, API, Cli, Yii 2 packages | Other adapters |

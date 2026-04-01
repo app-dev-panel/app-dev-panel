@@ -20,7 +20,7 @@ repos=(
   "adapter-laravel:ADP Laravel Adapter — auto-wires debug collectors and inspector into Laravel"
   "adapter-yii2:ADP Yii 2 Adapter — auto-wires debug collectors and inspector into Yii 2"
   "adapter-cycle:ADP Cycle ORM Adapter — database schema inspection via Cycle ORM"
-  "adapter-yiisoft:ADP Yii 3 Adapter — auto-wires debug collectors and inspector into Yiisoft"
+  "adapter-yii3:ADP Yii 3 Adapter — auto-wires debug collectors and inspector into Yii 3"
 )
 
 echo "Creating ${#repos[@]} split repositories in ${ORG}..."

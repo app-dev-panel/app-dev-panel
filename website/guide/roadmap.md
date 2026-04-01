@@ -52,7 +52,7 @@ Multi-framework support:
 |---------|--------|
 | Symfony | ✅ Complete |
 | Yii 2 | ✅ Complete |
-| Yii 3 (Yiisoft) | ✅ Complete |
+| Yii 3 | ✅ Complete |
 | Laravel | ✅ Complete |
 
 See [Feature Matrix](/guide/feature-matrix) for detailed adapter capabilities.

@@ -104,7 +104,7 @@ libs/
 ├── Cli/                # CLI commands
 ├── Testing/            # Test fixtures and runner
 ├── Adapter/
-│   ├── Yiisoft/        # Yii 3 adapter
+│   ├── Yii3/           # Yii 3 adapter
 │   ├── Symfony/        # Symfony adapter
 │   ├── Laravel/        # Laravel adapter
 │   ├── Yii2/           # Yii 2 adapter

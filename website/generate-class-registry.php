@@ -25,7 +25,7 @@ $libraries = [
     'libs/Cli/src' => 'AppDevPanel\\Cli',
     'libs/McpServer/src' => 'AppDevPanel\\McpServer',
     'libs/Testing/src' => 'AppDevPanel\\Testing',
-    'libs/Adapter/Yiisoft/src' => 'AppDevPanel\\Adapter\\Yiisoft',
+    'libs/Adapter/Yii3/src' => 'AppDevPanel\\Adapter\\Yii3',
     'libs/Adapter/Symfony/src' => 'AppDevPanel\\Adapter\\Symfony',
     'libs/Adapter/Laravel/src' => 'AppDevPanel\\Adapter\\Laravel',
     'libs/Adapter/Yii2/src' => 'AppDevPanel\\Adapter\\Yii2',
@@ -123,8 +123,8 @@ function parsePhpFile(string $content, string $filePath, string $repoRoot, strin
         $library = 'Adapter/Symfony';
     } elseif (str_contains($relativePath, 'libs/Adapter/Laravel/')) {
         $library = 'Adapter/Laravel';
-    } elseif (str_contains($relativePath, 'libs/Adapter/Yiisoft/')) {
-        $library = 'Adapter/Yiisoft';
+    } elseif (str_contains($relativePath, 'libs/Adapter/Yii3/')) {
+        $library = 'Adapter/Yii3';
     } elseif (str_contains($relativePath, 'libs/Adapter/Yii2/')) {
         $library = 'Adapter/Yii2';
     } elseif (str_contains($relativePath, 'libs/Adapter/Cycle/')) {

@@ -42,7 +42,7 @@ composer require app-dev-panel/adapter-yii2
 ```
 == Yii 3
 ```bash
-composer require app-dev-panel/adapter-yiisoft
+composer require app-dev-panel/adapter-yii3
 ```
 == Laravel
 ```bash
@@ -124,7 +124,7 @@ cd playground/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8103 -
 ```
 == Yii 3
 ```bash
-cd playground/yiisoft-app && ./yii serve --port=8101
+cd playground/yii3-app && ./yii serve --port=8101
 ```
 == Laravel
 ```bash

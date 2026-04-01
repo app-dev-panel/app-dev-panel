@@ -55,9 +55,9 @@ Framework adapters provide additional proxies for interfaces that are not PSR-st
 | <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy</class> | Symfony | <class>Symfony\Contracts\EventDispatcher\EventDispatcherInterface</class> | <class>AppDevPanel\Kernel\Collector\EventCollector</class> |
 | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy</class> | Laravel | <class>Illuminate\Contracts\Translation\Translator</class> | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
 | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy</class> | Laravel | `Dispatcher` | <class>AppDevPanel\Kernel\Collector\EventCollector</class> |
-| <class>AppDevPanel\Adapter\Yiisoft\Collector\Translator\TranslatorInterfaceProxy</class> | Yiisoft | `TranslatorInterface` | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
-| <class>AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy</class> | Yiisoft | `ValidatorInterface` | <class>AppDevPanel\Kernel\Collector\ValidatorCollector</class> |
-| <class>AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy</class> | Yiisoft | PSR-11 <class>Psr\Container\ContainerInterface</class> | <class>AppDevPanel\Kernel\Collector\ServiceCollector</class> |
+| <class>AppDevPanel\Adapter\Yii3\Collector\Translator\TranslatorInterfaceProxy</class> | Yii 3 | `TranslatorInterface` | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
+| <class>AppDevPanel\Adapter\Yii3\Collector\Validator\ValidatorInterfaceProxy</class> | Yii 3 | `ValidatorInterface` | <class>AppDevPanel\Kernel\Collector\ValidatorCollector</class> |
+| <class>AppDevPanel\Adapter\Yii3\Proxy\ContainerInterfaceProxy</class> | Yii 3 | PSR-11 <class>Psr\Container\ContainerInterface</class> | <class>AppDevPanel\Kernel\Collector\ServiceCollector</class> |
 | <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> | Yii 2 | `yii\i18n\I18N` | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
 
 ### Translator Proxies
@@ -68,7 +68,7 @@ Each framework has its own translator interface. ADP provides a dedicated proxy 
 
 **Laravel** -- decorates <class>Illuminate\Contracts\Translation\Translator</class> via `$app->extend('translator')`. Intercepts `get()` and `choice()` calls. Parses Laravel's dot-notation keys (`group.key`) into category and message.
 
-**Yiisoft** -- registered in `trackedServices` alongside <class>AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy</class>. Intercepts `translate()` calls. Supports `withDefaultCategory()` and `withLocale()` immutable methods.
+**Yii 3** -- registered in `trackedServices` alongside <class>AppDevPanel\Adapter\Yii3\Collector\Validator\ValidatorInterfaceProxy</class>. Intercepts `translate()` calls. Supports `withDefaultCategory()` and `withLocale()` immutable methods.
 
 **Yii 2** -- extends `yii\i18n\I18N` and overrides `translate()`. Replaces the `i18n` application component during module bootstrap.
 

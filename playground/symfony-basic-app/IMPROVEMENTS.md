@@ -6,7 +6,7 @@
 
 ## Strengths
 
-- **Full fixture coverage** — 22 actions, matches Yiisoft as the most complete
+- **Full fixture coverage** — 22 actions, matches Yii 3 as the most complete
 - **Best PSR proxy usage** — 9 actions use PSR proxies (`LoggerInterface`, `EventDispatcherInterface`, `ClientInterface`)
 - **Proper Symfony integration** — Bundle registration, YAML config, route attributes, Symfony conventions
 - **Strong test suite** — adapter has 150 tests (98.9% coverage), best-tested adapter
@@ -15,7 +15,7 @@
 
 ## Weaknesses
 
-- **6 fixtures use direct collector injection** — same as Yiisoft: cache, database, mailer, validator, router, messenger inject collectors directly
+- **6 fixtures use direct collector injection** — same as Yii 3: cache, database, mailer, validator, router, messenger inject collectors directly
 - **No real database** — `DatabaseAction` calls `DatabaseCollector::logQuery()` with fake data, not Doctrine DBAL
 - **No real cache** — `CacheAction` calls `CacheCollector::logCacheOperation()` directly, not Symfony Cache component
 - **No real mailer** — `MailerAction` calls `MailerCollector::collectMessage()` directly, not Symfony Mailer

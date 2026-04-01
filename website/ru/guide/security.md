@@ -87,7 +87,7 @@ app_dev_panel:
 | `User::EVENT_AFTER_LOGOUT` | Событие выхода с ID пользователя |
 | `EVENT_BEFORE_REQUEST` | Текущий пользователь сессии на каждый запрос |
 
-### Yiisoft (Yii 3)
+### Yii 3
 
 AuthorizationCollector зарегистрирован в DI, но требует ручных вызовов — в Yii 3 нет стандартизированной системы событий аутентификации.
 

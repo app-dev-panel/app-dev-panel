@@ -59,7 +59,7 @@ export default defineConfig({
                         items: [
                             { text: 'Symfony Adapter', link: '/guide/adapters/symfony' },
                             { text: 'Yii 2 Adapter', link: '/guide/adapters/yii2' },
-                            { text: 'Yii 3 Adapter', link: '/guide/adapters/yiisoft' },
+                            { text: 'Yii 3 Adapter', link: '/guide/adapters/yii3' },
                             { text: 'Laravel Adapter', link: '/guide/adapters/laravel' },
                         ],
                     },
@@ -153,7 +153,7 @@ export default defineConfig({
                             items: [
                                 { text: 'Symfony', link: '/guide/adapters/symfony' },
                                 { text: 'Yii 2', link: '/guide/adapters/yii2' },
-                                { text: 'Yii 3 (Yiisoft)', link: '/guide/adapters/yiisoft' },
+                                { text: 'Yii 3', link: '/guide/adapters/yii3' },
                                 { text: 'Laravel', link: '/guide/adapters/laravel' },
                             ],
                         },
@@ -222,7 +222,7 @@ export default defineConfig({
                         items: [
                             { text: 'Адаптер Symfony', link: '/ru/guide/adapters/symfony' },
                             { text: 'Адаптер Yii 2', link: '/ru/guide/adapters/yii2' },
-                            { text: 'Адаптер Yii 3', link: '/ru/guide/adapters/yiisoft' },
+                            { text: 'Адаптер Yii 3', link: '/ru/guide/adapters/yii3' },
                             { text: 'Адаптер Laravel', link: '/ru/guide/adapters/laravel' },
                         ],
                     },
@@ -316,7 +316,7 @@ export default defineConfig({
                             items: [
                                 { text: 'Symfony', link: '/ru/guide/adapters/symfony' },
                                 { text: 'Yii 2', link: '/ru/guide/adapters/yii2' },
-                                { text: 'Yii 3 (Yiisoft)', link: '/ru/guide/adapters/yiisoft' },
+                                { text: 'Yii 3', link: '/ru/guide/adapters/yii3' },
                                 { text: 'Laravel', link: '/ru/guide/adapters/laravel' },
                             ],
                         },

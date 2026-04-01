@@ -19,7 +19,7 @@
       <path value="$PROJECT_DIR$/vendor/guzzlehttp/guzzle" />
       <path value="$PROJECT_DIR$/vendor/zircote/swagger-php" />
       <path value="$PROJECT_DIR$/vendor/staabm/side-effects-detector" />
-      <path value="$PROJECT_DIR$/vendor/app-dev-panel/adapter-yiisoft" />
+      <path value="$PROJECT_DIR$/vendor/app-dev-panel/adapter-yii3" />
       <path value="$PROJECT_DIR$/vendor/app-dev-panel/api" />
       <path value="$PROJECT_DIR$/vendor/theseer/tokenizer" />
       <path value="$PROJECT_DIR$/vendor/clue/ndjson-react" />

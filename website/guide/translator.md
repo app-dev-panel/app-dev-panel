@@ -99,7 +99,7 @@ Lang::get('messages.welcome');
 - JSON translations (no dot): category defaults to `messages`
 - Uses `ProxyDecoratedCalls` trait for method forwarding
 
-### Yii 3 — <class>AppDevPanel\Adapter\Yiisoft\Collector\Translator\TranslatorInterfaceProxy</class>
+### Yii 3 — <class>AppDevPanel\Adapter\Yii3\Collector\Translator\TranslatorInterfaceProxy</class>
 
 Decorates `Yiisoft\Translator\TranslatorInterface`. Intercepts `translate()` calls.
 
@@ -153,7 +153,7 @@ app_dev_panel:
 == Yii 3
 ```php
 // config/params.php
-'app-dev-panel/yiisoft' => [
+'app-dev-panel/yii3' => [
     'collectors' => [
         TranslatorCollector::class => true,  // enabled by default
     ],

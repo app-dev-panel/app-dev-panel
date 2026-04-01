@@ -681,286 +681,286 @@
             "UrlRuleInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Api\\AliasPathResolver": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Api\\AliasPathResolver",
+    "AppDevPanel\\Adapter\\Yii3\\Api\\AliasPathResolver": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Api\\AliasPathResolver",
         "short": "AliasPathResolver",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Bridges Yii's alias system to the framework-agnostic PathResolverInterface.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Api/AliasPathResolver.php",
-        "path": "libs/Adapter/Yiisoft/src/Api/AliasPathResolver.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Api/AliasPathResolver.php",
+        "path": "libs/Adapter/Yii3/src/Api/AliasPathResolver.php",
         "modifier": "final",
         "implements": [
             "PathResolverInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Api\\YiiApiMiddleware": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Api\\YiiApiMiddleware",
+    "AppDevPanel\\Adapter\\Yii3\\Api\\YiiApiMiddleware": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Api\\YiiApiMiddleware",
         "short": "YiiApiMiddleware",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "PSR-15 middleware that intercepts /debug/api and /inspect/api requests and delegates them to the ADP ApiApplication.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Api/YiiApiMiddleware.php",
-        "path": "libs/Adapter/Yiisoft/src/Api/YiiApiMiddleware.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Api/YiiApiMiddleware.php",
+        "path": "libs/Adapter/Yii3/src/Api/YiiApiMiddleware.php",
         "modifier": "final",
         "implements": [
             "MiddlewareInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Db\\CommandInterfaceProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Db\\CommandInterfaceProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Db\\CommandInterfaceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Db\\CommandInterfaceProxy",
         "short": "CommandInterfaceProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorator proxy for Command Interface. Intercepts calls and forwards data to collectors.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Db/CommandInterfaceProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Db/CommandInterfaceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Db/CommandInterfaceProxy.php",
         "modifier": "final",
         "implements": [
             "CommandInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Db\\ConnectionInterfaceProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Db\\ConnectionInterfaceProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Db\\ConnectionInterfaceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Db\\ConnectionInterfaceProxy",
         "short": "ConnectionInterfaceProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorator proxy for Connection Interface. Intercepts calls and forwards data to collectors.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Db/ConnectionInterfaceProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Db/ConnectionInterfaceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Db/ConnectionInterfaceProxy.php",
         "modifier": "final",
         "implements": [
             "ConnectionInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Db\\TransactionInterfaceDecorator": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Db\\TransactionInterfaceDecorator",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Db\\TransactionInterfaceDecorator": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Db\\TransactionInterfaceDecorator",
         "short": "TransactionInterfaceDecorator",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Class TransactionInterfaceDecorator.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Db/TransactionInterfaceDecorator.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Db/TransactionInterfaceDecorator.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Db/TransactionInterfaceDecorator.php",
         "modifier": "final",
         "implements": [
             "TransactionInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Mailer\\MailerInterfaceProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Mailer\\MailerInterfaceProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Mailer\\MailerInterfaceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Mailer\\MailerInterfaceProxy",
         "short": "MailerInterfaceProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorator proxy for Mailer Interface. Intercepts calls and forwards data to collectors.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Mailer/MailerInterfaceProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Mailer/MailerInterfaceProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Mailer/MailerInterfaceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Mailer/MailerInterfaceProxy.php",
         "modifier": "final",
         "implements": [
             "MailerInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Middleware\\MiddlewareEventListener": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Middleware\\MiddlewareEventListener",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Middleware\\MiddlewareEventListener": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Middleware\\MiddlewareEventListener",
         "short": "MiddlewareEventListener",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Listens to Yii middleware events and feeds normalized data to the framework-agnostic Kernel MiddlewareCollector.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareEventListener.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Middleware/MiddlewareEventListener.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Middleware/MiddlewareEventListener.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Middleware/MiddlewareEventListener.php",
         "modifier": "final"
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Queue\\QueueDecorator": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Queue\\QueueDecorator",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Queue\\QueueDecorator": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Queue\\QueueDecorator",
         "short": "QueueDecorator",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Class QueueDecorator.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Queue/QueueDecorator.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Queue/QueueDecorator.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Queue/QueueDecorator.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Queue/QueueDecorator.php",
         "modifier": "final",
         "implements": [
             "QueueInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Queue\\QueueProviderInterfaceProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Queue\\QueueProviderInterfaceProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Queue\\QueueProviderInterfaceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Queue\\QueueProviderInterfaceProxy",
         "short": "QueueProviderInterfaceProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorator proxy for Queue Provider Interface. Intercepts calls and forwards data to collectors.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Queue/QueueProviderInterfaceProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Queue/QueueProviderInterfaceProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Queue/QueueProviderInterfaceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Queue/QueueProviderInterfaceProxy.php",
         "modifier": "final",
         "implements": [
             "QueueProviderInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Queue\\QueueWorkerInterfaceProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Queue\\QueueWorkerInterfaceProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Queue\\QueueWorkerInterfaceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Queue\\QueueWorkerInterfaceProxy",
         "short": "QueueWorkerInterfaceProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorator proxy for Queue Worker Interface. Intercepts calls and forwards data to collectors.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Queue/QueueWorkerInterfaceProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Queue/QueueWorkerInterfaceProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Queue/QueueWorkerInterfaceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Queue/QueueWorkerInterfaceProxy.php",
         "modifier": "final",
         "implements": [
             "WorkerInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Router\\RouterDataExtractor": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Router\\RouterDataExtractor",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Router\\RouterDataExtractor": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Router\\RouterDataExtractor",
         "short": "RouterDataExtractor",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Extracts route data from Yii router and feeds it to the Kernel RouterCollector.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Router/RouterDataExtractor.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Router/RouterDataExtractor.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Router/RouterDataExtractor.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Router/RouterDataExtractor.php",
         "modifier": "final"
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Router\\UrlMatcherInterfaceProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Router\\UrlMatcherInterfaceProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Router\\UrlMatcherInterfaceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Router\\UrlMatcherInterfaceProxy",
         "short": "UrlMatcherInterfaceProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorator proxy for Url Matcher Interface. Intercepts calls and forwards data to collectors.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Router/UrlMatcherInterfaceProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Router/UrlMatcherInterfaceProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Router/UrlMatcherInterfaceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Router/UrlMatcherInterfaceProxy.php",
         "modifier": "final",
         "implements": [
             "UrlMatcherInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Translator\\TranslatorInterfaceProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Translator\\TranslatorInterfaceProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Translator\\TranslatorInterfaceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Translator\\TranslatorInterfaceProxy",
         "short": "TranslatorInterfaceProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorates Yiisoft TranslatorInterface to feed translation lookups to TranslatorCollector.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Translator/TranslatorInterfaceProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Translator/TranslatorInterfaceProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Translator/TranslatorInterfaceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Translator/TranslatorInterfaceProxy.php",
         "modifier": "final",
         "implements": [
             "TranslatorInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Validator\\ValidatorInterfaceProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\Validator\\ValidatorInterfaceProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Validator\\ValidatorInterfaceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Validator\\ValidatorInterfaceProxy",
         "short": "ValidatorInterfaceProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorator proxy for Validator Interface. Intercepts calls and forwards data to collectors.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorInterfaceProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/Validator/ValidatorInterfaceProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Validator/ValidatorInterfaceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Validator/ValidatorInterfaceProxy.php",
         "modifier": "final",
         "implements": [
             "ValidatorInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Collector\\View\\ViewEventListener": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Collector\\View\\ViewEventListener",
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\View\\ViewEventListener": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\View\\ViewEventListener",
         "short": "ViewEventListener",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Listens to Yii view render events and feeds normalized data to the framework-agnostic Kernel TemplateCollector.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/View/ViewEventListener.php",
-        "path": "libs/Adapter/Yiisoft/src/Collector/View/ViewEventListener.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/View/ViewEventListener.php",
+        "path": "libs/Adapter/Yii3/src/Collector/View/ViewEventListener.php",
         "modifier": "final"
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\DebugServiceProvider": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\DebugServiceProvider",
+    "AppDevPanel\\Adapter\\Yii3\\DebugServiceProvider": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\DebugServiceProvider",
         "short": "DebugServiceProvider",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Provides Debug Service data.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/DebugServiceProvider.php",
-        "path": "libs/Adapter/Yiisoft/src/DebugServiceProvider.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/DebugServiceProvider.php",
+        "path": "libs/Adapter/Yii3/src/DebugServiceProvider.php",
         "modifier": "final",
         "implements": [
             "ServiceProviderInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Inspector\\DbSchemaProvider": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Inspector\\DbSchemaProvider",
+    "AppDevPanel\\Adapter\\Yii3\\Inspector\\DbSchemaProvider": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Inspector\\DbSchemaProvider",
         "short": "DbSchemaProvider",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Provides Db Schema data.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php",
-        "path": "libs/Adapter/Yiisoft/src/Inspector/DbSchemaProvider.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Inspector/DbSchemaProvider.php",
+        "path": "libs/Adapter/Yii3/src/Inspector/DbSchemaProvider.php",
         "implements": [
             "SchemaProviderInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ContainerInterfaceProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ContainerInterfaceProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Proxy\\ContainerInterfaceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Proxy\\ContainerInterfaceProxy",
         "short": "ContainerInterfaceProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorator proxy for Container Interface. Intercepts calls and forwards data to collectors.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Proxy/ContainerInterfaceProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Proxy/ContainerInterfaceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Proxy/ContainerInterfaceProxy.php",
         "modifier": "final",
         "implements": [
             "ContainerInterface"
         ]
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ContainerProxyConfig": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ContainerProxyConfig",
+    "AppDevPanel\\Adapter\\Yii3\\Proxy\\ContainerProxyConfig": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Proxy\\ContainerProxyConfig",
         "short": "ContainerProxyConfig",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Class ContainerProxyConfig.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php",
-        "path": "libs/Adapter/Yiisoft/src/Proxy/ContainerProxyConfig.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Proxy/ContainerProxyConfig.php",
+        "path": "libs/Adapter/Yii3/src/Proxy/ContainerProxyConfig.php",
         "modifier": "final"
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ProxyLogTrait": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ProxyLogTrait",
+    "AppDevPanel\\Adapter\\Yii3\\Proxy\\ProxyLogTrait": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Proxy\\ProxyLogTrait",
         "short": "ProxyLogTrait",
         "type": "trait",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Provides Proxy Log functionality.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php",
-        "path": "libs/Adapter/Yiisoft/src/Proxy/ProxyLogTrait.php"
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Proxy/ProxyLogTrait.php",
+        "path": "libs/Adapter/Yii3/src/Proxy/ProxyLogTrait.php"
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ServiceConfigType": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ServiceConfigType",
+    "AppDevPanel\\Adapter\\Yii3\\Proxy\\ServiceConfigType": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Proxy\\ServiceConfigType",
         "short": "ServiceConfigType",
         "type": "enum",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Describes the type of proxy configuration for a decorated service.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Proxy/ServiceConfigType.php",
-        "path": "libs/Adapter/Yiisoft/src/Proxy/ServiceConfigType.php"
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Proxy/ServiceConfigType.php",
+        "path": "libs/Adapter/Yii3/src/Proxy/ServiceConfigType.php"
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ServiceMethodProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ServiceMethodProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Proxy\\ServiceMethodProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Proxy\\ServiceMethodProxy",
         "short": "ServiceMethodProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorator proxy for Service Method. Intercepts calls and forwards data to collectors.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Proxy/ServiceMethodProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Proxy/ServiceMethodProxy.php",
+        "path": "libs/Adapter/Yii3/src/Proxy/ServiceMethodProxy.php",
         "extends": "ServiceProxy"
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ServiceProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\ServiceProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Proxy\\ServiceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Proxy\\ServiceProxy",
         "short": "ServiceProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorator proxy for Service. Intercepts calls and forwards data to collectors.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Proxy/ServiceProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Proxy/ServiceProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Proxy/ServiceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Proxy/ServiceProxy.php",
         "extends": "ObjectProxy"
     },
-    "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\VarDumperHandlerInterfaceProxy": {
-        "fqcn": "AppDevPanel\\Adapter\\Yiisoft\\Proxy\\VarDumperHandlerInterfaceProxy",
+    "AppDevPanel\\Adapter\\Yii3\\Proxy\\VarDumperHandlerInterfaceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Proxy\\VarDumperHandlerInterfaceProxy",
         "short": "VarDumperHandlerInterfaceProxy",
         "type": "class",
-        "library": "Adapter/Yiisoft",
+        "library": "Adapter/Yii3",
         "description": "Decorator proxy for Var Dumper Handler Interface. Intercepts calls and forwards data to collectors.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php",
-        "path": "libs/Adapter/Yiisoft/src/Proxy/VarDumperHandlerInterfaceProxy.php",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Proxy/VarDumperHandlerInterfaceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Proxy/VarDumperHandlerInterfaceProxy.php",
         "modifier": "final",
         "implements": [
             "HandlerInterface"

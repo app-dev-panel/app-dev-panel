@@ -21,7 +21,7 @@ are not Yii framework dependencies.
 
 Note: `yiisoft/proxy` was removed from Kernel. Container proxying (`ContainerInterfaceProxy`,
 `ServiceProxy`, `ServiceMethodProxy`, `ContainerProxyConfig`, `ProxyLogTrait`) and
-`VarDumperHandlerInterfaceProxy` now live in the Yii adapter (`libs/Adapter/Yiisoft`).
+`VarDumperHandlerInterfaceProxy` now live in the Yii adapter (`libs/Adapter/Yii3`).
 `LoggerDecorator` and `VarDumperHandler` remain in Kernel (`DebugServer/`) since they
 only depend on `yiisoft/var-dumper` (core infra).
 
@@ -171,7 +171,7 @@ The application code is completely unaware of the interception.
 - `HttpStreamProxy` — wraps `http://` and `https://` stream wrappers, feeds `HttpStreamCollector`
 - `StreamProxyTrait` — shared delegation logic for both stream wrappers
 
-**Proxies moved to Yii adapter** (`libs/Adapter/Yiisoft/src/Proxy/`):
+**Proxies moved to Yii adapter** (`libs/Adapter/Yii3/src/Proxy/`):
 - `ContainerInterfaceProxy` (PSR-11), `ContainerProxyConfig`, `ProxyLogTrait`
 - `ServiceProxy`, `ServiceMethodProxy` (generic service interception)
 - `VarDumperHandlerInterfaceProxy`

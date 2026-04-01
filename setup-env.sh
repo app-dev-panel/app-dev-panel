@@ -201,7 +201,7 @@ step "Installing playground dependencies..."
 
 cd "$PROJECT_DIR"
 
-for playground in yiisoft-app symfony-basic-app yii2-basic-app laravel-app; do
+for playground in yii3-app symfony-basic-app yii2-basic-app laravel-app; do
     PDIR="playground/${playground}"
     if [ -d "$PDIR" ]; then
         (cd "$PDIR" && composer install --prefer-dist --no-progress --no-interaction -q)

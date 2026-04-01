@@ -54,7 +54,7 @@ ADP includes an MCP (Model Context Protocol) server that exposes debug data to A
 |-----------|---------------|
 | Symfony 7 | Stable |
 | Yii 2 | Stable |
-| Yii 3 (Yiisoft) | Stable |
+| Yii 3 | Stable |
 | Laravel 12 | Stable |
 
 ## Philosophy

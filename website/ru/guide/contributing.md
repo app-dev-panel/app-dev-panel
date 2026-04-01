@@ -127,7 +127,7 @@ Frontend → API (только HTTP)
 2. Реализуйте `startup()`, `shutdown()`, `getCollected()`
 3. Опционально реализуйте <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> для метаданных в списке записей
 4. Напишите тест, наследующий `AbstractCollectorTestCase`
-5. Зарегистрируйте в конфигах адаптера (напр., `libs/Adapter/Yiisoft/config/params.php`)
+5. Зарегистрируйте в конфигах адаптера (напр., `libs/Adapter/Yii3/config/params.php`)
 
 См. [Коллекторы](/ru/guide/collectors) для описания контракта интерфейса.
 

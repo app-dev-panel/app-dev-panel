@@ -19,7 +19,7 @@
 - **No real cache operations** — `CacheAction` calls `CacheCollector::logCacheOperation()` directly; despite having `CacheListener` wired for cache events
 - **No real mail sending** — `MailerAction` calls `MailerCollector::collectMessage()` directly; despite having `MailListener` for `MessageSent` events
 - **No real queue dispatch** — `MessengerAction` calls `QueueCollector::logMessage()` directly
-- **Newest adapter** — less battle-tested than Yiisoft/Symfony, 55 unit tests but no integration tests
+- **Newest adapter** — less battle-tested than Yii 3/Symfony, 55 unit tests but no integration tests
 - **Dump fixture** — uses direct `VarDumperCollector` injection instead of `dump()` function
 - **Missing exception fixture** — `/test/fixtures/exception` throws but returns 500 (expected), however the debug entry may not be stored if exception kills the process before `terminate()`
 

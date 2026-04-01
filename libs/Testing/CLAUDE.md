@@ -63,7 +63,7 @@ libs/Testing/tests/
 ## Adding a New Fixture
 
 1. Add a new `Fixture` to `FixtureRegistry` with expectations
-2. Add the endpoint to each playground controller (Symfony, Yii2, Yiisoft)
+2. Add the endpoint to each playground controller (Symfony, Yii2, Yii3)
 3. Run `debug:fixtures` to verify
 
 ## Endpoint Contract
@@ -104,7 +104,7 @@ All playgrounds must implement these endpoints under `/test/fixtures/`:
 
 The reset endpoints (`/test/fixtures/reset` and `/test/fixtures/reset-cli`) accept both GET and POST. `ScenarioTest` uses GET to clear storage before running the full fixture suite.
 
-Yiisoft playground applies `FormatDataResponseAsJson` middleware to the entire `/test/fixtures` route group so all fixture responses return JSON.
+Yii3 playground applies `FormatDataResponseAsJson` middleware to the entire `/test/fixtures` route group so all fixture responses return JSON.
 
 ## Running Fixtures
 

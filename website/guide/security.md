@@ -87,7 +87,7 @@ app_dev_panel:
 | `User::EVENT_AFTER_LOGOUT` | Logout event with user ID |
 | `EVENT_BEFORE_REQUEST` | Current session user on each request |
 
-### Yiisoft (Yii 3)
+### Yii 3
 
 <class>AppDevPanel\Kernel\Collector\AuthorizationCollector</class> is registered in DI but requires manual calls — Yii 3 has no standardized auth event system.
 

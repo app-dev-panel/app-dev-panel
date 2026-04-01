@@ -8,7 +8,7 @@
 | libs/API | 41 | 479 | 520 |
 | libs/Cli | 2 | 38 | 40 |
 | libs/Testing | 16 | 82 | 98 |
-| libs/Adapter/Yiisoft | 19 | 228 | 247 |
+| libs/Adapter/Yii3 | 19 | 228 | 247 |
 | libs/Adapter/Symfony | 14 | 452 | 466 |
 | libs/Adapter/Laravel | 13 | 652 | 665 |
 | libs/Adapter/Yii2 | 14 | 313 | 327 |
@@ -30,7 +30,7 @@ Replace `empty()` with explicit comparisons (`=== []`, `=== ''`, `=== 0`).
 |--------|------:|------:|------:|
 | libs/API | 14 | 2 | 16 |
 | libs/Kernel | 12 | 6 | 18 |
-| libs/Adapter/Yiisoft | 7 | 0 | 7 |
+| libs/Adapter/Yii3 | 7 | 0 | 7 |
 | libs/Testing | 4 | 0 | 4 |
 | libs/Adapter/Yii2 | 3 | 0 | 3 |
 | libs/Adapter/Symfony | 2 | 0 | 2 |
@@ -75,7 +75,7 @@ Complex classes. Fix strategies:
 | libs/Adapter/Yii2 | 3 | 3 | 6 |
 | libs/Adapter/Laravel | 3 | 2 | 5 |
 | libs/Adapter/Symfony | 3 | 2 | 5 |
-| libs/Adapter/Yiisoft | 1 | 1 | 2 |
+| libs/Adapter/Yii3 | 1 | 1 | 2 |
 | libs/Cli | 1 | 1 | 2 |
 
 **Actionable:** Refactor the worst offenders (Dumper, CommandController, InspectController, Module). Some (e.g. E2E ScenarioTest with kan-defect 4.1) stay in baseline.
@@ -87,7 +87,7 @@ Constructors/methods with too many parameters. Fix by introducing parameter obje
 | Module | Count |
 |--------|------:|
 | libs/Kernel | 9 |
-| libs/Adapter/Yiisoft | 5 |
+| libs/Adapter/Yii3 | 5 |
 | libs/API | 1 |
 
 **Actionable:** Introduce value objects for Collector constructors (CacheCollector, DatabaseCollector, QueueCollector, ServiceCollector), ProxyLogTrait methods.

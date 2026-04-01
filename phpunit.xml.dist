@@ -36,8 +36,8 @@
         <testsuite name="Adapter-Symfony">
             <directory>libs/Adapter/Symfony/tests</directory>
         </testsuite>
-        <testsuite name="Adapter-Yiisoft">
-            <directory>libs/Adapter/Yiisoft/tests</directory>
+        <testsuite name="Adapter-Yii3">
+            <directory>libs/Adapter/Yii3/tests</directory>
         </testsuite>
         <testsuite name="Adapter-Laravel">
             <directory>libs/Adapter/Laravel/tests</directory>
@@ -68,7 +68,7 @@
             <directory>libs/API/src</directory>
             <directory>libs/Cli/src</directory>
             <directory>libs/Adapter/Symfony/src</directory>
-            <directory>libs/Adapter/Yiisoft/src</directory>
+            <directory>libs/Adapter/Yii3/src</directory>
             <directory>libs/Adapter/Laravel/src</directory>
             <directory>libs/Adapter/Yii2/src</directory>
             <directory>libs/McpServer/src</directory>

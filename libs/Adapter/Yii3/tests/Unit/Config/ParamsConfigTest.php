@@ -1,0 +1,70 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AppDevPanel\Adapter\Yii3\Tests\Unit\Config;
+
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Tests that params.php provides correct default values.
+ *
+ * Critical: ignoredRequests must include /debug/** and /inspect/**
+ * so that Debugger::isRequestIgnored() skips panel's own requests.
+ */
+final class ParamsConfigTest extends TestCase
+{
+    private array $params;
+
+    protected function setUp(): void
+    {
+        $this->params = require dirname(__DIR__, 3) . '/config/params.php';
+    }
+
+    public function testIgnoredRequestsIncludesDebugApi(): void
+    {
+        $ignored = $this->params['app-dev-panel/yii3']['ignoredRequests'];
+
+        $this->assertContains('/debug/**', $ignored);
+    }
+
+    public function testIgnoredRequestsIncludesInspectApi(): void
+    {
+        $ignored = $this->params['app-dev-panel/yii3']['ignoredRequests'];
+
+        $this->assertContains('/inspect/**', $ignored);
+    }
+
+    public function testEnabledByDefault(): void
+    {
+        $this->assertTrue($this->params['app-dev-panel/yii3']['enabled']);
+    }
+
+    public function testIgnoredCommandsHasDefaults(): void
+    {
+        $ignored = $this->params['app-dev-panel/yii3']['ignoredCommands'];
+
+        $this->assertNotEmpty($ignored);
+        $this->assertContains('help', $ignored);
+        $this->assertContains('list', $ignored);
+    }
+
+    public function testCollectorsArrayNotEmpty(): void
+    {
+        $this->assertNotEmpty($this->params['app-dev-panel/yii3']['collectors']);
+    }
+
+    public function testWebCollectorsDefined(): void
+    {
+        $this->assertArrayHasKey('collectors.web', $this->params['app-dev-panel/yii3']);
+        $this->assertNotEmpty($this->params['app-dev-panel/yii3']['collectors.web']);
+    }
+
+    public function testApiConfigExists(): void
+    {
+        $api = $this->params['app-dev-panel/yii3']['api'];
+
+        $this->assertTrue($api['enabled']);
+        $this->assertContains('127.0.0.1', $api['allowedIps']);
+    }
+}

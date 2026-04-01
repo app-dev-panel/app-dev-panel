@@ -10,7 +10,7 @@ Playgrounds are minimal, working applications demonstrating ADP integration with
 
 | Playground | Framework | Port | Adapter |
 |------------|-----------|------|---------|
-| `yiisoft-app` | Yii 3 | 8101 | <pkg>app-dev-panel/adapter-yiisoft</pkg> |
+| `yii3-app` | Yii 3 | 8101 | <pkg>app-dev-panel/adapter-yii3</pkg> |
 | `symfony-basic-app` | Symfony 7 | 8102 | <pkg>app-dev-panel/adapter-symfony</pkg> |
 | `yii2-basic-app` | Yii 2 | 8103 | <pkg>app-dev-panel/adapter-yii2</pkg> |
 | `laravel-app` | Laravel 12 | 8104 | <pkg>app-dev-panel/adapter-laravel</pkg> |
@@ -38,7 +38,7 @@ cd playground/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8103 -
 ```
 == Yii 3
 ```bash
-cd playground/yiisoft-app && ./yii serve --port=8101
+cd playground/yii3-app && ./yii serve --port=8101
 ```
 == Laravel
 ```bash
@@ -78,7 +78,7 @@ Each framework uses a different adapter registration approach:
 
 | Framework | Path | Resolution |
 |-----------|------|------------|
-| Yiisoft | `runtime/debug/` | `@runtime` alias |
+| Yii 3 | `runtime/debug/` | `@runtime` alias |
 | Symfony | `var/debug/` | `%kernel.project_dir%` |
 | Laravel | `storage/debug/` | `storage_path('debug')` |
 | Yii2 | `runtime/debug/` | `@runtime` alias |
@@ -89,7 +89,7 @@ Fixtures are automated test endpoints that exercise each collector:
 
 ```bash
 make fixtures              # All playgrounds in parallel
-make fixtures-yiisoft      # Yiisoft only
+make fixtures-yii3         # Yii 3 only
 make fixtures-symfony      # Symfony only
 make fixtures-yii2         # Yii2 only
 make fixtures-laravel      # Laravel only
@@ -99,7 +99,7 @@ For PHPUnit E2E tests (requires running servers):
 
 ```bash
 make test-fixtures         # All playgrounds
-make test-fixtures-yiisoft # Yiisoft only
+make test-fixtures-yii3    # Yii 3 only
 ```
 
 ## Adding a New Playground
@@ -132,7 +132,7 @@ To add a playground for a new framework:
 | Port | Assignment |
 |------|-----------|
 | 8100 | Frontend dev server |
-| 8101 | Yiisoft |
+| 8101 | Yii 3 |
 | 8102 | Symfony |
 | 8103 | Yii2 |
 | 8104 | Laravel |
