@@ -231,25 +231,34 @@ Two identical `DuckIcon` implementations exist:
 
 ---
 
-## Missing from Design System
+## Resolved Issues
 
-### 1. No `fontFamilyMono` on Theme Object
-Components must import `primitives` to access the monospace font. A custom theme property would eliminate 30+ direct primitive imports.
+The following issues were identified and fixed in this refactoring:
 
-### 2. No Chart/Data Visualization Color Tokens
-Timeline, performance metrics, and collector icons all define their own color palettes independently. A shared `chartColors` array with light/dark variants is needed.
+1. **`theme.adp.fontFamilyMono`** — Added via MUI module augmentation. Eliminates all `primitives.fontFamilyMono` imports from 45+ component files. Also exported `monoFontFamily` constant for safe use in `sx` props.
+2. **Chart color tokens** — `semanticTokens.chartColors` (10 colors) with `darkSemanticTokens.chartColors` variants. Used by TimelinePanel and performance metrics.
+3. **Collector color tokens** — `semanticTokens.collectorColors` (17 collectors + default) with dark mode variants. Used by IndexPage debug overview cards.
+4. **`micro` typography variant** — 10px/600 weight, registered as MUI typography variant via module augmentation.
+5. **Highlight color** — `theme.adp.highlightColor` with dark mode variant (`#ffcccc` light, `#5C2020` dark). CodeHighlight uses it as default.
+6. **Duplicate DuckIcon** — Consolidated to `SvgIcon/DuckIcon.tsx` (with monochrome support), old path re-exports.
+7. **DatabasePanel NULL color** — Replaced `#999` with `opacity: 0.5` (theme-agnostic).
+8. **ExceptionPreview highlight** — Removed hardcoded `#ffcccc`, now uses CodeHighlight's theme-aware default.
 
-### 3. No Collector Color Tokens
-17 collectors have unique icon colors hardcoded in `IndexPage.tsx`. These should be semantic tokens.
+---
 
-### 4. No `micro` Typography Variant
-10px text is used in 12+ places but has no corresponding typography variant.
+## Remaining Issues
 
-### 5. No Documented Component Usage Guidelines
+### 1. No Documented Component Usage Guidelines
 Which container to use (Box vs Paper vs Card), when to use `styled()` vs `sx`, how to handle responsive patterns — none of this is formally documented beyond the CLAUDE.md convention note.
 
-### 6. Limited MUI Component Overrides
+### 2. Limited MUI Component Overrides
 Only 8 components are overridden in the theme. Common components like TextField, Dialog, Chip, and Tooltip rely entirely on `sx` prop overrides per instance, leading to duplication.
+
+### 3. Hardcoded Font Sizes
+~50 instances of hardcoded `fontSize` values that match existing typography variants (`14px`=body1, `13px`=body2, `12px`=overline, `11px`=caption, `10px`=micro) but use raw strings instead of theme references. These still work correctly in both themes since font sizes don't change between light/dark mode.
+
+### 4. Box vs Paper Inconsistency
+Card-like containers use both `Box` (with border/bg) and `Paper variant="outlined"` without a clear rule. Not a functional issue — just inconsistent.
 
 ---
 
@@ -263,21 +272,7 @@ Only 8 components are overridden in the theme. Common components like TextField,
 | Files with `aria-label` | 21 |
 | Reusable SDK components | 50+ |
 | MUI component overrides in theme | 8 |
-| Hardcoded hex colors in components (non-SVG) | ~50 instances |
-| Hardcoded font sizes | ~50 instances |
-| Direct `primitives.*` usage in components | 30+ files |
+| Hardcoded hex colors in components (non-SVG) | ~0 (was ~50) |
+| Direct `primitives.*` usage in components | 0 (was 30+ files) |
 | CSS files (all legacy/empty) | 5 |
 | CSS modules | 0 |
-
----
-
-## Recommended Actions (Priority Order)
-
-1. **Add chart color tokens** to `tokens.ts` with light/dark variants — unblocks dark mode for timeline, metrics, and collector icons.
-2. **Add `fontFamilyMono` to theme** via MUI module augmentation — eliminates 30+ `primitives` imports.
-3. **Move collector icon colors** to semantic tokens — fixes dark mode for debug overview cards.
-4. **Add `micro` typography variant** (10px) — formalizes the most common unlisted size.
-5. **Replace hardcoded font sizes** matching existing variants with theme references.
-6. **Standardize container pattern** (Paper vs Box) and document in CLAUDE.md.
-7. **Add theme overrides** for TextField, Chip, Dialog — reduces sx duplication.
-8. **Audit rgba() overlays** for dark mode visibility.
