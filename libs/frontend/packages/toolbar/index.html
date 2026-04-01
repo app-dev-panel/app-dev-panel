@@ -11,10 +11,112 @@
         <meta name="msapplication-TileColor" content="#2563EB" />
         <meta name="theme-color" content="#2563EB" />
         <title>App Dev Panel | Toolbar</title>
+        <style>
+            .dev-controls {
+                position: fixed;
+                top: 12px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                font-family: 'Inter', system-ui, sans-serif;
+                font-size: 13px;
+                z-index: 9999;
+                background: #fff;
+                border: 1px solid #e5e5e5;
+                border-radius: 8px;
+                padding: 8px 12px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            }
+            .dev-controls label {
+                color: #666;
+                font-weight: 500;
+            }
+            .dev-controls input {
+                border: 1px solid #e5e5e5;
+                border-radius: 6px;
+                padding: 4px 8px;
+                font-size: 13px;
+                font-family: 'JetBrains Mono', monospace;
+                width: 260px;
+                outline: none;
+            }
+            .dev-controls input:focus {
+                border-color: #2563eb;
+            }
+            .dev-controls button {
+                background: #2563eb;
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                padding: 5px 12px;
+                font-size: 13px;
+                font-weight: 500;
+                cursor: pointer;
+            }
+            .dev-controls button:hover {
+                background: #1d4ed8;
+            }
+            .dev-controls .status {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #dc2626;
+            }
+            .dev-controls .status.ok {
+                background: #16a34a;
+            }
+        </style>
     </head>
     <body style="display: flex; flex-direction: column; min-height: 100vh; justify-content: space-between">
         <noscript>You need to enable JavaScript to run this app.</noscript>
+
+        <div class="dev-controls">
+            <label>Backend:</label>
+            <div class="status" id="status-dot"></div>
+            <input type="text" id="backend-url" placeholder="http://127.0.0.1:8080" />
+            <button onclick="connectBackend()">Connect</button>
+        </div>
+
         <div id="app-dev-toolbar" style="flex: 1"></div>
+
+        <script>
+            // Persist backend URL in localStorage
+            const KEY = 'adp-toolbar-dev-backend-url';
+            const input = document.getElementById('backend-url');
+            const dot = document.getElementById('status-dot');
+            input.value = localStorage.getItem(KEY) || 'http://127.0.0.1:8080';
+
+            // Expose for bootstrap.tsx to read
+            window.__adpBackendUrl = input.value;
+
+            async function checkStatus(url) {
+                try {
+                    const r = await fetch(url.replace(/\/$/, '') + '/debug/api/', {
+                        signal: AbortSignal.timeout(2000),
+                        headers: {Accept: 'application/json'},
+                    });
+                    dot.className = r.ok ? 'status ok' : 'status';
+                } catch {
+                    dot.className = 'status';
+                }
+            }
+
+            function connectBackend() {
+                const url = input.value.trim();
+                if (!url) return;
+                localStorage.setItem(KEY, url);
+                window.__adpBackendUrl = url;
+                location.reload();
+            }
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') connectBackend();
+            });
+            checkStatus(input.value);
+            setInterval(() => checkStatus(input.value), 5000);
+        </script>
 
         <script type="module" src="/src/index.tsx"></script>
     </body>

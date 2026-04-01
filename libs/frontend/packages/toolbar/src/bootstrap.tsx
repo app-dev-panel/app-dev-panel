@@ -26,7 +26,11 @@ import ReactDOM from 'react-dom/client';
             containerId: 'app-dev-toolbar',
             options: {
                 router: {basename: '', useHashRouter: Config.appEnv === 'github'},
-                backend: {baseUrl: import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8080', usePreferredUrl: false},
+                backend: {
+                    baseUrl:
+                        import.meta.env.VITE_BACKEND_URL || (window as any).__adpBackendUrl || 'http://127.0.0.1:8080',
+                    usePreferredUrl: false,
+                },
             },
         },
     }),
