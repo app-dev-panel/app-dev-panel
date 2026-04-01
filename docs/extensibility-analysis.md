@@ -217,16 +217,182 @@ This enables language-agnostic debugging — any app that can POST JSON can send
 
 ## 8. Module Federation — Remote Panel Components
 
-The `default` fallback in `CollectorData` (`Layout.tsx:163-175`) checks for `__isPanelRemote__`:
-```typescript
-if (typeof data === 'object' && data.__isPanelRemote__) {
-    return <ModuleLoader url={baseUrl + data.url} module={data.module} scope={data.scope} props={{data: data.data}} />;
+### Current State: Scaffolded but NOT Wired
+
+Module Federation support exists as **disconnected pieces** — the PHP interfaces exist, the frontend loader exists, but the middleware that connects them is missing.
+
+#### What exists
+
+**PHP side** (interfaces only, no glue):
+- `ModuleFederationProviderInterface` (`libs/API/src/Debug/ModuleFederationProviderInterface.php`) — a collector can declare it provides a remote panel via `getAsset(): ModuleFederationAssetBundle`
+- `ModuleFederationAssetBundle` (`libs/API/src/Debug/ModuleFederationAssetBundle.php`) — abstract class with `getModule()` and `getScope()` methods
+
+**Frontend side** (loader exists):
+- `ModuleLoader` (`libs/frontend/packages/panel/src/Application/Pages/RemoteComponent.tsx`) — dynamically loads a Webpack Module Federation remote via `<script>` injection + `__webpack_init_sharing__`
+- `Layout.tsx:164` — the `default` fallback checks for `data.__isPanelRemote__` flag
+
+#### What's MISSING
+
+The `DebugController::view()` (`libs/API/src/Debug/Controller/DebugController.php:49-63`) returns raw collector data from storage — it does **NOT** check if the collector implements `ModuleFederationProviderInterface` and does **NOT** inject the `__isPanelRemote__` flag. The data flows like this:
+
+```
+Collector::getCollected() → Dumper → JSON file → CollectorRepository::getDetail() → DebugController::view() → Frontend
+```
+
+There is no step that:
+1. Looks up the collector class in the DI container
+2. Checks if it implements `ModuleFederationProviderInterface`
+3. Wraps the data with `{__isPanelRemote__: true, url, module, scope, data}`
+
+**This means**: Module Federation currently only works if the collector's `getCollected()` manually returns data with the `__isPanelRemote__` flag baked in. The `ModuleFederationProviderInterface` / `ModuleFederationAssetBundle` PHP interfaces are dead code — nothing reads them.
+
+#### How it WOULD work (if wired)
+
+**Step 1: PHP — Create collector + asset bundle**
+
+```php
+// 1. Asset bundle describing the remote React component
+final class MyPanelAsset extends ModuleFederationAssetBundle
+{
+    public static function getModule(): string
+    {
+        return 'myRemote';                    // Webpack container name
+    }
+
+    public static function getScope(): string
+    {
+        return './MyCollectorPanel';           // Exposed component path
+    }
+}
+
+// 2. Collector implementing ModuleFederationProviderInterface
+final class MyCollector implements ModuleFederationProviderInterface
+{
+    use CollectorTrait;
+
+    private array $items = [];
+
+    public static function getAsset(): ModuleFederationAssetBundle
+    {
+        return new MyPanelAsset();
+    }
+
+    public function collect(string $key, mixed $value): void
+    {
+        if (!$this->isActive()) return;
+        $this->items[] = ['key' => $key, 'value' => $value];
+    }
+
+    public function getCollected(): array
+    {
+        return $this->items;
+    }
 }
 ```
 
-A collector can return a payload with `__isPanelRemote__` flag and Module Federation coordinates. The frontend will dynamically load a remote React component to render the collector's data.
+**Step 2: Frontend — Build the remote React component**
 
-**Difficulty**: High — requires understanding Webpack Module Federation, building a remote, and coordinating the data format.
+```typescript
+// webpack.config.js (remote app)
+const { ModuleFederationPlugin } = require('webpack').container;
+
+module.exports = {
+    plugins: [
+        new ModuleFederationPlugin({
+            name: 'myRemote',               // matches getModule()
+            filename: 'remoteEntry.js',
+            exposes: {
+                './MyCollectorPanel': './src/MyCollectorPanel',  // matches getScope()
+            },
+            shared: {
+                react: { singleton: true },
+                'react-dom': { singleton: true },
+                '@mui/material': { singleton: true },
+            },
+        }),
+    ],
+};
+```
+
+```tsx
+// src/MyCollectorPanel.tsx (the exposed component)
+import React from 'react';
+import { Box, Chip } from '@mui/material';
+
+type Props = { data: Array<{ key: string; value: any }> };
+
+const MyCollectorPanel = ({ data }: Props) => (
+    <Box>
+        {data.map((item, i) => (
+            <Box key={i} sx={{ display: 'flex', gap: 1, py: 0.5 }}>
+                <Chip label={item.key} size="small" />
+                <span>{JSON.stringify(item.value)}</span>
+            </Box>
+        ))}
+    </Box>
+);
+
+export default MyCollectorPanel;
+```
+
+Build this as a standalone remote:
+```bash
+npx webpack --config webpack.config.js
+# Output: dist/remoteEntry.js (+ chunks)
+```
+
+Serve `dist/` at a URL accessible to the debug panel (e.g., alongside your app's assets).
+
+**Step 3: The missing middleware** (what needs to be built)
+
+The `DebugController::view()` (or a middleware before it) needs to:
+
+```php
+// Pseudocode for what's missing
+$collectorData = $data[$collectorClass];
+
+// Check if collector is a Module Federation provider
+if (is_subclass_of($collectorClass, ModuleFederationProviderInterface::class)) {
+    $asset = $collectorClass::getAsset();
+    $collectorData = [
+        '__isPanelRemote__' => true,
+        'url' => '/path/to/remoteEntry.js',  // needs to be resolved
+        'module' => $asset->getModule(),
+        'scope' => $asset->getScope(),
+        'data' => $collectorData,
+    ];
+}
+```
+
+#### Workaround: Manual `__isPanelRemote__` in `getCollected()`
+
+Until the middleware is built, a collector can manually bake the flag into its data:
+
+```php
+final class MyCollector implements CollectorInterface
+{
+    use CollectorTrait;
+
+    private array $items = [];
+
+    public function collect(string $key, mixed $value): void { /* ... */ }
+
+    public function getCollected(): array
+    {
+        return [
+            '__isPanelRemote__' => true,
+            'url' => '/assets/my-collector/remoteEntry.js',
+            'module' => 'myRemote',
+            'scope' => './MyCollectorPanel',
+            'data' => $this->items,
+        ];
+    }
+}
+```
+
+This bypasses the PHP interfaces entirely but works with the existing frontend.
+
+**Difficulty**: High — requires Webpack Module Federation knowledge, React component building, and shared dependency coordination. The `__isPanelRemote__` workaround avoids the need to modify core code.
 
 ---
 
