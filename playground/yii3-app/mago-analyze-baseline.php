@@ -70,25 +70,25 @@ count = 6
 file = "config/common/routes.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 65
+count = 81
 
 [[issues]]
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `create` does not exist on type `Yiisoft\Router\Group`.'
-count = 2
+count = 3
 
 [[issues]]
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Yiisoft\Router\Route`.'
-count = 29
+count = 35
 
 [[issues]]
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `methods` does not exist on type `Yiisoft\Router\Route`.'
-count = 2
+count = 3
 
 [[issues]]
 file = "config/web/di/application.php"
@@ -193,6 +193,198 @@ message = "Method `setstring()` is never used."
 count = 1
 
 [[issues]]
+file = "src/Web/Api/ErrorAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/ErrorAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\TranslatorCollector)`).'
+count = 3
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\DataResponse\DataResponseFactoryInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\api\indexaction::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\TranslationRecord` not found.'
+count = 3
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\TranslatorCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\DataResponse\DataResponseFactoryInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/UsersAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
+count = 3
+
+[[issues]]
+file = "src/Web/Api/UsersAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\DataResponse\DataResponseFactoryInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/UsersAction.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\api\usersaction::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/UsersAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/UsersAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/UsersAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\DataResponse\DataResponseFactoryInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/ApiPlaygroundPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/ApiPlaygroundPage/Action.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\apiplaygroundpage\action::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/ApiPlaygroundPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/ApiPlaygroundPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Yii\View\Renderer\ViewRenderer`.'
+count = 1
+
+[[issues]]
+file = "src/Web/ApiPlaygroundPage/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/ApiPlaygroundPage/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/ContactPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Http\Message\ServerRequestInterface)`).'
+count = 3
+
+[[issues]]
+file = "src/Web/ContactPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/ContactPage/Action.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Web/ContactPage/Action.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\contactpage\action::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/ContactPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/ContactPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ServerRequestInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/ContactPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Yii\View\Renderer\ViewRenderer`.'
+count = 1
+
+[[issues]]
+file = "src/Web/ContactPage/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/ContactPage/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
 file = "src/Web/HomePage/Action.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
@@ -219,7 +411,25 @@ count = 1
 [[issues]]
 file = "src/Web/HomePage/template.php"
 code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Router\UrlGeneratorInterface)`).'
+count = 4
+
+[[issues]]
+file = "src/Web/HomePage/template.php"
+code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/HomePage/template.php"
+code = "mixed-argument"
+message = "The first value for `echo` is too general."
+count = 4
+
+[[issues]]
+file = "src/Web/HomePage/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Router\UrlGeneratorInterface`.'
 count = 1
 
 [[issues]]
@@ -315,26 +525,32 @@ count = 1
 [[issues]]
 file = "src/Web/Shared/Layout/Main/layout.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Aliases\Aliases)`).'
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Router\CurrentRoute)`).'
 count = 1
 
 [[issues]]
 file = "src/Web/Shared/Layout/Main/layout.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Assets\AssetManager)`).'
-count = 6
-
-[[issues]]
-file = "src/Web/Shared/Layout/Main/layout.php"
-code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
-count = 11
+count = 7
 
 [[issues]]
 file = "src/Web/Shared/Layout/Main/layout.php"
 code = "mixed-argument"
 message = "The first value for `echo` is too general."
-count = 5
+count = 2
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Web/Shared/Layout/Main/layout.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
 
 [[issues]]
 file = "src/Web/Shared/Layout/Main/layout.php"
@@ -613,24 +829,6 @@ message = "Property `$responseFactory` is never used."
 count = 1
 
 [[issues]]
-file = "src/Web/TestFixtures/QueueAction.php"
-code = "non-existent-class-like"
-message = 'Class `App\Web\TestFixtures\QueueAction` cannot implement unknown type `RequestHandlerInterface`'
-count = 1
-
-[[issues]]
-file = "src/Web/TestFixtures/QueueAction.php"
-code = "unused-property"
-message = "Property `$queueCollector` is never used."
-count = 1
-
-[[issues]]
-file = "src/Web/TestFixtures/QueueAction.php"
-code = "unused-property"
-message = "Property `$responseFactory` is never used."
-count = 1
-
-[[issues]]
 file = "src/Web/TestFixtures/MultiAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\MultiAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -668,6 +866,24 @@ count = 1
 
 [[issues]]
 file = "src/Web/TestFixtures/OpenTelemetryAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/QueueAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\QueueAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/QueueAction.php"
+code = "unused-property"
+message = "Property `$queueCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/QueueAction.php"
 code = "unused-property"
 message = "Property `$responseFactory` is never used."
 count = 1
@@ -787,24 +1003,6 @@ message = "Property `$templateCollector` is never used."
 count = 1
 
 [[issues]]
-file = "src/Web/TestFixtures/ViewAction.php"
-code = "non-existent-class-like"
-message = 'Class `App\Web\TestFixtures\ViewAction` cannot implement unknown type `RequestHandlerInterface`'
-count = 1
-
-[[issues]]
-file = "src/Web/TestFixtures/ViewAction.php"
-code = "unused-property"
-message = "Property `$responseFactory` is never used."
-count = 1
-
-[[issues]]
-file = "src/Web/TestFixtures/ViewAction.php"
-code = "unused-property"
-message = "Property `$templateCollector` is never used."
-count = 1
-
-[[issues]]
 file = "src/Web/TestFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\TimelineAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -858,3 +1056,56 @@ code = "unused-property"
 message = "Property `$validatorCollector` is never used."
 count = 1
 
+[[issues]]
+file = "src/Web/TestFixtures/ViewAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\ViewAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ViewAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ViewAction.php"
+code = "unused-property"
+message = "Property `$templateCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/UsersPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/UsersPage/Action.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\userspage\action::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/UsersPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/UsersPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Yii\View\Renderer\ViewRenderer`.'
+count = 1
+
+[[issues]]
+file = "src/Web/UsersPage/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/UsersPage/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1

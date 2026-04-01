@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ADP Symfony Playground{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <h1>ADP Symfony Playground</h1>
+        <p>A demo application for testing the Application Development Panel</p>
+    </div>
+
+    <div class="grid grid-2">
+        <a href="{{ path('users') }}" class="feature-card">
+            <h3>Users</h3>
+            <p>Browse the user directory with server-rendered table.</p>
+        </a>
+
+        <a href="{{ path('contact') }}" class="feature-card">
+            <h3>Contact Form</h3>
+            <p>Submit a form with server-side validation.</p>
+        </a>
+
+        <a href="{{ path('api_playground') }}" class="feature-card">
+            <h3>API Playground</h3>
+            <p>Send requests to API endpoints and inspect responses.</p>
+        </a>
+
+        <a href="{{ path('error_demo') }}" class="feature-card">
+            <h3>Error Demo</h3>
+            <p>Trigger an exception to test the error collector.</p>
+        </a>
+
+        <a href="/debug/api/" class="feature-card">
+            <h3>Debug Panel</h3>
+            <p>View collected debug data in the ADP panel.</p>
+        </a>
+    </div>
+{% endblock %}

@@ -17,7 +17,7 @@ app_dev_panel:
         http_stream: true
         command: true
         doctrine: true
-        twig: false           # Enable when twig/twig is installed
+        twig: true
         security: true
         cache: true
         mailer: true

@@ -25,10 +25,10 @@ final class HomeController
         $this->translator->get('messages.goodbye', [], 'fr'); // missing
 
         return new JsonResponse([
-            'message' => 'Welcome to the ADP Laravel Playground!',
+            'message' => 'Welcome to the ADP Laravel Playground API!',
             'debug_panel' => '/debug/api/',
             'endpoints' => [
-                'GET /' => 'This page',
+                'GET /api' => 'This page',
                 'GET /api/users' => 'List users (demo)',
                 'GET /api/error' => 'Trigger an exception (demo)',
             ],

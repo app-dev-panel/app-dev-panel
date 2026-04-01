@@ -19,7 +19,6 @@ return [
         ],
         'response' => [
             'class' => \yii\web\Response::class,
-            'format' => \yii\web\Response::FORMAT_JSON,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -30,8 +29,14 @@ return [
             'showScriptName' => false,
             'rules' => [
                 'GET /' => 'site/index',
-                'GET /api/users' => 'site/users',
-                'GET /api/error' => 'site/error-demo',
+                'GET /users' => 'site/users',
+                'GET /contact' => 'site/contact',
+                'POST /contact' => 'site/contact',
+                'GET /api-playground' => 'site/api-playground',
+                'GET /error' => 'site/error-demo',
+                'GET /api' => 'api/index',
+                'GET /api/users' => 'api/users',
+                'GET /api/error' => 'api/error-demo',
                 'GET /test/fixtures/logs' => 'test-fixtures/logs',
                 'GET /test/fixtures/logs-context' => 'test-fixtures/logs-context',
                 'GET /test/fixtures/events' => 'test-fixtures/events',

@@ -14,7 +14,8 @@
         test-fixtures test-fixtures-yii3 test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel \
         test-scenario test-scenario-yii3 test-scenario-symfony test-scenario-yii2 test-scenario-laravel \
         test-playground test-playground-yii3 test-playground-symfony test-playground-laravel \
-        test-mcp test-mcp-yii3 test-mcp-symfony test-mcp-yii2 test-mcp-laravel
+        test-mcp test-mcp-yii3 test-mcp-symfony test-mcp-yii2 test-mcp-laravel \
+        test-pages test-pages-yii3 test-pages-symfony test-pages-yii2 test-pages-laravel
 
 # --- Port allocation ---
 # Frontend dev server
@@ -451,6 +452,27 @@ test-mcp: ## Run MCP API E2E tests against all playgrounds (requires running ser
 	@echo "$(CYAN)Running MCP API E2E tests against all playgrounds...$(RESET)"
 	@$(MAKE) -j4 --output-sync=target test-mcp-yii3 test-mcp-symfony test-mcp-yii2 test-mcp-laravel
 	@echo "$(GREEN)All MCP API E2E tests passed!$(RESET)"
+
+test-pages-yii3: ## Run playground pages E2E tests against Yii 3 playground
+	@echo "$(CYAN)[Pages E2E: Yii3] Running pages tests on port $(YII3_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox
+
+test-pages-symfony: ## Run playground pages E2E tests against Symfony playground
+	@echo "$(CYAN)[Pages E2E: Symfony] Running pages tests on port $(SYMFONY_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox
+
+test-pages-yii2: ## Run playground pages E2E tests against Yii2 playground
+	@echo "$(CYAN)[Pages E2E: Yii2] Running pages tests on port $(YII2_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox
+
+test-pages-laravel: ## Run playground pages E2E tests against Laravel playground
+	@echo "$(CYAN)[Pages E2E: Laravel] Running pages tests on port $(LARAVEL_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox
+
+test-pages: ## Run playground pages E2E tests against all playgrounds (requires running servers)
+	@echo "$(CYAN)Running playground pages E2E tests against all playgrounds...$(RESET)"
+	@$(MAKE) -j4 --output-sync=target test-pages-yii3 test-pages-symfony test-pages-yii2 test-pages-laravel
+	@echo "$(GREEN)All playground pages E2E tests passed!$(RESET)"
 
 # ============================================================================
 # Playground Integration Tests (starts server, runs tests, stops server)
