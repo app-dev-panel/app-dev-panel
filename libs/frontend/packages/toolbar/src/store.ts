@@ -18,14 +18,13 @@ const rootReducer = combineReducers({...ToolbarApiReducers, ...DebugReducers, ..
 export const createStore = (preloadedState: Partial<ReturnType<typeof rootReducer>> = {}, forcedBaseUrl?: string) => {
     // Patch persisted application state so redux-persist REHYDRATE
     // uses the correct baseUrl instead of a stale persisted value.
+    // Creates the key if it doesn't exist yet.
     if (forcedBaseUrl) {
         try {
             const raw = localStorage.getItem('persist:application');
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                parsed.baseUrl = JSON.stringify(forcedBaseUrl);
-                localStorage.setItem('persist:application', JSON.stringify(parsed));
-            }
+            const parsed = raw ? JSON.parse(raw) : {};
+            parsed.baseUrl = JSON.stringify(forcedBaseUrl);
+            localStorage.setItem('persist:application', JSON.stringify(parsed));
         } catch {
             // localStorage may be unavailable or corrupted
         }
