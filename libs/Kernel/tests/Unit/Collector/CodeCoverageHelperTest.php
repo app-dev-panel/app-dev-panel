@@ -165,7 +165,11 @@ final class CodeCoverageHelperTest extends TestCase
             '/app/other/C.php' => [1 => 1],
         ];
 
-        $result = CodeCoverageHelper::processCoverage($rawCoverage, includePaths: ['/app/src', '/app/lib'], excludePaths: []);
+        $result = CodeCoverageHelper::processCoverage(
+            $rawCoverage,
+            includePaths: ['/app/src', '/app/lib'],
+            excludePaths: [],
+        );
 
         $this->assertCount(2, $result['files']);
         $this->assertArrayHasKey('/app/src/A.php', $result['files']);
@@ -176,8 +180,8 @@ final class CodeCoverageHelperTest extends TestCase
     {
         $rawCoverage = [
             '/app/src/File.php' => [
-                1 => 1,  // covered
-                2 => 1,  // covered
+                1 => 1, // covered
+                2 => 1, // covered
                 3 => -1, // executable but not covered
             ],
         ];
@@ -198,9 +202,7 @@ final class CodeCoverageHelperTest extends TestCase
     public function testShouldIncludeFileWithForwardSlashSeparators(): void
     {
         // Test the forward-slash branch of exclude check
-        $this->assertFalse(
-            CodeCoverageHelper::shouldIncludeFile('/app/vendor/lib/X.php', [], ['vendor']),
-        );
+        $this->assertFalse(CodeCoverageHelper::shouldIncludeFile('/app/vendor/lib/X.php', [], ['vendor']));
     }
 
     public function testProcessCoverageAllUncoveredLines(): void

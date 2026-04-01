@@ -29,4 +29,10 @@ final class PsalmCommandTest extends TestCase
     {
         $this->assertSame('analyse/psalm', PsalmCommand::COMMAND_NAME);
     }
+
+    public function testIsAvailableReturnsFalseWhenPsalmNotInstalled(): void
+    {
+        // vimeo/psalm is NOT installed in this project
+        $this->assertFalse(PsalmCommand::isAvailable());
+    }
 }

@@ -14,19 +14,23 @@ use InvalidArgumentException;
 
 final class CommandControllerTest extends ControllerTestCase
 {
-    private function pathResolver(): PathResolverInterface
+    private function pathResolver(?string $rootPath = null): PathResolverInterface
     {
+        $root = $rootPath ?? dirname(__DIR__, 6);
         $pathResolver = $this->createMock(PathResolverInterface::class);
-        $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
-        $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
+        $pathResolver->method('getRootPath')->willReturn($root);
+        $pathResolver->method('getRuntimePath')->willReturn($root . '/runtime');
         return $pathResolver;
     }
 
-    private function createController(array $commandMap = [], array $containerServices = []): CommandController
-    {
+    private function createController(
+        array $commandMap = [],
+        array $containerServices = [],
+        ?PathResolverInterface $pathResolver = null,
+    ): CommandController {
         return new CommandController(
             $this->createResponseFactory(),
-            $this->pathResolver(),
+            $pathResolver ?? $this->pathResolver(),
             $this->container($containerServices),
             $commandMap,
         );
@@ -289,15 +293,113 @@ final class CommandControllerTest extends ControllerTestCase
         $response = $controller->index($this->get());
 
         $data = $this->responseData($response);
-        $composerCommands = array_values(array_filter(
-            $data,
-            static fn(array $item) => $item['group'] === 'composer',
-        ));
+        $composerCommands = array_values(array_filter($data, static fn(array $item) => $item['group'] === 'composer'));
 
         if ($composerCommands !== []) {
             $first = $composerCommands[0];
             $this->assertArrayHasKey('description', $first);
             $this->assertIsString($first['description']);
         }
+    }
+
+    public function testRunResponseStructure(): void
+    {
+        $commandResult = new CommandResponse(CommandResponse::STATUS_OK, ['key' => 'value'], []);
+
+        $command = $this->createMock(CommandInterface::class);
+        $command->method('run')->willReturn($commandResult);
+
+        $controller = $this->createController([
+            'testing' => [
+                'struct-cmd' => BashCommand::class,
+            ],
+        ], [BashCommand::class => $command]);
+
+        $response = $controller->run($this->get(['command' => 'struct-cmd']));
+
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('status', $data);
+        $this->assertArrayHasKey('result', $data);
+        $this->assertArrayHasKey('error', $data);
+    }
+
+    public function testIndexWithNoComposerJson(): void
+    {
+        // Use a path with no composer.json
+        $tmpDir = sys_get_temp_dir() . '/adp-test-no-composer-' . uniqid();
+        mkdir($tmpDir, 0755, true);
+
+        try {
+            $controller = $this->createController(commandMap: [], pathResolver: $this->pathResolver($tmpDir));
+
+            $response = $controller->index($this->get());
+
+            $data = $this->responseData($response);
+            // No composer scripts should be present
+            $composerCommands = array_filter($data, static fn(array $item) => $item['group'] === 'composer');
+            $this->assertEmpty($composerCommands);
+        } finally {
+            rmdir($tmpDir);
+        }
+    }
+
+    public function testIndexCommandStructure(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $this->assertNotEmpty($data);
+
+        foreach ($data as $cmd) {
+            $this->assertArrayHasKey('name', $cmd);
+            $this->assertArrayHasKey('title', $cmd);
+            $this->assertArrayHasKey('group', $cmd);
+            $this->assertArrayHasKey('description', $cmd);
+            $this->assertIsString($cmd['name']);
+            $this->assertIsString($cmd['title']);
+            $this->assertIsString($cmd['group']);
+            $this->assertIsString($cmd['description']);
+        }
+    }
+
+    public function testRunUnknownCommandExceptionContainsAvailableCommands(): void
+    {
+        $controller = $this->createController();
+
+        try {
+            $controller->run($this->get(['command' => 'nonexistent']));
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $e) {
+            $this->assertStringContainsString('nonexistent', $e->getMessage());
+            $this->assertStringContainsString('Available commands', $e->getMessage());
+        }
+    }
+
+    public function testRunNullCommandExceptionContainsAvailableCommands(): void
+    {
+        $controller = $this->createController();
+
+        try {
+            $controller->run($this->get());
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $e) {
+            $this->assertStringContainsString('must not be null', $e->getMessage());
+            $this->assertStringContainsString('Available commands', $e->getMessage());
+        }
+    }
+
+    public function testIndexEmptyCommandMap(): void
+    {
+        $controller = $this->createController([]);
+        $response = $controller->index($this->get());
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertIsArray($data);
+
+        // Should still contain built-in commands
+        $names = array_column($data, 'name');
+        $this->assertContains('test/phpunit', $names);
     }
 }

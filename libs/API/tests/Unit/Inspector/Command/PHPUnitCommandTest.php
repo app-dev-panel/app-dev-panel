@@ -29,4 +29,10 @@ final class PHPUnitCommandTest extends TestCase
     {
         $this->assertSame('test/phpunit', PHPUnitCommand::COMMAND_NAME);
     }
+
+    public function testIsAvailableReturnsTrueWhenPHPUnitInstalled(): void
+    {
+        // phpunit/phpunit IS installed in this project
+        $this->assertTrue(PHPUnitCommand::isAvailable());
+    }
 }

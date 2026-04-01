@@ -30,6 +30,12 @@ final class PestCommandTest extends TestCase
         $this->assertSame('test/pest', PestCommand::COMMAND_NAME);
     }
 
+    public function testIsAvailableReturnsFalseWhenPestNotInstalled(): void
+    {
+        // pestphp/pest is not installed in this project
+        $this->assertFalse(PestCommand::isAvailable());
+    }
+
     public function testIsAvailableReturnsBool(): void
     {
         $this->assertIsBool(PestCommand::isAvailable());

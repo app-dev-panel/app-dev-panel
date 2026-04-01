@@ -30,6 +30,12 @@ final class TestoCommandTest extends TestCase
         $this->assertSame('test/testo', TestoCommand::COMMAND_NAME);
     }
 
+    public function testIsAvailableReturnsFalseWhenTestoNotInstalled(): void
+    {
+        // testo/testo is NOT installed in this project
+        $this->assertFalse(TestoCommand::isAvailable());
+    }
+
     public function testIsAvailableReturnsBool(): void
     {
         $this->assertIsBool(TestoCommand::isAvailable());

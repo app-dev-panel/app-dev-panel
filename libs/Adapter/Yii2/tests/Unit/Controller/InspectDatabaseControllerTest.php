@@ -154,11 +154,7 @@ final class InspectDatabaseControllerTest extends TestCase
     public function testActionTableWithCustomLimitAndOffset(): void
     {
         $schemaProvider = $this->createMock(SchemaProviderInterface::class);
-        $schemaProvider
-            ->expects($this->once())
-            ->method('getTable')
-            ->with('users', 10, 20)
-            ->willReturn([]);
+        $schemaProvider->expects($this->once())->method('getTable')->with('users', 10, 20)->willReturn([]);
 
         $controller = $this->createController($schemaProvider);
         $result = $controller->actionTable('users', limit: 10, offset: 20);
@@ -171,7 +167,11 @@ final class InspectDatabaseControllerTest extends TestCase
         $queryResult = [['id' => 1, 'name' => 'Alice']];
 
         $schemaProvider = $this->createMock(SchemaProviderInterface::class);
-        $schemaProvider->expects($this->once())->method('executeQuery')->with('SELECT * FROM users')->willReturn($queryResult);
+        $schemaProvider
+            ->expects($this->once())
+            ->method('executeQuery')
+            ->with('SELECT * FROM users')
+            ->willReturn($queryResult);
 
         $controller = $this->createController($schemaProvider);
         $result = $controller->actionQuery('SELECT * FROM users');
@@ -193,9 +193,7 @@ final class InspectDatabaseControllerTest extends TestCase
     public function testActionQueryHandlesException(): void
     {
         $schemaProvider = $this->createMock(SchemaProviderInterface::class);
-        $schemaProvider
-            ->method('executeQuery')
-            ->willThrowException(new \RuntimeException('Syntax error'));
+        $schemaProvider->method('executeQuery')->willThrowException(new \RuntimeException('Syntax error'));
 
         $controller = $this->createController($schemaProvider);
         $result = $controller->actionQuery('INVALID SQL');
@@ -223,11 +221,7 @@ final class InspectDatabaseControllerTest extends TestCase
     public function testActionExplainWithAnalyze(): void
     {
         $schemaProvider = $this->createMock(SchemaProviderInterface::class);
-        $schemaProvider
-            ->expects($this->once())
-            ->method('explainQuery')
-            ->with('SELECT 1', [], true)
-            ->willReturn([]);
+        $schemaProvider->expects($this->once())->method('explainQuery')->with('SELECT 1', [], true)->willReturn([]);
 
         $controller = $this->createController($schemaProvider);
         $result = $controller->actionExplain('SELECT 1', analyze: true);
@@ -249,9 +243,7 @@ final class InspectDatabaseControllerTest extends TestCase
     public function testActionExplainHandlesException(): void
     {
         $schemaProvider = $this->createMock(SchemaProviderInterface::class);
-        $schemaProvider
-            ->method('explainQuery')
-            ->willThrowException(new \RuntimeException('Query failed'));
+        $schemaProvider->method('explainQuery')->willThrowException(new \RuntimeException('Query failed'));
 
         $controller = $this->createController($schemaProvider);
         $result = $controller->actionExplain('BAD QUERY');

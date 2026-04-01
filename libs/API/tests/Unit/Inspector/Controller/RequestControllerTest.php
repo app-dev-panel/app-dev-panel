@@ -66,8 +66,6 @@ final class RequestControllerTest extends ControllerTestCase
         // Empty allowedHosts means all hosts allowed — should not throw
         $controller = new RequestController($this->createResponseFactory(), $repository, []);
 
-        // We can't actually send the HTTP request in tests, but we can test buildCurl
-        // which exercises the same data flow without network call
         $response = $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']));
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -107,6 +105,29 @@ final class RequestControllerTest extends ControllerTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('localhost');
         $controller->request($this->get(['debugEntryId' => 'entry-1']));
+    }
+
+    public function testRequestHostValidationMessageContainsAllAllowedHosts(): void
+    {
+        $rawRequest = "GET / HTTP/1.1\r\nHost: attacker.com\r\n\r\n";
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getDetail')
+            ->willReturn([
+                self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
+            ]);
+
+        $controller = new RequestController($this->createResponseFactory(), $repository, ['localhost', '127.0.0.1']);
+
+        try {
+            $controller->request($this->get(['debugEntryId' => 'entry-1']));
+            $this->fail('Expected InvalidArgumentException was not thrown.');
+        } catch (InvalidArgumentException $e) {
+            $this->assertStringContainsString('attacker.com', $e->getMessage());
+            $this->assertStringContainsString('localhost', $e->getMessage());
+            $this->assertStringContainsString('127.0.0.1', $e->getMessage());
+        }
     }
 
     public function testBuildCurlWithPostRequest(): void
@@ -161,12 +182,68 @@ final class RequestControllerTest extends ControllerTestCase
                 self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
             ]);
 
-        // buildCurl doesn't call validateHost, but we can verify the curl builds successfully
         $controller = new RequestController($this->createResponseFactory(), $repository, ['127.0.0.1']);
         $response = $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']));
 
         $this->assertSame(200, $response->getStatusCode());
         $data = $this->responseData($response);
         $this->assertArrayHasKey('command', $data);
+    }
+
+    public function testBuildCurlResponseContainsCurlCommand(): void
+    {
+        $rawRequest = "GET /health HTTP/1.1\r\nHost: example.com\r\n\r\n";
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getDetail')
+            ->willReturn([
+                self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
+            ]);
+
+        $controller = new RequestController($this->createResponseFactory(), $repository);
+        $response = $controller->buildCurl($this->get(['debugEntryId' => 'e1']));
+
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('command', $data);
+        $this->assertStringContainsString('curl', $data['command']);
+        $this->assertStringContainsString('example.com', $data['command']);
+    }
+
+    public function testRequestWithEmptyAllowedHostsAllowsAnything(): void
+    {
+        $rawRequest = "GET / HTTP/1.1\r\nHost: any-host.example.com\r\n\r\n";
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getDetail')
+            ->willReturn([
+                self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
+            ]);
+
+        // Empty allowedHosts = no restriction
+        $controller = new RequestController($this->createResponseFactory(), $repository, []);
+
+        // buildCurl doesn't call validateHost, just verify no exception and response is OK
+        $response = $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']));
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testDefaultAllowedHostsIsEmpty(): void
+    {
+        $rawRequest = "GET / HTTP/1.1\r\nHost: whatever.com\r\n\r\n";
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getDetail')
+            ->willReturn([
+                self::REQUEST_COLLECTOR => ['requestRaw' => $rawRequest],
+            ]);
+
+        // No allowedHosts arg = defaults to []
+        $controller = new RequestController($this->createResponseFactory(), $repository);
+
+        $response = $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']));
+        $this->assertSame(200, $response->getStatusCode());
     }
 }

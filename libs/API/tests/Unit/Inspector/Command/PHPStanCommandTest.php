@@ -30,6 +30,12 @@ final class PHPStanCommandTest extends TestCase
         $this->assertSame('analyse/phpstan', PHPStanCommand::COMMAND_NAME);
     }
 
+    public function testIsAvailableReturnsFalseWhenPHPStanNotInstalled(): void
+    {
+        // phpstan/phpstan is NOT installed in this project
+        $this->assertFalse(PHPStanCommand::isAvailable());
+    }
+
     public function testIsAvailableReturnsBool(): void
     {
         $this->assertIsBool(PHPStanCommand::isAvailable());

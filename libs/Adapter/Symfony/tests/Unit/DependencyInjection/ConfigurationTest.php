@@ -245,6 +245,152 @@ final class ConfigurationTest extends TestCase
         $this->assertFalse($config['collectors']['twig']);
     }
 
+    public function testAllCollectorNodesPresent(): void
+    {
+        $config = $this->processConfiguration([]);
+
+        $expectedCollectors = [
+            'environment',
+            'request',
+            'exception',
+            'log',
+            'event',
+            'service',
+            'http_client',
+            'timeline',
+            'var_dumper',
+            'filesystem_stream',
+            'http_stream',
+            'command',
+            'doctrine',
+            'twig',
+            'security',
+            'cache',
+            'mailer',
+            'queue',
+            'validator',
+            'router',
+            'deprecation',
+            'opentelemetry',
+            'translator',
+            'elasticsearch',
+            'redis',
+            'assets',
+            'code_coverage',
+        ];
+
+        foreach ($expectedCollectors as $name) {
+            $this->assertArrayHasKey($name, $config['collectors'], "Collector '{$name}' should exist");
+        }
+    }
+
+    public function testDisableAllCollectorsIndividually(): void
+    {
+        $collectorsConfig = [];
+        $collectorNames = [
+            'environment',
+            'request',
+            'exception',
+            'log',
+            'event',
+            'service',
+            'http_client',
+            'timeline',
+            'var_dumper',
+            'filesystem_stream',
+            'http_stream',
+            'command',
+            'doctrine',
+            'twig',
+            'security',
+            'cache',
+            'mailer',
+            'queue',
+            'validator',
+            'router',
+            'deprecation',
+            'opentelemetry',
+            'translator',
+            'elasticsearch',
+            'redis',
+            'assets',
+        ];
+
+        foreach ($collectorNames as $name) {
+            $collectorsConfig[$name] = false;
+        }
+
+        $config = $this->processConfiguration([['collectors' => $collectorsConfig]]);
+
+        foreach ($collectorNames as $name) {
+            $this->assertFalse($config['collectors'][$name], "Collector '{$name}' should be disabled");
+        }
+    }
+
+    public function testIgnoredCommandsDefault(): void
+    {
+        $config = $this->processConfiguration([]);
+
+        $this->assertContains('help', $config['ignored_commands']);
+        $this->assertContains('list', $config['ignored_commands']);
+        $this->assertContains('debug:*', $config['ignored_commands']);
+    }
+
+    public function testDumperDefaults(): void
+    {
+        $config = $this->processConfiguration([]);
+
+        $this->assertArrayHasKey('dumper', $config);
+        $this->assertArrayHasKey('excluded_classes', $config['dumper']);
+        $this->assertSame([], $config['dumper']['excluded_classes']);
+    }
+
+    public function testFullCustomConfiguration(): void
+    {
+        $config = $this->processConfiguration([
+            [
+                'enabled' => false,
+                'storage' => [
+                    'path' => '/custom/path',
+                    'history_size' => 200,
+                ],
+                'collectors' => [
+                    'request' => false,
+                    'log' => false,
+                    'code_coverage' => true,
+                ],
+                'ignored_requests' => ['/custom/**'],
+                'ignored_commands' => ['custom:cmd'],
+                'dumper' => ['excluded_classes' => ['App\\Heavy']],
+                'path_mapping' => ['/app' => '/local'],
+                'panel' => ['static_url' => 'http://cdn.example.com'],
+                'toolbar' => ['enabled' => false, 'static_url' => 'http://cdn.example.com/toolbar'],
+                'api' => [
+                    'enabled' => false,
+                    'allowed_ips' => ['10.0.0.0'],
+                    'auth_token' => 'my-token',
+                ],
+            ],
+        ]);
+
+        $this->assertFalse($config['enabled']);
+        $this->assertSame('/custom/path', $config['storage']['path']);
+        $this->assertSame(200, $config['storage']['history_size']);
+        $this->assertFalse($config['collectors']['request']);
+        $this->assertFalse($config['collectors']['log']);
+        $this->assertTrue($config['collectors']['code_coverage']);
+        $this->assertSame(['/custom/**'], $config['ignored_requests']);
+        $this->assertSame(['custom:cmd'], $config['ignored_commands']);
+        $this->assertSame(['App\\Heavy'], $config['dumper']['excluded_classes']);
+        $this->assertSame('/local', $config['path_mapping']['/app']);
+        $this->assertSame('http://cdn.example.com', $config['panel']['static_url']);
+        $this->assertFalse($config['toolbar']['enabled']);
+        $this->assertSame('http://cdn.example.com/toolbar', $config['toolbar']['static_url']);
+        $this->assertFalse($config['api']['enabled']);
+        $this->assertSame(['10.0.0.0'], $config['api']['allowed_ips']);
+        $this->assertSame('my-token', $config['api']['auth_token']);
+    }
+
     private function processConfiguration(array $configs): array
     {
         return new Processor()->processConfiguration(new Configuration(), $configs);

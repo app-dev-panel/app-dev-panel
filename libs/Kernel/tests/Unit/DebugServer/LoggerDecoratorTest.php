@@ -34,9 +34,7 @@ final class LoggerDecoratorTest extends TestCase
     public function logForwardsToDecoratedLogger(): void
     {
         $decorated = $this->createMock(LoggerInterface::class);
-        $decorated->expects($this->once())
-            ->method('log')
-            ->with('info', 'test message', ['key' => 'value']);
+        $decorated->expects($this->once())->method('log')->with('info', 'test message', ['key' => 'value']);
 
         $decorator = new LoggerDecorator($decorated);
         // Broadcaster.broadcast() with no sockets returns [] - safe in tests
@@ -47,9 +45,7 @@ final class LoggerDecoratorTest extends TestCase
     public function logWithEmptyContext(): void
     {
         $decorated = $this->createMock(LoggerInterface::class);
-        $decorated->expects($this->once())
-            ->method('log')
-            ->with('error', 'error happened', []);
+        $decorated->expects($this->once())->method('log')->with('error', 'error happened', []);
 
         $decorator = new LoggerDecorator($decorated);
         $decorator->log('error', 'error happened');
@@ -59,9 +55,7 @@ final class LoggerDecoratorTest extends TestCase
     public function logUsesLoggerTraitConvenienceMethods(): void
     {
         $decorated = $this->createMock(LoggerInterface::class);
-        $decorated->expects($this->once())
-            ->method('log')
-            ->with('warning', 'warn msg', []);
+        $decorated->expects($this->once())->method('log')->with('warning', 'warn msg', []);
 
         $decorator = new LoggerDecorator($decorated);
         $decorator->warning('warn msg');

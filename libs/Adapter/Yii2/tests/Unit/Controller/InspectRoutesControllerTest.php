@@ -170,7 +170,7 @@ final class InspectRoutesControllerTest extends TestCase
      */
     private function createRoute(string $name, string $pattern, string|array $methods): object
     {
-        return new class ($name, $pattern, $methods) {
+        return new class($name, $pattern, $methods) {
             public function __construct(
                 private readonly string $name,
                 private readonly string $pattern,
@@ -193,8 +193,10 @@ final class InspectRoutesControllerTest extends TestCase
      */
     private function createRouteCollection(array $routes): object
     {
-        return new class ($routes) {
-            public function __construct(private readonly array $routes) {}
+        return new class($routes) {
+            public function __construct(
+                private readonly array $routes,
+            ) {}
 
             public function getRoutes(): array
             {

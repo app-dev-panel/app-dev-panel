@@ -63,6 +63,99 @@ final class TokenAuthMiddlewareTest extends TestCase
         $response = $middleware->process(new ServerRequest('GET', '/test'), $handler);
 
         $this->assertSame(401, $response->getStatusCode());
+        $this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
+
+        $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertFalse($body['success']);
+        $this->assertStringContainsString('authentication token', $body['error']);
+    }
+
+    public function testHandlerIsNotCalledWhenTokenInvalid(): void
+    {
+        $middleware = new TokenAuthMiddleware(new HttpFactory(), new HttpFactory(), 'secret-token');
+
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler->expects($this->never())->method('handle');
+
+        $request = new ServerRequest('GET', '/test');
+        $request = $request->withHeader('X-Debug-Token', 'bad-token');
+
+        $middleware->process($request, $handler);
+    }
+
+    public function testHandlerIsNotCalledWhenTokenMissing(): void
+    {
+        $middleware = new TokenAuthMiddleware(new HttpFactory(), new HttpFactory(), 'my-token');
+
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler->expects($this->never())->method('handle');
+
+        $middleware->process(new ServerRequest('GET', '/test'), $handler);
+    }
+
+    public function testHandlerIsCalledWhenTokenValid(): void
+    {
+        $middleware = new TokenAuthMiddleware(new HttpFactory(), new HttpFactory(), 'my-token');
+
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler->expects($this->once())->method('handle')->willReturn(new Response());
+
+        $request = new ServerRequest('GET', '/test');
+        $request = $request->withHeader('X-Debug-Token', 'my-token');
+
+        $middleware->process($request, $handler);
+    }
+
+    public function testHandlerIsCalledWhenAuthDisabled(): void
+    {
+        $middleware = new TokenAuthMiddleware(new HttpFactory(), new HttpFactory(), '');
+
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler->expects($this->once())->method('handle')->willReturn(new Response());
+
+        $middleware->process(new ServerRequest('POST', '/anything'), $handler);
+    }
+
+    public function testTimingSafeComparison(): void
+    {
+        // Test that near-match tokens still fail (timing-safe comparison via hash_equals)
+        $middleware = new TokenAuthMiddleware(new HttpFactory(), new HttpFactory(), 'secret-token');
+        $handler = $this->createPassthroughHandler();
+
+        $request = new ServerRequest('GET', '/test');
+        $request = $request->withHeader('X-Debug-Token', 'secret-tokes'); // one char different
+
+        $response = $middleware->process($request, $handler);
+        $this->assertSame(401, $response->getStatusCode());
+    }
+
+    public function testEmptyHeaderValueWhenTokenIsSet(): void
+    {
+        $middleware = new TokenAuthMiddleware(new HttpFactory(), new HttpFactory(), 'secret');
+        $handler = $this->createPassthroughHandler();
+
+        $request = new ServerRequest('GET', '/test');
+        // X-Debug-Token header is present but empty
+        $request = $request->withHeader('X-Debug-Token', '');
+
+        $response = $middleware->process($request, $handler);
+        $this->assertSame(401, $response->getStatusCode());
+    }
+
+    public function testResponseBodyIsValidJson(): void
+    {
+        $middleware = new TokenAuthMiddleware(new HttpFactory(), new HttpFactory(), 'token');
+        $handler = $this->createPassthroughHandler();
+
+        $response = $middleware->process(new ServerRequest('GET', '/'), $handler);
+
+        $body = (string) $response->getBody();
+        $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertArrayHasKey('error', $decoded);
+        $this->assertArrayHasKey('success', $decoded);
+        $this->assertIsString($decoded['error']);
+        $this->assertFalse($decoded['success']);
     }
 
     private function createPassthroughHandler(): RequestHandlerInterface

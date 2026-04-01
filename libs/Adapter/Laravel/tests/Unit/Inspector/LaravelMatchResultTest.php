@@ -39,4 +39,37 @@ final class LaravelMatchResultTest extends TestCase
 
         $this->assertSame($result, $result->route());
     }
+
+    public function testFailedMatchWithController(): void
+    {
+        $result = new LaravelMatchResult(false, 'App\\Http\\Controllers\\FallbackController@handle');
+
+        $this->assertFalse($result->isSuccess());
+        $this->assertSame(['App\\Http\\Controllers\\FallbackController@handle'], $result->middlewares);
+    }
+
+    public function testMiddlewaresIsListType(): void
+    {
+        $result = new LaravelMatchResult(true, 'App\\Http\\Controllers\\UserController@show');
+
+        $this->assertCount(1, $result->middlewares);
+        $this->assertSame('App\\Http\\Controllers\\UserController@show', $result->middlewares[0]);
+    }
+
+    public function testRouteChainability(): void
+    {
+        $result = new LaravelMatchResult(true, 'Controller@action');
+
+        // route() returns self, so middlewares should be accessible
+        $this->assertSame(['Controller@action'], $result->route()->middlewares);
+        $this->assertTrue($result->route()->isSuccess());
+    }
+
+    public function testNullControllerExplicit(): void
+    {
+        $result = new LaravelMatchResult(true, null);
+
+        $this->assertTrue($result->isSuccess());
+        $this->assertSame([], $result->middlewares);
+    }
 }

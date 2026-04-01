@@ -237,6 +237,143 @@ final class FileStorageTest extends AbstractStorageTestCase
         $this->assertArrayHasKey('obj-test', $result);
     }
 
+    public function testClearNonExistentDirectory(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        // Clearing when directory doesn't exist should not throw
+        $storage->clear();
+        $this->assertDirectoryDoesNotExist($this->path);
+    }
+
+    public function testFlushClearsCollectors(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+        $collector = $this->createFakeCollector(['key' => 'value']);
+
+        $storage->addCollector($collector);
+        $this->assertNotEmpty($storage->getData());
+
+        $storage->flush();
+        $this->assertEmpty($storage->getData());
+    }
+
+    public function testWriteAndReadDataType(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $data = ['collector1' => ['items' => [1, 2, 3]]];
+        $storage->write('data-test-id', ['id' => 'data-test-id'], $data, []);
+
+        $result = $storage->read(StorageInterface::TYPE_DATA, 'data-test-id');
+        $this->assertArrayHasKey('data-test-id', $result);
+    }
+
+    public function testReadByIdReturnsEmptyForNonExistentType(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $storage->write('some-id', ['id' => 'some-id'], [], []);
+
+        // Try reading objects for an ID that has no objects file
+        // Actually objects are always written, so read a completely non-existent id
+        $result = $storage->read(StorageInterface::TYPE_DATA, 'completely-nonexistent');
+        $this->assertSame([], $result);
+    }
+
+    public function testMultipleCollectors(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $collector1 = $this->createFakeCollector(['data1']);
+        $collector2 = $this->createFakeSummaryCollector(['data2']);
+
+        $storage->addCollector($collector1);
+        $storage->addCollector($collector2);
+
+        $data = $storage->getData();
+        $this->assertCount(2, $data);
+        $this->assertArrayHasKey('Mock_Collector', $data);
+        $this->assertArrayHasKey('SummaryMock_Collector', $data);
+    }
+
+    public function testSetHistorySize(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+        $storage->setHistorySize(1);
+
+        $collector = $this->createFakeCollector([1]);
+
+        $storage->addCollector($collector);
+        $storage->flush();
+        $idGenerator->reset();
+
+        $storage->addCollector($collector);
+        $storage->flush();
+        $idGenerator->reset();
+
+        $storage->addCollector($collector);
+        $storage->flush();
+
+        $read = $storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertLessThanOrEqual(1, count($read));
+    }
+
+    public function testExcludedClassesPassedToStorage(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new FileStorage(
+            new Aliases()->get($this->path),
+            $idGenerator,
+            excludedClasses: ['SomeExcludedClass'],
+        );
+
+        $collector = $this->createFakeCollector(['test']);
+        $storage->addCollector($collector);
+        $storage->flush();
+
+        // Should flush without errors even with excluded classes
+        $result = $storage->read(StorageInterface::TYPE_DATA, $idGenerator->getId());
+        $this->assertNotEmpty($result);
+    }
+
+    public function testCustomCompressionLevel(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new FileStorage(new Aliases()->get($this->path), $idGenerator, compressionLevel: 9);
+
+        $storage->write('compress-test', ['id' => 'compress-test'], ['key' => 'value'], []);
+
+        $result = $storage->read(StorageInterface::TYPE_SUMMARY, 'compress-test');
+        $this->assertArrayHasKey('compress-test', $result);
+    }
+
+    public function testLegacyFileSkippedWhenGzExists(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $id = 'dual-format-entry';
+        $basePath = $this->path . '/' . date('Y-m-d') . '/' . $id . '/';
+        mkdir($basePath, 0o777, true);
+
+        // Write both legacy JSON and gzip for the same entry
+        $summaryData = json_encode(['id' => $id, 'format' => 'gz']);
+        file_put_contents($basePath . 'summary.json.gz', gzencode($summaryData));
+        file_put_contents($basePath . 'summary.json', json_encode(['id' => $id, 'format' => 'json']));
+
+        $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(1, $summaries);
+        // When both exist, the gz version should be preferred
+        $this->assertSame('gz', $summaries[$id]['format']);
+    }
+
     public function getStorage(DebuggerIdGenerator $idGenerator): FileStorage
     {
         return new FileStorage(new Aliases()->get($this->path), $idGenerator);

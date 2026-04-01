@@ -216,7 +216,8 @@ final class LaravelTranslatorProxyTest extends TestCase
     public function testMultipleTranslationsAccumulate(): void
     {
         $inner = $this->createMock(Translator::class);
-        $inner->method('get')
+        $inner
+            ->method('get')
             ->willReturnMap([
                 ['messages.hello', [], 'en', 'Hello'],
                 ['messages.goodbye', [], 'en', 'Goodbye'],

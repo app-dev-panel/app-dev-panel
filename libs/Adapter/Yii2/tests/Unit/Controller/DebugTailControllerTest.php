@@ -314,14 +314,91 @@ final class DebugTailControllerTest extends TestCase
     public function testRenderEntryCallsRepositoryWithId(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
-        $repository
-            ->expects($this->once())
-            ->method('getSummary')
-            ->with('specific-id')
-            ->willReturn([]);
+        $repository->expects($this->once())->method('getSummary')->with('specific-id')->willReturn([]);
 
         $controller = $this->createController($repository);
         $this->invokeRenderEntry($controller, 'specific-id', false);
+    }
+
+    public function testActionIndexOutputsHeaderAndDetectsNewEntries(): void
+    {
+        $callCount = 0;
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->willReturnCallback(function (?string $id = null) use (&$callCount) {
+                $callCount++;
+                if ($id !== null) {
+                    // renderEntry call
+                    return [
+                        'request' => ['method' => 'GET', 'url' => '/test', 'responseStatusCode' => '200'],
+                    ];
+                }
+                // getEntryIds calls
+                return match ($callCount) {
+                    1 => [], // initial known IDs (empty)
+                    2 => [['id' => 'new-entry-1']], // first poll: new entry found
+                    default => throw new \RuntimeException('Break loop'),
+                };
+            });
+
+        $controller = $this->createController($repository);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Break loop');
+        $controller->actionIndex(interval: 1);
+    }
+
+    public function testActionIndexNoNewEntriesContinuesLoop(): void
+    {
+        $callCount = 0;
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->willReturnCallback(function (?string $id = null) use (&$callCount) {
+                if ($id !== null) {
+                    return [];
+                }
+                $callCount++;
+                return match ($callCount) {
+                    1 => [['id' => 'existing-1']], // initial known IDs
+                    2 => [['id' => 'existing-1']], // first poll: same IDs, no new entries
+                    default => throw new \RuntimeException('Break loop'),
+                };
+            });
+
+        $controller = $this->createController($repository);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Break loop');
+        $controller->actionIndex(interval: 1);
+    }
+
+    public function testActionIndexJsonRendersNewEntries(): void
+    {
+        $callCount = 0;
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->willReturnCallback(function (?string $id = null) use (&$callCount) {
+                $callCount++;
+                if ($id !== null) {
+                    return [
+                        'request' => ['method' => 'POST', 'url' => '/api/data', 'responseStatusCode' => '201'],
+                    ];
+                }
+                return match ($callCount) {
+                    1 => [], // initial: empty
+                    2 => [['id' => 'json-entry-1']], // new entry
+                    default => throw new \RuntimeException('Break loop'),
+                };
+            });
+
+        $controller = $this->createController($repository);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Break loop');
+        $controller->actionIndex(interval: 1, json: true);
     }
 
     private function createController(CollectorRepositoryInterface $repository): DebugTailController

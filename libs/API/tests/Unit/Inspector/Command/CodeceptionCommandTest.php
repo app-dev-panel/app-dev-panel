@@ -29,4 +29,10 @@ final class CodeceptionCommandTest extends TestCase
     {
         $this->assertSame('test/codeception', CodeceptionCommand::COMMAND_NAME);
     }
+
+    public function testIsAvailableReturnsFalseWhenCodeceptionNotInstalled(): void
+    {
+        // codeception/codeception is NOT installed in this project
+        $this->assertFalse(CodeceptionCommand::isAvailable());
+    }
 }

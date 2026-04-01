@@ -140,10 +140,7 @@ final class GitControllerTest extends ControllerTestCase
     public function testCheckoutValidBranch(): void
     {
         $workingCopy = $this->createMock(WorkingCopy::class);
-        $workingCopy
-            ->expects($this->once())
-            ->method('checkout')
-            ->with('feature/my-branch');
+        $workingCopy->expects($this->once())->method('checkout')->with('feature/my-branch');
 
         $repository = $this->createMockRepository();
         // Override getWorkingCopy to return our mock

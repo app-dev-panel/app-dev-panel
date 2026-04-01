@@ -30,8 +30,9 @@ final class MagoCommandTest extends TestCase
         $this->assertSame('analyse/mago', MagoCommand::COMMAND_NAME);
     }
 
-    public function testIsAvailableReturnsBool(): void
+    public function testIsAvailableReturnsTrueWhenMagoInstalled(): void
     {
-        $this->assertIsBool(MagoCommand::isAvailable());
+        // carthage-software/mago IS installed in this project
+        $this->assertTrue(MagoCommand::isAvailable());
     }
 }
