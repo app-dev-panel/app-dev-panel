@@ -8,9 +8,10 @@ import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
-import {Code, FolderOpen, OpenInNew, SwapHoriz} from '@mui/icons-material';
+import {Code, ContentCopy, FolderOpen, OpenInNew, SwapHoriz} from '@mui/icons-material';
 import {Box, Chip, IconButton, Tab, Tabs, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
+import clipboardCopy from 'clipboard-copy';
 import React, {type SyntheticEvent, useCallback, useDeferredValue, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
@@ -50,6 +51,7 @@ const PackageRow = styled(Box)(({theme}) => ({
     borderBottom: `1px solid ${theme.palette.divider}`,
     transition: 'background-color 0.1s ease',
     '&:hover': {backgroundColor: theme.palette.action.hover},
+    '&:hover .copy-btn': {opacity: 1},
 }));
 
 const PackageName = styled(Typography)({
@@ -59,6 +61,9 @@ const PackageName = styled(Typography)({
     flex: 1,
     wordBreak: 'break-all',
     minWidth: 0,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
 });
 
 const VersionText = styled(Typography)(({theme}) => ({
@@ -69,7 +74,12 @@ const VersionText = styled(Typography)(({theme}) => ({
     whiteSpace: 'nowrap',
 }));
 
-const ActionsBox = styled(Box)({display: 'flex', alignItems: 'center', flexShrink: 0, gap: 2});
+const ActionsBox = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    flexShrink: 0,
+    gap: theme.spacing(0.5),
+}));
 
 // ---------------------------------------------------------------------------
 // Tab panel
@@ -118,7 +128,19 @@ const PackageItem = React.memo(({pkg, onSwitch}: PackageItemProps) => {
                     borderRadius: 1,
                 }}
             />
-            <PackageName>{pkg.name}</PackageName>
+            <PackageName>
+                {pkg.name}
+                <Tooltip title="Copy package name">
+                    <IconButton
+                        className="copy-btn"
+                        size="small"
+                        onClick={() => clipboardCopy(pkg.name)}
+                        sx={{p: 0.25, opacity: 0, transition: 'opacity 0.15s ease'}}
+                    >
+                        <ContentCopy sx={{fontSize: 14}} />
+                    </IconButton>
+                </Tooltip>
+            </PackageName>
             <VersionText>{pkg.constraint}</VersionText>
             {pkg.installedVersion && <VersionText sx={{color: 'text.disabled'}}>{pkg.installedVersion}</VersionText>}
             <ActionsBox>
@@ -132,14 +154,14 @@ const PackageItem = React.memo(({pkg, onSwitch}: PackageItemProps) => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                sx={{p: 0.25}}
+                                sx={{p: 0.5}}
                             >
-                                <OpenInNew sx={{fontSize: 14}} />
+                                <OpenInNew sx={{fontSize: 18}} />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Open in File Explorer">
-                            <IconButton size="small" onClick={handleOpenFileExplorer} sx={{p: 0.25}}>
-                                <FolderOpen sx={{fontSize: 14}} />
+                            <IconButton size="small" onClick={handleOpenFileExplorer} sx={{p: 0.5}}>
+                                <FolderOpen sx={{fontSize: 18}} />
                             </IconButton>
                         </Tooltip>
                         {editorUrl && (
@@ -149,15 +171,15 @@ const PackageItem = React.memo(({pkg, onSwitch}: PackageItemProps) => {
                                     component="a"
                                     href={editorUrl}
                                     onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                    sx={{p: 0.25}}
+                                    sx={{p: 0.5}}
                                 >
-                                    <Code sx={{fontSize: 14}} />
+                                    <Code sx={{fontSize: 18}} />
                                 </IconButton>
                             </Tooltip>
                         )}
                         <Tooltip title="Switch version">
-                            <IconButton size="small" onClick={handleSwitch} sx={{p: 0.25}}>
-                                <SwapHoriz sx={{fontSize: 14}} />
+                            <IconButton size="small" onClick={handleSwitch} sx={{p: 0.5}}>
+                                <SwapHoriz sx={{fontSize: 18}} />
                             </IconButton>
                         </Tooltip>
                     </>
