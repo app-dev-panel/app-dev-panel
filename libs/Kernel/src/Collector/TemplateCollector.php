@@ -14,19 +14,40 @@ use function count;
  * - collectRender() for view systems with output capture (Yii views, PHP templates)
  *
  * Works with any template/view engine. Includes duplicate detection for N+1 rendering issues.
+ * Supports nesting depth tracking via beginRender()/endRender() or the depth parameter.
  */
 final class TemplateCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
     use DuplicateDetectionTrait;
 
-    /** @var array<int, array{template: string, renderTime: float, output: string, parameters: array}> */
+    /** @var array<int, array{template: string, renderTime: float, output: string, parameters: array, depth: int}> */
     private array $renders = [];
     private float $totalTime = 0.0;
+    private int $currentDepth = 0;
 
     public function __construct(
         private readonly TimelineCollector $timelineCollector,
     ) {}
+
+    /**
+     * Signal that a template render is starting (increments nesting depth).
+     * Call before the actual render, pair with endRender() after.
+     */
+    public function beginRender(): void
+    {
+        $this->currentDepth++;
+    }
+
+    /**
+     * Signal that a template render has finished (decrements nesting depth).
+     */
+    public function endRender(): void
+    {
+        if ($this->currentDepth > 0) {
+            $this->currentDepth--;
+        }
+    }
 
     /**
      * Log a template render with timing data (e.g. Twig, Blade).
@@ -37,13 +58,14 @@ final class TemplateCollector implements SummaryCollectorInterface
     }
 
     /**
-     * Collect a template/view render with optional output, parameters, and timing.
+     * Collect a template/view render with optional output, parameters, timing, and depth.
      */
     public function collectRender(
         string $template,
         string $output = '',
         array $parameters = [],
         float $renderTime = 0.0,
+        int $depth = -1,
     ): void {
         if (!$this->isActive()) {
             return;
@@ -54,6 +76,7 @@ final class TemplateCollector implements SummaryCollectorInterface
             'renderTime' => $renderTime,
             'output' => $output,
             'parameters' => $parameters,
+            'depth' => $depth >= 0 ? $depth : $this->currentDepth,
         ];
         $this->totalTime += $renderTime;
 
@@ -96,5 +119,6 @@ final class TemplateCollector implements SummaryCollectorInterface
     {
         $this->renders = [];
         $this->totalTime = 0.0;
+        $this->currentDepth = 0;
     }
 }

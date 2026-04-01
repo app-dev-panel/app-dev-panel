@@ -34,25 +34,16 @@ describe('TemplatePanel', () => {
         expect(screen.getByText(/No template renders found/)).toBeInTheDocument();
     });
 
-    it('renders summary cards with count', () => {
-        renderWithProviders(<TemplatePanel data={makeData({renderCount: 5})} />);
-        expect(screen.getByText('Templates Rendered')).toBeInTheDocument();
-        expect(screen.getByText('5')).toBeInTheDocument();
-    });
-
-    it('renders total render time when timing present', () => {
+    it('renders inline title with count and timing', () => {
         renderWithProviders(<TemplatePanel data={makeData()} />);
-        expect(screen.getByText('Total Render Time')).toBeInTheDocument();
+        expect(screen.getByText(/1 renders/)).toBeInTheDocument();
+        expect(screen.getByText(/total/)).toBeInTheDocument();
     });
 
-    it('hides total render time when no timing', () => {
+    it('hides timing in title when no timing data', () => {
         renderWithProviders(<TemplatePanel data={makeData({renders: [makeRender({renderTime: 0})], totalTime: 0})} />);
-        expect(screen.queryByText('Total Render Time')).not.toBeInTheDocument();
-    });
-
-    it('renders count in section title', () => {
-        renderWithProviders(<TemplatePanel data={makeData()} />);
         expect(screen.getByText('1 renders')).toBeInTheDocument();
+        expect(screen.queryByText(/total/)).not.toBeInTheDocument();
     });
 
     it('renders template name', () => {
@@ -63,7 +54,7 @@ describe('TemplatePanel', () => {
     it('renders multiple templates', () => {
         const renders = [makeRender({template: 'base.html.twig'}), makeRender({template: 'header.html.twig'})];
         renderWithProviders(<TemplatePanel data={makeData({renders, renderCount: 2})} />);
-        expect(screen.getByText('2 renders')).toBeInTheDocument();
+        expect(screen.getByText(/2 renders/)).toBeInTheDocument();
         expect(screen.getByText('base.html.twig')).toBeInTheDocument();
         expect(screen.getByText('header.html.twig')).toBeInTheDocument();
     });

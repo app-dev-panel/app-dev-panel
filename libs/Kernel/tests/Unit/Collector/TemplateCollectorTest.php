@@ -36,6 +36,7 @@ final class TemplateCollectorTest extends AbstractCollectorTestCase
         $this->assertSame(0.012, $data['renders'][0]['renderTime']);
         $this->assertSame('', $data['renders'][0]['output']);
         $this->assertSame([], $data['renders'][0]['parameters']);
+        $this->assertSame(0, $data['renders'][0]['depth']);
 
         $this->assertArrayHasKey('duplicates', $data);
         $this->assertSame([], $data['duplicates']['groups']);
@@ -91,6 +92,48 @@ final class TemplateCollectorTest extends AbstractCollectorTestCase
         $this->assertSame(['name' => 'World'], $data['renders'][0]['parameters']);
         $this->assertSame(0.005, $data['renders'][0]['renderTime']);
         $this->assertSame(0.005, $data['totalTime']);
+    }
+
+    public function testNestingDepthTracking(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $collector = new TemplateCollector($timeline);
+        $collector->startup();
+
+        $collector->beginRender();
+        $collector->beginRender();
+        $collector->endRender();
+        $collector->collectRender('/views/layout.php', '<html>...</html>');
+        $collector->beginRender();
+        $collector->endRender();
+        $collector->collectRender('/views/index.php', '<div>content</div>');
+        $collector->endRender();
+        $collector->collectRender('/views/other.php', '<p>other</p>');
+
+        $data = $collector->getCollected();
+
+        $this->assertSame(1, $data['renders'][0]['depth']);
+        $this->assertSame(1, $data['renders'][1]['depth']);
+        $this->assertSame(0, $data['renders'][2]['depth']);
+    }
+
+    public function testExplicitDepthParameter(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $collector = new TemplateCollector($timeline);
+        $collector->startup();
+
+        $collector->collectRender('layout.twig', '', [], 0.0, 0);
+        $collector->collectRender('page.twig', '', [], 0.0, 1);
+        $collector->collectRender('widget.twig', '', [], 0.0, 2);
+
+        $data = $collector->getCollected();
+
+        $this->assertSame(0, $data['renders'][0]['depth']);
+        $this->assertSame(1, $data['renders'][1]['depth']);
+        $this->assertSame(2, $data['renders'][2]['depth']);
     }
 
     public function testDuplicateDetection(): void

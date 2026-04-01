@@ -1045,13 +1045,15 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         // Track render start times using a stack to handle nested renders correctly.
         // The same view file can be rendered recursively, so we use a stack per file path.
+        // beginRender/endRender track nesting depth for hierarchy display.
         $timers = [];
 
         Event::on(
             \yii\base\View::class,
             \yii\base\View::EVENT_BEFORE_RENDER,
-            static function (\yii\base\ViewEvent $event) use (&$timers): void {
+            static function (\yii\base\ViewEvent $event) use ($collector, &$timers): void {
                 $timers[$event->viewFile][] = microtime(true);
+                $collector->beginRender();
             },
         );
 
@@ -1068,6 +1070,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 }
 
                 $renderTime = $startTime > 0 ? microtime(true) - $startTime : 0.0;
+                $collector->endRender();
                 $collector->collectRender($event->viewFile, $event->output, $event->params, $renderTime);
             },
         );

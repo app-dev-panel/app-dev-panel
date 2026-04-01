@@ -1,5 +1,6 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
@@ -19,7 +20,7 @@ import {
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
 
-type Render = {template: string; renderTime: number; output: string; parameters: any[]};
+type Render = {template: string; renderTime: number; output: string; parameters: any[]; depth?: number};
 type DuplicateGroup = {key: string; count: number; indices: number[]};
 type DuplicatesData = {groups: DuplicateGroup[]; totalDuplicatedCount: number};
 type TemplatePanelProps = {
@@ -56,31 +57,6 @@ function hasTiming(renders: Render[]): boolean {
 function isFilePath(template: string): boolean {
     return template.includes('/') && (template.endsWith('.php') || template.includes('/views/'));
 }
-
-const SummaryGrid = styled(Box)(({theme}) => ({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-    gap: theme.spacing(2),
-    marginBottom: theme.spacing(3),
-}));
-
-const SummaryCard = styled(Box)(({theme}) => ({
-    padding: theme.spacing(2),
-    borderRadius: theme.shape.borderRadius * 1.5,
-    border: `1px solid ${theme.palette.divider}`,
-    backgroundColor: theme.palette.background.paper,
-}));
-
-const SummaryLabel = styled(Typography)(({theme}) => ({
-    fontSize: '11px',
-    fontWeight: 600,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.5px',
-    color: theme.palette.text.disabled,
-    marginBottom: theme.spacing(0.5),
-}));
-
-const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 700, fontSize: '22px'});
 
 const RenderRow = styled(Box, {shouldForwardProp: (p) => p !== 'expandable' && p !== 'expanded'})<{
     expandable?: boolean;
@@ -156,10 +132,15 @@ const RenderItem = ({
 
     return (
         <Box key={index}>
-            <RenderRow expandable={expandable} expanded={expanded} onClick={expandable ? onToggle : undefined}>
+            <RenderRow
+                expandable={expandable}
+                expanded={expanded}
+                onClick={expandable ? onToggle : undefined}
+                sx={render.depth ? {pl: 1.5 + render.depth * 3} : undefined}
+            >
                 <Box sx={{flex: 1, minWidth: 0}}>
                     {showAsPath ? (
-                        <>
+                        <FileLink path={render.template}>
                             <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '13px', fontWeight: 500}}>
                                 {basename(render.template)}
                             </Typography>
@@ -168,7 +149,7 @@ const RenderItem = ({
                             >
                                 {dirname(render.template)}
                             </Typography>
-                        </>
+                        </FileLink>
                     ) : (
                         <Typography
                             sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', wordBreak: 'break-all'}}
@@ -266,12 +247,16 @@ const DuplicateGroupView = ({
         <Box>
             <GroupHeader onClick={() => setExpanded(!expanded)}>
                 <Box sx={{flex: 1, minWidth: 0}}>
-                    <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '13px', fontWeight: 500}}>
-                        {basename(group.key)}
-                    </Typography>
-                    <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '10px', color: 'text.disabled'}}>
-                        {dirname(group.key)}
-                    </Typography>
+                    <FileLink path={group.key}>
+                        <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '13px', fontWeight: 500}}>
+                            {basename(group.key)}
+                        </Typography>
+                        <Typography
+                            sx={{fontFamily: primitives.fontFamilyMono, fontSize: '10px', color: 'text.disabled'}}
+                        >
+                            {dirname(group.key)}
+                        </Typography>
+                    </FileLink>
                 </Box>
                 <Chip
                     label={`${group.count}x`}
@@ -350,21 +335,6 @@ export const TemplatePanel = ({data}: TemplatePanelProps) => {
 
     return (
         <Box>
-            <SummaryGrid>
-                <SummaryCard>
-                    <SummaryLabel>Templates Rendered</SummaryLabel>
-                    <SummaryValue sx={{color: 'primary.main'}}>{data.renderCount}</SummaryValue>
-                </SummaryCard>
-                {showTiming && (
-                    <SummaryCard>
-                        <SummaryLabel>Total Render Time</SummaryLabel>
-                        <SummaryValue sx={{color: 'text.primary', fontSize: '18px'}}>
-                            {formatMillisecondsAsDuration(data.totalTime)}
-                        </SummaryValue>
-                    </SummaryCard>
-                )}
-            </SummaryGrid>
-
             <SectionTitle
                 action={
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
@@ -399,6 +369,7 @@ export const TemplatePanel = ({data}: TemplatePanelProps) => {
                 }
             >
                 {`${filtered.length} renders`}
+                {showTiming && ` · ${formatMillisecondsAsDuration(data.totalTime)} total`}
                 {hasDuplicates && (
                     <Chip
                         label={`N+1`}
