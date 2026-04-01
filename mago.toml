@@ -144,6 +144,11 @@ ignore = [
     "property-type-coercion",
     "method-access-on-null",
     "possible-method-access-on-null",
+
+    # ── never-return (1 issue) ──────────────────────────────────────────────
+    # False positive: gitonomy/gitlib is an optional dependency not installed
+    # in root composer, so Mago infers `never` for unresolved return types.
+    "never-return",
 ]
 
 [linter]
