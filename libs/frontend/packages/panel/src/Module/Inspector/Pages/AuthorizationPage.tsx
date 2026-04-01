@@ -7,7 +7,6 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, LinearProgress, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 
@@ -36,7 +35,7 @@ const TableHeader = styled(TableRow)(({theme}) => ({
     backgroundColor: theme.palette.action.hover,
 }));
 
-const MonoText = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontSize: '12px'});
+const MonoText = styled(Typography)(({theme}) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '12px'}));
 
 const HierarchyRow = styled(Box)(({theme}) => ({
     display: 'flex',
@@ -65,14 +64,14 @@ const GuardsTable = ({guards}: {guards: AuthorizationGuard[]}) => (
                             label={`${key}: ${String(value)}`}
                             size="small"
                             variant="outlined"
-                            sx={{
-                                fontFamily: primitives.fontFamilyMono,
+                            sx={(theme) => ({
+                                fontFamily: theme.adp.fontFamilyMono,
                                 fontSize: '10px',
                                 height: 20,
                                 borderRadius: 1,
                                 mr: 0.5,
                                 mb: 0.5,
-                            }}
+                            })}
                         />
                     ))}
                 </Box>
@@ -88,14 +87,14 @@ const RoleHierarchyTable = ({hierarchy}: {hierarchy: Record<string, string[]>}) 
                 <Chip
                     label={role}
                     size="small"
-                    sx={{
-                        fontFamily: primitives.fontFamilyMono,
+                    sx={(theme) => ({
+                        fontFamily: theme.adp.fontFamilyMono,
                         fontSize: '11px',
                         fontWeight: 600,
                         height: 22,
                         borderRadius: 1,
                         flexShrink: 0,
-                    }}
+                    })}
                 />
                 <Typography sx={{color: 'text.disabled', fontSize: '12px', mx: 0.5}}>inherits</Typography>
                 <Box sx={{display: 'flex', gap: 0.5, flexWrap: 'wrap'}}>
@@ -105,7 +104,12 @@ const RoleHierarchyTable = ({hierarchy}: {hierarchy: Record<string, string[]>}) 
                             label={child}
                             size="small"
                             variant="outlined"
-                            sx={{fontFamily: primitives.fontFamilyMono, fontSize: '10px', height: 20, borderRadius: 1}}
+                            sx={(theme) => ({
+                                fontFamily: theme.adp.fontFamilyMono,
+                                fontSize: '10px',
+                                height: 20,
+                                borderRadius: 1,
+                            })}
                         />
                     ))}
                 </Box>

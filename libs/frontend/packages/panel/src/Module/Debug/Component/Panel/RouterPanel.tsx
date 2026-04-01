@@ -3,7 +3,7 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {OpenInNew} from '@mui/icons-material';
 import {Box, Button, Chip, type Theme, Typography} from '@mui/material';
@@ -67,13 +67,13 @@ const RouteRow = styled(Box)(({theme}) => ({
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const PatternCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const PatternCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
     minWidth: 0,
-});
+}));
 
 const NameCell = styled(Typography)(({theme}) => ({
     fontSize: '11px',
@@ -125,16 +125,16 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
                     )}
                     <FieldRow>
                         <FieldLabel>Pattern</FieldLabel>
-                        <FieldValue sx={{fontFamily: primitives.fontFamilyMono}}>{currentRoute.pattern}</FieldValue>
+                        <FieldValue sx={{fontFamily: monoFontFamily}}>{currentRoute.pattern}</FieldValue>
                     </FieldRow>
                     <FieldRow>
                         <FieldLabel>URI</FieldLabel>
-                        <FieldValue sx={{fontFamily: primitives.fontFamilyMono}}>{currentRoute.uri}</FieldValue>
+                        <FieldValue sx={{fontFamily: monoFontFamily}}>{currentRoute.uri}</FieldValue>
                     </FieldRow>
                     {currentRoute.host && (
                         <FieldRow>
                             <FieldLabel>Host</FieldLabel>
-                            <FieldValue sx={{fontFamily: primitives.fontFamilyMono}}>{currentRoute.host}</FieldValue>
+                            <FieldValue sx={{fontFamily: monoFontFamily}}>{currentRoute.host}</FieldValue>
                         </FieldRow>
                     )}
                     <FieldRow>
@@ -163,20 +163,12 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
                                 {Object.entries(currentRoute.arguments).map(([key, val]) => (
                                     <Box key={key} sx={{display: 'flex', gap: 1, ml: 1, mb: 0.25}}>
                                         <Typography
-                                            sx={{
-                                                fontFamily: primitives.fontFamilyMono,
-                                                fontSize: '12px',
-                                                color: 'primary.main',
-                                            }}
+                                            sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'primary.main'}}
                                         >
                                             {key}:
                                         </Typography>
                                         <Typography
-                                            sx={{
-                                                fontFamily: primitives.fontFamilyMono,
-                                                fontSize: '12px',
-                                                color: 'text.secondary',
-                                            }}
+                                            sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'text.secondary'}}
                                         >
                                             {val}
                                         </Typography>
@@ -188,13 +180,13 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
                     {currentRoute.action && (
                         <FieldRow>
                             <FieldLabel>Action</FieldLabel>
-                            <FieldValue sx={{fontFamily: primitives.fontFamilyMono}}>
+                            <FieldValue sx={{fontFamily: monoFontFamily}}>
                                 {typeof currentRoute.action === 'string' ? (
                                     <FileLink className={currentRoute.action}>
                                         <Typography
                                             component="span"
                                             sx={{
-                                                fontFamily: primitives.fontFamilyMono,
+                                                fontFamily: monoFontFamily,
                                                 fontSize: '12px',
                                                 color: 'primary.main',
                                                 '&:hover': {textDecoration: 'underline'},

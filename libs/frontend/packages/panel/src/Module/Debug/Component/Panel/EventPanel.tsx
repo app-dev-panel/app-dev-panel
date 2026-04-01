@@ -3,7 +3,6 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {Description} from '@mui/icons-material';
@@ -45,21 +44,21 @@ const EventRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded' && p !=
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const TimeCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const TimeCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     width: 110,
-});
+}));
 
 const NameCell = styled(Typography)({fontSize: '13px', fontWeight: 500, flex: 1, wordBreak: 'break-word'});
 
-const FileCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const FileCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     whiteSpace: 'nowrap',
-}) as typeof Typography;
+})) as typeof Typography;
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(1.5, 1.5, 1.5, 15.5),
@@ -69,7 +68,7 @@ const DetailBox = styled(Box)(({theme}) => ({
 }));
 
 const DeltaChip = styled(Typography)<{component?: string}>(({theme}) => ({
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '10px',
     color: theme.palette.text.disabled,
     backgroundColor: theme.palette.action.selected,
@@ -227,7 +226,11 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                                 <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mb: 1}}>
                                     <Typography
                                         variant="caption"
-                                        sx={{fontFamily: primitives.fontFamilyMono, color: 'text.secondary', flex: 1}}
+                                        sx={(theme) => ({
+                                            fontFamily: theme.adp.fontFamilyMono,
+                                            color: 'text.secondary',
+                                            flex: 1,
+                                        })}
                                     >
                                         {event.name}
                                     </Typography>

@@ -12,7 +12,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 ## Tech Stack
 
 - **Backend**: PHP 8.4, PSR standards (PSR-3, PSR-7, PSR-11, PSR-14, PSR-15, PSR-16, PSR-17, PSR-18)
-- **Frontend**: React 18, TypeScript 5.5, Vite, Material-UI 5, Redux Toolkit
+- **Frontend**: React 19, TypeScript 5.5, Vite, Material-UI 5, Redux Toolkit
 - **Build**: Composer (PHP), npm workspaces + Lerna (JS), Docker
 - **Testing**: PHPUnit 11 (backend), Vitest (frontend)
 - **Code Quality**: [Mago](https://mago.carthage.software/) (linter + formatter + static analyzer, written in Rust)
@@ -218,8 +218,8 @@ GitHub Actions runs on every push and PR:
 |-------|---------|------:|--------:|-----:|--------------:|
 | Kernel | `libs/Kernel` | 276 | 7 | 1m 21s | **85.2%** (1073/1259) |
 | API | `libs/API` | 174 | 0 | 0.1s | **76.2%** (754/990) |
-| Adapter-Symfony | `libs/Adapter/Symfony` | 150 | 9 | 0.2s | **98.9%** (905/915) |
-| Adapter-Laravel | `libs/Adapter/Laravel` | 80 | 0 | 0.1s | — |
+| Adapter-Symfony | `libs/Adapter/Symfony` | 151 | 9 | 0.2s | **98.9%** (905/915) |
+| Adapter-Laravel | `libs/Adapter/Laravel` | 86 | 0 | 0.1s | — |
 | Adapter-Yii2 | `libs/Adapter/Yii2` | 95 | 0 | 0.1s | **57.3%** (373/651) |
 | Adapter-Cycle | `libs/Adapter/Cycle` | 10 | 0 | 0.02s | — |
 | Cli | `libs/Cli` | 6 | 0 | 0.02s | **41.1%** (30/73) |

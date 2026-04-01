@@ -2,7 +2,7 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {Box, Chip, Collapse, Icon, Tooltip, Typography} from '@mui/material';
 import {styled, type Theme, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
@@ -54,7 +54,11 @@ const SummaryLabel = styled(Typography)(({theme}) => ({
     marginBottom: theme.spacing(0.5),
 }));
 
-const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 700, fontSize: '22px'});
+const SummaryValue = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontWeight: 700,
+    fontSize: '22px',
+}));
 
 const CommandRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
     ({theme, expanded}) => ({
@@ -70,21 +74,21 @@ const CommandRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{ex
     }),
 );
 
-const KeyCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const KeyCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
     minWidth: 0,
-});
+}));
 
-const DurationCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const DurationCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     width: 80,
     textAlign: 'right',
-});
+}));
 
 const ConnectionChip = styled(Chip)(({theme}) => ({
     fontWeight: 600,
@@ -342,11 +346,7 @@ export const RedisPanel = ({data}: RedisPanelProps) => {
                                     <Box sx={{mb: 1}}>
                                         <DetailLabel sx={{color: 'error.main', mb: 0.5}}>Error</DetailLabel>
                                         <Typography
-                                            sx={{
-                                                fontFamily: primitives.fontFamilyMono,
-                                                fontSize: '12px',
-                                                color: 'error.main',
-                                            }}
+                                            sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'error.main'}}
                                         >
                                             {cmd.error}
                                         </Typography>
@@ -356,11 +356,7 @@ export const RedisPanel = ({data}: RedisPanelProps) => {
                                     <Box>
                                         <DetailLabel sx={{color: 'text.disabled', mb: 0.5}}>Source</DetailLabel>
                                         <Typography
-                                            sx={{
-                                                fontFamily: primitives.fontFamilyMono,
-                                                fontSize: '11px',
-                                                color: 'text.secondary',
-                                            }}
+                                            sx={{fontFamily: monoFontFamily, fontSize: '11px', color: 'text.secondary'}}
                                         >
                                             {cmd.line}
                                         </Typography>

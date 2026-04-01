@@ -3,12 +3,11 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
 import {Box, Chip, Collapse, Tooltip, Typography} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
 // Data format from PHP: [microtime, reference, collectorClass, additionalData?]
@@ -18,22 +17,6 @@ import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 // row[3] = additional data (optional)
 type Item = [number, number, string] | [number, number, string, string];
 type TimelinePanelProps = {data: Item[]};
-
-// Colors for different span types
-const barColors = [
-    '#42A5F5', // blue
-    '#AB47BC', // purple
-    '#66BB6A', // green
-    '#FFA726', // orange
-    '#26C6DA', // cyan
-    '#EC407A', // pink
-    '#8D6E63', // brown
-    '#78909C', // blue-gray
-    '#FFEE58', // yellow
-    '#7C3AED', // violet
-];
-
-const getBarColor = (index: number): string => barColors[index % barColors.length];
 
 // ---------------------------------------------------------------------------
 // Styled components
@@ -46,7 +29,7 @@ const TimeAxis = styled(Box)(({theme}) => ({
     paddingRight: 70,
     paddingBottom: theme.spacing(0.5),
     fontSize: '10px',
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     color: theme.palette.text.disabled,
     borderBottom: `1px solid ${theme.palette.divider}`,
     marginBottom: theme.spacing(0.5),
@@ -91,7 +74,7 @@ const Duration = styled(Typography)(({theme}) => ({
     width: 60,
     flexShrink: 0,
     textAlign: 'right',
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     color: theme.palette.text.disabled,
     paddingLeft: 8,
@@ -105,6 +88,9 @@ const DetailBox = styled(Box)(({theme}) => ({
 }));
 
 export const TimelinePanel = ({data}: TimelinePanelProps) => {
+    const theme = useTheme();
+    const chartColors = theme.adp.chartColors;
+    const getBarColor = (index: number): string => chartColors[index % chartColors.length];
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
@@ -267,11 +253,11 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                     <Typography
                                         variant="caption"
                                         component="span"
-                                        sx={{
-                                            fontFamily: primitives.fontFamilyMono,
+                                        sx={(theme) => ({
+                                            fontFamily: theme.adp.fontFamilyMono,
                                             color: 'primary.main',
                                             '&:hover': {textDecoration: 'underline'},
-                                        }}
+                                        })}
                                     >
                                         {row[2]}
                                     </Typography>

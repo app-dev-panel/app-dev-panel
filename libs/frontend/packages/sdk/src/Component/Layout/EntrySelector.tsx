@@ -6,7 +6,6 @@ import {
     loadFilterState,
     saveFilterState,
 } from '@app-dev-panel/sdk/Component/Layout/EntryFilterConfig';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {getEntrySearchText, isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
@@ -108,7 +107,7 @@ const EntryRow = styled(Box, {shouldForwardProp: (p) => p !== 'active' && p !== 
     gap: theme.spacing(1.25),
     padding: theme.spacing(1, 2),
     cursor: 'pointer',
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '13px',
     backgroundColor: highlighted ? theme.palette.action.selected : active ? theme.palette.primary.light : 'transparent',
     '&:hover': {backgroundColor: theme.palette.action.hover},
@@ -530,12 +529,12 @@ export const EntrySelector = ({
                                 {entry.web?.request?.processingTime != null && (
                                     <Typography
                                         component="span"
-                                        sx={{
-                                            fontFamily: primitives.fontFamilyMono,
+                                        sx={(theme) => ({
+                                            fontFamily: theme.adp.fontFamilyMono,
                                             fontSize: '10px',
                                             color: 'primary.main',
                                             flexShrink: 0,
-                                        }}
+                                        })}
                                     >
                                         {(entry.web.request.processingTime * 1000).toFixed(0)}ms
                                     </Typography>
@@ -543,12 +542,12 @@ export const EntrySelector = ({
                                 {entry.web?.memory?.peakUsage != null && (
                                     <Typography
                                         component="span"
-                                        sx={{
-                                            fontFamily: primitives.fontFamilyMono,
+                                        sx={(theme) => ({
+                                            fontFamily: theme.adp.fontFamilyMono,
                                             fontSize: '10px',
                                             color: 'success.main',
                                             flexShrink: 0,
-                                        }}
+                                        })}
                                     >
                                         {formatBytes(entry.web.memory.peakUsage)}
                                     </Typography>
@@ -586,12 +585,12 @@ export const EntrySelector = ({
                                 {entry.console?.request?.processingTime != null && (
                                     <Typography
                                         component="span"
-                                        sx={{
-                                            fontFamily: primitives.fontFamilyMono,
+                                        sx={(theme) => ({
+                                            fontFamily: theme.adp.fontFamilyMono,
                                             fontSize: '10px',
                                             color: 'primary.main',
                                             flexShrink: 0,
-                                        }}
+                                        })}
                                     >
                                         {(entry.console.request.processingTime * 1000).toFixed(0)}ms
                                     </Typography>
@@ -599,12 +598,12 @@ export const EntrySelector = ({
                                 {entry.console?.memory?.peakUsage != null && (
                                     <Typography
                                         component="span"
-                                        sx={{
-                                            fontFamily: primitives.fontFamilyMono,
+                                        sx={(theme) => ({
+                                            fontFamily: theme.adp.fontFamilyMono,
                                             fontSize: '10px',
                                             color: 'success.main',
                                             flexShrink: 0,
-                                        }}
+                                        })}
                                     >
                                         {formatBytes(entry.console.memory.peakUsage)}
                                     </Typography>

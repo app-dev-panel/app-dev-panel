@@ -3,7 +3,6 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
@@ -57,20 +56,20 @@ const ParamRow = styled(Box)(({theme}) => ({
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const ParamKey = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const ParamKey = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     fontWeight: 600,
     width: 220,
     flexShrink: 0,
     paddingTop: 4,
     wordBreak: 'break-word',
-});
+}));
 
 const ParamValue = styled(Box)({flex: 1, minWidth: 0, overflow: 'hidden'});
 
 const Preview = styled(Typography)(({theme}) => ({
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     color: theme.palette.text.secondary,
     overflow: 'hidden',

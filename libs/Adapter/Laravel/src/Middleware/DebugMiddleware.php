@@ -91,6 +91,8 @@ final class DebugMiddleware
         }
 
         $this->collectors->routerDataExtractor?->extract($request);
+
+        $this->collectViteAssets();
     }
 
     private function registerVarDumperHandler(): void
@@ -115,5 +117,15 @@ final class DebugMiddleware
         });
 
         self::$varDumperHandlerRegistered = true;
+    }
+
+    private function collectViteAssets(): void
+    {
+        if ($this->collectors->viteAssetListener === null || !class_exists(\Illuminate\Foundation\Vite::class)) {
+            return;
+        }
+
+        $vite = app(\Illuminate\Foundation\Vite::class);
+        $this->collectors->viteAssetListener->collect($vite);
     }
 }

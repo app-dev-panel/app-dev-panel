@@ -2,7 +2,7 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
@@ -81,20 +81,20 @@ const RequestRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{ex
     }),
 );
 
-const EndpointCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const EndpointCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
-});
+}));
 
-const DurationCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const DurationCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     textAlign: 'right',
     width: 80,
-});
+}));
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(2, 2, 2, 6),
@@ -128,9 +128,7 @@ const RequestDetail = ({entry}: {entry: ElasticsearchRequest}) => {
                     >
                         Source
                     </Typography>
-                    <Typography
-                        sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'primary.main', mt: 0.5}}
-                    >
+                    <Typography sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'primary.main', mt: 0.5}}>
                         {entry.line}
                     </Typography>
                 </Box>
@@ -145,25 +143,17 @@ const RequestDetail = ({entry}: {entry: ElasticsearchRequest}) => {
                 </Typography>
                 <Box sx={{mt: 0.5, display: 'flex', gap: 3}}>
                     <Typography
-                        sx={{
-                            fontFamily: primitives.fontFamilyMono,
-                            fontSize: '12px',
-                            color: durationColor(entry.duration, theme),
-                        }}
+                        sx={{fontFamily: monoFontFamily, fontSize: '12px', color: durationColor(entry.duration, theme)}}
                     >
                         Duration: {formatDuration(entry.duration)}
                     </Typography>
                     {entry.responseSize > 0 && (
-                        <Typography
-                            sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'text.secondary'}}
-                        >
+                        <Typography sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'text.secondary'}}>
                             Response size: {entry.responseSize} bytes
                         </Typography>
                     )}
                     {entry.hitsCount != null && (
-                        <Typography
-                            sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'text.secondary'}}
-                        >
+                        <Typography sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'text.secondary'}}>
                             Hits: {entry.hitsCount}
                         </Typography>
                     )}
@@ -195,7 +185,7 @@ const RequestDetail = ({entry}: {entry: ElasticsearchRequest}) => {
                         component="pre"
                         sx={{
                             mt: 0.5,
-                            fontFamily: primitives.fontFamilyMono,
+                            fontFamily: monoFontFamily,
                             fontSize: '12px',
                             whiteSpace: 'pre-wrap',
                             wordBreak: 'break-all',
@@ -232,7 +222,7 @@ const RequestDetail = ({entry}: {entry: ElasticsearchRequest}) => {
                         component="pre"
                         sx={{
                             mt: 0.5,
-                            fontFamily: primitives.fontFamilyMono,
+                            fontFamily: monoFontFamily,
                             fontSize: '12px',
                             color: 'error.main',
                             whiteSpace: 'pre-wrap',
@@ -459,7 +449,7 @@ export const ElasticsearchPanel = ({data}: ElasticsearchPanelProps) => {
                             {entry.hitsCount != null && (
                                 <Typography
                                     sx={{
-                                        fontFamily: primitives.fontFamilyMono,
+                                        fontFamily: monoFontFamily,
                                         fontSize: '11px',
                                         color: 'text.secondary',
                                         flexShrink: 0,

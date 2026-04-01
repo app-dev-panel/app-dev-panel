@@ -22,7 +22,7 @@ export const ErrorFallback = ({error, resetErrorBoundary}: FallbackProps) => {
                 sx={{position: 'relative'}}
                 action={
                     <Tooltip title={copied ? 'Copied!' : 'Copy error'}>
-                        <IconButton color="error" size="small" onClick={handleCopy}>
+                        <IconButton color="error" size="small" onClick={handleCopy} aria-label="Copy error">
                             <ContentCopy fontSize="small" />
                         </IconButton>
                     </Tooltip>

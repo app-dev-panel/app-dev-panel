@@ -50,6 +50,11 @@ DebugHeaders → ErrorCatcher → YiiApiMiddleware → ... → Router
 
 Включает специфичные для Yii коллекторы: запросы к БД, почта, очереди, роутер, валидатор, переводчик и представления — в дополнение ко всем коллекторам Kernel (логи, события, исключения, HTTP-клиент и др.).
 
+Дополнительно:
+
+- **Asset bundles** — <class>AppDevPanel\Adapter\Yii3\Collector\Asset\AssetLoaderInterfaceProxy</class> оборачивает `AssetLoaderInterface` для сбора загруженных бандлов с CSS/JS файлами, зависимостями и опциями.
+- **Code coverage** — <class>AppDevPanel\Kernel\Collector\CodeCoverageCollector</class> зарегистрирован и собирает покрытие кода построчно за каждый запрос (требуется pcov или xdebug).
+
 ## Интеграция с переводчиком
 
 При установленном пакете `yiisoft/translator` адаптер регистрирует <class>AppDevPanel\Adapter\Yii3\Collector\Translator\TranslatorInterfaceProxy</class> в `trackedServices`. Все вызовы `translate()` на `Yiisoft\Translator\TranslatorInterface` перехватываются автоматически. Подробности на странице [Переводчик](/ru/guide/translator).

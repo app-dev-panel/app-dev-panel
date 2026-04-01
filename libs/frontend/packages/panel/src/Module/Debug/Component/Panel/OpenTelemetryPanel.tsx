@@ -1,7 +1,7 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {Box, Chip, Collapse, Icon, IconButton, type Theme, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
@@ -96,28 +96,28 @@ const SpanRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded' && p !==
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const OperationCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const OperationCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
-});
+}));
 
-const DurationCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const DurationCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     textAlign: 'right',
     width: 80,
-});
+}));
 
-const TimeCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const TimeCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     width: 100,
     color: 'text.secondary',
-});
+}));
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(1.5, 1.5, 1.5, 4),
@@ -132,7 +132,7 @@ const AttrTable = styled('table')(({theme}) => ({
     '& td, & th': {
         padding: theme.spacing(0.25, 1),
         textAlign: 'left',
-        fontFamily: primitives.fontFamilyMono,
+        fontFamily: theme.adp.fontFamilyMono,
         fontSize: '11px',
         borderBottom: `1px solid ${theme.palette.divider}`,
     },
@@ -241,7 +241,7 @@ function TraceGroup({spans, traceId}: {spans: SpanEntry[]; traceId: string}) {
                                 label={kindLabel(span.kind)}
                                 size="small"
                                 variant="outlined"
-                                sx={{fontFamily: primitives.fontFamilyMono, fontSize: '10px', height: 20, minWidth: 36}}
+                                sx={{fontFamily: monoFontFamily, fontSize: '10px', height: 20, minWidth: 36}}
                             />
                             <Chip
                                 label={span.status}
@@ -249,7 +249,7 @@ function TraceGroup({spans, traceId}: {spans: SpanEntry[]; traceId: string}) {
                                 sx={{
                                     backgroundColor: statusColor(span.status, theme),
                                     color: theme.palette.common.white,
-                                    fontFamily: primitives.fontFamilyMono,
+                                    fontFamily: monoFontFamily,
                                     fontSize: '10px',
                                     height: 20,
                                     minWidth: 48,

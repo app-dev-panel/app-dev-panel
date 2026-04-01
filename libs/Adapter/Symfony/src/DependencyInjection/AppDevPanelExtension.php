@@ -6,6 +6,7 @@ namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Collector\RouterDataExtractor;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
+use AppDevPanel\Adapter\Symfony\EventSubscriber\AssetMapperSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
@@ -60,8 +61,16 @@ use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Cli\Command\DebugDumpCommand;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Cli\Command\DebugSummaryCommand;
+use AppDevPanel\Cli\Command\DebugTailCommand;
+use AppDevPanel\Cli\Command\FrontendUpdateCommand;
+use AppDevPanel\Cli\Command\InspectConfigCommand;
+use AppDevPanel\Cli\Command\InspectDatabaseCommand;
+use AppDevPanel\Cli\Command\InspectRoutesCommand;
+use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CodeCoverageCollector;
@@ -310,6 +319,14 @@ final class AppDevPanelExtension extends Extension
         if ($collectors['router']) {
             $this->registerRouterCollector($container);
         }
+
+        if ($collectors['assets']) {
+            $container
+                ->register(AssetBundleCollector::class, AssetBundleCollector::class)
+                ->setArguments([new Reference(TimelineCollector::class)])
+                ->setPublic(false)
+                ->addTag('app_dev_panel.collector');
+        }
     }
 
     private function registerRouterCollector(ContainerBuilder $container): void
@@ -367,6 +384,21 @@ final class AppDevPanelExtension extends Extension
             ])
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
+
+        // Asset mapper subscriber — only when symfony/asset-mapper is available and collector is enabled
+        if (
+            $container->has(AssetBundleCollector::class)
+            && interface_exists(\Symfony\Component\AssetMapper\AssetMapperInterface::class)
+        ) {
+            $container
+                ->register(AssetMapperSubscriber::class, AssetMapperSubscriber::class)
+                ->setArguments([
+                    new Reference(AssetBundleCollector::class),
+                    new Reference(\Symfony\Component\AssetMapper\AssetMapperInterface::class),
+                ])
+                ->addTag('kernel.event_subscriber')
+                ->setPublic(false);
+        }
 
         // Authorization subscriber — only when symfony/security-http is available and collector is enabled
         if (
@@ -794,6 +826,61 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([
                 new Reference(CollectorRepositoryInterface::class),
             ])
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container
+            ->register(DebugDumpCommand::class, DebugDumpCommand::class)
+            ->setArguments([
+                new Reference(CollectorRepositoryInterface::class),
+            ])
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container
+            ->register(DebugSummaryCommand::class, DebugSummaryCommand::class)
+            ->setArguments([
+                new Reference(CollectorRepositoryInterface::class),
+            ])
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container
+            ->register(DebugTailCommand::class, DebugTailCommand::class)
+            ->setArguments([
+                new Reference(CollectorRepositoryInterface::class),
+            ])
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container
+            ->register(InspectDatabaseCommand::class, InspectDatabaseCommand::class)
+            ->setArguments([
+                new Reference(SchemaProviderInterface::class),
+            ])
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container
+            ->register(InspectRoutesCommand::class, InspectRoutesCommand::class)
+            ->setArguments([
+                new Reference(SymfonyRouteCollectionAdapter::class),
+                new Reference(SymfonyUrlMatcherAdapter::class),
+            ])
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container
+            ->register(InspectConfigCommand::class, InspectConfigCommand::class)
+            ->setArguments([
+                new Reference('service_container'),
+                [],
+            ])
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container
+            ->register(FrontendUpdateCommand::class, FrontendUpdateCommand::class)
             ->addTag('console.command')
             ->setPublic(false);
     }

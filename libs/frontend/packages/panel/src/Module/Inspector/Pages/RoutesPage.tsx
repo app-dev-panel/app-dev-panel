@@ -5,7 +5,6 @@ import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {concatClassMethod} from '@app-dev-panel/sdk/Helper/classMethodConcater';
 import {ContentCopy, OpenInNew} from '@mui/icons-material';
@@ -116,13 +115,13 @@ const RouteRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expa
     }),
 );
 
-const PatternCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const PatternCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
     minWidth: 0,
-});
+}));
 
 const NameCell = styled(Typography)(({theme}) => ({
     fontSize: '11px',
@@ -135,7 +134,7 @@ const NameCell = styled(Typography)(({theme}) => ({
 }));
 
 const ActionInlineLink = styled('a')(({theme}) => ({
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     color: theme.palette.primary.main,
     textDecoration: 'none',
@@ -181,15 +180,15 @@ const MiddlewareItem = ({mw}: {mw: any}) => {
                 <Typography
                     component="span"
                     onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                    sx={{
+                    sx={(theme) => ({
                         display: 'block',
-                        fontFamily: primitives.fontFamilyMono,
+                        fontFamily: theme.adp.fontFamilyMono,
                         fontSize: '12px',
                         color: 'primary.main',
                         textDecoration: 'none',
                         py: 0.25,
                         '&:hover': {textDecoration: 'underline'},
-                    }}
+                    })}
                 >
                     {concatClassMethod(parsed.className, parsed.methodName)}
                 </Typography>
@@ -202,15 +201,15 @@ const MiddlewareItem = ({mw}: {mw: any}) => {
                 <Typography
                     component="span"
                     onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                    sx={{
+                    sx={(theme) => ({
                         display: 'block',
-                        fontFamily: primitives.fontFamilyMono,
+                        fontFamily: theme.adp.fontFamilyMono,
                         fontSize: '12px',
                         color: 'primary.main',
                         textDecoration: 'none',
                         py: 0.25,
                         '&:hover': {textDecoration: 'underline'},
-                    }}
+                    })}
                 >
                     {mw}
                 </Typography>
@@ -218,7 +217,14 @@ const MiddlewareItem = ({mw}: {mw: any}) => {
         );
     }
     return (
-        <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'text.secondary', py: 0.25}}>
+        <Typography
+            sx={(theme) => ({
+                fontFamily: theme.adp.fontFamilyMono,
+                fontSize: '12px',
+                color: 'text.secondary',
+                py: 0.25,
+            })}
+        >
             {typeof mw === 'string' ? mw : JSON.stringify(mw)}
         </Typography>
     );
@@ -243,14 +249,14 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                             <Typography
                                 component="span"
                                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                sx={{
-                                    fontFamily: primitives.fontFamilyMono,
+                                sx={(theme) => ({
+                                    fontFamily: theme.adp.fontFamilyMono,
                                     fontSize: '12px',
                                     wordBreak: 'break-all',
                                     color: 'primary.main',
                                     textDecoration: 'none',
                                     '&:hover': {textDecoration: 'underline'},
-                                }}
+                                })}
                             >
                                 {actionFull}
                             </Typography>
@@ -359,13 +365,13 @@ const RouteChecker = () => {
                                         <FileLink className={parsed.className} methodName={parsed.methodName}>
                                             <Typography
                                                 component="span"
-                                                sx={{
-                                                    fontFamily: primitives.fontFamilyMono,
+                                                sx={(theme) => ({
+                                                    fontFamily: theme.adp.fontFamilyMono,
                                                     fontSize: '13px',
                                                     color: 'primary.main',
                                                     textDecoration: 'none',
                                                     '&:hover': {textDecoration: 'underline'},
-                                                }}
+                                                })}
                                             >
                                                 {parsed.className + '::' + parsed.methodName}
                                             </Typography>

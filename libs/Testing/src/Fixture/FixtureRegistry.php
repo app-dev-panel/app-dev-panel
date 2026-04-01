@@ -361,6 +361,15 @@ final class FixtureRegistry
                     Expectation::exists(),
                 ],
             ]),
+
+            // === Assets ===
+            new Fixture(name: 'assets:basic', endpoint: '/test/fixtures/assets', expectations: [
+                'assets' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryHasKey('assets'),
+                    Expectation::summaryGte('assets.bundleCount', 3),
+                ],
+            ]),
         ];
     }
 }

@@ -40,6 +40,9 @@ return [
         'cache' => true,
         'mailer' => true,
         'queue' => true,
+        'assets' => true,
+        'template' => true,
+        'opentelemetry' => true,
         'code_coverage' => false,  // opt-in; requires pcov or xdebug
         // ... all collectors enabled by default
     ],
@@ -56,6 +59,12 @@ return [
 ## Collectors
 
 Supports all Kernel collectors plus Laravel-specific data capture via event listeners: Eloquent queries, cache operations, mail, queue jobs, HTTP client requests, translator lookups, and [Redis commands](/guide/collectors/redis) (via `Redis::listen()`).
+
+Additionally:
+
+- **Blade templates** — <class>AppDevPanel\Adapter\Laravel\Collector\TemplateCollectorCompilerEngine</class> wraps the Blade `CompilerEngine` to capture render timing and nesting depth automatically.
+- **Asset bundles** — <class>AppDevPanel\Adapter\Laravel\EventListener\ViteAssetListener</class> collects rendered Vite assets (`preloadedAssets()`) after each response.
+- **OpenTelemetry** — <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> decorates `SpanProcessorInterface` via `$app->extend()` when `open-telemetry/sdk` is installed.
 
 ## Translator Integration
 

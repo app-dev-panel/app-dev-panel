@@ -1,4 +1,3 @@
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {Box, Icon, Modal, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
@@ -54,14 +53,14 @@ const SearchInput = styled('input')(({theme}) => ({
     border: 'none',
     outline: 'none',
     fontSize: '16px',
-    fontFamily: primitives.fontFamily,
+    fontFamily: theme.typography.fontFamily,
     backgroundColor: 'transparent',
     color: theme.palette.text.primary,
     '&::placeholder': {color: theme.palette.text.disabled},
 }));
 
 const Kbd = styled('kbd')(({theme}) => ({
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '10px',
     backgroundColor: theme.palette.background.default,
     padding: '2px 6px',
@@ -109,7 +108,7 @@ const ItemRow = styled(Box, {shouldForwardProp: (p) => p !== 'selected'})<ItemRo
 const ItemLabel = styled(Typography)({flex: 1, fontSize: '14px'});
 
 const ItemShortcut = styled(Typography)(({theme}) => ({
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     color: theme.palette.text.disabled,
 }));

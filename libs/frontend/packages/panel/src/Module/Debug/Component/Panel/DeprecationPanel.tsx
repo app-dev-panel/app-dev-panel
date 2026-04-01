@@ -1,7 +1,6 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
@@ -54,18 +53,18 @@ const Row = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const TimeCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const TimeCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     width: 110,
     paddingTop: 2,
-});
+}));
 
 const MessageCell = styled(Typography)({fontSize: '13px', flex: 1, wordBreak: 'break-word'});
 
-const LocationCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const LocationCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     maxWidth: 300,
@@ -73,7 +72,7 @@ const LocationCell = styled(Typography)({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     paddingTop: 2,
-});
+}));
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(1.5, 1.5, 1.5, 15),
@@ -83,7 +82,7 @@ const DetailBox = styled(Box)(({theme}) => ({
 }));
 
 const TraceRow = styled(Box)(({theme}) => ({
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     padding: theme.spacing(0.25, 0),
     color: theme.palette.text.secondary,

@@ -62,6 +62,7 @@ return [
             Route::get('/coverage')->action(Web\TestFixtures\CoverageAction::class)->name('test-coverage'),
             Route::get('/view')->action(Web\TestFixtures\ViewAction::class)->name('test-view'),
             Route::get('/template')->action(Web\TestFixtures\TemplateAction::class)->name('test-template'),
+            Route::get('/assets')->action(Web\TestFixtures\AssetAction::class)->name('test-assets'),
             Route::methods(['GET', 'POST'], '/reset')
                 ->action(Web\TestFixtures\ResetAction::class)
                 ->name('test-reset'),

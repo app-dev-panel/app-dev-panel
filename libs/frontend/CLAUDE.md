@@ -4,7 +4,7 @@ React/TypeScript frontend for ADP. Provides a web UI to inspect debug data and a
 
 ## Tech Stack
 
-- React 18.3+, TypeScript 5.5+
+- React 19+, TypeScript 5.5+
 - Vite 5.4+ (build tool)
 - Material-UI (MUI) 5+ with DataGrid and TreeView
 - Redux Toolkit 1.9+ with RTK Query (state management and API calls)

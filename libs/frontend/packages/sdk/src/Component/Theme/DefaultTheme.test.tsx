@@ -35,4 +35,34 @@ describe('createAdpTheme', () => {
     it('disables button text transform', () => {
         expect(theme.components?.MuiButton?.styleOverrides?.root).toMatchObject({textTransform: 'none'});
     });
+
+    it('exposes adp.fontFamilyMono on theme', () => {
+        expect(theme.adp.fontFamilyMono).toBe(semanticTokens.typography.fontFamilyMono);
+    });
+
+    it('exposes light chart colors on light theme', () => {
+        expect(theme.adp.chartColors).toEqual(semanticTokens.chartColors);
+    });
+
+    it('exposes dark chart colors on dark theme', () => {
+        const darkTheme = createAdpTheme('dark', {openLinksInNewWindow: false, baseUrl: ''});
+        expect(darkTheme.adp.chartColors).toEqual(darkSemanticTokens.chartColors);
+    });
+
+    it('exposes light collector colors on light theme', () => {
+        expect(theme.adp.collectorColors.request).toEqual(semanticTokens.collectorColors.request);
+    });
+
+    it('exposes dark collector colors on dark theme', () => {
+        const darkTheme = createAdpTheme('dark', {openLinksInNewWindow: false, baseUrl: ''});
+        expect(darkTheme.adp.collectorColors.request).toEqual(darkSemanticTokens.collectorColors.request);
+    });
+
+    it('exposes highlight color', () => {
+        expect(theme.adp.highlightColor).toBe(semanticTokens.highlightColor);
+    });
+
+    it('includes micro typography variant', () => {
+        expect(theme.typography.micro).toMatchObject({fontSize: '10px', fontWeight: 600});
+    });
 });
