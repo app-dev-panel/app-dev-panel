@@ -12,7 +12,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 ## Tech Stack
 
 - **Backend**: PHP 8.4, PSR standards (PSR-3, PSR-7, PSR-11, PSR-14, PSR-15, PSR-16, PSR-17, PSR-18)
-- **Frontend**: React 18, TypeScript 5.5, Vite, Material-UI 5, Redux Toolkit
+- **Frontend**: React 19, TypeScript 5.5, Vite, Material-UI 5, Redux Toolkit
 - **Build**: Composer (PHP), npm workspaces + Lerna (JS), Docker
 - **Testing**: PHPUnit 11 (backend), Vitest (frontend)
 - **Code Quality**: [Mago](https://mago.carthage.software/) (linter + formatter + static analyzer, written in Rust)
