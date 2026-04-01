@@ -33,6 +33,7 @@ const TimeAxis = styled(Box)(({theme}) => ({
     color: theme.palette.text.disabled,
     borderBottom: `1px solid ${theme.palette.divider}`,
     marginBottom: theme.spacing(0.5),
+    [theme.breakpoints.down('sm')]: {paddingLeft: 100, paddingRight: 8},
 }));
 
 const Row = styled(Box, {shouldForwardProp: (p) => p !== 'selected'})<{selected?: boolean}>(({theme, selected}) => ({
@@ -47,7 +48,7 @@ const Row = styled(Box, {shouldForwardProp: (p) => p !== 'selected'})<{selected?
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const Label = styled(Typography)({
+const Label = styled(Typography)(({theme}) => ({
     width: 160,
     flexShrink: 0,
     fontSize: '12px',
@@ -56,7 +57,8 @@ const Label = styled(Typography)({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-});
+    [theme.breakpoints.down('sm')]: {width: 80, fontSize: '10px', paddingRight: 6},
+}));
 
 const BarArea = styled(Box)({flex: 1, position: 'relative', height: 20});
 
@@ -78,6 +80,7 @@ const Duration = styled(Typography)(({theme}) => ({
     fontSize: '11px',
     color: theme.palette.text.disabled,
     paddingLeft: 8,
+    [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
 
 const DetailBox = styled(Box)(({theme}) => ({

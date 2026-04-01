@@ -42,6 +42,7 @@ const EventRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded' && p !=
     transition: 'background-color 0.1s ease',
     backgroundColor: expanded ? theme.palette.action.hover : 'transparent',
     '&:hover': {backgroundColor: theme.palette.action.hover},
+    [theme.breakpoints.down('sm')]: {gap: theme.spacing(0.75), padding: theme.spacing(0.75, 1)},
 }));
 
 const TimeCell = styled(Typography)(({theme}) => ({
@@ -49,15 +50,28 @@ const TimeCell = styled(Typography)(({theme}) => ({
     fontSize: '11px',
     flexShrink: 0,
     width: 110,
+    [theme.breakpoints.down('sm')]: {width: 'auto', fontSize: '10px'},
 }));
 
-const NameCell = styled(Typography)({fontSize: '13px', fontWeight: 500, flex: 1, wordBreak: 'break-word'});
+const NameCell = styled(Typography)({
+    fontSize: '13px',
+    fontWeight: 500,
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+});
 
 const FileCell = styled(Typography)(({theme}) => ({
     fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
-    flexShrink: 0,
+    flexShrink: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    [theme.breakpoints.down('sm')]: {display: 'none'},
 })) as typeof Typography;
 
 const DetailBox = styled(Box)(({theme}) => ({

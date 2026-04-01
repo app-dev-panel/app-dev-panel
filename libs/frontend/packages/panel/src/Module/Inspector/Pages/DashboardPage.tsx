@@ -81,6 +81,8 @@ const HealthGrid = styled(Box)(({theme}) => ({
     gridTemplateColumns: 'repeat(4, 1fr)',
     gap: theme.spacing(1.5),
     marginBottom: theme.spacing(3.5),
+    [theme.breakpoints.down('md')]: {gridTemplateColumns: 'repeat(2, 1fr)'},
+    [theme.breakpoints.down('sm')]: {gridTemplateColumns: '1fr'},
 }));
 
 const HealthCardRoot = styled(Paper, {shouldForwardProp: (p) => p !== 'accentColor'})<{accentColor: HealthCardColor}>(
@@ -119,6 +121,7 @@ const Columns = styled(Box)(({theme}) => ({
     gridTemplateColumns: '1fr 1fr',
     gap: theme.spacing(2.5),
     marginBottom: theme.spacing(3.5),
+    [theme.breakpoints.down('sm')]: {gridTemplateColumns: '1fr'},
 }));
 
 const PanelRoot = styled(Paper)({overflow: 'hidden'});

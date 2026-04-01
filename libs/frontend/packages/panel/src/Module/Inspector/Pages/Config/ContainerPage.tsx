@@ -38,16 +38,18 @@ const EntryRow = styled(Box)(({theme}) => ({
     borderBottom: `1px solid ${theme.palette.divider}`,
     '&:last-child': {borderBottom: 'none'},
     '&:hover': {backgroundColor: theme.palette.action.hover},
+    [theme.breakpoints.down('sm')]: {flexDirection: 'column', gap: theme.spacing(0.5), padding: theme.spacing(1, 1.5)},
 }));
 
-const NameCell = styled(Box)({
+const NameCell = styled(Box)(({theme}) => ({
     width: 280,
     flexShrink: 0,
     display: 'flex',
     alignItems: 'flex-start',
     gap: 4,
     paddingTop: 4,
-});
+    [theme.breakpoints.down('sm')]: {width: '100%'},
+}));
 
 const NameText = styled(Typography)(({theme}) => ({
     fontFamily: theme.adp.fontFamilyMono,
