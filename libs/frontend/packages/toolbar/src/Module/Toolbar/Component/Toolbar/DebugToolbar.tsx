@@ -320,9 +320,11 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
             </Box>
 
             <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
-            <div ref={iframeContainerRef} style={{height: position, overflow: 'hidden'}} hidden={!iframeEnabled}>
-                <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
-            </div>
+            {iframeEnabled && (
+                <div ref={iframeContainerRef} style={{height: position, overflow: 'hidden'}}>
+                    <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
+                </div>
+            )}
         </Portal>
     );
 };
