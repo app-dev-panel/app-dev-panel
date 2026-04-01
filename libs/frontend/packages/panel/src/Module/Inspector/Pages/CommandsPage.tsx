@@ -3,6 +3,8 @@ import {
     useLazyGetCommandsQuery,
     useRunCommandMutation,
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {CommandErrorAlert} from '@app-dev-panel/panel/Module/Inspector/Component/Command/CommandErrorAlert';
+import {extractCommandError} from '@app-dev-panel/panel/Module/Inspector/Component/Command/extractCommandError';
 import {ResultDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Command/ResultDialog';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
@@ -16,6 +18,8 @@ export const CommandsPage = () => {
     const [groupedCommands, setGroupedCommands] = useState<GroupedCommands>({});
     const [commandStatus, setCommandStatus] = useState<CommandStatusMap>({});
     const [showResultDialog, setShowResultDialog] = useState<boolean>(false);
+    const [fetchError, setFetchError] = useState<string[] | null>(null);
+    const [lastCommand, setLastCommand] = useState<CommandType | null>(null);
 
     const [getCommandsQuery] = useLazyGetCommandsQuery();
     const [runCommandQuery, runCommandQueryInfo] = useRunCommandMutation();
@@ -37,14 +41,26 @@ export const CommandsPage = () => {
                 });
                 setCommandStatus(commandStatus);
                 setGroupedCommands(groupedCommands);
+            } else if (response.error) {
+                const error = extractCommandError({error: response.error});
+                setFetchError(error?.errors ?? ['Failed to load commands']);
             }
         })();
     }, []);
 
     const runCommand = async (command: CommandType) => {
+        setFetchError(null);
+        setLastCommand(command);
         setCommandStatus((prev) => ({...prev, [command.name]: {...prev[command.name], isLoading: true}}));
         const response = await runCommandQuery(command.name);
         setCommandStatus((prev) => ({...prev, [command.name]: {...prev[command.name], isLoading: false}}));
+
+        const error = extractCommandError(response);
+        if (!('data' in response) || !response.data) {
+            setFetchError(error?.errors ?? ['An unexpected error occurred']);
+            return;
+        }
+
         setShowResultDialog(true);
     };
     const commandEntries = Object.entries(groupedCommands as GroupedCommands);
@@ -101,6 +117,13 @@ export const CommandsPage = () => {
                     ))}
                 </Box>
             ))}
+            {fetchError && (
+                <CommandErrorAlert
+                    errors={fetchError}
+                    onRetry={lastCommand ? () => runCommand(lastCommand) : undefined}
+                    onDismiss={() => setFetchError(null)}
+                />
+            )}
             <ResultDialog
                 status={
                     runCommandQueryInfo.isLoading
@@ -116,6 +139,7 @@ export const CommandsPage = () => {
                           ? runCommandQueryInfo.data.result
                           : ''
                 }
+                errors={runCommandQueryInfo.data?.errors}
                 open={showResultDialog}
                 onRerun={() => runCommandQuery(runCommandQueryInfo.originalArgs as string)}
                 onClose={() => setShowResultDialog(false)}

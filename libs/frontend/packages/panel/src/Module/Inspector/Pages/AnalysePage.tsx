@@ -1,4 +1,6 @@
 import {useRunCommandMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {CommandErrorAlert} from '@app-dev-panel/panel/Module/Inspector/Component/Command/CommandErrorAlert';
+import {extractCommandError} from '@app-dev-panel/panel/Module/Inspector/Component/Command/extractCommandError';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
@@ -76,17 +78,21 @@ type AnalyseRow = {
     message: string;
     link: string;
 };
-type CommandResponseType = {isSuccessful: boolean | undefined; errors: string[]};
+type CommandState = {isSuccessful: boolean | undefined; errors: string[]};
 export const AnalysePage = () => {
     const [commandQuery, commandQueryInfo] = useRunCommandMutation();
     const [errorRows, setErrorRows] = useState<AnalyseRow[]>([]);
     const [infoRows, setInfoRows] = useState<AnalyseRow[]>([]);
-    const [commandResponse, setCommandResponse] = useState<CommandResponseType | null>(null);
+    const [commandResponse, setCommandResponse] = useState<CommandState | null>(null);
+    const [commandError, setCommandError] = useState<string[] | null>(null);
 
     async function runPsalmHandler() {
+        setCommandError(null);
         const data = await commandQuery('analyse/psalm');
+
+        const error = extractCommandError(data);
         if (!('data' in data) || typeof data.data !== 'object') {
-            console.error(data);
+            setCommandError(error?.errors ?? ['An unexpected error occurred']);
             return;
         }
 
@@ -115,6 +121,9 @@ export const AnalysePage = () => {
             }
         }
         setCommandResponse({isSuccessful: data.data.status === 'ok', errors: data.data.errors});
+        if (error) {
+            setCommandError(error.errors);
+        }
         setInfoRows(resultInfoRows);
         setErrorRows(resultErrorRows);
     }
@@ -144,6 +153,13 @@ export const AnalysePage = () => {
                     </>
                 )}
             </Box>
+            {commandError && (
+                <CommandErrorAlert
+                    errors={commandError}
+                    onRetry={runPsalmHandler}
+                    onDismiss={() => setCommandError(null)}
+                />
+            )}
             {commandQueryInfo.isSuccess && (
                 <>
                     <Accordion key="panel1" expanded={expanded.includes('panel1')} onChange={handleChange('panel1')}>
