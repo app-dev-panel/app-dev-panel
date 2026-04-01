@@ -134,14 +134,16 @@ export const ContainerPage = () => {
                 insertObject(id, result.data.object);
             }
         },
-        [lazyLoadObject, insertObject],
+
+        [lazyLoadObject],
     );
 
     useEffect(() => {
         if (!isLoading && data) {
             setObjects(data.map((row) => ({id: row, value: null})));
         }
-    }, [isLoading, data, setObjects]);
+
+    }, [isLoading, data]);
 
     const filteredRows = useMemo(() => {
         if (!searchString.trim()) return objects;

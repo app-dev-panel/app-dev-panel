@@ -200,14 +200,27 @@ export const handlers = [
         return HttpResponse.json({data: {items: [], pools: []}});
     }),
 
-    // Inspector - container
-    http.get(`${BASE}/inspect/api/container`, () => {
-        return HttpResponse.json({data: {definitions: []}});
+    // Inspector - container classes
+    http.get(`${BASE}/inspect/api/classes`, () => {
+        return HttpResponse.json({
+            data: ['App\\Controller\\HomeController', 'App\\Service\\UserService', 'Psr\\Log\\LoggerInterface'],
+        });
     }),
 
-    // Inspector - configuration
+    // Inspector - object
+    http.get(`${BASE}/inspect/api/object`, () => {
+        return HttpResponse.json({data: {object: {class: 'Test', active: true}, path: '/src'}});
+    }),
+
+    // Inspector - configuration (DI definitions)
     http.get(`${BASE}/inspect/api/config`, () => {
-        return HttpResponse.json({data: {groups: ['app', 'web'], data: {'app.name': 'Test App'}}});
+        return HttpResponse.json({
+            data: {
+                assetManager: 'yii\\web\\AssetManager',
+                db: 'yii\\db\\Connection',
+                errorHandler: 'yii\\web\\ErrorHandler',
+            },
+        });
     }),
 
     // GenCode API

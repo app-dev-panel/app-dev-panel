@@ -53,6 +53,35 @@ describe('Inspector Pages', () => {
         await expect.element(page.getByText('Configuration')).toBeVisible();
     });
 
+    it('renders config definitions sub-page with data', async () => {
+        renderApp('/inspector/config/definitions');
+        await expect.element(page.getByText('Definitions')).toBeVisible();
+        await new Promise((r) => setTimeout(r, 1000));
+        const bodyText = document.body.textContent || '';
+        expect(bodyText).toContain('assetManager');
+        expect(bodyText).toContain('db');
+        expect(bodyText).toContain('errorHandler');
+    });
+
+    it('renders config definitions with column headers', async () => {
+        renderApp('/inspector/config/definitions');
+        await expect.element(page.getByText('Definitions')).toBeVisible();
+        await new Promise((r) => setTimeout(r, 1000));
+        const bodyText = document.body.textContent || '';
+        expect(bodyText).toContain('Name');
+        expect(bodyText).toContain('Value');
+        expect(bodyText).toContain('Actions');
+    });
+
+    it('renders config container sub-page with data', async () => {
+        renderApp('/inspector/config/container');
+        await expect.element(page.getByText('Container')).toBeVisible();
+        await new Promise((r) => setTimeout(r, 1000));
+        const bodyText = document.body.textContent || '';
+        expect(bodyText).toContain('App\\Controller\\HomeController');
+        expect(bodyText).toContain('App\\Service\\UserService');
+    });
+
     it('renders git log sub-page', async () => {
         renderApp('/inspector/git/log');
         await expect.element(page.getByText('Inspector')).toBeVisible();

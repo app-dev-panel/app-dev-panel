@@ -156,7 +156,8 @@ export const DefinitionsPage = () => {
                 insertObject(id, result.data.object);
             }
         },
-        [lazyLoadObject, insertObject],
+
+        [lazyLoadObject],
     );
 
     useEffect(() => {
@@ -165,7 +166,8 @@ export const DefinitionsPage = () => {
             const items = rows.map((el) => ({id: el[0], value: el[1]}));
             setObjects(items);
         }
-    }, [isLoading, data, setObjects]);
+
+    }, [isLoading, data]);
 
     const filteredRows = useMemo(() => {
         if (!searchString.trim()) return objects;
