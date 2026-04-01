@@ -142,4 +142,47 @@ final class CommandControllerTest extends ControllerTestCase
         // PHPUnit is installed in this project
         $this->assertTrue(PHPUnitCommand::isAvailable());
     }
+
+    public function testIndexIncludesBuiltInAvailableCommands(): void
+    {
+        // No custom commandMap — built-in commands should auto-discover
+        $controller = $this->createController();
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $names = array_column($data, 'name');
+
+        // PHPUnit is installed in this project, so it must appear
+        $this->assertContains('test/phpunit', $names);
+    }
+
+    public function testIndexBuiltInCommandsHaveCorrectGroup(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $phpunit = array_values(array_filter($data, static fn(array $item) => $item['name'] === 'test/phpunit'));
+
+        $this->assertCount(1, $phpunit);
+        $this->assertSame('test', $phpunit[0]['group']);
+        $this->assertSame('PHPUnit', $phpunit[0]['title']);
+    }
+
+    public function testCustomCommandMapMergesWithBuiltIn(): void
+    {
+        $controller = $this->createController([
+            'custom' => [
+                'custom/cmd' => BashCommand::class,
+            ],
+        ]);
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $names = array_column($data, 'name');
+
+        // Both built-in and custom commands present
+        $this->assertContains('test/phpunit', $names);
+        $this->assertContains('custom/cmd', $names);
+    }
 }
