@@ -113,7 +113,7 @@ final class AppDevPanelExtensionTest extends TestCase
                     'twig' => false,
                     'security' => false,
                     'mailer' => false,
-                    'messenger' => false,
+                    'queue' => false,
                     'validator' => false,
                     'router' => false,
                 ],

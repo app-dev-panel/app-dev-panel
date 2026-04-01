@@ -14,11 +14,11 @@
 
 ## Weaknesses
 
-- **7 fixtures use direct collector injection** — most direct injection of any playground (cache, database, mailer, messenger, validator, router, var-dumper)
+- **7 fixtures use direct collector injection** — most direct injection of any playground (cache, database, mailer, queue, validator, router, var-dumper)
 - **No real database queries** — `DatabaseAction` calls `DatabaseCollector::logQuery()` directly; despite having SQLite configured and `QueryExecuted` event listener wired
 - **No real cache operations** — `CacheAction` calls `CacheCollector::logCacheOperation()` directly; despite having `CacheListener` wired for cache events
 - **No real mail sending** — `MailerAction` calls `MailerCollector::collectMessage()` directly; despite having `MailListener` for `MessageSent` events
-- **No real queue dispatch** — `MessengerAction` calls `QueueCollector::logMessage()` directly
+- **No real queue dispatch** — `QueueAction` calls `QueueCollector::logMessage()` directly
 - **Newest adapter** — less battle-tested than Yii 3/Symfony, 55 unit tests but no integration tests
 - **Dump fixture** — uses direct `VarDumperCollector` injection instead of `dump()` function
 - **Missing exception fixture** — `/test/fixtures/exception` throws but returns 500 (expected), however the debug entry may not be stored if exception kills the process before `terminate()`
@@ -29,7 +29,7 @@
 |--------|------:|---------|
 | PSR proxy | 7 | logs, logs-context, logs-heavy, http-client, timeline, multi (logger part) |
 | Framework event | 2 | events, multi (event part) |
-| Direct collector | 7 | cache, cache-heavy, database, mailer, messenger, validator, router |
+| Direct collector | 7 | cache, cache-heavy, database, mailer, queue, validator, router |
 | Native (exception/file) | 4 | exception, exception-chained, filesystem, reset-cli |
 | Direct storage | 1 | reset |
 | None needed | 1 | request-info |

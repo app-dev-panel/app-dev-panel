@@ -21,7 +21,7 @@ app_dev_panel:
         security: true
         cache: true
         mailer: true
-        messenger: true
+        queue: true
         validator: true
         router: true
     ignored_requests:

@@ -41,7 +41,7 @@ final class TestFixturesController extends Controller
             'cache-heavy' => \App\actions\testFixtures\CacheHeavyAction::class,
             'router' => \App\actions\testFixtures\RouterAction::class,
             'validator' => \App\actions\testFixtures\ValidatorAction::class,
-            'messenger' => \App\actions\testFixtures\MessengerAction::class,
+            'queue' => \App\actions\testFixtures\QueueAction::class,
             'opentelemetry' => \App\actions\testFixtures\OpenTelemetryAction::class,
             'translator' => \App\actions\testFixtures\TranslatorAction::class,
             'elasticsearch' => \App\actions\testFixtures\ElasticsearchAction::class,

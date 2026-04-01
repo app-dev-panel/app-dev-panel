@@ -13,12 +13,12 @@
 
 ## Weaknesses
 
-- **Fewest fixtures** — only 18 actions; missing `MessengerAction`, `RouterAction`, `ValidatorAction` (these collectors are not supported in Yii 2)
+- **Fewest fixtures** — only 18 actions; missing `RouterAction`, `ValidatorAction` (these collectors are not supported in Yii 2)
 - **No PSR proxy usage** — only 1 action uses PSR injection (`HttpClientAction` uses `ClientInterface`); everything else goes through Yii 2 statics
 - **Static coupling** — `\Yii::info()`, `Event::trigger()`, `\Yii::$app->getModule()` — hard to test, tightly coupled to framework globals
 - **Direct collector injection via Module** — `CacheAction`, `DatabaseAction`, `MailerAction`, `DumpAction` access collectors via `\Yii::$app->getModule('debug-panel')->getCollector()`
 - **Legacy architecture** — Yii 2's service locator pattern (no real DI container) limits clean dependency injection
-- **No queue/messenger support** — Yii 2 has no built-in queue; adapter doesn't integrate with `yii2-queue` extension
+- **No queue support** — Yii 2 has no built-in queue; adapter doesn't integrate with `yii2-queue` extension
 
 ## Fixture Data Capture Analysis
 
@@ -36,7 +36,7 @@
 
 | Fixture | Reason |
 |---------|--------|
-| `messenger:basic` | Yii 2 has no built-in queue/messenger component |
+| `queue:basic` | Yii 2 has no built-in queue component |
 | `router:basic` | `RouterCollector` not wired in Yii 2 adapter |
 | `validator:basic` | `ValidatorCollector` not wired in Yii 2 adapter |
 
@@ -52,7 +52,7 @@
 
 4. **Cache fixture via real cache** — use `\Yii::$app->cache->set()`, `get()`, `delete()` with array cache component, and wire `CacheCollector` to cache events
 5. **Mail fixture via real mailer** — use `\Yii::$app->mailer->compose()->send()` with file transport, hook `EVENT_AFTER_SEND` to capture messages naturally
-6. **Add MessengerAction** — if `yii2-queue` extension is available, integrate `QueueCollector` with its events
+6. **Add QueueAction** — if `yii2-queue` extension is available, integrate `QueueCollector` with its events
 
 ### Low Priority
 

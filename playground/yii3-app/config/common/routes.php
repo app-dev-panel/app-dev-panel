@@ -30,7 +30,7 @@ return [
             ),
             Route::get('/database')->action(Web\TestFixtures\DatabaseAction::class)->name('test-database'),
             Route::get('/mailer')->action(Web\TestFixtures\MailerAction::class)->name('test-mailer'),
-            Route::get('/messenger')->action(Web\TestFixtures\MessengerAction::class)->name('test-messenger'),
+            Route::get('/queue')->action(Web\TestFixtures\QueueAction::class)->name('test-queue'),
             Route::get('/validator')->action(Web\TestFixtures\ValidatorAction::class)->name('test-validator'),
             Route::get('/router')->action(Web\TestFixtures\RouterAction::class)->name('test-router'),
             Route::get('/cache')->action(Web\TestFixtures\CacheAction::class)->name('test-cache'),

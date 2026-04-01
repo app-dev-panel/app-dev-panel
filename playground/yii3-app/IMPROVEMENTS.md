@@ -14,10 +14,10 @@
 
 ## Weaknesses
 
-- **6 fixtures use direct collector injection** — `CacheAction`, `DatabaseAction`, `MailerAction`, `ValidatorAction`, `RouterAction`, `MessengerAction` inject collectors directly instead of using framework APIs
+- **6 fixtures use direct collector injection** — `CacheAction`, `DatabaseAction`, `MailerAction`, `ValidatorAction`, `RouterAction`, `QueueAction` inject collectors directly instead of using framework APIs
 - **No real database** — `DatabaseAction` calls `DatabaseCollector::logQuery()` directly with fake SQL
 - **No real mailer** — `MailerAction` calls `MailerCollector::collectMessage()` directly
-- **No real queue** — `MessengerAction` calls `QueueCollector::logMessage()` directly
+- **No real queue** — `QueueAction` calls `QueueCollector::logMessage()` directly
 - **Missing `.gitignore`** — runtime/vendor not ignored
 
 ## Fixture Data Capture Analysis
@@ -25,7 +25,7 @@
 | Method | Count | Actions |
 |--------|------:|---------|
 | PSR proxy | 8 | logs, logs-context, logs-heavy, events, http-client, multi, timeline, dump |
-| Direct collector | 6 | cache, cache-heavy, database, mailer, messenger, validator, router |
+| Direct collector | 6 | cache, cache-heavy, database, mailer, queue, validator, router |
 | Native (exception/file) | 5 | exception, exception-chained, filesystem, reset, reset-cli |
 | None needed | 1 | request-info |
 

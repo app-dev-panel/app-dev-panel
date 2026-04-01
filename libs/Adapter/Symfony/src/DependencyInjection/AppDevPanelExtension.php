@@ -279,7 +279,7 @@ final class AppDevPanelExtension extends Extension
             'twig' => TemplateCollector::class,
             'cache' => CacheCollector::class,
             'mailer' => MailerCollector::class,
-            'messenger' => QueueCollector::class,
+            'queue' => QueueCollector::class,
         ];
 
         foreach ($timelineCollectorMap as $key => $class) {

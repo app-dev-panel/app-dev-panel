@@ -139,9 +139,9 @@ message = 'Class `App\actions\testFixtures\MailerAction` cannot extend unknown t
 count = 1
 
 [[issues]]
-file = "src/actions/testFixtures/MessengerAction.php"
+file = "src/actions/testFixtures/QueueAction.php"
 code = "non-existent-class-like"
-message = 'Class `App\actions\testFixtures\MessengerAction` cannot extend unknown type `Action`'
+message = 'Class `App\actions\testFixtures\QueueAction` cannot extend unknown type `Action`'
 count = 1
 
 [[issues]]
@@ -199,6 +199,12 @@ message = 'Class `App\actions\testFixtures\TemplateAction` cannot extend unknown
 count = 1
 
 [[issues]]
+file = "src/actions/testFixtures/ViewAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\ViewAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
 file = "src/actions/testFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\TimelineAction` cannot extend unknown type `Action`'
@@ -214,12 +220,6 @@ count = 1
 file = "src/actions/testFixtures/ValidatorAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\ValidatorAction` cannot extend unknown type `Action`'
-count = 1
-
-[[issues]]
-file = "src/actions/testFixtures/ViewAction.php"
-code = "non-existent-class-like"
-message = 'Class `App\actions\testFixtures\ViewAction` cannot extend unknown type `Action`'
 count = 1
 
 [[issues]]

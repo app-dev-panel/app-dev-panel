@@ -31,6 +31,7 @@ final class CollectorDataResolver
         'router' => 'RouterCollector',
         'validator' => 'ValidatorCollector',
         'view' => 'TemplateCollector',
+        'template' => 'TemplateCollector',
         'assets' => 'AssetBundleCollector',
         'opentelemetry' => 'OpenTelemetryCollector',
         'elasticsearch' => 'ElasticsearchCollector',

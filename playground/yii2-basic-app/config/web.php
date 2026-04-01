@@ -52,7 +52,7 @@ return [
                 'GET /test/fixtures/router' => 'test-fixtures/router',
                 'GET /test/fixtures/validator' => 'test-fixtures/validator',
                 'GET /test/fixtures/opentelemetry' => 'test-fixtures/opentelemetry',
-                'GET /test/fixtures/messenger' => 'test-fixtures/messenger',
+                'GET /test/fixtures/queue' => 'test-fixtures/queue',
                 'GET /test/fixtures/translator' => 'test-fixtures/translator',
                 'GET /test/fixtures/security' => 'test-fixtures/security',
                 'GET /test/fixtures/elasticsearch' => 'test-fixtures/elasticsearch',

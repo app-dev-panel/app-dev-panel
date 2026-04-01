@@ -30,7 +30,6 @@ Configure the module in your application config:
             'assets' => true,
             'redis' => true,
             'elasticsearch' => true,
-            'view' => true,
             'template' => true,
             'code_coverage' => false, // opt-in, requires pcov or xdebug
             // ... all collectors enabled by default
@@ -53,19 +52,16 @@ Supports all Kernel collectors plus Yii 2-specific data capture:
 | Mailer | `BaseMailer::EVENT_AFTER_SEND` | From, to, cc, bcc, subject, body |
 | Asset Bundles | `View::EVENT_END_PAGE` | Bundles: class, paths, CSS/JS, dependencies |
 | Translator | <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> replaces `Yii::$app->i18n` | Translation lookups, missing translations |
-| View | `View::EVENT_AFTER_RENDER` | Rendered file, output, parameters |
-| Templates | `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` | Render timing per template (supports nesting) |
+| Template | `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` | Render timing, output, parameters (supports nesting) |
 | Redis | Direct collector calls | Redis commands, timing, errors |
 | Elasticsearch | Direct collector calls | ES requests, timing, hits |
 | Code Coverage | `pcov` / `xdebug` extension | Per-file line coverage (opt-in) |
 | Authorization | `User::EVENT_AFTER_LOGIN/LOGOUT` | Auth events, user identity |
 | Router | <class>AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy</class> wraps all URL rules | Route matching data, timing |
 
-### View & Template Collectors
+### Template Collector
 
-The **ViewCollector** hooks into `yii\base\View::EVENT_AFTER_RENDER` to capture every view rendering with its file path, output, and parameters. Detects duplicate renders automatically.
-
-The **TemplateCollector** hooks into both `EVENT_BEFORE_RENDER` and `EVENT_AFTER_RENDER` to measure render timing. Handles nested view rendering correctly (e.g., layout → partial → widget) using a per-file timer stack.
+The **TemplateCollector** hooks into `View::EVENT_BEFORE_RENDER` and `EVENT_AFTER_RENDER` to capture every view rendering with its file path, output, parameters, and timing. Handles nested view rendering correctly (e.g., layout → partial → widget) using a per-file timer stack. Detects duplicate renders automatically.
 
 ### Code Coverage
 

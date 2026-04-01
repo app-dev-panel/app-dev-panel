@@ -234,8 +234,8 @@ final class FixtureRegistry
                 ],
             ]),
 
-            // === Messenger / Queue messages ===
-            new Fixture(name: 'messenger:basic', endpoint: '/test/fixtures/messenger', expectations: [
+            // === Queue messages ===
+            new Fixture(name: 'queue:basic', endpoint: '/test/fixtures/queue', expectations: [
                 'queue' => [
                     Expectation::notEmpty(),
                     Expectation::summaryGte('messageCount', 2),
@@ -336,7 +336,7 @@ final class FixtureRegistry
                 ],
             ]),
 
-            // === Template (view + template merged) ===
+            // === Template (view output capture) ===
             new Fixture(name: 'template:basic', endpoint: '/test/fixtures/view', expectations: [
                 'template' => [
                     Expectation::notEmpty(),

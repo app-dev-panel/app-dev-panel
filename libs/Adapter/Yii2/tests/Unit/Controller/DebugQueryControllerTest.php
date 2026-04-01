@@ -169,7 +169,7 @@ final class DebugQueryControllerTest extends TestCase
         $this->assertSame(ExitCode::OK, $result);
     }
 
-    public function testViewCollectorWithJsonOutput(): void
+    public function testCollectorWithJsonOutput(): void
     {
         $collectorClass = 'AppDevPanel\\Kernel\\Collector\\LogCollector';
         $data = [

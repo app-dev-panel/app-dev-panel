@@ -8,7 +8,7 @@ use AppDevPanel\Kernel\Collector\MessageRecord;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use yii\base\Action;
 
-final class MessengerAction extends Action
+final class QueueAction extends Action
 {
     public function run(): array
     {
@@ -19,7 +19,7 @@ final class MessengerAction extends Action
         $queueCollector = $module->getCollector(QueueCollector::class);
 
         if ($queueCollector === null) {
-            return ['fixture' => 'messenger:basic', 'status' => 'error', 'message' => 'QueueCollector not found'];
+            return ['fixture' => 'queue:basic', 'status' => 'error', 'message' => 'QueueCollector not found'];
         }
 
         $queueCollector->logMessage(new MessageRecord(
@@ -49,6 +49,6 @@ final class MessengerAction extends Action
             ],
         ));
 
-        return ['fixture' => 'messenger:basic', 'status' => 'ok'];
+        return ['fixture' => 'queue:basic', 'status' => 'ok'];
     }
 }

@@ -2,23 +2,27 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\TestFixtures;
+namespace App\Web\TestFixtures;
 
 use AppDevPanel\Kernel\Collector\MessageRecord;
 use AppDevPanel\Kernel\Collector\QueueCollector;
-use Illuminate\Http\JsonResponse;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\DataResponse\DataResponseFactoryInterface;
 
-final readonly class MessengerAction
+final readonly class QueueAction implements RequestHandlerInterface
 {
     public function __construct(
+        private DataResponseFactoryInterface $responseFactory,
         private QueueCollector $queueCollector,
     ) {}
 
-    public function __invoke(): JsonResponse
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $this->queueCollector->logMessage(new MessageRecord(
             messageClass: 'App\\Message\\SendNotification',
-            bus: 'messenger.bus.default',
+            bus: 'default',
             transport: 'async',
             dispatched: true,
             handled: true,
@@ -31,7 +35,7 @@ final readonly class MessengerAction
         ));
         $this->queueCollector->logMessage(new MessageRecord(
             messageClass: 'App\\Message\\ProcessPayment',
-            bus: 'messenger.bus.default',
+            bus: 'default',
             transport: 'sync',
             dispatched: true,
             failed: true,
@@ -43,6 +47,6 @@ final readonly class MessengerAction
             ],
         ));
 
-        return new JsonResponse(['fixture' => 'messenger:basic', 'status' => 'ok']);
+        return $this->responseFactory->createResponse(['fixture' => 'queue:basic', 'status' => 'ok']);
     }
 }

@@ -30,7 +30,6 @@ composer require app-dev-panel/adapter-yii2
             'assets' => true,
             'redis' => true,
             'elasticsearch' => true,
-            'view' => true,
             'template' => true,
             'code_coverage' => false, // opt-in, требует pcov или xdebug
             // ... все коллекторы включены по умолчанию
@@ -53,19 +52,16 @@ composer require app-dev-panel/adapter-yii2
 | Mailer | `BaseMailer::EVENT_AFTER_SEND` | From, to, cc, bcc, subject, body |
 | Asset Bundles | `View::EVENT_END_PAGE` | Бандлы: класс, пути, CSS/JS, зависимости |
 | Translator | <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> заменяет `Yii::$app->i18n` | Поиск переводов, пропущенные переводы |
-| View | `View::EVENT_AFTER_RENDER` | Файл рендеринга, вывод, параметры |
-| Templates | `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` | Время рендеринга шаблонов (поддержка вложенности) |
+| Template | `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` | Время рендеринга, вывод, параметры (поддержка вложенности) |
 | Redis | Прямые вызовы коллектора | Redis-команды, время, ошибки |
 | Elasticsearch | Прямые вызовы коллектора | ES-запросы, время, количество совпадений |
 | Code Coverage | Расширение `pcov` / `xdebug` | Покрытие строк по файлам (opt-in) |
 | Authorization | `User::EVENT_AFTER_LOGIN/LOGOUT` | События аутентификации, идентификация пользователя |
 | Router | <class>AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy</class> оборачивает все URL-правила | Данные маршрутизации, время |
 
-### Коллекторы View и Template
+### Коллектор Template
 
-**ViewCollector** подключается к `yii\base\View::EVENT_AFTER_RENDER` для захвата каждого рендеринга view с путём к файлу, выводом и параметрами. Автоматически обнаруживает дублирующиеся рендеры.
-
-**TemplateCollector** подключается к `EVENT_BEFORE_RENDER` и `EVENT_AFTER_RENDER` для измерения времени рендеринга. Корректно обрабатывает вложенный рендеринг (например, layout → partial → widget) с помощью стека таймеров по файлам.
+**TemplateCollector** подключается к `View::EVENT_BEFORE_RENDER` и `EVENT_AFTER_RENDER` для захвата каждого рендеринга view с путём к файлу, выводом, параметрами и временем. Корректно обрабатывает вложенный рендеринг (например, layout → partial → widget) с помощью стека таймеров по файлам. Автоматически обнаруживает дублирующиеся рендеры.
 
 ### Code Coverage
 

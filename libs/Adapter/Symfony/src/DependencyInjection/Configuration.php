@@ -87,7 +87,7 @@ final class Configuration implements ConfigurationInterface
             ->booleanNode('mailer')
             ->defaultTrue()
             ->end()
-            ->booleanNode('messenger')
+            ->booleanNode('queue')
             ->defaultTrue()
             ->end()
             ->booleanNode('validator')
