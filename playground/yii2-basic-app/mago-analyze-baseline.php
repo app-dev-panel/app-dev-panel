@@ -193,6 +193,12 @@ message = 'Class `App\actions\testFixtures\SecurityAction` cannot extend unknown
 count = 1
 
 [[issues]]
+file = "src/actions/testFixtures/TemplateAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\TemplateAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
 file = "src/actions/testFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\TimelineAction` cannot extend unknown type `Action`'
@@ -208,6 +214,12 @@ count = 1
 file = "src/actions/testFixtures/ValidatorAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\ValidatorAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
+file = "src/actions/testFixtures/ViewAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\ViewAction` cannot extend unknown type `Action`'
 count = 1
 
 [[issues]]
@@ -232,4 +244,22 @@ count = 1
 file = "src/controllers/TestFixturesController.php"
 code = "non-existent-class-like"
 message = 'Class `App\controllers\TestFixturesController` cannot extend unknown type `Controller`'
+count = 1
+
+[[issues]]
+file = "src/views/test-fixtures/template-parent.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(yii\base\View)`).'
+count = 1
+
+[[issues]]
+file = "src/views/test-fixtures/template-parent.php"
+code = "mixed-argument"
+message = "The first value for `echo` is too general."
+count = 1
+
+[[issues]]
+file = "src/views/test-fixtures/template-parent.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `yii\base\View`.'
 count = 1

@@ -31,7 +31,7 @@ final class InspectorApiTest extends TestCase
         self::$client = new Client([
             'base_uri' => self::$baseUrl,
             'http_errors' => false,
-            'timeout' => 10,
+            'timeout' => 1,
         ]);
 
         // Verify server reachable

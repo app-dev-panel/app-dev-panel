@@ -337,15 +337,15 @@ serve-yiisoft: ## Start Yiisoft playground server (port $(YIISOFT_PORT))
 
 serve-symfony: ## Start Symfony playground server (port $(SYMFONY_PORT))
 	@echo "$(CYAN)[Playground: Symfony] Starting server on port $(SYMFONY_PORT)...$(RESET)"
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:$(SYMFONY_PORT) -t public
+	cd $(PLAYGROUND_DIR)/symfony-basic-app && bash ../../bin/serve.sh $(SYMFONY_PORT)
 
 serve-yii2: ## Start Yii2 playground server (port $(YII2_PORT))
 	@echo "$(CYAN)[Playground: Yii2] Starting server on port $(YII2_PORT)...$(RESET)"
-	cd $(PLAYGROUND_DIR)/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:$(YII2_PORT) -t public
+	cd $(PLAYGROUND_DIR)/yii2-basic-app && bash ../../bin/serve.sh $(YII2_PORT)
 
 serve-laravel: ## Start Laravel playground server (port $(LARAVEL_PORT))
 	@echo "$(CYAN)[Playground: Laravel] Starting server on port $(LARAVEL_PORT)...$(RESET)"
-	cd $(PLAYGROUND_DIR)/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:$(LARAVEL_PORT) -t public
+	cd $(PLAYGROUND_DIR)/laravel-app && bash ../../bin/serve.sh $(LARAVEL_PORT)
 
 serve: ## Start all playground servers in background
 	@echo "$(CYAN)Starting all playground servers...$(RESET)"

@@ -9,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 /**
  * Tests that params.php provides correct default values.
  *
- * Critical: ignoredRequests must include /debug/api/* and /inspect/api/*
- * so that Debugger::isRequestIgnored() skips panel's own API requests.
+ * Critical: ignoredRequests must include /debug/** and /inspect/**
+ * so that Debugger::isRequestIgnored() skips panel's own requests.
  */
 final class ParamsConfigTest extends TestCase
 {
@@ -25,14 +25,14 @@ final class ParamsConfigTest extends TestCase
     {
         $ignored = $this->params['app-dev-panel/yiisoft']['ignoredRequests'];
 
-        $this->assertContains('/debug/api/**', $ignored);
+        $this->assertContains('/debug/**', $ignored);
     }
 
     public function testIgnoredRequestsIncludesInspectApi(): void
     {
         $ignored = $this->params['app-dev-panel/yiisoft']['ignoredRequests'];
 
-        $this->assertContains('/inspect/api/**', $ignored);
+        $this->assertContains('/inspect/**', $ignored);
     }
 
     public function testEnabledByDefault(): void

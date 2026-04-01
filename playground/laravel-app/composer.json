@@ -29,7 +29,10 @@
         }
     },
     "scripts": {
-        "serve": "PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public"
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "bash ../../bin/serve.sh 8104"
+        ]
     },
     "config": {
         "sort-packages": true,

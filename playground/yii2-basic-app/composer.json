@@ -40,7 +40,7 @@
     "scripts": {
         "serve": [
             "Composer\\Config::disableProcessTimeout",
-            "PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8103 -t public"
+            "bash ../../bin/serve.sh 8103"
         ]
     },
     "config": {

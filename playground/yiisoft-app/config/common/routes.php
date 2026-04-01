@@ -45,6 +45,8 @@ return [
             ),
             Route::get('/redis')->action(Web\TestFixtures\RedisAction::class)->name('test-redis'),
             Route::get('/coverage')->action(Web\TestFixtures\CoverageAction::class)->name('test-coverage'),
+            Route::get('/view')->action(Web\TestFixtures\ViewAction::class)->name('test-view'),
+            Route::get('/template')->action(Web\TestFixtures\TemplateAction::class)->name('test-template'),
             Route::methods(['GET', 'POST'], '/reset')
                 ->action(Web\TestFixtures\ResetAction::class)
                 ->name('test-reset'),

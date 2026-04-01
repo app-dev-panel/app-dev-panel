@@ -61,11 +61,13 @@ use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\CodeCoverageCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\DeprecationCollector;
+use AppDevPanel\Kernel\Collector\ElasticsearchCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -75,14 +77,17 @@ use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RedisCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
+use AppDevPanel\Kernel\Collector\ViewCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
@@ -155,12 +160,17 @@ class Module extends \yii\base\Module implements BootstrapInterface
         'queue' => true,
         'validator' => true,
         'translator' => true,
+        'redis' => true,
+        'elasticsearch' => true,
+        'view' => true,
+        'template' => true,
+        'code_coverage' => false,
     ];
 
     /**
      * @var string[] URL patterns to ignore (wildcard).
      */
-    public array $ignoredRequests = ['/debug/api/**', '/inspect/api/**'];
+    public array $ignoredRequests = ['/debug/**', '/inspect/**'];
 
     /**
      * @var string[] Command name patterns to ignore (wildcard).
@@ -661,6 +671,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'translator' => static fn(): array => [new TranslatorCollector()],
             'security' => static fn(): array => [new AuthorizationCollector()],
             'opentelemetry' => static fn(): array => [new OpenTelemetryCollector($timeline)],
+            'redis' => static fn(): array => [new RedisCollector($timeline)],
+            'elasticsearch' => static fn(): array => [new ElasticsearchCollector($timeline)],
+            'view' => static fn(): array => [new ViewCollector($timeline)],
+            'template' => static fn(): array => [new TemplateCollector($timeline)],
+            'code_coverage' => static fn(): array => [new CodeCoverageCollector($timeline, [], ['vendor'])],
         ];
     }
 
@@ -766,6 +781,18 @@ class Module extends \yii\base\Module implements BootstrapInterface
         if ($translatorCollector instanceof TranslatorCollector) {
             $this->registerTranslatorProfiling($app, $translatorCollector);
         }
+
+        // Register view profiling if ViewCollector is active
+        $viewCollector = $this->getCollector(ViewCollector::class);
+        if ($viewCollector instanceof ViewCollector) {
+            $this->registerViewProfiling($viewCollector);
+        }
+
+        // Register template profiling if TemplateCollector is active
+        $templateCollector = $this->getCollector(TemplateCollector::class);
+        if ($templateCollector instanceof TemplateCollector) {
+            $this->registerTemplateProfiling($templateCollector);
+        }
     }
 
     private function registerAuthorizationListeners(Application $app): void
@@ -788,7 +815,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $listener,
         ): void {
             if ($app->has('user')) {
-                $listener->collectCurrentUser($app->getUser());
+                try {
+                    $listener->collectCurrentUser($app->getUser());
+                } catch (\Throwable) {
+                    // User component may not be fully configured (e.g. missing identityClass)
+                }
             }
         });
     }
@@ -1011,6 +1042,49 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         $target = new DebugLogTarget($logCollector);
         \Yii::$app->log->targets['adp-debug'] = $target;
+    }
+
+    private function registerViewProfiling(ViewCollector $collector): void
+    {
+        Event::on(
+            \yii\base\View::class,
+            \yii\base\View::EVENT_AFTER_RENDER,
+            static function (\yii\base\ViewEvent $event) use ($collector): void {
+                $collector->collectRender($event->viewFile, $event->output, $event->params);
+            },
+        );
+    }
+
+    private function registerTemplateProfiling(TemplateCollector $collector): void
+    {
+        // Track render start times using a stack to handle nested renders correctly.
+        // The same view file can be rendered recursively, so we use a stack per file path.
+        $timers = [];
+
+        Event::on(
+            \yii\base\View::class,
+            \yii\base\View::EVENT_BEFORE_RENDER,
+            static function (\yii\base\ViewEvent $event) use (&$timers): void {
+                $timers[$event->viewFile][] = microtime(true);
+            },
+        );
+
+        Event::on(
+            \yii\base\View::class,
+            \yii\base\View::EVENT_AFTER_RENDER,
+            static function (\yii\base\ViewEvent $event) use ($collector, &$timers): void {
+                $startTime = 0.0;
+                if (isset($timers[$event->viewFile]) && $timers[$event->viewFile] !== []) {
+                    $startTime = array_pop($timers[$event->viewFile]);
+                    if ($timers[$event->viewFile] === []) {
+                        unset($timers[$event->viewFile]);
+                    }
+                }
+
+                $renderTime = $startTime > 0 ? microtime(true) - $startTime : 0.0;
+                $collector->logRender($event->viewFile, $renderTime);
+            },
+        );
     }
 
     /**

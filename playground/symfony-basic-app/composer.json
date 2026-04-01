@@ -52,7 +52,7 @@
         "post-update-cmd": ["php bin/console cache:clear --no-warmup || true"],
         "serve": [
             "Composer\\Config::disableProcessTimeout",
-            "PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t public"
+            "bash ../../bin/serve.sh 8102"
         ]
     },
     "config": {

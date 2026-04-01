@@ -171,6 +171,13 @@ app_dev_panel:
     'code_coverage' => true,
 ],
 ```
+== Yii 2
+```php
+// config/web.php — modules.debug-panel
+'collectors' => [
+    'code_coverage' => true,
+],
+```
 :::
 
 ### Формат вывода
