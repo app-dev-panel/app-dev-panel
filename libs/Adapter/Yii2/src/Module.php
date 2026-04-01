@@ -170,7 +170,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     /**
      * @var string[] URL patterns to ignore (wildcard).
      */
-    public array $ignoredRequests = ['/debug/api/**', '/inspect/api/**'];
+    public array $ignoredRequests = ['/debug/**', '/inspect/**'];
 
     /**
      * @var string[] Command name patterns to ignore (wildcard).

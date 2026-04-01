@@ -120,7 +120,7 @@ final class Configuration implements ConfigurationInterface
             ->arrayNode('ignored_requests')
             ->scalarPrototype()
             ->end()
-            ->defaultValue(['/_wdt/**', '/_profiler/**', '/debug/api/**'])
+            ->defaultValue(['/_wdt/**', '/_profiler/**', '/debug/**', '/inspect/**'])
             ->info('URL patterns to ignore (wildcard)')
             ->end()
             ->arrayNode('ignored_commands')

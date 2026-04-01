@@ -36,8 +36,8 @@ return [
     ],
 
     'ignored_requests' => [
-        '/debug/api/**',
-        '/inspect/api/**',
+        '/debug/**',
+        '/inspect/**',
         '/telescope/**',
     ],
 

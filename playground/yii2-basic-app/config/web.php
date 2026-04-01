@@ -115,8 +115,8 @@ return [
                 'code_coverage' => true,
             ],
             'ignoredRequests' => [
-                '/debug/api/**',
-                '/inspect/api/**',
+                '/debug/**',
+                '/inspect/**',
                 '/assets/**',
             ],
             'ignoredCommands' => [
