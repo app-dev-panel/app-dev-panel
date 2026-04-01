@@ -139,4 +139,28 @@ describe('ContainerPage', () => {
 
         expect(mockLazyLoadObject).toHaveBeenCalledWith('App\\Controller\\HomeController');
     });
+
+    it('shows error message when load fails', async () => {
+        mockLazyLoadObject.mockResolvedValueOnce({
+            error: {status: 500, data: {error: 'Class "Foo" is not registered in the DI container.'}},
+        });
+        const user = userEvent.setup();
+        renderPage();
+
+        const loadButtons = screen.getAllByLabelText('Load object state');
+        await user.click(loadButtons[0]);
+
+        expect(await screen.findByText('Class "Foo" is not registered in the DI container.')).toBeInTheDocument();
+    });
+
+    it('shows retry button after load error', async () => {
+        mockLazyLoadObject.mockResolvedValueOnce({error: {status: 500, data: {error: 'Some error'}}});
+        const user = userEvent.setup();
+        renderPage();
+
+        const loadButtons = screen.getAllByLabelText('Load object state');
+        await user.click(loadButtons[0]);
+
+        expect(await screen.findByLabelText('Retry loading')).toBeInTheDocument();
+    });
 });
