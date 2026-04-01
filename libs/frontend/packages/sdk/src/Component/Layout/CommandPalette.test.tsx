@@ -28,7 +28,7 @@ describe('CommandPalette', () => {
         renderWithProviders(<CommandPalette open={true} onClose={vi.fn()} />);
         const input = screen.getByPlaceholderText('Search pages, actions, entries...');
         await user.type(input, 'database');
-        expect(screen.getByText('Inspector > Database')).toBeInTheDocument();
+        expect(screen.getByText('Inspector > Storage > Database')).toBeInTheDocument();
         expect(screen.queryByText('Inspector > Routes')).not.toBeInTheDocument();
     });
 

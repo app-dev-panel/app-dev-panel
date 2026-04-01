@@ -12,7 +12,7 @@ import {useSearchParams} from 'react-router-dom';
 
 type CacheViewProps = {data: any};
 
-export const CachePage = () => {
+export const CachePage = ({showHeader = true}: {showHeader?: boolean}) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const searchString = searchParams.get('filter') || '';
     const [clearCacheMutation, clearCacheMutationInfo] = useClearCacheMutation();
@@ -38,7 +38,7 @@ export const CachePage = () => {
 
     return (
         <>
-            <PageHeader title="Cache" icon="cached" description="View and manage application cache" />
+            {showHeader && <PageHeader title="Cache" icon="cached" description="View and manage application cache" />}
             <Stack direction="row" justifyContent="space-between">
                 <FilterInput value={searchString} onChange={onChangeHandler} />
                 <Button

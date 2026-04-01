@@ -4,7 +4,7 @@ import {GetApp, Refresh, Sync} from '@mui/icons-material';
 import {Box, Button, CircularProgress, Divider, List, ListItem, ListItemText, Typography} from '@mui/material';
 import {useCallback} from 'react';
 
-export const GitLogPage = () => {
+export const GitLogPage = ({showHeader = true}: {showHeader?: boolean}) => {
     const getLogQuery = useGetLogQuery();
     const [commandMutation, commandInfo] = useCommandMutation();
 
@@ -14,7 +14,9 @@ export const GitLogPage = () => {
 
     return (
         <>
-            <PageHeader title="Git Log" icon="history" description="Commit history and branch operations" />
+            {showHeader && (
+                <PageHeader title="Git Log" icon="history" description="Commit history and branch operations" />
+            )}
             {getLogQuery.isSuccess && (
                 <>
                     <Box>

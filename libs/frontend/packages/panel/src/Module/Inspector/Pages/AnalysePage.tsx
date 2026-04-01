@@ -79,7 +79,7 @@ type AnalyseRow = {
     link: string;
 };
 type CommandState = {isSuccessful: boolean | undefined; errors: string[]};
-export const AnalysePage = () => {
+export const AnalysePage = ({showHeader = true}: {showHeader?: boolean}) => {
     const [commandQuery, commandQueryInfo] = useRunCommandMutation();
     const [errorRows, setErrorRows] = useState<AnalyseRow[]>([]);
     const [infoRows, setInfoRows] = useState<AnalyseRow[]>([]);
@@ -136,7 +136,7 @@ export const AnalysePage = () => {
 
     return (
         <>
-            <PageHeader title="Psalm" icon="analytics" description="Static analysis results" />
+            {showHeader && <PageHeader title="Psalm" icon="analytics" description="Static analysis results" />}
             <Box display="flex" alignItems="center">
                 <Button
                     onClick={runPsalmHandler}

@@ -2,6 +2,7 @@ export {AnalysePage} from '@app-dev-panel/panel/Module/Inspector/Pages/AnalysePa
 export {AuthorizationPage} from '@app-dev-panel/panel/Module/Inspector/Pages/AuthorizationPage';
 export {CachePage} from '@app-dev-panel/panel/Module/Inspector/Pages/CachePage';
 export {CodeCoveragePage} from '@app-dev-panel/panel/Module/Inspector/Pages/CodeCoveragePage';
+export {CodeQualityPage} from '@app-dev-panel/panel/Module/Inspector/Pages/CodeQualityPage';
 export {CommandsPage} from '@app-dev-panel/panel/Module/Inspector/Pages/CommandsPage';
 export {ComposerPage} from '@app-dev-panel/panel/Module/Inspector/Pages/ComposerPage';
 export {ConfigurationPage} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/ConfigurationPage';
@@ -12,6 +13,7 @@ export {ContainerEntryPage} from '@app-dev-panel/panel/Module/Inspector/Pages/Co
 export {DashboardPage} from '@app-dev-panel/panel/Module/Inspector/Pages/DashboardPage';
 export {DatabasePage} from '@app-dev-panel/panel/Module/Inspector/Pages/DatabasePage';
 export {ElasticsearchPage} from '@app-dev-panel/panel/Module/Inspector/Pages/ElasticsearchPage';
+export {EnvironmentPage} from '@app-dev-panel/panel/Module/Inspector/Pages/EnvironmentPage';
 export {EventsPage} from '@app-dev-panel/panel/Module/Inspector/Pages/EventsPage';
 export {FileExplorerPage} from '@app-dev-panel/panel/Module/Inspector/Pages/FileExplorerPage';
 export * as GitPages from '@app-dev-panel/panel/Module/Inspector/Pages/Git';
@@ -19,6 +21,7 @@ export {OpcachePage} from '@app-dev-panel/panel/Module/Inspector/Pages/OpcachePa
 export {PhpInfoPage} from '@app-dev-panel/panel/Module/Inspector/Pages/PhpInfoPage';
 export {RedisPage} from '@app-dev-panel/panel/Module/Inspector/Pages/RedisPage';
 export {RoutesPage} from '@app-dev-panel/panel/Module/Inspector/Pages/RoutesPage';
+export {StoragePage} from '@app-dev-panel/panel/Module/Inspector/Pages/StoragePage';
 export {TablePage} from '@app-dev-panel/panel/Module/Inspector/Pages/TablePage';
 export {TestsPage} from '@app-dev-panel/panel/Module/Inspector/Pages/TestsPage';
 export {TranslationsPage} from '@app-dev-panel/panel/Module/Inspector/Pages/TranslationsPage';

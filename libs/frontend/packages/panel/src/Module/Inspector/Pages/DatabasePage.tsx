@@ -40,7 +40,7 @@ const columns: GridColDef[] = [
         renderCell: (params: GridRenderCellParams) => {
             return (
                 <Typography my={1}>
-                    <Button variant="contained" href={`/inspector/database/${params.row.name}`}>
+                    <Button variant="contained" href={`/inspector/storage/database/${params.row.name}`}>
                         View
                     </Button>
                 </Typography>
@@ -49,7 +49,7 @@ const columns: GridColDef[] = [
     },
 ];
 
-export const DatabasePage = () => {
+export const DatabasePage = ({showHeader = true}: {showHeader?: boolean}) => {
     const {data, isLoading} = useGetTableQuery();
     const [tables, setTables] = useState<GridValidRowModel[]>([]);
 
@@ -68,7 +68,9 @@ export const DatabasePage = () => {
     }
     return (
         <>
-            <PageHeader title="Database" icon="storage" description="Browse database tables and records" />
+            {showHeader && (
+                <PageHeader title="Database" icon="storage" description="Browse database tables and records" />
+            )}
             <DataTable
                 rows={tables as GridValidRowModel[]}
                 getRowId={(row) => row.name}

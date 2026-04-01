@@ -87,7 +87,7 @@ const DetailBox = styled(Box)(({theme}) => ({
 // RedisPage
 // ---------------------------------------------------------------------------
 
-export const RedisPage = () => {
+export const RedisPage = ({showHeader = true}: {showHeader?: boolean}) => {
     const theme = useTheme();
     const [searchParams, setSearchParams] = useSearchParams();
     const [tab, setTab] = useState(0);
@@ -148,7 +148,7 @@ export const RedisPage = () => {
 
     return (
         <>
-            <PageHeader title="Redis" icon="memory" description="Inspect and manage Redis data store" />
+            {showHeader && <PageHeader title="Redis" icon="memory" description="Inspect and manage Redis data store" />}
 
             {isLoading && <LinearProgress />}
 
