@@ -394,6 +394,114 @@ This bypasses the PHP interfaces entirely but works with the existing frontend.
 
 **Difficulty**: High — requires Webpack Module Federation knowledge, React component building, and shared dependency coordination. The `__isPanelRemote__` workaround avoids the need to modify core code.
 
+### How It Worked in yiisoft/yii-dev-panel (Original Project)
+
+The original Yii Dev Panel project (from which ADP was forked) had a working prototype:
+
+**Source**: [yiisoft/yii-dev-panel](https://github.com/yiisoft/yii-dev-panel), specifically:
+- `examples/remote-panel/` — a standalone Vite app building a Module Federation remote
+- PR [#57 "Remote example"](https://github.com/yiisoft/yii-dev-panel/pull/57) (draft, never merged)
+- [docs/guide/en/shared_components.md](https://github.com/yiisoft/yii-dev-panel/blob/master/docs/guide/en/shared_components.md)
+- Issue [#55 "Module federation doesn't work"](https://github.com/yiisoft/yii-dev-panel/issues/55) — known bug with `@originjs/vite-plugin-federation`
+
+**Architecture of the original remote-panel example:**
+
+```
+examples/remote-panel/              # Standalone Vite app (the "remote")
+├── src/
+│   ├── LogPanel.tsx                # Custom panel component for LogCollector
+│   └── CachePanel.tsx              # Custom panel component for CacheCollector
+├── vite.config.ts                  # Module Federation config (name: "remote")
+├── package.json                    # Deps: react, MUI, @originjs/vite-plugin-federation, SDK
+└── index.html
+```
+
+**Remote's vite.config.ts** (key part):
+```typescript
+import federation from '@originjs/vite-plugin-federation';
+
+export default defineConfig({
+    plugins: [
+        // ...react, svgr, tsconfigPaths
+        federation({
+            name: 'remote',                        // Container name
+            filename: 'external.js',               // Output filename (NOT remoteEntry.js!)
+            exposes: {
+                './LogPanel': './src/LogPanel',     // Exposed components
+                './CachePanel': './src/CachePanel',
+            },
+            shared: ['react', 'react-dom', 'react-redux', 'react-router', 'react-router-dom', 'redux-persist'],
+        }),
+    ],
+    build: { outDir: 'dist', minify: true, target: 'esnext' },
+});
+```
+
+**Host's vite.config.ts** (currently commented out at `libs/frontend/packages/panel/vite.config.ts:50-54`):
+```typescript
+// federation({
+//     name: 'host',
+//     remotes: {},         // Empty! Remotes are loaded dynamically, not statically
+//     shared: sharedModules,
+// }),
+```
+
+**Host-side loader** (`SharedPage.tsx` — exists at `libs/frontend/packages/panel/src/Application/Pages/SharedPage.tsx`):
+```tsx
+<ModuleLoader
+    url={'http://localhost:3002/external.js'}   // Remote's built output
+    module={'./LogPanel'}                        // Matches exposes key
+    scope={'remote'}                             // Matches federation name
+    props={{data: logsData}}                     // Collector data passed as props
+/>
+```
+
+**How `ModuleLoader` works** (`RemoteComponent.tsx`):
+1. Injects `<script src="http://localhost:3002/external.js">` into `<head>`
+2. Calls `__webpack_init_sharing__('default')` to initialize shared scope
+3. Calls `window['remote'].init(...)` to connect the remote container
+4. Calls `window['remote'].get('./LogPanel')` to get the component factory
+5. Wraps in `React.lazy()` + `<Suspense>` for async loading
+
+**Remote component contract** — receives `{data}` prop with collector data:
+```tsx
+type LogPanelProps = { data: Array<{severity: string; text: string}> };
+const LogPanel = ({data}: LogPanelProps) => (
+    <>
+        {data.map((entry, i) => (
+            <Alert key={i} severity={entry.severity}>{entry.text}</Alert>
+        ))}
+        <JsonRenderer value={data} />
+    </>
+);
+export default LogPanel;
+```
+
+**Known issue**: `@originjs/vite-plugin-federation` has compatibility problems (issue [originjs/vite-plugin-federation#448](https://github.com/originjs/vite-plugin-federation/issues/448)) — shared modules don't load correctly when host and remote use different chunk strategies. This is why the federation plugin is commented out in the current ADP codebase.
+
+### What Was Carried Over to ADP vs. What Was Lost
+
+| Component | In yii-dev-panel | In ADP | Status |
+|-----------|-----------------|--------|--------|
+| `RemoteComponent.tsx` (ModuleLoader) | Yes | Yes (`Application/Pages/RemoteComponent.tsx`) | Carried over, works |
+| `SharedPage.tsx` (demo page) | Yes | Yes (`Application/Pages/SharedPage.tsx`) | Carried over, hardcoded to localhost:3002 |
+| `examples/remote-panel/` | Yes | **No** | Lost — no example project |
+| Host federation plugin in vite.config | Active | **Commented out** (line 50-54) | Disabled due to plugin bugs |
+| `__isPanelRemote__` check in Layout | Yes | Yes (line 164) | Works, but no backend generates this flag |
+| `ModuleFederationProviderInterface` | N/A (was backend-less) | Yes (new in ADP) | Dead code — never consumed |
+| `ModuleFederationAssetBundle` | N/A | Yes (new in ADP) | Dead code — never consumed |
+| `shared_components.md` docs | Yes | **No** | Lost |
+
+**Key insight**: In yii-dev-panel, Module Federation was a **frontend-only** mechanism — the `SharedPage` had hardcoded data and URLs. There was never backend integration (no `ModuleFederationProviderInterface`). ADP added the PHP interfaces as a forward-looking design but never built the glue layer.
+
+### Recommended Path Forward
+
+Given that `@originjs/vite-plugin-federation` is buggy, and the original approach was never production-ready, consider these alternatives:
+
+1. **Module Federation 2.0** (`@module-federation/vite`) — newer Vite-native implementation, more stable than `@originjs`
+2. **Dynamic import() via URL** — simpler approach: collector returns a JS bundle URL, frontend loads it via `import()` without Module Federation overhead
+3. **iFrame-based panels** — the Frames module already supports this pattern; a collector could declare its panel URL and render in an iframe
+
 ---
 
 ## Gap Analysis: What's Missing for Easy Extensibility
