@@ -9,6 +9,7 @@ use ReflectionProperty;
 use yii\base\Application;
 use yii\base\Component;
 use yii\base\Event;
+use Yiisoft\VarDumper\ClosureExporter;
 
 /**
  * Provides configuration data from Yii 2's application for the ADP inspector.
@@ -19,6 +20,7 @@ use yii\base\Event;
 final class Yii2ConfigProvider
 {
     private static ?ReflectionProperty $classEventsProperty = null;
+    private static ?ClosureExporter $closureExporter = null;
 
     public function __construct(
         private readonly Application $app,
@@ -128,7 +130,7 @@ final class Yii2ConfigProvider
             return $class . '::' . (string) $handler[1];
         }
         if ($handler instanceof \Closure) {
-            return 'Closure';
+            return (self::$closureExporter ??= new ClosureExporter())->export($handler);
         }
         if (is_object($handler) && method_exists($handler, '__invoke')) {
             return $handler::class . '::__invoke';

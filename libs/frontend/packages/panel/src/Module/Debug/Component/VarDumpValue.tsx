@@ -1,3 +1,5 @@
+import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
+import {Box} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useCallback, useState} from 'react';
 
@@ -263,10 +265,9 @@ export const VarDumpValue = ({value, depth = 0, defaultExpanded = true}: VarDump
         // Closure / function
         if (isClosure(value)) {
             return (
-                <Mono>
-                    <Keyword>Closure</Keyword>
-                    <Annotation> {value.split('\n')[0]}</Annotation>
-                </Mono>
+                <Box sx={{display: 'inline-block'}}>
+                    <CodeHighlight language="php" code={`<?php\n${value}`} showLineNumbers={false} fontSize={10} />
+                </Box>
             );
         }
 

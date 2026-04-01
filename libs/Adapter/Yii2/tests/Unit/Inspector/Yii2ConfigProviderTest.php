@@ -225,7 +225,8 @@ final class Yii2ConfigProviderTest extends TestCase
         $method = new \ReflectionMethod(Yii2ConfigProvider::class, 'describeHandler');
 
         $result = $method->invoke(null, static function (): void {});
-        $this->assertSame('Closure', $result);
+        $this->assertStringContainsString('static function', $result);
+        $this->assertStringContainsString('void', $result);
     }
 
     public function testDescribeHandlerWithInvokableObject(): void

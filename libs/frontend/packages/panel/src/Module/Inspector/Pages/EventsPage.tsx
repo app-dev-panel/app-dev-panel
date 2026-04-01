@@ -1,4 +1,5 @@
 import {EventEntry, EventListenersType, useGetEventsQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -32,6 +33,12 @@ function normalizeEntries(data: EventListenersType | null): EventEntry[] {
 function shortClassName(fqcn: string): string {
     const parts = fqcn.split('\\');
     return parts[parts.length - 1];
+}
+
+const CLOSURE_PATTERN = /^(static )?(function |fn )\(.*\).*/s;
+
+function isClosureString(value: string): boolean {
+    return CLOSURE_PATTERN.test(value);
 }
 
 function parseCallable(value: any): {className: string; methodName: string} | null {
@@ -73,7 +80,7 @@ const EventHeader = styled(Box)(({theme}) => ({
 
 const ListenerRow = styled(Box)(({theme}) => ({
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: theme.spacing(1),
     padding: theme.spacing(0.5, 2),
     borderTop: `1px solid ${theme.palette.divider}`,
@@ -175,6 +182,15 @@ const EventListeners = React.memo(({entries}: EventListenersProps) => {
                                                 {listener}
                                             </Typography>
                                         </FileLink>
+                                    ) : typeof listener === 'string' && isClosureString(listener) ? (
+                                        <Box sx={{flex: 1, minWidth: 0}}>
+                                            <CodeHighlight
+                                                language="php"
+                                                code={`<?php\n${listener}`}
+                                                showLineNumbers={false}
+                                                fontSize={9}
+                                            />
+                                        </Box>
                                     ) : (
                                         <Typography
                                             sx={{
