@@ -1,4 +1,3 @@
-import {changeBaseUrl} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {RouterOptionsContextProvider} from '@app-dev-panel/sdk/Component/RouterOptions';
 import {DefaultThemeProvider} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import '@app-dev-panel/toolbar/App.css';
@@ -19,15 +18,13 @@ type AppProps = {
 export default function App({config}: AppProps) {
     const {store, router} = useMemo(() => {
         const r = createRouter(modules, config.router);
-        const {store: s} = createStore({
-            application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []} as any,
-        });
+        const configuredUrl = config.backend.baseUrl;
 
-        // Always override persisted baseUrl with the configured one.
-        // This must happen synchronously before the first render so RTK Query
-        // uses the correct URL from the start (redux-persist rehydration
-        // would otherwise restore a stale baseUrl).
-        s.dispatch(changeBaseUrl(config.backend.baseUrl));
+        // Pass the forced baseUrl so the store middleware can enforce it after REHYDRATE
+        const {store: s} = createStore(
+            {application: {baseUrl: configuredUrl, favoriteUrls: config.backend.favoriteUrls ?? []} as any},
+            configuredUrl,
+        );
 
         return {store: s, router: r};
     }, []);

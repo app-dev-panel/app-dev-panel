@@ -1,3 +1,4 @@
+import {changeBaseUrl} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {
     middlewares as ApplicationMiddlewares,
     reducers as ApplicationReducers,
@@ -10,28 +11,33 @@ import {
 import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import {setupListeners} from '@reduxjs/toolkit/query';
 import {TypedUseSelectorHook, useSelector} from 'react-redux';
-import {FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, persistStore} from 'redux-persist';
+import {FLUSH, PAUSE, PERSIST, persistStore, PURGE, REGISTER, REHYDRATE} from 'redux-persist';
 import {initMessageListener} from 'redux-state-sync';
 
 // TODO: get reducers and middlewares from modules.ts
 const rootReducer = combineReducers({...ToolbarApiReducers, ...DebugReducers, ...ApplicationReducers});
 
-export const createStore = (preloadedState: Partial<ReturnType<typeof rootReducer>> = {}) => {
+export const createStore = (preloadedState: Partial<ReturnType<typeof rootReducer>> = {}, forcedBaseUrl?: string) => {
     const store = configureStore({
         reducer: rootReducer,
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware({
                 serializableCheck: {ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]},
-            })
-                // .concat(consoleLogActionsMiddleware)
-                .concat([...ApplicationMiddlewares, ...ToolbarApiMiddlewares, ...DebugMiddlewares]),
+            }).concat([...ApplicationMiddlewares, ...ToolbarApiMiddlewares, ...DebugMiddlewares]),
         devTools: import.meta.env.DEV,
         preloadedState: preloadedState,
     });
     setupListeners(store.dispatch);
     initMessageListener(store);
 
-    const persistor = persistStore(store);
+    const persistor = persistStore(store, null, () => {
+        // Called after rehydration is complete.
+        // Re-apply the configured baseUrl because rehydration overwrites it
+        // with the stale persisted value from localStorage.
+        if (forcedBaseUrl) {
+            store.dispatch(changeBaseUrl(forcedBaseUrl));
+        }
+    });
 
     return {store, persistor};
 };
