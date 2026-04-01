@@ -140,16 +140,27 @@ const RenderItem = ({
             >
                 <Box sx={{flex: 1, minWidth: 0}}>
                     {showAsPath ? (
-                        <FileLink path={render.template}>
-                            <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '13px', fontWeight: 500}}>
-                                {basename(render.template)}
-                            </Typography>
+                        <>
+                            <FileLink path={render.template}>
+                                <Typography
+                                    component="span"
+                                    sx={{
+                                        fontFamily: primitives.fontFamilyMono,
+                                        fontSize: '13px',
+                                        fontWeight: 500,
+                                        color: 'primary.main',
+                                        '&:hover': {textDecoration: 'underline'},
+                                    }}
+                                >
+                                    {basename(render.template)}
+                                </Typography>
+                            </FileLink>
                             <Typography
                                 sx={{fontFamily: primitives.fontFamilyMono, fontSize: '10px', color: 'text.disabled'}}
                             >
                                 {dirname(render.template)}
                             </Typography>
-                        </FileLink>
+                        </>
                     ) : (
                         <Typography
                             sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', wordBreak: 'break-all'}}
@@ -257,15 +268,22 @@ const DuplicateGroupView = ({
             <GroupHeader onClick={() => setExpanded(!expanded)}>
                 <Box sx={{flex: 1, minWidth: 0}}>
                     <FileLink path={group.key}>
-                        <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '13px', fontWeight: 500}}>
+                        <Typography
+                            component="span"
+                            sx={{
+                                fontFamily: primitives.fontFamilyMono,
+                                fontSize: '13px',
+                                fontWeight: 500,
+                                color: 'primary.main',
+                                '&:hover': {textDecoration: 'underline'},
+                            }}
+                        >
                             {basename(group.key)}
                         </Typography>
-                        <Typography
-                            sx={{fontFamily: primitives.fontFamilyMono, fontSize: '10px', color: 'text.disabled'}}
-                        >
-                            {dirname(group.key)}
-                        </Typography>
                     </FileLink>
+                    <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '10px', color: 'text.disabled'}}>
+                        {dirname(group.key)}
+                    </Typography>
                 </Box>
                 <Chip
                     label={`${group.count}x`}
