@@ -67,7 +67,7 @@ final class LaravelConfigProvider
     }
 
     /**
-     * @return list<array{name: string, class: string|null, listeners: list<string>}>
+     * @return list<array{name: string, class: string|null, listeners: list<string|array>}>
      */
     private function getEventListeners(): array
     {
@@ -127,7 +127,10 @@ final class LaravelConfigProvider
         return $providers;
     }
 
-    private function describeListener(mixed $listener): string
+    /**
+     * @return string|array{__closure: true, source: string, file: string|null, startLine: int|null, endLine: int|null}
+     */
+    private function describeListener(mixed $listener): string|array
     {
         if (is_string($listener)) {
             return $listener;
@@ -137,11 +140,26 @@ final class LaravelConfigProvider
             return $class . '::' . $listener[1];
         }
         if ($listener instanceof \Closure) {
-            return (self::$closureExporter ??= new ClosureExporter())->export($listener);
+            return self::describeClosure($listener);
         }
         if (is_object($listener) && method_exists($listener, '__invoke')) {
             return $listener::class . '::__invoke';
         }
         return get_debug_type($listener);
+    }
+
+    /**
+     * @return array{__closure: true, source: string, file: string|null, startLine: int|null, endLine: int|null}
+     */
+    private static function describeClosure(\Closure $closure): array
+    {
+        $ref = new \ReflectionFunction($closure);
+        return [
+            '__closure' => true,
+            'source' => (self::$closureExporter ??= new ClosureExporter())->export($closure),
+            'file' => $ref->getFileName() ?: null,
+            'startLine' => $ref->getStartLine() ?: null,
+            'endLine' => $ref->getEndLine() ?: null,
+        ];
     }
 }

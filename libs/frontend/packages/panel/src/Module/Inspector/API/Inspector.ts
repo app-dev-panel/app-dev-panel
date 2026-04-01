@@ -180,9 +180,19 @@ type CurlBuilderResponse = {command: string};
 
 type CheckRouteResponse = {result: boolean; action: string[]};
 
-export type EventEntry = {name: string; class: string | null; listeners: Array<string | [string, string]>};
+export type ClosureDescriptor = {
+    __closure: true;
+    source: string;
+    file: string | null;
+    startLine: number | null;
+    endLine: number | null;
+};
 
-export type EventListenersType = EventEntry[] | Record<string, Array<string | [string, string]>>;
+export type EventListener = string | [string, string] | ClosureDescriptor;
+
+export type EventEntry = {name: string; class: string | null; listeners: EventListener[]};
+
+export type EventListenersType = EventEntry[] | Record<string, EventListener[]>;
 
 export type EventsResponse = {
     common: EventListenersType | null;

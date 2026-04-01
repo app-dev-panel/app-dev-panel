@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\Inspector;
 
 use ReflectionClass;
+use ReflectionFunction;
 use ReflectionProperty;
 use yii\base\Application;
 use yii\base\Component;
@@ -60,7 +61,7 @@ final class Yii2ConfigProvider
     }
 
     /**
-     * @return array<string, list<string>>
+     * @return array<string, list<string|array>>
      */
     private function getEventHandlers(): array
     {
@@ -69,7 +70,7 @@ final class Yii2ConfigProvider
         foreach ($this->getClassLevelEvents() as $eventName => $handlers) {
             foreach ($handlers as $className => $classHandlers) {
                 $key = $className . '::' . $eventName;
-                $events[$key] = array_map(static fn(array $handler): string => self::describeHandler(
+                $events[$key] = array_map(static fn(array $handler): string|array => self::describeHandler(
                     $handler[0],
                 ), $classHandlers);
             }
@@ -77,7 +78,7 @@ final class Yii2ConfigProvider
 
         foreach ($this->getInstanceEvents($this->app) as $eventName => $handlers) {
             $key = $this->app::class . '::' . $eventName . ' (instance)';
-            $events[$key] = array_map(static fn(array $handler): string => self::describeHandler(
+            $events[$key] = array_map(static fn(array $handler): string|array => self::describeHandler(
                 $handler[0],
             ), $handlers);
         }
@@ -120,7 +121,10 @@ final class Yii2ConfigProvider
         }
     }
 
-    private static function describeHandler(mixed $handler): string
+    /**
+     * @return string|array{__closure: true, source: string, file: string|null, startLine: int|null, endLine: int|null}
+     */
+    private static function describeHandler(mixed $handler): string|array
     {
         if (is_string($handler)) {
             return $handler;
@@ -130,12 +134,27 @@ final class Yii2ConfigProvider
             return $class . '::' . (string) $handler[1];
         }
         if ($handler instanceof \Closure) {
-            return (self::$closureExporter ??= new ClosureExporter())->export($handler);
+            return self::describeClosure($handler);
         }
         if (is_object($handler) && method_exists($handler, '__invoke')) {
             return $handler::class . '::__invoke';
         }
         return get_debug_type($handler);
+    }
+
+    /**
+     * @return array{__closure: true, source: string, file: string|null, startLine: int|null, endLine: int|null}
+     */
+    private static function describeClosure(\Closure $closure): array
+    {
+        $ref = new ReflectionFunction($closure);
+        return [
+            '__closure' => true,
+            'source' => (self::$closureExporter ??= new ClosureExporter())->export($closure),
+            'file' => $ref->getFileName() ?: null,
+            'startLine' => $ref->getStartLine() ?: null,
+            'endLine' => $ref->getEndLine() ?: null,
+        ];
     }
 
     /**

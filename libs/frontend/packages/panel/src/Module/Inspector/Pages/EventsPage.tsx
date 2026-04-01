@@ -1,4 +1,10 @@
-import {EventEntry, EventListenersType, useGetEventsQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {
+    ClosureDescriptor,
+    EventEntry,
+    EventListener,
+    EventListenersType,
+    useGetEventsQuery,
+} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
@@ -35,10 +41,15 @@ function shortClassName(fqcn: string): string {
     return parts[parts.length - 1];
 }
 
-const CLOSURE_PATTERN = /^(static )?(function |fn )\(.*\).*/s;
+function isClosureDescriptor(value: unknown): value is ClosureDescriptor {
+    return typeof value === 'object' && value !== null && '__closure' in value && (value as any).__closure === true;
+}
 
-function isClosureString(value: string): boolean {
-    return CLOSURE_PATTERN.test(value);
+function getListenerSearchText(listener: EventListener): string {
+    if (isClosureDescriptor(listener)) {
+        return listener.source;
+    }
+    return serializeCallable(listener);
 }
 
 function parseCallable(value: any): {className: string; methodName: string} | null {
@@ -138,6 +149,29 @@ const EventListeners = React.memo(({entries}: EventListenersProps) => {
                             {hasClass && <FileLink className={entry.class!} />}
                         </EventHeader>
                         {entry.listeners.map((listener, i) => {
+                            if (isClosureDescriptor(listener)) {
+                                return (
+                                    <ListenerRow key={i}>
+                                        <Box sx={{flex: 1, minWidth: 0}}>
+                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                                <CodeHighlight
+                                                    language="php"
+                                                    code={`<?php\n${listener.source}`}
+                                                    showLineNumbers={false}
+                                                    fontSize={9}
+                                                />
+                                                {listener.file && (
+                                                    <FileLink
+                                                        path={listener.file}
+                                                        line={listener.startLine ?? undefined}
+                                                    />
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    </ListenerRow>
+                                );
+                            }
+
                             const parsed = parseCallable(listener);
                             const isClass =
                                 !parsed &&
@@ -182,15 +216,6 @@ const EventListeners = React.memo(({entries}: EventListenersProps) => {
                                                 {listener}
                                             </Typography>
                                         </FileLink>
-                                    ) : typeof listener === 'string' && isClosureString(listener) ? (
-                                        <Box sx={{flex: 1, minWidth: 0}}>
-                                            <CodeHighlight
-                                                language="php"
-                                                code={`<?php\n${listener}`}
-                                                showLineNumbers={false}
-                                                fontSize={9}
-                                            />
-                                        </Box>
                                     ) : (
                                         <Typography
                                             sx={{
@@ -256,7 +281,7 @@ export const EventsPage = () => {
                     (re) =>
                         re.test(e.name) ||
                         (e.class && re.test(e.class)) ||
-                        e.listeners.some((l) => re.test(serializeCallable(l))),
+                        e.listeners.some((l) => re.test(getListenerSearchText(l))),
                 ),
             );
 
