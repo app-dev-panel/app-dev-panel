@@ -9,9 +9,9 @@ use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\PathResolverInterface;
 use Symfony\Component\Process\Process;
 
-class MagoCommand implements CommandInterface
+class TestoCommand implements CommandInterface
 {
-    public const COMMAND_NAME = 'analyse/mago';
+    public const COMMAND_NAME = 'test/testo';
 
     public function __construct(
         private readonly PathResolverInterface $pathResolver,
@@ -19,18 +19,12 @@ class MagoCommand implements CommandInterface
 
     public static function isAvailable(): bool
     {
-        if (\Composer\InstalledVersions::isInstalled('carthage-software/mago')) {
-            return true;
-        }
-
-        $check = DIRECTORY_SEPARATOR === '\\' ? 'where mago 2>NUL' : 'command -v mago 2>/dev/null';
-
-        return !empty(trim((string) @shell_exec($check)));
+        return \Composer\InstalledVersions::isInstalled('testo/testo');
     }
 
     public static function getTitle(): string
     {
-        return 'Mago';
+        return 'Testo';
     }
 
     public static function getDescription(): string
@@ -42,30 +36,27 @@ class MagoCommand implements CommandInterface
     {
         $projectDirectory = $this->pathResolver->getRootPath();
 
-        $binary = \Composer\InstalledVersions::isInstalled('carthage-software/mago')
-            ? $projectDirectory . '/vendor/bin/mago'
-            : 'mago';
-
         $params = [
-            $binary,
-            'lint',
+            'vendor/bin/testo',
         ];
 
         $process = new Process($params);
 
         $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
 
-        $processOutput = rtrim($process->getOutput() . $process->getErrorOutput());
+        $processOutput = rtrim($process->getOutput());
 
         if ($process->getExitCode() > 1) {
-            return new CommandResponse(status: CommandResponse::STATUS_FAIL, result: null, errors: array_filter([trim(
-                $processOutput,
-            )]));
+            return new CommandResponse(
+                status: CommandResponse::STATUS_FAIL,
+                result: null,
+                errors: array_filter([$processOutput, $process->getErrorOutput()]),
+            );
         }
 
         return new CommandResponse(
             status: $process->isSuccessful() ? CommandResponse::STATUS_OK : CommandResponse::STATUS_ERROR,
-            result: $processOutput,
+            result: $processOutput . $process->getErrorOutput(),
         );
     }
 }
