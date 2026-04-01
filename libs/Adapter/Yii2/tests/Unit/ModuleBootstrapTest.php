@@ -10,6 +10,7 @@ use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
@@ -427,6 +428,46 @@ final class ModuleBootstrapTest extends TestCase
 
         // NullSchemaProvider should be registered
         $this->assertTrue(\Yii::$container->has(SchemaProviderInterface::class));
+    }
+
+    /**
+     * Verifies that PathResolver rootPath points to the real project root (where composer.json lives),
+     * not to Yii 2's basePath which may be a subdirectory (e.g., src/).
+     *
+     * Regression test: when basePath is set to a subdirectory, @vendor defaults to basePath/vendor,
+     * and `dirname(@vendor)` resolves to the subdirectory instead of the project root.
+     */
+    public function testRootPathPointsToComposerProjectRoot(): void
+    {
+        $this->createModuleAndBootstrap();
+
+        $pathResolver = \Yii::$container->get(PathResolverInterface::class);
+        $rootPath = $pathResolver->getRootPath();
+
+        // The root path must contain composer.json (real project root)
+        $this->assertFileExists(
+            $rootPath . '/composer.json',
+            'Root path should point to the directory containing composer.json',
+        );
+    }
+
+    /**
+     * Verifies that rootPath is not affected by a custom basePath pointing to a subdirectory.
+     * This simulates the Yii 2 basic app pattern where basePath = project/src.
+     */
+    public function testRootPathNotAffectedBySubdirectoryBasePath(): void
+    {
+        $this->createModuleAndBootstrap();
+
+        $pathResolver = \Yii::$container->get(PathResolverInterface::class);
+        $rootPath = $pathResolver->getRootPath();
+
+        // Root path should NOT end with /src — it should be the actual project root
+        $this->assertNotEquals(
+            \Yii::getAlias('@app'),
+            $rootPath,
+            'Root path should not be the same as @app when @app may be a subdirectory',
+        );
     }
 
     private function createModuleAndBootstrap(array $extraConfig = []): Module

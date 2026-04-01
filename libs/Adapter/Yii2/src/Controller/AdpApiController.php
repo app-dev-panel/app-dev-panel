@@ -66,8 +66,11 @@ final class AdpApiController extends Controller
             $psrRequest = $psrRequest->withHeader($name, $values);
         }
 
-        // Copy query params
-        $psrRequest = $psrRequest->withQueryParams($yiiRequest->getQueryParams());
+        // Parse query params from the URI query string directly.
+        // Yii 2's getQueryParams() includes URL rule parameters (e.g., <path:.*>),
+        // which pollute actual query string values like ?path=/ with the route match.
+        parse_str($uri->getQuery(), $queryParams);
+        $psrRequest = $psrRequest->withQueryParams($queryParams);
 
         // Copy body
         $rawBody = $yiiRequest->getRawBody();

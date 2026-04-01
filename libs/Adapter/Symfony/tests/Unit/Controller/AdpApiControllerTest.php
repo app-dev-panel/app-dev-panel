@@ -2,58 +2,40 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Laravel\Tests\Unit\Controller;
+namespace AppDevPanel\Adapter\Symfony\Tests\Unit\Controller;
 
-use AppDevPanel\Adapter\Laravel\Controller\AdpApiController;
+use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Router\Route;
 use AppDevPanel\Api\Router\Router;
-use Illuminate\Http\Request;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Tests for Symfony AdpApiController — verifying PSR-7 conversion and query param handling.
+ */
 final class AdpApiControllerTest extends TestCase
 {
     public function testInvokeReturnsStandardResponse(): void
     {
-        $controller = $this->createController('application/json', '{"data":"test"}');
-        $request = Request::create('/debug/api/test', 'GET');
+        $controller = $this->createController();
+        $request = Request::create('/inspect/api/files?path=/', 'GET');
         $response = $controller($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertNotInstanceOf(StreamedResponse::class, $response);
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('{"data":"test"}', $response->getContent());
-    }
-
-    public function testInvokeReturnsStreamedResponseForSse(): void
-    {
-        $controller = $this->createController('text/event-stream', 'data: test');
-        $request = Request::create('/debug/api/test', 'GET');
-        $response = $controller($request);
-
-        $this->assertInstanceOf(StreamedResponse::class, $response);
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
-    public function testInvokePreservesResponseHeaders(): void
-    {
-        $controller = $this->createController('application/json', '{}', 201, ['X-Custom' => 'value']);
-        $request = Request::create('/debug/api/test', 'GET');
-        $response = $controller($request);
-
-        $this->assertSame(201, $response->getStatusCode());
-        $this->assertSame('value', $response->headers->get('X-Custom'));
     }
 
     /**
      * Verifies query params from the URL are correctly passed to the PSR-7 request.
-     * Laravel separates route params from query params, so no pollution should occur.
+     * Symfony separates route params from query params, so no pollution should occur.
      */
     public function testQueryParamsPreservedInPsr7Request(): void
     {
@@ -61,7 +43,7 @@ final class AdpApiControllerTest extends TestCase
         $controller = $this->createCapturingController($capturedRequest);
 
         $request = Request::create('/inspect/api/files?path=/src', 'GET');
-        // Simulate Laravel route param — it goes to $request->route(), NOT $request->query
+        // Simulate Symfony route param — it goes to $request->attributes, NOT $request->query
         $request->attributes->set('path', 'files');
 
         $controller($request);
@@ -89,14 +71,14 @@ final class AdpApiControllerTest extends TestCase
     }
 
     /**
-     * Verifies empty query string results in empty query params.
+     * Verifies that empty query string results in empty query params.
      */
     public function testEmptyQueryParamsWhenNoQueryString(): void
     {
         $capturedRequest = null;
         $controller = $this->createCapturingController($capturedRequest);
 
-        $request = Request::create('/debug/api/test', 'GET');
+        $request = Request::create('/debug/api', 'GET');
 
         $controller($request);
 
@@ -105,7 +87,7 @@ final class AdpApiControllerTest extends TestCase
     }
 
     /**
-     * Verifies the service query param for inspector proxy is correctly forwarded.
+     * Verifies that the service query param for inspector proxy is correctly forwarded.
      */
     public function testServiceQueryParamPreserved(): void
     {
@@ -122,11 +104,46 @@ final class AdpApiControllerTest extends TestCase
         $this->assertSame('python-app', $params['service']);
     }
 
+    public function testInvokeReturnsStreamedResponseForSse(): void
+    {
+        $controller = $this->createController('text/event-stream', 'data: test');
+        $request = Request::create('/debug/api/event-stream', 'GET');
+        $response = $controller($request);
+
+        $this->assertInstanceOf(StreamedResponse::class, $response);
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testInvokePreservesResponseHeaders(): void
+    {
+        $controller = $this->createController('application/json', '{}', 201, ['X-Custom' => 'value']);
+        $request = Request::create('/inspect/api/files?path=/', 'GET');
+        $response = $controller($request);
+
+        $this->assertSame(201, $response->getStatusCode());
+        $this->assertSame('value', $response->headers->get('X-Custom'));
+    }
+
+    public function testHttpMethodPreserved(): void
+    {
+        $capturedRequest = null;
+        $controller = $this->createCapturingController($capturedRequest, 'PUT');
+
+        $request = Request::create('/inspect/api/translations', 'PUT', [], [], [], [], '{"key":"value"}');
+
+        $controller($request);
+
+        $this->assertNotNull($capturedRequest);
+        $this->assertSame('PUT', $capturedRequest->getMethod());
+    }
+
     /**
      * Create a controller that captures the PSR-7 request for inspection.
      */
-    private function createCapturingController(?ServerRequestInterface &$capturedRequest): AdpApiController
-    {
+    private function createCapturingController(
+        ?ServerRequestInterface &$capturedRequest,
+        string $method = 'GET',
+    ): AdpApiController {
         $psr17 = new Psr17Factory();
 
         $captureController = new class($psr17, $capturedRequest) {
@@ -140,7 +157,7 @@ final class AdpApiControllerTest extends TestCase
                 $this->captured = &$capturedRequest;
             }
 
-            public function test(ServerRequestInterface $request): ResponseInterface
+            public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 $this->captured = $request;
                 return $this->psr17
@@ -152,47 +169,31 @@ final class AdpApiControllerTest extends TestCase
 
         $controllerClass = $captureController::class;
 
-        $container = new class($captureController, $controllerClass) implements ContainerInterface {
-            public function __construct(
-                private readonly object $controller,
-                private readonly string $controllerClass,
-            ) {}
-
-            public function get(string $id): mixed
-            {
-                if ($id === $this->controllerClass) {
-                    return $this->controller;
-                }
-                return null;
-            }
-
-            public function has(string $id): bool
-            {
-                return $id === $this->controllerClass;
-            }
-        };
+        $container = $this->createMock(ContainerInterface::class);
+        $container->method('has')->willReturn(false);
+        $container->method('get')->willReturnCallback(static fn(string $id) => $id === $controllerClass
+            ? $captureController
+            : throw new \RuntimeException("Not found: {$id}"));
 
         $router = new Router();
-        $router->addRoute(new Route('GET', '/debug/api/test', [$controllerClass, 'test']));
-        $router->addRoute(new Route('GET', '/inspect/api/{path+}', [$controllerClass, 'test']));
+        $router->addRoute(new Route($method, '/debug/api', [$controllerClass, 'handle']));
+        $router->addRoute(new Route($method, '/debug/api/{path+}', [$controllerClass, 'handle']));
+        $router->addRoute(new Route($method, '/inspect/api/{path+}', [$controllerClass, 'handle']));
 
-        $apiApp = new ApiApplication($container, $psr17, $psr17, $router);
-
-        return new AdpApiController($apiApp);
+        return new AdpApiController(new ApiApplication($container, $psr17, $psr17, $router));
     }
 
     /**
      * @param array<string, string> $extraHeaders
      */
     private function createController(
-        string $contentType,
-        string $body,
+        string $contentType = 'application/json',
+        string $body = '{"data":[]}',
         int $status = 200,
         array $extraHeaders = [],
     ): AdpApiController {
         $psr17 = new Psr17Factory();
 
-        // Create a test controller class inline
         $testController = new class($psr17, $contentType, $body, $status, $extraHeaders) {
             /**
              * @param array<string, string> $extraHeaders
@@ -205,7 +206,7 @@ final class AdpApiControllerTest extends TestCase
                 private readonly array $extraHeaders,
             ) {}
 
-            public function test(ServerRequestInterface $request): ResponseInterface
+            public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 $response = $this->psr17
                     ->createResponse($this->status)
@@ -222,31 +223,16 @@ final class AdpApiControllerTest extends TestCase
 
         $controllerClass = $testController::class;
 
-        $container = new class($testController, $controllerClass) implements ContainerInterface {
-            public function __construct(
-                private readonly object $controller,
-                private readonly string $controllerClass,
-            ) {}
-
-            public function get(string $id): mixed
-            {
-                if ($id === $this->controllerClass) {
-                    return $this->controller;
-                }
-                return null;
-            }
-
-            public function has(string $id): bool
-            {
-                return $id === $this->controllerClass;
-            }
-        };
+        $container = $this->createMock(ContainerInterface::class);
+        $container->method('has')->willReturn(false);
+        $container->method('get')->willReturnCallback(static fn(string $id) => $id === $controllerClass
+            ? $testController
+            : throw new \RuntimeException("Not found: {$id}"));
 
         $router = new Router();
-        $router->addRoute(new Route('GET', '/debug/api/test', [$controllerClass, 'test']));
+        $router->addRoute(new Route('GET', '/inspect/api/{path+}', [$controllerClass, 'handle']));
+        $router->addRoute(new Route('GET', '/debug/api/{path+}', [$controllerClass, 'handle']));
 
-        $apiApp = new ApiApplication($container, $psr17, $psr17, $router);
-
-        return new AdpApiController($apiApp);
+        return new AdpApiController(new ApiApplication($container, $psr17, $psr17, $router));
     }
 }

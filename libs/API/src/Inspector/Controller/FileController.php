@@ -91,12 +91,11 @@ final class FileController
 
         $parentPath = realpath($destination . '/..') . '/';
         $parentEntry = str_starts_with($parentPath, $rootPath)
-            ? [array_merge(['path' => preg_replace(
-                '/^' . preg_quote($rootPath, '/') . '/',
-                '',
-                $parentPath,
-                1,
-            )], $this->serializeFileInfo(new SplFileInfo(dirname($destination))))]
+            ? [array_merge(
+                ['path' => preg_replace('/^' . preg_quote($rootPath, '/') . '/', '', $parentPath, 1)],
+                $this->serializeFileInfo(new SplFileInfo(dirname($destination))),
+                ['baseName' => '..'],
+            )]
             : [];
 
         $files = [];

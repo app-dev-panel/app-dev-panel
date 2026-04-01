@@ -6,8 +6,6 @@ namespace AppDevPanel\Adapter\Yiisoft\Tests\Unit\Api;
 
 use AppDevPanel\Adapter\Yiisoft\Api\YiiApiMiddleware;
 use AppDevPanel\Api\ApiApplication;
-use AppDevPanel\Api\Panel\PanelConfig;
-use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\Router\Route;
 use AppDevPanel\Api\Router\Router;
 use GuzzleHttp\Psr7\HttpFactory;
@@ -64,6 +62,102 @@ final class YiiApiMiddlewareTest extends TestCase
         yield 'unrelated path' => ['/admin/dashboard'];
     }
 
+    /**
+     * Verifies query params from the URL are passed through to ApiApplication as-is.
+     * Yiisoft uses PSR-7 natively, so no conversion or pollution can occur.
+     */
+    public function testQueryParamsPreservedInPsr7Request(): void
+    {
+        $capturedRequest = null;
+        $middleware = $this->createCapturingMiddleware($capturedRequest);
+        $handler = $this->createPassthroughHandler();
+
+        $request = new ServerRequest('GET', '/inspect/api/files?path=/src')->withQueryParams(['path' => '/src']);
+
+        $middleware->process($request, $handler);
+
+        $this->assertNotNull($capturedRequest);
+        $this->assertSame('/src', $capturedRequest->getQueryParams()['path'] ?? null);
+    }
+
+    /**
+     * Verifies multiple query params are passed through correctly.
+     */
+    public function testMultipleQueryParamsPreserved(): void
+    {
+        $capturedRequest = null;
+        $middleware = $this->createCapturingMiddleware($capturedRequest);
+        $handler = $this->createPassthroughHandler();
+
+        $request = new ServerRequest('GET', '/inspect/api/table/users?page=2&limit=50')->withQueryParams([
+            'page' => '2',
+            'limit' => '50',
+        ]);
+
+        $middleware->process($request, $handler);
+
+        $this->assertNotNull($capturedRequest);
+        $params = $capturedRequest->getQueryParams();
+        $this->assertSame('2', $params['page']);
+        $this->assertSame('50', $params['limit']);
+    }
+
+    /**
+     * Verifies the service query param for inspector proxy is passed through.
+     */
+    public function testServiceQueryParamPreserved(): void
+    {
+        $capturedRequest = null;
+        $middleware = $this->createCapturingMiddleware($capturedRequest);
+        $handler = $this->createPassthroughHandler();
+
+        $request = new ServerRequest('GET', '/inspect/api/files?path=/&service=python-app')->withQueryParams([
+            'path' => '/',
+            'service' => 'python-app',
+        ]);
+
+        $middleware->process($request, $handler);
+
+        $this->assertNotNull($capturedRequest);
+        $params = $capturedRequest->getQueryParams();
+        $this->assertSame('/', $params['path']);
+        $this->assertSame('python-app', $params['service']);
+    }
+
+    private function createCapturingMiddleware(?ServerRequestInterface &$capturedRequest): YiiApiMiddleware
+    {
+        $captureController = new class($capturedRequest) {
+            /** @var ServerRequestInterface|null */
+            private $captured;
+
+            public function __construct(?ServerRequestInterface &$capturedRequest)
+            {
+                $this->captured = &$capturedRequest;
+            }
+
+            public function index(ServerRequestInterface $request): ResponseInterface
+            {
+                $this->captured = $request;
+                return new Response(200, [], 'captured');
+            }
+        };
+
+        $controllerClass = $captureController::class;
+
+        $router = new Router();
+        $router->addRoute(new Route('GET', '/inspect/api/{path+}', [$controllerClass, 'index']));
+
+        $container = $this->createMock(ContainerInterface::class);
+        $container->method('has')->willReturn(false);
+        $container->method('get')->willReturnCallback(static fn(string $id) => $id === $controllerClass
+            ? $captureController
+            : throw new \RuntimeException("Not found: {$id}"));
+
+        $factory = new HttpFactory();
+
+        return new YiiApiMiddleware(new ApiApplication($container, $factory, $factory, $router));
+    }
+
     private function createMiddleware(): YiiApiMiddleware
     {
         // Use a minimal ApiApplication with a single catch-all route
@@ -82,10 +176,12 @@ final class YiiApiMiddlewareTest extends TestCase
 
         $container = $this->createMock(ContainerInterface::class);
         $container->method('has')->willReturn(false);
-        $container->method('get')->willReturnCallback(static fn(string $id) => match ($id) {
-            $controller::class => $controller,
-            default => throw new \RuntimeException("Not found: {$id}"),
-        });
+        $container
+            ->method('get')
+            ->willReturnCallback(static fn(string $id) => match ($id) {
+                $controller::class => $controller,
+                default => throw new \RuntimeException("Not found: {$id}"),
+            });
 
         $factory = new HttpFactory();
 

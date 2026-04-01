@@ -83,6 +83,21 @@ final class FileControllerTest extends ControllerTestCase
         $this->assertContains('nested.php', $names);
     }
 
+    public function testParentEntryDisplaysDoubleDot(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->files($this->get(['path' => '/subdir']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+
+        // First entry should be the parent directory with baseName ".."
+        $parentEntry = $data[0];
+        $this->assertSame('..', $parentEntry['baseName']);
+        $this->assertSame('dir', $parentEntry['type']);
+        $this->assertSame('/', $parentEntry['path']);
+    }
+
     public function testPathNotFound(): void
     {
         $controller = $this->createController();
