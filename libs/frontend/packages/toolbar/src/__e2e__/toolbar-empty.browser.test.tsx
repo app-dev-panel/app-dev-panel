@@ -1,29 +1,31 @@
-import {page} from '@vitest/browser/context';
+import {fireEvent, screen, waitFor} from '@testing-library/react';
 import {describe, expect, it} from 'vitest';
 import {emptyHandlers} from './mocks/handlers';
 import {renderToolbar} from './renderToolbar';
 import {worker} from './setup';
 
 describe('Toolbar - Empty State', () => {
-    it('renders FAB even with no debug entries', async () => {
+    it('renders collapsed pill even with no debug entries', async () => {
         worker.use(...emptyHandlers);
         renderToolbar();
 
-        // FAB should still be visible even without entries
-        const fab = page.getByRole('button').first();
-        await expect.element(fab).toBeVisible();
+        await waitFor(() => {
+            expect(screen.getByLabelText('Open debug toolbar')).toBeInTheDocument();
+        });
     });
 
-    it('can open entries list modal when empty', async () => {
+    it('expands toolbar and shows action buttons when empty', async () => {
         worker.use(...emptyHandlers);
         renderToolbar();
 
-        const fab = page.getByRole('button').first();
-        await expect.element(fab).toBeVisible();
+        await waitFor(() => {
+            expect(screen.getByLabelText('Open debug toolbar')).toBeInTheDocument();
+        });
+        fireEvent.click(screen.getByLabelText('Open debug toolbar'));
 
-        const listAction = page.getByLabelText('List all debug entries');
-        await listAction.click();
-
-        await expect.element(page.getByText('Select a debug entry')).toBeVisible();
+        await waitFor(() => {
+            expect(screen.getByLabelText('List debug entries')).toBeInTheDocument();
+            expect(screen.getByLabelText('Open debug panel')).toBeInTheDocument();
+        });
     });
 });

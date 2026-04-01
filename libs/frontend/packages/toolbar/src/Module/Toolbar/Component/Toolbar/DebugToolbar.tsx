@@ -50,7 +50,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     useEffect(() => {
         const onMessageHandler = (event: MessageEvent) => {
-            if (!event.data.payload || !('x-debug-id' in event.data.payload.headers)) {
+            if (!event.data.payload?.headers || !('x-debug-id' in event.data.payload.headers)) {
                 return;
             }
             dispatch(debugApi.util.invalidateTags(['debug/list']));
@@ -165,6 +165,8 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
             <Portal>
                 <Paper
                     elevation={2}
+                    role="button"
+                    tabIndex={0}
                     onClick={onToolbarClickHandler}
                     aria-label="Open debug toolbar"
                     sx={{

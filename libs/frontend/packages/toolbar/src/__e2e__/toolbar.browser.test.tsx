@@ -1,74 +1,68 @@
-import {page} from '@vitest/browser/context';
+import {fireEvent, screen, waitFor} from '@testing-library/react';
 import {describe, expect, it} from 'vitest';
 import {renderToolbar} from './renderToolbar';
 import './setup';
 
+const expandToolbar = async () => {
+    await waitFor(() => {
+        // Wait for either pill or expanded toolbar to appear
+        const pill = screen.queryByLabelText('Open debug toolbar');
+        const toolbar = screen.queryByLabelText('Collapse toolbar');
+        expect(pill || toolbar).not.toBeNull();
+    });
+    const pill = screen.queryByLabelText('Open debug toolbar');
+    if (pill) {
+        fireEvent.click(pill);
+    }
+    await waitFor(() => {
+        expect(screen.getByLabelText('Collapse toolbar')).toBeInTheDocument();
+    });
+};
+
 describe('Toolbar', () => {
-    it('renders the FAB button', async () => {
+    it('shows request info chip when expanded', async () => {
         renderToolbar();
-        await expect.element(page.getByRole('button', {name: /speed/i}).first()).toBeVisible();
+        await expandToolbar();
+
+        await waitFor(() => {
+            expect(screen.getByText('GET /api/test 200')).toBeInTheDocument();
+        });
     });
 
-    it('renders request info when debug entries exist', async () => {
+    it('shows action buttons when expanded', async () => {
         renderToolbar();
-        // Wait for data to load, then click FAB to open toolbar
-        const fab = page.getByRole('button').first();
-        await expect.element(fab).toBeVisible();
-        await fab.click();
+        await expandToolbar();
 
-        // Should show the request method and path from mock data
-        await expect.element(page.getByText('GET')).toBeVisible();
-    });
-
-    it('shows speed dial actions on hover', async () => {
-        renderToolbar();
-        const fab = page.getByRole('button').first();
-        await expect.element(fab).toBeVisible();
-
-        // Open in new window action should exist
-        await expect.element(page.getByLabelText('Open debug in a new window')).toBeInTheDocument();
+        expect(screen.getByLabelText('List debug entries')).toBeInTheDocument();
+        expect(screen.getByLabelText('Open debug panel')).toBeInTheDocument();
     });
 
     it('opens debug entries list modal', async () => {
         renderToolbar();
-        const fab = page.getByRole('button').first();
-        await expect.element(fab).toBeVisible();
+        await expandToolbar();
 
-        // Click the list action
-        const listAction = page.getByLabelText('List all debug entries');
-        await listAction.click();
-
-        // Modal should appear with entries
-        await expect.element(page.getByText('Select a debug entry')).toBeVisible();
+        fireEvent.click(screen.getByLabelText('List debug entries'));
+        await waitFor(() => {
+            expect(screen.getByText('Select a debug entry')).toBeInTheDocument();
+        });
     });
 
     it('displays request time metric', async () => {
         renderToolbar();
-        const fab = page.getByRole('button').first();
-        await expect.element(fab).toBeVisible();
-        await fab.click();
+        await expandToolbar();
 
-        // Should display processing time (42ms = 0.042s)
-        await expect.element(page.getByText(/0\.04/)).toBeVisible();
+        await waitFor(() => {
+            expect(screen.getByText(/0\.042/)).toBeInTheDocument();
+        });
     });
 
-    it('displays log count badge', async () => {
+    it('can collapse toolbar', async () => {
         renderToolbar();
-        const fab = page.getByRole('button').first();
-        await expect.element(fab).toBeVisible();
-        await fab.click();
+        await expandToolbar();
 
-        // Should show log count from mock (5)
-        await expect.element(page.getByText('5')).toBeVisible();
-    });
-
-    it('displays event count badge', async () => {
-        renderToolbar();
-        const fab = page.getByRole('button').first();
-        await expect.element(fab).toBeVisible();
-        await fab.click();
-
-        // Should show event count from mock (12)
-        await expect.element(page.getByText('12')).toBeVisible();
+        fireEvent.click(screen.getByLabelText('Collapse toolbar'));
+        await waitFor(() => {
+            expect(screen.getByLabelText('Open debug toolbar')).toBeInTheDocument();
+        });
     });
 });
