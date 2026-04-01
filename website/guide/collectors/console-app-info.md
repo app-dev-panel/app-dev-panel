@@ -60,7 +60,7 @@ $collector->markApplicationFinished();
 ```
 
 ::: info
-`ConsoleAppInfoCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector`. Located in the `Console` sub-namespace.
+<class>\AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>. Located in the `Console` sub-namespace.
 :::
 
 ## How It Works

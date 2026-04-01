@@ -54,12 +54,12 @@ $collector->collect(
 ```
 
 ::: info
-`EventCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector` for cross-collector timeline integration.
+<class>\AppDevPanel\Kernel\Collector\EventCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class> for cross-collector timeline integration.
 :::
 
 ## How It Works
 
-The collector is fed by `EventDispatcherInterfaceProxy` — a PSR-14 `EventDispatcherInterface` decorator. Every `$dispatcher->dispatch($event)` call is intercepted, timed, and forwarded to the collector.
+The collector is fed by <class>\AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> — a PSR-14 `EventDispatcherInterface` decorator. Every `$dispatcher->dispatch($event)` call is intercepted, timed, and forwarded to the collector.
 
 Framework adapters register the proxy automatically.
 

@@ -66,7 +66,7 @@ $collector->collectBundles(bundles: $allBundles);
 ```
 
 ::: info
-`AssetBundleCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector`. Primarily used with Yii frameworks.
+<class>\AppDevPanel\Kernel\Collector\AssetBundleCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>. Primarily used with Yii frameworks.
 :::
 
 ## Debug Panel

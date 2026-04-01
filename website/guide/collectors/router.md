@@ -74,14 +74,14 @@ $collector->collectRoutes(routes: $allRoutes, routesTree: $routeTree);
 ```
 
 ::: info
-`RouterCollector` implements `SummaryCollectorInterface`. It has no dependencies on other collectors.
+<class>\AppDevPanel\Kernel\Collector\RouterCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. It has no dependencies on other collectors.
 :::
 
 ## How It Works
 
-Each framework adapter has a `RouterDataExtractor` that normalizes framework-specific route data into the common format:
+Each framework adapter has a <class>\AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor</class> that normalizes framework-specific route data into the common format:
 - **Symfony**: Extracts from `RouterInterface` and request attributes
-- **Laravel**: Extracts from `Router` facade and matched `Route` object
+- **Laravel**: Extracts from <class>\AppDevPanel\Api\Router\Router</class> facade and matched <class>\AppDevPanel\Api\Router\Route</class> object
 - **Yii 3**: Extracts from `UrlMatcherInterface` result
 
 ## Debug Panel

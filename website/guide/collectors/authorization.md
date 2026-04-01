@@ -90,7 +90,7 @@ $collector->logAccessDecision(
 ```
 
 ::: info
-`AuthorizationCollector` implements `SummaryCollectorInterface`. It has no dependencies on other collectors.
+<class>\AppDevPanel\Kernel\Collector\AuthorizationCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. It has no dependencies on other collectors.
 :::
 
 ## How It Works

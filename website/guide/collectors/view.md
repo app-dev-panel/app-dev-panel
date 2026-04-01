@@ -57,13 +57,13 @@ $collector->collectRender(
 ```
 
 ::: info
-`ViewCollector` implements `SummaryCollectorInterface`, depends on `TimelineCollector`, and uses `DuplicateDetectionTrait`.
+<class>\AppDevPanel\Kernel\Collector\ViewCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>, depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>, and uses <class>\AppDevPanel\Kernel\Collector\DuplicateDetectionTrait</class>.
 :::
 
 ## How It Works
 
 Framework adapters hook into the view rendering system:
-- **Yii 3**: `ViewEventListener` listens to view render events
+- **Yii 3**: <class>\AppDevPanel\Adapter\Yiisoft\Collector\View\ViewEventListener</class> listens to view render events
 - **Yii 2**: View component events
 
 ## Debug Panel

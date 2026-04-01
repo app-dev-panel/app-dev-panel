@@ -36,7 +36,7 @@ Supports inline HTTP method specification: `POST /api/users` (defaults to GET if
 
 | Adapter | Supported |
 |---------|-----------|
-| Symfony | Yes (via `SymfonyRouteCollectionAdapter`) |
+| Symfony | Yes (via <class>\AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter</class>) |
 | Laravel | Yes |
 | Yii 3 | Yes |
 | Yii 2 | Yes |

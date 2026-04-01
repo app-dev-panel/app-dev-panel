@@ -80,7 +80,7 @@ $collector->collectFromGlobals();
 ```
 
 ::: info
-`EnvironmentCollector` implements `SummaryCollectorInterface`. It has no dependencies on other collectors.
+<class>\AppDevPanel\Kernel\Collector\EnvironmentCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. It has no dependencies on other collectors.
 :::
 
 ## How It Works

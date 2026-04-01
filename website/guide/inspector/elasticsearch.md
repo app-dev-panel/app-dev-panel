@@ -54,4 +54,4 @@ For advanced use, execute any Elasticsearch API request by specifying the HTTP m
 
 ## Requirements
 
-Requires an `ElasticsearchProviderInterface` implementation in the DI container. Each adapter provides its own implementation based on the Elasticsearch client library in use.
+Requires an <class>\AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface</class> implementation in the DI container. Each adapter provides its own implementation based on the Elasticsearch client library in use.

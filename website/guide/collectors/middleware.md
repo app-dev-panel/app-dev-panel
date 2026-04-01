@@ -76,13 +76,13 @@ $collector->collectAfter(
 ```
 
 ::: info
-`MiddlewareCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector`.
+<class>\AppDevPanel\Kernel\Collector\MiddlewareCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>.
 :::
 
 ## How It Works
 
 Framework adapters instrument the middleware pipeline:
-- **Yii 3**: `MiddlewareEventListener` listens to Yii middleware events
+- **Yii 3**: <class>\AppDevPanel\Adapter\Yiisoft\Collector\Middleware\MiddlewareEventListener</class> listens to Yii middleware events
 - **Symfony**: Kernel events (`kernel.request`, `kernel.response`, `kernel.controller`)
 - **Laravel**: Middleware pipeline hooks
 

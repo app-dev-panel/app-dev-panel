@@ -58,12 +58,12 @@ $collector->collect(
 ```
 
 ::: info
-`FilesystemStreamCollector` implements `SummaryCollectorInterface`. Supports configurable ignore patterns to exclude paths (e.g., vendor directory).
+<class>\AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. Supports configurable ignore patterns to exclude paths (e.g., vendor directory).
 :::
 
 ## How It Works
 
-The collector uses a PHP stream wrapper proxy (`FilesystemStreamProxy`) that registers itself for the `file://` protocol. All filesystem operations (`fopen`, `file_get_contents`, `is_file`, `mkdir`, etc.) are intercepted via PHP's stream wrapper mechanism. Paths matching `excludePaths` patterns are ignored.
+The collector uses a PHP stream wrapper proxy (<class>\AppDevPanel\Kernel\Collector\Stream\FilesystemStreamProxy</class>) that registers itself for the `file://` protocol. All filesystem operations (`fopen`, `file_get_contents`, `is_file`, `mkdir`, etc.) are intercepted via PHP's stream wrapper mechanism. Paths matching `excludePaths` patterns are ignored.
 
 ## Debug Panel
 

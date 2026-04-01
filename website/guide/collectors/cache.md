@@ -68,7 +68,7 @@ $collector->logCacheOperation(new CacheOperationRecord(
 ```
 
 ::: info
-`CacheCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector`.
+<class>\AppDevPanel\Kernel\Collector\CacheCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>.
 :::
 
 ## How It Works

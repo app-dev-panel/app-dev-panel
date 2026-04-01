@@ -64,7 +64,7 @@ $collector->markApplicationFinished();
 ```
 
 ::: info
-`WebAppInfoCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector`. Located in the `Web` sub-namespace.
+<class>\AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>. Located in the `Web` sub-namespace.
 :::
 
 ## How It Works

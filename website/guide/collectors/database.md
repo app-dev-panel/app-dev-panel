@@ -97,7 +97,7 @@ $collector->collectTransactionEnd(status: 'commit', line: '...');
 ```
 
 ::: info
-`DatabaseCollector` implements `SummaryCollectorInterface`, depends on `TimelineCollector`, and uses `DuplicateDetectionTrait` for detecting repeated queries.
+<class>\AppDevPanel\Kernel\Collector\DatabaseCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>, depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>, and uses <class>\AppDevPanel\Kernel\Collector\DuplicateDetectionTrait</class> for detecting repeated queries.
 :::
 
 ## How It Works

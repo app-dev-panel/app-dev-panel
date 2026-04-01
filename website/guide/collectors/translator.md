@@ -75,7 +75,7 @@ $collector->logTranslation(new TranslationRecord(
 ```
 
 ::: info
-`TranslatorCollector` implements `SummaryCollectorInterface`. It has no dependencies on other collectors.
+<class>\AppDevPanel\Kernel\Collector\TranslatorCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. It has no dependencies on other collectors.
 :::
 
 ## How It Works

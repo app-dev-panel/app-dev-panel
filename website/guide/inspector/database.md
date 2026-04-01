@@ -54,10 +54,10 @@ Run `EXPLAIN` or `EXPLAIN ANALYZE` on queries to see execution plans, useful for
 
 | Adapter | Provider |
 |---------|----------|
-| Symfony | `DoctrineSchemaProvider` (Doctrine DBAL) |
-| Laravel | `LaravelSchemaProvider` (Eloquent) |
+| Symfony | <class>\AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider</class> (Doctrine DBAL) |
+| Laravel | <class>\AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider</class> (Eloquent) |
 | Yii 2 | `Yii2DbSchemaProvider` |
-| Cycle ORM | `CycleSchemaProvider` |
+| Cycle ORM | <class>\AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider</class> |
 
 ::: warning
 SQL queries execute against the live database. Use with care in production environments.

@@ -49,7 +49,7 @@ Captures PHP deprecation notices with message, source location, category, and st
 The collector registers a custom PHP error handler that intercepts `E_DEPRECATED` and `E_USER_DEPRECATED` notices. No explicit `collect()` method is needed — deprecations are captured automatically.
 
 ::: info
-`DeprecationCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector`.
+<class>\AppDevPanel\Kernel\Collector\DeprecationCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>.
 :::
 
 ## How It Works

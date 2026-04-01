@@ -495,6 +495,96 @@
 }
 
 /* ========================================================================
+   Class Reference Tooltips (<class> tags)
+   ======================================================================== */
+
+.class-ref {
+    position: relative;
+    font-family: var(--vp-font-family-mono);
+    font-size: var(--vp-code-font-size);
+    color: var(--vp-c-brand-1);
+    background: var(--vp-code-bg);
+    padding: 3px 6px;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+a.class-ref:hover {
+    color: var(--vp-c-brand-1);
+    background: var(--vp-c-brand-soft);
+    text-decoration: none;
+}
+
+.class-ref-unlinked {
+    cursor: help;
+    color: var(--vp-code-color);
+}
+
+.class-ref-tooltip {
+    display: none;
+    position: fixed;
+    background: var(--vp-c-bg-elv);
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 8px;
+    padding: 10px 14px;
+    width: max-content;
+    max-width: 480px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+    pointer-events: none;
+    user-select: none;
+
+    /* Reset inherited styles */
+    text-align: left;
+    text-decoration: none;
+    text-shadow: none;
+    text-indent: 0;
+    text-transform: none;
+    letter-spacing: normal;
+    word-spacing: normal;
+    font-style: normal;
+    font-weight: normal;
+    color: var(--vp-c-text-1);
+}
+
+.class-ref-tooltip.is-visible {
+    display: block;
+}
+
+.class-ref-tooltip-fqcn {
+    display: block;
+    font-family: var(--vp-font-family-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--vp-c-brand-1);
+    padding: 0 !important;
+    background: none !important;
+    white-space: nowrap;
+}
+
+.class-ref-tooltip-desc {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--vp-c-text-2);
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.class-ref-tooltip-meta {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--vp-c-text-3);
+    white-space: normal;
+}
+
+/* ========================================================================
    Image Zoom (medium-zoom)
    ======================================================================== */
 

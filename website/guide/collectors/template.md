@@ -49,7 +49,7 @@ $collector->logRender(
 ```
 
 ::: info
-`TemplateCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector`.
+<class>\AppDevPanel\Kernel\Collector\TemplateCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>.
 :::
 
 ## How It Works

@@ -101,7 +101,7 @@ $collector->logRequest(new ElasticsearchRequestRecord(
 ```
 
 ::: info
-`ElasticsearchCollector` implements `SummaryCollectorInterface`, depends on `TimelineCollector`, and uses `DuplicateDetectionTrait`.
+<class>\AppDevPanel\Kernel\Collector\ElasticsearchCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>, depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>, and uses <class>\AppDevPanel\Kernel\Collector\DuplicateDetectionTrait</class>.
 :::
 
 See the dedicated [Elasticsearch](/guide/elasticsearch) page for configuration and integration details.

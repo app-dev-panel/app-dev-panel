@@ -76,7 +76,7 @@ $collector->collectStatus(id: 'msg-1', status: 'handled');
 ```
 
 ::: info
-`QueueCollector` implements `SummaryCollectorInterface`, depends on `TimelineCollector`, and uses `DuplicateDetectionTrait`.
+<class>\AppDevPanel\Kernel\Collector\QueueCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>, depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>, and uses <class>\AppDevPanel\Kernel\Collector\DuplicateDetectionTrait</class>.
 :::
 
 ## How It Works

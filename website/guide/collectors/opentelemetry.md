@@ -75,7 +75,7 @@ $collector->collectBatch([$span1, $span2, $span3]);
 ```
 
 ::: info
-`OpenTelemetryCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector`.
+<class>\AppDevPanel\Kernel\Collector\OpenTelemetryCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>.
 :::
 
 ## How It Works

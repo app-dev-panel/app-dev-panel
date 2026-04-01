@@ -13,7 +13,7 @@ Captures email messages sent during a request — recipients, subject, body, and
 | Field | Description |
 |-------|-------------|
 | `from` | Sender addresses |
-| `to` | Recipient addresses |
+| <class>\AppDevPanel\Adapter\Yii2\Inspector\to</class> | Recipient addresses |
 | `cc` | CC addresses |
 | `bcc` | BCC addresses |
 | `replyTo` | Reply-To addresses |
@@ -71,7 +71,7 @@ $collector->collectMessage([
 ```
 
 ::: info
-`MailerCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector`.
+<class>\AppDevPanel\Kernel\Collector\MailerCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>.
 :::
 
 ## How It Works

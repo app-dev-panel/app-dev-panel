@@ -27,8 +27,8 @@ Inspect the security and authorization configuration of your application.
 
 | Adapter | Provider |
 |---------|----------|
-| Symfony | `SymfonyConfigProvider` (reads `security.yaml` config) |
-| Others | `NullAuthorizationConfigProvider` (returns empty) |
+| Symfony | <class>\AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider</class> (reads `security.yaml` config) |
+| Others | <class>\AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider</class> (returns empty) |
 
 ::: info
 Authorization inspection requires framework-specific integration. Currently, only the Symfony adapter provides full security config introspection.

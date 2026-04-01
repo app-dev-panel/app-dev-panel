@@ -62,7 +62,7 @@ $collector->collect(
 ```
 
 ::: info
-`ValidatorCollector` implements `SummaryCollectorInterface`. It has no dependencies on other collectors.
+<class>\AppDevPanel\Kernel\Collector\ValidatorCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. It has no dependencies on other collectors.
 :::
 
 ## How It Works

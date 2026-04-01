@@ -40,7 +40,7 @@ Provide a fully qualified class name (e.g., `App\Controller\UserController`) and
 
 ## IDE Integration
 
-File paths are mapped via `PathMapperInterface` for IDE integration. Click a file path to open it in your local IDE (VS Code, PhpStorm, etc.) if configured.
+File paths are mapped via <class>\AppDevPanel\Api\PathMapperInterface</class> for IDE integration. Click a file path to open it in your local IDE (VS Code, PhpStorm, etc.) if configured.
 
 ::: info
 File access is restricted to the project root directory. Attempting to navigate outside the root returns a 403 error.

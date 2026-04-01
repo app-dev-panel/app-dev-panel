@@ -54,12 +54,12 @@ $timeline->collect(
 ```
 
 ::: info
-`TimelineCollector` implements `SummaryCollectorInterface`. Most other collectors depend on `TimelineCollector` to register their events on the timeline.
+<class>\AppDevPanel\Kernel\Collector\TimelineCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. Most other collectors depend on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class> to register their events on the timeline.
 :::
 
 ## How It Works
 
-The `TimelineCollector` is a central aggregation point. Other collectors (Log, Event, Database, etc.) call `$timeline->collect()` when they record an event, passing themselves as the source. This creates a unified chronological view across all collectors.
+The <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class> is a central aggregation point. Other collectors (Log, Event, Database, etc.) call `$timeline->collect()` when they record an event, passing themselves as the source. This creates a unified chronological view across all collectors.
 
 ## Debug Panel
 

@@ -52,12 +52,12 @@ $collector->collect(
 ```
 
 ::: info
-`HttpStreamCollector` implements `SummaryCollectorInterface`. Supports configurable ignore patterns.
+<class>\AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. Supports configurable ignore patterns.
 :::
 
 ## How It Works
 
-The collector uses a PHP stream wrapper proxy (`HttpStreamProxy`) that registers itself for the `http://` and `https://` protocols. Stream operations via native PHP functions are intercepted. Paths matching `excludePaths` patterns are ignored.
+The collector uses a PHP stream wrapper proxy (<class>\AppDevPanel\Kernel\Collector\Stream\HttpStreamProxy</class>) that registers itself for the `http://` and `https://` protocols. Stream operations via native PHP functions are intercepted. Paths matching `excludePaths` patterns are ignored.
 
 ::: warning
 This collector only captures HTTP requests made via PHP stream functions (`file_get_contents`, `fopen`). For PSR-18 HTTP client calls, use the [HTTP Client Collector](/guide/collectors/http-client).

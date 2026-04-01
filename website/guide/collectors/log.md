@@ -56,12 +56,12 @@ $collector->collect(
 ```
 
 ::: info
-`LogCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector` for cross-collector timeline integration.
+<class>\AppDevPanel\Kernel\Collector\LogCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class> for cross-collector timeline integration.
 :::
 
 ## How It Works
 
-The collector is fed by `LoggerInterfaceProxy` — a PSR-3 `LoggerInterface` decorator. When the proxy is registered as the application's logger, every `$logger->info(...)`, `$logger->error(...)`, etc. call is automatically intercepted and forwarded to the collector.
+The collector is fed by <class>\AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> — a PSR-3 `LoggerInterface` decorator. When the proxy is registered as the application's logger, every `$logger->info(...)`, `$logger->error(...)`, etc. call is automatically intercepted and forwarded to the collector.
 
 No manual wiring is needed if you use an adapter (Symfony, Laravel, Yii) — the proxy is registered automatically.
 

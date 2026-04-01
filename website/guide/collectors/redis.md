@@ -4,7 +4,7 @@ title: Redis Collector
 
 # Redis Collector
 
-The `RedisCollector` captures all Redis commands executed during a request — SET, GET, DEL, INCR, and any other command — with timing, error tracking, and multi-connection support.
+The <class>\AppDevPanel\Kernel\Collector\RedisCollector</class> captures all Redis commands executed during a request — SET, GET, DEL, INCR, and any other command — with timing, error tracking, and multi-connection support.
 
 ## What It Captures
 
@@ -72,7 +72,7 @@ $collector->logCommand(new RedisCommandRecord(
 ```
 
 ::: info
-`RedisCollector` implements `SummaryCollectorInterface` and uses `CollectorTrait` for the standard lifecycle methods. It depends on `TimelineCollector` for cross-collector timeline integration.
+<class>\AppDevPanel\Kernel\Collector\RedisCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and uses <class>\AppDevPanel\Kernel\Collector\CollectorTrait</class> for the standard lifecycle methods. It depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class> for cross-collector timeline integration.
 :::
 
 Framework adapters are responsible for intercepting Redis calls and feeding data to the collector. There is no PSR standard for Redis, so each framework uses its own interception mechanism.

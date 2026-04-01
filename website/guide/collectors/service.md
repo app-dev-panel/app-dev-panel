@@ -69,12 +69,12 @@ $collector->collect(new MethodCallRecord(
 ```
 
 ::: info
-`ServiceCollector` implements `SummaryCollectorInterface` and depends on `TimelineCollector`.
+<class>\AppDevPanel\Kernel\Collector\ServiceCollector</class> implements <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and depends on <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>.
 :::
 
 ## How It Works
 
-The collector is fed by `ContainerInterfaceProxy` which wraps the PSR-11 `ContainerInterface`. When services are resolved and their methods are called through the proxy, the calls are intercepted and recorded.
+The collector is fed by <class>\AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy</class> which wraps the PSR-11 `ContainerInterface`. When services are resolved and their methods are called through the proxy, the calls are intercepted and recorded.
 
 ## Debug Panel
 
