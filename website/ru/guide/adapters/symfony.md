@@ -56,8 +56,8 @@ app_dev_panel:
 
 ## Интеграция с переводчиком
 
-Адаптер автоматически декорирует `TranslatorInterface` Symfony через `SymfonyTranslatorProxy` в compiler pass. Все вызовы `trans()` перехватываются и записываются в `TranslatorCollector` — изменения кода не требуются. Подробности на странице [Переводчик](/ru/guide/translator).
+Адаптер автоматически декорирует <class>Symfony\Contracts\Translation\TranslatorInterface</class> Symfony через <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> в compiler pass. Все вызовы `trans()` перехватываются и записываются в <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> — изменения кода не требуются. Подробности на странице [Переводчик](/ru/guide/translator).
 
 ## Инспектор базы данных
 
-При наличии `doctrine/dbal` инспекция схемы БД осуществляется через `DoctrineSchemaProvider`. Без Doctrine используется `NullSchemaProvider`.
+При наличии `doctrine/dbal` инспекция схемы БД осуществляется через <class>AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider</class>. Без Doctrine используется <class>AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider</class>.

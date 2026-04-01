@@ -123,4 +123,4 @@ Requires `\Redis` (phpredis extension) in the DI container.
 
 ## Multi-Service Proxying
 
-Inspector requests with `?service=<name>` are proxied to the registered external service's URL via `InspectorProxyMiddleware`. Requests without `?service` or with `?service=local` are handled locally.
+Inspector requests with `?service=<name>` are proxied to the registered external service's URL via <class>AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware</class>. Requests without `?service` or with `?service=local` are handled locally.

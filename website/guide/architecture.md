@@ -13,8 +13,8 @@ ADP follows a strict layered architecture where each layer has clear responsibil
 The core engine. **Framework-independent** — depends only on PSR interfaces and generic PHP libraries. Manages:
 
 - **Debugger** — Lifecycle management (start, collect, flush)
-- **Collectors** — Gather runtime data via `CollectorInterface`
-- **Storage** — Persist debug data (JSON files by default) via `StorageInterface`
+- **Collectors** — Gather runtime data via <class>AppDevPanel\Kernel\Collector\CollectorInterface</class>
+- **Storage** — Persist debug data (JSON files by default) via <class>AppDevPanel\Kernel\Storage\StorageInterface</class>
 - **Proxies** — Intercept PSR interfaces transparently
 
 ### 2. API
@@ -32,14 +32,15 @@ HTTP layer built on PSR-7/15. Provides:
 Framework bridges. Each adapter:
 
 - Registers proxy services in the framework's DI container
-- Maps framework lifecycle events to `Debugger::startup()` / `Debugger::shutdown()`
+- Maps framework lifecycle events to <class>AppDevPanel\Kernel\Debugger</class>`::startup()` / `::shutdown()`
 - Configures collectors and storage with framework-appropriate settings
 - Registers API routes (`/debug/api/*`, `/inspect/api/*`)
+- Serves the debug panel frontend at `/debug`
 - Implements framework-specific inspector providers (config, routes, database schema)
 
 ### 4. Frontend
 
-React 18 SPA with:
+React 19 SPA with:
 
 - Material-UI 5 design system
 - Redux Toolkit for state management
@@ -89,9 +90,9 @@ Storage and serialization remain behind interfaces to ensure pluggability:
 
 | Concern | Abstraction | Implementations |
 |---------|-------------|-----------------|
-| Debug data storage | `StorageInterface` | `FileStorage`, `MemoryStorage` |
-| Object serialization | `Dumper` class | JSON-based (built-in) |
-| Database inspection | `SchemaProviderInterface` | Per-adapter: `DbSchemaProvider`, `DoctrineSchemaProvider`, `LaravelSchemaProvider`, `Yii2DbSchemaProvider`, `CycleSchemaProvider` |
+| Debug data storage | <class>AppDevPanel\Kernel\Storage\StorageInterface</class> | <class>AppDevPanel\Kernel\Storage\FileStorage</class>, <class>AppDevPanel\Kernel\Storage\MemoryStorage</class> |
+| Object serialization | <class>AppDevPanel\Kernel\Dumper</class> | JSON-based (built-in) |
+| Database inspection | <class>AppDevPanel\Api\Inspector\Database\SchemaProviderInterface</class> | Per-adapter: <class>AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider</class>, <class>AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider</class>, <class>AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider</class>, <class>AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider</class>, <class>AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider</class> |
 
 ## Data Flow
 
@@ -124,9 +125,9 @@ Current modules: Debug, Inspector, LLM, MCP, OpenAPI, Frames.
 When creating an adapter for a new framework:
 
 1. Create `libs/Adapter/<FrameworkName>/`
-2. The adapter **must** depend on `app-dev-panel/kernel`
-3. The adapter **may** depend on `app-dev-panel/api` (for route and inspector registration)
-4. The adapter **may** depend on `app-dev-panel/cli` (for CLI commands)
+2. The adapter **must** depend on <pkg>app-dev-panel/kernel</pkg>
+3. The adapter **may** depend on <pkg>app-dev-panel/api</pkg> (for route and inspector registration)
+4. The adapter **may** depend on <pkg>app-dev-panel/cli</pkg> (for CLI commands)
 5. The adapter **must not** depend on other adapters
 6. The adapter **must not** modify Kernel or API code — only wire into them via configuration
 
@@ -134,13 +135,13 @@ When creating an adapter for a new framework:
 
 | Responsibility | Description |
 |----------------|-------------|
-| Lifecycle mapping | Map framework events → `Debugger::startup()` / `Debugger::shutdown()` |
+| Lifecycle mapping | Map framework events → <class>AppDevPanel\Kernel\Debugger</class>`::startup()` / `::shutdown()` |
 | Proxy wiring | Register Kernel PSR proxies as service decorators in the framework's DI |
-| Framework-specific proxies | Create proxies for non-PSR APIs (e.g., `SymfonyEventDispatcherProxy`) |
+| Framework-specific proxies | Create proxies for non-PSR APIs (e.g., <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy</class>) |
 | Collector configuration | Configure active collectors and pass framework-specific settings |
-| Storage setup | Wire `StorageInterface` with framework-appropriate paths |
-| Route registration | Register API routes for `/debug/api/*` and `/inspect/api/*` |
-| Inspector providers | Implement `SchemaProviderInterface`, `ConfigProviderInterface`, etc. |
+| Storage setup | Wire <class>AppDevPanel\Kernel\Storage\StorageInterface</class> with framework-appropriate paths |
+| Route registration | Register API routes for `/debug/api/*`, `/inspect/api/*` and serve the frontend at `/debug` |
+| Inspector providers | Implement <class>AppDevPanel\Api\Inspector\Database\SchemaProviderInterface</class>, <class>AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface</class>, etc. |
 
 ### Reference Implementations
 
@@ -153,9 +154,9 @@ When creating an adapter for a new framework:
 
 ### Minimal Checklist
 
-1. `composer.json` with `app-dev-panel/kernel` + `app-dev-panel/api` dependencies
-2. Lifecycle event mapping → `Debugger::startup()` / `Debugger::shutdown()`
+1. `composer.json` with <pkg>app-dev-panel/kernel</pkg> + <pkg>app-dev-panel/api</pkg> dependencies
+2. Lifecycle event mapping → <class>AppDevPanel\Kernel\Debugger</class>`::startup()` / `::shutdown()`
 3. Register Kernel PSR proxies as service decorators (logger, events, HTTP client)
-4. Wire `FileStorage` with a framework-appropriate path
+4. Wire <class>AppDevPanel\Kernel\Storage\FileStorage</class> with a framework-appropriate path
 5. Register API controller routes
 6. Create a [playground](/guide/playgrounds) for testing and demo

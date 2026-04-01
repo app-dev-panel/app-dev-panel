@@ -89,4 +89,4 @@ curl -X PUT http://localhost:8080/inspect/api/mcp/settings \
 
 ## Протокол
 
-ADP реализует спецификацию MCP версии `2024-11-05` на основе JSON-RPC 2.0. Поддерживаемые методы: `initialize`, `initialized`, `ping`, `tools/list`, `tools/call`.
+<class>AppDevPanel\McpServer\McpServer</class> реализует спецификацию MCP версии `2024-11-05` на основе JSON-RPC 2.0. Поддерживаемые методы: `initialize`, `initialized`, `ping`, `tools/list`, `tools/call`.

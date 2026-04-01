@@ -66,4 +66,4 @@ This collector only captures HTTP requests made via PHP stream functions (`file_
 ## Debug Panel
 
 - **Operation list** — HTTP stream operations with URLs
-- **Combined with Filesystem** — displayed together with FilesystemStreamCollector under the "I/O" sidebar item
+- **Combined with Filesystem** — displayed together with <class>\AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector</class> under the "I/O" sidebar item

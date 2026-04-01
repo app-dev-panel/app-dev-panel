@@ -20,27 +20,32 @@ function initZoom() {
 }
 
 function setupClassRefTooltips() {
+    // Create a single tooltip container on <body> so it escapes any stacking context
+    // (e.g., VitePress ::: info blocks that create new stacking contexts via transform/opacity)
+    const floatingTip = document.createElement('div');
+    floatingTip.className = 'floating-tooltip';
+    document.body.appendChild(floatingTip);
+
     document.addEventListener(
         'mouseenter',
         (e) => {
-            const ref = (e.target as Element).closest?.('.class-ref');
+            const ref = (e.target as Element).closest?.('.class-ref, .pkg-ref');
             if (!ref) return;
 
-            const tip = ref.querySelector('.class-ref-tooltip') as HTMLElement;
-            if (!tip) return;
+            const srcTip = ref.querySelector('.class-ref-tooltip, .pkg-ref-tooltip') as HTMLElement;
+            if (!srcTip) return;
 
-            tip.style.left = '0';
-            tip.style.top = '0';
-            tip.style.maxWidth = '';
-            tip.classList.add('is-visible');
+            // Copy tooltip content to the body-level container
+            floatingTip.innerHTML = srcTip.innerHTML;
+            floatingTip.className = 'floating-tooltip is-visible';
 
             const rect = ref.getBoundingClientRect();
-            const tipRect = tip.getBoundingClientRect();
+            const tipRect = floatingTip.getBoundingClientRect();
             const gap = 8;
 
             let top = rect.top - tipRect.height - gap;
             if (top < 0) top = rect.bottom + gap;
-            tip.style.top = top + 'px';
+            floatingTip.style.top = top + 'px';
 
             const refCenter = rect.left + rect.width / 2;
             let left = refCenter - tipRect.width / 2;
@@ -48,7 +53,7 @@ function setupClassRefTooltips() {
                 left = window.innerWidth - tipRect.width - 8;
             }
             if (left < 8) left = 8;
-            tip.style.left = left + 'px';
+            floatingTip.style.left = left + 'px';
         },
         true,
     );
@@ -56,10 +61,9 @@ function setupClassRefTooltips() {
     document.addEventListener(
         'mouseleave',
         (e) => {
-            const ref = (e.target as Element).closest?.('.class-ref');
+            const ref = (e.target as Element).closest?.('.class-ref, .pkg-ref');
             if (!ref) return;
-            const tip = ref.querySelector('.class-ref-tooltip') as HTMLElement;
-            if (tip) tip.classList.remove('is-visible');
+            floatingTip.classList.remove('is-visible');
         },
         true,
     );

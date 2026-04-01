@@ -41,9 +41,9 @@ Kernel provides framework-independent PSR proxies:
 
 | Proxy | PSR Interface | Paired Collector |
 |-------|---------------|-----------------|
-| `LoggerInterfaceProxy` | PSR-3 `LoggerInterface` | `LogCollector` |
-| `EventDispatcherInterfaceProxy` | PSR-14 `EventDispatcherInterface` | `EventCollector` |
-| `HttpClientInterfaceProxy` | PSR-18 `ClientInterface` | `HttpClientCollector` |
+| <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | PSR-3 <class>Psr\Log\LoggerInterface</class> | <class>AppDevPanel\Kernel\Collector\LogCollector</class> |
+| <class>AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> | PSR-14 <class>Psr\EventDispatcher\EventDispatcherInterface</class> | <class>AppDevPanel\Kernel\Collector\EventCollector</class> |
+| <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | PSR-18 <class>Psr\Http\Client\ClientInterface</class> | <class>AppDevPanel\Kernel\Collector\HttpClientCollector</class> |
 
 ### Framework-Specific Proxies
 
@@ -51,24 +51,24 @@ Framework adapters provide additional proxies for interfaces that are not PSR-st
 
 | Proxy | Framework | Interface | Paired Collector |
 |-------|-----------|-----------|-----------------|
-| `SymfonyTranslatorProxy` | Symfony | `TranslatorInterface` | `TranslatorCollector` |
-| `SymfonyEventDispatcherProxy` | Symfony | `EventDispatcherInterface` | `EventCollector` |
-| `LaravelTranslatorProxy` | Laravel | `Translator` | `TranslatorCollector` |
-| `LaravelEventDispatcherProxy` | Laravel | `Dispatcher` | `EventCollector` |
-| `TranslatorInterfaceProxy` | Yiisoft | `TranslatorInterface` | `TranslatorCollector` |
-| `ValidatorInterfaceProxy` | Yiisoft | `ValidatorInterface` | `ValidatorCollector` |
-| `ContainerInterfaceProxy` | Yiisoft | PSR-11 `ContainerInterface` | `ServiceCollector` |
-| `I18NProxy` | Yii 2 | `yii\i18n\I18N` | `TranslatorCollector` |
+| <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> | Symfony | <class>Symfony\Contracts\Translation\TranslatorInterface</class> | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
+| <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy</class> | Symfony | <class>Symfony\Contracts\EventDispatcher\EventDispatcherInterface</class> | <class>AppDevPanel\Kernel\Collector\EventCollector</class> |
+| <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy</class> | Laravel | <class>Illuminate\Contracts\Translation\Translator</class> | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
+| <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy</class> | Laravel | `Dispatcher` | <class>AppDevPanel\Kernel\Collector\EventCollector</class> |
+| <class>AppDevPanel\Adapter\Yiisoft\Collector\Translator\TranslatorInterfaceProxy</class> | Yiisoft | `TranslatorInterface` | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
+| <class>AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy</class> | Yiisoft | `ValidatorInterface` | <class>AppDevPanel\Kernel\Collector\ValidatorCollector</class> |
+| <class>AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy</class> | Yiisoft | PSR-11 <class>Psr\Container\ContainerInterface</class> | <class>AppDevPanel\Kernel\Collector\ServiceCollector</class> |
+| <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> | Yii 2 | `yii\i18n\I18N` | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
 
 ### Translator Proxies
 
-Each framework has its own translator interface. ADP provides a dedicated proxy for each, all feeding the same `TranslatorCollector`. See the [Translator](/guide/translator) page for full details.
+Each framework has its own translator interface. ADP provides a dedicated proxy for each, all feeding the same <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class>. See the [Translator](/guide/translator) page for full details.
 
-**Symfony** -- decorates `Symfony\Contracts\Translation\TranslatorInterface` via `setDecoratedService()` in the compiler pass. Intercepts `trans()` calls.
+**Symfony** -- decorates <class>Symfony\Contracts\Translation\TranslatorInterface</class> via `setDecoratedService()` in the compiler pass. Intercepts `trans()` calls.
 
-**Laravel** -- decorates `Illuminate\Contracts\Translation\Translator` via `$app->extend('translator')`. Intercepts `get()` and `choice()` calls. Parses Laravel's dot-notation keys (`group.key`) into category and message.
+**Laravel** -- decorates <class>Illuminate\Contracts\Translation\Translator</class> via `$app->extend('translator')`. Intercepts `get()` and `choice()` calls. Parses Laravel's dot-notation keys (`group.key`) into category and message.
 
-**Yiisoft** -- registered in `trackedServices` alongside `ValidatorInterfaceProxy`. Intercepts `translate()` calls. Supports `withDefaultCategory()` and `withLocale()` immutable methods.
+**Yiisoft** -- registered in `trackedServices` alongside <class>AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy</class>. Intercepts `translate()` calls. Supports `withDefaultCategory()` and `withLocale()` immutable methods.
 
 **Yii 2** -- extends `yii\i18n\I18N` and overrides `translate()`. Replaces the `i18n` application component during module bootstrap.
 

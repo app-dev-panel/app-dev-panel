@@ -4,11 +4,11 @@ title: Elasticsearch
 
 # Elasticsearch
 
-ADP provides an `ElasticsearchCollector` for capturing Elasticsearch requests during application lifecycle and an inspector for live cluster inspection.
+ADP provides an <class>AppDevPanel\Kernel\Collector\ElasticsearchCollector</class> for capturing Elasticsearch requests during application lifecycle and an inspector for live cluster inspection.
 
 ## Collector
 
-`ElasticsearchCollector` implements `SummaryCollectorInterface` and captures all Elasticsearch requests — searches, indexing, deletions, bulk operations.
+<class>AppDevPanel\Kernel\Collector\ElasticsearchCollector</class> implements <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and captures all Elasticsearch requests — searches, indexing, deletions, bulk operations.
 
 ### Collection Patterns
 
@@ -88,11 +88,11 @@ $collector->logRequest(new ElasticsearchRequestRecord(
 - **Index extraction** — parses the index name from the endpoint path (e.g., `/users/_search` → `users`)
 - **Hits count** — extracts `hits.total.value` from search responses
 - **Duplicate detection** — identifies repeated `method + endpoint` combinations (N+1 pattern detection)
-- **Timeline integration** — reports to `TimelineCollector` for unified performance timeline
+- **Timeline integration** — reports to <class>AppDevPanel\Kernel\Collector\TimelineCollector</class> for unified performance timeline
 
 ## Inspector
 
-The Elasticsearch inspector provides live cluster inspection via `ElasticsearchProviderInterface`.
+The Elasticsearch inspector provides live cluster inspection via <class>AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface</class>.
 
 ### API Endpoints
 
@@ -116,7 +116,7 @@ interface ElasticsearchProviderInterface
 }
 ```
 
-Default: `NullElasticsearchProvider` returns empty data. Adapters provide concrete implementations backed by an actual ES client.
+Default: <class>AppDevPanel\Api\Inspector\Elasticsearch\NullElasticsearchProvider</class> returns empty data. Adapters provide concrete implementations backed by an actual ES client.
 
 ## Frontend
 
@@ -139,6 +139,6 @@ The `ElasticsearchPage` shows live cluster state:
 
 ## Framework Integration
 
-Register `ElasticsearchCollector` in your adapter's DI with `TimelineCollector` as constructor dependency. Enable via config flag `'elasticsearch' => true`.
+Register <class>AppDevPanel\Kernel\Collector\ElasticsearchCollector</class> in your adapter's DI with <class>AppDevPanel\Kernel\Collector\TimelineCollector</class> as constructor dependency. Enable via config flag `'elasticsearch' => true`.
 
 See [Adapters](/guide/adapters/symfony) for framework-specific registration patterns.

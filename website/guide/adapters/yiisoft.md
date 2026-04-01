@@ -8,6 +8,10 @@ The Yii 3 adapter is the reference ADP adapter. It bridges ADP Kernel and API in
 composer require app-dev-panel/adapter-yiisoft
 ```
 
+::: info Package
+<pkg>app-dev-panel/adapter-yiisoft</pkg>
+:::
+
 The package auto-registers via Yii 3's config plugin system — no manual wiring needed.
 
 ## Configuration
@@ -43,8 +47,8 @@ Add the following middleware to your web application stack (order matters):
 DebugHeaders → ErrorCatcher → YiiApiMiddleware → ... → Router
 ```
 
-- **DebugHeaders** — must be outermost to attach `X-Debug-Id` even on error responses
-- **YiiApiMiddleware** — intercepts `/debug/api/*` requests before the router
+- <class>AppDevPanel\Api\Debug\Middleware\DebugHeaders</class> — must be outermost to attach `X-Debug-Id` even on error responses
+- <class>AppDevPanel\Adapter\Yiisoft\Api\YiiApiMiddleware</class> — intercepts `/debug/api/*` requests before the router
 
 ## Collectors
 
@@ -52,8 +56,8 @@ Includes Yii-specific collectors for database queries, mailer, queue, router, va
 
 ## Translator Integration
 
-When `yiisoft/translator` is installed, the adapter registers `TranslatorInterfaceProxy` in `trackedServices`. All `translate()` calls on `Yiisoft\Translator\TranslatorInterface` are intercepted automatically. See [Translator](/guide/translator) for details.
+When `yiisoft/translator` is installed, the adapter registers <class>AppDevPanel\Adapter\Yiisoft\Collector\Translator\TranslatorInterfaceProxy</class> in `trackedServices`. All `translate()` calls on `Yiisoft\Translator\TranslatorInterface` are intercepted automatically. See [Translator](/guide/translator) for details.
 
 ## Database Inspector
 
-Database schema inspection is provided via `Yiisoft\Db` through `DbSchemaProvider`.
+Database schema inspection is provided via `Yiisoft\Db` through <class>AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider</class>.

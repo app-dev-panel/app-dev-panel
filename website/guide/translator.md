@@ -8,11 +8,11 @@ ADP automatically intercepts translation calls in your application and records e
 
 ## TranslatorCollector
 
-`TranslatorCollector` implements `SummaryCollectorInterface` and captures every translation lookup during request execution.
+<class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> implements <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> and captures every translation lookup during request execution.
 
 ### TranslationRecord
 
-Each translation call produces a `TranslationRecord` DTO:
+Each translation call produces a <class>AppDevPanel\Kernel\Collector\TranslationRecord</class> DTO:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -66,13 +66,13 @@ Each framework proxy detects missing translations differently, but the logic is 
 
 ## Framework Proxies
 
-Each adapter provides a translator proxy that wraps the framework's native translator and feeds data to `TranslatorCollector`. Proxies are registered automatically — no manual setup needed.
+Each adapter provides a translator proxy that wraps the framework's native translator and feeds data to <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class>. Proxies are registered automatically — no manual setup needed.
 
-### Symfony — `SymfonyTranslatorProxy`
+### Symfony — <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class>
 
 Decorates `Symfony\Contracts\Translation\TranslatorInterface`. Intercepts `trans()` calls.
 
-**Wiring:** Registered via `CollectorProxyCompilerPass` using Symfony's `setDecoratedService()` pattern.
+**Wiring:** Registered via <class>AppDevPanel\Adapter\Symfony\DependencyInjection\CollectorProxyCompilerPass</class> using Symfony's `setDecoratedService()` pattern.
 
 ```php
 // All trans() calls are intercepted automatically
@@ -82,7 +82,7 @@ $translator->trans('welcome', [], 'messages', 'de');
 - Default domain: `messages` (when `$domain` is `null`)
 - Uses `ProxyDecoratedCalls` trait for method forwarding
 
-### Laravel — `LaravelTranslatorProxy`
+### Laravel — <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy</class>
 
 Decorates `Illuminate\Contracts\Translation\Translator`. Intercepts `get()` and `choice()` calls.
 
@@ -99,7 +99,7 @@ Lang::get('messages.welcome');
 - JSON translations (no dot): category defaults to `messages`
 - Uses `ProxyDecoratedCalls` trait for method forwarding
 
-### Yii 3 — `TranslatorInterfaceProxy`
+### Yii 3 — <class>AppDevPanel\Adapter\Yiisoft\Collector\Translator\TranslatorInterfaceProxy</class>
 
 Decorates `Yiisoft\Translator\TranslatorInterface`. Intercepts `translate()` calls.
 
@@ -113,7 +113,7 @@ $translator->translate('welcome', [], 'app', 'de');
 - Default category: `app` (when `$category` is `null` and no `withDefaultCategory()` was called)
 - Supports immutable `withDefaultCategory()` and `withLocale()` via `clone`
 
-### Yii 2 — `I18NProxy`
+### Yii 2 — <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class>
 
 Extends `yii\i18n\I18N` and overrides `translate()`. Replaces the `i18n` application component.
 
@@ -129,7 +129,7 @@ Yii::t('app', 'welcome', [], 'de');
 
 ## Configuration
 
-Translation interception is enabled by default when the `TranslatorCollector` is active. No additional configuration is needed.
+Translation interception is enabled by default when the <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> is active. No additional configuration is needed.
 
 :::tabs key:framework
 == Symfony

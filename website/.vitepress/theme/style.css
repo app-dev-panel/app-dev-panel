@@ -523,7 +523,13 @@ a.class-ref:hover {
     color: var(--vp-code-color);
 }
 
+/* Inline tooltip spans are hidden — content is cloned to .floating-tooltip on hover */
 .class-ref-tooltip {
+    display: none !important;
+}
+
+/* Body-level floating tooltip — escapes all stacking contexts */
+.floating-tooltip {
     display: none;
     position: fixed;
     background: var(--vp-c-bg-elv);
@@ -532,8 +538,8 @@ a.class-ref:hover {
     padding: 10px 14px;
     width: max-content;
     max-width: 480px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    z-index: 100;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
     pointer-events: none;
     user-select: none;
 
@@ -550,7 +556,7 @@ a.class-ref:hover {
     color: var(--vp-c-text-1);
 }
 
-.class-ref-tooltip.is-visible {
+.floating-tooltip.is-visible {
     display: block;
 }
 
@@ -644,6 +650,72 @@ a.class-ref:hover {
     z-index: 101;
     border: none !important;
     border-radius: 0 !important;
+}
+
+/* ========================================================================
+   Package Reference Badges (<pkg> tags)
+   ======================================================================== */
+
+.pkg-ref {
+    position: relative;
+    font-family: var(--vp-font-family-mono);
+    font-size: var(--vp-code-font-size);
+    color: var(--vp-c-brand-1);
+    background: var(--vp-code-bg);
+    padding: 3px 6px;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+a.pkg-ref:hover {
+    color: var(--vp-c-brand-1);
+    background: var(--vp-c-brand-soft);
+    text-decoration: none;
+}
+
+.pkg-badge {
+    display: inline-block;
+    vertical-align: middle;
+    height: 16px;
+    margin-left: 4px;
+}
+
+/* Inline pkg tooltip spans are hidden — content is cloned to .floating-tooltip on hover */
+.pkg-ref-tooltip {
+    display: none !important;
+}
+
+.pkg-ref-tooltip-name {
+    display: block;
+    font-family: var(--vp-font-family-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--vp-c-brand-1);
+    padding: 0 !important;
+    background: none !important;
+    white-space: nowrap;
+}
+
+.pkg-ref-tooltip-desc {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--vp-c-text-3);
+}
+
+.pkg-ref-tooltip-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.pkg-ref-tooltip-badges img {
+    height: 20px;
 }
 
 /* ========================================================================

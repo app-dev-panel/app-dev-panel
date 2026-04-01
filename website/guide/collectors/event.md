@@ -59,7 +59,7 @@ $collector->collect(
 
 ## How It Works
 
-The collector is fed by <class>\AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> — a PSR-14 `EventDispatcherInterface` decorator. Every `$dispatcher->dispatch($event)` call is intercepted, timed, and forwarded to the collector.
+The collector is fed by <class>\AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> — a PSR-14 <class>Psr\EventDispatcher\EventDispatcherInterface</class> decorator. Every `$dispatcher->dispatch($event)` call is intercepted, timed, and forwarded to the collector.
 
 Framework adapters register the proxy automatically.
 

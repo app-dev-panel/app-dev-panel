@@ -10,7 +10,7 @@ composer require app-dev-panel/adapter-cycle
 
 ## Использование
 
-Зарегистрируйте `CycleSchemaProvider` как `SchemaProviderInterface` в DI-контейнере вашего фреймворка:
+Зарегистрируйте <class>AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider</class> как <class>AppDevPanel\Api\Inspector\Database\SchemaProviderInterface</class> в DI-контейнере вашего фреймворка:
 
 ```php
 use AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider;

@@ -28,7 +28,7 @@ Enter a cache key to view its stored value. The inspector displays the deseriali
 
 ## Requirements
 
-Requires a PSR-16 `CacheInterface` implementation registered in the DI container.
+Requires a PSR-16 <class>Psr\SimpleCache\CacheInterface</class> implementation registered in the DI container.
 
 ::: warning
 The **Clear** action is destructive — it removes all cache entries. Use with care in production.

@@ -127,7 +127,7 @@ libs/frontend/
 
 ### Технологии
 
-- React 18, TypeScript 5.5+
+- React 19, TypeScript 5.5+
 - Vite 5 (сборщик)
 - MUI 5 (Material UI компоненты)
 - Redux Toolkit + RTK Query (управление состоянием + API)

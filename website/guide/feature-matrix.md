@@ -16,26 +16,26 @@ These collectors are registered in **all four adapters**:
 
 | Collector | Frontend Panel | Description |
 |-----------|---------------|-------------|
-| `TimelineCollector` | Timeline | Performance timeline events |
-| `LogCollector` | Logs | PSR-3 log messages |
-| `EventCollector` | Events | PSR-14 dispatched events |
-| `ExceptionCollector` | Exceptions | Uncaught exceptions with stack traces |
-| `DeprecationCollector` | _(in Logs)_ | PHP deprecation warnings |
-| `ServiceCollector` | Services | DI container service resolutions |
-| `HttpClientCollector` | HTTP Client | PSR-18 outgoing HTTP requests |
-| `VarDumperCollector` | Var Dumper | `dump()` / `dd()` calls |
-| `EnvironmentCollector` | Environment | PHP and OS environment info |
-| `FilesystemStreamCollector` | Filesystem | File system stream operations |
-| `HttpStreamCollector` | _(hidden)_ | Raw HTTP stream data (sub-view of HTTP Client) |
-| `RequestCollector` | Request | Incoming HTTP request/response (web entries) |
-| `CommandCollector` | Request | Console command details (console entries) |
-| `WebAppInfoCollector` | _(meta)_ | Web app summary for entry list |
-| `ConsoleAppInfoCollector` | _(meta)_ | Console app summary for entry list |
-| `RouterCollector` | Router | HTTP route matching data |
-| `ValidatorCollector` | Validator | Validation operations and results |
-| `TranslatorCollector` | Translator | Translation lookups, missing translations |
-| `AuthorizationCollector` | Security | Authentication and authorization data |
-| `OpenTelemetryCollector` | OpenTelemetry | OpenTelemetry spans and traces |
+| <class>AppDevPanel\Kernel\Collector\TimelineCollector</class> | Timeline | Performance timeline events |
+| <class>AppDevPanel\Kernel\Collector\LogCollector</class> | Logs | PSR-3 log messages |
+| <class>AppDevPanel\Kernel\Collector\EventCollector</class> | Events | PSR-14 dispatched events |
+| <class>AppDevPanel\Kernel\Collector\ExceptionCollector</class> | Exceptions | Uncaught exceptions with stack traces |
+| <class>AppDevPanel\Kernel\Collector\DeprecationCollector</class> | _(in Logs)_ | PHP deprecation warnings |
+| <class>AppDevPanel\Kernel\Collector\ServiceCollector</class> | Services | DI container service resolutions |
+| <class>AppDevPanel\Kernel\Collector\HttpClientCollector</class> | HTTP Client | PSR-18 outgoing HTTP requests |
+| <class>AppDevPanel\Kernel\Collector\VarDumperCollector</class> | Var Dumper | `dump()` / `dd()` calls |
+| <class>AppDevPanel\Kernel\Collector\EnvironmentCollector</class> | Environment | PHP and OS environment info |
+| <class>AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector</class> | Filesystem | File system stream operations |
+| <class>AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector</class> | _(hidden)_ | Raw HTTP stream data (sub-view of HTTP Client) |
+| <class>AppDevPanel\Kernel\Collector\Web\RequestCollector</class> | Request | Incoming HTTP request/response (web entries) |
+| <class>AppDevPanel\Kernel\Collector\Console\CommandCollector</class> | Request | Console command details (console entries) |
+| <class>AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector</class> | _(meta)_ | Web app summary for entry list |
+| <class>AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector</class> | _(meta)_ | Console app summary for entry list |
+| <class>AppDevPanel\Kernel\Collector\RouterCollector</class> | Router | HTTP route matching data |
+| <class>AppDevPanel\Kernel\Collector\ValidatorCollector</class> | Validator | Validation operations and results |
+| <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> | Translator | Translation lookups, missing translations |
+| <class>AppDevPanel\Kernel\Collector\AuthorizationCollector</class> | Security | Authentication and authorization data |
+| <class>AppDevPanel\Kernel\Collector\OpenTelemetryCollector</class> | OpenTelemetry | OpenTelemetry spans and traces |
 
 ### Collector Availability Matrix
 
@@ -69,20 +69,20 @@ Each adapter uses different strategies to intercept framework internals and feed
 
 | Interface | Yiisoft | Symfony | Laravel | Yii2 |
 |-----------|---------|---------|---------|------|
-| PSR-3 Logger | `LoggerInterfaceProxy` | `LoggerInterfaceProxy` | `LoggerInterfaceProxy` | `DebugLogTarget` |
-| PSR-14 Events | `EventDispatcherInterfaceProxy` | `SymfonyEventDispatcherProxy` | `LaravelEventDispatcherProxy` | Wildcard `Event::on('*')` |
-| PSR-18 HTTP Client | `HttpClientInterfaceProxy` | `HttpClientInterfaceProxy` | `HttpClientInterfaceProxy` | `HttpClientInterfaceProxy` |
-| PSR-11 Container | `ContainerInterfaceProxy` | Compiler pass | — | — |
-| VarDumper | `VarDumperHandlerInterfaceProxy` | Handler hook | Handler hook | Handler hook |
-| Database | `ConnectionInterfaceProxy` | DBAL middleware | Event listener | `DbProfilingTarget` |
-| Mailer | `MailerInterfaceProxy` | Event listener | Event listener | Event hook |
-| Router | `UrlMatcherInterfaceProxy` | — | `RouterDataExtractor` | `UrlRuleProxy` |
-| Validator | `ValidatorInterfaceProxy` | — | — | — |
-| Queue | `QueueProviderInterfaceProxy` | — | Event listener | — |
+| PSR-3 Logger | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget</class> |
+| PSR-14 Events | <class>AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy</class> | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy</class> | Wildcard `Event::on('*')` |
+| PSR-18 HTTP Client | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> |
+| PSR-11 Container | <class>AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy</class> | Compiler pass | — | — |
+| VarDumper | <class>AppDevPanel\Adapter\Yiisoft\Proxy\VarDumperHandlerInterfaceProxy</class> | Handler hook | Handler hook | Handler hook |
+| Database | <class>AppDevPanel\Adapter\Yiisoft\Collector\Db\ConnectionInterfaceProxy</class> | DBAL middleware | Event listener | `DbProfilingTarget` |
+| Mailer | <class>AppDevPanel\Adapter\Yiisoft\Collector\Mailer\MailerInterfaceProxy</class> | Event listener | Event listener | Event hook |
+| Router | <class>AppDevPanel\Adapter\Yiisoft\Collector\Router\UrlMatcherInterfaceProxy</class> | — | <class>AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor</class> | <class>AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy</class> |
+| Validator | <class>AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy</class> | — | — | — |
+| Queue | <class>AppDevPanel\Adapter\Yiisoft\Collector\Queue\QueueProviderInterfaceProxy</class> | — | Event listener | — |
 | View/Templates | — | Twig profiler extension | — | `View::EVENT_AFTER_RENDER` |
 | Cache | — | Decorated `CacheAdapter` | Event listener | — |
 | Messenger | — | Messenger middleware | — | — |
-| Translator | `TranslatorInterfaceProxy` | `SymfonyTranslatorProxy` | `LaravelTranslatorProxy` | `I18NProxy` |
+| Translator | <class>AppDevPanel\Adapter\Yiisoft\Collector\Translator\TranslatorInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy</class> | <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> |
 
 ## Inspector Features
 

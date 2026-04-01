@@ -123,4 +123,4 @@
 
 ## Мультисервисное проксирование
 
-Запросы Inspector с параметром `?service=<name>` проксируются на URL зарегистрированного внешнего сервиса через `InspectorProxyMiddleware`. Запросы без `?service` или с `?service=local` обрабатываются локально.
+Запросы Inspector с параметром `?service=<name>` проксируются на URL зарегистрированного внешнего сервиса через <class>AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware</class>. Запросы без `?service` или с `?service=local` обрабатываются локально.

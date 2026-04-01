@@ -13,7 +13,7 @@ Captures email messages sent during a request — recipients, subject, body, and
 | Field | Description |
 |-------|-------------|
 | `from` | Sender addresses |
-| <class>\AppDevPanel\Adapter\Yii2\Inspector\to</class> | Recipient addresses |
+| `to` | Recipient addresses |
 | `cc` | CC addresses |
 | `bcc` | BCC addresses |
 | `replyTo` | Reply-To addresses |

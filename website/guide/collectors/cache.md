@@ -73,7 +73,7 @@ $collector->logCacheOperation(new CacheOperationRecord(
 
 ## How It Works
 
-Framework adapters intercept PSR-16 `CacheInterface` operations through the `CacheInterfaceProxy` decorator. Every `get()`, `set()`, `delete()`, `has()`, and `clear()` call is automatically captured.
+Framework adapters intercept PSR-16 <class>Psr\SimpleCache\CacheInterface</class> operations through the `CacheInterfaceProxy` decorator. Every `get()`, `set()`, `delete()`, `has()`, and `clear()` call is automatically captured.
 
 ## Debug Panel
 

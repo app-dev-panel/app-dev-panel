@@ -30,15 +30,15 @@ ADP ships with collectors for common debugging scenarios:
 
 | Collector | What it captures |
 |-----------|-----------------|
-| `LogCollector` | PSR-3 log messages |
-| `EventCollector` | PSR-14 events |
-| `HttpClientCollector` | Outgoing HTTP requests |
-| `DatabaseCollector` | SQL queries and timings |
-| `ExceptionCollector` | Caught and uncaught exceptions |
-| `MiddlewareCollector` | PSR-15 middleware execution |
-| `ServiceCollector` | DI container resolutions |
-| `AssetCollector` | Frontend assets |
-| `RouterCollector` | Route matching and parameters |
+| <class>AppDevPanel\Kernel\Collector\LogCollector</class> | PSR-3 log messages |
+| <class>AppDevPanel\Kernel\Collector\EventCollector</class> | PSR-14 events |
+| <class>AppDevPanel\Kernel\Collector\HttpClientCollector</class> | Outgoing HTTP requests |
+| <class>AppDevPanel\Kernel\Collector\DatabaseCollector</class> | SQL queries and timings |
+| <class>AppDevPanel\Kernel\Collector\ExceptionCollector</class> | Caught and uncaught exceptions |
+| <class>AppDevPanel\Kernel\Collector\MiddlewareCollector</class> | PSR-15 middleware execution |
+| <class>AppDevPanel\Kernel\Collector\ServiceCollector</class> | DI container resolutions |
+| <class>AppDevPanel\Kernel\Collector\AssetBundleCollector</class> | Frontend assets |
+| <class>AppDevPanel\Kernel\Collector\RouterCollector</class> | Route matching and parameters |
 
 ### Real-time Updates
 
@@ -62,5 +62,5 @@ ADP includes an MCP (Model Context Protocol) server that exposes debug data to A
 - **Framework-agnostic** — Works with any PSR-compliant framework
 - **Zero configuration** — Install the adapter and it just works
 - **Non-intrusive** — Uses proxies, not patches. Your code stays clean
-- **Extensible** — Write custom collectors for your domain
-- **Modern stack** — React 18, TypeScript, Material-UI on the frontend
+- **Extensible** — Write custom collectors implementing <class>AppDevPanel\Kernel\Collector\CollectorInterface</class> for your domain
+- **Modern stack** — React 19, TypeScript, Material-UI on the frontend

@@ -32,7 +32,7 @@ Stops the debugger and clears all stored debug data.
 php yii debug:reset
 ```
 
-Internally calls `Debugger::stop()` followed by `StorageInterface::clear()`.
+Internally calls <class>AppDevPanel\Kernel\Debugger</class>`::stop()` followed by <class>AppDevPanel\Kernel\Storage\StorageInterface</class>`::clear()`.
 
 ### `dev:broadcast` -- Broadcast Test Messages
 

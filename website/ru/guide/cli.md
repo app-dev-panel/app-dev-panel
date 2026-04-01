@@ -32,7 +32,7 @@ php yii dev -a 127.0.0.1 -p 9000   # Пользовательский адрес
 php yii debug:reset
 ```
 
-Внутренне вызывает `Debugger::stop()`, затем `StorageInterface::clear()`.
+Внутренне вызывает <class>AppDevPanel\Kernel\Debugger</class>`::stop()`, затем <class>AppDevPanel\Kernel\Storage\StorageInterface</class>`::clear()`.
 
 ### `dev:broadcast` -- Трансляция тестовых сообщений
 

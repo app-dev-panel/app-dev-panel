@@ -123,9 +123,9 @@ All checks must pass before merging.
 
 ## Adding a Collector
 
-1. Create a class implementing `CollectorInterface` in `libs/Kernel/src/Collector/`
+1. Create a class implementing <class>AppDevPanel\Kernel\Collector\CollectorInterface</class> in `libs/Kernel/src/Collector/`
 2. Implement `startup()`, `shutdown()`, `getCollected()`
-3. Optionally implement `SummaryCollectorInterface` for entry list metadata
+3. Optionally implement <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> for entry list metadata
 4. Write a test extending `AbstractCollectorTestCase`
 5. Register in adapter configs (e.g., `libs/Adapter/Yiisoft/config/params.php`)
 

@@ -8,7 +8,7 @@
 composer require app-dev-panel/adapter-yii2
 ```
 
-Пакет автоматически регистрируется через `extra.bootstrap` в composer.json. Класс `Bootstrap` регистрирует модуль `debug-panel` автоматически при включенном `YII_DEBUG`.
+Пакет автоматически регистрируется через `extra.bootstrap` в composer.json. Класс <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> регистрирует модуль `debug-panel` автоматически при включенном `YII_DEBUG`.
 
 ## Конфигурация
 
@@ -49,17 +49,17 @@ composer require app-dev-panel/adapter-yii2
 | Коллектор | Механизм | Данные |
 |-----------|----------|--------|
 | Database | `DbProfilingTarget` (логгер Yii) | SQL-запросы, время, кол-во строк |
-| Log | `DebugLogTarget` (real-time Yii log target) | Сообщения логов с маппингом PSR-3 уровней |
+| Log | <class>AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget</class> (real-time Yii log target) | Сообщения логов с маппингом PSR-3 уровней |
 | Mailer | `BaseMailer::EVENT_AFTER_SEND` | From, to, cc, bcc, subject, body |
 | Asset Bundles | `View::EVENT_END_PAGE` | Бандлы: класс, пути, CSS/JS, зависимости |
-| Translator | `I18NProxy` заменяет `Yii::$app->i18n` | Поиск переводов, пропущенные переводы |
+| Translator | <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> заменяет `Yii::$app->i18n` | Поиск переводов, пропущенные переводы |
 | View | `View::EVENT_AFTER_RENDER` | Файл рендеринга, вывод, параметры |
 | Templates | `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` | Время рендеринга шаблонов (поддержка вложенности) |
 | Redis | Прямые вызовы коллектора | Redis-команды, время, ошибки |
 | Elasticsearch | Прямые вызовы коллектора | ES-запросы, время, количество совпадений |
 | Code Coverage | Расширение `pcov` / `xdebug` | Покрытие строк по файлам (opt-in) |
 | Authorization | `User::EVENT_AFTER_LOGIN/LOGOUT` | События аутентификации, идентификация пользователя |
-| Router | `UrlRuleProxy` оборачивает все URL-правила | Данные маршрутизации, время |
+| Router | <class>AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy</class> оборачивает все URL-правила | Данные маршрутизации, время |
 
 ### Коллекторы View и Template
 
@@ -73,8 +73,8 @@ Code coverage — **opt-in** (`'code_coverage' => false` по умолчанию
 
 ## Интеграция с переводчиком
 
-Адаптер заменяет компонент приложения `i18n` на `I18NProxy` — расширенный `yii\i18n\I18N`, который переопределяет метод `translate()`. Все вызовы `Yii::t()` перехватываются и записываются в `TranslatorCollector` автоматически. Подробности на странице [Переводчик](/ru/guide/translator).
+Адаптер заменяет компонент приложения `i18n` на <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> — расширенный `yii\i18n\I18N`, который переопределяет метод `translate()`. Все вызовы `Yii::t()` перехватываются и записываются в <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> автоматически. Подробности на странице [Переводчик](/ru/guide/translator).
 
 ## Инспектор базы данных
 
-`Yii2DbSchemaProvider` предоставляет инспекцию схемы БД через `yii\db\Schema`. Без настроенного компонента базы данных используется `NullSchemaProvider`.
+`Yii2DbSchemaProvider` предоставляет инспекцию схемы БД через `yii\db\Schema`. Без настроенного компонента базы данных используется <class>AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider</class>.

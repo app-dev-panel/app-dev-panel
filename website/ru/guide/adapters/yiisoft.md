@@ -52,8 +52,8 @@ DebugHeaders → ErrorCatcher → YiiApiMiddleware → ... → Router
 
 ## Интеграция с переводчиком
 
-При установленном пакете `yiisoft/translator` адаптер регистрирует `TranslatorInterfaceProxy` в `trackedServices`. Все вызовы `translate()` на `Yiisoft\Translator\TranslatorInterface` перехватываются автоматически. Подробности на странице [Переводчик](/ru/guide/translator).
+При установленном пакете `yiisoft/translator` адаптер регистрирует <class>AppDevPanel\Adapter\Yiisoft\Collector\Translator\TranslatorInterfaceProxy</class> в `trackedServices`. Все вызовы `translate()` на `Yiisoft\Translator\TranslatorInterface` перехватываются автоматически. Подробности на странице [Переводчик](/ru/guide/translator).
 
 ## Инспектор базы данных
 
-Инспекция схемы базы данных осуществляется через `Yiisoft\Db` с помощью `DbSchemaProvider`.
+Инспекция схемы базы данных осуществляется через `Yiisoft\Db` с помощью <class>AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider</class>.

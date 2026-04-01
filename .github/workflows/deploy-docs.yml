@@ -67,8 +67,9 @@ jobs:
       # Copy panel assets into the VitePress dist so they are served from GitHub Pages
       - name: Copy panel assets to dist
         run: |
-          cp libs/frontend/packages/panel/dist/bundle.js website/.vitepress/dist/bundle.js
-          cp libs/frontend/packages/panel/dist/bundle.css website/.vitepress/dist/bundle.css
+          cp libs/frontend/packages/panel/dist/bundle*.js website/.vitepress/dist/
+          cp libs/frontend/packages/panel/dist/bundle*.css website/.vitepress/dist/
+          cp -r libs/frontend/packages/panel/dist/assets website/.vitepress/dist/assets 2>/dev/null || true
 
       # Deploy the full panel SPA as a live demo at /demo/
       - name: Copy live demo

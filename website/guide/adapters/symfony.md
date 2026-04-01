@@ -8,6 +8,10 @@ The Symfony adapter bridges ADP Kernel and API into Symfony 6.4+ / 7.x / 8.x via
 composer require app-dev-panel/adapter-symfony
 ```
 
+::: info Package
+<pkg>app-dev-panel/adapter-symfony</pkg>
+:::
+
 ## Bundle Registration
 
 Register the bundle in `config/bundles.php`:
@@ -56,8 +60,8 @@ Supports all Kernel collectors plus Symfony-specific ones: Twig templates, Secur
 
 ## Translator Integration
 
-The adapter automatically decorates Symfony's `TranslatorInterface` with `SymfonyTranslatorProxy` via the compiler pass. All `trans()` calls are intercepted and logged to `TranslatorCollector` — no code changes needed. See [Translator](/guide/translator) for details.
+The adapter automatically decorates Symfony's <class>Symfony\Contracts\Translation\TranslatorInterface</class> with <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> via the compiler pass. All `trans()` calls are intercepted and logged to <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> — no code changes needed. See [Translator](/guide/translator) for details.
 
 ## Database Inspector
 
-When `doctrine/dbal` is available, `DoctrineSchemaProvider` provides database schema inspection. Falls back to `NullSchemaProvider` otherwise.
+When `doctrine/dbal` is available, <class>AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider</class> provides database schema inspection. Falls back to <class>AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider</class> otherwise.

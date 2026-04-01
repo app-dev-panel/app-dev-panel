@@ -8,6 +8,10 @@ The Laravel adapter bridges ADP Kernel and API into Laravel 11.x / 12.x via a se
 composer require app-dev-panel/adapter-laravel
 ```
 
+::: info Package
+<pkg>app-dev-panel/adapter-laravel</pkg>
+:::
+
 The package is auto-discovered via `extra.laravel.providers` in composer.json — no manual registration needed.
 
 ## Configuration
@@ -55,8 +59,8 @@ Supports all Kernel collectors plus Laravel-specific data capture via event list
 
 ## Translator Integration
 
-The adapter automatically decorates Laravel's `Translator` service with `LaravelTranslatorProxy` via `$app->extend('translator')`. All `__('key')`, `trans()`, and `Lang::get()` calls are intercepted. Laravel's dot-notation keys (`group.key`) are parsed into category and message. See [Translator](/guide/translator) for details.
+The adapter automatically decorates Laravel's `Translator` service with <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy</class> via `$app->extend('translator')`. All `__('key')`, `trans()`, and `Lang::get()` calls are intercepted. Laravel's dot-notation keys (`group.key`) are parsed into category and message. See [Translator](/guide/translator) for details.
 
 ## Database Inspector
 
-`LaravelSchemaProvider` provides database schema inspection via `Illuminate\Database\Connection`. Falls back to `NullSchemaProvider` when no database is configured.
+<class>AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider</class> provides database schema inspection via `Illuminate\Database\Connection`. Falls back to <class>AppDevPanel\Adapter\Laravel\Inspector\NullSchemaProvider</class> when no database is configured.

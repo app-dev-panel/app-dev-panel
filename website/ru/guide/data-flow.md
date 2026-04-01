@@ -19,7 +19,7 @@ title: Поток данных
 Когда приложение получает HTTP-запрос (или CLI-команду):
 
 1. Обработчик событий адаптера перехватывает событие запуска фреймворка
-2. Вызывается `Debugger::startup()`, который:
+2. Вызывается <class>AppDevPanel\Kernel\Debugger</class>`::startup()`, который:
    - Регистрирует shutdown-функцию
    - Проверяет, нужно ли игнорировать запрос/команду (через паттерны `$ignoredRequests` / `$ignoredCommands`, заголовок `X-Debug-Ignore`)
    - Если не игнорируется: вызывает `startup()` на всех зарегистрированных коллекторах
@@ -43,14 +43,14 @@ title: Поток данных
 
 ### Фаза 3: Завершение и сброс
 
-Когда запрос завершается (или консольная команда заканчивается), **Debugger** инициирует завершение:
+Когда запрос завершается (или консольная команда заканчивается), <class>AppDevPanel\Kernel\Debugger</class> инициирует завершение:
 
 1. Вызывает `shutdown()` на всех коллекторах (сбрасывает внутреннее состояние)
 2. Вызывает `getCollected()` для получения накопленных данных
-3. Сериализует объекты через `Dumper` (ограничение глубины — 30 уровней, обнаружение циклических ссылок)
+3. Сериализует объекты через <class>AppDevPanel\Kernel\Dumper</class> (ограничение глубины — 30 уровней, обнаружение циклических ссылок)
 4. Вызывает `flush()` на хранилище
 
-**FileStorage** записывает три JSON-файла на каждую отладочную запись:
+<class>AppDevPanel\Kernel\Storage\FileStorage</class> записывает три JSON-файла на каждую отладочную запись:
 
 | Файл | Содержимое |
 |------|------------|
@@ -96,7 +96,7 @@ runtime/debug/
 }
 ```
 
-Коллекторы, реализующие `SummaryCollectorInterface`, предоставляют свои ключи сводки (например, `logger`, `event`, `http`) для отображения в списке записей без загрузки полных данных.
+Коллекторы, реализующие <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>, предоставляют свои ключи сводки (например, `logger`, `event`, `http`) для отображения в списке записей без загрузки полных данных.
 
 ## Обслуживание API
 
@@ -226,14 +226,14 @@ InspectorProxyMiddleware
      │ ◀────────────────────────────────── │ (список с online/offline)
 ```
 
-`ServiceDescriptor` содержит: `service`, `language`, `inspectorUrl`, `capabilities[]`, `registeredAt`, `lastSeenAt`. Сервис считается онлайн, если `now() - lastSeenAt < 60с`.
+<class>AppDevPanel\Kernel\Service\ServiceDescriptor</class> содержит: `service`, `language`, `inspectorUrl`, `capabilities[]`, `registeredAt`, `lastSeenAt`. Сервис считается онлайн, если `now() - lastSeenAt < 60с`.
 
 ## Консольные команды
 
 Консольные команды следуют тому же жизненному циклу, что и веб-запросы, с отличиями:
 
-- `ConsoleAppInfoCollector` заменяет `WebAppInfoCollector`
-- `CommandCollector` заменяет `RequestCollector` (оба отображаются в единой панели "Request" в UI)
+- <class>AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector</class> заменяет <class>AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector</class>
+- <class>AppDevPanel\Kernel\Collector\Console\CommandCollector</class> заменяет <class>AppDevPanel\Kernel\Collector\Web\RequestCollector</class> (оба отображаются в единой панели "Request" в UI)
 - Нет middleware, маршрутизатора или коллекторов ассетов
 - События: `ConsoleCommandEvent` запускает startup, `ConsoleTerminateEvent` запускает shutdown
 

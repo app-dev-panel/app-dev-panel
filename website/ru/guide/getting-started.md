@@ -50,7 +50,7 @@ composer require app-dev-panel/adapter-laravel
 ```
 :::
 
-Каждый адаптер автоматически подтягивает `app-dev-panel/kernel` и `app-dev-panel/api` как зависимости.
+Каждый адаптер автоматически подтягивает <pkg>app-dev-panel/kernel</pkg> и <pkg>app-dev-panel/api</pkg> как зависимости.
 
 ### 2. Сконфигурируйте приложение
 

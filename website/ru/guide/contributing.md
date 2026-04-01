@@ -123,9 +123,9 @@ Frontend → API (только HTTP)
 
 ## Добавление коллектора
 
-1. Создайте класс, реализующий `CollectorInterface`, в `libs/Kernel/src/Collector/`
+1. Создайте класс, реализующий <class>AppDevPanel\Kernel\Collector\CollectorInterface</class>, в `libs/Kernel/src/Collector/`
 2. Реализуйте `startup()`, `shutdown()`, `getCollected()`
-3. Опционально реализуйте `SummaryCollectorInterface` для метаданных в списке записей
+3. Опционально реализуйте <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> для метаданных в списке записей
 4. Напишите тест, наследующий `AbstractCollectorTestCase`
 5. Зарегистрируйте в конфигах адаптера (напр., `libs/Adapter/Yiisoft/config/params.php`)
 

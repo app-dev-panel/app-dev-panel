@@ -79,10 +79,10 @@ $collector->collectRoutes(routes: $allRoutes, routesTree: $routeTree);
 
 ## How It Works
 
-Each framework adapter has a <class>\AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor</class> that normalizes framework-specific route data into the common format:
+Each framework adapter has a `RouterDataExtractor` that normalizes framework-specific route data into the common format:
 - **Symfony**: Extracts from `RouterInterface` and request attributes
-- **Laravel**: Extracts from <class>\AppDevPanel\Api\Router\Router</class> facade and matched <class>\AppDevPanel\Api\Router\Route</class> object
-- **Yii 3**: Extracts from `UrlMatcherInterface` result
+- **Laravel**: Extracts from <class>Illuminate\Routing\Router</class> facade and matched `Route` object
+- **Yii 3**: Extracts from <class>Symfony\Component\Routing\Matcher\UrlMatcherInterface</class> result
 
 ## Debug Panel
 

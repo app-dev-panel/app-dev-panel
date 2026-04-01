@@ -8,7 +8,7 @@ ADP собирает данные аутентификации и авториз
 
 ## AuthorizationCollector
 
-`AppDevPanel\Kernel\Collector\AuthorizationCollector` собирает данные безопасности во время выполнения. Реализует `SummaryCollectorInterface` для отображения в списке debug-записей.
+<class>AppDevPanel\Kernel\Collector\AuthorizationCollector</class> собирает данные безопасности во время выполнения. Реализует <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> для отображения в списке debug-записей.
 
 ### Собираемые данные
 
@@ -42,11 +42,11 @@ $collector->logAccessDecision('EDIT', 'App\\Entity\\Post', 'ACCESS_DENIED', $vot
 
 ## Интеграция с адаптерами
 
-Каждый адаптер автоматически передаёт данные в AuthorizationCollector из нативной системы аутентификации фреймворка.
+Каждый адаптер автоматически передаёт данные в <class>AppDevPanel\Kernel\Collector\AuthorizationCollector</class> из нативной системы аутентификации фреймворка.
 
 ### Symfony
 
-`AuthorizationSubscriber` слушает события Symfony Security. Требуется `symfony/security-http`.
+<class>AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber</class> слушает события Symfony Security. Требуется `symfony/security-http`.
 
 | Событие | Собираемые данные |
 |---------|-------------------|
@@ -67,7 +67,7 @@ app_dev_panel:
 
 ### Laravel
 
-`AuthorizationListener` слушает события Laravel Auth.
+<class>AppDevPanel\Adapter\Laravel\EventListener\AuthorizationListener</class> слушает события Laravel Auth.
 
 | Событие | Собираемые данные |
 |---------|-------------------|
@@ -79,7 +79,7 @@ app_dev_panel:
 
 ### Yii 2
 
-`AuthorizationListener` подключается к событиям `yii\web\User`.
+<class>AppDevPanel\Adapter\Yii2\EventListener\AuthorizationListener</class> подключается к событиям `yii\web\User`.
 
 | Событие | Собираемые данные |
 |---------|-------------------|
@@ -114,7 +114,7 @@ AuthorizationCollector зарегистрирован в DI, но требует
 }
 ```
 
-Адаптеры реализуют `AuthorizationConfigProviderInterface` для предоставления этих данных. По умолчанию: `NullAuthorizationConfigProvider` (пустые массивы).
+Адаптеры реализуют `AuthorizationConfigProviderInterface` для предоставления этих данных. По умолчанию: <class>AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider</class> (пустые массивы).
 
 ## Frontend
 

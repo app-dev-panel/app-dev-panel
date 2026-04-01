@@ -8,7 +8,7 @@ ADP captures authentication and authorization data from your application: user i
 
 ## AuthorizationCollector
 
-`AppDevPanel\Kernel\Collector\AuthorizationCollector` captures runtime security data. It implements `SummaryCollectorInterface` for summary display in the debug entry list.
+<class>AppDevPanel\Kernel\Collector\AuthorizationCollector</class> captures runtime security data. It implements <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> for summary display in the debug entry list.
 
 ### Collected Data
 
@@ -42,11 +42,11 @@ $collector->logAccessDecision('EDIT', 'App\\Entity\\Post', 'ACCESS_DENIED', $vot
 
 ## Adapter Wiring
 
-Each adapter automatically feeds AuthorizationCollector from the framework's native auth system.
+Each adapter automatically feeds <class>AppDevPanel\Kernel\Collector\AuthorizationCollector</class> from the framework's native auth system.
 
 ### Symfony
 
-`AuthorizationSubscriber` listens to Symfony Security events. Requires `symfony/security-http`.
+<class>AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber</class> listens to Symfony Security events. Requires `symfony/security-http`.
 
 | Event | Data Captured |
 |-------|---------------|
@@ -67,7 +67,7 @@ app_dev_panel:
 
 ### Laravel
 
-`AuthorizationListener` listens to Laravel Auth events.
+<class>AppDevPanel\Adapter\Laravel\EventListener\AuthorizationListener</class> listens to Laravel Auth events.
 
 | Event | Data Captured |
 |-------|---------------|
@@ -79,7 +79,7 @@ app_dev_panel:
 
 ### Yii 2
 
-`AuthorizationListener` hooks into `yii\web\User` events.
+<class>AppDevPanel\Adapter\Yii2\EventListener\AuthorizationListener</class> hooks into `yii\web\User` events.
 
 | Event | Data Captured |
 |-------|---------------|
@@ -89,7 +89,7 @@ app_dev_panel:
 
 ### Yiisoft (Yii 3)
 
-AuthorizationCollector is registered in DI but requires manual calls — Yii 3 has no standardized auth event system.
+<class>AppDevPanel\Kernel\Collector\AuthorizationCollector</class> is registered in DI but requires manual calls — Yii 3 has no standardized auth event system.
 
 ## Authorization Inspector
 
@@ -114,7 +114,7 @@ The inspector provides a live view of security configuration via `GET /inspect/a
 }
 ```
 
-Adapters implement `AuthorizationConfigProviderInterface` to supply this data. Default: `NullAuthorizationConfigProvider` (empty arrays).
+Adapters implement `AuthorizationConfigProviderInterface` to supply this data. Default: <class>AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider</class> (empty arrays).
 
 ## Frontend
 

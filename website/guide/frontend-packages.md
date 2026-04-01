@@ -127,7 +127,7 @@ libs/frontend/
 
 ### Tech Stack
 
-- React 18, TypeScript 5.5+
+- React 19, TypeScript 5.5+
 - Vite 5 (build tool)
 - MUI 5 (Material UI components)
 - Redux Toolkit + RTK Query (state management + API)

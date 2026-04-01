@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress';
 import llmstxt from 'vitepress-plugin-llms';
 import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs';
 import { classLinkPlugin } from './class-link';
+import { pkgLinkPlugin } from './pkg-link';
 
 export default defineConfig({
     vite: {
@@ -420,6 +421,7 @@ export default defineConfig({
         config(md) {
             md.use(tabsMarkdownPlugin);
             md.use(classLinkPlugin);
+            md.use(pkgLinkPlugin);
         },
     },
 

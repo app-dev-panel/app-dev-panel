@@ -41,9 +41,9 @@ ADP использует паттерн прокси для прозрачног
 
 | Прокси | PSR-интерфейс | Парный коллектор |
 |--------|---------------|-----------------|
-| `LoggerInterfaceProxy` | PSR-3 `LoggerInterface` | `LogCollector` |
-| `EventDispatcherInterfaceProxy` | PSR-14 `EventDispatcherInterface` | `EventCollector` |
-| `HttpClientInterfaceProxy` | PSR-18 `ClientInterface` | `HttpClientCollector` |
+| <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | PSR-3 <class>Psr\Log\LoggerInterface</class> | <class>AppDevPanel\Kernel\Collector\LogCollector</class> |
+| <class>AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> | PSR-14 <class>Psr\EventDispatcher\EventDispatcherInterface</class> | <class>AppDevPanel\Kernel\Collector\EventCollector</class> |
+| <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | PSR-18 <class>Psr\Http\Client\ClientInterface</class> | <class>AppDevPanel\Kernel\Collector\HttpClientCollector</class> |
 
 ### Прокси фреймворков
 
@@ -51,26 +51,26 @@ ADP использует паттерн прокси для прозрачног
 
 | Прокси | Фреймворк | Интерфейс | Парный коллектор |
 |--------|-----------|-----------|-----------------|
-| `SymfonyTranslatorProxy` | Symfony | `TranslatorInterface` | `TranslatorCollector` |
-| `SymfonyEventDispatcherProxy` | Symfony | `EventDispatcherInterface` | `EventCollector` |
-| `LaravelTranslatorProxy` | Laravel | `Translator` | `TranslatorCollector` |
-| `LaravelEventDispatcherProxy` | Laravel | `Dispatcher` | `EventCollector` |
-| `TranslatorInterfaceProxy` | Yiisoft | `TranslatorInterface` | `TranslatorCollector` |
-| `ValidatorInterfaceProxy` | Yiisoft | `ValidatorInterface` | `ValidatorCollector` |
-| `ContainerInterfaceProxy` | Yiisoft | PSR-11 `ContainerInterface` | `ServiceCollector` |
-| `I18NProxy` | Yii 2 | `yii\i18n\I18N` | `TranslatorCollector` |
+| <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> | Symfony | <class>Symfony\Contracts\Translation\TranslatorInterface</class> | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
+| <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy</class> | Symfony | <class>Symfony\Contracts\EventDispatcher\EventDispatcherInterface</class> | <class>AppDevPanel\Kernel\Collector\EventCollector</class> |
+| <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy</class> | Laravel | <class>Illuminate\Contracts\Translation\Translator</class> | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
+| <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy</class> | Laravel | `Dispatcher` | <class>AppDevPanel\Kernel\Collector\EventCollector</class> |
+| <class>AppDevPanel\Adapter\Yiisoft\Collector\Translator\TranslatorInterfaceProxy</class> | Yiisoft | `TranslatorInterface` | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
+| <class>AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy</class> | Yiisoft | `ValidatorInterface` | <class>AppDevPanel\Kernel\Collector\ValidatorCollector</class> |
+| <class>AppDevPanel\Adapter\Yiisoft\Proxy\ContainerInterfaceProxy</class> | Yiisoft | PSR-11 <class>Psr\Container\ContainerInterface</class> | <class>AppDevPanel\Kernel\Collector\ServiceCollector</class> |
+| <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> | Yii 2 | `yii\i18n\I18N` | <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> |
 
 ### Прокси переводчика
 
-У каждого фреймворка свой интерфейс переводчика. ADP предоставляет выделенный прокси для каждого, все они передают данные в один `TranslatorCollector`. Подробности на странице [Переводчик](/ru/guide/translator).
+У каждого фреймворка свой интерфейс переводчика. ADP предоставляет выделенный прокси для каждого, все они передают данные в один <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class>. Подробности на странице [Переводчик](/ru/guide/translator).
 
-**Symfony** -- декорирует `Symfony\Contracts\Translation\TranslatorInterface` через `setDecoratedService()` в compiler pass. Перехватывает вызовы `trans()`.
+**Symfony** -- <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> декорирует <class>Symfony\Contracts\Translation\TranslatorInterface</class> через `setDecoratedService()` в compiler pass. Перехватывает вызовы `trans()`.
 
-**Laravel** -- декорирует `Illuminate\Contracts\Translation\Translator` через `$app->extend('translator')`. Перехватывает вызовы `get()` и `choice()`. Разбирает точечную нотацию ключей Laravel (`group.key`) на категорию и сообщение.
+**Laravel** -- <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy</class> декорирует <class>Illuminate\Contracts\Translation\Translator</class> через `$app->extend('translator')`. Перехватывает вызовы `get()` и `choice()`. Разбирает точечную нотацию ключей Laravel (`group.key`) на категорию и сообщение.
 
-**Yiisoft** -- регистрируется в `trackedServices` наряду с `ValidatorInterfaceProxy`. Перехватывает вызовы `translate()`. Поддерживает иммутабельные методы `withDefaultCategory()` и `withLocale()`.
+**Yiisoft** -- <class>AppDevPanel\Adapter\Yiisoft\Collector\Translator\TranslatorInterfaceProxy</class> регистрируется в `trackedServices` наряду с <class>AppDevPanel\Adapter\Yiisoft\Collector\Validator\ValidatorInterfaceProxy</class>. Перехватывает вызовы `translate()`. Поддерживает иммутабельные методы `withDefaultCategory()` и `withLocale()`.
 
-**Yii 2** -- наследует `yii\i18n\I18N` и переопределяет `translate()`. Заменяет компонент приложения `i18n` при загрузке модуля.
+**Yii 2** -- <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> наследует `yii\i18n\I18N` и переопределяет `translate()`. Заменяет компонент приложения `i18n` при загрузке модуля.
 
 ::: tip Обнаружение отсутствующих переводов
 Все прокси определяют отсутствие перевода, сравнивая возвращённое значение переводчика с исходным идентификатором сообщения. Если они совпадают, перевод помечается как `missing`.
