@@ -1,6 +1,6 @@
 import DefaultTheme from 'vitepress/theme';
 import type { Theme } from 'vitepress';
-import { h, onMounted, watch, nextTick } from 'vue';
+import { defineComponent, h, onMounted, watch, nextTick } from 'vue';
 import { useRoute } from 'vitepress';
 import { enhanceAppWithTabs } from 'vitepress-plugin-tabs/client';
 import mediumZoom from 'medium-zoom';
@@ -14,31 +14,29 @@ import GitHubStars from './components/GitHubStars.vue';
 import './style.css';
 
 function initZoom() {
-    mediumZoom('.vp-doc img:not(.no-zoom)', {
+    mediumZoom('.vp-doc img:not(.no-zoom):not(.medium-zoom-image)', {
         background: 'rgba(0, 0, 0, 0.85)',
     });
 }
 
-function ImageZoomSetup() {
-    const route = useRoute();
-    onMounted(() => {
-        initZoom();
-        watch(
-            () => route.path,
-            () => nextTick(initZoom),
-        );
-    });
-    return () => null;
-}
-
 export default {
     extends: DefaultTheme,
-    Layout() {
-        return h(DefaultTheme.Layout, null, {
-            'nav-bar-content-after': () => h(GitHubStars),
-            'doc-after': () => h(ImageZoomSetup),
-        });
-    },
+    Layout: defineComponent({
+        setup() {
+            const route = useRoute();
+            onMounted(() => {
+                initZoom();
+                watch(
+                    () => route.path,
+                    () => nextTick(initZoom),
+                );
+            });
+            return () =>
+                h(DefaultTheme.Layout, null, {
+                    'nav-bar-content-after': () => h(GitHubStars),
+                });
+        },
+    }),
     enhanceApp({ app }) {
         enhanceAppWithTabs(app);
         app.component('BlogIndex', BlogIndex);
