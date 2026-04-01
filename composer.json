@@ -90,7 +90,6 @@
     "yiisoft/error-handler": "^4.3",
     "yiisoft/event-dispatcher": "^1.1",
     "yiisoft/profiler": "^3.0",
-    "yiisoft/proxy": "^1.0.1",
     "yiisoft/translator": "^3.0",
     "yiisoft/var-dumper": "^1.7",
     "yiisoft/yii-console": "^2.4",
