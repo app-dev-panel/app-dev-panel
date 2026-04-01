@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Inspector;
 
+use AppDevPanel\Kernel\Inspector\ClosureDescriptorTrait;
 use ReflectionClass;
-use ReflectionFunction;
 use ReflectionProperty;
 use yii\base\Application;
 use yii\base\Component;
 use yii\base\Event;
-use Yiisoft\VarDumper\ClosureExporter;
 
 /**
  * Provides configuration data from Yii 2's application for the ADP inspector.
@@ -20,8 +19,9 @@ use Yiisoft\VarDumper\ClosureExporter;
  */
 final class Yii2ConfigProvider
 {
+    use ClosureDescriptorTrait;
+
     private static ?ReflectionProperty $classEventsProperty = null;
-    private static ?ClosureExporter $closureExporter = null;
 
     public function __construct(
         private readonly Application $app,
@@ -140,21 +140,6 @@ final class Yii2ConfigProvider
             return $handler::class . '::__invoke';
         }
         return get_debug_type($handler);
-    }
-
-    /**
-     * @return array{__closure: true, source: string, file: string|null, startLine: int|null, endLine: int|null}
-     */
-    private static function describeClosure(\Closure $closure): array
-    {
-        $ref = new ReflectionFunction($closure);
-        return [
-            '__closure' => true,
-            'source' => (self::$closureExporter ??= new ClosureExporter())->export($closure),
-            'file' => $ref->getFileName() ?: null,
-            'startLine' => $ref->getStartLine() ?: null,
-            'endLine' => $ref->getEndLine() ?: null,
-        ];
     }
 
     /**

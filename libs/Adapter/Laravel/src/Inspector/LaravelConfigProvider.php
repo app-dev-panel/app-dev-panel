@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Laravel\Inspector;
 
+use AppDevPanel\Kernel\Inspector\ClosureDescriptorTrait;
 use Illuminate\Contracts\Foundation\Application;
-use Yiisoft\VarDumper\ClosureExporter;
 
 /**
  * Provides configuration data from Laravel's container for the ADP inspector.
@@ -14,7 +14,7 @@ use Yiisoft\VarDumper\ClosureExporter;
  */
 final class LaravelConfigProvider
 {
-    private static ?ClosureExporter $closureExporter = null;
+    use ClosureDescriptorTrait;
 
     public function __construct(
         private readonly Application $app,
@@ -146,20 +146,5 @@ final class LaravelConfigProvider
             return $listener::class . '::__invoke';
         }
         return get_debug_type($listener);
-    }
-
-    /**
-     * @return array{__closure: true, source: string, file: string|null, startLine: int|null, endLine: int|null}
-     */
-    private static function describeClosure(\Closure $closure): array
-    {
-        $ref = new \ReflectionFunction($closure);
-        return [
-            '__closure' => true,
-            'source' => (self::$closureExporter ??= new ClosureExporter())->export($closure),
-            'file' => $ref->getFileName() ?: null,
-            'startLine' => $ref->getStartLine() ?: null,
-            'endLine' => $ref->getEndLine() ?: null,
-        ];
     }
 }
