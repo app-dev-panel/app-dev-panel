@@ -7,7 +7,7 @@ import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
-import {ContentCopy, DataObject, Download} from '@mui/icons-material';
+import {ContentCopy, DataObject, Download, ErrorOutline} from '@mui/icons-material';
 import {Box, CircularProgress, IconButton, TablePagination, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
@@ -98,17 +98,20 @@ const HeaderLabel = styled(Typography)(({theme}) => ({
 // Sub-components
 // ---------------------------------------------------------------------------
 
-const DefinitionValue = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: string) => void}) => {
+const DefinitionValue = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: string) => Promise<string | null>}) => {
     const [loading, setLoading] = useState(false);
-    const [expanded, setExpanded] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const isClassName = typeof entry.value === 'string' && /^[\w\\]+$/i.test(entry.value);
 
     const handleLoad = useCallback(async () => {
         setLoading(true);
-        await onLoad(entry.id);
+        setError(null);
+        const errorMessage = await onLoad(entry.id);
         setLoading(false);
-        setExpanded(true);
+        if (errorMessage) {
+            setError(errorMessage);
+        }
     }, [entry.id, onLoad]);
 
     if (typeof entry.value === 'string' && isClassName) {
@@ -116,12 +119,19 @@ const DefinitionValue = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: 
             <Box>
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                     <ClassValue>{entry.value}</ClassValue>
-                    <Tooltip title="Load object state">
+                    <Tooltip title={error ? 'Retry loading' : 'Load object state'}>
                         <IconButton size="small" onClick={handleLoad} disabled={loading} sx={{flexShrink: 0}}>
-                            {loading ? <CircularProgress size={14} /> : <Download sx={{fontSize: 14}} />}
+                            {loading ? (
+                                <CircularProgress size={14} />
+                            ) : error ? (
+                                <ErrorOutline sx={{fontSize: 14, color: 'error.main'}} />
+                            ) : (
+                                <Download sx={{fontSize: 14}} />
+                            )}
                         </IconButton>
                     </Tooltip>
                 </Box>
+                {error && <Typography sx={{fontSize: '11px', color: 'error.main', mt: 0.5}}>{error}</Typography>}
             </Box>
         );
     }
@@ -150,13 +160,15 @@ export const DefinitionsPage = () => {
     const [rowsPerPage, setRowsPerPage] = useState(50);
 
     const handleLoadObject = useCallback(
-        async (id: string) => {
+        async (id: string): Promise<string | null> => {
             const result = await lazyLoadObject(id);
             if (result.data) {
                 insertObject(id, result.data.object);
+                return null;
             }
+            const errorData = (result.error as any)?.data;
+            return errorData?.error || errorData?.data?.message || 'Failed to load object';
         },
-
         [lazyLoadObject],
     );
 
@@ -166,7 +178,6 @@ export const DefinitionsPage = () => {
             const items = rows.map((el) => ({id: el[0], value: el[1]}));
             setObjects(items);
         }
-
     }, [isLoading, data]);
 
     const filteredRows = useMemo(() => {
