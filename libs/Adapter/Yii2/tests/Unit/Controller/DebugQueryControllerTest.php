@@ -12,16 +12,18 @@ use yii\console\ExitCode;
 
 final class DebugQueryControllerTest extends TestCase
 {
+    private string $basePath;
+
     protected function setUp(): void
     {
         \Yii::$container = new \yii\di\Container();
 
-        $storagePath = sys_get_temp_dir() . '/adp_query_test_' . bin2hex(random_bytes(4));
-        mkdir($storagePath, 0o777, true);
+        $this->basePath = sys_get_temp_dir() . '/adp_query_test_' . bin2hex(random_bytes(4));
+        mkdir($this->basePath, 0o777, true);
 
         new Application([
             'id' => 'test',
-            'basePath' => $storagePath,
+            'basePath' => $this->basePath,
         ]);
     }
 
@@ -29,6 +31,17 @@ final class DebugQueryControllerTest extends TestCase
     {
         \Yii::$container = new \yii\di\Container();
         \Yii::$app = null;
+
+        if (is_dir($this->basePath)) {
+            $items = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($this->basePath, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST,
+            );
+            foreach ($items as $item) {
+                $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
+            }
+            rmdir($this->basePath);
+        }
     }
 
     public function testListEmpty(): void
@@ -37,7 +50,10 @@ final class DebugQueryControllerTest extends TestCase
         $repository->method('getSummary')->willReturn([]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->runAction('list');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -55,7 +71,10 @@ final class DebugQueryControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->runAction('list');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -72,7 +91,10 @@ final class DebugQueryControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionList(limit: 2);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -86,7 +108,10 @@ final class DebugQueryControllerTest extends TestCase
         $repository->method('getDetail')->with('abc-123')->willReturn($data);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionView('abc-123');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -101,7 +126,10 @@ final class DebugQueryControllerTest extends TestCase
         $repository->method('getDetail')->with('abc-123')->willReturn($data);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionView('abc-123', collector: $collectorClass);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -116,7 +144,10 @@ final class DebugQueryControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionView('abc-123', collector: 'NonExistent');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }
@@ -127,7 +158,10 @@ final class DebugQueryControllerTest extends TestCase
         $repository->method('getDetail')->willThrowException(new \RuntimeException('Not found'));
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionView('nonexistent');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }
@@ -150,7 +184,10 @@ final class DebugQueryControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionList(json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -164,7 +201,10 @@ final class DebugQueryControllerTest extends TestCase
         $repository->method('getDetail')->with('abc-123')->willReturn($data);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionView('abc-123', json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -179,7 +219,10 @@ final class DebugQueryControllerTest extends TestCase
         $repository->method('getDetail')->willReturn($data);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionView('abc-123', collector: $collectorClass, json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -194,7 +237,10 @@ final class DebugQueryControllerTest extends TestCase
         $repository->method('getDetail')->willReturn($data);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionView('abc-123');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -215,7 +261,10 @@ final class DebugQueryControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionList();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -231,7 +280,10 @@ final class DebugQueryControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionList();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }

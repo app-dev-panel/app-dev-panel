@@ -56,7 +56,10 @@ final class DebugDumpControllerTest extends TestCase
         $repository->expects($this->once())->method('getDumpObject')->with('entry-1')->willReturn($dumpData);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionIndex('entry-1');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -67,7 +70,10 @@ final class DebugDumpControllerTest extends TestCase
         $repository->method('getDumpObject')->with('entry-1')->willReturn([]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionIndex('entry-1');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -84,7 +90,10 @@ final class DebugDumpControllerTest extends TestCase
         $repository->method('getDumpObject')->willReturn($dumpData);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionIndex('entry-1', json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -101,7 +110,10 @@ final class DebugDumpControllerTest extends TestCase
         $repository->method('getDumpObject')->willReturn($dumpData);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionIndex('entry-1', collector: $collectorClass);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -116,7 +128,10 @@ final class DebugDumpControllerTest extends TestCase
         $repository->method('getDumpObject')->willReturn($dumpData);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionIndex('entry-1', collector: 'NonExistent');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }
@@ -127,7 +142,10 @@ final class DebugDumpControllerTest extends TestCase
         $repository->method('getDumpObject')->willThrowException(new \RuntimeException('Not found'));
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionIndex('nonexistent');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }
@@ -142,7 +160,10 @@ final class DebugDumpControllerTest extends TestCase
             ->willReturn(['stdClass', ['property' => 'value']]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionObject('entry-1', 'obj-1');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -153,7 +174,10 @@ final class DebugDumpControllerTest extends TestCase
         $repository->method('getObject')->willReturn(['stdClass', ['property' => 'value']]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionObject('entry-1', 'obj-1', json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -164,7 +188,10 @@ final class DebugDumpControllerTest extends TestCase
         $repository->method('getObject')->willReturn(null);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionObject('entry-1', 'nonexistent');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }
@@ -175,7 +202,10 @@ final class DebugDumpControllerTest extends TestCase
         $repository->method('getObject')->willThrowException(new \RuntimeException('Storage error'));
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionObject('entry-1', 'obj-1');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }
@@ -186,7 +216,10 @@ final class DebugDumpControllerTest extends TestCase
         $repository->method('getDumpObject')->willReturn([]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionIndex('entry-1', json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -202,7 +235,10 @@ final class DebugDumpControllerTest extends TestCase
         $repository->method('getDumpObject')->willReturn($dumpData);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $result = $controller->actionIndex('entry-1', collector: $collectorClass, json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }

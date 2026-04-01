@@ -199,6 +199,65 @@ final class IgnoreConfigTest extends TestCase
         $this->assertFalse($config->isCommandIgnored('app:serve'));
     }
 
+    public function testWithIgnoredRequestsReplacesPatterns(): void
+    {
+        $config = new IgnoreConfig(ignoredRequests: ['/old/*']);
+        $newConfig = $config->withIgnoredRequests(['/new/*']);
+
+        // Old pattern should no longer match
+        $this->assertFalse($newConfig->isRequestIgnored($this->createRequest('/old/path')));
+        // New pattern should match
+        $this->assertTrue($newConfig->isRequestIgnored($this->createRequest('/new/path')));
+    }
+
+    public function testWithIgnoredCommandsReplacesPatterns(): void
+    {
+        $config = new IgnoreConfig(ignoredCommands: ['old:*']);
+        $newConfig = $config->withIgnoredCommands(['new:*']);
+
+        $this->assertFalse($newConfig->isCommandIgnored('old:command'));
+        $this->assertTrue($newConfig->isCommandIgnored('new:command'));
+    }
+
+    public function testRequestIgnoredByWildcardAtEnd(): void
+    {
+        $config = new IgnoreConfig(ignoredRequests: ['/api/*']);
+
+        $this->assertTrue($config->isRequestIgnored($this->createRequest('/api/foo')));
+        $this->assertFalse($config->isRequestIgnored($this->createRequest('/web/foo')));
+    }
+
+    public function testRequestNotIgnoredWhenHeaderIsMissing(): void
+    {
+        $config = new IgnoreConfig();
+
+        $uri = $this->createMock(UriInterface::class);
+        $uri->method('getPath')->willReturn('/some/path');
+
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->method('getUri')->willReturn($uri);
+        $request->method('hasHeader')->with('X-Debug-Ignore')->willReturn(false);
+        $request->method('getHeaderLine')->with('X-Debug-Ignore')->willReturn('');
+
+        $this->assertFalse($config->isRequestIgnored($request));
+    }
+
+    public function testRequestNotIgnoredWhenNoPatternMatches(): void
+    {
+        $config = new IgnoreConfig(ignoredRequests: ['/debug/*', '/health']);
+
+        $this->assertFalse($config->isRequestIgnored($this->createRequest('/api/data')));
+        $this->assertFalse($config->isRequestIgnored($this->createRequest('/users/list')));
+    }
+
+    public function testCommandIgnoredByExactMatch(): void
+    {
+        $config = new IgnoreConfig(ignoredCommands: ['migrate']);
+
+        $this->assertTrue($config->isCommandIgnored('migrate'));
+        $this->assertFalse($config->isCommandIgnored('migrate:fresh'));
+    }
+
     private function createRequest(string $path, bool $hasIgnoreHeader = false): ServerRequestInterface
     {
         $uri = $this->createMock(UriInterface::class);

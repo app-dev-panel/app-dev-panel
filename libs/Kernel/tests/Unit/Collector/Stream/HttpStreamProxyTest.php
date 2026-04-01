@@ -487,4 +487,92 @@ final class HttpStreamProxyTest extends TestCase
         $collector->shutdown();
         @unlink($tmpFile);
     }
+
+    public function testStreamReadCollectsOnFirstCallOnly(): void
+    {
+        $collector = new HttpStreamCollector();
+        $collector->startup();
+        HttpStreamProxy::$collector = $collector;
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'http_read_test_');
+        file_put_contents($tmpFile, 'hello world test data');
+
+        $proxy = new HttpStreamProxy();
+        $proxy->ignored = false;
+
+        HttpStreamProxy::unregister();
+        $proxy->decorated->stream = fopen($tmpFile, 'r');
+        $proxy->decorated->filename = $tmpFile;
+        HttpStreamProxy::register();
+
+        // First read should collect (suppress notice for wrapper_data on local streams)
+        @($data1 = $proxy->stream_read(5));
+        $this->assertSame('hello', $data1);
+
+        // Second read should NOT collect again (readCollected flag)
+        $data2 = $proxy->stream_read(6);
+        $this->assertSame(' world', $data2);
+
+        $collected = $collector->getCollected();
+        $this->assertArrayHasKey('read', $collected);
+        $this->assertCount(1, $collected['read']);
+
+        $proxy->stream_close();
+        $collector->shutdown();
+        HttpStreamProxy::$collector = null;
+        @unlink($tmpFile);
+    }
+
+    public function testStreamReadSkipsCollectionWhenIgnored(): void
+    {
+        $collector = new HttpStreamCollector();
+        $collector->startup();
+        HttpStreamProxy::$collector = $collector;
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'http_read_ign_');
+        file_put_contents($tmpFile, 'secret data');
+
+        $proxy = new HttpStreamProxy();
+        $proxy->ignored = true;
+
+        HttpStreamProxy::unregister();
+        $proxy->decorated->stream = fopen($tmpFile, 'r');
+        $proxy->decorated->filename = $tmpFile;
+        HttpStreamProxy::register();
+
+        $data = $proxy->stream_read(6);
+        $this->assertSame('secret', $data);
+
+        $collected = $collector->getCollected();
+        $this->assertArrayNotHasKey('read', $collected);
+
+        $proxy->stream_close();
+        $collector->shutdown();
+        HttpStreamProxy::$collector = null;
+        @unlink($tmpFile);
+    }
+
+    public function testIsIgnoredByClass(): void
+    {
+        $collector = new HttpStreamCollector();
+        $collector->startup();
+        HttpStreamProxy::$collector = $collector;
+
+        // Set ignored classes to a class that won't be in the backtrace
+        HttpStreamProxy::$ignoredClasses = ['SomeNonExistentClassInBacktrace'];
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'not_ignored_class_');
+
+        $proxy = new HttpStreamProxy();
+        $opened = null;
+        $proxy->stream_open($tmpFile, 'r', 0, $opened);
+
+        // Class not in backtrace, so not ignored
+        $this->assertFalse($proxy->ignored);
+
+        $proxy->stream_close();
+        $collector->shutdown();
+        HttpStreamProxy::$collector = null;
+        @unlink($tmpFile);
+    }
 }

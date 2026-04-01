@@ -14,7 +14,8 @@ use yii\console\ExitCode;
  * Tests for DebugTailController.
  *
  * Since actionIndex() runs an infinite loop, we test the private helper methods
- * (getEntryIds, renderEntry) via reflection to verify rendering logic.
+ * (getEntryIds, renderEntry) via reflection to verify rendering logic,
+ * and test actionIndex() by breaking the loop with an exception from the repository.
  */
 final class DebugTailControllerTest extends TestCase
 {
@@ -133,6 +134,7 @@ final class DebugTailControllerTest extends TestCase
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository
+            ->expects($this->once())
             ->method('getSummary')
             ->with('entry-1')
             ->willReturn([
@@ -140,10 +142,10 @@ final class DebugTailControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
-        $this->invokeRenderEntry($controller, 'entry-1', false);
 
-        // Verifies no exception thrown — output goes to STDOUT via fwrite
-        $this->assertTrue(true);
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
     }
 
     public function testRenderEntryJsonOutput(): void
@@ -152,18 +154,20 @@ final class DebugTailControllerTest extends TestCase
             'request' => ['method' => 'GET', 'url' => '/test', 'responseStatusCode' => '200'],
         ];
         $repository = $this->createMock(CollectorRepositoryInterface::class);
-        $repository->method('getSummary')->with('entry-1')->willReturn($summaryData);
+        $repository->expects($this->once())->method('getSummary')->with('entry-1')->willReturn($summaryData);
 
         $controller = $this->createController($repository);
-        $this->invokeRenderEntry($controller, 'entry-1', true);
 
-        $this->assertTrue(true);
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', true);
+        ob_end_clean();
     }
 
     public function testRenderEntryWithWebSummary(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository
+            ->expects($this->once())
             ->method('getSummary')
             ->with('entry-1')
             ->willReturn([
@@ -171,15 +175,17 @@ final class DebugTailControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
-        $this->invokeRenderEntry($controller, 'entry-1', false);
 
-        $this->assertTrue(true);
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
     }
 
     public function testRenderEntryWithCommandSummary(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository
+            ->expects($this->once())
             ->method('getSummary')
             ->with('entry-1')
             ->willReturn([
@@ -187,15 +193,17 @@ final class DebugTailControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
-        $this->invokeRenderEntry($controller, 'entry-1', false);
 
-        $this->assertTrue(true);
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
     }
 
     public function testRenderEntryWithExceptionHighlight(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository
+            ->expects($this->once())
             ->method('getSummary')
             ->with('entry-1')
             ->willReturn([
@@ -204,15 +212,17 @@ final class DebugTailControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
-        $this->invokeRenderEntry($controller, 'entry-1', false);
 
-        $this->assertTrue(true);
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
     }
 
     public function testRenderEntryWith4xxStatus(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository
+            ->expects($this->once())
             ->method('getSummary')
             ->with('entry-1')
             ->willReturn([
@@ -220,15 +230,17 @@ final class DebugTailControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
-        $this->invokeRenderEntry($controller, 'entry-1', false);
 
-        $this->assertTrue(true);
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
     }
 
     public function testRenderEntryWith3xxStatus(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository
+            ->expects($this->once())
             ->method('getSummary')
             ->with('entry-1')
             ->willReturn([
@@ -236,20 +248,22 @@ final class DebugTailControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
-        $this->invokeRenderEntry($controller, 'entry-1', false);
 
-        $this->assertTrue(true);
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
     }
 
     public function testRenderEntryWithNoSummaryKeys(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
-        $repository->method('getSummary')->with('entry-1')->willReturn([]);
+        $repository->expects($this->once())->method('getSummary')->with('entry-1')->willReturn([]);
 
         $controller = $this->createController($repository);
-        $this->invokeRenderEntry($controller, 'entry-1', false);
 
-        $this->assertTrue(true);
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
     }
 
     public function testRenderEntryJsonOutputStructure(): void
@@ -258,18 +272,20 @@ final class DebugTailControllerTest extends TestCase
             'request' => ['method' => 'DELETE', 'url' => '/resource/1', 'responseStatusCode' => '204'],
         ];
         $repository = $this->createMock(CollectorRepositoryInterface::class);
-        $repository->method('getSummary')->with('entry-1')->willReturn($summaryData);
+        $repository->expects($this->once())->method('getSummary')->with('entry-1')->willReturn($summaryData);
 
         $controller = $this->createController($repository);
-        $this->invokeRenderEntry($controller, 'entry-1', true);
 
-        $this->assertTrue(true);
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', true);
+        ob_end_clean();
     }
 
     public function testRenderEntryWith5xxStatusWithoutException(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository
+            ->expects($this->once())
             ->method('getSummary')
             ->with('entry-1')
             ->willReturn([
@@ -277,15 +293,17 @@ final class DebugTailControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
-        $this->invokeRenderEntry($controller, 'entry-1', false);
 
-        $this->assertTrue(true);
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
     }
 
     public function testRenderEntryWithUnknownStatusCode(): void
     {
         $repository = $this->createMock(CollectorRepositoryInterface::class);
         $repository
+            ->expects($this->once())
             ->method('getSummary')
             ->with('entry-1')
             ->willReturn([
@@ -293,9 +311,10 @@ final class DebugTailControllerTest extends TestCase
             ]);
 
         $controller = $this->createController($repository);
-        $this->invokeRenderEntry($controller, 'entry-1', false);
 
-        $this->assertTrue(true);
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
     }
 
     public function testGetEntryIdsCalledByRepository(): void
@@ -308,7 +327,9 @@ final class DebugTailControllerTest extends TestCase
             ->willReturn([['id' => 'abc']]);
 
         $controller = $this->createController($repository);
-        $this->invokeGetEntryIds($controller);
+        $ids = $this->invokeGetEntryIds($controller);
+
+        $this->assertSame(['abc'], $ids);
     }
 
     public function testRenderEntryCallsRepositoryWithId(): void
@@ -317,7 +338,10 @@ final class DebugTailControllerTest extends TestCase
         $repository->expects($this->once())->method('getSummary')->with('specific-id')->willReturn([]);
 
         $controller = $this->createController($repository);
+
+        ob_start();
         $this->invokeRenderEntry($controller, 'specific-id', false);
+        ob_end_clean();
     }
 
     public function testActionIndexOutputsHeaderAndDetectsNewEntries(): void
@@ -346,7 +370,13 @@ final class DebugTailControllerTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Break loop');
-        $controller->actionIndex(interval: 1);
+
+        ob_start();
+        try {
+            $controller->actionIndex(interval: 1);
+        } finally {
+            ob_end_clean();
+        }
     }
 
     public function testActionIndexNoNewEntriesContinuesLoop(): void
@@ -371,7 +401,13 @@ final class DebugTailControllerTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Break loop');
-        $controller->actionIndex(interval: 1);
+
+        ob_start();
+        try {
+            $controller->actionIndex(interval: 1);
+        } finally {
+            ob_end_clean();
+        }
     }
 
     public function testActionIndexJsonRendersNewEntries(): void
@@ -398,7 +434,13 @@ final class DebugTailControllerTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Break loop');
-        $controller->actionIndex(interval: 1, json: true);
+
+        ob_start();
+        try {
+            $controller->actionIndex(interval: 1, json: true);
+        } finally {
+            ob_end_clean();
+        }
     }
 
     private function createController(CollectorRepositoryInterface $repository): DebugTailController

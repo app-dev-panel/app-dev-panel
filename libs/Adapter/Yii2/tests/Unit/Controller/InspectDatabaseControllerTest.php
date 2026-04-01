@@ -57,7 +57,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->expects($this->once())->method('getTables')->willReturn([]);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionTables();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -73,7 +76,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->expects($this->once())->method('getTables')->willReturn($tables);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionTables();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -88,7 +94,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->expects($this->once())->method('getTables')->willReturn($tables);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionTables(json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -104,7 +113,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->method('getTables')->willReturn($tables);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionTables();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -120,7 +132,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->method('getTables')->willReturn($tables);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionTables();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -133,7 +148,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->expects($this->once())->method('getTable')->with('users', 50, 0)->willReturn($data);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionTable('users');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -146,7 +164,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->expects($this->once())->method('getTable')->with('orders', 50, 0)->willReturn($data);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionTable('orders', json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -157,7 +178,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->expects($this->once())->method('getTable')->with('users', 10, 20)->willReturn([]);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionTable('users', limit: 10, offset: 20);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -174,7 +198,10 @@ final class InspectDatabaseControllerTest extends TestCase
             ->willReturn($queryResult);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionQuery('SELECT * FROM users');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -185,7 +212,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->expects($this->never())->method('executeQuery');
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionQuery('');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }
@@ -196,7 +226,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->method('executeQuery')->willThrowException(new \RuntimeException('Syntax error'));
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionQuery('INVALID SQL');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }
@@ -213,7 +246,10 @@ final class InspectDatabaseControllerTest extends TestCase
             ->willReturn($explainResult);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionExplain('SELECT * FROM users');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -224,7 +260,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->expects($this->once())->method('explainQuery')->with('SELECT 1', [], true)->willReturn([]);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionExplain('SELECT 1', analyze: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -235,7 +274,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->expects($this->never())->method('explainQuery');
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionExplain('');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }
@@ -246,7 +288,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->method('explainQuery')->willThrowException(new \RuntimeException('Query failed'));
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionExplain('BAD QUERY');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }
@@ -257,7 +302,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->method('getTables')->willReturn([]);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->runAction('tables');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -268,7 +316,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->method('executeQuery')->willReturn([['id' => 1]]);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionQuery('SELECT 1', json: false);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -279,7 +330,10 @@ final class InspectDatabaseControllerTest extends TestCase
         $schemaProvider->method('explainQuery')->willReturn([['plan' => 'Seq Scan']]);
 
         $controller = $this->createController($schemaProvider);
+
+        ob_start();
         $result = $controller->actionExplain('SELECT 1', json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }

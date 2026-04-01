@@ -328,6 +328,188 @@ final class AnalyzeExceptionToolTest extends TestCase
         $this->assertStringContainsString('No debug entries with exceptions', $result['content'][0]['text']);
     }
 
+    public function testAnalyzeExceptionWithMissingFields(): void
+    {
+        $storage = new MemoryStorage(new DebuggerIdGenerator());
+        $storage->write(
+            'entry-1',
+            [
+                'id' => 'entry-1',
+                'exception' => ['class' => 'Error', 'message' => 'err'],
+            ],
+            [
+                ExceptionCollector::class => [
+                    [
+                        // Missing class, message, file, line, code, traceAsString
+                    ],
+                ],
+            ],
+            [],
+        );
+        $tool = new AnalyzeExceptionTool($storage);
+
+        $result = $tool->execute(['id' => 'entry-1']);
+
+        $text = $result['content'][0]['text'];
+        $this->assertStringContainsString('unknown', $text);
+        $this->assertStringContainsString('?:0', $text);
+    }
+
+    public function testAnalyzeExceptionAutoFindPicksLatestWithException(): void
+    {
+        $storage = new MemoryStorage(new DebuggerIdGenerator());
+        // First entry: no exception
+        $storage->write('entry-1', ['id' => 'entry-1'], [], []);
+        // Second entry: has exception
+        $storage->write(
+            'entry-2',
+            [
+                'id' => 'entry-2',
+                'exception' => ['class' => 'LogicException', 'message' => 'logic error'],
+            ],
+            [
+                ExceptionCollector::class => [
+                    [
+                        'class' => 'LogicException',
+                        'message' => 'logic error',
+                        'file' => '/app/logic.php',
+                        'line' => 5,
+                        'code' => 0,
+                        'trace' => [],
+                        'traceAsString' => '',
+                    ],
+                ],
+            ],
+            [],
+        );
+        $tool = new AnalyzeExceptionTool($storage);
+
+        $result = $tool->execute([]);
+
+        $this->assertStringContainsString('LogicException', $result['content'][0]['text']);
+        $this->assertStringContainsString('entry-2', $result['content'][0]['text']);
+    }
+
+    public function testAnalyzeExceptionWithEmptyExceptionData(): void
+    {
+        $storage = new MemoryStorage(new DebuggerIdGenerator());
+        $storage->write(
+            'entry-1',
+            [
+                'id' => 'entry-1',
+                'exception' => ['class' => 'Exception', 'message' => 'err'],
+            ],
+            [
+                ExceptionCollector::class => [],
+            ],
+            [],
+        );
+        $tool = new AnalyzeExceptionTool($storage);
+
+        $result = $tool->execute(['id' => 'entry-1']);
+
+        $this->assertStringContainsString('No exception found', $result['content'][0]['text']);
+    }
+
+    public function testAnalyzeExceptionWithNoLogData(): void
+    {
+        $storage = new MemoryStorage(new DebuggerIdGenerator());
+        $storage->write(
+            'entry-1',
+            [
+                'id' => 'entry-1',
+                'exception' => ['class' => 'RuntimeException', 'message' => 'err'],
+            ],
+            [
+                ExceptionCollector::class => [
+                    [
+                        'class' => 'RuntimeException',
+                        'message' => 'No logs',
+                        'file' => '/app/app.php',
+                        'line' => 1,
+                        'code' => 0,
+                        'trace' => [],
+                        'traceAsString' => '',
+                    ],
+                ],
+            ],
+            [],
+        );
+        $tool = new AnalyzeExceptionTool($storage);
+
+        $result = $tool->execute(['id' => 'entry-1']);
+
+        $text = $result['content'][0]['text'];
+        $this->assertStringNotContainsString('Related Log Messages', $text);
+        $this->assertStringNotContainsString('Request Context', $text);
+    }
+
+    public function testAnalyzeExceptionWithEmptyLogArray(): void
+    {
+        $storage = new MemoryStorage(new DebuggerIdGenerator());
+        $storage->write(
+            'entry-1',
+            [
+                'id' => 'entry-1',
+                'exception' => ['class' => 'Exception', 'message' => 'err'],
+            ],
+            [
+                ExceptionCollector::class => [
+                    [
+                        'class' => 'Exception',
+                        'message' => 'test',
+                        'file' => '/app/app.php',
+                        'line' => 1,
+                        'code' => 0,
+                        'trace' => [],
+                        'traceAsString' => '',
+                    ],
+                ],
+                LogCollector::class => [],
+            ],
+            [],
+        );
+        $tool = new AnalyzeExceptionTool($storage);
+
+        $result = $tool->execute(['id' => 'entry-1']);
+
+        $text = $result['content'][0]['text'];
+        $this->assertStringNotContainsString('Related Log Messages', $text);
+    }
+
+    public function testAnalyzeExceptionWithNullRequestData(): void
+    {
+        $storage = new MemoryStorage(new DebuggerIdGenerator());
+        $storage->write(
+            'entry-1',
+            [
+                'id' => 'entry-1',
+                'exception' => ['class' => 'Exception', 'message' => 'err'],
+            ],
+            [
+                ExceptionCollector::class => [
+                    [
+                        'class' => 'Exception',
+                        'message' => 'test',
+                        'file' => '/app/app.php',
+                        'line' => 1,
+                        'code' => 0,
+                        'trace' => [],
+                        'traceAsString' => '',
+                    ],
+                ],
+                RequestCollector::class => [],
+            ],
+            [],
+        );
+        $tool = new AnalyzeExceptionTool($storage);
+
+        $result = $tool->execute(['id' => 'entry-1']);
+
+        $text = $result['content'][0]['text'];
+        $this->assertStringNotContainsString('Request Context', $text);
+    }
+
     private function createStorageWithException(): MemoryStorage
     {
         $storage = new MemoryStorage(new DebuggerIdGenerator());

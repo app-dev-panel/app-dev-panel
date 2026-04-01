@@ -53,7 +53,10 @@ final class InspectRoutesControllerTest extends TestCase
     public function testActionListWithNullRouteCollection(): void
     {
         $controller = new InspectRoutesController('inspect-routes', \Yii::$app, null);
+
+        ob_start();
         $result = $controller->actionList();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }
@@ -63,7 +66,9 @@ final class InspectRoutesControllerTest extends TestCase
         $routeCollection = $this->createRouteCollection([]);
         $controller = new InspectRoutesController('inspect-routes', \Yii::$app, $routeCollection);
 
+        ob_start();
         $result = $controller->actionList();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -77,7 +82,9 @@ final class InspectRoutesControllerTest extends TestCase
         $routeCollection = $this->createRouteCollection($routes);
         $controller = new InspectRoutesController('inspect-routes', \Yii::$app, $routeCollection);
 
+        ob_start();
         $result = $controller->actionList();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -90,7 +97,9 @@ final class InspectRoutesControllerTest extends TestCase
         $routeCollection = $this->createRouteCollection($routes);
         $controller = new InspectRoutesController('inspect-routes', \Yii::$app, $routeCollection);
 
+        ob_start();
         $result = $controller->actionList(json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -100,7 +109,9 @@ final class InspectRoutesControllerTest extends TestCase
         $routeCollection = $this->createRouteCollection([]);
         $controller = new InspectRoutesController('inspect-routes', \Yii::$app, $routeCollection);
 
+        ob_start();
         $result = $controller->actionList(json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -111,7 +122,9 @@ final class InspectRoutesControllerTest extends TestCase
         $routeCollection = $this->createRouteCollection([$route]);
         $controller = new InspectRoutesController('inspect-routes', \Yii::$app, $routeCollection);
 
+        ob_start();
         $result = $controller->actionList();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -127,7 +140,9 @@ final class InspectRoutesControllerTest extends TestCase
         $routeCollection = $this->createRouteCollection([$route]);
         $controller = new InspectRoutesController('inspect-routes', \Yii::$app, $routeCollection);
 
+        ob_start();
         $result = $controller->actionList();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -142,7 +157,9 @@ final class InspectRoutesControllerTest extends TestCase
         $routeCollection = $this->createRouteCollection($routes);
         $controller = new InspectRoutesController('inspect-routes', \Yii::$app, $routeCollection);
 
+        ob_start();
         $result = $controller->actionList();
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -152,7 +169,9 @@ final class InspectRoutesControllerTest extends TestCase
         $routeCollection = $this->createRouteCollection([]);
         $controller = new InspectRoutesController('inspect-routes', \Yii::$app, $routeCollection);
 
+        ob_start();
         $result = $controller->runAction('list');
+        ob_end_clean();
 
         $this->assertSame(ExitCode::OK, $result);
     }
@@ -160,7 +179,10 @@ final class InspectRoutesControllerTest extends TestCase
     public function testActionListNullRouteCollectionJsonOutput(): void
     {
         $controller = new InspectRoutesController('inspect-routes', \Yii::$app, null);
+
+        ob_start();
         $result = $controller->actionList(json: true);
+        ob_end_clean();
 
         $this->assertSame(ExitCode::UNSPECIFIED_ERROR, $result);
     }

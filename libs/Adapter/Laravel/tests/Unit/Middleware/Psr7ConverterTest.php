@@ -8,6 +8,7 @@ use AppDevPanel\Adapter\Laravel\Middleware\Psr7Converter;
 use Illuminate\Http\Request;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class Psr7ConverterTest extends TestCase
 {
@@ -188,5 +189,67 @@ final class Psr7ConverterTest extends TestCase
 
         $this->assertSame(302, $psrResponse->getStatusCode());
         $this->assertSame('https://example.com/login', $psrResponse->getHeaderLine('location'));
+    }
+
+    public function testConvertResponseStreamedResponseReturnsFalseContent(): void
+    {
+        // StreamedResponse::getContent() returns false
+        $response = new StreamedResponse(
+            function (): void {
+                echo 'streamed content';
+            },
+            200,
+            ['Content-Type' => 'text/plain'],
+        );
+
+        $converter = new Psr7Converter();
+        $psrResponse = $converter->convertResponse($response);
+
+        $this->assertSame(200, $psrResponse->getStatusCode());
+        // When getContent() returns false, the body should not be set
+        $this->assertSame('', (string) $psrResponse->getBody());
+    }
+
+    public function testConvertResponsePreservesReasonPhrase(): void
+    {
+        $response = new Response('Not Found', 404);
+
+        $converter = new Psr7Converter();
+        $psrResponse = $converter->convertResponse($response);
+
+        $this->assertSame(404, $psrResponse->getStatusCode());
+        $this->assertSame('Not Found', (string) $psrResponse->getBody());
+    }
+
+    public function testConvertRequestWithNoHeaders(): void
+    {
+        $request = Request::create('https://example.com/api/test', 'GET');
+
+        $converter = new Psr7Converter();
+        $psrRequest = $converter->convertRequest($request);
+
+        $this->assertSame('GET', $psrRequest->getMethod());
+        $this->assertSame('/api/test', $psrRequest->getUri()->getPath());
+    }
+
+    public function testConvertResponseWithLargeBody(): void
+    {
+        $largeContent = str_repeat('x', 10000);
+        $response = new Response($largeContent, 200);
+
+        $converter = new Psr7Converter();
+        $psrResponse = $converter->convertResponse($response);
+
+        $this->assertSame(10000, strlen((string) $psrResponse->getBody()));
+    }
+
+    public function testConvertRequestServerParams(): void
+    {
+        $request = Request::create('https://example.com/api/data', 'GET', server: ['SERVER_NAME' => 'example.com']);
+
+        $converter = new Psr7Converter();
+        $psrRequest = $converter->convertRequest($request);
+
+        $this->assertNotEmpty($psrRequest->getServerParams());
     }
 }

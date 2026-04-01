@@ -390,4 +390,67 @@ final class DatabaseControllerTest extends ControllerTestCase
         $data = $this->responseData($response);
         $this->assertSame([], $data);
     }
+
+    public function testExplainWithDefaultParams(): void
+    {
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->expects($this->once())
+            ->method('explainQuery')
+            ->with('SELECT 1', [], false)
+            ->willReturn([['detail' => 'result']]);
+
+        $controller = $this->createController($provider);
+        // Post with only sql, no params or analyze
+        $response = $controller->explain($this->post(['sql' => 'SELECT 1']));
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testGetTableWithZeroOffset(): void
+    {
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->expects($this->once())
+            ->method('getTable')
+            ->with('data', 10, 0)
+            ->willReturn(['table' => 'data', 'records' => [], 'totalCount' => 0]);
+
+        $controller = $this->createController($provider);
+        $request = $this->get(['limit' => '10', 'offset' => '0']);
+        $request = $request->withAttribute('name', 'data');
+        $controller->getTable($request);
+    }
+
+    public function testQueryWithParams(): void
+    {
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->expects($this->once())
+            ->method('executeQuery')
+            ->with('SELECT * FROM users WHERE id = ?', [1])
+            ->willReturn([['id' => 1, 'name' => 'Test']]);
+
+        $controller = $this->createController($provider);
+        $response = $controller->query($this->post(['sql' => 'SELECT * FROM users WHERE id = ?', 'params' => [1]]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertSame('Test', $data[0]['name']);
+    }
+
+    public function testExplainAnalyzeTrue(): void
+    {
+        $provider = $this->createMock(SchemaProviderInterface::class);
+        $provider
+            ->expects($this->once())
+            ->method('explainQuery')
+            ->with('SELECT * FROM t', [], true)
+            ->willReturn([['plan' => 'analyzed']]);
+
+        $controller = $this->createController($provider);
+        $response = $controller->explain($this->post(['sql' => 'SELECT * FROM t', 'analyze' => true]));
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
 }

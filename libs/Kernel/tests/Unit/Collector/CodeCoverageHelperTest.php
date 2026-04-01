@@ -221,4 +221,97 @@ final class CodeCoverageHelperTest extends TestCase
         $this->assertSame(3, $result['executableLines']);
         $this->assertSame(0.0, $result['files']['/app/src/Uncovered.php']['percentage']);
     }
+
+    public function testProcessCoverageDefaultExcludesVendor(): void
+    {
+        $rawCoverage = [
+            '/app/vendor/package/File.php' => [1 => 1, 2 => 1],
+            '/app/src/MyClass.php' => [1 => 1],
+        ];
+
+        // Default excludePaths is ['vendor']
+        $result = CodeCoverageHelper::processCoverage($rawCoverage);
+
+        $this->assertCount(1, $result['files']);
+        $this->assertArrayHasKey('/app/src/MyClass.php', $result['files']);
+        $this->assertArrayNotHasKey('/app/vendor/package/File.php', $result['files']);
+    }
+
+    public function testShouldIncludeFileWithBackslashSeparators(): void
+    {
+        // On Windows, DIRECTORY_SEPARATOR is \, test the DIRECTORY_SEPARATOR branch
+        $file = '/app' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'X.php';
+        $this->assertFalse(CodeCoverageHelper::shouldIncludeFile($file, [], ['vendor']));
+    }
+
+    public function testProcessCoverageMixedStatusCodes(): void
+    {
+        $rawCoverage = [
+            '/app/src/Mixed.php' => [
+                1 => 1, // covered
+                2 => -1, // uncovered
+                3 => -2, // dead code (ignored)
+                4 => 0, // not counted (neither covered nor executable)
+                5 => 1, // covered
+            ],
+        ];
+
+        $result = CodeCoverageHelper::processCoverage($rawCoverage, excludePaths: []);
+
+        $file = $result['files']['/app/src/Mixed.php'];
+        // status=1 counted as covered+executable (lines 1,5)
+        // status=-1 counted as executable only (line 2)
+        // status=-2 and 0 are ignored
+        $this->assertSame(2, $file['coveredLines']);
+        $this->assertSame(3, $file['executableLines']);
+        $this->assertSame(66.67, $file['percentage']);
+    }
+
+    public function testBuildSummaryWithSingleFile(): void
+    {
+        $files = [
+            '/app/src/Only.php' => ['coveredLines' => 5, 'executableLines' => 10, 'percentage' => 50.0],
+        ];
+
+        $summary = CodeCoverageHelper::buildSummary($files, 5, 10);
+
+        $this->assertSame(1, $summary['totalFiles']);
+        $this->assertSame(5, $summary['coveredLines']);
+        $this->assertSame(10, $summary['executableLines']);
+        $this->assertSame(50.0, $summary['percentage']);
+    }
+
+    public function testShouldIncludeFileMultipleIncludePathsNoMatch(): void
+    {
+        $this->assertFalse(CodeCoverageHelper::shouldIncludeFile('/app/tests/Unit.php', ['/app/src', '/app/lib'], []));
+    }
+
+    public function testProcessCoverageIncludeAndExcludeTogether(): void
+    {
+        $rawCoverage = [
+            '/app/src/Good.php' => [1 => 1],
+            '/app/src/vendor/Bad.php' => [1 => 1],
+            '/app/lib/Other.php' => [1 => 1],
+        ];
+
+        $result = CodeCoverageHelper::processCoverage(
+            $rawCoverage,
+            includePaths: ['/app/src'],
+            excludePaths: ['vendor'],
+        );
+
+        $this->assertCount(1, $result['files']);
+        $this->assertArrayHasKey('/app/src/Good.php', $result['files']);
+    }
+
+    public function testBuildSummaryPercentageRoundsCorrectly(): void
+    {
+        $files = [
+            '/a.php' => ['coveredLines' => 1, 'executableLines' => 3, 'percentage' => 33.33],
+        ];
+
+        $summary = CodeCoverageHelper::buildSummary($files, 1, 3);
+
+        $this->assertSame(33.33, $summary['percentage']);
+    }
 }

@@ -72,4 +72,38 @@ final class LaravelMatchResultTest extends TestCase
         $this->assertTrue($result->isSuccess());
         $this->assertSame([], $result->middlewares);
     }
+
+    public function testRouteReturnsInstanceOfLaravelMatchResult(): void
+    {
+        $result = new LaravelMatchResult(true, 'Controller@action');
+
+        $route = $result->route();
+        $this->assertInstanceOf(LaravelMatchResult::class, $route);
+    }
+
+    public function testFailedMatchRouteChain(): void
+    {
+        $result = new LaravelMatchResult(false);
+
+        $this->assertFalse($result->route()->isSuccess());
+        $this->assertSame([], $result->route()->middlewares);
+    }
+
+    public function testMiddlewaresPropertyIsDirectlyAccessible(): void
+    {
+        $result = new LaravelMatchResult(true, 'App\\Controller@show');
+
+        // Test that middlewares is a public property
+        $this->assertIsArray($result->middlewares);
+        $this->assertSame('App\\Controller@show', $result->middlewares[0]);
+    }
+
+    public function testSuccessWithControllerRouteMiddlewares(): void
+    {
+        $result = new LaravelMatchResult(true, 'ClosureHandler');
+
+        // Chained access: route() returns self, middlewares accessible
+        $this->assertSame(['ClosureHandler'], $result->route()->middlewares);
+        $this->assertTrue($result->route()->isSuccess());
+    }
 }

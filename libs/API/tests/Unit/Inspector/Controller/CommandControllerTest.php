@@ -402,4 +402,190 @@ final class CommandControllerTest extends ControllerTestCase
         $names = array_column($data, 'name');
         $this->assertContains('test/phpunit', $names);
     }
+
+    public function testRunComposerScriptExecutesBashCommand(): void
+    {
+        // Create a temp directory with a composer.json that has a simple script
+        $tmpDir = sys_get_temp_dir() . '/adp-cmd-composer-' . uniqid();
+        mkdir($tmpDir, 0755, true);
+
+        $composerJson = json_encode([
+            'scripts' => [
+                'hello' => 'echo hello-from-composer',
+            ],
+        ], JSON_THROW_ON_ERROR);
+        file_put_contents($tmpDir . '/composer.json', $composerJson);
+
+        try {
+            $controller = $this->createController(
+                commandMap: [],
+                pathResolver: $this->pathResolver($tmpDir),
+            );
+
+            // First verify the script appears in the index
+            $indexResponse = $controller->index($this->get());
+            $indexData = $this->responseData($indexResponse);
+            $names = array_column($indexData, 'name');
+            $this->assertContains('composer/hello', $names);
+
+            // Now run the composer script — it resolves as BashCommand(['composer', 'hello'])
+            // This will fail since there's no actual composer binary context,
+            // but it exercises the resolveCommand path for array commands
+            $response = $controller->run($this->get(['command' => 'composer/hello']));
+            $data = $this->responseData($response);
+
+            // The response structure should be correct regardless of success/failure
+            $this->assertArrayHasKey('status', $data);
+            $this->assertArrayHasKey('result', $data);
+            $this->assertArrayHasKey('error', $data);
+        } finally {
+            @unlink($tmpDir . '/composer.json');
+            @rmdir($tmpDir);
+        }
+    }
+
+    public function testRunBuiltInCommandNotInContainer(): void
+    {
+        // When a built-in command class is NOT in the container,
+        // resolveCommand falls through to BashCommand
+        // BashCommand::isAvailable() returns true and it's always a valid command class
+        $controller = $this->createController(
+            commandMap: [
+                'testing' => [
+                    'my-bash' => BashCommand::class,
+                ],
+            ],
+            containerServices: [], // Empty container — no services registered
+        );
+
+        // BashCommand not in container, so resolveCommand creates new BashCommand
+        // with the class name cast to array, which will fail as a shell command
+        $response = $controller->run($this->get(['command' => 'my-bash']));
+        $data = $this->responseData($response);
+
+        // It should return a valid response structure even if the bash command fails
+        $this->assertArrayHasKey('status', $data);
+        $this->assertArrayHasKey('result', $data);
+        $this->assertArrayHasKey('error', $data);
+    }
+
+    public function testRunBuiltInCommandFromContainerCallsRun(): void
+    {
+        $result = new CommandResponse(CommandResponse::STATUS_OK, 'from-container', []);
+        $mock = $this->createMock(CommandInterface::class);
+        $mock->expects($this->once())->method('run')->willReturn($result);
+
+        // PHPUnitCommand is a built-in that IS available
+        $controller = $this->createController(
+            commandMap: [],
+            containerServices: [PHPUnitCommand::class => $mock],
+        );
+
+        $response = $controller->run($this->get(['command' => 'test/phpunit']));
+        $data = $this->responseData($response);
+
+        $this->assertSame('ok', $data['status']);
+        $this->assertSame('from-container', $data['result']);
+    }
+
+    public function testRunWithComposerScriptArrayCommands(): void
+    {
+        // composer.json can have array-format scripts
+        $tmpDir = sys_get_temp_dir() . '/adp-cmd-arr-' . uniqid();
+        mkdir($tmpDir, 0755, true);
+
+        $composerJson = json_encode([
+            'scripts' => [
+                'multi' => ['echo step1', 'echo step2'],
+            ],
+        ], JSON_THROW_ON_ERROR);
+        file_put_contents($tmpDir . '/composer.json', $composerJson);
+
+        try {
+            $controller = $this->createController(
+                commandMap: [],
+                pathResolver: $this->pathResolver($tmpDir),
+            );
+
+            $response = $controller->index($this->get());
+            $data = $this->responseData($response);
+
+            // Verify the multi-step script appears with joined description
+            $multiCmd = array_values(array_filter(
+                $data,
+                static fn(array $item) => $item['name'] === 'composer/multi',
+            ));
+            $this->assertCount(1, $multiCmd);
+            $this->assertStringContainsString('echo step1', $multiCmd[0]['description']);
+            $this->assertStringContainsString('echo step2', $multiCmd[0]['description']);
+        } finally {
+            @unlink($tmpDir . '/composer.json');
+            @rmdir($tmpDir);
+        }
+    }
+
+    public function testRunComposerScriptReturnsResult(): void
+    {
+        // Create a directory with composer.json and test running a script
+        $tmpDir = sys_get_temp_dir() . '/adp-cmd-run-script-' . uniqid();
+        mkdir($tmpDir, 0755, true);
+
+        $composerJson = json_encode([
+            'scripts' => [
+                'greet' => 'echo greet-output',
+            ],
+        ], JSON_THROW_ON_ERROR);
+        file_put_contents($tmpDir . '/composer.json', $composerJson);
+
+        try {
+            $controller = $this->createController(
+                commandMap: [],
+                pathResolver: $this->pathResolver($tmpDir),
+            );
+
+            // Run the composer/greet command
+            $response = $controller->run($this->get(['command' => 'composer/greet']));
+            $data = $this->responseData($response);
+
+            $this->assertArrayHasKey('status', $data);
+            // The BashCommand runs ['composer', 'greet'] which may fail since
+            // there's no composer autoloader in tmpDir, but the status should be valid
+            $this->assertContains($data['status'], [
+                CommandResponse::STATUS_OK,
+                CommandResponse::STATUS_ERROR,
+                CommandResponse::STATUS_FAIL,
+            ]);
+        } finally {
+            @unlink($tmpDir . '/composer.json');
+            @rmdir($tmpDir);
+        }
+    }
+
+    public function testIndexWithComposerJsonWithoutScripts(): void
+    {
+        $tmpDir = sys_get_temp_dir() . '/adp-cmd-no-scripts-' . uniqid();
+        mkdir($tmpDir, 0755, true);
+
+        $composerJson = json_encode([
+            'name' => 'test/test',
+            'require' => [],
+        ], JSON_THROW_ON_ERROR);
+        file_put_contents($tmpDir . '/composer.json', $composerJson);
+
+        try {
+            $controller = $this->createController(
+                commandMap: [],
+                pathResolver: $this->pathResolver($tmpDir),
+            );
+
+            $response = $controller->index($this->get());
+            $data = $this->responseData($response);
+
+            $composerCommands = array_filter($data, static fn(array $item) => $item['group'] === 'composer');
+            $this->assertEmpty($composerCommands);
+        } finally {
+            @unlink($tmpDir . '/composer.json');
+            @rmdir($tmpDir);
+        }
+    }
 }

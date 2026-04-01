@@ -188,6 +188,69 @@ final class AuthorizationControllerTest extends ControllerTestCase
         $this->assertSame([], $data['config']);
     }
 
+    public function testIndexCallsAllProviderMethods(): void
+    {
+        $provider = $this->createMock(AuthorizationConfigProviderInterface::class);
+        $provider->expects($this->once())->method('getGuards')->willReturn([]);
+        $provider->expects($this->once())->method('getRoleHierarchy')->willReturn([]);
+        $provider->expects($this->once())->method('getVoters')->willReturn([]);
+        $provider->expects($this->once())->method('getSecurityConfig')->willReturn([]);
+
+        $controller = $this->createController($provider);
+        $response = $controller->index($this->get());
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testIndexWithNestedConfig(): void
+    {
+        $provider = $this->createMock(AuthorizationConfigProviderInterface::class);
+        $provider
+            ->method('getGuards')
+            ->willReturn([
+                [
+                    'name' => 'api',
+                    'provider' => 'users',
+                    'config' => [
+                        'driver' => 'passport',
+                        'scopes' => ['read', 'write', 'admin'],
+                        'nested' => ['key' => 'value'],
+                    ],
+                ],
+            ]);
+        $provider
+            ->method('getRoleHierarchy')
+            ->willReturn([
+                'ROLE_SUPER_ADMIN' => ['ROLE_ADMIN', 'ROLE_USER'],
+                'ROLE_ADMIN' => ['ROLE_USER'],
+                'ROLE_USER' => [],
+            ]);
+        $provider
+            ->method('getVoters')
+            ->willReturn([
+                ['name' => 'RoleVoter', 'type' => 'voter', 'priority' => 255],
+                ['name' => 'CustomPolicy', 'type' => 'policy', 'priority' => null],
+                ['name' => 'AnotherVoter', 'type' => 'voter', 'priority' => 0],
+            ]);
+        $provider
+            ->method('getSecurityConfig')
+            ->willReturn([
+                'strategy' => 'unanimous',
+                'hide_user_not_found' => true,
+            ]);
+
+        $controller = $this->createController($provider);
+        $response = $controller->index($this->get());
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+
+        $this->assertCount(1, $data['guards']);
+        $this->assertCount(3, $data['roleHierarchy']);
+        $this->assertCount(3, $data['voters']);
+        $this->assertSame('unanimous', $data['config']['strategy']);
+    }
+
     public function testIndexGuardConfigDetails(): void
     {
         $provider = $this->createMock(AuthorizationConfigProviderInterface::class);
