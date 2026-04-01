@@ -14,7 +14,7 @@ import {ValidatorItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Too
 import {RequestItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RequestItem';
 import {RouterItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RouterItem';
 import {useSelector} from '@app-dev-panel/toolbar/store';
-import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
+import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -169,22 +169,26 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                         position: 'fixed',
                         bottom: 16,
                         right: 16,
-                        borderRadius: 20,
-                        p: 0.5,
+                        borderRadius: 24,
+                        py: 0.75,
+                        px: 1.5,
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 0.5,
+                        gap: 0.75,
                         cursor: 'pointer',
                         border: 1,
                         borderColor: 'divider',
-                        transition: 'box-shadow 200ms ease',
+                        transition: 'box-shadow 200ms ease, transform 200ms ease',
                         zIndex: 1300,
-                        '&:hover': {boxShadow: theme.shadows[3]},
+                        '&:hover': {boxShadow: theme.shadows[3], transform: 'scale(1.05)'},
                     }}
                 >
-                    <BugReportOutlinedIcon sx={{fontSize: 20, color: 'primary.main', ml: 0.5}} />
+                    <DuckIcon sx={{fontSize: 28}} />
                     {selectedEntry && (
-                        <Box component="span" sx={{fontSize: 11, fontWeight: 600, color: 'text.secondary', pr: 0.5}}>
+                        <Box
+                            component="span"
+                            sx={{fontSize: 12, fontWeight: 600, color: 'text.secondary', pr: 0.25}}
+                        >
                             {isDebugEntryAboutWeb(selectedEntry)
                                 ? `${selectedEntry.response.statusCode}`
                                 : isDebugEntryAboutConsole(selectedEntry)
@@ -246,7 +250,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                             size="small"
                             sx={actionButtonSx}
                         >
-                            <BugReportOutlinedIcon sx={{color: 'primary.main', fontSize: 20}} />
+                            <DuckIcon sx={{fontSize: 22}} />
                         </IconButton>
                     </Tooltip>
 
