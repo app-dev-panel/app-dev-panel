@@ -5,7 +5,7 @@ import {mapErrorsToForm} from '@app-dev-panel/panel/Module/GenCode/Component/err
 import {Context} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
 import {GenCodeFile} from '@app-dev-panel/panel/Module/GenCode/Types/FIle.types';
 import {createYupValidationSchema} from '@app-dev-panel/sdk/Adapter/yup/yii.validator';
-import {yupResolver} from '@hookform/resolvers/yup/dist/yup';
+import {yupResolver} from '@hookform/resolvers/yup';
 import {Box, Button, ButtonGroup} from '@mui/material';
 import {useContext, useEffect} from 'react';
 import {FieldValues, FormProvider, useForm} from 'react-hook-form';

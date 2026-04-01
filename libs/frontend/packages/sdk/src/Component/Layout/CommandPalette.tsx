@@ -31,7 +31,7 @@ const Backdrop = styled(Box)({
 const PaletteRoot = styled(Box)(({theme}) => ({
     width: 640,
     backgroundColor: theme.palette.background.paper,
-    borderRadius: theme.shape.borderRadius * 1.5,
+    borderRadius: Number(theme.shape.borderRadius) * 1.5,
     boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
     overflow: 'hidden',
     animation: 'paletteFade 0.15s ease-out',

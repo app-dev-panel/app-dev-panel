@@ -103,7 +103,7 @@ const AddButton = styled('button')(({theme}) => ({
     fontWeight: 600,
     color: theme.palette.primary.main,
     padding: theme.spacing(0.5, 1.5),
-    borderRadius: theme.shape.borderRadius / 2,
+    borderRadius: Number(theme.shape.borderRadius) / 2,
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(0.5),

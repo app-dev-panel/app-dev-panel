@@ -1,4 +1,4 @@
-import {ButtonPropsColorOverrides} from '@mui/material/Button/Button';
+import {ButtonPropsColorOverrides} from '@mui/material/Button';
 import {OverridableStringUnion} from '@mui/types';
 
 export type MuiColor = OverridableStringUnion<

@@ -13,7 +13,7 @@ import {styled} from '@mui/material/styles';
 
 const TableContainer = styled(Box)(({theme}) => ({
     border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius * 1.5,
+    borderRadius: Number(theme.shape.borderRadius) * 1.5,
     overflow: 'hidden',
     marginBottom: theme.spacing(3),
 }));

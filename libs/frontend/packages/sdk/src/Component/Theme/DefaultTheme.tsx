@@ -44,6 +44,7 @@ export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNew
     shadows[3] = semanticTokens.shadows.md;
 
     return createTheme({
+        cssVariables: true,
         palette: {mode, ...palette},
         typography: {
             fontFamily: semanticTokens.typography.fontFamily,

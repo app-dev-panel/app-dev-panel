@@ -14,7 +14,7 @@ type ResultDialogProps = {
     errors?: string[];
     onRerun: () => void;
     onClose: () => void;
-} & DialogProps;
+} & Omit<DialogProps, 'content'>;
 
 export const ResultDialog = ({open, status, content, errors, onRerun, onClose, ...rest}: ResultDialogProps) => {
     const isError = status === 'error' || status === 'fail';

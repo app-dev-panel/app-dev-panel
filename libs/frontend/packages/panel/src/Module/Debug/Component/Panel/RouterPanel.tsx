@@ -33,7 +33,7 @@ function durationColor(ms: number, theme: Theme): string {
 
 const InfoCard = styled(Box)(({theme}) => ({
     padding: theme.spacing(2.5),
-    borderRadius: theme.shape.borderRadius * 1.5,
+    borderRadius: Number(theme.shape.borderRadius) * 1.5,
     border: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
     marginBottom: theme.spacing(3),

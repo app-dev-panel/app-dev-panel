@@ -22,7 +22,7 @@ const MarkdownRoot = styled(Box)(({theme}) => ({
         fontSize: '12px',
         backgroundColor: theme.palette.action.hover,
         padding: theme.spacing(0.25, 0.5),
-        borderRadius: theme.shape.borderRadius / 2,
+        borderRadius: Number(theme.shape.borderRadius) / 2,
     },
     '& pre': {
         margin: theme.spacing(1.5, 0),
