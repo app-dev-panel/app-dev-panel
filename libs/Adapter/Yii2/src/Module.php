@@ -292,12 +292,12 @@ class Module extends \yii\base\Module implements BootstrapInterface
             \Yii::$container->setSingleton(ClientInterface::class, static fn() => new Client(['timeout' => 10]));
         }
 
-        $basePath = \Yii::getAlias('@app');
+        $rootPath = dirname(\Yii::getAlias('@vendor'));
         $runtimePath = \Yii::getAlias('@runtime');
 
         \Yii::$container->setSingleton(
             PathResolverInterface::class,
-            static fn() => new PathResolver($basePath, $runtimePath),
+            static fn() => new PathResolver($rootPath, $runtimePath),
         );
 
         $pathMapping = $this->pathMapping;
