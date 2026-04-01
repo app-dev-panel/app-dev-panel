@@ -1,4 +1,6 @@
 import {useRunCommandMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {CommandErrorAlert} from '@app-dev-panel/panel/Module/Inspector/Component/Command/CommandErrorAlert';
+import {extractCommandError} from '@app-dev-panel/panel/Module/Inspector/Component/Command/extractCommandError';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
@@ -61,16 +63,20 @@ const columns: GridColDef[] = [
     },
 ];
 
-type CommandResponseType = {isSuccessful: boolean | undefined; errors: string[]};
+type CommandState = {isSuccessful: boolean | undefined; errors: string[]};
 export const TestsPage = () => {
     const [commandQuery, commandQueryInfo] = useRunCommandMutation();
     const [rows, setRows] = useState<any[]>([]);
-    const [commandResponse, setCommandResponse] = useState<CommandResponseType | null>(null);
+    const [commandResponse, setCommandResponse] = useState<CommandState | null>(null);
+    const [commandError, setCommandError] = useState<string[] | null>(null);
 
     async function runCodeceptionHandler() {
+        setCommandError(null);
         const data = await commandQuery('test/codeception');
+
+        const error = extractCommandError(data);
         if (!('data' in data) || typeof data.data !== 'object') {
-            console.error(data);
+            setCommandError(error?.errors ?? ['An unexpected error occurred']);
             return;
         }
 
@@ -93,6 +99,9 @@ export const TestsPage = () => {
             });
         }
         setCommandResponse({isSuccessful: data.data.status === 'ok', errors: data.data.errors});
+        if (error) {
+            setCommandError(error.errors);
+        }
         setRows(resultRows);
     }
 
@@ -117,7 +126,13 @@ export const TestsPage = () => {
                     </>
                 )}
             </Box>
-
+            {commandError && (
+                <CommandErrorAlert
+                    errors={commandError}
+                    onRetry={runCodeceptionHandler}
+                    onDismiss={() => setCommandError(null)}
+                />
+            )}
             {commandQueryInfo.isSuccess && (
                 <DataTable rows={rows as GridValidRowModel[]} getRowId={getRowIdCallback} columns={columns} />
             )}
