@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\EventListener;
 
 use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
+use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -34,6 +35,7 @@ final class WebListener
         private readonly ?ExceptionCollector $exceptionCollector = null,
         private readonly ?RouterCollector $routerCollector = null,
         private readonly ?RouterMatchRecorder $matchRecorder = null,
+        private readonly ?ToolbarInjector $toolbarInjector = null,
     ) {}
 
     public function onBeforeRequest(\yii\base\Event $event): void
@@ -85,6 +87,8 @@ final class WebListener
         // Add debug ID header to the response
         $app->getResponse()->getHeaders()->set('X-Debug-Id', $this->debugger->getId());
 
+        $this->injectToolbar($app);
+
         $this->webAppInfoCollector?->markApplicationFinished();
 
         // Force-flush Yii's Logger so buffered messages reach DebugLogTarget before storage flush.
@@ -121,6 +125,30 @@ final class WebListener
         if ($errorHandler->exception !== null) {
             $this->exceptionCollector?->collect($errorHandler->exception);
         }
+    }
+
+    private function injectToolbar(\yii\web\Application $app): void
+    {
+        if ($this->toolbarInjector === null || !$this->toolbarInjector->isEnabled()) {
+            return;
+        }
+
+        $response = $app->getResponse();
+
+        // Only inject into HTML format responses
+        if ($response->format !== \yii\web\Response::FORMAT_HTML) {
+            return;
+        }
+
+        $content = $response->content;
+        if ($content === null || $content === '') {
+            return;
+        }
+
+        $request = $app->getRequest();
+        $backendUrl = $request->getHostInfo();
+
+        $response->content = $this->toolbarInjector->inject($content, $backendUrl, $this->debugger->getId());
     }
 
     private function getPsr17Factory(): Psr17Factory

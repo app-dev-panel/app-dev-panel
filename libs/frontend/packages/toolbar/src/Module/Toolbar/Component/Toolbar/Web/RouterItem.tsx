@@ -1,21 +1,20 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {Route} from '@mui/icons-material';
-import {Button} from '@mui/material';
+import {Chip} from '@mui/material';
 
 type RouterItemProps = {data: DebugEntry};
 
 export const RouterItem = ({data}: RouterItemProps) => {
-    if (!data.router) {
+    if (!data.router?.name) {
         return null;
     }
     return (
-        <Button
-            startIcon={<Route fontSize="small" />}
-            color="info"
-            variant="contained"
-            sx={{whiteSpace: 'nowrap', height: '100%', textTransform: 'none', borderRadius: 0}}
-        >
-            {data.router.name}
-        </Button>
+        <Chip
+            icon={<Route sx={{fontSize: '14px !important'}} />}
+            label={data.router.name}
+            size="small"
+            variant="outlined"
+            sx={{height: 24, borderRadius: 1, fontSize: 11, fontFamily: "'JetBrains Mono', monospace"}}
+        />
     );
 };

@@ -10,7 +10,7 @@ import {
 import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import {setupListeners} from '@reduxjs/toolkit/query';
 import {TypedUseSelectorHook, useSelector} from 'react-redux';
-import {FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, persistStore} from 'redux-persist';
+import {FLUSH, PAUSE, PERSIST, persistStore, PURGE, REGISTER, REHYDRATE} from 'redux-persist';
 import {initMessageListener} from 'redux-state-sync';
 
 // TODO: get reducers and middlewares from modules.ts
@@ -22,9 +22,7 @@ export const createStore = (preloadedState: Partial<ReturnType<typeof rootReduce
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware({
                 serializableCheck: {ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]},
-            })
-                // .concat(consoleLogActionsMiddleware)
-                .concat([...ApplicationMiddlewares, ...ToolbarApiMiddlewares, ...DebugMiddlewares]),
+            }).concat([...ApplicationMiddlewares, ...ToolbarApiMiddlewares, ...DebugMiddlewares]),
         devTools: import.meta.env.DEV,
         preloadedState: preloadedState,
     });

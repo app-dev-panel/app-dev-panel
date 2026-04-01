@@ -162,6 +162,7 @@ export default defineConfig({
                             collapsed: false,
                             items: [
                                 { text: 'Debug Panel', link: '/guide/debug-panel' },
+                                { text: 'Toolbar', link: '/guide/toolbar' },
                                 { text: 'Frontend Packages', link: '/guide/frontend-packages' },
                             ],
                         },
@@ -325,6 +326,7 @@ export default defineConfig({
                             collapsed: false,
                             items: [
                                 { text: 'Панель отладки', link: '/ru/guide/debug-panel' },
+                                { text: 'Тулбар', link: '/ru/guide/toolbar' },
                                 { text: 'Фронтенд-пакеты', link: '/ru/guide/frontend-packages' },
                             ],
                         },

@@ -1,24 +1,18 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
-import {Badge, Button} from '@mui/material';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import {Chip} from '@mui/material';
 import {format, fromUnixTime} from 'date-fns';
-import {ForwardedRef, forwardRef} from 'react';
 
 type DateItemProps = {data: DebugEntry};
 
-const DateItem = forwardRef((props: DateItemProps, ref: ForwardedRef<HTMLButtonElement>) => {
-    const {data, ...others} = props;
+export const DateItem = ({data}: DateItemProps) => {
     return (
-        <Badge color="secondary" badgeContent={String(data.event?.total)}>
-            <Button
-                ref={ref}
-                color="info"
-                variant="contained"
-                sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
-            >
-                {format(fromUnixTime((data.web || data.console).request.startTime), 'do MMM HH:mm:ss')}
-            </Button>
-        </Badge>
+        <Chip
+            icon={<ScheduleIcon sx={{fontSize: '14px !important'}} />}
+            label={format(fromUnixTime((data.web || data.console).request.startTime), 'HH:mm:ss')}
+            size="small"
+            variant="outlined"
+            sx={{height: 24, borderRadius: 1, fontSize: 11, color: 'text.secondary'}}
+        />
     );
-});
-DateItem.displayName = Button.name;
-export {DateItem};
+};

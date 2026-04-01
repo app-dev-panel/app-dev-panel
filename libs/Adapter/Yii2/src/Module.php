@@ -65,6 +65,8 @@ use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Toolbar\ToolbarConfig;
+use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -210,6 +212,17 @@ class Module extends \yii\base\Module implements BootstrapInterface
      *             Use http://localhost:3000 for Vite dev server with HMR.
      */
     public string $panelStaticUrl = '';
+
+    /**
+     * @var bool Whether to inject the debug toolbar into HTML responses.
+     */
+    public bool $toolbarEnabled = true;
+
+    /**
+     * @var string Base URL for toolbar assets (empty = uses panel static URL).
+     *             Use http://localhost:3001 for Vite dev server.
+     */
+    public string $toolbarStaticUrl = '';
 
     public $controllerNamespace = 'AppDevPanel\\Adapter\\Yii2\\Controller';
 
@@ -728,6 +741,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $this->getCollector(ExceptionCollector::class),
             $this->getCollector(RouterCollector::class),
             $this->matchRecorder,
+            $this->createToolbarInjector(),
         );
 
         Event::on(WebApplication::class, WebApplication::EVENT_BEFORE_REQUEST, [$listener, 'onBeforeRequest']);
@@ -1175,5 +1189,17 @@ class Module extends \yii\base\Module implements BootstrapInterface
             ],
             false,
         );
+    }
+
+    private function createToolbarInjector(): ?ToolbarInjector
+    {
+        if (!$this->toolbarEnabled) {
+            return null;
+        }
+
+        $panelConfig = \Yii::$container->get(PanelConfig::class);
+        $toolbarConfig = new ToolbarConfig(enabled: $this->toolbarEnabled, staticUrl: $this->toolbarStaticUrl);
+
+        return new ToolbarInjector($panelConfig, $toolbarConfig);
     }
 }

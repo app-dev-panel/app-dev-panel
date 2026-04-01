@@ -68,6 +68,7 @@
     "eslint-config-prettier": "^9.1.0",
     "jsdom": "^29.0.1",
     "msw": "^2.12.11",
+    "playwright": "^1.59.1",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.0.0",
     "vitest": "^2.1.9",

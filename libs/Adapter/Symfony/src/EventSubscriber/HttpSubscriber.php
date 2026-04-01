@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
+use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -34,6 +35,7 @@ final class HttpSubscriber implements EventSubscriberInterface
     public function __construct(
         private readonly Debugger $debugger,
         private readonly HttpSubscriberCollectors $collectors = new HttpSubscriberCollectors(),
+        private readonly ?ToolbarInjector $toolbarInjector = null,
     ) {
         $this->psr7Converter = new Psr7Converter();
     }
@@ -92,6 +94,8 @@ final class HttpSubscriber implements EventSubscriberInterface
 
         // Add debug ID header to the response
         $event->getResponse()->headers->set('X-Debug-Id', $this->debugger->getId());
+
+        $this->injectToolbar($event);
     }
 
     public function onKernelException(ExceptionEvent $event): void
@@ -111,6 +115,31 @@ final class HttpSubscriber implements EventSubscriberInterface
 
         $this->collectors->webAppInfo?->markApplicationFinished();
         $this->debugger->shutdown();
+    }
+
+    private function injectToolbar(ResponseEvent $event): void
+    {
+        if ($this->toolbarInjector === null || !$this->toolbarInjector->isEnabled()) {
+            return;
+        }
+
+        $response = $event->getResponse();
+        $contentType = $response->headers->get('Content-Type', '');
+
+        if (!$this->toolbarInjector->isHtmlResponse($contentType)) {
+            return;
+        }
+
+        $content = $response->getContent();
+        if ($content === false || $content === '') {
+            return;
+        }
+
+        $request = $event->getRequest();
+        $backendUrl = $request->getSchemeAndHttpHost();
+
+        $injected = $this->toolbarInjector->inject($content, $backendUrl, $this->debugger->getId());
+        $response->setContent($injected);
     }
 
     private function isAdpApiRequest(string $path): bool

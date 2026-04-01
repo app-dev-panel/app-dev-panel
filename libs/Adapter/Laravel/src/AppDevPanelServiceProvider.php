@@ -70,6 +70,8 @@ use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
+use AppDevPanel\Api\Toolbar\ToolbarConfig;
+use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
 use AppDevPanel\Cli\Command\DebugSummaryCommand;
@@ -515,6 +517,19 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             }
             return new PanelConfig($staticUrl);
         });
+
+        $this->app->singleton(
+            ToolbarConfig::class,
+            fn() => new ToolbarConfig(
+                enabled: (bool) config('app-dev-panel.toolbar.enabled', true),
+                staticUrl: (string) config('app-dev-panel.toolbar.static_url', ''),
+            ),
+        );
+
+        $this->app->singleton(
+            ToolbarInjector::class,
+            fn() => new ToolbarInjector($this->app->make(PanelConfig::class), $this->app->make(ToolbarConfig::class)),
+        );
 
         $this->app->singleton(
             PanelController::class,

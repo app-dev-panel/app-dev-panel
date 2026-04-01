@@ -164,10 +164,13 @@ build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 	cd $(FRONTEND_DIR) && npx lerna run build --scope=@app-dev-panel/panel --scope=@app-dev-panel/toolbar
 	@echo "$(CYAN)Copying assets to adapters...$(RESET)"
 	@for dir in $(SYMFONY_ASSETS) $(LARAVEL_ASSETS) $(YII2_ASSETS) $(YII3_ASSETS); do \
-		mkdir -p $$dir; \
-		find $$dir -mindepth 1 -maxdepth 1 -not -name '.gitignore' -not -name '.gitkeep' -exec rm -rf {} + 2>/dev/null; \
+		mkdir -p $$dir $$dir/toolbar; \
+		find $$dir -mindepth 1 -maxdepth 1 -not -name '.gitignore' -not -name '.gitkeep' -not -name 'toolbar' -exec rm -rf {} + 2>/dev/null; \
 		cp $(PANEL_DIST)/bundle.js $(PANEL_DIST)/bundle*.css $$dir/; \
 		if [ -d "$(PANEL_DIST)/assets" ]; then cp -r $(PANEL_DIST)/assets $$dir/assets; fi; \
+		find $$dir/toolbar -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null; \
+		cp $(TOOLBAR_DIST)/bundle.js $(TOOLBAR_DIST)/bundle*.css $$dir/toolbar/; \
+		if [ -d "$(TOOLBAR_DIST)/assets" ]; then cp -r $(TOOLBAR_DIST)/assets $$dir/toolbar/assets; fi; \
 	done
 	@echo "$(GREEN)Done. Run 'make install-panel' to publish assets to playgrounds.$(RESET)"
 

@@ -1,5 +1,3 @@
-import '@app-dev-panel/toolbar/wdyr';
-
 import {Config} from '@app-dev-panel/sdk/Config';
 import App from '@app-dev-panel/toolbar/App';
 import '@app-dev-panel/toolbar/index.css';
@@ -21,12 +19,15 @@ import ReactDOM from 'react-dom/client';
     };
     scope.init();
 })(
+    // In production: ToolbarInjector (PHP) sets window['AppDevPanelToolbarWidget'] before this script.
+    // On dev page: index.html sets it from dev controls.
+    // Fallback: use defaults (only when loaded standalone without any config).
     (window['AppDevPanelToolbarWidget'] ??= {
         config: {
             containerId: 'app-dev-toolbar',
             options: {
                 router: {basename: '', useHashRouter: Config.appEnv === 'github'},
-                backend: {baseUrl: import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8080', usePreferredUrl: false},
+                backend: {baseUrl: import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8080', usePreferredUrl: true},
             },
         },
     }),
