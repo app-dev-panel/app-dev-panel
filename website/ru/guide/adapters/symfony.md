@@ -40,6 +40,7 @@ app_dev_panel:
         cache: true
         mailer: true           # требуется symfony/mailer
         messenger: true        # требуется symfony/messenger
+        assets: true           # требуется symfony/asset-mapper
         code_coverage: false   # opt-in; требуется pcov или xdebug
     ignored_requests:
         - '/_wdt/*'
@@ -53,6 +54,10 @@ app_dev_panel:
 ## Коллекторы
 
 Поддерживает все коллекторы Kernel, а также специфичные для Symfony: шаблоны Twig, Security (пользователь/роли/файрвол), кеш, Messenger, переводчик и запросы к БД через Doctrine.
+
+Дополнительно:
+
+- **Asset bundles** — <class>AppDevPanel\Adapter\Symfony\EventSubscriber\AssetMapperSubscriber</class> собирает mapped-ассеты из `AssetMapperInterface` в конце каждого запроса (требуется `symfony/asset-mapper`).
 
 ## Интеграция с переводчиком
 

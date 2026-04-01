@@ -48,9 +48,9 @@ These collectors are registered in **all four adapters**:
 | Redis | ✅ | ✅ | ✅ | ✅ | Redis |
 | Elasticsearch | ✅ | ✅ | ✅ | ✅ | Elasticsearch |
 | View | ✅ | — | — | ✅ | WebView |
-| Templates | — | ✅ | — | ✅ | Templates |
-| Code Coverage | — | ✅ | ✅ | ✅ | Coverage |
-| Asset Bundles | — | — | — | ✅ | Asset Bundles |
+| Templates | — | ✅ | ✅ | ✅ | Templates |
+| Code Coverage | ✅ | ✅ | ✅ | ✅ | Coverage |
+| Asset Bundles | ✅ | ✅ | ✅ | ✅ | Asset Bundles |
 | Middleware | ✅ | — | — | — | Middleware |
 | Messenger | — | ✅ | — | — | Messenger |
 
@@ -58,10 +58,10 @@ These collectors are registered in **all four adapters**:
 
 | Adapter | Universal | Additional | Total |
 |---------|:---------:|:----------:|:-----:|
-| Yii 3 | 20 | 8 | **28** |
-| Symfony | 20 | 9 | **29** |
+| Yii 3 | 20 | 10 | **30** |
+| Symfony | 20 | 10 | **30** |
 | Yii2 | 20 | 10 | **30** |
-| Laravel | 20 | 7 | **27** |
+| Laravel | 20 | 10 | **30** |
 
 ## Proxy / Interception Mechanisms
 
@@ -79,9 +79,11 @@ Each adapter uses different strategies to intercept framework internals and feed
 | Router | <class>AppDevPanel\Adapter\Yii3\Collector\Router\UrlMatcherInterfaceProxy</class> | — | <class>AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor</class> | <class>AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy</class> |
 | Validator | <class>AppDevPanel\Adapter\Yii3\Collector\Validator\ValidatorInterfaceProxy</class> | — | — | — |
 | Queue | <class>AppDevPanel\Adapter\Yii3\Collector\Queue\QueueProviderInterfaceProxy</class> | — | Event listener | — |
-| View/Templates | — | Twig profiler extension | — | `View::EVENT_AFTER_RENDER` |
+| View/Templates | — | Twig profiler extension | <class>AppDevPanel\Adapter\Laravel\Collector\TemplateCollectorCompilerEngine</class> | `View::EVENT_AFTER_RENDER` |
 | Cache | — | Decorated `CacheAdapter` | Event listener | — |
 | Messenger | — | Messenger middleware | — | — |
+| Asset Bundles | <class>AppDevPanel\Adapter\Yii3\Collector\Asset\AssetLoaderInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\EventSubscriber\AssetMapperSubscriber</class> | <class>AppDevPanel\Adapter\Laravel\EventListener\ViteAssetListener</class> | `View::EVENT_END_PAGE` |
+| OpenTelemetry | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> |
 | Translator | <class>AppDevPanel\Adapter\Yii3\Collector\Translator\TranslatorInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy</class> | <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> |
 
 ## Inspector Features
@@ -109,11 +111,11 @@ Current differences between adapters:
 
 | Feature | Yii 3 | Symfony | Laravel | Yii2 |
 |---------|:-------:|:-------:|:-------:|:----:|
-| View/template debugging | ✅ | ✅ | ❌ | ✅ |
-| Code coverage | ❌ | ✅ | ✅ | ✅ |
+| View/template debugging | ✅ | ✅ | ✅ | ✅ |
+| Code coverage | ✅ | ✅ | ✅ | ✅ |
+| Asset bundle debugging | ✅ | ✅ | ✅ | ✅ |
 | Middleware debugging | ✅ | ❌ | ❌ | ❌ |
 | Message bus debugging | ❌ | ✅ | ❌ | ❌ |
-| Asset bundle debugging | ❌ | ❌ | ❌ | ✅ |
 | Container proxy | ✅ | ❌ | ❌ | ❌ |
 
 ::: tip
