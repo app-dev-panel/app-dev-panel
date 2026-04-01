@@ -815,7 +815,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $listener,
         ): void {
             if ($app->has('user')) {
-                $listener->collectCurrentUser($app->getUser());
+                try {
+                    $listener->collectCurrentUser($app->getUser());
+                } catch (\Throwable) {
+                    // User component may not be fully configured (e.g. missing identityClass)
+                }
             }
         });
     }

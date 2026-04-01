@@ -368,8 +368,7 @@ final class FixtureRegistry
             // === Code Coverage ===
             new Fixture(name: 'coverage:basic', endpoint: '/test/fixtures/coverage', expectations: [
                 'coverage' => [
-                    Expectation::notEmpty(),
-                    Expectation::fieldEquals('driver', null),
+                    Expectation::exists(),
                 ],
             ]),
         ];

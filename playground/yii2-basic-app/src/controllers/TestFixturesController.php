@@ -46,6 +46,7 @@ final class TestFixturesController extends Controller
             'translator' => \App\actions\testFixtures\TranslatorAction::class,
             'elasticsearch' => \App\actions\testFixtures\ElasticsearchAction::class,
             'redis' => \App\actions\testFixtures\RedisAction::class,
+            'security' => \App\actions\testFixtures\SecurityAction::class,
             'coverage' => \App\actions\testFixtures\CoverageAction::class,
             'view' => \App\actions\testFixtures\ViewAction::class,
             'template' => \App\actions\testFixtures\TemplateAction::class,
