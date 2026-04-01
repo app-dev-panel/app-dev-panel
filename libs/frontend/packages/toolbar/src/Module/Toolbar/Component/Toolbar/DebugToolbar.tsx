@@ -21,7 +21,6 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import WebAssetOffIcon from '@mui/icons-material/WebAssetOff';
 import {Box, Divider, IconButton, Paper, Portal, Stack, Tooltip, useTheme} from '@mui/material';
-import {styled} from '@mui/material/styles';
 import {ForwardedRef, forwardRef, useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {useResizable} from 'react-resizable-layout';
@@ -44,63 +43,10 @@ const DebugIFrame = forwardRef(
     },
 );
 
-const ToolbarRoot = styled(Paper)(({theme}) => ({
-    borderTop: `1px solid ${theme.palette.divider}`,
-    borderRadius: 0,
-    padding: theme.spacing(0.5, 1),
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(0.5),
-    minHeight: 40,
-}));
-
-const MetricsGroup = styled(Stack)(({theme}) => ({
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing(0.25),
-    flexWrap: 'nowrap',
-}));
-
-const ActionButton = styled(IconButton)(({theme}) => ({
-    padding: theme.spacing(0.5),
-    color: theme.palette.text.secondary,
-    '&:hover': {color: theme.palette.text.primary},
-}));
-
-const ResizeHandle = styled('div')(({theme}) => ({
-    position: 'absolute',
-    top: -6,
-    left: 0,
-    right: 0,
-    height: 12,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'row-resize',
-    zIndex: 1,
-    '&:hover': {backgroundColor: theme.palette.action.hover},
-    '& .MuiSvgIcon-root': {fontSize: 16, color: theme.palette.text.disabled},
-}));
-
-const CollapsedPill = styled(Paper)(({theme}) => ({
-    position: 'fixed',
-    bottom: theme.spacing(2),
-    right: theme.spacing(2),
-    borderRadius: 20,
-    padding: theme.spacing(0.5),
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(0.5),
-    cursor: 'pointer',
-    border: `1px solid ${theme.palette.divider}`,
-    transition: 'box-shadow 200ms ease',
-    zIndex: 1300,
-    '&:hover': {boxShadow: theme.shadows[3]},
-}));
-
 type DebugToolbarProps = {activeComponents: {iframe: boolean}};
 export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     const dispatch = useDispatch();
+    const theme = useTheme();
 
     useEffect(() => {
         const onMessageHandler = (event: MessageEvent) => {
@@ -190,7 +136,6 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         setIframeEnabled((value) => !value);
     }, [activeComponents]);
 
-    const theme = useTheme();
     const iframeContainerRef = useRef<HTMLDivElement | undefined>(undefined);
     const {position, separatorProps, setPosition} = useResizable({
         axis: 'y',
@@ -208,6 +153,8 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         setPosition(iframeHeight);
     }, [iframeHeight]);
 
+    const actionButtonSx = {p: 0.5, color: 'text.secondary', '&:hover': {color: 'text.primary'}};
+
     if (getDebugQuery.isLoading) {
         return null;
     }
@@ -216,19 +163,30 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     if (!isToolbarOpened) {
         return (
             <Portal>
-                <CollapsedPill elevation={2} onClick={onToolbarClickHandler} aria-label="Open debug toolbar">
+                <Paper
+                    elevation={2}
+                    onClick={onToolbarClickHandler}
+                    aria-label="Open debug toolbar"
+                    sx={{
+                        position: 'fixed',
+                        bottom: 16,
+                        right: 16,
+                        borderRadius: 20,
+                        p: 0.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        cursor: 'pointer',
+                        border: 1,
+                        borderColor: 'divider',
+                        transition: 'box-shadow 200ms ease',
+                        zIndex: 1300,
+                        '&:hover': {boxShadow: theme.shadows[3]},
+                    }}
+                >
                     <BugReportOutlinedIcon sx={{fontSize: 20, color: 'primary.main', ml: 0.5}} />
                     {selectedEntry && (
-                        <Box
-                            component="span"
-                            sx={{
-                                fontSize: 11,
-                                fontWeight: 600,
-                                color: 'text.secondary',
-                                pr: 0.5,
-                                fontFamily: theme.typography.fontFamily,
-                            }}
-                        >
+                        <Box component="span" sx={{fontSize: 11, fontWeight: 600, color: 'text.secondary', pr: 0.5}}>
                             {isDebugEntryAboutWeb(selectedEntry)
                                 ? `${selectedEntry.response.statusCode}`
                                 : isDebugEntryAboutConsole(selectedEntry)
@@ -236,7 +194,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                                   : ''}
                         </Box>
                     )}
-                </CollapsedPill>
+                </Paper>
                 <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
             </Portal>
         );
@@ -248,24 +206,57 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
             <Box sx={{position: 'sticky', bottom: 0, zIndex: 1300}}>
                 {/* Resize handle (only when iframe is active) */}
                 {iframeEnabled && (
-                    <ResizeHandle {...separatorProps}>
-                        <DragHandleIcon />
-                    </ResizeHandle>
+                    <Box
+                        {...separatorProps}
+                        sx={{
+                            position: 'absolute',
+                            top: -6,
+                            left: 0,
+                            right: 0,
+                            height: 12,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'row-resize',
+                            zIndex: 1,
+                            '&:hover': {bgcolor: 'action.hover'},
+                        }}
+                    >
+                        <DragHandleIcon sx={{fontSize: 16, color: 'text.disabled'}} />
+                    </Box>
                 )}
 
-                <ToolbarRoot elevation={0}>
+                <Paper
+                    elevation={0}
+                    sx={{
+                        borderTop: 1,
+                        borderColor: 'divider',
+                        borderRadius: 0,
+                        px: 1,
+                        py: 0.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        minHeight: 40,
+                    }}
+                >
                     {/* Logo / toggle button */}
                     <Tooltip title="Collapse toolbar" arrow>
-                        <ActionButton onClick={onToolbarClickHandler} aria-label="Collapse toolbar" size="small">
+                        <IconButton
+                            onClick={onToolbarClickHandler}
+                            aria-label="Collapse toolbar"
+                            size="small"
+                            sx={actionButtonSx}
+                        >
                             <BugReportOutlinedIcon sx={{color: 'primary.main', fontSize: 20}} />
-                        </ActionButton>
+                        </IconButton>
                     </Tooltip>
 
                     <Divider orientation="vertical" flexItem sx={{mx: 0.25}} />
 
                     {/* Metric items */}
                     {selectedEntry && (
-                        <MetricsGroup>
+                        <Stack direction="row" alignItems="center" spacing={0.25} sx={{flexWrap: 'nowrap'}}>
                             {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
                             {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
 
@@ -279,7 +270,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                             <ValidatorItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
                             <DateItem data={selectedEntry} />
-                        </MetricsGroup>
+                        </Stack>
                     )}
 
                     {/* Spacer */}
@@ -291,31 +282,42 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                     <Stack direction="row" spacing={0.25} alignItems="center">
                         {activeComponents.iframe && (
                             <Tooltip title={iframeEnabled ? 'Close panel' : 'Open panel'} arrow>
-                                <ActionButton
+                                <IconButton
                                     onClick={toggleIframeHandler}
                                     aria-label="Toggle debug panel"
                                     size="small"
+                                    sx={actionButtonSx}
                                 >
                                     {iframeEnabled ? (
                                         <WebAssetOffIcon sx={{fontSize: 18}} />
                                     ) : (
                                         <WebAssetIcon sx={{fontSize: 18}} />
                                     )}
-                                </ActionButton>
+                                </IconButton>
                             </Tooltip>
                         )}
                         <Tooltip title="Debug entries" arrow>
-                            <ActionButton onClick={handleClickOpen} aria-label="List debug entries" size="small">
+                            <IconButton
+                                onClick={handleClickOpen}
+                                aria-label="List debug entries"
+                                size="small"
+                                sx={actionButtonSx}
+                            >
                                 <FormatListBulletedIcon sx={{fontSize: 18}} />
-                            </ActionButton>
+                            </IconButton>
                         </Tooltip>
                         <Tooltip title="Open in new window" arrow>
-                            <ActionButton onClick={handleDebugWindowOpen} aria-label="Open debug panel" size="small">
+                            <IconButton
+                                onClick={handleDebugWindowOpen}
+                                aria-label="Open debug panel"
+                                size="small"
+                                sx={actionButtonSx}
+                            >
                                 <OpenInNewIcon sx={{fontSize: 18}} />
-                            </ActionButton>
+                            </IconButton>
                         </Tooltip>
                     </Stack>
-                </ToolbarRoot>
+                </Paper>
             </Box>
 
             <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
