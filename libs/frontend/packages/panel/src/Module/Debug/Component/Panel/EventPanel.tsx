@@ -224,20 +224,18 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                         </EventRow>
                         <Collapse in={expanded}>
                             <DetailBox>
-                                <Typography
-                                    variant="caption"
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
-                                        color: 'text.secondary',
-                                        display: 'block',
-                                        mb: 1,
-                                    }}
-                                >
-                                    {event.name}
-                                </Typography>
-
-                                <Box sx={{display: 'flex', gap: 0.5, mb: 1.5}}>
-                                    <FileLink path={event.line}>
+                                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mb: 1}}>
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            fontFamily: primitives.fontFamilyMono,
+                                            color: 'text.secondary',
+                                            flex: 1,
+                                        }}
+                                    >
+                                        {event.name}
+                                    </Typography>
+                                    <FileLink className={event.name}>
                                         <Tooltip title="Open File">
                                             <IconButton
                                                 size="small"
