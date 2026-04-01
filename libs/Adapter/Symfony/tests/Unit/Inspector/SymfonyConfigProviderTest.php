@@ -154,7 +154,51 @@ final class SymfonyConfigProviderTest extends TestCase
 
         $this->assertCount(1, $result);
         $this->assertSame('app.event', $result[0]['name']);
-        $this->assertNotEmpty($result[0]['listeners'][0]);
+        $listener = $result[0]['listeners'][0];
+        $this->assertIsArray($listener);
+        $this->assertTrue($listener['__closure']);
+        $this->assertStringContainsString('static function', $listener['source']);
+        $this->assertStringContainsString('void', $listener['source']);
+        $this->assertSame(__FILE__, $listener['file']);
+        $this->assertIsInt($listener['startLine']);
+        $this->assertIsInt($listener['endLine']);
+    }
+
+    public function testGetEventsWithClosureListenerRendersBody(): void
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener('app.event', static function (object $event): string {
+            return $event::class;
+        });
+
+        $container = new Container();
+        $container->set('event_dispatcher', $dispatcher);
+
+        $provider = new SymfonyConfigProvider($container);
+        $result = $provider->get('events');
+
+        $listener = $result[0]['listeners'][0];
+        $this->assertIsArray($listener);
+        $this->assertStringContainsString('static function', $listener['source']);
+        $this->assertStringContainsString('object $event', $listener['source']);
+        $this->assertStringContainsString('return $event::class', $listener['source']);
+    }
+
+    public function testGetEventsWithArrowFunctionListener(): void
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener('app.event', static fn(object $e): string => $e::class);
+
+        $container = new Container();
+        $container->set('event_dispatcher', $dispatcher);
+
+        $provider = new SymfonyConfigProvider($container);
+        $result = $provider->get('events');
+
+        $listener = $result[0]['listeners'][0];
+        $this->assertIsArray($listener);
+        $this->assertStringContainsString('fn', $listener['source']);
+        $this->assertStringContainsString('$e', $listener['source']);
     }
 
     public function testGetEventsWhenDispatcherIsNotEventDispatcherInterface(): void

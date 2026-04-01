@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Laravel\Inspector;
 
+use AppDevPanel\Kernel\Inspector\ClosureDescriptorTrait;
 use Illuminate\Contracts\Foundation\Application;
 
 /**
@@ -13,6 +14,8 @@ use Illuminate\Contracts\Foundation\Application;
  */
 final class LaravelConfigProvider
 {
+    use ClosureDescriptorTrait;
+
     public function __construct(
         private readonly Application $app,
     ) {}
@@ -64,7 +67,7 @@ final class LaravelConfigProvider
     }
 
     /**
-     * @return list<array{name: string, class: string|null, listeners: list<string>}>
+     * @return list<array{name: string, class: string|null, listeners: list<string|array>}>
      */
     private function getEventListeners(): array
     {
@@ -124,7 +127,10 @@ final class LaravelConfigProvider
         return $providers;
     }
 
-    private function describeListener(mixed $listener): string
+    /**
+     * @return string|array{__closure: true, source: string, file: string|null, startLine: int|null, endLine: int|null}
+     */
+    private function describeListener(mixed $listener): string|array
     {
         if (is_string($listener)) {
             return $listener;
@@ -134,13 +140,7 @@ final class LaravelConfigProvider
             return $class . '::' . $listener[1];
         }
         if ($listener instanceof \Closure) {
-            $ref = new \ReflectionFunction($listener);
-            $class = $ref->getClosureScopeClass();
-            if ($class !== null) {
-                $name = $ref->getName() !== '{closure}' ? $ref->getName() : '{closure}';
-                return $class->getName() . '::' . $name;
-            }
-            return $ref->getName();
+            return self::describeClosure($listener);
         }
         if (is_object($listener) && method_exists($listener, '__invoke')) {
             return $listener::class . '::__invoke';

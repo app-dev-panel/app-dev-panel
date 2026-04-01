@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\Inspector;
 
+use AppDevPanel\Kernel\Inspector\ClosureDescriptorTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -15,6 +16,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 final class SymfonyConfigProvider
 {
+    use ClosureDescriptorTrait;
+
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly array $containerParameters = [],
@@ -54,7 +57,7 @@ final class SymfonyConfigProvider
     }
 
     /**
-     * @return list<array{name: string, class: string|null, listeners: list<string>}>
+     * @return list<array{name: string, class: string|null, listeners: list<string|array>}>
      */
     private function getEventListeners(): array
     {
@@ -117,7 +120,10 @@ final class SymfonyConfigProvider
         return $reverseAliases;
     }
 
-    private function describeListener(mixed $listener): string
+    /**
+     * @return string|array{__closure: true, source: string, file: string|null, startLine: int|null, endLine: int|null}
+     */
+    private function describeListener(mixed $listener): string|array
     {
         if (is_string($listener)) {
             return $listener;
@@ -127,12 +133,7 @@ final class SymfonyConfigProvider
             return $class . '::' . $listener[1];
         }
         if ($listener instanceof \Closure) {
-            $ref = new \ReflectionFunction($listener);
-            $class = $ref->getClosureScopeClass();
-            if ($class !== null) {
-                return $class->getName() . '::' . ($ref->getName() !== '{closure}' ? $ref->getName() : '{closure}');
-            }
-            return $ref->getName();
+            return self::describeClosure($listener);
         }
         if (is_object($listener) && method_exists($listener, '__invoke')) {
             return $listener::class . '::__invoke';

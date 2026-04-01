@@ -225,7 +225,39 @@ final class Yii2ConfigProviderTest extends TestCase
         $method = new \ReflectionMethod(Yii2ConfigProvider::class, 'describeHandler');
 
         $result = $method->invoke(null, static function (): void {});
-        $this->assertSame('Closure', $result);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['__closure']);
+        $this->assertStringContainsString('static function', $result['source']);
+        $this->assertStringContainsString('void', $result['source']);
+        $this->assertSame(__FILE__, $result['file']);
+        $this->assertIsInt($result['startLine']);
+        $this->assertIsInt($result['endLine']);
+    }
+
+    public function testDescribeHandlerWithClosureBody(): void
+    {
+        $method = new \ReflectionMethod(Yii2ConfigProvider::class, 'describeHandler');
+
+        $result = $method->invoke(null, static function (object $event): string {
+            return $event::class;
+        });
+        $this->assertIsArray($result);
+        $this->assertTrue($result['__closure']);
+        $this->assertStringContainsString('static function', $result['source']);
+        $this->assertStringContainsString('object $event', $result['source']);
+        $this->assertStringContainsString('return $event::class', $result['source']);
+        $this->assertSame(__FILE__, $result['file']);
+    }
+
+    public function testDescribeHandlerWithArrowFunction(): void
+    {
+        $method = new \ReflectionMethod(Yii2ConfigProvider::class, 'describeHandler');
+
+        $result = $method->invoke(null, static fn(object $e): string => $e::class);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['__closure']);
+        $this->assertStringContainsString('fn', $result['source']);
+        $this->assertStringContainsString('$e', $result['source']);
     }
 
     public function testDescribeHandlerWithInvokableObject(): void
