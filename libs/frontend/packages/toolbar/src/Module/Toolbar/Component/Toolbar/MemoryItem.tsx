@@ -2,31 +2,37 @@ import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
-import {Button, Tooltip} from '@mui/material';
+import MemoryIcon from '@mui/icons-material/Memory';
+import {Chip, Tooltip} from '@mui/material';
 
 type MemoryItemProps = {data: DebugEntry; iframeUrlHandler: (url: string) => void};
 
-export const MemoryItem = (props: MemoryItemProps) => {
-    const {data, iframeUrlHandler, ...others} = props;
+export const MemoryItem = ({data, iframeUrlHandler}: MemoryItemProps) => {
     const collector = isDebugEntryAboutWeb(data)
         ? CollectorsMap.WebAppInfoCollector
         : CollectorsMap.ConsoleAppInfoCollector;
+    const peakUsage = (data.web || data.console).memory.peakUsage;
 
     return (
-        <Tooltip title={`${(data.web || data.console).memory.peakUsage.toLocaleString(undefined)} bytes`} arrow>
-            <Button
-                href={`/debug?collector=${collector}&debugEntry=${data.id}`}
+        <Tooltip title={`${peakUsage.toLocaleString(undefined)} bytes`} arrow>
+            <Chip
+                icon={<MemoryIcon sx={{fontSize: '14px !important'}} />}
+                label={formatBytes(peakUsage)}
+                size="small"
+                variant="outlined"
                 onClick={(e) => {
                     iframeUrlHandler(`/debug?collector=${collector}&debugEntry=${data.id}`);
                     e.stopPropagation();
                     e.preventDefault();
                 }}
-                color="info"
-                variant="contained"
-                sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
-            >
-                {formatBytes((data.web || data.console).memory.peakUsage)}
-            </Button>
+                sx={{
+                    height: 24,
+                    borderRadius: 1,
+                    fontSize: 11,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    cursor: 'pointer',
+                }}
+            />
         </Tooltip>
     );
 };

@@ -1,12 +1,13 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {MuiColor} from '@app-dev-panel/sdk/Adapter/mui/types';
 import {DataObject, Input, Repeat, Terminal} from '@mui/icons-material';
-import {Button, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography} from '@mui/material';
+import {Chip, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography} from '@mui/material';
 import React, {useState} from 'react';
 
-const buttonColor = (exitCode: number): MuiColor => {
+const chipColor = (exitCode: number): MuiColor => {
     return exitCode === 0 ? 'success' : 'error';
 };
+
 type CommandItemProps = {data: DebugEntry};
 
 export const CommandItem = ({data}: CommandItemProps) => {
@@ -20,16 +21,16 @@ export const CommandItem = ({data}: CommandItemProps) => {
 
     return (
         <>
-            <Tooltip title="Click to see more options" arrow>
-                <Button
-                    startIcon={<Terminal fontSize="small" />}
-                    color={buttonColor(data.command.exitCode)}
-                    variant="contained"
+            <Tooltip title="Click for command details" arrow>
+                <Chip
+                    icon={<Terminal sx={{fontSize: '14px !important'}} />}
+                    label={data.command.name}
+                    size="small"
+                    color={chipColor(data.command.exitCode)}
+                    variant="filled"
                     onClick={handleClick}
-                    sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
-                >
-                    {data.command.name}
-                </Button>
+                    sx={{fontWeight: 600, fontSize: 11, height: 24, borderRadius: 1}}
+                />
             </Tooltip>
             <Menu
                 anchorEl={anchorEl}

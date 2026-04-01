@@ -1,31 +1,30 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
-import {Badge, Button} from '@mui/material';
-import {ForwardedRef, forwardRef} from 'react';
+import BoltIcon from '@mui/icons-material/Bolt';
+import {Chip, Tooltip} from '@mui/material';
 
 type EventsItemProps = {data: DebugEntry; iframeUrlHandler: (url: string) => void};
 
-const EventsItem = forwardRef((props: EventsItemProps, ref: ForwardedRef<HTMLButtonElement>) => {
-    const {data, iframeUrlHandler, ...others} = props;
+export const EventsItem = ({data, iframeUrlHandler}: EventsItemProps) => {
+    const total = data.event?.total ?? 0;
+    if (total === 0) {
+        return null;
+    }
 
     return (
-        <Badge color="secondary" badgeContent={String(data.event?.total)}>
-            <Button
-                ref={ref}
-                href={`/debug?collector=${CollectorsMap.EventCollector}&debugEntry=${data.id}`}
+        <Tooltip title={`${total} events`} arrow>
+            <Chip
+                icon={<BoltIcon sx={{fontSize: '14px !important'}} />}
+                label={`Events ${total}`}
+                size="small"
+                variant="outlined"
                 onClick={(e) => {
                     iframeUrlHandler(`/debug?collector=${CollectorsMap.EventCollector}&debugEntry=${data.id}`);
                     e.stopPropagation();
                     e.preventDefault();
                 }}
-                color="info"
-                variant="contained"
-                sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
-            >
-                Events
-            </Button>
-        </Badge>
+                sx={{height: 24, borderRadius: 1, fontSize: 11, cursor: 'pointer'}}
+            />
+        </Tooltip>
     );
-});
-EventsItem.displayName = Button.name;
-export {EventsItem};
+};

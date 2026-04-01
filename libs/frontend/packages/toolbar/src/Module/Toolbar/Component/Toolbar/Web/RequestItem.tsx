@@ -2,7 +2,7 @@ import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {buttonColorHttp} from '@app-dev-panel/sdk/Helper/buttonColor';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {DataObject, DynamicFeed, Repeat, Route} from '@mui/icons-material';
-import {Button, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography} from '@mui/material';
+import {Chip, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography} from '@mui/material';
 import {NestedMenuItem} from 'mui-nested-menu';
 import React, {useState} from 'react';
 
@@ -13,19 +13,25 @@ export const RequestItem = ({data}: RequestItemProps) => {
     const handleClick = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
     const handleClose = () => setAnchorEl(null);
 
+    const color = buttonColorHttp(data.response.statusCode);
+
     return (
         <>
-            <Tooltip title="Click to see more options" arrow>
-                <Button
-                    color={buttonColorHttp(data.response.statusCode)}
-                    variant="contained"
+            <Tooltip title="Click for request details" arrow>
+                <Chip
+                    label={`${data.request.method} ${data.request.path} ${data.response.statusCode}`}
+                    size="small"
+                    color={color}
+                    variant="filled"
                     onClick={handleClick}
-                    sx={{whiteSpace: 'nowrap', textTransform: 'none', borderRadius: 0}}
-                >
-                    {data.request.method}&nbsp;
-                    {data.request.path}&nbsp;
-                    {String(data.response.statusCode)}
-                </Button>
+                    sx={{
+                        fontWeight: 600,
+                        fontSize: 11,
+                        fontFamily: "'JetBrains Mono', monospace",
+                        height: 24,
+                        borderRadius: 1,
+                    }}
+                />
             </Tooltip>
             <Menu
                 anchorEl={anchorEl}

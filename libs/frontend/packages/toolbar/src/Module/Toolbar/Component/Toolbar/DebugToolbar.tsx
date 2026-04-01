@@ -1,7 +1,6 @@
 import {setIFrameHeight, setToolbarOpen} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
-import {YiiIcon} from '@app-dev-panel/sdk/Component/SvgIcon/YiiIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {IFrameWrapper} from '@app-dev-panel/sdk/Helper/IFrameWrapper';
 import {DebugEntriesListModal} from '@app-dev-panel/toolbar/Module/Toolbar/Component/DebugEntriesListModal';
@@ -15,14 +14,14 @@ import {ValidatorItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Too
 import {RequestItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RequestItem';
 import {RouterItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RouterItem';
 import {useSelector} from '@app-dev-panel/toolbar/store';
-import ListIcon from '@mui/icons-material/List';
+import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
+import DragHandleIcon from '@mui/icons-material/DragHandle';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import WebAssetOffIcon from '@mui/icons-material/WebAssetOff';
-import {ButtonGroup, Paper, Portal, useTheme} from '@mui/material';
-import Box from '@mui/material/Box';
-import SpeedDial from '@mui/material/SpeedDial';
-import SpeedDialAction from '@mui/material/SpeedDialAction';
+import {Box, Divider, IconButton, Paper, Portal, Stack, Tooltip, useTheme} from '@mui/material';
+import {styled} from '@mui/material/styles';
 import {ForwardedRef, forwardRef, useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {useResizable} from 'react-resizable-layout';
@@ -36,9 +35,8 @@ const DebugIFrame = forwardRef(
         return (
             <iframe
                 ref={ref}
-                // src={`http://localhost:3000/debug?toolbar=0&debugEntry=${debugEntry?.id}`}
                 src={baseUrlState + `/debug?toolbar=0`}
-                style={{height: '100%', width: '100%'}}
+                style={{height: '100%', width: '100%', border: 'none'}}
                 hidden={!iframeEnabled}
                 loading="lazy"
             />
@@ -46,22 +44,74 @@ const DebugIFrame = forwardRef(
     },
 );
 
+const ToolbarRoot = styled(Paper)(({theme}) => ({
+    borderTop: `1px solid ${theme.palette.divider}`,
+    borderRadius: 0,
+    padding: theme.spacing(0.5, 1),
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    minHeight: 40,
+}));
+
+const MetricsGroup = styled(Stack)(({theme}) => ({
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing(0.25),
+    flexWrap: 'nowrap',
+}));
+
+const ActionButton = styled(IconButton)(({theme}) => ({
+    padding: theme.spacing(0.5),
+    color: theme.palette.text.secondary,
+    '&:hover': {color: theme.palette.text.primary},
+}));
+
+const ResizeHandle = styled('div')(({theme}) => ({
+    position: 'absolute',
+    top: -6,
+    left: 0,
+    right: 0,
+    height: 12,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'row-resize',
+    zIndex: 1,
+    '&:hover': {backgroundColor: theme.palette.action.hover},
+    '& .MuiSvgIcon-root': {fontSize: 16, color: theme.palette.text.disabled},
+}));
+
+const CollapsedPill = styled(Paper)(({theme}) => ({
+    position: 'fixed',
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
+    borderRadius: 20,
+    padding: theme.spacing(0.5),
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    cursor: 'pointer',
+    border: `1px solid ${theme.palette.divider}`,
+    transition: 'box-shadow 200ms ease',
+    zIndex: 1300,
+    '&:hover': {boxShadow: theme.shadows[3]},
+}));
+
 type DebugToolbarProps = {activeComponents: {iframe: boolean}};
 export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
+    const dispatch = useDispatch();
+
     useEffect(() => {
-        // console.debug('[START] Listen to message');
         const onMessageHandler = (event: MessageEvent) => {
             if (!event.data.payload || !('x-debug-id' in event.data.payload.headers)) {
                 return;
             }
-            // console.debug('[EVENT] Listen to message', event.data);
             dispatch(debugApi.util.invalidateTags(['debug/list']));
             dispatch(addCurrentPageRequestId(event.data.payload.headers['x-debug-id']));
         };
         serviceWorker?.addEventListener('message', onMessageHandler);
-
         return () => {
-            // console.debug('[STOP] Listen to message');
             serviceWorker?.removeEventListener('message', onMessageHandler);
         };
     }, []);
@@ -69,7 +119,6 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     const [isToolbarOpened, setIsToolbarOpened] = useState<boolean>(false);
     const getDebugQuery = useGetDebugQuery();
     const debugEntry = useDebugEntry();
-    const dispatch = useDispatch();
 
     const [selectedEntry, setSelectedEntry] = useState(debugEntry);
 
@@ -81,8 +130,8 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const toolbarOpenState = useSelector((state) => state.application.toolbarOpen);
     const iframeHeight = useSelector((state) => state.application.iframeHeight);
-
     const baseUrlState = useSelector((state) => state.application.baseUrl);
+
     useEffect(() => setIsToolbarOpened(toolbarOpenState), [toolbarOpenState]);
 
     const onToolbarClickHandler = () => {
@@ -108,16 +157,10 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         window.open(debugEntry ? baseUrlState + '/debug?debugEntry=' + debugEntry.id : baseUrlState + '/debug');
     }, [debugEntry]);
 
-    const handleClickOpen = useCallback(() => {
-        setOpen(true);
-    }, []);
-
-    const handleClose = useCallback(() => {
-        setOpen(false);
-    }, []);
+    const handleClickOpen = useCallback(() => setOpen(true), []);
+    const handleClose = useCallback(() => setOpen(false), []);
 
     const iframeRef = useRef<HTMLIFrameElement | undefined>(undefined);
-
     const [iframeWrapper, setIframeWrapper] = useState<IFrameWrapper | null>(null);
 
     useEffect(() => {
@@ -165,115 +208,116 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         setPosition(iframeHeight);
     }, [iframeHeight]);
 
+    if (getDebugQuery.isLoading) {
+        return null;
+    }
+
+    // Collapsed state: small pill in bottom-right corner
+    if (!isToolbarOpened) {
+        return (
+            <Portal>
+                <CollapsedPill elevation={2} onClick={onToolbarClickHandler} aria-label="Open debug toolbar">
+                    <BugReportOutlinedIcon sx={{fontSize: 20, color: 'primary.main', ml: 0.5}} />
+                    {selectedEntry && (
+                        <Box
+                            component="span"
+                            sx={{
+                                fontSize: 11,
+                                fontWeight: 600,
+                                color: 'text.secondary',
+                                pr: 0.5,
+                                fontFamily: theme.typography.fontFamily,
+                            }}
+                        >
+                            {isDebugEntryAboutWeb(selectedEntry)
+                                ? `${selectedEntry.response.statusCode}`
+                                : isDebugEntryAboutConsole(selectedEntry)
+                                  ? `exit ${selectedEntry.command?.exitCode}`
+                                  : ''}
+                        </Box>
+                    )}
+                </CollapsedPill>
+                <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
+            </Portal>
+        );
+    }
+
+    // Expanded state: full toolbar bar at bottom
     return (
         <Portal>
-            {!getDebugQuery.isLoading && (
-                <Paper
-                    component={Box}
-                    elevation={10}
-                    sx={{
-                        position: !isToolbarOpened ? 'fixed' : 'sticky',
-                        bottom: 0,
-                        right: 0,
-                        transition: 'width 350ms ease-in-out',
-                        pt: !isToolbarOpened ? 1 : 0,
-                        pb: 1,
-                        px: 0.5,
-                        backgroundColor: 'primary.main',
-                        zIndex: 1,
-                        borderRadius: '0',
-                    }}
-                >
-                    <hr
-                        {...separatorProps}
-                        style={{
-                            display: isToolbarOpened ? 'block' : 'none',
-                            position: 'absolute',
-                            top: '-9px',
-                            right: 0,
-                            left: 0,
-                            height: '10px',
-                            width: '100%',
-                            background: `linear-gradient(${theme.palette.action.hover}, ${theme.palette.primary.main})`,
-                            border: 0,
-                            padding: 0,
-                            margin: 0,
-                            cursor: iframeEnabled ? 'row-resize' : 'initial',
-                            borderTopLeftRadius: '5px',
-                            borderTopRightRadius: '5px',
-                        }}
-                    />
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            boxSizing: 'border-box',
-                        }}
-                    >
-                        <Box sx={{display: isToolbarOpened && selectedEntry ? 'inline-block' : 'none'}}>
-                            {selectedEntry && (
-                                <ButtonGroup disableElevation>
-                                    {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
-                                    {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
+            <Box sx={{position: 'sticky', bottom: 0, zIndex: 1300}}>
+                {/* Resize handle (only when iframe is active) */}
+                {iframeEnabled && (
+                    <ResizeHandle {...separatorProps}>
+                        <DragHandleIcon />
+                    </ResizeHandle>
+                )}
 
-                                    <RequestTimeItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                                    <MemoryItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                <ToolbarRoot elevation={0}>
+                    {/* Logo / toggle button */}
+                    <Tooltip title="Collapse toolbar" arrow>
+                        <ActionButton onClick={onToolbarClickHandler} aria-label="Collapse toolbar" size="small">
+                            <BugReportOutlinedIcon sx={{color: 'primary.main', fontSize: 20}} />
+                        </ActionButton>
+                    </Tooltip>
 
-                                    {isDebugEntryAboutWeb(selectedEntry) && <RouterItem data={selectedEntry} />}
+                    <Divider orientation="vertical" flexItem sx={{mx: 0.25}} />
 
-                                    <LogsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                                    <EventsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                                    <ValidatorItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                    {/* Metric items */}
+                    {selectedEntry && (
+                        <MetricsGroup>
+                            {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
+                            {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
 
-                                    <DateItem data={selectedEntry} />
-                                </ButtonGroup>
-                            )}
-                        </Box>
+                            <RequestTimeItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                            <MemoryItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
-                        <Box>
-                            <SpeedDial
-                                ariaLabel=""
-                                sx={{
-                                    bottom: 0,
-                                    right: 0,
-                                    marginX: 1,
-                                    '& .MuiSpeedDial-actions': {position: 'absolute', bottom: 32, marginX: 1},
-                                }}
-                                FabProps={{onClick: onToolbarClickHandler, size: 'small', sx: {background: 'white'}}}
-                                icon={
-                                    <YiiIcon
-                                        sx={{
-                                            transform: !isToolbarOpened ? 'rotate(360deg)' : 'rotate(0deg)',
-                                            transition: 'transform 400ms ease-in-out',
-                                        }}
-                                    />
-                                }
-                            >
-                                <SpeedDialAction
-                                    onClick={handleDebugWindowOpen}
-                                    icon={<OpenInNewIcon />}
-                                    tooltipTitle="Open debug in a new window"
-                                />
-                                <SpeedDialAction
-                                    onClick={handleClickOpen}
-                                    icon={<ListIcon />}
-                                    tooltipTitle="List all debug entries"
-                                />
-                                {activeComponents.iframe && isToolbarOpened && (
-                                    <SpeedDialAction
-                                        key={'iframe'}
-                                        onClick={toggleIframeHandler}
-                                        icon={iframeEnabled ? <WebAssetOffIcon /> : <WebAssetIcon />}
-                                        tooltipTitle={iframeEnabled ? 'Close iframe' : 'Open iframe'}
-                                    />
-                                )}
-                            </SpeedDial>
-                        </Box>
-                    </div>
-                </Paper>
-            )}
+                            {isDebugEntryAboutWeb(selectedEntry) && <RouterItem data={selectedEntry} />}
+
+                            <LogsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                            <EventsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                            <ValidatorItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+
+                            <DateItem data={selectedEntry} />
+                        </MetricsGroup>
+                    )}
+
+                    {/* Spacer */}
+                    <Box sx={{flex: 1}} />
+
+                    {/* Action buttons */}
+                    <Divider orientation="vertical" flexItem sx={{mx: 0.25}} />
+
+                    <Stack direction="row" spacing={0.25} alignItems="center">
+                        {activeComponents.iframe && (
+                            <Tooltip title={iframeEnabled ? 'Close panel' : 'Open panel'} arrow>
+                                <ActionButton
+                                    onClick={toggleIframeHandler}
+                                    aria-label="Toggle debug panel"
+                                    size="small"
+                                >
+                                    {iframeEnabled ? (
+                                        <WebAssetOffIcon sx={{fontSize: 18}} />
+                                    ) : (
+                                        <WebAssetIcon sx={{fontSize: 18}} />
+                                    )}
+                                </ActionButton>
+                            </Tooltip>
+                        )}
+                        <Tooltip title="Debug entries" arrow>
+                            <ActionButton onClick={handleClickOpen} aria-label="List debug entries" size="small">
+                                <FormatListBulletedIcon sx={{fontSize: 18}} />
+                            </ActionButton>
+                        </Tooltip>
+                        <Tooltip title="Open in new window" arrow>
+                            <ActionButton onClick={handleDebugWindowOpen} aria-label="Open debug panel" size="small">
+                                <OpenInNewIcon sx={{fontSize: 18}} />
+                            </ActionButton>
+                        </Tooltip>
+                    </Stack>
+                </ToolbarRoot>
+            </Box>
+
             <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
             <div ref={iframeContainerRef} style={{height: position, overflow: 'hidden'}} hidden={!iframeEnabled}>
                 <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
