@@ -6,8 +6,14 @@ namespace AppDevPanel\Adapter\Yii2;
 
 use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
+use AppDevPanel\Adapter\Yii2\Controller\DebugDumpController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugQueryController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugResetController;
+use AppDevPanel\Adapter\Yii2\Controller\DebugSummaryController;
+use AppDevPanel\Adapter\Yii2\Controller\DebugTailController;
+use AppDevPanel\Adapter\Yii2\Controller\InspectConfigController;
+use AppDevPanel\Adapter\Yii2\Controller\InspectDatabaseController;
+use AppDevPanel\Adapter\Yii2\Controller\InspectRoutesController;
 use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
 use AppDevPanel\Adapter\Yii2\EventListener\WebListener;
 use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
@@ -101,6 +107,7 @@ use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -869,10 +876,29 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         $collectorRepository = \Yii::$container->get(CollectorRepositoryInterface::class);
         $app->controllerMap['debug-query'] = new DebugQueryController('debug-query', $app, $collectorRepository);
+        $app->controllerMap['debug-dump'] = new DebugDumpController('debug-dump', $app, $collectorRepository);
+        $app->controllerMap['debug-summary'] = new DebugSummaryController('debug-summary', $app, $collectorRepository);
+        $app->controllerMap['debug-tail'] = new DebugTailController('debug-tail', $app, $collectorRepository);
 
         $storage = \Yii::$container->get(StorageInterface::class);
         $debugger = \Yii::$container->get(Debugger::class);
         $app->controllerMap['debug-reset'] = new DebugResetController('debug-reset', $app, $storage, $debugger);
+
+        $schemaProvider = \Yii::$container->get(SchemaProviderInterface::class);
+        $app->controllerMap['inspect-db'] = new InspectDatabaseController('inspect-db', $app, $schemaProvider);
+
+        $routeCollection = \Yii::$container->has(Yii2RouteCollection::class)
+            ? \Yii::$container->get(Yii2RouteCollection::class)
+            : null;
+        $app->controllerMap['inspect-routes'] = new InspectRoutesController('inspect-routes', $app, $routeCollection);
+
+        $container = \Yii::$container->get(\Psr\Container\ContainerInterface::class);
+        $app->controllerMap['inspect-config'] = new InspectConfigController(
+            'inspect-config',
+            $app,
+            $container,
+            \Yii::$app->params,
+        );
     }
 
     private function decorateHttpClient(HttpClientCollector $collector): void

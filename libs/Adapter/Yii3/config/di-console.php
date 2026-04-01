@@ -5,10 +5,13 @@ declare(strict_types=1);
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Cli\Command\DebugServerCommand;
+use AppDevPanel\Cli\Command\InspectConfigCommand;
+use AppDevPanel\Cli\Command\InspectRoutesCommand;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use Psr\Container\ContainerInterface;
 use Yiisoft\Definitions\ReferencesArray;
 
 require_once __DIR__ . '/helpers.php';
@@ -41,4 +44,9 @@ return [
             'port' => $params['app-dev-panel/yii3']['devServer']['port'],
         ],
     ],
+    InspectRoutesCommand::class => static fn() => new InspectRoutesCommand(),
+    InspectConfigCommand::class => static fn(ContainerInterface $container) => new InspectConfigCommand(
+        $container,
+        $params,
+    ),
 ];

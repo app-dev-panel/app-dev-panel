@@ -7,10 +7,17 @@ use AppDevPanel\Adapter\Yii3\Collector\Router\UrlMatcherInterfaceProxy;
 use AppDevPanel\Adapter\Yii3\Collector\Translator\TranslatorInterfaceProxy;
 use AppDevPanel\Adapter\Yii3\Collector\Validator\ValidatorInterfaceProxy;
 use AppDevPanel\Adapter\Yii3\Proxy\ContainerInterfaceProxy;
+use AppDevPanel\Cli\Command\DebugDumpCommand;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
 use AppDevPanel\Cli\Command\DebugServerBroadcastCommand;
 use AppDevPanel\Cli\Command\DebugServerCommand;
+use AppDevPanel\Cli\Command\DebugSummaryCommand;
+use AppDevPanel\Cli\Command\DebugTailCommand;
+use AppDevPanel\Cli\Command\FrontendUpdateCommand;
+use AppDevPanel\Cli\Command\InspectConfigCommand;
+use AppDevPanel\Cli\Command\InspectDatabaseCommand;
+use AppDevPanel\Cli\Command\InspectRoutesCommand;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\CodeCoverageCollector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
@@ -139,6 +146,13 @@ return [
     'yiisoft/yii-console' => [
         'commands' => [
             'debug:query' => DebugQueryCommand::class,
+            'debug:dump' => DebugDumpCommand::class,
+            'debug:summary' => DebugSummaryCommand::class,
+            'debug:tail' => DebugTailCommand::class,
+            'inspect:db' => InspectDatabaseCommand::class,
+            'inspect:routes' => InspectRoutesCommand::class,
+            'inspect:config' => InspectConfigCommand::class,
+            'frontend:update' => FrontendUpdateCommand::class,
             DebugResetCommand::COMMAND_NAME => DebugResetCommand::class,
             DebugServerCommand::COMMAND_NAME => DebugServerCommand::class,
             DebugServerBroadcastCommand::COMMAND_NAME => DebugServerBroadcastCommand::class,
