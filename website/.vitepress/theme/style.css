@@ -523,7 +523,13 @@ a.class-ref:hover {
     color: var(--vp-code-color);
 }
 
+/* Inline tooltip spans are hidden — content is cloned to .floating-tooltip on hover */
 .class-ref-tooltip {
+    display: none !important;
+}
+
+/* Body-level floating tooltip — escapes all stacking contexts */
+.floating-tooltip {
     display: none;
     position: fixed;
     background: var(--vp-c-bg-elv);
@@ -536,7 +542,6 @@ a.class-ref:hover {
     z-index: 9999;
     pointer-events: none;
     user-select: none;
-    opacity: 1;
 
     /* Reset inherited styles */
     text-align: left;
@@ -551,7 +556,7 @@ a.class-ref:hover {
     color: var(--vp-c-text-1);
 }
 
-.class-ref-tooltip.is-visible {
+.floating-tooltip.is-visible {
     display: block;
 }
 
@@ -678,36 +683,9 @@ a.pkg-ref:hover {
     margin-left: 4px;
 }
 
+/* Inline pkg tooltip spans are hidden — content is cloned to .floating-tooltip on hover */
 .pkg-ref-tooltip {
-    display: none;
-    position: fixed;
-    background: var(--vp-c-bg-elv);
-    border: 1px solid var(--vp-c-divider);
-    border-radius: 8px;
-    padding: 10px 14px;
-    width: max-content;
-    max-width: 480px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    z-index: 9999;
-    pointer-events: none;
-    user-select: none;
-    opacity: 1;
-
-    /* Reset inherited styles */
-    text-align: left;
-    text-decoration: none;
-    text-shadow: none;
-    text-indent: 0;
-    text-transform: none;
-    letter-spacing: normal;
-    word-spacing: normal;
-    font-style: normal;
-    font-weight: normal;
-    color: var(--vp-c-text-1);
-}
-
-.pkg-ref-tooltip.is-visible {
-    display: block;
+    display: none !important;
 }
 
 .pkg-ref-tooltip-name {
