@@ -336,8 +336,8 @@ final class FixtureRegistry
                 ],
             ]),
 
-            // === Template ===
-            new Fixture(name: 'template:basic', endpoint: '/test/fixtures/template', expectations: [
+            // === Template (view output capture) ===
+            new Fixture(name: 'template:basic', endpoint: '/test/fixtures/view', expectations: [
                 'template' => [
                     Expectation::notEmpty(),
                     Expectation::summaryHasKey('template'),

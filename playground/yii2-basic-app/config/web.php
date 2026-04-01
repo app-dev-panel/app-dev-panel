@@ -58,6 +58,7 @@ return [
                 'GET /test/fixtures/elasticsearch' => 'test-fixtures/elasticsearch',
                 'GET /test/fixtures/redis' => 'test-fixtures/redis',
                 'GET /test/fixtures/coverage' => 'test-fixtures/coverage',
+                'GET /test/fixtures/view' => 'test-fixtures/view',
                 'GET /test/fixtures/template' => 'test-fixtures/template',
                 '/test/fixtures/reset' => 'test-fixtures/reset',
                 '/test/fixtures/reset-cli' => 'test-fixtures/reset-cli',

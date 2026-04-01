@@ -30,6 +30,7 @@ final class CollectorDataResolver
         'middleware' => 'MiddlewareCollector',
         'router' => 'RouterCollector',
         'validator' => 'ValidatorCollector',
+        'view' => 'TemplateCollector',
         'template' => 'TemplateCollector',
         'assets' => 'AssetBundleCollector',
         'opentelemetry' => 'OpenTelemetryCollector',

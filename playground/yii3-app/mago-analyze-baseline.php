@@ -787,6 +787,24 @@ message = "Property `$templateCollector` is never used."
 count = 1
 
 [[issues]]
+file = "src/Web/TestFixtures/ViewAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\ViewAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ViewAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ViewAction.php"
+code = "unused-property"
+message = "Property `$templateCollector` is never used."
+count = 1
+
+[[issues]]
 file = "src/Web/TestFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\TimelineAction` cannot implement unknown type `RequestHandlerInterface`'

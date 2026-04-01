@@ -32,6 +32,7 @@ use App\Http\Controllers\TestFixtures\TemplateAction;
 use App\Http\Controllers\TestFixtures\TimelineAction;
 use App\Http\Controllers\TestFixtures\TranslatorAction;
 use App\Http\Controllers\TestFixtures\ValidatorAction;
+use App\Http\Controllers\TestFixtures\ViewAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index']);
@@ -68,5 +69,6 @@ Route::prefix('test/fixtures')->group(function (): void {
     Route::get('/elasticsearch', ElasticsearchAction::class);
     Route::get('/redis', RedisAction::class);
     Route::get('/coverage', CoverageAction::class);
+    Route::get('/view', ViewAction::class);
     Route::get('/template', TemplateAction::class);
 });

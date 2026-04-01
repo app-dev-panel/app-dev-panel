@@ -199,6 +199,12 @@ message = 'Class `App\actions\testFixtures\TemplateAction` cannot extend unknown
 count = 1
 
 [[issues]]
+file = "src/actions/testFixtures/ViewAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\actions\testFixtures\ViewAction` cannot extend unknown type `Action`'
+count = 1
+
+[[issues]]
 file = "src/actions/testFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\TimelineAction` cannot extend unknown type `Action`'

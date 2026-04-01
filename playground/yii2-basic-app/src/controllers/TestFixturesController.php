@@ -48,6 +48,7 @@ final class TestFixturesController extends Controller
             'redis' => \App\actions\testFixtures\RedisAction::class,
             'security' => \App\actions\testFixtures\SecurityAction::class,
             'coverage' => \App\actions\testFixtures\CoverageAction::class,
+            'view' => \App\actions\testFixtures\ViewAction::class,
             'template' => \App\actions\testFixtures\TemplateAction::class,
             'reset' => \App\actions\testFixtures\ResetAction::class,
             'reset-cli' => \App\actions\testFixtures\ResetCliAction::class,
