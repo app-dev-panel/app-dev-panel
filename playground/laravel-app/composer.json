@@ -29,7 +29,10 @@
         }
     },
     "scripts": {
-        "serve": "if lsof -ti :8104 >/dev/null 2>&1; then printf '\\n  Port 8104 is already in use.\\n  Run: kill -9 $(lsof -ti :8104) && composer serve\\n\\n' && exit 1; fi && trap 'kill 0' INT TERM && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public & wait"
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "if lsof -ti :8104 >/dev/null 2>&1; then printf '\\n  Port 8104 is already in use.\\n  Kill and restart? [y/N] ' && read answer && if [ \"$answer\" = y ] || [ \"$answer\" = Y ]; then kill -9 $(lsof -ti :8104) && sleep 1; else exit 0; fi; fi && trap 'kill 0 2>/dev/null; exit 0' INT TERM && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public & wait"
+        ]
     },
     "config": {
         "sort-packages": true,
