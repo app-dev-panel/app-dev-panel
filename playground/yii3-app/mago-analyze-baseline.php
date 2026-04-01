@@ -193,6 +193,30 @@ message = "Method `setstring()` is never used."
 count = 1
 
 [[issues]]
+file = "src/Web/Api/ErrorAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/ErrorAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\TranslatorCollector)`).'
+count = 3
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
+count = 1
+
+[[issues]]
 file = "src/Web/Api/IndexAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\DataResponse\DataResponseFactoryInterface)`).'
@@ -206,6 +230,18 @@ count = 1
 
 [[issues]]
 file = "src/Web/Api/IndexAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\TranslationRecord` not found.'
+count = 3
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\TranslatorCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
 count = 1
@@ -213,8 +249,20 @@ count = 1
 [[issues]]
 file = "src/Web/Api/IndexAction.php"
 code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Yiisoft\DataResponse\DataResponseFactoryInterface`.'
 count = 1
+
+[[issues]]
+file = "src/Web/Api/UsersAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
+count = 3
 
 [[issues]]
 file = "src/Web/Api/UsersAction.php"
@@ -232,6 +280,12 @@ count = 1
 file = "src/Web/Api/UsersAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/UsersAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
 count = 1
 
 [[issues]]

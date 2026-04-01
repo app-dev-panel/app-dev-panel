@@ -7,7 +7,7 @@ use Yiisoft\View\WebView;
 /**
  * @var WebView $this
  * @var string|null $csrf
- * @var array{name: string, email: string, subject: string, message: string} $formData
+ * @var array{name: string, email: string, message: string} $formData
  * @var array<string, string> $errors
  * @var bool $submitted
  */
@@ -58,21 +58,6 @@ $this->setTitle('Contact');
             >
             <?php if (isset($errors['email'])): ?>
                 <div class="form-error"><?= htmlspecialchars($errors['email']) ?></div>
-            <?php endif; ?>
-        </div>
-
-        <div class="form-group">
-            <label for="contact-subject">Subject</label>
-            <input
-                type="text"
-                id="contact-subject"
-                name="subject"
-                class="form-control<?= isset($errors['subject']) ? ' error' : '' ?>"
-                value="<?= htmlspecialchars($formData['subject']) ?>"
-                placeholder="What is this about?"
-            >
-            <?php if (isset($errors['subject'])): ?>
-                <div class="form-error"><?= htmlspecialchars($errors['subject']) ?></div>
             <?php endif; ?>
         </div>
 

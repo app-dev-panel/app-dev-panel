@@ -16,29 +16,9 @@ final readonly class Action
     public function __invoke(): ResponseInterface
     {
         $users = [
-            [
-                'id' => 1,
-                'name' => 'Alice Johnson',
-                'email' => 'alice@example.com',
-                'role' => 'admin',
-                'status' => 'active',
-            ],
-            ['id' => 2, 'name' => 'Bob Smith', 'email' => 'bob@example.com', 'role' => 'editor', 'status' => 'active'],
-            [
-                'id' => 3,
-                'name' => 'Charlie Brown',
-                'email' => 'charlie@example.com',
-                'role' => 'viewer',
-                'status' => 'inactive',
-            ],
-            [
-                'id' => 4,
-                'name' => 'Diana Prince',
-                'email' => 'diana@example.com',
-                'role' => 'editor',
-                'status' => 'active',
-            ],
-            ['id' => 5, 'name' => 'Eve Wilson', 'email' => 'eve@example.com', 'role' => 'viewer', 'status' => 'active'],
+            ['id' => 1, 'name' => 'Alice', 'email' => 'alice@example.com', 'role' => 'Admin'],
+            ['id' => 2, 'name' => 'Bob', 'email' => 'bob@example.com', 'role' => 'Editor'],
+            ['id' => 3, 'name' => 'Charlie', 'email' => 'charlie@example.com', 'role' => 'Viewer'],
         ];
 
         return $this->viewRenderer->render(__DIR__ . '/template', ['users' => $users]);

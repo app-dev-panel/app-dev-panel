@@ -6,7 +6,7 @@ use Yiisoft\View\WebView;
 
 /**
  * @var WebView $this
- * @var list<array{id: int, name: string, email: string, role: string, status: string}> $users
+ * @var list<array{id: int, name: string, email: string, role: string}> $users
  */
 
 $this->setTitle('Users');
@@ -18,7 +18,6 @@ $this->setTitle('Users');
 </div>
 
 <div class="card">
-    <div class="card-title">Registered Users</div>
     <div class="table-wrapper">
         <table>
             <thead>
@@ -27,7 +26,6 @@ $this->setTitle('Users');
                     <th>Name</th>
                     <th>Email</th>
                     <th>Role</th>
-                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,7 +35,6 @@ $this->setTitle('Users');
                         <td><?= htmlspecialchars($user['name']) ?></td>
                         <td><?= htmlspecialchars($user['email']) ?></td>
                         <td><span class="badge"><?= htmlspecialchars($user['role']) ?></span></td>
-                        <td><?= htmlspecialchars($user['status']) ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

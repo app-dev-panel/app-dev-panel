@@ -1,6 +1,12 @@
 variant = "loose"
 
 [[issues]]
+file = "app/Http/Controllers/PageController.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 4
+
+[[issues]]
 file = "app/Http/Controllers/TestFixtures/CoverageAction.php"
 code = "prefer-static-closure"
 message = "This arrow function does not use `$this` and should be declared static."

@@ -25,4 +25,8 @@ $this->title = 'Home';
         <h3>Error Demo</h3>
         <p>Trigger a runtime exception to see how ADP captures and displays error details.</p>
     </a>
+    <a href="/debug/api/" class="feature-card">
+        <h3>Debug Panel</h3>
+        <p>View collected debug data in the ADP panel.</p>
+    </a>
 </div>

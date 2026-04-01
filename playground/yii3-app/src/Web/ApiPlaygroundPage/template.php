@@ -19,38 +19,62 @@ $this->setTitle('API Playground');
 <div class="card">
     <div class="card-title">Try an Endpoint</div>
     <div class="api-playground-row">
-        <select id="api-endpoint">
-            <option value="/api/">GET /api/ &mdash; Index</option>
-            <option value="/api/users">GET /api/users &mdash; List Users</option>
-            <option value="/api/error">GET /api/error &mdash; Trigger Error</option>
+        <select id="method">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
         </select>
-        <button class="btn btn-primary" id="api-send">Send Request</button>
+        <select id="endpoint">
+            <option value="/api">/api</option>
+            <option value="/api/users">/api/users</option>
+            <option value="/api/error">/api/error</option>
+        </select>
+        <button class="btn btn-primary" id="send-btn">Send Request</button>
+    </div>
+    <div class="form-group" id="body-group" style="display: none; margin-top: 16px;">
+        <label for="body">Request Body (JSON)</label>
+        <textarea id="body" class="form-control" placeholder='{"key": "value"}'></textarea>
     </div>
 </div>
 
 <div class="card" id="api-response-card" style="display: none; margin-top: 16px;">
     <div class="card-title">Response</div>
-    <div id="api-response-status" class="response-status"></div>
-    <pre class="code-block" id="api-response-body"></pre>
+    <div id="response-status" class="response-status"></div>
+    <pre class="code-block" id="response-body"></pre>
 </div>
 
 <script>
-(function () {
-    const sendBtn = document.getElementById('api-send');
-    const endpointSelect = document.getElementById('api-endpoint');
+document.addEventListener('DOMContentLoaded', function () {
+    const methodSelect = document.getElementById('method');
+    const endpointSelect = document.getElementById('endpoint');
+    const sendBtn = document.getElementById('send-btn');
+    const bodyGroup = document.getElementById('body-group');
+    const bodyTextarea = document.getElementById('body');
     const responseCard = document.getElementById('api-response-card');
-    const responseStatus = document.getElementById('api-response-status');
-    const responseBody = document.getElementById('api-response-body');
+    const responseStatus = document.getElementById('response-status');
+    const responseBody = document.getElementById('response-body');
+
+    methodSelect.addEventListener('change', function () {
+        bodyGroup.style.display = methodSelect.value === 'POST' ? 'block' : 'none';
+    });
 
     sendBtn.addEventListener('click', async function () {
+        const method = methodSelect.value;
         const url = endpointSelect.value;
         sendBtn.disabled = true;
         sendBtn.textContent = 'Loading...';
 
         try {
-            const response = await fetch(url, {
+            const options = {
+                method: method,
                 headers: { 'Accept': 'application/json' }
-            });
+            };
+
+            if (method === 'POST') {
+                options.headers['Content-Type'] = 'application/json';
+                options.body = bodyTextarea.value || '{}';
+            }
+
+            const response = await fetch(url, options);
             const text = await response.text();
             let formatted;
             try {
@@ -73,5 +97,5 @@ $this->setTitle('API Playground');
             sendBtn.textContent = 'Send Request';
         }
     });
-})();
+});
 </script>

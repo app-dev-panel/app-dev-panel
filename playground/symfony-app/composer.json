@@ -15,7 +15,7 @@
         "symfony/framework-bundle": "^7.0",
         "symfony/runtime": "^7.0",
         "symfony/translation": "^8.0",
-        "symfony/twig-bundle": "^8.0",
+        "symfony/twig-bundle": "^7.0",
         "symfony/yaml": "^7.0",
         "twig/twig": "^3.24"
     },

@@ -22,7 +22,6 @@ final readonly class Action
         $formData = [
             'name' => '',
             'email' => '',
-            'subject' => '',
             'message' => '',
         ];
 
@@ -30,7 +29,6 @@ final readonly class Action
             $formData = [
                 'name' => trim((string) ($body['name'] ?? '')),
                 'email' => trim((string) ($body['email'] ?? '')),
-                'subject' => trim((string) ($body['subject'] ?? '')),
                 'message' => trim((string) ($body['message'] ?? '')),
             ];
 
@@ -42,10 +40,6 @@ final readonly class Action
                 $errors['email'] = 'Email is required.';
             } elseif (!filter_var($formData['email'], FILTER_VALIDATE_EMAIL)) {
                 $errors['email'] = 'Please enter a valid email address.';
-            }
-
-            if ($formData['subject'] === '') {
-                $errors['subject'] = 'Subject is required.';
             }
 
             if ($formData['message'] === '') {

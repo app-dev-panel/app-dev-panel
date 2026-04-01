@@ -442,7 +442,7 @@ textarea.form-control {
     </main>
 
     <footer class="footer">
-        ADP Playground &mdash; Laravel 12 | Powered by <a href="https://github.com/buggregator/app-dev-panel">Application Development Panel</a>
+        ADP Playground &mdash; Laravel 12 | Powered by <a href="https://github.com/app-dev-panel">Application Development Panel</a>
     </footer>
 </body>
 </html>
