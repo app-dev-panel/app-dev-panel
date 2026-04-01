@@ -303,15 +303,95 @@ const RouteDetail = ({route}: {route: RouteType}) => {
 };
 
 // ---------------------------------------------------------------------------
+// Route checker (isolated state — typing doesn't re-render the route list)
+// ---------------------------------------------------------------------------
+
+const RouteChecker = () => {
+    const [checkRouteQuery, checkRouteQueryInfo] = useLazyGetCheckRouteQuery();
+    const [url, setUrl] = useState('');
+
+    const onSubmitHandler = async (event: {preventDefault: () => void}) => {
+        event.preventDefault();
+        if (!url.trim()) return;
+        await checkRouteQuery(url);
+    };
+
+    return (
+        <>
+            <CheckerBox onSubmit={onSubmitHandler}>
+                <Tooltip title="Enter a path to check. Prefix with HTTP method (e.g. POST /login). Default is GET.">
+                    <Icon sx={{fontSize: 18, color: 'text.disabled', mr: 1}}>travel_explore</Icon>
+                </Tooltip>
+                <InputBase
+                    sx={{flex: 1, fontSize: '13px'}}
+                    placeholder="Check route: /site/index, POST /auth/login, DELETE /user/1"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                />
+                {checkRouteQueryInfo.isFetching ? (
+                    <CircularProgress size={18} sx={{mx: 0.5}} />
+                ) : (
+                    <IconButton type="submit" size="small" disabled={!url.trim()}>
+                        <Icon sx={{fontSize: 18}}>check</Icon>
+                    </IconButton>
+                )}
+            </CheckerBox>
+
+            {checkRouteQueryInfo.isError && (
+                <Alert severity="error" sx={{mb: 2}}>
+                    <AlertTitle>Failed to check route</AlertTitle>
+                    {'status' in (checkRouteQueryInfo.error ?? {}) &&
+                    typeof (checkRouteQueryInfo.error as any)?.data === 'object' &&
+                    (checkRouteQueryInfo.error as any)?.data?.data?.error
+                        ? (checkRouteQueryInfo.error as any).data.data.error
+                        : 'An error occurred while checking the route.'}
+                </Alert>
+            )}
+
+            {checkRouteQueryInfo.data && !checkRouteQueryInfo.isError && (
+                <Alert severity={checkRouteQueryInfo.data.result ? 'success' : 'error'} sx={{mb: 2}} onClose={() => {}}>
+                    {checkRouteQueryInfo.data.result ? (
+                        <AlertTitle>
+                            {(() => {
+                                const parsed = parseCallable(checkRouteQueryInfo.data.action);
+                                if (parsed) {
+                                    return (
+                                        <FileLink className={parsed.className} methodName={parsed.methodName}>
+                                            <Typography
+                                                component="span"
+                                                sx={{
+                                                    fontFamily: primitives.fontFamilyMono,
+                                                    fontSize: '13px',
+                                                    color: 'primary.main',
+                                                    textDecoration: 'none',
+                                                    '&:hover': {textDecoration: 'underline'},
+                                                }}
+                                            >
+                                                {parsed.className + '::' + parsed.methodName}
+                                            </Typography>
+                                        </FileLink>
+                                    );
+                                }
+                                return serializeCallable(checkRouteQueryInfo.data.action);
+                            })()}
+                        </AlertTitle>
+                    ) : (
+                        <AlertTitle>Route is invalid</AlertTitle>
+                    )}
+                </Alert>
+            )}
+        </>
+    );
+};
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
 export const RoutesPage = () => {
     const theme = useTheme();
     const {data, isLoading, isSuccess, isError, error} = useGetRoutesQuery();
-    const [checkRouteQuery, checkRouteQueryInfo] = useLazyGetCheckRouteQuery();
     const [routes, setRoutes] = useState<RouteType[]>([]);
-    const [url, setUrl] = useState('');
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
@@ -321,12 +401,6 @@ export const RoutesPage = () => {
         if (!isSuccess) return;
         setRoutes(collectGroupsAndRoutes(data));
     }, [isSuccess, data]);
-
-    const onSubmitHandler = async (event: {preventDefault: () => void}) => {
-        event.preventDefault();
-        if (!url.trim()) return;
-        await checkRouteQuery(url);
-    };
 
     const toggleFilter = useCallback((name: string) => {
         setActiveFilters((prev) => {
@@ -395,46 +469,7 @@ export const RoutesPage = () => {
                 </Alert>
             )}
 
-            {/* Route checker — compact inline form */}
-            <CheckerBox onSubmit={onSubmitHandler}>
-                <Tooltip title="Enter a path to check. Prefix with HTTP method (e.g. POST /login). Default is GET.">
-                    <Icon sx={{fontSize: 18, color: 'text.disabled', mr: 1}}>travel_explore</Icon>
-                </Tooltip>
-                <InputBase
-                    sx={{flex: 1, fontSize: '13px'}}
-                    placeholder="Check route: /site/index, POST /auth/login, DELETE /user/1"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                />
-                {checkRouteQueryInfo.isFetching ? (
-                    <CircularProgress size={18} sx={{mx: 0.5}} />
-                ) : (
-                    <IconButton type="submit" size="small" disabled={!url.trim()}>
-                        <Icon sx={{fontSize: 18}}>check</Icon>
-                    </IconButton>
-                )}
-            </CheckerBox>
-
-            {checkRouteQueryInfo.isError && (
-                <Alert severity="error" sx={{mb: 2}}>
-                    <AlertTitle>Failed to check route</AlertTitle>
-                    {'status' in (checkRouteQueryInfo.error ?? {}) &&
-                    typeof (checkRouteQueryInfo.error as any)?.data === 'object' &&
-                    (checkRouteQueryInfo.error as any)?.data?.data?.error
-                        ? (checkRouteQueryInfo.error as any).data.data.error
-                        : 'An error occurred while checking the route.'}
-                </Alert>
-            )}
-
-            {checkRouteQueryInfo.data && !checkRouteQueryInfo.isError && (
-                <Alert severity={checkRouteQueryInfo.data.result ? 'success' : 'error'} sx={{mb: 2}} onClose={() => {}}>
-                    {checkRouteQueryInfo.data.result ? (
-                        <AlertTitle>{serializeCallable(checkRouteQueryInfo.data.action)}</AlertTitle>
-                    ) : (
-                        <AlertTitle>Route is invalid</AlertTitle>
-                    )}
-                </Alert>
-            )}
+            <RouteChecker />
 
             {/* Routes list */}
             {!isError && routes.length === 0 ? (
@@ -487,10 +522,9 @@ export const RoutesPage = () => {
                         const expanded = expandedId === route.id;
                         const hasDetails = route.action !== null || (route.middlewares && route.middlewares.length > 0);
                         const actionShort = route.action
-                            ? concatClassMethod(
-                                  route.action.className.split('\\').pop() as string,
-                                  route.action.methodName,
-                              )
+                            ? (route.action.className.split('\\').pop() as string) +
+                              '::' +
+                              route.action.methodName
                             : null;
                         const firstClassMw =
                             !route.action && route.middlewares?.length > 0
