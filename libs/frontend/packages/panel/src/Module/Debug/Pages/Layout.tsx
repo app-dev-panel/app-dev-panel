@@ -126,7 +126,7 @@ const IOWrapper = ({primaryCollector, primaryData}: {primaryCollector: string; p
 type CollectorDataProps = {collectorData: any; selectedCollector: string};
 function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
-    const pages: {[name: string]: (data: any) => JSX.Element} = {
+    const pages: {[name: string]: (data: any) => React.JSX.Element} = {
         [CollectorsMap.MailerCollector]: (data: any) => <MailerPanel data={data} />,
         [CollectorsMap.ServiceCollector]: (data: any) => <ServicesPanel data={data} />,
         [CollectorsMap.TimelineCollector]: (data: any) => <TimelinePanel data={data} />,

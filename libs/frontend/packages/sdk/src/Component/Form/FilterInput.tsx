@@ -7,7 +7,7 @@ export type FilterInputProps = {value?: string; onChange: (value: string) => voi
 export const FilterInput = React.memo(
     (props: FilterInputProps) => {
         const {onChange, value = ''} = props;
-        const inputRef = useRef<HTMLInputElement>();
+        const inputRef = useRef<HTMLInputElement>(null);
         const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
         return (

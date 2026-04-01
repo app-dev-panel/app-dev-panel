@@ -111,7 +111,7 @@ export const createAdpTheme = (mode: PaletteMode, routerOptions: {openLinksInNew
         adp: {
             fontFamilyMono: semanticTokens.typography.fontFamilyMono,
             chartColors: isDark ? darkSemanticTokens.chartColors : semanticTokens.chartColors,
-            collectorColors: isDark ? darkSemanticTokens.collectorColors : semanticTokens.collectorColors,
+            collectorColors: (isDark ? darkSemanticTokens.collectorColors : semanticTokens.collectorColors) as CollectorColorsMap,
             highlightColor: isDark ? darkSemanticTokens.highlightColor : semanticTokens.highlightColor,
         },
         components: {

@@ -99,7 +99,7 @@ export const ChatPanel = () => {
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>();
+    const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
     const scrollToBottom = useCallback(() => {
         clearTimeout(scrollTimerRef.current);
         scrollTimerRef.current = setTimeout(() => messagesEndRef.current?.scrollIntoView({behavior: 'smooth'}), 100);

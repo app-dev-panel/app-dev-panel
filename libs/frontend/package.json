@@ -56,6 +56,10 @@
     "test": "vitest run",
     "test:e2e": "vitest run --config vitest.browser.config.ts"
   },
+  "overrides": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
+  },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

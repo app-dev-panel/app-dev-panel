@@ -71,7 +71,7 @@ export const McpPage = () => {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
     const [tab, setTab] = useState<ConfigTab>('url');
     const [copied, setCopied] = useState(false);
-    const copyTimerRef = useRef<ReturnType<typeof setTimeout>>();
+    const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
     useEffect(() => () => clearTimeout(copyTimerRef.current), []);
 
