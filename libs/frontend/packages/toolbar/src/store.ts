@@ -13,23 +13,10 @@ import {TypedUseSelectorHook, useSelector} from 'react-redux';
 import {FLUSH, PAUSE, PERSIST, persistStore, PURGE, REGISTER, REHYDRATE} from 'redux-persist';
 import {initMessageListener} from 'redux-state-sync';
 
+// TODO: get reducers and middlewares from modules.ts
 const rootReducer = combineReducers({...ToolbarApiReducers, ...DebugReducers, ...ApplicationReducers});
 
-export const createStore = (preloadedState: Partial<ReturnType<typeof rootReducer>> = {}, forcedBaseUrl?: string) => {
-    // Patch persisted application state so redux-persist REHYDRATE
-    // uses the correct baseUrl instead of a stale persisted value.
-    // Creates the key if it doesn't exist yet.
-    if (forcedBaseUrl) {
-        try {
-            const raw = localStorage.getItem('persist:application');
-            const parsed = raw ? JSON.parse(raw) : {};
-            parsed.baseUrl = JSON.stringify(forcedBaseUrl);
-            localStorage.setItem('persist:application', JSON.stringify(parsed));
-        } catch {
-            // localStorage may be unavailable or corrupted
-        }
-    }
-
+export const createStore = (preloadedState: Partial<ReturnType<typeof rootReducer>> = {}) => {
     const store = configureStore({
         reducer: rootReducer,
         middleware: (getDefaultMiddleware) =>

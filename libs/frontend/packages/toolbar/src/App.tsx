@@ -18,14 +18,9 @@ type AppProps = {
 export default function App({config}: AppProps) {
     const {store, router} = useMemo(() => {
         const r = createRouter(modules, config.router);
-        const configuredUrl = config.backend.baseUrl;
-
-        // Pass the forced baseUrl so the store middleware can enforce it after REHYDRATE
-        const {store: s} = createStore(
-            {application: {baseUrl: configuredUrl, favoriteUrls: config.backend.favoriteUrls ?? []} as any},
-            configuredUrl,
-        );
-
+        const {store: s} = createStore({
+            application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []} as any,
+        });
         return {store: s, router: r};
     }, []);
 

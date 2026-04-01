@@ -4,7 +4,6 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Toolbar for App Dev Panel" />
-
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="App Dev Panel | Toolbar" />
         <meta name="application-name" content="App Dev Panel | Toolbar" />
@@ -82,14 +81,24 @@
         <div id="app-dev-toolbar" style="flex: 1"></div>
 
         <script>
-            // Persist backend URL in localStorage
+            // Dev page sets window['AppDevPanelToolbarWidget'] BEFORE bootstrap.tsx loads.
+            // This is the same mechanism as ToolbarInjector in PHP — the config is
+            // provided by the page, not by the toolbar itself.
             const KEY = 'adp-toolbar-dev-backend-url';
             const input = document.getElementById('backend-url');
             const dot = document.getElementById('status-dot');
-            input.value = localStorage.getItem(KEY) || 'http://127.0.0.1:8080';
+            const backendUrl = localStorage.getItem(KEY) || 'http://127.0.0.1:8080';
+            input.value = backendUrl;
 
-            // Expose for bootstrap.tsx to read
-            window.__adpBackendUrl = input.value;
+            window['AppDevPanelToolbarWidget'] = {
+                config: {
+                    containerId: 'app-dev-toolbar',
+                    options: {
+                        router: {basename: '', useHashRouter: false},
+                        backend: {baseUrl: backendUrl, favoriteUrls: [], usePreferredUrl: true},
+                    },
+                },
+            };
 
             async function checkStatus(url) {
                 try {
@@ -107,14 +116,13 @@
                 const url = input.value.trim();
                 if (!url) return;
                 localStorage.setItem(KEY, url);
-                window.__adpBackendUrl = url;
                 location.reload();
             }
 
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') connectBackend();
             });
-            checkStatus(input.value);
+            checkStatus(backendUrl);
             setInterval(() => checkStatus(input.value), 5000);
         </script>
 
