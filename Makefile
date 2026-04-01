@@ -143,7 +143,7 @@ install-frontend: ## Install frontend deps
 install-playgrounds: ## Install playground deps
 	@echo "$(CYAN)Installing playground dependencies...$(RESET)"
 	cd $(PLAYGROUND_DIR)/yii3-app && composer install --prefer-dist --no-progress --no-interaction
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && composer install --prefer-dist --no-progress --no-interaction
+	cd $(PLAYGROUND_DIR)/symfony-app && composer install --prefer-dist --no-progress --no-interaction
 	cd $(PLAYGROUND_DIR)/yii2-basic-app && composer install --prefer-dist --no-progress --no-interaction
 	cd $(PLAYGROUND_DIR)/laravel-app && composer install --prefer-dist --no-progress --no-interaction
 
@@ -172,7 +172,7 @@ build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 
 install-panel: ## Publish built panel assets into playground applications
 	@echo "$(CYAN)Publishing panel assets to playgrounds...$(RESET)"
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && rm -rf public/bundles/appdevpanel && php bin/console assets:install public --symlink
+	cd $(PLAYGROUND_DIR)/symfony-app && rm -rf public/bundles/appdevpanel && php bin/console assets:install public --symlink
 	@echo "$(GREEN)Done. Panel available at /debug on each playground.$(RESET)"
 
 build-install-panel: build-panel install-panel ## Build panel + publish to all playgrounds
@@ -241,9 +241,9 @@ mago-playground-yii3: ## Mago checks for Yii 3 playground
 
 mago-playground-symfony: ## Mago checks for Symfony playground
 	@echo "$(CYAN)[Playground: Symfony] Running Mago checks...$(RESET)"
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) fmt --check
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) lint
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) analyze
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) fmt --check
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) lint
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) analyze
 
 mago-playground-yii2: ## Mago checks for Yii2 playground
 	@echo "$(CYAN)[Playground: Yii2] Running Mago checks...$(RESET)"
@@ -270,9 +270,9 @@ mago-playground-yii3-fix: ## Fix Yii 3 playground formatting
 
 mago-playground-symfony-fix: ## Fix Symfony playground formatting
 	@echo "$(CYAN)[Playground: Symfony] Fixing formatting...$(RESET)"
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) fmt
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) lint
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && $(MAGO) analyze
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) fmt
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) lint
+	cd $(PLAYGROUND_DIR)/symfony-app && $(MAGO) analyze
 
 mago-playground-yii2-fix: ## Fix Yii2 playground formatting
 	@echo "$(CYAN)[Playground: Yii2] Fixing formatting...$(RESET)"
@@ -337,7 +337,7 @@ serve-yii3: ## Start Yii 3 playground server (port $(YII3_PORT))
 
 serve-symfony: ## Start Symfony playground server (port $(SYMFONY_PORT))
 	@echo "$(CYAN)[Playground: Symfony] Starting server on port $(SYMFONY_PORT)...$(RESET)"
-	cd $(PLAYGROUND_DIR)/symfony-basic-app && bash ../../bin/serve.sh $(SYMFONY_PORT)
+	cd $(PLAYGROUND_DIR)/symfony-app && bash ../../bin/serve.sh $(SYMFONY_PORT)
 
 serve-yii2: ## Start Yii2 playground server (port $(YII2_PORT))
 	@echo "$(CYAN)[Playground: Yii2] Starting server on port $(YII2_PORT)...$(RESET)"
@@ -469,7 +469,7 @@ test-playground-yii3: ## Start Yii 3 server, run E2E fixtures + scenario, stop s
 
 test-playground-symfony: ## Start Symfony server, run E2E fixtures + scenario, stop server
 	@echo "$(CYAN)[Playground: Symfony] Starting server on port $(SYMFONY_PORT)...$(RESET)"
-	@cd $(PLAYGROUND_DIR)/symfony-basic-app && composer serve &>/dev/null & echo $$! > /tmp/adp-symfony.pid
+	@cd $(PLAYGROUND_DIR)/symfony-app && composer serve &>/dev/null & echo $$! > /tmp/adp-symfony.pid
 	@sleep 3
 	@echo "$(CYAN)[Playground: Symfony] Running E2E fixture tests...$(RESET)"
 	@PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox; \

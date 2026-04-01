@@ -116,7 +116,7 @@ make install              # Установить все зависимости
 :::tabs key:framework
 == Symfony
 ```bash
-cd playground/symfony-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t public
+cd playground/symfony-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t public
 ```
 == Yii 2
 ```bash

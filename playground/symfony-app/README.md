@@ -5,7 +5,7 @@ Minimal Symfony 7 application with ADP (Application Development Panel) integrate
 ## Setup
 
 ```bash
-cd playground/symfony-basic-app
+cd playground/symfony-app
 composer install
 ```
 

@@ -119,7 +119,7 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/yiisoft/var-dumper" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/yiisoft/yii-debug" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/zircote/swagger-php" />
-      <excludeFolder url="file://$MODULE_DIR$/playground/symfony-basic-app/var" />
+      <excludeFolder url="file://$MODULE_DIR$/playground/symfony-app/var" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/app-dev-panel/adapter-symfony" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/nyholm/psr7-server" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/psr/cache" />

@@ -11,7 +11,7 @@ Playgrounds are minimal, working applications demonstrating ADP integration with
 | Playground | Framework | Port | Adapter |
 |------------|-----------|------|---------|
 | `yii3-app` | Yii 3 | 8101 | <pkg>app-dev-panel/adapter-yii3</pkg> |
-| `symfony-basic-app` | Symfony 7 | 8102 | <pkg>app-dev-panel/adapter-symfony</pkg> |
+| `symfony-app` | Symfony 7 | 8102 | <pkg>app-dev-panel/adapter-symfony</pkg> |
 | `yii2-basic-app` | Yii 2 | 8103 | <pkg>app-dev-panel/adapter-yii2</pkg> |
 | `laravel-app` | Laravel 12 | 8104 | <pkg>app-dev-panel/adapter-laravel</pkg> |
 
@@ -30,7 +30,7 @@ Each playground runs on its own port. Start in separate terminals:
 :::tabs key:framework
 == Symfony
 ```bash
-cd playground/symfony-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t public
+cd playground/symfony-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t public
 ```
 == Yii 2
 ```bash

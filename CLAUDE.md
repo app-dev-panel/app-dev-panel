@@ -23,7 +23,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 /
 ├── playground/                    # Demo/reference applications per framework
 │   ├── yii3-app/                 # Yii 3 reference application
-│   ├── symfony-basic-app/        # Symfony 7 minimal demo
+│   ├── symfony-app/        # Symfony 7 minimal demo
 │   ├── laravel-app/              # Laravel 12 minimal demo
 │   └── yii2-basic-app/          # Yii 2 minimal demo
 ├── libs/
@@ -246,7 +246,7 @@ Playgrounds are demo/reference apps — they have **no unit tests**. Quality is 
 | Playground | Format | Lint | Analyze | Baseline (suppressed) |
 |------------|:------:|:----:|:-------:|----------------------:|
 | `yii3-app` | pass | pass (3 baselined) | pass (96 baselined) | 99 |
-| `symfony-basic-app` | pass | pass | pass (11 baselined) | 11 |
+| `symfony-app` | pass | pass | pass (11 baselined) | 11 |
 | `yii2-basic-app` | pass | pass | pass (9 baselined) | 9 |
 | `laravel-app` | pass | pass | pass | 0 |
 
