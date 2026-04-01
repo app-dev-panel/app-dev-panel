@@ -31,7 +31,7 @@ import {
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import React, {SyntheticEvent, useCallback, useMemo, useState} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Helpers

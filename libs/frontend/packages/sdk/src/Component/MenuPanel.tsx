@@ -107,7 +107,7 @@ const MenuPanel = React.memo((props: PropsWithChildren<MenuPanelProps>) => {
     const {links, children, activeLink} = props;
 
     const [open, setOpen] = useState(!!props.open);
-    const containerRef = useRef();
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setOpen(!!props.open);

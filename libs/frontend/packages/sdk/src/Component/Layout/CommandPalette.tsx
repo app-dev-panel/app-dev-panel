@@ -2,7 +2,7 @@ import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {Box, Icon, Modal, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router';
 
 type PaletteItem = {
     icon: string;

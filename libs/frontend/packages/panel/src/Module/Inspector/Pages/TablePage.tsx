@@ -5,7 +5,7 @@ import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {DataGrid, GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {useCallback, useMemo, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {useParams, useSearchParams} from 'react-router-dom';
+import {useParams, useSearchParams} from 'react-router';
 
 const rowsPerPageOptions = [20, 50, 100];
 

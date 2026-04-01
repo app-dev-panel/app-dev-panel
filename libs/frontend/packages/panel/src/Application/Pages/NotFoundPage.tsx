@@ -1,7 +1,7 @@
 import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {Link, Typography} from '@mui/material';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router';
 
 export const NotFoundPage = () => {
     const navigate = useNavigate();

@@ -6,7 +6,7 @@ import {PhpInfoPage} from '@app-dev-panel/panel/Module/Inspector/Pages/PhpInfoPa
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Box, Tab, Tabs} from '@mui/material';
 import {useCallback} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 const tabs = ['phpinfo', 'composer', 'opcache', 'git', 'git-log'] as const;
 type TabKey = (typeof tabs)[number];

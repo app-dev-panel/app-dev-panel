@@ -32,13 +32,13 @@
     "@types/node": "^22.12.0",
     "@vitejs/plugin-react": "^4.2.1",
     "gh-pages": "^6.1.1",
-    "lerna": "^8.1.8",
+    "lerna": "^9.0.7",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "typescript": "^5.4.4",
     "verdaccio": "^5.30.3",
     "vite": "^5.4.1",
-    "vite-plugin-svgr": "^4.2.0",
-    "vite-tsconfig-paths": "^5.0.1"
+    "vite-plugin-svgr": "^5.0.0",
+    "vite-tsconfig-paths": "^6.1.1"
   },
   "scripts": {
     "predeploy": "VITE_ENV=github npm run build; npm run copy-toolbar",
@@ -56,6 +56,10 @@
     "test": "vitest run",
     "test:e2e": "vitest run --config vitest.browser.config.ts"
   },
+  "overrides": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
+  },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -64,8 +68,8 @@
     "@typescript-eslint/parser": "^8.1.0",
     "@vitest/browser": "^2.1.9",
     "@vitest/coverage-v8": "^2.1.9",
-    "eslint": "^9.9.0",
-    "eslint-config-prettier": "^9.1.0",
+    "eslint": "^10.1.0",
+    "eslint-config-prettier": "^10.1.8",
     "jsdom": "^29.0.1",
     "msw": "^2.12.11",
     "playwright": "^1.59.1",

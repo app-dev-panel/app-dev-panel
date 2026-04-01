@@ -7,7 +7,7 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 import {fireEvent, render, screen} from '@testing-library/react';
 import {PropsWithChildren} from 'react';
 import {Provider} from 'react-redux';
-import {MemoryRouter} from 'react-router-dom';
+import {MemoryRouter} from 'react-router';
 import {describe, expect, it} from 'vitest';
 import {IndexPage} from './IndexPage';
 

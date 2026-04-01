@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useState} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Styled components

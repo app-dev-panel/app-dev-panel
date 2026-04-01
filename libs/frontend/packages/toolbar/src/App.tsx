@@ -6,7 +6,7 @@ import {createRouter} from '@app-dev-panel/toolbar/router';
 import {createStore} from '@app-dev-panel/toolbar/store';
 import {useMemo} from 'react';
 import {Provider} from 'react-redux';
-import {RouterProvider} from 'react-router-dom';
+import {RouterProvider} from 'react-router';
 
 type AppProps = {
     config: {

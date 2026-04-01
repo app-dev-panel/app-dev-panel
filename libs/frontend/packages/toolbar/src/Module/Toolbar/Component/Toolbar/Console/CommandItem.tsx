@@ -4,7 +4,7 @@ import {DataObject, Input, Repeat, Terminal} from '@mui/icons-material';
 import {Chip, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography} from '@mui/material';
 import React, {useState} from 'react';
 
-const chipColor = (exitCode: number): MuiColor => {
+const chipColor = (exitCode: number): Exclude<MuiColor, 'inherit'> => {
     return exitCode === 0 ? 'success' : 'error';
 };
 

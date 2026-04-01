@@ -1,5 +1,5 @@
 import * as Pages from '@app-dev-panel/panel/Module/Inspector/Pages';
-import {Navigate, RouteObject} from 'react-router-dom';
+import {Navigate, RouteObject} from 'react-router';
 
 export const routes = [
     {

@@ -4,7 +4,7 @@ import {useEffect, useRef} from 'react';
 
 export const PhpInfoPage = () => {
     const getPhpInfoQuery = useGetPhpInfoQuery();
-    const containerRef = useRef<HTMLDivElement>();
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (getPhpInfoQuery.data) {
