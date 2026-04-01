@@ -29,7 +29,12 @@ describe('Toolbar', () => {
         renderToolbar();
         await expandToolbar();
 
-        expect(screen.getByText('GET /api/test 200')).toBeInTheDocument();
+        await waitFor(
+            () => {
+                expect(screen.getByText('GET /api/test 200')).toBeInTheDocument();
+            },
+            {timeout: 5000},
+        );
         expect(screen.getByLabelText('List debug entries')).toBeInTheDocument();
         expect(screen.getByLabelText('Open debug panel')).toBeInTheDocument();
     });

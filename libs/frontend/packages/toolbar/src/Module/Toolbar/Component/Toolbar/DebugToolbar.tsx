@@ -1,6 +1,7 @@
 import {setIFrameHeight, setToolbarOpen} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {IFrameWrapper} from '@app-dev-panel/sdk/Helper/IFrameWrapper';
 import {DebugEntriesListModal} from '@app-dev-panel/toolbar/Module/Toolbar/Component/DebugEntriesListModal';
@@ -14,7 +15,6 @@ import {ValidatorItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Too
 import {RequestItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RequestItem';
 import {RouterItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RouterItem';
 import {useSelector} from '@app-dev-panel/toolbar/store';
-import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -78,17 +78,18 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     const iframeHeight = useSelector((state) => state.application.iframeHeight);
     const baseUrlState = useSelector((state) => state.application.baseUrl);
 
+    const [iframeEnabled, setIframeEnabled] = useState(false);
+
     useEffect(() => setIsToolbarOpened(toolbarOpenState), [toolbarOpenState]);
 
-    const onToolbarClickHandler = () => {
-        setIsToolbarOpened((v) => {
-            dispatch(setToolbarOpen(!v));
-            if (iframeEnabled) {
-                setIframeEnabled(false);
-            }
-            return !v;
-        });
-    };
+    const onToolbarClickHandler = useCallback(() => {
+        const next = !isToolbarOpened;
+        setIsToolbarOpened(next);
+        dispatch(setToolbarOpen(next));
+        if (!next && iframeEnabled) {
+            setIframeEnabled(false);
+        }
+    }, [isToolbarOpened, iframeEnabled]);
 
     const onChangeHandler = useCallback((entry: DebugEntry) => {
         setSelectedEntry(entry);
@@ -128,7 +129,6 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         [iframeWrapper, activeComponents],
     );
 
-    const [iframeEnabled, setIframeEnabled] = useState(false);
     const toggleIframeHandler = useCallback(() => {
         if (!activeComponents.iframe) {
             return;
@@ -185,10 +185,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                 >
                     <DuckIcon sx={{fontSize: 28}} />
                     {selectedEntry && (
-                        <Box
-                            component="span"
-                            sx={{fontSize: 12, fontWeight: 600, color: 'text.secondary', pr: 0.25}}
-                        >
+                        <Box component="span" sx={{fontSize: 12, fontWeight: 600, color: 'text.secondary', pr: 0.25}}>
                             {isDebugEntryAboutWeb(selectedEntry)
                                 ? `${selectedEntry.response.statusCode}`
                                 : isDebugEntryAboutConsole(selectedEntry)

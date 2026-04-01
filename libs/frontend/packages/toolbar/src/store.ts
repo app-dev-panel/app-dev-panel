@@ -1,4 +1,3 @@
-import {changeBaseUrl} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {
     middlewares as ApplicationMiddlewares,
     reducers as ApplicationReducers,
@@ -14,10 +13,20 @@ import {TypedUseSelectorHook, useSelector} from 'react-redux';
 import {FLUSH, PAUSE, PERSIST, persistStore, PURGE, REGISTER, REHYDRATE} from 'redux-persist';
 import {initMessageListener} from 'redux-state-sync';
 
-// TODO: get reducers and middlewares from modules.ts
 const rootReducer = combineReducers({...ToolbarApiReducers, ...DebugReducers, ...ApplicationReducers});
 
 export const createStore = (preloadedState: Partial<ReturnType<typeof rootReducer>> = {}, forcedBaseUrl?: string) => {
+    // Clear persisted application state so redux-persist REHYDRATE
+    // doesn't overwrite baseUrl with a stale value.
+    // We keep other persisted keys (debug, notifications) intact.
+    if (forcedBaseUrl) {
+        try {
+            localStorage.removeItem('persist:application');
+        } catch {
+            // localStorage may be unavailable
+        }
+    }
+
     const store = configureStore({
         reducer: rootReducer,
         middleware: (getDefaultMiddleware) =>
@@ -30,14 +39,7 @@ export const createStore = (preloadedState: Partial<ReturnType<typeof rootReduce
     setupListeners(store.dispatch);
     initMessageListener(store);
 
-    const persistor = persistStore(store, null, () => {
-        // Called after rehydration is complete.
-        // Re-apply the configured baseUrl because rehydration overwrites it
-        // with the stale persisted value from localStorage.
-        if (forcedBaseUrl) {
-            store.dispatch(changeBaseUrl(forcedBaseUrl));
-        }
-    });
+    const persistor = persistStore(store);
 
     return {store, persistor};
 };
