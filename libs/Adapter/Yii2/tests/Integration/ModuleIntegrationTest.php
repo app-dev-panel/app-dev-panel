@@ -8,12 +8,16 @@ use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
+use AppDevPanel\Kernel\Collector\ElasticsearchCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\QueryRecord;
+use AppDevPanel\Kernel\Collector\RedisCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\ViewCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
@@ -51,6 +55,10 @@ final class ModuleIntegrationTest extends Yii2IntegrationTestCase
             DatabaseCollector::class,
             MailerCollector::class,
             AssetBundleCollector::class,
+            RedisCollector::class,
+            ElasticsearchCollector::class,
+            ViewCollector::class,
+            TemplateCollector::class,
         ];
 
         foreach ($expectedClasses as $expected) {

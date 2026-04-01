@@ -336,6 +336,25 @@ final class FixtureRegistry
                 ],
             ]),
 
+            // === View ===
+            new Fixture(name: 'view:basic', endpoint: '/test/fixtures/view', expectations: [
+                'view' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryHasKey('view'),
+                    Expectation::summaryGte('view.total', 1),
+                ],
+            ]),
+
+            // === Template ===
+            new Fixture(name: 'template:basic', endpoint: '/test/fixtures/template', expectations: [
+                'template' => [
+                    Expectation::notEmpty(),
+                    Expectation::summaryHasKey('template'),
+                    Expectation::summaryGte('template.renderCount', 2),
+                    Expectation::summaryGte('template.totalTime', 0),
+                ],
+            ]),
+
             // === Elasticsearch ===
             new Fixture(name: 'elasticsearch:basic', endpoint: '/test/fixtures/elasticsearch', expectations: [
                 'elasticsearch' => [

@@ -28,7 +28,12 @@ Configure the module in your application config:
             'db' => true,
             'mailer' => true,
             'assets' => true,
-            // ... all collectors
+            'redis' => true,
+            'elasticsearch' => true,
+            'view' => true,
+            'template' => true,
+            'code_coverage' => false, // opt-in, requires pcov or xdebug
+            // ... all collectors enabled by default
         ],
         'ignoredRequests' => ['/debug/api/**', '/inspect/api/**'],
         'ignoredCommands' => ['help', 'list', 'cache/*', 'asset/*'],
@@ -39,7 +44,32 @@ Configure the module in your application config:
 
 ## Collectors
 
-Supports all Kernel collectors plus Yii 2-specific data capture: database queries via `DbProfilingTarget` (Yii logger), real-time log capture via `DebugLogTarget`, mailer events, asset bundle profiling, and translator interception.
+Supports all Kernel collectors plus Yii 2-specific data capture:
+
+| Collector | Mechanism | Data |
+|-----------|-----------|------|
+| Database | `DbProfilingTarget` (Yii logger) | SQL queries, timing, row count |
+| Log | `DebugLogTarget` (real-time Yii log target) | Log messages with PSR-3 level mapping |
+| Mailer | `BaseMailer::EVENT_AFTER_SEND` | From, to, cc, bcc, subject, body |
+| Asset Bundles | `View::EVENT_END_PAGE` | Bundles: class, paths, CSS/JS, dependencies |
+| Translator | `I18NProxy` replaces `Yii::$app->i18n` | Translation lookups, missing translations |
+| View | `View::EVENT_AFTER_RENDER` | Rendered file, output, parameters |
+| Templates | `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` | Render timing per template (supports nesting) |
+| Redis | Direct collector calls | Redis commands, timing, errors |
+| Elasticsearch | Direct collector calls | ES requests, timing, hits |
+| Code Coverage | `pcov` / `xdebug` extension | Per-file line coverage (opt-in) |
+| Authorization | `User::EVENT_AFTER_LOGIN/LOGOUT` | Auth events, user identity |
+| Router | `UrlRuleProxy` wraps all URL rules | Route matching data, timing |
+
+### View & Template Collectors
+
+The **ViewCollector** hooks into `yii\base\View::EVENT_AFTER_RENDER` to capture every view rendering with its file path, output, and parameters. Detects duplicate renders automatically.
+
+The **TemplateCollector** hooks into both `EVENT_BEFORE_RENDER` and `EVENT_AFTER_RENDER` to measure render timing. Handles nested view rendering correctly (e.g., layout → partial → widget) using a per-file timer stack.
+
+### Code Coverage
+
+Code coverage is **opt-in** (`'code_coverage' => false` by default). Requires the `pcov` or `xdebug` PHP extension. Without either, the collector returns `driver: null`. See [Collectors — Code Coverage](/guide/collectors#code-coverage-collector) for details.
 
 ## Translator Integration
 

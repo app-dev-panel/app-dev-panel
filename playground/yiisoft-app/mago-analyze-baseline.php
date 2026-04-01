@@ -70,7 +70,7 @@ count = 6
 file = "config/common/routes.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 61
+count = 65
 
 [[issues]]
 file = "config/common/routes.php"
@@ -82,7 +82,7 @@ count = 2
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Yiisoft\Router\Route`.'
-count = 27
+count = 29
 
 [[issues]]
 file = "config/common/routes.php"
@@ -769,6 +769,24 @@ message = "Property `$responseFactory` is never used."
 count = 1
 
 [[issues]]
+file = "src/Web/TestFixtures/TemplateAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\TemplateAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/TemplateAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/TemplateAction.php"
+code = "unused-property"
+message = "Property `$templateCollector` is never used."
+count = 1
+
+[[issues]]
 file = "src/Web/TestFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\TimelineAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -820,4 +838,22 @@ count = 1
 file = "src/Web/TestFixtures/ValidatorAction.php"
 code = "unused-property"
 message = "Property `$validatorCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ViewAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\ViewAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ViewAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/ViewAction.php"
+code = "unused-property"
+message = "Property `$viewCollector` is never used."
 count = 1

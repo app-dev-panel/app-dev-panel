@@ -18,10 +18,14 @@ use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\RedisCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
+use AppDevPanel\Kernel\Collector\ViewCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
@@ -119,6 +123,10 @@ final class ModuleBootstrapTest extends TestCase
             MailerCollector::class,
             AssetBundleCollector::class,
             RouterCollector::class,
+            RedisCollector::class,
+            ViewCollector::class,
+            TemplateCollector::class,
+            ValidatorCollector::class,
         ];
 
         $collectorClasses = array_map(static fn(CollectorInterface $c) => $c::class, $collectors);

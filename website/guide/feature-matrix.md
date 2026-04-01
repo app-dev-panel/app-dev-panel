@@ -6,9 +6,13 @@ title: Feature Matrix
 
 ADP supports multiple PHP frameworks through adapters. Each adapter wires framework-specific hooks into the shared Kernel collectors. This page documents what is available in each adapter.
 
-## Core Collectors
+## Collector Support by Adapter
 
-All 17 Kernel collectors are available to every adapter. Adapters wire framework-specific event hooks to feed data into them.
+All collectors live in the Kernel and are framework-independent. Adapters register and wire them via framework-specific event hooks, proxies, or decorators.
+
+### Universal Collectors
+
+These collectors are registered in **all four adapters**:
 
 | Collector | Frontend Panel | Description |
 |-----------|---------------|-------------|
@@ -16,6 +20,7 @@ All 17 Kernel collectors are available to every adapter. Adapters wire framework
 | `LogCollector` | Logs | PSR-3 log messages |
 | `EventCollector` | Events | PSR-14 dispatched events |
 | `ExceptionCollector` | Exceptions | Uncaught exceptions with stack traces |
+| `DeprecationCollector` | _(in Logs)_ | PHP deprecation warnings |
 | `ServiceCollector` | Services | DI container service resolutions |
 | `HttpClientCollector` | HTTP Client | PSR-18 outgoing HTTP requests |
 | `VarDumperCollector` | Var Dumper | `dump()` / `dd()` calls |
@@ -26,34 +31,37 @@ All 17 Kernel collectors are available to every adapter. Adapters wire framework
 | `CommandCollector` | Request | Console command details (console entries) |
 | `WebAppInfoCollector` | _(meta)_ | Web app summary for entry list |
 | `ConsoleAppInfoCollector` | _(meta)_ | Console app summary for entry list |
-| `DatabaseCollector` | Database | SQL queries, execution time, transactions |
-| `MailerCollector` | Mailer | Sent email messages |
-| `AssetBundleCollector` | Asset Bundles | Registered frontend asset bundles |
+| `RouterCollector` | Router | HTTP route matching data |
+| `ValidatorCollector` | Validator | Validation operations and results |
+| `TranslatorCollector` | Translator | Translation lookups, missing translations |
+| `AuthorizationCollector` | Security | Authentication and authorization data |
+| `OpenTelemetryCollector` | OpenTelemetry | OpenTelemetry spans and traces |
 
-## Adapter-Specific Collectors
-
-Beyond the shared Kernel collectors, each adapter provides framework-specific collectors:
+### Collector Availability Matrix
 
 | Collector | Yiisoft | Symfony | Laravel | Yii2 | Frontend Panel |
 |-----------|:-------:|:-------:|:-------:|:----:|---------------|
+| Database | ✅ | ✅ | ✅ | ✅ | Database |
+| Cache | ✅ | ✅ | ✅ | ✅ | Cache |
+| Mailer | ✅ | ✅ | ✅ | ✅ | Mailer |
+| Queue | ✅ | ✅ | ✅ | ✅ | Queue |
+| Redis | ✅ | ✅ | ✅ | ✅ | Redis |
+| Elasticsearch | ✅ | ✅ | ✅ | ✅ | Elasticsearch |
+| View | ✅ | — | — | ✅ | WebView |
+| Templates | — | ✅ | — | ✅ | Templates |
+| Code Coverage | — | ✅ | ✅ | ✅ | Coverage |
+| Asset Bundles | — | — | — | ✅ | Asset Bundles |
 | Middleware | ✅ | — | — | — | Middleware |
-| Queue | ✅ | — | ✅ | — | Queue |
-| Router | ✅ | — | ✅ | — | Router |
-| Validator | ✅ | — | — | — | Validator |
-| WebView | ✅ | — | — | — | WebView |
-| Twig Templates | — | ✅ | — | — | Twig |
-| Security | ✅ | ✅ | ✅ | ✅ | Security |
-| Cache | — | ✅ | ✅ | — | Cache |
 | Messenger | — | ✅ | — | — | Messenger |
 
 ### Collector Totals by Adapter
 
-| Adapter | Kernel | Adapter-Specific | Total |
-|---------|:------:|:----------------:|:-----:|
-| Yiisoft | 17 | 5 | **22** |
-| Symfony | 17 | 4 | **21** |
-| Laravel | 17 | 2 | **19** |
-| Yii2 | 17 | 0 | **17** |
+| Adapter | Universal | Additional | Total |
+|---------|:---------:|:----------:|:-----:|
+| Yiisoft | 20 | 5 | **25** |
+| Symfony | 20 | 5 | **25** |
+| Yii2 | 20 | 7 | **27** |
+| Laravel | 20 | 4 | **24** |
 
 ## Proxy / Interception Mechanisms
 
@@ -68,12 +76,13 @@ Each adapter uses different strategies to intercept framework internals and feed
 | VarDumper | `VarDumperHandlerInterfaceProxy` | Handler hook | Handler hook | Handler hook |
 | Database | `ConnectionInterfaceProxy` | DBAL middleware | Event listener | `DbProfilingTarget` |
 | Mailer | `MailerInterfaceProxy` | Event listener | Event listener | Event hook |
-| Router | `UrlMatcherInterfaceProxy` | — | `RouterDataExtractor` | — |
+| Router | `UrlMatcherInterfaceProxy` | — | `RouterDataExtractor` | `UrlRuleProxy` |
 | Validator | `ValidatorInterfaceProxy` | — | — | — |
 | Queue | `QueueProviderInterfaceProxy` | — | Event listener | — |
-| View/Templates | — | Twig profiler extension | — | View event |
+| View/Templates | — | Twig profiler extension | — | `View::EVENT_AFTER_RENDER` |
 | Cache | — | Decorated `CacheAdapter` | Event listener | — |
 | Messenger | — | Messenger middleware | — | — |
+| Translator | `TranslatorInterfaceProxy` | `SymfonyTranslatorProxy` | `LaravelTranslatorProxy` | `I18NProxy` |
 
 ## Inspector Features
 
@@ -96,17 +105,15 @@ Inspector provides live application introspection (not tied to debug entries). A
 
 ## Feature Parity Gaps
 
-Current differences between adapters in adapter-specific functionality:
+Current differences between adapters:
 
 | Feature | Yiisoft | Symfony | Laravel | Yii2 |
 |---------|:-------:|:-------:|:-------:|:----:|
-| Queue monitoring | ✅ | ❌ | ✅ | ❌ |
-| Route debugging | ✅ | ❌ | ✅ | ❌ |
-| Validation debugging | ✅ | ❌ | ❌ | ❌ |
-| View/template debugging | ✅ | ✅ | ❌ | ❌ |
+| View/template debugging | ✅ | ✅ | ❌ | ✅ |
+| Code coverage | ❌ | ✅ | ✅ | ✅ |
 | Middleware debugging | ✅ | ❌ | ❌ | ❌ |
-| Cache debugging | ❌ | ✅ | ✅ | ❌ |
 | Message bus debugging | ❌ | ✅ | ❌ | ❌ |
+| Asset bundle debugging | ❌ | ❌ | ❌ | ✅ |
 | Container proxy | ✅ | ❌ | ❌ | ❌ |
 
 ::: tip
