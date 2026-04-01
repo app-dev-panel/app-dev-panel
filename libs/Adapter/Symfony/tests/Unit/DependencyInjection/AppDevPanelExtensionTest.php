@@ -13,6 +13,7 @@ use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
@@ -79,6 +80,7 @@ final class AppDevPanelExtensionTest extends TestCase
             QueueCollector::class,
             ValidatorCollector::class,
             RouterCollector::class,
+            AssetBundleCollector::class,
         ];
 
         foreach ($expectedCollectors as $collectorClass) {
@@ -116,6 +118,7 @@ final class AppDevPanelExtensionTest extends TestCase
                     'queue' => false,
                     'validator' => false,
                     'router' => false,
+                    'assets' => false,
                 ],
             ],
         ], $container);
@@ -127,6 +130,7 @@ final class AppDevPanelExtensionTest extends TestCase
         $this->assertFalse($container->hasDefinition(QueueCollector::class));
         $this->assertFalse($container->hasDefinition(ValidatorCollector::class));
         $this->assertFalse($container->hasDefinition(RouterCollector::class));
+        $this->assertFalse($container->hasDefinition(AssetBundleCollector::class));
 
         // Core collectors still registered
         $this->assertTrue($container->hasDefinition(LogCollector::class));
