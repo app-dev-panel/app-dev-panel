@@ -48,9 +48,11 @@ export const ComposerPage = () => {
         if (!getComposerQuery.data || !getComposerQuery.data.lock) {
             return packages;
         }
-        getComposerQuery.data.lock.packages.concat(getComposerQuery.data.lock['packages-dev']).forEach((value) => {
-            packages[value.name] = value.version;
-        });
+        (getComposerQuery.data.lock.packages ?? [])
+            .concat(getComposerQuery.data.lock['packages-dev'] ?? [])
+            .forEach((value) => {
+                packages[value.name] = value.version;
+            });
         return packages;
     }, [getComposerQuery.data]);
     const onClickHandler = (name: string) => {
@@ -79,7 +81,7 @@ export const ComposerPage = () => {
                     <List sx={{width: '100%'}}>
                         <Divider>Require</Divider>
                         {getComposerQuery.data &&
-                            Object.entries(getComposerQuery.data.json.require).map(([name, version], index) => (
+                            Object.entries(getComposerQuery.data.json.require ?? {}).map(([name, version], index) => (
                                 <PackageItem
                                     key={index}
                                     packageName={name}
@@ -95,18 +97,20 @@ export const ComposerPage = () => {
                     <List sx={{width: '100%'}}>
                         <Divider>Require Dev</Divider>
                         {getComposerQuery.data &&
-                            Object.entries(getComposerQuery.data.json['require-dev']).map(([name, version], index) => (
-                                <PackageItem
-                                    key={index}
-                                    packageName={name}
-                                    version={
-                                        name in installedVersions
-                                            ? `Required: ${version}, Installed: ${installedVersions[name]}`
-                                            : `${version}`
-                                    }
-                                    onClick={onClickDevHandler}
-                                />
-                            ))}
+                            Object.entries(getComposerQuery.data.json['require-dev'] ?? {}).map(
+                                ([name, version], index) => (
+                                    <PackageItem
+                                        key={index}
+                                        packageName={name}
+                                        version={
+                                            name in installedVersions
+                                                ? `Required: ${version}, Installed: ${installedVersions[name]}`
+                                                : `${version}`
+                                        }
+                                        onClick={onClickDevHandler}
+                                    />
+                                ),
+                            )}
                     </List>
                 </Box>
             </TabPanel>
