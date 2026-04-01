@@ -30,7 +30,7 @@ return [
             ),
             Route::get('/database')->action(Web\TestFixtures\DatabaseAction::class)->name('test-database'),
             Route::get('/mailer')->action(Web\TestFixtures\MailerAction::class)->name('test-mailer'),
-            Route::get('/messenger')->action(Web\TestFixtures\MessengerAction::class)->name('test-messenger'),
+            Route::get('/queue')->action(Web\TestFixtures\QueueAction::class)->name('test-queue'),
             Route::get('/validator')->action(Web\TestFixtures\ValidatorAction::class)->name('test-validator'),
             Route::get('/router')->action(Web\TestFixtures\RouterAction::class)->name('test-router'),
             Route::get('/cache')->action(Web\TestFixtures\CacheAction::class)->name('test-cache'),
@@ -45,7 +45,6 @@ return [
             ),
             Route::get('/redis')->action(Web\TestFixtures\RedisAction::class)->name('test-redis'),
             Route::get('/coverage')->action(Web\TestFixtures\CoverageAction::class)->name('test-coverage'),
-            Route::get('/view')->action(Web\TestFixtures\ViewAction::class)->name('test-view'),
             Route::get('/template')->action(Web\TestFixtures\TemplateAction::class)->name('test-template'),
             Route::methods(['GET', 'POST'], '/reset')
                 ->action(Web\TestFixtures\ResetAction::class)

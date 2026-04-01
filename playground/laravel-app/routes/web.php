@@ -19,9 +19,9 @@ use App\Http\Controllers\TestFixtures\LogsAction;
 use App\Http\Controllers\TestFixtures\LogsContextAction;
 use App\Http\Controllers\TestFixtures\LogsHeavyAction;
 use App\Http\Controllers\TestFixtures\MailerAction;
-use App\Http\Controllers\TestFixtures\MessengerAction;
 use App\Http\Controllers\TestFixtures\MultiAction;
 use App\Http\Controllers\TestFixtures\OpenTelemetryAction;
+use App\Http\Controllers\TestFixtures\QueueAction;
 use App\Http\Controllers\TestFixtures\RedisAction;
 use App\Http\Controllers\TestFixtures\RequestInfoAction;
 use App\Http\Controllers\TestFixtures\ResetAction;
@@ -32,7 +32,6 @@ use App\Http\Controllers\TestFixtures\TemplateAction;
 use App\Http\Controllers\TestFixtures\TimelineAction;
 use App\Http\Controllers\TestFixtures\TranslatorAction;
 use App\Http\Controllers\TestFixtures\ValidatorAction;
-use App\Http\Controllers\TestFixtures\ViewAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index']);
@@ -58,7 +57,7 @@ Route::prefix('test/fixtures')->group(function (): void {
     Route::get('/database', DatabaseAction::class);
     Route::get('/http-client', HttpClientAction::class);
     Route::get('/mailer', MailerAction::class);
-    Route::get('/messenger', MessengerAction::class);
+    Route::get('/queue', QueueAction::class);
     Route::get('/validator', ValidatorAction::class);
     Route::get('/router', RouterAction::class);
     Route::get('/filesystem', FilesystemAction::class);
@@ -69,6 +68,5 @@ Route::prefix('test/fixtures')->group(function (): void {
     Route::get('/elasticsearch', ElasticsearchAction::class);
     Route::get('/redis', RedisAction::class);
     Route::get('/coverage', CoverageAction::class);
-    Route::get('/view', ViewAction::class);
     Route::get('/template', TemplateAction::class);
 });

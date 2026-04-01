@@ -15,11 +15,11 @@
 
 ## Weaknesses
 
-- **6 fixtures use direct collector injection** — same as Yii 3: cache, database, mailer, validator, router, messenger inject collectors directly
+- **6 fixtures use direct collector injection** — same as Yii 3: cache, database, mailer, validator, router, queue inject collectors directly
 - **No real database** — `DatabaseAction` calls `DatabaseCollector::logQuery()` with fake data, not Doctrine DBAL
 - **No real cache** — `CacheAction` calls `CacheCollector::logCacheOperation()` directly, not Symfony Cache component
 - **No real mailer** — `MailerAction` calls `MailerCollector::collectMessage()` directly, not Symfony Mailer
-- **No real messenger** — `MessengerAction` calls `QueueCollector::logMessage()` directly, not Symfony Messenger
+- **No real queue** — `QueueAction` calls `QueueCollector::logMessage()` directly, not Symfony Messenger
 - **Manual bundle registration** — requires editing `bundles.php`, `routes/`, and `config/packages/` manually
 
 ## Fixture Data Capture Analysis
@@ -27,7 +27,7 @@
 | Method | Count | Actions |
 |--------|------:|---------|
 | PSR proxy | 9 | logs, logs-context, logs-heavy, events, http-client, multi, timeline, dump |
-| Direct collector | 6 | cache, cache-heavy, database, mailer, messenger, validator, router |
+| Direct collector | 6 | cache, cache-heavy, database, mailer, queue, validator, router |
 | Native (exception/file) | 5 | exception, exception-chained, filesystem, reset, reset-cli |
 | None needed | 1 | request-info |
 
@@ -36,7 +36,7 @@
 1. **Database fixture via Doctrine DBAL** — add `doctrine/dbal` + SQLite, run actual queries, let `DatabaseSubscriber` capture queries via `doctrine.dbal.logging`
 2. **Cache fixture via Symfony Cache** — configure `framework.cache` with array adapter, use `CacheInterface`, let cache event subscriber capture operations
 3. **Mailer fixture via Symfony Mailer** — configure null transport, send real `Email` objects, let mailer subscriber capture
-4. **Messenger fixture via Symfony Messenger** — configure sync transport, dispatch real messages, let messenger subscriber capture
+4. **Messenger fixture via Symfony Messenger** — configure sync transport, dispatch real messages, let queue subscriber capture
 5. **Add Flex recipe** — create a Symfony Flex recipe for automatic config file generation during `composer require`
 6. **Add router:auto fixture** — `FixtureRegistry` defines it but no playground implements it
 7. **Reduce manual setup** — document or automate the 3 config files (`bundles.php`, route import, `app_dev_panel.yaml`) needed for installation

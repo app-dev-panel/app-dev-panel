@@ -2,15 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\TestFixtures;
+namespace App\Http\Controllers\TestFixtures;
 
 use AppDevPanel\Kernel\Collector\MessageRecord;
 use AppDevPanel\Kernel\Collector\QueueCollector;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Attribute\Route;
+use Illuminate\Http\JsonResponse;
 
-#[Route('/test/fixtures/messenger', name: 'test_messenger', methods: ['GET'])]
-final readonly class MessengerAction
+final readonly class QueueAction
 {
     public function __construct(
         private QueueCollector $queueCollector,
@@ -45,6 +43,6 @@ final readonly class MessengerAction
             ],
         ));
 
-        return new JsonResponse(['fixture' => 'messenger:basic', 'status' => 'ok']);
+        return new JsonResponse(['fixture' => 'queue:basic', 'status' => 'ok']);
     }
 }

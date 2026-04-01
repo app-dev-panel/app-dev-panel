@@ -87,7 +87,7 @@ All playgrounds must implement these endpoints under `/test/fixtures/`:
 | `/test/fixtures/filesystem-streams` | filesystem:streams | FilesystemStreamCollector |
 | `/test/fixtures/database` | database:basic | DatabaseCollector |
 | `/test/fixtures/mailer` | mailer:basic | MailerCollector |
-| `/test/fixtures/messenger` | messenger:basic | QueueCollector |
+| `/test/fixtures/queue` | queue:basic | QueueCollector |
 | `/test/fixtures/validator` | validator:basic | ValidatorCollector |
 | `/test/fixtures/router` | router:basic | RouterCollector |
 | `/test/fixtures/cache` | cache:basic | CacheCollector |

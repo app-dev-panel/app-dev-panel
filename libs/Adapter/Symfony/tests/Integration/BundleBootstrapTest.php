@@ -244,7 +244,7 @@ final class BundleBootstrapTest extends TestCase
                 'security' => false,
                 'cache' => false,
                 'mailer' => false,
-                'messenger' => false,
+                'queue' => false,
                 'validator' => false,
                 'router' => false,
             ],

@@ -31,7 +31,7 @@ src/
 ├── Collector/
 │   ├── TwigCollector.php                           # Template renders, timing (requires twig/twig)
 │   ├── CacheCollector.php                          # Cache hits/misses, operations
-│   ├── MessengerCollector.php                      # Message bus operations
+│   ├── QueueCollector.php                           # Queue/message bus operations (Symfony Messenger)
 │   ├── SymfonyRequestCollector.php                 # Legacy: Symfony HttpFoundation collector (unused)
 │   └── SymfonyExceptionCollector.php               # Legacy: Symfony exception collector (unused)
 ├── Inspector/
@@ -176,7 +176,7 @@ Conditionally registered only when `symfony/security-http` is installed and the 
 | `AuthorizationCollector` (Kernel) | `AuthorizationSubscriber` listening to Symfony Security events | User, roles, firewall, token, impersonation, auth events, access decisions with voters |
 | `CacheCollector` | Decorated cache adapter calling `logCacheOperation()` | Cache operations, hits/misses |
 | `MailerCollector` (Kernel) | Mailer MessageEvent listener calling `collectMessage()` | Emails sent |
-| `MessengerCollector` | Messenger middleware calling `logMessage()` | Messages dispatched/handled/failed |
+| `QueueCollector` (Kernel) | Messenger middleware calling `logMessage()` | Messages dispatched/handled/failed |
 | `TranslatorCollector` (Kernel) | `SymfonyTranslatorProxy` decorating `TranslatorInterface` | Translation lookups, missing translations |
 | `RedisCollector` (Kernel) | Predis plugin or phpredis decorator calling `logCommand()` | Redis commands, timing, errors |
 
@@ -205,7 +205,7 @@ app_dev_panel:
         security: true                     # AuthorizationCollector (requires symfony/security-bundle)
         cache: true                        # CacheCollector
         mailer: true                       # MailerCollector from Kernel (requires symfony/mailer)
-        messenger: true                    # MessengerCollector (requires symfony/messenger)
+        queue: true                        # QueueCollector from Kernel (requires symfony/messenger)
         translator: true                   # TranslatorCollector (Kernel, via SymfonyTranslatorProxy)
         code_coverage: false               # CodeCoverageCollector (opt-in, requires pcov or xdebug)
     ignored_requests:

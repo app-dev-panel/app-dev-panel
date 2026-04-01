@@ -613,19 +613,19 @@ message = "Property `$responseFactory` is never used."
 count = 1
 
 [[issues]]
-file = "src/Web/TestFixtures/MessengerAction.php"
+file = "src/Web/TestFixtures/QueueAction.php"
 code = "non-existent-class-like"
-message = 'Class `App\Web\TestFixtures\MessengerAction` cannot implement unknown type `RequestHandlerInterface`'
+message = 'Class `App\Web\TestFixtures\QueueAction` cannot implement unknown type `RequestHandlerInterface`'
 count = 1
 
 [[issues]]
-file = "src/Web/TestFixtures/MessengerAction.php"
+file = "src/Web/TestFixtures/QueueAction.php"
 code = "unused-property"
 message = "Property `$queueCollector` is never used."
 count = 1
 
 [[issues]]
-file = "src/Web/TestFixtures/MessengerAction.php"
+file = "src/Web/TestFixtures/QueueAction.php"
 code = "unused-property"
 message = "Property `$responseFactory` is never used."
 count = 1
@@ -840,20 +840,3 @@ code = "unused-property"
 message = "Property `$validatorCollector` is never used."
 count = 1
 
-[[issues]]
-file = "src/Web/TestFixtures/ViewAction.php"
-code = "non-existent-class-like"
-message = 'Class `App\Web\TestFixtures\ViewAction` cannot implement unknown type `RequestHandlerInterface`'
-count = 1
-
-[[issues]]
-file = "src/Web/TestFixtures/ViewAction.php"
-code = "unused-property"
-message = "Property `$responseFactory` is never used."
-count = 1
-
-[[issues]]
-file = "src/Web/TestFixtures/ViewAction.php"
-code = "unused-property"
-message = "Property `$viewCollector` is never used."
-count = 1
