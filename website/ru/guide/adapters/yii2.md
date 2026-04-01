@@ -69,7 +69,7 @@ composer require app-dev-panel/adapter-yii2
 
 ### Code Coverage
 
-Code coverage — **opt-in** (`'code_coverage' => false` по умолчанию). Требует расширение `pcov` или `xdebug`. Без них коллектор возвращает `driver: null`. Подробности на странице [Коллекторы — Code Coverage](/ru/guide/collectors#code-coverage-коллектор).
+Code coverage — **opt-in** (`'code_coverage' => false` по умолчанию). Требует расширение `pcov` или `xdebug`. Без них коллектор возвращает `driver: null`. Подробности на странице [Коллекторы — Code Coverage](/ru/guide/collectors#code-coverage-collector).
 
 ## Интеграция с переводчиком
 

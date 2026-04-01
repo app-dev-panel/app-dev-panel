@@ -58,10 +58,10 @@ These collectors are registered in **all four adapters**:
 
 | Adapter | Universal | Additional | Total |
 |---------|:---------:|:----------:|:-----:|
-| Yiisoft | 20 | 5 | **25** |
-| Symfony | 20 | 5 | **25** |
-| Yii2 | 20 | 7 | **27** |
-| Laravel | 20 | 4 | **24** |
+| Yiisoft | 20 | 8 | **28** |
+| Symfony | 20 | 9 | **29** |
+| Yii2 | 20 | 10 | **30** |
+| Laravel | 20 | 7 | **27** |
 
 ## Proxy / Interception Mechanisms
 
