@@ -4,7 +4,7 @@ title: Коллекторы
 
 # Коллекторы
 
-Коллекторы -- основной механизм сбора данных в ADP. Каждый коллектор реализует интерфейс `CollectorInterface` и отвечает за захват определённого типа данных во время выполнения приложения.
+Коллекторы -- основной механизм сбора данных в ADP. Каждый коллектор реализует интерфейс <class>AppDevPanel\Kernel\Collector\CollectorInterface</class> и отвечает за захват определённого типа данных во время выполнения приложения.
 
 ## Встроенные коллекторы
 
@@ -12,46 +12,46 @@ title: Коллекторы
 
 | Коллектор | Собираемые данные |
 |-----------|-------------------|
-| `LogCollector` | PSR-3 сообщения логов (уровень, текст, контекст) |
-| `EventCollector` | PSR-14 отправленные события и слушатели |
-| `ExceptionCollector` | Необработанные исключения со стектрейсами |
-| `HttpClientCollector` | PSR-18 исходящие HTTP-запросы и ответы |
-| `DatabaseCollector` | SQL-запросы, время выполнения, транзакции |
-| `ElasticsearchCollector` | Запросы к Elasticsearch, тайминг, количество hits |
-| `CacheCollector` | Операции кеша с отслеживанием hit/miss |
-| [`RedisCollector`](/guide/collectors/redis) | Redis-команды с таймингом и отслеживанием ошибок |
-| `MailerCollector` | Отправленные email-сообщения |
-| `TranslatorCollector` | Обращения к переводам, отсутствующие переводы |
-| `QueueCollector` | Операции очереди сообщений (push, consume, fail) |
-| `ServiceCollector` | Разрешение сервисов DI-контейнера |
-| `RouterCollector` | Данные маршрутизации HTTP-запросов |
-| `MiddlewareCollector` | Выполнение и тайминг стека middleware |
-| `ValidatorCollector` | Операции валидации и результаты |
-| `AuthorizationCollector` | Аутентификация и авторизация |
-| `TemplateCollector` | Рендеринг шаблонов/представлений с таймингами, захватом вывода и детекцией дубликатов |
-| `VarDumperCollector` | Ручные вызовы `dump()` / `dd()` |
-| `TimelineCollector` | Кросс-коллекторная временная шкала производительности |
-| `EnvironmentCollector` | Информация об окружении PHP и ОС |
-| `DeprecationCollector` | Предупреждения PHP о депрекациях |
-| `OpenTelemetryCollector` | Спаны и трейсы OpenTelemetry |
-| `AssetBundleCollector` | Бандлы фронтенд-ассетов (Yii) |
-| `FilesystemStreamCollector` | Операции файловых потоков |
-| `HttpStreamCollector` | Операции HTTP-потоков |
-| `CodeCoverageCollector` | Построчное покрытие PHP-кода за запрос (требуется pcov или xdebug) |
+| <class>AppDevPanel\Kernel\Collector\LogCollector</class> | PSR-3 сообщения логов (уровень, текст, контекст) |
+| <class>AppDevPanel\Kernel\Collector\EventCollector</class> | PSR-14 отправленные события и слушатели |
+| <class>AppDevPanel\Kernel\Collector\ExceptionCollector</class> | Необработанные исключения со стектрейсами |
+| <class>AppDevPanel\Kernel\Collector\HttpClientCollector</class> | PSR-18 исходящие HTTP-запросы и ответы |
+| <class>AppDevPanel\Kernel\Collector\DatabaseCollector</class> | SQL-запросы, время выполнения, транзакции |
+| <class>AppDevPanel\Kernel\Collector\ElasticsearchCollector</class> | Запросы к Elasticsearch, тайминг, количество hits |
+| <class>AppDevPanel\Kernel\Collector\CacheCollector</class> | Операции кеша с отслеживанием hit/miss |
+| <class>AppDevPanel\Kernel\Collector\RedisCollector</class> | Redis-команды с таймингом и отслеживанием ошибок |
+| <class>AppDevPanel\Kernel\Collector\MailerCollector</class> | Отправленные email-сообщения |
+| <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> | Обращения к переводам, отсутствующие переводы |
+| <class>AppDevPanel\Kernel\Collector\QueueCollector</class> | Операции очереди сообщений (push, consume, fail) |
+| <class>AppDevPanel\Kernel\Collector\ServiceCollector</class> | Разрешение сервисов DI-контейнера |
+| <class>AppDevPanel\Kernel\Collector\RouterCollector</class> | Данные маршрутизации HTTP-запросов |
+| <class>AppDevPanel\Kernel\Collector\MiddlewareCollector</class> | Выполнение и тайминг стека middleware |
+| <class>AppDevPanel\Kernel\Collector\ValidatorCollector</class> | Операции валидации и результаты |
+| <class>AppDevPanel\Kernel\Collector\AuthorizationCollector</class> | Аутентификация и авторизация |
+| <class>AppDevPanel\Kernel\Collector\TemplateCollector</class> | Рендеринг шаблонов/представлений с таймингами, захватом вывода и детекцией дубликатов |
+| <class>AppDevPanel\Kernel\Collector\VarDumperCollector</class> | Ручные вызовы `dump()` / `dd()` |
+| <class>AppDevPanel\Kernel\Collector\TimelineCollector</class> | Кросс-коллекторная временная шкала производительности |
+| <class>AppDevPanel\Kernel\Collector\EnvironmentCollector</class> | Информация об окружении PHP и ОС |
+| <class>AppDevPanel\Kernel\Collector\DeprecationCollector</class> | Предупреждения PHP о депрекациях |
+| <class>AppDevPanel\Kernel\Collector\OpenTelemetryCollector</class> | Спаны и трейсы OpenTelemetry |
+| <class>AppDevPanel\Kernel\Collector\AssetBundleCollector</class> | Бандлы фронтенд-ассетов (Yii) |
+| <class>AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector</class> | Операции файловых потоков |
+| <class>AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector</class> | Операции HTTP-потоков |
+| <class>AppDevPanel\Kernel\Collector\CodeCoverageCollector</class> | Построчное покрытие PHP-кода за запрос (требуется pcov или xdebug) |
 
 ### Веб-специфичные
 
 | Коллектор | Собираемые данные |
 |-----------|-------------------|
-| `RequestCollector` | Входящие HTTP-запросы и ответы |
-| `WebAppInfoCollector` | Версия PHP, память, время выполнения |
+| <class>AppDevPanel\Kernel\Collector\Web\RequestCollector</class> | Входящие HTTP-запросы и ответы |
+| <class>AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector</class> | Версия PHP, память, время выполнения |
 
 ### Консольные
 
 | Коллектор | Собираемые данные |
 |-----------|-------------------|
-| `CommandCollector` | Выполнение консольных команд |
-| `ConsoleAppInfoCollector` | Метаданные консольного приложения |
+| <class>AppDevPanel\Kernel\Collector\Console\CommandCollector</class> | Выполнение консольных команд |
+| <class>AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector</class> | Метаданные консольного приложения |
 
 ## CollectorInterface
 
@@ -68,7 +68,7 @@ interface CollectorInterface
 }
 ```
 
-`Debugger` вызывает `startup()` на всех зарегистрированных коллекторах в начале запроса, а `shutdown()` и `getCollected()` -- в конце.
+<class>AppDevPanel\Kernel\Debugger</class> вызывает `startup()` на всех зарегистрированных коллекторах в начале запроса, а `shutdown()` и `getCollected()` -- в конце.
 
 ## Создание пользовательского коллектора
 
@@ -117,28 +117,28 @@ final class MetricsCollector implements CollectorInterface
 }
 ```
 
-Зарегистрируйте коллектор в DI-конфигурации адаптера вашего фреймворка, чтобы `Debugger` подхватил его автоматически.
+Зарегистрируйте коллектор в DI-конфигурации адаптера вашего фреймворка, чтобы <class>AppDevPanel\Kernel\Debugger</class> подхватил его автоматически.
 
 ## Поток данных
 
 Коллекторы получают данные двумя способами:
 
-1. **Через прокси** -- прокси PSR-интерфейсов (например, `LoggerInterfaceProxy`) перехватывают вызовы и автоматически передают данные соответствующему коллектору.
-2. **Через прямые вызовы** -- хуки адаптера или код приложения вызывают методы коллектора напрямую (например, `DatabaseCollector` получает данные запросов через хуки базы данных фреймворка).
+1. **Через прокси** -- прокси PSR-интерфейсов (например, <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class>) перехватывают вызовы и автоматически передают данные соответствующему коллектору.
+2. **Через прямые вызовы** -- хуки адаптера или код приложения вызывают методы коллектора напрямую (например, <class>AppDevPanel\Kernel\Collector\DatabaseCollector</class> получает данные запросов через хуки базы данных фреймворка).
 
 ## SummaryCollectorInterface
 
-Коллекторы также могут реализовать `SummaryCollectorInterface` для предоставления сводных данных, отображаемых в списке отладочных записей без загрузки полных данных коллектора.
+Коллекторы также могут реализовать <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> для предоставления сводных данных, отображаемых в списке отладочных записей без загрузки полных данных коллектора.
 
 ## TranslatorCollector
 
-Захватывает обращения к переводам во время выполнения запроса, включая обнаружение отсутствующих переводов. Реализует `SummaryCollectorInterface`.
+Захватывает обращения к переводам во время выполнения запроса, включая обнаружение отсутствующих переводов. Реализует <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>.
 
 Подробности на странице [Переводчик](/ru/guide/translator): поля TranslationRecord, структура собранных данных, логика определения отсутствующих переводов, интеграции proxy фреймворков и примеры конфигурации.
 
 ## Code Coverage Collector
 
-`CodeCoverageCollector` собирает построчное покрытие PHP-кода за каждый HTTP-запрос, используя [pcov](https://github.com/krakjoe/pcov) или [xdebug](https://xdebug.org/) в качестве драйвера.
+<class>AppDevPanel\Kernel\Collector\CodeCoverageCollector</class> собирает построчное покрытие PHP-кода за каждый HTTP-запрос, используя [pcov](https://github.com/krakjoe/pcov) или [xdebug](https://xdebug.org/) в качестве драйвера.
 
 ::: warning Предварительные требования
 Необходимо расширение **pcov** (рекомендуется) или **xdebug** с включённым режимом coverage. Без них коллектор возвращает пустой результат с `driver: null`.

@@ -10,7 +10,7 @@ composer require app-dev-panel/adapter-cycle
 
 ## Usage
 
-Register `CycleSchemaProvider` as `SchemaProviderInterface` in your framework's DI container:
+Register <class>AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider</class> as <class>AppDevPanel\Api\Inspector\Database\SchemaProviderInterface</class> in your framework's DI container:
 
 ```php
 use AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider;

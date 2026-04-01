@@ -19,7 +19,7 @@ Target App → Adapter → Proxies → Collectors → Debugger → Storage → A
 When your application receives an HTTP request (or CLI command):
 
 1. The adapter's event listener catches the framework's startup event
-2. `Debugger::startup()` is called, which:
+2. <class>AppDevPanel\Kernel\Debugger</class>`::startup()` is called, which:
    - Registers a shutdown function
    - Checks if the request/command should be ignored (via `$ignoredRequests` / `$ignoredCommands` patterns, `X-Debug-Ignore` header)
    - If not ignored: calls `startup()` on all registered collectors
@@ -43,14 +43,14 @@ Each collector accumulates data in memory for the duration of the request. Proxi
 
 ### Phase 3: Shutdown and Flush
 
-When the request completes (or a console command finishes), the **Debugger** triggers shutdown:
+When the request completes (or a console command finishes), the <class>AppDevPanel\Kernel\Debugger</class> triggers shutdown:
 
 1. Calls `shutdown()` on all collectors (resets internal state)
 2. Calls `getCollected()` to retrieve accumulated data
-3. Serializes objects using `Dumper` (depth-limited to 30 levels, with circular reference detection)
+3. Serializes objects using <class>AppDevPanel\Kernel\Dumper</class> (depth-limited to 30 levels, with circular reference detection)
 4. Calls `flush()` on storage
 
-**FileStorage** writes three JSON files per debug entry:
+<class>AppDevPanel\Kernel\Storage\FileStorage</class> writes three JSON files per debug entry:
 
 | File | Contents |
 |------|----------|
@@ -96,7 +96,7 @@ runtime/debug/
 }
 ```
 
-Collectors that implement `SummaryCollectorInterface` contribute their summary keys (e.g., `logger`, `event`, `http`) for display in the entry list without loading full data.
+Collectors that implement <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> contribute their summary keys (e.g., `logger`, `event`, `http`) for display in the entry list without loading full data.
 
 ## API Serving
 
@@ -226,14 +226,14 @@ External App                              ADP
      │ ◀────────────────────────────────── │ (lists all with online/offline)
 ```
 
-`ServiceDescriptor` contains: `service`, `language`, `inspectorUrl`, `capabilities[]`, `registeredAt`, `lastSeenAt`. A service is considered online if `now() - lastSeenAt < 60s`.
+<class>AppDevPanel\Kernel\Service\ServiceDescriptor</class> contains: `service`, `language`, `inspectorUrl`, `capabilities[]`, `registeredAt`, `lastSeenAt`. A service is considered online if `now() - lastSeenAt < 60s`.
 
 ## Console Command Flow
 
 Console commands follow the same lifecycle as web requests, with these differences:
 
-- `ConsoleAppInfoCollector` replaces `WebAppInfoCollector`
-- `CommandCollector` replaces `RequestCollector` (both render under the unified "Request" panel in the UI)
+- <class>AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector</class> replaces <class>AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector</class>
+- <class>AppDevPanel\Kernel\Collector\Console\CommandCollector</class> replaces <class>AppDevPanel\Kernel\Collector\Web\RequestCollector</class> (both render under the unified "Request" panel in the UI)
 - No middleware, router, or asset collectors
 - Events: `ConsoleCommandEvent` triggers startup, `ConsoleTerminateEvent` triggers shutdown
 

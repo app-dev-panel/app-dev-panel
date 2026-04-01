@@ -214,7 +214,7 @@ See [CLAUDE.md](CLAUDE.md) for full development documentation.
 
 ## Contributing
 
-Contributions are welcome! Please see the development section above for setup instructions.
+Contributions are welcome! Please see the [Contributing Guide](https://app-dev-panel.github.io/app-dev-panel/guide/contributing) and the development section above for setup instructions.
 
 ---
 
@@ -231,6 +231,14 @@ ADP is 100% open-source and free. If it saves you debugging time, consider suppo
 <a href="https://boosty.to/xepozz"><img height="36" src="https://boosty.to/favicon.ico" alt="Boosty"> <b>Boosty</b></a>
 
 </div>
+
+### Crypto
+
+| Network | Address |
+|---------|---------|
+| **USDT — TON** | `UQDuFuRj_PgCMtV30FGLLlc51NzMGrGaHI8uhrkILw00D2UE` |
+| **USDT — TRC20 (Tron)** | `THfZotbtgmHrFGhPvY2BFq7ALKhZtYWjPh` |
+| **USDT — ERC20 (Ethereum)** | `0x923073361Da37E54443c364bA8fDB994B71D2083` |
 
 ---
 

@@ -8,7 +8,7 @@ The Yii 2 adapter bridges ADP Kernel and API into Yii 2.0.50+ via the bootstrap 
 composer require app-dev-panel/adapter-yii2
 ```
 
-The package auto-registers via `extra.bootstrap` in composer.json. The `Bootstrap` class registers the `debug-panel` module automatically when `YII_DEBUG` is enabled.
+The package auto-registers via `extra.bootstrap` in composer.json. The <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> class registers the `debug-panel` module automatically when `YII_DEBUG` is enabled.
 
 ## Configuration
 
@@ -49,17 +49,17 @@ Supports all Kernel collectors plus Yii 2-specific data capture:
 | Collector | Mechanism | Data |
 |-----------|-----------|------|
 | Database | `DbProfilingTarget` (Yii logger) | SQL queries, timing, row count |
-| Log | `DebugLogTarget` (real-time Yii log target) | Log messages with PSR-3 level mapping |
+| Log | <class>AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget</class> (real-time Yii log target) | Log messages with PSR-3 level mapping |
 | Mailer | `BaseMailer::EVENT_AFTER_SEND` | From, to, cc, bcc, subject, body |
 | Asset Bundles | `View::EVENT_END_PAGE` | Bundles: class, paths, CSS/JS, dependencies |
-| Translator | `I18NProxy` replaces `Yii::$app->i18n` | Translation lookups, missing translations |
+| Translator | <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> replaces `Yii::$app->i18n` | Translation lookups, missing translations |
 | View | `View::EVENT_AFTER_RENDER` | Rendered file, output, parameters |
 | Templates | `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` | Render timing per template (supports nesting) |
 | Redis | Direct collector calls | Redis commands, timing, errors |
 | Elasticsearch | Direct collector calls | ES requests, timing, hits |
 | Code Coverage | `pcov` / `xdebug` extension | Per-file line coverage (opt-in) |
 | Authorization | `User::EVENT_AFTER_LOGIN/LOGOUT` | Auth events, user identity |
-| Router | `UrlRuleProxy` wraps all URL rules | Route matching data, timing |
+| Router | <class>AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy</class> wraps all URL rules | Route matching data, timing |
 
 ### View & Template Collectors
 
@@ -73,8 +73,8 @@ Code coverage is **opt-in** (`'code_coverage' => false` by default). Requires th
 
 ## Translator Integration
 
-The adapter replaces Yii 2's `i18n` application component with `I18NProxy` — an extended `yii\i18n\I18N` that overrides `translate()`. All `Yii::t()` calls are intercepted and logged to `TranslatorCollector` automatically. See [Translator](/guide/translator) for details.
+The adapter replaces Yii 2's `i18n` application component with <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> — an extended `yii\i18n\I18N` that overrides `translate()`. All `Yii::t()` calls are intercepted and logged to <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> automatically. See [Translator](/guide/translator) for details.
 
 ## Database Inspector
 
-`Yii2DbSchemaProvider` provides database schema inspection via `yii\db\Schema`. Falls back to `NullSchemaProvider` when no database component is configured.
+`Yii2DbSchemaProvider` provides database schema inspection via `yii\db\Schema`. Falls back to <class>AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider</class> when no database component is configured.

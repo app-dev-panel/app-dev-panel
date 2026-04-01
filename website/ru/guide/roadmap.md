@@ -10,7 +10,7 @@ title: Дорожная карта
 
 Все критические баги устранены. Покрытие тестами расширяется по модулям.
 
-- Debugger отвязан от событий фреймворков через `StartupContext`
+- <class>AppDevPanel\Kernel\Debugger</class> отвязан от событий фреймворков через <class>AppDevPanel\Kernel\StartupContext</class>
 - Исправлена регистрация shutdown, жизненный цикл сокетов, обработка ошибок JSON
 - 755+ PHP-тестов, 328 фронтенд-тестов проходят
 
@@ -35,9 +35,9 @@ title: Дорожная карта
 
 Улучшения бэкенда (в основном завершены):
 
-- Разделён монолитный `InspectController` на доменные контроллеры
-- Глобальный `ApplicationState` заменён на правильный DI
-- Добавлена блокировка файлов в `FileStorage` (атомарная запись + неблокирующий GC)
+- Разделён монолитный `InspectController` на доменные контроллеры (<class>AppDevPanel\Api\Inspector\Controller\InspectController</class>)
+- Глобальный <class>AppDevPanel\Api\Inspector\ApplicationState</class> заменён на правильный DI
+- Добавлена блокировка файлов в <class>AppDevPanel\Kernel\Storage\FileStorage</class> (атомарная запись + неблокирующий GC)
 - Завершена миграция пространства имён на `AppDevPanel`
 
 **Осталось (бэкенд):** Рефакторинг Connection, конфигурируемость CLI, защита от циклических зависимостей.

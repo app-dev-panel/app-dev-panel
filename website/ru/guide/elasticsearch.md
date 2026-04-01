@@ -4,11 +4,11 @@ title: Elasticsearch
 
 # Elasticsearch
 
-ADP предоставляет `ElasticsearchCollector` для захвата запросов к Elasticsearch во время выполнения приложения и инспектор для инспекции кластера в реальном времени.
+ADP предоставляет <class>AppDevPanel\Kernel\Collector\ElasticsearchCollector</class> для захвата запросов к Elasticsearch во время выполнения приложения и инспектор для инспекции кластера в реальном времени.
 
 ## Коллектор
 
-`ElasticsearchCollector` реализует `SummaryCollectorInterface` и захватывает все запросы к Elasticsearch — поиск, индексацию, удаление, массовые операции.
+<class>AppDevPanel\Kernel\Collector\ElasticsearchCollector</class> реализует <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> и захватывает все запросы к Elasticsearch — поиск, индексацию, удаление, массовые операции.
 
 ### Паттерны сбора данных
 
@@ -88,11 +88,11 @@ $collector->logRequest(new ElasticsearchRequestRecord(
 - **Извлечение индекса** — парсит имя индекса из пути endpoint (например, `/users/_search` → `users`)
 - **Подсчёт hits** — извлекает `hits.total.value` из ответов поиска
 - **Обнаружение дубликатов** — выявляет повторяющиеся комбинации `method + endpoint` (детекция N+1 паттерна)
-- **Интеграция с Timeline** — передаёт данные в `TimelineCollector` для единой временной шкалы производительности
+- **Интеграция с Timeline** — передаёт данные в <class>AppDevPanel\Kernel\Collector\TimelineCollector</class> для единой временной шкалы производительности
 
 ## Инспектор
 
-Инспектор Elasticsearch предоставляет инспекцию кластера в реальном времени через `ElasticsearchProviderInterface`.
+Инспектор Elasticsearch предоставляет инспекцию кластера в реальном времени через <class>AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface</class>.
 
 ### API-эндпоинты
 
@@ -116,7 +116,7 @@ interface ElasticsearchProviderInterface
 }
 ```
 
-По умолчанию: `NullElasticsearchProvider` возвращает пустые данные. Адаптеры предоставляют конкретные реализации, подключённые к реальному ES-клиенту.
+По умолчанию: <class>AppDevPanel\Api\Inspector\Elasticsearch\NullElasticsearchProvider</class> возвращает пустые данные. Адаптеры предоставляют конкретные реализации, подключённые к реальному ES-клиенту.
 
 ## Фронтенд
 
@@ -139,6 +139,6 @@ interface ElasticsearchProviderInterface
 
 ## Интеграция с фреймворком
 
-Зарегистрируйте `ElasticsearchCollector` в DI вашего адаптера с `TimelineCollector` как зависимость конструктора. Включите через флаг конфигурации `'elasticsearch' => true`.
+Зарегистрируйте <class>AppDevPanel\Kernel\Collector\ElasticsearchCollector</class> в DI вашего адаптера с <class>AppDevPanel\Kernel\Collector\TimelineCollector</class> как зависимость конструктора. Включите через флаг конфигурации `'elasticsearch' => true`.
 
 Смотрите [Адаптеры](/ru/guide/adapters/symfony) для паттернов регистрации в конкретных фреймворках.

@@ -10,7 +10,7 @@ ADP development follows a phased approach. This page tracks progress and planned
 
 All critical bugs resolved. Test coverage expanding across modules.
 
-- Decoupled Debugger from framework-specific events via `StartupContext`
+- Decoupled <class>AppDevPanel\Kernel\Debugger</class> from framework-specific events via <class>AppDevPanel\Kernel\StartupContext</class>
 - Fixed shutdown registration, socket lifecycle, JSON error handling
 - 755+ PHP tests, 328 frontend tests passing
 
@@ -35,9 +35,9 @@ Eliminated critical security vulnerabilities in the API.
 
 Backend improvements (mostly complete):
 
-- Split monolithic `InspectController` into domain-specific controllers
-- Replaced global `ApplicationState` with proper DI
-- Added file locking to `FileStorage` (atomic writes + non-blocking GC)
+- Split monolithic <class>AppDevPanel\Api\Inspector\Controller\InspectController</class> into domain-specific controllers
+- Replaced global <class>AppDevPanel\Api\Inspector\ApplicationState</class> with proper DI
+- Added file locking to <class>AppDevPanel\Kernel\Storage\FileStorage</class> (atomic writes + non-blocking GC)
 - Completed namespace migration to `AppDevPanel`
 
 **Remaining backend:** Connection refactoring, CLI configurability, circular dependency guards.

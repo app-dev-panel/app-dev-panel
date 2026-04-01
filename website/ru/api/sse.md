@@ -38,6 +38,6 @@ source.onmessage = (event) => {
 
 ## Примечания
 
-- SSE-поток не оборачивается `ResponseDataWrapper` -- используется нативный формат text/event-stream, а не JSON-конверт.
+- SSE-поток не оборачивается <class>AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper</class> -- используется нативный формат text/event-stream, а не JSON-конверт.
 - Соединение остается открытым до отключения клиента.
 - Действует IP-фильтрация -- подключаться могут только разрешенные IP (по умолчанию: `127.0.0.1`, `::1`).

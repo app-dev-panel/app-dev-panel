@@ -23,7 +23,7 @@ This tutorial walks through building a custom collector from scratch.
 
 ## How Collectors Work
 
-A collector in ADP implements `CollectorInterface`. During a request (or console command), the collector accumulates data. When the debugger flushes at the end of the lifecycle, each collector's data is serialized and written to storage. The API then serves it to the frontend.
+A collector in ADP implements <class>AppDevPanel\Kernel\Collector\CollectorInterface</class>. During a request (or console command), the collector accumulates data. When the debugger flushes at the end of the lifecycle, each collector's data is serialized and written to storage. The API then serves it to the frontend.
 
 The lifecycle looks like this:
 
@@ -34,7 +34,7 @@ The lifecycle looks like this:
 
 ## Step 1: Define the Collector Class
 
-Let's build a collector that tracks payment gateway interactions. Create a class that implements `CollectorInterface`:
+Let's build a collector that tracks payment gateway interactions. Create a class that implements <class>AppDevPanel\Kernel\Collector\CollectorInterface</class>:
 
 ```php
 <?php
@@ -98,7 +98,7 @@ final class PaymentCollector implements CollectorInterface, SummaryCollectorInte
 }
 ```
 
-The `getName()` method returns a unique identifier used as the storage key. The `collect()` method returns the data payload that gets serialized. The optional `SummaryCollectorInterface` provides summary data shown in the debug toolbar.
+The `getName()` method returns a unique identifier used as the storage key. The `collect()` method returns the data payload that gets serialized. The optional <class>AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> provides summary data shown in the debug toolbar.
 
 ## Step 2: Feed Data to the Collector
 

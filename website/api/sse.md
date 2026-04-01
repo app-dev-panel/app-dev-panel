@@ -38,6 +38,6 @@ source.onmessage = (event) => {
 
 ## Notes
 
-- The SSE stream bypasses `ResponseDataWrapper` -- it uses the native SSE text/event-stream format, not the JSON envelope.
+- The SSE stream bypasses <class>AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper</class> -- it uses the native SSE text/event-stream format, not the JSON envelope.
 - The connection remains open until the client disconnects.
 - IP filtering applies -- only allowed IPs can connect (default: `127.0.0.1`, `::1`).

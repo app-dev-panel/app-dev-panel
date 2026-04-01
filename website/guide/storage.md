@@ -4,7 +4,7 @@ title: Storage
 
 # Storage
 
-ADP persists debug data through a `StorageInterface` abstraction. The default implementation, `FileStorage`, writes JSON files to disk.
+ADP persists debug data through a <class>AppDevPanel\Kernel\Storage\StorageInterface</class> abstraction. The default implementation, <class>AppDevPanel\Kernel\Storage\FileStorage</class>, writes JSON files to disk.
 
 ## StorageInterface
 
@@ -34,7 +34,7 @@ This separation allows the frontend to load summaries quickly without fetching f
 
 ## FileStorage
 
-`FileStorage` is the default production implementation. It writes JSON files to a configurable directory.
+<class>AppDevPanel\Kernel\Storage\FileStorage</class> is the default production implementation. It writes JSON files to a configurable directory.
 
 **Key behaviors:**
 
@@ -58,15 +58,15 @@ debug-data/
 
 ## MemoryStorage
 
-`MemoryStorage` is an in-memory implementation used exclusively for testing. It stores all data in PHP arrays with no disk I/O.
+<class>AppDevPanel\Kernel\Storage\MemoryStorage</class> is an in-memory implementation used exclusively for testing. It stores all data in PHP arrays with no disk I/O.
 
 ## Write Sources
 
 Storage receives data from two sources:
 
-1. **Debugger flush** -- After a request or console command completes, the `Debugger` calls `flush()` on the storage, which serializes all collector data.
-2. **Ingestion API** -- The `IngestionController` calls `write()` directly, allowing external (non-PHP) applications to send debug data via HTTP.
+1. **Debugger flush** -- After a request or console command completes, the <class>AppDevPanel\Kernel\Debugger</class> calls `flush()` on the storage, which serializes all collector data.
+2. **Ingestion API** -- The <class>AppDevPanel\Api\Ingestion\Controller\IngestionController</class> calls `write()` directly, allowing external (non-PHP) applications to send debug data via HTTP.
 
 ## Extending Storage
 
-To create a custom storage backend (e.g., Redis, database), implement `StorageInterface` and register it in your DI container. All six methods must be implemented. The `read()` method must support filtering by `$type` and optionally by `$id`.
+To create a custom storage backend (e.g., Redis, database), implement <class>AppDevPanel\Kernel\Storage\StorageInterface</class> and register it in your DI container. All six methods must be implemented. The `read()` method must support filtering by `$type` and optionally by `$id`.

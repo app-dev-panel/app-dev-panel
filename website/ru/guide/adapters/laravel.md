@@ -55,8 +55,8 @@ return [
 
 ## Интеграция с переводчиком
 
-Адаптер автоматически декорирует сервис `Translator` Laravel через `LaravelTranslatorProxy` при помощи `$app->extend('translator')`. Все вызовы `__('key')`, `trans()` и `Lang::get()` перехватываются. Точечная нотация ключей Laravel (`group.key`) разбирается на категорию и сообщение. Подробности на странице [Переводчик](/ru/guide/translator).
+Адаптер автоматически декорирует сервис `Translator` Laravel через <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy</class> при помощи `$app->extend('translator')`. Все вызовы `__('key')`, `trans()` и `Lang::get()` перехватываются. Точечная нотация ключей Laravel (`group.key`) разбирается на категорию и сообщение. Подробности на странице [Переводчик](/ru/guide/translator).
 
 ## Инспектор базы данных
 
-`LaravelSchemaProvider` предоставляет инспекцию схемы БД через `Illuminate\Database\Connection`. Без настроенной БД используется `NullSchemaProvider`.
+<class>AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider</class> предоставляет инспекцию схемы БД через `Illuminate\Database\Connection`. Без настроенной БД используется <class>AppDevPanel\Adapter\Laravel\Inspector\NullSchemaProvider</class>.

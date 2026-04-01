@@ -170,7 +170,7 @@ The panel SPA includes the following modules:
 
 ## Architecture
 
-The panel rendering is handled at the API layer (`PanelController`), which is framework-agnostic. Each adapter simply routes `/debug` and `/debug/*` to the same `ApiApplication` that handles API requests.
+The panel rendering is handled at the API layer (<class>AppDevPanel\Api\Panel\PanelController</class>), which is framework-agnostic. Each adapter simply routes `/debug` and `/debug/*` to the same <class>AppDevPanel\Api\ApiApplication</class> that handles API requests.
 
 ```
 GET /debug/logs/detail

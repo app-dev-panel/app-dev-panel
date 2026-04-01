@@ -532,10 +532,11 @@ a.class-ref:hover {
     padding: 10px 14px;
     width: max-content;
     max-width: 480px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    z-index: 100;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
     pointer-events: none;
     user-select: none;
+    opacity: 1;
 
     /* Reset inherited styles */
     text-align: left;
