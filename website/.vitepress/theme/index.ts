@@ -37,7 +37,7 @@ function setupClassRefTooltips() {
 
             // Copy tooltip content to the body-level container
             floatingTip.innerHTML = srcTip.innerHTML;
-            floatingTip.className = 'floating-tooltip ' + srcTip.className + ' is-visible';
+            floatingTip.className = 'floating-tooltip is-visible';
 
             const rect = ref.getBoundingClientRect();
             const tipRect = floatingTip.getBoundingClientRect();
