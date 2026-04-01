@@ -232,7 +232,12 @@ export const ChatPanel = () => {
                                     severity="error"
                                     action={
                                         <Tooltip title="Retry">
-                                            <IconButton size="small" color="error" onClick={() => handleRetry(i)}>
+                                            <IconButton
+                                                size="small"
+                                                color="error"
+                                                onClick={() => handleRetry(i)}
+                                                aria-label="Retry"
+                                            >
                                                 <ReplayIcon sx={replayIconSx} />
                                             </IconButton>
                                         </Tooltip>
@@ -305,7 +310,12 @@ export const ChatPanel = () => {
                             </Typography>
                             <Box sx={{flex: 1}} />
                             <Tooltip title="Clear history">
-                                <IconButton size="small" onClick={handleClearHistory} sx={clearBtnSx}>
+                                <IconButton
+                                    size="small"
+                                    onClick={handleClearHistory}
+                                    sx={clearBtnSx}
+                                    aria-label="Clear history"
+                                >
                                     <DeleteOutlineIcon sx={replayIconSx} />
                                 </IconButton>
                             </Tooltip>

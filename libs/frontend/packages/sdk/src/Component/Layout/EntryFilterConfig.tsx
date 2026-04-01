@@ -208,7 +208,12 @@ export const EntryFilterConfig = ({anchorEl, open, onClose, filterState, onChang
                         sx={{flex: 1}}
                     />
 
-                    <IconButton size="small" onClick={() => removeCondition(condition.id)} sx={{flexShrink: 0}}>
+                    <IconButton
+                        size="small"
+                        onClick={() => removeCondition(condition.id)}
+                        sx={{flexShrink: 0}}
+                        aria-label="Remove condition"
+                    >
                         <Icon sx={{fontSize: 16}}>close</Icon>
                     </IconButton>
                 </ConditionRow>

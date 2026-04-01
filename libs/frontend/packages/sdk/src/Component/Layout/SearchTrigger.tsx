@@ -41,7 +41,7 @@ export const SearchTrigger = ({onClick}: SearchTriggerProps) => {
     }
 
     return (
-        <TriggerRoot onClick={onClick}>
+        <TriggerRoot onClick={onClick} aria-label="Search">
             <Icon sx={{fontSize: 16}}>search</Icon>
             Search...
             <Kbd>Ctrl+K</Kbd>
