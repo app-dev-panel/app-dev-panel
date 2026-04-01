@@ -10,7 +10,7 @@ final class ViewAction extends Action
 {
     public function run(): array
     {
-        // Render a view to trigger VIEW_AFTER_RENDER event → ViewCollector
+        // Render a view to trigger VIEW_AFTER_RENDER event → TemplateCollector
         $output = $this->controller->renderPartial('@app/views/test-fixtures/test-view', [
             'title' => 'ADP View Test',
             'items' => ['alpha', 'beta', 'gamma'],

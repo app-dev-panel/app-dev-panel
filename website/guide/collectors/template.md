@@ -86,10 +86,7 @@ $collector->collectRender(
 Framework adapters hook into the template/view rendering system:
 - **Symfony**: Twig profiler extension measures render time, calls `logRender()`
 - **Yii 3**: <class>\AppDevPanel\Adapter\Yiisoft\Collector\View\ViewEventListener</class> listens to view render events, calls `collectRender()`
-- **Yii 2**: View component events
-
-- **Symfony**: Twig profiler extension
-- **Yii 2**: `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` with per-file timer stack (handles nested renders)
+- **Yii 2**: `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` with per-file timer stack — captures timing, output, and parameters in one call
 
 ## Debug Panel
 

@@ -88,7 +88,6 @@ use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
-use AppDevPanel\Kernel\Collector\ViewCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
@@ -163,7 +162,6 @@ class Module extends \yii\base\Module implements BootstrapInterface
         'translator' => true,
         'redis' => true,
         'elasticsearch' => true,
-        'view' => true,
         'template' => true,
         'code_coverage' => false,
     ];
@@ -679,7 +677,6 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'opentelemetry' => static fn(): array => [new OpenTelemetryCollector($timeline)],
             'redis' => static fn(): array => [new RedisCollector($timeline)],
             'elasticsearch' => static fn(): array => [new ElasticsearchCollector($timeline)],
-            'view' => static fn(): array => [new ViewCollector($timeline)],
             'template' => static fn(): array => [new TemplateCollector($timeline)],
             'code_coverage' => static fn(): array => [new CodeCoverageCollector($timeline, [], ['vendor'])],
         ];
@@ -786,12 +783,6 @@ class Module extends \yii\base\Module implements BootstrapInterface
         $translatorCollector = $this->getCollector(TranslatorCollector::class);
         if ($translatorCollector instanceof TranslatorCollector) {
             $this->registerTranslatorProfiling($app, $translatorCollector);
-        }
-
-        // Register view profiling if ViewCollector is active
-        $viewCollector = $this->getCollector(ViewCollector::class);
-        if ($viewCollector instanceof ViewCollector) {
-            $this->registerViewProfiling($viewCollector);
         }
 
         // Register template profiling if TemplateCollector is active
@@ -1050,17 +1041,6 @@ class Module extends \yii\base\Module implements BootstrapInterface
         \Yii::$app->log->targets['adp-debug'] = $target;
     }
 
-    private function registerViewProfiling(ViewCollector $collector): void
-    {
-        Event::on(
-            \yii\base\View::class,
-            \yii\base\View::EVENT_AFTER_RENDER,
-            static function (\yii\base\ViewEvent $event) use ($collector): void {
-                $collector->collectRender($event->viewFile, $event->output, $event->params);
-            },
-        );
-    }
-
     private function registerTemplateProfiling(TemplateCollector $collector): void
     {
         // Track render start times using a stack to handle nested renders correctly.
@@ -1088,7 +1068,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 }
 
                 $renderTime = $startTime > 0 ? microtime(true) - $startTime : 0.0;
-                $collector->logRender($event->viewFile, $renderTime);
+                $collector->collectRender($event->viewFile, $event->output, $event->params, $renderTime);
             },
         );
     }

@@ -74,7 +74,6 @@ It registers the `debug-panel` module if enabled (auto-enables in YII_DEBUG mode
             'security' => true,
             'redis' => true,
             'elasticsearch' => true,
-            'view' => true,
             'template' => true,
             'code_coverage' => false,
         ],
@@ -139,20 +138,15 @@ times internally and calls `DatabaseCollector::logQuery()` (from Kernel) on prof
 `Module::registerAssetProfiling()` hooks into (web only):
 - `yii\web\View::EVENT_END_PAGE` → `AssetBundleCollector::collectBundles()` (reads View::$assetBundles)
 
-### 6d. View Profiling
-
-`Module::registerViewProfiling()` hooks into:
-- `yii\base\View::EVENT_AFTER_RENDER` → `ViewCollector::collectRender($viewFile, $output, $params)`
-- Captures rendered file path, output, and parameters for every view render
-
-### 6e. Template Profiling
+### 6d. Template Profiling
 
 `Module::registerTemplateProfiling()` hooks into:
 - `yii\base\View::EVENT_BEFORE_RENDER` → records `microtime(true)` per `$viewFile` (using a stack for nested renders)
-- `yii\base\View::EVENT_AFTER_RENDER` → calculates render duration, calls `TemplateCollector::logRender($viewFile, $renderTime)`
+- `yii\base\View::EVENT_AFTER_RENDER` → calculates render duration, calls `TemplateCollector::collectRender($viewFile, $output, $params, $renderTime)`
+- Captures timing, rendered output, and parameters in a single call
 - Uses a per-file timer stack to handle nested rendering correctly (layout → partial → widget)
 
-### 6f. Redis, Elasticsearch, Code Coverage
+### 6e. Redis, Elasticsearch, Code Coverage
 
 `RedisCollector`, `ElasticsearchCollector`, and `CodeCoverageCollector` are registered in `buildCollectorMap()` and require no event wiring — they are fed data directly by application code or by the Kernel lifecycle (`startup()`/`shutdown()` for coverage).
 
@@ -218,8 +212,7 @@ Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: n
 | `AssetBundleCollector` | `View::EVENT_END_PAGE` (normalized in Module) | Asset bundles: class, source/base paths, CSS/JS files, dependencies |
 | `TranslatorCollector` | `I18NProxy` replacing `Yii::$app->i18n` | Translation lookups, missing translations |
 | `AuthorizationCollector` | `AuthorizationListener` on `User::EVENT_AFTER_LOGIN/LOGOUT` | Auth events: login, logout, user identity |
-| `ViewCollector` | `View::EVENT_AFTER_RENDER` | Rendered file, output, parameters |
-| `TemplateCollector` | `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` | Render timing per template (nested-safe) |
+| `TemplateCollector` | `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` | Render timing, output, parameters (nested-safe) |
 | `RedisCollector` | Direct collector calls | Redis commands, timing, errors |
 | `ElasticsearchCollector` | Direct collector calls | ES requests, timing, hits |
 | `CodeCoverageCollector` | `pcov` / `xdebug` lifecycle | Per-file line coverage (opt-in) |
