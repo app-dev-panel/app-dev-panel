@@ -9,33 +9,39 @@ use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\PathResolverInterface;
 use Symfony\Component\Process\Process;
 
-final class BashCommand implements CommandInterface
+class PestCommand implements CommandInterface
 {
+    public const COMMAND_NAME = 'test/pest';
+
     public function __construct(
         private readonly PathResolverInterface $pathResolver,
-        private readonly array $command,
     ) {}
 
     public static function isAvailable(): bool
     {
-        return true;
+        return \Composer\InstalledVersions::isInstalled('pestphp/pest');
     }
 
     public static function getTitle(): string
     {
-        return 'Bash';
+        return 'Pest';
     }
 
     public static function getDescription(): string
     {
-        return 'Runs any commands from the project root.';
+        return '';
     }
 
     public function run(): CommandResponse
     {
         $projectDirectory = $this->pathResolver->getRootPath();
 
-        $process = new Process($this->command);
+        $params = [
+            'vendor/bin/pest',
+            '-vvv',
+        ];
+
+        $process = new Process($params);
 
         $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
 

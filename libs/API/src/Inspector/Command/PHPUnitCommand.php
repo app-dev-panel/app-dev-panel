@@ -18,6 +18,11 @@ class PHPUnitCommand implements CommandInterface
         private readonly PathResolverInterface $pathResolver,
     ) {}
 
+    public static function isAvailable(): bool
+    {
+        return \Composer\InstalledVersions::isInstalled('phpunit/phpunit');
+    }
+
     public static function getTitle(): string
     {
         return 'PHPUnit';

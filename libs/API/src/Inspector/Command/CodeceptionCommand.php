@@ -18,6 +18,11 @@ class CodeceptionCommand implements CommandInterface
         private readonly PathResolverInterface $pathResolver,
     ) {}
 
+    public static function isAvailable(): bool
+    {
+        return \Composer\InstalledVersions::isInstalled('codeception/codeception');
+    }
+
     public static function getTitle(): string
     {
         return 'Codeception';

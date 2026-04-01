@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Controller;
 
 use AppDevPanel\Api\Inspector\Command\BashCommand;
+use AppDevPanel\Api\Inspector\Command\PHPUnitCommand;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
@@ -110,5 +111,35 @@ final class CommandControllerTest extends ControllerTestCase
         $data = $this->responseData($response);
         $this->assertSame(CommandResponse::STATUS_OK, $data['status']);
         $this->assertSame('output', $data['result']);
+    }
+
+    public function testIndexFiltersUnavailableCommands(): void
+    {
+        // PHPUnitCommand::isAvailable() returns true (phpunit is installed in this project)
+        // BashCommand::isAvailable() always returns true
+        $controller = $this->createController([
+            'testing' => [
+                'test/phpunit' => PHPUnitCommand::class,
+                'my-cmd' => BashCommand::class,
+            ],
+        ]);
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $names = array_column($data, 'name');
+
+        $this->assertContains('test/phpunit', $names);
+        $this->assertContains('my-cmd', $names);
+    }
+
+    public function testIsAvailableOnBashCommand(): void
+    {
+        $this->assertTrue(BashCommand::isAvailable());
+    }
+
+    public function testIsAvailableOnPHPUnitCommand(): void
+    {
+        // PHPUnit is installed in this project
+        $this->assertTrue(PHPUnitCommand::isAvailable());
     }
 }

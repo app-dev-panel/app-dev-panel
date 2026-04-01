@@ -17,6 +17,11 @@ class PsalmCommand implements CommandInterface
         private readonly PathResolverInterface $pathResolver,
     ) {}
 
+    public static function isAvailable(): bool
+    {
+        return \Composer\InstalledVersions::isInstalled('vimeo/psalm');
+    }
+
     public static function getTitle(): string
     {
         return 'Psalm';
