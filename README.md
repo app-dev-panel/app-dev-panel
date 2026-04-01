@@ -172,7 +172,7 @@ Any PHP App → Adapter → Kernel (28 collectors) → API (40+ endpoints) → R
 | **API** | `app-dev-panel/api` | REST + SSE endpoints for debug data and live inspection |
 | **CLI** | `app-dev-panel/cli` | Console commands: debug server, query, reset, serve |
 | **Adapters** | `app-dev-panel/adapter-*` | Framework bridges (Laravel, Symfony, Yii 3, Yii 2, Cycle) |
-| **Frontend** | `@app-dev-panel/*` | React 18 SPA + embeddable toolbar + shared SDK |
+| **Frontend** | `@app-dev-panel/*` | React 19 SPA + embeddable toolbar + shared SDK |
 
 ## Repository Structure
 
