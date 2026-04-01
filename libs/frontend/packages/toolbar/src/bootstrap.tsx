@@ -29,7 +29,7 @@ import ReactDOM from 'react-dom/client';
                 backend: {
                     baseUrl:
                         import.meta.env.VITE_BACKEND_URL || (window as any).__adpBackendUrl || 'http://127.0.0.1:8080',
-                    usePreferredUrl: false,
+                    usePreferredUrl: true,
                 },
             },
         },
