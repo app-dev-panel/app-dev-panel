@@ -7,7 +7,7 @@ import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {Box, Chip, Icon, IconButton, Tab, Tabs, type Theme, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
@@ -71,7 +71,7 @@ const TabPanel = styled(Box)(({theme}) => ({padding: theme.spacing(2)}));
 const HeaderTable = styled('table')(({theme}) => ({
     width: '100%',
     borderCollapse: 'collapse',
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     '& th': {
         textAlign: 'left',
@@ -352,9 +352,7 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
                         borderRadius: 1,
                     }}
                 />
-                <Typography
-                    sx={{fontFamily: primitives.fontFamilyMono, fontSize: '13px', flex: 1, wordBreak: 'break-all'}}
-                >
+                <Typography sx={{fontFamily: monoFontFamily, fontSize: '13px', flex: 1, wordBreak: 'break-all'}}>
                     {data.requestUrl}
                 </Typography>
                 <Chip
@@ -378,7 +376,7 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
                     />
                 )}
                 {data.userIp && (
-                    <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '11px', color: 'text.disabled'}}>
+                    <Typography sx={{fontFamily: monoFontFamily, fontSize: '11px', color: 'text.disabled'}}>
                         {data.userIp}
                     </Typography>
                 )}

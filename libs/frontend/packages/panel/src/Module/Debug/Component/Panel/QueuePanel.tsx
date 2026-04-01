@@ -2,7 +2,6 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
@@ -90,13 +89,13 @@ const StatusRow = styled(Box)(({theme}) => ({
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const IdCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const IdCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
     minWidth: 0,
-});
+}));
 
 function statusColor(status: string, theme: Theme): string {
     switch (status.toLowerCase()) {
@@ -137,21 +136,21 @@ const GroupHeader = styled(Box)(({theme}) => ({
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const MessageClassCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const MessageClassCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-word',
     minWidth: 0,
-});
+}));
 
-const MessageDurationCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const MessageDurationCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     textAlign: 'right',
     width: 80,
-});
+}));
 
 const MessageItem = ({message, expanded, onToggle}: {message: Message; expanded: boolean; onToggle: () => void}) => {
     const theme = useTheme();
@@ -168,26 +167,26 @@ const MessageItem = ({message, expanded, onToggle}: {message: Message; expanded:
                     label={message.bus}
                     size="small"
                     variant="outlined"
-                    sx={{
-                        fontFamily: primitives.fontFamilyMono,
+                    sx={(theme) => ({
+                        fontFamily: theme.adp.fontFamilyMono,
                         fontSize: '10px',
                         height: 20,
                         borderRadius: 1,
                         flexShrink: 0,
-                    }}
+                    })}
                 />
                 {message.transport && (
                     <Chip
                         label={message.transport}
                         size="small"
                         variant="outlined"
-                        sx={{
-                            fontFamily: primitives.fontFamilyMono,
+                        sx={(theme) => ({
+                            fontFamily: theme.adp.fontFamilyMono,
                             fontSize: '10px',
                             height: 20,
                             borderRadius: 1,
                             flexShrink: 0,
-                        }}
+                        })}
                     />
                 )}
                 {message.failed ? (
@@ -248,12 +247,12 @@ const MessageItem = ({message, expanded, onToggle}: {message: Message; expanded:
                             Full Class Name
                         </Typography>
                         <Typography
-                            sx={{
-                                fontFamily: primitives.fontFamilyMono,
+                            sx={(theme) => ({
+                                fontFamily: theme.adp.fontFamilyMono,
                                 fontSize: '12px',
                                 color: 'text.secondary',
                                 wordBreak: 'break-all',
-                            }}
+                            })}
                         >
                             {message.messageClass}
                         </Typography>
@@ -486,7 +485,7 @@ const PushItemRow = ({
     return (
         <Box>
             <ItemRow expanded={expanded} onClick={onToggle}>
-                <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', flex: 1}}>
+                <Typography sx={(theme) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '12px', flex: 1})}>
                     Message #{index + 1}
                 </Typography>
                 {push.middlewares.length > 0 && (
@@ -575,7 +574,7 @@ const ProcessingItemRow = ({
     return (
         <Box>
             <ItemRow expanded={expanded} onClick={onToggle}>
-                <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', flex: 1}}>
+                <Typography sx={(theme) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '12px', flex: 1})}>
                     Processing #{index + 1}
                 </Typography>
                 <IconButton size="small" sx={{flexShrink: 0}}>

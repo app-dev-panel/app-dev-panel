@@ -1,6 +1,5 @@
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, Tab, Tabs, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useMemo, useState} from 'react';
@@ -43,7 +42,7 @@ type EnvironmentPanelProps = {data: EnvironmentData};
 const KvTable = styled('table')(({theme}) => ({
     width: '100%',
     borderCollapse: 'collapse',
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     '& th': {
         textAlign: 'left',

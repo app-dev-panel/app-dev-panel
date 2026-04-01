@@ -6,7 +6,6 @@ import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {SqlHighlight} from '@app-dev-panel/sdk/Component/SqlHighlight';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {
     Box,
@@ -66,14 +65,14 @@ const QueryRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expa
     }),
 );
 
-const DurationCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const DurationCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     textAlign: 'right',
     width: 70,
     paddingTop: 2,
-});
+}));
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(1.5, 1.5, 1.5, 6),
@@ -306,7 +305,11 @@ const QueryResultTable = ({
             minWidth: 100,
             renderCell: (params: GridRenderCellParams) => (
                 <span style={{wordBreak: 'break-all', maxHeight: 100, overflowY: 'hidden'}}>
-                    {params.value == null ? <em style={{color: '#999'}}>NULL</em> : String(params.value)}
+                    {params.value == null ? (
+                        <em style={{color: 'inherit', opacity: 0.5}}>NULL</em>
+                    ) : (
+                        String(params.value)
+                    )}
                 </span>
             ),
         }));
@@ -325,7 +328,7 @@ const QueryResultTable = ({
 
     if (error) {
         return (
-            <Typography sx={{fontSize: '12px', color: 'error.main', fontFamily: primitives.fontFamilyMono}}>
+            <Typography sx={(theme) => ({fontSize: '12px', color: 'error.main', fontFamily: theme.adp.fontFamilyMono})}>
                 {'data' in error && (error.data as any)?.data?.error
                     ? (error.data as any).data.error
                     : 'Failed to execute query'}
@@ -335,7 +338,9 @@ const QueryResultTable = ({
 
     if (data && Array.isArray(data) && data.length === 0) {
         return (
-            <Typography sx={{fontSize: '12px', color: 'text.disabled', fontFamily: primitives.fontFamilyMono}}>
+            <Typography
+                sx={(theme) => ({fontSize: '12px', color: 'text.disabled', fontFamily: theme.adp.fontFamilyMono})}
+            >
                 Query returned no rows
             </Typography>
         );
@@ -499,7 +504,7 @@ const QueryRowWithExplain = ({
 const ExplainDataView = ({data, error, label}: {data: any[] | undefined; error: any; label: string}) => {
     if (error) {
         return (
-            <Typography sx={{fontSize: '12px', color: 'error.main', fontFamily: primitives.fontFamilyMono}}>
+            <Typography sx={(theme) => ({fontSize: '12px', color: 'error.main', fontFamily: theme.adp.fontFamilyMono})}>
                 {'data' in error && (error.data as any)?.data?.error
                     ? (error.data as any).data.error
                     : `Failed to run ${label}`}
@@ -511,7 +516,9 @@ const ExplainDataView = ({data, error, label}: {data: any[] | undefined; error: 
     }
     if (data && Array.isArray(data) && data.length === 0) {
         return (
-            <Typography sx={{fontSize: '12px', color: 'text.disabled', fontFamily: primitives.fontFamilyMono}}>
+            <Typography
+                sx={(theme) => ({fontSize: '12px', color: 'text.disabled', fontFamily: theme.adp.fontFamilyMono})}
+            >
                 No {label} data returned
             </Typography>
         );

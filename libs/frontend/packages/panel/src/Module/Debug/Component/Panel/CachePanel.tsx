@@ -2,7 +2,6 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, Collapse, Icon, LinearProgress, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
@@ -40,7 +39,11 @@ const SummaryLabel = styled(Typography)(({theme}) => ({
     marginBottom: theme.spacing(0.5),
 }));
 
-const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 700, fontSize: '22px'});
+const SummaryValue = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontWeight: 700,
+    fontSize: '22px',
+}));
 
 const OperationRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
     ({theme, expanded}) => ({
@@ -56,21 +59,21 @@ const OperationRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{
     }),
 );
 
-const KeyCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const KeyCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
     minWidth: 0,
-});
+}));
 
-const DurationCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const DurationCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flexShrink: 0,
     width: 80,
     textAlign: 'right',
-});
+}));
 
 const PoolChip = styled(Chip)(({theme}) => ({
     fontWeight: 600,

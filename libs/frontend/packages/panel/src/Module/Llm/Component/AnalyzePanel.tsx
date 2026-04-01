@@ -3,7 +3,7 @@ import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
 import {SendButton} from '@app-dev-panel/panel/Module/Llm/Component/SendButton';
 import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {HighlightedText, fuzzyMatch} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
@@ -57,7 +57,7 @@ const EntryRow = styled(Box, {shouldForwardProp: (p) => p !== 'active' && p !== 
     gap: theme.spacing(1),
     padding: theme.spacing(0.75, 1, 0.75, 0),
     cursor: 'pointer',
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '13px',
     backgroundColor: highlighted ? theme.palette.action.selected : active ? theme.palette.primary.light : 'transparent',
     '&:hover': {backgroundColor: theme.palette.action.hover},
@@ -416,7 +416,7 @@ export const AnalyzePanel = () => {
                                         <Typography
                                             component="span"
                                             sx={{
-                                                fontFamily: primitives.fontFamilyMono,
+                                                fontFamily: monoFontFamily,
                                                 fontSize: '10px',
                                                 color: 'primary.main',
                                                 flexShrink: 0,
@@ -429,7 +429,7 @@ export const AnalyzePanel = () => {
                                         <Typography
                                             component="span"
                                             sx={{
-                                                fontFamily: primitives.fontFamilyMono,
+                                                fontFamily: monoFontFamily,
                                                 fontSize: '10px',
                                                 color: 'success.main',
                                                 flexShrink: 0,
@@ -465,7 +465,7 @@ export const AnalyzePanel = () => {
                                         <Typography
                                             component="span"
                                             sx={{
-                                                fontFamily: primitives.fontFamilyMono,
+                                                fontFamily: monoFontFamily,
                                                 fontSize: '10px',
                                                 color: 'primary.main',
                                                 flexShrink: 0,
@@ -478,7 +478,7 @@ export const AnalyzePanel = () => {
                                         <Typography
                                             component="span"
                                             sx={{
-                                                fontFamily: primitives.fontFamilyMono,
+                                                fontFamily: monoFontFamily,
                                                 fontSize: '10px',
                                                 color: 'success.main',
                                                 flexShrink: 0,

@@ -1,6 +1,5 @@
 import {changeEntryAction} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {getEntrySearchText, isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate, formatTime} from '@app-dev-panel/sdk/Helper/formatDate';
@@ -40,24 +39,28 @@ const EntryRow = styled(Box)(({theme}) => ({
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const MethodLabel = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const MethodLabel = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     fontWeight: 600,
     minWidth: 44,
     flexShrink: 0,
-});
+}));
 
-const PathLabel = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const PathLabel = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '13px',
     flex: 1,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-});
+}));
 
-const MetaLabel = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontSize: '10px', flexShrink: 0});
+const MetaLabel = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontSize: '10px',
+    flexShrink: 0,
+}));
 
 const StatusChip = styled(Chip)({fontSize: '10px', height: 20, minWidth: 36, fontWeight: 600, borderRadius: 4});
 
@@ -68,7 +71,7 @@ const StatCell = styled(Box)(({theme}) => ({
     flexShrink: 0,
 }));
 
-const StatLabel = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontSize: '10px'});
+const StatLabel = styled(Typography)(({theme}) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '10px'}));
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -195,12 +198,12 @@ export const DebugEntryList = () => {
                 />
                 <Typography
                     variant="body2"
-                    sx={{
+                    sx={(theme) => ({
                         color: 'text.disabled',
                         flexShrink: 0,
-                        fontFamily: primitives.fontFamilyMono,
+                        fontFamily: theme.adp.fontFamilyMono,
                         fontSize: '12px',
-                    }}
+                    })}
                 >
                     {filtered.length}/{entries.length}
                 </Typography>

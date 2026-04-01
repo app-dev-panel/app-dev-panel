@@ -11,7 +11,6 @@ import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
@@ -123,13 +122,14 @@ const StyledAccordionSummary = styled(AccordionSummary)(({theme}) => ({
 // Shared sx constants
 // ---------------------------------------------------------------------------
 
-const monoLinkSx = {
-    fontFamily: primitives.fontFamilyMono,
-    fontSize: '12px',
-    color: 'primary.main',
-    wordBreak: 'break-all',
-    '&:hover': {textDecoration: 'underline'},
-} as const;
+const monoLinkSx = (theme: import('@mui/material/styles').Theme) =>
+    ({
+        fontFamily: theme.adp.fontFamilyMono,
+        fontSize: '12px',
+        color: 'primary.main',
+        wordBreak: 'break-all',
+        '&:hover': {textDecoration: 'underline'},
+    }) as const;
 
 // ---------------------------------------------------------------------------
 // Event name rendering
@@ -142,7 +142,10 @@ const EventName = React.memo(({name, eventClass}: {name: string; eventClass: str
         const methodName = 'member' in parsed ? parsed.member : undefined;
         return (
             <FileLink className={parsed.className} methodName={methodName} sx={{minWidth: 0}}>
-                <Typography component="span" sx={{...monoLinkSx, fontWeight: 600, fontSize: '13px'}}>
+                <Typography
+                    component="span"
+                    sx={(theme) => ({...monoLinkSx(theme), fontWeight: 600, fontSize: '13px'})}
+                >
                     {name}
                 </Typography>
             </FileLink>
@@ -242,7 +245,7 @@ const ListenerItem = React.memo(({listener}: {listener: EventListener}) => {
 
     return (
         <ListenerRow>
-            <Typography sx={{...monoLinkSx, flex: 1, color: 'text.secondary'}}>
+            <Typography sx={(theme) => ({...monoLinkSx(theme), flex: 1, color: 'text.secondary'})}>
                 {serializeCallable(listener)}
             </Typography>
         </ListenerRow>

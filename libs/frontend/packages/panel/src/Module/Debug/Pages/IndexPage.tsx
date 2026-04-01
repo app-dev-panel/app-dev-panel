@@ -1,6 +1,5 @@
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
@@ -22,28 +21,30 @@ const hiddenCollectors = new Set<string>([
 ]);
 
 // ---------------------------------------------------------------------------
-// Card icon background/foreground colors per collector
+// Card icon background/foreground colors per collector (from theme tokens)
 // ---------------------------------------------------------------------------
-const iconColors: Record<string, {bg: string; fg: string}> = {
-    [CollectorsMap.RequestCollector]: {bg: '#EFF6FF', fg: '#2563EB'},
-    [CollectorsMap.LogCollector]: {bg: '#FEF3C7', fg: '#D97706'},
-    [CollectorsMap.EventCollector]: {bg: '#F3E8FF', fg: '#9333EA'},
-    [CollectorsMap.DatabaseCollector]: {bg: '#ECFDF5', fg: '#16A34A'},
-    [CollectorsMap.MiddlewareCollector]: {bg: '#FFF7ED', fg: '#EA580C'},
-    [CollectorsMap.ExceptionCollector]: {bg: '#FEF2F2', fg: '#DC2626'},
-    [CollectorsMap.ServiceCollector]: {bg: '#F0F9FF', fg: '#0284C7'},
-    [CollectorsMap.TimelineCollector]: {bg: '#F5F3FF', fg: '#7C3AED'},
-    [CollectorsMap.VarDumperCollector]: {bg: '#F5F5F5', fg: '#666666'},
-    [CollectorsMap.MailerCollector]: {bg: '#FDF4FF', fg: '#A855F7'},
-    [CollectorsMap.FilesystemStreamCollector]: {bg: '#FFF7ED', fg: '#EA580C'},
-    [CollectorsMap.CacheCollector]: {bg: '#ECFDF5', fg: '#059669'},
-    [CollectorsMap.TemplateCollector]: {bg: '#FEF3C7', fg: '#B45309'},
-    [CollectorsMap.AuthorizationCollector]: {bg: '#FEF2F2', fg: '#DC2626'},
-    [CollectorsMap.DeprecationCollector]: {bg: '#FFF3E0', fg: '#E65100'},
-    [CollectorsMap.EnvironmentCollector]: {bg: '#E8F5E9', fg: '#2E7D32'},
-    [CollectorsMap.TranslatorCollector]: {bg: '#E3F2FD', fg: '#1565C0'},
+type CollectorColorKey =
+    keyof typeof import('@app-dev-panel/sdk/Component/Theme/tokens').semanticTokens.collectorColors;
+
+const collectorColorMap: Record<string, CollectorColorKey> = {
+    [CollectorsMap.RequestCollector]: 'request',
+    [CollectorsMap.LogCollector]: 'log',
+    [CollectorsMap.EventCollector]: 'event',
+    [CollectorsMap.DatabaseCollector]: 'database',
+    [CollectorsMap.MiddlewareCollector]: 'middleware',
+    [CollectorsMap.ExceptionCollector]: 'exception',
+    [CollectorsMap.ServiceCollector]: 'service',
+    [CollectorsMap.TimelineCollector]: 'timeline',
+    [CollectorsMap.VarDumperCollector]: 'varDumper',
+    [CollectorsMap.MailerCollector]: 'mailer',
+    [CollectorsMap.FilesystemStreamCollector]: 'filesystem',
+    [CollectorsMap.CacheCollector]: 'cache',
+    [CollectorsMap.TemplateCollector]: 'template',
+    [CollectorsMap.AuthorizationCollector]: 'authorization',
+    [CollectorsMap.DeprecationCollector]: 'deprecation',
+    [CollectorsMap.EnvironmentCollector]: 'environment',
+    [CollectorsMap.TranslatorCollector]: 'translator',
 };
-const defaultIconColor = {bg: '#F5F5F5', fg: '#666666'};
 
 // ---------------------------------------------------------------------------
 // Summary bar (top request headline)
@@ -65,7 +66,11 @@ const SummaryBar = styled(Box)(({theme}) => ({
 
 const SummaryItem = styled(Box)({display: 'flex', alignItems: 'center', gap: 8});
 
-const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 600, fontSize: '14px'});
+const SummaryValue = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontWeight: 600,
+    fontSize: '14px',
+}));
 
 const SummaryLabel = styled(Typography)(({theme}) => ({fontSize: '11px', color: theme.palette.text.secondary}));
 
@@ -102,7 +107,7 @@ const EnvChip = styled(Box)(({theme}) => ({
     whiteSpace: 'nowrap',
 }));
 
-const EnvChipValue = styled('span')({fontFamily: primitives.fontFamilyMono, fontWeight: 600});
+const EnvChipValue = styled('span')(({theme}) => ({fontFamily: theme.adp.fontFamilyMono, fontWeight: 600}));
 
 // ---------------------------------------------------------------------------
 // Performance metrics (compact)
@@ -131,7 +136,11 @@ const MetricLabel = styled(Typography)(({theme}) => ({
     lineHeight: 1.2,
 }));
 
-const MetricValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 600, fontSize: '14px'});
+const MetricValue = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontWeight: 600,
+    fontSize: '14px',
+}));
 
 const MetricBar = styled(Box)(({theme}) => ({
     height: 3,
@@ -159,6 +168,8 @@ const formatTime = (seconds: number) => {
 };
 
 const PerformanceSection = ({data}: {data: WebAppInfoData}) => {
+    const theme = useTheme();
+    const chart = theme.adp.chartColors;
     const totalTime = data.applicationProcessingTime || 0;
     const requestTime = data.requestProcessingTime || 0;
     const emitTime = data.applicationEmit || 0;
@@ -171,16 +182,21 @@ const PerformanceSection = ({data}: {data: WebAppInfoData}) => {
     const safeRatio = (value: number, max: number) => (value > 0 && value <= 1000 ? value / max : 0);
 
     const items = [
-        {label: 'Total', value: formatTime(totalTime), ratio: safeRatio(totalTime, maxTime), color: 'primary.main'},
-        {label: 'Request', value: formatTime(requestTime), ratio: safeRatio(requestTime, maxTime), color: '#42A5F5'},
-        {label: 'Preload', value: formatTime(preloadTime), ratio: safeRatio(preloadTime, maxTime), color: '#AB47BC'},
-        {label: 'Emit', value: formatTime(emitTime), ratio: safeRatio(emitTime, maxTime), color: '#66BB6A'},
-        {label: 'Peak Mem', value: formatBytes(memPeak), ratio: memPeak > 0 ? 1 : 0, color: '#FFA726'},
+        {
+            label: 'Total',
+            value: formatTime(totalTime),
+            ratio: safeRatio(totalTime, maxTime),
+            color: theme.palette.primary.main,
+        },
+        {label: 'Request', value: formatTime(requestTime), ratio: safeRatio(requestTime, maxTime), color: chart[0]},
+        {label: 'Preload', value: formatTime(preloadTime), ratio: safeRatio(preloadTime, maxTime), color: chart[1]},
+        {label: 'Emit', value: formatTime(emitTime), ratio: safeRatio(emitTime, maxTime), color: chart[2]},
+        {label: 'Peak Mem', value: formatBytes(memPeak), ratio: memPeak > 0 ? 1 : 0, color: chart[3]},
         {
             label: 'Mem Usage',
             value: formatBytes(memUsage),
             ratio: memPeak > 0 ? memUsage / memPeak : 0,
-            color: '#26C6DA',
+            color: chart[4],
         },
     ];
 
@@ -358,7 +374,10 @@ type CollectorCardData = {
     iconFg: string;
 };
 
-function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
+function buildCollectorCards(
+    entry: DebugEntry,
+    collectorColors: typeof import('@app-dev-panel/sdk/Component/Theme/tokens').semanticTokens.collectorColors,
+): CollectorCardData[] {
     return [...entry.collectors]
         .map((c) => (typeof c === 'string' ? c : c.id))
         .filter((c) => !hiddenCollectors.has(c))
@@ -366,7 +385,8 @@ function buildCollectorCards(entry: DebugEntry): CollectorCardData[] {
         .map((collector) => {
             const count = getCollectedCountByCollector(collector as CollectorsMap, entry);
             const isException = collector === CollectorsMap.ExceptionCollector && !!count && count > 0;
-            const colors = iconColors[collector] || defaultIconColor;
+            const colorKey = collectorColorMap[collector] ?? 'default';
+            const colors = collectorColors[colorKey];
             const label = getCollectorLabel(collector);
             let summary = count != null ? `${count} ${label.toLowerCase()}` : label;
 
@@ -424,7 +444,7 @@ export const IndexPage = () => {
         );
     }
 
-    const cards = buildCollectorCards(entry);
+    const cards = buildCollectorCards(entry, theme.adp.collectorColors);
     const activeCards = cards.filter((c) => c.badge != null && c.badge > 0);
     const emptyCards = cards.filter((c) => c.badge == null || c.badge === 0);
 

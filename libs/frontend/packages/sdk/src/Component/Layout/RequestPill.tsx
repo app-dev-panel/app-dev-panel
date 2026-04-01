@@ -1,4 +1,3 @@
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Icon, type Theme} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import React from 'react';
@@ -57,8 +56,8 @@ const Separator = styled('span')(({theme}) => ({color: theme.palette.divider, fl
 
 const MethodLabel = styled('span')({fontWeight: 600, fontSize: '11px', flexShrink: 0, whiteSpace: 'nowrap'});
 
-const PathLabel = styled('span')({
-    fontFamily: primitives.fontFamilyMono,
+const PathLabel = styled('span')(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     minWidth: 0,
@@ -66,7 +65,7 @@ const PathLabel = styled('span')({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     textAlign: 'left',
-});
+}));
 
 const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px', flexShrink: 0, whiteSpace: 'nowrap'});
 

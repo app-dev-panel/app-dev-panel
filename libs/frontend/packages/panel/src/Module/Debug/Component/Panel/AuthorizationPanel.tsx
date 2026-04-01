@@ -1,6 +1,6 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {Box, Chip, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useState} from 'react';
@@ -77,16 +77,16 @@ const DecisionRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{e
     }),
 );
 
-const AttributeCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const AttributeCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-word',
     minWidth: 0,
-});
+}));
 
 const SubjectCell = styled(Typography)(({theme}) => ({
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     color: theme.palette.text.secondary,
     flexShrink: 0,
@@ -173,9 +173,7 @@ export const AuthorizationPanel = ({data}: AuthorizationPanelProps) => {
                 {data.firewallName && (
                     <FieldRow>
                         <FieldLabel>Firewall</FieldLabel>
-                        <Typography
-                            sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', color: 'text.secondary'}}
-                        >
+                        <Typography sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'text.secondary'}}>
                             {data.firewallName}
                         </Typography>
                     </FieldRow>
@@ -190,12 +188,7 @@ export const AuthorizationPanel = ({data}: AuthorizationPanelProps) => {
                                     label={role}
                                     size="small"
                                     variant="outlined"
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
-                                        fontSize: '10px',
-                                        height: 20,
-                                        borderRadius: 1,
-                                    }}
+                                    sx={{fontFamily: monoFontFamily, fontSize: '10px', height: 20, borderRadius: 1}}
                                 />
                             ))}
                         </Box>
@@ -214,7 +207,7 @@ export const AuthorizationPanel = ({data}: AuthorizationPanelProps) => {
                                         size="small"
                                         variant="outlined"
                                         sx={{
-                                            fontFamily: primitives.fontFamilyMono,
+                                            fontFamily: monoFontFamily,
                                             fontSize: '10px',
                                             height: 20,
                                             borderRadius: 1,
@@ -234,7 +227,7 @@ export const AuthorizationPanel = ({data}: AuthorizationPanelProps) => {
                                 label={data.token.type.toUpperCase()}
                                 size="small"
                                 sx={{
-                                    fontFamily: primitives.fontFamilyMono,
+                                    fontFamily: monoFontFamily,
                                     fontSize: '10px',
                                     fontWeight: 600,
                                     height: 20,
@@ -281,21 +274,12 @@ export const AuthorizationPanel = ({data}: AuthorizationPanelProps) => {
                                     }}
                                 />
                                 <Typography
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
-                                        fontSize: '12px',
-                                        fontWeight: 500,
-                                        flex: 1,
-                                    }}
+                                    sx={{fontFamily: monoFontFamily, fontSize: '12px', fontWeight: 500, flex: 1}}
                                 >
                                     {event.type}
                                 </Typography>
                                 <Typography
-                                    sx={{
-                                        fontFamily: primitives.fontFamilyMono,
-                                        fontSize: '11px',
-                                        color: 'text.secondary',
-                                    }}
+                                    sx={{fontFamily: monoFontFamily, fontSize: '11px', color: 'text.secondary'}}
                                 >
                                     {event.provider}
                                 </Typography>
@@ -338,7 +322,7 @@ export const AuthorizationPanel = ({data}: AuthorizationPanelProps) => {
                                     {decision.duration != null && (
                                         <Typography
                                             sx={{
-                                                fontFamily: primitives.fontFamilyMono,
+                                                fontFamily: monoFontFamily,
                                                 fontSize: '10px',
                                                 color: 'text.disabled',
                                                 flexShrink: 0,
@@ -358,7 +342,7 @@ export const AuthorizationPanel = ({data}: AuthorizationPanelProps) => {
                                             <DetailLabel>Subject</DetailLabel>
                                             <Typography
                                                 sx={{
-                                                    fontFamily: primitives.fontFamilyMono,
+                                                    fontFamily: monoFontFamily,
                                                     fontSize: '12px',
                                                     color: 'text.secondary',
                                                     wordBreak: 'break-word',
@@ -382,7 +366,7 @@ export const AuthorizationPanel = ({data}: AuthorizationPanelProps) => {
                                                             size="small"
                                                             variant="outlined"
                                                             sx={{
-                                                                fontFamily: primitives.fontFamilyMono,
+                                                                fontFamily: monoFontFamily,
                                                                 fontSize: '10px',
                                                                 height: 20,
                                                                 borderRadius: 1,
@@ -403,7 +387,7 @@ export const AuthorizationPanel = ({data}: AuthorizationPanelProps) => {
                                                             size="small"
                                                             variant="outlined"
                                                             sx={{
-                                                                fontFamily: primitives.fontFamilyMono,
+                                                                fontFamily: monoFontFamily,
                                                                 fontSize: '10px',
                                                                 height: 20,
                                                                 borderRadius: 1,

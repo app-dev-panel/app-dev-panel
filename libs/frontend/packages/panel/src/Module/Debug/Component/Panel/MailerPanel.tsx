@@ -1,6 +1,5 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {nl2br} from '@app-dev-panel/sdk/Helper/nl2br';
 import {
     Box,
@@ -105,7 +104,11 @@ const PreviewDialog = ({message, open, onClose, previewType}: PreviewDialogProps
                     <DialogContentText dangerouslySetInnerHTML={{__html: message.htmlBody}} />
                 ) : (
                     <DialogContentText
-                        sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px', whiteSpace: 'pre-wrap'}}
+                        sx={(theme) => ({
+                            fontFamily: theme.adp.fontFamilyMono,
+                            fontSize: '12px',
+                            whiteSpace: 'pre-wrap',
+                        })}
                     >
                         {nl2br(message.raw)}
                     </DialogContentText>

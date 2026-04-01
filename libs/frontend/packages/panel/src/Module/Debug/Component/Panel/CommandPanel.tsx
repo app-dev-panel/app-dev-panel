@@ -1,6 +1,5 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, Collapse, Icon, Tab, Tabs, Typography, type Theme} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import React, {useCallback, useState} from 'react';
@@ -36,7 +35,7 @@ const TabPanel = styled(Box)(({theme}) => ({padding: theme.spacing(2)}));
 const InfoTable = styled('table')(({theme}) => ({
     width: '100%',
     borderCollapse: 'collapse',
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     '& th': {
         textAlign: 'left',
@@ -208,8 +207,8 @@ const OutputTab = ({data}: {data: Record<string, CommandEvent>}) => {
                     <SectionTitle>Console Output</SectionTitle>
                     <Box
                         component="pre"
-                        sx={{
-                            fontFamily: primitives.fontFamilyMono,
+                        sx={(theme) => ({
+                            fontFamily: theme.adp.fontFamilyMono,
                             fontSize: '12px',
                             p: 2,
                             borderRadius: 1,
@@ -219,7 +218,7 @@ const OutputTab = ({data}: {data: Record<string, CommandEvent>}) => {
                             whiteSpace: 'pre-wrap',
                             wordBreak: 'break-word',
                             m: 0,
-                        }}
+                        })}
                     >
                         {output}
                     </Box>
@@ -311,7 +310,7 @@ const EventCard = ({eventClass, eventData}: {eventClass: string; eventData: Comm
                                     {eventData.input ? (
                                         <Typography
                                             component="span"
-                                            sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px'}}
+                                            sx={(theme) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '12px'})}
                                         >
                                             {eventData.input}
                                         </Typography>
@@ -429,7 +428,12 @@ export const CommandPanel = ({data}: CommandPanelProps) => {
             <MetricBox>
                 <Icon sx={{fontSize: 18, color: 'info.main'}}>terminal</Icon>
                 <Typography
-                    sx={{fontFamily: primitives.fontFamilyMono, fontSize: '13px', flex: 1, wordBreak: 'break-all'}}
+                    sx={(theme) => ({
+                        fontFamily: theme.adp.fontFamilyMono,
+                        fontSize: '13px',
+                        flex: 1,
+                        wordBreak: 'break-all',
+                    })}
                 >
                     {commandInput}
                 </Typography>

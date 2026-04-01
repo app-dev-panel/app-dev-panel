@@ -1,7 +1,6 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, Icon, Link as MuiLink, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
@@ -53,7 +52,11 @@ const SummaryLabel = styled(Typography)(({theme}) => ({
     marginBottom: theme.spacing(0.5),
 }));
 
-const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 700, fontSize: '22px'});
+const SummaryValue = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontWeight: 700,
+    fontSize: '22px',
+}));
 
 const TranslationRow = styled(Box, {shouldForwardProp: (p) => p !== 'isMissing'})<{isMissing?: boolean}>(
     ({theme, isMissing}) => ({
@@ -68,21 +71,21 @@ const TranslationRow = styled(Box, {shouldForwardProp: (p) => p !== 'isMissing'}
     }),
 );
 
-const MessageCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const MessageCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
     minWidth: 0,
-});
+}));
 
-const TranslationCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const TranslationCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-all',
     minWidth: 0,
-});
+}));
 
 // ---------------------------------------------------------------------------
 // TranslatorPanel

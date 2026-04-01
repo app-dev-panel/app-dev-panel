@@ -2,7 +2,6 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useMemo, useState} from 'react';
@@ -24,8 +23,8 @@ const ValidationRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<
     }),
 );
 
-const ValuePreview = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const ValuePreview = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-word',
@@ -33,7 +32,7 @@ const ValuePreview = styled(Typography)({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-});
+}));
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(1.5, 1.5, 1.5, 6),
@@ -46,7 +45,7 @@ const ErrorTable = styled('table')(({theme}) => ({
     width: '100%',
     borderCollapse: 'collapse',
     fontSize: '12px',
-    fontFamily: primitives.fontFamilyMono,
+    fontFamily: theme.adp.fontFamilyMono,
     '& th': {
         textAlign: 'left',
         padding: theme.spacing(0.5, 1),

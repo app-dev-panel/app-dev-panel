@@ -2,7 +2,6 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Box, Chip, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useDeferredValue, useState} from 'react';
@@ -47,7 +46,11 @@ const SummaryLabel = styled(Typography)(({theme}) => ({
     marginBottom: theme.spacing(0.5),
 }));
 
-const SummaryValue = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontWeight: 700, fontSize: '22px'});
+const SummaryValue = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontWeight: 700,
+    fontSize: '22px',
+}));
 
 const BundleRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
     ({theme, expanded}) => ({
@@ -63,13 +66,13 @@ const BundleRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{exp
     }),
 );
 
-const ClassCell = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const ClassCell = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
     wordBreak: 'break-word',
     minWidth: 0,
-});
+}));
 
 const DetailBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(1.5, 1.5, 1.5, 6),
@@ -87,7 +90,11 @@ const FieldLabel = styled(Typography)(({theme}) => ({
 
 const FileList = styled(Box)(({theme}) => ({marginLeft: theme.spacing(1), marginBottom: theme.spacing(1)}));
 
-const FileItem = styled(Typography)({fontFamily: primitives.fontFamilyMono, fontSize: '11px', lineHeight: 1.8});
+const FileItem = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontSize: '11px',
+    lineHeight: 1.8,
+}));
 
 export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
     const [filter, setFilter] = useState('');
@@ -172,12 +179,12 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
                                 <Box sx={{mb: 1.5}}>
                                     <FieldLabel>Full Class Name</FieldLabel>
                                     <Typography
-                                        sx={{
-                                            fontFamily: primitives.fontFamilyMono,
+                                        sx={(theme) => ({
+                                            fontFamily: theme.adp.fontFamilyMono,
                                             fontSize: '12px',
                                             color: 'text.secondary',
                                             wordBreak: 'break-all',
-                                        }}
+                                        })}
                                     >
                                         {bundle.class}
                                     </Typography>
@@ -186,12 +193,12 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
                                     <Box sx={{mb: 1.5}}>
                                         <FieldLabel>Source Path</FieldLabel>
                                         <Typography
-                                            sx={{
-                                                fontFamily: primitives.fontFamilyMono,
+                                            sx={(theme) => ({
+                                                fontFamily: theme.adp.fontFamilyMono,
                                                 fontSize: '11px',
                                                 color: 'text.secondary',
                                                 wordBreak: 'break-all',
-                                            }}
+                                            })}
                                         >
                                             {bundle.sourcePath}
                                         </Typography>
@@ -201,12 +208,12 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
                                     <Box sx={{mb: 1.5}}>
                                         <FieldLabel>Base Path</FieldLabel>
                                         <Typography
-                                            sx={{
-                                                fontFamily: primitives.fontFamilyMono,
+                                            sx={(theme) => ({
+                                                fontFamily: theme.adp.fontFamilyMono,
                                                 fontSize: '11px',
                                                 color: 'text.secondary',
                                                 wordBreak: 'break-all',
-                                            }}
+                                            })}
                                         >
                                             {bundle.basePath}
                                         </Typography>
@@ -216,12 +223,12 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
                                     <Box sx={{mb: 1.5}}>
                                         <FieldLabel>Base URL</FieldLabel>
                                         <Typography
-                                            sx={{
-                                                fontFamily: primitives.fontFamilyMono,
+                                            sx={(theme) => ({
+                                                fontFamily: theme.adp.fontFamilyMono,
                                                 fontSize: '11px',
                                                 color: 'text.secondary',
                                                 wordBreak: 'break-all',
-                                            }}
+                                            })}
                                         >
                                             {bundle.baseUrl}
                                         </Typography>
@@ -261,12 +268,12 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
                                                     label={shortClassName(dep)}
                                                     size="small"
                                                     variant="outlined"
-                                                    sx={{
-                                                        fontFamily: primitives.fontFamilyMono,
+                                                    sx={(theme) => ({
+                                                        fontFamily: theme.adp.fontFamilyMono,
                                                         fontSize: '10px',
                                                         height: 20,
                                                         borderRadius: 1,
-                                                    }}
+                                                    })}
                                                 />
                                             ))}
                                         </Box>

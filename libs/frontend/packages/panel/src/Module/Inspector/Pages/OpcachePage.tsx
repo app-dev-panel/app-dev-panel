@@ -2,7 +2,6 @@ import {useGetOpcacheQuery} from '@app-dev-panel/panel/Module/Inspector/API/Insp
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
-import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {Box, Chip, Tab, Tabs, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
@@ -84,15 +83,15 @@ const MetricRow = styled(Box)(({theme}) => ({
     '&:last-child': {borderBottom: 'none'},
 }));
 
-const MetricKey = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const MetricKey = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     fontWeight: 600,
     width: 220,
     flexShrink: 0,
-});
+}));
 
-const MetricValue = styled(Box)({fontFamily: primitives.fontFamilyMono, fontSize: '12px', flex: 1});
+const MetricValue = styled(Box)(({theme}) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '12px', flex: 1}));
 
 const ProgressBar = styled(Box)(({theme}) => ({
     height: 6,
@@ -115,14 +114,14 @@ const ScriptRow = styled(Box)(({theme}) => ({
     '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const ScriptPath = styled(Typography)({
-    fontFamily: primitives.fontFamilyMono,
+const ScriptPath = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     flex: 1,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-});
+}));
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -166,20 +165,20 @@ const MemoryBar = ({used, total, color}: {used: number; total: number; color: st
     const percent = total > 0 ? (used / total) * 100 : 0;
     return (
         <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5}}>
-            <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px'}}>
+            <Typography sx={(theme) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '12px'})}>
                 {formatBytes(used)} / {formatBytes(total)}
             </Typography>
             <ProgressBar>
                 <ProgressFill sx={{width: `${percent}%`, backgroundColor: color}} />
             </ProgressBar>
             <Typography
-                sx={{
-                    fontFamily: primitives.fontFamilyMono,
+                sx={(theme) => ({
+                    fontFamily: theme.adp.fontFamilyMono,
                     fontSize: '11px',
                     color: 'text.disabled',
                     width: 50,
                     textAlign: 'right',
-                }}
+                })}
             >
                 {formatPercent(percent)}
             </Typography>
@@ -284,7 +283,9 @@ const StatusTab = ({status}: {status: Record<string, unknown>}) => {
                             key: 'hit_rate',
                             value: (
                                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                    <Typography sx={{fontFamily: primitives.fontFamilyMono, fontSize: '12px'}}>
+                                    <Typography
+                                        sx={(theme) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '12px'})}
+                                    >
                                         {formatPercent(stats.opcache_hit_rate)}
                                     </Typography>
                                     <Chip
@@ -388,24 +389,24 @@ const ScriptsTab = ({scripts}: {scripts: Record<string, unknown> | null}) => {
                         <ScriptPath title={path}>{path}</ScriptPath>
                         {info && typeof info === 'object' && 'hits' in info && (
                             <Typography
-                                sx={{
-                                    fontFamily: primitives.fontFamilyMono,
+                                sx={(theme) => ({
+                                    fontFamily: theme.adp.fontFamilyMono,
                                     fontSize: '10px',
                                     color: 'text.disabled',
                                     flexShrink: 0,
-                                }}
+                                })}
                             >
                                 {(info as {hits: number}).hits} hits
                             </Typography>
                         )}
                         {info && typeof info === 'object' && 'memory_consumption' in info && (
                             <Typography
-                                sx={{
-                                    fontFamily: primitives.fontFamilyMono,
+                                sx={(theme) => ({
+                                    fontFamily: theme.adp.fontFamilyMono,
                                     fontSize: '10px',
                                     color: 'success.main',
                                     flexShrink: 0,
-                                }}
+                                })}
                             >
                                 {formatBytes((info as {memory_consumption: number}).memory_consumption)}
                             </Typography>
