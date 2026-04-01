@@ -127,7 +127,7 @@
     "test": "@test:unit",
     "test:unit": "phpunit --testdox --testsuite Kernel,API,Cli,McpServer,Adapter-Symfony,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle",
     "test:e2e": "phpunit --testdox --testsuite E2E",
-    "test:coverage": "phpunit --coverage-clover=coverage.xml --coverage-text",
+    "test:coverage": "phpunit --testsuite Kernel,API,Cli,McpServer,Adapter-Symfony,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle --coverage-clover=coverage.xml --coverage-text",
     "lint": "mago lint",
     "analyze": "mago analyze",
     "format:check": "mago fmt --check",
