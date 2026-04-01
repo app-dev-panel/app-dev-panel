@@ -23,10 +23,10 @@ function setupClassRefTooltips() {
     document.addEventListener(
         'mouseenter',
         (e) => {
-            const ref = (e.target as Element).closest?.('.class-ref');
+            const ref = (e.target as Element).closest?.('.class-ref, .pkg-ref');
             if (!ref) return;
 
-            const tip = ref.querySelector('.class-ref-tooltip') as HTMLElement;
+            const tip = ref.querySelector('.class-ref-tooltip, .pkg-ref-tooltip') as HTMLElement;
             if (!tip) return;
 
             tip.style.left = '0';
@@ -56,9 +56,9 @@ function setupClassRefTooltips() {
     document.addEventListener(
         'mouseleave',
         (e) => {
-            const ref = (e.target as Element).closest?.('.class-ref');
+            const ref = (e.target as Element).closest?.('.class-ref, .pkg-ref');
             if (!ref) return;
-            const tip = ref.querySelector('.class-ref-tooltip') as HTMLElement;
+            const tip = ref.querySelector('.class-ref-tooltip, .pkg-ref-tooltip') as HTMLElement;
             if (tip) tip.classList.remove('is-visible');
         },
         true,

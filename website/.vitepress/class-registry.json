@@ -2572,7 +2572,7 @@
         "short": "BacktraceIgnoreMatcher",
         "type": "class",
         "library": "Kernel",
-        "description": "All backtrace parameters should contain at least 4 elements in the following order: 0 \u2013 Called method 1 \u2013 Proxy 2 \u2013 Real using place / Composer\\ClassLoader include function 3 \u2013 Whatever / Composer\\ClassLoader",
+        "description": "All backtrace parameters should contain at least 4 elements in the following order: 0 – Called method 1 – Proxy 2 – Real using place / Composer\\ClassLoader include function 3 – Whatever / Composer\\ClassLoader",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php",
         "path": "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php",
         "modifier": "final"
@@ -2855,7 +2855,7 @@
         "short": "StdioTransport",
         "type": "class",
         "library": "McpServer",
-        "description": "MCP stdio transport \u2014 reads/writes JSON-RPC 2.0 messages over stdin/stdout.",
+        "description": "MCP stdio transport — reads/writes JSON-RPC 2.0 messages over stdin/stdout.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/McpServer/src/Transport/StdioTransport.php",
         "path": "libs/McpServer/src/Transport/StdioTransport.php",
         "modifier": "final"
@@ -3010,5 +3010,176 @@
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Testing/src/Runner/FixtureRunner.php",
         "path": "libs/Testing/src/Runner/FixtureRunner.php",
         "modifier": "final"
+    },
+    "Psr\\Log\\LoggerInterface": {
+        "fqcn": "Psr\\Log\\LoggerInterface",
+        "short": "LoggerInterface",
+        "type": "interface",
+        "library": "PSR-3",
+        "description": "PSR-3 Logger Interface. Describes a logger instance.",
+        "github": "https://github.com/php-fig/log/blob/master/src/LoggerInterface.php",
+        "path": "vendor/psr/log/src/LoggerInterface.php"
+    },
+    "Psr\\EventDispatcher\\EventDispatcherInterface": {
+        "fqcn": "Psr\\EventDispatcher\\EventDispatcherInterface",
+        "short": "EventDispatcherInterface",
+        "type": "interface",
+        "library": "PSR-14",
+        "description": "PSR-14 Event Dispatcher Interface. Defines a dispatcher for events.",
+        "github": "https://github.com/php-fig/event-dispatcher/blob/master/src/EventDispatcherInterface.php",
+        "path": "vendor/psr/event-dispatcher/src/EventDispatcherInterface.php"
+    },
+    "Psr\\Http\\Client\\ClientInterface": {
+        "fqcn": "Psr\\Http\\Client\\ClientInterface",
+        "short": "ClientInterface",
+        "type": "interface",
+        "library": "PSR-18",
+        "description": "PSR-18 HTTP Client Interface. Sends PSR-7 requests and returns PSR-7 responses.",
+        "github": "https://github.com/php-fig/http-client/blob/master/src/ClientInterface.php",
+        "path": "vendor/psr/http-client/src/ClientInterface.php"
+    },
+    "Psr\\SimpleCache\\CacheInterface": {
+        "fqcn": "Psr\\SimpleCache\\CacheInterface",
+        "short": "CacheInterface",
+        "type": "interface",
+        "library": "PSR-16",
+        "description": "PSR-16 Simple Cache Interface. Defines basic cache operations.",
+        "github": "https://github.com/php-fig/simple-cache/blob/master/src/CacheInterface.php",
+        "path": "vendor/psr/simple-cache/src/CacheInterface.php"
+    },
+    "Psr\\Container\\ContainerInterface": {
+        "fqcn": "Psr\\Container\\ContainerInterface",
+        "short": "ContainerInterface",
+        "type": "interface",
+        "library": "PSR-11",
+        "description": "PSR-11 Container Interface. Describes the interface of a dependency injection container.",
+        "github": "https://github.com/php-fig/container/blob/master/src/ContainerInterface.php",
+        "path": "vendor/psr/container/src/ContainerInterface.php"
+    },
+    "Psr\\Http\\Message\\ServerRequestInterface": {
+        "fqcn": "Psr\\Http\\Message\\ServerRequestInterface",
+        "short": "ServerRequestInterface",
+        "type": "interface",
+        "library": "PSR-7",
+        "description": "PSR-7 Server Request Interface. Representation of an incoming, server-side HTTP request.",
+        "github": "https://github.com/php-fig/http-message/blob/master/src/ServerRequestInterface.php",
+        "path": "vendor/psr/http-message/src/ServerRequestInterface.php"
+    },
+    "Psr\\Http\\Message\\ResponseInterface": {
+        "fqcn": "Psr\\Http\\Message\\ResponseInterface",
+        "short": "ResponseInterface",
+        "type": "interface",
+        "library": "PSR-7",
+        "description": "PSR-7 Response Interface. Representation of an outgoing, server-side response.",
+        "github": "https://github.com/php-fig/http-message/blob/master/src/ResponseInterface.php",
+        "path": "vendor/psr/http-message/src/ResponseInterface.php"
+    },
+    "Psr\\Http\\Server\\MiddlewareInterface": {
+        "fqcn": "Psr\\Http\\Server\\MiddlewareInterface",
+        "short": "MiddlewareInterface",
+        "type": "interface",
+        "library": "PSR-15",
+        "description": "PSR-15 Middleware Interface. Participant in processing a server request and response.",
+        "github": "https://github.com/php-fig/http-server-middleware/blob/master/src/MiddlewareInterface.php",
+        "path": "vendor/psr/http-server-middleware/src/MiddlewareInterface.php"
+    },
+    "Psr\\Http\\Server\\RequestHandlerInterface": {
+        "fqcn": "Psr\\Http\\Server\\RequestHandlerInterface",
+        "short": "RequestHandlerInterface",
+        "type": "interface",
+        "library": "PSR-15",
+        "description": "PSR-15 Request Handler Interface. Handles a server request and produces a response.",
+        "github": "https://github.com/php-fig/http-server-handler/blob/master/src/RequestHandlerInterface.php",
+        "path": "vendor/psr/http-server-handler/src/RequestHandlerInterface.php"
+    },
+    "Psr\\Http\\Message\\RequestInterface": {
+        "fqcn": "Psr\\Http\\Message\\RequestInterface",
+        "short": "RequestInterface",
+        "type": "interface",
+        "library": "PSR-7",
+        "description": "PSR-7 Request Interface. Representation of an outgoing, client-side request.",
+        "github": "https://github.com/php-fig/http-message/blob/master/src/RequestInterface.php",
+        "path": "vendor/psr/http-message/src/RequestInterface.php"
+    },
+    "Symfony\\Contracts\\Translation\\TranslatorInterface": {
+        "fqcn": "Symfony\\Contracts\\Translation\\TranslatorInterface",
+        "short": "TranslatorInterface",
+        "type": "interface",
+        "library": "Symfony",
+        "description": "Symfony Translation Contract. Translates messages using message catalogs.",
+        "github": "https://github.com/symfony/translation-contracts/blob/main/TranslatorInterface.php",
+        "path": "vendor/symfony/translation-contracts/TranslatorInterface.php"
+    },
+    "Symfony\\Component\\Routing\\Matcher\\UrlMatcherInterface": {
+        "fqcn": "Symfony\\Component\\Routing\\Matcher\\UrlMatcherInterface",
+        "short": "UrlMatcherInterface",
+        "type": "interface",
+        "library": "Symfony",
+        "description": "Symfony Routing URL Matcher. Matches a URL path to a set of route parameters.",
+        "github": "https://github.com/symfony/routing/blob/7.2/Matcher/UrlMatcherInterface.php",
+        "path": "vendor/symfony/routing/Matcher/UrlMatcherInterface.php"
+    },
+    "Symfony\\Component\\Validator\\Validator\\ValidatorInterface": {
+        "fqcn": "Symfony\\Component\\Validator\\Validator\\ValidatorInterface",
+        "short": "ValidatorInterface",
+        "type": "interface",
+        "library": "Symfony",
+        "description": "Symfony Validator Interface. Validates PHP values against constraints.",
+        "github": "https://github.com/symfony/validator/blob/7.2/Validator/ValidatorInterface.php",
+        "path": "vendor/symfony/validator/Validator/ValidatorInterface.php"
+    },
+    "Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface": {
+        "fqcn": "Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface",
+        "short": "EventDispatcherInterface",
+        "type": "interface",
+        "library": "Symfony",
+        "description": "Symfony Event Dispatcher Contract. Dispatches events to registered listeners.",
+        "github": "https://github.com/symfony/event-dispatcher-contracts/blob/main/EventDispatcherInterface.php",
+        "path": "vendor/symfony/event-dispatcher-contracts/EventDispatcherInterface.php"
+    },
+    "yii\\base\\BootstrapInterface": {
+        "fqcn": "yii\\base\\BootstrapInterface",
+        "short": "BootstrapInterface",
+        "type": "interface",
+        "library": "Yii 2",
+        "description": "Yii 2 Bootstrap Interface. Allows a class to participate in the application bootstrapping process.",
+        "github": "https://github.com/yiisoft/yii2/blob/master/framework/base/BootstrapInterface.php",
+        "path": "vendor/yiisoft/yii2/base/BootstrapInterface.php"
+    },
+    "yii\\i18n\\I18N": {
+        "fqcn": "yii\\i18n\\I18N",
+        "short": "I18N",
+        "type": "class",
+        "library": "Yii 2",
+        "description": "Yii 2 I18N component. Provides internationalization and translation features.",
+        "github": "https://github.com/yiisoft/yii2/blob/master/framework/i18n/I18N.php",
+        "path": "vendor/yiisoft/yii2/i18n/I18N.php"
+    },
+    "Cycle\\ORM\\SchemaInterface": {
+        "fqcn": "Cycle\\ORM\\SchemaInterface",
+        "short": "SchemaInterface",
+        "type": "interface",
+        "library": "Cycle ORM",
+        "description": "Cycle ORM Schema Interface. Provides access to ORM entity schema definitions.",
+        "github": "https://github.com/cycle/orm/blob/master/src/SchemaInterface.php",
+        "path": "vendor/cycle/orm/src/SchemaInterface.php"
+    },
+    "Illuminate\\Contracts\\Translation\\Translator": {
+        "fqcn": "Illuminate\\Contracts\\Translation\\Translator",
+        "short": "Translator",
+        "type": "interface",
+        "library": "Laravel",
+        "description": "Laravel Translator Contract. Provides translation services for the application.",
+        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Contracts/Translation/Translator.php",
+        "path": "vendor/laravel/framework/src/Illuminate/Contracts/Translation/Translator.php"
+    },
+    "Illuminate\\Routing\\Router": {
+        "fqcn": "Illuminate\\Routing\\Router",
+        "short": "Router",
+        "type": "class",
+        "library": "Laravel",
+        "description": "Laravel Router. Registers routes and dispatches HTTP requests to controllers.",
+        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Routing/Router.php",
+        "path": "vendor/laravel/framework/src/Illuminate/Routing/Router.php"
     }
 }
