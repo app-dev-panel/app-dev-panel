@@ -16,14 +16,18 @@ import {initMessageListener} from 'redux-state-sync';
 const rootReducer = combineReducers({...ToolbarApiReducers, ...DebugReducers, ...ApplicationReducers});
 
 export const createStore = (preloadedState: Partial<ReturnType<typeof rootReducer>> = {}, forcedBaseUrl?: string) => {
-    // Clear persisted application state so redux-persist REHYDRATE
-    // doesn't overwrite baseUrl with a stale value.
-    // We keep other persisted keys (debug, notifications) intact.
+    // Patch persisted application state so redux-persist REHYDRATE
+    // uses the correct baseUrl instead of a stale persisted value.
     if (forcedBaseUrl) {
         try {
-            localStorage.removeItem('persist:application');
+            const raw = localStorage.getItem('persist:application');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                parsed.baseUrl = JSON.stringify(forcedBaseUrl);
+                localStorage.setItem('persist:application', JSON.stringify(parsed));
+            }
         } catch {
-            // localStorage may be unavailable
+            // localStorage may be unavailable or corrupted
         }
     }
 
