@@ -26,7 +26,7 @@ final class FixtureRunner
         $this->client = new Client([
             'base_uri' => rtrim($this->baseUrl, '/'),
             'http_errors' => false,
-            'timeout' => 10,
+            'timeout' => 1,
         ]);
         $this->evaluator = new ExpectationEvaluator();
         $this->collectorResolver = new CollectorDataResolver();
