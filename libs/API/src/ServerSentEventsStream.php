@@ -19,7 +19,23 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
         private Closure $stream,
         private int $pollIntervalMicros = 500_000,
         private int $sleepChunkMicros = 50_000,
-    ) {}
+    ) {
+        $this->installSignalHandler();
+    }
+
+    private function installSignalHandler(): void
+    {
+        if (!function_exists('pcntl_signal')) {
+            return;
+        }
+
+        pcntl_async_signals(true);
+        $handler = function (): void {
+            $this->eof = true;
+        };
+        pcntl_signal(SIGINT, $handler);
+        pcntl_signal(SIGTERM, $handler);
+    }
 
     public function close(): void
     {

@@ -111,7 +111,7 @@ final class DebugController
             return md5(json_encode($read, JSON_THROW_ON_ERROR));
         };
         $hash = $compareFunction();
-        $deadline = time() + 60;
+        $deadline = time() + 5;
 
         return $this->psrResponseFactory
             ->createResponse()
