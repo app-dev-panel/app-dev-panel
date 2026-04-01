@@ -97,11 +97,10 @@ src/
 │   ├── RedisCollector.php              # Redis commands (fed by adapter hooks)
 │   ├── RedisCommandRecord.php          # Value object for Redis command
 │   ├── RouterCollector.php              # Route matching data (fed by adapter hooks)
-│   ├── TemplateCollector.php           # Template rendering
+│   ├── TemplateCollector.php           # Template/view rendering with timing, output, params, duplicate detection
 │   ├── TranslatorCollector.php         # Translation lookups + missing detection
 │   ├── TranslationRecord.php           # Value object for translation lookup
 │   ├── ValidatorCollector.php           # Validation results (fed by adapter hooks)
-│   ├── ViewCollector.php               # View rendering with output
 │   ├── Web/
 │   │   ├── RequestCollector.php
 │   │   └── WebAppInfoCollector.php

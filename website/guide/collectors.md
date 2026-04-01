@@ -28,8 +28,7 @@ Collectors are the core data-gathering mechanism in ADP. Each collector implemen
 | [`MiddlewareCollector`](/guide/collectors/middleware) | Middleware stack execution and timing |
 | [`ValidatorCollector`](/guide/collectors/validator) | Validation operations and results |
 | [`AuthorizationCollector`](/guide/collectors/authorization) | Authentication and authorization data |
-| [`TemplateCollector`](/guide/collectors/template) | Template rendering (Twig, Blade, etc.) |
-| [`ViewCollector`](/guide/collectors/view) | View rendering with captured output |
+| [`TemplateCollector`](/guide/collectors/template) | Template/view rendering with timing, output capture, and duplicate detection |
 | [`VarDumperCollector`](/guide/collectors/var-dumper) | Manual `dump()` / `dd()` calls |
 | [`TimelineCollector`](/guide/collectors/timeline) | Cross-collector performance timeline |
 | [`EnvironmentCollector`](/guide/collectors/environment) | PHP and OS environment info |

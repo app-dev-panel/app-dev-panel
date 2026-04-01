@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yiisoft\Tests\Unit\Collector\View;
 
 use AppDevPanel\Adapter\Yiisoft\Collector\View\ViewEventListener;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
-use AppDevPanel\Kernel\Collector\ViewCollector;
 use PHPUnit\Framework\TestCase;
 
 final class ViewEventListenerTest extends TestCase
@@ -18,11 +18,11 @@ final class ViewEventListenerTest extends TestCase
         }
     }
 
-    public function testCollectDelegatesRenderDataToViewCollector(): void
+    public function testCollectDelegatesRenderDataToTemplateCollector(): void
     {
         $timeline = new TimelineCollector();
         $timeline->startup();
-        $collector = new ViewCollector($timeline);
+        $collector = new TemplateCollector($timeline);
         $collector->startup();
         $listener = new ViewEventListener($collector);
 
@@ -34,17 +34,17 @@ final class ViewEventListenerTest extends TestCase
         $listener->collect($event);
 
         $collected = $collector->getCollected();
-        $this->assertCount(1, $collected);
-        $this->assertSame('/views/index.php', $collected[0]['file']);
-        $this->assertSame('<h1>Hello</h1>', $collected[0]['output']);
-        $this->assertSame(['title' => 'Test'], $collected[0]['parameters']);
+        $this->assertCount(1, $collected['renders']);
+        $this->assertSame('/views/index.php', $collected['renders'][0]['template']);
+        $this->assertSame('<h1>Hello</h1>', $collected['renders'][0]['output']);
+        $this->assertSame(['title' => 'Test'], $collected['renders'][0]['parameters']);
     }
 
     public function testCollectMultipleRenderEvents(): void
     {
         $timeline = new TimelineCollector();
         $timeline->startup();
-        $collector = new ViewCollector($timeline);
+        $collector = new TemplateCollector($timeline);
         $collector->startup();
         $listener = new ViewEventListener($collector);
 
@@ -62,16 +62,16 @@ final class ViewEventListenerTest extends TestCase
         $listener->collect($event2);
 
         $collected = $collector->getCollected();
-        $this->assertCount(2, $collected);
-        $this->assertSame('/views/layout.php', $collected[0]['file']);
-        $this->assertSame('/views/partial.php', $collected[1]['file']);
+        $this->assertCount(2, $collected['renders']);
+        $this->assertSame('/views/layout.php', $collected['renders'][0]['template']);
+        $this->assertSame('/views/partial.php', $collected['renders'][1]['template']);
     }
 
     public function testCollectUpdatesTimeline(): void
     {
         $timeline = new TimelineCollector();
         $timeline->startup();
-        $collector = new ViewCollector($timeline);
+        $collector = new TemplateCollector($timeline);
         $collector->startup();
         $listener = new ViewEventListener($collector);
 
@@ -89,7 +89,7 @@ final class ViewEventListenerTest extends TestCase
     {
         $timeline = new TimelineCollector();
         $timeline->startup();
-        $collector = new ViewCollector($timeline);
+        $collector = new TemplateCollector($timeline);
         $collector->startup();
         $listener = new ViewEventListener($collector);
 
@@ -100,6 +100,8 @@ final class ViewEventListenerTest extends TestCase
 
         $listener->collect($event);
 
-        $this->assertSame(['view' => ['total' => 1]], $collector->getSummary());
+        $summary = $collector->getSummary();
+        $this->assertSame(1, $summary['template']['renderCount']);
+        $this->assertSame(0.0, $summary['template']['totalTime']);
     }
 }

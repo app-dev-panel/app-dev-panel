@@ -28,8 +28,7 @@ title: Коллекторы
 | `MiddlewareCollector` | Выполнение и тайминг стека middleware |
 | `ValidatorCollector` | Операции валидации и результаты |
 | `AuthorizationCollector` | Аутентификация и авторизация |
-| `TemplateCollector` | Рендеринг шаблонов (Twig, Blade и др.) |
-| `ViewCollector` | Рендеринг представлений с захватом вывода |
+| `TemplateCollector` | Рендеринг шаблонов/представлений с таймингами, захватом вывода и детекцией дубликатов |
 | `VarDumperCollector` | Ручные вызовы `dump()` / `dd()` |
 | `TimelineCollector` | Кросс-коллекторная временная шкала производительности |
 | `EnvironmentCollector` | Информация об окружении PHP и ОС |

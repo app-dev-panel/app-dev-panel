@@ -20,7 +20,6 @@ export enum CollectorsMap {
     MiddlewareCollector = 'AppDevPanel\\Kernel\\Collector\\MiddlewareCollector',
     QueueCollector = 'AppDevPanel\\Kernel\\Collector\\QueueCollector',
     ValidatorCollector = 'AppDevPanel\\Kernel\\Collector\\ValidatorCollector',
-    ViewCollector = 'AppDevPanel\\Kernel\\Collector\\ViewCollector',
     RouterCollector = 'AppDevPanel\\Kernel\\Collector\\RouterCollector',
     CacheCollector = 'AppDevPanel\\Kernel\\Collector\\CacheCollector',
     TemplateCollector = 'AppDevPanel\\Kernel\\Collector\\TemplateCollector',

@@ -862,7 +862,7 @@
         "short": "ViewEventListener",
         "type": "class",
         "library": "Adapter/Yiisoft",
-        "description": "Listens to Yii view render events and feeds normalized data to the framework-agnostic Kernel ViewCollector.",
+        "description": "Listens to Yii view render events and feeds normalized data to the framework-agnostic Kernel TemplateCollector.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yiisoft/src/Collector/View/ViewEventListener.php",
         "path": "libs/Adapter/Yiisoft/src/Collector/View/ViewEventListener.php",
         "modifier": "final"
@@ -2345,7 +2345,7 @@
         "short": "TemplateCollector",
         "type": "class",
         "library": "Kernel",
-        "description": "Captures template rendering data with timing.",
+        "description": "Captures template/view rendering with optional timing, output, parameters, and duplicate detection.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Collector/TemplateCollector.php",
         "path": "libs/Kernel/src/Collector/TemplateCollector.php",
         "modifier": "final",
@@ -2410,19 +2410,6 @@
         "description": "Collects Var Dumper data during application lifecycle.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Collector/VarDumperCollector.php",
         "path": "libs/Kernel/src/Collector/VarDumperCollector.php",
-        "modifier": "final",
-        "implements": [
-            "SummaryCollectorInterface"
-        ]
-    },
-    "AppDevPanel\\Kernel\\Collector\\ViewCollector": {
-        "fqcn": "AppDevPanel\\Kernel\\Collector\\ViewCollector",
-        "short": "ViewCollector",
-        "type": "class",
-        "library": "Kernel",
-        "description": "Captures view/template rendering with output and parameters.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Collector/ViewCollector.php",
-        "path": "libs/Kernel/src/Collector/ViewCollector.php",
         "modifier": "final",
         "implements": [
             "SummaryCollectorInterface"

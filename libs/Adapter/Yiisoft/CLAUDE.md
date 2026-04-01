@@ -49,7 +49,7 @@ src/
 │   │   ├── ValidatorCollector.php
 │   │   └── ValidatorInterfaceProxy.php
 │   └── View/
-│       └── WebViewCollector.php
+│       └── ViewEventListener.php
 ├── Inspector/
 │   └── DbSchemaProvider.php             # Database schema via Yiisoft DB
 ├── Proxy/
