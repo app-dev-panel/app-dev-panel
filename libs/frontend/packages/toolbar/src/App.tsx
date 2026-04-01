@@ -5,7 +5,7 @@ import '@app-dev-panel/toolbar/App.css';
 import {modules} from '@app-dev-panel/toolbar/modules';
 import {createRouter} from '@app-dev-panel/toolbar/router';
 import {createStore} from '@app-dev-panel/toolbar/store';
-import {useEffect} from 'react';
+import {useMemo} from 'react';
 import {Provider} from 'react-redux';
 import {RouterProvider} from 'react-router-dom';
 
@@ -17,16 +17,19 @@ type AppProps = {
 };
 
 export default function App({config}: AppProps) {
-    const router = createRouter(modules, config.router);
-    const {store} = createStore({
-        application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []} as any,
-    });
+    const {store, router} = useMemo(() => {
+        const r = createRouter(modules, config.router);
+        const {store: s} = createStore({
+            application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []} as any,
+        });
 
-    useEffect(() => {
-        if (config.backend.usePreferredUrl) {
-            console.log('Override backend url', config.backend.baseUrl);
-            store.dispatch(changeBaseUrl(config.backend.baseUrl));
-        }
+        // Always override persisted baseUrl with the configured one.
+        // This must happen synchronously before the first render so RTK Query
+        // uses the correct URL from the start (redux-persist rehydration
+        // would otherwise restore a stale baseUrl).
+        s.dispatch(changeBaseUrl(config.backend.baseUrl));
+
+        return {store: s, router: r};
     }, []);
 
     return (

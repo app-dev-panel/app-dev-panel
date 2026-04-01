@@ -155,10 +155,6 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const actionButtonSx = {p: 0.5, color: 'text.secondary', '&:hover': {color: 'text.primary'}};
 
-    if (getDebugQuery.isLoading) {
-        return null;
-    }
-
     // Collapsed state: small pill in bottom-right corner
     if (!isToolbarOpened) {
         return (

@@ -36,9 +36,16 @@ export const createBaseQuery = (
                 }
             }
 
-            return rawBaseQuery(args, WebApi, extraOptions);
+            const result = await rawBaseQuery(args, WebApi, extraOptions);
+
+            // Don't retry network errors (connection refused, timeout, etc.)
+            if (result.error && result.error.status === 'FETCH_ERROR') {
+                retry.fail(result.error);
+            }
+
+            return result;
         },
-        {maxRetries: 1},
+        {maxRetries: 0},
     );
 
     return baseQueryWithRetry;
