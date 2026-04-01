@@ -6,14 +6,15 @@ import {useCallback, useState} from 'react';
 import {FallbackProps} from 'react-error-boundary';
 
 export const ErrorFallback = ({error, resetErrorBoundary}: FallbackProps) => {
+    const err = error instanceof Error ? error : new Error(String(error));
     const [copied, setCopied] = useState(false);
     const handleCopy = useCallback(() => {
-        const text = [error.message, error.stack].filter(Boolean).join('\n\n');
+        const text = [err.message, err.stack].filter(Boolean).join('\n\n');
         clipboardCopy(text).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         });
-    }, [error]);
+    }, [err]);
 
     return (
         <Box mt={2}>
@@ -29,10 +30,10 @@ export const ErrorFallback = ({error, resetErrorBoundary}: FallbackProps) => {
                 }
             >
                 <AlertTitle>Something went wrong:</AlertTitle>
-                <pre>{error.message}</pre>
+                <pre>{err.message}</pre>
                 <Accordion>
                     <AccordionDetails>
-                        <pre>{error.stack?.toString()}</pre>
+                        <pre>{err.stack?.toString()}</pre>
                     </AccordionDetails>
                 </Accordion>
                 <Button color="error" variant="outlined" onClick={resetErrorBoundary}>

@@ -37,8 +37,8 @@
     "typescript": "^5.4.4",
     "verdaccio": "^5.30.3",
     "vite": "^5.4.1",
-    "vite-plugin-svgr": "^4.2.0",
-    "vite-tsconfig-paths": "^5.0.1"
+    "vite-plugin-svgr": "^5.0.0",
+    "vite-tsconfig-paths": "^6.1.1"
   },
   "scripts": {
     "predeploy": "VITE_ENV=github npm run build; npm run copy-toolbar",
