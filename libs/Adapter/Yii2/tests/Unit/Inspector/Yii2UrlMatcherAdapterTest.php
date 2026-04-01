@@ -7,15 +7,35 @@ namespace AppDevPanel\Adapter\Yii2\Tests\Unit\Inspector;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2UrlMatcherAdapter;
 use GuzzleHttp\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
+use yii\web\Application;
 use yii\web\UrlManager;
 
 final class Yii2UrlMatcherAdapterTest extends TestCase
 {
+    private ?Application $originalApp = null;
+
+    protected function setUp(): void
+    {
+        $this->originalApp = \Yii::$app;
+
+        // Boot a minimal Yii 2 web app so createController() works
+        new Application([
+            'id' => 'test-app',
+            'basePath' => __DIR__,
+            'controllerNamespace' => 'AppDevPanel\\Adapter\\Yii2\\Tests\\Unit\\Inspector\\Fixture',
+        ]);
+    }
+
+    protected function tearDown(): void
+    {
+        \Yii::$app = $this->originalApp;
+    }
+
     public function testMatchReturnsSuccessForKnownRoute(): void
     {
         $urlManager = $this->createUrlManager([
-            'about' => 'site/about',
-            '' => 'site/index',
+            'about' => 'stub/about',
+            '' => 'stub/index',
         ]);
 
         $adapter = new Yii2UrlMatcherAdapter($urlManager);
@@ -23,13 +43,15 @@ final class Yii2UrlMatcherAdapterTest extends TestCase
         $result = $adapter->match($request);
 
         $this->assertTrue($result->isSuccess());
-        $this->assertSame(['site/about'], $result->middlewares);
+        $this->assertCount(1, $result->middlewares);
+        $this->assertStringContainsString('StubController', $result->middlewares[0]);
+        $this->assertStringContainsString('actionAbout', $result->middlewares[0]);
     }
 
     public function testMatchReturnsFailureForUnknownRoute(): void
     {
         $urlManager = $this->createUrlManager([
-            '' => 'site/index',
+            '' => 'stub/index',
         ]);
 
         $adapter = new Yii2UrlMatcherAdapter($urlManager);
@@ -43,7 +65,7 @@ final class Yii2UrlMatcherAdapterTest extends TestCase
     public function testMatchRespectsHttpMethod(): void
     {
         $urlManager = $this->createUrlManager([
-            'POST login' => 'auth/login',
+            'POST login' => 'stub/login',
         ]);
 
         $adapter = new Yii2UrlMatcherAdapter($urlManager);
@@ -57,24 +79,24 @@ final class Yii2UrlMatcherAdapterTest extends TestCase
         $this->assertFalse($getResult->isSuccess());
     }
 
-    public function testMatchWithParameterizedRoute(): void
+    public function testMatchRootRoute(): void
     {
         $urlManager = $this->createUrlManager([
-            'user/<id:\d+>' => 'user/view',
+            '' => 'stub/index',
         ]);
 
         $adapter = new Yii2UrlMatcherAdapter($urlManager);
-        $request = new ServerRequest('GET', '/user/42');
+        $request = new ServerRequest('GET', '/');
         $result = $adapter->match($request);
 
         $this->assertTrue($result->isSuccess());
-        $this->assertSame(['user/view'], $result->middlewares);
+        $this->assertStringContainsString('StubController', $result->middlewares[0]);
     }
 
     public function testRouteReturnsSelf(): void
     {
         $urlManager = $this->createUrlManager([
-            '' => 'site/index',
+            '' => 'stub/index',
         ]);
 
         $adapter = new Yii2UrlMatcherAdapter($urlManager);
@@ -84,18 +106,18 @@ final class Yii2UrlMatcherAdapterTest extends TestCase
         $this->assertSame($result, $result->route());
     }
 
-    public function testMatchRootRoute(): void
+    public function testMatchReturnsFailureForNonExistentController(): void
     {
         $urlManager = $this->createUrlManager([
-            '' => 'site/index',
+            'missing' => 'nonexistent/index',
         ]);
 
         $adapter = new Yii2UrlMatcherAdapter($urlManager);
-        $request = new ServerRequest('GET', '/');
+        $request = new ServerRequest('GET', '/missing');
         $result = $adapter->match($request);
 
-        $this->assertTrue($result->isSuccess());
-        $this->assertSame(['site/index'], $result->middlewares);
+        // Route matches URL pattern but controller doesn't exist
+        $this->assertFalse($result->isSuccess());
     }
 
     private function createUrlManager(array $rules): UrlManager

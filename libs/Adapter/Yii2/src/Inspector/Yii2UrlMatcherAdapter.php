@@ -44,6 +44,14 @@ final class Yii2UrlMatcherAdapter
 
         [$route] = $result;
 
-        return new Yii2MatchResult(true, $route);
+        // Resolve route string to actual controller class + action method
+        $resolved = Yii2ActionResolver::resolve($route);
+        if ($resolved === null) {
+            return new Yii2MatchResult(false);
+        }
+
+        [$className, $methodName] = $resolved;
+
+        return new Yii2MatchResult(true, $className . '::' . $methodName);
     }
 }

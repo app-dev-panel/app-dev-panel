@@ -32,6 +32,20 @@ final class Yii2RouteAdapterTest extends TestCase
         $this->assertSame(['user/view'], $info['middlewares']);
     }
 
+    public function testDebugInfoWithResolvedAction(): void
+    {
+        $rule = new UrlRule([
+            'pattern' => 'user/<id:\d+>',
+            'route' => 'user/view',
+            'verb' => ['GET'],
+        ]);
+
+        $adapter = new Yii2RouteAdapter($rule, '', ['app\\controllers\\UserController', 'actionView']);
+        $info = $adapter->__debugInfo();
+
+        $this->assertSame([['app\\controllers\\UserController', 'actionView']], $info['middlewares']);
+    }
+
     public function testDebugInfoWithNullRule(): void
     {
         $adapter = new Yii2RouteAdapter(null, 'yii\rest\UrlRule');
@@ -70,5 +84,18 @@ final class Yii2RouteAdapterTest extends TestCase
         $info = $adapter->__debugInfo();
 
         $this->assertSame([], $info['methods']);
+    }
+
+    public function testDebugInfoWithUnresolvedActionFallsBackToRouteString(): void
+    {
+        $rule = new UrlRule([
+            'pattern' => 'posts',
+            'route' => 'post/index',
+        ]);
+
+        $adapter = new Yii2RouteAdapter($rule, '', null);
+        $info = $adapter->__debugInfo();
+
+        $this->assertSame(['post/index'], $info['middlewares']);
     }
 }

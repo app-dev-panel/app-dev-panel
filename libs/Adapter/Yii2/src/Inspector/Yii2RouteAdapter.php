@@ -12,9 +12,13 @@ use yii\web\UrlRule;
  */
 final class Yii2RouteAdapter
 {
+    /**
+     * @param array{string, string}|null $resolvedAction [className, methodName] if resolved
+     */
     public function __construct(
         private readonly ?UrlRule $rule = null,
         private readonly string $fallbackClass = '',
+        private readonly ?array $resolvedAction = null,
     ) {}
 
     public function __debugInfo(): array
@@ -31,6 +35,8 @@ final class Yii2RouteAdapter
             ];
         }
 
+        $middlewares = $this->resolvedAction !== null ? [$this->resolvedAction] : [$this->rule->route];
+
         return [
             'name' => $this->rule->name,
             'hosts' => $this->rule->host ? [$this->rule->host] : [],
@@ -38,7 +44,7 @@ final class Yii2RouteAdapter
             'methods' => $this->rule->verb ?? [],
             'defaults' => $this->rule->defaults,
             'override' => 0,
-            'middlewares' => [$this->rule->route],
+            'middlewares' => $middlewares,
         ];
     }
 }
