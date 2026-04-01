@@ -100,8 +100,7 @@ class CommandController
         foreach ($merged as $groupName => $commands) {
             $valid = array_filter(
                 $commands,
-                static fn(string $class) => is_subclass_of($class, CommandInterface::class)
-                    && $class::isAvailable(),
+                static fn(string $class) => is_subclass_of($class, CommandInterface::class) && $class::isAvailable(),
             );
             foreach ($valid as $name => $command) {
                 $result[$name] = ['group' => $groupName, 'class' => $command];

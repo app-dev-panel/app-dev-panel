@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Laravel;
 
 use AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor;
+use AppDevPanel\Adapter\Laravel\Collector\TemplateCollectorCompilerEngine;
 use AppDevPanel\Adapter\Laravel\Controller\AdpApiController;
 use AppDevPanel\Adapter\Laravel\EventListener\AuthorizationListener;
 use AppDevPanel\Adapter\Laravel\EventListener\CacheListener;
+use AppDevPanel\Adapter\Laravel\EventListener\ViteAssetListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ConsoleListener;
 use AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener;
 use AppDevPanel\Adapter\Laravel\EventListener\HttpClientListener;
@@ -69,6 +71,7 @@ use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CodeCoverageCollector;
@@ -85,11 +88,13 @@ use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
+use AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
@@ -160,6 +165,8 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->registerMiddleware();
         $this->registerEventListeners();
         $this->decoratePsrServices();
+        $this->decorateBladeEngine();
+        $this->decorateSpanProcessor();
     }
 
     private function isEnabled(): bool
@@ -241,6 +248,8 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'mailer' => MailerCollector::class,
             'queue' => QueueCollector::class,
             'opentelemetry' => OpenTelemetryCollector::class,
+            'assets' => AssetBundleCollector::class,
+            'template' => TemplateCollector::class,
         ];
 
         foreach ($timelineCollectors as $key => $class) {
@@ -370,6 +379,9 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                     : null,
                 routerDataExtractor: $this->app->bound(RouterDataExtractor::class)
                     ? $this->app->make(RouterDataExtractor::class)
+                    : null,
+                viteAssetListener: $this->app->bound(AssetBundleCollector::class)
+                    ? new ViteAssetListener(fn() => $this->app->make(AssetBundleCollector::class))
                     : null,
             ),
         );
@@ -878,6 +890,53 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 return $translator;
             }
             return new LaravelTranslatorProxy($translator, $this->app->make(TranslatorCollector::class));
+        });
+    }
+
+    private function decorateBladeEngine(): void
+    {
+        $collectors = $this->app->make('config')->get('app-dev-panel.collectors', []);
+
+        if (!($collectors['template'] ?? true) || !$this->app->bound(TemplateCollector::class)) {
+            return;
+        }
+
+        if (!$this->app->bound('view.engine.resolver')) {
+            return;
+        }
+
+        $resolver = $this->app->make('view.engine.resolver');
+        $resolver->register('blade', function () {
+            $engine = new TemplateCollectorCompilerEngine(
+                $this->app->make('blade.compiler'),
+                $this->app->make('files'),
+            );
+            $engine->setCollector($this->app->make(TemplateCollector::class));
+            return $engine;
+        });
+    }
+
+    private function decorateSpanProcessor(): void
+    {
+        $collectors = $this->app->make('config')->get('app-dev-panel.collectors', []);
+
+        if (!($collectors['opentelemetry'] ?? true) || !$this->app->bound(OpenTelemetryCollector::class)) {
+            return;
+        }
+
+        if (!interface_exists(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class)) {
+            return;
+        }
+
+        if (!$this->app->bound(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class)) {
+            return;
+        }
+
+        $this->app->extend(\OpenTelemetry\SDK\Trace\SpanProcessorInterface::class, function ($processor) {
+            if ($processor instanceof SpanProcessorInterfaceProxy) {
+                return $processor;
+            }
+            return new SpanProcessorInterfaceProxy($processor, $this->app->make(OpenTelemetryCollector::class));
         });
     }
 }

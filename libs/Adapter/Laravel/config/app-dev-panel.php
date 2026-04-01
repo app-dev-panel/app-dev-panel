@@ -32,6 +32,9 @@ return [
         'router' => true,
         'opentelemetry' => true,
         'translator' => true,
+        'security' => true,
+        'assets' => true,
+        'template' => true,
         'code_coverage' => false,
     ],
 
