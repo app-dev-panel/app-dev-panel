@@ -1,65 +1,142 @@
 import {useGetConfigurationQuery, useLazyGetObjectQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {DataContext} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
-import {LoaderContext, LoaderContextProvider} from '@app-dev-panel/panel/Module/Inspector/Context/LoaderContext';
-import {FilterInput} from '@app-dev-panel/sdk/Component/Form/FilterInput';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
-import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {primitives} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
-import {ContentCopy, DataObject} from '@mui/icons-material';
-import {Button, IconButton, Tooltip} from '@mui/material';
-import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
+import {ContentCopy, DataObject, Download} from '@mui/icons-material';
+import {Box, CircularProgress, IconButton, TablePagination, Tooltip, Typography} from '@mui/material';
+import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
-import {useCallback, useContext, useEffect, useMemo} from 'react';
+import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 
-const TempComponent = (params: GridRenderCellParams) => {
-    const {loader} = useContext(LoaderContext);
-    if (typeof params.value === 'string') {
-        if (!params.value.match(/^[\w\\]+$/i)) {
-            return <JsonRenderer value={params.value} />;
-        }
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+type DefinitionEntry = {id: string; value: unknown};
+
+// ---------------------------------------------------------------------------
+// Styled components
+// ---------------------------------------------------------------------------
+
+const SearchRow = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1.5),
+    padding: theme.spacing(2),
+}));
+
+const DefinitionRow = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: theme.spacing(2),
+    padding: theme.spacing(1, 2),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    '&:last-child': {borderBottom: 'none'},
+    '&:hover': {backgroundColor: theme.palette.action.hover},
+}));
+
+const NameCell = styled(Box)({
+    width: 240,
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 4,
+    paddingTop: 4,
+});
+
+const NameText = styled(Typography)({
+    fontFamily: primitives.fontFamilyMono,
+    fontSize: '12px',
+    fontWeight: 600,
+    wordBreak: 'break-word',
+    flex: 1,
+    paddingTop: 2,
+});
+
+const ValueCell = styled(Box)({flex: 1, minWidth: 0, overflow: 'hidden'});
+
+const ClassValue = styled(Typography)(({theme}) => ({
+    fontFamily: primitives.fontFamilyMono,
+    fontSize: '12px',
+    color: theme.palette.text.secondary,
+    wordBreak: 'break-word',
+    paddingTop: 4,
+}));
+
+const ActionsCell = styled(Box)({display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0, paddingTop: 2});
+
+const ListContainer = styled(Box)(({theme}) => ({
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: theme.shape.borderRadius,
+    overflow: 'hidden',
+}));
+
+const ListHeader = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(2),
+    padding: theme.spacing(1, 2),
+    backgroundColor: theme.palette.action.hover,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+}));
+
+const HeaderLabel = styled(Typography)(({theme}) => ({
+    fontSize: '11px',
+    fontWeight: 600,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    color: theme.palette.text.disabled,
+}));
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+const DefinitionValue = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: string) => void}) => {
+    const [loading, setLoading] = useState(false);
+    const [expanded, setExpanded] = useState(false);
+
+    const isClassName = typeof entry.value === 'string' && /^[\w\\]+$/i.test(entry.value);
+
+    const handleLoad = useCallback(async () => {
+        setLoading(true);
+        await onLoad(entry.id);
+        setLoading(false);
+        setExpanded(true);
+    }, [entry.id, onLoad]);
+
+    if (typeof entry.value === 'string' && isClassName) {
         return (
-            <>
-                {params.value}
-                <Button onClick={() => loader(params.row.id)}>Load</Button>
-            </>
+            <Box>
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                    <ClassValue>{entry.value}</ClassValue>
+                    <Tooltip title="Load object state">
+                        <IconButton size="small" onClick={handleLoad} disabled={loading} sx={{flexShrink: 0}}>
+                            {loading ? <CircularProgress size={14} /> : <Download sx={{fontSize: 14}} />}
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            </Box>
         );
     }
-    return <JsonRenderer value={params.value} />;
+
+    if (typeof entry.value !== 'string') {
+        return <JsonRenderer value={entry.value} depth={2} />;
+    }
+
+    return <JsonRenderer value={entry.value} />;
 };
-const columns: GridColDef[] = [
-    {
-        field: 'id',
-        headerName: 'Name',
-        width: 200,
-        renderCell: (params: GridRenderCellParams) => {
-            const value = params.value as string;
-            return (
-                <div style={{wordBreak: 'break-word'}}>
-                    <Tooltip title="Copy">
-                        <IconButton size="small" onClick={() => clipboardCopy(value)}>
-                            <ContentCopy fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Examine as a container entry">
-                        <IconButton size="small" href={'/inspector/container/view?class=' + value}>
-                            <DataObject fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                    {value}
-                </div>
-            );
-        },
-    },
-    {
-        field: 'value',
-        headerName: 'Value',
-        flex: 1,
-        renderCell: (params: GridRenderCellParams) => <TempComponent {...params} />,
-    },
-];
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
 export const DefinitionsPage = () => {
     const {data, isLoading} = useGetConfigurationQuery('di');
     const [lazyLoadObject] = useLazyGetObjectQuery();
@@ -68,41 +145,118 @@ export const DefinitionsPage = () => {
 
     const {objects, setObjects, insertObject} = useContext(DataContext);
 
-    const handleLoadObject = useCallback(async (id: string) => {
-        const result = await lazyLoadObject(id);
-        if (result.data) {
-            insertObject(id, result.data.object);
-        }
-    }, []);
+    // Pagination state
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(50);
+
+    const handleLoadObject = useCallback(
+        async (id: string) => {
+            const result = await lazyLoadObject(id);
+            if (result.data) {
+                insertObject(id, result.data.object);
+            }
+        },
+
+        [lazyLoadObject],
+    );
 
     useEffect(() => {
         if (!isLoading && data) {
             const rows = Object.entries(data || ([] as any));
-            const objects = rows.map((el) => ({id: el[0], value: el[1]}));
-
-            setObjects(objects);
+            const items = rows.map((el) => ({id: el[0], value: el[1]}));
+            setObjects(items);
         }
-    }, [isLoading]);
+
+    }, [isLoading, data]);
 
     const filteredRows = useMemo(() => {
-        const patterns = searchVariants(searchString || '').map((v) => new RegExp(regexpQuote(v), 'i'));
-        return objects.filter((object) => patterns.some((re) => object.id.match(re)));
+        if (!searchString.trim()) return objects;
+        const patterns = searchVariants(searchString).map((v) => new RegExp(regexpQuote(v), 'i'));
+        return objects.filter((object) => patterns.some((re) => re.test(object.id)));
     }, [objects, searchString]);
 
-    const onChangeHandler = useCallback(async (value: string) => {
-        setSearchParams({filter: value});
-    }, []);
+    const paginatedRows = useMemo(() => {
+        const start = page * rowsPerPage;
+        return filteredRows.slice(start, start + rowsPerPage);
+    }, [filteredRows, page, rowsPerPage]);
+
+    const onChangeHandler = useCallback(
+        (value: string) => {
+            setSearchParams({filter: value});
+            setPage(0);
+        },
+        [setSearchParams],
+    );
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
     }
 
     return (
-        <>
-            <FilterInput value={searchString} onChange={onChangeHandler} />
-            <LoaderContextProvider loader={handleLoadObject}>
-                <DataTable rows={filteredRows as GridValidRowModel[]} getRowId={(row) => row.id} columns={columns} />
-            </LoaderContextProvider>
-        </>
+        <Box>
+            <SearchRow>
+                <FilterInput value={searchString} onChange={onChangeHandler} placeholder="Search definitions..." />
+                <Typography sx={{fontSize: '12px', color: 'text.disabled', whiteSpace: 'nowrap'}}>
+                    {searchString
+                        ? `${filteredRows.length} of ${objects.length} definitions`
+                        : `${objects.length} definitions`}
+                </Typography>
+            </SearchRow>
+
+            <Box sx={{px: 2, pb: 2}}>
+                {filteredRows.length === 0 ? (
+                    <EmptyState
+                        icon="account_tree"
+                        title="No definitions found"
+                        description={searchString ? `No definitions match "${searchString}"` : undefined}
+                    />
+                ) : (
+                    <ListContainer>
+                        <ListHeader>
+                            <HeaderLabel sx={{width: 240, flexShrink: 0}}>Name</HeaderLabel>
+                            <HeaderLabel sx={{flex: 1}}>Value</HeaderLabel>
+                            <HeaderLabel sx={{width: 68, flexShrink: 0, textAlign: 'right'}}>Actions</HeaderLabel>
+                        </ListHeader>
+                        {paginatedRows.map((entry) => (
+                            <DefinitionRow key={entry.id}>
+                                <NameCell>
+                                    <NameText>{entry.id}</NameText>
+                                </NameCell>
+                                <ValueCell>
+                                    <DefinitionValue entry={entry} onLoad={handleLoadObject} />
+                                </ValueCell>
+                                <ActionsCell>
+                                    <Tooltip title="Copy name">
+                                        <IconButton size="small" onClick={() => clipboardCopy(entry.id)}>
+                                            <ContentCopy sx={{fontSize: 14}} />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Examine in container">
+                                        <IconButton size="small" href={'/inspector/container/view?class=' + entry.id}>
+                                            <DataObject sx={{fontSize: 14}} />
+                                        </IconButton>
+                                    </Tooltip>
+                                </ActionsCell>
+                            </DefinitionRow>
+                        ))}
+                        {filteredRows.length > 20 && (
+                            <TablePagination
+                                component="div"
+                                count={filteredRows.length}
+                                page={page}
+                                onPageChange={(_, p) => setPage(p)}
+                                rowsPerPage={rowsPerPage}
+                                onRowsPerPageChange={(e) => {
+                                    setRowsPerPage(parseInt(e.target.value, 10));
+                                    setPage(0);
+                                }}
+                                rowsPerPageOptions={[20, 50, 100]}
+                                sx={{borderTop: 1, borderColor: 'divider'}}
+                            />
+                        )}
+                    </ListContainer>
+                )}
+            </Box>
+        </Box>
     );
 };
