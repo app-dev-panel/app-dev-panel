@@ -21,7 +21,7 @@ import {
 import * as React from 'react';
 import {useCallback} from 'react';
 
-export const GitPage = () => {
+export const GitPage = ({showHeader = true}: {showHeader?: boolean}) => {
     const getSummaryQuery = useGetSummaryQuery();
     const [checkoutMutation, checkoutInfo] = useCheckoutMutation();
     const [commandMutation, commandInfo] = useCommandMutation();
@@ -40,7 +40,7 @@ export const GitPage = () => {
 
     return (
         <>
-            <PageHeader title="Git" icon="code" description="Repository status and operations" />
+            {showHeader && <PageHeader title="Git" icon="code" description="Repository status and operations" />}
             {getSummaryQuery.isSuccess && (
                 <>
                     <Box>
@@ -115,7 +115,7 @@ export const GitPage = () => {
                                     }
                                 />
                                 <ListItemSecondaryAction>
-                                    <Button color="primary" href="/inspector/git/log">
+                                    <Button color="primary" href="/inspector/environment?tab=git-log">
                                         Show log
                                     </Button>
                                 </ListItemSecondaryAction>

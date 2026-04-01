@@ -85,7 +85,7 @@ type HealthData = {
     indices: GridValidRowModel[];
 };
 
-export const ElasticsearchPage = () => {
+export const ElasticsearchPage = ({showHeader = true}: {showHeader?: boolean}) => {
     const {data, isLoading} = useGetElasticsearchHealthQuery();
 
     const typedData = data as unknown as HealthData | undefined;
@@ -98,7 +98,13 @@ export const ElasticsearchPage = () => {
 
     return (
         <>
-            <PageHeader title="Elasticsearch" icon="search" description="Inspect Elasticsearch cluster and indices" />
+            {showHeader && (
+                <PageHeader
+                    title="Elasticsearch"
+                    icon="search"
+                    description="Inspect Elasticsearch cluster and indices"
+                />
+            )}
 
             {health && (
                 <Box sx={{display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap'}}>

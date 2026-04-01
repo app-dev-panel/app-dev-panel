@@ -5,7 +5,7 @@ import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScree
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Box} from '@mui/material';
 
-export const CodeCoveragePage = () => {
+export const CodeCoveragePage = ({showHeader = true}: {showHeader?: boolean}) => {
     const {data, isLoading} = useGetCoverageQuery();
 
     if (isLoading) return <FullScreenCircularProgress />;
@@ -13,7 +13,9 @@ export const CodeCoveragePage = () => {
     if (!data || data.driver === null) {
         return (
             <>
-                <PageHeader title="Code Coverage" icon="shield" description="PHP code coverage analysis" />
+                {showHeader && (
+                    <PageHeader title="Code Coverage" icon="shield" description="PHP code coverage analysis" />
+                )}
                 <EmptyState
                     icon="shield"
                     title="No coverage driver"
@@ -25,7 +27,7 @@ export const CodeCoveragePage = () => {
 
     return (
         <Box>
-            <PageHeader title="Code Coverage" icon="shield" description="PHP code coverage analysis" />
+            {showHeader && <PageHeader title="Code Coverage" icon="shield" description="PHP code coverage analysis" />}
             <CoverageSummary data={data} />
             <CoverageFileList files={data.files} />
         </Box>

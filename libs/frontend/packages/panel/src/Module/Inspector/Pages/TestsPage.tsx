@@ -64,7 +64,7 @@ const columns: GridColDef[] = [
 ];
 
 type CommandState = {isSuccessful: boolean | undefined; errors: string[]};
-export const TestsPage = () => {
+export const TestsPage = ({showHeader = true}: {showHeader?: boolean}) => {
     const [commandQuery, commandQueryInfo] = useRunCommandMutation();
     const [rows, setRows] = useState<any[]>([]);
     const [commandResponse, setCommandResponse] = useState<CommandState | null>(null);
@@ -109,7 +109,7 @@ export const TestsPage = () => {
 
     return (
         <>
-            <PageHeader title="Tests" icon="science" description="Run and inspect test results" />
+            {showHeader && <PageHeader title="Tests" icon="science" description="Run and inspect test results" />}
             <Box display="flex" alignItems="center">
                 <Button
                     onClick={runCodeceptionHandler}
