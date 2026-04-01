@@ -46,15 +46,15 @@ Each adapter automatically feeds <class>AppDevPanel\Kernel\Collector\Authorizati
 
 ### Symfony
 
-<class>AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber</class> listens to Symfony Security events. Requires `symfony/security-http`.
+<class>AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber</class> listens to Symfony Security events. Requires <pkg>symfony/security-http</pkg>.
 
 | Event | Data Captured |
 |-------|---------------|
-| `LoginSuccessEvent` | User identity, roles, firewall, token type, impersonation |
-| `LoginFailureEvent` | Failed auth event with exception details |
-| `LogoutEvent` | Logout event |
-| `SwitchUserEvent` | Impersonation data |
-| `VoteEvent` | Access decisions with voter results |
+| <class>Symfony\Component\Security\Http\Event\LoginSuccessEvent</class> | User identity, roles, firewall, token type, impersonation |
+| <class>Symfony\Component\Security\Http\Event\LoginFailureEvent</class> | Failed auth event with exception details |
+| <class>Symfony\Component\Security\Http\Event\LogoutEvent</class> | Logout event |
+| <class>Symfony\Component\Security\Http\Event\SwitchUserEvent</class> | Impersonation data |
+| <class>Symfony\Component\Security\Core\Event\VoteEvent</class> | Access decisions with voter results |
 
 ::: tip
 Enable in `config/packages/app_dev_panel.yaml`:
@@ -71,21 +71,21 @@ app_dev_panel:
 
 | Event | Data Captured |
 |-------|---------------|
-| `Illuminate\Auth\Events\Authenticated` | User identity, guard name |
-| `Illuminate\Auth\Events\Login` | Login event, remember flag |
-| `Illuminate\Auth\Events\Logout` | Logout event |
-| `Illuminate\Auth\Events\Failed` | Failed auth with credential keys |
-| `Illuminate\Auth\Events\OtherDeviceLogout` | Other device logout |
+| <class>Illuminate\Auth\Events\Authenticated</class> | User identity, guard name |
+| <class>Illuminate\Auth\Events\Login</class> | Login event, remember flag |
+| <class>Illuminate\Auth\Events\Logout</class> | Logout event |
+| <class>Illuminate\Auth\Events\Failed</class> | Failed auth with credential keys |
+| <class>Illuminate\Auth\Events\OtherDeviceLogout</class> | Other device logout |
 
 ### Yii 2
 
-<class>AppDevPanel\Adapter\Yii2\EventListener\AuthorizationListener</class> hooks into `yii\web\User` events.
+<class>AppDevPanel\Adapter\Yii2\EventListener\AuthorizationListener</class> hooks into <class>yii\web\User</class> events.
 
 | Event | Data Captured |
 |-------|---------------|
 | `User::EVENT_AFTER_LOGIN` | User ID, duration, cookie-based flag |
 | `User::EVENT_AFTER_LOGOUT` | Logout event with user ID |
-| `EVENT_BEFORE_REQUEST` | Current session user on each request |
+| `Application::EVENT_BEFORE_REQUEST` | Current session user on each request |
 
 ### Yii 3
 

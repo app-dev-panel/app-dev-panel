@@ -46,15 +46,15 @@ $collector->logAccessDecision('EDIT', 'App\\Entity\\Post', 'ACCESS_DENIED', $vot
 
 ### Symfony
 
-<class>AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber</class> слушает события Symfony Security. Требуется `symfony/security-http`.
+<class>AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber</class> слушает события Symfony Security. Требуется <pkg>symfony/security-http</pkg>.
 
 | Событие | Собираемые данные |
 |---------|-------------------|
-| `LoginSuccessEvent` | Идентификация пользователя, роли, firewall, тип токена, имперсонация |
-| `LoginFailureEvent` | Событие неудачной аутентификации с деталями исключения |
-| `LogoutEvent` | Событие выхода |
-| `SwitchUserEvent` | Данные имперсонации |
-| `VoteEvent` | Решения по доступу с результатами voters |
+| <class>Symfony\Component\Security\Http\Event\LoginSuccessEvent</class> | Идентификация пользователя, роли, firewall, тип токена, имперсонация |
+| <class>Symfony\Component\Security\Http\Event\LoginFailureEvent</class> | Событие неудачной аутентификации с деталями исключения |
+| <class>Symfony\Component\Security\Http\Event\LogoutEvent</class> | Событие выхода |
+| <class>Symfony\Component\Security\Http\Event\SwitchUserEvent</class> | Данные имперсонации |
+| <class>Symfony\Component\Security\Core\Event\VoteEvent</class> | Решения по доступу с результатами voters |
 
 ::: tip
 Включите в `config/packages/app_dev_panel.yaml`:
@@ -71,21 +71,21 @@ app_dev_panel:
 
 | Событие | Собираемые данные |
 |---------|-------------------|
-| `Illuminate\Auth\Events\Authenticated` | Идентификация пользователя, имя guard |
-| `Illuminate\Auth\Events\Login` | Событие входа, флаг remember |
-| `Illuminate\Auth\Events\Logout` | Событие выхода |
-| `Illuminate\Auth\Events\Failed` | Неудачная аутентификация с ключами credentials |
-| `Illuminate\Auth\Events\OtherDeviceLogout` | Выход на другом устройстве |
+| <class>Illuminate\Auth\Events\Authenticated</class> | Идентификация пользователя, имя guard |
+| <class>Illuminate\Auth\Events\Login</class> | Событие входа, флаг remember |
+| <class>Illuminate\Auth\Events\Logout</class> | Событие выхода |
+| <class>Illuminate\Auth\Events\Failed</class> | Неудачная аутентификация с ключами credentials |
+| <class>Illuminate\Auth\Events\OtherDeviceLogout</class> | Выход на другом устройстве |
 
 ### Yii 2
 
-<class>AppDevPanel\Adapter\Yii2\EventListener\AuthorizationListener</class> подключается к событиям `yii\web\User`.
+<class>AppDevPanel\Adapter\Yii2\EventListener\AuthorizationListener</class> подключается к событиям <class>yii\web\User</class>.
 
 | Событие | Собираемые данные |
 |---------|-------------------|
 | `User::EVENT_AFTER_LOGIN` | ID пользователя, duration, cookie-based флаг |
 | `User::EVENT_AFTER_LOGOUT` | Событие выхода с ID пользователя |
-| `EVENT_BEFORE_REQUEST` | Текущий пользователь сессии на каждый запрос |
+| `Application::EVENT_BEFORE_REQUEST` | Текущий пользователь сессии на каждый запрос |
 
 ### Yii 3
 

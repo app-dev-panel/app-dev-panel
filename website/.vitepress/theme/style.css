@@ -568,7 +568,8 @@ a.class-ref:hover {
     color: var(--vp-c-brand-1);
     padding: 0 !important;
     background: none !important;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-all;
 }
 
 .class-ref-tooltip-desc {

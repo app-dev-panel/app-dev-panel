@@ -92,7 +92,7 @@ Storage and serialization remain behind interfaces to ensure pluggability:
 |---------|-------------|-----------------|
 | Debug data storage | <class>AppDevPanel\Kernel\Storage\StorageInterface</class> | <class>AppDevPanel\Kernel\Storage\FileStorage</class>, <class>AppDevPanel\Kernel\Storage\MemoryStorage</class> |
 | Object serialization | <class>AppDevPanel\Kernel\Dumper</class> | JSON-based (built-in) |
-| Database inspection | <class>AppDevPanel\Api\Inspector\Database\SchemaProviderInterface</class> | Per-adapter: <class>AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider</class>, <class>AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider</class>, <class>AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider</class>, <class>AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider</class>, <class>AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider</class> |
+| Database inspection | <class>AppDevPanel\Api\Inspector\Database\SchemaProviderInterface</class> | Per-adapter: <class>AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider</class>, <class>AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider</class>, <class>AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider</class>, <class>AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider</class>, <class>AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider</class> |
 
 ## Data Flow
 

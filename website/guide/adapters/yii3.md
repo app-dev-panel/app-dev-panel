@@ -48,7 +48,7 @@ DebugHeaders → ErrorCatcher → YiiApiMiddleware → ... → Router
 ```
 
 - <class>AppDevPanel\Api\Debug\Middleware\DebugHeaders</class> — must be outermost to attach `X-Debug-Id` even on error responses
-- <class>AppDevPanel\Adapter\Yiisoft\Api\YiiApiMiddleware</class> — intercepts `/debug/api/*` requests before the router
+- <class>AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware</class> — intercepts `/debug/api/*` requests before the router
 
 ## Collectors
 
@@ -56,8 +56,8 @@ Includes Yii-specific collectors for database queries, mailer, queue, router, va
 
 ## Translator Integration
 
-When `yiisoft/translator` is installed, the adapter registers <class>AppDevPanel\Adapter\Yiisoft\Collector\Translator\TranslatorInterfaceProxy</class> in `trackedServices`. All `translate()` calls on `Yiisoft\Translator\TranslatorInterface` are intercepted automatically. See [Translator](/guide/translator) for details.
+When `yiisoft/translator` is installed, the adapter registers <class>AppDevPanel\Adapter\Yii3\Collector\Translator\TranslatorInterfaceProxy</class> in `trackedServices`. All `translate()` calls on `Yiisoft\Translator\TranslatorInterface` are intercepted automatically. See [Translator](/guide/translator) for details.
 
 ## Database Inspector
 
-Database schema inspection is provided via `Yiisoft\Db` through <class>AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider</class>.
+Database schema inspection is provided via `Yiisoft\Db` through <class>AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider</class>.

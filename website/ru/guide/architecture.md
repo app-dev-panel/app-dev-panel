@@ -92,7 +92,7 @@ React 19 SPA:
 |--------|------------|------------|
 | Хранилище данных | <class>AppDevPanel\Kernel\Storage\StorageInterface</class> | <class>AppDevPanel\Kernel\Storage\FileStorage</class>, <class>AppDevPanel\Kernel\Storage\MemoryStorage</class> |
 | Сериализация объектов | <class>AppDevPanel\Kernel\Dumper</class> | На основе JSON (встроенная) |
-| Инспекция БД | <class>AppDevPanel\Api\Inspector\Database\SchemaProviderInterface</class> | По адаптерам: <class>AppDevPanel\Adapter\Yiisoft\Inspector\DbSchemaProvider</class>, <class>AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider</class>, <class>AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider</class>, <class>AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider</class>, <class>AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider</class> |
+| Инспекция БД | <class>AppDevPanel\Api\Inspector\Database\SchemaProviderInterface</class> | По адаптерам: <class>AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider</class>, <class>AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider</class>, <class>AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider</class>, <class>AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider</class>, <class>AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider</class> |
 
 ## Поток данных
 

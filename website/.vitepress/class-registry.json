@@ -510,14 +510,16 @@
         "modifier": "final",
         "extends": "Target"
     },
-    "AppDevPanel\\Adapter\\Yii2\\Collector\\uses": {
-        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Collector\\uses",
-        "short": "uses",
+    "AppDevPanel\\Adapter\\Yii2\\Collector\\DbProfilingTarget": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Collector\\DbProfilingTarget",
+        "short": "DbProfilingTarget",
         "type": "class",
         "library": "Adapter/Yii2",
-        "description": "Class uses.",
+        "description": "Yii 2 profiling target that captures database query timing and feeds it to DbCollector.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Collector/DbProfilingTarget.php",
-        "path": "libs/Adapter/Yii2/src/Collector/DbProfilingTarget.php"
+        "path": "libs/Adapter/Yii2/src/Collector/DbProfilingTarget.php",
+        "modifier": "final",
+        "extends": "Target"
     },
     "AppDevPanel\\Adapter\\Yii2\\Controller\\AdpApiController": {
         "fqcn": "AppDevPanel\\Adapter\\Yii2\\Controller\\AdpApiController",
@@ -3181,5 +3183,104 @@
         "description": "Laravel Router. Registers routes and dispatches HTTP requests to controllers.",
         "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Routing/Router.php",
         "path": "vendor/laravel/framework/src/Illuminate/Routing/Router.php"
+    },
+    "Symfony\\Component\\Security\\Http\\Event\\LoginSuccessEvent": {
+        "fqcn": "Symfony\\Component\\Security\\Http\\Event\\LoginSuccessEvent",
+        "short": "LoginSuccessEvent",
+        "type": "class",
+        "library": "Symfony",
+        "description": "Dispatched after a successful authentication. Contains the authenticated token, request, and firewall name.",
+        "github": "https://github.com/symfony/security-http/blob/7.2/Event/LoginSuccessEvent.php",
+        "path": "vendor/symfony/security-http/Event/LoginSuccessEvent.php"
+    },
+    "Symfony\\Component\\Security\\Http\\Event\\LoginFailureEvent": {
+        "fqcn": "Symfony\\Component\\Security\\Http\\Event\\LoginFailureEvent",
+        "short": "LoginFailureEvent",
+        "type": "class",
+        "library": "Symfony",
+        "description": "Dispatched when authentication fails. Contains the authentication exception and request.",
+        "github": "https://github.com/symfony/security-http/blob/7.2/Event/LoginFailureEvent.php",
+        "path": "vendor/symfony/security-http/Event/LoginFailureEvent.php"
+    },
+    "Symfony\\Component\\Security\\Http\\Event\\LogoutEvent": {
+        "fqcn": "Symfony\\Component\\Security\\Http\\Event\\LogoutEvent",
+        "short": "LogoutEvent",
+        "type": "class",
+        "library": "Symfony",
+        "description": "Dispatched on user logout. Contains the request, response, and token.",
+        "github": "https://github.com/symfony/security-http/blob/7.2/Event/LogoutEvent.php",
+        "path": "vendor/symfony/security-http/Event/LogoutEvent.php"
+    },
+    "Symfony\\Component\\Security\\Http\\Event\\SwitchUserEvent": {
+        "fqcn": "Symfony\\Component\\Security\\Http\\Event\\SwitchUserEvent",
+        "short": "SwitchUserEvent",
+        "type": "class",
+        "library": "Symfony",
+        "description": "Dispatched when impersonation (user switching) occurs.",
+        "github": "https://github.com/symfony/security-http/blob/7.2/Event/SwitchUserEvent.php",
+        "path": "vendor/symfony/security-http/Event/SwitchUserEvent.php"
+    },
+    "Symfony\\Component\\Security\\Core\\Event\\VoteEvent": {
+        "fqcn": "Symfony\\Component\\Security\\Core\\Event\\VoteEvent",
+        "short": "VoteEvent",
+        "type": "class",
+        "library": "Symfony",
+        "description": "Dispatched by the access decision manager for each voter's vote on an authorization check.",
+        "github": "https://github.com/symfony/security-core/blob/7.2/Event/VoteEvent.php",
+        "path": "vendor/symfony/security-core/Event/VoteEvent.php"
+    },
+    "Illuminate\\Auth\\Events\\Authenticated": {
+        "fqcn": "Illuminate\\Auth\\Events\\Authenticated",
+        "short": "Authenticated",
+        "type": "class",
+        "library": "Laravel",
+        "description": "Fired when a user is authenticated (on each request after session check).",
+        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Auth/Events/Authenticated.php",
+        "path": "vendor/laravel/framework/src/Illuminate/Auth/Events/Authenticated.php"
+    },
+    "Illuminate\\Auth\\Events\\Login": {
+        "fqcn": "Illuminate\\Auth\\Events\\Login",
+        "short": "Login",
+        "type": "class",
+        "library": "Laravel",
+        "description": "Fired when a user logs in via credentials or remember token.",
+        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Auth/Events/Login.php",
+        "path": "vendor/laravel/framework/src/Illuminate/Auth/Events/Login.php"
+    },
+    "Illuminate\\Auth\\Events\\Logout": {
+        "fqcn": "Illuminate\\Auth\\Events\\Logout",
+        "short": "Logout",
+        "type": "class",
+        "library": "Laravel",
+        "description": "Fired when a user logs out.",
+        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Auth/Events/Logout.php",
+        "path": "vendor/laravel/framework/src/Illuminate/Auth/Events/Logout.php"
+    },
+    "Illuminate\\Auth\\Events\\Failed": {
+        "fqcn": "Illuminate\\Auth\\Events\\Failed",
+        "short": "Failed",
+        "type": "class",
+        "library": "Laravel",
+        "description": "Fired when an authentication attempt fails.",
+        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Auth/Events/Failed.php",
+        "path": "vendor/laravel/framework/src/Illuminate/Auth/Events/Failed.php"
+    },
+    "Illuminate\\Auth\\Events\\OtherDeviceLogout": {
+        "fqcn": "Illuminate\\Auth\\Events\\OtherDeviceLogout",
+        "short": "OtherDeviceLogout",
+        "type": "class",
+        "library": "Laravel",
+        "description": "Fired when sessions on other devices are invalidated.",
+        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Auth/Events/OtherDeviceLogout.php",
+        "path": "vendor/laravel/framework/src/Illuminate/Auth/Events/OtherDeviceLogout.php"
+    },
+    "yii\\web\\User": {
+        "fqcn": "yii\\web\\User",
+        "short": "User",
+        "type": "class",
+        "library": "Yii 2",
+        "description": "Manages user authentication state. Provides login, logout, and identity management.",
+        "github": "https://github.com/yiisoft/yii2/blob/master/framework/web/User.php",
+        "path": "vendor/yiisoft/yii2/web/User.php"
     }
 }
