@@ -11,6 +11,7 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
 {
     public array $buffer = [];
     private bool $eof = false;
+    private readonly int $parentPid;
 
     /**
      * @param Closure $stream Callback that populates buffer and returns true to continue
@@ -20,6 +21,7 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
         private int $pollIntervalMicros = 500_000,
         private int $sleepChunkMicros = 50_000,
     ) {
+        $this->parentPid = function_exists('posix_getppid') ? posix_getppid() : 0;
         $this->installSignalHandler();
     }
 
@@ -35,6 +37,19 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
         };
         pcntl_signal(SIGINT, $handler);
         pcntl_signal(SIGTERM, $handler);
+    }
+
+    /**
+     * Detect if the parent process has died (worker became orphan).
+     * Orphaned processes are reparented to PID 1 (init/systemd).
+     */
+    private function isOrphaned(): bool
+    {
+        if ($this->parentPid === 0 || !function_exists('posix_getppid')) {
+            return false;
+        }
+
+        return posix_getppid() !== $this->parentPid;
     }
 
     public function close(): void
@@ -123,7 +138,7 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
         // Interruptible sleep: split into small chunks so connection abort is detected quickly
         $slept = 0;
         while ($slept < $this->pollIntervalMicros) {
-            if ($this->eof || connection_aborted()) {
+            if ($this->eof || connection_aborted() || $this->isOrphaned()) {
                 $this->eof = true;
                 return $output;
             }
