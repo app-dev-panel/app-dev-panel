@@ -90,6 +90,16 @@
             const backendUrl = localStorage.getItem(KEY) || 'http://127.0.0.1:8080';
             input.value = backendUrl;
 
+            // Patch redux-persist storage so REHYDRATE uses the correct baseUrl.
+            // Without this, persist restores the old baseUrl and the first API
+            // requests (and iframe src) use the stale URL.
+            try {
+                const raw = localStorage.getItem('persist:application');
+                const parsed = raw ? JSON.parse(raw) : {};
+                parsed.baseUrl = JSON.stringify(backendUrl);
+                localStorage.setItem('persist:application', JSON.stringify(parsed));
+            } catch {}
+
             window['AppDevPanelToolbarWidget'] = {
                 config: {
                     containerId: 'app-dev-toolbar',
