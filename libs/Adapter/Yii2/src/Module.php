@@ -302,7 +302,10 @@ class Module extends \yii\base\Module implements BootstrapInterface
             \Yii::$container->setSingleton(ClientInterface::class, static fn() => new Client(['timeout' => 10]));
         }
 
-        $rootPath = dirname(\Yii::getAlias('@vendor'));
+        // Find the real project root via Composer's ClassLoader location.
+        // Yii 2's @vendor alias may point to @app/vendor (basePath/vendor),
+        // which is wrong when basePath is a subdirectory (e.g., src/).
+        $rootPath = dirname(new \ReflectionClass(\Composer\Autoload\ClassLoader::class)->getFileName(), 3);
         $runtimePath = \Yii::getAlias('@runtime');
 
         \Yii::$container->setSingleton(
