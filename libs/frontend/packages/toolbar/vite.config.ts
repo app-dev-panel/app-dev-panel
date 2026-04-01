@@ -27,7 +27,7 @@ export default defineConfig(async () => ({
         viteTsconfigPaths(),
         svgrPlugin(),
     ],
-    base: process.env.VITE_ENV === 'github' ? 'https://app-dev-panel.github.io/app-dev-panel/' : './',
+    base: './',
     build: {
         rollupOptions: {
             output: {
