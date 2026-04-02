@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Laravel\Middleware;
 
 use AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor;
+use AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ViteAssetListener;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -25,5 +26,6 @@ final readonly class DebugCollectors
         public ?EnvironmentCollector $environment = null,
         public ?RouterDataExtractor $routerDataExtractor = null,
         public ?ViteAssetListener $viteAssetListener = null,
+        public ?DatabaseListener $databaseListener = null,
     ) {}
 }

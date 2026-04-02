@@ -112,6 +112,7 @@ const RouteRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expa
         transition: 'background-color 0.1s ease',
         backgroundColor: expanded ? theme.palette.action.hover : 'transparent',
         '&:hover': {backgroundColor: theme.palette.action.hover},
+        [theme.breakpoints.down('sm')]: {gap: theme.spacing(0.75), padding: theme.spacing(0.75, 1)},
     }),
 );
 
@@ -119,8 +120,11 @@ const PatternCell = styled(Typography)(({theme}) => ({
     fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     flex: 1,
-    wordBreak: 'break-all',
     minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    [theme.breakpoints.down('sm')]: {fontSize: '11px'},
 }));
 
 const NameCell = styled(Typography)(({theme}) => ({
@@ -131,6 +135,7 @@ const NameCell = styled(Typography)(({theme}) => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
 
 const ActionInlineLink = styled('a')(({theme}) => ({
@@ -138,12 +143,14 @@ const ActionInlineLink = styled('a')(({theme}) => ({
     fontSize: '11px',
     color: theme.palette.primary.main,
     textDecoration: 'none',
-    flexShrink: 0,
+    flexShrink: 1,
+    minWidth: 0,
     maxWidth: 300,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     '&:hover': {textDecoration: 'underline'},
+    [theme.breakpoints.down('sm')]: {maxWidth: '100%'},
 }));
 
 const DetailBox = styled(Box)(({theme}) => ({

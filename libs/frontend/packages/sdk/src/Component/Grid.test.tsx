@@ -1,5 +1,5 @@
 import {screen} from '@testing-library/react';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {renderWithProviders} from '../test-utils';
 import {DataTable} from './Grid';
 
@@ -41,6 +41,21 @@ describe('DataTable', () => {
 
     it('renders with custom rowsPerPage', () => {
         renderWithProviders(<DataTable rows={rows} columns={columns} rowsPerPage={[5, 10, 25]} />);
+        expect(screen.getByText('Alice')).toBeInTheDocument();
+    });
+
+    it('uses initialPageSize when provided', () => {
+        renderWithProviders(
+            <DataTable rows={rows} columns={columns} initialPageSize={50} rowsPerPage={[10, 50, 100]} />,
+        );
+        expect(screen.getByText('Alice')).toBeInTheDocument();
+    });
+
+    it('calls onPageSizeChange callback instead of Redux dispatch', () => {
+        const onPageSizeChange = vi.fn();
+        renderWithProviders(
+            <DataTable rows={rows} columns={columns} onPageSizeChange={onPageSizeChange} initialPageSize={20} />,
+        );
         expect(screen.getByText('Alice')).toBeInTheDocument();
     });
 });

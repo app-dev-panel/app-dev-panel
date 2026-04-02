@@ -1,5 +1,6 @@
 ---
 title: Feature Matrix
+description: "Collector and inspector support comparison across ADP adapters for Symfony, Laravel, Yii 3, and Yii 2."
 ---
 
 # Feature Matrix

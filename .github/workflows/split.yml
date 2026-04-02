@@ -2,11 +2,14 @@ name: Monorepo Split
 
 on:
   push:
+    branches:
+      - master
+      - '*.x'
     tags:
-      - '*'
+      - 'v*'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -26,23 +29,52 @@ jobs:
           - { name: "adapter-laravel",  local_path: "libs/Adapter/Laravel", split_repository: "adapter-laravel" }
           - { name: "adapter-yii2",     local_path: "libs/Adapter/Yii2",    split_repository: "adapter-yii2" }
           - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",   split_repository: "adapter-cycle" }
-          - { name: "adapter-yii3",  local_path: "libs/Adapter/Yii3", split_repository: "adapter-yii3" }
+          - { name: "adapter-yii3",     local_path: "libs/Adapter/Yii3",    split_repository: "adapter-yii3" }
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Monorepo Tagged Split of ${{ matrix.package.split_repository }}
-        uses: danharrin/monorepo-split-github-action@v2.4.4
+      - name: Install splitsh-lite
+        env:
+          SPLITSH_VERSION: v1.0.1
+          SPLITSH_SHA256: "2539301ce5e21d0ca44b689d0dd2c1b20d9f9e996c1fe6c462afb8af4e7141cc"
+        run: |
+          curl -sL "https://github.com/splitsh/lite/releases/download/${SPLITSH_VERSION}/lite_linux_amd64.tar.gz" -o /tmp/splitsh.tar.gz
+          echo "${SPLITSH_SHA256}  /tmp/splitsh.tar.gz" | sha256sum -c -
+          tar xzf /tmp/splitsh.tar.gz -C /tmp
+          sudo mv /tmp/splitsh-lite /usr/local/bin/splitsh-lite
+          rm /tmp/splitsh.tar.gz
+
+      - name: Configure git
+        run: |
+          git config --local user.name "xepozz"
+          git config --local user.email "xepozz@list.ru"
+
+      - name: Split ${{ matrix.package.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
-        with:
-          tag: ${{ github.ref_name }}
-          branch: "master"
-          package_directory: '${{ matrix.package.local_path }}'
-          repository_organization: 'app-dev-panel'
-          repository_name: '${{ matrix.package.split_repository }}'
-          user_name: "xepozz"
-          user_email: "xepozz@list.ru"
+          LOCAL_PATH: ${{ matrix.package.local_path }}
+          SPLIT_REPO: ${{ matrix.package.split_repository }}
+          REF_NAME: ${{ github.ref_name }}
+          IS_TAG: ${{ startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          REMOTE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/app-dev-panel/${SPLIT_REPO}.git"
+
+          # Run splitsh-lite to extract the subdirectory with full history
+          SHA=$(splitsh-lite --prefix="${LOCAL_PATH}")
+
+          # Add split remote
+          git remote add split "${REMOTE_URL}" 2>/dev/null || true
+
+          if [ "${IS_TAG}" = "true" ]; then
+            # For tags: push the split commit to master and create the tag
+            git push split "${SHA}:refs/heads/master" --force
+            git push split "${SHA}:refs/tags/${REF_NAME}" --force
+          else
+            # For branches: push the split commit to the same branch
+            git push split "${SHA}:refs/heads/${REF_NAME}" --force
+          fi

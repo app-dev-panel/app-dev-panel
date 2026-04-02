@@ -1,5 +1,6 @@
 ---
 title: Editor Integration
+description: "Planned ADP editor integration for VS Code, PhpStorm, and other IDEs. Open-file links and inline debugging."
 ---
 
 # Editor Integration

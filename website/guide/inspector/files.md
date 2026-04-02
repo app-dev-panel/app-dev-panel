@@ -1,5 +1,6 @@
 ---
 title: File Explorer
+description: "ADP File Explorer browses application files and directories with syntax highlighting and metadata."
 ---
 
 # File Explorer

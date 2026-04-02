@@ -1,5 +1,6 @@
 ---
 title: Validator Collector
+description: "ADP Validator Collector records validation runs with rules, data, and error messages for debugging."
 ---
 
 # Validator Collector

@@ -1,5 +1,6 @@
 ---
 title: Database Inspector
+description: "ADP Database Inspector provides live schema browsing: tables, columns, indexes, and foreign keys."
 ---
 
 # Database Inspector

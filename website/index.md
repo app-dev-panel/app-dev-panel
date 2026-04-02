@@ -1,4 +1,5 @@
 ---
+description: "ADP — framework-agnostic debugging and development panel for PHP. Works with Symfony, Laravel, Yii, and any PSR app."
 layout: home
 hero:
   name: ADP

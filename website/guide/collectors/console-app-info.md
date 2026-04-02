@@ -1,5 +1,6 @@
 ---
 title: ConsoleAppInfo Collector
+description: "ADP ConsoleAppInfo Collector records console application metadata: command name, arguments, exit code, memory."
 ---
 
 # ConsoleAppInfo Collector

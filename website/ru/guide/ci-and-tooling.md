@@ -1,5 +1,6 @@
 ---
 title: CI и инструменты
+description: "CI-пайплайн ADP: GitHub Actions, Mago для качества PHP-кода, PHPUnit и Vitest для тестирования."
 ---
 
 # CI и инструменты

@@ -1,5 +1,6 @@
 ---
 title: Routes Inspector
+description: "ADP Routes Inspector shows all registered routes with methods, patterns, controllers, and middleware."
 ---
 
 # Routes Inspector

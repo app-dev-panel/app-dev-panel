@@ -1,5 +1,6 @@
 ---
 title: Cache Inspector
+description: "ADP Cache Inspector provides live cache browsing: list keys, view values, check TTL, and flush entries."
 ---
 
 # Cache Inspector

@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Blog
+description: "News, tutorials, and deep dives from the ADP team about PHP debugging, framework adapters, and development tools."
 ---
 
 <script setup>

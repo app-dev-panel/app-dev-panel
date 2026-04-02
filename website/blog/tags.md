@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Tags
+description: "Browse ADP blog posts by tag — find articles on collectors, adapters, AI debugging, SSE, and more."
 ---
 
 <script setup>

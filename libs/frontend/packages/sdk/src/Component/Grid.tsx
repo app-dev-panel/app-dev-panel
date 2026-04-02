@@ -14,9 +14,12 @@ type GridProps = {
     pageSize?: number;
     rowHeight?: number | 'auto';
     sortModel?: GridSortModel;
+    /** Override the initial page size instead of reading from Redux. */
+    initialPageSize?: number;
+    /** Called when the user changes the page size. When omitted, the component persists the value to Redux. */
+    onPageSizeChange?: (size: number) => void;
 };
 const defaultRowsPerPage = [20, 50, 100];
-const voidCallback = () => {};
 const defaultStyle = {'& .MuiDataGrid-cell': {alignItems: 'flex-start', flexDirection: 'column'}};
 const defaultGetRowId = (row: GridValidRowModel) => row.id as string | number;
 
@@ -28,6 +31,8 @@ export function DataTable(props: GridProps) {
         rowHeight = 'auto',
         getRowId = defaultGetRowId,
         rowsPerPage = defaultRowsPerPage,
+        initialPageSize,
+        onPageSizeChange,
     } = props;
 
     const dispatch = useDispatch();
@@ -36,23 +41,26 @@ export function DataTable(props: GridProps) {
     );
 
     const [searchParams, setSearchParams] = useSearchParams({page: '0'});
-    const [pageSize, setPageSize] = useState(preferredPageSize || Math.min(...rowsPerPage));
+    const [pageSize, setPageSize] = useState((initialPageSize ?? preferredPageSize) || Math.min(...rowsPerPage));
 
     const getRowHeightCallback = useCallback(() => rowHeight, [rowHeight]);
     const handlePageChange = useCallback((page: number) => setSearchParams({page: String(page)}), [setSearchParams]);
     const handlePageSizeChange = useCallback(
         (value: number) => {
             setPageSize(value);
-            dispatch(setPreferredPageSize(value));
+            if (onPageSizeChange) {
+                onPageSizeChange(value);
+            } else {
+                dispatch(setPreferredPageSize(value));
+            }
         },
-        [dispatch],
+        [dispatch, onPageSizeChange],
     );
 
     return (
         <DataGrid
             disableDensitySelector
             disableColumnSelector
-            disableVirtualization
             disableRowSelectionOnClick
             sortModel={sortModel}
             rows={rows}

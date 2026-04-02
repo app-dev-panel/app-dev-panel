@@ -1,5 +1,6 @@
 ---
 title: Playground-приложения
+description: "Демо-приложения ADP для Symfony, Laravel, Yii 3 и Yii 2. Используйте как эталонные примеры интеграции."
 ---
 
 # Playground-приложения

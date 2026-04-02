@@ -1,3 +1,7 @@
+---
+description: "ADP HTTP API overview: Debug, Inspector, and Ingestion endpoints. REST and SSE for real-time debug data access."
+---
+
 # API Overview
 
 ADP exposes three API domains over HTTP: **Debug** (stored debug entries), **Inspector** (live application state), and **Ingestion** (external data intake).

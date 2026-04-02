@@ -1,5 +1,6 @@
 ---
 title: Log Collector
+description: "ADP Log Collector captures PSR-3 log messages with level, context, channel, and timestamps for debugging."
 ---
 
 # Log Collector

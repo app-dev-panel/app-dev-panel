@@ -3,6 +3,7 @@ title: Real-time Debugging with Server-Sent Events
 date: 2026-03-25
 author: ADP Team
 tags: [deep-dive, sse, architecture]
+description: "How ADP uses Server-Sent Events to stream debug data to the panel in real time, eliminating manual refreshes."
 ---
 
 <script setup>

@@ -1,5 +1,6 @@
 ---
 title: Начало работы
+description: "Установка ADP в PHP-приложение. Быстрая настройка для Symfony, Laravel, Yii 3 и Yii 2 через Composer."
 ---
 
 # Начало работы

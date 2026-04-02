@@ -20,9 +20,10 @@ import {
 } from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import React, {useCallback, useDeferredValue, useMemo, useState} from 'react';
+import React, {useCallback, useDeferredValue, useMemo, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {useNavigate} from 'react-router';
+import {Virtuoso, type VirtuosoHandle} from 'react-virtuoso';
 
 // ---------------------------------------------------------------------------
 // Styled components
@@ -37,6 +38,7 @@ const EntryRow = styled(Box)(({theme}) => ({
     cursor: 'pointer',
     transition: 'background-color 0.1s ease',
     '&:hover': {backgroundColor: theme.palette.action.hover},
+    [theme.breakpoints.down('sm')]: {gap: theme.spacing(0.75), padding: theme.spacing(0.75, 1)},
 }));
 
 const MethodLabel = styled(Typography)(({theme}) => ({
@@ -60,6 +62,7 @@ const MetaLabel = styled(Typography)(({theme}) => ({
     fontFamily: theme.adp.fontFamilyMono,
     fontSize: '10px',
     flexShrink: 0,
+    [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
 
 const StatusChip = styled(Chip)({fontSize: '10px', height: 20, minWidth: 36, fontWeight: 600, borderRadius: 4});
@@ -69,6 +72,7 @@ const StatCell = styled(Box)(({theme}) => ({
     alignItems: 'center',
     gap: theme.spacing(0.5),
     flexShrink: 0,
+    [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
 
 const StatLabel = styled(Typography)(({theme}) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '10px'}));
@@ -166,9 +170,156 @@ export const DebugEntryList = () => {
         );
     }
 
+    const virtuosoRef = useRef<VirtuosoHandle>(null);
+
+    const renderEntry = useCallback(
+        (_index: number, entry: DebugEntry) => {
+            if (isDebugEntryAboutWeb(entry)) {
+                const duration = entry.web?.request?.processingTime;
+                const memory = entry.web?.memory?.peakUsage;
+                return (
+                    <EntryRow onClick={() => handleEntryClick(entry)}>
+                        <MethodLabel sx={{color: methodColor(entry.request.method, theme)}}>
+                            {entry.request.method}
+                        </MethodLabel>
+                        <PathLabel>{entry.request.path}</PathLabel>
+                        {duration != null && (
+                            <MetaLabel sx={{color: 'primary.main'}}>{(duration * 1000).toFixed(0)}ms</MetaLabel>
+                        )}
+                        {memory != null && <MetaLabel sx={{color: 'success.main'}}>{formatBytes(memory)}</MetaLabel>}
+                        {entry.logger?.total != null && entry.logger.total > 0 && (
+                            <StatCell>
+                                <Icon sx={{fontSize: 13, color: 'text.disabled'}}>description</Icon>
+                                <StatLabel sx={{color: 'text.disabled'}}>{entry.logger.total}</StatLabel>
+                            </StatCell>
+                        )}
+                        {entry.db?.queries?.total != null && entry.db.queries.total > 0 && (
+                            <StatCell>
+                                <Icon
+                                    sx={{fontSize: 13, color: entry.db.queries.error ? 'error.main' : 'text.disabled'}}
+                                >
+                                    storage
+                                </Icon>
+                                <StatLabel sx={{color: entry.db.queries.error ? 'error.main' : 'text.disabled'}}>
+                                    {entry.db.queries.total}
+                                </StatLabel>
+                            </StatCell>
+                        )}
+                        {hasN1Indicator(entry) && (
+                            <Tooltip title="Duplicate operations detected (N+1)">
+                                <Chip
+                                    label="N+1"
+                                    size="small"
+                                    color="warning"
+                                    sx={{
+                                        fontWeight: 700,
+                                        fontSize: '9px',
+                                        height: 18,
+                                        minWidth: 32,
+                                        borderRadius: 1,
+                                        flexShrink: 0,
+                                    }}
+                                />
+                            </Tooltip>
+                        )}
+                        {entry.exception && (
+                            <Tooltip title={entry.exception.message}>
+                                <Icon sx={{fontSize: 15, color: 'error.main'}}>error</Icon>
+                            </Tooltip>
+                        )}
+                        <StatusChip
+                            label={entry.response.statusCode}
+                            size="small"
+                            sx={{
+                                color: statusColor(entry.response.statusCode, theme),
+                                backgroundColor: statusBg(entry.response.statusCode, theme),
+                            }}
+                        />
+                        <Tooltip title={compact ? formatDate(entry.web.request.startTime) : ''} arrow>
+                            <MetaLabel sx={{color: 'text.disabled'}}>
+                                {compact
+                                    ? formatTime(entry.web.request.startTime)
+                                    : formatDate(entry.web.request.startTime)}
+                            </MetaLabel>
+                        </Tooltip>
+                    </EntryRow>
+                );
+            }
+
+            if (isDebugEntryAboutConsole(entry)) {
+                const duration = entry.console?.request?.processingTime;
+                const memory = entry.console?.memory?.peakUsage;
+                const exitOk = entry.command?.exitCode === 0;
+                return (
+                    <EntryRow onClick={() => handleEntryClick(entry)}>
+                        <MethodLabel
+                            sx={{
+                                color: theme.palette.info.main,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <Icon sx={{fontSize: 14}}>terminal</Icon>
+                        </MethodLabel>
+                        <PathLabel>{entry.command?.input ?? 'Unknown command'}</PathLabel>
+                        {duration != null && (
+                            <MetaLabel sx={{color: 'primary.main'}}>{(duration * 1000).toFixed(0)}ms</MetaLabel>
+                        )}
+                        {memory != null && <MetaLabel sx={{color: 'success.main'}}>{formatBytes(memory)}</MetaLabel>}
+                        {entry.logger?.total != null && entry.logger.total > 0 && (
+                            <StatCell>
+                                <Icon sx={{fontSize: 13, color: 'text.disabled'}}>description</Icon>
+                                <StatLabel sx={{color: 'text.disabled'}}>{entry.logger.total}</StatLabel>
+                            </StatCell>
+                        )}
+                        {hasN1Indicator(entry) && (
+                            <Tooltip title="Duplicate operations detected (N+1)">
+                                <Chip
+                                    label="N+1"
+                                    size="small"
+                                    color="warning"
+                                    sx={{
+                                        fontWeight: 700,
+                                        fontSize: '9px',
+                                        height: 18,
+                                        minWidth: 32,
+                                        borderRadius: 1,
+                                        flexShrink: 0,
+                                    }}
+                                />
+                            </Tooltip>
+                        )}
+                        <StatusChip
+                            label={exitOk ? 'OK' : `EXIT ${entry.command?.exitCode}`}
+                            size="small"
+                            color={exitOk ? 'success' : 'error'}
+                        />
+                        <Tooltip title={compact ? formatDate(entry.console.request.startTime) : ''} arrow>
+                            <MetaLabel sx={{color: 'text.disabled'}}>
+                                {compact
+                                    ? formatTime(entry.console.request.startTime)
+                                    : formatDate(entry.console.request.startTime)}
+                            </MetaLabel>
+                        </Tooltip>
+                    </EntryRow>
+                );
+            }
+
+            return (
+                <EntryRow onClick={() => handleEntryClick(entry)}>
+                    <PathLabel>{entry.id}</PathLabel>
+                </EntryRow>
+            );
+        },
+        [handleEntryClick, theme, compact],
+    );
+
+    const computeItemKey = useCallback((_index: number, entry: DebugEntry) => entry.id, []);
+
     return (
-        <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, mb: 2}}>
+        <Box sx={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+            <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, flexShrink: 0}}>
                 <TextField
                     fullWidth
                     size="small"
@@ -214,152 +365,16 @@ export const DebugEntryList = () => {
                 </Tooltip>
             </Box>
 
-            {filtered.map((entry) => {
-                if (isDebugEntryAboutWeb(entry)) {
-                    const duration = entry.web?.request?.processingTime;
-                    const memory = entry.web?.memory?.peakUsage;
-                    return (
-                        <EntryRow key={entry.id} onClick={() => handleEntryClick(entry)}>
-                            <MethodLabel sx={{color: methodColor(entry.request.method, theme)}}>
-                                {entry.request.method}
-                            </MethodLabel>
-                            <PathLabel>{entry.request.path}</PathLabel>
-                            {duration != null && (
-                                <MetaLabel sx={{color: 'primary.main'}}>{(duration * 1000).toFixed(0)}ms</MetaLabel>
-                            )}
-                            {memory != null && (
-                                <MetaLabel sx={{color: 'success.main'}}>{formatBytes(memory)}</MetaLabel>
-                            )}
-                            {entry.logger?.total != null && entry.logger.total > 0 && (
-                                <StatCell>
-                                    <Icon sx={{fontSize: 13, color: 'text.disabled'}}>description</Icon>
-                                    <StatLabel sx={{color: 'text.disabled'}}>{entry.logger.total}</StatLabel>
-                                </StatCell>
-                            )}
-                            {entry.db?.queries?.total != null && entry.db.queries.total > 0 && (
-                                <StatCell>
-                                    <Icon
-                                        sx={{
-                                            fontSize: 13,
-                                            color: entry.db.queries.error ? 'error.main' : 'text.disabled',
-                                        }}
-                                    >
-                                        storage
-                                    </Icon>
-                                    <StatLabel sx={{color: entry.db.queries.error ? 'error.main' : 'text.disabled'}}>
-                                        {entry.db.queries.total}
-                                    </StatLabel>
-                                </StatCell>
-                            )}
-                            {hasN1Indicator(entry) && (
-                                <Tooltip title="Duplicate operations detected (N+1)">
-                                    <Chip
-                                        label="N+1"
-                                        size="small"
-                                        color="warning"
-                                        sx={{
-                                            fontWeight: 700,
-                                            fontSize: '9px',
-                                            height: 18,
-                                            minWidth: 32,
-                                            borderRadius: 1,
-                                            flexShrink: 0,
-                                        }}
-                                    />
-                                </Tooltip>
-                            )}
-                            {entry.exception && (
-                                <Tooltip title={entry.exception.message}>
-                                    <Icon sx={{fontSize: 15, color: 'error.main'}}>error</Icon>
-                                </Tooltip>
-                            )}
-                            <StatusChip
-                                label={entry.response.statusCode}
-                                size="small"
-                                sx={{
-                                    color: statusColor(entry.response.statusCode, theme),
-                                    backgroundColor: statusBg(entry.response.statusCode, theme),
-                                }}
-                            />
-                            <Tooltip title={compact ? formatDate(entry.web.request.startTime) : ''} arrow>
-                                <MetaLabel sx={{color: 'text.disabled'}}>
-                                    {compact
-                                        ? formatTime(entry.web.request.startTime)
-                                        : formatDate(entry.web.request.startTime)}
-                                </MetaLabel>
-                            </Tooltip>
-                        </EntryRow>
-                    );
-                }
-
-                if (isDebugEntryAboutConsole(entry)) {
-                    const duration = entry.console?.request?.processingTime;
-                    const memory = entry.console?.memory?.peakUsage;
-                    const exitOk = entry.command?.exitCode === 0;
-                    return (
-                        <EntryRow key={entry.id} onClick={() => handleEntryClick(entry)}>
-                            <MethodLabel
-                                sx={{
-                                    color: theme.palette.info.main,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <Icon sx={{fontSize: 14}}>terminal</Icon>
-                            </MethodLabel>
-                            <PathLabel>{entry.command?.input ?? 'Unknown command'}</PathLabel>
-                            {duration != null && (
-                                <MetaLabel sx={{color: 'primary.main'}}>{(duration * 1000).toFixed(0)}ms</MetaLabel>
-                            )}
-                            {memory != null && (
-                                <MetaLabel sx={{color: 'success.main'}}>{formatBytes(memory)}</MetaLabel>
-                            )}
-                            {entry.logger?.total != null && entry.logger.total > 0 && (
-                                <StatCell>
-                                    <Icon sx={{fontSize: 13, color: 'text.disabled'}}>description</Icon>
-                                    <StatLabel sx={{color: 'text.disabled'}}>{entry.logger.total}</StatLabel>
-                                </StatCell>
-                            )}
-                            {hasN1Indicator(entry) && (
-                                <Tooltip title="Duplicate operations detected (N+1)">
-                                    <Chip
-                                        label="N+1"
-                                        size="small"
-                                        color="warning"
-                                        sx={{
-                                            fontWeight: 700,
-                                            fontSize: '9px',
-                                            height: 18,
-                                            minWidth: 32,
-                                            borderRadius: 1,
-                                            flexShrink: 0,
-                                        }}
-                                    />
-                                </Tooltip>
-                            )}
-                            <StatusChip
-                                label={exitOk ? 'OK' : `EXIT ${entry.command?.exitCode}`}
-                                size="small"
-                                color={exitOk ? 'success' : 'error'}
-                            />
-                            <Tooltip title={compact ? formatDate(entry.console.request.startTime) : ''} arrow>
-                                <MetaLabel sx={{color: 'text.disabled'}}>
-                                    {compact
-                                        ? formatTime(entry.console.request.startTime)
-                                        : formatDate(entry.console.request.startTime)}
-                                </MetaLabel>
-                            </Tooltip>
-                        </EntryRow>
-                    );
-                }
-
-                return (
-                    <EntryRow key={entry.id} onClick={() => handleEntryClick(entry)}>
-                        <PathLabel>{entry.id}</PathLabel>
-                    </EntryRow>
-                );
-            })}
+            <Box sx={{flex: 1, minHeight: 400}}>
+                <Virtuoso
+                    ref={virtuosoRef}
+                    data={filtered}
+                    computeItemKey={computeItemKey}
+                    itemContent={renderEntry}
+                    overscan={200}
+                    style={{height: '100%'}}
+                />
+            </Box>
         </Box>
     );
 };

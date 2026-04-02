@@ -1,5 +1,6 @@
 ---
 title: OpenTelemetry Collector
+description: "ADP OpenTelemetry Collector integrates with OTel SDK to capture distributed traces and span data."
 ---
 
 # OpenTelemetry Collector

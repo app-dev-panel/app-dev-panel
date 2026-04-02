@@ -1,5 +1,6 @@
 ---
 title: Router Collector
+description: "ADP Router Collector captures matched routes with parameters, middleware stack, and controller details."
 ---
 
 # Router Collector

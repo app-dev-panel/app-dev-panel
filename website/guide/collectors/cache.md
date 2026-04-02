@@ -1,5 +1,6 @@
 ---
 title: Cache Collector
+description: "ADP Cache Collector tracks PSR-16 cache operations: hits, misses, writes, deletes, and TTL values."
 ---
 
 # Cache Collector

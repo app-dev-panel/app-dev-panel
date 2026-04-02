@@ -311,6 +311,31 @@ const { chromium } = require('playwright');
 
 View with `Read /tmp/screenshot.png`. See `/screenshot` skill for full documentation.
 
+## Responsive Design
+
+Uses MUI breakpoints (`theme.breakpoints.down('sm')`, `theme.breakpoints.down('md')`) for mobile/tablet adaptation.
+
+| Breakpoint | Width | Layout |
+|------------|-------|--------|
+| `xs` | 0-599px | Mobile: sidebar as drawer, single-column grids, hidden secondary info |
+| `sm` | 600-899px | Small tablet: reduced gaps/padding, narrower labels |
+| `md` | 900-1199px | Tablet: sidebar visible, 2-column grids |
+| `lg+` | 1200px+ | Desktop: full layout, 4-column grids |
+
+**Layout** (`Application/Component/Layout.tsx`): Below `md`, sidebar collapses into a `Drawer` with hamburger menu. Content area gets full width.
+
+**Responsive patterns used in components**:
+
+| Pattern | Where | Behavior on mobile (`< sm`) |
+|---------|-------|-----------------------------|
+| Hide secondary cells | `DebugEntryList`, `EventPanel`, `TimelinePanel` | `StatCell`, `MetaLabel`, `FileCell`, `Duration` hidden |
+| Ellipsis truncation | `EventPanel.NameCell`, `RoutesPage.PatternCell` | Text truncated with `...` instead of wrapping |
+| Flex-wrap | `RequestPanel.MetricBox` | URL + chips wrap to next line |
+| Column stacking | `DashboardPage`, Config pages | `flex-direction: column` on mobile |
+| Reduced spacing | `EventRow`, `EntryRow`, `RouteRow` | Smaller gap and padding |
+| Auto-width labels | `TimelinePanel.Label`, `EventPanel.TimeCell` | Fixed widths removed or shrunk |
+| Responsive grid | `DashboardPage.HealthGrid` | `repeat(4, 1fr)` -> `repeat(2, 1fr)` -> `1fr` |
+
 ## PWA Support
 
 Service Worker via Workbox provides offline caching and background sync.

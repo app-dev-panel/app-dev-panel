@@ -1,5 +1,6 @@
 ---
 title: Git Inspector
+description: "ADP Git Inspector displays repository status, branches, recent commits, and diff information."
 ---
 
 # Git Inspector

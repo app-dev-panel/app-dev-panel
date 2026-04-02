@@ -1,5 +1,6 @@
 ---
 title: Фронтенд-пакеты
+description: "Фронтенд npm-пакеты ADP: @app-dev-panel/panel, @app-dev-panel/toolbar и @app-dev-panel/sdk на GitHub Packages."
 ---
 
 # Фронтенд-пакеты

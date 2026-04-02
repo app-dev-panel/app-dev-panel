@@ -1,5 +1,6 @@
 ---
 title: Authorization Inspector
+description: "ADP Authorization Inspector shows security configuration: roles, voters, firewalls, and access rules."
 ---
 
 # Authorization Inspector

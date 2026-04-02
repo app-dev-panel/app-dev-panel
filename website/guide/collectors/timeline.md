@@ -1,5 +1,6 @@
 ---
 title: Timeline Collector
+description: "ADP Timeline Collector records execution timing of application phases for performance profiling."
 ---
 
 # Timeline Collector

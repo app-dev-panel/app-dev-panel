@@ -1,5 +1,6 @@
 ---
 title: Environment Collector
+description: "ADP Environment Collector records PHP version, extensions, ini settings, and server environment variables."
 ---
 
 # Environment Collector

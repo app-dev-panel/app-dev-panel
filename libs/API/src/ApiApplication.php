@@ -7,6 +7,7 @@ namespace AppDevPanel\Api;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Middleware\CacheControlMiddleware;
 use AppDevPanel\Api\Middleware\CorsMiddleware;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\Middleware\MiddlewarePipeline;
@@ -123,6 +124,9 @@ final class ApiApplication implements RequestHandlerInterface
         if (!$isMcp && $this->container->has(ResponseDataWrapper::class)) {
             $middlewares[] = $this->container->get(ResponseDataWrapper::class);
         }
+
+        // Cache-Control headers
+        $middlewares[] = new CacheControlMiddleware();
 
         // Inspector proxy (only for /inspect/api)
         if ($isInspector && $this->container->has(InspectorProxyMiddleware::class)) {

@@ -35,10 +35,62 @@ import Drawer from '@mui/material/Drawer';
 import {styled, useTheme as useMuiTheme} from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useReducer} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
 import {Outlet, useLocation, useNavigate, useSearchParams} from 'react-router';
+
+// ---------------------------------------------------------------------------
+// UI state reducer
+// ---------------------------------------------------------------------------
+
+type UIState = {
+    mobileMenuOpen: boolean;
+    notificationAnchor: HTMLElement | null;
+    entrySelectorAnchor: HTMLElement | null;
+    paletteOpen: boolean;
+};
+
+type UIAction =
+    | {type: 'OPEN_MOBILE_MENU'}
+    | {type: 'CLOSE_MOBILE_MENU'}
+    | {type: 'TOGGLE_NOTIFICATIONS'; anchor: HTMLElement | null}
+    | {type: 'CLOSE_NOTIFICATIONS'}
+    | {type: 'TOGGLE_ENTRY_SELECTOR'; anchor: HTMLElement | null}
+    | {type: 'CLOSE_ENTRY_SELECTOR'}
+    | {type: 'TOGGLE_PALETTE'}
+    | {type: 'OPEN_PALETTE'}
+    | {type: 'CLOSE_PALETTE'};
+
+const initialUIState: UIState = {
+    mobileMenuOpen: false,
+    notificationAnchor: null,
+    entrySelectorAnchor: null,
+    paletteOpen: false,
+};
+
+function uiReducer(state: UIState, action: UIAction): UIState {
+    switch (action.type) {
+        case 'OPEN_MOBILE_MENU':
+            return {...state, mobileMenuOpen: true};
+        case 'CLOSE_MOBILE_MENU':
+            return {...state, mobileMenuOpen: false};
+        case 'TOGGLE_NOTIFICATIONS':
+            return {...state, notificationAnchor: state.notificationAnchor ? null : action.anchor};
+        case 'CLOSE_NOTIFICATIONS':
+            return {...state, notificationAnchor: null};
+        case 'TOGGLE_ENTRY_SELECTOR':
+            return {...state, entrySelectorAnchor: state.entrySelectorAnchor ? null : action.anchor};
+        case 'CLOSE_ENTRY_SELECTOR':
+            return {...state, entrySelectorAnchor: null};
+        case 'TOGGLE_PALETTE':
+            return {...state, paletteOpen: !state.paletteOpen};
+        case 'OPEN_PALETTE':
+            return {...state, paletteOpen: true};
+        case 'CLOSE_PALETTE':
+            return {...state, paletteOpen: false};
+    }
+}
 
 // ---------------------------------------------------------------------------
 // Collectors hidden from sidebar (shown in overview instead)
@@ -113,9 +165,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const [searchParams] = useSearchParams();
     const muiTheme = useMuiTheme();
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const handleMenuClick = useCallback(() => setMobileMenuOpen(true), []);
-    const handleMenuClose = useCallback(() => setMobileMenuOpen(false), []);
+    const [ui, dispatchUI] = useReducer(uiReducer, initialUIState);
+    const handleMenuClick = useCallback(() => dispatchUI({type: 'OPEN_MOBILE_MENU'}), []);
+    const handleMenuClose = useCallback(() => dispatchUI({type: 'CLOSE_MOBILE_MENU'}), []);
 
     // Debug entry state
     const debugEntry = useDebugEntry();
@@ -133,11 +185,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const [updateMcpSettings] = useUpdateMcpSettingsMutation();
 
     // Notification center popover
-    const [notificationAnchor, setNotificationAnchor] = useState<HTMLElement | null>(null);
     const handleNotificationsClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
-        setNotificationAnchor((prev) => (prev ? null : e.currentTarget));
+        dispatchUI({type: 'TOGGLE_NOTIFICATIONS', anchor: e.currentTarget});
     }, []);
-    const handleNotificationsClose = useCallback(() => setNotificationAnchor(null), []);
+    const handleNotificationsClose = useCallback(() => dispatchUI({type: 'CLOSE_NOTIFICATIONS'}), []);
 
     // Fetch debug entries on mount and when backend URL changes
     useEffect(() => {
@@ -199,10 +250,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     }, [getDebugQuery]);
 
     // Entry selector popover
-    const [entrySelectorAnchor, setEntrySelectorAnchor] = useState<HTMLElement | null>(null);
     const handleEntryClick = useCallback((e?: React.MouseEvent) => {
         const target = (e?.currentTarget as HTMLElement) ?? null;
-        setEntrySelectorAnchor((prev) => (prev ? null : target));
+        dispatchUI({type: 'TOGGLE_ENTRY_SELECTOR', anchor: target});
     }, []);
 
     // Theme toggle
@@ -212,18 +262,17 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     }, [dispatch, currentMode]);
 
     // Command palette
-    const [paletteOpen, setPaletteOpen] = useState(false);
-    const handleSearchClick = useCallback(() => setPaletteOpen(true), []);
+    const handleSearchClick = useCallback(() => dispatchUI({type: 'OPEN_PALETTE'}), []);
     const handleLogoClick = useCallback(() => navigate('/'), [navigate]);
-    const handlePaletteClose = useCallback(() => setPaletteOpen(false), []);
-    const handleEntrySelectorClose = useCallback(() => setEntrySelectorAnchor(null), []);
+    const handlePaletteClose = useCallback(() => dispatchUI({type: 'CLOSE_PALETTE'}), []);
+    const handleEntrySelectorClose = useCallback(() => dispatchUI({type: 'CLOSE_ENTRY_SELECTOR'}), []);
     const handleAllEntriesClick = useCallback(() => navigate('/debug/list'), [navigate]);
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
                 e.preventDefault();
-                setPaletteOpen((prev) => !prev);
+                dispatchUI({type: 'TOGGLE_PALETTE'});
             }
         };
         document.addEventListener('keydown', handler);
@@ -450,8 +499,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onLogoClick={handleLogoClick}
                 />
                 <EntrySelector
-                    anchorEl={entrySelectorAnchor}
-                    open={Boolean(entrySelectorAnchor)}
+                    anchorEl={ui.entrySelectorAnchor}
+                    open={Boolean(ui.entrySelectorAnchor)}
                     onClose={handleEntrySelectorClose}
                     entries={entries}
                     currentEntryId={debugEntry?.id}
@@ -459,14 +508,14 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onAllClick={handleAllEntriesClick}
                 />
                 <NotificationCenter
-                    anchorEl={notificationAnchor}
-                    open={Boolean(notificationAnchor)}
+                    anchorEl={ui.notificationAnchor}
+                    open={Boolean(ui.notificationAnchor)}
                     onClose={handleNotificationsClose}
                 />
 
                 {isMobile && (
                     <Drawer
-                        open={mobileMenuOpen}
+                        open={ui.mobileMenuOpen}
                         onClose={handleMenuClose}
                         ModalProps={{keepMounted: true}}
                         sx={{'& .MuiDrawer-paper': {width: 240, pt: 1}}}
@@ -501,7 +550,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             </Box>
             {children}
             <ScrollTopButton bottomOffset={!!children} />
-            <CommandPalette open={paletteOpen} onClose={handlePaletteClose} extraItems={paletteCollectorItems} />
+            <CommandPalette open={ui.paletteOpen} onClose={handlePaletteClose} extraItems={paletteCollectorItems} />
         </>
     );
 });

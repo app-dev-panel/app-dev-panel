@@ -3,6 +3,7 @@ title: Представляем ADP — Универсальная панель 
 date: 2026-03-15
 author: ADP Team
 tags: [announcement, release]
+description: "Знакомьтесь с ADP -- фреймворк-независимой панелью отладки PHP для Yii, Symfony, Laravel и других фреймворков."
 ---
 
 <script setup>

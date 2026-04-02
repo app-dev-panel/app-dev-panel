@@ -1,5 +1,6 @@
 ---
 title: Middleware Collector
+description: "ADP Middleware Collector tracks PSR-15 middleware pipeline execution with timing and order details."
 ---
 
 # Middleware Collector

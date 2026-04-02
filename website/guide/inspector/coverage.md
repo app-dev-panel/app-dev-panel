@@ -1,5 +1,6 @@
 ---
 title: Code Coverage
+description: "ADP Code Coverage inspector runs PCOV/Xdebug coverage and displays per-file line coverage results."
 ---
 
 # Code Coverage

@@ -1,3 +1,7 @@
+---
+description: "Install and configure ADP for Yii 2.0.50+. Bootstrap integration, collector wiring, and debug module setup."
+---
+
 # Yii 2 Adapter
 
 The Yii 2 adapter bridges ADP Kernel and API into Yii 2.0.50+ via the bootstrap mechanism.

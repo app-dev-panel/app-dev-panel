@@ -21,9 +21,7 @@ export default defineConfig(() => ({
         },
     },
     plugins: [
-        react({
-            jsxImportSource: '@welldone-software/why-did-you-render',
-        }),
+        react(),
         VitePWA({
             // injectRegister: 'script',
             strategies: 'injectManifest',

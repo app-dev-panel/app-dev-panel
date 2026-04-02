@@ -1,5 +1,6 @@
 ---
 title: CLI-команды
+description: "CLI-команды ADP для управления системой отладки: serve, reset, broadcast, query и MCP-сервер."
 ---
 
 # CLI-команды

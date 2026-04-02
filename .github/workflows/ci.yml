@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, master]
 
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -122,15 +126,23 @@ jobs:
 
       - name: Run format check
         if: matrix.check == 'format'
-        run: mago fmt --check
+        run: mago fmt --check 2>&1 | tee /tmp/mago-format.txt
 
       - name: Run linter
         if: matrix.check == 'lint'
-        run: mago lint --reporting-format=github
+        run: mago lint --reporting-format=github 2>&1 | tee /tmp/mago-lint.txt
 
       - name: Run analyzer
         if: matrix.check == 'analyze'
-        run: mago analyze --reporting-format=github
+        run: mago analyze --reporting-format=github 2>&1 | tee /tmp/mago-analyze.txt
+
+      - name: Upload Mago output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mago-${{ matrix.check }}
+          path: /tmp/mago-${{ matrix.check }}.txt
+          retention-days: 1
 
   # ---------------------------------------------------------------------------
   # Mago — Playgrounds (format, lint, analyze for each playground)

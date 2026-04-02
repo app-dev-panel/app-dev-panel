@@ -1,5 +1,6 @@
 ---
 title: Translator
+description: "ADP automatically intercepts translation calls and records every lookup, including missing translations."
 ---
 
 # Translator
