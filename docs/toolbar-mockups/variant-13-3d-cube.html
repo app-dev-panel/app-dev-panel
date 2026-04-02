@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbar Variant 13 — 3D Debug Cube</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0A1A;
+    --text: #E2E8F0;
+    --text-dim: #64748B;
+    --primary: #818CF8;
+    --primary-glow: rgba(129,140,248,0.3);
+    --success: #34D399;
+    --warning: #FBBF24;
+    --error: #FB7185;
+    --face-bg: rgba(15, 23, 42, 0.85);
+    --face-border: rgba(129,140,248,0.2);
+    --font-ui: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .description {
+    position: fixed; top: 20px; left: 20px; max-width: 380px; z-index: 10;
+  }
+  .description h1 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .description h2 { font-size: 14px; color: var(--text-dim); margin-bottom: 12px; }
+  .description p { font-size: 13px; color: var(--text-dim); line-height: 1.5; margin-bottom: 6px; }
+  .tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: rgba(129,140,248,0.15); color: var(--primary); margin-right: 4px; }
+
+  /* Controls */
+  .controls {
+    position: fixed; bottom: 20px; left: 20px; z-index: 10;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .ctrl-btn {
+    padding: 6px 14px; border-radius: 8px;
+    border: 1px solid var(--face-border); background: var(--face-bg);
+    color: var(--text); font-family: var(--font-ui); font-size: 12px;
+    cursor: pointer; backdrop-filter: blur(8px);
+    transition: all 0.15s;
+  }
+  .ctrl-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .ctrl-btn.active { background: rgba(129,140,248,0.15); border-color: var(--primary); color: var(--primary); }
+
+  /* Background grid */
+  .grid-bg {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(129,140,248,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(129,140,248,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    perspective: 800px;
+  }
+
+  /* ===== 3D CUBE ===== */
+  .scene {
+    position: fixed;
+    top: 50%; left: 55%;
+    transform: translate(-50%, -50%);
+    perspective: 900px;
+    z-index: 5;
+  }
+
+  .cube {
+    width: 280px; height: 280px;
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(-20deg) rotateY(30deg);
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .cube.spinning {
+    animation: spin 20s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotateX(-20deg) rotateY(0deg); }
+    100% { transform: rotateX(-20deg) rotateY(360deg); }
+  }
+
+  .face {
+    position: absolute;
+    width: 280px; height: 280px;
+    background: var(--face-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--face-border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 30px rgba(129,140,248,0.05);
+    backface-visibility: visible;
+    overflow: hidden;
+  }
+
+  .face-front  { transform: translateZ(140px); }
+  .face-back   { transform: rotateY(180deg) translateZ(140px); }
+  .face-right  { transform: rotateY(90deg) translateZ(140px); }
+  .face-left   { transform: rotateY(-90deg) translateZ(140px); }
+  .face-top    { transform: rotateX(90deg) translateZ(140px); }
+  .face-bottom { transform: rotateX(-90deg) translateZ(140px); }
+
+  .face-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--primary); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .face-title .icon { font-size: 16px; }
+
+  /* Face: Request (front) */
+  .req-method { font-family: var(--font-mono); font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+  .req-status { font-family: var(--font-mono); font-size: 18px; color: var(--success); font-weight: 600; }
+  .req-path { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); margin-top: 8px; word-break: break-all; }
+  .req-time { font-family: var(--font-mono); font-size: 40px; font-weight: 700; margin-top: auto; }
+  .req-time .unit { font-size: 16px; color: var(--text-dim); }
+
+  /* Face: DB Queries (right) */
+  .db-big { font-family: var(--font-mono); font-size: 64px; font-weight: 700; color: var(--warning); }
+  .db-label { font-size: 14px; color: var(--text-dim); margin-bottom: 12px; }
+  .db-list { flex: 1; overflow: hidden; }
+  .db-item {
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+    padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .db-item .db-time { color: var(--warning); margin-right: 6px; }
+
+  /* Face: Logs (back) */
+  .log-entry {
+    font-family: var(--font-mono); font-size: 11px;
+    padding: 3px 0; display: flex; gap: 6px;
+  }
+  .log-level { font-weight: 600; width: 40px; flex-shrink: 0; }
+  .log-level.info { color: var(--primary); }
+  .log-level.debug { color: var(--text-dim); }
+  .log-level.warn { color: var(--warning); }
+  .log-msg { color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Face: Events (left) */
+  .event-count { font-family: var(--font-mono); font-size: 64px; font-weight: 700; color: var(--primary); }
+  .event-list { flex: 1; overflow: hidden; }
+  .event-item {
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+    padding: 2px 0; display: flex; justify-content: space-between;
+  }
+  .event-listeners { color: var(--text-dim); font-size: 10px; }
+
+  /* Face: Memory (top) */
+  .mem-big { font-family: var(--font-mono); font-size: 48px; font-weight: 700; }
+  .mem-bar-bg {
+    width: 100%; height: 8px; background: rgba(255,255,255,0.05);
+    border-radius: 4px; margin: 12px 0; overflow: hidden;
+  }
+  .mem-bar { height: 100%; background: var(--success); border-radius: 4px; transition: width 0.5s; }
+  .mem-detail { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+
+  /* Face: HTTP (bottom) */
+  .http-item {
+    font-family: var(--font-mono); font-size: 11px;
+    padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex; gap: 6px; align-items: center;
+  }
+  .http-method { color: var(--primary); font-weight: 600; width: 35px; }
+  .http-url { color: var(--text-dim); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .http-status { color: var(--success); font-weight: 600; }
+  .http-time { color: var(--text-dim); }
+
+  /* Face navigation dots */
+  .face-nav {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 10;
+  }
+  .face-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(129,140,248,0.2); cursor: pointer;
+    border: 1px solid var(--face-border);
+    transition: all 0.2s;
+  }
+  .face-dot:hover { background: rgba(129,140,248,0.4); }
+  .face-dot.active { background: var(--primary); box-shadow: 0 0 8px var(--primary-glow); }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<div class="description">
+  <h1>Variant 13 — 3D Debug Cube</h1>
+  <h2>Rotate between debug facets in 3D space</h2>
+  <div>
+    <span class="tag">EXPERIMENTAL</span>
+    <span class="tag">3D CSS</span>
+    <span class="tag">SPATIAL</span>
+  </div>
+  <br>
+  <p>Each face of the cube shows a different debug facet: Request, DB Queries, Logs, Events, Memory, HTTP. Click navigation dots or use arrow keys to rotate.</p>
+  <p><strong>Keys:</strong> ← → rotate Y, ↑ ↓ rotate X, Space = auto-spin</p>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn" id="spinBtn" onclick="toggleSpin()">⟳ Auto-Spin</button>
+</div>
+
+<div class="scene">
+  <div class="cube" id="cube">
+    <!-- FRONT: Request Overview -->
+    <div class="face face-front">
+      <div class="face-title"><span class="icon">🌐</span> Request</div>
+      <div class="req-method">GET</div>
+      <div class="req-status">200 OK</div>
+      <div class="req-path">/api/users?page=1&limit=20</div>
+      <div class="req-time">45<span class="unit">ms</span></div>
+    </div>
+
+    <!-- RIGHT: DB Queries -->
+    <div class="face face-right">
+      <div class="face-title"><span class="icon">🗄</span> Database</div>
+      <div class="db-big">12</div>
+      <div class="db-label">queries in 8.4ms</div>
+      <div class="db-list">
+        <div class="db-item"><span class="db-time">1.2ms</span>SELECT * FROM users LIMIT 20</div>
+        <div class="db-item"><span class="db-time">0.8ms</span>SELECT * FROM roles WHERE…</div>
+        <div class="db-item"><span class="db-time">2.1ms</span>SELECT COUNT(*) FROM users</div>
+        <div class="db-item"><span class="db-time">0.5ms</span>SELECT * FROM permissions…</div>
+        <div class="db-item"><span class="db-time">0.3ms</span>SELECT * FROM settings…</div>
+      </div>
+    </div>
+
+    <!-- BACK: Logs -->
+    <div class="face face-back">
+      <div class="face-title"><span class="icon">📋</span> Logs (7)</div>
+      <div class="log-entry"><span class="log-level info">INFO</span><span class="log-msg">Request started</span></div>
+      <div class="log-entry"><span class="log-level debug">DBG</span><span class="log-msg">Route matched: api.users.index</span></div>
+      <div class="log-entry"><span class="log-level debug">DBG</span><span class="log-msg">Controller resolved</span></div>
+      <div class="log-entry"><span class="log-level info">INFO</span><span class="log-msg">Querying users…</span></div>
+      <div class="log-entry"><span class="log-level debug">DBG</span><span class="log-msg">Cache miss: users_page_1</span></div>
+      <div class="log-entry"><span class="log-level info">INFO</span><span class="log-msg">Found 20 users</span></div>
+      <div class="log-entry"><span class="log-level info">INFO</span><span class="log-msg">Response sent: 200</span></div>
+    </div>
+
+    <!-- LEFT: Events -->
+    <div class="face face-left">
+      <div class="face-title"><span class="icon">⚡</span> Events</div>
+      <div class="event-count">15</div>
+      <div class="event-list">
+        <div class="event-item"><span>kernel.request</span><span class="event-listeners">2 listeners</span></div>
+        <div class="event-item"><span>security.auth</span><span class="event-listeners">1 listener</span></div>
+        <div class="event-item"><span>controller.exec</span><span class="event-listeners">3 listeners</span></div>
+        <div class="event-item"><span>doctrine.query</span><span class="event-listeners">12 calls</span></div>
+        <div class="event-item"><span>kernel.response</span><span class="event-listeners">4 listeners</span></div>
+      </div>
+    </div>
+
+    <!-- TOP: Memory -->
+    <div class="face face-top">
+      <div class="face-title"><span class="icon">💾</span> Memory</div>
+      <div class="mem-big">2.4<span class="unit" style="font-size:20px;color:var(--text-dim)">MB</span></div>
+      <div class="mem-bar-bg"><div class="mem-bar" style="width:24%"></div></div>
+      <div class="mem-detail">Peak: 2.4 MB / Limit: 128 MB</div>
+      <div class="mem-detail" style="margin-top:8px">Usage: 1.9%</div>
+      <div style="margin-top:auto">
+        <div class="mem-detail">Allocated: 4.0 MB</div>
+        <div class="mem-detail">Real: 6.0 MB</div>
+      </div>
+    </div>
+
+    <!-- BOTTOM: HTTP Client -->
+    <div class="face face-bottom">
+      <div class="face-title"><span class="icon">📡</span> HTTP Client (3)</div>
+      <div class="http-item">
+        <span class="http-method">GET</span>
+        <span class="http-url">api.external.com/v2/users</span>
+        <span class="http-status">200</span>
+        <span class="http-time">32ms</span>
+      </div>
+      <div class="http-item">
+        <span class="http-method">POST</span>
+        <span class="http-url">analytics.io/track</span>
+        <span class="http-status">204</span>
+        <span class="http-time">45ms</span>
+      </div>
+      <div class="http-item">
+        <span class="http-method">GET</span>
+        <span class="http-url">cdn.assets.com/config.json</span>
+        <span class="http-status">200</span>
+        <span class="http-time">12ms</span>
+      </div>
+      <div style="margin-top:auto; font-family:var(--font-mono); font-size:12px; color:var(--text-dim)">
+        Total: 89ms across 3 requests
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation dots -->
+<div class="face-nav">
+  <div class="face-dot active" onclick="rotateTo(0)" title="Request"></div>
+  <div class="face-dot" onclick="rotateTo(1)" title="Database"></div>
+  <div class="face-dot" onclick="rotateTo(2)" title="Logs"></div>
+  <div class="face-dot" onclick="rotateTo(3)" title="Events"></div>
+  <div class="face-dot" onclick="rotateTo(4)" title="Memory"></div>
+  <div class="face-dot" onclick="rotateTo(5)" title="HTTP"></div>
+</div>
+
+<script>
+  const cube = document.getElementById('cube');
+  let rotX = -20, rotY = 30;
+  let spinning = false;
+  let currentFace = 0;
+
+  const faceAngles = [
+    { x: -20, y: 0 },    // front (request)
+    { x: -20, y: -90 },  // right (db)
+    { x: -20, y: -180 }, // back (logs)
+    { x: -20, y: -270 }, // left (events) — same as +90
+    { x: -110, y: 0 },   // top (memory)
+    { x: 70, y: 0 },     // bottom (http)
+  ];
+
+  function rotateTo(face) {
+    if (spinning) toggleSpin();
+    currentFace = face;
+    rotX = faceAngles[face].x;
+    rotY = faceAngles[face].y;
+    cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    document.querySelectorAll('.face-dot').forEach((d, i) => d.classList.toggle('active', i === face));
+  }
+
+  function toggleSpin() {
+    spinning = !spinning;
+    cube.classList.toggle('spinning', spinning);
+    document.getElementById('spinBtn').classList.toggle('active', spinning);
+    if (!spinning) {
+      cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    }
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (spinning) toggleSpin();
+    if (e.key === 'ArrowRight') { rotY -= 90; cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`; }
+    if (e.key === 'ArrowLeft') { rotY += 90; cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`; }
+    if (e.key === 'ArrowUp') { rotX -= 90; cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`; }
+    if (e.key === 'ArrowDown') { rotX += 90; cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`; }
+    if (e.key === ' ') { e.preventDefault(); toggleSpin(); }
+  });
+
+  // Drag to rotate
+  let dragging = false, startX, startY;
+  cube.addEventListener('mousedown', e => { dragging = true; startX = e.clientX; startY = e.clientY; if (spinning) toggleSpin(); });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    rotY += (e.clientX - startX) * 0.5;
+    rotX -= (e.clientY - startY) * 0.5;
+    startX = e.clientX; startY = e.clientY;
+    cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+  });
+  document.addEventListener('mouseup', () => { dragging = false; });
+</script>
+</body>
+</html>

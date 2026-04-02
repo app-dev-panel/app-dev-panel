@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbar Variant 15 — Ambient Glow Border</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-ui: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-ui);
+    background: #F8FAFC;
+    color: #1E293B;
+    min-height: 100vh;
+  }
+
+  .description {
+    max-width: 700px; margin: 40px auto; padding: 0 24px;
+  }
+  .description h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  .description h2 { font-size: 16px; color: #64748B; margin-bottom: 16px; }
+  .description p { font-size: 14px; color: #64748B; line-height: 1.6; margin-bottom: 8px; }
+  .description ul { font-size: 14px; color: #64748B; line-height: 1.8; padding-left: 20px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #EFF6FF; color: #2563EB; margin-right: 6px; }
+
+  /* Controls */
+  .sim-controls {
+    max-width: 700px; margin: 20px auto; padding: 0 24px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .sim-btn {
+    padding: 8px 14px; border-radius: 8px;
+    border: 1px solid #E2E8F0; background: white;
+    color: #334155; font-family: var(--font-ui); font-size: 13px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .sim-btn:hover { border-color: #2563EB; color: #2563EB; }
+  .sim-btn.active { background: #2563EB; color: white; border-color: #2563EB; }
+
+  /* ===== AMBIENT GLOW BORDER ===== */
+  /* Thin glow strip around the entire viewport edge */
+  .glow-top, .glow-bottom, .glow-left, .glow-right {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    transition: opacity 0.5s, background 1s;
+  }
+  .glow-top {
+    top: 0; left: 0; right: 0; height: 3px;
+  }
+  .glow-bottom {
+    bottom: 0; left: 0; right: 0; height: 3px;
+  }
+  .glow-left {
+    top: 0; bottom: 0; left: 0; width: 3px;
+  }
+  .glow-right {
+    top: 0; bottom: 0; right: 0; width: 3px;
+  }
+
+  /* Glow shadow behind the strips */
+  .glow-top { box-shadow: 0 0 20px 6px var(--glow-color, transparent); }
+  .glow-bottom { box-shadow: 0 0 20px 6px var(--glow-color, transparent); }
+  .glow-left { box-shadow: 0 0 20px 6px var(--glow-color, transparent); }
+  .glow-right { box-shadow: 0 0 20px 6px var(--glow-color, transparent); }
+
+  /* State classes */
+  .glow-ok { --glow-color: #22C55E; background: #22C55E; }
+  .glow-slow { --glow-color: #F59E0B; background: #F59E0B; }
+  .glow-error { --glow-color: #EF4444; background: #EF4444; }
+  .glow-loading {
+    --glow-color: #3B82F6;
+    background: linear-gradient(90deg, transparent 0%, #3B82F6 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: glowSlide 1.5s ease infinite;
+  }
+  @keyframes glowSlide {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .glow-left.glow-loading, .glow-right.glow-loading {
+    background: linear-gradient(180deg, transparent 0%, #3B82F6 50%, transparent 100%);
+    background-size: 100% 200%;
+    animation: glowSlideV 1.5s ease infinite;
+  }
+  @keyframes glowSlideV {
+    0% { background-position: 0 200%; }
+    100% { background-position: 0 -200%; }
+  }
+  .glow-hidden { opacity: 0; }
+
+  /* Pulse animation for errors */
+  .glow-error {
+    animation: glowPulse 1s ease infinite;
+  }
+  @keyframes glowPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ===== CORNER BADGE ===== */
+  .corner-badge {
+    position: fixed;
+    bottom: 12px;
+    right: 12px;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 12px;
+    font-family: var(--font-mono);
+  }
+  .corner-badge:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+  .corner-badge .duck { font-size: 18px; }
+  .corner-badge .badge-status { font-weight: 600; }
+  .corner-badge .badge-status.ok { color: #22C55E; }
+  .corner-badge .badge-status.slow { color: #F59E0B; }
+  .corner-badge .badge-status.error { color: #EF4444; }
+  .corner-badge .badge-time { color: #64748B; }
+  .corner-badge .badge-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    transition: background 0.3s;
+  }
+  .corner-badge .badge-dot.ok { background: #22C55E; }
+  .corner-badge .badge-dot.slow { background: #F59E0B; }
+  .corner-badge .badge-dot.error { background: #EF4444; }
+
+  /* ===== EXPANDED DETAIL (on badge click) ===== */
+  .detail-popup {
+    position: fixed;
+    bottom: 60px; right: 12px;
+    width: 320px;
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    padding: 16px;
+    z-index: 10000;
+    transform: translateY(10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+  .detail-popup.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .detail-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .detail-row {
+    display: flex; justify-content: space-between; padding: 5px 0;
+    font-size: 13px; border-bottom: 1px solid #F1F5F9;
+  }
+  .detail-label { color: #64748B; }
+  .detail-value { font-family: var(--font-mono); font-weight: 500; }
+  .detail-value.ok { color: #22C55E; }
+  .detail-value.warn { color: #F59E0B; }
+  .detail-value.err { color: #EF4444; }
+
+  /* Page content placeholder */
+  .page-content {
+    max-width: 700px; margin: 30px auto; padding: 0 24px;
+  }
+  .fake-card {
+    background: white; border-radius: 12px;
+    padding: 20px; margin-bottom: 16px;
+    border: 1px solid #E2E8F0;
+  }
+  .fake-card h3 { font-size: 16px; margin-bottom: 8px; }
+  .fake-card p { font-size: 14px; color: #64748B; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- Glow borders -->
+<div class="glow-top glow-ok" id="glowTop"></div>
+<div class="glow-bottom glow-ok" id="glowBottom"></div>
+<div class="glow-left glow-ok" id="glowLeft"></div>
+<div class="glow-right glow-ok" id="glowRight"></div>
+
+<div class="description">
+  <h1>Variant 15 — Ambient Glow Border</h1>
+  <h2>Page edge color reflects application health</h2>
+  <div>
+    <span class="tag">EXPERIMENTAL</span>
+    <span class="tag">AMBIENT</span>
+    <span class="tag">ZERO UI</span>
+  </div>
+  <br>
+  <p>
+    The most minimal possible toolbar: a thin 3px colored border around the entire viewport.
+    Green = healthy, yellow = slow, red = error, blue = loading. No buttons, no text — just color.
+    A tiny corner badge shows details on hover.
+  </p>
+  <ul>
+    <li>3px glow strip on all 4 edges — adapts color to request health</li>
+    <li>Green glow = fast, healthy response</li>
+    <li>Yellow glow = slow response (>200ms) or warnings</li>
+    <li>Red glow = exception or 5xx (pulses!)</li>
+    <li>Blue sliding animation = loading/in-progress</li>
+    <li>Tiny corner badge with duck + status code + time</li>
+    <li>Click badge for detail popup</li>
+    <li>Absolute minimum visual intrusion</li>
+  </ul>
+  <br>
+  <p><strong>Interaction:</strong> Click the simulation buttons below to change the glow state. Click the corner badge for details.</p>
+</div>
+
+<div class="sim-controls">
+  <button class="sim-btn active" onclick="setGlow('ok', this)">✅ Healthy (200, 45ms)</button>
+  <button class="sim-btn" onclick="setGlow('slow', this)">🐌 Slow (200, 1.2s)</button>
+  <button class="sim-btn" onclick="setGlow('error', this)">💥 Error (500)</button>
+  <button class="sim-btn" onclick="setGlow('loading', this)">⏳ Loading...</button>
+  <button class="sim-btn" onclick="setGlow('hidden', this)">👻 Hidden</button>
+</div>
+
+<div class="page-content">
+  <div class="fake-card">
+    <h3>Your Application</h3>
+    <p>This is your normal page content. Notice how the ambient glow border communicates request health without any intrusive UI elements. The color is visible in peripheral vision while you focus on your application.</p>
+  </div>
+  <div class="fake-card">
+    <h3>Dashboard Widget</h3>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+  </div>
+</div>
+
+<!-- Corner badge -->
+<div class="corner-badge" onclick="toggleDetail()">
+  <span class="duck">🦆</span>
+  <span class="badge-dot ok" id="badgeDot"></span>
+  <span class="badge-status ok" id="badgeStatus">200</span>
+  <span class="badge-time" id="badgeTime">45ms</span>
+</div>
+
+<!-- Detail popup -->
+<div class="detail-popup" id="detailPopup">
+  <div class="detail-title">🦆 Debug Info</div>
+  <div class="detail-row"><span class="detail-label">Request</span><span class="detail-value">GET /api/users</span></div>
+  <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value ok" id="detStatus">200 OK</span></div>
+  <div class="detail-row"><span class="detail-label">Time</span><span class="detail-value" id="detTime">45ms</span></div>
+  <div class="detail-row"><span class="detail-label">Memory</span><span class="detail-value">2.4 MB</span></div>
+  <div class="detail-row"><span class="detail-label">DB Queries</span><span class="detail-value">12</span></div>
+  <div class="detail-row"><span class="detail-label">HTTP Out</span><span class="detail-value">3</span></div>
+  <div class="detail-row"><span class="detail-label">Deprecations</span><span class="detail-value warn" id="detDepr">2</span></div>
+</div>
+
+<script>
+  const glowEls = ['glowTop', 'glowBottom', 'glowLeft', 'glowRight'].map(id => document.getElementById(id));
+  const states = ['glow-ok', 'glow-slow', 'glow-error', 'glow-loading', 'glow-hidden'];
+
+  function setGlow(state, btn) {
+    // Update buttons
+    document.querySelectorAll('.sim-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    // Update glow
+    glowEls.forEach(el => {
+      states.forEach(s => el.classList.remove(s));
+      el.classList.add('glow-' + state);
+    });
+
+    // Update badge
+    const dot = document.getElementById('badgeDot');
+    const status = document.getElementById('badgeStatus');
+    const time = document.getElementById('badgeTime');
+    const detStatus = document.getElementById('detStatus');
+    const detTime = document.getElementById('detTime');
+
+    dot.className = 'badge-dot';
+    status.className = 'badge-status';
+
+    if (state === 'ok') {
+      dot.classList.add('ok'); status.classList.add('ok');
+      status.textContent = '200'; time.textContent = '45ms';
+      detStatus.textContent = '200 OK'; detStatus.className = 'detail-value ok';
+      detTime.textContent = '45ms';
+    } else if (state === 'slow') {
+      dot.classList.add('slow'); status.classList.add('slow');
+      status.textContent = '200'; time.textContent = '1.2s';
+      detStatus.textContent = '200 OK (SLOW)'; detStatus.className = 'detail-value warn';
+      detTime.textContent = '1,241ms';
+    } else if (state === 'error') {
+      dot.classList.add('error'); status.classList.add('error');
+      status.textContent = '500'; time.textContent = '89ms';
+      detStatus.textContent = '500 Internal Server Error'; detStatus.className = 'detail-value err';
+      detTime.textContent = '89ms';
+    } else if (state === 'loading') {
+      dot.classList.add('ok');
+      status.textContent = '...'; time.textContent = '';
+      detStatus.textContent = 'Loading...'; detStatus.className = 'detail-value';
+      detTime.textContent = '—';
+    } else {
+      status.textContent = '—'; time.textContent = '';
+    }
+  }
+
+  function toggleDetail() {
+    document.getElementById('detailPopup').classList.toggle('visible');
+  }
+
+  // Close popup on outside click
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.corner-badge') && !e.target.closest('.detail-popup')) {
+      document.getElementById('detailPopup').classList.remove('visible');
+    }
+  });
+</script>
+</body>
+</html>
