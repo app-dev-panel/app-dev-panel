@@ -99,7 +99,7 @@ app_dev_panel:
 ```php
 // config/web.php
 'modules' => [
-    'debug-panel' => [
+    'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'panelStaticUrl' => '/adp-panel',
     ],
@@ -142,7 +142,7 @@ app_dev_panel:
 == Yii 2
 ```php
 'modules' => [
-    'debug-panel' => [
+    'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'panelStaticUrl' => 'http://localhost:3000',
     ],
