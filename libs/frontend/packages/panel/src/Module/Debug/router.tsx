@@ -1,14 +1,34 @@
-import * as Pages from '@app-dev-panel/panel/Module/Debug/Pages';
 import {RouteObject} from 'react-router';
 
 export const routes = [
     {
         path: 'debug',
-        element: <Pages.Layout />,
+        lazy: async () => {
+            const {Layout} = await import('@app-dev-panel/panel/Module/Debug/Pages/Layout');
+            return {Component: Layout};
+        },
         children: [
-            {element: <Pages.IndexPage />, index: true},
-            {path: 'list', element: <Pages.ListPage />},
+            {
+                index: true,
+                lazy: async () => {
+                    const {IndexPage} = await import('@app-dev-panel/panel/Module/Debug/Pages/IndexPage');
+                    return {Component: IndexPage};
+                },
+            },
+            {
+                path: 'list',
+                lazy: async () => {
+                    const {ListPage} = await import('@app-dev-panel/panel/Module/Debug/Pages/ListPage');
+                    return {Component: ListPage};
+                },
+            },
         ],
     },
-    {path: 'debug/object', element: <Pages.ObjectPage />},
+    {
+        path: 'debug/object',
+        lazy: async () => {
+            const {ObjectPage} = await import('@app-dev-panel/panel/Module/Debug/Pages/ObjectPage');
+            return {Component: ObjectPage};
+        },
+    },
 ] satisfies RouteObject[];
