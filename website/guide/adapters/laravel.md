@@ -1,10 +1,10 @@
 ---
-description: "Install and configure ADP for Laravel 11.x/12.x. Service provider auto-discovery and collector setup."
+description: "Install and configure ADP for Laravel 11.x/12.x/13.x. Service provider auto-discovery and collector setup."
 ---
 
 # Laravel Adapter
 
-The Laravel adapter bridges ADP Kernel and API into Laravel 11.x / 12.x via a service provider with auto-discovery.
+The Laravel adapter bridges ADP Kernel and API into Laravel 11.x / 12.x / 13.x via a service provider with auto-discovery.
 
 ## Installation
 
