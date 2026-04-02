@@ -64,6 +64,11 @@
     "@types/react-dom": "^19.2.0",
     "vite-plugin-pwa": {
       "vite": "^8.0.0"
+    },
+    "@textea/json-viewer": {
+      "@mui/material": "^7.0.0",
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0"
     }
   },
   "devDependencies": {
