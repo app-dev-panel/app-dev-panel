@@ -26,9 +26,9 @@ export const RequestItem = ({data}: RequestItemProps) => {
                     onClick={handleClick}
                     sx={{
                         fontWeight: 600,
-                        fontSize: 11,
+                        fontSize: 12,
                         fontFamily: "'JetBrains Mono', monospace",
-                        height: 24,
+                        height: 32,
                         borderRadius: 1,
                     }}
                 />

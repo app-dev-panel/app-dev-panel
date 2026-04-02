@@ -14,7 +14,7 @@ export const LogsItem = ({data, iframeUrlHandler}: LogsItemProps) => {
     return (
         <Tooltip title={`${total} log entries`} arrow>
             <Chip
-                icon={<DescriptionOutlinedIcon sx={{fontSize: '14px !important'}} />}
+                icon={<DescriptionOutlinedIcon sx={{fontSize: '16px !important'}} />}
                 label={`Logs ${total}`}
                 size="small"
                 variant="outlined"
@@ -23,7 +23,7 @@ export const LogsItem = ({data, iframeUrlHandler}: LogsItemProps) => {
                     e.stopPropagation();
                     e.preventDefault();
                 }}
-                sx={{height: 24, borderRadius: 1, fontSize: 11, cursor: 'pointer'}}
+                sx={{height: 32, borderRadius: 1, fontSize: 12, cursor: 'pointer'}}
             />
         </Tooltip>
     );

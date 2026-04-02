@@ -255,7 +255,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
                     {/* Metric items */}
                     {selectedEntry && (
-                        <Stack direction="row" alignItems="center" spacing={0.25} sx={{flexWrap: 'nowrap'}}>
+                        <Stack direction="row" alignItems="center" spacing={0.5} sx={{flexWrap: 'nowrap'}}>
                             {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
                             {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
 

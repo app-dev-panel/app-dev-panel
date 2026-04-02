@@ -16,7 +16,7 @@ export const MemoryItem = ({data, iframeUrlHandler}: MemoryItemProps) => {
     return (
         <Tooltip title={`${peakUsage.toLocaleString(undefined)} bytes`} arrow>
             <Chip
-                icon={<MemoryIcon sx={{fontSize: '14px !important'}} />}
+                icon={<MemoryIcon sx={{fontSize: '16px !important'}} />}
                 label={formatBytes(peakUsage)}
                 size="small"
                 variant="outlined"
@@ -26,9 +26,9 @@ export const MemoryItem = ({data, iframeUrlHandler}: MemoryItemProps) => {
                     e.preventDefault();
                 }}
                 sx={{
-                    height: 24,
+                    height: 32,
                     borderRadius: 1,
-                    fontSize: 11,
+                    fontSize: 12,
                     fontFamily: "'JetBrains Mono', monospace",
                     cursor: 'pointer',
                 }}
