@@ -133,7 +133,25 @@ For actual git splitting, delegates to `symplify/github-action-monorepo-split` (
 
 ---
 
-### 1.6. subtreesplit.com (SaaS)
+### 1.6. claudiodekker/splitsh-action (GitHub Action + splitsh-lite)
+
+**How it works**: Thin GitHub Action wrapper that downloads the splitsh-lite binary and runs it. Gets the benefits of splitsh-lite (speed, history preservation, caching) with GitHub Actions convenience.
+
+**Pros**:
+- splitsh-lite performance + deterministic SHAs
+- Preserves full commit history in split repos
+- Native GitHub Actions integration
+
+**Cons**:
+- Requires `fetch-depth: 0` (full clone)
+- Cache management needs explicit GitHub Actions cache step
+- Binary download on each run (unless cached)
+
+**Verdict**: Best option if you want history-preserving splits with minimal setup.
+
+---
+
+### 1.7. subtreesplit.com (SaaS)
 
 **How it works**: Managed service by Tobias Nyholm. Uses splitsh-lite internally. Also has a bot that redirects PRs from split repos to the monorepo.
 
