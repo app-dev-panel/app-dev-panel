@@ -1,17 +1,21 @@
-import {useRunCommandMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {
+    type CommandType,
+    useLazyGetCommandsQuery,
+    useRunCommandMutation,
+} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {CommandErrorAlert} from '@app-dev-panel/panel/Module/Inspector/Component/Command/CommandErrorAlert';
 import {extractCommandError} from '@app-dev-panel/panel/Module/Inspector/Component/Command/extractCommandError';
+import {ResultDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Command/ResultDialog';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
-import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Check, ContentCopy, Error} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import {Box, Button, CircularProgress, IconButton, styled, Tooltip} from '@mui/material';
+import {Box, Button, CircularProgress, IconButton, styled, Tooltip, Typography} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import clipboardCopy from 'clipboard-copy';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
 const CenteredBox = styled(Box)({
     height: '100%',
@@ -59,20 +63,39 @@ const columns: GridColDef[] = [
         field: 'stacktrace',
         headerName: 'Stacktrace',
         flex: 1,
-        renderCell: (params: GridRenderCellParams) => <JsonRenderer key={params.id} value={params.value} depth={0} />,
+        renderCell: (params: GridRenderCellParams) => (
+            <span key={params.id}>{params.value ? JSON.stringify(params.value) : ''}</span>
+        ),
     },
 ];
 
 type CommandState = {isSuccessful: boolean | undefined; errors: string[]};
 export const TestsPage = ({showHeader = true}: {showHeader?: boolean}) => {
+    const [getCommandsQuery] = useLazyGetCommandsQuery();
     const [commandQuery, commandQueryInfo] = useRunCommandMutation();
+    const [availableCommands, setAvailableCommands] = useState<CommandType[]>([]);
+    const [activeCommand, setActiveCommand] = useState<CommandType | null>(null);
     const [rows, setRows] = useState<any[]>([]);
     const [commandResponse, setCommandResponse] = useState<CommandState | null>(null);
     const [commandError, setCommandError] = useState<string[] | null>(null);
+    const [showResultDialog, setShowResultDialog] = useState(false);
+    const [dialogResult, setDialogResult] = useState<{status: string; result: any; errors?: string[]} | null>(null);
 
-    async function runCodeceptionHandler() {
+    useEffect(() => {
+        void (async () => {
+            const response = await getCommandsQuery();
+            if (response.data) {
+                setAvailableCommands(response.data.filter((cmd) => cmd.group === 'test'));
+            }
+        })();
+    }, []);
+
+    const runCommand = async (command: CommandType) => {
+        setActiveCommand(command);
         setCommandError(null);
-        const data = await commandQuery('test/codeception');
+        setCommandResponse(null);
+        setRows([]);
+        const data = await commandQuery(command.name);
 
         const error = extractCommandError(data);
         if (!('data' in data) || typeof data.data !== 'object') {
@@ -80,61 +103,107 @@ export const TestsPage = ({showHeader = true}: {showHeader?: boolean}) => {
             return;
         }
 
-        let id = 0;
-        const resultRows = [];
-        for (const event of data.data.result) {
-            const testName = [event.suite]
-                .concat(event.test)
-                .filter((v) => !!v)
-                .join('::');
+        const result = data.data.result;
+        if (Array.isArray(result)) {
+            let id = 0;
+            const resultRows = [];
+            for (const event of result) {
+                const testName = [event.suite]
+                    .concat(event.test)
+                    .filter((v: any) => !!v)
+                    .join('::');
 
-            id++;
-            resultRows.push({
-                id,
-                name: testName,
-                status: event.status,
-                stacktrace: event.stacktrace,
-                path: event.file,
-                time: event.time,
-            });
+                id++;
+                resultRows.push({
+                    id,
+                    name: testName,
+                    status: event.status,
+                    stacktrace: event.stacktrace,
+                    path: event.file,
+                    time: event.time,
+                });
+            }
+            setRows(resultRows);
+            setCommandResponse({isSuccessful: data.data.status === 'ok', errors: data.data.errors});
+        } else {
+            setDialogResult({status: data.data.status, result, errors: data.data.errors});
+            setShowResultDialog(true);
+            setCommandResponse({isSuccessful: data.data.status === 'ok', errors: data.data.errors});
         }
-        setCommandResponse({isSuccessful: data.data.status === 'ok', errors: data.data.errors});
+
         if (error) {
             setCommandError(error.errors);
         }
-        setRows(resultRows);
-    }
+    };
 
     const getRowIdCallback = useCallback((row: any) => row.id, []);
+
+    if (availableCommands.length === 0) {
+        return (
+            <>
+                {showHeader && <PageHeader title="Tests" icon="science" description="Run and inspect test results" />}
+                <Typography sx={{color: 'text.secondary', mt: 2}}>
+                    No test commands available. Install a test runner (PHPUnit, Codeception, Pest) to enable this
+                    feature.
+                </Typography>
+            </>
+        );
+    }
 
     return (
         <>
             {showHeader && <PageHeader title="Tests" icon="science" description="Run and inspect test results" />}
-            <Box display="flex" alignItems="center">
-                <Button
-                    onClick={runCodeceptionHandler}
-                    color={commandResponse === null ? 'primary' : commandResponse.isSuccessful ? 'success' : 'error'}
-                    disabled={commandQueryInfo.isLoading}
-                    endIcon={commandQueryInfo.isLoading ? <CircularProgress size={24} color="info" /> : null}
-                >
-                    Run Codeception
-                </Button>
-                {!commandQueryInfo.isLoading && commandResponse && (
-                    <>
-                        {commandResponse.isSuccessful === true && <Check color="success" />}
-                        {commandResponse.isSuccessful === false && <Error color="error" />}
-                    </>
-                )}
+            <Box display="flex" alignItems="center" gap={1}>
+                {availableCommands.map((command) => (
+                    <Box key={command.name} display="flex" alignItems="center">
+                        <Button
+                            onClick={() => runCommand(command)}
+                            color={
+                                activeCommand?.name === command.name && commandResponse !== null
+                                    ? commandResponse.isSuccessful
+                                        ? 'success'
+                                        : 'error'
+                                    : 'primary'
+                            }
+                            disabled={commandQueryInfo.isLoading}
+                            endIcon={
+                                commandQueryInfo.isLoading && activeCommand?.name === command.name ? (
+                                    <CircularProgress size={24} color="info" />
+                                ) : null
+                            }
+                        >
+                            Run {command.title}
+                        </Button>
+                        {!commandQueryInfo.isLoading &&
+                            activeCommand?.name === command.name &&
+                            commandResponse !== null && (
+                                <>
+                                    {commandResponse.isSuccessful === true && <Check color="success" />}
+                                    {commandResponse.isSuccessful === false && <Error color="error" />}
+                                </>
+                            )}
+                    </Box>
+                ))}
             </Box>
             {commandError && (
                 <CommandErrorAlert
                     errors={commandError}
-                    onRetry={runCodeceptionHandler}
+                    onRetry={activeCommand ? () => runCommand(activeCommand) : undefined}
                     onDismiss={() => setCommandError(null)}
                 />
             )}
-            {commandQueryInfo.isSuccess && (
+            {rows.length > 0 && (
                 <DataTable rows={rows as GridValidRowModel[]} getRowId={getRowIdCallback} columns={columns} />
+            )}
+            {dialogResult && (
+                <ResultDialog
+                    open={showResultDialog}
+                    status={dialogResult.status as 'ok' | 'error' | 'fail'}
+                    content={dialogResult.result}
+                    errors={dialogResult.errors}
+                    onRerun={() => activeCommand && runCommand(activeCommand)}
+                    onClose={() => setShowResultDialog(false)}
+                />
             )}
         </>
     );
