@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbar Variant 17 — Floating Resizable Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #F3F4F6;
+    --bg-paper: #FFFFFF;
+    --text: #1A1A1A;
+    --text-dim: #666666;
+    --text-faint: #999999;
+    --divider: #E5E5E5;
+    --primary: #2563EB;
+    --primary-light: #EFF6FF;
+    --success: #16A34A;
+    --success-light: #DCFCE7;
+    --warning: #D97706;
+    --warning-light: #FEF3C7;
+    --error: #DC2626;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+    --font-ui: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  [data-theme="dark"] {
+    --bg-page: #0F172A;
+    --bg-paper: #1E293B;
+    --text: #F1F5F9;
+    --text-dim: #94A3B8;
+    --text-faint: #64748B;
+    --divider: #334155;
+    --primary: #60A5FA;
+    --primary-light: #1E3A5F;
+    --success: #4ADE80;
+    --success-light: #14532D;
+    --warning: #FBBF24;
+    --warning-light: #713F12;
+    --error: #F87171;
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg-page);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .description {
+    max-width: 700px; margin: 40px auto; padding: 0 24px;
+  }
+  .description h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  .description h2 { font-size: 16px; color: var(--text-dim); margin-bottom: 16px; }
+  .description p { font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 8px; }
+  .description ul { font-size: 14px; color: var(--text-dim); line-height: 1.8; padding-left: 20px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--primary-light); color: var(--primary); margin-right: 6px; }
+
+  .theme-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 9999;
+    background: var(--bg-paper); border: 1px solid var(--divider); border-radius: 20px;
+    padding: 6px 14px; cursor: pointer; font-size: 13px; color: var(--text-dim);
+    font-family: var(--font-ui);
+  }
+  .theme-toggle:hover { color: var(--text); }
+
+  /* ===== COLLAPSED PILL ===== */
+  .pill {
+    position: fixed;
+    z-index: 1300;
+    background: var(--bg-paper);
+    border: 1px solid var(--divider);
+    border-radius: 24px;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s, transform 0.2s;
+    user-select: none;
+  }
+  .pill:hover { box-shadow: var(--shadow-md); transform: scale(1.05); }
+  .pill .duck { font-size: 22px; }
+  .pill .pill-status { font-size: 12px; font-weight: 600; color: var(--success); font-family: var(--font-mono); }
+  .pill .pill-time { font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); }
+  .pill.hidden { display: none; }
+
+  /* ===== FLOATING WIDGET ===== */
+  .widget {
+    position: fixed;
+    z-index: 1300;
+    background: var(--bg-paper);
+    border: 1px solid var(--divider);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 260px;
+    min-height: 180px;
+    opacity: 0;
+    transform: scale(0.92);
+    pointer-events: none;
+    transition: opacity 0.25s cubic-bezier(0.4,0,0.2,1),
+                transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+  .widget.visible {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+  /* Снимаем transition при драге/ресайзе */
+  .widget.interacting {
+    transition: none !important;
+  }
+
+  /* ---- Drag header ---- */
+  .widget-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 8px;
+    cursor: grab;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--divider);
+    user-select: none;
+  }
+  .widget-header:active { cursor: grabbing; }
+  .widget-header .duck { font-size: 18px; }
+  .widget-header .title { font-size: 13px; font-weight: 600; flex: 1; }
+  .widget-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-faint); font-size: 14px; width: 24px; height: 24px;
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s;
+  }
+  .widget-btn:hover { background: var(--primary-light); color: var(--text); }
+
+  /* ---- Request hero ---- */
+  .widget-hero {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: var(--primary-light);
+    flex-shrink: 0;
+    font-size: 12px;
+    overflow: hidden;
+  }
+  .hero-method { font-family: var(--font-mono); font-weight: 600; }
+  .hero-status { font-family: var(--font-mono); font-weight: 600; color: var(--success); }
+  .hero-path { font-family: var(--font-mono); color: var(--text-dim); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hero-time { font-family: var(--font-mono); color: var(--text-faint); flex-shrink: 0; }
+
+  /* ---- Metrics (auto-layout) ---- */
+  .widget-metrics {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-content: flex-start;
+  }
+
+  .metric-tile {
+    flex: 1 1 100px;
+    min-width: 90px;
+    background: var(--bg-page);
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .metric-tile:hover { border-color: var(--primary); background: var(--primary-light); }
+  .metric-label {
+    font-size: 10px; font-weight: 500; color: var(--text-faint);
+    text-transform: uppercase; letter-spacing: 0.3px;
+    margin-bottom: 3px;
+  }
+  .metric-value {
+    font-family: var(--font-mono); font-size: 16px; font-weight: 700;
+  }
+  .metric-value .unit { font-size: 10px; font-weight: 500; color: var(--text-faint); }
+  .metric-value.warn { color: var(--warning); }
+  .metric-value.err { color: var(--error); }
+
+  /* Sparkline inside tile */
+  .metric-spark {
+    width: 100%; height: 20px; margin-top: 4px;
+  }
+  .spark-path { fill: none; stroke-width: 1.5; stroke: var(--primary); stroke-linecap: round; }
+  .spark-area { fill: var(--primary); opacity: 0.08; }
+
+  /* ---- Actions bar ---- */
+  .widget-actions {
+    display: flex; gap: 4px; padding: 6px 8px;
+    border-top: 1px solid var(--divider);
+    flex-shrink: 0;
+  }
+  .action-btn {
+    flex: 1; padding: 6px;
+    background: none; border: 1px solid var(--divider);
+    border-radius: 8px; color: var(--text-dim);
+    font-size: 11px; font-family: var(--font-ui); font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;
+    transition: all 0.15s;
+  }
+  .action-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+  /* ---- Resize handles ---- */
+  .resize-handle {
+    position: absolute;
+    z-index: 10;
+  }
+  .resize-handle-se {
+    bottom: 0; right: 0; width: 20px; height: 20px;
+    cursor: se-resize;
+  }
+  .resize-handle-se::after {
+    content: '';
+    position: absolute;
+    bottom: 4px; right: 4px;
+    width: 8px; height: 8px;
+    border-right: 2px solid var(--text-faint);
+    border-bottom: 2px solid var(--text-faint);
+    opacity: 0.4;
+  }
+  .resize-handle-e {
+    top: 20px; right: -3px; bottom: 20px; width: 6px;
+    cursor: e-resize;
+  }
+  .resize-handle-s {
+    bottom: -3px; left: 20px; right: 20px; height: 6px;
+    cursor: s-resize;
+  }
+  .resize-handle-w {
+    top: 20px; left: -3px; bottom: 20px; width: 6px;
+    cursor: w-resize;
+  }
+  .resize-handle-n {
+    top: -3px; left: 20px; right: 20px; height: 6px;
+    cursor: n-resize;
+  }
+
+  /* ---- Dock indicator ---- */
+  .dock-indicator {
+    position: fixed;
+    z-index: 1299;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity 0.15s;
+    pointer-events: none;
+    border-radius: 4px;
+  }
+  .dock-indicator.visible { opacity: 0.15; }
+  .dock-indicator.dock-right { top: 10%; right: 0; width: 8px; bottom: 10%; }
+  .dock-indicator.dock-left { top: 10%; left: 0; width: 8px; bottom: 10%; }
+  .dock-indicator.dock-bottom { bottom: 0; left: 10%; right: 10%; height: 8px; }
+
+  /* Size presets */
+  .size-presets {
+    display: flex; gap: 4px; padding: 0 8px 6px;
+    flex-shrink: 0;
+  }
+  .size-preset {
+    width: 20px; height: 14px;
+    border: 1px solid var(--divider);
+    border-radius: 3px;
+    cursor: pointer;
+    background: none;
+    transition: border-color 0.15s;
+    position: relative;
+  }
+  .size-preset:hover { border-color: var(--primary); }
+  .size-preset.active { border-color: var(--primary); background: var(--primary-light); }
+  /* Mini icon inside preset */
+  .size-preset::after {
+    content: '';
+    position: absolute;
+    background: var(--text-faint);
+    border-radius: 1px;
+  }
+  .size-preset.sz-sm::after { inset: 3px 5px; }
+  .size-preset.sz-md::after { inset: 2px 3px; }
+  .size-preset.sz-lg::after { inset: 1px 1px; }
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+
+<div class="description">
+  <h1>Variant 17 — Floating Resizable Widget</h1>
+  <h2>Draggable + resizable + dockable debug widget</h2>
+  <div>
+    <span class="tag">HYBRID</span>
+    <span class="tag">RESIZABLE</span>
+    <span class="tag">DRAGGABLE</span>
+    <span class="tag">DOCKABLE</span>
+  </div>
+  <br>
+  <p>Combines the best of V1 (animation), V3 (side position), V12 (compact floating). A small floating card you can drag anywhere, resize freely, and dock to screen edges. Metrics reflow automatically based on widget size.</p>
+  <ul>
+    <li>Drag by header to reposition anywhere on screen</li>
+    <li>Resize from any edge/corner (try bottom-right handle)</li>
+    <li>Metrics auto-reflow: narrow = vertical list, wide = grid</li>
+    <li>Sparkline charts inside metric tiles</li>
+    <li>Size presets: S / M / L (bottom of widget)</li>
+    <li>Smooth spring animation on open/close</li>
+    <li>Dark mode toggle</li>
+  </ul>
+  <br>
+  <p><strong>Interaction:</strong> Click pill → widget opens → drag header to move → drag edges/corner to resize → click size presets (S/M/L) → click 🦆 to collapse.</p>
+</div>
+
+<!-- Collapsed pill -->
+<div class="pill" id="pill" style="bottom:20px;right:20px;" onclick="openWidget()">
+  <span class="duck">🦆</span>
+  <span class="pill-status">200</span>
+  <span class="pill-time">45ms</span>
+</div>
+
+<!-- Dock indicators -->
+<div class="dock-indicator dock-right" id="dockRight"></div>
+<div class="dock-indicator dock-left" id="dockLeft"></div>
+<div class="dock-indicator dock-bottom" id="dockBottom"></div>
+
+<!-- Floating widget -->
+<div class="widget" id="widget" style="bottom:20px;right:20px;width:340px;height:380px;">
+  <!-- Resize handles -->
+  <div class="resize-handle resize-handle-se" data-dir="se"></div>
+  <div class="resize-handle resize-handle-e" data-dir="e"></div>
+  <div class="resize-handle resize-handle-s" data-dir="s"></div>
+  <div class="resize-handle resize-handle-w" data-dir="w"></div>
+  <div class="resize-handle resize-handle-n" data-dir="n"></div>
+
+  <!-- Header (draggable) -->
+  <div class="widget-header" id="widgetHeader">
+    <span class="duck">🦆</span>
+    <span class="title">Debug</span>
+    <button class="widget-btn" onclick="collapseWidget()" title="Collapse">▾</button>
+    <button class="widget-btn" title="New window">↗️</button>
+  </div>
+
+  <!-- Request hero -->
+  <div class="widget-hero">
+    <span class="hero-method">GET</span>
+    <span class="hero-status">200</span>
+    <span class="hero-path">/api/users</span>
+    <span class="hero-time">45ms</span>
+  </div>
+
+  <!-- Metrics grid (auto-flows) -->
+  <div class="widget-metrics" id="metricsGrid">
+    <div class="metric-tile">
+      <div class="metric-label">Response</div>
+      <div class="metric-value">45<span class="unit">ms</span></div>
+      <svg class="metric-spark" viewBox="0 0 100 20" preserveAspectRatio="none" id="spark-time"></svg>
+    </div>
+    <div class="metric-tile">
+      <div class="metric-label">Memory</div>
+      <div class="metric-value">2.4<span class="unit">MB</span></div>
+      <svg class="metric-spark" viewBox="0 0 100 20" preserveAspectRatio="none" id="spark-mem"></svg>
+    </div>
+    <div class="metric-tile">
+      <div class="metric-label">DB Queries</div>
+      <div class="metric-value">12</div>
+      <svg class="metric-spark" viewBox="0 0 100 20" preserveAspectRatio="none" id="spark-db"></svg>
+    </div>
+    <div class="metric-tile">
+      <div class="metric-label">HTTP Out</div>
+      <div class="metric-value">3</div>
+      <svg class="metric-spark" viewBox="0 0 100 20" preserveAspectRatio="none" id="spark-http"></svg>
+    </div>
+    <div class="metric-tile">
+      <div class="metric-label">Logs</div>
+      <div class="metric-value">7</div>
+    </div>
+    <div class="metric-tile">
+      <div class="metric-label">Events</div>
+      <div class="metric-value">15</div>
+    </div>
+    <div class="metric-tile">
+      <div class="metric-label">Deprec</div>
+      <div class="metric-value warn">2</div>
+    </div>
+  </div>
+
+  <!-- Size presets -->
+  <div class="size-presets">
+    <button class="size-preset sz-sm" onclick="setSize(260,240)" title="Small"></button>
+    <button class="size-preset sz-md active" onclick="setSize(340,380)" title="Medium"></button>
+    <button class="size-preset sz-lg" onclick="setSize(480,440)" title="Large"></button>
+  </div>
+
+  <!-- Actions -->
+  <div class="widget-actions">
+    <button class="action-btn">📐 Panel</button>
+    <button class="action-btn">📋 History</button>
+    <button class="action-btn">🤖 AI Chat</button>
+  </div>
+</div>
+
+<script>
+  const widget = document.getElementById('widget');
+  const header = document.getElementById('widgetHeader');
+  const pill = document.getElementById('pill');
+
+  // ===== SPARKLINES =====
+  function sparkline(svgId, data) {
+    const svg = document.getElementById(svgId);
+    if (!svg) return;
+    const max = Math.max(...data) * 1.15;
+    const min = Math.min(...data) * 0.85;
+    const range = max - min || 1;
+    const w = 100, h = 20;
+    const step = w / (data.length - 1);
+    const pts = data.map((v,i) => ({ x: i*step, y: h - ((v-min)/range)*(h-4) - 2 }));
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const cx1 = pts[i-1].x + step*0.4, cy1 = pts[i-1].y;
+      const cx2 = pts[i].x - step*0.4, cy2 = pts[i].y;
+      d += ` C ${cx1} ${cy1}, ${cx2} ${cy2}, ${pts[i].x} ${pts[i].y}`;
+    }
+    const area = d + ` L ${pts[pts.length-1].x} ${h} L ${pts[0].x} ${h} Z`;
+    svg.innerHTML = `<path class="spark-area" d="${area}"/><path class="spark-path" d="${d}"/>`;
+  }
+  sparkline('spark-time', [89,120,67,45,78,55,92,57,62,45]);
+  sparkline('spark-mem', [2.1,2.3,2.2,2.4,2.3,2.5,2.2,2.4,2.3,2.4]);
+  sparkline('spark-db', [8,10,7,9,12,8,11,9,9,12]);
+  sparkline('spark-http', [2,3,2,4,3,2,3,3,3,3]);
+
+  // ===== OPEN / CLOSE =====
+  function openWidget() {
+    pill.classList.add('hidden');
+    widget.classList.add('visible');
+  }
+  function collapseWidget() {
+    widget.classList.remove('visible');
+    setTimeout(() => pill.classList.remove('hidden'), 250);
+  }
+
+  // ===== SIZE PRESETS =====
+  function setSize(w, h) {
+    widget.style.width = w + 'px';
+    widget.style.height = h + 'px';
+    document.querySelectorAll('.size-preset').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  // ===== DRAGGING =====
+  let isDragging = false, dragStartX, dragStartY, widgetStartX, widgetStartY;
+
+  header.addEventListener('mousedown', e => {
+    if (e.target.closest('.widget-btn')) return;
+    isDragging = true;
+    widget.classList.add('interacting');
+    const rect = widget.getBoundingClientRect();
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    widgetStartX = rect.left;
+    widgetStartY = rect.top;
+    // Switch from bottom/right to top/left positioning
+    widget.style.left = rect.left + 'px';
+    widget.style.top = rect.top + 'px';
+    widget.style.right = 'auto';
+    widget.style.bottom = 'auto';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (isDragging) {
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+      let newX = widgetStartX + dx;
+      let newY = widgetStartY + dy;
+      // Clamp
+      newX = Math.max(0, Math.min(newX, window.innerWidth - widget.offsetWidth));
+      newY = Math.max(0, Math.min(newY, window.innerHeight - widget.offsetHeight));
+      widget.style.left = newX + 'px';
+      widget.style.top = newY + 'px';
+
+      // Dock indicators
+      const threshold = 30;
+      document.getElementById('dockRight').classList.toggle('visible', window.innerWidth - newX - widget.offsetWidth < threshold);
+      document.getElementById('dockLeft').classList.toggle('visible', newX < threshold);
+      document.getElementById('dockBottom').classList.toggle('visible', window.innerHeight - newY - widget.offsetHeight < threshold);
+    }
+
+    if (isResizing) {
+      handleResize(e);
+    }
+  });
+
+  document.addEventListener('mouseup', e => {
+    if (isDragging) {
+      isDragging = false;
+      widget.classList.remove('interacting');
+      // Snap to edges
+      const rect = widget.getBoundingClientRect();
+      const threshold = 30;
+      if (window.innerWidth - rect.right < threshold) {
+        widget.style.left = (window.innerWidth - widget.offsetWidth) + 'px';
+      }
+      if (rect.left < threshold) {
+        widget.style.left = '0px';
+      }
+      if (window.innerHeight - rect.bottom < threshold) {
+        widget.style.top = (window.innerHeight - widget.offsetHeight) + 'px';
+      }
+      // Hide dock indicators
+      document.querySelectorAll('.dock-indicator').forEach(d => d.classList.remove('visible'));
+    }
+    if (isResizing) {
+      isResizing = false;
+      widget.classList.remove('interacting');
+      resizeDir = null;
+    }
+  });
+
+  // ===== RESIZING =====
+  let isResizing = false, resizeDir = null;
+  let resizeStartX, resizeStartY, resizeStartW, resizeStartH, resizeStartL, resizeStartT;
+
+  document.querySelectorAll('.resize-handle').forEach(handle => {
+    handle.addEventListener('mousedown', e => {
+      isResizing = true;
+      resizeDir = handle.dataset.dir;
+      widget.classList.add('interacting');
+      const rect = widget.getBoundingClientRect();
+      resizeStartX = e.clientX;
+      resizeStartY = e.clientY;
+      resizeStartW = rect.width;
+      resizeStartH = rect.height;
+      resizeStartL = rect.left;
+      resizeStartT = rect.top;
+      // Ensure top/left positioning
+      widget.style.left = rect.left + 'px';
+      widget.style.top = rect.top + 'px';
+      widget.style.right = 'auto';
+      widget.style.bottom = 'auto';
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  });
+
+  function handleResize(e) {
+    const dx = e.clientX - resizeStartX;
+    const dy = e.clientY - resizeStartY;
+    const minW = 260, minH = 180;
+
+    if (resizeDir.includes('e')) {
+      widget.style.width = Math.max(minW, resizeStartW + dx) + 'px';
+    }
+    if (resizeDir.includes('s')) {
+      widget.style.height = Math.max(minH, resizeStartH + dy) + 'px';
+    }
+    if (resizeDir.includes('w')) {
+      const newW = Math.max(minW, resizeStartW - dx);
+      widget.style.width = newW + 'px';
+      widget.style.left = (resizeStartL + resizeStartW - newW) + 'px';
+    }
+    if (resizeDir.includes('n')) {
+      const newH = Math.max(minH, resizeStartH - dy);
+      widget.style.height = newH + 'px';
+      widget.style.top = (resizeStartT + resizeStartH - newH) + 'px';
+    }
+  }
+
+  // ===== THEME =====
+  function toggleTheme() {
+    const btn = document.querySelector('.theme-toggle');
+    if (document.documentElement.dataset.theme === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+      btn.textContent = '🌙 Dark';
+    } else {
+      document.documentElement.dataset.theme = 'dark';
+      btn.textContent = '☀️ Light';
+    }
+  }
+</script>
+</body>
+</html>
