@@ -1,26 +1,24 @@
 import {addFrame, deleteFrame, useFramesEntries} from '@app-dev-panel/panel/Module/Frames/Context/Context';
-import {Remove} from '@mui/icons-material';
+import {Close, Remove} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import {
     IconButton,
-    InputBase,
     List,
     ListItem,
     ListItemButton,
     ListItemSecondaryAction,
     ListItemText,
+    OutlinedInput,
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import * as React from 'react';
 import {useDispatch} from 'react-redux';
 
-// TODO: split saving and cancelling
 type SettingsDialogProps = {onClose: () => void};
 export const SettingsDialog = (props: SettingsDialogProps) => {
     const [selectedEntry, setSelectedEntry] = React.useState('');
@@ -41,14 +39,17 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
     };
 
     return (
-        <Dialog fullWidth={true} open={true} onClose={handleClose}>
-            <DialogTitle>Frames</DialogTitle>
-            <DialogContent>
-                <DialogContentText>Create, edit or delete frames.</DialogContentText>
-
-                <List>
+        <Dialog fullWidth open={true} onClose={handleClose}>
+            <DialogTitle sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1}}>
+                Frames
+                <IconButton size="small" onClick={handleClose} aria-label="close" sx={{color: 'text.secondary'}}>
+                    <Close fontSize="small" />
+                </IconButton>
+            </DialogTitle>
+            <DialogContent dividers>
+                <List disablePadding>
                     {Object.entries(frames).map(([name, url]) => (
-                        <ListItem key={name}>
+                        <ListItem key={name} disablePadding>
                             <ListItemButton
                                 onClick={() => {
                                     setSelectedEntry(url);
@@ -56,7 +57,7 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                             >
                                 <ListItemText primary={url} secondary={name} />
                                 <ListItemSecondaryAction>
-                                    <IconButton onClick={onDeleteHandler(name)} sx={{p: 2}} aria-label="Delete frame">
+                                    <IconButton onClick={onDeleteHandler(name)} sx={{p: 1}} aria-label="Delete frame">
                                         <Remove />
                                     </IconButton>
                                 </ListItemSecondaryAction>
@@ -67,25 +68,26 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                 <Box
                     noValidate
                     component="form"
-                    sx={{display: 'flex', flexDirection: 'row', p: [0.5, 1], alignItems: 'center'}}
+                    sx={{display: 'flex', flexDirection: 'row', mt: 2, alignItems: 'center', gap: 1}}
                     onSubmit={(e) => {
                         e.preventDefault();
                         onAddHandler();
                     }}
                 >
-                    <InputBase
-                        sx={{ml: 1, flex: 1}}
-                        placeholder={'https://external-resource.com/'}
+                    <OutlinedInput
+                        size="small"
+                        fullWidth
+                        placeholder="https://external-resource.com/"
                         value={selectedEntry}
                         onChange={(event) => setSelectedEntry(event.target.value)}
                     />
-                    <IconButton onClick={onAddHandler} sx={{p: 2}} aria-label="Add frame">
+                    <IconButton onClick={onAddHandler} color="primary" aria-label="Add frame">
                         <CheckIcon />
                     </IconButton>
                 </Box>
             </DialogContent>
-            <DialogActions>
-                <Button onClick={handleClose} color="primary">
+            <DialogActions sx={{px: 3, py: 1.5}}>
+                <Button variant="text" color="inherit" onClick={handleClose} sx={{color: 'text.secondary'}}>
                     Close
                 </Button>
             </DialogActions>

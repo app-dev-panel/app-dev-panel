@@ -2,13 +2,15 @@ import {useCurrentPageRequestIds, useDebugEntry} from '@app-dev-panel/sdk/API/De
 import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {DebugEntryChip} from '@app-dev-panel/sdk/Component/DebugEntryChip';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {Close} from '@mui/icons-material';
 import HttpIcon from '@mui/icons-material/Http';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import {
-    Button,
+    Box,
     CircularProgress,
+    IconButton,
     ListItemIcon,
     ListItemText,
     ToggleButton,
@@ -16,6 +18,7 @@ import {
     Tooltip,
 } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -78,30 +81,45 @@ export const DebugEntriesListModal = ({onClick, onClose, open}: DebugEntriesList
 
     return (
         <Dialog fullWidth onClose={() => onClose()} open={open}>
-            <DialogTitle>Select a debug entry</DialogTitle>
-            <List sx={{pt: 0}}>
-                <ToggleButtonGroup fullWidth size="small" color="primary" value={filters} onChange={handleFormat}>
-                    <ToggleButton value="web">
-                        <HttpIcon />
-                    </ToggleButton>
-                    <ToggleButton value="console">
-                        <TerminalIcon />
-                    </ToggleButton>
-                    <ToggleButton value="current">Current</ToggleButton>
-                    <Button color="primary" onClick={() => getDebugQuery.refetch()} disabled={getDebugQuery.isFetching}>
-                        {getDebugQuery.isFetching ? <CircularProgress size={24} color="info" /> : <RefreshIcon />}
-                    </Button>
-                </ToggleButtonGroup>
-                {entries.filter(filterDebugEntry(filters, currentPageRequestIds)).map((entry) => (
-                    <DebugEntryItem
-                        key={entry.id}
-                        entry={entry}
-                        onClick={onClick}
-                        selected={currentEntry && entry.id === currentEntry.id}
-                        rightText={currentPageRequestIds.includes(entry.id) ? 'Current' : null}
-                    />
-                ))}
-            </List>
+            <DialogTitle sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1}}>
+                Select a debug entry
+                <IconButton size="small" onClick={onClose} aria-label="close" sx={{color: 'text.secondary'}}>
+                    <Close fontSize="small" />
+                </IconButton>
+            </DialogTitle>
+            <DialogContent dividers sx={{p: 0}}>
+                <Box sx={{px: 1, py: 1}}>
+                    <ToggleButtonGroup fullWidth size="small" color="primary" value={filters} onChange={handleFormat}>
+                        <ToggleButton value="web">
+                            <HttpIcon />
+                        </ToggleButton>
+                        <ToggleButton value="console">
+                            <TerminalIcon />
+                        </ToggleButton>
+                        <ToggleButton value="current">Current</ToggleButton>
+                    </ToggleButtonGroup>
+                    <IconButton
+                        color="primary"
+                        onClick={() => getDebugQuery.refetch()}
+                        disabled={getDebugQuery.isFetching}
+                        aria-label="Refresh"
+                        sx={{ml: 1}}
+                    >
+                        {getDebugQuery.isFetching ? <CircularProgress size={20} /> : <RefreshIcon />}
+                    </IconButton>
+                </Box>
+                <List disablePadding>
+                    {entries.filter(filterDebugEntry(filters, currentPageRequestIds)).map((entry) => (
+                        <DebugEntryItem
+                            key={entry.id}
+                            entry={entry}
+                            onClick={onClick}
+                            selected={currentEntry && entry.id === currentEntry.id}
+                            rightText={currentPageRequestIds.includes(entry.id) ? 'Current' : null}
+                        />
+                    ))}
+                </List>
+            </DialogContent>
         </Dialog>
     );
 };

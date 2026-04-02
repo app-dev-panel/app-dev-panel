@@ -140,6 +140,7 @@ export const CommandsPage = () => {
                           : ''
                 }
                 errors={runCommandQueryInfo.data?.errors}
+                commandName={lastCommand?.title}
                 open={showResultDialog}
                 onRerun={() => runCommandQuery(runCommandQueryInfo.originalArgs as string)}
                 onClose={() => setShowResultDialog(false)}
