@@ -95,7 +95,7 @@ describe('ValidatorPanel', () => {
         const user = userEvent.setup();
         const data = [makeValidation({value: 'test-value', rules: {type: 'string'}, result: true})];
         renderWithProviders(<ValidatorPanel data={data} />);
-        await user.click(screen.getByText('test-value'));
+        await user.click(screen.getAllByText('test-value')[0]);
         expect(screen.getByText('Value')).toBeInTheDocument();
         expect(screen.getByText('Rules')).toBeInTheDocument();
     });

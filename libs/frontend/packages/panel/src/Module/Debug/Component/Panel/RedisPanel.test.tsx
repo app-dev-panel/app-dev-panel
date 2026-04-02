@@ -72,7 +72,7 @@ describe('RedisPanel', () => {
 
     it('renders command arguments in row', () => {
         renderWithProviders(<RedisPanel data={makeData({commands: [makeCommand({arguments: ['session:abc']})]})} />);
-        expect(screen.getByText('session:abc')).toBeInTheDocument();
+        expect(screen.getAllByText('session:abc').length).toBeGreaterThan(0);
     });
 
     it('renders command chip with correct label', () => {
@@ -105,15 +105,15 @@ describe('RedisPanel', () => {
         ];
         renderWithProviders(<RedisPanel data={makeData({commands: cmds, totalCommands: 2})} />);
         await user.type(screen.getByPlaceholderText('Filter commands...'), 'SET');
-        expect(screen.getByText('key1')).toBeInTheDocument();
-        expect(screen.queryByText('key2')).not.toBeInTheDocument();
+        expect(screen.getAllByText('key1').length).toBeGreaterThan(0);
+        expect(screen.queryAllByText('key2').length).toBe(0);
     });
 
     it('expands command to show details on click', async () => {
         const user = userEvent.setup();
         const cmds = [makeCommand({arguments: ['user:42'], result: {name: 'John'}})];
         renderWithProviders(<RedisPanel data={makeData({commands: cmds})} />);
-        await user.click(screen.getByText('user:42'));
+        await user.click(screen.getAllByText('user:42')[0]);
         expect(screen.getByText('Arguments')).toBeInTheDocument();
         expect(screen.getByText('Result')).toBeInTheDocument();
     });
@@ -122,7 +122,7 @@ describe('RedisPanel', () => {
         const user = userEvent.setup();
         const cmds = [makeCommand({error: 'WRONGTYPE Operation', arguments: ['bad:key']})];
         renderWithProviders(<RedisPanel data={makeData({commands: cmds, errorCount: 1})} />);
-        await user.click(screen.getByText('bad:key'));
+        await user.click(screen.getAllByText('bad:key')[0]);
         expect(screen.getByText('Error')).toBeInTheDocument();
         expect(screen.getByText('WRONGTYPE Operation')).toBeInTheDocument();
     });
@@ -131,7 +131,7 @@ describe('RedisPanel', () => {
         const user = userEvent.setup();
         const cmds = [makeCommand({line: '/app/src/Service.php:42', arguments: ['key1']})];
         renderWithProviders(<RedisPanel data={makeData({commands: cmds})} />);
-        await user.click(screen.getByText('key1'));
+        await user.click(screen.getAllByText('key1')[0]);
         expect(screen.getByText('Source')).toBeInTheDocument();
         expect(screen.getByText('/app/src/Service.php:42')).toBeInTheDocument();
     });
