@@ -1,18 +1,18 @@
 ---
-title: Коллектор потоков файловой системы
+title: Коллектор файловых потоков
 ---
 
-# Коллектор потоков файловой системы
+# Коллектор файловых потоков
 
-Захватывает операции потоков файловой системы (`file://`) через прокси PHP stream wrapper — чтение, запись, получение статистики и операции с директориями.
+Захватывает операции файловой системы (`file://`) через прокси обёртки PHP-потоков — чтение, запись, получение информации и операции с директориями.
 
-![Панель коллектора потоков файловой системы](/images/collectors/filesystem-stream.png)
+![Панель коллектора файловых потоков](/images/collectors/filesystem-stream.png)
 
-## Что собирает
+## Собираемые данные
 
 | Поле | Описание |
 |------|----------|
-| `operation` | Тип операции (`open`, `read`, `write`, `stat`, `unlink`, `mkdir` и т.д.) |
+| `operation` | Тип операции (`open`, `read`, `write`, `stat`, `unlink`, `mkdir` и др.) |
 | `path` | Путь к файлу |
 | `args` | Аргументы операции |
 
@@ -58,15 +58,15 @@ $collector->collect(
 ```
 
 ::: info
-<class>\AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector</class> реализует <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. Поддерживает настраиваемые шаблоны исключений для пропуска путей (например, директория vendor).
+<class>\AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector</class> реализует <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. Поддерживает настраиваемые шаблоны игнорирования для исключения путей (например, директория vendor).
 :::
 
 ## Как это работает
 
-Коллектор использует прокси PHP stream wrapper (<class>\AppDevPanel\Kernel\Collector\Stream\FilesystemStreamProxy</class>), который регистрируется для протокола `file://`. Все операции файловой системы (`fopen`, `file_get_contents`, `is_file`, `mkdir` и т.д.) перехватываются через механизм stream wrapper PHP. Пути, соответствующие шаблонам `excludePaths`, игнорируются.
+Коллектор использует прокси обёртки PHP-потоков (<class>\AppDevPanel\Kernel\Collector\Stream\FilesystemStreamProxy</class>), которая регистрируется для протокола `file://`. Все операции файловой системы (`fopen`, `file_get_contents`, `is_file`, `mkdir` и др.) перехватываются через механизм обёрток потоков PHP. Пути, соответствующие шаблонам `excludePaths`, игнорируются.
 
 ## Панель отладки
 
 - **Группы операций** — операции файловой системы, сгруппированные по типу
-- **Список путей к файлам** — все файлы, к которым был доступ, с деталями операций
-- **Счётчики операций** — сводка операций по типу в боковом бейдже (I/O)
+- **Список путей к файлам** — все доступные пути с деталями операций
+- **Счётчики операций** — сводка операций по типу в значке боковой панели (I/O)
