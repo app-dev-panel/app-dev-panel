@@ -26,7 +26,76 @@ import {Box, Chip, Divider, IconButton, Paper, Portal, Stack, Tooltip, useTheme}
 import {ForwardedRef, forwardRef, useCallback, useEffect, useRef, useState} from 'react';
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
-import {useResizable} from 'react-resizable-layout';
+
+/**
+ * Delta-based resize hook. Tracks mouse movement delta from drag start,
+ * independent of container/body position. Fixes the "runaway handle" bug
+ * that occurs with react-resizable-layout inside sticky-positioned containers.
+ */
+const useBottomResize = ({
+    initial,
+    min,
+    max,
+    onResizeEnd,
+}: {
+    initial: number;
+    min: number;
+    max: number;
+    onResizeEnd: (height: number) => void;
+}) => {
+    const [height, setHeight] = useState(initial || 400);
+    const [isDragging, setIsDragging] = useState(false);
+    const dragRef = useRef<{startY: number; startHeight: number} | null>(null);
+    const heightRef = useRef(height);
+    heightRef.current = height;
+
+    const onPointerDown = useCallback(
+        (e: React.PointerEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dragRef.current = {startY: e.clientY, startHeight: heightRef.current};
+            setIsDragging(true);
+
+            const clamp = (v: number) => Math.min(max, Math.max(min, v));
+
+            const onMove = (ev: PointerEvent | MouseEvent) => {
+                if (!dragRef.current) return;
+                const delta = dragRef.current.startY - ev.clientY;
+                const next = clamp(dragRef.current.startHeight + delta);
+                setHeight(next);
+                heightRef.current = next;
+            };
+
+            const onUp = () => {
+                document.removeEventListener('pointermove', onMove);
+                document.removeEventListener('pointerup', onUp);
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+                setIsDragging(false);
+                onResizeEnd(heightRef.current);
+                dragRef.current = null;
+            };
+
+            document.addEventListener('pointermove', onMove);
+            document.addEventListener('pointerup', onUp);
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        },
+        [min, max, onResizeEnd],
+    );
+
+    const separatorProps = {
+        role: 'separator' as const,
+        'aria-valuenow': height,
+        'aria-valuemin': min,
+        'aria-valuemax': max,
+        'aria-orientation': 'horizontal' as const,
+        'aria-disabled': false,
+        onPointerDown,
+    };
+
+    return {height, setHeight, isDragging, separatorProps};
+};
 
 const ToolbarErrorFallback = ({resetErrorBoundary}: FallbackProps) => (
     <Chip
@@ -160,19 +229,22 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         setIframeEnabled((value) => !value);
     }, [activeComponents]);
 
-    const {position, separatorProps, setPosition} = useResizable({
-        axis: 'y',
+    const {
+        height: panelHeight,
+        setHeight: setPanelHeight,
+        separatorProps,
+    } = useBottomResize({
         initial: iframeHeight,
         min: 100,
         max: 1000,
-        reverse: true,
-        disabled: !isToolbarOpened,
-        onResizeEnd: (e) => {
-            dispatch(setIFrameHeight(e.position));
+        onResizeEnd: (h) => {
+            dispatch(setIFrameHeight(h));
         },
     });
     useEffect(() => {
-        setPosition(iframeHeight);
+        if (iframeHeight != null) {
+            setPanelHeight(iframeHeight);
+        }
     }, [iframeHeight]);
 
     const actionButtonSx = {p: 0.5, color: 'text.secondary', '&:hover': {color: 'text.primary'}};
@@ -345,7 +417,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                 </Paper>
 
                 {iframeEnabled && (
-                    <div style={{height: position, overflow: 'hidden'}}>
+                    <div style={{height: panelHeight, overflow: 'hidden'}}>
                         <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
                     </div>
                 )}
