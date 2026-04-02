@@ -12,6 +12,10 @@ The Yii 2 adapter bridges ADP Kernel and API into Yii 2.0.50+ via the bootstrap 
 composer require app-dev-panel/adapter-yii2
 ```
 
+::: info Package
+<pkg>app-dev-panel/adapter-yii2</pkg>
+:::
+
 The package auto-registers via `extra.bootstrap` in composer.json. The <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> class registers the `debug-panel` module automatically when `YII_DEBUG` is enabled.
 
 ## Configuration
