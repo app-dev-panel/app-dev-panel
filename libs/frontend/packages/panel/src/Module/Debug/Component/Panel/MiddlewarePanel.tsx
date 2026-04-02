@@ -4,9 +4,10 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Chip, Collapse, Icon, IconButton, Link, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useState} from 'react';
+import {Link as RouterLink} from 'react-router';
 
 type MiddlewareType = {memory: number; name: string; time: number};
 type BeforeMiddlewareType = {request: string} & MiddlewareType;
@@ -152,8 +153,8 @@ export const MiddlewarePanel = (props: MiddlewarePanelProps) => {
                                     <Box sx={{mb: 1}}>
                                         <Chip
                                             clickable
-                                            component={Link}
-                                            href={`/debug/object?debugEntry=${debugEntry.id}&id=${objectId}`}
+                                            component={RouterLink}
+                                            to={`/debug/object?debugEntry=${debugEntry.id}&id=${objectId}`}
                                             label="Examine Object"
                                             size="small"
                                             icon={<Icon sx={{fontSize: '14px !important'}}>data_object</Icon>}

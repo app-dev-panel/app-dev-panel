@@ -5,6 +5,7 @@ import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Button, Typography} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {useEffect, useState} from 'react';
+import {Link as RouterLink} from 'react-router';
 
 const columns: GridColDef[] = [
     {
@@ -40,7 +41,11 @@ const columns: GridColDef[] = [
         renderCell: (params: GridRenderCellParams) => {
             return (
                 <Typography my={1}>
-                    <Button variant="contained" href={`/inspector/storage/database/${params.row.name}`}>
+                    <Button
+                        variant="contained"
+                        component={RouterLink}
+                        to={`/inspector/storage/database/${params.row.name}`}
+                    >
                         View
                     </Button>
                 </Typography>
