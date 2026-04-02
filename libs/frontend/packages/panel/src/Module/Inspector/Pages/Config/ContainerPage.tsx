@@ -11,7 +11,7 @@ import {Box, CircularProgress, IconButton, TablePagination, Tooltip, Typography}
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
-import {useSearchParams} from 'react-router';
+import {Link as RouterLink, useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -226,7 +226,11 @@ export const ContainerPage = () => {
                                         </IconButton>
                                     </Tooltip>
                                     <Tooltip title="Examine as container entry">
-                                        <IconButton size="small" href={'/inspector/container/view?class=' + entry.id}>
+                                        <IconButton
+                                            size="small"
+                                            component={RouterLink}
+                                            to={'/inspector/container/view?class=' + entry.id}
+                                        >
                                             <OpenInNew sx={{fontSize: 14}} />
                                         </IconButton>
                                     </Tooltip>

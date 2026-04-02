@@ -25,6 +25,7 @@ import {
 import {styled, useTheme} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import React, {useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
+import {Link as RouterLink} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -186,7 +187,6 @@ const MiddlewareItem = ({mw}: {mw: any}) => {
             <FileLink className={parsed.className} methodName={parsed.methodName}>
                 <Typography
                     component="span"
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     sx={(theme) => ({
                         display: 'block',
                         fontFamily: theme.adp.fontFamilyMono,
@@ -207,7 +207,6 @@ const MiddlewareItem = ({mw}: {mw: any}) => {
             <FileLink className={mw}>
                 <Typography
                     component="span"
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     sx={(theme) => ({
                         display: 'block',
                         fontFamily: theme.adp.fontFamilyMono,
@@ -255,7 +254,6 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                         <FileLink className={action.className} methodName={action.methodName}>
                             <Typography
                                 component="span"
-                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
                                 sx={(theme) => ({
                                     fontFamily: theme.adp.fontFamilyMono,
                                     fontSize: '12px',
@@ -282,8 +280,9 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                         <Tooltip title="Examine as a container entry">
                             <IconButton
                                 size="small"
-                                href={'/inspector/container/view?class=' + action.className}
-                                onClick={(e) => e.stopPropagation()}
+                                component={RouterLink}
+                                to={'/inspector/container/view?class=' + action.className}
+                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
                             >
                                 <OpenInNew sx={{fontSize: 14}} />
                             </IconButton>
@@ -572,22 +571,12 @@ export const RoutesPage = () => {
                                             className={route.action.className}
                                             methodName={route.action.methodName}
                                         >
-                                            <ActionInlineLink
-                                                as="span"
-                                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                            >
-                                                {actionShort}
-                                            </ActionInlineLink>
+                                            <ActionInlineLink as="span">{actionShort}</ActionInlineLink>
                                         </FileLink>
                                     )}
                                     {firstClassMwShort && (
                                         <FileLink className={firstClassMw}>
-                                            <ActionInlineLink
-                                                as="span"
-                                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                            >
-                                                {firstClassMwShort}
-                                            </ActionInlineLink>
+                                            <ActionInlineLink as="span">{firstClassMwShort}</ActionInlineLink>
                                         </FileLink>
                                     )}
                                     {route.name && <NameCell>{route.name}</NameCell>}

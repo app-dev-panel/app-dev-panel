@@ -55,7 +55,11 @@ export const FileLink = ({path, className, methodName, line, children, sx}: File
     return (
         <span style={{display: 'inline-flex', alignItems: 'center', gap: 2, ...sx}}>
             {children !== undefined ? (
-                <RouterLink to={explorerHref} style={{color: 'inherit', textDecoration: 'inherit'}}>
+                <RouterLink
+                    to={explorerHref}
+                    style={{color: 'inherit', textDecoration: 'inherit'}}
+                    onClick={(e) => e.stopPropagation()}
+                >
                     {children}
                 </RouterLink>
             ) : null}
