@@ -60,7 +60,6 @@ final class DatabaseListener
 
         $sql = $exception->getSql();
         $bindings = $exception->getBindings();
-        $endTime = microtime(true);
 
         $id = uniqid('failed-', true);
         $collector->collectQueryStart(

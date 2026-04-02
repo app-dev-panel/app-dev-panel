@@ -9,6 +9,7 @@ use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use InvalidArgumentException;
+use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -26,7 +27,7 @@ final class LlmController
         private readonly LlmHistoryStorageInterface $historyStorage,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory,
-        private readonly \Psr\Http\Client\ClientInterface $httpClient,
+        private readonly ClientInterface $httpClient,
     ) {}
 
     /**
