@@ -241,6 +241,55 @@ final class FileControllerTest extends ControllerTestCase
         $this->assertContains($response->getStatusCode(), [200, 404]);
     }
 
+    public function testReadByClassNameThatCannotFindSource(): void
+    {
+        // Internal classes have no source file
+        $controller = $this->createController(dirname(__DIR__, 4));
+
+        // Use an internal class — ReflectionClass::getFileName() returns false
+        $response = $controller->files($this->get(['class' => \stdClass::class]));
+
+        $this->assertSame(404, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertStringContainsString('Cannot find source', $data['message']);
+    }
+
+    public function testDirectoryListingContainsFileInfo(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->files($this->get(['path' => '/']));
+
+        $data = $this->responseData($response);
+        foreach ($data as $entry) {
+            $this->assertArrayHasKey('baseName', $entry);
+            $this->assertArrayHasKey('type', $entry);
+            $this->assertArrayHasKey('size', $entry);
+            $this->assertArrayHasKey('permissions', $entry);
+        }
+    }
+
+    public function testReadClassOutsideRootSetsInsideRootFlag(): void
+    {
+        // Use a fixture dir as root, so our test class is outside root
+        $controller = $this->createController($this->fixtureDir);
+        $response = $controller->files($this->get(['class' => self::class]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertFalse($data['insideRoot']);
+    }
+
+    public function testReadClassInsideRootSetsInsideRootFlag(): void
+    {
+        // Use the tests directory as root, so our test class is inside root
+        $controller = $this->createController(dirname(__DIR__, 4));
+        $response = $controller->files($this->get(['class' => self::class]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertTrue($data['insideRoot']);
+    }
+
     private function removeDir(string $dir): void
     {
         if (!is_dir($dir)) {

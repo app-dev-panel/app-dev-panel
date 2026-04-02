@@ -326,4 +326,175 @@ final class DebugSummaryCommandTest extends TestCase
 
         // web fallback would be used, which is also not present - no timing section
     }
+
+    public function testSummaryTimingFromWebFallback(): void
+    {
+        $data = [
+            'web' => [
+                'method' => 'GET',
+                'url' => '/web-fallback',
+                'responseStatusCode' => '200',
+                'duration' => 77.7,
+                'memory' => 4096,
+                'memoryPeak' => 8192,
+            ],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('77.70 ms', $display);
+        $this->assertStringContainsString('4.0 KB', $display);
+        $this->assertStringContainsString('8.0 KB', $display);
+    }
+
+    public function testSummaryWithOnlyMemoryPeak(): void
+    {
+        $data = [
+            'request' => ['method' => 'GET', 'url' => '/', 'responseStatusCode' => '200'],
+            'timeline' => ['memoryPeak' => 10_485_760], // 10 MB
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('Memory Peak', $display);
+        $this->assertStringContainsString('10.0 MB', $display);
+    }
+
+    public function testSummaryExceptionEmptyArray(): void
+    {
+        $data = [
+            'request' => ['method' => 'GET', 'url' => '/', 'responseStatusCode' => '500'],
+            'exception' => [],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        // Exception section should NOT appear since 'class' key is missing
+        $this->assertStringNotContainsString('Exception', $tester->getDisplay());
+    }
+
+    public function testSummaryExceptionNonArray(): void
+    {
+        $data = [
+            'request' => ['method' => 'GET', 'url' => '/', 'responseStatusCode' => '500'],
+            'exception' => 'not an array',
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringNotContainsString('Exception', $tester->getDisplay());
+    }
+
+    public function testSummaryExceptionWithFileLine(): void
+    {
+        $data = [
+            'request' => ['method' => 'GET', 'url' => '/', 'responseStatusCode' => '500'],
+            'exception' => [
+                'class' => 'InvalidArgumentException',
+                'message' => 'Bad input',
+                'file' => '/app/src/Service.php',
+                'line' => 99,
+            ],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('at /app/src/Service.php:99', $display);
+    }
+
+    public function testSummaryNoCollectorsSection(): void
+    {
+        $data = [
+            'request' => ['method' => 'GET', 'url' => '/', 'responseStatusCode' => '200'],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringNotContainsString('Collectors', $tester->getDisplay());
+    }
+
+    public function testSummaryWithZeroTotals(): void
+    {
+        $data = [
+            'request' => ['method' => 'GET', 'url' => '/', 'responseStatusCode' => '200'],
+            'logger' => ['total' => 0],
+            'event' => ['total' => 0],
+            'db' => ['total' => 0],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        // Zero totals should not show in collectors section
+        $this->assertStringNotContainsString('Log entries', $tester->getDisplay());
+        $this->assertStringNotContainsString('Events', $tester->getDisplay());
+    }
+
+    public function testSummaryCommandKey(): void
+    {
+        $data = [
+            'command' => [
+                'method' => 'CLI',
+                'url' => 'cache:clear',
+                'responseStatusCode' => '0',
+            ],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('console', $display);
+        $this->assertStringContainsString('cache:clear', $display);
+    }
+
+    public function testSummaryRequestInfoMissingFields(): void
+    {
+        $data = [
+            'request' => [],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->willReturn($data);
+
+        $tester = new CommandTester(new DebugSummaryCommand($repository));
+        $tester->execute(['id' => 'entry-1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        // Should show dash for missing fields
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString("\xe2\x80\x94", $display); // em dash character
+    }
 }

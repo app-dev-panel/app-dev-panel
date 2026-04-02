@@ -144,31 +144,6 @@ final class GarbageCollectorTest extends TestCase
         $this->assertFileDoesNotExist($this->storagePath . '/aa/old-json/summary.json');
     }
 
-    public function testRunReturnsEarlyWhenLockCannotBeAcquired(): void
-    {
-        // Make the directory read-only so fopen for lock file fails
-        $readOnlyPath = $this->storagePath . '/readonly';
-        mkdir($readOnlyPath, 0o777, true);
-        $this->createEntryIn($readOnlyPath, 'aa', '01');
-
-        // Now make it read-only
-        chmod($readOnlyPath, 0o444);
-
-        $gc = new GarbageCollector($readOnlyPath, 0);
-        $gc->run(); // Should return early without crashing
-
-        // Restore permissions for cleanup
-        chmod($readOnlyPath, 0o777);
-        $this->assertTrue(true); // Reached without exception
-    }
-
-    private function createEntryIn(string $basePath, string $group, string $id): void
-    {
-        $dir = $basePath . '/' . $group . '/' . $id;
-        mkdir($dir, 0o777, true);
-        file_put_contents($dir . '/summary.json', json_encode(['id' => $id]));
-    }
-
     public function testRunWithExactlyHistorySizeEntries(): void
     {
         $this->createEntry('aa', '01');
@@ -180,6 +155,75 @@ final class GarbageCollectorTest extends TestCase
         // Both should be preserved (count <= historySize)
         $this->assertFileExists($this->storagePath . '/aa/01/summary.json');
         $this->assertFileExists($this->storagePath . '/bb/02/summary.json');
+    }
+
+    public function testRunSkipsWhenLockAlreadyHeld(): void
+    {
+        $this->createEntry('aa', '01', time() - 100);
+        $this->createEntry('bb', '02', time());
+
+        // Acquire the lock externally to simulate concurrent GC
+        $lockFile = $this->storagePath . '/.gc.lock';
+        $lockHandle = fopen($lockFile, 'c');
+        flock($lockHandle, LOCK_EX | LOCK_NB);
+
+        try {
+            $gc = new GarbageCollector($this->storagePath, 1);
+            $gc->run();
+
+            // Both entries should still exist since GC couldn't acquire lock
+            $this->assertFileExists($this->storagePath . '/aa/01/summary.json');
+            $this->assertFileExists($this->storagePath . '/bb/02/summary.json');
+        } finally {
+            flock($lockHandle, LOCK_UN);
+            fclose($lockHandle);
+            if (file_exists($lockFile)) {
+                unlink($lockFile);
+            }
+        }
+    }
+
+    public function testRunWithNonExistentPath(): void
+    {
+        $gc = new GarbageCollector($this->storagePath . '/nonexistent', 50);
+        // Should not throw - acquireGcLock fails, run returns early
+        $gc->run();
+        $this->assertTrue(true);
+    }
+
+    public function testRunRemovesMultipleExcessGroups(): void
+    {
+        $this->createEntry('aa', '01', time() - 300);
+        $this->createEntry('bb', '02', time() - 200);
+        $this->createEntry('cc', '03', time() - 100);
+        $this->createEntry('dd', '04', time());
+
+        $gc = new GarbageCollector($this->storagePath, 2);
+        $gc->run();
+
+        // Two newest should survive
+        $this->assertFileExists($this->storagePath . '/dd/04/summary.json');
+        $this->assertFileExists($this->storagePath . '/cc/03/summary.json');
+        // Two oldest should be removed
+        $this->assertFileDoesNotExist($this->storagePath . '/aa/01/summary.json');
+        $this->assertFileDoesNotExist($this->storagePath . '/bb/02/summary.json');
+        // Empty group directories should be cleaned
+        $this->assertDirectoryDoesNotExist($this->storagePath . '/aa');
+        $this->assertDirectoryDoesNotExist($this->storagePath . '/bb');
+    }
+
+    public function testRunKeepsGroupWithRemainingEntries(): void
+    {
+        $this->createEntry('aa', '01', time() - 200);
+        $this->createEntry('aa', '02', time());
+
+        $gc = new GarbageCollector($this->storagePath, 1);
+        $gc->run();
+
+        // Group 'aa' should still exist because entry '02' is kept
+        $this->assertDirectoryExists($this->storagePath . '/aa');
+        $this->assertFileExists($this->storagePath . '/aa/02/summary.json');
+        $this->assertFileDoesNotExist($this->storagePath . '/aa/01/summary.json');
     }
 
     private function removeDirectory(string $path): void

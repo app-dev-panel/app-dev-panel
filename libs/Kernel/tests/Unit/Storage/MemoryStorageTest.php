@@ -186,4 +186,80 @@ final class MemoryStorageTest extends AbstractStorageTestCase
         $storage->flush();
         $this->assertSame([], $storage->getData());
     }
+
+    public function testReadSummaryForNonCurrentSession(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        // Write an entry with a different ID
+        $storage->write('other-id', ['id' => 'other-id', 'status' => 200], ['d' => 1], ['o' => 1]);
+
+        // Read summary for a specific non-current-session ID
+        $result = $storage->read(StorageInterface::TYPE_SUMMARY, 'other-id');
+        $this->assertCount(1, $result);
+        $this->assertArrayHasKey('other-id', $result);
+        $this->assertSame(['id' => 'other-id', 'status' => 200], $result['other-id']);
+    }
+
+    public function testReadDataForNonCurrentSession(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $storage->write('other-id', ['id' => 'other-id'], ['collector' => 'data'], ['obj' => 'info']);
+
+        // Read data for the non-current-session entry
+        $result = $storage->read(StorageInterface::TYPE_DATA, 'other-id');
+        $this->assertCount(1, $result);
+        $this->assertArrayHasKey('other-id', $result);
+        $this->assertSame(['collector' => 'data'], $result['other-id']);
+    }
+
+    public function testReadObjectsForNonCurrentSession(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $storage->write('other-id', ['id' => 'other-id'], ['d' => 1], ['obj-key' => 'obj-val']);
+
+        // Read objects for the non-current-session entry
+        $result = $storage->read(StorageInterface::TYPE_OBJECTS, 'other-id');
+        $this->assertCount(1, $result);
+        $this->assertSame(['obj-key' => 'obj-val'], $result['other-id']);
+    }
+
+    public function testReadAllIncludesBothWrittenAndCurrentSession(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $collector = $this->createFakeCollector(['live' => 'data']);
+        $storage->addCollector($collector);
+
+        $storage->write('entry-a', ['id' => 'entry-a'], ['a' => 1], []);
+        $storage->write('entry-b', ['id' => 'entry-b'], ['b' => 2], []);
+
+        // Read all data entries (no ID filter)
+        $result = $storage->read(StorageInterface::TYPE_DATA);
+        $this->assertCount(3, $result); // 2 written + 1 current session
+        $this->assertArrayHasKey('entry-a', $result);
+        $this->assertArrayHasKey('entry-b', $result);
+        $this->assertArrayHasKey($idGenerator->getId(), $result);
+    }
+
+    public function testWriteOverwritesExistingEntry(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $storage->write('entry-1', ['id' => 'entry-1', 'v' => 1], ['d' => 'old'], []);
+        $storage->write('entry-1', ['id' => 'entry-1', 'v' => 2], ['d' => 'new'], []);
+
+        $result = $storage->read(StorageInterface::TYPE_DATA, 'entry-1');
+        $this->assertSame(['d' => 'new'], $result['entry-1']);
+
+        $summary = $storage->read(StorageInterface::TYPE_SUMMARY, 'entry-1');
+        $this->assertSame(2, $summary['entry-1']['v']);
+    }
 }
