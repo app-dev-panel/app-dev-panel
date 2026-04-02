@@ -205,6 +205,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const sendToIframe = useCallback((url: string) => {
         const contentWindow = iframeRef.current?.contentWindow;
+        console.log('[ADP Toolbar] sendToIframe', {url, hasContentWindow: !!contentWindow, hasIframe: !!iframeRef.current});
         if (contentWindow) {
             dispatchWindowEvent(contentWindow, 'router.navigate', url);
         }
@@ -216,6 +217,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
             // Accept from any origin — panel iframe may be on a different host/port
             if (!e.data || typeof e.data !== 'object' || e.data.event !== 'panel.loaded') return;
 
+            console.log('[ADP Toolbar] Received panel.loaded, pending:', pendingNavigationRef.current);
             panelReadyRef.current = true;
 
             // Drain any pending navigation queued before the panel was ready
@@ -238,20 +240,21 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const iframeRouteNavigate = useCallback(
         (url: string) => {
+            console.log('[ADP Toolbar] iframeRouteNavigate', {url, iframeEnabled, panelReady: panelReadyRef.current, hasIframe: !!activeComponents.iframe});
             if (!activeComponents.iframe) return;
 
             if (!iframeEnabled) {
-                // Iframe is closed — open it and queue navigation for after panel.loaded
+                console.log('[ADP Toolbar] Iframe closed → opening, queuing URL');
                 setIframeEnabled(true);
                 pendingNavigationRef.current = url;
                 return;
             }
 
             if (panelReadyRef.current) {
-                // Panel is loaded — dispatch immediately
+                console.log('[ADP Toolbar] Panel ready → sending directly');
                 sendToIframe(url);
             } else {
-                // Iframe is mounted but panel hasn't signaled ready yet — queue
+                console.log('[ADP Toolbar] Panel not ready → queuing URL');
                 pendingNavigationRef.current = url;
             }
         },

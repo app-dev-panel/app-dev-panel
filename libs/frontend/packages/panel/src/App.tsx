@@ -40,6 +40,7 @@ export default function App({config}: AppProps) {
     }, [config.backend.usePreferredUrl, config.backend.baseUrl]);
 
     useEffect(() => {
+        console.log('[ADP Panel] Sending panel.loaded to parent');
         dispatchWindowEvent(window.parent, 'panel.loaded', true);
 
         const listener = (event: MessageEvent) => {
@@ -49,8 +50,10 @@ export default function App({config}: AppProps) {
             const data = event.data;
 
             if (data && typeof data === 'object' && 'event' in data) {
+                console.log('[ADP Panel] Received message:', data.event, data.value);
                 switch (data.event as CrossWindowEventType) {
                     case 'router.navigate':
+                        console.log('[ADP Panel] Navigating to:', data.value);
                         router.navigate(data.value);
                         break;
                 }
