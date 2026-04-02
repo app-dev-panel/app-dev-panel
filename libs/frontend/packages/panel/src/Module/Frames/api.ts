@@ -1,6 +1,6 @@
 import {framesSlice} from '@app-dev-panel/panel/Module/Frames/Context/Context';
 import {persistReducer} from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+import storage from '@app-dev-panel/sdk/API/storage';
 
 const framesSliceConfig = {key: framesSlice.name, version: 1, storage};
 

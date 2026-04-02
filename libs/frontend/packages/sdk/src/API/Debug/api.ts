@@ -1,7 +1,7 @@
 import {debugSlice} from '@app-dev-panel/sdk/API/Debug/Context';
 import {debugApi} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {persistReducer} from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+import storage from '@app-dev-panel/sdk/API/storage';
 
 const debugSliceConfig = {key: debugSlice.name, version: 1, whitelist: ['entry'], storage};
 
