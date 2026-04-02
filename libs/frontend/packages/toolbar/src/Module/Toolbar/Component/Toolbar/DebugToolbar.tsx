@@ -160,7 +160,6 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         setIframeEnabled((value) => !value);
     }, [activeComponents]);
 
-    const iframeContainerRef = useRef<HTMLDivElement | undefined>(undefined);
     const {position, separatorProps, setPosition} = useResizable({
         axis: 'y',
         initial: iframeHeight,
@@ -168,7 +167,6 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         max: 1000,
         reverse: true,
         disabled: !isToolbarOpened,
-        containerRef: iframeContainerRef,
         onResizeEnd: (e) => {
             dispatch(setIFrameHeight(e.position));
         },
@@ -226,7 +224,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     // Expanded state: full toolbar bar at bottom
     return (
         <Portal>
-            <Box ref={iframeContainerRef} sx={{position: 'sticky', bottom: 0, zIndex: 1300}}>
+            <Box sx={{position: 'sticky', bottom: 0, zIndex: 1300}}>
                 {/* Resize handle (only when iframe is active) */}
                 {iframeEnabled && (
                     <Box
