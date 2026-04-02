@@ -1,5 +1,6 @@
 ---
 title: Хранилище
+description: "Как ADP сохраняет отладочные данные через StorageInterface. FileStorage по умолчанию пишет JSON-файлы на диск."
 ---
 
 # Хранилище

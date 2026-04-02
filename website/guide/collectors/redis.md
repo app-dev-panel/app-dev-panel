@@ -1,5 +1,6 @@
 ---
 title: Redis Collector
+description: "ADP Redis Collector captures Redis commands with arguments, execution time, and connection info."
 ---
 
 # Redis Collector

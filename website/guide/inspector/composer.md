@@ -1,5 +1,6 @@
 ---
 title: Composer Inspector
+description: "ADP Composer Inspector shows installed packages, versions, autoload config, and dependency tree."
 ---
 
 # Composer Inspector

@@ -1,5 +1,6 @@
 ---
 title: Sponsor ADP
+description: "Support ADP development with sponsorship. Help fund new features, infrastructure, and active maintenance."
 ---
 
 # Sponsor ADP

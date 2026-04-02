@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress';
 import llmstxt from 'vitepress-plugin-llms';
 import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs';
 import { classLinkPlugin } from './class-link';
+import { generateFeed } from './feed';
 import { pkgLinkPlugin } from './pkg-link';
 
 export default defineConfig({
@@ -37,6 +38,12 @@ export default defineConfig({
         ['meta', { name: 'theme-color', content: '#2563EB' }],
         ['meta', { property: 'og:type', content: 'website' }],
         ['meta', { property: 'og:site_name', content: 'ADP — Application Development Panel' }],
+        ['meta', { property: 'og:image', content: 'https://app-dev-panel.github.io/app-dev-panel/og-image.png' }],
+        ['meta', { property: 'og:url', content: 'https://app-dev-panel.github.io/app-dev-panel/' }],
+        ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+        ['meta', { name: 'twitter:image', content: 'https://app-dev-panel.github.io/app-dev-panel/og-image.png' }],
+        ['link', { rel: 'alternate', type: 'application/rss+xml', title: 'ADP Blog', href: '/app-dev-panel/feed.xml' }],
+        ['link', { rel: 'alternate', type: 'application/atom+xml', title: 'ADP Blog', href: '/app-dev-panel/feed.atom' }],
     ],
 
     locales: {
@@ -258,57 +265,57 @@ export default defineConfig({
                             text: 'Руководства по коллекторам',
                             collapsed: true,
                             items: [
-                                { text: 'Log', link: '/guide/collectors/log' },
-                                { text: 'Event', link: '/guide/collectors/event' },
-                                { text: 'Exception', link: '/guide/collectors/exception' },
-                                { text: 'Database', link: '/guide/collectors/database' },
-                                { text: 'Cache', link: '/guide/collectors/cache' },
-                                { text: 'Redis', link: '/guide/collectors/redis' },
-                                { text: 'HTTP Client', link: '/guide/collectors/http-client' },
-                                { text: 'Mailer', link: '/guide/collectors/mailer' },
-                                { text: 'Queue', link: '/guide/collectors/queue' },
-                                { text: 'Validator', link: '/guide/collectors/validator' },
-                                { text: 'Router', link: '/guide/collectors/router' },
-                                { text: 'Translator', link: '/guide/collectors/translator' },
-                                { text: 'Timeline', link: '/guide/collectors/timeline' },
-                                { text: 'VarDumper', link: '/guide/collectors/var-dumper' },
-                                { text: 'Request', link: '/guide/collectors/request' },
-                                { text: 'Environment', link: '/guide/collectors/environment' },
-                                { text: 'Elasticsearch', link: '/guide/collectors/elasticsearch' },
-                                { text: 'OpenTelemetry', link: '/guide/collectors/opentelemetry' },
-                                { text: 'Authorization', link: '/guide/collectors/authorization' },
-                                { text: 'Deprecation', link: '/guide/collectors/deprecation' },
-                                { text: 'Service', link: '/guide/collectors/service' },
-                                { text: 'Middleware', link: '/guide/collectors/middleware' },
-                                { text: 'Template', link: '/guide/collectors/template' },
-                                { text: 'AssetBundle', link: '/guide/collectors/asset-bundle' },
-                                { text: 'WebAppInfo', link: '/guide/collectors/web-app-info' },
-                                { text: 'Command', link: '/guide/collectors/command' },
-                                { text: 'ConsoleAppInfo', link: '/guide/collectors/console-app-info' },
-                                { text: 'Filesystem Stream', link: '/guide/collectors/filesystem-stream' },
-                                { text: 'HTTP Stream', link: '/guide/collectors/http-stream' },
+                                { text: 'Log', link: '/ru/guide/collectors/log' },
+                                { text: 'Event', link: '/ru/guide/collectors/event' },
+                                { text: 'Exception', link: '/ru/guide/collectors/exception' },
+                                { text: 'Database', link: '/ru/guide/collectors/database' },
+                                { text: 'Cache', link: '/ru/guide/collectors/cache' },
+                                { text: 'Redis', link: '/ru/guide/collectors/redis' },
+                                { text: 'HTTP Client', link: '/ru/guide/collectors/http-client' },
+                                { text: 'Mailer', link: '/ru/guide/collectors/mailer' },
+                                { text: 'Queue', link: '/ru/guide/collectors/queue' },
+                                { text: 'Validator', link: '/ru/guide/collectors/validator' },
+                                { text: 'Router', link: '/ru/guide/collectors/router' },
+                                { text: 'Translator', link: '/ru/guide/collectors/translator' },
+                                { text: 'Timeline', link: '/ru/guide/collectors/timeline' },
+                                { text: 'VarDumper', link: '/ru/guide/collectors/var-dumper' },
+                                { text: 'Request', link: '/ru/guide/collectors/request' },
+                                { text: 'Environment', link: '/ru/guide/collectors/environment' },
+                                { text: 'Elasticsearch', link: '/ru/guide/collectors/elasticsearch' },
+                                { text: 'OpenTelemetry', link: '/ru/guide/collectors/opentelemetry' },
+                                { text: 'Authorization', link: '/ru/guide/collectors/authorization' },
+                                { text: 'Deprecation', link: '/ru/guide/collectors/deprecation' },
+                                { text: 'Service', link: '/ru/guide/collectors/service' },
+                                { text: 'Middleware', link: '/ru/guide/collectors/middleware' },
+                                { text: 'Template', link: '/ru/guide/collectors/template' },
+                                { text: 'AssetBundle', link: '/ru/guide/collectors/asset-bundle' },
+                                { text: 'WebAppInfo', link: '/ru/guide/collectors/web-app-info' },
+                                { text: 'Command', link: '/ru/guide/collectors/command' },
+                                { text: 'ConsoleAppInfo', link: '/ru/guide/collectors/console-app-info' },
+                                { text: 'Filesystem Stream', link: '/ru/guide/collectors/filesystem-stream' },
+                                { text: 'HTTP Stream', link: '/ru/guide/collectors/http-stream' },
                             ],
                         },
                         {
                             text: 'Руководства по инспектору',
                             collapsed: true,
                             items: [
-                                { text: 'Маршруты', link: '/guide/inspector/routes' },
-                                { text: 'Слушатели событий', link: '/guide/inspector/events' },
-                                { text: 'Конфигурация', link: '/guide/inspector/config' },
-                                { text: 'База данных', link: '/guide/inspector/database' },
-                                { text: 'Файловый менеджер', link: '/guide/inspector/files' },
-                                { text: 'Команды', link: '/guide/inspector/commands' },
-                                { text: 'Composer', link: '/guide/inspector/composer' },
-                                { text: 'Git', link: '/guide/inspector/git' },
-                                { text: 'Авторизация', link: '/guide/inspector/authorization' },
-                                { text: 'Кеш', link: '/guide/inspector/cache' },
-                                { text: 'Redis', link: '/guide/inspector/redis' },
-                                { text: 'Elasticsearch', link: '/guide/inspector/elasticsearch' },
-                                { text: 'Переводы', link: '/guide/inspector/translations' },
-                                { text: 'PHP Info', link: '/guide/inspector/phpinfo' },
-                                { text: 'OPcache', link: '/guide/inspector/opcache' },
-                                { text: 'Покрытие кода', link: '/guide/inspector/coverage' },
+                                { text: 'Маршруты', link: '/ru/guide/inspector/routes' },
+                                { text: 'Слушатели событий', link: '/ru/guide/inspector/events' },
+                                { text: 'Конфигурация', link: '/ru/guide/inspector/config' },
+                                { text: 'База данных', link: '/ru/guide/inspector/database' },
+                                { text: 'Файловый менеджер', link: '/ru/guide/inspector/files' },
+                                { text: 'Команды', link: '/ru/guide/inspector/commands' },
+                                { text: 'Composer', link: '/ru/guide/inspector/composer' },
+                                { text: 'Git', link: '/ru/guide/inspector/git' },
+                                { text: 'Авторизация', link: '/ru/guide/inspector/authorization' },
+                                { text: 'Кеш', link: '/ru/guide/inspector/cache' },
+                                { text: 'Redis', link: '/ru/guide/inspector/redis' },
+                                { text: 'Elasticsearch', link: '/ru/guide/inspector/elasticsearch' },
+                                { text: 'Переводы', link: '/ru/guide/inspector/translations' },
+                                { text: 'PHP Info', link: '/ru/guide/inspector/phpinfo' },
+                                { text: 'OPcache', link: '/ru/guide/inspector/opcache' },
+                                { text: 'Покрытие кода', link: '/ru/guide/inspector/coverage' },
                             ],
                         },
                         {
@@ -429,7 +436,30 @@ export default defineConfig({
 
     sitemap: {
         hostname: 'https://app-dev-panel.github.io/app-dev-panel/',
+        transformItems(items) {
+            return items.map((item) => {
+                if (item.url === '') {
+                    item.changefreq = 'weekly';
+                    item.priority = 1.0;
+                } else if (item.url.startsWith('guide/')) {
+                    item.changefreq = 'weekly';
+                    item.priority = 0.8;
+                } else if (item.url.startsWith('api/')) {
+                    item.changefreq = 'monthly';
+                    item.priority = 0.7;
+                } else if (item.url.startsWith('blog/')) {
+                    item.changefreq = 'monthly';
+                    item.priority = 0.6;
+                } else {
+                    item.changefreq = 'monthly';
+                    item.priority = 0.5;
+                }
+                return item;
+            });
+        },
     },
+
+    buildEnd: generateFeed,
 
     lastUpdated: true,
 });

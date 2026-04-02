@@ -1,3 +1,7 @@
+---
+description: "Install and configure ADP for Yii 3. Config plugin integration, collector wiring, and middleware setup."
+---
+
 # Yii 3 Adapter
 
 The Yii 3 adapter is the reference ADP adapter. It bridges ADP Kernel and API into Yii 3 via config plugins.

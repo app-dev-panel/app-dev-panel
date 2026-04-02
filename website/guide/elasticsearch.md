@@ -1,5 +1,6 @@
 ---
 title: Elasticsearch
+description: "Capture Elasticsearch requests and inspect live cluster state with ADP's collector and inspector integration."
 ---
 
 # Elasticsearch

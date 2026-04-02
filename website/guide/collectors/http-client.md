@@ -1,5 +1,6 @@
 ---
 title: HTTP Client Collector
+description: "ADP HTTP Client Collector records PSR-18 outgoing HTTP requests with headers, body, timing, and responses."
 ---
 
 # HTTP Client Collector

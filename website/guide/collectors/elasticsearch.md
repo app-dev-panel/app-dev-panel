@@ -1,5 +1,6 @@
 ---
 title: Elasticsearch Collector
+description: "ADP Elasticsearch Collector captures search queries, index operations, and cluster requests with timing."
 ---
 
 # Elasticsearch Collector

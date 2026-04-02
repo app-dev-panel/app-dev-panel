@@ -1,5 +1,6 @@
 ---
 title: CLI Commands
+description: "ADP CLI commands for managing the debug system: serve, reset, broadcast, query, and MCP server operations."
 ---
 
 # CLI Commands

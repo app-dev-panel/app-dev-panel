@@ -1,5 +1,6 @@
 ---
 title: Template Collector
+description: "ADP Template Collector records template renders with name, engine, variables, and rendering time."
 ---
 
 # Template Collector

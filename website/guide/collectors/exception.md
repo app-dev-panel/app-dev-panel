@@ -1,5 +1,6 @@
 ---
 title: Exception Collector
+description: "ADP Exception Collector captures thrown exceptions with stack traces, message, code, and context data."
 ---
 
 # Exception Collector

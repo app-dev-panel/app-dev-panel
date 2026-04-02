@@ -1,5 +1,6 @@
 ---
 title: Commands
+description: "ADP Commands Inspector lists all registered console commands with descriptions and argument definitions."
 ---
 
 # Commands

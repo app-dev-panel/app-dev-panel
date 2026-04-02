@@ -1,5 +1,6 @@
 ---
 title: Data Flow
+description: "How debug data flows from your PHP application through proxies and collectors to the ADP panel via REST and SSE."
 ---
 
 # Data Flow

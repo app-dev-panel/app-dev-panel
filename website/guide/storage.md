@@ -1,5 +1,6 @@
 ---
 title: Storage
+description: "How ADP persists debug data via StorageInterface. Default FileStorage writes JSON files; supports custom backends."
 ---
 
 # Storage

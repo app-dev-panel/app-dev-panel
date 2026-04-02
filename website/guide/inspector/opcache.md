@@ -1,5 +1,6 @@
 ---
 title: OPcache Inspector
+description: "ADP OPcache Inspector shows cache status, hit rates, cached scripts, and memory usage statistics."
 ---
 
 # OPcache Inspector

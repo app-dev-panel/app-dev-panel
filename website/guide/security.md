@@ -1,5 +1,6 @@
 ---
 title: Security & Authorization
+description: "ADP captures authentication and authorization data: user identity, roles, tokens, access decisions, impersonation."
 ---
 
 # Security & Authorization

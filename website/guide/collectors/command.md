@@ -1,5 +1,6 @@
 ---
 title: Command Collector
+description: "ADP Command Collector captures console command executions with name, arguments, exit code, and timing."
 ---
 
 # Command Collector

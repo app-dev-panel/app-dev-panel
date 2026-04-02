@@ -1,5 +1,6 @@
 ---
 title: Request Collector
+description: "ADP Request Collector captures PSR-7 HTTP request and response details: method, URL, headers, body, status."
 ---
 
 # Request Collector

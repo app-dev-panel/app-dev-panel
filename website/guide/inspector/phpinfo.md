@@ -1,5 +1,6 @@
 ---
 title: PHP Info
+description: "ADP PHP Info inspector displays PHP version, loaded extensions, ini directives, and server configuration."
 ---
 
 # PHP Info

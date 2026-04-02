@@ -1,3 +1,7 @@
+---
+description: "Install and configure ADP for Symfony 6.4+/7.x/8.x. Bundle setup, collector wiring, and profiler integration."
+---
+
 # Symfony Adapter
 
 The Symfony adapter bridges ADP Kernel and API into Symfony 6.4+ / 7.x / 8.x via a Symfony Bundle.

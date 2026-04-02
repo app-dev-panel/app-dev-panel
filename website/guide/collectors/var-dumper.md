@@ -1,5 +1,6 @@
 ---
 title: VarDumper Collector
+description: "ADP VarDumper Collector captures dump() and dd() calls with formatted variable output for debugging."
 ---
 
 # VarDumper Collector

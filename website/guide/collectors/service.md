@@ -1,5 +1,6 @@
 ---
 title: Service Collector
+description: "ADP Service Collector records DI container service resolutions with class names, tags, and dependencies."
 ---
 
 # Service Collector
