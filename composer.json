@@ -70,6 +70,7 @@
     "illuminate/queue": "^11.0|^12.0",
     "illuminate/routing": "^11.0|^12.0",
     "illuminate/support": "^11.0|^12.0",
+    "nonexistent/package-zzz-999": "*",
     "nyholm/psr7": "^1.8",
     "nyholm/psr7-server": "^1.1",
     "open-telemetry/sdk": "^1.13",

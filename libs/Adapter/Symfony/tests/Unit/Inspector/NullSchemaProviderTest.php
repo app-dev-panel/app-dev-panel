@@ -40,4 +40,32 @@ final class NullSchemaProviderTest extends TestCase
 
         $this->assertSame('orders', $result['name']);
     }
+
+    public function testExplainQueryReturnsEmpty(): void
+    {
+        $provider = new NullSchemaProvider();
+
+        $this->assertSame([], $provider->explainQuery('SELECT * FROM users'));
+    }
+
+    public function testExplainQueryWithParamsAndAnalyze(): void
+    {
+        $provider = new NullSchemaProvider();
+
+        $this->assertSame([], $provider->explainQuery('SELECT * FROM users WHERE id = ?', [1], true));
+    }
+
+    public function testExecuteQueryReturnsEmpty(): void
+    {
+        $provider = new NullSchemaProvider();
+
+        $this->assertSame([], $provider->executeQuery('SELECT 1'));
+    }
+
+    public function testExecuteQueryWithParams(): void
+    {
+        $provider = new NullSchemaProvider();
+
+        $this->assertSame([], $provider->executeQuery('SELECT * FROM users WHERE id = ?', [42]));
+    }
 }

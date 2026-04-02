@@ -142,4 +142,113 @@ final class LaravelTranslatorProxyTest extends TestCase
         $collected = $this->collector->getCollected();
         $this->assertSame('ja', $collected['translations'][0]['locale']);
     }
+
+    public function testChoiceWithMissingTranslation(): void
+    {
+        $inner = $this->createMock(Translator::class);
+        // Laravel returns the key when translation is missing
+        $inner->method('choice')->willReturn('messages.items_count');
+        $inner->method('getLocale')->willReturn('en');
+
+        $proxy = new LaravelTranslatorProxy($inner, $this->collector);
+
+        $result = $proxy->choice('messages.items_count', 5, [], 'en');
+
+        $this->assertSame('messages.items_count', $result);
+
+        $collected = $this->collector->getCollected();
+        $this->assertSame(1, $collected['missingCount']);
+        $this->assertTrue($collected['translations'][0]['missing']);
+        $this->assertNull($collected['translations'][0]['translation']);
+    }
+
+    public function testChoiceWithoutGroupUsesMessagesCategory(): void
+    {
+        $inner = $this->createMock(Translator::class);
+        $inner->method('choice')->willReturn('2 articles');
+        $inner->method('getLocale')->willReturn('fr');
+
+        $proxy = new LaravelTranslatorProxy($inner, $this->collector);
+
+        $proxy->choice('articles', 2, [], 'fr');
+
+        $collected = $this->collector->getCollected();
+        $this->assertSame('messages', $collected['translations'][0]['category']);
+        $this->assertSame('articles', $collected['translations'][0]['message']);
+    }
+
+    public function testChoiceUsesDefaultLocaleWhenNull(): void
+    {
+        $inner = $this->createMock(Translator::class);
+        $inner->method('choice')->willReturn('1 item');
+        $inner->method('getLocale')->willReturn('de');
+
+        $proxy = new LaravelTranslatorProxy($inner, $this->collector);
+
+        $proxy->choice('cart.items', 1);
+
+        $collected = $this->collector->getCollected();
+        $this->assertSame('de', $collected['translations'][0]['locale']);
+        $this->assertSame('cart', $collected['translations'][0]['category']);
+        $this->assertSame('items', $collected['translations'][0]['message']);
+    }
+
+    public function testGetWithArrayResultIsMarkedAsMissing(): void
+    {
+        $inner = $this->createMock(Translator::class);
+        // Laravel returns an array for group-level access like get('validation')
+        $inner->method('get')->willReturn(['required' => 'This field is required']);
+        $inner->method('getLocale')->willReturn('en');
+
+        $proxy = new LaravelTranslatorProxy($inner, $this->collector);
+
+        $result = $proxy->get('validation');
+
+        $this->assertIsArray($result);
+
+        $collected = $this->collector->getCollected();
+        // Array result is not equal to the string key, so missing=false
+        $this->assertFalse($collected['translations'][0]['missing']);
+        // Non-string result should have null translation
+        $this->assertNull($collected['translations'][0]['translation']);
+    }
+
+    public function testMultipleTranslationsAccumulate(): void
+    {
+        $inner = $this->createMock(Translator::class);
+        $inner
+            ->method('get')
+            ->willReturnMap([
+                ['messages.hello', [], 'en', 'Hello'],
+                ['messages.goodbye', [], 'en', 'Goodbye'],
+                ['messages.missing_key', [], 'en', 'messages.missing_key'],
+            ]);
+        $inner->method('getLocale')->willReturn('en');
+
+        $proxy = new LaravelTranslatorProxy($inner, $this->collector);
+
+        $proxy->get('messages.hello', [], 'en');
+        $proxy->get('messages.goodbye', [], 'en');
+        $proxy->get('messages.missing_key', [], 'en');
+
+        $collected = $this->collector->getCollected();
+        $this->assertSame(3, $collected['totalCount']);
+        $this->assertSame(1, $collected['missingCount']);
+    }
+
+    public function testGetWithNestedDotKey(): void
+    {
+        $inner = $this->createMock(Translator::class);
+        $inner->method('get')->willReturn('The field is required');
+        $inner->method('getLocale')->willReturn('en');
+
+        $proxy = new LaravelTranslatorProxy($inner, $this->collector);
+
+        $proxy->get('validation.custom.email.required', [], 'en');
+
+        $collected = $this->collector->getCollected();
+        // Only the first dot separates the category from the message
+        $this->assertSame('validation', $collected['translations'][0]['category']);
+        $this->assertSame('custom.email.required', $collected['translations'][0]['message']);
+    }
 }

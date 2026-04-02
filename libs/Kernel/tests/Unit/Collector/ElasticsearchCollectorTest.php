@@ -182,4 +182,60 @@ final class ElasticsearchCollectorTest extends AbstractCollectorTestCase
         $data = $collector->getCollected();
         $this->assertSame([], $data['requests']);
     }
+
+    public function testLogRequestWhenInactive(): void
+    {
+        $collector = new ElasticsearchCollector(new TimelineCollector());
+        // Not started
+        $record = new ElasticsearchRequestRecord(
+            method: 'GET',
+            endpoint: '/test/_search',
+            body: '{}',
+            line: 'Test.php:1',
+            startTime: 0.0,
+            endTime: 0.1,
+            statusCode: 200,
+        );
+        $collector->logRequest($record);
+
+        $this->assertSame([], $collector->getCollected());
+    }
+
+    public function testExtractIndexFromEmptyEndpoint(): void
+    {
+        $collector = new ElasticsearchCollector(new TimelineCollector());
+        $collector->startup();
+
+        $collector->collectRequestStart('r1', 'GET', '/', '', 'Test.php:1');
+        $collector->collectRequestEnd('r1', 200, '', 0);
+
+        $data = $collector->getCollected();
+        $this->assertSame('', $data['requests'][0]['index']);
+    }
+
+    public function testExtractHitsCountWithInvalidJson(): void
+    {
+        $collector = new ElasticsearchCollector(new TimelineCollector());
+        $collector->startup();
+
+        $collector->collectRequestStart('r1', 'GET', '/test/_search', '{}', 'Test.php:1');
+        $collector->collectRequestEnd('r1', 200, 'not-json', 8);
+
+        $data = $collector->getCollected();
+        $this->assertNull($data['requests'][0]['hitsCount']);
+    }
+
+    public function testExtractHitsCountWithEs5StyleTotal(): void
+    {
+        $collector = new ElasticsearchCollector(new TimelineCollector());
+        $collector->startup();
+
+        // ES5 format: hits.total is an integer, not an object
+        $responseBody = json_encode(['hits' => ['total' => 42, 'hits' => []]]);
+        $collector->collectRequestStart('r1', 'GET', '/test/_search', '{}', 'Test.php:1');
+        $collector->collectRequestEnd('r1', 200, $responseBody, strlen($responseBody));
+
+        $data = $collector->getCollected();
+        $this->assertSame(42, $data['requests'][0]['hitsCount']);
+    }
 }

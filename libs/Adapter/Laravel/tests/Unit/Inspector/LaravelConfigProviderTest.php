@@ -301,6 +301,185 @@ final class LaravelConfigProviderTest extends TestCase
         $this->assertSame('App\\Listeners\\MyListener', $result[0]['listeners'][0]);
     }
 
+    public function testGetDiIsAliasForServices(): void
+    {
+        $app = $this->createAppMock();
+        $provider = new LaravelConfigProvider($app);
+
+        $this->assertSame($provider->get('di'), $provider->get('services'));
+    }
+
+    public function testGetBundlesIsAliasForProviders(): void
+    {
+        $app = $this->createAppMock();
+        $provider = new LaravelConfigProvider($app);
+
+        $this->assertSame($provider->get('bundles'), $provider->get('providers'));
+    }
+
+    public function testGetEventsWebIsAliasForEvents(): void
+    {
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(false);
+
+        $provider = new LaravelConfigProvider($app);
+
+        $this->assertSame($provider->get('events'), $provider->get('events-web'));
+    }
+
+    public function testGetEventsWithDispatcherLackingGetRawListeners(): void
+    {
+        $dispatcherWithoutMethod = new class {
+            // No getRawListeners method
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use (
+            $dispatcherWithoutMethod,
+        ): mixed {
+            if ($abstract === 'events') {
+                return $dispatcherWithoutMethod;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+
+        $this->assertSame([], $provider->get('events'));
+    }
+
+    public function testGetEventsWithClassNameEvent(): void
+    {
+        $mockDispatcher = new class {
+            public function getRawListeners(): array
+            {
+                return [\stdClass::class => ['SomeListener']];
+            }
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($mockDispatcher): mixed {
+            if ($abstract === 'events') {
+                return $mockDispatcher;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+        $result = $provider->get('events');
+
+        $this->assertCount(1, $result);
+        $this->assertSame(\stdClass::class, $result[0]['name']);
+        $this->assertSame(\stdClass::class, $result[0]['class']);
+    }
+
+    public function testGetEventsWithNonClassNameEvent(): void
+    {
+        $mockDispatcher = new class {
+            public function getRawListeners(): array
+            {
+                return ['custom.event' => ['SomeListener']];
+            }
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($mockDispatcher): mixed {
+            if ($abstract === 'events') {
+                return $mockDispatcher;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+        $result = $provider->get('events');
+
+        $this->assertCount(1, $result);
+        $this->assertSame('custom.event', $result[0]['name']);
+        $this->assertNull($result[0]['class']);
+    }
+
+    public function testGetEventsWithStringArrayListener(): void
+    {
+        $mockDispatcher = new class {
+            public function getRawListeners(): array
+            {
+                return ['app.event' => [['App\\Listeners\\MyListener', 'handle']]];
+            }
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($mockDispatcher): mixed {
+            if ($abstract === 'events') {
+                return $mockDispatcher;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+        $result = $provider->get('events');
+
+        $this->assertSame('App\\Listeners\\MyListener::handle', $result[0]['listeners'][0]);
+    }
+
+    public function testGetEventsWithUnknownListenerType(): void
+    {
+        $mockDispatcher = new class {
+            public function getRawListeners(): array
+            {
+                return ['app.event' => [42]]; // int is not a known listener type
+            }
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($mockDispatcher): mixed {
+            if ($abstract === 'events') {
+                return $mockDispatcher;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+        $result = $provider->get('events');
+
+        $this->assertSame('int', $result[0]['listeners'][0]);
+    }
+
+    public function testGetEventsMultipleEventsSorted(): void
+    {
+        $mockDispatcher = new class {
+            public function getRawListeners(): array
+            {
+                return [
+                    'z.event' => ['ZListener'],
+                    'a.event' => ['AListener'],
+                    'm.event' => ['MListener'],
+                ];
+            }
+        };
+
+        $app = $this->createAppMock();
+        $app->method('bound')->with('events')->willReturn(true);
+        $app->method('make')->willReturnCallback(static function (string $abstract) use ($mockDispatcher): mixed {
+            if ($abstract === 'events') {
+                return $mockDispatcher;
+            }
+            return null;
+        });
+
+        $provider = new LaravelConfigProvider($app);
+        $result = $provider->get('events');
+
+        $this->assertCount(3, $result);
+        $this->assertSame('a.event', $result[0]['name']);
+        $this->assertSame('m.event', $result[1]['name']);
+        $this->assertSame('z.event', $result[2]['name']);
+    }
+
     /**
      * @return Application&\PHPUnit\Framework\MockObject\MockObject
      */

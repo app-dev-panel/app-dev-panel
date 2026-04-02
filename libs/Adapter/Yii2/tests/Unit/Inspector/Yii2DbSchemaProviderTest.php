@@ -290,6 +290,74 @@ final class Yii2DbSchemaProviderTest extends TestCase
         $provider->explainQuery('SELECT * FROM users');
     }
 
+    public function testExplainQueryMysqlWithoutAnalyze(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->method('queryAll')->willReturn([['id' => 1, 'type' => 'ALL']]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('getDriverName')->willReturn('mysql');
+        $connection
+            ->expects($this->once())
+            ->method('createCommand')
+            ->with('EXPLAIN SELECT * FROM orders')
+            ->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $result = $provider->explainQuery('SELECT * FROM orders');
+
+        $this->assertSame([['id' => 1, 'type' => 'ALL']], $result);
+    }
+
+    public function testExplainQuerySqliteIgnoresAnalyzeFlag(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->method('queryAll')->willReturn([]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('getDriverName')->willReturn('sqlite');
+        $connection
+            ->expects($this->once())
+            ->method('createCommand')
+            ->with('EXPLAIN QUERY PLAN SELECT 1')
+            ->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        // Even with analyze=true, SQLite should use EXPLAIN QUERY PLAN
+        $provider->explainQuery('SELECT 1', [], true);
+    }
+
+    public function testExecuteQueryWithEmptyParams(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->expects($this->never())->method('bindValues');
+        $command->method('queryAll')->willReturn([]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('createCommand')->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $result = $provider->executeQuery('SELECT 1', []);
+
+        $this->assertSame([], $result);
+    }
+
+    public function testExplainQueryWithEmptyParams(): void
+    {
+        $command = $this->createMock(Command::class);
+        $command->expects($this->never())->method('bindValues');
+        $command->method('queryAll')->willReturn([]);
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('getDriverName')->willReturn('pgsql');
+        $connection->method('createCommand')->willReturn($command);
+
+        $provider = new Yii2DbSchemaProvider($connection);
+        $result = $provider->explainQuery('SELECT 1', []);
+
+        $this->assertSame([], $result);
+    }
+
     public function testExplainQueryWithParams(): void
     {
         $command = $this->createMock(Command::class);

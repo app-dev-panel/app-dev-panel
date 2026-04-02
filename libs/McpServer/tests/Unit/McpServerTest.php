@@ -184,6 +184,87 @@ final class McpServerTest extends TestCase
         $this->assertNull($response);
     }
 
+    public function testRunThrowsWithoutTransport(): void
+    {
+        $server = $this->createServer();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Cannot run() without a stdio transport');
+        $server->run();
+    }
+
+    public function testRunProcessesMessagesUntilEof(): void
+    {
+        $input = fopen('php://memory', 'rw');
+        fwrite($input, '{"jsonrpc":"2.0","id":1,"method":"ping"}' . "\n");
+        fwrite($input, '{"jsonrpc":"2.0","id":2,"method":"ping"}' . "\n");
+        rewind($input);
+
+        $output = fopen('php://memory', 'rw');
+        $transport = new \AppDevPanel\McpServer\Transport\StdioTransport($input, $output);
+        $server = new McpServer(new ToolRegistry(), $transport);
+
+        $server->run();
+
+        rewind($output);
+        $lines = [];
+        while (($line = fgets($output)) !== false) {
+            $lines[] = json_decode(trim($line), true, 512, JSON_THROW_ON_ERROR);
+        }
+
+        $this->assertCount(2, $lines);
+        $this->assertSame(1, $lines[0]['id']);
+        $this->assertSame(2, $lines[1]['id']);
+    }
+
+    public function testRunSkipsNotifications(): void
+    {
+        $input = fopen('php://memory', 'rw');
+        // Notification (no id) — should not produce output
+        fwrite($input, '{"method":"initialized"}' . "\n");
+        // Request — should produce output
+        fwrite($input, '{"jsonrpc":"2.0","id":1,"method":"ping"}' . "\n");
+        rewind($input);
+
+        $output = fopen('php://memory', 'rw');
+        $transport = new \AppDevPanel\McpServer\Transport\StdioTransport($input, $output);
+        $server = new McpServer(new ToolRegistry(), $transport);
+
+        $server->run();
+
+        rewind($output);
+        $lines = [];
+        while (($line = fgets($output)) !== false) {
+            $lines[] = json_decode(trim($line), true, 512, JSON_THROW_ON_ERROR);
+        }
+
+        $this->assertCount(1, $lines);
+        $this->assertSame(1, $lines[0]['id']);
+    }
+
+    public function testNotificationCancelledReturnsNull(): void
+    {
+        $server = $this->createServer();
+
+        $response = $server->process([
+            'method' => 'notifications/cancelled',
+            'params' => ['requestId' => 'abc'],
+        ]);
+
+        $this->assertNull($response);
+    }
+
+    public function testUnknownNotificationReturnsNull(): void
+    {
+        $server = $this->createServer();
+
+        $response = $server->process([
+            'method' => 'some/unknown/notification',
+        ]);
+
+        $this->assertNull($response);
+    }
+
     private function createServer(?ToolRegistry $registry = null): McpServer
     {
         return new McpServer($registry ?? new ToolRegistry());

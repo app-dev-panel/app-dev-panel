@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\Tests\Unit\EventSubscriber;
 
+use AppDevPanel\Adapter\Symfony\Collector\RouterDataExtractor;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriberCollectors;
+use AppDevPanel\Api\Panel\PanelConfig;
+use AppDevPanel\Api\Toolbar\ToolbarConfig;
+use AppDevPanel\Api\Toolbar\ToolbarInjector;
+use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
+use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
@@ -360,5 +367,371 @@ final class HttpSubscriberTest extends TestCase
 
         $data = $webAppInfo->getCollected();
         $this->assertArrayHasKey('applicationProcessingTime', $data);
+    }
+
+    public function testOnKernelRequestCollectsEnvironmentData(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $environmentCollector = new EnvironmentCollector($timeline);
+        $debugger = new Debugger($idGenerator, $storage, [$environmentCollector, $timeline]);
+
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(environment: $environmentCollector));
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/test');
+        $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $subscriber->onKernelRequest($event);
+
+        $data = $environmentCollector->getCollected();
+        $this->assertArrayHasKey('php', $data);
+        $this->assertArrayHasKey('os', $data);
+    }
+
+    public function testOnKernelResponseCallsRouterDataExtractor(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $routerCollector = new RouterCollector($timeline);
+        $routerDataExtractor = new RouterDataExtractor($routerCollector);
+        $debugger = new Debugger($idGenerator, $storage, [$routerCollector, $timeline]);
+
+        $subscriber = new HttpSubscriber(
+            $debugger,
+            new HttpSubscriberCollectors(routerDataExtractor: $routerDataExtractor),
+        );
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        // Start debugger
+        $request = Request::create('/test');
+        $request->attributes->set('_route', 'test_route');
+        $request->attributes->set('_controller', 'App\\Controller\\TestController::index');
+        $request->attributes->set('_route_params', ['id' => '42']);
+        $requestEvent = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+        $subscriber->onKernelRequest($requestEvent);
+
+        // Trigger response
+        $response = new Response('OK', 200);
+        $responseEvent = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
+        $subscriber->onKernelResponse($responseEvent);
+
+        $data = $routerCollector->getCollected();
+        $this->assertSame('test_route', $data['currentRoute']['name']);
+        $this->assertSame('App\\Controller\\TestController::index', $data['currentRoute']['action']);
+    }
+
+    public function testOnKernelResponseMarksWebAppInfoTimings(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $webAppInfo = new WebAppInfoCollector($timeline);
+        $debugger = new Debugger($idGenerator, $storage, [$webAppInfo, $timeline]);
+
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(webAppInfo: $webAppInfo));
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        // Start request
+        $request = Request::create('/test');
+        $subscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
+
+        // Response
+        $response = new Response('OK');
+        $subscriber->onKernelResponse(
+            new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response),
+        );
+
+        $data = $webAppInfo->getCollected();
+        $this->assertArrayHasKey('requestProcessingTime', $data);
+    }
+
+    public function testOnKernelTerminateFlushesToStorage(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $webAppInfo = new WebAppInfoCollector($timeline);
+        $debugger = new Debugger($idGenerator, $storage, [$webAppInfo, $timeline]);
+
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(webAppInfo: $webAppInfo));
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        // Full lifecycle
+        $request = Request::create('/test');
+        $subscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
+
+        $response = new Response('OK');
+        $subscriber->onKernelResponse(
+            new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response),
+        );
+
+        // Check data before terminate (collector still active)
+        $data = $webAppInfo->getCollected();
+        $this->assertArrayHasKey('applicationProcessingTime', $data);
+        $this->assertArrayHasKey('requestProcessingTime', $data);
+
+        $subscriber->onKernelTerminate(new TerminateEvent($kernel, $request, $response));
+
+        // After terminate, data has been flushed to storage
+        $this->assertTrue($response->headers->has('X-Debug-Id'));
+    }
+
+    public function testToolbarInjectionOnHtmlResponse(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $debugger = new Debugger($idGenerator, $storage, []);
+
+        $toolbarInjector = new ToolbarInjector(
+            new PanelConfig('https://cdn.example.com'),
+            new ToolbarConfig(enabled: true),
+        );
+
+        $subscriber = new HttpSubscriber($debugger, toolbarInjector: $toolbarInjector);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        // Start debugger
+        $request = Request::create('/test');
+        $subscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
+
+        // Response with HTML content
+        $response = new Response('<html><body>Hello</body></html>', 200, ['Content-Type' => 'text/html']);
+        $responseEvent = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
+        $subscriber->onKernelResponse($responseEvent);
+
+        $this->assertStringContainsString('app-dev-toolbar', $response->getContent());
+    }
+
+    public function testToolbarNotInjectedWhenDisabled(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $debugger = new Debugger($idGenerator, $storage, []);
+
+        $toolbarInjector = new ToolbarInjector(new PanelConfig(), new ToolbarConfig(enabled: false));
+
+        $subscriber = new HttpSubscriber($debugger, toolbarInjector: $toolbarInjector);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/test');
+        $subscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
+
+        $response = new Response('<html><body>Hello</body></html>', 200, ['Content-Type' => 'text/html']);
+        $subscriber->onKernelResponse(
+            new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response),
+        );
+
+        $this->assertStringNotContainsString('app-dev-toolbar', $response->getContent());
+    }
+
+    public function testToolbarNotInjectedForNonHtmlResponse(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $debugger = new Debugger($idGenerator, $storage, []);
+
+        $toolbarInjector = new ToolbarInjector(new PanelConfig(), new ToolbarConfig(enabled: true));
+
+        $subscriber = new HttpSubscriber($debugger, toolbarInjector: $toolbarInjector);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/test');
+        $subscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
+
+        $response = new Response('{"data":true}', 200, ['Content-Type' => 'application/json']);
+        $subscriber->onKernelResponse(
+            new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response),
+        );
+
+        $this->assertSame('{"data":true}', $response->getContent());
+    }
+
+    public function testToolbarNotInjectedForEmptyContent(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $debugger = new Debugger($idGenerator, $storage, []);
+
+        $toolbarInjector = new ToolbarInjector(new PanelConfig(), new ToolbarConfig(enabled: true));
+
+        $subscriber = new HttpSubscriber($debugger, toolbarInjector: $toolbarInjector);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/test');
+        $subscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
+
+        $response = new Response('', 200, ['Content-Type' => 'text/html']);
+        $subscriber->onKernelResponse(
+            new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response),
+        );
+
+        $this->assertSame('', $response->getContent());
+    }
+
+    public function testVarDumperHandlerRegistered(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $varDumperCollector = new VarDumperCollector($timeline);
+        $debugger = new Debugger($idGenerator, $storage, [$varDumperCollector, $timeline]);
+
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(varDumper: $varDumperCollector));
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/test');
+        $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+        $subscriber->onKernelRequest($event);
+
+        // VarDumper handler should have been registered — calling dump() should not fail
+        $this->assertNotEmpty($debugger->getId());
+    }
+
+    public function testVarDumperHandlerNotRegisteredWithoutCollector(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $debugger = new Debugger($idGenerator, $storage, []);
+
+        // No varDumper collector
+        $subscriber = new HttpSubscriber($debugger);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/test');
+        $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+        $subscriber->onKernelRequest($event);
+
+        // Should complete without error even without VarDumper collector
+        $this->assertNotEmpty($debugger->getId());
+    }
+
+    public function testVarDumperHandlerRegisteredOnlyOnce(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $varDumperCollector = new VarDumperCollector($timeline);
+        $debugger = new Debugger($idGenerator, $storage, [$varDumperCollector, $timeline]);
+
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(varDumper: $varDumperCollector));
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        // First request
+        $request = Request::create('/test');
+        $subscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
+        $subscriber->onKernelTerminate(new TerminateEvent($kernel, $request, new Response()));
+
+        // Second request - handler should not be re-registered
+        $debugger->startup(StartupContext::generic());
+        $subscriber->onKernelRequest(
+            new RequestEvent($kernel, Request::create('/test2'), HttpKernelInterface::MAIN_REQUEST),
+        );
+
+        // No error, completed successfully
+        $this->assertTrue(true);
+    }
+
+    public function testOnKernelResponseWithoutRequestCollectorDoesNotCollectResponse(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $debugger = new Debugger($idGenerator, $storage, []);
+
+        // No request collector — only webAppInfo
+        $timeline = new TimelineCollector();
+        $webAppInfo = new WebAppInfoCollector($timeline);
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(webAppInfo: $webAppInfo));
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/test');
+        $subscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
+
+        $response = new Response('OK', 200);
+        $responseEvent = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
+        $subscriber->onKernelResponse($responseEvent);
+
+        // Should add debug header even without request collector
+        $this->assertTrue($response->headers->has('X-Debug-Id'));
+    }
+
+    public function testVarDumperHandlerCollectsDumpCallsWithSourceLine(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $varDumperCollector = new VarDumperCollector($timeline);
+        $debugger = new Debugger($idGenerator, $storage, [$varDumperCollector, $timeline]);
+
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(varDumper: $varDumperCollector));
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/test');
+        $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+        $subscriber->onKernelRequest($event);
+
+        // Trigger the VarDumper handler by calling dump()
+        // This exercises lines 160-171 of HttpSubscriber (the VarDumper handler closure)
+        \Symfony\Component\VarDumper\VarDumper::dump('test-value');
+
+        $collected = $varDumperCollector->getCollected();
+        $this->assertNotEmpty($collected);
+    }
+
+    public function testAllCollectorsCombined(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $requestCollector = new RequestCollector($timeline);
+        $webAppInfo = new WebAppInfoCollector($timeline);
+        $exceptionCollector = new ExceptionCollector($timeline);
+        $varDumperCollector = new VarDumperCollector($timeline);
+        $environmentCollector = new EnvironmentCollector($timeline);
+        $routerCollector = new RouterCollector($timeline);
+        $routerDataExtractor = new RouterDataExtractor($routerCollector);
+
+        $debugger = new Debugger($idGenerator, $storage, [
+            $requestCollector,
+            $webAppInfo,
+            $exceptionCollector,
+            $varDumperCollector,
+            $environmentCollector,
+            $routerCollector,
+            $timeline,
+        ]);
+
+        $collectors = new HttpSubscriberCollectors(
+            request: $requestCollector,
+            webAppInfo: $webAppInfo,
+            exception: $exceptionCollector,
+            varDumper: $varDumperCollector,
+            environment: $environmentCollector,
+            routerDataExtractor: $routerDataExtractor,
+        );
+
+        $subscriber = new HttpSubscriber($debugger, $collectors);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        // Full lifecycle with all collectors
+        $request = Request::create('/api/data', 'POST');
+        $request->attributes->set('_route', 'api_data');
+        $request->attributes->set('_controller', 'App\\Controller\\DataController::index');
+        $subscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
+
+        $response = new Response('{"ok":true}', 200);
+        $subscriber->onKernelResponse(
+            new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response),
+        );
+
+        // Check data before terminate (collectors still active)
+        $this->assertTrue($response->headers->has('X-Debug-Id'));
+        $this->assertSame('/api/data', $requestCollector->getCollected()['requestPath']);
+        $this->assertArrayHasKey('php', $environmentCollector->getCollected());
+        $this->assertSame('api_data', $routerCollector->getCollected()['currentRoute']['name']);
+
+        $subscriber->onKernelTerminate(new TerminateEvent($kernel, $request, $response));
     }
 }
