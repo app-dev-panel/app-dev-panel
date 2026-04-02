@@ -3,7 +3,7 @@ import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@app-de
 import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
-import {IFrameWrapper} from '@app-dev-panel/sdk/Helper/IFrameWrapper';
+import {dispatchWindowEvent} from '@app-dev-panel/sdk/Helper/dispatchWindowEvent';
 import {DebugEntriesListModal} from '@app-dev-panel/toolbar/Module/Toolbar/Component/DebugEntriesListModal';
 import {CommandItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Console/CommandItem';
 import {DatabaseItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DatabaseItem';
@@ -51,18 +51,15 @@ const useBottomResize = ({
 
     const separatorRef = useRef<HTMLElement | null>(null);
 
-    const onPointerDown = useCallback(
-        (e: React.PointerEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const target = e.currentTarget as HTMLElement;
-            separatorRef.current = target;
-            target.setPointerCapture(e.pointerId);
-            dragRef.current = {startY: e.clientY, startHeight: heightRef.current};
-            setIsDragging(true);
-        },
-        [],
-    );
+    const onPointerDown = useCallback((e: React.PointerEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const target = e.currentTarget as HTMLElement;
+        separatorRef.current = target;
+        target.setPointerCapture(e.pointerId);
+        dragRef.current = {startY: e.clientY, startHeight: heightRef.current};
+        setIsDragging(true);
+    }, []);
 
     const onPointerMove = useCallback(
         (e: React.PointerEvent) => {
@@ -203,35 +200,62 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     const handleClose = useCallback(() => setOpen(false), []);
 
     const iframeRef = useRef<HTMLIFrameElement | undefined>(undefined);
-    const [iframeWrapper, setIframeWrapper] = useState<IFrameWrapper | null>(null);
+    const panelReadyRef = useRef(false);
     const pendingNavigationRef = useRef<string | null>(null);
 
-    useEffect(() => {
-        if (iframeRef.current) {
-            const wrapper = new IFrameWrapper(iframeRef.current);
-            setIframeWrapper(wrapper);
-            if (pendingNavigationRef.current) {
-                wrapper.dispatchEvent('router.navigate', pendingNavigationRef.current);
-                pendingNavigationRef.current = null;
-            }
+    const sendToIframe = useCallback((url: string) => {
+        const contentWindow = iframeRef.current?.contentWindow;
+        if (contentWindow) {
+            dispatchWindowEvent(contentWindow, 'router.navigate', url);
         }
-    }, [iframeRef.current]);
+    }, []);
+
+    // Listen for panel.loaded from iframe — mounted once, uses refs to avoid stale closures
+    useEffect(() => {
+        const onMessage = (e: MessageEvent) => {
+            if (e.origin !== window.location.origin) return;
+            if (e.data?.event !== 'panel.loaded') return;
+
+            panelReadyRef.current = true;
+
+            // Drain any pending navigation queued before the panel was ready
+            if (pendingNavigationRef.current) {
+                const url = pendingNavigationRef.current;
+                pendingNavigationRef.current = null;
+                sendToIframe(url);
+            }
+        };
+        window.addEventListener('message', onMessage);
+        return () => window.removeEventListener('message', onMessage);
+    }, [sendToIframe]);
+
+    // Reset readiness when iframe is unmounted/remounted
+    useEffect(() => {
+        if (!iframeEnabled) {
+            panelReadyRef.current = false;
+        }
+    }, [iframeEnabled]);
 
     const iframeRouteNavigate = useCallback(
         (url: string) => {
-            if (!activeComponents.iframe) {
+            if (!activeComponents.iframe) return;
+
+            if (!iframeEnabled) {
+                // Iframe is closed — open it and queue navigation for after panel.loaded
+                setIframeEnabled(true);
+                pendingNavigationRef.current = url;
                 return;
             }
-            if (!iframeEnabled) {
-                setIframeEnabled(true);
-            }
-            if (iframeWrapper) {
-                iframeWrapper.dispatchEvent('router.navigate', url);
+
+            if (panelReadyRef.current) {
+                // Panel is loaded — dispatch immediately
+                sendToIframe(url);
             } else {
+                // Iframe is mounted but panel hasn't signaled ready yet — queue
                 pendingNavigationRef.current = url;
             }
         },
-        [iframeWrapper, iframeEnabled, activeComponents],
+        [iframeEnabled, activeComponents, sendToIframe],
     );
 
     const toggleIframeHandler = useCallback(() => {
