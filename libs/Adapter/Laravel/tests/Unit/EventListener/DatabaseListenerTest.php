@@ -129,7 +129,7 @@ final class DatabaseListenerTest extends TestCase
 
         $connection = $this->createMock(Connection::class);
         $event = new QueryExecuted(
-            "SELECT * FROM users WHERE name = ? AND role = ?",
+            'SELECT * FROM users WHERE name = ? AND role = ?',
             ["O'Brien", 'admin'],
             1.0,
             $connection,
