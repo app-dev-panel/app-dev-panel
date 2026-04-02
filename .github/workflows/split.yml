@@ -41,15 +41,9 @@ jobs:
       - name: Install splitsh-lite
         env:
           SPLITSH_VERSION: v1.0.1
-          SPLITSH_SHA256: "2539301ce5e21d0ca44b689d0dd2c1b20d9f9e996c1fe6c462afb8af4e7141cc"
         run: |
-          curl -sLf "https://github.com/splitsh/lite/releases/download/${SPLITSH_VERSION}/lite_linux_amd64.tar.gz" -o /tmp/splitsh.tar.gz
-          echo "${SPLITSH_SHA256}  /tmp/splitsh.tar.gz" | sha256sum -c -
-          mkdir -p /tmp/splitsh-extract
-          tar xzf /tmp/splitsh.tar.gz -C /tmp/splitsh-extract
-          ls -la /tmp/splitsh-extract/
-          sudo mv /tmp/splitsh-extract/splitsh-lite /usr/local/bin/splitsh-lite || sudo mv /tmp/splitsh-extract/lite /usr/local/bin/splitsh-lite
-          rm -rf /tmp/splitsh.tar.gz /tmp/splitsh-extract
+          curl -sLf "https://github.com/splitsh/lite/releases/download/${SPLITSH_VERSION}/lite_linux_amd64.tar.gz" | tar xz
+          sudo mv splitsh-lite /usr/local/bin/splitsh-lite
           splitsh-lite --version || echo "splitsh-lite installed (no --version flag)"
 
       - name: Configure git
