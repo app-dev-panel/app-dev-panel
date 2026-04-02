@@ -5,72 +5,81 @@ import {useMediaQuery} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import JsonView from '@uiw/react-json-view';
 import * as React from 'react';
-import {ReactElement} from 'react';
+import {ReactElement, useMemo} from 'react';
+import {monoFontFamily} from './Theme/DefaultTheme';
 import {jsonViewDarkTheme, jsonViewLightTheme} from './Theme/jsonViewTheme';
 
 const REGEXP_PHP_FUNCTION = /(static )?(function |fn )\(.*\).*((\{.*})|(=>.*))/s;
 
-type PrimitiveValueProps = {
-    value: any;
-    renderString?: JsonRendererProps['renderString'];
+const monoSx = {fontFamily: monoFontFamily, fontSize: '13px'} as const;
+
+const renderClassLink = (value: string) => (
+    <FileLink className={value}>
+        <Typography
+            component="span"
+            sx={{
+                display: 'inline',
+                wordBreak: 'break-word',
+                color: 'primary.main',
+                cursor: 'pointer',
+                ...monoSx,
+                '&:hover': {textDecoration: 'underline'},
+            }}
+        >
+            {value}
+        </Typography>
+    </FileLink>
+);
+
+const renderCustomString = (
+    value: string,
+    keyName: string,
+    renderString?: JsonRendererProps['renderString'],
+): ReactElement | undefined => {
+    if (renderString) {
+        const result = renderString({value, keyName});
+        if (result) return result;
+    }
+    if (value.startsWith('@')) {
+        return <Typography sx={monoSx}>alias: {value}</Typography>;
+    }
+    if (isClassString(value)) {
+        return renderClassLink(value);
+    }
+    return undefined;
 };
+
+type PrimitiveValueProps = {value: any; renderString?: JsonRendererProps['renderString']};
 
 const PrimitiveValue = ({value, renderString}: PrimitiveValueProps) => {
     if (typeof value === 'string') {
-        if (renderString) {
-            const result = renderString({}, {type: 'value', value, keyName: ''});
-            if (result) return result;
-        }
-        if (value.startsWith('@')) {
-            return <Typography sx={{fontFamily: 'monospace', fontSize: '13px'}}>alias: {value}</Typography>;
-        }
-        if (isClassString(value)) {
-            return (
-                <FileLink className={value}>
-                    <Typography
-                        component="span"
-                        sx={{
-                            display: 'inline',
-                            wordBreak: 'break-word',
-                            color: 'primary.main',
-                            cursor: 'pointer',
-                            fontFamily: 'monospace',
-                            fontSize: '13px',
-                            '&:hover': {textDecoration: 'underline'},
-                        }}
-                    >
-                        {value}
-                    </Typography>
-                </FileLink>
-            );
-        }
-        return <Typography sx={{fontFamily: 'monospace', fontSize: '13px'}}>{value}</Typography>;
+        const custom = renderCustomString(value, '', renderString);
+        if (custom) return custom;
+        return <Typography sx={monoSx}>{value}</Typography>;
     }
-    return (
-        <Typography sx={{fontFamily: 'monospace', fontSize: '13px', color: 'text.secondary'}}>
-            {String(value)}
-        </Typography>
-    );
+    return <Typography sx={{...monoSx, color: 'text.secondary'}}>{String(value)}</Typography>;
 };
 
-export type StringRenderContext = {type: 'type' | 'value'; value: string; keyName: string};
+export type StringRenderContext = {value: string; keyName: string};
 
 export type JsonRendererProps = {
     value: any;
     depth?: number;
     editable?: boolean;
     onChange?: (path: (string | number)[], oldValue: any, newValue: any) => void;
-    renderString?: (props: Record<string, any>, context: StringRenderContext) => ReactElement | undefined;
+    renderString?: (context: StringRenderContext) => ReactElement | undefined;
 };
 export const JsonRenderer = React.memo(({value, depth = 5, renderString}: JsonRendererProps) => {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-    const theme = prefersDarkMode ? jsonViewDarkTheme : jsonViewLightTheme;
+    const style = useMemo(
+        () => ({...(prefersDarkMode ? jsonViewDarkTheme : jsonViewLightTheme), width: '100%'}),
+        [prefersDarkMode],
+    );
 
     if (typeof value == 'string' && value.match(REGEXP_PHP_FUNCTION)?.length) {
         return <CodeHighlight language={'php'} code={value} showLineNumbers={false} fontSize={10} />;
     }
 
-    // @uiw/react-json-view only accepts objects/arrays — render primitives inline
     if (typeof value !== 'object' || value === null) {
         return <PrimitiveValue value={value} renderString={renderString} />;
     }
@@ -83,7 +92,7 @@ export const JsonRenderer = React.memo(({value, depth = 5, renderString}: JsonRe
             displayObjectSize={true}
             enableClipboard={true}
             shortenTextAfterLength={50}
-            style={{...theme, width: '100%'}}
+            style={style}
         >
             <JsonView.Quote render={() => <span />} />
             <JsonView.String
@@ -91,37 +100,8 @@ export const JsonRenderer = React.memo(({value, depth = 5, renderString}: JsonRe
                     if (type === 'type') return undefined;
 
                     const strVal = String(strValue);
-
-                    // Custom external render (from Panel's JsonRenderer)
-                    if (renderString) {
-                        const result = renderString(props, {type, value: strVal, keyName: String(keyName)});
-                        if (result) return result;
-                    }
-
-                    // Alias values (starting with '@')
-                    if (strVal.startsWith('@')) {
-                        return <span {...props}>alias: {strVal}</span>;
-                    }
-
-                    // Class strings as clickable file links
-                    if (isClassString(strVal)) {
-                        return (
-                            <FileLink className={strVal}>
-                                <Typography
-                                    component="span"
-                                    sx={{
-                                        display: 'inline',
-                                        wordBreak: 'break-word',
-                                        color: 'primary.main',
-                                        cursor: 'pointer',
-                                        '&:hover': {textDecoration: 'underline'},
-                                    }}
-                                >
-                                    {strVal}
-                                </Typography>
-                            </FileLink>
-                        );
-                    }
+                    const custom = renderCustomString(strVal, String(keyName), renderString);
+                    if (custom) return custom;
 
                     return undefined;
                 }}
