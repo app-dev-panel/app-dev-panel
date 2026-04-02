@@ -50,7 +50,7 @@
         "yiisoft/files": "^2.0",
         "yiisoft/json": "^1.0",
         "yiisoft/profiler": "^3.0",
-        "yiisoft/proxy": "^1.0.1",
+        "yiisoft/proxy": "^1.2",
         "yiisoft/strings": "^2.2",
         "yiisoft/var-dumper": "^1.7"
     },
