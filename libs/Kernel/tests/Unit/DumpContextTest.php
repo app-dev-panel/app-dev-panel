@@ -340,4 +340,107 @@ final class DumpContextTest extends TestCase
 
         $this->assertStringStartsWith('RuntimeException#', $description);
     }
+
+    public function testDumpObjectWithPrivateProperty(): void
+    {
+        $obj = new class {
+            private string $secret = 'hidden';
+        };
+
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $context->buildObjectsCache($obj);
+
+        $result = $context->dumpNestedInternal($obj, 5, 0, 0, true);
+
+        $this->assertIsArray($result);
+        // Private properties show as 'private $propertyName' after normalizeProperty
+        $found = false;
+        foreach ($result as $key => $value) {
+            if ($value === 'hidden' && str_contains($key, 'secret')) {
+                $found = true;
+                break;
+            }
+        }
+        $this->assertTrue($found, 'Expected private property with value "hidden" to be present');
+    }
+
+    public function testDumpObjectWithProtectedProperty(): void
+    {
+        $obj = new class {
+            protected int $value = 42;
+        };
+
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $context->buildObjectsCache($obj);
+
+        $result = $context->dumpNestedInternal($obj, 5, 0, 0, true);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('protected $value', $result);
+        $this->assertSame(42, $result['protected $value']);
+    }
+
+    public function testDumpObjectWithMixedVisibility(): void
+    {
+        $obj = new class {
+            public string $pub = 'a';
+            protected string $prot = 'b';
+            private string $priv = 'c';
+        };
+
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $context->buildObjectsCache($obj);
+
+        $result = $context->dumpNestedInternal($obj, 5, 0, 0, true);
+
+        $this->assertIsArray($result);
+        $this->assertSame('a', $result['public $pub']);
+        $this->assertSame('b', $result['protected $prot']);
+
+        // Private property value 'c' should exist somewhere in the result
+        $this->assertContains('c', $result);
+    }
+
+    public function testDumpNestedObjectInArray(): void
+    {
+        $inner = new \stdClass();
+        $inner->x = 1;
+
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $context->buildObjectsCache($inner);
+
+        $result = $context->dumpNestedInternal(['nested' => $inner], 5, 0, 0, false);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('nested', $result);
+    }
+
+    public function testBuildObjectsCacheSkipsExcludedNestedObject(): void
+    {
+        $inner = new \stdClass();
+        $inner->value = 'test';
+
+        $context = new DumpContext(objects: [], excludedClasses: [\stdClass::class => true]);
+
+        // Build cache with an array containing an excluded object
+        $context->buildObjectsCache([$inner]);
+
+        // Should not have cached the excluded class
+        $this->assertEmpty($context->objects);
+    }
+
+    public function testBuildObjectsCacheNestedObjectsInObject(): void
+    {
+        $child = new \stdClass();
+        $child->name = 'child';
+
+        $parent = new \stdClass();
+        $parent->child = $child;
+
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $context->buildObjectsCache($parent);
+
+        // Both parent and child should be cached
+        $this->assertCount(2, $context->objects);
+    }
 }
