@@ -45,7 +45,7 @@ jobs:
         run: |
           curl -sLf "https://github.com/splitsh/lite/releases/download/${SPLITSH_VERSION}/lite_linux_amd64.tar.gz" -o /tmp/splitsh.tar.gz
           echo "${SPLITSH_SHA256}  /tmp/splitsh.tar.gz" | sha256sum -c -
-          tar xzf /tmp/splitsh.tar.gz -C /tmp
+          tar xzf /tmp/splitsh.tar.gz -C /tmp --no-same-owner --no-same-permissions
           ls -la /tmp/splitsh-lite || ls -la /tmp/lite || ls -la /tmp
           sudo mv /tmp/splitsh-lite /usr/local/bin/splitsh-lite || sudo mv /tmp/lite /usr/local/bin/splitsh-lite
           rm /tmp/splitsh.tar.gz
