@@ -1,36 +1,39 @@
 name: PR Report
 
 on:
-  pull_request:
-    branches: [main, master]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+concurrency:
+  group: pr-report-${{ github.event.workflow_run.pull_requests[0].number || github.event.workflow_run.id }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
   pull-requests: write
+  actions: read
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # Coverage Report (reuses coverage.xml from CI)
+  # ---------------------------------------------------------------------------
   coverage:
     name: Coverage Report
     runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.pull_requests[0]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
         with:
-          php-version: '8.4'
-          extensions: mbstring, sockets
-          coverage: pcov
-          tools: composer:v2
-        env:
-          COMPOSER_ALLOW_SUPERUSER: 1
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
-
-      - name: Run tests with coverage
-        run: composer test:coverage
+          name: coverage-report
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Coverage comment
         uses: danhunsaker/clover-reporter-action@v0.2.17-clover
@@ -38,61 +41,92 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           clover-file: coverage.xml
 
+  # ---------------------------------------------------------------------------
+  # Mago Report (reuses Mago outputs from CI)
+  # ---------------------------------------------------------------------------
   mago-report:
     name: Mago Report
     runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.pull_requests[0]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Download Mago format output
+        id: dl-format
+        continue-on-error: true
+        uses: actions/download-artifact@v4
         with:
-          php-version: '8.4'
-          extensions: mbstring
-          coverage: none
-          tools: composer:v2
-        env:
-          COMPOSER_ALLOW_SUPERUSER: 1
+          name: mago-format
+          path: /tmp/mago
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
-
-      - name: Setup Mago
-        uses: nhedger/setup-mago@v1
-
-      - name: Run format check
-        id: format
+      - name: Download Mago lint output
+        id: dl-lint
         continue-on-error: true
-        run: |
-          mago fmt --check 2>&1 | tee /tmp/mago-format.txt
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+        uses: actions/download-artifact@v4
+        with:
+          name: mago-lint
+          path: /tmp/mago
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run linter
-        id: lint
+      - name: Download Mago analyze output
+        id: dl-analyze
         continue-on-error: true
-        run: |
-          mago lint 2>&1 | tee /tmp/mago-lint.txt
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+        uses: actions/download-artifact@v4
+        with:
+          name: mago-analyze
+          path: /tmp/mago
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run analyzer
-        id: analyze
-        continue-on-error: true
+      - name: Determine Mago job outcomes
+        id: outcomes
         run: |
-          mago analyze 2>&1 | tee /tmp/mago-analyze.txt
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          CI_RUN_ID="${{ github.event.workflow_run.id }}"
+          CI_CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+
+          # If CI passed overall, all Mago checks passed
+          if [ "${CI_CONCLUSION}" = "success" ]; then
+            echo "format=success" >> $GITHUB_OUTPUT
+            echo "lint=success" >> $GITHUB_OUTPUT
+            echo "analyze=success" >> $GITHUB_OUTPUT
+          else
+            # Check if individual artifact downloads succeeded (non-empty files indicate output was captured)
+            for check in format lint analyze; do
+              if [ -f "/tmp/mago/mago-${check}.txt" ] && [ -s "/tmp/mago/mago-${check}.txt" ]; then
+                # File exists and is non-empty — check if it contains error indicators
+                if grep -qiE '(error|failed|violation)' "/tmp/mago/mago-${check}.txt" 2>/dev/null; then
+                  echo "${check}=failure" >> $GITHUB_OUTPUT
+                else
+                  echo "${check}=success" >> $GITHUB_OUTPUT
+                fi
+              else
+                echo "${check}=unknown" >> $GITHUB_OUTPUT
+              fi
+            done
+          fi
 
       - name: Build PR comment
         id: comment
         run: |
+          status_icon() {
+            case "$1" in
+              success) echo "✅" ;;
+              unknown) echo "⚠️" ;;
+              *) echo "❌" ;;
+            esac
+          }
+
           {
             echo 'body<<MAGO_EOF'
             echo '## Mago Report'
             echo ''
 
-            FORMAT_STATUS="${{ steps.format.outcome == 'success' && '✅' || '❌' }}"
-            LINT_STATUS="${{ steps.lint.outcome == 'success' && '✅' || '❌' }}"
-            ANALYZE_STATUS="${{ steps.analyze.outcome == 'success' && '✅' || '❌' }}"
+            FORMAT_STATUS=$(status_icon "${{ steps.outcomes.outputs.format }}")
+            LINT_STATUS=$(status_icon "${{ steps.outcomes.outputs.lint }}")
+            ANALYZE_STATUS=$(status_icon "${{ steps.outcomes.outputs.analyze }}")
 
             echo "| Check | Status |"
             echo "|-------|--------|"
@@ -101,35 +135,19 @@ jobs:
             echo "| Analyze | ${ANALYZE_STATUS} |"
             echo ''
 
-            if [ "${{ steps.format.outcome }}" != "success" ]; then
-              echo '<details><summary>Format output</summary>'
-              echo ''
-              echo '```'
-              head -100 /tmp/mago-format.txt
-              echo '```'
-              echo '</details>'
-              echo ''
-            fi
-
-            if [ "${{ steps.lint.outcome }}" != "success" ]; then
-              echo '<details><summary>Lint output</summary>'
-              echo ''
-              echo '```'
-              head -100 /tmp/mago-lint.txt
-              echo '```'
-              echo '</details>'
-              echo ''
-            fi
-
-            if [ "${{ steps.analyze.outcome }}" != "success" ]; then
-              echo '<details><summary>Analyze output</summary>'
-              echo ''
-              echo '```'
-              head -100 /tmp/mago-analyze.txt
-              echo '```'
-              echo '</details>'
-              echo ''
-            fi
+            for check in format lint analyze; do
+              FILE="/tmp/mago/mago-${check}.txt"
+              if [ -f "${FILE}" ] && [ -s "${FILE}" ] && grep -qiE '(error|failed|violation)' "${FILE}" 2>/dev/null; then
+                CHECK_TITLE="$(echo "${check}" | sed 's/.*/\u&/')"
+                echo "<details><summary>${CHECK_TITLE} output</summary>"
+                echo ''
+                echo '```'
+                head -100 "${FILE}"
+                echo '```'
+                echo '</details>'
+                echo ''
+              fi
+            done
 
             echo 'MAGO_EOF'
           } >> $GITHUB_OUTPUT
@@ -138,8 +156,5 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: mago-report
+          number: ${{ github.event.workflow_run.pull_requests[0].number }}
           message: ${{ steps.comment.outputs.body }}
-
-      - name: Fail if checks failed
-        if: steps.format.outcome != 'success' || steps.lint.outcome != 'success' || steps.analyze.outcome != 'success'
-        run: exit 1

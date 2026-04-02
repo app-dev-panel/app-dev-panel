@@ -19,8 +19,22 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  ci-gate:
+    name: Wait for CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for CI workflow to succeed
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          check-regexp: ^(PHP Tests|Frontend Tests|Mago:|Frontend: Quality)
+          wait-interval: 30
+          allowed-conclusions: success,skipped
+
   build:
     name: Build VitePress + Panel
+    needs: ci-gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,7 +45,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 21
+          node-version: '22'
           cache: npm
           cache-dependency-path: |
             website/package-lock.json

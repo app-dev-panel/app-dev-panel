@@ -2,7 +2,7 @@ name: Frontend Publish
 
 on:
   push:
-    tags: ['*']
+    tags: ['v*']
 
 permissions:
   contents: write
@@ -13,8 +13,31 @@ defaults:
     working-directory: libs/frontend
 
 jobs:
+  ci-gate:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: libs/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: libs/frontend
+        run: npm ci
+
+      - name: Run unit tests
+        working-directory: libs/frontend
+        run: npm test
+
   build:
     name: Build frontend packages
+    needs: ci-gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
