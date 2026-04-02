@@ -11,6 +11,7 @@ import BlogArchive from './components/BlogArchive.vue';
 import DuckHero from './components/DuckHero.vue';
 import CopyButton from './components/CopyButton.vue';
 import GitHubStars from './components/GitHubStars.vue';
+import NotFound from './components/NotFound.vue';
 import './style.css';
 
 function initZoom() {
@@ -84,6 +85,7 @@ export default {
             return () =>
                 h(DefaultTheme.Layout, null, {
                     'nav-bar-content-after': () => h(GitHubStars),
+                    'not-found': () => h(NotFound),
                 });
         },
     }),
