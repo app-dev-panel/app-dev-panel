@@ -38,6 +38,12 @@ export default defineConfig({
         ['meta', { name: 'theme-color', content: '#2563EB' }],
         ['meta', { property: 'og:type', content: 'website' }],
         ['meta', { property: 'og:site_name', content: 'ADP — Application Development Panel' }],
+        ['meta', { property: 'og:image', content: 'https://app-dev-panel.github.io/app-dev-panel/og-image.png' }],
+        ['meta', { property: 'og:url', content: 'https://app-dev-panel.github.io/app-dev-panel/' }],
+        ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+        ['meta', { name: 'twitter:image', content: 'https://app-dev-panel.github.io/app-dev-panel/og-image.png' }],
+        ['link', { rel: 'alternate', type: 'application/rss+xml', title: 'ADP Blog', href: '/app-dev-panel/feed.xml' }],
+        ['link', { rel: 'alternate', type: 'application/atom+xml', title: 'ADP Blog', href: '/app-dev-panel/feed.atom' }],
     ],
 
     locales: {
@@ -430,7 +436,30 @@ export default defineConfig({
 
     sitemap: {
         hostname: 'https://app-dev-panel.github.io/app-dev-panel/',
+        transformItems(items) {
+            return items.map((item) => {
+                if (item.url === '') {
+                    item.changefreq = 'weekly';
+                    item.priority = 1.0;
+                } else if (item.url.startsWith('guide/')) {
+                    item.changefreq = 'weekly';
+                    item.priority = 0.8;
+                } else if (item.url.startsWith('api/')) {
+                    item.changefreq = 'monthly';
+                    item.priority = 0.7;
+                } else if (item.url.startsWith('blog/')) {
+                    item.changefreq = 'monthly';
+                    item.priority = 0.6;
+                } else {
+                    item.changefreq = 'monthly';
+                    item.priority = 0.5;
+                }
+                return item;
+            });
+        },
     },
+
+    buildEnd: generateFeed,
 
     lastUpdated: true,
 });
