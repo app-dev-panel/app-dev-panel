@@ -49,40 +49,49 @@ const useBottomResize = ({
     const heightRef = useRef(height);
     heightRef.current = height;
 
+    const separatorRef = useRef<HTMLElement | null>(null);
+
     const onPointerDown = useCallback(
         (e: React.PointerEvent) => {
             e.preventDefault();
             e.stopPropagation();
+            const target = e.currentTarget as HTMLElement;
+            separatorRef.current = target;
+            target.setPointerCapture(e.pointerId);
             dragRef.current = {startY: e.clientY, startHeight: heightRef.current};
             setIsDragging(true);
-
-            const clamp = (v: number) => Math.min(max, Math.max(min, v));
-
-            const onMove = (ev: PointerEvent | MouseEvent) => {
-                if (!dragRef.current) return;
-                const delta = dragRef.current.startY - ev.clientY;
-                const next = clamp(dragRef.current.startHeight + delta);
-                setHeight(next);
-                heightRef.current = next;
-            };
-
-            const onUp = () => {
-                document.removeEventListener('pointermove', onMove);
-                document.removeEventListener('pointerup', onUp);
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-                setIsDragging(false);
-                onResizeEnd(heightRef.current);
-                dragRef.current = null;
-            };
-
-            document.addEventListener('pointermove', onMove);
-            document.addEventListener('pointerup', onUp);
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
         },
-        [min, max, onResizeEnd],
+        [],
     );
+
+    const onPointerMove = useCallback(
+        (e: React.PointerEvent) => {
+            if (!dragRef.current) return;
+            const delta = dragRef.current.startY - e.clientY;
+            const next = Math.min(max, Math.max(min, dragRef.current.startHeight + delta));
+            setHeight(next);
+            heightRef.current = next;
+        },
+        [min, max],
+    );
+
+    const onPointerUp = useCallback(
+        (e: React.PointerEvent) => {
+            if (!dragRef.current) return;
+            separatorRef.current?.releasePointerCapture(e.pointerId);
+            setIsDragging(false);
+            onResizeEnd(heightRef.current);
+            dragRef.current = null;
+        },
+        [onResizeEnd],
+    );
+
+    const onLostPointerCapture = useCallback(() => {
+        if (!dragRef.current) return;
+        setIsDragging(false);
+        onResizeEnd(heightRef.current);
+        dragRef.current = null;
+    }, [onResizeEnd]);
 
     const separatorProps = {
         role: 'separator' as const,
@@ -92,6 +101,9 @@ const useBottomResize = ({
         'aria-orientation': 'horizontal' as const,
         'aria-disabled': false,
         onPointerDown,
+        onPointerMove,
+        onPointerUp,
+        onLostPointerCapture,
     };
 
     return {height, setHeight, isDragging, separatorProps};

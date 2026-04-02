@@ -67,12 +67,13 @@ const simulateDrag = (element: HTMLElement, startY: number, endY: number) => {
 
     fireEvent.pointerDown(element, {clientX: startX, clientY: startY, pointerId: 1});
     // Move in small steps to simulate real drag
+    // With pointer capture, events fire on the element, not document
     const steps = 5;
     const deltaY = (endY - startY) / steps;
     for (let i = 1; i <= steps; i++) {
-        fireEvent.pointerMove(document, {clientX: startX, clientY: startY + deltaY * i, pointerId: 1});
+        fireEvent.pointerMove(element, {clientX: startX, clientY: startY + deltaY * i, pointerId: 1});
     }
-    fireEvent.pointerUp(document, {clientX: startX, clientY: endY, pointerId: 1});
+    fireEvent.pointerUp(element, {clientX: startX, clientY: endY, pointerId: 1});
 };
 
 describe('Toolbar Resize', () => {
