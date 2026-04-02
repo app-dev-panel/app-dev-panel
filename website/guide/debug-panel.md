@@ -107,7 +107,42 @@ app_dev_panel:
 ```
 :::
 
-### Option 3: Vite Dev Server
+### Option 3: Build from Source
+
+If you're developing ADP itself or want to use a custom build, you can build the frontend from source and copy the assets into the adapter packages:
+
+```bash
+make build-panel
+```
+
+This command:
+1. Builds the panel and toolbar packages via Vite
+2. Copies `bundle.js`, `bundle.css`, and assets into each adapter's asset directory:
+   - `libs/Adapter/Symfony/Resources/public/`
+   - `libs/Adapter/Laravel/resources/dist/`
+   - `libs/Adapter/Yii3/resources/dist/`
+   - `libs/Adapter/Yii2/resources/dist/`
+
+To also publish the assets into playground applications:
+
+```bash
+make build-install-panel    # Build + publish in one step
+```
+
+::: tip Auto-Detection
+When `static_url` is left empty (the default), each adapter automatically checks whether built assets exist in its package directory. If `bundle.js` is found locally, the adapter serves assets from the local path instead of GitHub Pages — **no configuration needed**.
+
+| Adapter | Local assets path | Served as |
+|---------|-------------------|-----------|
+| Symfony | `Resources/public/bundle.js` | `/bundles/appdevpanel` |
+| Laravel | `resources/dist/bundle.js` → published to `public/vendor/app-dev-panel/` | `/vendor/app-dev-panel` |
+| Yii 3 | `resources/dist/bundle.js` → symlinked to `@public/app-dev-panel/` | `/app-dev-panel` |
+| Yii 2 | `resources/dist/bundle.js` → symlinked to `@webroot/app-dev-panel/` | `/app-dev-panel` |
+
+To revert to GitHub Pages, remove the built assets from the adapter directory.
+:::
+
+### Option 4: Vite Dev Server
 
 During frontend development, you can point the panel to the local Vite dev server:
 

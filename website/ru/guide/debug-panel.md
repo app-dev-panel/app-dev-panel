@@ -107,7 +107,42 @@ app_dev_panel:
 ```
 :::
 
-### Вариант 3: Vite dev-сервер
+### Вариант 3: Сборка из исходников
+
+Если вы разрабатываете сам ADP или хотите использовать собственную сборку, можно собрать фронтенд из исходников и скопировать ассеты в пакеты адаптеров:
+
+```bash
+make build-panel
+```
+
+Эта команда:
+1. Собирает пакеты panel и toolbar через Vite
+2. Копирует `bundle.js`, `bundle.css` и ассеты в директорию каждого адаптера:
+   - `libs/Adapter/Symfony/Resources/public/`
+   - `libs/Adapter/Laravel/resources/dist/`
+   - `libs/Adapter/Yii3/resources/dist/`
+   - `libs/Adapter/Yii2/resources/dist/`
+
+Для публикации ассетов в playground-приложения:
+
+```bash
+make build-install-panel    # Сборка + публикация одной командой
+```
+
+::: tip Автоопределение
+Если `static_url` оставлен пустым (по умолчанию), каждый адаптер автоматически проверяет наличие собранных ассетов в своей директории. Если `bundle.js` найден локально, адаптер раздаёт ассеты из локального пути вместо GitHub Pages — **настройка не требуется**.
+
+| Адаптер | Путь к локальным ассетам | Раздаётся как |
+|---------|--------------------------|---------------|
+| Symfony | `Resources/public/bundle.js` | `/bundles/appdevpanel` |
+| Laravel | `resources/dist/bundle.js` → публикуется в `public/vendor/app-dev-panel/` | `/vendor/app-dev-panel` |
+| Yii 3 | `resources/dist/bundle.js` → симлинк в `@public/app-dev-panel/` | `/app-dev-panel` |
+| Yii 2 | `resources/dist/bundle.js` → симлинк в `@webroot/app-dev-panel/` | `/app-dev-panel` |
+
+Для возврата к GitHub Pages удалите собранные ассеты из директории адаптера.
+:::
+
+### Вариант 4: Vite dev-сервер
 
 При разработке фронтенда можно направить панель на локальный Vite dev-сервер:
 
