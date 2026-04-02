@@ -12,17 +12,23 @@ use Illuminate\Support\Facades\Route;
  * which bridges to the framework-agnostic ADP ApiApplication.
  * Also routes /debug and /debug/* (non-API) for the embedded panel SPA.
  */
+
+// Laravel 13 renamed VerifyCsrfToken to PreventRequestForgery
+$csrfMiddleware = class_exists(\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class)
+    ? \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class
+    : \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class;
+
 Route::any('/debug/api/{path?}', AdpApiController::class)
     ->where('path', '.*')
     ->middleware(['api'])
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+    ->withoutMiddleware([$csrfMiddleware]);
 
 Route::any('/inspect/api/{path?}', AdpApiController::class)
     ->where('path', '.*')
     ->middleware(['api'])
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+    ->withoutMiddleware([$csrfMiddleware]);
 
 // Panel SPA — catch-all for client-side routing (must be after /debug/api to avoid conflicts)
-Route::get('/debug/{path?}', AdpApiController::class)
-    ->where('path', '(?!api(/|$)).*')
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::get('/debug/{path?}', AdpApiController::class)->where('path', '(?!api(/|$)).*')->withoutMiddleware([
+    $csrfMiddleware,
+]);

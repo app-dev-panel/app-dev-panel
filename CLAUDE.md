@@ -24,7 +24,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 ├── playground/                    # Demo/reference applications per framework
 │   ├── yii3-app/                 # Yii 3 reference application
 │   ├── symfony-app/        # Symfony 7 minimal demo
-│   ├── laravel-app/              # Laravel 12 minimal demo
+│   ├── laravel-app/              # Laravel 11/12/13 minimal demo
 │   └── yii2-basic-app/          # Yii 2 minimal demo
 ├── libs/
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
