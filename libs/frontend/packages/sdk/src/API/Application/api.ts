@@ -2,7 +2,11 @@ import {ApplicationSlice} from '@app-dev-panel/sdk/API/Application/ApplicationCo
 import {NotificationsSlice} from '@app-dev-panel/sdk/Component/Notifications';
 import {Middleware} from '@reduxjs/toolkit';
 import {persistReducer} from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+import storageImport from 'redux-persist/lib/storage';
+
+// redux-persist/lib/storage is CJS with exports.default — Vite 8 (rolldown)
+// may wrap it as { default: storage } instead of unwrapping the default export.
+const storage = (storageImport as any).default ?? storageImport;
 import {createStateSyncMiddleware, withReduxStateSync} from 'redux-state-sync';
 
 const applicationSliceConfig = {key: ApplicationSlice.name, version: 1, storage};
