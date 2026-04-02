@@ -1,5 +1,6 @@
 ---
 title: Getting Started
+description: "Install ADP in your PHP application. Quick setup guide for Symfony, Laravel, Yii 3, and Yii 2 with Composer."
 ---
 
 # Getting Started

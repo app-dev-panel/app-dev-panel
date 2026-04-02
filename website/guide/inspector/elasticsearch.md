@@ -1,5 +1,6 @@
 ---
 title: Elasticsearch Inspector
+description: "ADP Elasticsearch Inspector shows cluster health, indexes, mappings, and node information in real time."
 ---
 
 # Elasticsearch Inspector

@@ -49,6 +49,7 @@ use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
+use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
@@ -724,16 +725,28 @@ final class AppDevPanelExtension extends Extension
             ->setArguments(['%app_dev_panel.storage.path%'])
             ->setPublic(true);
 
+        // LLM provider service
+        $container
+            ->register(LlmProviderService::class, LlmProviderService::class)
+            ->setArguments([
+                new Reference(LlmSettingsInterface::class),
+                new Reference(ClientInterface::class),
+                new Reference(RequestFactoryInterface::class),
+                new Reference(StreamFactoryInterface::class),
+            ])
+            ->setPublic(true);
+
         // LLM controller
         $container
             ->register(LlmController::class, LlmController::class)
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
                 new Reference(LlmSettingsInterface::class),
-                new Reference(ClientInterface::class),
+                new Reference(LlmProviderService::class),
+                new Reference(LlmHistoryStorageInterface::class),
                 new Reference(RequestFactoryInterface::class),
                 new Reference(StreamFactoryInterface::class),
-                new Reference(LlmHistoryStorageInterface::class),
+                new Reference(ClientInterface::class),
             ])
             ->setPublic(true);
     }

@@ -1,5 +1,6 @@
 ---
 title: Database Collector
+description: "ADP Database Collector records SQL queries with bindings, execution time, and connection details."
 ---
 
 # Database Collector

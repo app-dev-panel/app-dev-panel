@@ -1,5 +1,6 @@
 ---
 title: Redis Inspector
+description: "ADP Redis Inspector provides live Redis browsing: server info, key listing, and value inspection."
 ---
 
 # Redis Inspector

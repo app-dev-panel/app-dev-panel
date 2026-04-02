@@ -1,5 +1,6 @@
 ---
 title: Contributing
+description: "How to contribute to ADP: development setup, code conventions, adding collectors, adapters, and frontend features."
 ---
 
 # Contributing

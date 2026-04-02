@@ -30,6 +30,7 @@ use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
+use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
@@ -325,15 +326,24 @@ return [
         $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug'),
     ),
 
-    // LLM controller
-    LlmController::class => static fn(
-        JsonResponseFactoryInterface $jsonResponseFactory,
+    // LLM provider service
+    LlmProviderService::class => static fn(
         LlmSettingsInterface $llmSettings,
         ClientInterface $httpClient,
         RequestFactoryInterface $requestFactory,
         StreamFactoryInterface $streamFactory,
+    ) => new LlmProviderService($llmSettings, $httpClient, $requestFactory, $streamFactory),
+
+    // LLM controller
+    LlmController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        LlmSettingsInterface $llmSettings,
+        LlmProviderService $providerService,
         LlmHistoryStorageInterface $historyStorage,
-    ) => new LlmController($jsonResponseFactory, $llmSettings, $httpClient, $requestFactory, $streamFactory, $historyStorage),
+        RequestFactoryInterface $requestFactory,
+        StreamFactoryInterface $streamFactory,
+        ClientInterface $httpClient,
+    ) => new LlmController($jsonResponseFactory, $llmSettings, $providerService, $historyStorage, $requestFactory, $streamFactory, $httpClient),
 
     // ApiApplication
     ApiApplication::class => static fn(

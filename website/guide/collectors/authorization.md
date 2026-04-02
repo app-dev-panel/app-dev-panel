@@ -1,5 +1,6 @@
 ---
 title: Authorization Collector
+description: "ADP Authorization Collector records access decisions, voter results, roles, and permission checks."
 ---
 
 # Authorization Collector

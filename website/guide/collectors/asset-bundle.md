@@ -1,5 +1,6 @@
 ---
 title: AssetBundle Collector
+description: "ADP AssetBundle Collector captures registered asset bundles with CSS/JS files and dependencies."
 ---
 
 # AssetBundle Collector

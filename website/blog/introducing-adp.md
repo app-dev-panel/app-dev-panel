@@ -3,6 +3,7 @@ title: Introducing ADP — A Universal PHP Debugging Panel
 date: 2026-03-15
 author: ADP Team
 tags: [announcement, release]
+description: "Meet ADP, a framework-agnostic PHP debugging panel for Yii, Symfony, Laravel, and more. Learn why we built it."
 ---
 
 <script setup>

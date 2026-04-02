@@ -1,5 +1,6 @@
 ---
 title: CI & Tooling
+description: "ADP CI pipeline with GitHub Actions, Mago for PHP code quality, and PHPUnit/Vitest for testing."
 ---
 
 # CI & Tooling

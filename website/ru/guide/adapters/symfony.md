@@ -1,3 +1,7 @@
+---
+description: "Установка и настройка ADP для Symfony 6.4+/7.x/8.x. Настройка бандла, коллекторов и интеграция с профайлером."
+---
+
 # Адаптер Symfony
 
 Адаптер Symfony связывает ADP Kernel и API с Symfony 6.4+ / 7.x / 8.x через Symfony Bundle.

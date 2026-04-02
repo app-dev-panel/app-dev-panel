@@ -54,6 +54,11 @@ const ParamRow = styled(Box)(({theme}) => ({
     padding: theme.spacing(0.75, 2),
     borderTop: `1px solid ${theme.palette.divider}`,
     '&:hover': {backgroundColor: theme.palette.action.hover},
+    [theme.breakpoints.down('sm')]: {
+        flexDirection: 'column',
+        gap: theme.spacing(0.5),
+        padding: theme.spacing(0.75, 1.5),
+    },
 }));
 
 const ParamKey = styled(Typography)(({theme}) => ({
@@ -64,6 +69,7 @@ const ParamKey = styled(Typography)(({theme}) => ({
     flexShrink: 0,
     paddingTop: 4,
     wordBreak: 'break-word',
+    [theme.breakpoints.down('sm')]: {width: '100%'},
 }));
 
 const ParamValue = styled(Box)({flex: 1, minWidth: 0, overflow: 'hidden'});

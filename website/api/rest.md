@@ -1,3 +1,7 @@
+---
+description: "Complete ADP REST API reference: debug entries, summaries, collector data, inspector queries, and ingestion."
+---
+
 # REST Endpoints
 
 ## Debug API

@@ -1,5 +1,6 @@
 ---
 title: Frontend Packages
+description: "ADP frontend npm packages: @app-dev-panel/panel, @app-dev-panel/toolbar, and @app-dev-panel/sdk on GitHub Packages."
 ---
 
 # Frontend Packages

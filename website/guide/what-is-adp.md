@@ -1,3 +1,7 @@
+---
+description: "ADP is a framework-agnostic debugging panel for PHP. One tool for Symfony, Laravel, Yii, and any PSR-compatible app."
+---
+
 # What is ADP?
 
 **ADP (Application Development Panel)** is a framework-agnostic debugging and development panel for PHP applications. Think of it as a universal "developer toolbar" that works with any PHP framework.

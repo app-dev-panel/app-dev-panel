@@ -3,6 +3,7 @@ title: Отладка с помощью ИИ через MCP-сервер
 date: 2026-03-27
 author: ADP Team
 tags: [ai, mcp, deep-dive]
+description: "Как MCP-сервер ADP позволяет AI-ассистентам вроде Claude анализировать отладочные данные: логи, запросы, трейсы."
 ---
 
 <script setup>

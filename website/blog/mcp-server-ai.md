@@ -3,6 +3,7 @@ title: AI-Powered Debugging with MCP Server
 date: 2026-03-27
 author: ADP Team
 tags: [ai, mcp, deep-dive]
+description: "Learn how ADP's MCP server lets AI assistants like Claude analyze your debug data — logs, queries, and traces."
 ---
 
 <script setup>

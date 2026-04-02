@@ -1,5 +1,6 @@
 ---
 title: Playgrounds
+description: "Demo applications showing ADP integration with Symfony, Laravel, Yii 3, and Yii 2. Use them as reference setups."
 ---
 
 # Playgrounds

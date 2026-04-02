@@ -1,30 +1,109 @@
-import * as Pages from '@app-dev-panel/panel/Module/Inspector/Pages';
 import {Navigate, RouteObject} from 'react-router';
+
+const lazy = (importer: () => Promise<{[key: string]: React.ComponentType}>, name: string) => ({
+    lazy: async () => {
+        const mod = await importer();
+        return {Component: mod[name]};
+    },
+});
 
 export const routes = [
     {
         path: 'inspector',
         children: [
-            {index: true, element: <Pages.DashboardPage />},
-            {path: 'code-quality', element: <Pages.CodeQualityPage />},
-            {path: 'storage', element: <Pages.StoragePage />},
-            {path: 'storage/database', children: [{path: ':table', element: <Pages.TablePage />}]},
-            {path: 'environment', element: <Pages.EnvironmentPage />},
-            {path: 'routes', element: <Pages.RoutesPage />},
-            {path: 'events', element: <Pages.EventsPage />},
-            {path: 'files', element: <Pages.FileExplorerPage />},
-            {path: 'translations', element: <Pages.TranslationsPage />},
-            {path: 'commands', element: <Pages.CommandsPage />},
-            {path: 'config', element: <Pages.ConfigurationPage />},
-            {path: 'config/:page', element: <Pages.ConfigurationPage />},
-            {path: 'authorization', element: <Pages.AuthorizationPage />},
-            {path: 'container', children: [{path: 'view', element: <Pages.ContainerEntryPage />}]},
+            {
+                index: true,
+                ...lazy(() => import('@app-dev-panel/panel/Module/Inspector/Pages/DashboardPage'), 'DashboardPage'),
+            },
+            {
+                path: 'code-quality',
+                ...lazy(() => import('@app-dev-panel/panel/Module/Inspector/Pages/CodeQualityPage'), 'CodeQualityPage'),
+            },
+            {
+                path: 'storage',
+                ...lazy(() => import('@app-dev-panel/panel/Module/Inspector/Pages/StoragePage'), 'StoragePage'),
+            },
+            {
+                path: 'storage/database',
+                children: [
+                    {
+                        path: ':table',
+                        ...lazy(() => import('@app-dev-panel/panel/Module/Inspector/Pages/TablePage'), 'TablePage'),
+                    },
+                ],
+            },
+            {
+                path: 'environment',
+                ...lazy(() => import('@app-dev-panel/panel/Module/Inspector/Pages/EnvironmentPage'), 'EnvironmentPage'),
+            },
+            {
+                path: 'routes',
+                ...lazy(() => import('@app-dev-panel/panel/Module/Inspector/Pages/RoutesPage'), 'RoutesPage'),
+            },
+            {
+                path: 'events',
+                ...lazy(() => import('@app-dev-panel/panel/Module/Inspector/Pages/EventsPage'), 'EventsPage'),
+            },
+            {
+                path: 'files',
+                ...lazy(
+                    () => import('@app-dev-panel/panel/Module/Inspector/Pages/FileExplorerPage'),
+                    'FileExplorerPage',
+                ),
+            },
+            {
+                path: 'translations',
+                ...lazy(
+                    () => import('@app-dev-panel/panel/Module/Inspector/Pages/TranslationsPage'),
+                    'TranslationsPage',
+                ),
+            },
+            {
+                path: 'commands',
+                ...lazy(() => import('@app-dev-panel/panel/Module/Inspector/Pages/CommandsPage'), 'CommandsPage'),
+            },
+            {
+                path: 'config',
+                ...lazy(
+                    () => import('@app-dev-panel/panel/Module/Inspector/Pages/Config/ConfigurationPage'),
+                    'ConfigurationPage',
+                ),
+            },
+            {
+                path: 'config/:page',
+                ...lazy(
+                    () => import('@app-dev-panel/panel/Module/Inspector/Pages/Config/ConfigurationPage'),
+                    'ConfigurationPage',
+                ),
+            },
+            {
+                path: 'authorization',
+                ...lazy(
+                    () => import('@app-dev-panel/panel/Module/Inspector/Pages/AuthorizationPage'),
+                    'AuthorizationPage',
+                ),
+            },
+            {
+                path: 'container',
+                children: [
+                    {
+                        path: 'view',
+                        ...lazy(
+                            () => import('@app-dev-panel/panel/Module/Inspector/Pages/ContainerEntryPage'),
+                            'ContainerEntryPage',
+                        ),
+                    },
+                ],
+            },
             // Redirects from old paths to new combined pages
             {path: 'tests', element: <Navigate to="/inspector/code-quality?tab=tests" replace />},
             {path: 'analyse', element: <Navigate to="/inspector/code-quality?tab=analyse" replace />},
             {path: 'coverage', element: <Navigate to="/inspector/code-quality?tab=coverage" replace />},
             {path: 'database', element: <Navigate to="/inspector/storage?tab=database" replace />},
-            {path: 'database/:table', element: <Pages.TablePage />},
+            {
+                path: 'database/:table',
+                ...lazy(() => import('@app-dev-panel/panel/Module/Inspector/Pages/TablePage'), 'TablePage'),
+            },
             {path: 'cache', element: <Navigate to="/inspector/storage?tab=cache" replace />},
             {path: 'redis', element: <Navigate to="/inspector/storage?tab=redis" replace />},
             {path: 'elasticsearch', element: <Navigate to="/inspector/storage?tab=elasticsearch" replace />},

@@ -1,3 +1,7 @@
+---
+description: "ADP SSE endpoint streams real-time debug notifications to the panel when new entries are written to storage."
+---
+
 # SSE (Server-Sent Events)
 
 The SSE endpoint provides real-time push notifications when new debug entries are written to storage.

@@ -1,5 +1,6 @@
 ---
 title: Toolbar
+description: "ADP toolbar widget embeds directly into your pages, showing request metrics, log counts, and quick debug access."
 ---
 
 # Toolbar

@@ -3,6 +3,7 @@ title: Building Custom Collectors for Your Domain
 date: 2026-03-20
 author: ADP Team
 tags: [tutorial, collectors, php]
+description: "Step-by-step tutorial on building custom ADP collectors to capture domain-specific data in the debug panel."
 ---
 
 <script setup>

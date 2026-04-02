@@ -1,3 +1,7 @@
+---
+description: "ADP Cycle ORM adapter for database schema inspection. Lightweight — no collectors or lifecycle wiring."
+---
+
 # Cycle ORM Adapter
 
 The Cycle ORM adapter is a lightweight adapter that provides database schema inspection only. Unlike full adapters, it has no collectors, event listeners, or lifecycle wiring.

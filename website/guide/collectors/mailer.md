@@ -1,5 +1,6 @@
 ---
 title: Mailer Collector
+description: "ADP Mailer Collector captures sent emails with recipients, subject, body, headers, and attachments."
 ---
 
 # Mailer Collector

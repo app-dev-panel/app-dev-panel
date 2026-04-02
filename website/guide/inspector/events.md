@@ -1,5 +1,6 @@
 ---
 title: Event Listeners Inspector
+description: "ADP Event Listeners Inspector displays all registered event listeners with priorities and class details."
 ---
 
 # Event Listeners Inspector

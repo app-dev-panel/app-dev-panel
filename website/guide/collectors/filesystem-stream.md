@@ -1,5 +1,6 @@
 ---
 title: Filesystem Stream Collector
+description: "ADP Filesystem Stream Collector captures file operations: reads, writes, deletes, and directory listings."
 ---
 
 # Filesystem Stream Collector

@@ -1,5 +1,6 @@
 ---
 title: Deprecation Collector
+description: "ADP Deprecation Collector captures PHP deprecation notices with file, line, message, and trigger context."
 ---
 
 # Deprecation Collector

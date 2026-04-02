@@ -1,5 +1,6 @@
 ---
 title: Screenshots
+description: "Take screenshots of the ADP frontend panel using Playwright for visual verification and documentation."
 ---
 
 # Screenshots
