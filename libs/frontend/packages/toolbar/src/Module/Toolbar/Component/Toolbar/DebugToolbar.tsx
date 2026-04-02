@@ -3,7 +3,6 @@ import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@app-de
 import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
-import {dispatchWindowEvent} from '@app-dev-panel/sdk/Helper/dispatchWindowEvent';
 import {DebugEntriesListModal} from '@app-dev-panel/toolbar/Module/Toolbar/Component/DebugEntriesListModal';
 import {CommandItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Console/CommandItem';
 import {DatabaseItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DatabaseItem';
@@ -119,14 +118,17 @@ const ToolbarErrorFallback = ({resetErrorBoundary}: FallbackProps) => (
 
 const serviceWorker = navigator?.serviceWorker;
 
-type DebugIFrameProps = {baseUrlState: string; iframeEnabled: boolean};
+type DebugIFrameProps = {baseUrlState: string; iframeEnabled: boolean; iframeSrc: string | null};
 
 const DebugIFrame = forwardRef(
-    ({baseUrlState, iframeEnabled}: DebugIFrameProps, ref: ForwardedRef<HTMLIFrameElement>) => {
+    ({baseUrlState, iframeEnabled, iframeSrc}: DebugIFrameProps, ref: ForwardedRef<HTMLIFrameElement>) => {
+        const src = iframeSrc
+            ? baseUrlState + iframeSrc + (iframeSrc.includes('?') ? '&' : '?') + 'toolbar=0'
+            : baseUrlState + '/debug?toolbar=0';
         return (
             <iframe
                 ref={ref}
-                src={baseUrlState + `/debug?toolbar=0`}
+                src={src}
                 style={{height: '100%', width: '100%', border: 'none'}}
                 hidden={!iframeEnabled}
                 loading="lazy"
@@ -200,64 +202,19 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     const handleClose = useCallback(() => setOpen(false), []);
 
     const iframeRef = useRef<HTMLIFrameElement | undefined>(undefined);
-    const panelReadyRef = useRef(false);
-    const pendingNavigationRef = useRef<string | null>(null);
-
-    const sendToIframe = useCallback((url: string) => {
-        const contentWindow = iframeRef.current?.contentWindow;
-        console.log('[ADP Toolbar] sendToIframe', {url, hasContentWindow: !!contentWindow, hasIframe: !!iframeRef.current});
-        if (contentWindow) {
-            dispatchWindowEvent(contentWindow, 'router.navigate', url);
-        }
-    }, []);
-
-    // Listen for panel.loaded from iframe — mounted once, uses refs to avoid stale closures
-    useEffect(() => {
-        const onMessage = (e: MessageEvent) => {
-            // Accept from any origin — panel iframe may be on a different host/port
-            if (!e.data || typeof e.data !== 'object' || e.data.event !== 'panel.loaded') return;
-
-            console.log('[ADP Toolbar] Received panel.loaded, pending:', pendingNavigationRef.current);
-            panelReadyRef.current = true;
-
-            // Drain any pending navigation queued before the panel was ready
-            if (pendingNavigationRef.current) {
-                const url = pendingNavigationRef.current;
-                pendingNavigationRef.current = null;
-                sendToIframe(url);
-            }
-        };
-        window.addEventListener('message', onMessage);
-        return () => window.removeEventListener('message', onMessage);
-    }, [sendToIframe]);
-
-    // Reset readiness when iframe is unmounted/remounted
-    useEffect(() => {
-        if (!iframeEnabled) {
-            panelReadyRef.current = false;
-        }
-    }, [iframeEnabled]);
+    const [iframeSrc, setIframeSrc] = useState<string | null>(null);
 
     const iframeRouteNavigate = useCallback(
         (url: string) => {
-            console.log('[ADP Toolbar] iframeRouteNavigate', {url, iframeEnabled, panelReady: panelReadyRef.current, hasIframe: !!activeComponents.iframe});
             if (!activeComponents.iframe) return;
 
+            // Navigate by changing the iframe src — works across any origin combination
+            setIframeSrc(url);
             if (!iframeEnabled) {
-                console.log('[ADP Toolbar] Iframe closed → opening, queuing URL');
                 setIframeEnabled(true);
-                pendingNavigationRef.current = url;
-                return;
             }
-
-            // Always try to send directly if contentWindow exists
-            console.log('[ADP Toolbar] Sending to iframe + queuing as backup');
-            sendToIframe(url);
-            // Also queue as backup — if panel hasn't loaded yet, the direct send
-            // is lost but panel.loaded will drain the queue
-            pendingNavigationRef.current = url;
         },
-        [iframeEnabled, activeComponents, sendToIframe],
+        [iframeEnabled, activeComponents],
     );
 
     const toggleIframeHandler = useCallback(() => {
@@ -456,7 +413,12 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
                 {iframeEnabled && (
                     <div style={{height: panelHeight, overflow: 'hidden'}}>
-                        <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
+                        <DebugIFrame
+                            ref={iframeRef}
+                            baseUrlState={baseUrlState}
+                            iframeEnabled={iframeEnabled}
+                            iframeSrc={iframeSrc}
+                        />
                     </div>
                 )}
             </Box>
