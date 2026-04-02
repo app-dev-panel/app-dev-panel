@@ -116,4 +116,169 @@ final class AuthorizationControllerTest extends ControllerTestCase
         $data = $this->responseData($response);
         $this->assertSame('affirmative', $data['config']['access_decision_manager']['strategy']);
     }
+
+    public function testIndexResponseContainsAllFourKeys(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('guards', $data);
+        $this->assertArrayHasKey('roleHierarchy', $data);
+        $this->assertArrayHasKey('voters', $data);
+        $this->assertArrayHasKey('config', $data);
+    }
+
+    public function testIndexWithFullConfig(): void
+    {
+        $provider = $this->createMock(AuthorizationConfigProviderInterface::class);
+        $provider
+            ->method('getGuards')
+            ->willReturn([
+                ['name' => 'main', 'provider' => 'users', 'config' => ['driver' => 'session']],
+            ]);
+        $provider
+            ->method('getRoleHierarchy')
+            ->willReturn([
+                'ROLE_SUPER_ADMIN' => ['ROLE_ADMIN'],
+                'ROLE_ADMIN' => ['ROLE_USER'],
+            ]);
+        $provider
+            ->method('getVoters')
+            ->willReturn([
+                ['name' => 'AuthenticatedVoter', 'type' => 'voter', 'priority' => 0],
+            ]);
+        $provider
+            ->method('getSecurityConfig')
+            ->willReturn([
+                'enable_authenticator_manager' => true,
+            ]);
+
+        $controller = $this->createController($provider);
+        $response = $controller->index($this->get());
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+
+        $this->assertCount(1, $data['guards']);
+        $this->assertSame('main', $data['guards'][0]['name']);
+
+        $this->assertCount(2, $data['roleHierarchy']);
+        $this->assertSame(['ROLE_ADMIN'], $data['roleHierarchy']['ROLE_SUPER_ADMIN']);
+
+        $this->assertCount(1, $data['voters']);
+        $this->assertSame('AuthenticatedVoter', $data['voters'][0]['name']);
+
+        $this->assertTrue($data['config']['enable_authenticator_manager']);
+    }
+
+    public function testIndexWithNullAuthorizationConfigProvider(): void
+    {
+        $nullProvider = new NullAuthorizationConfigProvider();
+        $controller = $this->createController($nullProvider);
+        $response = $controller->index($this->get());
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+
+        // NullAuthorizationConfigProvider returns empty arrays
+        $this->assertSame([], $data['guards']);
+        $this->assertSame([], $data['roleHierarchy']);
+        $this->assertSame([], $data['voters']);
+        $this->assertSame([], $data['config']);
+    }
+
+    public function testIndexCallsAllProviderMethods(): void
+    {
+        $provider = $this->createMock(AuthorizationConfigProviderInterface::class);
+        $provider->expects($this->once())->method('getGuards')->willReturn([]);
+        $provider->expects($this->once())->method('getRoleHierarchy')->willReturn([]);
+        $provider->expects($this->once())->method('getVoters')->willReturn([]);
+        $provider->expects($this->once())->method('getSecurityConfig')->willReturn([]);
+
+        $controller = $this->createController($provider);
+        $response = $controller->index($this->get());
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testIndexWithNestedConfig(): void
+    {
+        $provider = $this->createMock(AuthorizationConfigProviderInterface::class);
+        $provider
+            ->method('getGuards')
+            ->willReturn([
+                [
+                    'name' => 'api',
+                    'provider' => 'users',
+                    'config' => [
+                        'driver' => 'passport',
+                        'scopes' => ['read', 'write', 'admin'],
+                        'nested' => ['key' => 'value'],
+                    ],
+                ],
+            ]);
+        $provider
+            ->method('getRoleHierarchy')
+            ->willReturn([
+                'ROLE_SUPER_ADMIN' => ['ROLE_ADMIN', 'ROLE_USER'],
+                'ROLE_ADMIN' => ['ROLE_USER'],
+                'ROLE_USER' => [],
+            ]);
+        $provider
+            ->method('getVoters')
+            ->willReturn([
+                ['name' => 'RoleVoter', 'type' => 'voter', 'priority' => 255],
+                ['name' => 'CustomPolicy', 'type' => 'policy', 'priority' => null],
+                ['name' => 'AnotherVoter', 'type' => 'voter', 'priority' => 0],
+            ]);
+        $provider
+            ->method('getSecurityConfig')
+            ->willReturn([
+                'strategy' => 'unanimous',
+                'hide_user_not_found' => true,
+            ]);
+
+        $controller = $this->createController($provider);
+        $response = $controller->index($this->get());
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+
+        $this->assertCount(1, $data['guards']);
+        $this->assertCount(3, $data['roleHierarchy']);
+        $this->assertCount(3, $data['voters']);
+        $this->assertSame('unanimous', $data['config']['strategy']);
+    }
+
+    public function testIndexGuardConfigDetails(): void
+    {
+        $provider = $this->createMock(AuthorizationConfigProviderInterface::class);
+        $provider
+            ->method('getGuards')
+            ->willReturn([
+                [
+                    'name' => 'jwt',
+                    'provider' => 'app_users',
+                    'config' => [
+                        'driver' => 'jwt',
+                        'ttl' => 3600,
+                        'refresh_ttl' => 86400,
+                    ],
+                ],
+            ]);
+        $provider->method('getRoleHierarchy')->willReturn([]);
+        $provider->method('getVoters')->willReturn([]);
+        $provider->method('getSecurityConfig')->willReturn([]);
+
+        $controller = $this->createController($provider);
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $guard = $data['guards'][0];
+        $this->assertSame('jwt', $guard['name']);
+        $this->assertSame('app_users', $guard['provider']);
+        $this->assertSame('jwt', $guard['config']['driver']);
+        $this->assertSame(3600, $guard['config']['ttl']);
+    }
 }

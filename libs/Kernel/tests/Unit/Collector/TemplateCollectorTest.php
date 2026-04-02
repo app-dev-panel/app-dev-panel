@@ -152,6 +152,24 @@ final class TemplateCollectorTest extends AbstractCollectorTestCase
         $this->assertSame(2, $data['renders'][2]['depth']);
     }
 
+    public function testBeginRenderWhenInactive(): void
+    {
+        $collector = new TemplateCollector(new TimelineCollector());
+        // Not started — should be no-op
+        $collector->beginRender('layout.twig');
+
+        $this->assertSame([], $collector->getCollected());
+    }
+
+    public function testEndRenderWhenInactive(): void
+    {
+        $collector = new TemplateCollector(new TimelineCollector());
+        // Not started — should be no-op
+        $collector->endRender('<html>test</html>');
+
+        $this->assertSame([], $collector->getCollected());
+    }
+
     public function testDuplicateDetection(): void
     {
         $timeline = new TimelineCollector();

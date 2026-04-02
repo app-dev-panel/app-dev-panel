@@ -1,24 +1,24 @@
 ---
-title: Коллектор маршрутизации
+title: Коллектор маршрутизатора
 ---
 
-# Коллектор маршрутизации
+# Коллектор маршрутизатора
 
-Собирает данные HTTP-маршрутизации — совпавший маршрут, паттерн, аргументы, время сопоставления и полное дерево маршрутов.
+Захватывает данные сопоставления HTTP-маршрутов — совпавший маршрут, шаблон, аргументы, время сопоставления и полное дерево маршрутов.
 
-![Панель коллектора маршрутизации](/images/collectors/router.png)
+![Панель коллектора маршрутизатора](/images/collectors/router.png)
 
-## Что собирает
+## Собираемые данные
 
 | Поле | Описание |
 |------|----------|
 | `currentRoute.name` | Имя маршрута (если именованный) |
-| `currentRoute.pattern` | URL-паттерн маршрута |
+| `currentRoute.pattern` | URL-шаблон маршрута |
 | `currentRoute.arguments` | Совпавшие параметры маршрута |
 | `currentRoute.host` | Ограничение по хосту (если есть) |
 | `currentRoute.uri` | Фактический совпавший URI |
 | `currentRoute.action` | Обработчик контроллера/действия |
-| `currentRoute.middlewares` | Стек мидлваров маршрута |
+| `currentRoute.middlewares` | Стек middleware маршрута |
 | `currentRoute.matchTime` | Время сопоставления маршрута (секунды) |
 | `routes` | Полная таблица маршрутов |
 | `routesTree` | Древовидная структура маршрутов |
@@ -74,19 +74,19 @@ $collector->collectRoutes(routes: $allRoutes, routesTree: $routeTree);
 ```
 
 ::: info
-<class>\AppDevPanel\Kernel\Collector\RouterCollector</class> реализует <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. Не зависит от других коллекторов.
+<class>\AppDevPanel\Kernel\Collector\RouterCollector</class> реализует <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. Не имеет зависимостей от других коллекторов.
 :::
 
 ## Как это работает
 
 Каждый адаптер фреймворка имеет `RouterDataExtractor`, который нормализует специфичные для фреймворка данные маршрутизации в общий формат:
-- **Symfony**: извлекает из `RouterInterface` и атрибутов запроса
-- **Laravel**: извлекает из фасада <class>Illuminate\Routing\Router</class> и совпавшего объекта `Route`
-- **Yii 3**: извлекает из результата <class>Symfony\Component\Routing\Matcher\UrlMatcherInterface</class>
+- **Symfony**: Извлекает из `RouterInterface` и атрибутов запроса
+- **Laravel**: Извлекает из фасада <class>Illuminate\Routing\Router</class> и совпавшего объекта `Route`
+- **Yii 3**: Извлекает из результата <class>Symfony\Component\Routing\Matcher\UrlMatcherInterface</class>
 
 ## Панель отладки
 
-- **Совпавший маршрут** — паттерн текущего маршрута, имя и совпавшие параметры
+- **Совпавший маршрут** — шаблон текущего маршрута, имя и совпавшие параметры
 - **Аргументы маршрута** — пары ключ-значение разрешённых параметров
 - **Обработчик действия** — класс контроллера и метод
-- **Тайминг сопоставления** — сколько времени заняло сопоставление маршрута
+- **Время сопоставления** — сколько времени заняло сопоставление маршрута

@@ -834,6 +834,36 @@ final class DumperTest extends TestCase
         ];
     }
 
+    public function testAsJsonObjectsMapWithoutPrettyPrint(): void
+    {
+        $object = new stdClass();
+        $object->var = 'test';
+        $objectId = spl_object_id($object);
+
+        $result = Dumper::create($object)->asJsonObjectsMap(1, false);
+        $this->assertStringNotContainsString("\n", $result);
+        $this->assertStringContainsString("stdClass#{$objectId}", $result);
+    }
+
+    public function testAsJsonWithFormatTrue(): void
+    {
+        $object = new stdClass();
+        $object->a = 1;
+
+        $result = Dumper::create($object)->asJson(2, true);
+        $this->assertStringContainsString("\n", $result);
+        $this->assertStringContainsString('    ', $result);
+    }
+
+    public function testAsJsonWithFormatFalse(): void
+    {
+        $object = new stdClass();
+        $object->a = 1;
+
+        $result = Dumper::create($object)->asJson(2, false);
+        $this->assertStringNotContainsString("\n", $result);
+    }
+
     /**
      * Asserting two strings equality ignoring line endings.
      */

@@ -437,4 +437,275 @@ final class InspectRoutesCommandTest extends TestCase
         $this->assertSame(0, $tester->getStatusCode());
         $this->assertStringContainsString('ANY', $tester->getDisplay());
     }
+
+    public function testCheckRouteWithNonHttpMethodPrefix(): void
+    {
+        // Path starts with a word that is NOT an HTTP method — should default to GET
+        $urlMatcher = new class() {
+            public function match(object $request): object
+            {
+                return new class() {
+                    public function isSuccess(): bool
+                    {
+                        return false;
+                    }
+                };
+            }
+        };
+
+        $tester = new CommandTester(new InspectRoutesCommand(null, $urlMatcher));
+        $tester->execute(['action' => 'check', 'path' => 'NOTMETHOD /foo']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        // Should treat the whole thing as the path with GET method
+        $this->assertStringContainsString('No route matched for GET NOTMETHOD /foo', $tester->getDisplay());
+    }
+
+    public function testCheckRouteWithPutMethod(): void
+    {
+        $urlMatcher = new class() {
+            public function match(object $request): object
+            {
+                return new class() {
+                    public function isSuccess(): bool
+                    {
+                        return false;
+                    }
+                };
+            }
+        };
+
+        $tester = new CommandTester(new InspectRoutesCommand(null, $urlMatcher));
+        $tester->execute(['action' => 'check', 'path' => 'PUT /api/resource/1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('No route matched for PUT /api/resource/1', $tester->getDisplay());
+    }
+
+    public function testCheckRouteWithDeleteMethod(): void
+    {
+        $urlMatcher = new class() {
+            public function match(object $request): object
+            {
+                return new class() {
+                    public function isSuccess(): bool
+                    {
+                        return false;
+                    }
+                };
+            }
+        };
+
+        $tester = new CommandTester(new InspectRoutesCommand(null, $urlMatcher));
+        $tester->execute(['action' => 'check', 'path' => 'DELETE /api/resource/1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('No route matched for DELETE /api/resource/1', $tester->getDisplay());
+    }
+
+    public function testCheckRouteWithPatchMethod(): void
+    {
+        $matchedRoute = new class() {
+            /** @var list<string> */
+            public array $middlewareDefinitions = ['App\\Controller\\PatchController::update'];
+        };
+
+        $urlMatcher = new class($matchedRoute) {
+            public function __construct(
+                private readonly object $route,
+            ) {}
+
+            public function match(object $request): object
+            {
+                $route = $this->route;
+                return new class($route) {
+                    public function __construct(
+                        private readonly object $route,
+                    ) {}
+
+                    public function isSuccess(): bool
+                    {
+                        return true;
+                    }
+
+                    public function route(): object
+                    {
+                        return $this->route;
+                    }
+                };
+            }
+        };
+
+        $tester = new CommandTester(new InspectRoutesCommand(null, $urlMatcher));
+        $tester->execute(['action' => 'check', 'path' => 'PATCH /api/resource/1']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('Route matched: PATCH /api/resource/1', $tester->getDisplay());
+    }
+
+    public function testCheckRouteMatchWithArrayAction(): void
+    {
+        $matchedRoute = new class() {
+            /** @var list<mixed> */
+            public array $middlewareDefinitions = [['class' => 'App\\Controller\\ApiController', 'method' => 'index']];
+        };
+
+        $urlMatcher = new class($matchedRoute) {
+            public function __construct(
+                private readonly object $route,
+            ) {}
+
+            public function match(object $request): object
+            {
+                $route = $this->route;
+                return new class($route) {
+                    public function __construct(
+                        private readonly object $route,
+                    ) {}
+
+                    public function isSuccess(): bool
+                    {
+                        return true;
+                    }
+
+                    public function route(): object
+                    {
+                        return $this->route;
+                    }
+                };
+            }
+        };
+
+        $tester = new CommandTester(new InspectRoutesCommand(null, $urlMatcher));
+        $tester->execute(['action' => 'check', 'path' => '/api']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('Route matched: GET /api', $display);
+        // Array action should be JSON-encoded
+        $this->assertStringContainsString('Action:', $display);
+    }
+
+    public function testCheckRouteMatchJsonWithArrayAction(): void
+    {
+        $matchedRoute = new class() {
+            /** @var list<mixed> */
+            public array $middlewareDefinitions = [['class' => 'Controller', 'method' => 'action']];
+        };
+
+        $urlMatcher = new class($matchedRoute) {
+            public function __construct(
+                private readonly object $route,
+            ) {}
+
+            public function match(object $request): object
+            {
+                $route = $this->route;
+                return new class($route) {
+                    public function __construct(
+                        private readonly object $route,
+                    ) {}
+
+                    public function isSuccess(): bool
+                    {
+                        return true;
+                    }
+
+                    public function route(): object
+                    {
+                        return $this->route;
+                    }
+                };
+            }
+        };
+
+        $tester = new CommandTester(new InspectRoutesCommand(null, $urlMatcher));
+        $tester->execute(['action' => 'check', 'path' => '/test', '--json' => true]);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $decoded = json_decode($tester->getDisplay(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertTrue($decoded['result']);
+        $this->assertIsArray($decoded['action']);
+    }
+
+    public function testCheckRouteEmptyPath(): void
+    {
+        $urlMatcher = new class() {
+            public function match(object $request): object
+            {
+                return new class() {
+                    public function isSuccess(): bool
+                    {
+                        return false;
+                    }
+                };
+            }
+        };
+
+        $tester = new CommandTester(new InspectRoutesCommand(null, $urlMatcher));
+        $tester->execute(['action' => 'check', 'path' => '']);
+
+        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertStringContainsString('Path is required', $tester->getDisplay());
+    }
+
+    public function testListRoutesWithMissingNameAndPattern(): void
+    {
+        $route = new class() {
+            public function __debugInfo(): array
+            {
+                return [
+                    'name' => null,
+                    'hosts' => [],
+                    'pattern' => null,
+                    'methods' => ['GET'],
+                    'defaults' => [],
+                    'override' => false,
+                    'middlewares' => [],
+                ];
+            }
+        };
+
+        $routeCollection = new class($route) {
+            private array $routes;
+
+            public function __construct(object ...$routes)
+            {
+                $this->routes = $routes;
+            }
+
+            public function getRoutes(): array
+            {
+                return $this->routes;
+            }
+        };
+
+        $tester = new CommandTester(new InspectRoutesCommand($routeCollection));
+        $tester->execute(['action' => 'list']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        // Null name/pattern should render as dashes
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('Application Routes (1)', $display);
+    }
+
+    public function testDefaultActionIsList(): void
+    {
+        $tester = new CommandTester(new InspectRoutesCommand(null, null));
+        // No action argument — should default to 'list'
+        $tester->execute([]);
+
+        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertStringContainsString('Route inspection requires framework integration', $tester->getDisplay());
+    }
+
+    public function testHelpText(): void
+    {
+        $command = new InspectRoutesCommand();
+        $help = $command->getHelp();
+
+        $this->assertStringContainsString('inspect:routes', $help);
+        $this->assertStringContainsString('inspect:routes list', $help);
+        $this->assertStringContainsString('inspect:routes check', $help);
+    }
 }

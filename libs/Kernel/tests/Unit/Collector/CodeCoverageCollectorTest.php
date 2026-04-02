@@ -156,4 +156,115 @@ final class CodeCoverageCollectorTest extends AbstractCollectorTestCase
         $this->assertIsFloat($data['codeCoverage']['percentage']);
         $this->assertNotNull($data['codeCoverage']['driver']);
     }
+
+    public function testGetCollectedWithNoDriverReturnsError(): void
+    {
+        $collector = $this->getCollector();
+
+        // Without calling startup(), driver remains null
+        $data = $collector->getCollected();
+
+        $this->assertNull($data['driver']);
+        $this->assertSame('No code coverage driver available (install pcov or xdebug)', $data['error']);
+        $this->assertSame([], $data['files']);
+        $this->assertSame(0, $data['summary']['totalFiles']);
+        $this->assertSame(0, $data['summary']['coveredLines']);
+        $this->assertSame(0, $data['summary']['executableLines']);
+        $this->assertSame(0.0, $data['summary']['percentage']);
+    }
+
+    public function testGetSummaryWithNoDriverReturnsEmptyArray(): void
+    {
+        $collector = $this->getCollector();
+
+        // Without startup, driver is null
+        $summary = $collector->getSummary();
+        $this->assertSame([], $summary);
+    }
+
+    public function testShutdownWithNoDriverIsNoOp(): void
+    {
+        $collector = $this->getCollector();
+
+        // startup and shutdown without errors when no driver
+        $collector->startup();
+        $collector->shutdown();
+
+        $data = $collector->getCollected();
+        $this->assertContains($data['driver'], [null, 'pcov', 'xdebug']);
+    }
+
+    public function testCollectWithIncludePaths(): void
+    {
+        $collector = new CodeCoverageCollector(
+            new TimelineCollector(),
+            includePaths: [dirname(__DIR__)],
+            excludePaths: ['vendor'],
+        );
+
+        $collector->startup();
+        $data = $collector->getCollected();
+        $collector->shutdown();
+
+        $this->assertArrayHasKey('driver', $data);
+        $this->assertArrayHasKey('files', $data);
+        $this->assertArrayHasKey('summary', $data);
+    }
+
+    public function testStartupAndShutdownLifecycle(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $collector = new CodeCoverageCollector($timeline, includePaths: [], excludePaths: ['vendor']);
+
+        $collector->startup();
+        // Execute some code between startup and shutdown
+        $x = array_sum(range(1, 100));
+        $this->assertSame(5050, $x);
+        $collector->shutdown();
+
+        $data = $collector->getCollected();
+        if ($data['driver'] !== null) {
+            // Coverage data collected; files may or may not contain entries
+            // depending on what pcov/xdebug captures in this short window
+            $this->assertIsArray($data['files']);
+            $this->assertIsInt($data['summary']['totalFiles']);
+        }
+    }
+
+    public function testSummaryWithDriverContainsDriverField(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $collector = new CodeCoverageCollector($timeline, includePaths: [], excludePaths: ['vendor']);
+
+        $collector->startup();
+        $this->collectTestData($collector);
+        $collector->shutdown();
+
+        $summary = $collector->getSummary();
+        if ($summary !== []) {
+            $this->assertArrayHasKey('codeCoverage', $summary);
+            $this->assertArrayHasKey('driver', $summary['codeCoverage']);
+            $this->assertContains($summary['codeCoverage']['driver'], ['pcov', 'xdebug']);
+        }
+    }
+
+    public function testCollectedDataAfterShutdownHasCoverageResults(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $collector = new CodeCoverageCollector($timeline, includePaths: [], excludePaths: ['vendor']);
+
+        $collector->startup();
+        $this->collectTestData($collector);
+        $collector->shutdown();
+
+        $data = $collector->getCollected();
+        if ($data['driver'] !== null) {
+            $this->assertIsArray($data['files']);
+            $this->assertIsInt($data['summary']['coveredLines']);
+            $this->assertIsInt($data['summary']['executableLines']);
+        }
+    }
 }

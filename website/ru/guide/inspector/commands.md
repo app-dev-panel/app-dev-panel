@@ -18,7 +18,7 @@ title: Команды
 |---------|------------|-----------------|
 | `analyse/psalm` | [Psalm](https://psalm.dev/) | `vimeo/psalm` в Composer |
 | `analyse/phpstan` | [PHPStan](https://phpstan.org/) | `phpstan/phpstan` в Composer |
-| `analyse/mago` | [Mago](https://mago.carthage.software/) | `carthage-software/mago` в Composer или бинарник `mago` в PATH |
+| `analyse/mago` | [Mago](https://mago.carthage.software/) | `carthage-software/mago` в Composer или бинарный файл `mago` в PATH |
 
 ### Тестирование
 
@@ -43,7 +43,7 @@ title: Команды
 2. **Пользовательские команды** — Дополнительные команды, зарегистрированные через конфигурацию адаптера (`commandMap`).
 3. **Скрипты Composer** — Все записи `scripts` из `composer.json` доступны как команды `composer/{scriptName}`.
 
-Нажмите кнопку команды для её выполнения. Вывод отображается в диалоговом окне с индикацией статуса.
+Нажмите кнопку команды для выполнения. Вывод отображается в диалоговом окне с индикацией статуса.
 
 ## Создание пользовательских команд
 
@@ -129,7 +129,7 @@ interface CommandInterface
 |--------|----------|
 | `ok` | Команда выполнена успешно |
 | `error` | Команда выполнилась, но обнаружила проблемы (например, найдены ошибки линтера) |
-| `fail` | Команда не смогла запуститься (например, бинарник не найден, сбой) |
+| `fail` | Команда не смогла выполниться (например, бинарный файл не найден, сбой) |
 
 ## Регистрация пользовательских команд
 
@@ -153,7 +153,7 @@ return [
 ];
 ```
 
-Зарегистрируйте зависимости в DI-конфигурации, если команде нужно внедрение через конструктор:
+Зарегистрируйте зависимости в конфигурации DI, если команде нужна инъекция через конструктор:
 
 ```php
 \App\Debug\Command\MyLinterCommand::class => static fn(
@@ -228,12 +228,12 @@ $this->app->extend(CommandController::class, function (CommandController $contro
 ],
 ```
 
-## API-эндпоинты
+## Эндпоинты API
 
 | Метод | Путь | Описание |
 |-------|------|----------|
 | GET | `/inspect/api/command` | Список доступных команд |
-| POST | `/inspect/api/command?command=analyse/psalm` | Выполнение команды |
+| POST | `/inspect/api/command?command=analyse/psalm` | Выполнить команду |
 
 **Формат ответа:**
 ```json
@@ -245,5 +245,5 @@ $this->app->extend(CommandController::class, function (CommandController $contro
 ```
 
 ::: tip
-Команды PHPUnit и Codeception используют пользовательские JSON-репортеры для структурированного вывода в панели. Остальные команды возвращают простой текстовый вывод.
+Команды PHPUnit и Codeception используют пользовательские JSON-репортеры для структурированного вывода в панели. Остальные команды возвращают текстовый вывод.
 :::

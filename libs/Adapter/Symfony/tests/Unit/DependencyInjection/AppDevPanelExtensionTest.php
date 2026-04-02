@@ -16,6 +16,7 @@ use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\CodeCoverageCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -227,5 +228,53 @@ final class AppDevPanelExtensionTest extends TestCase
         $definition = $container->getDefinition(RoutingController::class);
         $arguments = $definition->getArguments();
         $this->assertCount(3, $arguments);
+    }
+
+    public function testLoadRegistersCodeCoverageCollectorWhenEnabled(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new AppDevPanelExtension();
+
+        $extension->load([
+            [
+                'enabled' => true,
+                'collectors' => ['code_coverage' => true],
+            ],
+        ], $container);
+
+        $this->assertTrue($container->hasDefinition(CodeCoverageCollector::class));
+
+        $definition = $container->getDefinition(CodeCoverageCollector::class);
+        $this->assertTrue($definition->hasTag('app_dev_panel.collector'));
+    }
+
+    public function testCodeCoverageCollectorNotRegisteredByDefault(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new AppDevPanelExtension();
+
+        $extension->load([['enabled' => true]], $container);
+
+        $this->assertFalse($container->hasDefinition(CodeCoverageCollector::class));
+    }
+
+    public function testLoadWithApiDisabledDoesNotRegisterApiServices(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new AppDevPanelExtension();
+
+        $extension->load([
+            [
+                'enabled' => true,
+                'api' => ['enabled' => false],
+            ],
+        ], $container);
+
+        // Core services should still be registered
+        $this->assertTrue($container->hasDefinition(DebuggerIdGenerator::class));
+
+        // API services should not be registered
+        $this->assertFalse($container->hasDefinition(SymfonyConfigProvider::class));
+        $this->assertFalse($container->hasDefinition(RoutingController::class));
     }
 }

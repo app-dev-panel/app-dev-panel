@@ -64,4 +64,56 @@ final class NullSchemaProviderTest extends TestCase
 
         $this->assertSame([], $provider->explainQuery('SELECT * FROM users', [], true));
     }
+
+    public function testExplainQueryWithParamsAndAnalyze(): void
+    {
+        $provider = new NullSchemaProvider();
+
+        $this->assertSame([], $provider->explainQuery('SELECT * FROM users WHERE id = ?', [42], true));
+    }
+
+    public function testGetTableWithDefaultParams(): void
+    {
+        $provider = new NullSchemaProvider();
+
+        $result = $provider->getTable('products');
+
+        $this->assertSame('products', $result['name']);
+        $this->assertSame([], $result['columns']);
+        $this->assertSame([], $result['records']);
+        $this->assertSame(0, $result['total']);
+    }
+
+    public function testImplementsSchemaProviderInterface(): void
+    {
+        $provider = new NullSchemaProvider();
+
+        $this->assertInstanceOf(\AppDevPanel\Api\Inspector\Database\SchemaProviderInterface::class, $provider);
+    }
+
+    public function testExecuteQueryWithComplexSql(): void
+    {
+        $provider = new NullSchemaProvider();
+
+        $this->assertSame(
+            [],
+            $provider->executeQuery('SELECT u.*, o.total FROM users u JOIN orders o ON u.id = o.user_id WHERE u.active = ?', [
+                true,
+            ]),
+        );
+    }
+
+    public function testGetTableReturnsSameStructureForDifferentTables(): void
+    {
+        $provider = new NullSchemaProvider();
+
+        $result1 = $provider->getTable('users');
+        $result2 = $provider->getTable('posts');
+
+        $this->assertSame('users', $result1['name']);
+        $this->assertSame('posts', $result2['name']);
+        $this->assertSame($result1['columns'], $result2['columns']);
+        $this->assertSame($result1['records'], $result2['records']);
+        $this->assertSame($result1['total'], $result2['total']);
+    }
 }

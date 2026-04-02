@@ -294,6 +294,20 @@ final class DebugControllerTest extends TestCase
         $this->assertSame([], $payload['payload']);
     }
 
+    public function testDumpWithoutCollector(): void
+    {
+        $dumpData = ['collector1' => ['data'], 'collector2' => ['other']];
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->once())->method('getDumpObject')->with('123')->willReturn($dumpData);
+
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')->withAttribute('id', '123');
+        $response = $controller->dump($request);
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
     private function createJsonResponseFactory(): JsonResponseFactoryInterface
     {
         $factory = $this->createMock(JsonResponseFactoryInterface::class);

@@ -10,6 +10,10 @@ use PHPUnit\Framework\TestCase;
 use yii\web\Application;
 use yii\web\UrlManager;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
 final class Yii2UrlMatcherAdapterTest extends TestCase
 {
     private ?Application $originalApp = null;
@@ -17,6 +21,12 @@ final class Yii2UrlMatcherAdapterTest extends TestCase
     protected function setUp(): void
     {
         $this->originalApp = \Yii::$app;
+
+        // Required by yii\web\Application to determine entry script URL in separate processes
+        $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/index.php';
+        $_SERVER['SCRIPT_NAME'] = '/index.php';
+        $_SERVER['SERVER_NAME'] = $_SERVER['SERVER_NAME'] ?? 'localhost';
+        $_SERVER['SERVER_PORT'] = $_SERVER['SERVER_PORT'] ?? '80';
 
         // Boot a minimal Yii 2 web app so createController() works
         new Application([
@@ -29,6 +39,7 @@ final class Yii2UrlMatcherAdapterTest extends TestCase
     protected function tearDown(): void
     {
         \Yii::$app = $this->originalApp;
+        unset($_SERVER['SCRIPT_FILENAME'], $_SERVER['SCRIPT_NAME']);
     }
 
     public function testMatchReturnsSuccessForKnownRoute(): void

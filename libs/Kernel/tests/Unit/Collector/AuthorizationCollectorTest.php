@@ -168,4 +168,13 @@ final class AuthorizationCollectorTest extends AbstractCollectorTestCase
         $this->assertSame('api_key', $data['token']['type']);
         $this->assertNull($data['token']['expiresAt']);
     }
+
+    public function testCollectImpersonationWhenInactive(): void
+    {
+        $collector = new AuthorizationCollector();
+        // Not started
+        $collector->collectImpersonation('admin', 'user');
+
+        $this->assertSame([], $collector->getCollected());
+    }
 }

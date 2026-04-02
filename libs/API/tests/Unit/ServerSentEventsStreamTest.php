@@ -377,4 +377,37 @@ final class ServerSentEventsStreamTest extends TestCase
         $this->assertGreaterThan(80, $elapsedMs);
         $this->assertLessThan(250, $elapsedMs);
     }
+
+    public function testGetMetadataWithKey(): void
+    {
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => false);
+        $this->assertSame([], $stream->getMetadata('mode'));
+    }
+
+    public function testDetachReturnsNull(): void
+    {
+        $stream = new ServerSentEventsStream(static fn(array &$buffer) => true);
+        $result = $stream->detach();
+        $this->assertNull($result);
+    }
+
+    public function testCloseWhileSleeping(): void
+    {
+        // Start a stream that sleeps, then close mid-sleep
+        $callCount = 0;
+        $stream = new ServerSentEventsStream(
+            static function (array &$buffer) use (&$callCount) {
+                $callCount++;
+                return true;
+            },
+            pollIntervalMicros: 200_000,
+            sleepChunkMicros: 10_000,
+        );
+
+        // Read once - this will sleep for 200ms
+        // Close the stream early
+        $stream->close();
+        $output = $stream->read(1024);
+        $this->assertSame('', $output);
+    }
 }

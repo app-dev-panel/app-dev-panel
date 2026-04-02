@@ -127,4 +127,56 @@ final class LaravelEventDispatcherProxyTest extends TestCase
         $proxy = new LaravelEventDispatcherProxy($inner, $this->collector);
         $proxy->forgetPushed();
     }
+
+    public function testMagicCallForwardsToDecorated(): void
+    {
+        // Create a concrete dispatcher that has extra methods beyond the interface
+        $inner = new class implements Dispatcher {
+            public bool $customMethodCalled = false;
+            public string $customMethodArg = '';
+
+            public function listen($events, $listener = null): void {}
+
+            public function hasListeners($eventName): bool
+            {
+                return false;
+            }
+
+            public function subscribe($subscriber): void {}
+
+            public function until($event, $payload = []): mixed
+            {
+                return null;
+            }
+
+            public function dispatch($event, $payload = [], $halt = false): mixed
+            {
+                return null;
+            }
+
+            public function push($event, $payload = []): void {}
+
+            public function flush($event): void {}
+
+            public function forget($event): void {}
+
+            public function forgetPushed(): void {}
+
+            public function customMethod(string $arg): string
+            {
+                $this->customMethodCalled = true;
+                $this->customMethodArg = $arg;
+                return 'custom-result';
+            }
+        };
+
+        $proxy = new LaravelEventDispatcherProxy($inner, $this->collector);
+
+        /** @var string $result */
+        $result = $proxy->customMethod('test-arg');
+
+        $this->assertSame('custom-result', $result);
+        $this->assertTrue($inner->customMethodCalled);
+        $this->assertSame('test-arg', $inner->customMethodArg);
+    }
 }

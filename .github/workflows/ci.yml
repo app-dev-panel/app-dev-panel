@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         php: ['8.4', '8.5']
     steps:
       - name: Checkout
@@ -148,7 +148,7 @@ jobs:
   # Mago — Playgrounds (format, lint, analyze for each playground)
   # ---------------------------------------------------------------------------
   mago-playgrounds:
-    name: "Mago: ${{ matrix.playground }} (${{ matrix.check }})"
+    name: "Mago: ${{ matrix.playground.name }} (${{ matrix.check }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

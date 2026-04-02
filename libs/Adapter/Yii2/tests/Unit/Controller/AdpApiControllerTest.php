@@ -13,6 +13,10 @@ use yii\web\Application;
  * Tests for AdpApiController — verifying PSR-7 request conversion
  * preserves the original query string and is not polluted by Yii 2 URL rule parameters.
  */
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
 final class AdpApiControllerTest extends TestCase
 {
     private string $basePath;
@@ -29,6 +33,8 @@ final class AdpApiControllerTest extends TestCase
         $_SERVER['SERVER_NAME'] = '127.0.0.1';
         $_SERVER['SERVER_PORT'] = '8103';
         $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['SCRIPT_FILENAME'] = $this->basePath . '/web/index.php';
+        $_SERVER['SCRIPT_NAME'] = '/index.php';
     }
 
     protected function tearDown(): void
@@ -43,6 +49,8 @@ final class AdpApiControllerTest extends TestCase
             $_SERVER['REQUEST_URI'],
             $_SERVER['QUERY_STRING'],
             $_SERVER['HTTP_HOST'],
+            $_SERVER['SCRIPT_FILENAME'],
+            $_SERVER['SCRIPT_NAME'],
         );
 
         if (is_dir($this->basePath)) {

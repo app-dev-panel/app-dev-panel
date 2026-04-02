@@ -68,4 +68,17 @@ final class StdioTransportTest extends TestCase
         $this->expectException(\JsonException::class);
         $transport->receive();
     }
+
+    public function testReceiveThrowsOnNonObjectJson(): void
+    {
+        $input = fopen('php://memory', 'rw');
+        fwrite($input, "\"just a string\"\n");
+        rewind($input);
+
+        $transport = new StdioTransport($input, STDOUT);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Invalid JSON-RPC message: expected object');
+        $transport->receive();
+    }
 }
