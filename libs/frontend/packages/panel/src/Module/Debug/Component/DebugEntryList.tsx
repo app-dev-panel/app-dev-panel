@@ -37,6 +37,7 @@ const EntryRow = styled(Box)(({theme}) => ({
     cursor: 'pointer',
     transition: 'background-color 0.1s ease',
     '&:hover': {backgroundColor: theme.palette.action.hover},
+    [theme.breakpoints.down('sm')]: {gap: theme.spacing(0.75), padding: theme.spacing(0.75, 1)},
 }));
 
 const MethodLabel = styled(Typography)(({theme}) => ({
@@ -60,6 +61,7 @@ const MetaLabel = styled(Typography)(({theme}) => ({
     fontFamily: theme.adp.fontFamilyMono,
     fontSize: '10px',
     flexShrink: 0,
+    [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
 
 const StatusChip = styled(Chip)({fontSize: '10px', height: 20, minWidth: 36, fontWeight: 600, borderRadius: 4});
@@ -69,6 +71,7 @@ const StatCell = styled(Box)(({theme}) => ({
     alignItems: 'center',
     gap: theme.spacing(0.5),
     flexShrink: 0,
+    [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
 
 const StatLabel = styled(Typography)(({theme}) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '10px'}));

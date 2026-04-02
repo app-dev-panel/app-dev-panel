@@ -60,10 +60,12 @@ const methodColor = (method: string, theme: Theme): string => {
 const MetricBox = styled(Box)(({theme}) => ({
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing(1.5),
+    flexWrap: 'wrap',
+    gap: theme.spacing(1),
     padding: theme.spacing(1.5, 2),
     borderBottom: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.action.hover,
+    [theme.breakpoints.down('sm')]: {gap: theme.spacing(0.75), padding: theme.spacing(1, 1.5)},
 }));
 
 const TabPanel = styled(Box)(({theme}) => ({padding: theme.spacing(2)}));
@@ -82,6 +84,7 @@ const HeaderTable = styled('table')(({theme}) => ({
         whiteSpace: 'nowrap',
         width: '30%',
         verticalAlign: 'top',
+        [theme.breakpoints.down('sm')]: {width: 'auto', padding: theme.spacing(0.5, 1), fontSize: '11px'},
     },
     '& td': {
         padding: theme.spacing(0.75, 1.5),
@@ -352,7 +355,16 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
                         borderRadius: 1,
                     }}
                 />
-                <Typography sx={{fontFamily: monoFontFamily, fontSize: '13px', flex: 1, wordBreak: 'break-all'}}>
+                <Typography
+                    sx={{
+                        fontFamily: monoFontFamily,
+                        fontSize: '13px',
+                        flex: 1,
+                        minWidth: 0,
+                        wordBreak: 'break-word',
+                        overflowWrap: 'anywhere',
+                    }}
+                >
                     {data.requestUrl}
                 </Typography>
                 <Chip
