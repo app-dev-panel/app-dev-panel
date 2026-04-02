@@ -374,7 +374,7 @@ final class HttpSubscriberTest extends TestCase
         $idGenerator = new DebuggerIdGenerator();
         $storage = new MemoryStorage($idGenerator);
         $timeline = new TimelineCollector();
-        $environmentCollector = new EnvironmentCollector($timeline);
+        $environmentCollector = new EnvironmentCollector();
         $debugger = new Debugger($idGenerator, $storage, [$environmentCollector, $timeline]);
 
         $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(environment: $environmentCollector));
@@ -395,7 +395,7 @@ final class HttpSubscriberTest extends TestCase
         $idGenerator = new DebuggerIdGenerator();
         $storage = new MemoryStorage($idGenerator);
         $timeline = new TimelineCollector();
-        $routerCollector = new RouterCollector($timeline);
+        $routerCollector = new RouterCollector();
         $routerDataExtractor = new RouterDataExtractor($routerCollector);
         $debugger = new Debugger($idGenerator, $storage, [$routerCollector, $timeline]);
 
@@ -689,8 +689,8 @@ final class HttpSubscriberTest extends TestCase
         $webAppInfo = new WebAppInfoCollector($timeline);
         $exceptionCollector = new ExceptionCollector($timeline);
         $varDumperCollector = new VarDumperCollector($timeline);
-        $environmentCollector = new EnvironmentCollector($timeline);
-        $routerCollector = new RouterCollector($timeline);
+        $environmentCollector = new EnvironmentCollector();
+        $routerCollector = new RouterCollector();
         $routerDataExtractor = new RouterDataExtractor($routerCollector);
 
         $debugger = new Debugger($idGenerator, $storage, [

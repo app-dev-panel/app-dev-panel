@@ -70,7 +70,7 @@ count = 6
 file = "config/common/routes.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 81
+count = 83
 
 [[issues]]
 file = "config/common/routes.php"
@@ -82,7 +82,7 @@ count = 3
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Yiisoft\Router\Route`.'
-count = 35
+count = 36
 
 [[issues]]
 file = "config/common/routes.php"
@@ -385,6 +385,12 @@ message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebVi
 count = 1
 
 [[issues]]
+file = "src/Web/ContactPage/template.php"
+code = "redundant-cast"
+message = "Redundant cast to `(string)`: the expression already has this type."
+count = 1
+
+[[issues]]
 file = "src/Web/HomePage/Action.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
@@ -587,6 +593,24 @@ file = "src/Web/Shared/Layout/Main/layout.php"
 code = "non-existent-method"
 message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
 count = 4
+
+[[issues]]
+file = "src/Web/TestFixtures/AssetAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\AssetAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/AssetAction.php"
+code = "unused-property"
+message = "Property `$assetCollector` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/AssetAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
 
 [[issues]]
 file = "src/Web/TestFixtures/CacheAction.php"
