@@ -123,10 +123,16 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const iframeRef = useRef<HTMLIFrameElement | undefined>(undefined);
     const [iframeWrapper, setIframeWrapper] = useState<IFrameWrapper | null>(null);
+    const pendingNavigationRef = useRef<string | null>(null);
 
     useEffect(() => {
         if (iframeRef.current) {
-            setIframeWrapper(new IFrameWrapper(iframeRef.current));
+            const wrapper = new IFrameWrapper(iframeRef.current);
+            setIframeWrapper(wrapper);
+            if (pendingNavigationRef.current) {
+                wrapper.dispatchEvent('router.navigate', pendingNavigationRef.current);
+                pendingNavigationRef.current = null;
+            }
         }
     }, [iframeRef.current]);
 
@@ -138,9 +144,13 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
             if (!iframeEnabled) {
                 setIframeEnabled(true);
             }
-            iframeWrapper?.dispatchEvent('router.navigate', url);
+            if (iframeWrapper) {
+                iframeWrapper.dispatchEvent('router.navigate', url);
+            } else {
+                pendingNavigationRef.current = url;
+            }
         },
-        [iframeWrapper, activeComponents],
+        [iframeWrapper, iframeEnabled, activeComponents],
     );
 
     const toggleIframeHandler = useCallback(() => {
@@ -216,7 +226,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     // Expanded state: full toolbar bar at bottom
     return (
         <Portal>
-            <Box sx={{position: 'sticky', bottom: 0, zIndex: 1300}}>
+            <Box ref={iframeContainerRef} sx={{position: 'sticky', bottom: 0, zIndex: 1300}}>
                 {/* Resize handle (only when iframe is active) */}
                 {iframeEnabled && (
                     <Box
@@ -335,14 +345,15 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                         </Tooltip>
                     </Stack>
                 </Paper>
+
+                {iframeEnabled && (
+                    <div style={{height: position, overflow: 'hidden'}}>
+                        <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
+                    </div>
+                )}
             </Box>
 
             <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
-            {iframeEnabled && (
-                <div ref={iframeContainerRef} style={{height: position, overflow: 'hidden'}}>
-                    <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
-                </div>
-            )}
         </Portal>
     );
 };
