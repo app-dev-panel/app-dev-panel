@@ -6,14 +6,16 @@ import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk
 import {IFrameWrapper} from '@app-dev-panel/sdk/Helper/IFrameWrapper';
 import {DebugEntriesListModal} from '@app-dev-panel/toolbar/Module/Toolbar/Component/DebugEntriesListModal';
 import {CommandItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Console/CommandItem';
-import {DateItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DateItem';
+import {DatabaseItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DatabaseItem';
+import {DeprecationItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DeprecationItem';
 import {EventsItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/EventsItem';
+import {ExceptionItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/ExceptionItem';
+import {HttpClientItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/HttpClientItem';
 import {LogsItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/LogsItem';
 import {MemoryItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/MemoryItem';
 import {RequestTimeItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/RequestTimeItem';
 import {ValidatorItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/ValidatorItem';
 import {RequestItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RequestItem';
-import {RouterItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RouterItem';
 import {useSelector} from '@app-dev-panel/toolbar/store';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
@@ -259,16 +261,18 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                             {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
                             {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
 
+                            <ExceptionItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+
                             <RequestTimeItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
                             <MemoryItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
-                            {isDebugEntryAboutWeb(selectedEntry) && <RouterItem data={selectedEntry} />}
+                            <DatabaseItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                            <HttpClientItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
                             <LogsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
                             <EventsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
                             <ValidatorItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-
-                            <DateItem data={selectedEntry} />
+                            <DeprecationItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
                         </Stack>
                     )}
 
