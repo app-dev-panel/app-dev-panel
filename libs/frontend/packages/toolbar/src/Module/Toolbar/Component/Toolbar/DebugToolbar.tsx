@@ -213,8 +213,8 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     // Listen for panel.loaded from iframe — mounted once, uses refs to avoid stale closures
     useEffect(() => {
         const onMessage = (e: MessageEvent) => {
-            if (e.origin !== window.location.origin) return;
-            if (e.data?.event !== 'panel.loaded') return;
+            // Accept from any origin — panel iframe may be on a different host/port
+            if (!e.data || typeof e.data !== 'object' || e.data.event !== 'panel.loaded') return;
 
             panelReadyRef.current = true;
 
