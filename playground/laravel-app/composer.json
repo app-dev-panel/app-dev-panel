@@ -8,7 +8,7 @@
         "app-dev-panel/adapter-laravel": "*",
         "app-dev-panel/testing": "*",
         "guzzlehttp/guzzle": "^7.5",
-        "laravel/framework": "^11.0|^12.0",
+        "laravel/framework": "^11.0|^12.0|^13.0",
         "nyholm/psr7": "^1.8"
     },
     "require-dev": {

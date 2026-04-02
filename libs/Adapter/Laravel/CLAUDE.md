@@ -7,7 +7,7 @@ Bridges ADP Kernel and API into Laravel. Uses Laravel's event system, middleware
 - Composer: `app-dev-panel/adapter-laravel`
 - Namespace: `AppDevPanel\Adapter\Laravel\`
 - PHP: 8.4+
-- Laravel: 11.x / 12.x
+- Laravel: 11.x / 12.x / 13.x
 - Dependencies: `app-dev-panel/kernel`, `app-dev-panel/api`, `app-dev-panel/cli`, `nyholm/psr7`, `guzzlehttp/guzzle`, `guzzlehttp/psr7`, `symfony/var-dumper`, PSR packages (`container`, `event-dispatcher`, `http-client`, `http-message`, `log`), Illuminate components (`contracts`, `http`, `routing`, `support`)
 
 ## Directory Structure

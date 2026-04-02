@@ -66,12 +66,12 @@ return [
     'path_mapping' => [],
 
     'panel' => [
-        'static_url' => '',  // Base URL for panel assets (empty = GitHub Pages default). Use http://localhost:3000 for Vite dev with HMR.
+        'static_url' => '', // Base URL for panel assets (empty = GitHub Pages default). Use http://localhost:3000 for Vite dev with HMR.
     ],
 
     'toolbar' => [
-        'enabled' => true,  // Inject the debug toolbar into HTML responses.
-        'static_url' => '',  // Base URL for toolbar assets (empty = uses panel static_url). Use http://localhost:3001 for Vite dev server.
+        'enabled' => true, // Inject the debug toolbar into HTML responses.
+        'static_url' => '', // Base URL for toolbar assets (empty = uses panel static_url). Use http://localhost:3001 for Vite dev server.
     ],
 
     'api' => [

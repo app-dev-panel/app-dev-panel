@@ -151,7 +151,7 @@ interface ModuleInterface {
 | Symfony | Symfony 6.4–8.x | Bundle + Extension + CompilerPass |
 | Yii2 | Yii 2 | Module + BootstrapInterface |
 | Yii 3 | Yii 3 | Config plugin + ServiceProvider |
-| Laravel | Laravel 11.x–12.x | ServiceProvider (register + boot) |
+| Laravel | Laravel 11.x–13.x | ServiceProvider (register + boot) |
 
 ### Минимальный чеклист
 
