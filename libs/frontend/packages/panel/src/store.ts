@@ -15,7 +15,7 @@ import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import {setupListeners} from '@reduxjs/toolkit/query';
 // import {middlewares as ToolbarApiMiddlewares, reducers as ToolbarApiReducers} from './Module/Toolbar/api';
 import {errorNotificationMiddleware} from '@app-dev-panel/sdk/API/errorNotificationMiddleware';
-import {TypedUseSelectorHook, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, persistStore} from 'redux-persist';
 import {initMessageListener} from 'redux-state-sync';
 
@@ -67,6 +67,6 @@ type StoreType = ReturnTypeOfCreateStoreFunction['store'];
 
 export type RootState = ReturnType<StoreType['getState']>;
 export type AppDispatch = StoreType['dispatch'];
-const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+const useAppSelector = useSelector.withTypes<RootState>();
 
 export {useAppSelector as useSelector};
