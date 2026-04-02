@@ -148,7 +148,7 @@ jobs:
   # Mago — Playgrounds (format, lint, analyze for each playground)
   # ---------------------------------------------------------------------------
   mago-playgrounds:
-    name: "Mago: ${{ matrix.playground }} (${{ matrix.check }})"
+    name: "Mago: ${{ matrix.playground.name }} (${{ matrix.check }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
