@@ -182,10 +182,6 @@ export const ChatPanel = () => {
         [sendMessages, scrollToBottom],
     );
 
-    if (!status?.connected) {
-        return <Alert severity="info">Connect an LLM provider first to use the chat feature.</Alert>;
-    }
-
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -215,6 +211,10 @@ export const ChatPanel = () => {
         }),
         [],
     );
+
+    if (!status?.connected) {
+        return <Alert severity="info">Connect an LLM provider first to use the chat feature.</Alert>;
+    }
 
     return (
         <Box sx={containerSx}>
