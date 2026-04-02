@@ -46,8 +46,8 @@
   "scripts": {
     "predeploy": "VITE_ENV=github npm run build; npm run copy-toolbar",
     "deploy": "VITE_ENV=github gh-pages -t true -d packages/panel/dist",
-    "start": "npm run start --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present",
+    "start": "npm run start -w packages/panel & npm run start -w packages/toolbar & wait",
+    "build": "npm run build -w packages/sdk & npm run build -w packages/panel & npm run build -w packages/toolbar & wait",
     "build:dev": "npm run build:dev -w packages/panel; npm run build -w packages/toolbar; npm run copy-toolbar",
     "serve:dev": "npm run serve:dev -w packages/panel",
     "copy-toolbar": "mkdir packages/panel/dist/toolbar && cp -r packages/toolbar/dist/bundle.* packages/toolbar/dist/assets packages/panel/dist/toolbar",
