@@ -393,6 +393,9 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 viteAssetListener: $this->app->bound(AssetBundleCollector::class)
                     ? new ViteAssetListener(fn() => $this->app->make(AssetBundleCollector::class))
                     : null,
+                databaseListener: $this->app->bound(DatabaseListener::class)
+                    ? $this->app->make(DatabaseListener::class)
+                    : null,
             ),
         );
     }
@@ -849,6 +852,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             }
             $listener = new $listenerClass(fn() => $this->app->make($collectorClass));
             $listener->register($events);
+
+            // Store DatabaseListener for DebugMiddleware to capture failed queries
+            if ($listenerClass === DatabaseListener::class) {
+                $this->app->instance(DatabaseListener::class, $listener);
+            }
         }
 
         if ($collectors['security'] ?? true) {
