@@ -43,11 +43,13 @@ jobs:
           SPLITSH_VERSION: v1.0.1
           SPLITSH_SHA256: "2539301ce5e21d0ca44b689d0dd2c1b20d9f9e996c1fe6c462afb8af4e7141cc"
         run: |
-          curl -sL "https://github.com/splitsh/lite/releases/download/${SPLITSH_VERSION}/lite_linux_amd64.tar.gz" -o /tmp/splitsh.tar.gz
+          curl -sLf "https://github.com/splitsh/lite/releases/download/${SPLITSH_VERSION}/lite_linux_amd64.tar.gz" -o /tmp/splitsh.tar.gz
           echo "${SPLITSH_SHA256}  /tmp/splitsh.tar.gz" | sha256sum -c -
           tar xzf /tmp/splitsh.tar.gz -C /tmp
-          sudo mv /tmp/splitsh-lite /usr/local/bin/splitsh-lite
+          ls -la /tmp/splitsh-lite || ls -la /tmp/lite || ls -la /tmp
+          sudo mv /tmp/splitsh-lite /usr/local/bin/splitsh-lite || sudo mv /tmp/lite /usr/local/bin/splitsh-lite
           rm /tmp/splitsh.tar.gz
+          splitsh-lite --version || echo "splitsh-lite installed (no --version flag)"
 
       - name: Configure git
         run: |
@@ -64,8 +66,11 @@ jobs:
         run: |
           REMOTE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/app-dev-panel/${SPLIT_REPO}.git"
 
+          echo "Splitting ${LOCAL_PATH} → ${SPLIT_REPO} (ref: ${REF_NAME}, tag: ${IS_TAG})"
+
           # Run splitsh-lite to extract the subdirectory with full history
           SHA=$(splitsh-lite --prefix="${LOCAL_PATH}")
+          echo "Split SHA: ${SHA}"
 
           # Add split remote
           git remote add split "${REMOTE_URL}" 2>/dev/null || true
