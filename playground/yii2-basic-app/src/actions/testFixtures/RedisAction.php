@@ -13,7 +13,7 @@ final class RedisAction extends Action
     public function run(): array
     {
         /** @var \AppDevPanel\Adapter\Yii2\Module $module */
-        $module = \Yii::$app->getModule('debug-panel');
+        $module = \Yii::$app->getModule('adp');
 
         /** @var RedisCollector|null $redisCollector */
         $redisCollector = $module->getCollector(RedisCollector::class);

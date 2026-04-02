@@ -144,7 +144,7 @@ app_dev_panel:
 ```php
 // конфигурация приложения
 'modules' => [
-    'debug-panel' => [
+    'adp' => [
         'collectors' => [
             'translator' => true,   // включён по умолчанию
         ],

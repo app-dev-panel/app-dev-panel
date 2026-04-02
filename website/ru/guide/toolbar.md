@@ -148,7 +148,7 @@ app_dev_panel:
 ```php
 // config/web.php
 'modules' => [
-    'debug-panel' => [
+    'adp' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'toolbarEnabled' => true,
         'toolbarStaticUrl' => '',  // Использует panelStaticUrl по умолчанию
@@ -185,7 +185,7 @@ app_dev_panel:
 == Yii 2
 ```php
 'modules' => [
-    'debug-panel' => [
+    'adp' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'toolbarEnabled' => false,
     ],
@@ -274,7 +274,7 @@ app_dev_panel:
 == Yii 2
 ```php
 'modules' => [
-    'debug-panel' => [
+    'adp' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'toolbarStaticUrl' => 'http://localhost:3001',
     ],

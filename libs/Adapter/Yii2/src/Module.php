@@ -1164,37 +1164,37 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'debug/api/<path:.*>',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'adp/adp-api/handle',
                     'defaults' => ['path' => ''],
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'debug/api',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'adp/adp-api/handle',
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'inspect/api/<path:.*>',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'adp/adp-api/handle',
                     'defaults' => ['path' => ''],
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'inspect/api',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'adp/adp-api/handle',
                 ],
                 // Panel SPA routes (catch-all for client-side routing)
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'debug/<path:(?!api(/|$)).+>',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'adp/adp-api/handle',
                     'defaults' => ['path' => ''],
                     'verb' => ['GET'],
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'debug',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'adp/adp-api/handle',
                     'verb' => ['GET'],
                 ],
             ],

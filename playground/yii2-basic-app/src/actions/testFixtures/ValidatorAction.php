@@ -12,7 +12,7 @@ final class ValidatorAction extends Action
     public function run(): array
     {
         /** @var \AppDevPanel\Adapter\Yii2\Module $module */
-        $module = \Yii::$app->getModule('debug-panel');
+        $module = \Yii::$app->getModule('adp');
 
         /** @var ValidatorCollector|null $validatorCollector */
         $validatorCollector = $module->getCollector(ValidatorCollector::class);

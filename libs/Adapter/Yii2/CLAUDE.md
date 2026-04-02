@@ -45,13 +45,13 @@ src/
 ### 1. Bootstrap Registration (`composer.json`)
 
 Via `extra.bootstrap` in composer.json, Yii 2 auto-loads `Bootstrap` class.
-It registers the `debug-panel` module if enabled (auto-enables in YII_DEBUG mode).
+It registers the `adp` module if enabled (auto-enables in YII_DEBUG mode).
 
 ### 2. Configuration (application config)
 
 ```php
 'modules' => [
-    'debug-panel' => [
+    'adp' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'storagePath' => '@runtime/debug',
         'historySize' => 50,

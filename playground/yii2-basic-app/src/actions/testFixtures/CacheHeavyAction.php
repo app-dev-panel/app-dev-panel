@@ -13,7 +13,7 @@ final class CacheHeavyAction extends Action
     public function run(): array
     {
         /** @var \AppDevPanel\Adapter\Yii2\Module $module */
-        $module = \Yii::$app->getModule('debug-panel');
+        $module = \Yii::$app->getModule('adp');
 
         /** @var CacheCollector|null $cacheCollector */
         $cacheCollector = $module->getCollector(CacheCollector::class);

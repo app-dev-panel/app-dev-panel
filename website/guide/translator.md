@@ -144,7 +144,7 @@ app_dev_panel:
 ```php
 // application config
 'modules' => [
-    'debug-panel' => [
+    'adp' => [
         'collectors' => [
             'translator' => true,   // enabled by default
         ],

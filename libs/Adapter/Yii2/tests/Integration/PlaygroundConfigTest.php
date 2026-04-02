@@ -10,11 +10,11 @@ use PHPUnit\Framework\TestCase;
 /**
  * Tests that the Yii 2 playground app configuration is correct.
  *
- * Specifically validates that the debug-panel module is included in the
+ * Specifically validates that the adp module is included in the
  * bootstrap array, which is required for route registration and
  * debugger initialization.
  *
- * Without 'debug-panel' in bootstrap, the Module::bootstrap() method
+ * Without 'adp' in bootstrap, the Module::bootstrap() method
  * is never called, resulting in 404 errors for /debug/api/* and
  * /inspect/api/* endpoints.
  */
@@ -43,9 +43,9 @@ final class PlaygroundConfigTest extends TestCase
     public function testDebugPanelIsInBootstrapArray(): void
     {
         $this->assertContains(
-            'debug-panel',
+            'adp',
             $this->config['bootstrap'],
-            'The "debug-panel" module must be in the bootstrap array. '
+            'The "adp" module must be in the bootstrap array. '
             . 'Without it, Module::bootstrap() is never called and API routes '
             . '(/debug/api/*, /inspect/api/*) will return 404.',
         );
@@ -54,24 +54,24 @@ final class PlaygroundConfigTest extends TestCase
     public function testDebugPanelModuleIsConfigured(): void
     {
         $this->assertArrayHasKey('modules', $this->config);
-        $this->assertArrayHasKey('debug-panel', $this->config['modules']);
+        $this->assertArrayHasKey('adp', $this->config['modules']);
     }
 
     public function testDebugPanelBootstrapsBeforeLog(): void
     {
         $bootstrap = $this->config['bootstrap'];
-        $debugIndex = array_search('debug-panel', $bootstrap, true);
+        $debugIndex = array_search('adp', $bootstrap, true);
         $logIndex = array_search('log', $bootstrap, true);
 
         if ($logIndex === false) {
             $this->markTestSkipped('No "log" component in bootstrap array.');
         }
 
-        $this->assertNotFalse($debugIndex, '"debug-panel" should be in bootstrap array');
+        $this->assertNotFalse($debugIndex, '"adp" should be in bootstrap array');
         $this->assertLessThan(
             $logIndex,
             $debugIndex,
-            '"debug-panel" should bootstrap before "log" to capture early log messages.',
+            '"adp" should bootstrap before "log" to capture early log messages.',
         );
     }
 }

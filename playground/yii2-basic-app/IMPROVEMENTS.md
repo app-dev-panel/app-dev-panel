@@ -16,7 +16,7 @@
 - **Fewest fixtures** — only 18 actions; missing `RouterAction`, `ValidatorAction` (these collectors are not supported in Yii 2)
 - **No PSR proxy usage** — only 1 action uses PSR injection (`HttpClientAction` uses `ClientInterface`); everything else goes through Yii 2 statics
 - **Static coupling** — `\Yii::info()`, `Event::trigger()`, `\Yii::$app->getModule()` — hard to test, tightly coupled to framework globals
-- **Direct collector injection via Module** — `CacheAction`, `DatabaseAction`, `MailerAction`, `DumpAction` access collectors via `\Yii::$app->getModule('debug-panel')->getCollector()`
+- **Direct collector injection via Module** — `CacheAction`, `DatabaseAction`, `MailerAction`, `DumpAction` access collectors via `\Yii::$app->getModule('adp')->getCollector()`
 - **Legacy architecture** — Yii 2's service locator pattern (no real DI container) limits clean dependency injection
 - **No queue support** — Yii 2 has no built-in queue; adapter doesn't integrate with `yii2-queue` extension
 

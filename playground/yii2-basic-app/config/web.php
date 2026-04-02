@@ -9,7 +9,7 @@ return [
     'name' => 'ADP Yii 2 Playground',
     'basePath' => dirname(__DIR__) . '/src',
     'runtimePath' => dirname(__DIR__) . '/runtime',
-    'bootstrap' => ['debug-panel', 'log', \App\bootstrap\DatabaseBootstrap::class],
+    'bootstrap' => ['adp', 'log', \App\bootstrap\DatabaseBootstrap::class],
     'controllerNamespace' => 'App\\controllers',
     'params' => $params,
 
@@ -86,7 +86,7 @@ return [
     ],
 
     'modules' => [
-        'debug-panel' => [
+        'adp' => [
             'class' => \AppDevPanel\Adapter\Yii2\Module::class,
             'storagePath' => '@runtime/debug',
             'historySize' => 50,
