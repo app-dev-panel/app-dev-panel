@@ -657,6 +657,29 @@ final class HttpSubscriberTest extends TestCase
         $this->assertTrue($response->headers->has('X-Debug-Id'));
     }
 
+    public function testVarDumperHandlerCollectsDumpCallsWithSourceLine(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $varDumperCollector = new VarDumperCollector($timeline);
+        $debugger = new Debugger($idGenerator, $storage, [$varDumperCollector, $timeline]);
+
+        $subscriber = new HttpSubscriber($debugger, new HttpSubscriberCollectors(varDumper: $varDumperCollector));
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/test');
+        $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+        $subscriber->onKernelRequest($event);
+
+        // Trigger the VarDumper handler by calling dump()
+        // This exercises lines 160-171 of HttpSubscriber (the VarDumper handler closure)
+        \Symfony\Component\VarDumper\VarDumper::dump('test-value');
+
+        $collected = $varDumperCollector->getCollected();
+        $this->assertNotEmpty($collected);
+    }
+
     public function testAllCollectorsCombined(): void
     {
         $idGenerator = new DebuggerIdGenerator();

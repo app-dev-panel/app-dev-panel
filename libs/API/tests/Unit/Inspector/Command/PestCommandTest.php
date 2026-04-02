@@ -8,6 +8,8 @@ use AppDevPanel\Api\Inspector\Command\PestCommand;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\PathResolverInterface;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 final class PestCommandTest extends TestCase
@@ -43,6 +45,8 @@ final class PestCommandTest extends TestCase
         $this->assertIsBool(PestCommand::isAvailable());
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinarySuccess(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-pest-ok-' . uniqid();
@@ -72,6 +76,8 @@ final class PestCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinaryError(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-pest-err-' . uniqid();
@@ -101,6 +107,8 @@ final class PestCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinaryFail(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-pest-fail-' . uniqid();
@@ -130,6 +138,8 @@ final class PestCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunCombinesStdoutAndStderr(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-pest-combined-' . uniqid();

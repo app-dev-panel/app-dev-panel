@@ -271,6 +271,51 @@ final class IngestionControllerTest extends TestCase
         $this->assertContains('custom_metrics', $collectorIds);
     }
 
+    public function testIngestBatchExceedsLimit(): void
+    {
+        $controller = $this->createController();
+
+        $entries = [];
+        for ($i = 0; $i < 101; $i++) {
+            $entries[] = ['collectors' => ['logs' => []]];
+        }
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Maximum 100');
+        $controller->ingestBatch($this->post(['entries' => $entries]));
+    }
+
+    public function testIngestLogWithMinimalFields(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->ingestLog($this->post([
+            'level' => 'debug',
+            'message' => 'Simple message',
+        ]));
+
+        $this->assertSame(201, $response->getStatusCode());
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertTrue($data['success']);
+    }
+
+    public function testIngestLogMissingMessage(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('level');
+        $controller->ingestLog($this->post(['level' => 'info']));
+    }
+
+    public function testIngestCollectorsNotArrayThrowsException(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('collectors');
+        $controller->ingest($this->post(['collectors' => 'not-an-array']));
+    }
+
     private function removeDir(string $dir): void
     {
         if (!is_dir($dir)) {

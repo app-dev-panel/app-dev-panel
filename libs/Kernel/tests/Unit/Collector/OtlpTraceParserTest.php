@@ -280,6 +280,84 @@ final class OtlpTraceParserTest extends TestCase
         $this->assertSame('svc-b', $spans[2]->serviceName);
     }
 
+    public function testParseArrayValueAttribute(): void
+    {
+        $data = $this->buildSpanWithAttributes([
+            [
+                'key' => 'tags',
+                'value' => ['arrayValue' => ['values' => [
+                    ['stringValue' => 'tag1'],
+                    ['stringValue' => 'tag2'],
+                    ['intValue' => '99'],
+                ]]],
+            ],
+        ]);
+
+        $spans = $this->parser->parse($data);
+        $this->assertSame(['tag1', 'tag2', 99], $spans[0]->attributes['tags']);
+    }
+
+    public function testParseKvlistValueAttribute(): void
+    {
+        $data = $this->buildSpanWithAttributes([
+            [
+                'key' => 'metadata',
+                'value' => ['kvlistValue' => ['values' => [
+                    ['key' => 'env', 'value' => ['stringValue' => 'prod']],
+                    ['key' => 'version', 'value' => ['intValue' => '3']],
+                ]]],
+            ],
+        ]);
+
+        $spans = $this->parser->parse($data);
+        $this->assertSame(['env' => 'prod', 'version' => 3], $spans[0]->attributes['metadata']);
+    }
+
+    public function testParseBytesValueAttribute(): void
+    {
+        $data = $this->buildSpanWithAttributes([
+            ['key' => 'payload', 'value' => ['bytesValue' => 'AQIDBA==']],
+        ]);
+
+        $spans = $this->parser->parse($data);
+        $this->assertSame('AQIDBA==', $spans[0]->attributes['payload']);
+    }
+
+    public function testParseUnknownValueAttributeReturnsNull(): void
+    {
+        $data = $this->buildSpanWithAttributes([
+            ['key' => 'mystery', 'value' => []],
+        ]);
+
+        $spans = $this->parser->parse($data);
+        $this->assertNull($spans[0]->attributes['mystery']);
+    }
+
+    private function buildSpanWithAttributes(array $attributes): array
+    {
+        return [
+            'resourceSpans' => [
+                [
+                    'resource' => ['attributes' => []],
+                    'scopeSpans' => [
+                        [
+                            'spans' => [
+                                [
+                                    'traceId' => 'trace1',
+                                    'spanId' => 'span1',
+                                    'name' => 'test',
+                                    'startTimeUnixNano' => '0',
+                                    'endTimeUnixNano' => '0',
+                                    'attributes' => $attributes,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
     public function testAllSpanKinds(): void
     {
         $parser = new OtlpTraceParser();

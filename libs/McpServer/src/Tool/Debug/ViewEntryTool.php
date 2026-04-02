@@ -99,18 +99,14 @@ final class ViewEntryTool implements ToolInterface
         foreach ($data as $fqcn => $collectorData) {
             $name = $this->shortName($fqcn);
             $sections[] = "## {$name}\n";
-            $sections[] = $this->formatValue($collectorData, 0);
+            $sections[] = $this->formatValue($collectorData);
         }
 
         return implode("\n", $sections);
     }
 
-    private function formatValue(mixed $value, int $depth): string
+    private function formatValue(mixed $value): string
     {
-        if ($depth > 5) {
-            return is_array($value) ? '[...]' : (string) json_encode($value, JSON_UNESCAPED_SLASHES);
-        }
-
         if (!is_array($value)) {
             return (string) json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }

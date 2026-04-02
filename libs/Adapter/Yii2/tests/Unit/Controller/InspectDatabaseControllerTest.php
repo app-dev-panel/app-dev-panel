@@ -44,6 +44,10 @@ final class InspectDatabaseControllerTest extends TestCase
         }
     }
 
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
     public function testDefaultActionIsTables(): void
     {
         $controller = $this->createController();

@@ -236,6 +236,47 @@ final class SearchLogsToolTest extends TestCase
         $this->assertStringContainsString('UNKNOWN', $text);
     }
 
+    public function testSearchRespectsLimitAcrossEntries(): void
+    {
+        $storage = new MemoryStorage(new DebuggerIdGenerator());
+        $storage->write(
+            'entry-1',
+            ['id' => 'entry-1'],
+            [
+                LogCollector::class => [
+                    ['time' => 1000.0, 'level' => 'info', 'message' => 'Match in entry 1', 'context' => [], 'line' => ''],
+                ],
+            ],
+            [],
+        );
+        $storage->write(
+            'entry-2',
+            ['id' => 'entry-2'],
+            [
+                LogCollector::class => [
+                    ['time' => 1001.0, 'level' => 'info', 'message' => 'Match in entry 2', 'context' => [], 'line' => ''],
+                ],
+            ],
+            [],
+        );
+        $storage->write(
+            'entry-3',
+            ['id' => 'entry-3'],
+            [
+                LogCollector::class => [
+                    ['time' => 1002.0, 'level' => 'info', 'message' => 'Match in entry 3', 'context' => [], 'line' => ''],
+                ],
+            ],
+            [],
+        );
+        $tool = new SearchLogsTool($storage);
+
+        // Limit to 2 — should stop before processing entry-1 (oldest, processed last due to reverse)
+        $result = $tool->execute(['query' => 'match', 'limit' => 2]);
+
+        $this->assertStringContainsString('Found 2', $result['content'][0]['text']);
+    }
+
     private function createStorageWithLogs(): MemoryStorage
     {
         $storage = new MemoryStorage(new DebuggerIdGenerator());

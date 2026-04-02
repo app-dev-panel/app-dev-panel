@@ -7,6 +7,7 @@ namespace AppDevPanel\McpServer\Tests\Unit\Tool\Debug;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\MemoryStorage;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\Tool\Debug\ViewDatabaseQueriesTool;
 use PHPUnit\Framework\TestCase;
 
@@ -306,6 +307,52 @@ final class ViewDatabaseQueriesToolTest extends TestCase
         $text = $result['content'][0]['text'];
         $this->assertStringContainsString('SELECT 1', $text);
         $this->assertStringContainsString('1 queries', $text);
+    }
+
+    public function testViewQueriesAutoSelectWithEmptyStorage(): void
+    {
+        $storage = $this->createMock(StorageInterface::class);
+        $storage->method('read')->willReturn([]);
+        $tool = new ViewDatabaseQueriesTool($storage);
+
+        $result = $tool->execute([]);
+
+        $this->assertStringContainsString('No debug entries found', $result['content'][0]['text']);
+    }
+
+    public function testViewQueriesWithActionMissingTime(): void
+    {
+        $storage = new MemoryStorage(new DebuggerIdGenerator());
+        $storage->write(
+            'entry-1',
+            ['id' => 'entry-1'],
+            [
+                DatabaseCollector::class => [
+                    'queries' => [
+                        [
+                            'position' => 1,
+                            'sql' => 'SELECT 1',
+                            'params' => [],
+                            'line' => '',
+                            'status' => 'success',
+                            'rowsNumber' => 1,
+                            'actions' => [
+                                ['action' => 'query.start'],
+                                ['action' => 'query.end', 'time' => 1000.001],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [],
+        );
+        $tool = new ViewDatabaseQueriesTool($storage);
+
+        $result = $tool->execute(['id' => 'entry-1']);
+
+        $text = $result['content'][0]['text'];
+        // Duration should be 0.0ms since start is null (missing time)
+        $this->assertStringContainsString('0.0ms', $text);
     }
 
     private function createStorageWithQueries(): MemoryStorage

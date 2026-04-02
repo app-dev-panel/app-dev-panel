@@ -8,6 +8,8 @@ use AppDevPanel\Api\Inspector\Command\PHPStanCommand;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\PathResolverInterface;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 final class PHPStanCommandTest extends TestCase
@@ -43,6 +45,8 @@ final class PHPStanCommandTest extends TestCase
         $this->assertIsBool(PHPStanCommand::isAvailable());
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunFailsWhenBinaryNotFound(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-phpstan-test-' . uniqid();
@@ -61,6 +65,8 @@ final class PHPStanCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinaryThatOutputsJson(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-phpstan-run-' . uniqid();
@@ -91,6 +97,8 @@ final class PHPStanCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinaryThatReportsErrors(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-phpstan-err-' . uniqid();
@@ -122,6 +130,8 @@ final class PHPStanCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinaryThatFails(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-phpstan-fail-' . uniqid();

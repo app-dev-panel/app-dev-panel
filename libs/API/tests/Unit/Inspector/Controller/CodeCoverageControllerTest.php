@@ -81,4 +81,48 @@ final class CodeCoverageControllerTest extends ControllerTestCase
         $this->assertArrayHasKey('lines', $data);
         $this->assertGreaterThan(0, $data['lines']);
     }
+
+    public function testFileOutsideRootReturns403(): void
+    {
+        // Create a controller with a temp directory as root
+        $tmpDir = sys_get_temp_dir() . '/adp-coverage-test-' . uniqid();
+        mkdir($tmpDir, 0o755, true);
+        file_put_contents($tmpDir . '/allowed.php', '<?php echo 1;');
+
+        try {
+            $resolver = $this->createMock(PathResolverInterface::class);
+            $resolver->method('getRootPath')->willReturn($tmpDir);
+            $resolver->method('getRuntimePath')->willReturn($tmpDir . '/runtime');
+
+            $controller = new CodeCoverageController($this->createResponseFactory(), $resolver);
+
+            // __FILE__ is outside $tmpDir
+            $response = $controller->file($this->get(['path' => __FILE__]));
+
+            $this->assertSame(403, $response->getStatusCode());
+            $data = $this->responseData($response);
+            $this->assertSame('Access denied: path is outside the project root.', $data['message']);
+        } finally {
+            @unlink($tmpDir . '/allowed.php');
+            @rmdir($tmpDir);
+        }
+    }
+
+    public function testFileEmptyPathReturns400(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->file($this->get(['path' => '']));
+
+        $this->assertSame(400, $response->getStatusCode());
+    }
+
+    public function testFileContentHasCorrectLineCount(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->file($this->get(['path' => __FILE__]));
+
+        $data = $this->responseData($response);
+        $expectedLines = substr_count(file_get_contents(__FILE__), "\n") + 1;
+        $this->assertSame($expectedLines, $data['lines']);
+    }
 }

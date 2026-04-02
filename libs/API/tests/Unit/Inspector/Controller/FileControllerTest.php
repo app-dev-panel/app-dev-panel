@@ -217,6 +217,30 @@ final class FileControllerTest extends ControllerTestCase
         $this->assertSame($this->fixtureDir . '/test.txt', $data['absolutePath']);
     }
 
+    public function testReadByClassNameWithNonexistentMethod(): void
+    {
+        $controller = $this->createController(dirname(__DIR__, 4));
+        $response = $controller->files($this->get([
+            'class' => self::class,
+            'method' => 'nonExistentMethod',
+        ]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertNull($data['startLine']);
+        $this->assertNull($data['endLine']);
+    }
+
+    public function testEmptyPathParameters(): void
+    {
+        $controller = $this->createController();
+        // No class, no path — defaults to empty path
+        $response = $controller->files($this->get());
+
+        // Empty path resolves to root directory "/"
+        $this->assertContains($response->getStatusCode(), [200, 404]);
+    }
+
     private function removeDir(string $dir): void
     {
         if (!is_dir($dir)) {

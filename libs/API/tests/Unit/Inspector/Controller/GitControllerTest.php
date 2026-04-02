@@ -255,4 +255,38 @@ final class GitControllerTest extends ControllerTestCase
         $this->assertArrayHasKey('commits', $data);
         $this->assertCount(1, $data['commits']);
     }
+
+    public function testSummaryWithNullCommit(): void
+    {
+        $branch = $this->createMock(Branch::class);
+        $branch->method('getName')->willReturn('main');
+        $branch->method('getCommitHash')->willReturn('abc123');
+        $branch->method('getCommit')->willReturn(null);
+
+        $references = $this->createMock(ReferenceBag::class);
+        $references->method('getBranch')->with('main')->willReturn($branch);
+        $references->method('getBranches')->willReturn([$branch]);
+
+        $log = $this->createMock(Log::class);
+        $log->method('getCommits')->willReturn([]);
+
+        $repository = $this->createMock(Repository::class);
+        $repository->method('getReferences')->willReturn($references);
+        $repository
+            ->method('run')
+            ->willReturnMap([
+                ['branch', ['--show-current'], "main\n"],
+                ['remote', [], "origin\n"],
+                ['remote', ['get-url', 'origin'], "git@github.com:test/repo.git\n"],
+                ['status', [], "On branch main\nnothing to commit"],
+            ]);
+        $repository->method('getLog')->willReturn($log);
+
+        $controller = $this->createController($repository);
+        $response = $controller->summary($this->get());
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertSame([], $data['lastCommit']);
+    }
 }

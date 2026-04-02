@@ -374,6 +374,42 @@ final class FileStorageTest extends AbstractStorageTestCase
         $this->assertSame('gz', $summaries[$id]['format']);
     }
 
+    public function testReadEntryByIdWithLegacyJsonFile(): void
+    {
+        $id = 'legacy-by-id';
+        $basePath = $this->path . '/' . date('Y-m-d') . '/' . $id . '/';
+        mkdir($basePath, 0o777, true);
+
+        // Write plain JSON files only (legacy format)
+        file_put_contents($basePath . 'summary.json', json_encode(['id' => $id]));
+        file_put_contents($basePath . 'data.json', json_encode(['key' => 'val']));
+
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        // Read by specific ID — exercises readFile() .json fallback path
+        $result = $storage->read(StorageInterface::TYPE_DATA, $id);
+        $this->assertArrayHasKey($id, $result);
+        $this->assertSame(['key' => 'val'], $result[$id]);
+    }
+
+    public function testReadEntryByIdMissingTypeFileReturnsEmpty(): void
+    {
+        $id = 'partial-entry';
+        $basePath = $this->path . '/' . date('Y-m-d') . '/' . $id . '/';
+        mkdir($basePath, 0o777, true);
+
+        // Only write summary, not data
+        file_put_contents($basePath . 'summary.json.gz', gzencode(json_encode(['id' => $id])));
+
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        // Try to read data type — readFile returns null
+        $result = $storage->read(StorageInterface::TYPE_DATA, $id);
+        $this->assertSame([], $result);
+    }
+
     public function getStorage(DebuggerIdGenerator $idGenerator): FileStorage
     {
         return new FileStorage(new Aliases()->get($this->path), $idGenerator);

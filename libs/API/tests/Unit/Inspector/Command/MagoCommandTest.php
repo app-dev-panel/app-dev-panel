@@ -8,6 +8,8 @@ use AppDevPanel\Api\Inspector\Command\MagoCommand;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\PathResolverInterface;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 final class MagoCommandTest extends TestCase
@@ -38,6 +40,8 @@ final class MagoCommandTest extends TestCase
         $this->assertTrue(MagoCommand::isAvailable());
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunUsesProjectRootAsWorkingDirectory(): void
     {
         $projectRoot = dirname(__DIR__, 6);
@@ -51,6 +55,8 @@ final class MagoCommandTest extends TestCase
         $this->assertNotNull($response->getResult());
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunReturnsFailWhenBinaryNotFound(): void
     {
         // Use a temp directory with no vendor/bin/mago and ensure mago composer package appears not installed
@@ -79,6 +85,8 @@ final class MagoCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunReturnsCommandResponse(): void
     {
         $projectRoot = dirname(__DIR__, 6);

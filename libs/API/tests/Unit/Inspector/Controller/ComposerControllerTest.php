@@ -240,4 +240,45 @@ final class ComposerControllerTest extends ControllerTestCase
         $this->expectException(InvalidArgumentException::class);
         $controller->require($this->post([]));
     }
+
+    public function testRequireWithPackageReturnsResult(): void
+    {
+        // Use the real project root so composer binary is available
+        $pathResolver = $this->createMock(PathResolverInterface::class);
+        $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
+        $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
+
+        $controller = new ComposerController($this->createResponseFactory(), $pathResolver);
+
+        // Dry-run: require a non-existent package — will error but exercises the method
+        $response = $controller->require($this->post([
+            'package' => 'nonexistent/package-zzz-999',
+            'version' => '1.0.0',
+            'isDev' => false,
+        ]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('status', $data);
+        $this->assertArrayHasKey('result', $data);
+        $this->assertArrayHasKey('errors', $data);
+    }
+
+    public function testRequireWithDevFlag(): void
+    {
+        $pathResolver = $this->createMock(PathResolverInterface::class);
+        $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
+        $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
+
+        $controller = new ComposerController($this->createResponseFactory(), $pathResolver);
+
+        $response = $controller->require($this->post([
+            'package' => 'nonexistent/package-zzz-999',
+            'isDev' => true,
+        ]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('status', $data);
+    }
 }

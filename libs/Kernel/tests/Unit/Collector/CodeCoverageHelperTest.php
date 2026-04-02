@@ -422,4 +422,82 @@ final class CodeCoverageHelperTest extends TestCase
         // File path contains 'vendor' as substring but not as a directory segment
         $this->assertTrue(CodeCoverageHelper::shouldIncludeFile('/app/src/VendorHelper.php', [], ['vendor']));
     }
+
+    public function testDetectDriverReturnsNullWhenNoDriverAvailable(): void
+    {
+        // If neither pcov nor xdebug is loaded/enabled, detectDriver returns null
+        // This test exercises the full method regardless of environment
+        $result = CodeCoverageHelper::detectDriver();
+
+        if (\extension_loaded('pcov') && \ini_get('pcov.enabled')) {
+            $this->assertSame('pcov', $result);
+        } elseif (\extension_loaded('xdebug') && \in_array('coverage', \xdebug_info('mode'), true)) {
+            $this->assertSame('xdebug', $result);
+        } else {
+            $this->assertNull($result);
+        }
+    }
+
+    public function testProcessCoverageWithLargeDataset(): void
+    {
+        $rawCoverage = [];
+        for ($i = 0; $i < 50; $i++) {
+            $lines = [];
+            for ($j = 1; $j <= 20; $j++) {
+                $lines[$j] = ($j % 3) === 0 ? -1 : 1;
+            }
+            $rawCoverage["/app/src/File{$i}.php"] = $lines;
+        }
+
+        $result = CodeCoverageHelper::processCoverage($rawCoverage, excludePaths: []);
+
+        $this->assertCount(50, $result['files']);
+        // Each file: 14 covered (status=1), 6 uncovered (status=-1), 20 executable
+        $this->assertSame(700, $result['coveredLines']);
+        $this->assertSame(1000, $result['executableLines']);
+    }
+
+    public function testShouldIncludeFileEmptyExcludeAndInclude(): void
+    {
+        // Both empty - should include
+        $this->assertTrue(CodeCoverageHelper::shouldIncludeFile('/any/path/file.php', [], []));
+    }
+
+    public function testShouldIncludeFileMultipleExcludeFirstMatch(): void
+    {
+        // First exclude pattern matches
+        $this->assertFalse(CodeCoverageHelper::shouldIncludeFile(
+            '/app/vendor/lib/X.php',
+            [],
+            ['vendor', 'cache', 'tmp'],
+        ));
+    }
+
+    public function testShouldIncludeFileMultipleExcludeSecondMatch(): void
+    {
+        // Second exclude pattern matches
+        $this->assertFalse(CodeCoverageHelper::shouldIncludeFile(
+            '/app/cache/gen/X.php',
+            [],
+            ['vendor', 'cache', 'tmp'],
+        ));
+    }
+
+    public function testShouldIncludeFileIncludePathFirstMatch(): void
+    {
+        // First include path matches
+        $this->assertTrue(CodeCoverageHelper::shouldIncludeFile('/app/src/Foo.php', ['/app/src', '/app/lib'], []));
+    }
+
+    public function testShouldIncludeFileIncludePathSecondMatch(): void
+    {
+        // Second include path matches
+        $this->assertTrue(CodeCoverageHelper::shouldIncludeFile('/app/lib/Bar.php', ['/app/src', '/app/lib'], []));
+    }
+
+    public function testShouldIncludeFileIncludePathNoneMatch(): void
+    {
+        // No include path matches — return false
+        $this->assertFalse(CodeCoverageHelper::shouldIncludeFile('/app/other/Baz.php', ['/app/src', '/app/lib'], []));
+    }
 }

@@ -256,6 +256,20 @@ final class FlattenExceptionTest extends TestCase
         $this->assertIsString($traceStr);
     }
 
+    public function testGetTraceAsStringReturnsEmptyWhenNoStackTraceMarker(): void
+    {
+        // Create a custom Throwable whose __toString() has no "Stack trace:\n"
+        $exception = new class('no stack trace') extends Exception {
+            public function __toString(): string
+            {
+                return 'Exception: no stack trace marker here';
+            }
+        };
+
+        $flattened = new FlattenException($exception);
+        $this->assertSame('', $flattened->getTraceAsString());
+    }
+
     public function testClassWithNamespace(): void
     {
         $exception = new RuntimeException('ns test');

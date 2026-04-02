@@ -149,6 +149,16 @@ final class FileServiceRegistryTest extends TestCase
         $this->assertSame('persistent-svc', $resolved->service);
     }
 
+    public function testLoadReturnsEmptyWhenFileIsEmpty(): void
+    {
+        // Create the registry file as an empty file
+        $filePath = $this->storagePath . '/.services.json';
+        file_put_contents($filePath, '');
+
+        $registry = $this->createRegistry();
+        $this->assertSame([], $registry->all());
+    }
+
     public function testEmptyStoragePath(): void
     {
         $newPath = $this->storagePath . '/nested/deep';

@@ -342,6 +342,60 @@ final class CollectorProxyCompilerPassTest extends TestCase
         $this->assertSame('translator', $proxyDef->getDecoratedService()[0]);
     }
 
+    public function testSkipsSpanProcessorWhenCollectorDisabled(): void
+    {
+        $container = $this->createLoadedContainer(['opentelemetry' => false]);
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        $this->assertFalse($container->hasDefinition(\AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy::class));
+    }
+
+    public function testUpgradesSchemaProviderWhenDoctrineAvailable(): void
+    {
+        // This test exercises upgradeSchemaProvider() when doctrine.dbal.default_connection exists.
+        // Doctrine\DBAL\Connection class must exist (it does since it's in composer deps).
+        if (!class_exists(\Doctrine\DBAL\Connection::class)) {
+            $this->markTestSkipped('Doctrine DBAL not installed');
+        }
+
+        $container = $this->createLoadedContainer();
+
+        // Register a fake doctrine connection service
+        $container->register('doctrine.dbal.default_connection', \Doctrine\DBAL\Connection::class);
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        // SchemaProviderInterface should now point to DoctrineSchemaProvider
+        $this->assertTrue($container->hasDefinition(\AppDevPanel\Api\Inspector\Database\SchemaProviderInterface::class));
+        $definition = $container->getDefinition(\AppDevPanel\Api\Inspector\Database\SchemaProviderInterface::class);
+        $this->assertSame(
+            \AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider::class,
+            $definition->getClass(),
+        );
+    }
+
+    public function testSkipsSchemaProviderUpgradeWhenNoDbalConnection(): void
+    {
+        if (!class_exists(\Doctrine\DBAL\Connection::class)) {
+            $this->markTestSkipped('Doctrine DBAL not installed');
+        }
+
+        $container = $this->createLoadedContainer();
+
+        // Don't register doctrine.dbal.default_connection
+
+        $pass = new CollectorProxyCompilerPass();
+        $pass->process($container);
+
+        // SchemaProviderInterface should remain as NullSchemaProvider (registered by extension)
+        $this->assertTrue($container->hasDefinition(\AppDevPanel\Api\Inspector\Database\SchemaProviderInterface::class));
+        $definition = $container->getDefinition(\AppDevPanel\Api\Inspector\Database\SchemaProviderInterface::class);
+        $this->assertSame(\AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider::class, $definition->getClass());
+    }
+
     private function createLoadedContainer(array $collectorOverrides = []): ContainerBuilder
     {
         $container = new ContainerBuilder();

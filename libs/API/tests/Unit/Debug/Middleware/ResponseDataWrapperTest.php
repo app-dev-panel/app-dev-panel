@@ -130,6 +130,90 @@ final class ResponseDataWrapperTest extends TestCase
         };
     }
 
+    public function testGenericExceptionWrappedWith500(): void
+    {
+        $exception = new \RuntimeException('Something broke');
+        $middleware = $this->createMiddleware();
+        $response = $middleware->process(
+            new ServerRequest('GET', '/test'),
+            $this->createExceptionRequestHandler($exception),
+        );
+
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertEquals(500, $response->getStatusCode());
+
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertFalse($data['success']);
+        $this->assertSame('Something broke', $data['error']);
+        $this->assertArrayHasKey('data', $data);
+        $this->assertSame(\RuntimeException::class, $data['data']['class']);
+        $this->assertSame('Something broke', $data['data']['message']);
+        $this->assertArrayHasKey('file', $data['data']);
+        $this->assertArrayHasKey('line', $data['data']);
+        $this->assertArrayHasKey('trace', $data['data']);
+        $this->assertIsArray($data['data']['trace']);
+        $this->assertLessThanOrEqual(20, count($data['data']['trace']));
+    }
+
+    public function testGenericExceptionTraceFormat(): void
+    {
+        $exception = new \LogicException('Logic error');
+        $middleware = $this->createMiddleware();
+        $response = $middleware->process(
+            new ServerRequest('GET', '/test'),
+            $this->createExceptionRequestHandler($exception),
+        );
+
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        foreach ($data['data']['trace'] as $frame) {
+            $this->assertIsString($frame);
+        }
+    }
+
+    public function testEmptyBodyResponse(): void
+    {
+        $innerResponse = new Response(200, ['Content-Type' => 'application/json'], '');
+
+        $middleware = $this->createMiddleware();
+        $response = $middleware->process(
+            new ServerRequest('GET', '/test'),
+            $this->createRequestHandler($innerResponse),
+        );
+
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertNull($data['data']);
+        $this->assertTrue($data['success']);
+    }
+
+    public function testResponseWithNoContentType(): void
+    {
+        // Response with no Content-Type header — should be treated as JSON and wrapped
+        $innerResponse = new Response(200, [], '{"key":"value"}');
+
+        $middleware = $this->createMiddleware();
+        $response = $middleware->process(
+            new ServerRequest('GET', '/test'),
+            $this->createRequestHandler($innerResponse),
+        );
+
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(['key' => 'value'], $data['data']);
+        $this->assertTrue($data['success']);
+    }
+
+    public function testIdAttributePassedThrough(): void
+    {
+        $innerResponse = new Response(200, ['Content-Type' => 'application/json'], '[]');
+
+        $middleware = $this->createMiddleware();
+        $request = new ServerRequest('GET', '/test')->withAttribute('id', 'debug-123');
+        $response = $middleware->process($request, $this->createRequestHandler($innerResponse));
+
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('debug-123', $data['id']);
+    }
+
     private function createMiddleware(): ResponseDataWrapper
     {
         return new ResponseDataWrapper($this->createJsonResponseFactory());

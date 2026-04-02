@@ -199,6 +199,76 @@ final class ApiApplicationTest extends TestCase
         $this->assertArrayHasKey('success', $body);
     }
 
+    public function testMcpRouteSkipsResponseDataWrapper(): void
+    {
+        $controller = new class {
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                return new Response(200, ['Content-Type' => 'application/json'], '{"jsonrpc":"2.0","result":{}}');
+            }
+        };
+
+        $wrapper = new \AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper(
+            new \AppDevPanel\Api\Http\JsonResponseFactory(new HttpFactory(), new HttpFactory()),
+        );
+
+        $router = new Router();
+        $router->addRoute(new Route('POST', '/inspect/api/mcp', [$controller::class, 'handle']));
+
+        $container = $this->createContainer([
+            $controller::class => $controller,
+            \AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper::class => $wrapper,
+        ]);
+        $app = new ApiApplication($container, new HttpFactory(), new HttpFactory(), $router);
+
+        $response = $app->handle(new ServerRequest('POST', '/inspect/api/mcp'));
+
+        // MCP routes should NOT be wrapped
+        $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertArrayHasKey('jsonrpc', $body);
+        $this->assertArrayNotHasKey('data', $body);
+    }
+
+    public function testInspectorRouteAddsProxyMiddleware(): void
+    {
+        $controller = new class {
+            public function index(ServerRequestInterface $request): ResponseInterface
+            {
+                return new Response(200, ['Content-Type' => 'application/json'], '{"routes":[]}');
+            }
+        };
+
+        $router = new Router();
+        $router->addRoute(new Route('GET', '/inspect/api/routes', [$controller::class, 'index']));
+
+        $container = $this->createContainer([$controller::class => $controller]);
+        $app = new ApiApplication($container, new HttpFactory(), new HttpFactory(), $router);
+
+        $response = $app->handle(new ServerRequest('GET', '/inspect/api/routes'));
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testRootSlashNotNormalized(): void
+    {
+        $controller = new class {
+            public function index(ServerRequestInterface $request): ResponseInterface
+            {
+                return new Response(200);
+            }
+        };
+
+        $router = new Router();
+        $router->addRoute(new Route('GET', '/', [$controller::class, 'index']));
+
+        $container = $this->createContainer([$controller::class => $controller]);
+        $app = new ApiApplication($container, new HttpFactory(), new HttpFactory(), $router);
+
+        $response = $app->handle(new ServerRequest('GET', '/'));
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
     private function createContainer(array $services = []): ContainerInterface
     {
         $container = $this->createMock(ContainerInterface::class);

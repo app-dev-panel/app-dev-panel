@@ -111,6 +111,65 @@ final class TranslationControllerTest extends ControllerTestCase
         ]));
     }
 
+    public function testGetTranslationsNoFrameworkReturns501(): void
+    {
+        $controller = $this->createController([]);
+
+        $response = $controller->getTranslations($this->get());
+
+        $this->assertSame(501, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertStringContainsString('framework integration', $data['error']);
+    }
+
+    public function testPutTranslationNoFrameworkReturns501(): void
+    {
+        $controller = $this->createController([]);
+
+        $response = $controller->putTranslation($this->put([
+            'category' => 'app',
+            'locale' => 'en',
+            'translation' => 'hello',
+            'message' => 'Hi',
+        ]));
+
+        $this->assertSame(501, $response->getStatusCode());
+    }
+
+    public function testGetTranslationsHandlesExceptionInCategorySource(): void
+    {
+        $reader = $this->createMock(MessageReaderInterface::class);
+        $reader->method('getMessages')->willThrowException(new \RuntimeException('Source error'));
+
+        $source = $this->createCategorySource('broken', $reader);
+        $container = $this->container([
+            'tag@translation.categorySource' => [$source],
+        ]);
+
+        $controller = $this->createController(['locale' => ['locales' => [
+            'en' => 'English',
+        ]]], $container);
+        $response = $controller->getTranslations($this->get());
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        // The category should be empty since the exception is caught and logged
+        $this->assertArrayNotHasKey('en', $data['broken'] ?? []);
+    }
+
+    public function testGetTranslationsNoLocalesParam(): void
+    {
+        $container = $this->container([
+            'tag@translation.categorySource' => [],
+        ]);
+
+        $controller = $this->createController([], $container);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Unable to determine');
+        $controller->getTranslations($this->get());
+    }
+
     private function createController(array $params, ?ContainerInterface $container = null): TranslationController
     {
         return new TranslationController(

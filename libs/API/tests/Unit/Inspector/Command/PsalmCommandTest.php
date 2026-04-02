@@ -8,6 +8,8 @@ use AppDevPanel\Api\Inspector\Command\PsalmCommand;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\PathResolverInterface;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 final class PsalmCommandTest extends TestCase
@@ -38,6 +40,8 @@ final class PsalmCommandTest extends TestCase
         $this->assertFalse(PsalmCommand::isAvailable());
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinarySuccess(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-psalm-ok-' . uniqid();
@@ -89,6 +93,8 @@ final class PsalmCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinaryErrorExitCode(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-psalm-err-' . uniqid();
@@ -134,6 +140,8 @@ final class PsalmCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinaryFail(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-psalm-fail-' . uniqid();

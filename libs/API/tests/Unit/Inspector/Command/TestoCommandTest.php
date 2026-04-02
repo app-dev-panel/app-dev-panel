@@ -8,6 +8,8 @@ use AppDevPanel\Api\Inspector\Command\TestoCommand;
 use AppDevPanel\Api\Inspector\CommandInterface;
 use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\PathResolverInterface;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 final class TestoCommandTest extends TestCase
@@ -43,6 +45,8 @@ final class TestoCommandTest extends TestCase
         $this->assertIsBool(TestoCommand::isAvailable());
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinarySuccess(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-testo-ok-' . uniqid();
@@ -72,6 +76,8 @@ final class TestoCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinaryError(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-testo-err-' . uniqid();
@@ -100,6 +106,8 @@ final class TestoCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunWithMockBinaryFail(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-testo-fail-' . uniqid();
@@ -129,6 +137,8 @@ final class TestoCommandTest extends TestCase
         }
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testRunCombinesStdoutAndStderr(): void
     {
         $tmpDir = sys_get_temp_dir() . '/adp-testo-combined-' . uniqid();

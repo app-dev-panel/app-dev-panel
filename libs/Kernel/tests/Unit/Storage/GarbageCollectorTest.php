@@ -144,6 +144,31 @@ final class GarbageCollectorTest extends TestCase
         $this->assertFileDoesNotExist($this->storagePath . '/aa/old-json/summary.json');
     }
 
+    public function testRunReturnsEarlyWhenLockCannotBeAcquired(): void
+    {
+        // Make the directory read-only so fopen for lock file fails
+        $readOnlyPath = $this->storagePath . '/readonly';
+        mkdir($readOnlyPath, 0o777, true);
+        $this->createEntryIn($readOnlyPath, 'aa', '01');
+
+        // Now make it read-only
+        chmod($readOnlyPath, 0o444);
+
+        $gc = new GarbageCollector($readOnlyPath, 0);
+        $gc->run(); // Should return early without crashing
+
+        // Restore permissions for cleanup
+        chmod($readOnlyPath, 0o777);
+        $this->assertTrue(true); // Reached without exception
+    }
+
+    private function createEntryIn(string $basePath, string $group, string $id): void
+    {
+        $dir = $basePath . '/' . $group . '/' . $id;
+        mkdir($dir, 0o777, true);
+        file_put_contents($dir . '/summary.json', json_encode(['id' => $id]));
+    }
+
     public function testRunWithExactlyHistorySizeEntries(): void
     {
         $this->createEntry('aa', '01');

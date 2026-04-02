@@ -56,4 +56,49 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
         $this->assertSame('home', $data['router']['name']);
         $this->assertSame('/', $data['router']['pattern']);
     }
+
+    public function testCollectMatchTime(): void
+    {
+        $collector = new RouterCollector();
+        $collector->startup();
+
+        $collector->collectMatchTime(0.123);
+
+        $data = $collector->getCollected();
+        $this->assertNull($data['currentRoute']);
+        // routes not set, so routeTime not in result
+        $this->assertArrayNotHasKey('routeTime', $data);
+    }
+
+    public function testCollectMatchTimeWhenInactive(): void
+    {
+        $collector = new RouterCollector();
+        // Not started
+        $collector->collectMatchTime(0.5);
+
+        $this->assertSame([], $collector->getCollected());
+    }
+
+    public function testGetSummaryWithNoMatchedRoute(): void
+    {
+        $collector = new RouterCollector();
+        $collector->startup();
+
+        // No route collected — summary should be empty
+        $summary = $collector->getSummary();
+        $this->assertSame([], $summary);
+    }
+
+    public function testCollectMatchTimeWithRoutes(): void
+    {
+        $collector = new RouterCollector();
+        $collector->startup();
+
+        $collector->collectMatchTime(0.042);
+        $collector->collectRoutes([['name' => 'home', 'pattern' => '/']], null);
+
+        $data = $collector->getCollected();
+        $this->assertSame(0.042, $data['routeTime']);
+        $this->assertNull($data['routesTree']);
+    }
 }

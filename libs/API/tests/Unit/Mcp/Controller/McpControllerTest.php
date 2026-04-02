@@ -111,6 +111,38 @@ final class McpControllerTest extends TestCase
         $this->assertSame(204, $response->getStatusCode());
     }
 
+    public function testHandleReturnsErrorWhenMcpDisabled(): void
+    {
+        $tmpDir = sys_get_temp_dir() . '/adp-mcp-settings-' . uniqid();
+        mkdir($tmpDir, 0o755, true);
+
+        try {
+            $mcpSettings = new \AppDevPanel\Api\Mcp\McpSettings($tmpDir);
+            $mcpSettings->setEnabled(false);
+
+            $httpFactory = new HttpFactory();
+            $jsonResponseFactory = new JsonResponseFactory($httpFactory, $httpFactory);
+            $mcpServer = new McpServer(new ToolRegistry());
+            $controller = new McpController($jsonResponseFactory, $mcpServer, $mcpSettings);
+
+            $request = $this->createJsonRequest([
+                'jsonrpc' => '2.0',
+                'id' => 1,
+                'method' => 'ping',
+            ]);
+
+            $response = $controller->handle($request);
+
+            $this->assertSame(400, $response->getStatusCode());
+            $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            $this->assertSame(-32_000, $body['error']['code']);
+            $this->assertStringContainsString('disabled', $body['error']['message']);
+        } finally {
+            @unlink($tmpDir . '/mcp-settings.json');
+            @rmdir($tmpDir);
+        }
+    }
+
     private function createController(): McpController
     {
         $httpFactory = new HttpFactory();

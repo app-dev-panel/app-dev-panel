@@ -8,6 +8,7 @@ use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\MemoryStorage;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\Tool\Debug\ViewTimelineTool;
 use PHPUnit\Framework\TestCase;
 
@@ -190,6 +191,17 @@ final class ViewTimelineToolTest extends TestCase
         $result = $tool->execute(['id' => 'entry-1']);
 
         $this->assertStringContainsString('No timeline data', $result['content'][0]['text']);
+    }
+
+    public function testViewTimelineAutoSelectWithEmptyStorage(): void
+    {
+        $storage = $this->createMock(StorageInterface::class);
+        $storage->method('read')->willReturn([]);
+        $tool = new ViewTimelineTool($storage);
+
+        $result = $tool->execute([]);
+
+        $this->assertStringContainsString('No debug entries found', $result['content'][0]['text']);
     }
 
     private function createStorageWithTimeline(): MemoryStorage

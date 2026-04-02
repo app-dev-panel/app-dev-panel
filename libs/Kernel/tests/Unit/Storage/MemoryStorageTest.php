@@ -118,4 +118,72 @@ final class MemoryStorageTest extends AbstractStorageTestCase
         $result = $storage->read(StorageInterface::TYPE_DATA, $idGenerator->getId());
         $this->assertArrayHasKey($idGenerator->getId(), $result);
     }
+
+    public function testReadObjectsWithMultipleCollectors(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $collector1 = $this->createFakeCollector(['key1' => 'val1']);
+        $collector2 = $this->createFakeCollector(['key2' => 'val2']);
+        // Give collector2 a different ID
+        $collector2->method('getId')->willReturn('Mock_Collector_2');
+        $storage->addCollector($collector1);
+        $storage->addCollector($collector2);
+
+        $result = $storage->read(StorageInterface::TYPE_OBJECTS);
+        $this->assertArrayHasKey($idGenerator->getId(), $result);
+        // Objects merge all collector data
+        $this->assertNotEmpty($result[$idGenerator->getId()]);
+    }
+
+    public function testReadWrittenEntryObjectsType(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $storage->write('written-id', ['id' => 'written-id'], ['data' => 'test'], ['obj1' => 'info1']);
+
+        $result = $storage->read(StorageInterface::TYPE_OBJECTS, 'written-id');
+        $this->assertSame(['obj1' => 'info1'], $result['written-id']);
+    }
+
+    public function testReadSummaryForCurrentSessionWithCollectors(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $collector = $this->createFakeCollector(['x' => 'y']);
+        $storage->addCollector($collector);
+
+        $result = $storage->read(StorageInterface::TYPE_SUMMARY, $idGenerator->getId());
+        $this->assertArrayHasKey($idGenerator->getId(), $result);
+        $this->assertSame($idGenerator->getId(), $result[$idGenerator->getId()]['id']);
+        $this->assertNotEmpty($result[$idGenerator->getId()]['collectors']);
+    }
+
+    public function testReadWrittenEntryMissingType(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $storage->write('entry-x', ['id' => 'entry-x'], ['d' => 1], ['o' => 2]);
+
+        // Read a type that doesn't match any stored type key for a written entry
+        $result = $storage->read('nonexistent_type', 'entry-x');
+        $this->assertSame([], $result['entry-x']);
+    }
+
+    public function testFlushClearsCollectors(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = $this->getStorage($idGenerator);
+
+        $collector = $this->createFakeCollector(['data' => 'value']);
+        $storage->addCollector($collector);
+
+        $this->assertNotEmpty($storage->getData());
+        $storage->flush();
+        $this->assertSame([], $storage->getData());
+    }
 }
