@@ -168,7 +168,7 @@ final class ModuleBootstrapTest extends TestCase
 
     public function testGetDebuggerThrowsBeforeBootstrap(): void
     {
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
 
@@ -179,7 +179,7 @@ final class ModuleBootstrapTest extends TestCase
 
     public function testGetTimelineCollectorReturnsConsistentInstance(): void
     {
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
 
@@ -210,7 +210,7 @@ final class ModuleBootstrapTest extends TestCase
         });
         \Yii::$app = $app;
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
         $module->bootstrap($app);
@@ -223,7 +223,7 @@ final class ModuleBootstrapTest extends TestCase
 
         $app = $this->createWebApp([$existingRule]);
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
         $module->bootstrap($app);
@@ -241,7 +241,7 @@ final class ModuleBootstrapTest extends TestCase
 
         $app = $this->createWebApp([$existingRule]);
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
             'collectors' => ['router' => false],
         ]);
@@ -262,7 +262,7 @@ final class ModuleBootstrapTest extends TestCase
     {
         $app = $this->createWebApp();
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
         $module->bootstrap($app);
@@ -283,7 +283,7 @@ final class ModuleBootstrapTest extends TestCase
             'basePath' => $storagePath,
         ]);
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $storagePath . '/debug',
         ]);
         $module->bootstrap($app);
@@ -301,7 +301,7 @@ final class ModuleBootstrapTest extends TestCase
         $app = $this->createWebApp([], $logDispatcher);
         $this->assertNotNull($logDispatcher);
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
         $module->bootstrap($app);
@@ -317,7 +317,7 @@ final class ModuleBootstrapTest extends TestCase
         $app = $this->createWebApp([], $logDispatcher);
         $this->assertNotNull($logDispatcher);
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
         $module->bootstrap($app);
@@ -330,7 +330,7 @@ final class ModuleBootstrapTest extends TestCase
     {
         $app = $this->createWebApp();
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
             'enabled' => false,
         ]);
@@ -343,7 +343,7 @@ final class ModuleBootstrapTest extends TestCase
     {
         $app = $this->createWebApp();
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
         $module->bootstrap($app);
@@ -355,7 +355,7 @@ final class ModuleBootstrapTest extends TestCase
     {
         $app = $this->createWebApp();
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
         $module->bootstrap($app);
@@ -419,7 +419,7 @@ final class ModuleBootstrapTest extends TestCase
 
         \Yii::$app = $app;
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
         $module->bootstrap($app);
@@ -476,7 +476,7 @@ final class ModuleBootstrapTest extends TestCase
             'storagePath' => $this->storagePath . '/debug',
         ], $extraConfig);
 
-        $module = new Module('adp', null, $config);
+        $module = new Module('app-dev-panel', null, $config);
         $module->bootstrap($app);
 
         return $module;

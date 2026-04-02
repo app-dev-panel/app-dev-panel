@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
  * bootstrap array, which is required for route registration and
  * debugger initialization.
  *
- * Without 'adp' in bootstrap, the Module::bootstrap() method
+ * Without 'app-dev-panel' in bootstrap, the Module::bootstrap() method
  * is never called, resulting in 404 errors for /debug/api/* and
  * /inspect/api/* endpoints.
  */
@@ -43,7 +43,7 @@ final class PlaygroundConfigTest extends TestCase
     public function testDebugPanelIsInBootstrapArray(): void
     {
         $this->assertContains(
-            'adp',
+            'app-dev-panel',
             $this->config['bootstrap'],
             'The "adp" module must be in the bootstrap array. '
             . 'Without it, Module::bootstrap() is never called and API routes '
@@ -54,13 +54,13 @@ final class PlaygroundConfigTest extends TestCase
     public function testDebugPanelModuleIsConfigured(): void
     {
         $this->assertArrayHasKey('modules', $this->config);
-        $this->assertArrayHasKey('adp', $this->config['modules']);
+        $this->assertArrayHasKey('app-dev-panel', $this->config['modules']);
     }
 
     public function testDebugPanelBootstrapsBeforeLog(): void
     {
         $bootstrap = $this->config['bootstrap'];
-        $debugIndex = array_search('adp', $bootstrap, true);
+        $debugIndex = array_search('app-dev-panel', $bootstrap, true);
         $logIndex = array_search('log', $bootstrap, true);
 
         if ($logIndex === false) {

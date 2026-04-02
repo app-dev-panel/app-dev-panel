@@ -16,7 +16,7 @@ composer require app-dev-panel/adapter-yii2
 <pkg>app-dev-panel/adapter-yii2</pkg>
 :::
 
-The package auto-registers via `extra.bootstrap` in composer.json. The <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> class registers the `adp` module automatically when `YII_DEBUG` is enabled.
+The package auto-registers via `extra.bootstrap` in composer.json. The <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> class registers the `app-dev-panel` module automatically when `YII_DEBUG` is enabled.
 
 ## Configuration
 
@@ -24,7 +24,7 @@ Configure the module in your application config:
 
 ```php
 'modules' => [
-    'adp' => [
+    'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'storagePath' => '@runtime/debug',
         'historySize' => 50,

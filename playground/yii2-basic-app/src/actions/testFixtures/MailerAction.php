@@ -12,7 +12,7 @@ final class MailerAction extends Action
     public function run(): array
     {
         /** @var \AppDevPanel\Adapter\Yii2\Module $module */
-        $module = \Yii::$app->getModule('adp');
+        $module = \Yii::$app->getModule('app-dev-panel');
 
         /** @var MailerCollector|null $mailerCollector */
         $mailerCollector = $module->getCollector(MailerCollector::class);

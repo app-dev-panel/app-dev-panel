@@ -173,7 +173,7 @@ final class ModuleIntegrationTest extends Yii2IntegrationTestCase
         $this->createWebApplication(['enabled' => false]);
 
         // Module exists but should not have initialized the debugger
-        $module = \Yii::$app->getModule('adp');
+        $module = \Yii::$app->getModule('app-dev-panel');
         $this->assertInstanceOf(Module::class, $module);
 
         $this->expectException(\RuntimeException::class);

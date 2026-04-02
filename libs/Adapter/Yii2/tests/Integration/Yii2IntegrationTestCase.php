@@ -74,13 +74,13 @@ abstract class Yii2IntegrationTestCase extends TestCase
                 ],
             ],
             'modules' => [
-                'adp' => array_merge([
+                'app-dev-panel' => array_merge([
                     'class' => Module::class,
                     'storagePath' => $this->storagePath . '/debug',
                     'historySize' => 10,
                 ], $moduleConfig),
             ],
-            'bootstrap' => ['adp'],
+            'bootstrap' => ['app-dev-panel'],
         ], $appConfig);
 
         // Module::hookErrorHandler() installs a custom exception handler during bootstrap.
@@ -112,13 +112,13 @@ abstract class Yii2IntegrationTestCase extends TestCase
                 ],
             ],
             'modules' => [
-                'adp' => array_merge([
+                'app-dev-panel' => array_merge([
                     'class' => Module::class,
                     'storagePath' => $this->storagePath . '/debug',
                     'historySize' => 10,
                 ], $moduleConfig),
             ],
-            'bootstrap' => ['adp'],
+            'bootstrap' => ['app-dev-panel'],
         ]);
     }
 
@@ -127,7 +127,7 @@ abstract class Yii2IntegrationTestCase extends TestCase
      */
     protected function getModule(): Module
     {
-        $module = \Yii::$app->getModule('adp');
+        $module = \Yii::$app->getModule('app-dev-panel');
         $this->assertInstanceOf(Module::class, $module);
 
         return $module;

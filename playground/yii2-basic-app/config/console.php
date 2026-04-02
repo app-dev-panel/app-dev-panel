@@ -8,7 +8,7 @@ return [
     'id' => 'adp-yii2-playground-console',
     'basePath' => dirname(__DIR__) . '/src',
     'runtimePath' => dirname(__DIR__) . '/runtime',
-    'bootstrap' => ['adp', 'log'],
+    'bootstrap' => ['app-dev-panel', 'log'],
     'controllerNamespace' => 'App\\commands',
     'params' => $params,
 
@@ -29,7 +29,7 @@ return [
     ],
 
     'modules' => [
-        'adp' => [
+        'app-dev-panel' => [
             'class' => \AppDevPanel\Adapter\Yii2\Module::class,
             'storagePath' => '@runtime/debug',
             'historySize' => 50,

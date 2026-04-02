@@ -226,7 +226,7 @@ If using `yiisoft/yii2-redis`:
 use yii\redis\Connection;
 
 Event::on(Connection::class, Connection::EVENT_AFTER_EXECUTE, function ($event) {
-    $module = \Yii::$app->getModule('adp');
+    $module = \Yii::$app->getModule('app-dev-panel');
     $collector = $module->getCollector(RedisCollector::class);
     $collector?->logCommand(new RedisCommandRecord(
         connection: 'default',

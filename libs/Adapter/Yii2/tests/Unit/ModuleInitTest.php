@@ -45,7 +45,7 @@ final class ModuleInitTest extends TestCase
 
     public function testInitRegistersNamespaceAlias(): void
     {
-        new Module('adp', null, [
+        new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
 
@@ -55,7 +55,7 @@ final class ModuleInitTest extends TestCase
 
     public function testControllerPathIsResolvable(): void
     {
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
 
@@ -69,7 +69,7 @@ final class ModuleInitTest extends TestCase
 
     public function testAliasPointsToSourceDirectory(): void
     {
-        new Module('adp', null, [
+        new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
 

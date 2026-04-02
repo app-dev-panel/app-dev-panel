@@ -12,7 +12,7 @@ final class RouterAction extends Action
     public function run(): array
     {
         /** @var \AppDevPanel\Adapter\Yii2\Module $module */
-        $module = \Yii::$app->getModule('adp');
+        $module = \Yii::$app->getModule('app-dev-panel');
 
         /** @var RouterCollector|null $routerCollector */
         $routerCollector = $module->getCollector(RouterCollector::class);

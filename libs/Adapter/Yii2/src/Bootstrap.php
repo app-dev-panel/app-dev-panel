@@ -11,7 +11,7 @@ use yii\base\BootstrapInterface;
  * Yii 2 bootstrap component that registers the ADP debug module.
  *
  * Registered automatically via composer.json "extra.bootstrap".
- * Configures the 'adp' module if ADP is enabled and the app is in debug mode.
+ * Configures the 'app-dev-panel' module if ADP is enabled and the app is in debug mode.
  */
 final class Bootstrap implements BootstrapInterface
 {
@@ -22,14 +22,14 @@ final class Bootstrap implements BootstrapInterface
         }
 
         // Register the module if not already configured
-        if (!$app->hasModule('adp')) {
-            $app->setModule('adp', [
+        if (!$app->hasModule('app-dev-panel')) {
+            $app->setModule('app-dev-panel', [
                 'class' => Module::class,
             ]);
         }
 
         // Ensure the module is bootstrapped
-        $module = $app->getModule('adp');
+        $module = $app->getModule('app-dev-panel');
         if ($module instanceof Module) {
             $module->bootstrap($app);
         }
@@ -38,8 +38,8 @@ final class Bootstrap implements BootstrapInterface
     private function shouldEnable(Application $app): bool
     {
         // Respect explicit configuration
-        if ($app->hasModule('adp')) {
-            $config = $app->getModules()['adp'] ?? [];
+        if ($app->hasModule('app-dev-panel')) {
+            $config = $app->getModules()['app-dev-panel'] ?? [];
             if (is_array($config) && array_key_exists('enabled', $config) && $config['enabled'] === false) {
                 return false;
             }

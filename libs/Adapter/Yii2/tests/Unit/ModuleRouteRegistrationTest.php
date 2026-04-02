@@ -75,7 +75,7 @@ final class ModuleRouteRegistrationTest extends TestCase
         $app = $this->createMock(Application::class);
         $app->method('getUrlManager')->willReturn($urlManager);
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
 
@@ -102,7 +102,7 @@ final class ModuleRouteRegistrationTest extends TestCase
         $app->method('getUrlManager')->willReturn($urlManager);
 
         // Module is configured but bootstrap() is NOT called (simulating missing bootstrap config)
-        new Module('adp', null, [
+        new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
 
@@ -122,7 +122,7 @@ final class ModuleRouteRegistrationTest extends TestCase
         $app = $this->createMock(Application::class);
         $app->method('getUrlManager')->willReturn($urlManager);
 
-        $module = new Module('adp', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
             'enabled' => false,
         ]);

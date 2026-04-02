@@ -14,13 +14,13 @@ final class BootstrapTest extends TestCase
     public function testBootstrapRegistersModuleWhenNotPresent(): void
     {
         $app = $this->createMock(Application::class);
-        $app->method('hasModule')->with('adp')->willReturn(false);
+        $app->method('hasModule')->with('app-dev-panel')->willReturn(false);
 
         $module = $this->createMock(Module::class);
         $module->expects($this->once())->method('bootstrap')->with($app);
 
-        $app->expects($this->once())->method('setModule')->with('adp', $this->isType('array'));
-        $app->method('getModule')->with('adp')->willReturn($module);
+        $app->expects($this->once())->method('setModule')->with('app-dev-panel', $this->isType('array'));
+        $app->method('getModule')->with('app-dev-panel')->willReturn($module);
 
         $bootstrap = new Bootstrap();
         $bootstrap->bootstrap($app);
@@ -29,9 +29,9 @@ final class BootstrapTest extends TestCase
     public function testBootstrapSkipsWhenExplicitlyDisabled(): void
     {
         $app = $this->createMock(Application::class);
-        $app->method('hasModule')->with('adp')->willReturn(true);
+        $app->method('hasModule')->with('app-dev-panel')->willReturn(true);
         $app->method('getModules')->willReturn([
-            'adp' => ['class' => Module::class, 'enabled' => false],
+            'app-dev-panel' => ['class' => Module::class, 'enabled' => false],
         ]);
 
         $app->expects($this->never())->method('setModule');
@@ -46,11 +46,11 @@ final class BootstrapTest extends TestCase
         $module->expects($this->once())->method('bootstrap');
 
         $app = $this->createMock(Application::class);
-        $app->method('hasModule')->with('adp')->willReturn(true);
+        $app->method('hasModule')->with('app-dev-panel')->willReturn(true);
         $app->method('getModules')->willReturn([
-            'adp' => ['class' => Module::class],
+            'app-dev-panel' => ['class' => Module::class],
         ]);
-        $app->method('getModule')->with('adp')->willReturn($module);
+        $app->method('getModule')->with('app-dev-panel')->willReturn($module);
 
         $bootstrap = new Bootstrap();
         $bootstrap->bootstrap($app);

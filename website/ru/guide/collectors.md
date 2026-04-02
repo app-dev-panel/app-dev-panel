@@ -173,7 +173,7 @@ app_dev_panel:
 ```
 == Yii 2
 ```php
-// config/web.php — modules.adp
+// config/web.php — modules.app-dev-panel
 'collectors' => [
     'code_coverage' => true,
 ],

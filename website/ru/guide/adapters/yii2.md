@@ -16,7 +16,7 @@ composer require app-dev-panel/adapter-yii2
 <pkg>app-dev-panel/adapter-yii2</pkg>
 :::
 
-Пакет автоматически регистрируется через `extra.bootstrap` в composer.json. Класс <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> регистрирует модуль `adp` автоматически при включенном `YII_DEBUG`.
+Пакет автоматически регистрируется через `extra.bootstrap` в composer.json. Класс <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> регистрирует модуль `app-dev-panel` автоматически при включенном `YII_DEBUG`.
 
 ## Конфигурация
 
@@ -24,7 +24,7 @@ composer require app-dev-panel/adapter-yii2
 
 ```php
 'modules' => [
-    'adp' => [
+    'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'storagePath' => '@runtime/debug',
         'historySize' => 50,
