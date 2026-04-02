@@ -11,9 +11,11 @@ export const ExceptionItem = ({data, iframeUrlHandler}: ExceptionItemProps) => {
     }
 
     const shortClass = data.exception.class.split('\\').pop() || data.exception.class;
+    const message =
+        data.exception.message.length > 120 ? data.exception.message.slice(0, 120) + '...' : data.exception.message;
 
     return (
-        <Tooltip title={`${data.exception.class}: ${data.exception.message}`} arrow>
+        <Tooltip title={`${data.exception.class}: ${message}`} arrow>
             <Chip
                 icon={<ErrorIcon sx={{fontSize: '16px !important'}} />}
                 label={shortClass}

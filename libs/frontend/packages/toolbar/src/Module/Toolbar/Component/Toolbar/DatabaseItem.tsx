@@ -33,13 +33,7 @@ export const DatabaseItem = ({data, iframeUrlHandler}: DatabaseItemProps) => {
                     e.stopPropagation();
                     e.preventDefault();
                 }}
-                sx={{
-                    height: 32,
-                    borderRadius: 1,
-                    fontSize: 12,
-                    fontFamily: "'JetBrains Mono', monospace",
-                    cursor: 'pointer',
-                }}
+                sx={{height: 32, borderRadius: 1, fontSize: 12, cursor: 'pointer'}}
             />
         </Tooltip>
     );
