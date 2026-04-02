@@ -6,12 +6,10 @@ namespace AppDevPanel\Api\Llm\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
+use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
-use GuzzleHttp\Client;
 use InvalidArgumentException;
-use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -20,23 +18,15 @@ final class LlmController
 {
     private const string OPENROUTER_AUTH_URL = 'https://openrouter.ai/auth';
     private const string OPENROUTER_KEY_EXCHANGE_URL = 'https://openrouter.ai/api/v1/auth/keys';
-    private const string OPENROUTER_MODELS_URL = 'https://openrouter.ai/api/v1/models';
-    private const string OPENROUTER_COMPLETIONS_URL = 'https://openrouter.ai/api/v1/chat/completions';
-
-    private const string ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
-    private const string ANTHROPIC_MODELS_URL = 'https://api.anthropic.com/v1/models';
-    private const string ANTHROPIC_API_VERSION = '2023-06-01';
-
-    private const string OPENAI_COMPLETIONS_URL = 'https://api.openai.com/v1/chat/completions';
-    private const string OPENAI_MODELS_URL = 'https://api.openai.com/v1/models';
 
     public function __construct(
         private readonly JsonResponseFactoryInterface $responseFactory,
         private readonly LlmSettingsInterface $settings,
-        private readonly ClientInterface $httpClient,
+        private readonly LlmProviderService $providerService,
+        private readonly LlmHistoryStorageInterface $historyStorage,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory,
-        private readonly LlmHistoryStorageInterface $historyStorage,
+        private readonly \Psr\Http\Client\ClientInterface $httpClient,
     ) {}
 
     /**
@@ -48,9 +38,7 @@ final class LlmController
     }
 
     /**
-     * POST /debug/api/llm/connect — Connect with direct API key (for Anthropic and other key-based providers).
-     *
-     * Body: { "provider": "anthropic", "apiKey": "sk-ant-..." }
+     * POST /debug/api/llm/connect — Connect with direct API key.
      */
     public function connect(ServerRequestInterface $request): ResponseInterface
     {
@@ -78,9 +66,6 @@ final class LlmController
 
     /**
      * POST /debug/api/llm/oauth/initiate — Start OAuth PKCE flow (OpenRouter only).
-     *
-     * Body: { "callbackUrl": "..." }
-     * Returns: { "authUrl": "...", "codeVerifier": "..." }
      */
     public function oauthInitiate(ServerRequestInterface $request): ResponseInterface
     {
@@ -112,8 +97,6 @@ final class LlmController
 
     /**
      * POST /debug/api/llm/oauth/exchange — Exchange authorization code for API key (OpenRouter only).
-     *
-     * Body: { "code": "...", "codeVerifier": "..." }
      */
     public function oauthExchange(ServerRequestInterface $request): ResponseInterface
     {
@@ -178,8 +161,6 @@ final class LlmController
 
     /**
      * POST /debug/api/llm/model — Set preferred model.
-     *
-     * Body: { "model": "anthropic/claude-sonnet-4" }
      */
     public function setModel(ServerRequestInterface $request): ResponseInterface
     {
@@ -198,8 +179,6 @@ final class LlmController
 
     /**
      * POST /debug/api/llm/timeout — Set request timeout.
-     *
-     * Body: { "timeout": 30 }
      */
     public function setTimeout(ServerRequestInterface $request): ResponseInterface
     {
@@ -217,9 +196,7 @@ final class LlmController
     }
 
     /**
-     * POST /debug/api/llm/custom-prompt — Set custom prompt that is appended to system instructions.
-     *
-     * Body: { "customPrompt": "..." }
+     * POST /debug/api/llm/custom-prompt — Set custom prompt.
      */
     public function setCustomPrompt(ServerRequestInterface $request): ResponseInterface
     {
@@ -247,19 +224,13 @@ final class LlmController
             ], 401);
         }
 
-        $provider = $this->settings->getProvider();
+        $models = $this->providerService->listModels($this->settings->getProvider());
 
-        return match ($provider) {
-            'anthropic' => $this->anthropicModels(),
-            'openai' => $this->openAiModels(),
-            default => $this->openRouterModels(),
-        };
+        return $this->responseFactory->createJsonResponse(['models' => $models]);
     }
 
     /**
      * POST /debug/api/llm/chat — Proxy chat completions.
-     *
-     * Body: { "messages": [...], "model"?: "...", "temperature"?: 0.7 }
      */
     public function chat(ServerRequestInterface $request): ResponseInterface
     {
@@ -277,50 +248,23 @@ final class LlmController
             throw new InvalidArgumentException('Field "messages" is required and must be a non-empty array.');
         }
 
-        $model = $body['model'] ?? $this->settings->getModel();
+        $provider = $this->settings->getProvider();
+        $model = $body['model'] ?? $this->settings->getModel() ?? $this->providerService->getDefaultModel($provider);
         $temperature = isset($body['temperature']) ? (float) $body['temperature'] : 0.7;
 
-        // Prepend custom prompt if configured.
-        // Anthropic and OpenAI support system role; OpenRouter models may not (e.g. Gemma),
-        // so merge into the first user message instead.
-        $customPrompt = $this->settings->getCustomPrompt();
-        $provider = $this->settings->getProvider();
+        $messages = $this->prependCustomPrompt($messages, $provider);
 
-        if ($customPrompt !== '') {
-            if ($provider === 'anthropic' || $provider === 'openai') {
-                array_unshift($messages, ['role' => 'system', 'content' => $customPrompt]);
-            } else {
-                // Merge into first user message for maximum model compatibility.
-                for ($i = 0, $len = count($messages); $i < $len; $i++) {
-                    if ($messages[$i]['role'] === 'user') {
-                        $messages[$i]['content'] = "[Instructions: {$customPrompt}]\n\n" . $messages[$i]['content'];
-                        break;
-                    }
-                }
-            }
+        $data = $this->providerService->sendChat($provider, $messages, $model, $temperature);
+
+        if (isset($data['error'])) {
+            return $this->responseFactory->createJsonResponse(['error' => $data['error']], 502);
         }
 
-        if ($provider === 'anthropic') {
-            $model ??= 'claude-sonnet-4-20250514';
-
-            return $this->anthropicChat($messages, $model, $temperature);
-        }
-
-        if ($provider === 'openai') {
-            $model ??= 'gpt-4o';
-
-            return $this->openAiChat($messages, $model, $temperature);
-        }
-
-        $model ??= 'anthropic/claude-sonnet-4';
-
-        return $this->openRouterChat($messages, $model, $temperature);
+        return $this->responseFactory->createJsonResponse($data);
     }
 
     /**
      * POST /debug/api/llm/analyze — Analyze debug entry data with LLM.
-     *
-     * Body: { "context": {...}, "prompt"?: "..." }
      */
     public function analyze(ServerRequestInterface $request): ResponseInterface
     {
@@ -362,14 +306,12 @@ final class LlmController
 
         $contextJson = json_encode($context, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
-        // Truncate context to avoid exceeding model context windows (especially free/small models).
+        // Truncate context to avoid exceeding model context windows.
         $maxContextLength = 12000;
         if (strlen($contextJson) > $maxContextLength) {
             $contextJson = substr($contextJson, 0, $maxContextLength) . "\n... [truncated]";
         }
 
-        // Merge instructions into a single user message for maximum model compatibility.
-        // Some models (especially free ones) do not support the system role.
         $messages = [
             [
                 'role' => 'user',
@@ -378,17 +320,9 @@ final class LlmController
         ];
 
         $provider = $this->settings->getProvider();
-        $model = $this->settings->getModel();
+        $model = $this->settings->getModel() ?? $this->providerService->getDefaultModel($provider);
 
-        if ($provider === 'anthropic') {
-            $model ??= 'claude-sonnet-4-20250514';
-        } elseif ($provider === 'openai') {
-            $model ??= 'gpt-4o';
-        } else {
-            $model ??= 'anthropic/claude-sonnet-4';
-        }
-
-        $data = $this->sendChat($provider, $messages, $model, 0.3);
+        $data = $this->providerService->sendChat($provider, $messages, $model, 0.3);
 
         if (isset($data['error'])) {
             return $this->responseFactory->createJsonResponse([
@@ -396,7 +330,6 @@ final class LlmController
             ], 502);
         }
 
-        // All providers return normalized OpenAI-compatible format
         $content = $data['choices'][0]['message']['content'] ?? '';
 
         return $this->responseFactory->createJsonResponse([
@@ -415,8 +348,6 @@ final class LlmController
 
     /**
      * POST /debug/api/llm/history — Add a history entry.
-     *
-     * Body: { "query": "...", "response": "...", "timestamp": 123, "error"?: "..." }
      */
     public function addHistory(ServerRequestInterface $request): ResponseInterface
     {
@@ -467,337 +398,28 @@ final class LlmController
     }
 
     /**
-     * Send chat messages to the configured provider and return parsed response data.
-     *
-     * @param list<array{role: string, content: string}> $messages
-     * @return array<string, mixed>
+     * Prepend custom prompt to messages based on provider capabilities.
      */
-    private function sendChat(string $provider, array $messages, string $model, float $temperature): array
+    private function prependCustomPrompt(array $messages, string $provider): array
     {
-        if ($provider === 'anthropic') {
-            return $this->sendAnthropicChat($messages, $model, $temperature);
-        }
-        if ($provider === 'openai') {
-            return $this->sendOpenAiChat($messages, $model, $temperature);
+        $customPrompt = $this->settings->getCustomPrompt();
+        if ($customPrompt === '') {
+            return $messages;
         }
 
-        return $this->sendOpenRouterChat($messages, $model, $temperature);
-    }
-
-    private function openRouterModels(): ResponseInterface
-    {
-        $modelsRequest = $this->requestFactory->createRequest('GET', self::OPENROUTER_MODELS_URL)->withHeader(
-            'Authorization',
-            'Bearer ' . $this->settings->getApiKey(),
-        );
-
-        $modelsResponse = $this->httpClient->sendRequest($modelsRequest);
-        $responseBody = $modelsResponse->getBody()->getContents();
-
-        /** @var array{data?: list<array<string, mixed>>} $data */
-        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
-
-        $models = [];
-        foreach ($data['data'] ?? [] as $model) {
-            $models[] = [
-                'id' => $model['id'] ?? '',
-                'name' => $model['name'] ?? '',
-                'context_length' => $model['context_length'] ?? 0,
-                'pricing' => $model['pricing'] ?? [],
-            ];
-        }
-
-        return $this->responseFactory->createJsonResponse(['models' => $models]);
-    }
-
-    private function anthropicModels(): ResponseInterface
-    {
-        $modelsRequest = $this->requestFactory->createRequest('GET', self::ANTHROPIC_MODELS_URL)->withHeader(
-            'anthropic-version',
-            self::ANTHROPIC_API_VERSION,
-        );
-
-        $modelsRequest = $this->applyAnthropicAuth($modelsRequest);
-
-        $modelsResponse = $this->httpClient->sendRequest($modelsRequest);
-        $responseBody = $modelsResponse->getBody()->getContents();
-
-        /** @var array{data?: list<array<string, mixed>>} $data */
-        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
-
-        $models = [];
-        foreach ($data['data'] ?? [] as $model) {
-            $models[] = [
-                'id' => $model['id'] ?? '',
-                'name' => $model['display_name'] ?? $model['id'] ?? '',
-                'context_length' => $model['context_window'] ?? 0,
-                'pricing' => [],
-            ];
-        }
-
-        return $this->responseFactory->createJsonResponse(['models' => $models]);
-    }
-
-    private function openRouterChat(array $messages, string $model, float $temperature): ResponseInterface
-    {
-        $data = $this->sendOpenRouterChat($messages, $model, $temperature);
-
-        if (isset($data['error'])) {
-            return $this->responseFactory->createJsonResponse(['error' => $data['error']], 502);
-        }
-
-        return $this->responseFactory->createJsonResponse($data);
-    }
-
-    /**
-     * @param list<array{role: string, content: string}> $messages
-     * @return array<string, mixed>
-     */
-    private function sendOpenRouterChat(array $messages, string $model, float $temperature): array
-    {
-        $chatBody = json_encode([
-            'model' => $model,
-            'messages' => $messages,
-            'temperature' => $temperature,
-        ], JSON_THROW_ON_ERROR);
-
-        $chatRequest = $this->requestFactory
-            ->createRequest('POST', self::OPENROUTER_COMPLETIONS_URL)
-            ->withHeader('Content-Type', 'application/json')
-            ->withHeader('Authorization', 'Bearer ' . $this->settings->getApiKey())
-            ->withHeader('HTTP-Referer', 'https://app-dev-panel.dev')
-            ->withHeader('X-Title', 'Application Development Panel')
-            ->withBody($this->streamFactory->createStream($chatBody));
-
-        $chatResponse = $this->sendLlmRequest($chatRequest);
-        $responseBody = $chatResponse->getBody()->getContents();
-
-        /** @var array<string, mixed> $data */
-        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
-
-        if (isset($data['error'])) {
-            $errorMessage = is_array($data['error'])
-                ? $data['error']['message'] ?? 'Unknown OpenRouter API error.'
-                : (string) $data['error'];
-
-            // Append provider-specific details when available (e.g. rate limits, context overflow).
-            if (is_array($data['error'])) {
-                $code = $data['error']['code'] ?? null;
-                $metadata = $data['error']['metadata'] ?? null;
-                $details = [];
-                if ($code !== null) {
-                    $details[] = "code: {$code}";
-                }
-                if (is_array($metadata) && isset($metadata['raw'])) {
-                    $details[] = (string) $metadata['raw'];
-                }
-                if ($details !== []) {
-                    $errorMessage .= ' (' . implode('; ', $details) . ')';
+        if ($provider === 'anthropic' || $provider === 'openai') {
+            array_unshift($messages, ['role' => 'system', 'content' => $customPrompt]);
+        } else {
+            // Merge into first user message for maximum model compatibility.
+            for ($i = 0, $len = count($messages); $i < $len; $i++) {
+                if ($messages[$i]['role'] === 'user') {
+                    $messages[$i]['content'] = "[Instructions: {$customPrompt}]\n\n" . $messages[$i]['content'];
+                    break;
                 }
             }
-
-            return ['error' => $errorMessage];
         }
 
-        return $data;
-    }
-
-    /**
-     * @param list<array{role: string, content: string}> $messages
-     */
-    private function anthropicChat(array $messages, string $model, float $temperature): ResponseInterface
-    {
-        $data = $this->sendAnthropicChat($messages, $model, $temperature);
-
-        if (isset($data['error'])) {
-            return $this->responseFactory->createJsonResponse(['error' => $data['error']], 502);
-        }
-
-        return $this->responseFactory->createJsonResponse($data);
-    }
-
-    /**
-     * @param list<array{role: string, content: string}> $messages
-     * @return array<string, mixed>
-     */
-    private function sendAnthropicChat(array $messages, string $model, float $temperature): array
-    {
-        $systemPrompt = null;
-        $chatMessages = [];
-        foreach ($messages as $message) {
-            if ($message['role'] === 'system') {
-                $systemPrompt = $message['content'];
-            } else {
-                $chatMessages[] = $message;
-            }
-        }
-
-        $payload = [
-            'model' => $model,
-            'max_tokens' => 4096,
-            'messages' => $chatMessages,
-            'temperature' => $temperature,
-        ];
-        if ($systemPrompt !== null) {
-            $payload['system'] = $systemPrompt;
-        }
-
-        $chatBody = json_encode($payload, JSON_THROW_ON_ERROR);
-
-        $chatRequest = $this->requestFactory
-            ->createRequest('POST', self::ANTHROPIC_MESSAGES_URL)
-            ->withHeader('Content-Type', 'application/json')
-            ->withHeader('anthropic-version', self::ANTHROPIC_API_VERSION)
-            ->withBody($this->streamFactory->createStream($chatBody));
-
-        $chatRequest = $this->applyAnthropicAuth($chatRequest);
-
-        $chatResponse = $this->sendLlmRequest($chatRequest);
-        $responseBody = $chatResponse->getBody()->getContents();
-
-        /** @var array<string, mixed> $anthropicData */
-        $anthropicData = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
-
-        if (isset($anthropicData['error'])) {
-            $errorMessage = is_array($anthropicData['error'])
-                ? $anthropicData['error']['message'] ?? 'Unknown Anthropic API error.'
-                : (string) $anthropicData['error'];
-
-            return ['error' => $errorMessage];
-        }
-
-        // Normalize Anthropic response to OpenAI-compatible format
-        $content = $anthropicData['content'][0]['text'] ?? '';
-
-        return [
-            'choices' => [
-                [
-                    'message' => [
-                        'role' => 'assistant',
-                        'content' => $content,
-                    ],
-                ],
-            ],
-            'model' => $anthropicData['model'] ?? $model,
-            'usage' => $anthropicData['usage'] ?? [],
-        ];
-    }
-
-    private function openAiModels(): ResponseInterface
-    {
-        $modelsRequest = $this->requestFactory->createRequest('GET', self::OPENAI_MODELS_URL)->withHeader(
-            'Authorization',
-            'Bearer ' . $this->settings->getApiKey(),
-        );
-
-        $modelsResponse = $this->httpClient->sendRequest($modelsRequest);
-        $responseBody = $modelsResponse->getBody()->getContents();
-
-        /** @var array{data?: list<array<string, mixed>>} $data */
-        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
-
-        $models = [];
-        foreach ($data['data'] ?? [] as $model) {
-            $id = $model['id'] ?? '';
-            // Only include chat-capable models
-            if (!str_starts_with($id, 'gpt-') && !str_starts_with($id, 'o') && !str_starts_with($id, 'chatgpt-')) {
-                continue;
-            }
-            $models[] = [
-                'id' => $id,
-                'name' => $id,
-                'context_length' => 0,
-                'pricing' => [],
-            ];
-        }
-
-        usort($models, static fn(array $a, array $b): int => strcmp((string) $a['id'], (string) $b['id']));
-
-        return $this->responseFactory->createJsonResponse(['models' => $models]);
-    }
-
-    /**
-     * @param list<array{role: string, content: string}> $messages
-     */
-    private function openAiChat(array $messages, string $model, float $temperature): ResponseInterface
-    {
-        $data = $this->sendOpenAiChat($messages, $model, $temperature);
-
-        if (isset($data['error'])) {
-            return $this->responseFactory->createJsonResponse(['error' => $data['error']], 502);
-        }
-
-        return $this->responseFactory->createJsonResponse($data);
-    }
-
-    /**
-     * @param list<array{role: string, content: string}> $messages
-     * @return array<string, mixed>
-     */
-    private function sendOpenAiChat(array $messages, string $model, float $temperature): array
-    {
-        $chatBody = json_encode([
-            'model' => $model,
-            'messages' => $messages,
-            'temperature' => $temperature,
-        ], JSON_THROW_ON_ERROR);
-
-        $chatRequest = $this->requestFactory
-            ->createRequest('POST', self::OPENAI_COMPLETIONS_URL)
-            ->withHeader('Content-Type', 'application/json')
-            ->withHeader('Authorization', 'Bearer ' . $this->settings->getApiKey())
-            ->withBody($this->streamFactory->createStream($chatBody));
-
-        $chatResponse = $this->sendLlmRequest($chatRequest);
-        $responseBody = $chatResponse->getBody()->getContents();
-
-        /** @var array<string, mixed> $data */
-        $data = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
-
-        if (isset($data['error'])) {
-            $errorMessage = is_array($data['error'])
-                ? $data['error']['message'] ?? 'Unknown OpenAI API error.'
-                : (string) $data['error'];
-
-            return ['error' => $errorMessage];
-        }
-
-        return $data;
-    }
-
-    /**
-     * Apply the correct authentication header based on the API key type.
-     *
-     * OAuth tokens (sk-ant-oat*) from Claude subscriptions use Authorization: Bearer.
-     * Standard API keys use x-api-key header.
-     */
-    private function applyAnthropicAuth(RequestInterface $request): RequestInterface
-    {
-        $apiKey = (string) $this->settings->getApiKey();
-
-        // OAuth tokens from Claude subscriptions use Bearer auth.
-        // Standard API keys use x-api-key header.
-        if (str_starts_with($apiKey, 'sk-ant-oat')) {
-            return $request->withHeader('Authorization', 'Bearer ' . $apiKey);
-        }
-
-        return $request->withHeader('x-api-key', $apiKey);
-    }
-
-    /**
-     * Send an HTTP request with the configured LLM timeout.
-     *
-     * Falls back to the injected PSR-18 client if Guzzle is unavailable.
-     */
-    private function sendLlmRequest(RequestInterface $request): ResponseInterface
-    {
-        $timeout = $this->settings->getTimeout();
-
-        if (class_exists(Client::class)) {
-            return new Client(['timeout' => $timeout])->sendRequest($request);
-        }
-
-        return $this->httpClient->sendRequest($request);
+        return $messages;
     }
 
     private function generateCodeVerifier(): string
