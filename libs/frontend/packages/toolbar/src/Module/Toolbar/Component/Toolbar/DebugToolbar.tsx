@@ -225,26 +225,26 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     return (
         <Portal>
             <Box sx={{position: 'sticky', bottom: 0, zIndex: 1300}}>
-                {/* Resize handle (only when iframe is active) */}
+                {/* Resize handle + iframe above the toolbar bar */}
                 {iframeEnabled && (
-                    <Box
-                        {...separatorProps}
-                        sx={{
-                            position: 'absolute',
-                            top: -6,
-                            left: 0,
-                            right: 0,
-                            height: 12,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'row-resize',
-                            zIndex: 1,
-                            '&:hover': {bgcolor: 'action.hover'},
-                        }}
-                    >
-                        <DragHandleIcon sx={{fontSize: 16, color: 'text.disabled'}} />
-                    </Box>
+                    <>
+                        <Box
+                            {...separatorProps}
+                            sx={{
+                                height: 12,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'row-resize',
+                                '&:hover': {bgcolor: 'action.hover'},
+                            }}
+                        >
+                            <DragHandleIcon sx={{fontSize: 16, color: 'text.disabled'}} />
+                        </Box>
+                        <div style={{height: position, overflow: 'hidden'}}>
+                            <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
+                        </div>
+                    </>
                 )}
 
                 <Paper
@@ -343,12 +343,6 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                         </Tooltip>
                     </Stack>
                 </Paper>
-
-                {iframeEnabled && (
-                    <div style={{height: position, overflow: 'hidden'}}>
-                        <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
-                    </div>
-                )}
             </Box>
 
             <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
