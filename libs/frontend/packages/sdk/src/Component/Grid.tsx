@@ -1,9 +1,10 @@
 import {setPreferredPageSize} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {DataGrid, GridColDef, GridValidRowModel} from '@mui/x-data-grid';
-import {GridSortModel} from '@mui/x-data-grid/models/gridSortModel';
 import {useCallback, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {useSearchParams} from 'react-router';
+
+type GridSortModel = readonly {field: string; sort: 'asc' | 'desc' | null | undefined}[];
 
 type GridProps = {
     rows: GridValidRowModel[];

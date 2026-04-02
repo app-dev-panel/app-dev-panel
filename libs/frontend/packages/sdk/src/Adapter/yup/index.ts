@@ -13,8 +13,8 @@ yup.addMethod(yup.MixedSchema, 'sequence', function (schemas) {
             for (const schema of schemas) {
                 await schema.validate(value);
             }
-        } catch ({message}) {
-            return context.createError({message: message as any});
+        } catch (error) {
+            return context.createError({message: (error as any).message});
         }
         return true;
     });
