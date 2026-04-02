@@ -95,6 +95,7 @@
     "yiisoft/var-dumper": "^1.7",
     "yiisoft/yii-console": "^2.4",
     "yiisoft/yii-http": "^1.1",
+    "yiisoft/proxy": "^1.2",
     "yiisoft/yii2": "^2.0.50",
     "zircote/swagger-php": "^4.0"
   },
@@ -126,9 +127,9 @@
   },
   "scripts": {
     "test": "@test:unit",
-    "test:unit": "phpunit --testdox --testsuite Kernel,API,Cli,McpServer,Adapter-Symfony,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle",
+    "test:unit": "phpunit --testdox --testsuite Kernel,API,Cli,McpServer,Adapter-Symfony,Adapter-Yii3,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle",
     "test:e2e": "phpunit --testdox --testsuite E2E",
-    "test:coverage": "phpunit --testsuite Kernel,API,Cli,McpServer,Adapter-Symfony,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle --coverage-clover=coverage.xml --coverage-text",
+    "test:coverage": "phpunit --testsuite Kernel,API,Cli,McpServer,Adapter-Symfony,Adapter-Yii3,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle --coverage-clover=coverage.xml --coverage-text",
     "lint": "mago lint",
     "analyze": "mago analyze",
     "format:check": "mago fmt --check",
@@ -156,7 +157,7 @@
       "AppDevPanel\\Adapter\\Laravel\\": "libs/Adapter/Laravel/src",
       "AppDevPanel\\Adapter\\Yii2\\": "libs/Adapter/Yii2/src",
       "AppDevPanel\\Adapter\\Cycle\\": "libs/Adapter/Cycle/src",
-      "AppDevPanel\\Adapter\\Yiisoft\\": "libs/Adapter/Yiisoft/src"
+      "AppDevPanel\\Adapter\\Yii3\\": "libs/Adapter/Yii3/src"
     }
   },
   "autoload-dev": {
@@ -167,6 +168,7 @@
       "AppDevPanel\\McpServer\\Tests\\": "libs/McpServer/tests",
       "AppDevPanel\\Adapter\\Symfony\\Tests\\": "libs/Adapter/Symfony/tests",
       "AppDevPanel\\Adapter\\Laravel\\Tests\\": "libs/Adapter/Laravel/tests",
+      "AppDevPanel\\Adapter\\Yii3\\Tests\\": "libs/Adapter/Yii3/tests",
       "AppDevPanel\\Adapter\\Yii2\\Tests\\": "libs/Adapter/Yii2/tests",
       "AppDevPanel\\Testing\\Tests\\": "libs/Testing/tests",
       "AppDevPanel\\Tests\\": "tests"
