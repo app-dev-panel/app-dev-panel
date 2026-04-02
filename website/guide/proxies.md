@@ -1,5 +1,6 @@
 ---
 title: Proxy System
+description: "ADP proxy system intercepts PSR interface calls transparently to feed data to collectors without code changes."
 ---
 
 # Proxy System

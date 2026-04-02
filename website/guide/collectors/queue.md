@@ -1,5 +1,6 @@
 ---
 title: Queue Collector
+description: "ADP Queue Collector tracks queued jobs with payload, status, execution time, and retry information."
 ---
 
 # Queue Collector

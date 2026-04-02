@@ -1,5 +1,6 @@
 ---
 title: Event Collector
+description: "ADP Event Collector records PSR-14 event dispatches with listener details, timing, and propagation status."
 ---
 
 # Event Collector

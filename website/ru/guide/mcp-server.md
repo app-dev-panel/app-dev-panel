@@ -1,5 +1,6 @@
 ---
 title: MCP-сервер
+description: "MCP-сервер ADP предоставляет отладочные данные AI-ассистентам Claude и Cursor через stdio и HTTP-транспорты."
 ---
 
 # MCP-сервер

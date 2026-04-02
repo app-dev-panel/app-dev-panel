@@ -1,4 +1,5 @@
 ---
+description: "ADP -- фреймворк-независимая панель отладки и разработки для PHP. Работает с Symfony, Laravel, Yii и любым PSR-приложением."
 layout: home
 hero:
   name: ADP

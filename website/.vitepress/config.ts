@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress';
 import llmstxt from 'vitepress-plugin-llms';
 import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs';
 import { classLinkPlugin } from './class-link';
+import { generateFeed } from './feed';
 import { pkgLinkPlugin } from './pkg-link';
 
 export default defineConfig({

@@ -1,5 +1,6 @@
 ---
 title: llms.txt — Документация для AI-агентов
+description: "ADP предоставляет машиночитаемую документацию по стандарту llms.txt для AI-ассистентов Claude, ChatGPT, Copilot."
 ---
 
 # llms.txt

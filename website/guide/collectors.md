@@ -1,5 +1,6 @@
 ---
 title: Collectors
+description: "Overview of ADP collectors — the core mechanism for capturing logs, events, queries, and other runtime data."
 ---
 
 # Collectors

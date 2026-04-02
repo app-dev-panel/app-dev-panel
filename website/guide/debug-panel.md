@@ -1,5 +1,6 @@
 ---
 title: Debug Panel
+description: "The ADP debug panel is a React SPA for inspecting logs, queries, events, and other debug data from your PHP app."
 ---
 
 # Debug Panel

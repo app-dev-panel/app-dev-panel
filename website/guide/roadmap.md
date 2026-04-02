@@ -1,5 +1,6 @@
 ---
 title: Roadmap
+description: "ADP development roadmap — completed phases, current work, and planned features for the debugging panel."
 ---
 
 # Roadmap

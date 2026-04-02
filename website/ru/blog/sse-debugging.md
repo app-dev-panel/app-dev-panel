@@ -3,6 +3,7 @@ title: Отладка в реальном времени с Server-Sent Events
 date: 2026-03-25
 author: ADP Team
 tags: [deep-dive, sse, architecture]
+description: "Как ADP использует Server-Sent Events для потоковой передачи отладочных данных в панель в реальном времени."
 ---
 
 <script setup>

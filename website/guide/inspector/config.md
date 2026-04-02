@@ -1,5 +1,6 @@
 ---
 title: Configuration Inspector
+description: "ADP Configuration Inspector shows resolved application config values, parameters, and environment settings."
 ---
 
 # Configuration Inspector

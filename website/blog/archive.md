@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Archive
+description: "Chronological archive of all ADP blog posts about PHP debugging, collectors, adapters, and development tools."
 ---
 
 <script setup>

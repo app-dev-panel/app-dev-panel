@@ -1,5 +1,6 @@
 ---
 title: Architecture
+description: "ADP's layered architecture: Kernel, API, Adapters, and Frontend. Understand how data flows from app to debug panel."
 ---
 
 # Architecture

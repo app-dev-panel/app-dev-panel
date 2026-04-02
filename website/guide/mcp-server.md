@@ -1,5 +1,6 @@
 ---
 title: MCP Server
+description: "ADP MCP server exposes debug data to AI assistants like Claude and Cursor via stdio and HTTP transports."
 ---
 
 # MCP Server

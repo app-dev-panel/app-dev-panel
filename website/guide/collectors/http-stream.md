@@ -1,5 +1,6 @@
 ---
 title: HTTP Stream Collector
+description: "ADP HTTP Stream Collector captures streaming HTTP responses with chunk data, timing, and transfer details."
 ---
 
 # HTTP Stream Collector

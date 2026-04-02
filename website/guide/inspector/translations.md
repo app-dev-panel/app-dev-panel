@@ -1,5 +1,6 @@
 ---
 title: Translations Inspector
+description: "ADP Translations Inspector lists all translation keys, locales, domains, and identifies missing translations."
 ---
 
 # Translations Inspector

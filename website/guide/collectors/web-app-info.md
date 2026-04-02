@@ -1,5 +1,6 @@
 ---
 title: WebAppInfo Collector
+description: "ADP WebAppInfo Collector records web application metadata: request method, URL, response status, memory, time."
 ---
 
 # WebAppInfo Collector

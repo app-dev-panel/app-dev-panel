@@ -1,5 +1,6 @@
 ---
 title: Translator Collector
+description: "ADP Translator Collector records translation lookups including missing keys, locale, domain, and fallbacks."
 ---
 
 # Translator Collector

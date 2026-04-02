@@ -1,3 +1,7 @@
+---
+description: "ADP Inspector REST API: live queries for routes, config, database schema, cache, Redis, and more."
+---
+
 # Inspector Endpoints
 
 Inspector endpoints query live application state. All routes are under `/inspect/api`.
