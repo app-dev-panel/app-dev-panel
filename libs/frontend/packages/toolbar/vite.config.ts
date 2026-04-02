@@ -24,8 +24,6 @@ export default defineConfig(async () => ({
         svgrPlugin(),
     ],
     optimizeDeps: {
-        // Force Vite to pre-bundle MUI dependencies together to avoid
-        // createTheme resolution issues caused by the react-redux alias.
         include: ['@mui/material', '@mui/system', '@mui/material/styles'],
     },
     base: './',
