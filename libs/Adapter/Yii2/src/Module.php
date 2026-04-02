@@ -53,6 +53,7 @@ use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
+use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
@@ -628,14 +629,24 @@ class Module extends \yii\base\Module implements BootstrapInterface
         );
 
         \Yii::$container->setSingleton(
-            LlmController::class,
-            static fn() => new LlmController(
-                \Yii::$container->get(JsonResponseFactoryInterface::class),
+            LlmProviderService::class,
+            static fn() => new LlmProviderService(
                 \Yii::$container->get(LlmSettingsInterface::class),
                 \Yii::$container->get(ClientInterface::class),
                 \Yii::$container->get(RequestFactoryInterface::class),
                 \Yii::$container->get(StreamFactoryInterface::class),
+            ),
+        );
+        \Yii::$container->setSingleton(
+            LlmController::class,
+            static fn() => new LlmController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(LlmSettingsInterface::class),
+                \Yii::$container->get(LlmProviderService::class),
                 \Yii::$container->get(LlmHistoryStorageInterface::class),
+                \Yii::$container->get(RequestFactoryInterface::class),
+                \Yii::$container->get(StreamFactoryInterface::class),
+                \Yii::$container->get(ClientInterface::class),
             ),
         );
     }

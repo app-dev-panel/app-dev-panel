@@ -57,6 +57,7 @@ use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
+use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
@@ -69,9 +70,9 @@ use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
-use AppDevPanel\Cli\Command\DebugDumpCommand;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
+use AppDevPanel\Cli\Command\DebugDumpCommand;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
 use AppDevPanel\Cli\Command\DebugSummaryCommand;
@@ -392,6 +393,9 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 viteAssetListener: $this->app->bound(AssetBundleCollector::class)
                     ? new ViteAssetListener(fn() => $this->app->make(AssetBundleCollector::class))
                     : null,
+                databaseListener: $this->app->bound(DatabaseListener::class)
+                    ? $this->app->make(DatabaseListener::class)
+                    : null,
             ),
         );
     }
@@ -650,14 +654,24 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(
-            LlmController::class,
-            fn() => new LlmController(
-                $this->app->make(JsonResponseFactoryInterface::class),
+            LlmProviderService::class,
+            fn() => new LlmProviderService(
                 $this->app->make(LlmSettingsInterface::class),
                 $this->app->make(ClientInterface::class),
                 $this->app->make(RequestFactoryInterface::class),
                 $this->app->make(StreamFactoryInterface::class),
+            ),
+        );
+        $this->app->singleton(
+            LlmController::class,
+            fn() => new LlmController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(LlmSettingsInterface::class),
+                $this->app->make(LlmProviderService::class),
                 $this->app->make(LlmHistoryStorageInterface::class),
+                $this->app->make(RequestFactoryInterface::class),
+                $this->app->make(StreamFactoryInterface::class),
+                $this->app->make(ClientInterface::class),
             ),
         );
     }
@@ -838,6 +852,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             }
             $listener = new $listenerClass(fn() => $this->app->make($collectorClass));
             $listener->register($events);
+
+            // Store DatabaseListener for DebugMiddleware to capture failed queries
+            if ($listenerClass === DatabaseListener::class) {
+                $this->app->instance(DatabaseListener::class, $listener);
+            }
         }
 
         if ($collectors['security'] ?? true) {

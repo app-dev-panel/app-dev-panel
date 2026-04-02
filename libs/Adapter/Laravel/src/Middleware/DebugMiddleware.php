@@ -7,6 +7,7 @@ namespace AppDevPanel\Adapter\Laravel\Middleware;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\VarDumper\VarDumper;
@@ -49,6 +50,9 @@ final class DebugMiddleware
             $response = $next($request);
         } catch (\Throwable $e) {
             $this->collectors->exception?->collect($e);
+            if ($e instanceof QueryException) {
+                $this->collectors->databaseListener?->collectFailedQuery($e);
+            }
             throw $e;
         }
 

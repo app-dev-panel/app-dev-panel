@@ -6,10 +6,8 @@ namespace AppDevPanel\Kernel;
 
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Yiisoft\Strings\WildcardPattern;
 
 final class Debugger
 {
@@ -49,7 +47,7 @@ final class Debugger
         }
 
         $request = $context->getRequest();
-        if ($request !== null && $this->isRequestIgnored($request)) {
+        if ($request !== null && $this->ignoreConfig->isRequestIgnored($request)) {
             $this->logger->debug('Debugger: skipping ignored request', [
                 'path' => $request->getUri()->getPath(),
             ]);
@@ -57,7 +55,7 @@ final class Debugger
             return;
         }
 
-        if ($context->isCommand() && $this->isCommandIgnored($context->getCommandName())) {
+        if ($context->isCommand() && $this->ignoreConfig->isCommandIgnored($context->getCommandName())) {
             $this->logger->debug('Debugger: skipping ignored command', [
                 'command' => $context->getCommandName(),
             ]);
@@ -113,40 +111,8 @@ final class Debugger
         $this->active = false;
     }
 
-    private function isRequestIgnored(ServerRequestInterface $request): bool
-    {
-        if ($request->hasHeader('X-Debug-Ignore') && $request->getHeaderLine('X-Debug-Ignore') === 'true') {
-            return true;
-        }
-        $path = $request->getUri()->getPath();
-        foreach ($this->ignoreConfig->requests as $pattern) {
-            if (new WildcardPattern($pattern)->match($path)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private function isCommandIgnored(?string $command): bool
-    {
-        if ($command === null || $command === '') {
-            return true;
-        }
-        if (getenv('YII_DEBUG_IGNORE') === 'true') {
-            return true;
-        }
-        foreach ($this->ignoreConfig->commands as $pattern) {
-            if (new WildcardPattern($pattern)->match($command)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * @param array $ignoredRequests Patterns for ignored request URLs.
-     *
-     * @see WildcardPattern
      */
     public function withIgnoredRequests(array $ignoredRequests): self
     {
@@ -157,8 +123,6 @@ final class Debugger
 
     /**
      * @param array $ignoredCommands Patterns for ignored commands names.
-     *
-     * @see WildcardPattern
      */
     public function withIgnoredCommands(array $ignoredCommands): self
     {

@@ -82,9 +82,13 @@ final class FileServiceRegistry implements ServiceRegistryInterface
     {
         $dir = dirname($this->filePath);
         if (!is_dir($dir)) {
-            mkdir($dir, 0o775, true);
+            if (!mkdir($dir, 0o775, true) && !is_dir($dir)) {
+                throw new \RuntimeException(sprintf('Failed to create directory "%s".', $dir));
+            }
         }
 
-        file_put_contents($this->filePath, Json::encode($services), LOCK_EX);
+        if (file_put_contents($this->filePath, Json::encode($services), LOCK_EX) === false) {
+            throw new \RuntimeException(sprintf('Failed to write service registry file "%s".', $this->filePath));
+        }
     }
 }
