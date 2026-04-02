@@ -6,24 +6,38 @@ import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk
 import {IFrameWrapper} from '@app-dev-panel/sdk/Helper/IFrameWrapper';
 import {DebugEntriesListModal} from '@app-dev-panel/toolbar/Module/Toolbar/Component/DebugEntriesListModal';
 import {CommandItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Console/CommandItem';
-import {DateItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DateItem';
+import {DatabaseItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DatabaseItem';
+import {DeprecationItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DeprecationItem';
 import {EventsItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/EventsItem';
+import {ExceptionItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/ExceptionItem';
+import {HttpClientItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/HttpClientItem';
 import {LogsItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/LogsItem';
 import {MemoryItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/MemoryItem';
 import {RequestTimeItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/RequestTimeItem';
 import {ValidatorItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/ValidatorItem';
 import {RequestItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RequestItem';
-import {RouterItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RouterItem';
 import {useSelector} from '@app-dev-panel/toolbar/store';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import WebAssetOffIcon from '@mui/icons-material/WebAssetOff';
-import {Box, Divider, IconButton, Paper, Portal, Stack, Tooltip, useTheme} from '@mui/material';
+import {Box, Chip, Divider, IconButton, Paper, Portal, Stack, Tooltip, useTheme} from '@mui/material';
 import {ForwardedRef, forwardRef, useCallback, useEffect, useRef, useState} from 'react';
+import {ErrorBoundary, type FallbackProps} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
 import {useResizable} from 'react-resizable-layout';
+
+const ToolbarErrorFallback = ({resetErrorBoundary}: FallbackProps) => (
+    <Chip
+        label="Toolbar error"
+        size="small"
+        color="error"
+        variant="outlined"
+        onClick={resetErrorBoundary}
+        sx={{height: 32, borderRadius: 1, fontSize: 12, cursor: 'pointer'}}
+    />
+);
 
 const serviceWorker = navigator?.serviceWorker;
 
@@ -109,10 +123,16 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const iframeRef = useRef<HTMLIFrameElement | undefined>(undefined);
     const [iframeWrapper, setIframeWrapper] = useState<IFrameWrapper | null>(null);
+    const pendingNavigationRef = useRef<string | null>(null);
 
     useEffect(() => {
         if (iframeRef.current) {
-            setIframeWrapper(new IFrameWrapper(iframeRef.current));
+            const wrapper = new IFrameWrapper(iframeRef.current);
+            setIframeWrapper(wrapper);
+            if (pendingNavigationRef.current) {
+                wrapper.dispatchEvent('router.navigate', pendingNavigationRef.current);
+                pendingNavigationRef.current = null;
+            }
         }
     }, [iframeRef.current]);
 
@@ -124,9 +144,13 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
             if (!iframeEnabled) {
                 setIframeEnabled(true);
             }
-            iframeWrapper?.dispatchEvent('router.navigate', url);
+            if (iframeWrapper) {
+                iframeWrapper.dispatchEvent('router.navigate', url);
+            } else {
+                pendingNavigationRef.current = url;
+            }
         },
-        [iframeWrapper, activeComponents],
+        [iframeWrapper, iframeEnabled, activeComponents],
     );
 
     const toggleIframeHandler = useCallback(() => {
@@ -136,7 +160,6 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         setIframeEnabled((value) => !value);
     }, [activeComponents]);
 
-    const iframeContainerRef = useRef<HTMLDivElement | undefined>(undefined);
     const {position, separatorProps, setPosition} = useResizable({
         axis: 'y',
         initial: iframeHeight,
@@ -144,7 +167,6 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         max: 1000,
         reverse: true,
         disabled: !isToolbarOpened,
-        containerRef: iframeContainerRef,
         onResizeEnd: (e) => {
             dispatch(setIFrameHeight(e.position));
         },
@@ -255,21 +277,25 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
                     {/* Metric items */}
                     {selectedEntry && (
-                        <Stack direction="row" alignItems="center" spacing={0.25} sx={{flexWrap: 'nowrap'}}>
-                            {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
-                            {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
+                        <ErrorBoundary FallbackComponent={ToolbarErrorFallback} resetKeys={[selectedEntry.id]}>
+                            <Stack direction="row" alignItems="center" spacing={0.5} sx={{flexWrap: 'nowrap'}}>
+                                {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
+                                {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
 
-                            <RequestTimeItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                            <MemoryItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <ExceptionItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
-                            {isDebugEntryAboutWeb(selectedEntry) && <RouterItem data={selectedEntry} />}
+                                <RequestTimeItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <MemoryItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
-                            <LogsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                            <EventsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                            <ValidatorItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <DatabaseItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <HttpClientItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
-                            <DateItem data={selectedEntry} />
-                        </Stack>
+                                <LogsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <EventsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <ValidatorItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <DeprecationItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                            </Stack>
+                        </ErrorBoundary>
                     )}
 
                     {/* Spacer */}
@@ -317,14 +343,15 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                         </Tooltip>
                     </Stack>
                 </Paper>
+
+                {iframeEnabled && (
+                    <div style={{height: position, overflow: 'hidden'}}>
+                        <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
+                    </div>
+                )}
             </Box>
 
             <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
-            {iframeEnabled && (
-                <div ref={iframeContainerRef} style={{height: position, overflow: 'hidden'}}>
-                    <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
-                </div>
-            )}
         </Portal>
     );
 };

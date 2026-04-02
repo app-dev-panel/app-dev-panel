@@ -10,11 +10,11 @@ export const RouterItem = ({data}: RouterItemProps) => {
     }
     return (
         <Chip
-            icon={<Route sx={{fontSize: '14px !important'}} />}
+            icon={<Route sx={{fontSize: '16px !important'}} />}
             label={data.router.name}
             size="small"
             variant="outlined"
-            sx={{height: 24, borderRadius: 1, fontSize: 11, fontFamily: "'JetBrains Mono', monospace"}}
+            sx={{height: 32, borderRadius: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace"}}
         />
     );
 };

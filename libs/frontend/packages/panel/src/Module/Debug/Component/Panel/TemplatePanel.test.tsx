@@ -117,7 +117,7 @@ describe('TemplatePanel', () => {
                 })}
             />,
         );
-        await user.click(screen.getByText('index.php'));
+        await user.click(screen.getByRole('button', {name: 'Expand'}));
         expect(screen.getByText('Output')).toBeInTheDocument();
         expect(screen.getByText('<p>Test content</p>')).toBeInTheDocument();
     });

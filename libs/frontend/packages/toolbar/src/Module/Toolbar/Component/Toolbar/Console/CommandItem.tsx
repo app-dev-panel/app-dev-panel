@@ -23,13 +23,13 @@ export const CommandItem = ({data}: CommandItemProps) => {
         <>
             <Tooltip title="Click for command details" arrow>
                 <Chip
-                    icon={<Terminal sx={{fontSize: '14px !important'}} />}
+                    icon={<Terminal sx={{fontSize: '16px !important'}} />}
                     label={data.command.name}
                     size="small"
                     color={chipColor(data.command.exitCode)}
                     variant="filled"
                     onClick={handleClick}
-                    sx={{fontWeight: 600, fontSize: 11, height: 24, borderRadius: 1}}
+                    sx={{fontWeight: 600, fontSize: 12, height: 32, borderRadius: 1}}
                 />
             </Tooltip>
             <Menu

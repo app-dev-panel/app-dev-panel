@@ -14,7 +14,7 @@ export const EventsItem = ({data, iframeUrlHandler}: EventsItemProps) => {
     return (
         <Tooltip title={`${total} events`} arrow>
             <Chip
-                icon={<BoltIcon sx={{fontSize: '14px !important'}} />}
+                icon={<BoltIcon sx={{fontSize: '16px !important'}} />}
                 label={`Events ${total}`}
                 size="small"
                 variant="outlined"
@@ -23,7 +23,7 @@ export const EventsItem = ({data, iframeUrlHandler}: EventsItemProps) => {
                     e.stopPropagation();
                     e.preventDefault();
                 }}
-                sx={{height: 24, borderRadius: 1, fontSize: 11, cursor: 'pointer'}}
+                sx={{height: 32, borderRadius: 1, fontSize: 12, cursor: 'pointer'}}
             />
         </Tooltip>
     );
