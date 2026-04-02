@@ -4,11 +4,11 @@ title: Коллектор Elasticsearch
 
 # Коллектор Elasticsearch
 
-Захватывает запросы к Elasticsearch — метод, эндпоинт, индекс, тело запроса/ответа, тайминг, количество hits и обнаружение дубликатов.
+Захватывает запросы к Elasticsearch — метод, эндпоинт, индекс, тело запроса/ответа, тайминг, количество совпадений и обнаружение дубликатов.
 
 ![Панель коллектора Elasticsearch](/images/collectors/elasticsearch.png)
 
-## Что собирает
+## Собираемые данные
 
 | Поле | Описание |
 |------|----------|
@@ -17,10 +17,10 @@ title: Коллектор Elasticsearch
 | `index` | Имя целевого индекса |
 | `body` | Тело запроса (JSON) |
 | `status` | Статус запроса (`success` или `error`) |
-| `statusCode` | HTTP-код ответа |
+| `statusCode` | HTTP-код статуса ответа |
 | `responseBody` | Тело ответа |
 | `responseSize` | Размер ответа в байтах |
-| `hitsCount` | Количество найденных результатов (для поисковых запросов) |
+| `hitsCount` | Количество найденных совпадений (для поисковых запросов) |
 | `duration` | Длительность запроса в секундах |
 
 ## Схема данных
@@ -72,7 +72,7 @@ title: Коллектор Elasticsearch
 use AppDevPanel\Kernel\Collector\ElasticsearchCollector;
 use AppDevPanel\Kernel\Collector\ElasticsearchRequestRecord;
 
-// Вариант A: парный паттерн start/end
+// Option A: start/end pattern
 $collector->collectRequestStart(
     id: 'es-1',
     method: 'GET',
@@ -87,7 +87,7 @@ $collector->collectRequestEnd(
     responseSize: 1024,
 );
 
-// Вариант B: одиночная запись
+// Option B: single record
 $collector->logRequest(new ElasticsearchRequestRecord(
     method: 'GET',
     endpoint: '/users/_search',
@@ -104,11 +104,11 @@ $collector->logRequest(new ElasticsearchRequestRecord(
 <class>\AppDevPanel\Kernel\Collector\ElasticsearchCollector</class> реализует <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>, зависит от <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class> и использует <class>\AppDevPanel\Kernel\Collector\DuplicateDetectionTrait</class>.
 :::
 
-Подробнее о конфигурации и интеграции — на странице [Elasticsearch](/ru/guide/elasticsearch).
+Подробности настройки и интеграции см. на странице [Elasticsearch](/ru/guide/elasticsearch).
 
 ## Панель отладки
 
 - **Список запросов** — все ES-запросы с методом, эндпоинтом, статусом и таймингом
-- **Количество hits** — число результатов поиска для поисковых запросов
+- **Количество совпадений** — число результатов поиска для поисковых запросов
 - **Обнаружение дубликатов** — подсветка повторяющихся идентичных запросов
 - **Отслеживание ошибок** — неудачные запросы выделены с деталями ошибки

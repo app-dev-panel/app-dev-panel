@@ -4,15 +4,15 @@ title: Коллектор HTTP-потоков
 
 # Коллектор HTTP-потоков
 
-Захватывает операции HTTP/HTTPS stream wrapper — запросы, выполненные через `file_get_contents('http://...')`, `fopen('https://...')` и аналогичные PHP-функции потоков.
+Захватывает операции обёрток HTTP/HTTPS-потоков — запросы, выполненные через `file_get_contents('http://...')`, `fopen('https://...')` и аналогичные PHP-функции потоков.
 
 ![Панель коллектора HTTP-потоков](/images/collectors/http-stream.png)
 
-## Что собирает
+## Собираемые данные
 
 | Поле | Описание |
 |------|----------|
-| `operation` | Тип операции потока (`open`, `read`, `stat` и т.д.) |
+| `operation` | Тип операции потока (`open`, `read`, `stat` и др.) |
 | `uri` | HTTP/HTTPS URL, к которому выполнен доступ |
 | `args` | Аргументы операции |
 
@@ -52,12 +52,12 @@ $collector->collect(
 ```
 
 ::: info
-<class>\AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector</class> реализует <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. Поддерживает настраиваемые шаблоны исключений.
+<class>\AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector</class> реализует <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class>. Поддерживает настраиваемые шаблоны игнорирования.
 :::
 
 ## Как это работает
 
-Коллектор использует прокси PHP stream wrapper (<class>\AppDevPanel\Kernel\Collector\Stream\HttpStreamProxy</class>), который регистрируется для протоколов `http://` и `https://`. Операции потоков через нативные PHP-функции перехватываются. Пути, соответствующие шаблонам `excludePaths`, игнорируются.
+Коллектор использует прокси обёртки PHP-потоков (<class>\AppDevPanel\Kernel\Collector\Stream\HttpStreamProxy</class>), которая регистрируется для протоколов `http://` и `https://`. Операции потоков через нативные PHP-функции перехватываются. Пути, соответствующие шаблонам `excludePaths`, игнорируются.
 
 ::: warning
 Этот коллектор захватывает только HTTP-запросы, выполненные через PHP-функции потоков (`file_get_contents`, `fopen`). Для вызовов PSR-18 HTTP-клиента используйте [коллектор HTTP-клиента](/ru/guide/collectors/http-client).
@@ -66,4 +66,4 @@ $collector->collect(
 ## Панель отладки
 
 - **Список операций** — операции HTTP-потоков с URL-адресами
-- **Совмещение с файловой системой** — отображается вместе с <class>\AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector</class> под пунктом "I/O" в боковой панели
+- **Совместно с файловой системой** — отображается вместе с <class>\AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector</class> в элементе боковой панели "I/O"

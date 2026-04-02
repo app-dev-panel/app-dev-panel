@@ -1,23 +1,23 @@
 ---
-title: Коллектор наборов ресурсов
+title: Коллектор пакетов ресурсов
 ---
 
-# Коллектор наборов ресурсов
+# Коллектор пакетов ресурсов
 
-Захватывает зарегистрированные наборы фронтенд-ресурсов — CSS-файлы, JavaScript-файлы, зависимости и конфигурацию.
+Захватывает зарегистрированные пакеты фронтенд-ресурсов — CSS-файлы, JavaScript-файлы, зависимости и конфигурацию.
 
-## Что собирает
+## Собираемые данные
 
 | Поле | Описание |
 |------|----------|
-| `class` | Имя класса набора ресурсов |
-| `sourcePath` | Путь к исходным файлам для публикуемых ресурсов |
-| `basePath` | Базовый путь опубликованных ресурсов |
-| `baseUrl` | Базовый URL опубликованных ресурсов |
+| `class` | Имя класса пакета ресурсов |
+| `sourcePath` | Исходный путь для публикуемых ресурсов |
+| `basePath` | Базовый путь публикации |
+| `baseUrl` | Базовый URL публикации |
 | `css` | Список CSS-файлов |
 | `js` | Список JavaScript-файлов |
-| `depends` | Зависимости набора |
-| `options` | Опции набора |
+| `depends` | Зависимости пакета |
+| `options` | Опции пакета |
 
 ## Схема данных
 
@@ -61,16 +61,16 @@ $collector->collectBundle(name: 'AppAsset', bundle: [
     'depends' => ['yii\\web\\JqueryAsset'],
 ]);
 
-// Или собрать все наборы сразу
+// Или собрать все пакеты за один раз
 $collector->collectBundles(bundles: $allBundles);
 ```
 
 ::: info
-<class>\AppDevPanel\Kernel\Collector\AssetBundleCollector</class> реализует <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> и зависит от <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>. Преимущественно используется с фреймворками Yii.
+<class>\AppDevPanel\Kernel\Collector\AssetBundleCollector</class> реализует <class>\AppDevPanel\Kernel\Collector\SummaryCollectorInterface</class> и зависит от <class>\AppDevPanel\Kernel\Collector\TimelineCollector</class>. Используется преимущественно с фреймворками Yii.
 :::
 
 ## Панель отладки
 
-- **Список наборов** — все зарегистрированные наборы ресурсов с количеством файлов
-- **Файлы ресурсов** — CSS и JS файлы по каждому набору
-- **Дерево зависимостей** — граф зависимостей наборов
+- **Список пакетов** — все зарегистрированные пакеты ресурсов с количеством файлов
+- **Файлы ресурсов** — CSS и JS файлы по каждому пакету
+- **Дерево зависимостей** — граф зависимостей пакетов
