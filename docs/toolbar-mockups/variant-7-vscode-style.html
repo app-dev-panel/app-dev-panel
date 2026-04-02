@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbar Variant 7 — VS Code Style</title>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* VS Code Dark+ palette */
+    --bg-main: #1E1E1E;
+    --bg-sidebar: #252526;
+    --bg-panel: #1E1E1E;
+    --bg-editor: #1E1E1E;
+    --bg-activitybar: #333333;
+    --bg-statusbar: #007ACC;
+    --bg-statusbar-debug: #CC6633;
+    --bg-tab: #2D2D2D;
+    --bg-tab-active: #1E1E1E;
+    --bg-hover: #2A2D2E;
+    --bg-selected: #094771;
+    --bg-input: #3C3C3C;
+    --text: #CCCCCC;
+    --text-dim: #858585;
+    --text-bright: #E7E7E7;
+    --text-status: #FFFFFF;
+    --accent: #007ACC;
+    --success: #89D185;
+    --warning: #CCA700;
+    --error: #F48771;
+    --border: #474747;
+    --font-ui: 'Segoe UI', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg-main);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-size: 13px;
+  }
+
+  /* ===== VS CODE LAYOUT ===== */
+
+  /* Top menu bar */
+  .vsc-menubar {
+    height: 30px;
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .vsc-menu-item {
+    padding: 2px 8px;
+    font-size: 12px;
+    color: var(--text);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .vsc-menu-item:hover { background: var(--bg-hover); }
+
+  .vsc-main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* Activity bar (icon strip) */
+  .vsc-activitybar {
+    width: 48px;
+    background: var(--bg-activitybar);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 0;
+    gap: 2px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+  }
+  .activity-btn {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-radius: 4px;
+    border: none; background: none;
+    position: relative;
+  }
+  .activity-btn:hover { color: var(--text-bright); }
+  .activity-btn.active {
+    color: var(--text-bright);
+  }
+  .activity-btn.active::before {
+    content: '';
+    position: absolute; left: 0; top: 8px; bottom: 8px;
+    width: 2px;
+    background: var(--text-bright);
+    border-radius: 0 1px 1px 0;
+  }
+  .activity-spacer { flex: 1; }
+  .activity-badge {
+    position: absolute; top: 4px; right: 4px;
+    background: var(--accent);
+    color: white;
+    font-size: 9px; font-weight: 600;
+    min-width: 14px; height: 14px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-ui);
+  }
+  .activity-badge.warn { background: var(--warning); }
+
+  /* Sidebar */
+  .vsc-sidebar {
+    width: 220px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .vsc-sidebar-header {
+    padding: 8px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+  }
+  .vsc-tree-item {
+    display: flex; align-items: center; gap: 4px;
+    padding: 2px 14px 2px 20px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .vsc-tree-item:hover { background: var(--bg-hover); }
+  .vsc-tree-item.selected { background: var(--bg-selected); }
+  .vsc-tree-icon { font-size: 14px; width: 16px; }
+
+  /* Editor pane */
+  .vsc-editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .vsc-tabs {
+    height: 35px;
+    background: var(--bg-tab);
+    display: flex;
+    align-items: stretch;
+    flex-shrink: 0;
+  }
+  .vsc-tab {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-right: 1px solid var(--bg-main);
+    background: var(--bg-tab);
+  }
+  .vsc-tab.active {
+    background: var(--bg-tab-active);
+    color: var(--text-bright);
+    border-bottom: 1px solid var(--bg-tab-active);
+    margin-bottom: -1px;
+  }
+
+  .vsc-editor-content {
+    flex: 1;
+    background: var(--bg-editor);
+    padding: 4px 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    overflow: auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .ln { display: flex; }
+  .ln:hover { background: #2A2D2E; }
+  .ln-n { width: 50px; text-align: right; padding-right: 16px; color: var(--text-dim); user-select: none; flex-shrink: 0; }
+  .ln-c { white-space: pre; }
+  .c-kw { color: #569CD6; }
+  .c-fn { color: #DCDCAA; }
+  .c-str { color: #CE9178; }
+  .c-var { color: #9CDCFE; }
+  .c-cm { color: #6A9955; }
+  .c-type { color: #4EC9B0; }
+  .c-num { color: #B5CEA8; }
+
+  /* ===== BOTTOM PANEL (debug tab) ===== */
+  .vsc-bottom-panel {
+    height: 0;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    overflow: hidden;
+    transition: height 0.15s ease;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .vsc-bottom-panel.open { height: 240px; }
+
+  .vsc-panel-tabs {
+    height: 32px;
+    display: flex;
+    align-items: stretch;
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .vsc-panel-tab {
+    display: flex; align-items: center; gap: 4px;
+    padding: 0 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .vsc-panel-tab:hover { color: var(--text); }
+  .vsc-panel-tab.active {
+    color: var(--text-bright);
+    border-bottom-color: var(--accent);
+  }
+  .vsc-panel-tab .count {
+    font-size: 10px; font-weight: 600;
+    background: var(--bg-input);
+    padding: 0 5px;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+  }
+  .vsc-panel-close {
+    margin-left: auto;
+    background: none; border: none; cursor: pointer;
+    color: var(--text-dim); font-size: 16px; padding: 0 8px;
+  }
+  .vsc-panel-close:hover { color: var(--text); }
+
+  /* Debug panel content */
+  .vsc-debug-content {
+    flex: 1;
+    overflow: auto;
+    padding: 4px 0;
+  }
+  .debug-row {
+    display: flex;
+    align-items: center;
+    padding: 3px 12px;
+    gap: 8px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .debug-row:hover { background: var(--bg-hover); }
+  .debug-row .row-icon { width: 16px; text-align: center; }
+  .debug-row .row-label { color: var(--text-dim); width: 100px; }
+  .debug-row .row-value { font-family: var(--font-mono); font-size: 12px; }
+  .debug-row .row-value.ok { color: var(--success); }
+  .debug-row .row-value.warn { color: var(--warning); }
+  .debug-row .row-value.err { color: var(--error); }
+
+  .debug-separator {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 12px;
+  }
+
+  /* ===== STATUS BAR ===== */
+  .vsc-statusbar {
+    height: 22px;
+    background: var(--bg-statusbar);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    gap: 0;
+    font-size: 12px;
+    color: var(--text-status);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .vsc-statusbar.debugging { background: var(--bg-statusbar-debug); }
+  .sb-item {
+    display: flex; align-items: center; gap: 4px;
+    padding: 0 6px;
+    height: 100%;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .sb-item:hover { background: rgba(255,255,255,0.12); }
+  .sb-spacer { flex: 1; }
+  .sb-item .sb-icon { font-size: 12px; }
+  .sb-duck {
+    font-size: 14px;
+    display: flex; align-items: center; gap: 4px;
+    padding: 0 8px;
+    height: 100%;
+    cursor: pointer;
+    font-weight: 600;
+    background: rgba(0,0,0,0.15);
+    border-radius: 0;
+  }
+  .sb-duck:hover { background: rgba(0,0,0,0.25); }
+  .sb-sep {
+    width: 1px; height: 14px; background: rgba(255,255,255,0.2);
+    margin: 0 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Menu bar -->
+<div class="vsc-menubar">
+  <span class="vsc-menu-item">File</span>
+  <span class="vsc-menu-item">Edit</span>
+  <span class="vsc-menu-item">Selection</span>
+  <span class="vsc-menu-item">View</span>
+  <span class="vsc-menu-item">Go</span>
+  <span class="vsc-menu-item">Run</span>
+  <span class="vsc-menu-item">Terminal</span>
+  <span class="vsc-menu-item">Help</span>
+</div>
+
+<div class="vsc-main">
+  <!-- Activity bar -->
+  <div class="vsc-activitybar">
+    <button class="activity-btn active" title="Explorer">📁</button>
+    <button class="activity-btn" title="Search">🔍</button>
+    <button class="activity-btn" title="Source Control">🔀</button>
+    <button class="activity-btn" title="Run & Debug">▶️</button>
+    <button class="activity-btn" title="Extensions">🧩</button>
+    <div class="activity-spacer"></div>
+    <button class="activity-btn" title="ADP Debug" onclick="togglePanel()">
+      🦆
+      <span class="activity-badge warn">12</span>
+    </button>
+    <button class="activity-btn" title="Settings">⚙️</button>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="vsc-sidebar">
+    <div class="vsc-sidebar-header">Explorer</div>
+    <div class="vsc-tree-item"><span class="vsc-tree-icon">📂</span> src</div>
+    <div class="vsc-tree-item" style="padding-left:32px"><span class="vsc-tree-icon">📂</span> Controller</div>
+    <div class="vsc-tree-item selected" style="padding-left:44px"><span class="vsc-tree-icon">🐘</span> UserController.php</div>
+    <div class="vsc-tree-item" style="padding-left:44px"><span class="vsc-tree-icon">🐘</span> PostController.php</div>
+    <div class="vsc-tree-item" style="padding-left:32px"><span class="vsc-tree-icon">📂</span> Model</div>
+    <div class="vsc-tree-item" style="padding-left:32px"><span class="vsc-tree-icon">📂</span> Service</div>
+    <div class="vsc-tree-item"><span class="vsc-tree-icon">📂</span> config</div>
+    <div class="vsc-tree-item"><span class="vsc-tree-icon">📂</span> tests</div>
+    <div class="vsc-tree-item"><span class="vsc-tree-icon">📄</span> composer.json</div>
+    <div class="vsc-tree-item"><span class="vsc-tree-icon">📄</span> .env</div>
+  </div>
+
+  <!-- Editor -->
+  <div class="vsc-editor">
+    <div class="vsc-tabs">
+      <div class="vsc-tab active">🐘 UserController.php</div>
+      <div class="vsc-tab">🐘 User.php</div>
+    </div>
+    <div class="vsc-editor-content">
+      <div class="ln"><span class="ln-n">1</span><span class="ln-c"><span class="c-cm">&lt;?php</span></span></div>
+      <div class="ln"><span class="ln-n">2</span><span class="ln-c"></span></div>
+      <div class="ln"><span class="ln-n">3</span><span class="ln-c"><span class="c-kw">namespace</span> <span class="c-type">App\Controller</span>;</span></div>
+      <div class="ln"><span class="ln-n">4</span><span class="ln-c"></span></div>
+      <div class="ln"><span class="ln-n">5</span><span class="ln-c"><span class="c-kw">use</span> <span class="c-type">App\Repository\UserRepository</span>;</span></div>
+      <div class="ln"><span class="ln-n">6</span><span class="ln-c"><span class="c-kw">use</span> <span class="c-type">Psr\Http\Message\ResponseInterface</span>;</span></div>
+      <div class="ln"><span class="ln-n">7</span><span class="ln-c"></span></div>
+      <div class="ln"><span class="ln-n">8</span><span class="ln-c"><span class="c-kw">final class</span> <span class="c-type">UserController</span></span></div>
+      <div class="ln"><span class="ln-n">9</span><span class="ln-c">{</span></div>
+      <div class="ln"><span class="ln-n">10</span><span class="ln-c">    <span class="c-kw">public function</span> <span class="c-fn">__construct</span>(</span></div>
+      <div class="ln"><span class="ln-n">11</span><span class="ln-c">        <span class="c-kw">private readonly</span> <span class="c-type">UserRepository</span> <span class="c-var">$userRepo</span>,</span></div>
+      <div class="ln"><span class="ln-n">12</span><span class="ln-c">    ) {}</span></div>
+      <div class="ln"><span class="ln-n">13</span><span class="ln-c"></span></div>
+      <div class="ln"><span class="ln-n">14</span><span class="ln-c">    <span class="c-kw">public function</span> <span class="c-fn">index</span>(): <span class="c-type">ResponseInterface</span></span></div>
+      <div class="ln"><span class="ln-n">15</span><span class="ln-c">    {</span></div>
+      <div class="ln"><span class="ln-n">16</span><span class="ln-c">        <span class="c-var">$users</span> = <span class="c-var">$this</span>-><span class="c-var">userRepo</span>-><span class="c-fn">findAll</span>();</span></div>
+      <div class="ln"><span class="ln-n">17</span><span class="ln-c">        <span class="c-kw">return</span> <span class="c-var">$this</span>-><span class="c-fn">json</span>(<span class="c-var">$users</span>);</span></div>
+      <div class="ln"><span class="ln-n">18</span><span class="ln-c">    }</span></div>
+      <div class="ln"><span class="ln-n">19</span><span class="ln-c">}</span></div>
+    </div>
+
+    <!-- Bottom panel -->
+    <div class="vsc-bottom-panel" id="bottomPanel">
+      <div class="vsc-panel-tabs">
+        <div class="vsc-panel-tab">Problems</div>
+        <div class="vsc-panel-tab">Output</div>
+        <div class="vsc-panel-tab">Terminal</div>
+        <div class="vsc-panel-tab active">🦆 ADP Debug <span class="count">12</span></div>
+        <button class="vsc-panel-close" onclick="togglePanel()">✕</button>
+      </div>
+      <div class="vsc-debug-content">
+        <div class="debug-row">
+          <span class="row-icon">🌐</span>
+          <span class="row-label">Request</span>
+          <span class="row-value">GET /api/users</span>
+        </div>
+        <div class="debug-row">
+          <span class="row-icon">📊</span>
+          <span class="row-label">Status</span>
+          <span class="row-value ok">200 OK</span>
+        </div>
+        <div class="debug-separator"></div>
+        <div class="debug-row">
+          <span class="row-icon">⏱</span>
+          <span class="row-label">Time</span>
+          <span class="row-value">45 ms</span>
+        </div>
+        <div class="debug-row">
+          <span class="row-icon">💾</span>
+          <span class="row-label">Memory</span>
+          <span class="row-value">2.4 MB</span>
+        </div>
+        <div class="debug-separator"></div>
+        <div class="debug-row">
+          <span class="row-icon">🗄</span>
+          <span class="row-label">DB Queries</span>
+          <span class="row-value warn">12 queries (3 duplicated)</span>
+        </div>
+        <div class="debug-row">
+          <span class="row-icon">🌐</span>
+          <span class="row-label">HTTP Out</span>
+          <span class="row-value">3 requests, 120ms total</span>
+        </div>
+        <div class="debug-separator"></div>
+        <div class="debug-row">
+          <span class="row-icon">📋</span>
+          <span class="row-label">Logs</span>
+          <span class="row-value">7 entries</span>
+        </div>
+        <div class="debug-row">
+          <span class="row-icon">⚡</span>
+          <span class="row-label">Events</span>
+          <span class="row-value">15 dispatched</span>
+        </div>
+        <div class="debug-row">
+          <span class="row-icon">⚠️</span>
+          <span class="row-label">Deprecations</span>
+          <span class="row-value warn">2 warnings</span>
+        </div>
+        <div class="debug-row">
+          <span class="row-icon">🔀</span>
+          <span class="row-label">Route</span>
+          <span class="row-value">api.users.index</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status bar -->
+<div class="vsc-statusbar" id="statusbar">
+  <div class="sb-duck" onclick="togglePanel()" title="Toggle ADP Debug Panel">
+    🦆 ADP
+  </div>
+  <div class="sb-sep"></div>
+  <div class="sb-item" onclick="togglePanel()">
+    <span class="sb-icon">✓</span> 200
+  </div>
+  <div class="sb-item" onclick="togglePanel()">
+    <span class="sb-icon">⏱</span> 45ms
+  </div>
+  <div class="sb-item" onclick="togglePanel()">
+    <span class="sb-icon">🗄</span> 12 queries
+  </div>
+  <div class="sb-item" onclick="togglePanel()">
+    <span class="sb-icon">⚠️</span> 2
+  </div>
+  <div class="sb-spacer"></div>
+  <div class="sb-item">Ln 16, Col 42</div>
+  <div class="sb-item">Spaces: 4</div>
+  <div class="sb-item">UTF-8</div>
+  <div class="sb-item">PHP</div>
+</div>
+
+<script>
+  let panelOpen = false;
+  function togglePanel() {
+    panelOpen = !panelOpen;
+    document.getElementById('bottomPanel').classList.toggle('open', panelOpen);
+    // Change status bar color when debug panel is open
+    document.getElementById('statusbar').classList.toggle('debugging', panelOpen);
+  }
+</script>
+</body>
+</html>

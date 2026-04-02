@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Toolbar Variant 8 — Liquid Glass Mobile (iOS 26)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-ui: 'Inter', -apple-system, 'SF Pro', sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-ui);
+    background: #000;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ===== PHONE FRAME ===== */
+  .phone {
+    width: 393px;
+    height: 852px;
+    background: #F2F2F7;
+    border-radius: 50px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 0 3px #1D1D1F, 0 0 0 6px #3A3A3C, 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  /* Dynamic Island */
+  .dynamic-island {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 126px;
+    height: 37px;
+    background: #000;
+    border-radius: 24px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.1, 1);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .dynamic-island:hover {
+    width: 200px;
+  }
+  .dynamic-island.expanded {
+    width: 370px;
+    height: 100px;
+    border-radius: 36px;
+    top: 8px;
+  }
+  .di-collapsed-content {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: #86868B;
+    font-family: var(--font-mono);
+    transition: opacity 0.2s;
+  }
+  .dynamic-island.expanded .di-collapsed-content { opacity: 0; position: absolute; }
+  .di-dot { width: 6px; height: 6px; border-radius: 50%; background: #30D158; }
+
+  .di-expanded-content {
+    display: none;
+    padding: 12px 20px;
+    width: 100%;
+    color: white;
+  }
+  .dynamic-island.expanded .di-expanded-content { display: flex; flex-direction: column; gap: 6px; }
+  .di-row { display: flex; align-items: center; justify-content: space-between; }
+  .di-method { font-family: var(--font-mono); font-size: 13px; font-weight: 600; }
+  .di-status { color: #30D158; font-family: var(--font-mono); font-size: 13px; font-weight: 600; }
+  .di-metrics { display: flex; gap: 12px; }
+  .di-metric { font-size: 11px; color: #86868B; font-family: var(--font-mono); }
+  .di-metric span { color: white; font-weight: 500; }
+  .di-path { font-size: 11px; color: #636366; font-family: var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Status bar */
+  .ios-status {
+    height: 54px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 28px 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1D1D1F;
+  }
+
+  /* Wallpaper / app content */
+  .app-content {
+    padding: 8px 16px;
+    flex: 1;
+    overflow-y: auto;
+    height: calc(100% - 54px - 90px);
+  }
+  .app-header {
+    font-size: 34px;
+    font-weight: 700;
+    color: #1D1D1F;
+    padding: 8px 0 16px;
+  }
+  .app-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .app-card-title { font-size: 13px; font-weight: 600; color: #86868B; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px; }
+  .app-card-value { font-size: 24px; font-weight: 700; color: #1D1D1F; }
+  .app-card-row { display: flex; gap: 12px; }
+  .app-card-row .app-card { flex: 1; }
+
+  /* Home indicator */
+  .home-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    background: #1D1D1F;
+    border-radius: 3px;
+    z-index: 200;
+  }
+
+  /* ===== LIQUID GLASS TOOLBAR ===== */
+
+  /* Floating glass FAB */
+  .glass-fab {
+    position: absolute;
+    bottom: 100px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    /* Liquid glass effect */
+    background: linear-gradient(
+      145deg,
+      rgba(255,255,255,0.45) 0%,
+      rgba(255,255,255,0.15) 50%,
+      rgba(255,255,255,0.25) 100%
+    );
+    backdrop-filter: blur(40px) saturate(200%) brightness(110%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(110%);
+    border: 0.5px solid rgba(255,255,255,0.5);
+    box-shadow:
+      0 2px 20px rgba(0,0,0,0.08),
+      0 0 0 0.5px rgba(255,255,255,0.3),
+      inset 0 1px 0 rgba(255,255,255,0.4),
+      inset 0 -1px 2px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 50;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.1, 1);
+  }
+  .glass-fab:hover { transform: scale(1.1); }
+  .glass-fab:active { transform: scale(0.95); }
+  .glass-fab .fab-icon { font-size: 26px; }
+  .glass-fab .fab-badge {
+    position: absolute; top: -2px; right: -2px;
+    background: #30D158;
+    color: white;
+    font-size: 10px; font-weight: 700;
+    font-family: var(--font-mono);
+    padding: 1px 5px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .glass-fab.hidden { opacity: 0; transform: scale(0.5); pointer-events: none; }
+
+  /* Glass sheet (bottom drawer) */
+  .glass-sheet {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    /* Liquid glass */
+    background: linear-gradient(
+      180deg,
+      rgba(255,255,255,0.55) 0%,
+      rgba(255,255,255,0.40) 40%,
+      rgba(255,255,255,0.50) 100%
+    );
+    backdrop-filter: blur(60px) saturate(200%) brightness(110%);
+    -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(110%);
+    border-top: 0.5px solid rgba(255,255,255,0.6);
+    box-shadow:
+      0 -4px 30px rgba(0,0,0,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.5);
+    border-radius: 20px 20px 0 0;
+    padding: 0;
+    transform: translateY(100%);
+    transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .glass-sheet.visible { transform: translateY(0); }
+
+  /* Drag handle */
+  .sheet-handle {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0 6px;
+  }
+  .sheet-handle-bar {
+    width: 36px; height: 5px;
+    background: rgba(0,0,0,0.15);
+    border-radius: 3px;
+  }
+
+  /* Sheet header */
+  .sheet-header {
+    display: flex;
+    align-items: center;
+    padding: 4px 20px 12px;
+    gap: 10px;
+  }
+  .sheet-header .duck { font-size: 24px; }
+  .sheet-header .title {
+    flex: 1;
+    font-size: 17px;
+    font-weight: 600;
+    color: #1D1D1F;
+  }
+  .sheet-close {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(0,0,0,0.06);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #86868B;
+  }
+  .sheet-close:active { background: rgba(0,0,0,0.12); }
+
+  /* Request hero inside sheet */
+  .sheet-hero {
+    margin: 0 16px 12px;
+    padding: 12px 16px;
+    /* Nested glass */
+    background: linear-gradient(
+      135deg,
+      rgba(255,255,255,0.5) 0%,
+      rgba(255,255,255,0.2) 100%
+    );
+    border-radius: 14px;
+    border: 0.5px solid rgba(255,255,255,0.5);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .sheet-hero-top {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 6px;
+  }
+  .sheet-hero-method {
+    font-family: var(--font-mono);
+    font-size: 15px; font-weight: 600;
+    color: #1D1D1F;
+  }
+  .sheet-hero-status {
+    font-family: var(--font-mono);
+    font-size: 13px; font-weight: 600;
+    color: #30D158;
+    background: rgba(48,209,88,0.12);
+    padding: 2px 8px; border-radius: 8px;
+  }
+  .sheet-hero-time {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 13px; color: #86868B;
+  }
+  .sheet-hero-path {
+    font-family: var(--font-mono);
+    font-size: 12px; color: #86868B;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  /* Metrics grid */
+  .sheet-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 16px 12px;
+  }
+  .sheet-cell {
+    /* Nested glass tile */
+    background: linear-gradient(
+      135deg,
+      rgba(255,255,255,0.45) 0%,
+      rgba(255,255,255,0.2) 100%
+    );
+    border-radius: 14px;
+    border: 0.5px solid rgba(255,255,255,0.4);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .sheet-cell:active { background: rgba(255,255,255,0.55); }
+  .sheet-cell-label {
+    font-size: 11px; font-weight: 500;
+    color: #86868B;
+    margin-bottom: 4px;
+  }
+  .sheet-cell-value {
+    font-family: var(--font-mono);
+    font-size: 22px; font-weight: 700;
+    color: #1D1D1F;
+  }
+  .sheet-cell-value .unit {
+    font-size: 12px; font-weight: 500; color: #86868B;
+  }
+  .sheet-cell-value.warn { color: #FF9500; }
+  .sheet-cell-value.err { color: #FF3B30; }
+
+  /* Tags row */
+  .sheet-tags {
+    display: flex;
+    gap: 6px;
+    padding: 0 16px 12px;
+    flex-wrap: wrap;
+  }
+  .sheet-tag {
+    font-size: 13px; font-weight: 500;
+    font-family: var(--font-mono);
+    color: #3A3A3C;
+    /* Glass tag */
+    background: rgba(255,255,255,0.4);
+    border: 0.5px solid rgba(255,255,255,0.3);
+    backdrop-filter: blur(8px);
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .sheet-tag:active { background: rgba(255,255,255,0.6); }
+  .sheet-tag.warn { color: #FF9500; }
+
+  /* Actions row */
+  .sheet-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 24px;
+  }
+  .sheet-action {
+    flex: 1;
+    /* Glass button */
+    background: linear-gradient(
+      135deg,
+      rgba(255,255,255,0.5) 0%,
+      rgba(255,255,255,0.25) 100%
+    );
+    border: 0.5px solid rgba(255,255,255,0.4);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-size: 14px; font-weight: 500;
+    color: #1D1D1F;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    transition: background 0.15s;
+  }
+  .sheet-action:active { background: rgba(255,255,255,0.6); }
+  .sheet-action.primary {
+    background: linear-gradient(135deg, rgba(0,122,255,0.8) 0%, rgba(0,122,255,0.6) 100%);
+    color: white;
+    border-color: rgba(0,122,255,0.3);
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <!-- Dynamic Island (with ADP status) -->
+  <div class="dynamic-island" id="dynamicIsland" onclick="toggleDI()">
+    <div class="di-collapsed-content">
+      <span class="di-dot"></span>
+      <span>200 · 45ms</span>
+    </div>
+    <div class="di-expanded-content">
+      <div class="di-row">
+        <span class="di-method">GET /api/users</span>
+        <span class="di-status">200</span>
+      </div>
+      <div class="di-metrics">
+        <span class="di-metric">Time <span>45ms</span></span>
+        <span class="di-metric">Mem <span>2.4MB</span></span>
+        <span class="di-metric">DB <span>12</span></span>
+        <span class="di-metric">HTTP <span>3</span></span>
+      </div>
+      <div class="di-path">/api/users?page=1&limit=20</div>
+    </div>
+  </div>
+
+  <!-- iOS status bar -->
+  <div class="ios-status">
+    <span>9:41</span>
+    <span style="width:126px"></span>
+    <span style="display:flex;gap:4px;align-items:center;">
+      <span style="font-size:12px">📶</span>
+      <span style="font-size:12px">📡</span>
+      <span style="font-size:12px">🔋</span>
+    </span>
+  </div>
+
+  <!-- App content -->
+  <div class="app-content">
+    <div class="app-header">Dashboard</div>
+
+    <div class="app-card-row">
+      <div class="app-card">
+        <div class="app-card-title">Users</div>
+        <div class="app-card-value">1,247</div>
+      </div>
+      <div class="app-card">
+        <div class="app-card-title">Revenue</div>
+        <div class="app-card-value">$42.8k</div>
+      </div>
+    </div>
+
+    <div class="app-card">
+      <div class="app-card-title">Recent Orders</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div style="display:flex;justify-content:space-between;font-size:14px">
+          <span style="color:#1D1D1F">Order #1247</span>
+          <span style="color:#30D158;font-weight:600">Completed</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px">
+          <span style="color:#1D1D1F">Order #1246</span>
+          <span style="color:#FF9500;font-weight:600">Processing</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px">
+          <span style="color:#1D1D1F">Order #1245</span>
+          <span style="color:#30D158;font-weight:600">Completed</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-card">
+      <div class="app-card-title">Server Health</div>
+      <div style="font-size:14px;color:#86868B;margin-top:4px">All systems operational</div>
+    </div>
+  </div>
+
+  <!-- Glass FAB -->
+  <div class="glass-fab" id="fab" onclick="openSheet()">
+    <span class="fab-icon">🦆</span>
+    <span class="fab-badge">200</span>
+  </div>
+
+  <!-- Glass sheet (bottom drawer) -->
+  <div class="glass-sheet" id="sheet">
+    <div class="sheet-handle"><div class="sheet-handle-bar"></div></div>
+    <div class="sheet-header">
+      <span class="duck">🦆</span>
+      <span class="title">Debug Info</span>
+      <button class="sheet-close" onclick="closeSheet()">✕</button>
+    </div>
+
+    <div class="sheet-hero">
+      <div class="sheet-hero-top">
+        <span class="sheet-hero-method">GET</span>
+        <span class="sheet-hero-status">200</span>
+        <span class="sheet-hero-time">45ms</span>
+      </div>
+      <div class="sheet-hero-path">/api/users?page=1&limit=20</div>
+    </div>
+
+    <div class="sheet-grid">
+      <div class="sheet-cell">
+        <div class="sheet-cell-label">Response</div>
+        <div class="sheet-cell-value">45<span class="unit">ms</span></div>
+      </div>
+      <div class="sheet-cell">
+        <div class="sheet-cell-label">Memory</div>
+        <div class="sheet-cell-value">2.4<span class="unit">MB</span></div>
+      </div>
+      <div class="sheet-cell">
+        <div class="sheet-cell-label">DB Queries</div>
+        <div class="sheet-cell-value">12</div>
+      </div>
+      <div class="sheet-cell">
+        <div class="sheet-cell-label">HTTP</div>
+        <div class="sheet-cell-value">3</div>
+      </div>
+    </div>
+
+    <div class="sheet-tags">
+      <span class="sheet-tag">Logs 7</span>
+      <span class="sheet-tag">Events 15</span>
+      <span class="sheet-tag">Valid ✓</span>
+      <span class="sheet-tag warn">Depr 2</span>
+    </div>
+
+    <div class="sheet-actions">
+      <button class="sheet-action primary">📐 Full Panel</button>
+      <button class="sheet-action">📋 History</button>
+    </div>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+  function openSheet() {
+    document.getElementById('fab').classList.add('hidden');
+    document.getElementById('sheet').classList.add('visible');
+  }
+  function closeSheet() {
+    document.getElementById('sheet').classList.remove('visible');
+    setTimeout(() => document.getElementById('fab').classList.remove('hidden'), 400);
+  }
+
+  let diExpanded = false;
+  function toggleDI() {
+    diExpanded = !diExpanded;
+    document.getElementById('dynamicIsland').classList.toggle('expanded', diExpanded);
+  }
+
+  // Touch-like swipe down to dismiss
+  let startY = 0;
+  const sheet = document.getElementById('sheet');
+  sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; });
+  sheet.addEventListener('touchmove', e => {
+    const dy = e.touches[0].clientY - startY;
+    if (dy > 80) closeSheet();
+  });
+</script>
+</body>
+</html>

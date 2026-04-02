@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbar Variant 9 — Radial Pie Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F172A;
+    --text: #F1F5F9;
+    --text-dim: #64748B;
+    --accent: #3B82F6;
+    --success: #4ADE80;
+    --warning: #FBBF24;
+    --error: #F87171;
+    --ring-bg: rgba(30, 41, 59, 0.95);
+    --ring-border: rgba(148, 163, 184, 0.15);
+    --font-ui: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    cursor: default;
+  }
+
+  .description {
+    max-width: 700px; margin: 40px auto; padding: 0 24px;
+  }
+  .description h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  .description h2 { font-size: 16px; font-weight: 500; color: var(--text-dim); margin-bottom: 16px; }
+  .description p { font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 8px; }
+  .description ul { font-size: 14px; color: var(--text-dim); line-height: 1.8; padding-left: 20px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: rgba(59,130,246,0.15); color: var(--accent); margin-right: 6px; }
+
+  /* ===== FLOATING TRIGGER ===== */
+  .trigger-orb {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--ring-bg);
+    border: 1px solid var(--ring-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    font-size: 26px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition: transform 0.2s, opacity 0.2s;
+  }
+  .trigger-orb:hover { transform: scale(1.1); }
+  .trigger-orb.hidden { opacity: 0; pointer-events: none; transform: scale(0.5); }
+
+  /* ===== RADIAL MENU ===== */
+  .radial-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .radial-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .radial-container {
+    position: fixed;
+    z-index: 201;
+    /* Will be positioned via JS */
+  }
+
+  /* Center hub */
+  .radial-hub {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--ring-bg);
+    border: 2px solid var(--ring-border);
+    box-shadow: 0 0 40px rgba(59,130,246,0.15), 0 8px 32px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    z-index: 10;
+  }
+  .radial-overlay.open .radial-hub { transform: translate(-50%, -50%) scale(1); }
+  .radial-hub .hub-duck { font-size: 28px; }
+  .radial-hub .hub-status {
+    font-family: var(--font-mono);
+    font-size: 14px; font-weight: 700;
+    color: var(--success);
+    margin-top: 2px;
+  }
+
+  /* Radial items */
+  .radial-item {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--ring-bg);
+    border: 1px solid var(--ring-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    cursor: pointer;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                background 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    z-index: 5;
+  }
+  .radial-item:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(59,130,246,0.2), 0 4px 16px rgba(0,0,0,0.2);
+    transform: translate(-50%, -50%) scale(1.12) !important;
+  }
+  .radial-overlay.open .radial-item {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .radial-item .r-icon { font-size: 20px; }
+  .radial-item .r-value {
+    font-family: var(--font-mono);
+    font-size: 13px; font-weight: 600;
+    color: var(--text);
+  }
+  .radial-item .r-label {
+    font-size: 9px; font-weight: 500;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .radial-item.success .r-value { color: var(--success); }
+  .radial-item.warning .r-value { color: var(--warning); }
+  .radial-item.error .r-value { color: var(--error); }
+
+  /* Stagger animation delays */
+  .radial-item:nth-child(2) { transition-delay: 0.02s; }
+  .radial-item:nth-child(3) { transition-delay: 0.04s; }
+  .radial-item:nth-child(4) { transition-delay: 0.06s; }
+  .radial-item:nth-child(5) { transition-delay: 0.08s; }
+  .radial-item:nth-child(6) { transition-delay: 0.10s; }
+  .radial-item:nth-child(7) { transition-delay: 0.12s; }
+  .radial-item:nth-child(8) { transition-delay: 0.14s; }
+  .radial-item:nth-child(9) { transition-delay: 0.16s; }
+
+  /* Tooltip on hover */
+  .radial-item .r-tooltip {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ring-bg);
+    border: 1px solid var(--ring-border);
+    color: var(--text);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+  .radial-item:hover .r-tooltip { opacity: 1; }
+
+  /* Connection lines (decorative) */
+  .radial-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, var(--ring-border) 0%, transparent 100%);
+    transform-origin: left center;
+    opacity: 0;
+    transition: opacity 0.3s 0.1s;
+    z-index: 1;
+  }
+  .radial-overlay.open .radial-line { opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<div class="description">
+  <h1>Variant 9 — Radial Pie Menu</h1>
+  <h2>Circular context menu for debug metrics</h2>
+  <div>
+    <span class="tag">RADICAL</span>
+    <span class="tag">SPATIAL</span>
+    <span class="tag">ZERO FOOTPRINT</span>
+  </div>
+  <br>
+  <p>
+    Completely eliminates the toolbar as a persistent UI element. Instead, a radial menu
+    appears on demand — triggered by clicking a floating orb or a keyboard shortcut.
+    Metrics are arranged in a circle around the center hub.
+  </p>
+  <ul>
+    <li>Metrics arranged in a circle — spatial memory for quick access</li>
+    <li>Spring animation with staggered delays for each item</li>
+    <li>Glow effect on hover — items enlarge and highlight</li>
+    <li>Center hub shows overall status (duck + status code)</li>
+    <li>Zero persistent footprint — menu appears only when needed</li>
+    <li>Inspired by Blender's pie menus and gaming radial menus</li>
+    <li>Could be triggered by middle-click or custom shortcut</li>
+  </ul>
+  <br>
+  <p><strong>Interaction:</strong> Click the orb (bottom-right) or press <kbd>Ctrl+D</kbd> → radial menu appears → hover items to see tooltips → click to navigate → click center or Esc to close.</p>
+</div>
+
+<!-- Trigger orb -->
+<div class="trigger-orb" id="trigger" onclick="openRadial()">🦆</div>
+
+<!-- Overlay -->
+<div class="radial-overlay" id="overlay" onclick="closeRadial()">
+  <div class="radial-container" id="radialContainer" onclick="event.stopPropagation()">
+    <!-- Center hub -->
+    <div class="radial-hub" onclick="closeRadial()">
+      <span class="hub-duck">🦆</span>
+      <span class="hub-status">200</span>
+    </div>
+
+    <!-- Radial items (positioned via JS) -->
+    <div class="radial-item success" data-angle="0">
+      <span class="r-icon">🌐</span>
+      <span class="r-value">200</span>
+      <span class="r-label">Request</span>
+      <span class="r-tooltip">GET /api/users — 200 OK</span>
+    </div>
+    <div class="radial-item" data-angle="45">
+      <span class="r-icon">⏱</span>
+      <span class="r-value">45ms</span>
+      <span class="r-label">Time</span>
+      <span class="r-tooltip">Response time: 45.2ms</span>
+    </div>
+    <div class="radial-item" data-angle="90">
+      <span class="r-icon">💾</span>
+      <span class="r-value">2.4M</span>
+      <span class="r-label">Memory</span>
+      <span class="r-tooltip">Peak memory: 2.4 MB</span>
+    </div>
+    <div class="radial-item" data-angle="135">
+      <span class="r-icon">🗄</span>
+      <span class="r-value">12</span>
+      <span class="r-label">Queries</span>
+      <span class="r-tooltip">12 database queries</span>
+    </div>
+    <div class="radial-item" data-angle="180">
+      <span class="r-icon">📡</span>
+      <span class="r-value">3</span>
+      <span class="r-label">HTTP</span>
+      <span class="r-tooltip">3 HTTP client requests</span>
+    </div>
+    <div class="radial-item" data-angle="225">
+      <span class="r-icon">📋</span>
+      <span class="r-value">7</span>
+      <span class="r-label">Logs</span>
+      <span class="r-tooltip">7 log entries</span>
+    </div>
+    <div class="radial-item" data-angle="270">
+      <span class="r-icon">⚡</span>
+      <span class="r-value">15</span>
+      <span class="r-label">Events</span>
+      <span class="r-tooltip">15 events dispatched</span>
+    </div>
+    <div class="radial-item warning" data-angle="315">
+      <span class="r-icon">⚠️</span>
+      <span class="r-value">2</span>
+      <span class="r-label">Depr</span>
+      <span class="r-tooltip">2 deprecation warnings</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const RADIUS = 150; // Distance from center to items
+  const container = document.getElementById('radialContainer');
+  const overlay = document.getElementById('overlay');
+
+  function positionItems() {
+    const items = container.querySelectorAll('.radial-item');
+    items.forEach(item => {
+      const angle = parseInt(item.dataset.angle) - 90; // Start from top
+      const rad = angle * (Math.PI / 180);
+      const x = Math.cos(rad) * RADIUS;
+      const y = Math.sin(rad) * RADIUS;
+      item.style.left = x + 'px';
+      item.style.top = y + 'px';
+    });
+  }
+
+  function openRadial() {
+    // Position at center of viewport (or near the trigger)
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    container.style.left = cx + 'px';
+    container.style.top = cy + 'px';
+
+    positionItems();
+    overlay.classList.add('open');
+    document.getElementById('trigger').classList.add('hidden');
+  }
+
+  function closeRadial() {
+    overlay.classList.remove('open');
+    setTimeout(() => document.getElementById('trigger').classList.remove('hidden'), 300);
+  }
+
+  // Keyboard shortcut
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+      e.preventDefault();
+      if (overlay.classList.contains('open')) closeRadial();
+      else openRadial();
+    }
+    if (e.key === 'Escape') closeRadial();
+  });
+</script>
+</body>
+</html>
