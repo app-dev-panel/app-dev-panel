@@ -250,13 +250,12 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                 return;
             }
 
-            if (panelReadyRef.current) {
-                console.log('[ADP Toolbar] Panel ready → sending directly');
-                sendToIframe(url);
-            } else {
-                console.log('[ADP Toolbar] Panel not ready → queuing URL');
-                pendingNavigationRef.current = url;
-            }
+            // Always try to send directly if contentWindow exists
+            console.log('[ADP Toolbar] Sending to iframe + queuing as backup');
+            sendToIframe(url);
+            // Also queue as backup — if panel hasn't loaded yet, the direct send
+            // is lost but panel.loaded will drain the queue
+            pendingNavigationRef.current = url;
         },
         [iframeEnabled, activeComponents, sendToIframe],
     );
