@@ -22,10 +22,22 @@ import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import WebAssetOffIcon from '@mui/icons-material/WebAssetOff';
-import {Box, Divider, IconButton, Paper, Portal, Stack, Tooltip, useTheme} from '@mui/material';
+import {Box, Chip, Divider, IconButton, Paper, Portal, Stack, Tooltip, useTheme} from '@mui/material';
 import {ForwardedRef, forwardRef, useCallback, useEffect, useRef, useState} from 'react';
+import {ErrorBoundary, type FallbackProps} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
 import {useResizable} from 'react-resizable-layout';
+
+const ToolbarErrorFallback = ({resetErrorBoundary}: FallbackProps) => (
+    <Chip
+        label="Toolbar error"
+        size="small"
+        color="error"
+        variant="outlined"
+        onClick={resetErrorBoundary}
+        sx={{height: 32, borderRadius: 1, fontSize: 12, cursor: 'pointer'}}
+    />
+);
 
 const serviceWorker = navigator?.serviceWorker;
 
@@ -257,23 +269,25 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
                     {/* Metric items */}
                     {selectedEntry && (
-                        <Stack direction="row" alignItems="center" spacing={0.5} sx={{flexWrap: 'nowrap'}}>
-                            {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
-                            {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
+                        <ErrorBoundary FallbackComponent={ToolbarErrorFallback} resetKeys={[selectedEntry.id]}>
+                            <Stack direction="row" alignItems="center" spacing={0.5} sx={{flexWrap: 'nowrap'}}>
+                                {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
+                                {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
 
-                            <ExceptionItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <ExceptionItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
-                            <RequestTimeItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                            <MemoryItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <RequestTimeItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <MemoryItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
-                            <DatabaseItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                            <HttpClientItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <DatabaseItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <HttpClientItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
 
-                            <LogsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                            <EventsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                            <ValidatorItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                            <DeprecationItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                        </Stack>
+                                <LogsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <EventsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <ValidatorItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                                <DeprecationItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
+                            </Stack>
+                        </ErrorBoundary>
                     )}
 
                     {/* Spacer */}
