@@ -6,7 +6,7 @@ RUN apk add --update --no-cache git nano curl python3 py3-setuptools make g++\
 WORKDIR /app
 
 # Root monorepo package
-COPY lerna.json package*.json ./
+COPY package*.json ./
 
 # Panel
 COPY packages/panel/package*.json packages/panel/
