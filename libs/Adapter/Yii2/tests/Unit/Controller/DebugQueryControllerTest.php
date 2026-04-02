@@ -10,12 +10,21 @@ use PHPUnit\Framework\TestCase;
 use yii\console\Application;
 use yii\console\ExitCode;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
 final class DebugQueryControllerTest extends TestCase
 {
     private string $basePath;
 
     protected function setUp(): void
     {
+        if (!in_array('null', stream_get_filters(), true)) {
+            stream_filter_register('null', \NullFilter::class);
+        }
+        stream_filter_append(\STDERR, 'null', STREAM_FILTER_WRITE);
+
         \Yii::$container = new \yii\di\Container();
 
         $this->basePath = sys_get_temp_dir() . '/adp_query_test_' . bin2hex(random_bytes(4));

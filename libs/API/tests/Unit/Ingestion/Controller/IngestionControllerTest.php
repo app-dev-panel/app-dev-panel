@@ -316,6 +316,67 @@ final class IngestionControllerTest extends TestCase
         $controller->ingest($this->post(['collectors' => 'not-an-array']));
     }
 
+    public function testIngestBatchEntryWithoutCollectorsThrows(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('collectors');
+        $controller->ingestBatch($this->post([
+            'entries' => [
+                ['context' => ['type' => 'web']],
+            ],
+        ]));
+    }
+
+    public function testIngestLogMissingLevel(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('level');
+        $controller->ingestLog($this->post(['message' => 'no level here']));
+    }
+
+    public function testIngestBatchEntriesNotArrayThrows(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('entries');
+        $controller->ingestBatch($this->post(['entries' => 'not-array']));
+    }
+
+    public function testIngestWithCustomDebugId(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->ingest($this->post([
+            'debugId' => 'custom-id-abc',
+            'collectors' => ['logs' => [['level' => 'info', 'message' => 'test']]],
+        ]));
+
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('custom-id-abc', $data['id']);
+    }
+
+    public function testIngestLogContextDefaults(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->ingestLog($this->post([
+            'level' => 'info',
+            'message' => 'test',
+        ]));
+
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        // Verify stored data has default context
+        $summaryFiles = glob($this->storagePath . '/**/' . $data['id'] . '/summary.json.gz');
+        $this->assertCount(1, $summaryFiles);
+        $summary = json_decode(gzdecode(file_get_contents($summaryFiles[0])), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('generic', $summary['context']['type']);
+        $this->assertSame('external', $summary['context']['service']);
+    }
+
     private function removeDir(string $dir): void
     {
         if (!is_dir($dir)) {

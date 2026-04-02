@@ -138,4 +138,105 @@ final class FileLlmHistoryStorageTest extends TestCase
 
         $this->assertSame([], $storage->getAll());
     }
+
+    public function testClearOnEmptyStorageDoesNotFail(): void
+    {
+        $storage = new FileLlmHistoryStorage($this->tmpDir);
+        $storage->clear();
+
+        $this->assertSame([], $storage->getAll());
+    }
+
+    public function testDeleteMiddleElement(): void
+    {
+        $storage = new FileLlmHistoryStorage($this->tmpDir);
+        $storage->add(['query' => 'c', 'response' => 'r', 'timestamp' => 3]);
+        $storage->add(['query' => 'b', 'response' => 'r', 'timestamp' => 2]);
+        $storage->add(['query' => 'a', 'response' => 'r', 'timestamp' => 1]);
+
+        // Items are prepended, so order is [a, b, c]
+        $storage->delete(1);
+
+        $all = $storage->getAll();
+        $this->assertCount(2, $all);
+        $this->assertSame('a', $all[0]['query']);
+        $this->assertSame('c', $all[1]['query']);
+    }
+
+    public function testAddWithErrorField(): void
+    {
+        $storage = new FileLlmHistoryStorage($this->tmpDir);
+        $storage->add(['query' => 'q', 'response' => '', 'timestamp' => 1, 'error' => 'Timeout']);
+
+        $all = $storage->getAll();
+        $this->assertSame('Timeout', $all[0]['error']);
+    }
+
+    public function testStorageCreatesDirectoryIfNeeded(): void
+    {
+        $nested = $this->tmpDir . '/nested/dir';
+        $storage = new FileLlmHistoryStorage($nested);
+        $storage->add(['query' => 'q', 'response' => 'r', 'timestamp' => 1]);
+
+        $this->assertFileExists($nested . '/.llm-history.json');
+
+        // Cleanup
+        @unlink($nested . '/.llm-history.json');
+        @rmdir($nested);
+        @rmdir($this->tmpDir . '/nested');
+    }
+
+    public function testDeleteNegativeIndex(): void
+    {
+        $storage = new FileLlmHistoryStorage($this->tmpDir);
+        $storage->add(['query' => 'a', 'response' => 'r', 'timestamp' => 1]);
+
+        $storage->delete(-1);
+
+        $this->assertCount(1, $storage->getAll());
+    }
+
+    public function testLoadFromNonArrayJsonReturnsEmpty(): void
+    {
+        file_put_contents($this->tmpDir . '/.llm-history.json', '"just a string"');
+
+        $storage = new FileLlmHistoryStorage($this->tmpDir);
+
+        $this->assertSame([], $storage->getAll());
+    }
+
+    public function testDeletePersistsChange(): void
+    {
+        $storage = new FileLlmHistoryStorage($this->tmpDir);
+        $storage->add(['query' => 'a', 'response' => 'r1', 'timestamp' => 1]);
+        $storage->add(['query' => 'b', 'response' => 'r2', 'timestamp' => 2]);
+        $storage->delete(0);
+
+        $storage2 = new FileLlmHistoryStorage($this->tmpDir);
+        $all = $storage2->getAll();
+        $this->assertCount(1, $all);
+        $this->assertSame('a', $all[0]['query']);
+    }
+
+    public function testClearDeletesFileAndNewInstanceIsEmpty(): void
+    {
+        $storage = new FileLlmHistoryStorage($this->tmpDir);
+        $storage->add(['query' => 'x', 'response' => 'y', 'timestamp' => 1]);
+        $storage->clear();
+
+        $storage2 = new FileLlmHistoryStorage($this->tmpDir);
+        $this->assertSame([], $storage2->getAll());
+    }
+
+    public function testAddAfterClearOnSameInstance(): void
+    {
+        $storage = new FileLlmHistoryStorage($this->tmpDir);
+        $storage->add(['query' => 'before', 'response' => 'r', 'timestamp' => 1]);
+        $storage->clear();
+        $storage->add(['query' => 'after', 'response' => 'r', 'timestamp' => 2]);
+
+        $all = $storage->getAll();
+        $this->assertCount(1, $all);
+        $this->assertSame('after', $all[0]['query']);
+    }
 }

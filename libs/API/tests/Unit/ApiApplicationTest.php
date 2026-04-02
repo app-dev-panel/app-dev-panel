@@ -269,6 +269,87 @@ final class ApiApplicationTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
     }
 
+    public function testPanelRouteAppliesIpFilter(): void
+    {
+        $controller = new class {
+            public function index(ServerRequestInterface $request): ResponseInterface
+            {
+                return new Response(200, ['Content-Type' => 'text/html'], '<html>panel</html>');
+            }
+        };
+
+        $ipFilter = new \AppDevPanel\Api\Middleware\IpFilterMiddleware(
+            new HttpFactory(),
+            new HttpFactory(),
+            ['127.0.0.1'],
+        );
+
+        $router = new Router();
+        $router->addRoute(new Route('GET', '/debug', [$controller::class, 'index']));
+
+        $container = $this->createContainer([
+            $controller::class => $controller,
+            \AppDevPanel\Api\Middleware\IpFilterMiddleware::class => $ipFilter,
+        ]);
+        $app = new ApiApplication($container, new HttpFactory(), new HttpFactory(), $router);
+
+        // Request from disallowed IP
+        $request = new ServerRequest('GET', '/debug', [], null, '1.1', ['REMOTE_ADDR' => '10.0.0.99']);
+        $response = $app->handle($request);
+
+        $this->assertSame(403, $response->getStatusCode());
+    }
+
+    public function testApiRouteAppliesTokenAuth(): void
+    {
+        $controller = new class {
+            public function index(ServerRequestInterface $request): ResponseInterface
+            {
+                return new Response(200, ['Content-Type' => 'application/json'], '[]');
+            }
+        };
+
+        $tokenAuth = new \AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware(
+            new HttpFactory(),
+            new HttpFactory(),
+            'secret-token',
+        );
+
+        $router = new Router();
+        $router->addRoute(new Route('GET', '/debug/api', [$controller::class, 'index']));
+
+        $container = $this->createContainer([
+            $controller::class => $controller,
+            \AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware::class => $tokenAuth,
+        ]);
+        $app = new ApiApplication($container, new HttpFactory(), new HttpFactory(), $router);
+
+        // Request without token
+        $response = $app->handle(new ServerRequest('GET', '/debug/api'));
+        $this->assertSame(401, $response->getStatusCode());
+
+        // Request with correct token
+        $request = new ServerRequest('GET', '/debug/api')->withHeader('X-Debug-Token', 'secret-token');
+        $response = $app->handle($request);
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testHandleOptionsOnMatchedRouteReturns204(): void
+    {
+        $router = new Router();
+        // Add an OPTIONS route that won't match, but also test the fallthrough
+        $router->addRoute(new Route('GET', '/api/test', ['Controller', 'index']));
+
+        $container = $this->createContainer();
+        $app = new ApiApplication($container, new HttpFactory(), new HttpFactory(), $router);
+
+        // OPTIONS on a path that doesn't match any route
+        $response = $app->handle(new ServerRequest('OPTIONS', '/api/test'));
+
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame('*', $response->getHeaderLine('Access-Control-Allow-Origin'));
+    }
+
     private function createContainer(array $services = []): ContainerInterface
     {
         $container = $this->createMock(ContainerInterface::class);

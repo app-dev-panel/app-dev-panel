@@ -17,12 +17,21 @@ use yii\console\ExitCode;
  * (getEntryIds, renderEntry) via reflection to verify rendering logic,
  * and test actionIndex() by breaking the loop with an exception from the repository.
  */
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
 final class DebugTailControllerTest extends TestCase
 {
     private string $basePath;
 
     protected function setUp(): void
     {
+        if (!in_array('null', stream_get_filters(), true)) {
+            stream_filter_register('null', \NullFilter::class);
+        }
+        stream_filter_append(\STDERR, 'null', STREAM_FILTER_WRITE);
+
         \Yii::$container = new \yii\di\Container();
 
         $this->basePath = sys_get_temp_dir() . '/adp_tail_test_' . bin2hex(random_bytes(4));

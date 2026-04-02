@@ -180,4 +180,106 @@ final class FileLlmSettingsTest extends TestCase
 
         $this->assertNull($settings->getModel());
     }
+
+    public function testLoadFromPartialFile(): void
+    {
+        // Save a file with only apiKey, missing other fields
+        file_put_contents($this->tmpDir . '/.llm-settings.json', json_encode(['apiKey' => 'sk-partial']));
+
+        $settings = new FileLlmSettings($this->tmpDir);
+
+        $this->assertSame('sk-partial', $settings->getApiKey());
+        $this->assertSame('openrouter', $settings->getProvider());
+        $this->assertNull($settings->getModel());
+        $this->assertSame(30, $settings->getTimeout());
+        $this->assertTrue($settings->isConnected());
+    }
+
+    public function testLoadWithNonStringApiKey(): void
+    {
+        file_put_contents($this->tmpDir . '/.llm-settings.json', json_encode([
+            'apiKey' => 123,
+            'provider' => 456,
+            'model' => true,
+            'timeout' => 'not-int',
+        ]));
+
+        $settings = new FileLlmSettings($this->tmpDir);
+
+        // Non-string apiKey should be treated as null
+        $this->assertNull($settings->getApiKey());
+        // Non-string provider should fallback to 'openrouter'
+        $this->assertSame('openrouter', $settings->getProvider());
+        // Non-string model should be null
+        $this->assertNull($settings->getModel());
+        // Non-int timeout should fallback to default
+        $this->assertSame(30, $settings->getTimeout());
+    }
+
+    public function testLoadWithNonStringCustomPrompt(): void
+    {
+        file_put_contents($this->tmpDir . '/.llm-settings.json', json_encode(['customPrompt' => 42]));
+
+        $settings = new FileLlmSettings($this->tmpDir);
+
+        // Non-string customPrompt should fallback to default
+        $this->assertStringContainsString('English', $settings->getCustomPrompt());
+    }
+
+    public function testClearWhenNoFileExists(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+        // No file written yet, clear should not throw
+        $settings->clear();
+
+        $this->assertNull($settings->getApiKey());
+        $this->assertFalse($settings->isConnected());
+    }
+
+    public function testSetTimeoutBoundaryValues(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+
+        $settings->setTimeout(5);
+        $this->assertSame(5, $settings->getTimeout());
+
+        $settings->setTimeout(300);
+        $this->assertSame(300, $settings->getTimeout());
+    }
+
+    public function testSaveCreatesDirectoryIfMissing(): void
+    {
+        $nestedDir = $this->tmpDir . '/nested/deep';
+        $settings = new FileLlmSettings($nestedDir);
+        $settings->setApiKey('sk-test');
+
+        $this->assertFileExists($nestedDir . '/.llm-settings.json');
+
+        // Cleanup
+        @unlink($nestedDir . '/.llm-settings.json');
+        @rmdir($nestedDir);
+        @rmdir($this->tmpDir . '/nested');
+    }
+
+    public function testToArrayWithDefaults(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+
+        $arr = $settings->toArray();
+
+        $this->assertFalse($arr['connected']);
+        $this->assertSame('openrouter', $arr['provider']);
+        $this->assertNull($arr['model']);
+        $this->assertSame(30, $arr['timeout']);
+        $this->assertStringContainsString('English', $arr['customPrompt']);
+    }
+
+    public function testClearResetsCustomPromptToDefault(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+        $settings->setCustomPrompt('Custom prompt');
+        $settings->clear();
+
+        $this->assertStringContainsString('English', $settings->getCustomPrompt());
+    }
 }

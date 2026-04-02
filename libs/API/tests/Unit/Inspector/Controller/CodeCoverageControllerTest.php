@@ -125,4 +125,68 @@ final class CodeCoverageControllerTest extends ControllerTestCase
         $expectedLines = substr_count(file_get_contents(__FILE__), "\n") + 1;
         $this->assertSame($expectedLines, $data['lines']);
     }
+
+    public function testFileWithValidPathReturnsContent(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->file($this->get(['path' => __FILE__]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('path', $data);
+        $this->assertArrayHasKey('content', $data);
+        $this->assertStringContainsString('CodeCoverageControllerTest', $data['content']);
+    }
+
+    public function testFileWithDirectoryPathReturns404(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->file($this->get(['path' => __DIR__]));
+
+        // __DIR__ is a directory, not a file - is_file() returns false
+        $this->assertSame(404, $response->getStatusCode());
+    }
+
+    public function testIndexReturnsDriverAndSummary(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('driver', $data);
+
+        if ($data['driver'] === null) {
+            // No driver available
+            $this->assertArrayHasKey('error', $data);
+            $this->assertSame([], $data['files']);
+        } else {
+            // Driver available — files and summary should have data
+            $this->assertIsArray($data['files']);
+            $this->assertIsArray($data['summary']);
+            $this->assertContains($data['driver'], ['pcov', 'xdebug']);
+        }
+    }
+
+    public function testFileReturnsRealPathInResponse(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->file($this->get(['path' => __FILE__]));
+
+        $data = $this->responseData($response);
+        $this->assertSame(realpath(__FILE__), $data['path']);
+    }
+
+    public function testIndexSummaryStructure(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->index($this->get());
+
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('summary', $data);
+        $summary = $data['summary'];
+        $this->assertArrayHasKey('totalFiles', $summary);
+        $this->assertArrayHasKey('coveredLines', $summary);
+        $this->assertArrayHasKey('executableLines', $summary);
+        $this->assertArrayHasKey('percentage', $summary);
+    }
 }
