@@ -84,7 +84,7 @@ useServerSentEvents(backendUrl, (event: MessageEvent<EventTypes>) => {
 
 | Component | Purpose |
 |-----------|---------|
-| `JsonRenderer.tsx` | JSON display with `@textea/json-viewer` |
+| `JsonRenderer.tsx` | JSON display with `@uiw/react-json-view` |
 | `CodeHighlight.tsx` | Syntax highlighting via `react-syntax-highlighter` |
 | `MenuPanel.tsx` | Sidebar navigation panel |
 | `Grid.tsx` | MUI DataGrid wrapper with common configuration |
