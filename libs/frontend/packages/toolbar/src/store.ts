@@ -9,7 +9,7 @@ import {
 } from '@app-dev-panel/toolbar/Module/Toolbar/api';
 import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import {setupListeners} from '@reduxjs/toolkit/query';
-import {TypedUseSelectorHook, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {FLUSH, PAUSE, PERSIST, persistStore, PURGE, REGISTER, REHYDRATE} from 'redux-persist';
 import {initMessageListener} from 'redux-state-sync';
 
@@ -40,6 +40,6 @@ type StoreType = ReturnTypeOfCreateStoreFunction['store'];
 
 export type RootState = ReturnType<StoreType['getState']>;
 export type AppDispatch = StoreType['dispatch'];
-const useAppSelector: TypedUseSelectorHook<RootState> = useSelector<RootState>;
+const useAppSelector = useSelector.withTypes<RootState>();
 
 export {useAppSelector as useSelector};
