@@ -75,7 +75,7 @@ final class HttpSubscriberCollectorsTest extends TestCase
     public function testWithEnvironmentCollector(): void
     {
         $timeline = new TimelineCollector();
-        $environmentCollector = new EnvironmentCollector($timeline);
+        $environmentCollector = new EnvironmentCollector();
 
         $collectors = new HttpSubscriberCollectors(environment: $environmentCollector);
 
@@ -87,7 +87,7 @@ final class HttpSubscriberCollectorsTest extends TestCase
     public function testWithRouterDataExtractor(): void
     {
         $timeline = new TimelineCollector();
-        $routerCollector = new RouterCollector($timeline);
+        $routerCollector = new RouterCollector();
         $routerDataExtractor = new RouterDataExtractor($routerCollector);
 
         $collectors = new HttpSubscriberCollectors(routerDataExtractor: $routerDataExtractor);
@@ -104,8 +104,8 @@ final class HttpSubscriberCollectorsTest extends TestCase
         $webAppInfo = new WebAppInfoCollector($timeline);
         $exceptionCollector = new ExceptionCollector($timeline);
         $varDumperCollector = new VarDumperCollector($timeline);
-        $environmentCollector = new EnvironmentCollector($timeline);
-        $routerCollector = new RouterCollector($timeline);
+        $environmentCollector = new EnvironmentCollector();
+        $routerCollector = new RouterCollector();
         $routerDataExtractor = new RouterDataExtractor($routerCollector);
 
         $collectors = new HttpSubscriberCollectors(

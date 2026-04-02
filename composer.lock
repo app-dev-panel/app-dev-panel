@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c518c6cd8e5cebae3ea0ff2fcf75df72",
+    "content-hash": "913853629388809b4d763e1f4faf50f7",
     "packages": [
         {
             "name": "nikic/fast-route",
@@ -11677,6 +11677,64 @@
                 }
             ],
             "time": "2023-02-15T09:15:24+00:00"
+        },
+        {
+            "name": "yiisoft/proxy",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/proxy.git",
+                "reference": "7f316620e7b3c00ed3fe74812f1a4f5193de38b4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/proxy/zipball/7f316620e7b3c00ed3fe74812f1a4f5193de38b4",
+                "reference": "7f316620e7b3c00ed3fe74812f1a4f5193de38b4",
+                "shasum": ""
+            },
+            "require": {
+                "php": "8.1 - 8.5",
+                "yiisoft/files": "^1.0.2 || ^2.0.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.5.47",
+                "roave/infection-static-analysis-plugin": "^1.35",
+                "vimeo/psalm": "^5.26.1 || ^6.12"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Yiisoft\\Proxy\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "proxy",
+            "homepage": "https://www.yiiframework.com/",
+            "keywords": [
+                "proxy"
+            ],
+            "support": {
+                "chat": "https://t.me/yii3en",
+                "forum": "https://www.yiiframework.com/forum/",
+                "irc": "ircs://irc.libera.chat:6697/yii",
+                "issues": "https://github.com/yiisoft/proxy/issues?state=open",
+                "source": "https://github.com/yiisoft/proxy",
+                "wiki": "https://www.yiiframework.com/wiki/"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/yiisoft",
+                    "type": "github"
+                },
+                {
+                    "url": "https://opencollective.com/yiisoft",
+                    "type": "opencollective"
+                }
+            ],
+            "time": "2026-04-02T12:11:35+00:00"
         },
         {
             "name": "yiisoft/strings",
