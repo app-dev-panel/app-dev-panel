@@ -10,6 +10,7 @@ use Cycle\Database\ColumnInterface;
 use Cycle\Database\DatabaseInterface;
 use Cycle\Database\DatabaseProviderInterface;
 use Cycle\Database\Query\SelectQuery;
+use Cycle\Database\StatementInterface;
 use Cycle\Database\TableInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -204,20 +205,145 @@ final class CycleSchemaProviderTest extends TestCase
         $this->assertSame(0, $result['offset']);
     }
 
-    public function testExplainQueryReturnsEmptyArray(): void
+    public function testExplainQueryExecutesExplainPrefix(): void
     {
-        $provider = $this->createProvider($this->createMock(DatabaseInterface::class));
+        $expectedRows = [['id' => 1, 'select_type' => 'SIMPLE', 'table' => 'users']];
 
-        $this->assertSame([], $provider->explainQuery('SELECT 1'));
-        $this->assertSame([], $provider->explainQuery('SELECT * FROM users', ['id' => 1], true));
+        $statement = $this->createMock(StatementInterface::class);
+        $statement->method('fetchAll')->willReturn($expectedRows);
+
+        $database = $this->createMock(DatabaseInterface::class);
+        $database->method('getType')->willReturn('MySQL');
+        $database->expects($this->once())
+            ->method('query')
+            ->with('EXPLAIN SELECT * FROM users', [])
+            ->willReturn($statement);
+
+        $provider = $this->createProvider($database);
+
+        $this->assertSame($expectedRows, $provider->explainQuery('SELECT * FROM users'));
     }
 
-    public function testExecuteQueryReturnsEmptyArray(): void
+    public function testExplainQueryWithAnalyze(): void
     {
-        $provider = $this->createProvider($this->createMock(DatabaseInterface::class));
+        $expectedRows = [['QUERY PLAN' => 'Seq Scan on users']];
 
-        $this->assertSame([], $provider->executeQuery('SELECT 1'));
-        $this->assertSame([], $provider->executeQuery('INSERT INTO users VALUES (?)', [1]));
+        $statement = $this->createMock(StatementInterface::class);
+        $statement->method('fetchAll')->willReturn($expectedRows);
+
+        $database = $this->createMock(DatabaseInterface::class);
+        $database->method('getType')->willReturn('Postgres');
+        $database->expects($this->once())
+            ->method('query')
+            ->with('EXPLAIN ANALYZE SELECT * FROM users', [])
+            ->willReturn($statement);
+
+        $provider = $this->createProvider($database);
+
+        $this->assertSame($expectedRows, $provider->explainQuery('SELECT * FROM users', [], true));
+    }
+
+    public function testExplainQuerySqliteUsesExplainQueryPlan(): void
+    {
+        $expectedRows = [['selectid' => 0, 'order' => 0, 'detail' => 'SCAN users']];
+
+        $statement = $this->createMock(StatementInterface::class);
+        $statement->method('fetchAll')->willReturn($expectedRows);
+
+        $database = $this->createMock(DatabaseInterface::class);
+        $database->method('getType')->willReturn('SQLite');
+        $database->expects($this->once())
+            ->method('query')
+            ->with('EXPLAIN QUERY PLAN SELECT * FROM users', [])
+            ->willReturn($statement);
+
+        $provider = $this->createProvider($database);
+
+        $this->assertSame($expectedRows, $provider->explainQuery('SELECT * FROM users'));
+    }
+
+    public function testExplainQuerySqliteIgnoresAnalyzeFlag(): void
+    {
+        $statement = $this->createMock(StatementInterface::class);
+        $statement->method('fetchAll')->willReturn([]);
+
+        $database = $this->createMock(DatabaseInterface::class);
+        $database->method('getType')->willReturn('SQLite');
+        $database->expects($this->once())
+            ->method('query')
+            ->with('EXPLAIN QUERY PLAN SELECT 1', [])
+            ->willReturn($statement);
+
+        $provider = $this->createProvider($database);
+        $provider->explainQuery('SELECT 1', [], true);
+    }
+
+    public function testExplainQueryWithParams(): void
+    {
+        $statement = $this->createMock(StatementInterface::class);
+        $statement->method('fetchAll')->willReturn([]);
+
+        $database = $this->createMock(DatabaseInterface::class);
+        $database->method('getType')->willReturn('MySQL');
+        $database->expects($this->once())
+            ->method('query')
+            ->with('EXPLAIN SELECT * FROM users WHERE id = ?', [1])
+            ->willReturn($statement);
+
+        $provider = $this->createProvider($database);
+        $provider->explainQuery('SELECT * FROM users WHERE id = ?', [1]);
+    }
+
+    public function testExecuteQueryReturnsResults(): void
+    {
+        $expectedRows = [
+            ['id' => 1, 'name' => 'Alice'],
+            ['id' => 2, 'name' => 'Bob'],
+        ];
+
+        $statement = $this->createMock(StatementInterface::class);
+        $statement->method('fetchAll')->willReturn($expectedRows);
+
+        $database = $this->createMock(DatabaseInterface::class);
+        $database->expects($this->once())
+            ->method('query')
+            ->with('SELECT * FROM users', [])
+            ->willReturn($statement);
+
+        $provider = $this->createProvider($database);
+
+        $this->assertSame($expectedRows, $provider->executeQuery('SELECT * FROM users'));
+    }
+
+    public function testExecuteQueryWithParams(): void
+    {
+        $expectedRows = [['id' => 1, 'name' => 'Alice']];
+
+        $statement = $this->createMock(StatementInterface::class);
+        $statement->method('fetchAll')->willReturn($expectedRows);
+
+        $database = $this->createMock(DatabaseInterface::class);
+        $database->expects($this->once())
+            ->method('query')
+            ->with('SELECT * FROM users WHERE id = ?', [42])
+            ->willReturn($statement);
+
+        $provider = $this->createProvider($database);
+
+        $this->assertSame($expectedRows, $provider->executeQuery('SELECT * FROM users WHERE id = ?', [42]));
+    }
+
+    public function testExecuteQueryReturnsEmptyForNoResults(): void
+    {
+        $statement = $this->createMock(StatementInterface::class);
+        $statement->method('fetchAll')->willReturn([]);
+
+        $database = $this->createMock(DatabaseInterface::class);
+        $database->method('query')->willReturn($statement);
+
+        $provider = $this->createProvider($database);
+
+        $this->assertSame([], $provider->executeQuery('SELECT * FROM empty_table'));
     }
 
     public function testColumnSerializationWithDefaultValue(): void
