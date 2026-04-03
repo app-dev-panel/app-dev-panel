@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Cli\Command;
 
+use AppDevPanel\Cli\ApplicationFactory;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -19,7 +20,8 @@ final class FrontendUpdateCommand extends Command
 {
     private const string GITHUB_API = 'https://api.github.com';
     private const string REPO = 'app-dev-panel/app-dev-panel';
-    private const string ASSET_NAME = 'frontend-dist.zip';
+    private const string PANEL_ASSET = 'panel-dist.tar.gz';
+    private const string TOOLBAR_ASSET = 'toolbar-dist.tar.gz';
 
     public function __construct(
         private readonly ?Client $httpClient = null,
@@ -39,7 +41,10 @@ final class FrontendUpdateCommand extends Command
                 Check latest version:
                   <info>frontend:update check</info>
 
-                Download and install:
+                Download and install to default path:
+                  <info>frontend:update download</info>
+
+                Download and install to custom path:
                   <info>frontend:update download --path=/path/to/frontend</info>
                 HELP);
     }
@@ -70,7 +75,7 @@ final class FrontendUpdateCommand extends Command
         $currentVersion = $this->getCurrentVersion($input);
         $latestVersion = $release['tag_name'] ?? 'unknown';
         $publishedAt = $release['published_at'] ?? 'unknown';
-        $hasAsset = $this->findAssetUrl($release) !== null;
+        $hasAsset = $this->findAssetUrl($release, self::PANEL_ASSET) !== null;
 
         $data = [
             'current_version' => $currentVersion,
@@ -78,6 +83,7 @@ final class FrontendUpdateCommand extends Command
             'published_at' => $publishedAt,
             'has_frontend_asset' => $hasAsset,
             'update_available' => $currentVersion !== $latestVersion && $currentVersion !== 'unknown',
+            'frontend_path' => $this->resolvePath($input),
         ];
 
         if ($json) {
@@ -91,11 +97,12 @@ final class FrontendUpdateCommand extends Command
             ['Latest version', $latestVersion],
             ['Published at', $publishedAt],
             ['Frontend asset available', $hasAsset ? 'Yes' : 'No'],
+            ['Frontend path', $data['frontend_path']],
         ]);
 
         if ($data['update_available']) {
             $io->success(sprintf('Update available: %s → %s', $currentVersion, $latestVersion));
-            $io->text('Run <info>frontend:update download --path=/path/to/frontend</info> to install.');
+            $io->text('Run <info>frontend:update download</info> to install.');
         } elseif ($currentVersion === $latestVersion) {
             $io->success('Already up to date.');
         }
@@ -105,11 +112,7 @@ final class FrontendUpdateCommand extends Command
 
     private function download(InputInterface $input, OutputInterface $output, SymfonyStyle $io): int
     {
-        $path = $input->getOption('path');
-        if (!is_string($path) || $path === '') {
-            $io->error('Path is required. Usage: frontend:update download --path=/path/to/frontend');
-            return Command::FAILURE;
-        }
+        $path = $this->resolvePath($input);
 
         try {
             $release = $this->getLatestRelease();
@@ -118,11 +121,11 @@ final class FrontendUpdateCommand extends Command
             return Command::FAILURE;
         }
 
-        $assetUrl = $this->findAssetUrl($release);
-        if ($assetUrl === null) {
+        $panelUrl = $this->findAssetUrl($release, self::PANEL_ASSET);
+        if ($panelUrl === null) {
             $io->error(sprintf(
                 'No "%s" asset found in latest release "%s".',
-                self::ASSET_NAME,
+                self::PANEL_ASSET,
                 (string) ($release['tag_name'] ?? 'unknown'),
             ));
             $io->text('Available assets:');
@@ -137,10 +140,21 @@ final class FrontendUpdateCommand extends Command
         $io->text(sprintf('Downloading %s...', (string) ($release['tag_name'] ?? 'latest')));
 
         try {
-            $this->downloadAndExtract($assetUrl, $path, $io);
+            $this->downloadAndExtract($panelUrl, $path, $io);
         } catch (\Throwable $e) {
             $io->error(sprintf('Download failed: %s', $e->getMessage()));
             return Command::FAILURE;
+        }
+
+        // Download toolbar if available
+        $toolbarUrl = $this->findAssetUrl($release, self::TOOLBAR_ASSET);
+        if ($toolbarUrl !== null) {
+            $io->text('Downloading toolbar...');
+            try {
+                $this->downloadAndExtract($toolbarUrl, $path . '/toolbar', $io);
+            } catch (\Throwable) {
+                $io->warning('Toolbar download failed (optional component).');
+            }
         }
 
         $this->saveVersionFile($path, (string) ($release['tag_name'] ?? 'unknown'));
@@ -164,10 +178,10 @@ final class FrontendUpdateCommand extends Command
         return json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
     }
 
-    private function findAssetUrl(array $release): ?string
+    private function findAssetUrl(array $release, string $assetName): ?string
     {
         foreach ($release['assets'] ?? [] as $asset) {
-            if (is_array($asset) && ($asset['name'] ?? '') === self::ASSET_NAME) {
+            if (is_array($asset) && ($asset['name'] ?? '') === $assetName) {
                 return $asset['browser_download_url'] ?? null;
             }
         }
@@ -177,7 +191,7 @@ final class FrontendUpdateCommand extends Command
     private function downloadAndExtract(string $url, string $path, SymfonyStyle $io): void
     {
         $client = $this->httpClient ?? new Client();
-        $tempFile = tempnam(sys_get_temp_dir(), 'adp-frontend-') . '.zip';
+        $tempFile = tempnam(sys_get_temp_dir(), 'adp-frontend-') . '.tar.gz';
 
         try {
             $client->get($url, [
@@ -193,15 +207,15 @@ final class FrontendUpdateCommand extends Command
                 mkdir($path, 0o777, true);
             }
 
-            $zip = new \ZipArchive();
-            $result = $zip->open($tempFile);
+            $phar = new \PharData($tempFile);
+            $phar->extractTo($path, null, true);
 
-            if ($result !== true) {
-                throw new \RuntimeException(sprintf('Failed to open zip archive (error code: %d)', $result));
+            // The archive contains a dist/ directory — move contents up if present
+            $distDir = $path . '/dist';
+            if (is_dir($distDir)) {
+                $this->moveContents($distDir, $path);
+                rmdir($distDir);
             }
-
-            $zip->extractTo($path);
-            $zip->close();
 
             $io->text(sprintf('Extracted to %s', $path));
         } finally {
@@ -211,14 +225,57 @@ final class FrontendUpdateCommand extends Command
         }
     }
 
-    private function getCurrentVersion(InputInterface $input): string
+    private function moveContents(string $source, string $target): void
+    {
+        $iterator = new \DirectoryIterator($source);
+        foreach ($iterator as $item) {
+            if ($item->isDot()) {
+                continue;
+            }
+            $targetItem = $target . '/' . $item->getFilename();
+            if (file_exists($targetItem)) {
+                if (is_dir($targetItem) && !is_link($targetItem)) {
+                    $this->removeDirectory($targetItem);
+                } else {
+                    unlink($targetItem);
+                }
+            }
+            rename($item->getPathname(), $targetItem);
+        }
+    }
+
+    private function removeDirectory(string $dir): void
+    {
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST,
+        );
+        foreach ($iterator as $file) {
+            if ($file->isDir()) {
+                rmdir($file->getPathname());
+            } else {
+                unlink($file->getPathname());
+            }
+        }
+        rmdir($dir);
+    }
+
+    private function resolvePath(InputInterface $input): string
     {
         $path = $input->getOption('path');
         if (is_string($path) && $path !== '') {
-            $versionFile = rtrim($path, '/') . '/.adp-version';
-            if (file_exists($versionFile)) {
-                return trim((string) file_get_contents($versionFile));
-            }
+            return $path;
+        }
+
+        return ApplicationFactory::getDefaultFrontendPath();
+    }
+
+    private function getCurrentVersion(InputInterface $input): string
+    {
+        $path = $this->resolvePath($input);
+        $versionFile = rtrim($path, '/') . '/.adp-version';
+        if (file_exists($versionFile)) {
+            return trim((string) file_get_contents($versionFile));
         }
 
         return 'unknown';

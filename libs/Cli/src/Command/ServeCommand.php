@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Cli\Command;
 
+use AppDevPanel\Cli\ApplicationFactory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -43,7 +44,7 @@ final class ServeCommand extends Command
         $storagePath = $input->getOption('storage-path') ?? sys_get_temp_dir() . '/adp';
         $rootPath = $input->getOption('root-path');
         $runtimePath = $input->getOption('runtime-path') ?? $storagePath;
-        $frontendPath = $input->getOption('frontend-path');
+        $frontendPath = $input->getOption('frontend-path') ?? $this->detectFrontendPath();
 
         $routerScript = $this->routerScript ?? dirname(__DIR__) . '/Server/server-router.php';
 
@@ -97,5 +98,15 @@ final class ServeCommand extends Command
         });
 
         return $process->getExitCode() ?? Command::FAILURE;
+    }
+
+    private function detectFrontendPath(): ?string
+    {
+        $defaultPath = ApplicationFactory::getDefaultFrontendPath();
+        if (is_dir($defaultPath) && file_exists($defaultPath . '/index.html')) {
+            return $defaultPath;
+        }
+
+        return null;
     }
 }

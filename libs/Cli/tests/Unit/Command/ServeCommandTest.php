@@ -155,7 +155,7 @@ final class ServeCommandTest extends TestCase
         rmdir($frontendPath);
     }
 
-    public function testExecuteWithoutFrontendPathShowsNotConfigured(): void
+    public function testExecuteWithoutFrontendPathShowsFrontendStatus(): void
     {
         $storagePath = sys_get_temp_dir() . '/adp-test-nofp-' . uniqid();
 
@@ -169,7 +169,8 @@ final class ServeCommandTest extends TestCase
         ]);
 
         $display = $tester->getDisplay();
-        $this->assertStringContainsString('(not configured)', $display);
+        // When no --frontend-path is given, it either auto-detects or shows (not configured)
+        $this->assertStringContainsString('Frontend:', $display);
 
         // Clean up
         if (is_dir($storagePath)) {

@@ -200,7 +200,8 @@
     "allow-plugins": {
       "yiisoft/config": false,
       "carthage-software/mago": true,
-      "yiisoft/yii2-composer": true
+      "yiisoft/yii2-composer": true,
+      "app-dev-panel/cli": true
     }
   },
   "minimum-stability": "dev",

@@ -1,0 +1,36 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * ADP CLI — Application Development Panel console entry point.
+ *
+ * This file is installed as vendor/bin/adp when the package is required via Composer.
+ */
+
+// Find autoloader
+$autoloadPaths = [
+    __DIR__ . '/../../../autoload.php',          // vendor/app-dev-panel/cli/bin/ → vendor/autoload.php
+    __DIR__ . '/../vendor/autoload.php',         // Running from package root
+    __DIR__ . '/../../../vendor/autoload.php',   // Monorepo: libs/Cli/bin/ → root/vendor/autoload.php
+];
+
+$autoloaded = false;
+foreach ($autoloadPaths as $autoloadPath) {
+    if (file_exists($autoloadPath)) {
+        require $autoloadPath;
+        $autoloaded = true;
+        break;
+    }
+}
+
+if (!$autoloaded) {
+    fwrite(STDERR, "Error: Composer autoloader not found. Run 'composer install'.\n");
+    exit(1);
+}
+
+use AppDevPanel\Cli\ApplicationFactory;
+
+$application = ApplicationFactory::create();
+$application->run();

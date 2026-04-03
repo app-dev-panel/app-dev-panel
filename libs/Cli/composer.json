@@ -1,6 +1,6 @@
 {
     "name": "app-dev-panel/cli",
-    "type": "library",
+    "type": "composer-plugin",
     "description": "ADP CLI — console commands for the debug server, data queries, storage reset, and standalone HTTP server",
     "keywords": [
         "debug",
@@ -25,6 +25,7 @@
     "minimum-stability": "dev",
     "require": {
         "php": "^8.4",
+        "composer-plugin-api": "^2.0",
         "app-dev-panel/kernel": "*",
         "app-dev-panel/api": "*",
         "app-dev-panel/mcp-server": "*",
@@ -34,7 +35,9 @@
         "symfony/console": "^6.4|^7.0|^8.0",
         "symfony/process": "^6.4|^7.0|^8.0"
     },
-    "require-dev": {},
+    "require-dev": {
+        "composer/composer": "^2.0"
+    },
     "repositories": [
         {
             "type": "path",
@@ -58,6 +61,12 @@
         "psr-4": {
             "AppDevPanel\\Cli\\Tests\\": "tests"
         }
+    },
+    "bin": [
+        "bin/adp"
+    ],
+    "extra": {
+        "class": "AppDevPanel\\Cli\\Composer\\Plugin"
     },
     "scripts": {
         "test": "phpunit --testdox --no-interaction"
