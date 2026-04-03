@@ -27,9 +27,9 @@ flowchart LR
 
 ## Tech Stack
 
-- React 18, TypeScript 5.5, Vite 5.4
-- Material-UI 5 with custom dark/light theming
-- Redux Toolkit + RTK Query
+- React 19, TypeScript 6, Vite 8
+- Material-UI (MUI) 7 with custom dark/light theming
+- Redux Toolkit 2 + RTK Query
 - Lerna 8 (monorepo management)
 - Prettier 3.8+, ESLint 9
 
