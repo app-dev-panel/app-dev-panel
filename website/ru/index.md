@@ -14,7 +14,7 @@ hero:
       link: /ru/guide/getting-started
     - theme: alt
       text: Live Demo
-      link: https://app-dev-panel.github.io/app-dev-panel/demo/
+      link: /demo/
     - theme: alt
       text: GitHub
       link: https://github.com/app-dev-panel/app-dev-panel
