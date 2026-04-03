@@ -1,3 +1,4 @@
+import {playwright} from '@vitest/browser-playwright';
 import {defineConfig} from 'vitest/config';
 
 export default defineConfig({
@@ -13,15 +14,13 @@ export default defineConfig({
         browser: {
             enabled: true,
             headless: true,
-            instances: [
-                {
-                    browser: 'chromium',
-                    launch: {
-                        executablePath: process.env.CHROMIUM_PATH || undefined,
-                        args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
-                    },
+            provider: playwright({
+                launch: {
+                    executablePath: process.env.CHROMIUM_PATH || undefined,
+                    args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
                 },
-            ],
+            }),
+            instances: [{browser: 'chromium'}],
         },
         globals: true,
         testTimeout: 15000,
