@@ -9,6 +9,12 @@ namespace AppDevPanel\Kernel\DebugServer;
 use Generator;
 use Socket;
 
+/**
+ * Reads messages from a debug server socket.
+ *
+ * Cross-platform: uses PHP's SOCKET_EAGAIN constant (correct on Linux/macOS/Windows)
+ * and handles MSG_DONTWAIT absence on Windows.
+ */
 final class SocketReader
 {
     public function __construct(
@@ -20,12 +26,12 @@ final class SocketReader
      */
     public function read(): Generator
     {
-        $sndbuf = socket_get_option($this->socket, SOL_SOCKET, SO_SNDBUF);
-        $rcvbuf = socket_get_option($this->socket, SOL_SOCKET, SO_RCVBUF);
-
         socket_set_option($this->socket, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 2, 'usec' => 0]);
         socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, 1024 * 10);
         socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, 1024 * 10);
+
+        $eagain = self::eagainErrorCode();
+        $recvFlags = self::nonBlockingRecvFlags();
 
         $newFrameAwaitRepeat = 0;
         $maxFrameAwaitRepeats = 10;
@@ -33,18 +39,18 @@ final class SocketReader
 
         while (true) {
             if (!socket_recv($this->socket, $header, 8, MSG_WAITALL)) {
-                $socket_last_error = socket_last_error($this->socket);
+                $socketLastError = socket_last_error($this->socket);
                 $newFrameAwaitRepeat++;
                 if ($newFrameAwaitRepeat === $maxFrameAwaitRepeats) {
                     $newFrameAwaitRepeat = 0;
-                    yield [Connection::TYPE_RELEASE, $socket_last_error, socket_strerror($socket_last_error)];
+                    yield [Connection::TYPE_RELEASE, $socketLastError, socket_strerror($socketLastError)];
                 }
-                if ($socket_last_error === self::SOCKET_EAGAIN) {
+                if ($socketLastError === $eagain) {
                     usleep(Connection::DEFAULT_TIMEOUT);
                     continue;
                 }
                 $this->closeSocket();
-                yield [Connection::TYPE_ERROR, $socket_last_error, socket_strerror($socket_last_error)];
+                yield [Connection::TYPE_ERROR, $socketLastError, socket_strerror($socketLastError)];
                 continue;
             }
 
@@ -58,14 +64,14 @@ final class SocketReader
                     $this->socket,
                     $buffer,
                     min($bytesToRead - $bytesRead, Connection::DEFAULT_BUFFER_SIZE),
-                    MSG_DONTWAIT,
+                    $recvFlags,
                 );
                 if ($bufferLength === false) {
                     if ($repeat === $maxRepeats) {
                         break;
                     }
-                    $socket_last_error = socket_last_error($this->socket);
-                    if ($socket_last_error === self::SOCKET_EAGAIN) {
+                    $socketLastError = socket_last_error($this->socket);
+                    if ($socketLastError === $eagain) {
                         $repeat++;
                         usleep(Connection::DEFAULT_TIMEOUT * 5);
                         continue;
@@ -81,7 +87,43 @@ final class SocketReader
         }
     }
 
-    private const SOCKET_EAGAIN = 35;
+    /**
+     * Returns the platform-correct EAGAIN/EWOULDBLOCK error code.
+     *
+     * - Linux: SOCKET_EAGAIN = 11
+     * - macOS: SOCKET_EAGAIN = 35
+     * - Windows: SOCKET_EWOULDBLOCK = 10035
+     */
+    private static function eagainErrorCode(): int
+    {
+        // PHP's sockets extension defines SOCKET_EAGAIN with the correct OS value
+        if (defined('SOCKET_EAGAIN')) {
+            return SOCKET_EAGAIN;
+        }
+        // Fallback for Windows where EAGAIN maps to EWOULDBLOCK
+        if (defined('SOCKET_EWOULDBLOCK')) {
+            return SOCKET_EWOULDBLOCK;
+        }
+
+        // Last resort: detect OS
+        return PHP_OS_FAMILY === 'Darwin' ? 35 : 11;
+    }
+
+    /**
+     * Returns flags for non-blocking socket_recv.
+     *
+     * MSG_DONTWAIT is not available on Windows; use socket_set_nonblock() instead.
+     */
+    private static function nonBlockingRecvFlags(): int
+    {
+        if (defined('MSG_DONTWAIT')) {
+            return MSG_DONTWAIT;
+        }
+
+        // On Windows, MSG_DONTWAIT is not available.
+        // Return 0 — callers should use socket_set_nonblock() on the socket.
+        return 0;
+    }
 
     private function closeSocket(): void
     {

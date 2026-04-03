@@ -19,10 +19,10 @@ final class BroadcasterTest extends TestCase
         $this->assertIsArray($errors);
     }
 
-    public function testBroadcastReturnsEmptyErrorsWhenNoSocketFiles(): void
+    public function testBroadcastReturnsEmptyErrorsWhenNoDiscoveryFiles(): void
     {
-        // Clean up any existing socket files in temp dir to ensure no listeners
-        $existingFiles = glob(sys_get_temp_dir() . '/yii-dev-server-*.sock', GLOB_NOSORT);
+        // Clean up any existing discovery files to ensure no listeners
+        $existingFiles = glob(Connection::discoveryPattern(), GLOB_NOSORT);
         foreach ($existingFiles as $file) {
             @unlink($file);
         }
@@ -34,10 +34,8 @@ final class BroadcasterTest extends TestCase
 
     public function testBroadcastToActiveConnection(): void
     {
-        // Create a real UDP socket to receive the broadcast
         $connection = Connection::create();
         $connection->bind();
-        $uri = $connection->getUri();
 
         try {
             $broadcaster = new Broadcaster();
@@ -49,20 +47,26 @@ final class BroadcasterTest extends TestCase
         }
     }
 
-    public function testBroadcastCleansUpRefusedConnections(): void
+    public function testBroadcastCleansUpStaleDiscoveryFiles(): void
     {
-        // Create a fake .sock file that doesn't have a listening socket
-        $fakeSocketFile = sys_get_temp_dir() . '/yii-dev-server-' . random_int(900000000, 999999999) . '.sock';
-        touch($fakeSocketFile);
+        if (Connection::isWindows()) {
+            // On Windows, create a .port file with an invalid port
+            $fakeFile = sys_get_temp_dir() . '/' . Connection::SOCKET_FILE_PREFIX . '99999.port';
+            file_put_contents($fakeFile, '0');
+        } else {
+            // On Unix, create a fake .sock file that doesn't have a listening socket
+            $fakeFile =
+                sys_get_temp_dir() . '/' . Connection::SOCKET_FILE_PREFIX . random_int(900000000, 999999999) . '.sock';
+            touch($fakeFile);
+        }
 
         $broadcaster = new Broadcaster();
         $errors = $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, 'test');
 
-        // The file may have been cleaned up if connection was refused
-        // Either way, the broadcast should complete without throwing
+        // Broadcast should complete without throwing
         $this->assertIsArray($errors);
 
-        @unlink($fakeSocketFile);
+        @unlink($fakeFile);
     }
 
     public function testBroadcastWithDifferentMessageTypes(): void
@@ -97,5 +101,23 @@ final class BroadcasterTest extends TestCase
         $broadcaster = new Broadcaster();
         $errors = $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, '');
         $this->assertIsArray($errors);
+    }
+
+    public function testBroadcastToMultipleConnections(): void
+    {
+        $conn1 = Connection::create();
+        $conn1->bind();
+        $conn2 = Connection::create();
+        $conn2->bind();
+
+        try {
+            $broadcaster = new Broadcaster();
+            $errors = $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, 'multi-target');
+
+            $this->assertIsArray($errors);
+        } finally {
+            $conn1->close();
+            $conn2->close();
+        }
     }
 }
