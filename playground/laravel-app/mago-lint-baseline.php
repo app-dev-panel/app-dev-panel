@@ -19,6 +19,12 @@ message = "Do not commit debug functions."
 count = 1
 
 [[issues]]
+file = "app/Http/Controllers/TestFixtures/QueueAction.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
 file = "app/Providers/AppServiceProvider.php"
 code = "no-empty-comment"
 message = "Empty comments are not allowed."
@@ -28,7 +34,7 @@ count = 2
 file = "bootstrap/app.php"
 code = "no-empty-comment"
 message = "Empty comments are not allowed."
-count = 2
+count = 1
 
 [[issues]]
 file = "routes/api.php"

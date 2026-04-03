@@ -4,48 +4,24 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\CacheCollector;
-use AppDevPanel\Kernel\Collector\CacheOperationRecord;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
-final readonly class CacheAction
+final class CacheAction
 {
-    public function __construct(
-        private CacheCollector $cacheCollector,
-    ) {}
-
     public function __invoke(): JsonResponse
     {
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'set',
-            key: 'user:42',
-            duration: 0.001,
-            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
-        ));
+        // set
+        Cache::put('user:42', ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'], 3600);
 
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'get',
-            key: 'user:42',
-            hit: true,
-            duration: 0.0005,
-            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
-        ));
+        // get (hit)
+        Cache::get('user:42');
 
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'get',
-            key: 'user:99',
-            duration: 0.0003,
-        ));
+        // get (miss)
+        Cache::get('user:99');
 
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'delete',
-            key: 'user:42',
-            duration: 0.0002,
-        ));
+        // delete
+        Cache::forget('user:42');
 
         return new JsonResponse(['fixture' => 'cache:basic', 'status' => 'ok']);
     }
