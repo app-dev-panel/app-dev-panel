@@ -27,10 +27,13 @@ final class NullSchemaProviderTest extends TestCase
         $provider = new NullSchemaProvider();
         $result = $provider->getTable('users');
 
-        $this->assertSame('users', $result['name']);
+        $this->assertSame('users', $result['table']);
+        $this->assertSame([], $result['primaryKeys']);
         $this->assertSame([], $result['columns']);
         $this->assertSame([], $result['records']);
-        $this->assertSame(0, $result['total']);
+        $this->assertSame(0, $result['totalCount']);
+        $this->assertSame(SchemaProviderInterface::DEFAULT_LIMIT, $result['limit']);
+        $this->assertSame(0, $result['offset']);
     }
 
     public function testGetTableRespectsArguments(): void
@@ -38,7 +41,9 @@ final class NullSchemaProviderTest extends TestCase
         $provider = new NullSchemaProvider();
         $result = $provider->getTable('orders', 500, 10);
 
-        $this->assertSame('orders', $result['name']);
+        $this->assertSame('orders', $result['table']);
+        $this->assertSame(500, $result['limit']);
+        $this->assertSame(10, $result['offset']);
     }
 
     public function testExplainQueryReturnsEmpty(): void

@@ -57,12 +57,20 @@ class CycleSchemaProvider implements SchemaProviderInterface
 
     public function explainQuery(string $sql, array $params = [], bool $analyze = false): array
     {
-        return [];
+        $database = $this->databaseProvider->database();
+        $prefix = match ($database->getType()) {
+            'SQLite' => 'EXPLAIN QUERY PLAN ',
+            default => $analyze ? 'EXPLAIN ANALYZE ' : 'EXPLAIN ',
+        };
+
+        return $database->query($prefix . $sql, $params)->fetchAll();
     }
 
     public function executeQuery(string $sql, array $params = []): array
     {
-        return [];
+        $database = $this->databaseProvider->database();
+
+        return $database->query($sql, $params)->fetchAll();
     }
 
     /**

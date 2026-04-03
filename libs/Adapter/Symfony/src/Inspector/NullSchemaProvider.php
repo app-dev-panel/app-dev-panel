@@ -23,10 +23,13 @@ final class NullSchemaProvider implements SchemaProviderInterface
         int $offset = 0,
     ): array {
         return [
-            'name' => $tableName,
+            'table' => $tableName,
+            'primaryKeys' => [],
             'columns' => [],
             'records' => [],
-            'total' => 0,
+            'totalCount' => 0,
+            'limit' => $limit,
+            'offset' => $offset,
         ];
     }
 
