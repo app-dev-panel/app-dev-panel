@@ -5,7 +5,7 @@ description: "ADP CLI commands for managing the debug system: serve, reset, broa
 
 # CLI Commands
 
-ADP provides console commands for managing the debug system. All commands are built on Symfony Console and available through your framework's CLI runner or the standalone `debug:serve` server.
+ADP provides console commands for managing the debug system. All commands are built on Symfony Console and available through your framework's CLI runner or the standalone `serve` server.
 
 ## Available Commands
 
@@ -56,15 +56,15 @@ debug:query view <id>                     # Full entry data
 debug:query view <id> -c <CollectorFQCN>  # Specific collector data
 ```
 
-### `debug:serve` -- Standalone ADP Server
+### `serve` -- Standalone ADP Server
 
 Starts a standalone HTTP server using PHP's built-in server, serving the ADP API directly. No framework required.
 
 ```bash
-debug:serve                                       # Default: 127.0.0.1:8888
-debug:serve --host=0.0.0.0 --port=9000            # Custom host/port
-debug:serve --storage-path=/path/to/debug/data    # Custom storage directory
-debug:serve --frontend-path=/path/to/built/assets # Serve frontend assets
+serve                                              # Default: 127.0.0.1:8888
+serve --host=0.0.0.0 --port=9000                   # Custom host/port
+serve --storage-path=/path/to/debug/data           # Custom storage directory
+serve --frontend-path=/path/to/built/assets        # Serve frontend assets
 ```
 
 ### `mcp:serve` -- MCP Server (stdio)
@@ -75,6 +75,64 @@ Starts the MCP server in stdio mode for AI assistant integration. See the [MCP S
 php yii mcp:serve --storage-path=/path/to/debug-data
 ```
 
+### `debug:summary` -- Entry Summary
+
+Shows a brief summary of a debug entry.
+
+```bash
+debug:summary <id>
+```
+
+### `debug:dump` -- View Dumped Objects
+
+View dumped objects for a specific debug entry.
+
+```bash
+debug:dump <id>
+```
+
+### `debug:tail` -- Watch Entries
+
+Watch debug entries in real-time as they arrive.
+
+```bash
+debug:tail
+```
+
+### `frontend:update` -- Update Frontend
+
+Check for updates and download the latest frontend build.
+
+```bash
+frontend:update
+```
+
+### `inspect:config` -- Inspect Configuration
+
+Inspect application configuration from the command line.
+
+```bash
+inspect:config
+```
+
+### `inspect:db` -- Inspect Database
+
+Inspect database: list tables, view schema, execute queries.
+
+```bash
+inspect:db                        # List tables
+inspect:db --table=users          # View table schema
+```
+
+### `inspect:routes` -- Inspect Routes
+
+Inspect application routes: list all routes, check route matching.
+
+```bash
+inspect:routes                    # List all routes
+inspect:routes --check=/api/users # Check route matching
+```
+
 ## Command Summary
 
 | Command | Purpose |
@@ -83,5 +141,12 @@ php yii mcp:serve --storage-path=/path/to/debug-data
 | `debug:reset` | Clear all stored debug data |
 | `dev:broadcast` | Send test messages to debug server |
 | `debug:query` | Query stored entries from CLI |
-| `debug:serve` | Start standalone HTTP API server |
+| `debug:summary` | Show brief summary of a debug entry |
+| `debug:dump` | View dumped objects for a debug entry |
+| `debug:tail` | Watch debug entries in real-time |
+| `serve` | Start standalone HTTP API server |
 | `mcp:serve` | Start MCP server (stdio transport) |
+| `frontend:update` | Check for updates and download latest frontend |
+| `inspect:config` | Inspect application configuration |
+| `inspect:db` | Inspect database (tables, schema, queries) |
+| `inspect:routes` | Inspect application routes |

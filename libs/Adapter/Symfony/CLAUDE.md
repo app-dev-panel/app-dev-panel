@@ -29,7 +29,7 @@ src/
 │   ├── SymfonyEventDispatcherProxy.php             # Wraps event_dispatcher, implements Component interface
 │   └── SymfonyTranslatorProxy.php                  # Wraps TranslatorInterface, feeds TranslatorCollector
 ├── Collector/
-│   ├── TwigCollector.php                           # Template renders, timing (requires twig/twig)
+│   ├── TwigCollector.php                           # Twig template renders, timing (feeds Kernel TemplateCollector)
 │   ├── CacheCollector.php                          # Cache hits/misses, operations
 │   ├── QueueCollector.php                           # Queue/message bus operations (Symfony Messenger)
 │   ├── SymfonyRequestCollector.php                 # Legacy: Symfony HttpFoundation collector (unused)
