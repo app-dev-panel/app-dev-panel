@@ -115,19 +115,20 @@ Maps framework lifecycle events to debugger lifecycle:
 
 ## Middleware
 
-The adapter provides two middleware classes that must be added to the application's middleware stack:
+The adapter provides three middleware classes that must be added to the application's middleware stack:
 
 | Middleware | Purpose |
 |-----------|---------|
 | `DebugHeaders` (from `AppDevPanel\Api`) | Adds `X-Debug-Id` response header linking each response to its debug entry |
+| `ToolbarMiddleware` | Injects the ADP debug toolbar into HTML responses (before `</body>`) |
 | `YiiApiMiddleware` | Routes requests matching `/debug/api/*` to the ADP API application, bypassing normal app routing |
 
 **Required middleware stack order** (in `config/web/di/application.php`):
 ```
-DebugHeaders → ErrorCatcher → YiiApiMiddleware → SessionMiddleware → CsrfTokenMiddleware → FormatDataResponse → RequestCatcherMiddleware → Router
+DebugHeaders → ToolbarMiddleware → ErrorCatcher → YiiApiMiddleware → SessionMiddleware → CsrfTokenMiddleware → FormatDataResponse → RequestCatcherMiddleware → Router
 ```
 
-`DebugHeaders` must be outermost (before `ErrorCatcher`) to attach the debug ID even on error responses. `YiiApiMiddleware` must be before `Router` to intercept API requests early.
+`DebugHeaders` must be outermost (before `ErrorCatcher`) to attach the debug ID even on error responses. `ToolbarMiddleware` must be after `DebugHeaders` (needs the debug ID) and before `ErrorCatcher` so the toolbar appears even on error pages. `YiiApiMiddleware` must be before `Router` to intercept API requests early.
 
 ## Configuration (`params.php`)
 
