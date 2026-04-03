@@ -77,6 +77,10 @@ export const routes = [
                 ),
             },
             {
+                path: 'http-mock',
+                ...lazy(() => import('@app-dev-panel/panel/Module/Inspector/Pages/HttpMockPage'), 'HttpMockPage'),
+            },
+            {
                 path: 'authorization',
                 ...lazy(
                     () => import('@app-dev-panel/panel/Module/Inspector/Pages/AuthorizationPage'),
