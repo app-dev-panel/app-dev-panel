@@ -55,6 +55,7 @@
     "@uiw/react-json-view": "^2.0.0-alpha.41",
     "clipboard-copy": "^4.0.1",
     "date-fns": "^4.1.0",
+    "html-to-image": "^1.11.13",
     "mui-nested-menu": "^4.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

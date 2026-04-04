@@ -25,6 +25,7 @@ import {UnifiedSidebar} from '@app-dev-panel/sdk/Component/Layout/UnifiedSidebar
 import {selectUnreadCount} from '@app-dev-panel/sdk/Component/Notifications';
 import {ScrollTopButton} from '@app-dev-panel/sdk/Component/ScrollTop';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {useCopyAsImage} from '@app-dev-panel/sdk/Component/useCopyAsImage';
 import {EventTypesEnum, useServerSentEvents} from '@app-dev-panel/sdk/Component/useServerSentEvents';
 import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
@@ -185,6 +186,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const notificationCount = useSelector(selectUnreadCount);
     const liveFeedCount = useLiveCount();
     const liveFeedOpen = useSelector((state) => state.application.liveFeedOpen ?? false);
+
+    // Copy as image
+    const {copyToClipboard: copyAsImage, downloadAsPng, isCapturing, targetRef: contentRef} = useCopyAsImage();
 
     // MCP settings
     const {data: mcpSettings} = useGetMcpSettingsQuery();
@@ -533,6 +537,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onNotificationsClick={handleNotificationsClick}
                     onLiveFeedClick={handleLiveFeedClick}
                     onLogoClick={handleLogoClick}
+                    onCopyAsImage={copyAsImage}
+                    onDownloadAsImage={downloadAsPng}
+                    isCopyingAsImage={isCapturing}
                 />
                 <EntrySelector
                     anchorEl={ui.entrySelectorAnchor}
@@ -576,7 +583,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                                 onChildClick={handleChildClick}
                             />
                         )}
-                        <ContentArea>
+                        <ContentArea ref={contentRef}>
                             <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[location.pathname]}>
                                 <Outlet />
                             </ErrorBoundary>
