@@ -215,6 +215,7 @@ export default defineConfig({
                             collapsed: false,
                             items: [
                                 { text: 'Debug Panel', link: '/guide/debug-panel' },
+                                { text: 'Live Feed', link: '/guide/live-feed' },
                                 { text: 'Toolbar', link: '/guide/toolbar' },
                                 { text: 'Frontend Packages', link: '/guide/frontend-packages' },
                             ],

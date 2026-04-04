@@ -54,6 +54,7 @@ type TopBarProps = {
     showInactiveCollectors?: boolean;
     mcpEnabled?: boolean;
     notificationCount?: number;
+    liveFeedCount?: number;
     editorPreset?: EditorPreset;
     editorCustomTemplate?: string;
     onMenuClick?: () => void;
@@ -69,6 +70,7 @@ type TopBarProps = {
     onEditorPresetChange?: (preset: EditorPreset) => void;
     onEditorCustomTemplateChange?: (template: string) => void;
     onNotificationsClick?: (e: React.MouseEvent<HTMLElement>) => void;
+    onLiveFeedClick?: () => void;
     onLogoClick?: () => void;
 };
 
@@ -140,7 +142,9 @@ export const TopBar = React.memo(
         onEditorPresetChange,
         onEditorCustomTemplateChange,
         notificationCount,
+        liveFeedCount,
         onNotificationsClick,
+        onLiveFeedClick,
         onLogoClick,
     }: TopBarProps) => {
         const theme = useTheme();
@@ -247,6 +251,23 @@ export const TopBar = React.memo(
                         </Icon>
                     </IconButton>
                 </CenterGroup>
+                <IconButton size="small" onClick={onLiveFeedClick} aria-label="Live feed">
+                    <Badge
+                        badgeContent={liveFeedCount}
+                        color="warning"
+                        max={99}
+                        sx={{
+                            '& .MuiBadge-badge': {
+                                fontSize: 10,
+                                height: 16,
+                                minWidth: 16,
+                                animation: liveFeedCount && liveFeedCount > 0 ? `${badgePulse} 0.4s ease-out` : 'none',
+                            },
+                        }}
+                    >
+                        <Icon sx={{fontSize: 18}}>terminal</Icon>
+                    </Badge>
+                </IconButton>
                 <SearchTrigger onClick={onSearchClick} />
                 {!compact && (
                     <>
