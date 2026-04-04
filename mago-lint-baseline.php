@@ -469,12 +469,6 @@ message = "Numeric literal could use underscore separators for readability."
 count = 2
 
 [[issues]]
-file = "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php"
-code = "no-redundant-string-concat"
-message = "String concatenation can be simplified."
-count = 1
-
-[[issues]]
 file = "libs/Adapter/Symfony/src/DependencyInjection/CollectorProxyCompilerPass.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -550,12 +544,6 @@ count = 1
 file = "libs/Adapter/Symfony/src/Proxy/TwigEnvironmentProxy.php"
 code = "no-redundant-use"
 message = "Unused import: `Template`."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Symfony/tests/Integration/BundleBootstrapTest.php"
-code = "no-redundant-use"
-message = "Unused import: `SqliteStorage`."
 count = 1
 
 [[issues]]

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Cli\Command;
 
 use AppDevPanel\Kernel\DebuggerIdGenerator;
-use AppDevPanel\Kernel\Storage\SqliteStorage;
+use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\McpServer\Transport\StdioTransport;
@@ -20,32 +20,41 @@ final class McpServeCommand extends Command
 {
     protected function configure(): void
     {
-        $this->addOption(
-            'storage-path',
-            's',
-            InputOption::VALUE_REQUIRED,
-            'Path to debug data storage directory',
-            sys_get_temp_dir() . '/adp',
-        )->setHelp(<<<'HELP'
-            Start an MCP server over stdio that exposes ADP debug data to AI assistants.
+        $this
+            ->addOption(
+                'storage-path',
+                's',
+                InputOption::VALUE_REQUIRED,
+                'Path to debug data storage directory',
+                sys_get_temp_dir() . '/adp',
+            )
+            ->addOption(
+                'storage-driver',
+                'd',
+                InputOption::VALUE_REQUIRED,
+                'Storage driver: "sqlite", "file", or FQCN',
+                'sqlite',
+            )
+            ->setHelp(<<<'HELP'
+                Start an MCP server over stdio that exposes ADP debug data to AI assistants.
 
-            The server speaks the Model Context Protocol (JSON-RPC 2.0 over stdio)
-            and provides tools for querying debug entries, searching logs, analyzing
-            exceptions, and viewing database queries.
+                The server speaks the Model Context Protocol (JSON-RPC 2.0 over stdio)
+                and provides tools for querying debug entries, searching logs, analyzing
+                exceptions, and viewing database queries.
 
-            Configure in your AI client (e.g., Claude Code):
-              <info>{
-                "mcpServers": {
-                  "adp": {
-                    "command": "php",
-                    "args": ["vendor/bin/adp-mcp", "--storage=/path/to/debug-data"]
-                  }
-                }
-              }</info>
+                Configure in your AI client (e.g., Claude Code):
+                  <info>{
+                    "mcpServers": {
+                      "adp": {
+                        "command": "php",
+                        "args": ["vendor/bin/adp-mcp", "--storage=/path/to/debug-data"]
+                      }
+                    }
+                  }</info>
 
-            Or use this command directly:
-              <info>mcp:serve --storage-path=/path/to/debug-data</info>
-            HELP);
+                Or use this command directly:
+                  <info>mcp:serve --storage-path=/path/to/debug-data</info>
+                HELP);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -57,7 +66,8 @@ final class McpServeCommand extends Command
             return Command::FAILURE;
         }
 
-        $storage = new SqliteStorage($storagePath . '/debug.db', new DebuggerIdGenerator());
+        $driver = (string) $input->getOption('storage-driver');
+        $storage = StorageFactory::create($driver, $storagePath, new DebuggerIdGenerator());
         $toolRegistry = McpToolRegistryFactory::create($storage);
 
         $transport = new StdioTransport();

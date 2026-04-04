@@ -33,7 +33,6 @@ use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
-use AppDevPanel\Kernel\Storage\SqliteStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;

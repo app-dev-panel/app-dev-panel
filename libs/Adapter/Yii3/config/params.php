@@ -133,6 +133,7 @@ return [
             ContainerInterfaceProxy::LOG_ARGUMENTS
                 | ContainerInterfaceProxy::LOG_RESULT
                 | ContainerInterfaceProxy::LOG_ERROR,
+        'storage.driver' => 'sqlite',
         'path' => '@runtime/debug',
         'ignoredRequests' => [
             '/debug/**',

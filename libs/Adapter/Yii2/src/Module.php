@@ -110,7 +110,7 @@ use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
-use AppDevPanel\Kernel\Storage\SqliteStorage;
+use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
@@ -142,6 +142,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
     public bool $enabled = true;
 
     /**
+     * @var string Storage driver: 'sqlite', 'file', or FQCN of a StorageInterface implementation.
+     */
+    public string $storageDriver = 'sqlite';
+
+    /**
      * @var string Directory for debug data storage.
      */
     public string $storagePath = '@runtime/debug';
@@ -149,7 +154,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     /**
      * @var int Maximum number of debug entries to keep.
      */
-    public int $historySize = SqliteStorage::DEFAULT_HISTORY_SIZE;
+    public int $historySize = 50;
 
     /**
      * @var array<string, bool> Collector toggle map.
@@ -313,9 +318,12 @@ class Module extends \yii\base\Module implements BootstrapInterface
     private function registerCoreServices(string $storagePath): void
     {
         $idGenerator = new DebuggerIdGenerator();
-        $storage = new BroadcastingStorage(
-            new SqliteStorage($storagePath . '/debug.db', $idGenerator, $this->excludedClasses),
-        );
+        $storage = new BroadcastingStorage(StorageFactory::create(
+            $this->storageDriver,
+            $storagePath,
+            $idGenerator,
+            $this->excludedClasses,
+        ));
 
         $httpFactory = new HttpFactory();
 

@@ -10,7 +10,9 @@ use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
+use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\SqliteStorage;
+use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Composer\Autoload\ClassLoader;
 use Psr\Container\ContainerInterface;
@@ -29,8 +31,10 @@ $common = [
         $params = $params['app-dev-panel/yii3'];
         $debuggerIdGenerator = $container->get(DebuggerIdGenerator::class);
         $excludedClasses = $params['dumper.excludedClasses'];
-        $storage = new SqliteStorage(
-            $aliases->get($params['path']) . '/debug.db',
+        $driver = $params['storage.driver'] ?? 'sqlite';
+        $storage = StorageFactory::create(
+            $driver,
+            $aliases->get($params['path']),
             $debuggerIdGenerator,
             $excludedClasses,
         );
@@ -103,6 +107,7 @@ return array_merge(
                 'ignoredClasses' => [
                     ClosureExporter::class,
                     UseStatementParser::class,
+                    FileStorage::class,
                     SqliteStorage::class,
                     ClassLoader::class,
                 ],

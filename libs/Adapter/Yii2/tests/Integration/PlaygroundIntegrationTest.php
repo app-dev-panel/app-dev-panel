@@ -10,7 +10,6 @@ use AppDevPanel\Kernel\Collector\QueryRecord;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\StartupContext;
-use AppDevPanel\Kernel\Storage\SqliteStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use PHPUnit\Framework\Attributes\CoversNothing;
 
@@ -19,7 +18,7 @@ use PHPUnit\Framework\Attributes\CoversNothing;
  *
  * Bootstraps a real Yii 2 Application with the ADP Module, feeds it
  * request data through the Debugger, and verifies that debug data
- * is correctly flushed to SqliteStorage.
+ * is correctly flushed to storage.
  */
 #[CoversNothing]
 final class PlaygroundIntegrationTest extends Yii2IntegrationTestCase
@@ -90,7 +89,7 @@ final class PlaygroundIntegrationTest extends Yii2IntegrationTestCase
 
         $debugger->shutdown();
 
-        /** @var SqliteStorage $storage */
+        /** @var StorageInterface $storage */
         $storage = \Yii::$container->get(StorageInterface::class);
 
         $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
@@ -136,7 +135,7 @@ final class PlaygroundIntegrationTest extends Yii2IntegrationTestCase
 
         $debugger->shutdown();
 
-        /** @var SqliteStorage $storage */
+        /** @var StorageInterface $storage */
         $storage = \Yii::$container->get(StorageInterface::class);
 
         $data = $storage->read(StorageInterface::TYPE_DATA);
@@ -174,7 +173,7 @@ final class PlaygroundIntegrationTest extends Yii2IntegrationTestCase
 
         $debugger->shutdown();
 
-        /** @var SqliteStorage $storage */
+        /** @var StorageInterface $storage */
         $storage = \Yii::$container->get(StorageInterface::class);
         $data = $storage->read(StorageInterface::TYPE_DATA);
 
@@ -201,7 +200,7 @@ final class PlaygroundIntegrationTest extends Yii2IntegrationTestCase
 
         $debugger->shutdown();
 
-        /** @var SqliteStorage $storage */
+        /** @var StorageInterface $storage */
         $storage = \Yii::$container->get(StorageInterface::class);
         $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
 
@@ -229,7 +228,7 @@ final class PlaygroundIntegrationTest extends Yii2IntegrationTestCase
         $ids[] = $debugger->getId();
         $debugger->shutdown();
 
-        /** @var SqliteStorage $storage */
+        /** @var StorageInterface $storage */
         $storage = \Yii::$container->get(StorageInterface::class);
         $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
 
@@ -252,7 +251,7 @@ final class PlaygroundIntegrationTest extends Yii2IntegrationTestCase
         $debugger->startup(StartupContext::forRequest($psrRequest));
         $debugger->shutdown();
 
-        /** @var SqliteStorage $storage */
+        /** @var StorageInterface $storage */
         $storage = \Yii::$container->get(StorageInterface::class);
         $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
 
@@ -276,7 +275,7 @@ final class PlaygroundIntegrationTest extends Yii2IntegrationTestCase
         $debugger->shutdown();
         $debugId = $debugger->getId();
 
-        /** @var SqliteStorage $storage */
+        /** @var StorageInterface $storage */
         $storage = \Yii::$container->get(StorageInterface::class);
 
         // Summary format check
