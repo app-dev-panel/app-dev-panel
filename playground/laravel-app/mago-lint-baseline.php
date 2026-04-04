@@ -2,6 +2,12 @@ variant = "loose"
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
+code = "no-debug-symbols"
+message = "Do not commit debug functions."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/PageController.php"
 code = "no-empty"
 message = "Use of the `empty` construct."
 count = 4

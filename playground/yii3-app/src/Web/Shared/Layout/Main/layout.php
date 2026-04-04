@@ -136,6 +136,8 @@ $this->beginPage() ?>
         <a href="/contact"<?= $currentPath === '/contact' ? ' class="active"' : '' ?>>Contact</a>
         <a href="/api-playground"<?= $currentPath === '/api-playground' ? ' class="active"' : '' ?>>API Playground</a>
         <a href="/error"<?= $currentPath === '/error' ? ' class="active"' : '' ?>>Error Demo</a>
+        <a href="/log-demo"<?= $currentPath === '/log-demo' ? ' class="active"' : '' ?>>Log Demo</a>
+        <a href="/var-dumper"<?= $currentPath === '/var-dumper' ? ' class="active"' : '' ?>>Var Dumper</a>
     </nav>
 </div>
 

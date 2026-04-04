@@ -46,19 +46,19 @@ count = 1
 file = "app/Http/Controllers/PageController.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
-count = 2
+count = 7
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
-count = 4
+count = 5
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
+count = 2
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
@@ -81,20 +81,32 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\http\controllers\pagecontroller::logdemo`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/PageController.php"
+code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `app\http\controllers\pagecontroller::users`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/PageController.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\http\controllers\pagecontroller::vardumper`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\View\View`.'
-count = 4
+count = 6
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Request`.'
-count = 1
+count = 3
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
@@ -105,8 +117,14 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "non-existent-function"
+message = 'Could not find definition for function `App\Http\Controllers\dump` (also tried as `dump` in a broader scope).'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/PageController.php"
+code = "non-existent-function"
 message = 'Could not find definition for function `App\Http\Controllers\view` (also tried as `view` in a broader scope).'
-count = 4
+count = 6
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
@@ -1258,7 +1276,7 @@ count = 36
 file = "routes/web.php"
 code = "non-existent-method"
 message = 'Method `match` does not exist on type `Illuminate\Support\Facades\Route`.'
-count = 3
+count = 5
 
 [[issues]]
 file = "routes/web.php"
