@@ -224,7 +224,7 @@ Inspired by [VK Modulite](https://github.com/VKCOM/modulite). Enforces that each
 | `api` | `kernel`, `mcp-server` |
 | `cli` | `kernel`, `api`, `mcp-server` |
 | `testing` | (none — independent) |
-| `adapter-yii3` | `kernel`, `api`, `cli` |
+| `adapter-yii3` | `kernel`, `api`, `cli`, `mcp-server` |
 | `adapter-symfony` | `kernel`, `api`, `cli`, `mcp-server` |
 | `adapter-laravel` | `kernel`, `api`, `cli`, `mcp-server` |
 | `adapter-yii2` | `kernel`, `api`, `cli`, `mcp-server` |

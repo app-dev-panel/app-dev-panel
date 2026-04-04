@@ -144,9 +144,13 @@ $stats = [
 ];
 
 foreach ($modules as $moduleId => $module) {
-    $srcDir = $rootDir . '/' . $module['path'];
+    $paths = (array) $module['path'];
     $allowedModules = $module['requires'];
-    $files = findPhpFiles($srcDir);
+    $files = [];
+    foreach ($paths as $path) {
+        $files = array_merge($files, findPhpFiles($rootDir . '/' . $path));
+    }
+    sort($files);
 
     foreach ($files as $filePath) {
         $stats['files_scanned']++;

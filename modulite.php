@@ -32,7 +32,7 @@ declare(strict_types=1);
  *
  *   Testing  (independent, no internal deps)
  *
- *   Adapter/Yii3 -----> Kernel, API, Cli
+ *   Adapter/Yii3 -----> Kernel, API, Cli, McpServer
  *   Adapter/Symfony ---> Kernel, API, Cli, McpServer
  *   Adapter/Laravel ---> Kernel, API, Cli, McpServer
  *   Adapter/Yii2 -----> Kernel, API, Cli, McpServer
@@ -79,8 +79,8 @@ return [
 
     'adapter-yii3' => [
         'namespace' => 'AppDevPanel\\Adapter\\Yii3\\',
-        'path' => 'libs/Adapter/Yii3/src',
-        'requires' => ['kernel', 'api', 'cli'],
+        'path' => ['libs/Adapter/Yii3/src', 'libs/Adapter/Yii3/config'],
+        'requires' => ['kernel', 'api', 'cli', 'mcp-server'],
     ],
 
     'adapter-symfony' => [
