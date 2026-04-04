@@ -235,9 +235,29 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     changeEntry(result.data[0]);
                 }
             } else if (data.type === EventTypesEnum.LiveLog) {
-                dispatch(addLiveLog(data.payload));
+                try {
+                    const payload = typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+                    if (payload && typeof payload === 'object') {
+                        dispatch(
+                            addLiveLog({
+                                level: String(payload.level ?? 'debug'),
+                                message: String(payload.message ?? ''),
+                                context: payload.context,
+                            }),
+                        );
+                    }
+                } catch {
+                    /* ignore malformed payloads */
+                }
             } else if (data.type === EventTypesEnum.LiveDump) {
-                dispatch(addLiveDump(data.payload));
+                try {
+                    const payload = typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+                    if (payload && typeof payload === 'object') {
+                        dispatch(addLiveDump({variable: payload, line: payload.$__line__$ ?? undefined}));
+                    }
+                } catch {
+                    /* ignore malformed payloads */
+                }
             }
         },
         [getDebugQuery, changeEntry, dispatch],

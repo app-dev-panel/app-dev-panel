@@ -97,7 +97,8 @@ const formatTime = (timestamp: number): string => {
 const LogEventItem = React.memo(({entry}: {entry: LiveLogEntry}) => {
     const theme = useTheme();
     const [expanded, setExpanded] = useState(false);
-    const color = levelColor(entry.payload.level, theme);
+    const level = entry.payload.level ?? 'debug';
+    const color = levelColor(level, theme);
     const hasContext = entry.payload.context && Object.keys(entry.payload.context).length > 0;
 
     return (
@@ -106,7 +107,7 @@ const LogEventItem = React.memo(({entry}: {entry: LiveLogEntry}) => {
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 0.5}}>
                     <TimeLabel>{formatTime(entry.timestamp)}</TimeLabel>
                     <Chip
-                        label={entry.payload.level.toUpperCase()}
+                        label={level.toUpperCase()}
                         size="small"
                         sx={{
                             fontWeight: 600,
