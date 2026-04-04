@@ -32,6 +32,7 @@ use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\Storage\BroadcastingStorage;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -80,7 +81,7 @@ final class BundleBootstrapTest extends TestCase
         $container = $this->buildContainer();
 
         $this->assertInstanceOf(DebuggerIdGenerator::class, $container->get(DebuggerIdGenerator::class));
-        $this->assertInstanceOf(FileStorage::class, $container->get(StorageInterface::class));
+        $this->assertInstanceOf(BroadcastingStorage::class, $container->get(StorageInterface::class));
         $this->assertInstanceOf(TimelineCollector::class, $container->get(TimelineCollector::class));
     }
 

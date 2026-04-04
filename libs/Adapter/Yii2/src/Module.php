@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2;
 
+use AppDevPanel\Adapter\Yii2\Collector\BroadcastingLogTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
 use AppDevPanel\Adapter\Yii2\Controller\DebugDumpController;
@@ -11,6 +12,8 @@ use AppDevPanel\Adapter\Yii2\Controller\DebugQueryController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugResetController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugSummaryController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugTailController;
+use AppDevPanel\Adapter\Yii2\Controller\DevBroadcastController;
+use AppDevPanel\Adapter\Yii2\Controller\DevServerController;
 use AppDevPanel\Adapter\Yii2\Controller\InspectConfigController;
 use AppDevPanel\Adapter\Yii2\Controller\InspectDatabaseController;
 use AppDevPanel\Adapter\Yii2\Controller\InspectRoutesController;
@@ -102,8 +105,11 @@ use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
+use AppDevPanel\Kernel\Storage\BroadcastingStorage;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\McpServer;
@@ -307,7 +313,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     private function registerCoreServices(string $storagePath): void
     {
         $idGenerator = new DebuggerIdGenerator();
-        $storage = new FileStorage($storagePath, $idGenerator, $this->excludedClasses);
+        $storage = new BroadcastingStorage(new FileStorage($storagePath, $idGenerator, $this->excludedClasses));
 
         $httpFactory = new HttpFactory();
 
@@ -811,6 +817,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $this->registerDebugLogTarget($logCollector);
         }
 
+        // Register VarDumper broadcasting for Live Feed
+        $this->registerVarDumperBroadcasting();
+
         // Register translator profiling if TranslatorCollector is active
         $translatorCollector = $this->getCollector(TranslatorCollector::class);
         if ($translatorCollector instanceof TranslatorCollector) {
@@ -924,6 +933,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $container,
             \Yii::$app->params,
         );
+
+        $app->controllerMap['dev'] = new DevServerController('dev', $app);
+        $app->controllerMap['dev-broadcast'] = new DevBroadcastController('dev-broadcast', $app);
     }
 
     private function decorateHttpClient(HttpClientCollector $collector): void
@@ -1090,6 +1102,45 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         $target = new DebugLogTarget($logCollector);
         \Yii::$app->log->targets['adp-debug'] = $target;
+
+        // Also register broadcasting target for Live Feed
+        $broadcastTarget = new BroadcastingLogTarget();
+        \Yii::$app->log->targets['adp-broadcast'] = $broadcastTarget;
+    }
+
+    private function registerVarDumperBroadcasting(): void
+    {
+        $broadcaster = new Broadcaster();
+        $varDumperCollector = $this->getCollector(VarDumperCollector::class);
+
+        // Hook into Symfony's VarDumper (used by dump() in most PHP projects)
+        if (class_exists(\Symfony\Component\VarDumper\VarDumper::class)) {
+            \Symfony\Component\VarDumper\VarDumper::setHandler(static function (mixed $var, ?string $label = null) use (
+                $broadcaster,
+                $varDumperCollector,
+            ): void {
+                $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+                $line = '';
+                foreach ($trace as $frame) {
+                    if (array_key_exists('file', $frame) && !str_contains($frame['file'], 'vendor/')) {
+                        $line = $frame['file'] . ':' . ($frame['line'] ?? 0);
+                        break;
+                    }
+                }
+
+                // Broadcast for Live Feed
+                try {
+                    $broadcaster->broadcast(
+                        Connection::MESSAGE_TYPE_VAR_DUMPER,
+                        \Yiisoft\VarDumper\VarDumper::create($var)->asJson(false),
+                    );
+                } catch (\Throwable) {
+                }
+
+                // Also collect for VarDumperCollector
+                $varDumperCollector?->collect($var, $label ?? $line);
+            });
+        }
     }
 
     private function registerTemplateProfiling(TemplateCollector $collector): void
