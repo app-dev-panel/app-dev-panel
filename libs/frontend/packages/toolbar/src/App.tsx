@@ -1,6 +1,5 @@
 import {RouterOptionsContextProvider} from '@app-dev-panel/sdk/Component/RouterOptions';
 import {DefaultThemeProvider} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
-import '@app-dev-panel/toolbar/App.css';
 import {modules} from '@app-dev-panel/toolbar/modules';
 import {createRouter} from '@app-dev-panel/toolbar/router';
 import {createStore} from '@app-dev-panel/toolbar/store';
