@@ -128,6 +128,7 @@ use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
 use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
@@ -635,9 +636,18 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
         $this->app->singleton(McpSettings::class, fn() => new McpSettings($config->get('app-dev-panel.storage.path')));
 
+        $this->app->singleton(InspectorClient::class, function () {
+            $url = $this->app['request']->getSchemeAndHttpHost();
+
+            return new InspectorClient($url);
+        });
+
         $this->app->singleton(
             McpServer::class,
-            fn() => new McpServer(McpToolRegistryFactory::create($this->app->make(StorageInterface::class))),
+            fn() => new McpServer(McpToolRegistryFactory::create(
+                $this->app->make(StorageInterface::class),
+                $this->app->make(InspectorClient::class),
+            )),
         );
 
         $this->app->singleton(

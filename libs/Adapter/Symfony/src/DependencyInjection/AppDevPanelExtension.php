@@ -113,6 +113,7 @@ use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
 use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\McpServer\Tool\ToolRegistry;
@@ -621,9 +622,14 @@ final class AppDevPanelExtension extends Extension
             ->setPublic(true);
 
         $container
+            ->register(InspectorClient::class, InspectorClient::class)
+            ->setArguments(['http://127.0.0.1:8080'])
+            ->setPublic(false);
+
+        $container
             ->register(ToolRegistry::class, ToolRegistry::class)
             ->setFactory([McpToolRegistryFactory::class, 'create'])
-            ->setArguments([new Reference(StorageInterface::class)])
+            ->setArguments([new Reference(StorageInterface::class), new Reference(InspectorClient::class)])
             ->setPublic(false);
 
         $container
