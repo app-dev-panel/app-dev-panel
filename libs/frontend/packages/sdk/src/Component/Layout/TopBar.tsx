@@ -73,6 +73,9 @@ type TopBarProps = {
     onNotificationsClick?: (e: React.MouseEvent<HTMLElement>) => void;
     onLiveFeedClick?: () => void;
     onLogoClick?: () => void;
+    onCopyAsImage?: () => void;
+    onDownloadAsImage?: () => void;
+    isCopyingAsImage?: boolean;
 };
 
 const BarRoot = styled('header')(({theme}) => ({
@@ -148,6 +151,9 @@ export const TopBar = React.memo(
         onNotificationsClick,
         onLiveFeedClick,
         onLogoClick,
+        onCopyAsImage,
+        onDownloadAsImage,
+        isCopyingAsImage,
     }: TopBarProps) => {
         const theme = useTheme();
         const compact = useMediaQuery(theme.breakpoints.down('md'));
@@ -367,6 +373,35 @@ export const TopBar = React.memo(
                         </MenuItem>
                     )}
                     {compact && <Divider />}
+                    {onCopyAsImage && (
+                        <MenuItem
+                            disabled={isCopyingAsImage}
+                            onClick={() => {
+                                handleMenuClose();
+                                onCopyAsImage();
+                            }}
+                        >
+                            <ListItemIcon>
+                                <Icon sx={{fontSize: 20}}>{isCopyingAsImage ? 'hourglass_empty' : 'photo_camera'}</Icon>
+                            </ListItemIcon>
+                            <ListItemText>{isCopyingAsImage ? 'Capturing...' : 'Copy as image'}</ListItemText>
+                        </MenuItem>
+                    )}
+                    {onDownloadAsImage && (
+                        <MenuItem
+                            disabled={isCopyingAsImage}
+                            onClick={() => {
+                                handleMenuClose();
+                                onDownloadAsImage();
+                            }}
+                        >
+                            <ListItemIcon>
+                                <Icon sx={{fontSize: 20}}>download</Icon>
+                            </ListItemIcon>
+                            <ListItemText>Download as image</ListItemText>
+                        </MenuItem>
+                    )}
+                    {(onCopyAsImage || onDownloadAsImage) && <Divider />}
                     <MenuItem onClick={handleSettingsOpen}>
                         <ListItemIcon>
                             <Icon sx={{fontSize: 20}}>settings</Icon>
