@@ -55,7 +55,8 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Run tests
-        run: composer test:unit
+        run: php vendor/bin/phpunit --testsuite Kernel,API,Cli,McpServer,Adapter-Symfony,Adapter-Yii3,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle --enforce-time-limit --default-time-limit=30
+        timeout-minutes: 10
 
       - name: Run tests with coverage
         if: matrix.os == 'ubuntu-latest' && matrix.php == '8.4'
