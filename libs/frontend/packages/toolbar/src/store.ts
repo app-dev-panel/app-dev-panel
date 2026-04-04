@@ -3,6 +3,7 @@ import {
     reducers as ApplicationReducers,
 } from '@app-dev-panel/sdk/API/Application/api';
 import {middlewares as DebugMiddlewares, reducers as DebugReducers} from '@app-dev-panel/sdk/API/Debug/api';
+import {middlewares as LlmMiddlewares, reducers as LlmReducers} from '@app-dev-panel/sdk/API/Llm/api';
 import {
     middlewares as ToolbarApiMiddlewares,
     reducers as ToolbarApiReducers,
@@ -14,7 +15,7 @@ import {FLUSH, PAUSE, PERSIST, persistStore, PURGE, REGISTER, REHYDRATE} from 'r
 import {initMessageListener} from 'redux-state-sync';
 
 // TODO: get reducers and middlewares from modules.ts
-const rootReducer = combineReducers({...ToolbarApiReducers, ...DebugReducers, ...ApplicationReducers});
+const rootReducer = combineReducers({...ToolbarApiReducers, ...DebugReducers, ...ApplicationReducers, ...LlmReducers});
 
 export const createStore = (preloadedState: Partial<ReturnType<typeof rootReducer>> = {}) => {
     const store = configureStore({
@@ -22,7 +23,7 @@ export const createStore = (preloadedState: Partial<ReturnType<typeof rootReduce
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware({
                 serializableCheck: {ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]},
-            }).concat([...ApplicationMiddlewares, ...ToolbarApiMiddlewares, ...DebugMiddlewares]),
+            }).concat([...ApplicationMiddlewares, ...ToolbarApiMiddlewares, ...DebugMiddlewares, ...LlmMiddlewares]),
         devTools: import.meta.env.DEV,
         preloadedState: preloadedState,
     });
