@@ -22,12 +22,10 @@ final readonly class AssetAction implements RequestHandlerInterface
     {
         // Load real asset bundles via yiisoft/assets — the AssetLoaderInterfaceProxy
         // intercepts loadBundle() calls and feeds bundle data to AssetBundleCollector.
-        $bundle = $this->assetLoader->loadBundle(MainAsset::class);
+        $this->assetLoader->loadBundle(MainAsset::class);
+        $this->assetLoader->loadBundle(BootstrapAsset::class);
+        $this->assetLoader->loadBundle(JqueryAsset::class);
 
-        return $this->responseFactory->createResponse([
-            'fixture' => 'assets:basic',
-            'status' => 'ok',
-            'bundle' => $bundle::class,
-        ]);
+        return $this->responseFactory->createResponse(['fixture' => 'assets:basic', 'status' => 'ok']);
     }
 }
