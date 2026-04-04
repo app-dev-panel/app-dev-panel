@@ -87,14 +87,14 @@ count = 1
 [[issues]]
 file = "libs/API/src/Llm/Acp/AcpClient.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.4000000000000004)."
+message = "Class has a high kan defect score (2.47)."
 count = 1
 
 [[issues]]
 file = "libs/API/src/Llm/Acp/AcpClient.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 9
+count = 8
 
 [[issues]]
 file = "libs/API/src/Llm/Acp/AcpClient.php"
@@ -141,14 +141,14 @@ count = 1
 [[issues]]
 file = "libs/API/src/Llm/Controller/LlmController.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (1.9700000000000002)."
+message = "Class has a high kan defect score (1.9000000000000001)."
 count = 1
 
 [[issues]]
 file = "libs/API/src/Llm/Controller/LlmController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 7
+count = 8
 
 [[issues]]
 file = "libs/API/src/Llm/Controller/LlmController.php"

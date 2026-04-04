@@ -79,10 +79,10 @@ final class LlmController
      */
     private function connectAcp(array $body): ResponseInterface
     {
-        $command = $body['acpCommand'] ?? 'claude';
-        if (!is_string($command) || $command === '') {
-            $command = 'claude';
-        }
+        $command =
+            isset($body['acpCommand']) && is_string($body['acpCommand']) && $body['acpCommand'] !== ''
+                ? $body['acpCommand']
+                : 'claude';
 
         $acpArgs = isset($body['acpArgs']) && is_array($body['acpArgs']) ? $body['acpArgs'] : [];
         $acpEnv = isset($body['acpEnv']) && is_array($body['acpEnv']) ? $body['acpEnv'] : [];
@@ -349,9 +349,10 @@ final class LlmController
         $contextJson = json_encode($context, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
         // Truncate context to avoid exceeding model context windows.
+        // JSON structure is ASCII; values may contain UTF-8 but truncation is for size limits, not display.
         $maxContextLength = 12000;
-        if (mb_strlen($contextJson, 'UTF-8') > $maxContextLength) {
-            $contextJson = mb_substr($contextJson, 0, $maxContextLength, 'UTF-8') . "\n... [truncated]";
+        if (strlen($contextJson) > $maxContextLength) {
+            $contextJson = substr($contextJson, 0, $maxContextLength) . "\n... [truncated]";
         }
 
         $messages = [

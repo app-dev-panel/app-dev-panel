@@ -21,6 +21,12 @@ final class AcpClient
     private const string CLIENT_NAME = 'ADP';
     private const string CLIENT_VERSION = '1.0.0';
 
+    /** Safety limit: max accumulated response text size (10 MB). */
+    private const int MAX_RESPONSE_SIZE = 10_000_000;
+
+    /** Safety limit: max tool calls per prompt. */
+    private const int MAX_TOOL_CALLS = 1000;
+
     private int $nextId = 1;
 
     public function __construct(
@@ -74,14 +80,7 @@ final class AcpClient
             ],
         ]);
 
-        $response = $this->receiveResponse($timeout);
-
-        if (isset($response['error'])) {
-            throw new RuntimeException(sprintf(
-                'ACP initialize failed: %s',
-                $response['error']['message'] ?? 'Unknown error',
-            ));
-        }
+        $response = $this->waitForResponse(null, $timeout, 'ACP initialize failed');
 
         return $response['result'] ?? [];
     }
@@ -93,14 +92,7 @@ final class AcpClient
     {
         $this->sendRequest('session/new', (object) []);
 
-        $response = $this->receiveResponse($timeout);
-
-        if (isset($response['error'])) {
-            throw new RuntimeException(sprintf(
-                'ACP session/new failed: %s',
-                $response['error']['message'] ?? 'Unknown error',
-            ));
-        }
+        $response = $this->waitForResponse(null, $timeout, 'ACP session/new failed');
 
         $sessionId = $response['result']['sessionId'] ?? null;
         if (!is_string($sessionId) || $sessionId === '') {
@@ -142,26 +134,19 @@ final class AcpClient
         $textParts = [];
         $toolCalls = [];
         $stopReason = 'end_turn';
+        $totalTextSize = 0;
         $deadline = microtime(true) + $timeout;
 
         while (microtime(true) < $deadline) {
-            $remaining = $deadline - microtime(true);
-            $message = $this->transport->receive(min($remaining, 5.0));
+            $message = $this->receiveWithDeadline($deadline);
 
             if ($message === null) {
-                if (!$this->transport->isAlive()) {
-                    $stderr = $this->transport->readStderr();
-                    throw new RuntimeException(sprintf(
-                        'ACP agent process terminated unexpectedly.%s',
-                        $stderr !== '' ? " stderr: {$stderr}" : '',
-                    ));
-                }
                 continue;
             }
 
             // Notification (no id) — session/update
             if (!isset($message['id'])) {
-                $this->handleNotification($message, $textParts, $toolCalls);
+                $this->handleNotification($message, $textParts, $toolCalls, $totalTextSize);
                 continue;
             }
 
@@ -200,7 +185,7 @@ final class AcpClient
      * @param-out list<string> $textParts
      * @param-out list<array{role: string, content: string}> $toolCalls
      */
-    private function handleNotification(array $message, array &$textParts, array &$toolCalls): void
+    private function handleNotification(array $message, array &$textParts, array &$toolCalls, int &$totalTextSize): void
     {
         $method = $message['method'] ?? '';
         if ($method !== 'session/update') {
@@ -214,12 +199,20 @@ final class AcpClient
             $content = $update['content'] ?? [];
             foreach ($content as $block) {
                 if (($block['type'] ?? '') === 'text' && isset($block['text'])) {
-                    $textParts[] = (string) $block['text'];
+                    $text = (string) $block['text'];
+                    $totalTextSize += strlen($text);
+                    if ($totalTextSize > self::MAX_RESPONSE_SIZE) {
+                        throw new RuntimeException('ACP agent response exceeds maximum size limit.');
+                    }
+                    $textParts[] = $text;
                 }
             }
         }
 
         if ($type === 'tool_call_start' || $type === 'tool_call_update') {
+            if (count($toolCalls) >= self::MAX_TOOL_CALLS) {
+                throw new RuntimeException('ACP agent response exceeds maximum tool calls limit.');
+            }
             $toolName = (string) ($update['toolCall']['name'] ?? $update['name'] ?? 'unknown');
             $toolCalls[] = [
                 'role' => 'tool',
@@ -310,33 +303,64 @@ final class AcpClient
     }
 
     /**
-     * Wait for a JSON-RPC response (skipping notifications).
+     * Wait for a JSON-RPC response, skipping notifications.
+     *
+     * Used by initialize and session/new where we don't need to process notifications.
+     *
+     * @return array<string, mixed> The JSON-RPC response message
      */
-    private function receiveResponse(float $timeout): array
+    private function waitForResponse(?int $expectedId, float $timeout, string $errorPrefix): array
     {
         $deadline = microtime(true) + $timeout;
 
         while (microtime(true) < $deadline) {
-            $remaining = $deadline - microtime(true);
-            $message = $this->transport->receive(min($remaining, 5.0));
+            $message = $this->receiveWithDeadline($deadline);
 
             if ($message === null) {
-                if (!$this->transport->isAlive()) {
-                    $stderr = $this->transport->readStderr();
-                    throw new RuntimeException(sprintf(
-                        'ACP agent process terminated during initialization.%s',
-                        $stderr !== '' ? " stderr: {$stderr}" : '',
-                    ));
-                }
                 continue;
             }
 
             // Skip notifications (no id).
-            if (isset($message['id'])) {
-                return $message;
+            if (!isset($message['id'])) {
+                continue;
             }
+
+            if (isset($message['error'])) {
+                throw new RuntimeException(sprintf(
+                    '%s: %s',
+                    $errorPrefix,
+                    $message['error']['message'] ?? 'Unknown error',
+                ));
+            }
+
+            return $message;
         }
 
         throw new RuntimeException('Timeout waiting for ACP agent response.');
+    }
+
+    /**
+     * Receive a single message from the transport, respecting deadline.
+     *
+     * Checks process liveness on null reads and throws on unexpected termination.
+     */
+    private function receiveWithDeadline(float $deadline): ?array
+    {
+        $remaining = $deadline - microtime(true);
+        if ($remaining <= 0) {
+            return null;
+        }
+
+        $message = $this->transport->receive(min($remaining, 5.0));
+
+        if ($message === null && !$this->transport->isAlive()) {
+            $stderr = $this->transport->readStderr();
+            throw new RuntimeException(sprintf(
+                'ACP agent process terminated unexpectedly.%s',
+                $stderr !== '' ? " stderr: {$stderr}" : '',
+            ));
+        }
+
+        return $message;
     }
 }
