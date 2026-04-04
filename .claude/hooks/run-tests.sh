@@ -42,8 +42,14 @@ if [[ "$FILE_PATH" == *.ts || "$FILE_PATH" == *.tsx || "$FILE_PATH" == *.js || "
         if [[ "$FILE_PATH" == *.test.ts || "$FILE_PATH" == *.test.tsx || "$FILE_PATH" == *.spec.ts || "$FILE_PATH" == *.spec.tsx ]]; then
             TEST_FILE="$FILE_PATH"
         else
+            # Tests live next to source files (e.g., Foo.tsx -> Foo.test.tsx)
+            DIR=$(dirname "$FILE_PATH")
             BASENAME=$(basename "$FILE_PATH" | sed 's/\.\(ts\|tsx\|js\|jsx\)$//')
-            TEST_FILE=$(find "$FRONTEND_DIR" -name "${BASENAME}.test.*" -o -name "${BASENAME}.spec.*" 2>/dev/null | head -1)
+            TEST_FILE=$(find "$DIR" -maxdepth 1 -name "${BASENAME}.test.*" -o -name "${BASENAME}.spec.*" 2>/dev/null | head -1)
+            # Fallback: search entire frontend dir
+            if [[ -z "$TEST_FILE" ]]; then
+                TEST_FILE=$(find "$FRONTEND_DIR" -name "${BASENAME}.test.*" -o -name "${BASENAME}.spec.*" 2>/dev/null | head -1)
+            fi
         fi
 
         if [[ -n "$TEST_FILE" && -f "$TEST_FILE" ]]; then

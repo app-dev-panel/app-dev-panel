@@ -16,8 +16,8 @@ MAGO="${ROOT_DIR}/vendor/bin/mago"
 # PHP files: run Mago format + lint
 if [[ "$FILE_PATH" == *.php ]]; then
     if [[ -x "$MAGO" ]]; then
-        "$MAGO" format --file "$FILE_PATH" 2>/dev/null || true
-        LINT_OUTPUT=$("$MAGO" lint --file "$FILE_PATH" 2>&1) || true
+        "$MAGO" format "$FILE_PATH" 2>/dev/null || true
+        LINT_OUTPUT=$("$MAGO" lint "$FILE_PATH" 2>&1) || true
         if [[ -n "$LINT_OUTPUT" && "$LINT_OUTPUT" != *"No issues found"* ]]; then
             echo "$LINT_OUTPUT" | tail -20
         fi
