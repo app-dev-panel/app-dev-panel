@@ -4,35 +4,41 @@ declare(strict_types=1);
 
 namespace App\Web\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\DatabaseCollector;
-use AppDevPanel\Kernel\Collector\QueryRecord;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
+use Yiisoft\Db\Connection\ConnectionInterface;
 
 final readonly class DatabaseAction implements RequestHandlerInterface
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-        private DatabaseCollector $databaseCollector,
+        private ConnectionInterface $connection,
     ) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        // Simulate a database query by calling the collector directly.
-        // This tests the DatabaseCollector without requiring yiisoft/db infrastructure.
-        $start = microtime(true);
-        $this->databaseCollector->logQuery(new QueryRecord(
-            sql: 'SELECT * FROM test_users WHERE id = :id',
-            rawSql: 'SELECT * FROM test_users WHERE id = 1',
-            params: ['id' => 1],
-            line: __FILE__ . ':' . __LINE__,
-            startTime: $start,
-            endTime: microtime(true),
-            rowsNumber: 1,
-        ));
+        // Execute real SQL queries via yiisoft/db — the ConnectionInterfaceProxy
+        // intercepts these calls and feeds query data to DatabaseCollector.
+        $this->connection
+            ->createCommand('CREATE TABLE IF NOT EXISTS test_users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)')
+            ->execute();
 
-        return $this->responseFactory->createResponse(['fixture' => 'database:basic', 'status' => 'ok']);
+        $this->connection
+            ->createCommand('INSERT OR REPLACE INTO test_users (id, name, email) VALUES (:id, :name, :email)', [
+                'id' => 1,
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+            ])
+            ->execute();
+
+        $result = $this->connection->createCommand('SELECT * FROM test_users WHERE id = :id', ['id' => 1])->queryOne();
+
+        return $this->responseFactory->createResponse([
+            'fixture' => 'database:basic',
+            'status' => 'ok',
+            'user' => $result,
+        ]);
     }
 }

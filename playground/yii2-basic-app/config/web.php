@@ -87,6 +87,11 @@ return [
             'dsn' => 'sqlite:' . dirname(__DIR__) . '/runtime/db.sqlite',
             'charset' => 'utf8',
         ],
+        'mailer' => [
+            'class' => \yii\symfonymailer\Mailer::class,
+            'useFileTransport' => true,
+            'fileTransportPath' => '@runtime/mail',
+        ],
     ],
 
     'modules' => [

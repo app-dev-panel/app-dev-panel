@@ -37,6 +37,30 @@ message = 'Method `from` does not exist on type `Yiisoft\Definitions\ReferencesA
 count = 1
 
 [[issues]]
+file = "config/common/di/mailer.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Aliases\Aliases)`).'
+count = 1
+
+[[issues]]
+file = "config/common/di/mailer.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Mailer\FileMailer` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/mailer.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Aliases\Aliases`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/mailer.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Mailer\MailerInterface`.'
+count = 1
+
+[[issues]]
 file = "config/common/di/router.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Config\Config)`).'
@@ -58,6 +82,48 @@ count = 1
 file = "config/common/di/router.php"
 code = "non-existent-method"
 message = 'Method `to` does not exist on type `Yiisoft\Definitions\DynamicReference`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 2
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Translator\CategorySource` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Translator\InMemoryMessageSource` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Translator\IntlMessageFormatter` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Translator\Translator` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Translator\TranslatorInterface`.'
 count = 1
 
 [[issues]]
@@ -681,7 +747,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/AssetAction.php"
 code = "unused-property"
-message = "Property `$assetCollector` is never used."
+message = "Property `$assetLoader` is never used."
 count = 1
 
 [[issues]]
@@ -747,7 +813,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/DatabaseAction.php"
 code = "unused-property"
-message = "Property `$databaseCollector` is never used."
+message = "Property `$connection` is never used."
 count = 1
 
 [[issues]]
@@ -921,7 +987,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/MailerAction.php"
 code = "unused-property"
-message = "Property `$mailerCollector` is never used."
+message = "Property `$mailer` is never used."
 count = 1
 
 [[issues]]
@@ -1059,13 +1125,19 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/RouterAction.php"
 code = "unused-property"
+message = "Property `$currentRoute` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/RouterAction.php"
+code = "unused-property"
 message = "Property `$responseFactory` is never used."
 count = 1
 
 [[issues]]
 file = "src/Web/TestFixtures/RouterAction.php"
 code = "unused-property"
-message = "Property `$routerCollector` is never used."
+message = "Property `$routeCollection` is never used."
 count = 1
 
 [[issues]]
@@ -1101,7 +1173,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/TemplateAction.php"
 code = "unused-property"
-message = "Property `$templateCollector` is never used."
+message = "Property `$webView` is never used."
 count = 1
 
 [[issues]]
@@ -1137,7 +1209,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/TranslatorAction.php"
 code = "unused-property"
-message = "Property `$translatorCollector` is never used."
+message = "Property `$translator` is never used."
 count = 1
 
 [[issues]]
@@ -1155,7 +1227,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/ValidatorAction.php"
 code = "unused-property"
-message = "Property `$validatorCollector` is never used."
+message = "Property `$validator` is never used."
 count = 1
 
 [[issues]]
@@ -1173,7 +1245,25 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/ViewAction.php"
 code = "unused-property"
-message = "Property `$templateCollector` is never used."
+message = "Property `$webView` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/views/footer.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/views/header.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/views/home.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
 count = 1
 
 [[issues]]

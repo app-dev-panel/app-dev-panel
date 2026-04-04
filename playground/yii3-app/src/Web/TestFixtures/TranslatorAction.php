@@ -4,49 +4,35 @@ declare(strict_types=1);
 
 namespace App\Web\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\TranslationRecord;
-use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
+use Yiisoft\Translator\TranslatorInterface;
 
 final readonly class TranslatorAction implements RequestHandlerInterface
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-        private TranslatorCollector $translatorCollector,
+        private TranslatorInterface $translator,
     ) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'app',
-            locale: 'en',
-            message: 'welcome',
-            translation: 'Welcome!',
-        ));
+        // Translate using Yii's Translator — the TranslatorInterfaceProxy intercepts
+        // these calls and feeds translation data to TranslatorCollector.
 
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'app',
-            locale: 'de',
-            message: 'welcome',
-            translation: 'Willkommen!',
-        ));
+        // Found: en → "Welcome!"
+        $this->translator->translate('welcome', category: 'app', locale: 'en');
 
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'app',
-            locale: 'en',
-            message: 'goodbye',
-            translation: 'Goodbye!',
-        ));
+        // Found: de → "Willkommen!"
+        $this->translator->translate('welcome', category: 'app', locale: 'de');
 
-        $this->translatorCollector->logTranslation(new TranslationRecord(
-            category: 'app',
-            locale: 'fr',
-            message: 'welcome',
-            missing: true,
-        ));
+        // Found: en → "Goodbye!"
+        $this->translator->translate('goodbye', category: 'app', locale: 'en');
+
+        // Missing: fr has no translations
+        $this->translator->translate('welcome', category: 'app', locale: 'fr');
 
         return $this->responseFactory->createResponse(['fixture' => 'translator:basic', 'status' => 'ok']);
     }

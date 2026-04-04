@@ -8,7 +8,8 @@
         "app-dev-panel/adapter-yii2": "*",
         "nyholm/psr7": "^1.8",
         "nyholm/psr7-server": "^1.1",
-        "yiisoft/yii2": "^2.0.50"
+        "yiisoft/yii2": "^2.0.50",
+        "yiisoft/yii2-symfonymailer": "^4.0"
     },
     "repositories": [
         {

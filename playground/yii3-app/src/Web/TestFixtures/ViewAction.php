@@ -4,31 +4,33 @@ declare(strict_types=1);
 
 namespace App\Web\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\TemplateCollector;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
+use Yiisoft\View\WebView;
 
 final readonly class ViewAction implements RequestHandlerInterface
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-        private TemplateCollector $templateCollector,
+        private WebView $webView,
     ) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $this->templateCollector->collectRender('/views/site/index.php', '<h1>Home Page</h1><p>Welcome</p>', [
+        // Render actual PHP templates via yiisoft/view — the ViewEventListener
+        // listens to AfterRender events and feeds render data to TemplateCollector.
+        $this->webView->render(__DIR__ . '/views/home', [
             'title' => 'Home',
             'user' => 'admin',
         ]);
 
-        $this->templateCollector->collectRender('/views/layout/header.php', '<header>ADP</header>', [
+        $this->webView->render(__DIR__ . '/views/header', [
             'siteName' => 'ADP',
         ]);
 
-        $this->templateCollector->collectRender('/views/layout/footer.php', '<footer>&copy; 2026</footer>', [
+        $this->webView->render(__DIR__ . '/views/footer', [
             'year' => 2026,
         ]);
 

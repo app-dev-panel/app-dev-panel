@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0573f059e8c093d7004e3df4eb05d9bb",
+    "content-hash": "7357a6e4c49db4054d8a729f87142f63",
     "packages": [
         {
             "name": "alexkart/curl-builder",
@@ -55,11 +55,11 @@
         },
         {
             "name": "app-dev-panel/adapter-yii3",
-            "version": "dev-claude/improve-playgrounds-api-pFqYT",
+            "version": "dev-claude/audit-fixture-tours-K4DUa",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Adapter/Yii3",
-                "reference": "7773fa673613e6db850488f16c7c18f6de0fddf6"
+                "reference": "bb077481cf403ffd5052a460102b4b7749ac8df4"
             },
             "require": {
                 "app-dev-panel/api": "*",
@@ -83,7 +83,7 @@
                 "yiisoft/files": "^2.0",
                 "yiisoft/json": "^1.0",
                 "yiisoft/profiler": "^3.0",
-                "yiisoft/proxy": "^1.0.1",
+                "yiisoft/proxy": "^1.2",
                 "yiisoft/strings": "^2.2",
                 "yiisoft/var-dumper": "^1.7"
             },
@@ -173,7 +173,7 @@
         },
         {
             "name": "app-dev-panel/api",
-            "version": "dev-claude/improve-playgrounds-api-pFqYT",
+            "version": "dev-claude/audit-fixture-tours-K4DUa",
             "dist": {
                 "type": "path",
                 "url": "../../libs/API",
@@ -252,7 +252,7 @@
         },
         {
             "name": "app-dev-panel/cli",
-            "version": "dev-claude/improve-playgrounds-api-pFqYT",
+            "version": "dev-claude/audit-fixture-tours-K4DUa",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Cli",
@@ -312,7 +312,7 @@
         },
         {
             "name": "app-dev-panel/kernel",
-            "version": "dev-claude/improve-playgrounds-api-pFqYT",
+            "version": "dev-claude/audit-fixture-tours-K4DUa",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Kernel",
@@ -384,7 +384,7 @@
         },
         {
             "name": "app-dev-panel/mcp-server",
-            "version": "dev-claude/improve-playgrounds-api-pFqYT",
+            "version": "dev-claude/audit-fixture-tours-K4DUa",
             "dist": {
                 "type": "path",
                 "url": "../../libs/McpServer",
@@ -4647,6 +4647,92 @@
             "time": "2025-12-13T11:57:57+00:00"
         },
         {
+            "name": "yiisoft/mailer",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/mailer.git",
+                "reference": "b3516fb25d37e51903df3682a10ec84b5c60f2d9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/mailer/zipball/b3516fb25d37e51903df3682a10ec84b5c60f2d9",
+                "reference": "b3516fb25d37e51903df3682a10ec84b5c60f2d9",
+                "shasum": ""
+            },
+            "require": {
+                "php": "8.1 - 8.5"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.8.3",
+                "friendsofphp/php-cs-fixer": "^3.93",
+                "phpunit/phpunit": "^10.5.45",
+                "psr/event-dispatcher": "^1.0",
+                "rector/rector": "^2.0.10",
+                "roave/infection-static-analysis-plugin": "^1.35",
+                "vimeo/psalm": "^5.26.1 || ^6.9.4",
+                "yiisoft/aliases": "^3.0",
+                "yiisoft/code-style": "^1.0",
+                "yiisoft/definitions": "^3.4",
+                "yiisoft/di": "^1.3",
+                "yiisoft/files": "^2.0",
+                "yiisoft/test-support": "^3.0.2",
+                "yiisoft/yii-debug": "dev-master"
+            },
+            "suggest": {
+                "psr/event-dispatcher": "Use PSR Event Dispatcher implementation for process before/after send events",
+                "yiisoft/event-dispatcher": "Yii Event Dispatcher",
+                "yiisoft/mailer-symfony": "`symfony/mailer` based driver for send emails"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": true,
+                    "target-directory": "tools"
+                },
+                "config-plugin": {
+                    "di": "config/di.php",
+                    "params": "config/params.php"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Yiisoft\\Mailer\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Sending email abstraction",
+            "homepage": "https://www.yiiframework.com/",
+            "keywords": [
+                "mailer",
+                "yii"
+            ],
+            "support": {
+                "chat": "https://t.me/yii3en",
+                "forum": "https://www.yiiframework.com/forum/",
+                "irc": "ircs://irc.libera.chat:6697/yii",
+                "issues": "https://github.com/yiisoft/mailer/issues?state=open",
+                "source": "https://github.com/yiisoft/mailer",
+                "wiki": "https://www.yiiframework.com/wiki/"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/yiisoft",
+                    "type": "github"
+                },
+                {
+                    "url": "https://opencollective.com/yiisoft",
+                    "type": "opencollective"
+                }
+            ],
+            "time": "2026-02-27T19:04:16+00:00"
+        },
+        {
             "name": "yiisoft/middleware-dispatcher",
             "version": "5.4.0",
             "source": {
@@ -4873,26 +4959,25 @@
         },
         {
             "name": "yiisoft/proxy",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/proxy.git",
-                "reference": "752a4de3c39e90b23dd3ac12b1d5298f8b86916f"
+                "reference": "7f316620e7b3c00ed3fe74812f1a4f5193de38b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/proxy/zipball/752a4de3c39e90b23dd3ac12b1d5298f8b86916f",
-                "reference": "752a4de3c39e90b23dd3ac12b1d5298f8b86916f",
+                "url": "https://api.github.com/repos/yiisoft/proxy/zipball/7f316620e7b3c00ed3fe74812f1a4f5193de38b4",
+                "reference": "7f316620e7b3c00ed3fe74812f1a4f5193de38b4",
                 "shasum": ""
             },
             "require": {
-                "php": "8.1 - 8.4",
+                "php": "8.1 - 8.5",
                 "yiisoft/files": "^1.0.2 || ^2.0.0"
             },
             "require-dev": {
                 "phpunit/phpunit": "^10.5.47",
                 "roave/infection-static-analysis-plugin": "^1.35",
-                "spatie/phpunit-watcher": "^1.24",
                 "vimeo/psalm": "^5.26.1 || ^6.12"
             },
             "type": "library",
@@ -4928,7 +5013,7 @@
                     "type": "opencollective"
                 }
             ],
-            "time": "2025-09-23T12:47:50+00:00"
+            "time": "2026-04-02T12:11:35+00:00"
         },
         {
             "name": "yiisoft/psr-emitter",
@@ -9985,7 +10070,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "yiisoft/mailer": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
