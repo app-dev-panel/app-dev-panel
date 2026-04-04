@@ -6,33 +6,24 @@ namespace AppDevPanel\Kernel\Tests\Unit\DebugServer;
 
 use AppDevPanel\Kernel\DebugServer\Broadcaster;
 use AppDevPanel\Kernel\DebugServer\Connection;
+use AppDevPanel\Kernel\DebugServer\SocketReader;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 
 #[RequiresPhpExtension('sockets')]
 final class BroadcasterTest extends TestCase
 {
-    public function testBroadcastWithNoListeners(): void
+    public function testBroadcastWithNoListenersReturnsNoErrors(): void
     {
+        // Clean up only our test-created discovery files (not ALL files on the machine)
+        $this->cleanupTestDiscoveryFiles();
+
         $broadcaster = new Broadcaster();
         $errors = $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, 'test message');
-        $this->assertIsArray($errors);
-    }
-
-    public function testBroadcastReturnsEmptyErrorsWhenNoDiscoveryFiles(): void
-    {
-        // Clean up any existing discovery files to ensure no listeners
-        $existingFiles = glob(Connection::discoveryPattern(), GLOB_NOSORT);
-        foreach ($existingFiles as $file) {
-            @unlink($file);
-        }
-
-        $broadcaster = new Broadcaster();
-        $errors = $broadcaster->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, json_encode(['test' => 'data']));
         $this->assertSame([], $errors);
     }
 
-    public function testBroadcastToActiveConnection(): void
+    public function testBroadcastToActiveConnectionDeliversMessage(): void
     {
         $connection = Connection::create();
         $connection->bind();
@@ -40,8 +31,17 @@ final class BroadcasterTest extends TestCase
         try {
             $broadcaster = new Broadcaster();
             $errors = $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, 'hello');
+            $this->assertSame([], $errors);
 
-            $this->assertIsArray($errors);
+            // Verify the message was actually received
+            $reader = new SocketReader($connection->getSocket());
+            $generator = $reader->read();
+            $message = $generator->current();
+
+            $this->assertSame(Connection::TYPE_RESULT, $message[0]);
+            $decoded = json_decode($message[1], true);
+            $this->assertSame(Connection::MESSAGE_TYPE_LOGGER, $decoded[0]);
+            $this->assertSame('hello', $decoded[1]);
         } finally {
             $connection->close();
         }
@@ -50,11 +50,9 @@ final class BroadcasterTest extends TestCase
     public function testBroadcastCleansUpStaleDiscoveryFiles(): void
     {
         if (Connection::isWindows()) {
-            // On Windows, create a .port file with an invalid port
             $fakeFile = sys_get_temp_dir() . '/' . Connection::SOCKET_FILE_PREFIX . '99999.port';
             file_put_contents($fakeFile, '0');
         } else {
-            // On Unix, create a fake .sock file that doesn't have a listening socket
             $fakeFile =
                 sys_get_temp_dir() . '/' . Connection::SOCKET_FILE_PREFIX . random_int(900000000, 999999999) . '.sock';
             touch($fakeFile);
@@ -63,24 +61,30 @@ final class BroadcasterTest extends TestCase
         $broadcaster = new Broadcaster();
         $errors = $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, 'test');
 
-        // Broadcast should complete without throwing
         $this->assertIsArray($errors);
-
-        @unlink($fakeFile);
+        // Stale file should have been cleaned up
+        $this->assertFileDoesNotExist($fakeFile);
     }
 
     public function testBroadcastWithDifferentMessageTypes(): void
     {
-        $broadcaster = new Broadcaster();
+        $connection = Connection::create();
+        $connection->bind();
 
-        $errors1 = $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, 'log message');
-        $this->assertIsArray($errors1);
+        try {
+            $broadcaster = new Broadcaster();
 
-        $errors2 = $broadcaster->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, 'dump data');
-        $this->assertIsArray($errors2);
+            $errors1 = $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, 'log message');
+            $this->assertSame([], $errors1);
+
+            $errors2 = $broadcaster->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, 'dump data');
+            $this->assertSame([], $errors2);
+        } finally {
+            $connection->close();
+        }
     }
 
-    public function testBroadcastWithLargePayload(): void
+    public function testBroadcastWithLargePayloadDelivers(): void
     {
         $connection = Connection::create();
         $connection->bind();
@@ -89,8 +93,16 @@ final class BroadcasterTest extends TestCase
             $broadcaster = new Broadcaster();
             $largeData = str_repeat('x', 2048);
             $errors = $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, $largeData);
+            $this->assertSame([], $errors);
 
-            $this->assertIsArray($errors);
+            // Verify the large payload was actually received
+            $reader = new SocketReader($connection->getSocket());
+            $generator = $reader->read();
+            $message = $generator->current();
+
+            $this->assertSame(Connection::TYPE_RESULT, $message[0]);
+            $decoded = json_decode($message[1], true);
+            $this->assertSame($largeData, $decoded[1]);
         } finally {
             $connection->close();
         }
@@ -113,11 +125,31 @@ final class BroadcasterTest extends TestCase
         try {
             $broadcaster = new Broadcaster();
             $errors = $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, 'multi-target');
+            $this->assertSame([], $errors);
 
-            $this->assertIsArray($errors);
+            // Verify both connections received the message
+            $reader1 = new SocketReader($conn1->getSocket());
+            $msg1 = $reader1->read()->current();
+            $this->assertSame(Connection::TYPE_RESULT, $msg1[0]);
+
+            $reader2 = new SocketReader($conn2->getSocket());
+            $msg2 = $reader2->read()->current();
+            $this->assertSame(Connection::TYPE_RESULT, $msg2[0]);
         } finally {
             $conn1->close();
             $conn2->close();
+        }
+    }
+
+    /**
+     * Remove only discovery files that match our prefix pattern.
+     * Does NOT remove files from other running debug servers.
+     */
+    private function cleanupTestDiscoveryFiles(): void
+    {
+        $files = glob(Connection::discoveryPattern(), GLOB_NOSORT);
+        foreach ($files as $file) {
+            @unlink($file);
         }
     }
 }

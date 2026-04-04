@@ -149,7 +149,11 @@ final class Connection
 
         $file = sprintf('%s/%s%d.port', sys_get_temp_dir(), self::SOCKET_FILE_PREFIX, $port);
         $this->uri = $file;
-        file_put_contents($file, (string) $port);
+
+        if (file_put_contents($file, (string) $port) === false) {
+            @socket_close($this->socket);
+            throw new RuntimeException(sprintf('Failed to write discovery file: "%s".', $file));
+        }
     }
 
     private function closeUnix(): void
@@ -157,16 +161,16 @@ final class Connection
         $path = null;
         @socket_getsockname($this->socket, $path);
         @socket_close($this->socket);
-        if ($path !== null && file_exists($path)) {
-            unlink($path);
+        if ($path !== null) {
+            @unlink($path);
         }
     }
 
     private function closeWindows(): void
     {
         @socket_close($this->socket);
-        if (isset($this->uri) && file_exists($this->uri)) {
-            unlink($this->uri);
+        if (isset($this->uri)) {
+            @unlink($this->uri);
         }
     }
 }

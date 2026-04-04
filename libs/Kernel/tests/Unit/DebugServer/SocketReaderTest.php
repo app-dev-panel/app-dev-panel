@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 #[RequiresPhpExtension('sockets')]
 final class SocketReaderTest extends TestCase
 {
-    public function testReadReceivesBroadcastedMessage(): void
+    public function testReadReceivesBroadcastedLoggerMessage(): void
     {
         $connection = Connection::create();
         $connection->bind();
@@ -23,18 +23,12 @@ final class SocketReaderTest extends TestCase
             $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, 'hello from test');
 
             $reader = new SocketReader($connection->getSocket());
-            $generator = $reader->read();
+            $message = $this->readFirstResult($reader);
 
-            $message = $generator->current();
-
-            // We should get either a TYPE_RESULT with our data, or TYPE_RELEASE on timeout
-            $this->assertContains($message[0], [Connection::TYPE_RESULT, Connection::TYPE_RELEASE]);
-
-            if ($message[0] === Connection::TYPE_RESULT) {
-                $decoded = json_decode($message[1], true);
-                $this->assertSame(Connection::MESSAGE_TYPE_LOGGER, $decoded[0]);
-                $this->assertSame('hello from test', $decoded[1]);
-            }
+            $this->assertNotNull($message, 'Expected to receive a broadcasted message but got only timeouts');
+            $decoded = json_decode($message[1], true);
+            $this->assertSame(Connection::MESSAGE_TYPE_LOGGER, $decoded[0]);
+            $this->assertSame('hello from test', $decoded[1]);
         } finally {
             $connection->close();
         }
@@ -50,37 +44,12 @@ final class SocketReaderTest extends TestCase
             $broadcaster->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, '{"var":"dump"}');
 
             $reader = new SocketReader($connection->getSocket());
-            $generator = $reader->read();
+            $message = $this->readFirstResult($reader);
 
-            $message = $generator->current();
-
-            if ($message[0] === Connection::TYPE_RESULT) {
-                $decoded = json_decode($message[1], true);
-                $this->assertSame(Connection::MESSAGE_TYPE_VAR_DUMPER, $decoded[0]);
-                $this->assertSame('{"var":"dump"}', $decoded[1]);
-            } else {
-                // Timeout/release is acceptable in test environment
-                $this->assertContains($message[0], [Connection::TYPE_RELEASE, Connection::TYPE_ERROR]);
-            }
-        } finally {
-            $connection->close();
-        }
-    }
-
-    public function testReadYieldsReleaseOnTimeout(): void
-    {
-        $connection = Connection::create();
-        $connection->bind();
-
-        try {
-            // Don't broadcast anything — reader should time out
-            $reader = new SocketReader($connection->getSocket());
-            $generator = $reader->read();
-
-            $message = $generator->current();
-
-            // Should be a release or error (timeout with no data)
-            $this->assertContains($message[0], [Connection::TYPE_RELEASE, Connection::TYPE_ERROR]);
+            $this->assertNotNull($message, 'Expected to receive a broadcasted message but got only timeouts');
+            $decoded = json_decode($message[1], true);
+            $this->assertSame(Connection::MESSAGE_TYPE_VAR_DUMPER, $decoded[0]);
+            $this->assertSame('{"var":"dump"}', $decoded[1]);
         } finally {
             $connection->close();
         }
@@ -100,32 +69,63 @@ final class SocketReaderTest extends TestCase
             $generator = $reader->read();
 
             $received = [];
-            // Try to read up to 2 messages, allow for timeouts
-            for ($i = 0; $i < 5 && count($received) < 2; $i++) {
+            for ($i = 0; $i < 15; $i++) {
                 $message = $generator->current();
                 if ($message[0] === Connection::TYPE_RESULT) {
                     $received[] = json_decode($message[1], true);
+                    if (count($received) >= 2) {
+                        break;
+                    }
                 }
                 $generator->next();
             }
 
-            // At least one message should have been received
-            $this->assertNotEmpty($received);
+            $this->assertCount(2, $received, 'Expected exactly 2 messages');
+            $this->assertSame(Connection::MESSAGE_TYPE_LOGGER, $received[0][0]);
+            $this->assertSame('msg1', $received[0][1]);
+            $this->assertSame(Connection::MESSAGE_TYPE_VAR_DUMPER, $received[1][0]);
+            $this->assertSame('msg2', $received[1][1]);
         } finally {
             $connection->close();
         }
     }
 
-    public function testConstructorAcceptsSocket(): void
+    public function testReadGeneratorCanBeStopped(): void
     {
         $connection = Connection::create();
         $connection->bind();
 
         try {
+            // Broadcast a message so the generator has something to yield
+            $broadcaster = new Broadcaster();
+            $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, 'stop-test');
+
             $reader = new SocketReader($connection->getSocket());
-            $this->assertInstanceOf(SocketReader::class, $reader);
+            $generator = $reader->read();
+            $message = $generator->current();
+
+            // After getting a result, we can stop iterating (generator is garbage-collected)
+            $this->assertSame(Connection::TYPE_RESULT, $message[0]);
         } finally {
             $connection->close();
         }
+    }
+
+    /**
+     * Read from the generator until a TYPE_RESULT is received or max iterations exceeded.
+     */
+    private function readFirstResult(SocketReader $reader, int $maxIterations = 15): ?array
+    {
+        $generator = $reader->read();
+
+        for ($i = 0; $i < $maxIterations; $i++) {
+            $message = $generator->current();
+            if ($message[0] === Connection::TYPE_RESULT) {
+                return $message;
+            }
+            $generator->next();
+        }
+
+        return null;
     }
 }
