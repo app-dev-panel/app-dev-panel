@@ -222,7 +222,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             } catch {
                 return;
             }
-            if (data.type && data.type === EventTypesEnum.DebugUpdated) {
+            if (
+                data.type &&
+                (data.type === EventTypesEnum.DebugUpdated || data.type === EventTypesEnum.EntryCreated)
+            ) {
                 const result = await getDebugQuery();
                 if ('data' in result && result.data.length > 0) {
                     changeEntry(result.data[0]);

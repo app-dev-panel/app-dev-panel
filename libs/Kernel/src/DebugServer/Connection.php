@@ -30,6 +30,7 @@ final class Connection
 
     public const MESSAGE_TYPE_VAR_DUMPER = 0x001B;
     public const MESSAGE_TYPE_LOGGER = 0x002B;
+    public const MESSAGE_TYPE_ENTRY_CREATED = 0x003B;
 
     public const SOCKET_FILE_PREFIX = 'adp-debug-server-';
 

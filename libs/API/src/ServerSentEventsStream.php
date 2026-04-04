@@ -15,11 +15,13 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
 
     /**
      * @param Closure $stream Callback that populates buffer and returns true to continue
+     * @param null|Closure $onClose Optional cleanup callback invoked when stream ends
      */
     public function __construct(
         private Closure $stream,
         private int $pollIntervalMicros = 500_000,
         private int $sleepChunkMicros = 50_000,
+        private ?Closure $onClose = null,
     ) {
         $this->parentPid = function_exists('posix_getppid') ? posix_getppid() : 0;
         $this->installSignalHandler();
@@ -54,12 +56,17 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
 
     public function close(): void
     {
-        $this->eof = true;
+        if (!$this->eof) {
+            $this->eof = true;
+            if ($this->onClose !== null) {
+                ($this->onClose)();
+            }
+        }
     }
 
     public function detach(): mixed
     {
-        $this->eof = true;
+        $this->close();
         return null;
     }
 
@@ -127,7 +134,7 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
         $output .= "\n";
 
         if (!$continue || $this->eof) {
-            $this->eof = true;
+            $this->close();
             return $output;
         }
 
@@ -139,7 +146,7 @@ final class ServerSentEventsStream implements StreamInterface, \Stringable
         $slept = 0;
         while ($slept < $this->pollIntervalMicros) {
             if ($this->eof || connection_aborted() || $this->isOrphaned()) {
-                $this->eof = true;
+                $this->close();
                 return $output;
             }
             usleep($this->sleepChunkMicros);
