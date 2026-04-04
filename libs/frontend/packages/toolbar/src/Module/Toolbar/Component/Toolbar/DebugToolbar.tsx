@@ -10,6 +10,7 @@ import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Deb
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {DebugEntriesListModal} from '@app-dev-panel/toolbar/Module/Toolbar/Component/DebugEntriesListModal';
+import {AiChatPopup} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/AiChatPopup';
 import {CommandItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Console/CommandItem';
 import {DatabaseItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DatabaseItem';
 import {DeprecationItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DeprecationItem';
@@ -476,6 +477,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                     )}
                 </Box>
                 <SnapZones activeZone={snapZone} />
+                <AiChatPopup open={chatOpen} onClose={() => setChatOpen(false)} entry={selectedEntry ?? null} />
                 <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
             </Portal>
         );
@@ -533,6 +535,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                     <Box sx={{p: 1, display: 'flex', gap: 0.5}}>{actionButtons}</Box>
                 </Paper>
                 <SnapZones activeZone={snapZone} />
+                <AiChatPopup open={chatOpen} onClose={() => setChatOpen(false)} entry={selectedEntry ?? null} />
                 <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
             </Portal>
         );
@@ -611,6 +614,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                 </Box>
             </Paper>
             <SnapZones activeZone={snapZone} />
+            <AiChatPopup open={chatOpen} onClose={() => setChatOpen(false)} entry={selectedEntry ?? null} />
             <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
         </Portal>
     );
