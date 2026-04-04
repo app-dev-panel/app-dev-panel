@@ -18,6 +18,15 @@
             "command": ".claude/hooks/run-tests.sh"
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/modulite-check.sh"
+          }
+        ]
       }
     ],
     "PreToolUse": [

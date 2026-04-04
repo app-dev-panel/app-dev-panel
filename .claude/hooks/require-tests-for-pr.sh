@@ -21,7 +21,13 @@ if [[ -x "$MAGO" ]]; then
     fi
 fi
 
-# 2. Frontend linting
+# 2. Modulite (module boundary check)
+echo "Checking module boundaries (Modulite)..."
+if ! php "$ROOT_DIR/tools/modulite-check.php" 2>&1 | tail -5; then
+    ERRORS+=("Modulite boundary check failed")
+fi
+
+# 3. Frontend linting
 FRONTEND_DIR="${ROOT_DIR}/libs/frontend"
 if [[ -f "${FRONTEND_DIR}/package.json" ]]; then
     echo "Checking frontend code quality..."
@@ -30,13 +36,13 @@ if [[ -f "${FRONTEND_DIR}/package.json" ]]; then
     fi
 fi
 
-# 3. PHP tests
+# 4. PHP tests
 echo "Running PHP tests..."
 if ! cd "$ROOT_DIR" && composer test:unit 2>&1 | tail -15; then
     ERRORS+=("PHP tests failed")
 fi
 
-# 4. Frontend tests
+# 5. Frontend tests
 if [[ -f "${FRONTEND_DIR}/package.json" ]]; then
     echo "Running frontend tests..."
     if ! cd "$FRONTEND_DIR" && npm test 2>&1 | tail -15; then

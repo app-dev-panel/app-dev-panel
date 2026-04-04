@@ -15,7 +15,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 - **Frontend**: React 19, TypeScript 6, Vite 8, Material-UI (MUI) 7, Redux Toolkit 2
 - **Build**: Composer (PHP), npm workspaces + Lerna (JS), Docker
 - **Testing**: PHPUnit 11 (backend), Vitest (frontend)
-- **Code Quality**: [Mago](https://mago.carthage.software/) (linter + formatter + static analyzer, written in Rust)
+- **Code Quality**: [Mago](https://mago.carthage.software/) (linter + formatter + static analyzer, written in Rust), Modulite (module boundary checker, inspired by [VK Modulite](https://github.com/VKCOM/modulite))
 
 ## Repository Structure
 
@@ -51,6 +51,9 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │   ├── api/                      # API reference docs (EN)
 │   ├── blog/                     # Blog posts (EN)
 │   └── ru/                       # Russian translations (guide/, api/, blog/)
+├── modulite.php                   # Module boundary rules (dependency graph)
+├── tools/
+│   └── modulite-check.php        # Module boundary validator script
 ├── CLAUDE.md                     # This file
 └── docs/
     ├── mcp-server-plan.md        # MCP server remaining phases (3-6)
@@ -164,8 +167,11 @@ make mago-playgrounds-fix           # Fix formatting in all playgrounds (paralle
 make frontend-check                 # Run frontend checks (Prettier + ESLint)
 make frontend-fix                   # Fix frontend code quality issues
 
+# Modulite — Module boundary validation
+make modulite                       # Check module boundary violations
+
 # Combined
-make check                          # Run ALL code quality checks (core + playgrounds + frontend)
+make check                          # Run ALL code quality checks (core + playgrounds + frontend + modulite)
 make fix                            # Fix all code (core + playgrounds + frontend)
 make all                            # Run everything: checks + tests
 
@@ -202,12 +208,54 @@ composer fix                        # PHP fix (same as make mago-fix)
 cd libs/frontend && npm run check   # Frontend check (same as make frontend-check)
 ```
 
+## Modulite — Module Boundary Validation
+
+Inspired by [VK Modulite](https://github.com/VKCOM/modulite). Enforces that each module only imports from its declared dependencies.
+
+**Configuration**: `modulite.php` — defines modules, namespaces, paths, and allowed `requires`.
+**Validator**: `tools/modulite-check.php` — scans `use` statements, reports violations.
+
+### Dependency Rules
+
+| Module | Requires |
+|--------|----------|
+| `kernel` | (none — foundation) |
+| `mcp-server` | `kernel` |
+| `api` | `kernel`, `mcp-server` |
+| `cli` | `kernel`, `api`, `mcp-server` |
+| `testing` | (none — independent) |
+| `adapter-yii3` | `kernel`, `api`, `cli`, `mcp-server` |
+| `adapter-symfony` | `kernel`, `api`, `cli`, `mcp-server` |
+| `adapter-laravel` | `kernel`, `api`, `cli`, `mcp-server` |
+| `adapter-yii2` | `kernel`, `api`, `cli`, `mcp-server` |
+| `adapter-cycle` | `api` |
+
+### Rules
+
+- **No circular dependencies**: the graph is strictly acyclic
+- **Kernel is the foundation**: all core modules depend on Kernel (directly or transitively)
+- **Adapters depend on core**: adapters may use Kernel + API + Cli, never other adapters
+- **Testing is independent**: no internal dependencies
+- **Cycle is minimal**: only depends on API (for `SchemaProviderInterface`)
+- External (vendor) namespaces are not governed by these rules
+
+### Usage
+
+```bash
+make modulite                              # Human-readable output
+php tools/modulite-check.php --format=github   # GitHub Actions annotations
+php tools/modulite-check.php --format=json     # JSON output
+```
+
+To add a new dependency: edit `requires` in `modulite.php`. To add a new module: add a new entry with `namespace`, `path`, `requires`.
+
 ## CI/CD
 
 GitHub Actions runs on every push and PR:
 
 - **Tests**: Matrix of PHP 8.4/8.5 on Linux and Windows
 - **Mago**: Format check, lint, and static analysis
+- **Modulite**: Module boundary validation
 - **PR Reports**: Coverage report and Mago analysis posted as PR comments
 
 ## Test Coverage Summary
@@ -283,6 +331,7 @@ make mago-playgrounds-fix           # Playgrounds only
 make frontend-fix                   # Frontend only
 make test-php                       # PHP tests only
 make test-frontend                  # Frontend tests only
+make modulite                       # Module boundary check only
 ```
 All checks must be green. Fix any failures before proceeding — **including pre-existing test failures from other branches**. If tests were broken before your branch, fix them anyway.
 

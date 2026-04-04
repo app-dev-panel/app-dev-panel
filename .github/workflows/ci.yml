@@ -249,6 +249,28 @@ jobs:
           retention-days: 1
 
   # ---------------------------------------------------------------------------
+  # Modulite — Module Boundary Validation
+  # ---------------------------------------------------------------------------
+  modulite:
+    name: "Modulite: Boundaries"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring
+          coverage: none
+        env:
+          COMPOSER_ALLOW_SUPERUSER: 1
+
+      - name: Check module boundaries
+        run: php tools/modulite-check.php --format=github
+
+  # ---------------------------------------------------------------------------
   # Frontend Code Quality (Prettier + ESLint)
   # ---------------------------------------------------------------------------
   frontend-quality:
