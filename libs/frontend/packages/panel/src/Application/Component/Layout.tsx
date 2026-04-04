@@ -123,6 +123,7 @@ const inspectorChildren = [
     {key: '/inspector/storage', icon: 'storage', label: 'Storage'},
     {key: '/inspector/authorization', icon: 'shield', label: 'Authorization'},
     {key: '/inspector/environment', icon: 'settings_suggest', label: 'Environment'},
+    {key: '/inspector/http-mock', icon: 'cloud_queue', label: 'HTTP Mock'},
 ];
 
 // ---------------------------------------------------------------------------

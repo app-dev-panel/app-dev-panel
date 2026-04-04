@@ -17,6 +17,7 @@ use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\ElasticsearchController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
+use AppDevPanel\Api\Inspector\Controller\HttpMockController;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Controller\OpcacheController;
 use AppDevPanel\Api\Inspector\Controller\RedisController;
@@ -270,6 +271,48 @@ final class ApiRoutes
                 '/inspect/api/coverage/file',
                 [CodeCoverageController::class, 'file'],
                 'inspect/api/coverage/file',
+            ),
+            new Route(
+                'GET',
+                '/inspect/api/http-mock/status',
+                [HttpMockController::class, 'status'],
+                'inspect/api/http-mock/status',
+            ),
+            new Route(
+                'GET',
+                '/inspect/api/http-mock/expectations',
+                [HttpMockController::class, 'listExpectations'],
+                'inspect/api/http-mock/expectations',
+            ),
+            new Route(
+                'POST',
+                '/inspect/api/http-mock/expectations',
+                [HttpMockController::class, 'createExpectation'],
+                'inspect/api/http-mock/expectations/create',
+            ),
+            new Route(
+                'DELETE',
+                '/inspect/api/http-mock/expectations',
+                [HttpMockController::class, 'clearExpectations'],
+                'inspect/api/http-mock/expectations/clear',
+            ),
+            new Route(
+                'POST',
+                '/inspect/api/http-mock/verify',
+                [HttpMockController::class, 'verify'],
+                'inspect/api/http-mock/verify',
+            ),
+            new Route(
+                'GET',
+                '/inspect/api/http-mock/history',
+                [HttpMockController::class, 'history'],
+                'inspect/api/http-mock/history',
+            ),
+            new Route(
+                'POST',
+                '/inspect/api/http-mock/reset',
+                [HttpMockController::class, 'reset'],
+                'inspect/api/http-mock/reset',
             ),
             new Route('POST', '/inspect/api/mcp', [McpController::class, 'handle'], 'inspect/api/mcp'),
             new Route(
