@@ -77,7 +77,7 @@ final class FileStorageTest extends AbstractStorageTestCase
         $this->assertDirectoryDoesNotExist($this->path);
     }
 
-    public function testFilesAreGzipCompressed(): void
+    public function testFilesArePlainJson(): void
     {
         $idGenerator = new DebuggerIdGenerator();
         $storage = $this->getStorage($idGenerator);
@@ -86,31 +86,29 @@ final class FileStorageTest extends AbstractStorageTestCase
         $storage->addCollector($collector);
         $storage->flush();
 
-        $gzFiles = glob($this->path . '/**/**/*.json.gz');
-        $this->assertCount(3, $gzFiles, 'Expected 3 .json.gz files (summary, data, objects)');
-
         $jsonFiles = glob($this->path . '/**/**/*.json');
-        $this->assertCount(0, $jsonFiles, 'No plain .json files should exist');
+        $this->assertCount(3, $jsonFiles, 'Expected 3 .json files (summary, data, objects)');
 
-        // Verify files are valid gzip
-        foreach ($gzFiles as $file) {
+        $gzFiles = glob($this->path . '/**/**/*.json.gz');
+        $this->assertCount(0, $gzFiles, 'No .json.gz files should exist');
+
+        // Verify files are valid JSON
+        foreach ($jsonFiles as $file) {
             $raw = file_get_contents($file);
-            $decoded = gzdecode($raw);
-            $this->assertNotFalse($decoded);
-            $this->assertJson($decoded);
+            $this->assertJson($raw);
         }
     }
 
-    public function testReadLegacyJsonFiles(): void
+    public function testReadLegacyGzipFiles(): void
     {
-        $id = 'legacy-entry';
+        $id = 'legacy-gz-entry';
         $basePath = $this->path . '/' . date('Y-m-d') . '/' . $id . '/';
         mkdir($basePath, 0777, true);
 
-        // Write plain JSON files (legacy format)
-        file_put_contents($basePath . 'summary.json', json_encode(['id' => $id, 'collectors' => []]));
-        file_put_contents($basePath . 'data.json', json_encode(['test' => 'value']));
-        file_put_contents($basePath . 'objects.json', json_encode([]));
+        // Write gzip files (legacy format)
+        file_put_contents($basePath . 'summary.json.gz', gzencode(json_encode(['id' => $id, 'collectors' => []])));
+        file_put_contents($basePath . 'data.json.gz', gzencode(json_encode(['test' => 'value'])));
+        file_put_contents($basePath . 'objects.json.gz', gzencode(json_encode([])));
 
         $idGenerator = new DebuggerIdGenerator();
         $storage = $this->getStorage($idGenerator);
@@ -120,20 +118,18 @@ final class FileStorageTest extends AbstractStorageTestCase
         $this->assertSame($id, $summaries[$id]['id']);
     }
 
-    public function testWriteViaWriteMethodProducesGzip(): void
+    public function testWriteViaWriteMethodProducesJson(): void
     {
         $idGenerator = new DebuggerIdGenerator();
         $storage = $this->getStorage($idGenerator);
 
         $storage->write('test-id', ['id' => 'test-id'], ['key' => 'value'], []);
 
-        $gzFiles = glob($this->path . '/**/test-id/*.json.gz');
-        $this->assertCount(3, $gzFiles);
-    }
+        $jsonFiles = glob($this->path . '/**/test-id/*.json');
+        $this->assertCount(3, $jsonFiles);
 
-    public function testDefaultCompressionLevelConstant(): void
-    {
-        $this->assertSame(1, FileStorage::DEFAULT_COMPRESSION_LEVEL);
+        $gzFiles = glob($this->path . '/**/test-id/*.json.gz');
+        $this->assertCount(0, $gzFiles);
     }
 
     public function testReadEmptyDirectory(): void
@@ -185,23 +181,23 @@ final class FileStorageTest extends AbstractStorageTestCase
         $this->assertArrayHasKey('collectors', $summary);
     }
 
-    public function testGzipAndLegacyFilesCoexist(): void
+    public function testJsonAndLegacyGzipFilesCoexist(): void
     {
         $idGenerator = new DebuggerIdGenerator();
         $storage = $this->getStorage($idGenerator);
 
-        // Write a gzip entry
-        $storage->write('gz-entry', ['id' => 'gz-entry'], ['data' => 'gz'], []);
+        // Write a plain JSON entry
+        $storage->write('json-entry', ['id' => 'json-entry'], ['data' => 'json'], []);
 
-        // Write a legacy JSON entry manually
-        $legacyDir = $this->path . '/' . date('Y-m-d') . '/legacy-entry/';
+        // Write a legacy gzip entry manually
+        $legacyDir = $this->path . '/' . date('Y-m-d') . '/legacy-gz-entry/';
         mkdir($legacyDir, 0777, true);
-        file_put_contents($legacyDir . 'summary.json', json_encode(['id' => 'legacy-entry']));
+        file_put_contents($legacyDir . 'summary.json.gz', gzencode(json_encode(['id' => 'legacy-gz-entry'])));
 
         $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
         $this->assertCount(2, $summaries);
-        $this->assertArrayHasKey('gz-entry', $summaries);
-        $this->assertArrayHasKey('legacy-entry', $summaries);
+        $this->assertArrayHasKey('json-entry', $summaries);
+        $this->assertArrayHasKey('legacy-gz-entry', $summaries);
     }
 
     public function testReadAllSortsChronologically(): void
@@ -214,9 +210,9 @@ final class FileStorageTest extends AbstractStorageTestCase
         $storage->write('entry-b', ['id' => 'entry-b'], [], []);
 
         // Touch entry-a to be newer
-        $gzFiles = glob($this->path . '/**/entry-a/summary.json.gz');
-        if ($gzFiles) {
-            touch($gzFiles[0], time() + 10);
+        $jsonFiles = glob($this->path . '/**/entry-a/summary.json');
+        if ($jsonFiles) {
+            touch($jsonFiles[0], time() + 10);
         }
 
         $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
@@ -343,18 +339,7 @@ final class FileStorageTest extends AbstractStorageTestCase
         $this->assertNotEmpty($result);
     }
 
-    public function testCustomCompressionLevel(): void
-    {
-        $idGenerator = new DebuggerIdGenerator();
-        $storage = new FileStorage(new Aliases()->get($this->path), $idGenerator, compressionLevel: 9);
-
-        $storage->write('compress-test', ['id' => 'compress-test'], ['key' => 'value'], []);
-
-        $result = $storage->read(StorageInterface::TYPE_SUMMARY, 'compress-test');
-        $this->assertArrayHasKey('compress-test', $result);
-    }
-
-    public function testLegacyFileSkippedWhenGzExists(): void
+    public function testJsonPreferredOverLegacyGzipWhenBothExist(): void
     {
         $idGenerator = new DebuggerIdGenerator();
         $storage = $this->getStorage($idGenerator);
@@ -363,31 +348,29 @@ final class FileStorageTest extends AbstractStorageTestCase
         $basePath = $this->path . '/' . date('Y-m-d') . '/' . $id . '/';
         mkdir($basePath, 0o777, true);
 
-        // Write both legacy JSON and gzip for the same entry
-        $summaryData = json_encode(['id' => $id, 'format' => 'gz']);
-        file_put_contents($basePath . 'summary.json.gz', gzencode($summaryData));
+        // Write both plain JSON and legacy gzip for the same entry
         file_put_contents($basePath . 'summary.json', json_encode(['id' => $id, 'format' => 'json']));
+        file_put_contents($basePath . 'summary.json.gz', gzencode(json_encode(['id' => $id, 'format' => 'gz'])));
 
         $summaries = $storage->read(StorageInterface::TYPE_SUMMARY);
         $this->assertCount(1, $summaries);
-        // When both exist, the gz version should be preferred
-        $this->assertSame('gz', $summaries[$id]['format']);
+        // When both exist, the json version should be preferred
+        $this->assertSame('json', $summaries[$id]['format']);
     }
 
-    public function testReadEntryByIdWithLegacyJsonFile(): void
+    public function testReadEntryByIdWithLegacyGzipFile(): void
     {
         $id = 'legacy-by-id';
         $basePath = $this->path . '/' . date('Y-m-d') . '/' . $id . '/';
         mkdir($basePath, 0o777, true);
 
-        // Write plain JSON files only (legacy format)
-        file_put_contents($basePath . 'summary.json', json_encode(['id' => $id]));
-        file_put_contents($basePath . 'data.json', json_encode(['key' => 'val']));
+        // Write gzip files only (legacy format)
+        file_put_contents($basePath . 'data.json.gz', gzencode(json_encode(['key' => 'val'])));
 
         $idGenerator = new DebuggerIdGenerator();
         $storage = $this->getStorage($idGenerator);
 
-        // Read by specific ID — exercises readFile() .json fallback path
+        // Read by specific ID — exercises readFile() .json.gz fallback path
         $result = $storage->read(StorageInterface::TYPE_DATA, $id);
         $this->assertArrayHasKey($id, $result);
         $this->assertSame(['key' => 'val'], $result[$id]);
@@ -400,7 +383,7 @@ final class FileStorageTest extends AbstractStorageTestCase
         mkdir($basePath, 0o777, true);
 
         // Only write summary, not data
-        file_put_contents($basePath . 'summary.json.gz', gzencode(json_encode(['id' => $id])));
+        file_put_contents($basePath . 'summary.json', json_encode(['id' => $id]));
 
         $idGenerator = new DebuggerIdGenerator();
         $storage = $this->getStorage($idGenerator);
