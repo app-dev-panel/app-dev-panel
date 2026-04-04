@@ -72,7 +72,7 @@ Route::prefix('test/fixtures')->group(function (): void {
     Route::get('/mailer', MailerAction::class);
     Route::get('/queue', QueueAction::class);
     Route::get('/validator', ValidatorAction::class);
-    Route::get('/router', RouterAction::class);
+    Route::get('/router', RouterAction::class)->name('test_router');
     Route::get('/filesystem', FilesystemAction::class);
     Route::get('/filesystem-streams', FileStreamAction::class);
     Route::get('/opentelemetry', OpenTelemetryAction::class);

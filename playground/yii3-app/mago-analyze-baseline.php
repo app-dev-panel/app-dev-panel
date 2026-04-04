@@ -757,6 +757,12 @@ message = "Property `$responseFactory` is never used."
 count = 1
 
 [[issues]]
+file = "src/Web/TestFixtures/BootstrapAsset.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\BootstrapAsset` cannot extend unknown type `AssetBundle`'
+count = 1
+
+[[issues]]
 file = "src/Web/TestFixtures/CacheAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\CacheAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -922,6 +928,12 @@ count = 1
 file = "src/Web/TestFixtures/HttpClientAction.php"
 code = "unused-property"
 message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/JqueryAsset.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\JqueryAsset` cannot extend unknown type `AssetBundle`'
 count = 1
 
 [[issues]]

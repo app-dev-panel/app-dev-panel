@@ -11,6 +11,7 @@ use AppDevPanel\Adapter\Laravel\EventListener\AuthorizationListener;
 use AppDevPanel\Adapter\Laravel\EventListener\CacheListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ConsoleListener;
 use AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener;
+use AppDevPanel\Adapter\Laravel\EventListener\GateListener;
 use AppDevPanel\Adapter\Laravel\EventListener\HttpClientListener;
 use AppDevPanel\Adapter\Laravel\EventListener\MailListener;
 use AppDevPanel\Adapter\Laravel\EventListener\QueueListener;
@@ -882,6 +883,9 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         if ($collectors['security'] ?? true) {
             $listener = new AuthorizationListener(fn() => $this->app->make(AuthorizationCollector::class));
             $listener->register($events);
+
+            $gateListener = new GateListener(fn() => $this->app->make(AuthorizationCollector::class));
+            $gateListener->register($events);
         }
 
         if ($collectors['command'] ?? true) {
