@@ -25,7 +25,7 @@ final class ApiController extends Controller
 
         return [
             'message' => 'Welcome to the ADP Yii 2 Playground API!',
-            'debug_panel' => '/debug/api/',
+            'debug_panel' => '/debug/',
             'endpoints' => [
                 'GET /api' => 'This page',
                 'GET /api/users' => 'List users (demo)',

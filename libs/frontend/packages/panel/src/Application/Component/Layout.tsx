@@ -1,3 +1,4 @@
+import {LiveFeedPanel} from '@app-dev-panel/panel/Application/Component/LiveFeedPanel';
 import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/NotificationCenter';
 
 import {
@@ -11,9 +12,11 @@ import {
     changeEditorPreset,
     changeShowInactiveCollectors,
     changeThemeMode,
+    toggleLiveFeed,
 } from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, debugApi, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {addLiveDump, addLiveLog, useLiveCount} from '@app-dev-panel/sdk/API/Debug/LiveContext';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {CommandPalette} from '@app-dev-panel/sdk/Component/Layout/CommandPalette';
 import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
@@ -137,12 +140,12 @@ const MainArea = styled(Box)(({theme}) => ({
     [theme.breakpoints.up('sm')]: {padding: componentTokens.mainGap, gap: componentTokens.mainGap},
 }));
 
-const MainInner = styled(Box)({
+const MainInner = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(({expanded}) => ({
     display: 'flex',
     width: '100%',
-    maxWidth: componentTokens.mainMaxWidth,
+    maxWidth: expanded ? 'none' : componentTokens.mainMaxWidth,
     gap: componentTokens.mainGap,
-});
+}));
 
 const ContentArea = styled(Box)(({theme}) => ({
     flex: 1,
@@ -180,6 +183,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const showInactiveCollectors = useSelector((state) => state.application.showInactiveCollectors);
     const editorConfig = useSelector((state) => state.application.editorConfig) ?? defaultEditorConfig;
     const notificationCount = useSelector(selectUnreadCount);
+    const liveFeedCount = useLiveCount();
+    const liveFeedOpen = useSelector((state) => state.application.liveFeedOpen ?? false);
 
     // MCP settings
     const {data: mcpSettings} = useGetMcpSettingsQuery();
@@ -223,14 +228,40 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             } catch {
                 return;
             }
-            if (data.type && data.type === EventTypesEnum.DebugUpdated) {
+            if (!data.type) return;
+
+            if (data.type === EventTypesEnum.DebugUpdated || data.type === EventTypesEnum.EntryCreated) {
                 const result = await getDebugQuery();
                 if ('data' in result && result.data.length > 0) {
                     changeEntry(result.data[0]);
                 }
+            } else if (data.type === EventTypesEnum.LiveLog) {
+                try {
+                    const payload = typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+                    if (payload && typeof payload === 'object') {
+                        dispatch(
+                            addLiveLog({
+                                level: String(payload.level ?? 'debug'),
+                                message: String(payload.message ?? ''),
+                                context: payload.context,
+                            }),
+                        );
+                    }
+                } catch {
+                    /* ignore malformed payloads */
+                }
+            } else if (data.type === EventTypesEnum.LiveDump) {
+                try {
+                    const payload = typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+                    if (payload && typeof payload === 'object') {
+                        dispatch(addLiveDump({variable: payload, line: payload.$__line__$ ?? undefined}));
+                    }
+                } catch {
+                    /* ignore malformed payloads */
+                }
             }
         },
-        [getDebugQuery, changeEntry],
+        [getDebugQuery, changeEntry, dispatch],
     );
     useServerSentEvents(backendUrl, onUpdatesHandler, autoLatest);
 
@@ -263,6 +294,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     }, [dispatch, currentMode]);
 
     // Command palette
+    const handleLiveFeedClick = useCallback(() => dispatch(toggleLiveFeed()), [dispatch]);
     const handleSearchClick = useCallback(() => dispatchUI({type: 'OPEN_PALETTE'}), []);
     const handleLogoClick = useCallback(() => navigate('/'), [navigate]);
     const handlePaletteClose = useCallback(() => dispatchUI({type: 'CLOSE_PALETTE'}), []);
@@ -496,7 +528,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onEditorPresetChange={handleEditorPresetChange}
                     onEditorCustomTemplateChange={handleEditorCustomTemplateChange}
                     notificationCount={notificationCount}
+                    liveFeedCount={liveFeedCount}
+                    liveFeedActive={liveFeedOpen}
                     onNotificationsClick={handleNotificationsClick}
+                    onLiveFeedClick={handleLiveFeedClick}
                     onLogoClick={handleLogoClick}
                 />
                 <EntrySelector
@@ -531,7 +566,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     </Drawer>
                 )}
                 <MainArea>
-                    <MainInner>
+                    <MainInner expanded={liveFeedOpen && !isMobile}>
                         {!isMobile && (
                             <UnifiedSidebar
                                 sections={sidebarSections}
@@ -546,6 +581,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                                 <Outlet />
                             </ErrorBoundary>
                         </ContentArea>
+                        {liveFeedOpen && !isMobile && <LiveFeedPanel onClose={handleLiveFeedClick} />}
                     </MainInner>
                 </MainArea>
             </Box>

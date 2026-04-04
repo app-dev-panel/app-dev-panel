@@ -16,6 +16,12 @@ return [
             ->name('contact'),
         Route::get('/api-playground')->action(Web\ApiPlaygroundPage\Action::class)->name('api-playground'),
         Route::get('/error')->action(Web\ErrorPage\Action::class)->name('error-demo'),
+        Route::methods(['GET', 'POST'], '/log-demo')
+            ->action(Web\LogDemoPage\Action::class)
+            ->name('log-demo'),
+        Route::methods(['GET', 'POST'], '/var-dumper')
+            ->action(Web\VarDumperPage\Action::class)
+            ->name('var-dumper'),
     ),
     Group::create('/api')
         ->routes(

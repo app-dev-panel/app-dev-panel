@@ -24,7 +24,7 @@ final class HomeController extends AbstractController
 
         return $this->json([
             'message' => 'Welcome to the ADP Symfony Playground API!',
-            'debug_panel' => '/debug/api/',
+            'debug_panel' => '/debug/',
             'endpoints' => [
                 'GET /api' => 'This page',
                 'GET /api/users' => 'List users (demo)',

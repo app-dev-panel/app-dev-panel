@@ -3,7 +3,6 @@ import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@app-de
 import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
-import {IFrameWrapper} from '@app-dev-panel/sdk/Helper/IFrameWrapper';
 import {DebugEntriesListModal} from '@app-dev-panel/toolbar/Module/Toolbar/Component/DebugEntriesListModal';
 import {CommandItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Console/CommandItem';
 import {DatabaseItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DatabaseItem';
@@ -26,7 +25,85 @@ import {Box, Chip, Divider, IconButton, Paper, Portal, Stack, Tooltip, useTheme}
 import {ForwardedRef, forwardRef, useCallback, useEffect, useRef, useState} from 'react';
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
-import {useResizable} from 'react-resizable-layout';
+
+/**
+ * Delta-based resize hook. Tracks mouse movement delta from drag start,
+ * independent of container/body position. Fixes the "runaway handle" bug
+ * that occurs with react-resizable-layout inside sticky-positioned containers.
+ */
+const useBottomResize = ({
+    initial,
+    min,
+    max,
+    onResizeEnd,
+}: {
+    initial: number;
+    min: number;
+    max: number;
+    onResizeEnd: (height: number) => void;
+}) => {
+    const [height, setHeight] = useState(initial || 400);
+    const [isDragging, setIsDragging] = useState(false);
+    const dragRef = useRef<{startY: number; startHeight: number} | null>(null);
+    const heightRef = useRef(height);
+    heightRef.current = height;
+
+    const separatorRef = useRef<HTMLElement | null>(null);
+
+    const onPointerDown = useCallback((e: React.PointerEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const target = e.currentTarget as HTMLElement;
+        separatorRef.current = target;
+        target.setPointerCapture(e.pointerId);
+        dragRef.current = {startY: e.clientY, startHeight: heightRef.current};
+        setIsDragging(true);
+    }, []);
+
+    const onPointerMove = useCallback(
+        (e: React.PointerEvent) => {
+            if (!dragRef.current) return;
+            const delta = dragRef.current.startY - e.clientY;
+            const next = Math.min(max, Math.max(min, dragRef.current.startHeight + delta));
+            setHeight(next);
+            heightRef.current = next;
+        },
+        [min, max],
+    );
+
+    const onPointerUp = useCallback(
+        (e: React.PointerEvent) => {
+            if (!dragRef.current) return;
+            separatorRef.current?.releasePointerCapture(e.pointerId);
+            setIsDragging(false);
+            onResizeEnd(heightRef.current);
+            dragRef.current = null;
+        },
+        [onResizeEnd],
+    );
+
+    const onLostPointerCapture = useCallback(() => {
+        if (!dragRef.current) return;
+        setIsDragging(false);
+        onResizeEnd(heightRef.current);
+        dragRef.current = null;
+    }, [onResizeEnd]);
+
+    const separatorProps = {
+        role: 'separator' as const,
+        'aria-valuenow': height,
+        'aria-valuemin': min,
+        'aria-valuemax': max,
+        'aria-orientation': 'horizontal' as const,
+        'aria-disabled': false,
+        onPointerDown,
+        onPointerMove,
+        onPointerUp,
+        onLostPointerCapture,
+    };
+
+    return {height, setHeight, isDragging, separatorProps};
+};
 
 const ToolbarErrorFallback = ({resetErrorBoundary}: FallbackProps) => (
     <Chip
@@ -41,14 +118,17 @@ const ToolbarErrorFallback = ({resetErrorBoundary}: FallbackProps) => (
 
 const serviceWorker = navigator?.serviceWorker;
 
-type DebugIFrameProps = {baseUrlState: string; iframeEnabled: boolean};
+type DebugIFrameProps = {baseUrlState: string; iframeEnabled: boolean; iframeSrc: string | null};
 
 const DebugIFrame = forwardRef(
-    ({baseUrlState, iframeEnabled}: DebugIFrameProps, ref: ForwardedRef<HTMLIFrameElement>) => {
+    ({baseUrlState, iframeEnabled, iframeSrc}: DebugIFrameProps, ref: ForwardedRef<HTMLIFrameElement>) => {
+        const src = iframeSrc
+            ? baseUrlState + iframeSrc + (iframeSrc.includes('?') ? '&' : '?') + 'toolbar=0'
+            : baseUrlState + '/debug?toolbar=0';
         return (
             <iframe
                 ref={ref}
-                src={baseUrlState + `/debug?toolbar=0`}
+                src={src}
                 style={{height: '100%', width: '100%', border: 'none'}}
                 hidden={!iframeEnabled}
                 loading="lazy"
@@ -122,35 +202,19 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     const handleClose = useCallback(() => setOpen(false), []);
 
     const iframeRef = useRef<HTMLIFrameElement | undefined>(undefined);
-    const [iframeWrapper, setIframeWrapper] = useState<IFrameWrapper | null>(null);
-    const pendingNavigationRef = useRef<string | null>(null);
-
-    useEffect(() => {
-        if (iframeRef.current) {
-            const wrapper = new IFrameWrapper(iframeRef.current);
-            setIframeWrapper(wrapper);
-            if (pendingNavigationRef.current) {
-                wrapper.dispatchEvent('router.navigate', pendingNavigationRef.current);
-                pendingNavigationRef.current = null;
-            }
-        }
-    }, [iframeRef.current]);
+    const [iframeSrc, setIframeSrc] = useState<string | null>(null);
 
     const iframeRouteNavigate = useCallback(
         (url: string) => {
-            if (!activeComponents.iframe) {
-                return;
-            }
+            if (!activeComponents.iframe) return;
+
+            // Navigate by changing the iframe src — works across any origin combination
+            setIframeSrc(url);
             if (!iframeEnabled) {
                 setIframeEnabled(true);
             }
-            if (iframeWrapper) {
-                iframeWrapper.dispatchEvent('router.navigate', url);
-            } else {
-                pendingNavigationRef.current = url;
-            }
         },
-        [iframeWrapper, iframeEnabled, activeComponents],
+        [iframeEnabled, activeComponents],
     );
 
     const toggleIframeHandler = useCallback(() => {
@@ -160,19 +224,22 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         setIframeEnabled((value) => !value);
     }, [activeComponents]);
 
-    const {position, separatorProps, setPosition} = useResizable({
-        axis: 'y',
+    const {
+        height: panelHeight,
+        setHeight: setPanelHeight,
+        separatorProps,
+    } = useBottomResize({
         initial: iframeHeight,
         min: 100,
         max: 1000,
-        reverse: true,
-        disabled: !isToolbarOpened,
-        onResizeEnd: (e) => {
-            dispatch(setIFrameHeight(e.position));
+        onResizeEnd: (h) => {
+            dispatch(setIFrameHeight(h));
         },
     });
     useEffect(() => {
-        setPosition(iframeHeight);
+        if (iframeHeight != null) {
+            setPanelHeight(iframeHeight);
+        }
     }, [iframeHeight]);
 
     const actionButtonSx = {p: 0.5, color: 'text.secondary', '&:hover': {color: 'text.primary'}};
@@ -345,8 +412,13 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                 </Paper>
 
                 {iframeEnabled && (
-                    <div style={{height: position, overflow: 'hidden'}}>
-                        <DebugIFrame ref={iframeRef} baseUrlState={baseUrlState} iframeEnabled={iframeEnabled} />
+                    <div style={{height: panelHeight, overflow: 'hidden'}}>
+                        <DebugIFrame
+                            ref={iframeRef}
+                            baseUrlState={baseUrlState}
+                            iframeEnabled={iframeEnabled}
+                            iframeSrc={iframeSrc}
+                        />
                     </div>
                 )}
             </Box>

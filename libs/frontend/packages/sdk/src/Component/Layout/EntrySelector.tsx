@@ -1,4 +1,5 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {
     EntryFilterConfig,
     type EntryFilterState,
@@ -498,11 +499,7 @@ export const EntrySelector = ({
                 onChange={setFilterState}
             />
             <Box ref={listRef} sx={{overflowY: 'auto', maxHeight: 360}}>
-                {matched.length === 0 && (
-                    <Box sx={{textAlign: 'center', py: 3, color: 'text.disabled'}}>
-                        <Typography variant="body2">No entries match "{filter}"</Typography>
-                    </Box>
-                )}
+                {matched.length === 0 && <EmptyState icon="search_off" title={`No entries match "${filter}"`} />}
                 {matched.map(({entry, indices}, idx) => {
                     const active = entry.id === currentEntryId;
                     const isHighlighted = idx === highlightedIndex;

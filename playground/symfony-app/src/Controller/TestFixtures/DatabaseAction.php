@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\DatabaseCollector;
-use AppDevPanel\Kernel\Collector\QueryRecord;
+use Doctrine\DBAL\Connection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -13,24 +12,25 @@ use Symfony\Component\Routing\Attribute\Route;
 final readonly class DatabaseAction
 {
     public function __construct(
-        private DatabaseCollector $databaseCollector,
+        private Connection $connection,
     ) {}
 
     public function __invoke(): JsonResponse
     {
-        // Simulate a database query by calling the collector directly.
-        // This tests the DatabaseCollector without requiring Doctrine DBAL infrastructure.
-        $start = microtime(true);
-        $this->databaseCollector->logQuery(new QueryRecord(
-            sql: 'SELECT * FROM test_users WHERE id = :id',
-            rawSql: 'SELECT * FROM test_users WHERE id = 1',
-            params: ['id' => 1],
-            line: __FILE__ . ':' . __LINE__,
-            startTime: $start,
-            endTime: microtime(true),
-            rowsNumber: 1,
-        ));
+        // Execute real SQL queries via Doctrine DBAL — the DoctrineDbalMiddleware
+        // intercepts these calls and feeds query data to DatabaseCollector.
+        $this->connection->executeStatement(
+            'CREATE TABLE IF NOT EXISTS test_users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)',
+        );
 
-        return new JsonResponse(['fixture' => 'database:basic', 'status' => 'ok']);
+        $this->connection->executeStatement('INSERT OR REPLACE INTO test_users (id, name, email) VALUES (?, ?, ?)', [
+            1,
+            'John Doe',
+            'john@example.com',
+        ]);
+
+        $result = $this->connection->fetchAssociative('SELECT * FROM test_users WHERE id = ?', [1]);
+
+        return new JsonResponse(['fixture' => 'database:basic', 'status' => 'ok', 'user' => $result]);
     }
 }

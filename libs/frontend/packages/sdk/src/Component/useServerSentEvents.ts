@@ -2,12 +2,18 @@ import {createServerSentEventsObserver} from '@app-dev-panel/sdk/Component/Serve
 import {useEffect, useRef} from 'react';
 
 type DebugUpdatedType = {type: EventTypesEnum.DebugUpdated; payload: Record<string, never>};
+type EntryCreatedType = {type: EventTypesEnum.EntryCreated; payload: {id: string}};
+type LiveLogType = {type: EventTypesEnum.LiveLog; payload: string};
+type LiveDumpType = {type: EventTypesEnum.LiveDump; payload: string};
 
 export enum EventTypesEnum {
     DebugUpdated = 'debug-updated',
+    EntryCreated = 'entry-created',
+    LiveLog = 'live-log',
+    LiveDump = 'live-dump',
 }
 
-export type EventTypes = DebugUpdatedType;
+export type EventTypes = DebugUpdatedType | EntryCreatedType | LiveLogType | LiveDumpType;
 
 export const useServerSentEvents = (
     backendUrl: string,

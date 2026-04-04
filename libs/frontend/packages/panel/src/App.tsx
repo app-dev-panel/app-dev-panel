@@ -43,10 +43,9 @@ export default function App({config}: AppProps) {
         dispatchWindowEvent(window.parent, 'panel.loaded', true);
 
         const listener = (event: MessageEvent) => {
-            if (event.origin !== window.location.origin) {
-                return;
-            }
-
+            // Accept messages from any origin — the toolbar (parent window) may be
+            // served from a different host/port than the debug panel iframe.
+            // We validate the message structure instead.
             const data = event.data;
 
             if (data && typeof data === 'object' && 'event' in data) {

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\DebugServer;
 
-use Throwable;
-
+/**
+ * Broadcasts messages to all connected debug servers.
+ *
+ * Cross-platform: discovers servers via .sock files (Unix) or .port files (Windows).
+ */
 final class Broadcaster
 {
-    private const SOCKET_ECONNREFUSED = 61;
-
     /**
      * Broadcasts a message to all connected debug servers.
      *
@@ -17,53 +18,98 @@ final class Broadcaster
      */
     public function broadcast(int $type, string $data): array
     {
-        $files = glob(sys_get_temp_dir() . '/yii-dev-server-*.sock', GLOB_NOSORT);
-        $uniqueErrors = [];
+        $files = glob(Connection::discoveryPattern(), GLOB_NOSORT);
+        if ($files === false || $files === []) {
+            return [];
+        }
+
         $payload = json_encode([$type, $data], JSON_THROW_ON_ERROR);
+        $uniqueErrors = [];
+
         foreach ($files as $file) {
-            $socket = @fsockopen('udg://' . $file, -1, $errno, $errstr);
-            if ($errno === self::SOCKET_ECONNREFUSED) {
-                if (file_exists($file)) {
-                    unlink($file);
-                }
+            $socket = Connection::isWindows()
+                ? $this->openUdpSocket($file, $uniqueErrors)
+                : $this->openUnixSocket($file, $uniqueErrors);
+
+            if ($socket === null) {
                 continue;
             }
-            if ($errno !== 0) {
-                $uniqueErrors[$errno] = $errstr;
-                continue;
-            }
+
             try {
-                if (!$this->fwriteStream($socket, $payload)) {
-                    $uniqueErrors[] = error_get_last();
-                    /**
-                     * Connection is closed.
-                     */
-                    continue;
-                }
-            } catch (Throwable $e) {
-                throw $e;
+                $this->writePayload($socket, $payload, $uniqueErrors);
             } finally {
                 fclose($socket);
             }
         }
+
         return $uniqueErrors;
     }
 
     /**
+     * @return resource|null
+     */
+    private function openUnixSocket(string $file, array &$errors)
+    {
+        $socket = @fsockopen('udg://' . $file, -1, $errno, $errstr);
+
+        if ($errno === SOCKET_ECONNREFUSED) {
+            @unlink($file);
+            return null;
+        }
+        if ($socket === false || $errno !== 0) {
+            if ($errno !== 0) {
+                $errors[$errno] = $errstr;
+            }
+            return null;
+        }
+
+        return $socket;
+    }
+
+    /**
+     * @return resource|null
+     */
+    private function openUdpSocket(string $file, array &$errors)
+    {
+        $portStr = @file_get_contents($file);
+        if ($portStr === false) {
+            return null;
+        }
+
+        $port = (int) $portStr;
+        if ($port <= 0) {
+            @unlink($file);
+            return null;
+        }
+
+        $socket = @fsockopen('udp://127.0.0.1', $port, $errno, $errstr);
+
+        if ($socket === false || $errno !== 0) {
+            if ($errno !== 0) {
+                $errors[$errno] = $errstr;
+            }
+            @unlink($file);
+            return null;
+        }
+
+        return $socket;
+    }
+
+    /**
+     * Writes an entire message as one atomic datagram (correct for SOCK_DGRAM).
+     * Format: 8-byte length header + base64-encoded payload.
+     *
      * @param resource $fp
      */
-    private function fwriteStream($fp, string $data): int|false
+    private function writePayload($fp, string $payload, array &$errors): void
     {
-        $data = base64_encode($data);
-        $strlen = strlen($data);
-        fwrite($fp, pack('P', $strlen));
-        for ($written = 0; $written < $strlen; $written += $fwrite) {
-            $fwrite = fwrite($fp, substr($data, $written), Connection::DEFAULT_BUFFER_SIZE);
-            usleep(Connection::DEFAULT_TIMEOUT * 5);
-            if ($fwrite === false) {
-                return $written;
-            }
+        stream_set_write_buffer($fp, 0);
+
+        $encoded = base64_encode($payload);
+        $datagram = pack('P', strlen($encoded)) . $encoded;
+
+        if (fwrite($fp, $datagram) === false) {
+            $errors[] = error_get_last();
         }
-        return $written;
     }
 }

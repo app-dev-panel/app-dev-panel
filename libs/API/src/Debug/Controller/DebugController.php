@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Debug\Controller;
 
 use AppDevPanel\Api\Debug\Exception\NotFoundException;
+use AppDevPanel\Api\Debug\LiveEventStreamFactory;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\ServerSentEventsStream;
@@ -105,39 +106,17 @@ final class DebugController
 
     public function eventStream(ServerRequestInterface $request): ResponseInterface
     {
-        $storage = $this->storage;
-        $compareFunction = static function () use ($storage): string {
-            $read = $storage->read(StorageInterface::TYPE_SUMMARY, null);
-            return md5(json_encode($read, JSON_THROW_ON_ERROR));
-        };
-        $hash = $compareFunction();
-        $deadline = time() + 5;
+        [$stream, $close] = LiveEventStreamFactory::create(deadlineSeconds: 30);
 
         return $this->psrResponseFactory
             ->createResponse()
             ->withHeader('Content-Type', 'text/event-stream')
             ->withHeader('Cache-Control', 'no-cache')
             ->withHeader('Connection', 'keep-alive')
-            ->withBody(new ServerSentEventsStream(static function (array &$buffer) use (
-                $compareFunction,
-                &$hash,
-                $deadline,
-            ): bool {
-                if (time() > $deadline) {
-                    return false;
-                }
-
-                $newHash = $compareFunction();
-
-                if ($hash !== $newHash) {
-                    $buffer[] = json_encode([
-                        'type' => 'debug-updated',
-                        'payload' => [],
-                    ]);
-                    $hash = $newHash;
-                }
-
-                return true;
-            }));
+            ->withBody(new ServerSentEventsStream(
+                stream: $stream,
+                pollIntervalMicros: 0, // No extra sleep — recv timeout handles pacing
+                onClose: $close,
+            ));
     }
 }

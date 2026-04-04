@@ -81,4 +81,69 @@ final class PageController extends AbstractController
         $logger->warning('About to trigger a demo exception');
         throw new \RuntimeException('This is a demo exception triggered from the Error Demo page');
     }
+
+    #[Route('/log-demo', name: 'log_demo', methods: ['GET', 'POST'])]
+    public function logDemo(Request $request, LoggerInterface $logger): Response
+    {
+        $success = false;
+        $loggedLevel = '';
+        $loggedMessage = '';
+
+        if ($request->isMethod('POST')) {
+            $level = $request->request->getString('level', 'info');
+            $message = $request->request->getString('message', '');
+            $contextRaw = $request->request->getString('context', '{}');
+
+            $context = json_decode($contextRaw, true);
+            if (!is_array($context)) {
+                $context = [];
+            }
+
+            $logger->log($level, $message, $context);
+
+            $success = true;
+            $loggedLevel = $level;
+            $loggedMessage = $message;
+        }
+
+        return $this->render('page/log-demo.html.twig', [
+            'success' => $success,
+            'loggedLevel' => $loggedLevel,
+            'loggedMessage' => $loggedMessage,
+        ]);
+    }
+
+    #[Route('/var-dumper', name: 'var_dumper', methods: ['GET', 'POST'])]
+    public function varDumper(Request $request): Response
+    {
+        $success = false;
+
+        if ($request->isMethod('POST')) {
+            dump([
+                'string' => 'Hello from ADP Playground!',
+                'integer' => 42,
+                'float' => 3.14,
+                'boolean' => true,
+                'null_value' => null,
+                'array' => ['apples', 'oranges', 'bananas'],
+                'nested' => [
+                    'user' => [
+                        'id' => 1,
+                        'name' => 'Alice',
+                        'email' => 'alice@example.com',
+                        'roles' => ['admin', 'editor'],
+                    ],
+                    'metadata' => [
+                        'created_at' => '2026-04-04T12:00:00Z',
+                        'version' => '1.0.0',
+                    ],
+                ],
+            ]);
+            $success = true;
+        }
+
+        return $this->render('page/var-dumper.html.twig', [
+            'success' => $success,
+        ]);
+    }
 }

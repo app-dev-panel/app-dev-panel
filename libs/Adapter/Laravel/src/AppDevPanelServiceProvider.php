@@ -14,6 +14,8 @@ use AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener;
 use AppDevPanel\Adapter\Laravel\EventListener\HttpClientListener;
 use AppDevPanel\Adapter\Laravel\EventListener\MailListener;
 use AppDevPanel\Adapter\Laravel\EventListener\QueueListener;
+use AppDevPanel\Adapter\Laravel\EventListener\RedisListener;
+use AppDevPanel\Adapter\Laravel\EventListener\ValidatorListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ViteAssetListener;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelConfigProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
@@ -75,6 +77,8 @@ use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Cli\Command\DebugServerBroadcastCommand;
+use AppDevPanel\Cli\Command\DebugServerCommand;
 use AppDevPanel\Cli\Command\DebugSummaryCommand;
 use AppDevPanel\Cli\Command\DebugTailCommand;
 use AppDevPanel\Cli\Command\FrontendUpdateCommand;
@@ -99,6 +103,7 @@ use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RedisCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy;
@@ -114,8 +119,12 @@ use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\Connection;
+use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
+use AppDevPanel\Kernel\Storage\BroadcastingStorage;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\McpServer;
@@ -190,11 +199,13 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
         $this->app->singleton(DebuggerIdGenerator::class);
 
-        $this->app->singleton(StorageInterface::class, function () use ($config): FileStorage {
-            return new FileStorage(
-                $config->get('app-dev-panel.storage.path'),
-                $this->app->make(DebuggerIdGenerator::class),
-                $config->get('app-dev-panel.dumper.excluded_classes', []),
+        $this->app->singleton(StorageInterface::class, function () use ($config): BroadcastingStorage {
+            return new BroadcastingStorage(
+                new FileStorage(
+                    $config->get('app-dev-panel.storage.path'),
+                    $this->app->make(DebuggerIdGenerator::class),
+                    $config->get('app-dev-panel.dumper.excluded_classes', []),
+                ),
             );
         });
 
@@ -260,6 +271,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'opentelemetry' => OpenTelemetryCollector::class,
             'assets' => AssetBundleCollector::class,
             'template' => TemplateCollector::class,
+            'redis' => RedisCollector::class,
         ];
 
         foreach ($timelineCollectors as $key => $class) {
@@ -792,6 +804,8 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             DebugDumpCommand::class,
             DebugSummaryCommand::class,
             DebugTailCommand::class,
+            DebugServerCommand::class,
+            DebugServerBroadcastCommand::class,
             InspectDatabaseCommand::class,
             InspectRoutesCommand::class,
             InspectConfigCommand::class,
@@ -844,6 +858,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'mailer' => [MailListener::class, MailerCollector::class],
             'queue' => [QueueListener::class, QueueCollector::class],
             'http_client' => [HttpClientListener::class, HttpClientCollector::class],
+            'redis' => [RedisListener::class, RedisCollector::class],
         ];
 
         foreach ($simpleListeners as $key => [$listenerClass, $collectorClass]) {
@@ -857,6 +872,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             if ($listenerClass === DatabaseListener::class) {
                 $this->app->instance(DatabaseListener::class, $listener);
             }
+        }
+
+        if ($collectors['validator'] ?? true) {
+            $listener = new ValidatorListener(fn() => $this->app->make(ValidatorCollector::class));
+            $listener->register($this->app->make('validator'));
         }
 
         if ($collectors['security'] ?? true) {
@@ -899,7 +919,8 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             if ($logger instanceof LoggerInterfaceProxy) {
                 return $logger;
             }
-            return new LoggerInterfaceProxy($logger, $this->app->make(LogCollector::class));
+            // Wrap with LoggerDecorator for Live Feed broadcasting, then LoggerInterfaceProxy for collection
+            return new LoggerInterfaceProxy(new LoggerDecorator($logger), $this->app->make(LogCollector::class));
         });
     }
 

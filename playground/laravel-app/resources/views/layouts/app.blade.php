@@ -434,6 +434,8 @@ textarea.form-control {
             <a href="/contact" class="{{ request()->is('contact') ? 'active' : '' }}">Contact</a>
             <a href="/api-playground" class="{{ request()->is('api-playground') ? 'active' : '' }}">API Playground</a>
             <a href="/error" class="{{ request()->is('error') ? 'active' : '' }}">Error Demo</a>
+            <a href="/log-demo" class="{{ request()->is('log-demo') ? 'active' : '' }}">Log Demo</a>
+            <a href="/var-dumper" class="{{ request()->is('var-dumper') ? 'active' : '' }}">Var Dumper</a>
         </nav>
     </header>
 

@@ -4,46 +4,31 @@ declare(strict_types=1);
 
 namespace App\Controller\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\MessageRecord;
-use AppDevPanel\Kernel\Collector\QueueCollector;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/test/fixtures/queue', name: 'test_queue', methods: ['GET'])]
 final readonly class QueueAction
 {
     public function __construct(
-        private QueueCollector $queueCollector,
+        private MessageBusInterface $messageBus,
     ) {}
 
     public function __invoke(): JsonResponse
     {
-        $this->queueCollector->logMessage(new MessageRecord(
-            messageClass: 'App\\Message\\SendNotification',
-            bus: 'messenger.bus.default',
-            transport: 'async',
-            dispatched: true,
-            handled: true,
-            duration: 12.5,
-            message: [
-                'userId' => 42,
-                'channel' => 'email',
-                'subject' => 'Welcome to ADP',
-            ],
-        ));
-        $this->queueCollector->logMessage(new MessageRecord(
-            messageClass: 'App\\Message\\ProcessPayment',
-            bus: 'messenger.bus.default',
-            transport: 'sync',
-            dispatched: true,
-            failed: true,
-            duration: 45.0,
-            message: [
-                'orderId' => 'ORD-12345',
-                'amount' => 99.99,
-                'currency' => 'USD',
-            ],
-        ));
+        // Dispatch messages via Symfony Messenger — the MessengerCollectorMiddleware
+        // intercepts dispatch and feeds message data to QueueCollector.
+        $this->messageBus->dispatch(new TestMessage(userId: 42, action: 'send_notification', payload: [
+            'channel' => 'email',
+            'subject' => 'Welcome to ADP',
+        ]));
+
+        $this->messageBus->dispatch(new TestMessage(userId: 1, action: 'process_payment', payload: [
+            'orderId' => 'ORD-12345',
+            'amount' => 99.99,
+            'currency' => 'USD',
+        ]));
 
         return new JsonResponse(['fixture' => 'queue:basic', 'status' => 'ok']);
     }
