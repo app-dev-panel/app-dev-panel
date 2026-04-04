@@ -181,8 +181,8 @@ export const FileExplorerPage = () => {
     const methodName = searchParams.get('method') || '';
     const getEditorUrl = useEditorUrl();
 
-    const [lazyGetFilesQuery, getFilesQueryInfo] = useLazyGetFilesQuery();
-    const [lazyGetClassQuery, getClassQueryInfo] = useLazyGetClassQuery();
+    const [lazyGetFilesQuery, _getFilesQueryInfo] = useLazyGetFilesQuery();
+    const [lazyGetClassQuery, _getClassQueryInfo] = useLazyGetClassQuery();
     const [tree, setTree] = useState<InspectorFile[]>([]);
     const [filteredTree, setFilteredTree] = useState<InspectorFile[]>([]);
     const [file, setFile] = useState<InspectorFileContent | null>(null);

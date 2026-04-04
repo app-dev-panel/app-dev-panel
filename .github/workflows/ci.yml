@@ -33,7 +33,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, sockets, zip
+          extensions: mbstring, sockets, zip, redis, pcov
           coverage: pcov
           tools: composer:v2
         env:
@@ -55,7 +55,8 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Run tests
-        run: composer test:unit
+        run: php vendor/bin/phpunit --testsuite Kernel,API,Cli,McpServer,Adapter-Symfony,Adapter-Yii3,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle --enforce-time-limit --default-time-limit=30
+        timeout-minutes: 10
 
       - name: Run tests with coverage
         if: matrix.os == 'ubuntu-latest' && matrix.php == '8.4'
@@ -70,10 +71,10 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------------------------
-  # Frontend Tests (Vitest unit + component tests)
+  # Frontend Install (shared dependency installation)
   # ---------------------------------------------------------------------------
-  frontend-tests:
-    name: Frontend Tests
+  frontend-install:
+    name: "Frontend: Install"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -90,9 +91,67 @@ jobs:
         working-directory: libs/frontend
         run: npm ci
 
+      - name: Cache node_modules
+        uses: actions/cache/save@v4
+        with:
+          path: libs/frontend/node_modules
+          key: frontend-node-modules-${{ hashFiles('libs/frontend/package-lock.json') }}
+
+  # ---------------------------------------------------------------------------
+  # Frontend Unit Tests (Vitest)
+  # ---------------------------------------------------------------------------
+  frontend-tests:
+    name: "Frontend: Unit Tests"
+    needs: frontend-install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: libs/frontend/node_modules
+          key: frontend-node-modules-${{ hashFiles('libs/frontend/package-lock.json') }}
+
       - name: Run unit tests
         working-directory: libs/frontend
         run: npm test
+
+  # ---------------------------------------------------------------------------
+  # Frontend E2E Tests (Vitest + Playwright browser tests)
+  # ---------------------------------------------------------------------------
+  frontend-e2e:
+    name: "Frontend: E2E Tests"
+    needs: frontend-install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: libs/frontend/node_modules
+          key: frontend-node-modules-${{ hashFiles('libs/frontend/package-lock.json') }}
+
+      - name: Install Playwright browsers
+        working-directory: libs/frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        working-directory: libs/frontend
+        run: npm run test:e2e
 
   # ---------------------------------------------------------------------------
   # Mago — Core libs (format, lint, analyze)
@@ -169,23 +228,32 @@ jobs:
       - name: Run format check
         if: matrix.check == 'format'
         working-directory: ${{ matrix.playground.path }}
-        run: mago fmt --check
+        run: mago fmt --check 2>&1 | tee /tmp/mago-playground-${{ matrix.playground.name }}-${{ matrix.check }}.txt
 
       - name: Run linter
         if: matrix.check == 'lint'
         working-directory: ${{ matrix.playground.path }}
-        run: mago lint --reporting-format=github
+        run: mago lint --reporting-format=github 2>&1 | tee /tmp/mago-playground-${{ matrix.playground.name }}-${{ matrix.check }}.txt
 
       - name: Run analyzer
         if: matrix.check == 'analyze'
         working-directory: ${{ matrix.playground.path }}
-        run: mago analyze --reporting-format=github
+        run: mago analyze --reporting-format=github 2>&1 | tee /tmp/mago-playground-${{ matrix.playground.name }}-${{ matrix.check }}.txt
+
+      - name: Upload Mago output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mago-playground-${{ matrix.playground.name }}-${{ matrix.check }}
+          path: /tmp/mago-playground-${{ matrix.playground.name }}-${{ matrix.check }}.txt
+          retention-days: 1
 
   # ---------------------------------------------------------------------------
   # Frontend Code Quality (Prettier + ESLint)
   # ---------------------------------------------------------------------------
   frontend-quality:
     name: "Frontend: Quality"
+    needs: frontend-install
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -195,12 +263,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: libs/frontend/package-lock.json
 
-      - name: Install dependencies
-        working-directory: libs/frontend
-        run: npm ci
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: libs/frontend/node_modules
+          key: frontend-node-modules-${{ hashFiles('libs/frontend/package-lock.json') }}
 
       - name: Check formatting (Prettier)
         working-directory: libs/frontend

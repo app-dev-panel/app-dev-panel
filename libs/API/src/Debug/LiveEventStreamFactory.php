@@ -28,7 +28,7 @@ final class LiveEventStreamFactory
     /**
      * Creates an SSE stream callback that receives live events via UDP.
      *
-     * @return array{0: \Closure(array&): bool, 1: \Closure(): void} [streamCallback, closeCallback]
+     * @return array{0: \Closure, 1: \Closure} [streamCallback, closeCallback]
      */
     public static function create(int $deadlineSeconds = 30): array
     {
@@ -48,6 +48,12 @@ final class LiveEventStreamFactory
         // Non-blocking recv: 50ms timeout so SSE can check for connection abort
         socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 0, 'usec' => 50_000]);
         socket_set_option($socket, SOL_SOCKET, SO_RCVBUF, 65536);
+
+        // On Windows, SO_RCVTIMEO may not work reliably for UDP sockets.
+        // Non-blocking mode prevents socket_recv from blocking forever.
+        if (Connection::isWindows()) {
+            socket_set_nonblock($socket);
+        }
 
         $deadline = time() + $deadlineSeconds;
 
@@ -125,7 +131,7 @@ final class LiveEventStreamFactory
      * Fallback when sockets extension is not available.
      * Returns a heartbeat-only stream (no live events).
      *
-     * @return array{0: \Closure(array&): bool, 1: \Closure(): void}
+     * @return array{0: \Closure, 1: \Closure}
      */
     private static function createFallback(int $deadlineSeconds): array
     {

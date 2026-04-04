@@ -42,7 +42,7 @@ final class MailerInterfaceProxy implements MailerInterface
             'cc' => (array) $message->getCc(),
             'bcc' => (array) $message->getBcc(),
             'charset' => $message->getCharset(),
-            'date' => $message->getDate(),
+            'date' => $message->getDate()?->format('Y-m-d H:i:s'),
             'raw' => (string) $message,
         ];
     }

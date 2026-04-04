@@ -8,12 +8,14 @@ use AppDevPanel\Adapter\Yii3\Collector\View\ViewEventListener;
 use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
 use PHPUnit\Framework\TestCase;
+use Yiisoft\View\Event\WebView\AfterRender;
+use Yiisoft\View\WebView;
 
 final class ViewEventListenerTest extends TestCase
 {
     protected function setUp(): void
     {
-        if (!class_exists(\Yiisoft\View\Event\WebView\AfterRender::class, true)) {
+        if (!class_exists(AfterRender::class, true)) {
             $this->markTestSkipped('yiisoft/view is not installed.');
         }
     }
@@ -26,10 +28,7 @@ final class ViewEventListenerTest extends TestCase
         $collector->startup();
         $listener = new ViewEventListener($collector);
 
-        $event = $this->createMock(\Yiisoft\View\Event\WebView\AfterRender::class);
-        $event->method('getFile')->willReturn('/views/index.php');
-        $event->method('getResult')->willReturn('<h1>Hello</h1>');
-        $event->method('getParameters')->willReturn(['title' => 'Test']);
+        $event = new AfterRender(new WebView(), '/views/index.php', ['title' => 'Test'], '<h1>Hello</h1>');
 
         $listener->collect($event);
 
@@ -48,15 +47,8 @@ final class ViewEventListenerTest extends TestCase
         $collector->startup();
         $listener = new ViewEventListener($collector);
 
-        $event1 = $this->createMock(\Yiisoft\View\Event\WebView\AfterRender::class);
-        $event1->method('getFile')->willReturn('/views/layout.php');
-        $event1->method('getResult')->willReturn('<html></html>');
-        $event1->method('getParameters')->willReturn([]);
-
-        $event2 = $this->createMock(\Yiisoft\View\Event\WebView\AfterRender::class);
-        $event2->method('getFile')->willReturn('/views/partial.php');
-        $event2->method('getResult')->willReturn('<div>Partial</div>');
-        $event2->method('getParameters')->willReturn(['key' => 'value']);
+        $event1 = new AfterRender(new WebView(), '/views/layout.php', [], '<html></html>');
+        $event2 = new AfterRender(new WebView(), '/views/partial.php', ['key' => 'value'], '<div>Partial</div>');
 
         $listener->collect($event1);
         $listener->collect($event2);
@@ -75,10 +67,7 @@ final class ViewEventListenerTest extends TestCase
         $collector->startup();
         $listener = new ViewEventListener($collector);
 
-        $event = $this->createMock(\Yiisoft\View\Event\WebView\AfterRender::class);
-        $event->method('getFile')->willReturn('/views/test.php');
-        $event->method('getResult')->willReturn('');
-        $event->method('getParameters')->willReturn([]);
+        $event = new AfterRender(new WebView(), '/views/test.php', [], '');
 
         $listener->collect($event);
 
@@ -93,10 +82,7 @@ final class ViewEventListenerTest extends TestCase
         $collector->startup();
         $listener = new ViewEventListener($collector);
 
-        $event = $this->createMock(\Yiisoft\View\Event\WebView\AfterRender::class);
-        $event->method('getFile')->willReturn('/views/test.php');
-        $event->method('getResult')->willReturn('output');
-        $event->method('getParameters')->willReturn([]);
+        $event = new AfterRender(new WebView(), '/views/test.php', [], 'output');
 
         $listener->collect($event);
 

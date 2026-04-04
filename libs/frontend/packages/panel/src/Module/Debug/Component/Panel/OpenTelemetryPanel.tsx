@@ -455,7 +455,7 @@ export const OpenTelemetryPanel = ({data}: OpenTelemetryPanelProps) => {
     const filteredTraces = useMemo(() => {
         if (!deferredFilter) return [...traceGroups.entries()];
         const q = deferredFilter.toLowerCase();
-        return [...traceGroups.entries()].filter(([traceId, traceSpans]) =>
+        return [...traceGroups.entries()].filter(([_traceId, traceSpans]) =>
             traceSpans.some(
                 (s) =>
                     s.operationName.toLowerCase().includes(q) ||

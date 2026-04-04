@@ -7,7 +7,7 @@ import {createBrowserRouter, createHashRouter, RouteObject} from 'react-router';
 export function createRouter(
     modules: ModuleInterface[],
     routerConfig: {basename: string; useHashRouter: boolean},
-    modulesConfig: {toolbar: boolean},
+    _modulesConfig: {toolbar: boolean},
 ) {
     const standaloneModules = modules.filter((module) => module.standaloneModule);
     const others = modules.filter((module) => !module.standaloneModule);

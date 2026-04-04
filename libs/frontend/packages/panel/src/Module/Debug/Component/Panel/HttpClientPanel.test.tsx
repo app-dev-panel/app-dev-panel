@@ -121,6 +121,6 @@ describe('HttpClientPanel', () => {
         const user = userEvent.setup();
         renderWithProviders(<HttpClientPanel data={[makeEntry()]} />, {preloadedState});
         await user.click(screen.getByRole('tab', {name: 'Stream (0)'}));
-        expect(screen.getByText(/No HTTP stream data/)).toBeInTheDocument();
+        expect(await screen.findByText(/No HTTP stream data/)).toBeInTheDocument();
     });
 });

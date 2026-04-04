@@ -40,7 +40,7 @@ final class LiveEventStreamFactoryTest extends TestCase
             $this->assertTrue($continue);
             $this->assertNotEmpty($buffer);
 
-            $event = json_decode($buffer[0], true);
+            $event = json_decode((string) $buffer[0], true);
             $this->assertSame('live-log', $event['type']);
             $this->assertSame('test log message', $event['payload']);
         } finally {
@@ -60,7 +60,7 @@ final class LiveEventStreamFactoryTest extends TestCase
             $stream($buffer);
 
             $this->assertNotEmpty($buffer);
-            $event = json_decode($buffer[0], true);
+            $event = json_decode((string) $buffer[0], true);
             $this->assertSame('live-dump', $event['type']);
             $this->assertSame('{"x":42}', $event['payload']);
         } finally {
@@ -80,7 +80,7 @@ final class LiveEventStreamFactoryTest extends TestCase
             $stream($buffer);
 
             $this->assertNotEmpty($buffer);
-            $event = json_decode($buffer[0], true);
+            $event = json_decode((string) $buffer[0], true);
             $this->assertSame('entry-created', $event['type']);
             $this->assertSame(['id' => 'abc123'], $event['payload']);
         } finally {

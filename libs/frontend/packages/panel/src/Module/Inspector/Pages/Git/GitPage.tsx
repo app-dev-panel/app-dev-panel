@@ -23,7 +23,7 @@ import {useCallback} from 'react';
 
 export const GitPage = ({showHeader = true}: {showHeader?: boolean}) => {
     const getSummaryQuery = useGetSummaryQuery();
-    const [checkoutMutation, checkoutInfo] = useCheckoutMutation();
+    const [checkoutMutation, _checkoutInfo] = useCheckoutMutation();
     const [commandMutation, commandInfo] = useCommandMutation();
 
     const [open, setOpen] = React.useState(false);

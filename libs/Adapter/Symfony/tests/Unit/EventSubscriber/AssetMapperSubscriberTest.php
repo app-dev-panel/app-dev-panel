@@ -34,8 +34,8 @@ final class AssetMapperSubscriberTest extends TestCase
         $collector = new AssetBundleCollector($timeline);
         $collector->startup();
 
-        $jsAsset = $this->createMockAsset('app.js', '/src/app.js', '/assets/app.123.js', []);
-        $cssAsset = $this->createMockAsset('styles.css', '/src/styles.css', '/assets/styles.456.css', []);
+        $jsAsset = $this->createRealAsset('app.js', '/src/app.js', '/assets/app.123.js');
+        $cssAsset = $this->createRealAsset('styles.css', '/src/styles.css', '/assets/styles.456.css');
 
         $assetMapper = $this->createMock(\Symfony\Component\AssetMapper\AssetMapperInterface::class);
         $assetMapper->method('allAssets')->willReturn(new \ArrayIterator([$jsAsset, $cssAsset]));
@@ -75,12 +75,15 @@ final class AssetMapperSubscriberTest extends TestCase
         $collector = new AssetBundleCollector($timeline);
         $collector->startup();
 
-        $depAsset = $this->createMockAsset('vendor.js', '/src/vendor.js', '/assets/vendor.js', []);
+        $depAsset = $this->createRealAsset('vendor.js', '/src/vendor.js', '/assets/vendor.js');
 
-        $dep = $this->createMock(\Symfony\Component\AssetMapper\ImportMap\JavaScriptImport::class);
-        $dep->asset = $depAsset;
-
-        $mainAsset = $this->createMockAsset('app.js', '/src/app.js', '/assets/app.js', [$dep]);
+        $mainAsset = new \Symfony\Component\AssetMapper\MappedAsset(
+            logicalPath: 'app.js',
+            sourcePath: '/src/app.js',
+            publicPathWithoutDigest: '/assets/app.js',
+            publicPath: '/assets/app.js',
+        );
+        $mainAsset->addDependency($depAsset);
 
         $assetMapper = $this->createMock(\Symfony\Component\AssetMapper\AssetMapperInterface::class);
         $assetMapper->method('allAssets')->willReturn(new \ArrayIterator([$mainAsset]));
@@ -92,18 +95,16 @@ final class AssetMapperSubscriberTest extends TestCase
         $this->assertSame(['vendor.js'], $collected['bundles']['app.js']['depends']);
     }
 
-    private function createMockAsset(
+    private function createRealAsset(
         string $logicalPath,
         string $sourcePath,
         string $publicPath,
-        array $dependencies,
-    ): object {
-        $asset = $this->createMock(\Symfony\Component\AssetMapper\MappedAsset::class);
-        $asset->logicalPath = $logicalPath;
-        $asset->sourcePath = $sourcePath;
-        $asset->publicPath = $publicPath;
-        $asset->method('getDependencies')->willReturn($dependencies);
-
-        return $asset;
+    ): \Symfony\Component\AssetMapper\MappedAsset {
+        return new \Symfony\Component\AssetMapper\MappedAsset(
+            logicalPath: $logicalPath,
+            sourcePath: $sourcePath,
+            publicPathWithoutDigest: $publicPath,
+            publicPath: $publicPath,
+        );
     }
 }

@@ -6,7 +6,7 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
 import {Box, Chip, Icon, IconButton, Tab, Tooltip, Typography} from '@mui/material';
-import {styled, useTheme} from '@mui/material/styles';
+import {styled} from '@mui/material/styles';
 import {SyntheticEvent, useDeferredValue, useMemo, useState} from 'react';
 
 type Operation = string;
@@ -207,7 +207,6 @@ const OperationView = ({items, operation, filter}: {items: Information[]; operat
 // ---------------------------------------------------------------------------
 
 export const FilesystemPanel = ({data}: FilesystemPanelProps) => {
-    const theme = useTheme();
     const tabs = data ? (Object.keys(data) as Operation[]) : [];
     const [value, setValue] = useState<Operation>(tabs[0]);
     const [filter, setFilter] = useState('');

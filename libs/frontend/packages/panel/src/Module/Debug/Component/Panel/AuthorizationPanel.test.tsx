@@ -198,7 +198,7 @@ describe('AuthorizationPanel', () => {
     });
 
     it('renders decision duration when present', async () => {
-        const user = userEvent.setup();
+        const _user = userEvent.setup();
         const decisions = [makeDecision({attribute: 'EDIT', duration: 0.0023})];
         renderWithProviders(<AuthorizationPanel data={makeAuthorizationData({accessDecisions: decisions})} />);
         expect(screen.getByText('2.3ms')).toBeInTheDocument();

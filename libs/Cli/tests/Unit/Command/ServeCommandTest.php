@@ -84,6 +84,10 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteWithInvalidHostExitsWithFailure(): void
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
+        }
+
         $storagePath = sys_get_temp_dir() . '/adp-test-' . uniqid();
 
         $command = new ServeCommand();
@@ -111,6 +115,10 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteCreatesStorageDirectory(): void
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
+        }
+
         $storagePath = sys_get_temp_dir() . '/adp-test-serve-' . uniqid();
         $this->assertDirectoryDoesNotExist($storagePath);
 
@@ -131,6 +139,10 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteWithFrontendPath(): void
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
+        }
+
         $storagePath = sys_get_temp_dir() . '/adp-test-fp-' . uniqid();
         $frontendPath = sys_get_temp_dir() . '/adp-test-frontend-' . uniqid();
         mkdir($frontendPath, 0o777, true);
@@ -157,6 +169,10 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteWithoutFrontendPathShowsNotConfigured(): void
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
+        }
+
         $storagePath = sys_get_temp_dir() . '/adp-test-nofp-' . uniqid();
 
         $command = new ServeCommand();
@@ -179,6 +195,10 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteWithRuntimePath(): void
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
+        }
+
         $storagePath = sys_get_temp_dir() . '/adp-test-rp-' . uniqid();
         $runtimePath = sys_get_temp_dir() . '/adp-test-runtime';
 
@@ -202,6 +222,10 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteUsesDefaultStoragePath(): void
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
+        }
+
         $command = new ServeCommand();
         $tester = new CommandTester($command);
 

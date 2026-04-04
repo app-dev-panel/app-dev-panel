@@ -36,7 +36,11 @@ final class SocketReader
         socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, self::MAX_DATAGRAM_SIZE);
         socket_set_option($this->socket, SOL_SOCKET, SO_SNDBUF, self::MAX_DATAGRAM_SIZE);
 
-        $eagain = self::eagainErrorCode();
+        // On Windows, SO_RCVTIMEO may not work reliably for UDP sockets.
+        // Use non-blocking mode as a safety net to prevent socket_recv from blocking forever.
+        if (Connection::isWindows()) {
+            socket_set_nonblock($this->socket);
+        }
 
         $newFrameAwaitRepeat = 0;
         $maxFrameAwaitRepeats = 10;
@@ -51,7 +55,7 @@ final class SocketReader
                     $newFrameAwaitRepeat = 0;
                     yield [Connection::TYPE_RELEASE, $socketLastError, socket_strerror($socketLastError)];
                 }
-                if ($socketLastError === $eagain) {
+                if (self::isRetryableError($socketLastError)) {
                     usleep(Connection::DEFAULT_TIMEOUT);
                     continue;
                 }
@@ -99,5 +103,26 @@ final class SocketReader
         }
 
         return PHP_OS_FAMILY === 'Darwin' ? 35 : 11;
+    }
+
+    /**
+     * Determines if an error code indicates a retryable "no data yet" condition.
+     *
+     * Handles platform differences:
+     * - Linux/macOS: EAGAIN (11/35)
+     * - Windows: EWOULDBLOCK (10035) or ETIMEDOUT (10060) from SO_RCVTIMEO
+     * - Error code 0: may occur on Windows with non-blocking sockets
+     */
+    private static function isRetryableError(int $errorCode): bool
+    {
+        if ($errorCode === 0 || $errorCode === self::eagainErrorCode()) {
+            return true;
+        }
+        // Windows: WSAETIMEDOUT from SO_RCVTIMEO
+        if (defined('SOCKET_ETIMEDOUT') && $errorCode === SOCKET_ETIMEDOUT) {
+            return true;
+        }
+
+        return false;
     }
 }
