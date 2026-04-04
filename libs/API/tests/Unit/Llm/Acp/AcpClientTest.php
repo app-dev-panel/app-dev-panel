@@ -256,7 +256,7 @@ final class AcpClientTest extends TestCase
         ));
         $this->assertCount(1, $promptMsg);
 
-        $text = $promptMsg[0]['params']['prompt']['content'][0]['text'];
+        $text = $promptMsg[0]['params']['prompt'][0]['text'];
         $this->assertStringContainsString('Reply in Russian', $text);
         $this->assertStringContainsString('Be brief', $text);
         $this->assertStringContainsString('Hi', $text);
@@ -293,7 +293,7 @@ final class AcpClientTest extends TestCase
             $sentMessages,
             static fn($m) => ($m['method'] ?? '') === 'session/prompt',
         ));
-        $text = $promptMsg[0]['params']['prompt']['content'][0]['text'];
+        $text = $promptMsg[0]['params']['prompt'][0]['text'];
 
         $this->assertStringContainsString('First message', $text);
         $this->assertStringContainsString('First reply', $text);
@@ -331,7 +331,7 @@ final class AcpClientTest extends TestCase
             $sentMessages,
             static fn($m) => ($m['method'] ?? '') === 'session/prompt',
         ));
-        $text = $promptMsg[0]['params']['prompt']['content'][0]['text'];
+        $text = $promptMsg[0]['params']['prompt'][0]['text'];
 
         $this->assertStringContainsString('Valid', $text);
         $this->assertStringNotContainsString('broken', $text);

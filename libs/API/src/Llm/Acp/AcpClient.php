@@ -117,9 +117,7 @@ final class AcpClient
     ): AcpResponse {
         $requestId = $this->sendRequest('session/prompt', [
             'sessionId' => $sessionId,
-            'prompt' => [
-                'content' => $content,
-            ],
+            'prompt' => $content,
         ]);
 
         return $this->collectPromptResponse($requestId, $agentName, $agentVersion, $timeout);
