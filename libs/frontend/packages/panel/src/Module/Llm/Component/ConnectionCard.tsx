@@ -262,8 +262,10 @@ export const ConnectionCard = () => {
     // Disconnected: full setup form
     return (
         <Paper variant="outlined" sx={{p: 2, display: 'flex', flexDirection: 'column', gap: 2}}>
-            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                <Box>
+            <Box
+                sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap'}}
+            >
+                <Box sx={{minWidth: 0}}>
                     <Typography variant="body1" fontWeight={600}>
                         LLM Connection
                     </Typography>
@@ -286,10 +288,17 @@ export const ConnectionCard = () => {
                 onChange={(_, value) => value && setSelectedProvider(value)}
                 size="small"
                 fullWidth
+                sx={{flexWrap: 'wrap'}}
             >
-                <ToggleButton value="openrouter">OpenRouter</ToggleButton>
-                <ToggleButton value="anthropic">Anthropic</ToggleButton>
-                <ToggleButton value="openai">OpenAI</ToggleButton>
+                <ToggleButton value="openrouter" sx={{flex: '1 1 auto', minWidth: 0}}>
+                    OpenRouter
+                </ToggleButton>
+                <ToggleButton value="anthropic" sx={{flex: '1 1 auto', minWidth: 0}}>
+                    Anthropic
+                </ToggleButton>
+                <ToggleButton value="openai" sx={{flex: '1 1 auto', minWidth: 0}}>
+                    OpenAI
+                </ToggleButton>
             </ToggleButtonGroup>
 
             {selectedProvider === 'openrouter' ? (
