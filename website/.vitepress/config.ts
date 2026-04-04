@@ -283,6 +283,7 @@ export default defineConfig({
               collapsed: false,
               items: [
                 { text: "Debug Panel", link: "/guide/debug-panel" },
+                { text: "AI Chat", link: "/guide/ai-chat" },
                 { text: "Live Feed", link: "/guide/live-feed" },
                 {
                   text: "Live Feed Internals",
@@ -507,6 +508,7 @@ export default defineConfig({
               collapsed: false,
               items: [
                 { text: "Панель отладки", link: "/ru/guide/debug-panel" },
+                { text: "ИИ чат", link: "/ru/guide/ai-chat" },
                 { text: "Тулбар", link: "/ru/guide/toolbar" },
                 {
                   text: "Фронтенд-пакеты",

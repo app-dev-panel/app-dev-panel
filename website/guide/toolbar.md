@@ -108,7 +108,11 @@ Drag the toolbar to the right or left edge to dock it as a vertical panel. Metri
 
 ### AI Chat
 
-Click the AI Chat button to open a floating chat popup. The Debug Duck provides request summaries and will support AI-powered debug analysis via the MCP server in a future update.
+Click the duck icon button to open the Debug Duck chat popup. When an [LLM provider is connected](/guide/ai-chat), the toolbar sends messages to the backend AI and displays responses inline. The current debug entry's context (request, timing, queries, exceptions) is automatically included, so you can ask questions like "Why is this slow?" without pasting data.
+
+If no provider is connected, the chat shows a warning banner with a link to configure the connection in the panel. See [AI Chat](/guide/ai-chat) for full setup instructions.
+
+Features: multi-turn conversations, suggestion chips, draggable/resizable popup, shared chat history with the panel, connection status indicator.
 
 ![Toolbar with AI chat](/images/features/toolbar-chat.png)
 

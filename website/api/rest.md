@@ -55,23 +55,150 @@ Returns full collected data for the specified entry, optionally filtered to a si
 
 ## LLM API
 
+All LLM endpoints share the same settings stored in `.llm-settings.json`. Both the debug panel and the toolbar use these endpoints — configure once, use everywhere.
+
+See the [AI Chat guide](/guide/ai-chat) for user-facing documentation.
+
+### Connection
+
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/debug/api/llm/status` | LLM connection status |
-| POST | `/debug/api/llm/connect` | Connect to LLM provider (API key) |
-| POST | `/debug/api/llm/oauth/initiate` | Start OAuth flow for LLM provider |
-| POST | `/debug/api/llm/oauth/exchange` | Exchange OAuth code for token |
-| POST | `/debug/api/llm/disconnect` | Disconnect from LLM provider |
-| POST | `/debug/api/llm/model` | Set active model |
-| POST | `/debug/api/llm/timeout` | Set request timeout |
-| POST | `/debug/api/llm/custom-prompt` | Set custom system prompt |
-| GET | `/debug/api/llm/models` | List available models |
-| POST | `/debug/api/llm/chat` | Send chat message |
-| POST | `/debug/api/llm/analyze` | Analyze debug entry with AI |
-| GET | `/debug/api/llm/history` | Get chat history |
-| POST | `/debug/api/llm/history` | Add history entry |
-| DELETE | `/debug/api/llm/history/{index}` | Delete specific history entry |
+| GET | `/debug/api/llm/status` | Connection status, provider, model, timeout, custom prompt |
+| POST | `/debug/api/llm/connect` | Connect with API key |
+| POST | `/debug/api/llm/disconnect` | Clear stored credentials |
+
+#### Status
+
+```
+GET /debug/api/llm/status
+```
+
+```json
+{
+    "data": {
+        "connected": true,
+        "provider": "openrouter",
+        "model": "anthropic/claude-sonnet-4",
+        "timeout": 30,
+        "customPrompt": "Reply in English. Be concise and actionable..."
+    }
+}
+```
+
+#### Connect with API Key
+
+```
+POST /debug/api/llm/connect
+Content-Type: application/json
+
+{"provider": "anthropic", "apiKey": "sk-ant-..."}
+```
+
+Supported providers: `openrouter`, `anthropic`, `openai`.
+
+### OAuth (OpenRouter)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/debug/api/llm/oauth/initiate` | Start OAuth PKCE flow, returns `authUrl` and `codeVerifier` |
+| POST | `/debug/api/llm/oauth/exchange` | Exchange authorization `code` + `codeVerifier` for API key |
+
+#### Initiate
+
+```
+POST /debug/api/llm/oauth/initiate
+Content-Type: application/json
+
+{"callbackUrl": "https://localhost:5173/debug/llm/callback"}
+```
+
+```json
+{
+    "data": {
+        "authUrl": "https://openrouter.ai/auth?...",
+        "codeVerifier": "..."
+    }
+}
+```
+
+Open `authUrl` in a popup. After user approval, OpenRouter redirects to `callbackUrl?code=...`. Exchange the code:
+
+```
+POST /debug/api/llm/oauth/exchange
+Content-Type: application/json
+
+{"code": "...", "codeVerifier": "..."}
+```
+
+### Settings
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/debug/api/llm/models` | List available models for the connected provider |
+| POST | `/debug/api/llm/model` | Set active model: `{"model": "anthropic/claude-sonnet-4"}` |
+| POST | `/debug/api/llm/timeout` | Set timeout in seconds (5–300): `{"timeout": 60}` |
+| POST | `/debug/api/llm/custom-prompt` | Set system prompt: `{"customPrompt": "..."}` |
+
+All settings endpoints return the updated `LlmStatus` object (same shape as `GET /status`).
+
+### Chat & Analysis
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/debug/api/llm/chat` | Send chat completion request |
+| POST | `/debug/api/llm/analyze` | Analyze debug entry data with AI |
+
+#### Chat
+
+```
+POST /debug/api/llm/chat
+Content-Type: application/json
+
+{
+    "messages": [
+        {"role": "user", "content": "Why is my /api/users endpoint slow?"}
+    ],
+    "model": "anthropic/claude-sonnet-4",
+    "temperature": 0.7
+}
+```
+
+```json
+{
+    "data": {
+        "choices": [{"message": {"role": "assistant", "content": "Based on..."}}],
+        "model": "anthropic/claude-sonnet-4",
+        "usage": {"prompt_tokens": 50, "completion_tokens": 200}
+    }
+}
+```
+
+The custom prompt (if set) is automatically prepended as a system message. All responses are normalized to the OpenAI-compatible format regardless of provider.
+
+#### Analyze
+
+```
+POST /debug/api/llm/analyze
+Content-Type: application/json
+
+{
+    "context": {"request": {"method": "GET", "path": "/api/users"}, "db": {"queries": {"total": 47}}},
+    "prompt": "Why are there so many queries?"
+}
+```
+
+Context is truncated to 12,000 characters. Returns `{"data": {"analysis": "...", "model": "..."}}`.
+
+### History
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/debug/api/llm/history` | Get all history entries (max 100, FIFO) |
+| POST | `/debug/api/llm/history` | Add entry: `{query, response, timestamp, error?}` |
+| DELETE | `/debug/api/llm/history/{index}` | Delete entry by index |
 | DELETE | `/debug/api/llm/history` | Clear all history |
+
+History is shared between the panel and toolbar — entries added from either appear in both.
 
 ## Ingestion API
 
