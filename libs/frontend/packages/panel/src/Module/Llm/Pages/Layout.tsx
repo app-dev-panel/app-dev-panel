@@ -18,7 +18,13 @@ export const Layout = () => {
                 <ConnectionCard />
                 {connected && (
                     <Box>
-                        <Tabs value={tab} onChange={(_, v) => setTab(v)}>
+                        <Tabs
+                            value={tab}
+                            onChange={(_, v) => setTab(v)}
+                            variant="scrollable"
+                            scrollButtons="auto"
+                            allowScrollButtonsMobile
+                        >
                             <Tab label="Chat" />
                             <Tab label="Analyze Debug Entry" />
                         </Tabs>
