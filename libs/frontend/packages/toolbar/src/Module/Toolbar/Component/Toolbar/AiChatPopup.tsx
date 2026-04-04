@@ -77,19 +77,17 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
     // Global mouse listeners for drag + resize
     useEffect(() => {
         const onMouseMove = (e: MouseEvent) => {
-            if (dragRef.current) {
-                const dx = e.clientX - dragRef.current.startX;
-                const dy = e.clientY - dragRef.current.startY;
-                setPos((p) => ({...p, x: dragRef.current!.startLeft + dx, y: dragRef.current!.startTop + dy}));
+            const drag = dragRef.current;
+            if (drag) {
+                const x = drag.startLeft + (e.clientX - drag.startX);
+                const y = drag.startTop + (e.clientY - drag.startY);
+                setPos((p) => ({...p, x, y}));
             }
-            if (resizeRef.current) {
-                const dx = e.clientX - resizeRef.current.startX;
-                const dy = e.clientY - resizeRef.current.startY;
-                setPos((p) => ({
-                    ...p,
-                    w: Math.max(260, resizeRef.current!.startW + dx),
-                    h: Math.max(300, resizeRef.current!.startH + dy),
-                }));
+            const resize = resizeRef.current;
+            if (resize) {
+                const w = Math.max(260, resize.startW + (e.clientX - resize.startX));
+                const h = Math.max(300, resize.startH + (e.clientY - resize.startY));
+                setPos((p) => ({...p, w, h}));
             }
         };
         const onMouseUp = () => {
@@ -110,18 +108,16 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
         const rect = chatRef.current?.getBoundingClientRect();
         if (!rect) return;
         dragRef.current = {startX: e.clientX, startY: e.clientY, startLeft: rect.left, startTop: rect.top};
-        // Switch to absolute positioning
         setPos((p) => ({...p, x: rect.left, y: rect.top}));
     }, []);
 
-    const onResizeMouseDown = useCallback(
-        (e: React.MouseEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-            resizeRef.current = {startX: e.clientX, startY: e.clientY, startW: pos.w, startH: pos.h};
-        },
-        [pos.w, pos.h],
-    );
+    const onResizeMouseDown = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const rect = chatRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        resizeRef.current = {startX: e.clientX, startY: e.clientY, startW: rect.width, startH: rect.height};
+    }, []);
 
     const sendMessage = useCallback((text: string) => {
         if (!text.trim()) return;

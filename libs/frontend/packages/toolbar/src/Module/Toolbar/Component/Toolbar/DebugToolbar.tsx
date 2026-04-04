@@ -441,7 +441,9 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                         </Box>
                     )}
                     <Paper
+                        ref={widgetRef}
                         elevation={0}
+                        {...dragHandleProps}
                         sx={{
                             borderTop: 1,
                             borderColor: 'divider',
@@ -452,6 +454,8 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                             alignItems: 'center',
                             gap: 0.5,
                             minHeight: 40,
+                            cursor: 'grab',
+                            '&:active': {cursor: 'grabbing'},
                         }}
                     >
                         <Tooltip title="Collapse toolbar" arrow>
@@ -463,10 +467,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                         {selectedEntry && (
                             <MetricItems entry={selectedEntry} iframeRouteNavigate={iframeRouteNavigate} />
                         )}
-                        <Box
-                            {...dragHandleProps}
-                            sx={{flex: 1, minHeight: 32, cursor: 'grab', '&:active': {cursor: 'grabbing'}}}
-                        />
+                        <Box sx={{flex: 1}} />
                         <Divider orientation="vertical" flexItem sx={{mx: 0.25}} />
                         {actionButtons}
                     </Paper>
