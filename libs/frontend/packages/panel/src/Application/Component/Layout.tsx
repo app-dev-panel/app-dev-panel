@@ -427,7 +427,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 href: '/llm',
                 children: [{key: '/llm/mcp', icon: 'hub', label: 'MCP'}],
             },
-            {key: 'gen-code', icon: 'build_circle', label: 'GenCode', href: '/gen-code'},
             {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api'},
             {key: 'frames', icon: 'web', label: 'Frames', href: '/frames'},
         ],
