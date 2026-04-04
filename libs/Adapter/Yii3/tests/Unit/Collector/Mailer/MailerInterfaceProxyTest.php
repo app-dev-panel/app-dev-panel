@@ -57,7 +57,7 @@ final class MailerInterfaceProxyTest extends TestCase
         $this->assertSame(['cc@example.com'], $msg['cc']);
         $this->assertSame(['bcc@example.com'], $msg['bcc']);
         $this->assertSame('utf-8', $msg['charset']);
-        $this->assertSame('2026-01-01', $msg['date']);
+        $this->assertSame('2026-01-01 00:00:00', $msg['date']);
     }
 
     public function testSendMultipleCollectsAllMessagesAndDelegates(): void
@@ -65,7 +65,7 @@ final class MailerInterfaceProxyTest extends TestCase
         $msg1 = $this->createMessageMock(from: ['a@test.com'], to: ['b@test.com'], subject: 'First');
         $msg2 = $this->createMessageMock(from: ['c@test.com'], to: ['d@test.com'], subject: 'Second');
 
-        $sendResults = new \Yiisoft\Mailer\SendResults([]);
+        $sendResults = new \Yiisoft\Mailer\SendResults([], []);
 
         $mailer = $this->createMock(\Yiisoft\Mailer\MailerInterface::class);
         $mailer->expects($this->once())->method('sendMultiple')->with([$msg1, $msg2])->willReturn($sendResults);
@@ -146,7 +146,7 @@ final class MailerInterfaceProxyTest extends TestCase
         $message->method('getCc')->willReturn($cc);
         $message->method('getBcc')->willReturn($bcc);
         $message->method('getCharset')->willReturn($charset);
-        $message->method('getDate')->willReturn($date);
+        $message->method('getDate')->willReturn($date !== null ? new \DateTimeImmutable($date) : null);
         $message->method('__toString')->willReturn('raw-message');
         return $message;
     }

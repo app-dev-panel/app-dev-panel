@@ -44,7 +44,7 @@ final class AssetMapperSubscriber implements EventSubscriberInterface
 
             $depends = [];
             foreach ($asset->getDependencies() as $dependency) {
-                $depends[] = $dependency->asset->logicalPath;
+                $depends[] = $dependency->logicalPath;
             }
 
             $bundles[$asset->logicalPath] = [

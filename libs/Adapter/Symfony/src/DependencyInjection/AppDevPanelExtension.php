@@ -399,10 +399,11 @@ final class AppDevPanelExtension extends Extension
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
 
-        // Asset mapper subscriber — only when symfony/asset-mapper is available and collector is enabled
+        // Asset mapper subscriber — only when symfony/asset-mapper is available and service is registered
         if (
             $container->has(AssetBundleCollector::class)
             && interface_exists(\Symfony\Component\AssetMapper\AssetMapperInterface::class)
+            && $container->has(\Symfony\Component\AssetMapper\AssetMapperInterface::class)
         ) {
             $container
                 ->register(AssetMapperSubscriber::class, AssetMapperSubscriber::class)

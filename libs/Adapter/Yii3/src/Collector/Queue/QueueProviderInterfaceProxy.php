@@ -25,4 +25,9 @@ final class QueueProviderInterfaceProxy implements QueueProviderInterface
     {
         return $this->queueProvider->has($name);
     }
+
+    public function getNames(): array
+    {
+        return $this->queueProvider->getNames();
+    }
 }
