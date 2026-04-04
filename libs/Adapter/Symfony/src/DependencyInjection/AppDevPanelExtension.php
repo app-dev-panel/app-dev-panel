@@ -47,6 +47,10 @@ use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Llm\Acp\AcpClientFactory;
+use AppDevPanel\Api\Llm\Acp\AcpClientFactoryInterface;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -767,6 +771,10 @@ final class AppDevPanelExtension extends Extension
             ->setArguments(['%app_dev_panel.storage.path%'])
             ->setPublic(true);
 
+        // ACP client factory and command verifier
+        $container->register(AcpClientFactoryInterface::class, AcpClientFactory::class)->setPublic(true);
+        $container->register(AcpCommandVerifierInterface::class, AcpCommandVerifier::class)->setPublic(true);
+
         // LLM provider service
         $container
             ->register(LlmProviderService::class, LlmProviderService::class)
@@ -775,6 +783,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(ClientInterface::class),
                 new Reference(RequestFactoryInterface::class),
                 new Reference(StreamFactoryInterface::class),
+                new Reference(AcpClientFactoryInterface::class),
             ])
             ->setPublic(true);
 
@@ -789,6 +798,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(RequestFactoryInterface::class),
                 new Reference(StreamFactoryInterface::class),
                 new Reference(ClientInterface::class),
+                new Reference(AcpCommandVerifierInterface::class),
             ])
             ->setPublic(true);
     }

@@ -41,6 +41,10 @@ use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Llm\Acp\AcpClientFactory;
+use AppDevPanel\Api\Llm\Acp\AcpClientFactoryInterface;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -63,7 +67,6 @@ use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
-use AppDevPanel\McpServer\Inspector\InspectorClient;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
@@ -302,15 +305,7 @@ return [
             $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
         )),
 
-    InspectorClient::class => static fn(ContainerInterface $container) => new InspectorClient(rtrim(
-        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['inspectorUrl'] ?? 'http://127.0.0.1:8080'),
-        '/',
-    )),
-
-    McpServer::class => static fn(
-        StorageInterface $storage,
-        InspectorClient $inspectorClient,
-    ) => new McpServer(McpToolRegistryFactory::create($storage, $inspectorClient)),
+    McpServer::class => static fn(StorageInterface $storage) => new McpServer(McpToolRegistryFactory::create($storage)),
 
     McpController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
@@ -335,13 +330,18 @@ return [
             $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
         )),
 
+    // ACP client factory and command verifier
+    AcpClientFactoryInterface::class => static fn() => new AcpClientFactory(),
+    AcpCommandVerifierInterface::class => static fn() => new AcpCommandVerifier(),
+
     // LLM provider service
     LlmProviderService::class => static fn(
         LlmSettingsInterface $llmSettings,
         ClientInterface $httpClient,
         RequestFactoryInterface $requestFactory,
         StreamFactoryInterface $streamFactory,
-    ) => new LlmProviderService($llmSettings, $httpClient, $requestFactory, $streamFactory),
+        AcpClientFactoryInterface $acpClientFactory,
+    ) => new LlmProviderService($llmSettings, $httpClient, $requestFactory, $streamFactory, $acpClientFactory),
 
     // LLM controller
     LlmController::class => static fn(
@@ -352,6 +352,7 @@ return [
         RequestFactoryInterface $requestFactory,
         StreamFactoryInterface $streamFactory,
         ClientInterface $httpClient,
+        AcpCommandVerifierInterface $commandVerifier,
     ) => new LlmController(
         $jsonResponseFactory,
         $llmSettings,
@@ -360,6 +361,7 @@ return [
         $requestFactory,
         $streamFactory,
         $httpClient,
+        $commandVerifier,
     ),
 
     // ApiApplication
