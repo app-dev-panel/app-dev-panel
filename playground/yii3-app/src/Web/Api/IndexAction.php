@@ -45,7 +45,7 @@ final readonly class IndexAction
 
         return $this->responseFactory->createResponse([
             'message' => 'Welcome to the ADP Yii 3 Playground API!',
-            'debug_panel' => '/debug/api/',
+            'debug_panel' => '/debug/',
             'endpoints' => [
                 'GET /api' => 'This page',
                 'GET /api/users' => 'List users (demo)',

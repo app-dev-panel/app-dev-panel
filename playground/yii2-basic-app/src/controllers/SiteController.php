@@ -76,6 +76,89 @@ final class SiteController extends Controller
         throw new \RuntimeException('This is a demo exception for ADP debugging');
     }
 
+    public function actionLogDemo(): string
+    {
+        $success = false;
+        $loggedLevel = '';
+        $loggedMessage = '';
+
+        if (\Yii::$app->request->isPost) {
+            $level = \Yii::$app->request->post('level', 'info');
+            $message = \Yii::$app->request->post('message', '');
+            $contextRaw = \Yii::$app->request->post('context', '{}');
+
+            $context = json_decode($contextRaw, true);
+            if (!is_array($context)) {
+                $context = [];
+            }
+
+            $yiiLevelMap = [
+                'emergency' => 'error',
+                'alert' => 'error',
+                'critical' => 'error',
+                'error' => 'error',
+                'warning' => 'warning',
+                'notice' => 'info',
+                'info' => 'info',
+                'debug' => 'debug',
+            ];
+            $yiiMethod = $yiiLevelMap[$level] ?? 'info';
+
+            \Yii::$yiiMethod($message . ($context !== [] ? ' | context: ' . json_encode($context) : ''), 'application');
+
+            $success = true;
+            $loggedLevel = $level;
+            $loggedMessage = $message;
+        }
+
+        return $this->render('log-demo', [
+            'success' => $success,
+            'loggedLevel' => $loggedLevel,
+            'loggedMessage' => $loggedMessage,
+        ]);
+    }
+
+    public function actionVarDumper(): string
+    {
+        $success = false;
+
+        if (\Yii::$app->request->isPost) {
+            $data = [
+                'string' => 'Hello from ADP Playground!',
+                'integer' => 42,
+                'float' => 3.14,
+                'boolean' => true,
+                'null_value' => null,
+                'array' => ['apples', 'oranges', 'bananas'],
+                'nested' => [
+                    'user' => [
+                        'id' => 1,
+                        'name' => 'Alice',
+                        'email' => 'alice@example.com',
+                        'roles' => ['admin', 'editor'],
+                    ],
+                    'metadata' => [
+                        'created_at' => '2026-04-04T12:00:00Z',
+                        'version' => '1.0.0',
+                    ],
+                ],
+            ];
+
+            /** @var \AppDevPanel\Kernel\Collector\VarDumperCollector|null $collector */
+            $collector = \Yii::$container->has(\AppDevPanel\Kernel\Collector\VarDumperCollector::class)
+                ? \Yii::$container->get(\AppDevPanel\Kernel\Collector\VarDumperCollector::class)
+                : null;
+
+            $collector?->collect($data, __FILE__ . ':' . __LINE__);
+
+            $success = true;
+        }
+
+        return $this->render('var-dumper', [
+            'success' => $success,
+        ]);
+    }
+
     public function actionError(): string
     {
         $exception = \Yii::$app->getErrorHandler()->exception;

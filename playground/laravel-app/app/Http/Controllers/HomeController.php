@@ -26,7 +26,7 @@ final class HomeController
 
         return new JsonResponse([
             'message' => 'Welcome to the ADP Laravel Playground API!',
-            'debug_panel' => '/debug/api/',
+            'debug_panel' => '/debug/',
             'endpoints' => [
                 'GET /api' => 'This page',
                 'GET /api/users' => 'List users (demo)',

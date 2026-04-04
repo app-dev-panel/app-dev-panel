@@ -46,7 +46,21 @@ $this->setTitle('ADP Yii 3 Playground');
         </div>
     </a>
 
-    <a href="/debug/api/" class="feature-card">
+    <a href="<?= $urlGenerator->generate('log-demo') ?>" class="feature-card">
+        <div>
+            <h3>Log Demo</h3>
+            <p>Send log messages with different severity levels and context data.</p>
+        </div>
+    </a>
+
+    <a href="<?= $urlGenerator->generate('var-dumper') ?>" class="feature-card">
+        <div>
+            <h3>Var Dumper</h3>
+            <p>Dump variables to inspect their structure in ADP.</p>
+        </div>
+    </a>
+
+    <a href="/debug/" class="feature-card">
         <div>
             <h3>Debug Panel</h3>
             <p>View collected debug data in the ADP panel.</p>
