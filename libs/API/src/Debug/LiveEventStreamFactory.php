@@ -49,6 +49,12 @@ final class LiveEventStreamFactory
         socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 0, 'usec' => 50_000]);
         socket_set_option($socket, SOL_SOCKET, SO_RCVBUF, 65536);
 
+        // On Windows, SO_RCVTIMEO may not work reliably for UDP sockets.
+        // Non-blocking mode prevents socket_recv from blocking forever.
+        if (Connection::isWindows()) {
+            socket_set_nonblock($socket);
+        }
+
         $deadline = time() + $deadlineSeconds;
 
         $stream = static function (array &$buffer) use ($socket, &$deadline): bool {
