@@ -1,4 +1,10 @@
-import {setIFrameHeight, setToolbarOpen} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
+import {
+    setIFrameHeight,
+    setToolbarFloatRect,
+    setToolbarOpen,
+    setToolbarPosition,
+    type ToolbarPosition,
+} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
@@ -13,12 +19,16 @@ import {HttpClientItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/To
 import {LogsItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/LogsItem';
 import {MemoryItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/MemoryItem';
 import {RequestTimeItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/RequestTimeItem';
+import {ResizeGrip} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/ResizeGrip';
+import {SnapZones} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/SnapZones';
+import {useDrag} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/useDrag';
 import {ValidatorItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/ValidatorItem';
 import {RequestItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RequestItem';
 import {useSelector} from '@app-dev-panel/toolbar/store';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import WebAssetOffIcon from '@mui/icons-material/WebAssetOff';
 import {Box, Chip, Divider, IconButton, Paper, Portal, Stack, Tooltip, useTheme} from '@mui/material';
@@ -27,9 +37,7 @@ import {ErrorBoundary, type FallbackProps} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
 
 /**
- * Delta-based resize hook. Tracks mouse movement delta from drag start,
- * independent of container/body position. Fixes the "runaway handle" bug
- * that occurs with react-resizable-layout inside sticky-positioned containers.
+ * Delta-based resize hook for the iframe panel.
  */
 const useBottomResize = ({
     initial,
@@ -43,7 +51,7 @@ const useBottomResize = ({
     onResizeEnd: (height: number) => void;
 }) => {
     const [height, setHeight] = useState(initial || 400);
-    const [isDragging, setIsDragging] = useState(false);
+    const [, setIsDragging] = useState(false);
     const dragRef = useRef<{startY: number; startHeight: number} | null>(null);
     const heightRef = useRef(height);
     heightRef.current = height;
@@ -102,7 +110,7 @@ const useBottomResize = ({
         onLostPointerCapture,
     };
 
-    return {height, setHeight, isDragging, separatorProps};
+    return {height, setHeight, separatorProps};
 };
 
 const ToolbarErrorFallback = ({resetErrorBoundary}: FallbackProps) => (
@@ -137,16 +145,59 @@ const DebugIFrame = forwardRef(
     },
 );
 
+/** Metric items rendered in a row */
+const MetricItems = ({entry, iframeRouteNavigate}: {entry: DebugEntry; iframeRouteNavigate: (url: string) => void}) => (
+    <ErrorBoundary FallbackComponent={ToolbarErrorFallback} resetKeys={[entry.id]}>
+        <Stack direction="row" alignItems="center" spacing={0.5} sx={{flexWrap: 'nowrap'}}>
+            {isDebugEntryAboutWeb(entry) && <RequestItem data={entry} />}
+            {isDebugEntryAboutConsole(entry) && <CommandItem data={entry} />}
+            <ExceptionItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <RequestTimeItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <MemoryItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <DatabaseItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <HttpClientItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <LogsItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <EventsItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <ValidatorItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <DeprecationItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+        </Stack>
+    </ErrorBoundary>
+);
+
+/** Metric items rendered vertically for side rail */
+const MetricItemsVertical = ({
+    entry,
+    iframeRouteNavigate,
+}: {
+    entry: DebugEntry;
+    iframeRouteNavigate: (url: string) => void;
+}) => (
+    <ErrorBoundary FallbackComponent={ToolbarErrorFallback} resetKeys={[entry.id]}>
+        <Stack direction="column" spacing={0} sx={{flex: 1, overflowY: 'auto', py: 0.5}}>
+            {isDebugEntryAboutWeb(entry) && <RequestItem data={entry} />}
+            {isDebugEntryAboutConsole(entry) && <CommandItem data={entry} />}
+            <ExceptionItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <RequestTimeItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <MemoryItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <DatabaseItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <HttpClientItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <LogsItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <EventsItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <ValidatorItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <DeprecationItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+        </Stack>
+    </ErrorBoundary>
+);
+
 type DebugToolbarProps = {activeComponents: {iframe: boolean}};
 export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     const dispatch = useDispatch();
     const theme = useTheme();
 
+    // Service worker listener for debug IDs
     useEffect(() => {
         const onMessageHandler = (event: MessageEvent) => {
-            if (!event.data.payload?.headers || !('x-debug-id' in event.data.payload.headers)) {
-                return;
-            }
+            if (!event.data.payload?.headers || !('x-debug-id' in event.data.payload.headers)) return;
             dispatch(debugApi.util.invalidateTags(['debug/list']));
             dispatch(addCurrentPageRequestId(event.data.payload.headers['x-debug-id']));
         };
@@ -159,7 +210,6 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     const [isToolbarOpened, setIsToolbarOpened] = useState<boolean>(false);
     const getDebugQuery = useGetDebugQuery();
     const debugEntry = useDebugEntry();
-
     const [selectedEntry, setSelectedEntry] = useState(debugEntry);
 
     useEffect(() => {
@@ -171,18 +221,25 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     const toolbarOpenState = useSelector((state) => state.application.toolbarOpen);
     const iframeHeight = useSelector((state) => state.application.iframeHeight);
     const baseUrlState = useSelector((state) => state.application.baseUrl);
+    const toolbarPosition = useSelector((state) => state.application.toolbarPosition) ?? 'bottom';
+    const savedFloatRect = useSelector((state) => state.application.toolbarFloatRect);
 
     const [iframeEnabled, setIframeEnabled] = useState(false);
+    const [iframeSrc, setIframeSrc] = useState<string | null>(null);
+    const [chatOpen, setChatOpen] = useState(false);
+    const [position, setPosition] = useState<ToolbarPosition>(toolbarPosition);
+    const [floatPos, setFloatPos] = useState(savedFloatRect ?? {x: 0, y: 0, width: 320, height: 360});
+
+    const widgetRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => setIsToolbarOpened(toolbarOpenState), [toolbarOpenState]);
+    useEffect(() => setPosition(toolbarPosition), [toolbarPosition]);
 
     const onToolbarClickHandler = useCallback(() => {
         const next = !isToolbarOpened;
         setIsToolbarOpened(next);
         dispatch(setToolbarOpen(next));
-        if (!next && iframeEnabled) {
-            setIframeEnabled(false);
-        }
+        if (!next && iframeEnabled) setIframeEnabled(false);
     }, [isToolbarOpened, iframeEnabled]);
 
     const onChangeHandler = useCallback((entry: DebugEntry) => {
@@ -193,7 +250,6 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     }, []);
 
     const [open, setOpen] = useState(false);
-
     const handleDebugWindowOpen = useCallback(() => {
         window.open(debugEntry ? baseUrlState + '/debug?debugEntry=' + debugEntry.id : baseUrlState + '/debug');
     }, [debugEntry]);
@@ -202,49 +258,79 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     const handleClose = useCallback(() => setOpen(false), []);
 
     const iframeRef = useRef<HTMLIFrameElement | undefined>(undefined);
-    const [iframeSrc, setIframeSrc] = useState<string | null>(null);
 
     const iframeRouteNavigate = useCallback(
         (url: string) => {
             if (!activeComponents.iframe) return;
-
-            // Navigate by changing the iframe src — works across any origin combination
             setIframeSrc(url);
-            if (!iframeEnabled) {
-                setIframeEnabled(true);
-            }
+            if (!iframeEnabled) setIframeEnabled(true);
         },
         [iframeEnabled, activeComponents],
     );
 
     const toggleIframeHandler = useCallback(() => {
-        if (!activeComponents.iframe) {
-            return;
-        }
-        setIframeEnabled((value) => !value);
+        if (!activeComponents.iframe) return;
+        setIframeEnabled((v) => !v);
     }, [activeComponents]);
 
     const {
         height: panelHeight,
         setHeight: setPanelHeight,
         separatorProps,
-    } = useBottomResize({
-        initial: iframeHeight,
-        min: 100,
-        max: 1000,
-        onResizeEnd: (h) => {
-            dispatch(setIFrameHeight(h));
-        },
-    });
+    } = useBottomResize({initial: iframeHeight, min: 100, max: 1000, onResizeEnd: (h) => dispatch(setIFrameHeight(h))});
     useEffect(() => {
-        if (iframeHeight != null) {
-            setPanelHeight(iframeHeight);
-        }
+        if (iframeHeight != null) setPanelHeight(iframeHeight);
     }, [iframeHeight]);
+
+    // === Snap / Drag logic ===
+    const snapTo = useCallback(
+        (newPos: ToolbarPosition) => {
+            setPosition(newPos);
+            dispatch(setToolbarPosition(newPos));
+        },
+        [dispatch],
+    );
+
+    const {isDragging, snapZone, dragHandleProps} = useDrag({
+        onDragEnd: (zone) => {
+            if (zone) {
+                snapTo(zone);
+            } else {
+                snapTo('float');
+                const rect = widgetRef.current?.getBoundingClientRect();
+                if (rect) {
+                    const newRect = {x: rect.left, y: rect.top, width: floatPos.width, height: floatPos.height};
+                    setFloatPos(newRect);
+                    dispatch(setToolbarFloatRect(newRect));
+                }
+            }
+        },
+        onPositionChange: (x, y) => {
+            if (position !== 'float') {
+                setPosition('float');
+            }
+            setFloatPos((prev) => ({...prev, x, y}));
+        },
+        getWidgetRect: () => widgetRef.current?.getBoundingClientRect() ?? null,
+    });
+
+    // Float resize
+    const handleResize = useCallback((dx: number, dy: number) => {
+        setFloatPos((prev) => ({
+            x: prev.x + dx,
+            y: prev.y + dy,
+            width: Math.max(260, prev.width - dx),
+            height: Math.max(200, prev.height - dy),
+        }));
+    }, []);
+
+    const handleResizeEnd = useCallback(() => {
+        dispatch(setToolbarFloatRect(floatPos));
+    }, [floatPos, dispatch]);
 
     const actionButtonSx = {p: 0.5, color: 'text.secondary', '&:hover': {color: 'text.primary'}};
 
-    // Collapsed state: small pill in bottom-right corner
+    // === Collapsed state ===
     if (!isToolbarOpened) {
         return (
             <Portal>
@@ -288,141 +374,245 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         );
     }
 
-    // Expanded state: full toolbar bar at bottom
-    return (
-        <Portal>
-            <Box sx={{position: 'sticky', bottom: 0, zIndex: 1300}}>
-                {/* Resize handle (only when iframe is active) */}
-                {iframeEnabled && (
-                    <Box
-                        {...separatorProps}
+    const isBottom = position === 'bottom';
+    const isSide = position === 'right' || position === 'left';
+
+    // Shared action buttons
+    const actionButtons = (
+        <Stack direction="row" spacing={0.25} alignItems="center">
+            {activeComponents.iframe && (
+                <Tooltip title={iframeEnabled ? 'Close panel' : 'Open panel'} arrow>
+                    <IconButton onClick={toggleIframeHandler} size="small" sx={actionButtonSx}>
+                        {iframeEnabled ? <WebAssetOffIcon sx={{fontSize: 18}} /> : <WebAssetIcon sx={{fontSize: 18}} />}
+                    </IconButton>
+                </Tooltip>
+            )}
+            <Tooltip title="AI Chat" arrow>
+                <IconButton
+                    onClick={() => setChatOpen((v) => !v)}
+                    size="small"
+                    sx={{...actionButtonSx, ...(chatOpen && {color: 'primary.main'})}}
+                >
+                    <SmartToyIcon sx={{fontSize: 18}} />
+                </IconButton>
+            </Tooltip>
+            <Tooltip title="Debug entries" arrow>
+                <IconButton onClick={handleClickOpen} size="small" sx={actionButtonSx}>
+                    <FormatListBulletedIcon sx={{fontSize: 18}} />
+                </IconButton>
+            </Tooltip>
+            <Tooltip title="Open in new window" arrow>
+                <IconButton onClick={handleDebugWindowOpen} size="small" sx={actionButtonSx}>
+                    <OpenInNewIcon sx={{fontSize: 18}} />
+                </IconButton>
+            </Tooltip>
+        </Stack>
+    );
+
+    // === BOTTOM BAR: single horizontal row ===
+    if (isBottom) {
+        return (
+            <Portal>
+                <Box sx={{position: 'sticky', bottom: 0, zIndex: 1300}}>
+                    {iframeEnabled && (
+                        <Box
+                            {...separatorProps}
+                            sx={{
+                                position: 'absolute',
+                                top: -6,
+                                left: 0,
+                                right: 0,
+                                height: 12,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'row-resize',
+                                zIndex: 1,
+                                '&:hover': {bgcolor: 'action.hover'},
+                            }}
+                        >
+                            <DragHandleIcon sx={{fontSize: 16, color: 'text.disabled'}} />
+                        </Box>
+                    )}
+                    <Paper
+                        elevation={0}
                         sx={{
-                            position: 'absolute',
-                            top: -6,
-                            left: 0,
-                            right: 0,
-                            height: 12,
+                            borderTop: 1,
+                            borderColor: 'divider',
+                            borderRadius: 0,
+                            px: 1,
+                            py: 0.5,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'row-resize',
-                            zIndex: 1,
-                            '&:hover': {bgcolor: 'action.hover'},
+                            gap: 0.5,
+                            minHeight: 40,
                         }}
                     >
-                        <DragHandleIcon sx={{fontSize: 16, color: 'text.disabled'}} />
-                    </Box>
-                )}
+                        <Tooltip title="Collapse toolbar" arrow>
+                            <IconButton
+                                onClick={onToolbarClickHandler}
+                                size="small"
+                                sx={actionButtonSx}
+                                {...dragHandleProps}
+                            >
+                                <DuckIcon sx={{fontSize: 22}} />
+                            </IconButton>
+                        </Tooltip>
+                        <Divider orientation="vertical" flexItem sx={{mx: 0.25}} />
+                        {selectedEntry && (
+                            <MetricItems entry={selectedEntry} iframeRouteNavigate={iframeRouteNavigate} />
+                        )}
+                        <Box sx={{flex: 1}} />
+                        <Divider orientation="vertical" flexItem sx={{mx: 0.25}} />
+                        {actionButtons}
+                    </Paper>
+                    {iframeEnabled && (
+                        <div style={{height: panelHeight, overflow: 'hidden'}}>
+                            <DebugIFrame
+                                ref={iframeRef}
+                                baseUrlState={baseUrlState}
+                                iframeEnabled={iframeEnabled}
+                                iframeSrc={iframeSrc}
+                            />
+                        </div>
+                    )}
+                </Box>
+                <SnapZones activeZone={snapZone} />
+                <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
+            </Portal>
+        );
+    }
 
+    // === SIDE RAIL: vertical panel ===
+    if (isSide) {
+        return (
+            <Portal>
                 <Paper
+                    ref={widgetRef}
                     elevation={0}
                     sx={{
-                        borderTop: 1,
-                        borderColor: 'divider',
+                        position: 'fixed',
+                        top: 0,
+                        [position]: 0,
+                        bottom: 0,
+                        width: 260,
+                        zIndex: 1300,
                         borderRadius: 0,
-                        px: 1,
-                        py: 0.5,
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        minHeight: 40,
+                        flexDirection: 'column',
+                        ...(position === 'right'
+                            ? {borderLeft: 1, borderColor: 'divider'}
+                            : {borderRight: 1, borderColor: 'divider'}),
+                        boxShadow: theme.shadows[4],
                     }}
                 >
-                    {/* Logo / toggle button */}
-                    <Tooltip title="Collapse toolbar" arrow>
-                        <IconButton
-                            onClick={onToolbarClickHandler}
-                            aria-label="Collapse toolbar"
-                            size="small"
-                            sx={actionButtonSx}
-                        >
-                            <DuckIcon sx={{fontSize: 22}} />
+                    <Box
+                        {...dragHandleProps}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            px: 1.5,
+                            py: 1,
+                            gap: 1,
+                            borderBottom: 1,
+                            borderColor: 'divider',
+                            cursor: 'grab',
+                            '&:active': {cursor: 'grabbing'},
+                        }}
+                    >
+                        <DuckIcon sx={{fontSize: 22}} />
+                        <Box sx={{fontSize: 14, fontWeight: 600, flex: 1}}>Debug</Box>
+                        <IconButton onClick={onToolbarClickHandler} size="small" sx={actionButtonSx}>
+                            <Box component="span" sx={{fontSize: 14}}>
+                                ✕
+                            </Box>
+                        </IconButton>
+                    </Box>
+                    {selectedEntry && (
+                        <MetricItemsVertical entry={selectedEntry} iframeRouteNavigate={iframeRouteNavigate} />
+                    )}
+                    <Divider />
+                    <Box sx={{p: 1, display: 'flex', gap: 0.5}}>{actionButtons}</Box>
+                </Paper>
+                <SnapZones activeZone={snapZone} />
+                <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
+            </Portal>
+        );
+    }
+
+    // === FLOAT: draggable/resizable card ===
+    return (
+        <Portal>
+            <Paper
+                ref={widgetRef}
+                elevation={4}
+                sx={{
+                    position: 'fixed',
+                    left: floatPos.x,
+                    top: floatPos.y,
+                    width: floatPos.width,
+                    height: floatPos.height,
+                    zIndex: 1300,
+                    borderRadius: '14px',
+                    border: 1,
+                    borderColor: 'divider',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    transition: isDragging ? 'none' : 'box-shadow 200ms ease',
+                }}
+            >
+                <ResizeGrip onResize={handleResize} onResizeEnd={handleResizeEnd} />
+                <Box
+                    {...dragHandleProps}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        px: 1,
+                        py: 0.75,
+                        gap: 0.75,
+                        borderBottom: 1,
+                        borderColor: 'divider',
+                        cursor: 'grab',
+                        '&:active': {cursor: 'grabbing'},
+                        userSelect: 'none',
+                        flexShrink: 0,
+                    }}
+                >
+                    <DuckIcon sx={{fontSize: 20}} />
+                    <Box sx={{fontSize: 12, fontWeight: 600, flex: 1}}>Debug</Box>
+                    <IconButton onClick={() => setChatOpen((v) => !v)} size="small" sx={actionButtonSx}>
+                        <SmartToyIcon sx={{fontSize: 16}} />
+                    </IconButton>
+                    <IconButton onClick={handleDebugWindowOpen} size="small" sx={actionButtonSx}>
+                        <OpenInNewIcon sx={{fontSize: 16}} />
+                    </IconButton>
+                </Box>
+                {selectedEntry && (
+                    <Box sx={{flex: 1, overflowY: 'auto', px: 0.5, py: 0.5}}>
+                        <MetricItems entry={selectedEntry} iframeRouteNavigate={iframeRouteNavigate} />
+                    </Box>
+                )}
+                <Box sx={{display: 'flex', gap: 0.5, p: 0.75, borderTop: 1, borderColor: 'divider', flexShrink: 0}}>
+                    {activeComponents.iframe && (
+                        <Tooltip title="Toggle panel" arrow>
+                            <IconButton onClick={toggleIframeHandler} size="small" sx={actionButtonSx}>
+                                {iframeEnabled ? (
+                                    <WebAssetOffIcon sx={{fontSize: 16}} />
+                                ) : (
+                                    <WebAssetIcon sx={{fontSize: 16}} />
+                                )}
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                    <Tooltip title="Debug entries" arrow>
+                        <IconButton onClick={handleClickOpen} size="small" sx={actionButtonSx}>
+                            <FormatListBulletedIcon sx={{fontSize: 16}} />
                         </IconButton>
                     </Tooltip>
-
-                    <Divider orientation="vertical" flexItem sx={{mx: 0.25}} />
-
-                    {/* Metric items */}
-                    {selectedEntry && (
-                        <ErrorBoundary FallbackComponent={ToolbarErrorFallback} resetKeys={[selectedEntry.id]}>
-                            <Stack direction="row" alignItems="center" spacing={0.5} sx={{flexWrap: 'nowrap'}}>
-                                {isDebugEntryAboutWeb(selectedEntry) && <RequestItem data={selectedEntry} />}
-                                {isDebugEntryAboutConsole(selectedEntry) && <CommandItem data={selectedEntry} />}
-
-                                <ExceptionItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-
-                                <RequestTimeItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                                <MemoryItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-
-                                <DatabaseItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                                <HttpClientItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-
-                                <LogsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                                <EventsItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                                <ValidatorItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                                <DeprecationItem data={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
-                            </Stack>
-                        </ErrorBoundary>
-                    )}
-
-                    {/* Spacer */}
-                    <Box sx={{flex: 1}} />
-
-                    {/* Action buttons */}
-                    <Divider orientation="vertical" flexItem sx={{mx: 0.25}} />
-
-                    <Stack direction="row" spacing={0.25} alignItems="center">
-                        {activeComponents.iframe && (
-                            <Tooltip title={iframeEnabled ? 'Close panel' : 'Open panel'} arrow>
-                                <IconButton
-                                    onClick={toggleIframeHandler}
-                                    aria-label="Toggle debug panel"
-                                    size="small"
-                                    sx={actionButtonSx}
-                                >
-                                    {iframeEnabled ? (
-                                        <WebAssetOffIcon sx={{fontSize: 18}} />
-                                    ) : (
-                                        <WebAssetIcon sx={{fontSize: 18}} />
-                                    )}
-                                </IconButton>
-                            </Tooltip>
-                        )}
-                        <Tooltip title="Debug entries" arrow>
-                            <IconButton
-                                onClick={handleClickOpen}
-                                aria-label="List debug entries"
-                                size="small"
-                                sx={actionButtonSx}
-                            >
-                                <FormatListBulletedIcon sx={{fontSize: 18}} />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Open in new window" arrow>
-                            <IconButton
-                                onClick={handleDebugWindowOpen}
-                                aria-label="Open debug panel"
-                                size="small"
-                                sx={actionButtonSx}
-                            >
-                                <OpenInNewIcon sx={{fontSize: 18}} />
-                            </IconButton>
-                        </Tooltip>
-                    </Stack>
-                </Paper>
-
-                {iframeEnabled && (
-                    <div style={{height: panelHeight, overflow: 'hidden'}}>
-                        <DebugIFrame
-                            ref={iframeRef}
-                            baseUrlState={baseUrlState}
-                            iframeEnabled={iframeEnabled}
-                            iframeSrc={iframeSrc}
-                        />
-                    </div>
-                )}
-            </Box>
-
+                </Box>
+            </Paper>
+            <SnapZones activeZone={snapZone} />
             <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
         </Portal>
     );

@@ -1,10 +1,14 @@
 import {type EditorConfig, type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
+export type ToolbarPosition = 'float' | 'bottom' | 'right' | 'left';
+
 type ApplicationContext = {
     baseUrl: string;
     preferredPageSize: number;
     toolbarOpen: boolean;
+    toolbarPosition: ToolbarPosition;
+    toolbarFloatRect: {x: number; y: number; width: number; height: number} | null;
     favoriteUrls: string[];
     autoLatest: boolean;
     iframeHeight: number;
@@ -19,6 +23,8 @@ export const ApplicationSlice = createSlice({
         baseUrl: '',
         preferredPageSize: 20,
         toolbarOpen: true,
+        toolbarPosition: 'bottom' as ToolbarPosition,
+        toolbarFloatRect: null as {x: number; y: number; width: number; height: number} | null,
         favoriteUrls: [] as string[],
         autoLatest: false,
         iframeHeight: 400,
@@ -52,6 +58,15 @@ export const ApplicationSlice = createSlice({
         setIFrameHeight: (state, action) => {
             state.iframeHeight = action.payload;
         },
+        setToolbarPosition: (state, action: PayloadAction<ToolbarPosition>) => {
+            state.toolbarPosition = action.payload;
+        },
+        setToolbarFloatRect: (
+            state,
+            action: PayloadAction<{x: number; y: number; width: number; height: number} | null>,
+        ) => {
+            state.toolbarFloatRect = action.payload;
+        },
         changeSelectedService(state, action: PayloadAction<string>) {
             state.selectedService = action.payload;
         },
@@ -81,6 +96,8 @@ export const {
     addFavoriteUrl,
     removeFavoriteUrl,
     setIFrameHeight,
+    setToolbarPosition,
+    setToolbarFloatRect,
     changeSelectedService,
     changeThemeMode,
     changeShowInactiveCollectors,
