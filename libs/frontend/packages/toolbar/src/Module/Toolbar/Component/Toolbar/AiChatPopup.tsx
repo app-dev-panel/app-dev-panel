@@ -30,6 +30,8 @@ const formatSummary = (entry: DebugEntry): string => {
 
 const SUGGESTIONS = ['Show queries', 'Performance tips', 'Show logs', 'Explain route'];
 
+const DEFAULT_POS = {x: -1, y: -1, w: 320, h: 420};
+
 type AiChatPopupProps = {
     open: boolean;
     onClose: () => void;
@@ -40,8 +42,26 @@ type AiChatPopupProps = {
 export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: AiChatPopupProps) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
+    const [pos, setPos] = useState(DEFAULT_POS);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const prevEntryId = useRef<string | null>(null);
+    const chatRef = useRef<HTMLDivElement>(null);
+
+    // Drag state
+    const dragRef = useRef<{startX: number; startY: number; startLeft: number; startTop: number} | null>(null);
+    // Resize state
+    const resizeRef = useRef<{startX: number; startY: number; startW: number; startH: number} | null>(null);
+
+    // Compute initial position based on toolbar position
+    useEffect(() => {
+        if (open && pos.x === -1) {
+            if (toolbarPosition === 'bottom')
+                setPos((p) => ({...p, x: window.innerWidth - 332, y: window.innerHeight - 480}));
+            else if (toolbarPosition === 'right') setPos((p) => ({...p, x: window.innerWidth - 600, y: 60}));
+            else if (toolbarPosition === 'left') setPos((p) => ({...p, x: 272, y: 60}));
+            else setPos((p) => ({...p, x: window.innerWidth - 332, y: window.innerHeight - 480}));
+        }
+    }, [open, toolbarPosition]);
 
     useEffect(() => {
         if (entry && entry.id !== prevEntryId.current) {
@@ -53,6 +73,55 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
     }, [messages]);
+
+    // Global mouse listeners for drag + resize
+    useEffect(() => {
+        const onMouseMove = (e: MouseEvent) => {
+            if (dragRef.current) {
+                const dx = e.clientX - dragRef.current.startX;
+                const dy = e.clientY - dragRef.current.startY;
+                setPos((p) => ({...p, x: dragRef.current!.startLeft + dx, y: dragRef.current!.startTop + dy}));
+            }
+            if (resizeRef.current) {
+                const dx = e.clientX - resizeRef.current.startX;
+                const dy = e.clientY - resizeRef.current.startY;
+                setPos((p) => ({
+                    ...p,
+                    w: Math.max(260, resizeRef.current!.startW + dx),
+                    h: Math.max(300, resizeRef.current!.startH + dy),
+                }));
+            }
+        };
+        const onMouseUp = () => {
+            dragRef.current = null;
+            resizeRef.current = null;
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        return () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+    }, []);
+
+    const onHeaderMouseDown = useCallback((e: React.MouseEvent) => {
+        if ((e.target as HTMLElement).closest('button')) return;
+        e.preventDefault();
+        const rect = chatRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        dragRef.current = {startX: e.clientX, startY: e.clientY, startLeft: rect.left, startTop: rect.top};
+        // Switch to absolute positioning
+        setPos((p) => ({...p, x: rect.left, y: rect.top}));
+    }, []);
+
+    const onResizeMouseDown = useCallback(
+        (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            resizeRef.current = {startX: e.clientX, startY: e.clientY, startW: pos.w, startH: pos.h};
+        },
+        [pos.w, pos.h],
+    );
 
     const sendMessage = useCallback((text: string) => {
         if (!text.trim()) return;
@@ -75,15 +144,14 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
     return (
         <Portal>
             <Paper
+                ref={chatRef}
                 elevation={6}
                 sx={{
                     position: 'fixed',
-                    width: 320,
-                    height: 420,
-                    ...(toolbarPosition === 'bottom' && {bottom: 56, right: 12}),
-                    ...(toolbarPosition === 'right' && {right: 272, top: 60}),
-                    ...(toolbarPosition === 'left' && {left: 272, top: 60}),
-                    ...(toolbarPosition === 'float' && {bottom: 56, right: 12}),
+                    left: pos.x,
+                    top: pos.y,
+                    width: pos.w,
+                    height: pos.h,
                     zIndex: 1400,
                     borderRadius: 3,
                     border: 1,
@@ -93,8 +161,9 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                     overflow: 'hidden',
                 }}
             >
-                {/* Header */}
+                {/* Header — draggable */}
                 <Box
+                    onMouseDown={onHeaderMouseDown}
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
@@ -104,6 +173,9 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                         borderBottom: 1,
                         borderColor: 'divider',
                         flexShrink: 0,
+                        cursor: 'grab',
+                        userSelect: 'none',
+                        '&:active': {cursor: 'grabbing'},
                     }}
                 >
                     <DuckIcon sx={{fontSize: 22}} />
@@ -179,6 +251,30 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                     >
                         <SendIcon sx={{fontSize: 18}} />
                     </IconButton>
+                </Box>
+
+                {/* Resize handle — bottom-right */}
+                <Box
+                    onMouseDown={onResizeMouseDown}
+                    sx={{
+                        position: 'absolute',
+                        bottom: 0,
+                        right: 0,
+                        width: 18,
+                        height: 18,
+                        cursor: 'se-resize',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: 0.3,
+                        '&:hover': {opacity: 0.7},
+                    }}
+                >
+                    <svg width="10" height="10" viewBox="0 0 10 10">
+                        <line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" strokeWidth="1.2" />
+                        <line x1="9" y1="4" x2="4" y2="9" stroke="currentColor" strokeWidth="1.2" />
+                        <line x1="9" y1="7" x2="7" y2="9" stroke="currentColor" strokeWidth="1.2" />
+                    </svg>
                 </Box>
             </Paper>
         </Portal>

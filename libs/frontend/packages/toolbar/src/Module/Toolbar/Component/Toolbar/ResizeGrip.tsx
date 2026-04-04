@@ -1,45 +1,55 @@
 import {Box} from '@mui/material';
-import {useCallback, useRef} from 'react';
+import {useCallback, useEffect, useRef} from 'react';
 
 type ResizeGripProps = {onResize: (deltaX: number, deltaY: number) => void; onResizeEnd: () => void};
 
+/**
+ * Resize grip (top-left corner, 3 diagonal lines).
+ * Uses document-level mousemove/mouseup for reliable tracking.
+ */
 export const ResizeGrip = ({onResize, onResizeEnd}: ResizeGripProps) => {
-    const dragRef = useRef<{startX: number; startY: number} | null>(null);
+    const onResizeRef = useRef(onResize);
+    const onResizeEndRef = useRef(onResizeEnd);
+    const activeRef = useRef(false);
+    onResizeRef.current = onResize;
+    onResizeEndRef.current = onResizeEnd;
 
-    const onPointerDown = useCallback((e: React.PointerEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const target = e.currentTarget as HTMLElement;
-        target.setPointerCapture(e.pointerId);
-        dragRef.current = {startX: e.clientX, startY: e.clientY};
+    useEffect(() => {
+        let lastX = 0;
+        let lastY = 0;
+
+        const onMouseMove = (e: MouseEvent) => {
+            if (!activeRef.current) return;
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            lastX = e.clientX;
+            lastY = e.clientY;
+            onResizeRef.current(dx, dy);
+        };
+
+        const onMouseUp = () => {
+            if (!activeRef.current) return;
+            activeRef.current = false;
+            onResizeEndRef.current();
+        };
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        return () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
     }, []);
 
-    const onPointerMove = useCallback(
-        (e: React.PointerEvent) => {
-            if (!dragRef.current) return;
-            const dx = e.clientX - dragRef.current.startX;
-            const dy = e.clientY - dragRef.current.startY;
-            dragRef.current = {startX: e.clientX, startY: e.clientY};
-            onResize(dx, dy);
-        },
-        [onResize],
-    );
-
-    const onPointerUp = useCallback(
-        (e: React.PointerEvent) => {
-            if (!dragRef.current) return;
-            (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-            dragRef.current = null;
-            onResizeEnd();
-        },
-        [onResizeEnd],
-    );
+    const onMouseDown = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        activeRef.current = true;
+    }, []);
 
     return (
         <Box
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
+            onMouseDown={onMouseDown}
             sx={{
                 position: 'absolute',
                 top: 0,
