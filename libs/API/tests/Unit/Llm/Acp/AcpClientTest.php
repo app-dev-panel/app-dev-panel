@@ -56,7 +56,7 @@ final class AcpClientTest extends TestCase
                 'params' => [
                     'sessionId' => 'test-session-123',
                     'update' => [
-                        'type' => 'message_chunk',
+                        'type' => 'agent_message_chunk',
                         'content' => [['type' => 'text', 'text' => 'Hello ']],
                     ],
                 ],
@@ -68,7 +68,7 @@ final class AcpClientTest extends TestCase
                 'params' => [
                     'sessionId' => 'test-session-123',
                     'update' => [
-                        'type' => 'message_chunk',
+                        'type' => 'agent_message_chunk',
                         'content' => [['type' => 'text', 'text' => 'World!']],
                     ],
                 ],
@@ -121,7 +121,7 @@ final class AcpClientTest extends TestCase
                 'params' => [
                     'sessionId' => 'sess-1',
                     'update' => [
-                        'type' => 'message_chunk',
+                        'type' => 'agent_message_chunk',
                         'content' => [['type' => 'text', 'text' => 'Found 3 errors.']],
                     ],
                 ],
@@ -199,7 +199,7 @@ final class AcpClientTest extends TestCase
                 'method' => 'session/update',
                 'params' => [
                     'sessionId' => 'sess-1',
-                    'update' => ['type' => 'message_chunk', 'content' => [['type' => 'text', 'text' => 'OK']]],
+                    'update' => ['type' => 'agent_message_chunk', 'content' => [['type' => 'text', 'text' => 'OK']]],
                 ],
             ],
             ['jsonrpc' => '2.0', 'id' => 3, 'result' => ['stopReason' => 'end_turn']],

@@ -196,7 +196,7 @@ final class AcpClient
         $update = $message['params']['update'] ?? [];
         $type = $update['type'] ?? '';
 
-        if ($type === 'message_chunk') {
+        if ($type === 'agent_message_chunk') {
             $content = $update['content'] ?? [];
             foreach ($content as $block) {
                 if (($block['type'] ?? '') === 'text' && isset($block['text'])) {
