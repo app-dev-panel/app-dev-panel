@@ -139,14 +139,12 @@ const MainArea = styled(Box)(({theme}) => ({
     [theme.breakpoints.up('sm')]: {padding: componentTokens.mainGap, gap: componentTokens.mainGap},
 }));
 
-const MainInner = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
-    ({expanded}) => ({
-        display: 'flex',
-        width: '100%',
-        maxWidth: expanded ? 'none' : componentTokens.mainMaxWidth,
-        gap: componentTokens.mainGap,
-    }),
-);
+const MainInner = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(({expanded}) => ({
+    display: 'flex',
+    width: '100%',
+    maxWidth: expanded ? 'none' : componentTokens.mainMaxWidth,
+    gap: componentTokens.mainGap,
+}));
 
 const ContentArea = styled(Box)(({theme}) => ({
     flex: 1,

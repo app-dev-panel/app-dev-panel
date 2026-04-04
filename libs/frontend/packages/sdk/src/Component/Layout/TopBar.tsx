@@ -257,10 +257,7 @@ export const TopBar = React.memo(
                     size="small"
                     onClick={onLiveFeedClick}
                     aria-label="Live feed"
-                    sx={{
-                        backgroundColor: liveFeedActive ? 'action.selected' : undefined,
-                        borderRadius: 1,
-                    }}
+                    sx={{backgroundColor: liveFeedActive ? 'action.selected' : undefined, borderRadius: 1}}
                 >
                     <Badge
                         badgeContent={liveFeedCount}
