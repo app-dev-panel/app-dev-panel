@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Llm;
 
+use AppDevPanel\Api\Llm\Acp\AcpClient;
+use AppDevPanel\Api\Llm\Acp\AcpClientFactoryInterface;
+use AppDevPanel\Api\Llm\Acp\AcpTransportInterface;
 use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use GuzzleHttp\Psr7\HttpFactory;
@@ -219,6 +222,16 @@ final class LlmProviderServiceTest extends TestCase
         $this->assertStringContainsString('ACP Agent', $models[0]['name']);
     }
 
+    public function testSendChatAcpReturnsErrorWhenNoFactory(): void
+    {
+        $service = $this->createService('acp');
+
+        $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertStringContainsString('not configured', $result['error']);
+    }
+
     public function testSendChatAcpReturnsErrorWhenCommandNotFound(): void
     {
         $settings = $this->createMock(LlmSettingsInterface::class);
@@ -228,17 +241,37 @@ final class LlmProviderServiceTest extends TestCase
         $settings->method('getTimeout')->willReturn(5);
         $settings->method('getCustomPrompt')->willReturn('');
 
+        $factory = $this->createMock(AcpClientFactoryInterface::class);
+        $factory->method('create')->willReturn(new AcpClient($this->createMockAcpTransport([])));
+
         $httpFactory = new HttpFactory();
         $service = new LlmProviderService(
             $settings,
             $this->mockHttpClient(new Response(200, [], '{}')),
             $httpFactory,
             $httpFactory,
+            $factory,
         );
 
         $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7);
 
         $this->assertArrayHasKey('error', $result);
         $this->assertStringContainsString('ACP agent error', $result['error']);
+    }
+
+    private function createMockAcpTransport(array $responses): AcpTransportInterface
+    {
+        $transport = $this->createMock(AcpTransportInterface::class);
+        $transport->method('isAlive')->willReturn(false);
+        $transport->method('readStderr')->willReturn('');
+
+        $callIndex = 0;
+        $transport
+            ->method('receive')
+            ->willReturnCallback(static function () use (&$callIndex, $responses): ?array {
+                return $responses[$callIndex++] ?? null;
+            });
+
+        return $transport;
     }
 }

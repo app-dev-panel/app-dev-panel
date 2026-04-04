@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Tests\Unit\Llm\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactory;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -39,6 +40,7 @@ final class LlmControllerTest extends TestCase
         ?string $apiKey = null,
         ?ClientInterface $httpClient = null,
         ?LlmProviderService $providerService = null,
+        ?AcpCommandVerifierInterface $commandVerifier = null,
     ): LlmController {
         $settings = new FileLlmSettings($this->tmpDir);
         if ($apiKey !== null) {
@@ -59,6 +61,7 @@ final class LlmControllerTest extends TestCase
             $httpFactory,
             $httpFactory,
             $client,
+            $commandVerifier,
         );
     }
 
@@ -634,22 +637,29 @@ final class LlmControllerTest extends TestCase
 
     // --- ACP Connect ---
 
+    private function mockVerifier(bool $available): AcpCommandVerifierInterface
+    {
+        $verifier = $this->createMock(AcpCommandVerifierInterface::class);
+        $verifier->method('isAvailable')->willReturn($available);
+
+        return $verifier;
+    }
+
     public function testConnectAcpWithValidCommand(): void
     {
-        $controller = $this->makeController();
-        // 'php' should be available in test environment
-        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'php']));
+        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
+        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'claude']));
         $data = $this->data($response);
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertTrue($data['connected']);
         $this->assertSame('acp', $data['provider']);
-        $this->assertSame('php', $data['acpCommand']);
+        $this->assertSame('claude', $data['acpCommand']);
     }
 
     public function testConnectAcpWithInvalidCommand(): void
     {
-        $controller = $this->makeController();
+        $controller = $this->makeController(commandVerifier: $this->mockVerifier(false));
         $response = $controller->connect($this->post([
             'provider' => 'acp',
             'acpCommand' => 'nonexistent-acp-cmd-99999',
@@ -663,27 +673,25 @@ final class LlmControllerTest extends TestCase
 
     public function testConnectAcpDefaultCommand(): void
     {
-        $controller = $this->makeController();
-        // Without acpCommand, defaults to 'claude'. Likely not on PATH in test env.
+        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
         $response = $controller->connect($this->post(['provider' => 'acp']));
-        // Either 200 (claude found) or 400 (not found) — both are valid.
-        $this->assertContains($response->getStatusCode(), [200, 400]);
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('claude', $this->data($response)['acpCommand']);
     }
 
     public function testConnectAcpDoesNotRequireApiKey(): void
     {
-        $controller = $this->makeController();
-        // ACP provider should not throw about missing apiKey
-        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'php']));
+        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
+        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'claude']));
         $this->assertSame(200, $response->getStatusCode());
     }
 
     public function testConnectAcpWithArgsAndEnv(): void
     {
-        $controller = $this->makeController();
+        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
         $response = $controller->connect($this->post([
             'provider' => 'acp',
-            'acpCommand' => 'php',
+            'acpCommand' => 'claude',
             'acpArgs' => ['--version'],
             'acpEnv' => ['MY_VAR' => 'value'],
         ]));
@@ -694,23 +702,33 @@ final class LlmControllerTest extends TestCase
 
     public function testStatusAfterAcpConnect(): void
     {
-        $controller = $this->makeController();
-        $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'php']));
+        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
+        $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'claude']));
 
         $data = $this->data($controller->status(new ServerRequest('GET', '/')));
         $this->assertTrue($data['connected']);
         $this->assertSame('acp', $data['provider']);
-        $this->assertSame('php', $data['acpCommand']);
+        $this->assertSame('claude', $data['acpCommand']);
     }
 
     public function testModelsAcpConnected(): void
     {
-        $controller = $this->makeController();
-        $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'php']));
+        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
+        $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'claude']));
 
         $data = $this->data($controller->models(new ServerRequest('GET', '/')));
         $this->assertArrayHasKey('models', $data);
         $this->assertCount(1, $data['models']);
         $this->assertSame('acp-agent', $data['models'][0]['id']);
+    }
+
+    public function testConnectAcpWithoutVerifierSkipsCheck(): void
+    {
+        // Without a verifier injected, ACP connect should succeed regardless of command
+        $controller = $this->makeController();
+        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'anything']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($this->data($response)['connected']);
     }
 }

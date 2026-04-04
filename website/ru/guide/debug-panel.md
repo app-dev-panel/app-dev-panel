@@ -193,7 +193,7 @@ SPA панели включает следующие модули:
 |--------|------|----------|
 | Debug | `/debug` | Просмотр собранных записей — логи, SQL-запросы, события, исключения, timeline, HTTP-запросы, кэш, почта и т.д. |
 | Inspector | `/debug/inspector/*` | Состояние приложения в реальном времени — маршруты, конфигурация, схема БД, git, кэш, файлы, переводы, Composer-пакеты |
-| LLM | `/debug/llm` | AI-чат и анализ отладочных данных |
+| LLM | `/debug/llm` | AI-чат и анализ отладочных данных. Поддержка OpenRouter, Anthropic, OpenAI и ACP (локальные агенты, например Claude Code) |
 | MCP | `/debug/mcp` | Настройка MCP (Model Context Protocol) сервера |
 | OpenAPI | `/debug/openapi` | Swagger UI для REST API ADP |
 

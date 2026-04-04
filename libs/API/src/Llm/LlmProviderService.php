@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Llm;
 
-use AppDevPanel\Api\Llm\Acp\AcpClient;
-use AppDevPanel\Api\Llm\Acp\AcpTransport;
+use AppDevPanel\Api\Llm\Acp\AcpClientFactoryInterface;
 use GuzzleHttp\Client;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -14,7 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 
 /**
- * Handles communication with LLM providers (OpenRouter, Anthropic, OpenAI).
+ * Handles communication with LLM providers (OpenRouter, Anthropic, OpenAI, ACP).
  *
  * Encapsulates provider-specific API differences: authentication, request format,
  * response normalization, and model listing.
@@ -36,6 +35,7 @@ final class LlmProviderService
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory,
+        private readonly ?AcpClientFactoryInterface $acpClientFactory = null,
     ) {}
 
     /**
@@ -366,14 +366,17 @@ final class LlmProviderService
      */
     private function sendAcpChat(array $messages): array
     {
+        if ($this->acpClientFactory === null) {
+            return ['error' => 'ACP provider is not configured (missing AcpClientFactory).'];
+        }
+
         $command = $this->settings->getAcpCommand();
         $args = $this->settings->getAcpArgs();
         $env = $this->settings->getAcpEnv();
         $timeout = (float) $this->settings->getTimeout();
         $customPrompt = $this->settings->getCustomPrompt();
 
-        $transport = new AcpTransport();
-        $client = new AcpClient($transport);
+        $client = $this->acpClientFactory->create();
 
         try {
             $response = $client->chat($command, $messages, $args, $env, $timeout, $customPrompt);

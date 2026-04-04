@@ -59,12 +59,21 @@ All LLM endpoints share the same settings stored in `.llm-settings.json`. Both t
 
 See the [AI Chat guide](/guide/ai-chat) for user-facing documentation.
 
+### LLM Providers
+
+| Provider | Auth | How it works |
+|----------|------|--------------|
+| `openrouter` | API key or OAuth | HTTP calls to OpenRouter API (default) |
+| `anthropic` | API key or OAuth token | HTTP calls to Anthropic Messages API |
+| `openai` | API key | HTTP calls to OpenAI Chat Completions API |
+| `acp` | None (local agent) | Spawns agent (e.g. Claude Code) as subprocess via Agent Client Protocol |
+
 ### Connection
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/debug/api/llm/status` | Connection status, provider, model, timeout, custom prompt |
-| POST | `/debug/api/llm/connect` | Connect with API key |
+| POST | `/debug/api/llm/connect` | Connect with API key or ACP agent |
 | POST | `/debug/api/llm/disconnect` | Clear stored credentials |
 
 #### Status
@@ -95,6 +104,30 @@ Content-Type: application/json
 ```
 
 Supported providers: `openrouter`, `anthropic`, `openai`.
+
+#### Connect with ACP
+
+The ACP provider uses the [Agent Client Protocol](https://agentclientprotocol.com/) to communicate with local AI agents over stdio. ADP acts as an ACP client, spawning the agent as a subprocess per request.
+
+```
+POST /debug/api/llm/connect
+Content-Type: application/json
+
+{
+  "provider": "acp",
+  "acpCommand": "claude",
+  "acpArgs": ["--model", "opus"],
+  "acpEnv": {"ANTHROPIC_MODEL": "claude-sonnet-4-20250514"}
+}
+```
+
+- `acpCommand` — Agent CLI binary (default: `claude`). Must be on system PATH.
+- `acpArgs` — Additional CLI arguments passed to the agent.
+- `acpEnv` — Environment variables merged into the agent's environment.
+
+**Protocol lifecycle per chat request:** `initialize` → `session/new` → `session/prompt` (with streaming `session/update` notifications) → close.
+
+**Supported agents:** Claude Code, Gemini CLI, Codex CLI, or any agent implementing ACP v1.
 
 ### OAuth (OpenRouter)
 

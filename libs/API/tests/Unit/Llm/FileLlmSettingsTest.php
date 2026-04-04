@@ -313,9 +313,9 @@ final class FileLlmSettingsTest extends TestCase
     public function testSetAndGetAcpEnv(): void
     {
         $settings = new FileLlmSettings($this->tmpDir);
-        $settings->setAcpEnv(['ANTHROPIC_API_KEY' => 'sk-test']);
+        $settings->setAcpEnv(['MY_CUSTOM_VAR' => 'test-value']);
 
-        $this->assertSame(['ANTHROPIC_API_KEY' => 'sk-test'], $settings->getAcpEnv());
+        $this->assertSame(['MY_CUSTOM_VAR' => 'test-value'], $settings->getAcpEnv());
     }
 
     public function testAcpProviderIsConnectedWithoutApiKey(): void

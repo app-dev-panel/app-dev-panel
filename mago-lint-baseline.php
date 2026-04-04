@@ -73,6 +73,60 @@ message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/API/src/Llm/Acp/AcpClient.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/Acp/AcpClient.php"
+code = "excessive-parameter-list"
+message = "Parameter list is too long."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/Acp/AcpClient.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.4000000000000004)."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/Acp/AcpClient.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 9
+
+[[issues]]
+file = "libs/API/src/Llm/Acp/AcpClient.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/Acp/AcpClient.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/Acp/AcpClient.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/Acp/AcpTransport.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Llm/Acp/AcpTransport.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.0100000000000002)."
+count = 1
+
+[[issues]]
 file = "libs/API/src/Llm/Controller/LlmController.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
@@ -87,14 +141,14 @@ count = 1
 [[issues]]
 file = "libs/API/src/Llm/Controller/LlmController.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (1.76)."
+message = "Class has a high kan defect score (1.9700000000000002)."
 count = 1
 
 [[issues]]
 file = "libs/API/src/Llm/Controller/LlmController.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 5
+count = 7
 
 [[issues]]
 file = "libs/API/src/Llm/Controller/LlmController.php"
@@ -130,7 +184,7 @@ count = 1
 file = "libs/API/src/Llm/FileLlmSettings.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 5
+count = 8
 
 [[issues]]
 file = "libs/API/src/Llm/FileLlmSettings.php"
@@ -153,7 +207,7 @@ count = 1
 [[issues]]
 file = "libs/API/src/Llm/LlmProviderService.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.5700000000000003)."
+message = "Class has a high kan defect score (2.64)."
 count = 1
 
 [[issues]]
@@ -313,6 +367,18 @@ message = "Do not use empty `catch` blocks."
 count = 1
 
 [[issues]]
+file = "libs/API/tests/Unit/Llm/Acp/AcpClientTest.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/API/tests/Unit/Llm/Acp/AcpClientTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 4
+
+[[issues]]
 file = "libs/API/tests/Unit/Llm/Controller/LlmControllerTest.php"
 code = "no-empty-catch-clause"
 message = "Do not use empty `catch` blocks."
@@ -364,7 +430,7 @@ count = 5
 file = "libs/API/tests/Unit/Llm/FileLlmSettingsTest.php"
 code = "no-literal-password"
 message = "Literal passwords or sensitive data should not be stored in code."
-count = 2
+count = 3
 
 [[issues]]
 file = "libs/API/tests/Unit/Llm/LlmProviderServiceTest.php"

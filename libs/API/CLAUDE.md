@@ -1,6 +1,6 @@
 # API Module
 
-HTTP layer for ADP. Five domains: **Debug** (stored debug entries), **Inspector** (live app state), **Ingestion** (external data intake), **MCP** (AI assistant integration), **LLM** (AI chat and analysis).
+HTTP layer for ADP. Five domains: **Debug** (stored debug entries), **Inspector** (live app state), **Ingestion** (external data intake), **MCP** (AI assistant integration), **LLM** (AI chat and analysis). LLM supports four providers: OpenRouter, Anthropic, OpenAI (HTTP APIs), and ACP (Agent Client Protocol — spawns local AI agents like Claude Code via stdio subprocess).
 
 ## Package
 
@@ -91,9 +91,19 @@ src/
 ├── Llm/
 │   ├── Controller/
 │   │   └── LlmController.php           # LLM integration (connect, chat, analyze, history, OAuth)
+│   ├── Acp/
+│   │   ├── AcpClient.php               # ACP protocol client (JSON-RPC 2.0 over stdio)
+│   │   ├── AcpClientFactory.php         # Default factory: creates AcpClient + AcpTransport
+│   │   ├── AcpClientFactoryInterface.php # Factory interface for DI
+│   │   ├── AcpCommandVerifier.php       # Checks if agent command exists on PATH
+│   │   ├── AcpCommandVerifierInterface.php # Interface for command verification
+│   │   ├── AcpResponse.php              # Value object for ACP agent response
+│   │   ├── AcpTransport.php             # Subprocess management (proc_open + stdio pipes)
+│   │   └── AcpTransportInterface.php    # Transport interface for testability
 │   ├── FileLlmHistoryStorage.php        # File-based chat history
 │   ├── FileLlmSettings.php              # File-based LLM settings
 │   ├── LlmHistoryStorageInterface.php
+│   ├── LlmProviderService.php          # Provider dispatch (OpenRouter, Anthropic, OpenAI, ACP)
 │   └── LlmSettingsInterface.php
 ├── Http/
 │   ├── JsonResponseFactory.php          # JSON response creation

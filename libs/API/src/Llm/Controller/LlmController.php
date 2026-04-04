@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Llm\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
-use AppDevPanel\Api\Llm\Acp\AcpClient;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
@@ -29,6 +29,7 @@ final class LlmController
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory,
         private readonly ClientInterface $httpClient,
+        private readonly ?AcpCommandVerifierInterface $commandVerifier = null,
     ) {}
 
     /**
@@ -86,7 +87,7 @@ final class LlmController
         $acpArgs = isset($body['acpArgs']) && is_array($body['acpArgs']) ? $body['acpArgs'] : [];
         $acpEnv = isset($body['acpEnv']) && is_array($body['acpEnv']) ? $body['acpEnv'] : [];
 
-        if (!AcpClient::isCommandAvailable($command)) {
+        if ($this->commandVerifier !== null && !$this->commandVerifier->isAvailable($command)) {
             return $this->responseFactory->createJsonResponse([
                 'connected' => false,
                 'error' => sprintf('ACP agent command "%s" not found on system PATH.', $command),
@@ -349,8 +350,8 @@ final class LlmController
 
         // Truncate context to avoid exceeding model context windows.
         $maxContextLength = 12000;
-        if (strlen($contextJson) > $maxContextLength) {
-            $contextJson = substr($contextJson, 0, $maxContextLength) . "\n... [truncated]";
+        if (mb_strlen($contextJson, 'UTF-8') > $maxContextLength) {
+            $contextJson = mb_substr($contextJson, 0, $maxContextLength, 'UTF-8') . "\n... [truncated]";
         }
 
         $messages = [

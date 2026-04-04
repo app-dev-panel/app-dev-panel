@@ -61,24 +61,13 @@ final class AcpClient
     }
 
     /**
-     * Check if an ACP agent command is available on the system.
-     */
-    public static function isCommandAvailable(string $command): bool
-    {
-        $which = PHP_OS_FAMILY === 'Windows' ? 'where' : 'which';
-        $result = @exec(sprintf('%s %s 2>/dev/null', $which, escapeshellarg($command)), $output, $exitCode);
-
-        return $exitCode === 0 && $result !== false;
-    }
-
-    /**
      * Send initialize request and return agent capabilities.
      */
     private function initialize(float $timeout): array
     {
         $this->sendRequest('initialize', [
             'protocolVersion' => self::PROTOCOL_VERSION,
-            'capabilities' => new \stdClass(),
+            'capabilities' => (object) [],
             'clientInfo' => [
                 'name' => self::CLIENT_NAME,
                 'version' => self::CLIENT_VERSION,
@@ -102,7 +91,7 @@ final class AcpClient
      */
     private function createSession(float $timeout): string
     {
-        $this->sendRequest('session/new', new \stdClass());
+        $this->sendRequest('session/new', (object) []);
 
         $response = $this->receiveResponse($timeout);
 
@@ -279,8 +268,12 @@ final class AcpClient
         }
 
         foreach ($messages as $message) {
-            $role = $message['role'];
-            $content = $message['content'];
+            if (!isset($message['role'], $message['content'])) {
+                continue;
+            }
+
+            $role = (string) $message['role'];
+            $content = (string) $message['content'];
 
             if ($role === 'system') {
                 $parts[] = "[System: {$content}]";

@@ -116,7 +116,7 @@ final class AcpTransport implements AcpTransportInterface
             $seconds = (int) $remaining;
             $microseconds = (int) (($remaining - $seconds) * 1_000_000);
 
-            $ready = @stream_select($read, $write, $except, $seconds, $microseconds);
+            $ready = stream_select($read, $write, $except, $seconds, $microseconds);
 
             if ($ready === false || $ready === 0) {
                 // Timeout or error — check if process is still alive.

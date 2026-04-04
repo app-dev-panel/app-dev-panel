@@ -18,7 +18,7 @@ final class AcpClientTest extends TestCase
         $callIndex = 0;
         $transport
             ->method('receive')
-            ->willReturnCallback(function () use (&$callIndex, $responses): ?array {
+            ->willReturnCallback(static function () use (&$callIndex, $responses): ?array {
                 if ($callIndex >= count($responses)) {
                     return null;
                 }
@@ -208,7 +208,7 @@ final class AcpClientTest extends TestCase
         $transport = $this->createMockTransport($responses);
         $transport
             ->method('send')
-            ->willReturnCallback(function (array $msg) use (&$sentMessages): void {
+            ->willReturnCallback(static function (array $msg) use (&$sentMessages): void {
                 $sentMessages[] = $msg;
             });
 
@@ -218,7 +218,7 @@ final class AcpClientTest extends TestCase
         $this->assertSame('OK', $result->text);
 
         // Verify agent request was rejected
-        $rejections = array_filter($sentMessages, fn($m) => isset($m['error']) && $m['id'] === 99);
+        $rejections = array_filter($sentMessages, static fn($m) => isset($m['error']) && $m['id'] === 99);
         $this->assertCount(1, $rejections);
 
         $rejection = array_values($rejections)[0];
@@ -237,7 +237,7 @@ final class AcpClientTest extends TestCase
         $transport = $this->createMockTransport($responses);
         $transport
             ->method('send')
-            ->willReturnCallback(function (array $msg) use (&$sentMessages): void {
+            ->willReturnCallback(static function (array $msg) use (&$sentMessages): void {
                 $sentMessages[] = $msg;
             });
 
@@ -250,7 +250,10 @@ final class AcpClientTest extends TestCase
         );
 
         // Find the session/prompt message
-        $promptMsg = array_values(array_filter($sentMessages, fn($m) => ($m['method'] ?? '') === 'session/prompt'));
+        $promptMsg = array_values(array_filter(
+            $sentMessages,
+            static fn($m) => ($m['method'] ?? '') === 'session/prompt',
+        ));
         $this->assertCount(1, $promptMsg);
 
         $text = $promptMsg[0]['params']['prompt']['content'][0]['text'];
@@ -271,7 +274,7 @@ final class AcpClientTest extends TestCase
         $transport = $this->createMockTransport($responses);
         $transport
             ->method('send')
-            ->willReturnCallback(function (array $msg) use (&$sentMessages): void {
+            ->willReturnCallback(static function (array $msg) use (&$sentMessages): void {
                 $sentMessages[] = $msg;
             });
 
@@ -286,7 +289,10 @@ final class AcpClientTest extends TestCase
             timeout: 5.0,
         );
 
-        $promptMsg = array_values(array_filter($sentMessages, fn($m) => ($m['method'] ?? '') === 'session/prompt'));
+        $promptMsg = array_values(array_filter(
+            $sentMessages,
+            static fn($m) => ($m['method'] ?? '') === 'session/prompt',
+        ));
         $text = $promptMsg[0]['params']['prompt']['content'][0]['text'];
 
         $this->assertStringContainsString('First message', $text);
@@ -294,14 +300,40 @@ final class AcpClientTest extends TestCase
         $this->assertStringContainsString('Second message', $text);
     }
 
-    public function testIsCommandAvailableWithValidCommand(): void
+    public function testMalformedMessagesSkipped(): void
     {
-        // 'php' should be available in test environment
-        $this->assertTrue(AcpClient::isCommandAvailable('php'));
-    }
+        $sentMessages = [];
+        $responses = [
+            ['jsonrpc' => '2.0', 'id' => 1, 'result' => ['protocolVersion' => 1, 'agentInfo' => []]],
+            ['jsonrpc' => '2.0', 'id' => 2, 'result' => ['sessionId' => 'sess-1']],
+            ['jsonrpc' => '2.0', 'id' => 3, 'result' => ['stopReason' => 'end_turn']],
+        ];
 
-    public function testIsCommandAvailableWithInvalidCommand(): void
-    {
-        $this->assertFalse(AcpClient::isCommandAvailable('nonexistent-command-that-does-not-exist-99999'));
+        $transport = $this->createMockTransport($responses);
+        $transport
+            ->method('send')
+            ->willReturnCallback(static function (array $msg) use (&$sentMessages): void {
+                $sentMessages[] = $msg;
+            });
+
+        $client = new AcpClient($transport);
+        $client->chat(
+            'agent',
+            [
+                ['role' => 'user', 'content' => 'Valid'],
+                ['broken' => 'no role or content'],
+                ['role' => 'user'], // missing content
+            ],
+            timeout: 5.0,
+        );
+
+        $promptMsg = array_values(array_filter(
+            $sentMessages,
+            static fn($m) => ($m['method'] ?? '') === 'session/prompt',
+        ));
+        $text = $promptMsg[0]['params']['prompt']['content'][0]['text'];
+
+        $this->assertStringContainsString('Valid', $text);
+        $this->assertStringNotContainsString('broken', $text);
     }
 }
