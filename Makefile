@@ -7,6 +7,7 @@
         mago mago-format mago-lint mago-analyze mago-fix \
         mago-playgrounds mago-playground-yii3 mago-playground-symfony mago-playground-yii2 mago-playground-laravel \
         mago-playgrounds-fix mago-playground-yii3-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix \
+        modulite \
         check check-ci fix \
         install install-php install-frontend install-playgrounds \
         serve-yii3 serve-symfony serve-yii2 serve-laravel serve \
@@ -77,8 +78,11 @@ help: ## Show this help
 	@echo "  make mago-playground-yii2      Mago checks for Yii2 playground"
 	@echo "  make mago-playground-laravel   Mago checks for Laravel playground"
 	@echo ""
+	@echo "$(YELLOW)Modulite (Module Boundaries):$(RESET)"
+	@echo "  make modulite              Check module boundary violations"
+	@echo ""
 	@echo "$(YELLOW)Combined:$(RESET)"
-	@echo "  make check                 Run ALL code quality checks (core + playgrounds)"
+	@echo "  make check                 Run ALL code quality checks (core + playgrounds + modulite)"
 	@echo "  make check-ci              Run all checks for CI (core + playgrounds + frontend)"
 	@echo "  make fix                   Fix all code (core + playgrounds)"
 	@echo ""
@@ -296,6 +300,18 @@ mago-playgrounds-fix: ## Fix formatting in all playgrounds (parallel)
 	@echo "$(GREEN)All playground formatting fixed!$(RESET)"
 
 # ============================================================================
+# Modulite — Module Boundary Validation
+# ============================================================================
+
+modulite: ## Check module boundary violations (inspired by VK Modulite)
+	@echo "$(CYAN)Checking module boundaries (Modulite)...$(RESET)"
+	php tools/modulite-check.php
+
+modulite-ci: ## Check module boundaries with GitHub Actions annotations
+	@echo "$(CYAN)Checking module boundaries (Modulite, GitHub format)...$(RESET)"
+	php tools/modulite-check.php --format=github
+
+# ============================================================================
 # Code Quality — Frontend
 # ============================================================================
 
@@ -311,15 +327,15 @@ frontend-fix: ## Fix frontend code quality issues
 # Combined
 # ============================================================================
 
-check: ## Run ALL code quality checks (core + playgrounds + frontend)
+check: ## Run ALL code quality checks (core + playgrounds + frontend + modulite)
 	@echo "$(CYAN)Running all code quality checks...$(RESET)"
-	@$(MAKE) -j3 --output-sync=target mago mago-playgrounds frontend-check
+	@$(MAKE) -j4 --output-sync=target mago mago-playgrounds frontend-check modulite
 	@echo ""
 	@echo "$(GREEN)All code quality checks passed!$(RESET)"
 
-check-ci: ## Run all checks for CI (core + playgrounds + frontend)
+check-ci: ## Run all checks for CI (core + playgrounds + frontend + modulite)
 	@echo "$(CYAN)Running all CI checks...$(RESET)"
-	@$(MAKE) -j3 --output-sync=target mago mago-playgrounds frontend-check
+	@$(MAKE) -j4 --output-sync=target mago mago-playgrounds frontend-check modulite-ci
 	@echo ""
 	@echo "$(GREEN)All CI checks passed!$(RESET)"
 
