@@ -8,6 +8,11 @@ use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Asset fixture — calls the collector directly because symfony/asset-mapper is not
+ * installed in this playground. When AssetMapper is available, the AssetMapperSubscriber
+ * automatically feeds asset data to the collector. This fixture simulates that data path.
+ */
 #[Route('/test/fixtures/assets', name: 'test_assets', methods: ['GET'])]
 final readonly class AssetAction
 {

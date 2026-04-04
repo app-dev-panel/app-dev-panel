@@ -9,6 +9,12 @@ use AppDevPanel\Kernel\Collector\SpanRecord;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * OpenTelemetry fixture — calls the collector directly because the OpenTelemetry SDK
+ * is not installed in this playground. When the SDK is available, the
+ * SpanProcessorInterfaceProxy automatically intercepts span processing and feeds
+ * data to the collector. This fixture simulates that data path.
+ */
 #[Route('/test/fixtures/opentelemetry', name: 'test_opentelemetry', methods: ['GET'])]
 final readonly class OpenTelemetryAction
 {
