@@ -55,6 +55,7 @@ type TopBarProps = {
     mcpEnabled?: boolean;
     notificationCount?: number;
     liveFeedCount?: number;
+    liveFeedActive?: boolean;
     editorPreset?: EditorPreset;
     editorCustomTemplate?: string;
     onMenuClick?: () => void;
@@ -143,6 +144,7 @@ export const TopBar = React.memo(
         onEditorCustomTemplateChange,
         notificationCount,
         liveFeedCount,
+        liveFeedActive,
         onNotificationsClick,
         onLiveFeedClick,
         onLogoClick,
@@ -251,7 +253,15 @@ export const TopBar = React.memo(
                         </Icon>
                     </IconButton>
                 </CenterGroup>
-                <IconButton size="small" onClick={onLiveFeedClick} aria-label="Live feed">
+                <IconButton
+                    size="small"
+                    onClick={onLiveFeedClick}
+                    aria-label="Live feed"
+                    sx={{
+                        backgroundColor: liveFeedActive ? 'action.selected' : undefined,
+                        borderRadius: 1,
+                    }}
+                >
                     <Badge
                         badgeContent={liveFeedCount}
                         color="warning"
@@ -265,7 +275,7 @@ export const TopBar = React.memo(
                             },
                         }}
                     >
-                        <Icon sx={{fontSize: 18}}>terminal</Icon>
+                        <Icon sx={{fontSize: 18, color: liveFeedActive ? 'primary.main' : undefined}}>terminal</Icon>
                     </Badge>
                 </IconButton>
                 <SearchTrigger onClick={onSearchClick} />
