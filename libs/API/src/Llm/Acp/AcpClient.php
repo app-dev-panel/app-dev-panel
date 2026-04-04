@@ -90,7 +90,10 @@ final class AcpClient
      */
     private function createSession(float $timeout): string
     {
-        $this->sendRequest('session/new', (object) []);
+        $this->sendRequest('session/new', [
+            'cwd' => getcwd() ?: sys_get_temp_dir(),
+            'mcpServers' => [],
+        ]);
 
         $response = $this->waitForResponse(null, $timeout, 'ACP session/new failed');
 
