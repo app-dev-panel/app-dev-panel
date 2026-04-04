@@ -1,0 +1,1 @@
+<footer>&copy; {{ $year }}</footer>

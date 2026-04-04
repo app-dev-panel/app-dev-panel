@@ -45,14 +45,17 @@ All settings are managed in `config/params.php`:
 
 ## Middleware
 
-Add the following middleware to your web application stack (order matters):
+Add the following middleware to your web application stack. **Order matters** — incorrect ordering will cause the panel to malfunction:
 
 ```
-DebugHeaders → ErrorCatcher → YiiApiMiddleware → ... → Router
+ErrorCatcher → YiiApiMiddleware → ... → Router
 ```
 
-- <class>AppDevPanel\Api\Debug\Middleware\DebugHeaders</class> — must be outermost to attach `X-Debug-Id` even on error responses
-- <class>AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware</class> — intercepts `/debug/api/*` requests before the router
+- <class>AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware</class> — must be before `Router` to intercept `/debug/api/*` and `/inspect/api/*` requests
+
+::: warning Middleware Order is Critical
+`YiiApiMiddleware` **must** be placed before the `Router` middleware but after `ErrorCatcher`. If placed after the router, ADP API routes will not be intercepted. If placed before error handling, exceptions in ADP itself won't be caught gracefully.
+:::
 
 ## Collectors
 

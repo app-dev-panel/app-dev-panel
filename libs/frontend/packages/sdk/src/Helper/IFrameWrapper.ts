@@ -10,15 +10,14 @@ export class IFrameWrapper {
 
     constructor(public frame: HTMLIFrameElement) {
         window.addEventListener('message', (e) => {
-            if (e.origin !== window.location.origin) {
+            // Accept from any origin — iframe and parent can be on different host/port
+            if (!e.data || typeof e.data !== 'object' || !('event' in e.data)) {
                 return;
             }
-            if (e.data && typeof e.data === 'object' && 'event' in e.data) {
-                switch (e.data.event as CrossWindowEventType) {
-                    case 'panel.loaded':
-                        this.eventQueue.ready();
-                        break;
-                }
+            switch (e.data.event as CrossWindowEventType) {
+                case 'panel.loaded':
+                    this.eventQueue.ready();
+                    break;
             }
         });
     }

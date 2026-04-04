@@ -13,7 +13,7 @@ final class OpenTelemetryAction extends Action
     public function run(): array
     {
         /** @var \AppDevPanel\Adapter\Yii2\Module $module */
-        $module = \Yii::$app->getModule('debug-panel');
+        $module = \Yii::$app->getModule('app-dev-panel');
 
         /** @var OpenTelemetryCollector|null $collector */
         $collector = $module->getCollector(OpenTelemetryCollector::class);

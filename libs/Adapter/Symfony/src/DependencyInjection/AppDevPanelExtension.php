@@ -12,10 +12,12 @@ use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriberCollectors;
+use AppDevPanel\Adapter\Symfony\EventSubscriber\MailerSubscriber;
 use AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
+use AppDevPanel\Adapter\Symfony\Proxy\MessengerCollectorMiddleware;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
@@ -413,6 +415,28 @@ final class AppDevPanelExtension extends Extension
                 ->register(AuthorizationSubscriber::class, AuthorizationSubscriber::class)
                 ->setArguments([new Reference(AuthorizationCollector::class)])
                 ->addTag('kernel.event_subscriber')
+                ->setPublic(false);
+        }
+
+        // Mailer subscriber — only when symfony/mailer is available and collector is enabled
+        if (
+            $container->has(MailerCollector::class) && class_exists(\Symfony\Component\Mailer\Event\MessageEvent::class)
+        ) {
+            $container
+                ->register(MailerSubscriber::class, MailerSubscriber::class)
+                ->setArguments([new Reference(MailerCollector::class)])
+                ->addTag('kernel.event_subscriber')
+                ->setPublic(false);
+        }
+
+        // Messenger middleware — only when symfony/messenger is available and collector is enabled
+        if (
+            $container->has(QueueCollector::class)
+            && interface_exists(\Symfony\Component\Messenger\Middleware\MiddlewareInterface::class)
+        ) {
+            $container
+                ->register(MessengerCollectorMiddleware::class, MessengerCollectorMiddleware::class)
+                ->setArguments([new Reference(QueueCollector::class)])
                 ->setPublic(false);
         }
     }

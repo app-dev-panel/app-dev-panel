@@ -14,6 +14,7 @@ import {
 } from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, debugApi, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {addLiveDump, addLiveLog, useLiveCount} from '@app-dev-panel/sdk/API/Debug/LiveContext';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {CommandPalette} from '@app-dev-panel/sdk/Component/Layout/CommandPalette';
 import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
@@ -222,14 +223,20 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             } catch {
                 return;
             }
-            if (data.type && data.type === EventTypesEnum.DebugUpdated) {
+            if (!data.type) return;
+
+            if (data.type === EventTypesEnum.DebugUpdated || data.type === EventTypesEnum.EntryCreated) {
                 const result = await getDebugQuery();
                 if ('data' in result && result.data.length > 0) {
                     changeEntry(result.data[0]);
                 }
+            } else if (data.type === EventTypesEnum.LiveLog) {
+                dispatch(addLiveLog(data.payload));
+            } else if (data.type === EventTypesEnum.LiveDump) {
+                dispatch(addLiveDump(data.payload));
             }
         },
-        [getDebugQuery, changeEntry],
+        [getDebugQuery, changeEntry, dispatch],
     );
     useServerSentEvents(backendUrl, onUpdatesHandler, autoLatest);
 
@@ -339,9 +346,11 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     // Build sidebar sections
     const selectedCollector = searchParams.get('collector') || '';
 
+    const liveCount = useLiveCount();
     const debugChildren = useMemo(() => {
+        const liveItem = {key: '__live__', icon: 'stream', label: 'Live', badge: liveCount || undefined};
         const entriesList = [{key: '__entries__', icon: 'list', label: 'All Entries'}];
-        if (!debugEntry) return entriesList;
+        if (!debugEntry) return [liveItem, ...entriesList];
         const entryIsWeb = isDebugEntryAboutWeb(debugEntry);
         const hasRequestOrCommand = debugEntry.collectors.some((c) => {
             const id = typeof c === 'string' ? c : c.id;
@@ -366,8 +375,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 };
             })
             .filter((c) => showInactiveCollectors || c.badge == null || c.badge > 0);
-        return [...entryItem, ...collectors, ...entriesList];
-    }, [debugEntry, showInactiveCollectors]);
+        return [...entryItem, ...collectors, liveItem, ...entriesList];
+    }, [debugEntry, showInactiveCollectors, liveCount]);
 
     // Build extra items for CommandPalette from current debug entry's collectors
     const paletteCollectorItems = useMemo(() => {
@@ -402,6 +411,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
 
     // Determine active child key
     const activeChildKey = useMemo(() => {
+        if (location.pathname === '/debug/live') {
+            return '__live__';
+        }
         if (location.pathname === '/debug/list') {
             return '__entries__';
         }
@@ -438,6 +450,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             if (sectionKey === 'debug') {
                 if (childKey === '__entries__') {
                     navigate('/debug/list');
+                    return;
+                }
+                if (childKey === '__live__') {
+                    navigate('/debug/live');
                     return;
                 }
                 // Navigate to debug page with collector

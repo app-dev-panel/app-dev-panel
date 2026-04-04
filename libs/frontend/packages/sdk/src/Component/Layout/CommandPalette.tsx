@@ -1,3 +1,4 @@
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {Box, Icon, Modal, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
@@ -371,11 +372,7 @@ export const CommandPalette = ({open, onClose, extraItems = []}: CommandPaletteP
                                 </Box>
                             );
                         })}
-                        {filtered.length === 0 && (
-                            <Box sx={{textAlign: 'center', py: 4, color: 'text.disabled'}}>
-                                <Typography variant="body2">No results found</Typography>
-                            </Box>
-                        )}
+                        {filtered.length === 0 && <EmptyState icon="search_off" title="No results found" />}
                     </PaletteBody>
                 </PaletteRoot>
             </Backdrop>

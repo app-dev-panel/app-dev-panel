@@ -12,6 +12,7 @@ import DuckHero from './components/DuckHero.vue';
 import CopyButton from './components/CopyButton.vue';
 import GitHubStars from './components/GitHubStars.vue';
 import NotFound from './components/NotFound.vue';
+import DemoPage from './components/DemoPage.vue';
 import './style.css';
 
 function initZoom() {
@@ -97,6 +98,7 @@ export default {
         app.component('BlogArchive', BlogArchive);
         app.component('DuckHero', DuckHero);
         app.component('CopyButton', CopyButton);
+        app.component('DemoPage', DemoPage);
 
         if (typeof window !== 'undefined') {
             setupClassRefTooltips();

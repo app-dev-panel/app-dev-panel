@@ -27,9 +27,9 @@ $this->title = 'Contact';
 
         <div class="form-group">
             <label for="name">Name</label>
-            <input type="text" id="name" name="name" class="form-control<?= isset($errors['name']) ? ' error' : '' ?>" value="<?= htmlspecialchars(
-                $data['name'] ?? '',
-            ) ?>">
+            <input type="text" id="name" name="name" class="form-control<?= isset($errors['name'])
+                ? ' error'
+                : '' ?>" value="<?= htmlspecialchars($data['name'] ?? '') ?>">
             <?php if (isset($errors['name'])): ?>
                 <div class="form-error"><?= htmlspecialchars($errors['name']) ?></div>
             <?php endif; ?>
@@ -37,9 +37,9 @@ $this->title = 'Contact';
 
         <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" class="form-control<?= isset($errors['email']) ? ' error' : '' ?>" value="<?= htmlspecialchars(
-                $data['email'] ?? '',
-            ) ?>">
+            <input type="email" id="email" name="email" class="form-control<?= isset($errors['email'])
+                ? ' error'
+                : '' ?>" value="<?= htmlspecialchars($data['email'] ?? '') ?>">
             <?php if (isset($errors['email'])): ?>
                 <div class="form-error"><?= htmlspecialchars($errors['email']) ?></div>
             <?php endif; ?>
@@ -47,9 +47,9 @@ $this->title = 'Contact';
 
         <div class="form-group">
             <label for="message">Message</label>
-            <textarea id="message" name="message" class="form-control<?= isset($errors['message']) ? ' error' : '' ?>"><?= htmlspecialchars(
-                $data['message'] ?? '',
-            ) ?></textarea>
+            <textarea id="message" name="message" class="form-control<?= isset($errors['message'])
+                ? ' error'
+                : '' ?>"><?= htmlspecialchars($data['message'] ?? '') ?></textarea>
             <?php if (isset($errors['message'])): ?>
                 <div class="form-error"><?= htmlspecialchars($errors['message']) ?></div>
             <?php endif; ?>

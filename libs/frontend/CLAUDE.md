@@ -4,11 +4,11 @@ React/TypeScript frontend for ADP. Provides a web UI to inspect debug data and a
 
 ## Tech Stack
 
-- React 19+, TypeScript 5.5+
-- Vite 5.4+ (build tool)
-- Material-UI (MUI) 5+ with DataGrid and TreeView
-- Redux Toolkit 1.9+ with RTK Query (state management and API calls)
-- React Router 6 (navigation)
+- React 19+, TypeScript 6+
+- Vite 6+ (build tool)
+- Material-UI (MUI) 7+ with DataGrid and TreeView
+- Redux Toolkit 2+ with RTK Query (state management and API calls)
+- React Router 7 (navigation)
 - React Hook Form + Yup (forms and validation)
 - Workbox 7 (PWA / Service Worker)
 - Lerna 8 (monorepo management)
@@ -29,7 +29,7 @@ packages/
 │   │   ├── Application/    # App shell (Layout, NotFoundPage, Settings)
 │   │   └── Module/         # Feature modules
 │   │       ├── Debug/      # Debug data viewer (collector panels, timeline, exceptions)
-│   │       ├── Inspector/  # Application inspector (20+ pages: routes, DB, git, cache, etc.)
+│   │       ├── Inspector/  # Application inspector (28 pages: routes, DB, git, cache, etc.)
 │   │       ├── Llm/        # LLM chat and AI-powered analysis (connect, chat, analyze, history)
 │   │       ├── Mcp/        # MCP server setup and configuration page
 │   │       ├── GenCode/    # Code generation wizard (stepper: generate, preview, result)
@@ -92,7 +92,7 @@ packages/
     │   │   ├── mui/        # MUI type extensions
     │   │   ├── yii/        # Yii-specific input matchers
     │   │   └── yup/        # Yup validation adapters
-    │   ├── Helper/         # Utility functions (30+ helpers)
+    │   ├── Helper/         # Utility functions (25 helpers)
     │   │   ├── fuzzyMatch.ts              # Fuzzy matching algorithm (score + indices)
     │   │   ├── layoutTranslit.ts          # QWERTY ↔ ЙЦУКЕН transliteration
     │   └── Types/          # TypeScript type definitions

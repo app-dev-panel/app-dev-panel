@@ -22,6 +22,13 @@ export const routes = [
                     return {Component: ListPage};
                 },
             },
+            {
+                path: 'live',
+                lazy: async () => {
+                    const {LivePage} = await import('@app-dev-panel/panel/Module/Debug/Pages/LivePage');
+                    return {Component: LivePage};
+                },
+            },
         ],
     },
     {

@@ -13,6 +13,7 @@ description: "Complete ADP REST API reference: debug entries, summaries, collect
 | GET | `/debug/api/view/{id}` | Full entry data (optionally filtered by collector) |
 | GET | `/debug/api/dump/{id}` | Dump objects for entry |
 | GET | `/debug/api/object/{id}/{objectId}` | Specific object from dump |
+| GET | `/debug/api/settings` | Debug settings (path mapping) |
 
 ### Example: List entries
 
@@ -34,8 +35,7 @@ GET /debug/api/
         }
     ],
     "error": null,
-    "success": true,
-    "status": 200
+    "success": true
 }
 ```
 
@@ -46,6 +46,32 @@ GET /debug/api/view/abc123?collector=log
 ```
 
 Returns full collected data for the specified entry, optionally filtered to a single collector.
+
+## OTLP Trace Ingestion
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/debug/api/otlp/v1/traces` | Ingest OpenTelemetry traces in OTLP format |
+
+## LLM API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/debug/api/llm/status` | LLM connection status |
+| POST | `/debug/api/llm/connect` | Connect to LLM provider (API key) |
+| POST | `/debug/api/llm/oauth/initiate` | Start OAuth flow for LLM provider |
+| POST | `/debug/api/llm/oauth/exchange` | Exchange OAuth code for token |
+| POST | `/debug/api/llm/disconnect` | Disconnect from LLM provider |
+| POST | `/debug/api/llm/model` | Set active model |
+| POST | `/debug/api/llm/timeout` | Set request timeout |
+| POST | `/debug/api/llm/custom-prompt` | Set custom system prompt |
+| GET | `/debug/api/llm/models` | List available models |
+| POST | `/debug/api/llm/chat` | Send chat message |
+| POST | `/debug/api/llm/analyze` | Analyze debug entry with AI |
+| GET | `/debug/api/llm/history` | Get chat history |
+| POST | `/debug/api/llm/history` | Add history entry |
+| DELETE | `/debug/api/llm/history/{index}` | Delete specific history entry |
+| DELETE | `/debug/api/llm/history` | Clear all history |
 
 ## Ingestion API
 

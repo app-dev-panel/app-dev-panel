@@ -1,9 +1,27 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { extname, join, resolve } from 'node:path';
 import { defineConfig } from 'vitepress';
 import llmstxt from 'vitepress-plugin-llms';
 import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs';
 import { classLinkPlugin } from './class-link';
 import { generateFeed } from './feed';
 import { pkgLinkPlugin } from './pkg-link';
+
+const panelDist = resolve(__dirname, '../../libs/frontend/packages/panel/dist');
+
+const MIME: Record<string, string> = {
+    '.js': 'application/javascript',
+    '.css': 'text/css',
+    '.json': 'application/json',
+    '.html': 'text/html',
+    '.svg': 'image/svg+xml',
+    '.png': 'image/png',
+    '.ico': 'image/x-icon',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf',
+    '.webmanifest': 'application/manifest+json',
+};
 
 export default defineConfig({
     vite: {
@@ -12,6 +30,34 @@ export default defineConfig({
                 ignoreFiles: ['ru/**'],
                 domain: 'https://app-dev-panel.github.io',
             }),
+            {
+                name: 'serve-panel-dist',
+                configureServer(server) {
+                    if (!existsSync(panelDist)) {
+                        return;
+                    }
+                    // Serve panel assets (bundle.js, bundle.css, assets/*) from the base path
+                    server.middlewares.use('/app-dev-panel', (req, res, next) => {
+                        const url = req.url?.split('?')[0] ?? '';
+                        if (
+                            url.startsWith('/bundle') ||
+                            url.startsWith('/assets/') ||
+                            url.startsWith('/registerSW') ||
+                            url.startsWith('/manifest') ||
+                            url.startsWith('/service-worker')
+                        ) {
+                            const filePath = join(panelDist, url);
+                            if (existsSync(filePath)) {
+                                const ext = extname(filePath);
+                                res.setHeader('Content-Type', MIME[ext] ?? 'application/octet-stream');
+                                res.end(readFileSync(filePath));
+                                return;
+                            }
+                        }
+                        next();
+                    });
+                },
+            },
         ],
     },
     title: 'ADP',

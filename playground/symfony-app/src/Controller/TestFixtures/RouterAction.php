@@ -4,35 +4,35 @@ declare(strict_types=1);
 
 namespace App\Controller\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\RouterCollector;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\RouterInterface;
 
 #[Route('/test/fixtures/router', name: 'test_router', methods: ['GET'])]
 final readonly class RouterAction
 {
     public function __construct(
-        private RouterCollector $routerCollector,
+        private RouterInterface $router,
     ) {}
 
     public function __invoke(): JsonResponse
     {
-        $this->routerCollector->collectMatchedRoute([
-            'name' => 'test_router',
-            'pattern' => '/test/fixtures/router',
-            'arguments' => [],
-            'uri' => '/test/fixtures/router',
-            'host' => null,
-            'action' => self::class,
-            'middlewares' => [],
-            'matchTime' => 0.123,
-        ]);
-        $this->routerCollector->collectRoutes(routes: [
-            ['name' => 'home', 'pattern' => '/', 'methods' => ['GET']],
-            ['name' => 'test_router', 'pattern' => '/test/fixtures/router', 'methods' => ['GET']],
-            ['name' => 'test_logs', 'pattern' => '/test/fixtures/logs', 'methods' => ['GET']],
-        ]);
+        // The RouterDataExtractor (called by HttpSubscriber on kernel.response)
+        // automatically feeds matched route and all routes to RouterCollector.
+        // This fixture just uses the router to verify it works.
+        $routes = [];
+        foreach ($this->router->getRouteCollection() as $name => $route) {
+            $routes[] = [
+                'name' => $name,
+                'pattern' => $route->getPath(),
+                'methods' => $route->getMethods() ?: ['ANY'],
+            ];
+        }
 
-        return new JsonResponse(['fixture' => 'router:basic', 'status' => 'ok']);
+        return new JsonResponse([
+            'fixture' => 'router:basic',
+            'status' => 'ok',
+            'routeCount' => count($routes),
+        ]);
     }
 }

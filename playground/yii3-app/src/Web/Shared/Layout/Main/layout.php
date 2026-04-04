@@ -23,7 +23,9 @@ $this->beginPage() ?>
 <head>
     <meta charset="<?= Html::encode($applicationParams->charset) ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= Html::encode($this->getTitle()) ? Html::encode($this->getTitle()) . ' — ' : '' ?>ADP Yii 3 Playground</title>
+    <title><?= Html::encode($this->getTitle())
+        ? Html::encode($this->getTitle()) . ' — '
+        : '' ?>ADP Yii 3 Playground</title>
     <?php $this->head() ?>
     <style>
     :root {

@@ -123,7 +123,7 @@ const results = useSearchFilter({
 
 ## Helpers
 
-30+ utility functions in `Helper/`:
+25 utility functions in `Helper/`:
 
 | Helper | Purpose |
 |--------|---------|

@@ -1,0 +1,8 @@
+framework:
+    messenger:
+        buses:
+            messenger.bus.default:
+                middleware:
+                    - AppDevPanel\Adapter\Symfony\Proxy\MessengerCollectorMiddleware
+        transports: {}
+        routing: {}

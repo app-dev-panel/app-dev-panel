@@ -14,6 +14,8 @@ use AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener;
 use AppDevPanel\Adapter\Laravel\EventListener\HttpClientListener;
 use AppDevPanel\Adapter\Laravel\EventListener\MailListener;
 use AppDevPanel\Adapter\Laravel\EventListener\QueueListener;
+use AppDevPanel\Adapter\Laravel\EventListener\RedisListener;
+use AppDevPanel\Adapter\Laravel\EventListener\ValidatorListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ViteAssetListener;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelConfigProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
@@ -99,6 +101,7 @@ use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RedisCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy;
@@ -260,6 +263,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'opentelemetry' => OpenTelemetryCollector::class,
             'assets' => AssetBundleCollector::class,
             'template' => TemplateCollector::class,
+            'redis' => RedisCollector::class,
         ];
 
         foreach ($timelineCollectors as $key => $class) {
@@ -844,6 +848,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'mailer' => [MailListener::class, MailerCollector::class],
             'queue' => [QueueListener::class, QueueCollector::class],
             'http_client' => [HttpClientListener::class, HttpClientCollector::class],
+            'redis' => [RedisListener::class, RedisCollector::class],
         ];
 
         foreach ($simpleListeners as $key => [$listenerClass, $collectorClass]) {
@@ -857,6 +862,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             if ($listenerClass === DatabaseListener::class) {
                 $this->app->instance(DatabaseListener::class, $listener);
             }
+        }
+
+        if ($collectors['validator'] ?? true) {
+            $listener = new ValidatorListener(fn() => $this->app->make(ValidatorCollector::class));
+            $listener->register($this->app->make('validator'));
         }
 
         if ($collectors['security'] ?? true) {
