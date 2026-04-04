@@ -253,28 +253,6 @@ export const TopBar = React.memo(
                         </Icon>
                     </IconButton>
                 </CenterGroup>
-                <IconButton
-                    size="small"
-                    onClick={onLiveFeedClick}
-                    aria-label="Live feed"
-                    sx={{backgroundColor: liveFeedActive ? 'action.selected' : undefined, borderRadius: 1}}
-                >
-                    <Badge
-                        badgeContent={liveFeedCount}
-                        color="warning"
-                        max={99}
-                        sx={{
-                            '& .MuiBadge-badge': {
-                                fontSize: 10,
-                                height: 16,
-                                minWidth: 16,
-                                animation: liveFeedCount && liveFeedCount > 0 ? `${badgePulse} 0.4s ease-out` : 'none',
-                            },
-                        }}
-                    >
-                        <Icon sx={{fontSize: 18, color: liveFeedActive ? 'primary.main' : undefined}}>terminal</Icon>
-                    </Badge>
-                </IconButton>
                 <SearchTrigger onClick={onSearchClick} />
                 {!compact && (
                     <>
@@ -308,6 +286,28 @@ export const TopBar = React.memo(
                         </IconButton>
                     </>
                 )}
+                <IconButton
+                    size="small"
+                    onClick={onLiveFeedClick}
+                    aria-label="Live feed"
+                    sx={{backgroundColor: liveFeedActive ? 'action.selected' : undefined, borderRadius: 1}}
+                >
+                    <Badge
+                        badgeContent={liveFeedCount}
+                        color="warning"
+                        max={99}
+                        sx={{
+                            '& .MuiBadge-badge': {
+                                fontSize: 10,
+                                height: 16,
+                                minWidth: 16,
+                                animation: liveFeedCount && liveFeedCount > 0 ? `${badgePulse} 0.4s ease-out` : 'none',
+                            },
+                        }}
+                    >
+                        <Icon sx={{fontSize: 18, color: liveFeedActive ? 'primary.main' : undefined}}>terminal</Icon>
+                    </Badge>
+                </IconButton>
                 <IconButton size="small" onClick={handleMenuOpen} aria-label="More options">
                     {compact && notificationCount ? (
                         <Badge
