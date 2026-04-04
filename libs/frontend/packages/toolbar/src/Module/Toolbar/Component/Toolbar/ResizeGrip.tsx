@@ -14,16 +14,14 @@ export const ResizeGrip = ({onResize, onResizeEnd}: ResizeGripProps) => {
     onResizeRef.current = onResize;
     onResizeEndRef.current = onResizeEnd;
 
-    useEffect(() => {
-        let lastX = 0;
-        let lastY = 0;
+    const lastPos = useRef({x: 0, y: 0});
 
+    useEffect(() => {
         const onMouseMove = (e: MouseEvent) => {
             if (!activeRef.current) return;
-            const dx = e.clientX - lastX;
-            const dy = e.clientY - lastY;
-            lastX = e.clientX;
-            lastY = e.clientY;
+            const dx = e.clientX - lastPos.current.x;
+            const dy = e.clientY - lastPos.current.y;
+            lastPos.current = {x: e.clientX, y: e.clientY};
             onResizeRef.current(dx, dy);
         };
 
@@ -44,6 +42,7 @@ export const ResizeGrip = ({onResize, onResizeEnd}: ResizeGripProps) => {
     const onMouseDown = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        lastPos.current = {x: e.clientX, y: e.clientY};
         activeRef.current = true;
     }, []);
 

@@ -273,6 +273,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     );
 
     const {isDragging, snapZone, dragHandleProps} = useDrag({
+        floatSize: {width: floatPos.width, height: floatPos.height},
         onDragEnd: (zone) => {
             if (zone) {
                 snapTo(zone);
