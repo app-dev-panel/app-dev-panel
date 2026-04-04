@@ -337,13 +337,7 @@ const QueryResultTable = ({
     }
 
     if (data && Array.isArray(data) && data.length === 0) {
-        return (
-            <Typography
-                sx={(theme) => ({fontSize: '12px', color: 'text.disabled', fontFamily: theme.adp.fontFamilyMono})}
-            >
-                Query returned no rows
-            </Typography>
-        );
+        return <EmptyState icon="table_rows" title="Query returned no rows" />;
     }
 
     if (!data) return null;

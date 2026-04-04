@@ -14,7 +14,7 @@
 
 <br/>
 
-**28 collectors &middot; 20+ live inspector pages &middot; 40+ API endpoints**<br/>
+**30 collectors &middot; 28 live inspector pages &middot; 40+ API endpoints**<br/>
 **4 framework adapters &middot; Language-agnostic API &middot; 100% free & open-source**
 
 <br/>
@@ -83,8 +83,8 @@ ADP is **the only debug panel built for the entire PHP ecosystem.** One install,
 | | **ADP** | Telescope | Symfony Profiler | Clockwork | Ray |
 |---|:---:|:---------:|:----------------:|:---------:|:---:|
 | **Frameworks** | **4+ any PSR** | 1 | 1 | 3 | 2 |
-| **Auto-collectors** | **28** | 14 | ~12 | ~10 | 0 |
-| **Live Inspector** | **20+ pages** | — | — | — | — |
+| **Auto-collectors** | **30** | 14 | ~12 | ~10 | 0 |
+| **Live Inspector** | **28 pages** | — | — | — | — |
 | **Real-time streaming** | **UDP + SSE** | HTTP poll | HTTP poll | HTTP poll | WebSocket |
 | **Code generation** | **Yes** | — | — | — | — |
 | **Git integration** | **Yes** | — | — | — | — |
@@ -97,7 +97,7 @@ ADP is **the only debug panel built for the entire PHP ecosystem.** One install,
 
 ## Features
 
-### 28 Data Collectors — Install and Forget
+### 30 Data Collectors — Install and Forget
 
 Everything is captured automatically. No configuration, no boilerplate.
 
@@ -122,7 +122,7 @@ Everything is captured automatically. No configuration, no boilerplate.
 
 ### Inspector — X-Ray Your Running App
 
-> **No competitor has this.** 20+ live introspection pages — no CLI, no SSH, no restart needed.
+> **No competitor has this.** 28 live introspection pages — no CLI, no SSH, no restart needed.
 
 | Page | What It Does |
 |------|-------------|
@@ -163,7 +163,7 @@ Everything is captured automatically. No configuration, no boilerplate.
 ## Architecture
 
 ```
-Any PHP App → Adapter → Kernel (28 collectors) → API (40+ endpoints) → React SPA
+Any PHP App → Adapter → Kernel (30 collectors) → API (40+ endpoints) → React SPA
 ```
 
 | Layer | Package | Purpose |

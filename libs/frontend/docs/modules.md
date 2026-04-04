@@ -58,8 +58,9 @@ export const middlewares = [inspectorApi.middleware, gitApi.middleware];
 |--------|------|-----------|-------------|
 | Application | `/`, `/shared` | No | App shell, home page, shared layout |
 | Debug | `/debug/*` | No | Debug entry viewer with collector tabs |
-| Inspector | `/inspector/*` | No | Live application introspection (20+ pages) |
-| GenCode | `/gen-code/*` | No | Code generation wizard |
+| Inspector | `/inspector/*` | No | Live application introspection (28 pages) |
+| Llm | `/llm/*` | No | LLM chat and AI-powered analysis |
+| Mcp | `/mcp/*` | No | MCP server setup and configuration |
 | OpenAPI | `/open-api/*` | No | Swagger UI integration |
 | Frames | `/frames/*` | No | iFrame manager for remote panels |
 
@@ -161,12 +162,13 @@ Shared styled components across panels: expandable `Row`, `DetailBox`, `TimeCell
 
 **Path prefix**: `/inspector`
 
-Introspects the live application state. The most feature-rich module with 20+ pages.
+Introspects the live application state. The most feature-rich module with 28 pages.
 
 ### Pages
 
 | Page | Route | Description |
 |------|-------|-------------|
+| DashboardPage | `/inspector` | Inspector dashboard overview |
 | RoutesPage | `/inspector/routes` | All routes with methods, path, middleware, action |
 | EventsPage | `/inspector/events` | Event listeners grouped by event class |
 | DatabasePage | `/inspector/database` | Tables list with column info |
@@ -174,6 +176,8 @@ Introspects the live application state. The most feature-rich module with 20+ pa
 | CommandsPage | `/inspector/commands` | Available CLI commands |
 | TestsPage | `/inspector/tests` | Test execution results (PHPUnit/Codeception) |
 | AnalysePage | `/inspector/analyse` | Static analysis results (Psalm) |
+| CodeQualityPage | `/inspector/code-quality` | Code quality analysis |
+| CodeCoveragePage | `/inspector/coverage` | PHP code coverage |
 | FileExplorerPage | `/inspector/files` | Source code file browser |
 | ContainerEntryPage | `/inspector/container/view` | DI container entry inspection |
 | ComposerPage | `/inspector/composer` | Composer packages and autoload info |
@@ -181,7 +185,15 @@ Introspects the live application state. The most feature-rich module with 20+ pa
 | CachePage | `/inspector/cache` | Cache viewer/clearer |
 | OpcachePage | `/inspector/opcache` | OPcache status and config |
 | PhpInfoPage | `/inspector/phpinfo` | PHP configuration viewer |
-| ConfigurationPage | `/inspector/config(/:page)` | Application configuration viewer |
+| EnvironmentPage | `/inspector/environment` | Runtime environment info |
+| AuthorizationPage | `/inspector/authorization` | Security config, guards, voters |
+| ElasticsearchPage | `/inspector/elasticsearch` | Elasticsearch cluster inspection |
+| RedisPage | `/inspector/redis` | Redis key browser and inspection |
+| StoragePage | `/inspector/storage` | Debug storage management |
+| ConfigurationPage | `/inspector/config` | Application configuration viewer |
+| ParametersPage | `/inspector/config/params` | DI parameters |
+| DefinitionsPage | `/inspector/config/definitions` | Service definitions |
+| ContainerPage | `/inspector/config/container` | DI container browser |
 | GitPage | `/inspector/git` | Git repository summary |
 | GitLogPage | `/inspector/git/log` | Git commit log |
 
