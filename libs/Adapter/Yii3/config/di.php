@@ -10,7 +10,7 @@ use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\SqliteStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Composer\Autoload\ClassLoader;
 use Psr\Container\ContainerInterface;
@@ -29,13 +29,17 @@ $common = [
         $params = $params['app-dev-panel/yii3'];
         $debuggerIdGenerator = $container->get(DebuggerIdGenerator::class);
         $excludedClasses = $params['dumper.excludedClasses'];
-        $fileStorage = new FileStorage($aliases->get($params['path']), $debuggerIdGenerator, $excludedClasses);
+        $storage = new SqliteStorage(
+            $aliases->get($params['path']) . '/debug.db',
+            $debuggerIdGenerator,
+            $excludedClasses,
+        );
 
         if (isset($params['historySize'])) {
-            $fileStorage->setHistorySize((int) $params['historySize']);
+            $storage->setHistorySize((int) $params['historySize']);
         }
 
-        return $fileStorage;
+        return $storage;
     },
 ];
 
@@ -99,7 +103,7 @@ return array_merge(
                 'ignoredClasses' => [
                     ClosureExporter::class,
                     UseStatementParser::class,
-                    FileStorage::class,
+                    SqliteStorage::class,
                     ClassLoader::class,
                 ],
             ],

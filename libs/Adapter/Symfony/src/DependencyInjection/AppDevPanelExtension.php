@@ -111,7 +111,7 @@ use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\SqliteStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
@@ -158,9 +158,9 @@ final class AppDevPanelExtension extends Extension
         $container->register(DebuggerIdGenerator::class, DebuggerIdGenerator::class)->setPublic(false);
 
         $container
-            ->register('app_dev_panel.storage.file', FileStorage::class)
+            ->register('app_dev_panel.storage.file', SqliteStorage::class)
             ->setArguments([
-                '%app_dev_panel.storage.path%',
+                '%app_dev_panel.storage.path%' . '/debug.db',
                 new Reference(DebuggerIdGenerator::class),
                 '%app_dev_panel.dumper.excluded_classes%',
             ])

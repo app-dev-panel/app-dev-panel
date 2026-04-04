@@ -126,7 +126,7 @@ use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\SqliteStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
@@ -202,8 +202,8 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
         $this->app->singleton(StorageInterface::class, function () use ($config): BroadcastingStorage {
             return new BroadcastingStorage(
-                new FileStorage(
-                    $config->get('app-dev-panel.storage.path'),
+                new SqliteStorage(
+                    $config->get('app-dev-panel.storage.path') . '/debug.db',
                     $this->app->make(DebuggerIdGenerator::class),
                     $config->get('app-dev-panel.dumper.excluded_classes', []),
                 ),

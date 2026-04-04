@@ -110,7 +110,7 @@ use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\SqliteStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
@@ -149,7 +149,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     /**
      * @var int Maximum number of debug entries to keep.
      */
-    public int $historySize = FileStorage::DEFAULT_HISTORY_SIZE;
+    public int $historySize = SqliteStorage::DEFAULT_HISTORY_SIZE;
 
     /**
      * @var array<string, bool> Collector toggle map.
@@ -313,7 +313,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
     private function registerCoreServices(string $storagePath): void
     {
         $idGenerator = new DebuggerIdGenerator();
-        $storage = new BroadcastingStorage(new FileStorage($storagePath, $idGenerator, $this->excludedClasses));
+        $storage = new BroadcastingStorage(
+            new SqliteStorage($storagePath . '/debug.db', $idGenerator, $this->excludedClasses),
+        );
 
         $httpFactory = new HttpFactory();
 

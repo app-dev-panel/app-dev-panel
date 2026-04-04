@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Cli\Command;
 
 use AppDevPanel\Kernel\DebuggerIdGenerator;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\SqliteStorage;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\McpServer\Transport\StdioTransport;
@@ -57,7 +57,7 @@ final class McpServeCommand extends Command
             return Command::FAILURE;
         }
 
-        $storage = new FileStorage($storagePath, new DebuggerIdGenerator());
+        $storage = new SqliteStorage($storagePath . '/debug.db', new DebuggerIdGenerator());
         $toolRegistry = McpToolRegistryFactory::create($storage);
 
         $transport = new StdioTransport();
