@@ -32,6 +32,7 @@ const providerLabels: Record<LlmProvider, string> = {
     openrouter: 'OpenRouter',
     anthropic: 'Anthropic',
     openai: 'OpenAI',
+    acp: 'ACP',
 };
 
 const isFreeModel = (model: LlmModel): boolean => {
@@ -51,6 +52,8 @@ export const ConnectionCard = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedProvider, setSelectedProvider] = useState<LlmProvider>('openrouter');
     const [apiKey, setApiKey] = useState('');
+    const [acpCommand, setAcpCommand] = useState('claude');
+    const [acpArgs, setAcpArgs] = useState('');
     const [expanded, setExpanded] = useState(false);
     const [freeOnly, setFreeOnly] = useState(false);
     const [localPrompt, setLocalPrompt] = useState(status?.customPrompt ?? '');
@@ -80,12 +83,40 @@ export const ConnectionCard = () => {
             return;
         }
         try {
-            await connect({provider: selectedProvider, apiKey: apiKey.trim()}).unwrap();
+            await connect({
+                provider: selectedProvider as 'openrouter' | 'anthropic' | 'openai',
+                apiKey: apiKey.trim(),
+            }).unwrap();
             setApiKey('');
         } catch {
             setError('Failed to connect with API key.');
         }
     }, [connect, selectedProvider, apiKey]);
+
+    const handleAcpConnect = useCallback(async () => {
+        setError(null);
+        const cmd = acpCommand.trim();
+        if (!cmd) {
+            setError('Agent command is required.');
+            return;
+        }
+        try {
+            const args = acpArgs
+                .trim()
+                .split(/\s+/)
+                .filter((s) => s !== '');
+            const result = await connect({
+                provider: 'acp',
+                acpCommand: cmd,
+                ...(args.length > 0 ? {acpArgs: args} : {}),
+            }).unwrap();
+            if (!result.connected) {
+                setError(result.error ?? 'Failed to connect ACP agent.');
+            }
+        } catch {
+            setError('Failed to connect ACP agent.');
+        }
+    }, [connect, acpCommand, acpArgs]);
 
     const handleDisconnect = useCallback(async () => {
         await disconnect();
@@ -102,6 +133,7 @@ export const ConnectionCard = () => {
     const provider = status?.provider;
     const connected = status?.connected ?? false;
     const isOpenRouter = provider === 'openrouter';
+    const isAcp = provider === 'acp';
 
     const popularModels = useMemo(() => {
         let filtered = (models ?? []).filter((m: LlmModel) => {
@@ -149,7 +181,11 @@ export const ConnectionCard = () => {
                     <Typography variant="body2" color="text.secondary">
                         {providerLabels[provider as LlmProvider] ?? provider}
                     </Typography>
-                    {selectedModel && (
+                    {isAcp ? (
+                        <Typography variant="body2" noWrap sx={{flex: 1, minWidth: 0}}>
+                            {status?.model ?? 'Agent'}
+                        </Typography>
+                    ) : selectedModel ? (
                         <>
                             <Typography variant="body2" color="text.disabled">
                                 /
@@ -158,8 +194,7 @@ export const ConnectionCard = () => {
                                 {selectedModel.name}
                             </Typography>
                         </>
-                    )}
-                    {!selectedModel && (
+                    ) : (
                         <Typography variant="body2" color="warning.main" sx={{flex: 1}}>
                             No model selected
                         </Typography>
@@ -178,59 +213,67 @@ export const ConnectionCard = () => {
                                 {error}
                             </Alert>
                         )}
-                        <Autocomplete
-                            size="small"
-                            fullWidth
-                            options={popularModels}
-                            getOptionLabel={(option: LlmModel) =>
-                                isOpenRouter && isFreeModel(option)
-                                    ? `${option.name} (free) (${option.id})`
-                                    : `${option.name} (${option.id})`
-                            }
-                            value={selectedModel ?? null}
-                            onChange={(_, option) => option && handleModelChange(option.id)}
-                            loading={modelsLoading}
-                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label="Model"
-                                    InputProps={{
-                                        ...params.InputProps,
-                                        endAdornment: (
-                                            <>
-                                                {isOpenRouter && (
-                                                    <InputAdornment position="end" sx={{mr: -0.5}}>
-                                                        <ToggleButton
-                                                            value="free"
-                                                            selected={freeOnly}
-                                                            onChange={(e) => {
-                                                                e.stopPropagation();
-                                                                setFreeOnly((prev) => !prev);
-                                                            }}
-                                                            size="small"
-                                                            sx={{
-                                                                px: 1,
-                                                                py: 0,
-                                                                height: 24,
-                                                                textTransform: 'none',
-                                                                fontWeight: 600,
-                                                                fontSize: '11px',
-                                                                lineHeight: 1,
-                                                                borderRadius: 1,
-                                                            }}
-                                                        >
-                                                            Free
-                                                        </ToggleButton>
-                                                    </InputAdornment>
-                                                )}
-                                                {params.InputProps.endAdornment}
-                                            </>
-                                        ),
-                                    }}
-                                />
-                            )}
-                        />
+                        {!isAcp && (
+                            <Autocomplete
+                                size="small"
+                                fullWidth
+                                options={popularModels}
+                                getOptionLabel={(option: LlmModel) =>
+                                    isOpenRouter && isFreeModel(option)
+                                        ? `${option.name} (free) (${option.id})`
+                                        : `${option.name} (${option.id})`
+                                }
+                                value={selectedModel ?? null}
+                                onChange={(_, option) => option && handleModelChange(option.id)}
+                                loading={modelsLoading}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Model"
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <>
+                                                    {isOpenRouter && (
+                                                        <InputAdornment position="end" sx={{mr: -0.5}}>
+                                                            <ToggleButton
+                                                                value="free"
+                                                                selected={freeOnly}
+                                                                onChange={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setFreeOnly((prev) => !prev);
+                                                                }}
+                                                                size="small"
+                                                                sx={{
+                                                                    px: 1,
+                                                                    py: 0,
+                                                                    height: 24,
+                                                                    textTransform: 'none',
+                                                                    fontWeight: 600,
+                                                                    fontSize: '11px',
+                                                                    lineHeight: 1,
+                                                                    borderRadius: 1,
+                                                                }}
+                                                            >
+                                                                Free
+                                                            </ToggleButton>
+                                                        </InputAdornment>
+                                                    )}
+                                                    {params.InputProps.endAdornment}
+                                                </>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                            />
+                        )}
+                        {isAcp && (
+                            <Typography variant="body2" color="text.secondary">
+                                Connected to local AI agent via Agent Client Protocol (stdio subprocess). Model
+                                selection is managed by the agent.
+                            </Typography>
+                        )}
                         <TextField
                             size="small"
                             fullWidth
@@ -299,6 +342,9 @@ export const ConnectionCard = () => {
                 <ToggleButton value="openai" sx={{flex: '1 1 auto', minWidth: 0}}>
                     OpenAI
                 </ToggleButton>
+                <ToggleButton value="acp" sx={{flex: '1 1 auto', minWidth: 0}}>
+                    ACP
+                </ToggleButton>
             </ToggleButtonGroup>
 
             {selectedProvider === 'openrouter' ? (
@@ -320,6 +366,33 @@ export const ConnectionCard = () => {
                         value={apiKey}
                         onChange={(e) => setApiKey(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleApiKeyConnect()}
+                    />
+                </Box>
+            ) : selectedProvider === 'acp' ? (
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                    <Typography variant="body2" color="text.secondary">
+                        Connect to a local AI agent via Agent Client Protocol. The agent runs as a stdio subprocess
+                        (Claude Code, Gemini CLI, Codex CLI, or any ACP-compatible agent).
+                    </Typography>
+                    <TextField
+                        size="small"
+                        fullWidth
+                        label="Agent command"
+                        placeholder="claude"
+                        value={acpCommand}
+                        onChange={(e) => setAcpCommand(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAcpConnect()}
+                        helperText="CLI binary name or path (must be on system PATH)"
+                    />
+                    <TextField
+                        size="small"
+                        fullWidth
+                        label="Arguments"
+                        placeholder="--model opus"
+                        value={acpArgs}
+                        onChange={(e) => setAcpArgs(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAcpConnect()}
+                        helperText="Optional CLI arguments (space-separated)"
                     />
                 </Box>
             ) : (
@@ -348,6 +421,16 @@ export const ConnectionCard = () => {
                     sx={{alignSelf: 'flex-start'}}
                 >
                     Connect with OpenRouter
+                </Button>
+            ) : selectedProvider === 'acp' ? (
+                <Button
+                    size="small"
+                    variant="contained"
+                    onClick={handleAcpConnect}
+                    disabled={!acpCommand.trim()}
+                    sx={{alignSelf: 'flex-start'}}
+                >
+                    Connect Agent
                 </Button>
             ) : (
                 <Button

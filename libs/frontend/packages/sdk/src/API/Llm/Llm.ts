@@ -1,7 +1,7 @@
 import {createBaseQuery} from '@app-dev-panel/sdk/API/createBaseQuery';
 import {createApi} from '@reduxjs/toolkit/query/react';
 
-export type LlmProvider = 'openrouter' | 'anthropic' | 'openai';
+export type LlmProvider = 'openrouter' | 'anthropic' | 'openai' | 'acp';
 
 export type LlmStatus = {
     connected: boolean;
@@ -17,9 +17,13 @@ type OAuthInitiateResponse = {authUrl: string; codeVerifier: string};
 
 type OAuthExchangeResponse = {connected: boolean; error?: string};
 
-type ConnectRequest = {provider: LlmProvider; apiKey: string};
+type ConnectApiKeyRequest = {provider: 'openrouter' | 'anthropic' | 'openai'; apiKey: string};
 
-type ConnectResponse = {connected: boolean; provider: string};
+type ConnectAcpRequest = {provider: 'acp'; acpCommand?: string; acpArgs?: string[]; acpEnv?: Record<string, string>};
+
+type ConnectRequest = ConnectApiKeyRequest | ConnectAcpRequest;
+
+type ConnectResponse = {connected: boolean; provider: string; acpCommand?: string; error?: string};
 
 type ModelsResponse = {models: LlmModel[]};
 
