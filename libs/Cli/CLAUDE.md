@@ -18,8 +18,15 @@ src/
 │   ├── DebugResetCommand.php           # Clear debug data (debug:reset)
 │   ├── DebugServerBroadcastCommand.php # Broadcast test messages (dev:broadcast)
 │   ├── DebugQueryCommand.php           # Query stored debug data (debug:query)
+│   ├── DebugSummaryCommand.php         # Show brief summary of debug entry (debug:summary)
+│   ├── DebugDumpCommand.php            # View dumped objects (debug:dump)
+│   ├── DebugTailCommand.php            # Watch entries in real-time (debug:tail)
 │   ├── ServeCommand.php                # Start HTTP debug server (serve)
-│   └── McpServeCommand.php             # Start MCP server for AI integration (mcp:serve)
+│   ├── McpServeCommand.php             # Start MCP server for AI integration (mcp:serve)
+│   ├── FrontendUpdateCommand.php       # Download latest frontend build (frontend:update)
+│   ├── InspectConfigCommand.php        # Inspect application config (inspect:config)
+│   ├── InspectDatabaseCommand.php      # Inspect database schema/data (inspect:db)
+│   └── InspectRoutesCommand.php        # Inspect application routes (inspect:routes)
 └── Server/
     └── server-router.php               # Router for built-in PHP server (bootstraps API)
 tests/
@@ -90,10 +97,10 @@ Uses `CollectorRepositoryInterface` to read from storage.
 Starts a standalone HTTP server using PHP built-in server, serving the ADP API directly.
 
 ```bash
-debug:serve                                       # Default: 127.0.0.1:8888
-debug:serve --host=0.0.0.0 --port=9000            # Custom host/port
-debug:serve --storage-path=/path/to/debug/data    # Custom storage
-debug:serve --frontend-path=/path/to/built/assets # Serve frontend
+serve                                              # Default: 127.0.0.1:8888
+serve --host=0.0.0.0 --port=9000                   # Custom host/port
+serve --storage-path=/path/to/debug/data           # Custom storage
+serve --frontend-path=/path/to/built/assets        # Serve frontend
 ```
 
 ### `mcp:serve` — MCP Server

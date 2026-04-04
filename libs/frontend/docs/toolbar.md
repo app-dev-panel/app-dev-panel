@@ -59,6 +59,10 @@ The toolbar displays compact metric items along a horizontal bar:
 | EventsItem | Event listener count | `event.total` |
 | LogsItem | Log entry count | `logger.total` |
 | ValidatorItem | Valid/invalid count | `validator.*` |
+| DatabaseItem | Query count | `db.queries.total` |
+| HttpClientItem | HTTP client request count | `httpClient.total` |
+| ExceptionItem | Exception indicator | `exception.*` |
+| DeprecationItem | Deprecation count | `deprecation.total` |
 | CommandItem | CLI command name + exit code | `command.*` (console mode) |
 
 ## How It Works

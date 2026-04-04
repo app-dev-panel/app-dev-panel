@@ -23,7 +23,7 @@ src/
 │   │   ├── DebugController.php          # Debug data endpoints (list, summary, view, dump, object, SSE)
 │   │   └── SettingsController.php       # Debug settings (path mapping)
 │   ├── Middleware/
-│   │   ├── ResponseDataWrapper.php      # Wraps responses in {id, data, error, success, status}
+│   │   ├── ResponseDataWrapper.php      # Wraps responses in {id, data, error, success}
 │   │   ├── DebugHeaders.php             # Adds X-Debug-Id, X-Debug-Link headers
 │   │   └── TokenAuthMiddleware.php      # Token-based authentication
 │   ├── Repository/
@@ -317,8 +317,8 @@ All API requests pass through:
 
 1. **IpFilterMiddleware** — Validates request IP against `allowedIPs` (default: `127.0.0.1`, `::1`)
 2. **CorsMiddleware** — Adds permissive CORS headers (`Access-Control-Allow-Origin: *`)
-3. **ResponseDataWrapper** — Wraps all responses in `{id, data, error, success, status}`
-4. **DebugHeaders** — Adds `X-Debug-Id` and `X-Debug-Link` response headers
+3. **ResponseDataWrapper** — Wraps all responses in `{id, data, error, success}`
+4. **TokenAuthMiddleware** — Optional token-based authentication
 
 Inspector route group (`/inspect/api`) additionally includes:
 
@@ -333,8 +333,7 @@ All API responses are wrapped:
     "id": "debug-entry-id",
     "data": { ... },
     "error": null,
-    "success": true,
-    "status": 200
+    "success": true
 }
 ```
 
