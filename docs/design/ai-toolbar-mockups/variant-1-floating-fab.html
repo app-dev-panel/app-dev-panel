@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant 1 — Floating AI FAB</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Inter, sans-serif; background: #F3F4F6; color: #1A1A1A; font-size: 14px; }
+  code, pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+  /* === Layout === */
+  .topbar { height: 48px; background: #1E293B; display: flex; align-items: center; padding: 0 16px; color: #F1F5F9; gap: 16px; }
+  .topbar .logo { font-weight: 600; font-size: 15px; }
+  .topbar .nav { display: flex; gap: 12px; font-size: 13px; color: #94A3B8; }
+  .shell { display: flex; height: calc(100vh - 48px); }
+  .sidebar { width: 200px; background: #fff; border-right: 1px solid #E5E7EB; padding: 12px 0; flex-shrink: 0; }
+  .sidebar .item { padding: 8px 16px; font-size: 13px; color: #666; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+  .sidebar .item.active { color: #2563EB; background: #EFF6FF; border-left: 3px solid #2563EB; }
+  .sidebar .item .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .content { flex: 1; padding: 24px; overflow-y: auto; max-width: 960px; }
+
+  /* === Content blocks === */
+  .breadcrumb { font-size: 12px; color: #999; margin-bottom: 16px; }
+  .card { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .card h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #1A1A1A; }
+  .code-block { background: #F8FAFC; border: 1px solid #E5E7EB; border-radius: 6px; padding: 12px; white-space: pre-wrap; line-height: 1.6; color: #334155; }
+  .log-row { padding: 8px 12px; border-bottom: 1px solid #F3F4F6; display: flex; gap: 12px; align-items: baseline; }
+  .log-row .time { color: #999; font-size: 12px; min-width: 100px; font-family: 'JetBrains Mono', monospace; }
+  .log-row .msg { color: #334155; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge.info { background: #DBEAFE; color: #2563EB; }
+  .badge.warn { background: #FEF3C7; color: #D97706; }
+
+  /* === Floating AI FAB === */
+  .ai-fab { position: fixed; bottom: 24px; right: 24px; z-index: 1000; }
+  .ai-fab-btn { width: 52px; height: 52px; border-radius: 50%; background: #2563EB; color: #fff; border: none; cursor: pointer; font-size: 22px; box-shadow: 0 4px 12px rgba(37,99,235,0.4); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+  .ai-fab-btn:hover { transform: scale(1.08); }
+  .ai-fab-btn.open { background: #1D4ED8; border-radius: 16px 16px 50% 50%; }
+
+  .ai-menu { position: absolute; bottom: 64px; right: 0; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08); padding: 8px; width: 220px; display: none; }
+  .ai-menu.show { display: block; }
+  .ai-menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; border: none; background: none; width: 100%; font-size: 13px; color: #334155; font-family: Inter, sans-serif; }
+  .ai-menu-item:hover { background: #F3F4F6; }
+  .ai-menu-item .icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .ai-menu-item .icon.blue { background: #DBEAFE; }
+  .ai-menu-item .icon.purple { background: #EDE9FE; }
+  .ai-menu-item .icon.green { background: #D1FAE5; }
+  .ai-menu-item .label { font-weight: 500; }
+  .ai-menu-item .desc { font-size: 11px; color: #999; }
+  .ai-menu .divider { height: 1px; background: #E5E7EB; margin: 4px 8px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">ADP</span>
+  <div class="nav"><span>Debug</span><span>Inspector</span><span>LLM</span></div>
+</div>
+
+<div class="shell">
+  <div class="sidebar">
+    <div class="item"><div class="dot" style="background:#2563EB"></div> Overview</div>
+    <div class="item active"><div class="dot" style="background:#8B5CF6"></div> Request</div>
+    <div class="item"><div class="dot" style="background:#10B981"></div> Logs</div>
+    <div class="item"><div class="dot" style="background:#F59E0B"></div> Events</div>
+    <div class="item"><div class="dot" style="background:#EF4444"></div> Exceptions</div>
+    <div class="item"><div class="dot" style="background:#6366F1"></div> Database</div>
+  </div>
+
+  <div class="content">
+    <div class="breadcrumb">Debug / RequestCollector</div>
+
+    <div class="card">
+      <h3>Request</h3>
+      <div class="code-block">GET / HTTP/1.1
+Host: 127.0.0.1:8080
+Accept: text/html,application/xhtml+xml
+User-Agent: Mozilla/5.0
+Cookie: PHPSESSID=abc123
+Connection: keep-alive</div>
+    </div>
+
+    <div class="card">
+      <h3>Logs</h3>
+      <div class="log-row"><span class="time">20:06:48.671</span> <span class="badge info">info</span> <span class="msg">Application started</span></div>
+      <div class="log-row"><span class="time">20:06:48.672</span> <span class="badge warn">warn</span> <span class="msg">Deprecated: Method getData() is deprecated</span></div>
+      <div class="log-row"><span class="time">20:06:48.673</span> <span class="badge info">info</span> <span class="msg">BeforeMiddleware executed</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating AI FAB -->
+<div class="ai-fab">
+  <div class="ai-menu" id="menu">
+    <button class="ai-menu-item">
+      <div class="icon blue">&#128247;</div>
+      <div><div class="label">Screenshot page</div><div class="desc">Copy full page as image</div></div>
+    </button>
+    <button class="ai-menu-item">
+      <div class="icon purple">&#9986;</div>
+      <div><div class="label">Copy visible panel</div><div class="desc">Copy main content as text</div></div>
+    </button>
+    <div class="divider"></div>
+    <button class="ai-menu-item">
+      <div class="icon green">&#10024;</div>
+      <div><div class="label">Explain this page</div><div class="desc">Send context to AI chat</div></div>
+    </button>
+  </div>
+  <button class="ai-fab-btn" onclick="document.getElementById('menu').classList.toggle('show')">&#10024;</button>
+</div>
+
+</body>
+</html>

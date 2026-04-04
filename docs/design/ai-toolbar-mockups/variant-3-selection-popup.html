@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant 3 — Text Selection Popup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Inter, sans-serif; background: #F3F4F6; color: #1A1A1A; font-size: 14px; }
+  code, pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+  .topbar { height: 48px; background: #1E293B; display: flex; align-items: center; padding: 0 16px; color: #F1F5F9; }
+  .topbar .logo { font-weight: 600; }
+  .shell { display: flex; height: calc(100vh - 48px); }
+  .sidebar { width: 200px; background: #fff; border-right: 1px solid #E5E7EB; padding: 12px 0; }
+  .sidebar .item { padding: 8px 16px; font-size: 13px; color: #666; }
+  .sidebar .item.active { color: #2563EB; background: #EFF6FF; border-left: 3px solid #2563EB; }
+  .content { flex: 1; padding: 24px; overflow-y: auto; max-width: 960px; }
+  .breadcrumb { font-size: 12px; color: #999; margin-bottom: 16px; }
+  .card { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .card h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .code-block { background: #F8FAFC; border: 1px solid #E5E7EB; border-radius: 6px; padding: 12px; white-space: pre-wrap; line-height: 1.6; color: #334155; }
+
+  /* === Selection popup === */
+  .selection-popup { position: absolute; display: flex; gap: 2px; background: #1E293B; border-radius: 8px; padding: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 100; }
+  .sel-btn { border: none; background: transparent; color: #F1F5F9; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: Inter, sans-serif; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .sel-btn:hover { background: #334155; }
+  .sel-btn .ico { font-size: 14px; }
+  .sel-divider { width: 1px; background: #475569; margin: 4px 0; }
+
+  /* Arrow */
+  .selection-popup::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #1E293B; }
+
+  /* Simulated selection highlight */
+  .highlight { background: #BFDBFE; border-radius: 2px; }
+
+  /* Stack trace */
+  .stack { font-size: 12px; line-height: 2; color: #64748B; }
+  .stack .frame { color: #334155; }
+  .stack .file { color: #2563EB; text-decoration: underline; cursor: pointer; }
+  .stack .line-num { color: #D97706; }
+
+  /* Demo note */
+  .note { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #1E40AF; display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+
+<div class="topbar"><span class="logo">ADP</span></div>
+<div class="shell">
+  <div class="sidebar">
+    <div class="item">Request</div>
+    <div class="item">Logs</div>
+    <div class="item">Events</div>
+    <div class="item active">Exceptions</div>
+    <div class="item">Database</div>
+  </div>
+  <div class="content">
+    <div class="breadcrumb">Debug / ExceptionCollector</div>
+
+    <div class="note">&#128161; Select any text to see the AI popup. Try selecting error messages or stack frames.</div>
+
+    <div class="card" style="position: relative;">
+      <h3>RuntimeException</h3>
+      <div class="code-block" style="border-color: #FECACA; background: #FFF5F5;">
+<span class="highlight">Class "App\Service\UserRepository" not found</span>
+
+in /app/src/Controller/UserController.php on line 42</div>
+
+      <!-- Popup shown above selected text -->
+      <div class="selection-popup" style="top: 38px; left: 120px;">
+        <button class="sel-btn"><span class="ico">&#128203;</span> Copy</button>
+        <div class="sel-divider"></div>
+        <button class="sel-btn"><span class="ico">&#10024;</span> Explain</button>
+        <div class="sel-divider"></div>
+        <button class="sel-btn"><span class="ico">&#128269;</span> Search</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Stack Trace</h3>
+      <div class="stack">
+        <div>#0 <span class="file">/app/src/Controller/UserController.php</span>:<span class="line-num">42</span> <span class="frame">App\Controller\UserController->getUser()</span></div>
+        <div>#1 <span class="file">/vendor/framework/src/Router.php</span>:<span class="line-num">187</span> <span class="frame">Framework\Router->dispatch()</span></div>
+        <div>#2 <span class="file">/vendor/framework/src/Kernel.php</span>:<span class="line-num">92</span> <span class="frame">Framework\Kernel->handle()</span></div>
+        <div>#3 <span class="file">/app/public/index.php</span>:<span class="line-num">15</span> <span class="frame">{main}</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="position: relative;">
+      <h3>SQL Query</h3>
+      <div class="code-block"><span class="highlight">SELECT u.id, u.name, u.email
+FROM users u
+LEFT JOIN roles r ON r.user_id = u.id
+WHERE u.status = 'active'
+ORDER BY u.created_at DESC
+LIMIT 50</span></div>
+
+      <!-- Another popup instance -->
+      <div class="selection-popup" style="top: 30px; right: 20px; left: auto;">
+        <button class="sel-btn"><span class="ico">&#128203;</span> Copy</button>
+        <div class="sel-divider"></div>
+        <button class="sel-btn"><span class="ico">&#10024;</span> Explain query</button>
+        <div class="sel-divider"></div>
+        <button class="sel-btn"><span class="ico">&#9881;</span> Optimize</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
