@@ -729,8 +729,20 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\OpenTelemetryCollector)`).'
-count = 4
+message = 'Attempting to access a method on a non-object type (`unknown-ref(OpenTelemetry\API\Trace\TracerProviderInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 29
 
 [[issues]]
 file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
@@ -747,19 +759,13 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\SpanRecord` not found.'
-count = 4
-
-[[issues]]
-file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
-code = "non-existent-class"
 message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\OpenTelemetryCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `OpenTelemetry\API\Trace\TracerProviderInterface`.'
 count = 1
 
 [[issues]]
@@ -767,6 +773,18 @@ file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
 count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Class, interface, enum, or trait `OpenTelemetry\API\Trace\SpanKind` not found.'
+count = 4
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Class, interface, enum, or trait `OpenTelemetry\API\Trace\StatusCode` not found.'
+count = 2
 
 [[issues]]
 file = "src/Controller/TestFixtures/QueueAction.php"

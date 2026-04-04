@@ -6,8 +6,11 @@ namespace AppDevPanel\Adapter\Symfony\Proxy;
 
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\ProxyDecoratedCalls;
+use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\Constraints\GroupSequence;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -26,8 +29,8 @@ final class SymfonyValidatorProxy implements ValidatorInterface
 
     public function validate(
         mixed $value,
-        array|object|null $constraints = null,
-        array|string|null $groups = null,
+        Constraint|array|null $constraints = null,
+        string|GroupSequence|array|null $groups = null,
     ): ConstraintViolationListInterface {
         $violations = $this->decorated->validate($value, $constraints, $groups);
 
@@ -40,7 +43,7 @@ final class SymfonyValidatorProxy implements ValidatorInterface
         $rules = null;
         if ($constraints !== null) {
             $rules = is_array($constraints)
-                ? array_map(static fn(object $c) => $c::class, $constraints)
+                ? array_map(static fn(Constraint $c) => $c::class, $constraints)
                 : $constraints::class;
         }
 
@@ -52,7 +55,7 @@ final class SymfonyValidatorProxy implements ValidatorInterface
     public function validateProperty(
         object $object,
         string $propertyName,
-        array|string|null $groups = null,
+        string|GroupSequence|array|null $groups = null,
     ): ConstraintViolationListInterface {
         return $this->decorated->validateProperty($object, $propertyName, $groups);
     }
@@ -61,17 +64,17 @@ final class SymfonyValidatorProxy implements ValidatorInterface
         object|string $objectOrClass,
         string $propertyName,
         mixed $value,
-        array|string|null $groups = null,
+        string|GroupSequence|array|null $groups = null,
     ): ConstraintViolationListInterface {
         return $this->decorated->validatePropertyValue($objectOrClass, $propertyName, $value, $groups);
     }
 
-    public function startContext(): ExecutionContextInterface
+    public function startContext(): ContextualValidatorInterface
     {
         return $this->decorated->startContext();
     }
 
-    public function inContext(ExecutionContextInterface $context): ValidatorInterface
+    public function inContext(ExecutionContextInterface $context): ContextualValidatorInterface
     {
         return $this->decorated->inContext($context);
     }
