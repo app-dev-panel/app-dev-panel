@@ -1,6 +1,8 @@
 # Live Data Streaming Design
 
-Status: 2026-04-04. Active design — implementation in progress.
+Status: 2026-04-04. **IMPLEMENTED** — this file is now reference documentation.
+
+All components described below are implemented and wired into adapters (Symfony, Laravel, Yii2).
 
 ## Problem
 
