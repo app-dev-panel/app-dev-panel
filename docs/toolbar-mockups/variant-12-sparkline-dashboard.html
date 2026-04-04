@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbar Variant 12 — Sparkline Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F172A;
+    --bg-card: #1E293B;
+    --bg-card-hover: #253449;
+    --text: #F1F5F9;
+    --text-dim: #94A3B8;
+    --text-faint: #475569;
+    --divider: #334155;
+    --primary: #3B82F6;
+    --primary-glow: rgba(59,130,246,0.2);
+    --success: #10B981;
+    --success-glow: rgba(16,185,129,0.2);
+    --warning: #F59E0B;
+    --warning-glow: rgba(245,158,11,0.2);
+    --error: #EF4444;
+    --error-glow: rgba(239,68,68,0.2);
+    --font-ui: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .description {
+    max-width: 800px; margin: 40px auto; padding: 0 24px;
+  }
+  .description h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  .description h2 { font-size: 16px; font-weight: 500; color: var(--text-dim); margin-bottom: 16px; }
+  .description p { font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 8px; }
+  .description ul { font-size: 14px; color: var(--text-dim); line-height: 1.8; padding-left: 20px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: rgba(59,130,246,0.15); color: var(--primary); margin-right: 6px; }
+
+  /* ===== FLOATING DASHBOARD ===== */
+  .dashboard-trigger {
+    position: fixed; bottom: 20px; right: 20px; z-index: 100;
+    width: 52px; height: 52px; border-radius: 16px;
+    background: var(--bg-card); border: 1px solid var(--divider);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+  }
+  .dashboard-trigger:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--primary-glow); border-color: var(--primary); }
+  .dashboard-trigger.hidden { display: none; }
+
+  .dashboard {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    z-index: 200;
+    width: 440px;
+    background: var(--bg);
+    border: 1px solid var(--divider);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+    overflow: hidden;
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .dashboard.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
+
+  .dash-header {
+    display: flex; align-items: center; padding: 16px 20px 12px; gap: 10px;
+  }
+  .dash-header .duck { font-size: 22px; }
+  .dash-header .title { flex: 1; font-size: 15px; font-weight: 600; }
+  .dash-header .live-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--success);
+    box-shadow: 0 0 8px var(--success-glow);
+    animation: livePulse 2s ease infinite;
+  }
+  @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+  .dash-close {
+    background: var(--bg-card); border: none; cursor: pointer;
+    color: var(--text-dim); font-size: 14px; width: 28px; height: 28px;
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  }
+  .dash-close:hover { background: var(--bg-card-hover); color: var(--text); }
+
+  /* Request hero */
+  .dash-hero {
+    margin: 0 16px 12px; padding: 10px 14px;
+    background: var(--bg-card); border-radius: 12px; border: 1px solid var(--divider);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .dash-hero-method { font-family: var(--font-mono); font-size: 13px; font-weight: 600; }
+  .dash-hero-status { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--success); }
+  .dash-hero-path { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dash-hero-time { font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); }
+
+  /* Sparkline cards grid */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 16px 12px;
+  }
+
+  .spark-card {
+    background: var(--bg-card);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .spark-card:hover { background: var(--bg-card-hover); border-color: var(--primary); }
+  .spark-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .spark-card-label { font-size: 11px; font-weight: 500; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.4px; }
+  .spark-card-icon { font-size: 14px; }
+  .spark-card-value {
+    font-family: var(--font-mono); font-size: 24px; font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .spark-card-value .unit { font-size: 12px; font-weight: 500; color: var(--text-dim); }
+  .spark-card-change {
+    font-size: 11px; font-family: var(--font-mono);
+    display: flex; align-items: center; gap: 4px;
+    margin-bottom: 8px;
+  }
+  .spark-card-change.up { color: var(--error); }
+  .spark-card-change.down { color: var(--success); }
+  .spark-card-change.neutral { color: var(--text-faint); }
+
+  /* Sparkline SVG */
+  .sparkline {
+    width: 100%;
+    height: 32px;
+    display: block;
+  }
+  .sparkline-path {
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .sparkline-area {
+    opacity: 0.1;
+  }
+  .spark-card[data-color="blue"] .sparkline-path { stroke: var(--primary); }
+  .spark-card[data-color="blue"] .sparkline-area { fill: var(--primary); }
+  .spark-card[data-color="green"] .sparkline-path { stroke: var(--success); }
+  .spark-card[data-color="green"] .sparkline-area { fill: var(--success); }
+  .spark-card[data-color="yellow"] .sparkline-path { stroke: var(--warning); }
+  .spark-card[data-color="yellow"] .sparkline-area { fill: var(--warning); }
+  .spark-card[data-color="red"] .sparkline-path { stroke: var(--error); }
+  .spark-card[data-color="red"] .sparkline-area { fill: var(--error); }
+
+  /* Hover glow effect */
+  .spark-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .spark-card[data-color="blue"]:hover::after { box-shadow: inset 0 0 20px var(--primary-glow); opacity: 1; }
+  .spark-card[data-color="green"]:hover::after { box-shadow: inset 0 0 20px var(--success-glow); opacity: 1; }
+  .spark-card[data-color="yellow"]:hover::after { box-shadow: inset 0 0 20px var(--warning-glow); opacity: 1; }
+  .spark-card[data-color="red"]:hover::after { box-shadow: inset 0 0 20px var(--error-glow); opacity: 1; }
+
+  /* Bottom row — compact tags */
+  .dash-tags {
+    display: flex; gap: 6px; padding: 0 16px 12px; flex-wrap: wrap;
+  }
+  .dash-tag {
+    font-size: 11px; font-family: var(--font-mono); font-weight: 500;
+    color: var(--text-dim); background: var(--bg-card);
+    border: 1px solid var(--divider);
+    padding: 4px 10px; border-radius: 8px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .dash-tag:hover { border-color: var(--primary); color: var(--text); }
+  .dash-tag.warn { color: var(--warning); border-color: rgba(245,158,11,0.3); }
+
+  /* Actions */
+  .dash-actions {
+    display: flex; gap: 6px; padding: 0 16px 16px;
+  }
+  .dash-action {
+    flex: 1; padding: 8px;
+    background: var(--bg-card); border: 1px solid var(--divider);
+    border-radius: 10px; color: var(--text-dim);
+    font-size: 12px; font-family: var(--font-ui); font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.15s;
+  }
+  .dash-action:hover { border-color: var(--primary); color: var(--text); background: var(--bg-card-hover); }
+
+  /* Live update flash */
+  @keyframes flashUpdate {
+    0% { background: rgba(59,130,246,0.15); }
+    100% { background: transparent; }
+  }
+  .spark-card.flash { animation: flashUpdate 0.8s ease; }
+</style>
+</head>
+<body>
+
+<div class="description">
+  <h1>Variant 12 — Sparkline Dashboard</h1>
+  <h2>Mini charts showing metric trends across requests</h2>
+  <div>
+    <span class="tag">EXPERIMENTAL</span>
+    <span class="tag">DATA-RICH</span>
+    <span class="tag">LIVE</span>
+  </div>
+  <br>
+  <p>Each metric card contains a sparkline chart showing its value over the last 10 requests. At a glance you see not just the current value but the trend — is response time going up? Are queries increasing?</p>
+  <ul>
+    <li>SVG sparkline charts rendered inline on each metric card</li>
+    <li>Trend indicator: ↑ worse / ↓ better vs previous request</li>
+    <li>Glow hover effects per metric color</li>
+    <li>Live pulse dot — auto-updates when new requests arrive</li>
+    <li>"Simulate request" button generates new random data + flash animation</li>
+    <li>Dark-native dashboard aesthetic</li>
+  </ul>
+  <br>
+  <p><strong>Interaction:</strong> Click trigger → dashboard opens → hover cards for glow → click "Simulate Request" to add data points with flash animation.</p>
+</div>
+
+<div class="dashboard-trigger" id="trigger" onclick="openDash()">🦆</div>
+
+<div class="dashboard" id="dashboard">
+  <div class="dash-header">
+    <span class="duck">🦆</span>
+    <span class="title">Debug Dashboard</span>
+    <div class="live-dot"></div>
+    <button class="dash-close" onclick="closeDash()">✕</button>
+  </div>
+
+  <div class="dash-hero">
+    <span class="dash-hero-method">GET</span>
+    <span class="dash-hero-status">200</span>
+    <span class="dash-hero-path">/api/users</span>
+    <span class="dash-hero-time">14:23:07</span>
+  </div>
+
+  <div class="dash-grid" id="dashGrid">
+    <div class="spark-card" data-color="blue" data-metric="time">
+      <div class="spark-card-header">
+        <span class="spark-card-label">Response</span>
+        <span class="spark-card-icon">⏱</span>
+      </div>
+      <div class="spark-card-value"><span class="val">45</span><span class="unit">ms</span></div>
+      <div class="spark-card-change down">↓ 12ms faster</div>
+      <svg class="sparkline" viewBox="0 0 100 32" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="spark-card" data-color="green" data-metric="memory">
+      <div class="spark-card-header">
+        <span class="spark-card-label">Memory</span>
+        <span class="spark-card-icon">💾</span>
+      </div>
+      <div class="spark-card-value"><span class="val">2.4</span><span class="unit">MB</span></div>
+      <div class="spark-card-change neutral">→ stable</div>
+      <svg class="sparkline" viewBox="0 0 100 32" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="spark-card" data-color="yellow" data-metric="db">
+      <div class="spark-card-header">
+        <span class="spark-card-label">DB Queries</span>
+        <span class="spark-card-icon">🗄</span>
+      </div>
+      <div class="spark-card-value"><span class="val">12</span></div>
+      <div class="spark-card-change up">↑ 3 more</div>
+      <svg class="sparkline" viewBox="0 0 100 32" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="spark-card" data-color="blue" data-metric="http">
+      <div class="spark-card-header">
+        <span class="spark-card-label">HTTP Out</span>
+        <span class="spark-card-icon">🌐</span>
+      </div>
+      <div class="spark-card-value"><span class="val">3</span></div>
+      <div class="spark-card-change neutral">→ same</div>
+      <svg class="sparkline" viewBox="0 0 100 32" preserveAspectRatio="none"></svg>
+    </div>
+  </div>
+
+  <div class="dash-tags">
+    <span class="dash-tag">Logs 7</span>
+    <span class="dash-tag">Events 15</span>
+    <span class="dash-tag">Valid ✓</span>
+    <span class="dash-tag warn">Depr 2</span>
+  </div>
+
+  <div class="dash-actions">
+    <button class="dash-action" onclick="simulateRequest()">🔄 Simulate Request</button>
+    <button class="dash-action">📐 Panel</button>
+    <button class="dash-action">↗️ Window</button>
+  </div>
+</div>
+
+<script>
+  // Data store
+  const metricData = {
+    time: [89, 120, 67, 45, 78, 55, 92, 57, 62, 45],
+    memory: [2.1, 2.3, 2.2, 2.4, 2.3, 2.5, 2.2, 2.4, 2.3, 2.4],
+    db: [8, 10, 7, 9, 12, 8, 11, 9, 9, 12],
+    http: [2, 3, 2, 4, 3, 2, 3, 3, 3, 3],
+  };
+
+  function generateSparkline(svg, data, color) {
+    const max = Math.max(...data) * 1.1;
+    const min = Math.min(...data) * 0.9;
+    const range = max - min || 1;
+    const w = 100, h = 32;
+    const step = w / (data.length - 1);
+
+    const points = data.map((v, i) => ({
+      x: i * step,
+      y: h - ((v - min) / range) * (h - 4) - 2
+    }));
+
+    // Line path
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 1; i < points.length; i++) {
+      const cp1x = points[i-1].x + step * 0.4;
+      const cp1y = points[i-1].y;
+      const cp2x = points[i].x - step * 0.4;
+      const cp2y = points[i].y;
+      d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${points[i].x} ${points[i].y}`;
+    }
+
+    // Area path
+    const areaD = d + ` L ${points[points.length-1].x} ${h} L ${points[0].x} ${h} Z`;
+
+    svg.innerHTML = `
+      <path class="sparkline-area" d="${areaD}" />
+      <path class="sparkline-path" d="${d}" />
+      <circle cx="${points[points.length-1].x}" cy="${points[points.length-1].y}" r="2.5"
+              fill="${getColor(color)}" opacity="0.8" />
+    `;
+  }
+
+  function getColor(name) {
+    const colors = { blue: '#3B82F6', green: '#10B981', yellow: '#F59E0B', red: '#EF4444' };
+    return colors[name] || colors.blue;
+  }
+
+  function renderAllSparklines() {
+    document.querySelectorAll('.spark-card').forEach(card => {
+      const metric = card.dataset.metric;
+      const color = card.dataset.color;
+      const svg = card.querySelector('.sparkline');
+      if (metricData[metric]) {
+        generateSparkline(svg, metricData[metric], color);
+      }
+    });
+  }
+
+  function simulateRequest() {
+    // Add random new values
+    const newTime = 30 + Math.floor(Math.random() * 120);
+    const newMemory = +(1.8 + Math.random() * 1.5).toFixed(1);
+    const newDb = 5 + Math.floor(Math.random() * 15);
+    const newHttp = 1 + Math.floor(Math.random() * 5);
+
+    Object.entries({time: newTime, memory: newMemory, db: newDb, http: newHttp}).forEach(([key, val]) => {
+      metricData[key].push(val);
+      if (metricData[key].length > 10) metricData[key].shift();
+    });
+
+    // Update displayed values
+    const cards = document.querySelectorAll('.spark-card');
+    const values = [newTime, newMemory, newDb, newHttp];
+    const units = ['ms', 'MB', '', ''];
+    const prevValues = [
+      metricData.time[metricData.time.length - 2],
+      metricData.memory[metricData.memory.length - 2],
+      metricData.db[metricData.db.length - 2],
+      metricData.http[metricData.http.length - 2],
+    ];
+
+    cards.forEach((card, i) => {
+      card.querySelector('.val').textContent = values[i];
+      // Update change indicator
+      const changeEl = card.querySelector('.spark-card-change');
+      const diff = values[i] - prevValues[i];
+      if (Math.abs(diff) < 0.01) {
+        changeEl.className = 'spark-card-change neutral';
+        changeEl.textContent = '→ stable';
+      } else if (i === 0 || i === 2) { // time and db: lower is better
+        if (diff > 0) {
+          changeEl.className = 'spark-card-change up';
+          changeEl.textContent = `↑ ${Math.abs(diff).toFixed(i===1?1:0)}${units[i]} more`;
+        } else {
+          changeEl.className = 'spark-card-change down';
+          changeEl.textContent = `↓ ${Math.abs(diff).toFixed(i===1?1:0)}${units[i]} less`;
+        }
+      } else {
+        changeEl.className = 'spark-card-change neutral';
+        changeEl.textContent = `→ ${values[i]}${units[i]}`;
+      }
+
+      // Flash animation
+      card.classList.remove('flash');
+      void card.offsetWidth;
+      card.classList.add('flash');
+    });
+
+    renderAllSparklines();
+  }
+
+  function openDash() {
+    document.getElementById('trigger').classList.add('hidden');
+    document.getElementById('dashboard').classList.add('open');
+    renderAllSparklines();
+  }
+  function closeDash() {
+    document.getElementById('dashboard').classList.remove('open');
+    setTimeout(() => document.getElementById('trigger').classList.remove('hidden'), 300);
+  }
+
+  // Initial render
+  setTimeout(() => { openDash(); renderAllSparklines(); }, 300);
+</script>
+</body>
+</html>

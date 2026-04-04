@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbar Variant 5 — Glassmorphism HUD</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-ui: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    /* Rich background to show off glassmorphism */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 40%, #f093fb 100%);
+    color: #1A1A1A;
+    overflow-x: hidden;
+  }
+
+  /* Fake page content to show toolbar overlaying */
+  .page-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 24px 200px;
+  }
+  .page-content h1 {
+    font-size: 24px; font-weight: 600; color: white; margin-bottom: 8px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .page-content h2 {
+    font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.8); margin-bottom: 16px;
+  }
+  .page-content p {
+    font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 8px;
+  }
+  .page-content ul {
+    font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8; padding-left: 20px;
+  }
+  .tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 4px;
+    background: rgba(255,255,255,0.2); color: white; margin-right: 6px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* ===== GLASSMORPHISM HUD ===== */
+
+  /* Collapsed — floating glass orb */
+  .hud-orb {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1300;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+  }
+  .hud-orb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.22);
+  }
+  .hud-orb .duck { font-size: 24px; }
+  .hud-orb .orb-badge {
+    position: absolute;
+    top: -2px; right: -2px;
+    background: #4ADE80;
+    color: #0a3019;
+    font-size: 10px; font-weight: 700;
+    font-family: var(--font-mono);
+    padding: 1px 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .hud-orb.hidden { display: none; }
+
+  /* Expanded — glass HUD panel */
+  .hud {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1300;
+    width: 360px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.15);
+    padding: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.1, 1);
+  }
+  .hud.visible {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+  }
+
+  /* HUD Header */
+  .hud-header {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .hud-header .duck { font-size: 22px; }
+  .hud-header .title {
+    flex: 1; font-size: 14px; font-weight: 600; color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .hud-close {
+    background: rgba(255,255,255,0.1); border: none; cursor: pointer;
+    color: rgba(255,255,255,0.6); font-size: 14px; padding: 4px 8px;
+    border-radius: 8px; display: flex; align-items: center;
+    transition: all 0.15s;
+  }
+  .hud-close:hover { background: rgba(255,255,255,0.2); color: white; }
+
+  /* Request hero */
+  .hud-hero {
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .hud-hero-method {
+    font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: white;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hud-hero-status {
+    background: rgba(74, 222, 128, 0.2);
+    color: #4ADE80;
+    font-size: 12px; font-weight: 700;
+    padding: 2px 8px; border-radius: 6px;
+    font-family: var(--font-mono);
+  }
+  .hud-hero-path {
+    font-family: var(--font-mono); font-size: 11px;
+    color: rgba(255,255,255,0.5); margin-top: 4px;
+    word-break: break-all;
+  }
+
+  /* Metrics grid */
+  .hud-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(255,255,255,0.05);
+  }
+  .hud-cell {
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.02);
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .hud-cell:hover { background: rgba(255,255,255,0.08); }
+  .hud-cell-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: rgba(255,255,255,0.4);
+    margin-bottom: 4px;
+  }
+  .hud-cell-value {
+    font-family: var(--font-mono); font-size: 18px; font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .hud-cell-value.success { color: #4ADE80; }
+  .hud-cell-value.warning { color: #FBBF24; }
+  .hud-cell-value.error { color: #F87171; }
+  .hud-cell-value .unit {
+    font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.4);
+    margin-left: 2px;
+  }
+
+  /* Compact metrics row */
+  .hud-compact {
+    display: flex;
+    padding: 8px 16px;
+    gap: 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    flex-wrap: wrap;
+  }
+  .hud-tag {
+    font-size: 11px; font-family: var(--font-mono); font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.06);
+    padding: 3px 8px; border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .hud-tag:hover { background: rgba(255,255,255,0.12); color: white; }
+  .hud-tag.warning { color: #FBBF24; background: rgba(251,191,36,0.12); }
+
+  /* Actions */
+  .hud-actions {
+    display: flex;
+    padding: 8px 12px;
+    gap: 6px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .hud-action {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 8px;
+    color: rgba(255,255,255,0.7);
+    font-size: 12px; font-family: var(--font-ui); font-weight: 500;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.15s;
+  }
+  .hud-action:hover {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  /* ===== DRAGGABLE ===== */
+  .hud-orb, .hud {
+    /* Allow drag repositioning */
+  }
+  .dragging { cursor: grabbing !important; }
+</style>
+</head>
+<body>
+
+<div class="page-content">
+  <h1>Variant 5 — Glassmorphism HUD</h1>
+  <h2>Frosted glass heads-up display</h2>
+  <div>
+    <span class="tag">PREMIUM</span>
+    <span class="tag">GLASSMORPHISM</span>
+    <span class="tag">DASHBOARD</span>
+  </div>
+  <br>
+  <p>
+    A frosted glass overlay panel inspired by macOS widgets and iOS Control Center.
+    Uses backdrop-filter blur for a modern translucent effect. The toolbar adapts to
+    whatever background it's placed over.
+  </p>
+  <ul>
+    <li>Collapsed: glass orb with status badge (bottom-right, draggable concept)</li>
+    <li>Expanded: card-like HUD with 2-column metrics grid</li>
+    <li>Large typography for key metrics — easy to scan</li>
+    <li>Frosted glass with blur + saturate — adapts to any page background</li>
+    <li>Dashboard-style layout instead of linear chip row</li>
+    <li>Warm animations with spring easing</li>
+    <li>Colorful gradient background for demonstration (works on any bg)</li>
+  </ul>
+  <br>
+  <p><strong>Interaction:</strong> Click the glass orb (bottom-right) → HUD slides up → hover cells for details → click actions → click ✕ to close.</p>
+  <br><br>
+  <p style="opacity: 0.5">
+    (Rich gradient background is intentional — shows how glassmorphism adapts to underlying content)
+  </p>
+
+  <!-- Fake content blocks -->
+  <div style="margin-top: 40px; display: grid; gap: 16px; grid-template-columns: 1fr 1fr;">
+    <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.15);">
+      <div style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Users</div>
+      <div style="font-size: 28px; font-weight: 700; color: white;">1,247</div>
+    </div>
+    <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.15);">
+      <div style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Revenue</div>
+      <div style="font-size: 28px; font-weight: 700; color: white;">$42.8k</div>
+    </div>
+    <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.15);">
+      <div style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Orders</div>
+      <div style="font-size: 28px; font-weight: 700; color: white;">384</div>
+    </div>
+    <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.15);">
+      <div style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Avg Response</div>
+      <div style="font-size: 28px; font-weight: 700; color: white;">23ms</div>
+    </div>
+  </div>
+</div>
+
+<!-- Glass orb (collapsed) -->
+<div class="hud-orb" id="orb" onclick="openHud()">
+  <span class="duck">🦆</span>
+  <span class="orb-badge">200</span>
+</div>
+
+<!-- HUD panel (expanded) -->
+<div class="hud" id="hud">
+  <div class="hud-header">
+    <span class="duck">🦆</span>
+    <span class="title">Debug HUD</span>
+    <button class="hud-close" onclick="closeHud()">✕</button>
+  </div>
+
+  <div class="hud-hero">
+    <div class="hud-hero-method">
+      GET <span class="hud-hero-status">200</span>
+    </div>
+    <div class="hud-hero-path">/api/users?page=1&limit=20</div>
+  </div>
+
+  <div class="hud-grid">
+    <div class="hud-cell">
+      <div class="hud-cell-label">Response</div>
+      <div class="hud-cell-value">45<span class="unit">ms</span></div>
+    </div>
+    <div class="hud-cell">
+      <div class="hud-cell-label">Memory</div>
+      <div class="hud-cell-value">2.4<span class="unit">MB</span></div>
+    </div>
+    <div class="hud-cell">
+      <div class="hud-cell-label">DB Queries</div>
+      <div class="hud-cell-value">12</div>
+    </div>
+    <div class="hud-cell">
+      <div class="hud-cell-label">HTTP Calls</div>
+      <div class="hud-cell-value">3</div>
+    </div>
+  </div>
+
+  <div class="hud-compact">
+    <span class="hud-tag">Logs 7</span>
+    <span class="hud-tag">Events 15</span>
+    <span class="hud-tag">Valid ✓</span>
+    <span class="hud-tag warning">Depr 2</span>
+  </div>
+
+  <div class="hud-actions">
+    <button class="hud-action">📐 Panel</button>
+    <button class="hud-action">📋 History</button>
+    <button class="hud-action">↗️ Window</button>
+  </div>
+</div>
+
+<script>
+  function openHud() {
+    document.getElementById('orb').classList.add('hidden');
+    setTimeout(() => document.getElementById('hud').classList.add('visible'), 10);
+  }
+  function closeHud() {
+    document.getElementById('hud').classList.remove('visible');
+    setTimeout(() => document.getElementById('orb').classList.remove('hidden'), 350);
+  }
+</script>
+</body>
+</html>

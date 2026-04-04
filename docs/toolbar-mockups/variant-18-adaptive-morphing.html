@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbar Variant 18 — Adaptive Morphing Bar</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #F3F4F6;
+    --bg-paper: #FFFFFF;
+    --text: #1A1A1A;
+    --text-dim: #666666;
+    --text-faint: #999999;
+    --divider: #E5E5E5;
+    --primary: #2563EB;
+    --primary-light: #EFF6FF;
+    --success: #16A34A;
+    --success-light: #DCFCE7;
+    --warning: #D97706;
+    --error: #DC2626;
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08);
+    --font-ui: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  [data-theme="dark"] {
+    --bg-page: #0F172A;
+    --bg-paper: #1E293B;
+    --text: #F1F5F9;
+    --text-dim: #94A3B8;
+    --text-faint: #64748B;
+    --divider: #334155;
+    --primary: #60A5FA;
+    --primary-light: #1E3A5F;
+    --success: #4ADE80;
+    --success-light: #14532D;
+    --warning: #FBBF24;
+    --error: #F87171;
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg-page);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .description {
+    max-width: 600px; margin: 40px auto; padding: 0 24px;
+  }
+  .description h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  .description h2 { font-size: 16px; color: var(--text-dim); margin-bottom: 16px; }
+  .description p { font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 8px; }
+  .description ul { font-size: 14px; color: var(--text-dim); line-height: 1.8; padding-left: 20px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--primary-light); color: var(--primary); margin-right: 6px; }
+  .theme-toggle {
+    position: fixed; top: 16px; left: 16px; z-index: 9999;
+    background: var(--bg-paper); border: 1px solid var(--divider); border-radius: 20px;
+    padding: 6px 14px; cursor: pointer; font-size: 13px; color: var(--text-dim);
+    font-family: var(--font-ui);
+  }
+
+  /* ===== POSITION SWITCH ===== */
+  .pos-switch {
+    position: fixed; top: 16px; right: 16px; z-index: 9999;
+    display: flex; gap: 4px;
+    background: var(--bg-paper); border: 1px solid var(--divider);
+    border-radius: 10px; padding: 4px;
+  }
+  .pos-btn {
+    padding: 5px 12px; border: none; border-radius: 7px;
+    background: none; color: var(--text-dim);
+    font-size: 12px; font-family: var(--font-ui); font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .pos-btn:hover { color: var(--text); }
+  .pos-btn.active { background: var(--primary); color: white; }
+
+  /* ===== COLLAPSED PILL ===== */
+  .pill {
+    position: fixed; z-index: 1300;
+    background: var(--bg-paper); border: 1px solid var(--divider);
+    border-radius: 24px; padding: 6px 14px;
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+    user-select: none;
+  }
+  .pill:hover { box-shadow: var(--shadow-lg); transform: scale(1.05); }
+  .pill .duck { font-size: 22px; }
+  .pill .status { font-size: 12px; font-weight: 600; color: var(--success); font-family: var(--font-mono); }
+  .pill.hidden { opacity: 0; pointer-events: none; transform: scale(0.8); }
+
+  /* Pill position variants */
+  .pill.pos-bottom { bottom: 16px; right: 16px; }
+  .pill.pos-right { top: 50%; right: 16px; transform: translateY(-50%); }
+  .pill.pos-right:hover { transform: translateY(-50%) scale(1.05); }
+  .pill.pos-left { top: 50%; left: 16px; transform: translateY(-50%); }
+  .pill.pos-left:hover { transform: translateY(-50%) scale(1.05); }
+
+  /* ===== TOOLBAR — adaptive layout ===== */
+  .toolbar {
+    position: fixed; z-index: 1300;
+    background: var(--bg-paper);
+    border: 1px solid var(--divider);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    /* Smooth morph between positions */
+    transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .toolbar.visible { opacity: 1; pointer-events: auto; }
+
+  /* BOTTOM mode */
+  .toolbar.mode-bottom {
+    bottom: 0; left: 0; right: 0;
+    border-radius: 0;
+    border-left: none; border-right: none; border-bottom: none;
+    display: flex; flex-direction: column;
+    height: auto;
+  }
+  .toolbar.mode-bottom .tb-bar {
+    display: flex; align-items: center; gap: 4px;
+    padding: 4px 8px; min-height: 44px;
+  }
+  .toolbar.mode-bottom .tb-vertical { display: none; }
+  .toolbar.mode-bottom .tb-divider-h { width: 1px; height: 24px; background: var(--divider); margin: 0 4px; flex-shrink: 0; }
+  .toolbar.mode-bottom .tb-spacer { flex: 1; }
+
+  /* RIGHT SIDE mode */
+  .toolbar.mode-right {
+    top: 0; right: 0; bottom: 0;
+    width: 260px;
+    border-radius: 0;
+    border-right: none; border-top: none; border-bottom: none;
+    display: flex; flex-direction: column;
+  }
+  .toolbar.mode-right .tb-bar { display: none; }
+  .toolbar.mode-right .tb-vertical { display: flex; flex-direction: column; flex: 1; overflow-y: auto; }
+
+  /* LEFT SIDE mode */
+  .toolbar.mode-left {
+    top: 0; left: 0; bottom: 0;
+    width: 260px;
+    border-radius: 0;
+    border-left: none; border-top: none; border-bottom: none;
+    display: flex; flex-direction: column;
+  }
+  .toolbar.mode-left .tb-bar { display: none; }
+  .toolbar.mode-left .tb-vertical { display: flex; flex-direction: column; flex: 1; overflow-y: auto; }
+
+  /* ---- Shared elements ---- */
+  .tb-icon-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-faint); padding: 4px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; font-size: 18px;
+  }
+  .tb-icon-btn:hover { color: var(--text); background: var(--primary-light); }
+
+  /* Chip (horizontal mode) */
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    height: 30px; padding: 0 10px;
+    border-radius: 6px; border: 1px solid var(--divider);
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+    color: var(--text); cursor: pointer; white-space: nowrap;
+    transition: all 0.15s; flex-shrink: 0;
+  }
+  .chip:hover { background: var(--primary-light); border-color: var(--primary); }
+  .chip.success { background: var(--success-light); border-color: var(--success); color: var(--success); }
+  .chip.warn { color: var(--warning); }
+
+  /* ---- Vertical layout elements ---- */
+  .v-header {
+    display: flex; align-items: center; padding: 10px 14px; gap: 8px;
+    border-bottom: 1px solid var(--divider); flex-shrink: 0;
+  }
+  .v-header .duck { font-size: 20px; }
+  .v-header .title { font-size: 14px; font-weight: 600; flex: 1; }
+
+  .v-request {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--divider); flex-shrink: 0;
+  }
+  .v-req-line { font-family: var(--font-mono); font-size: 13px; font-weight: 600; display: flex; gap: 6px; }
+  .v-req-status { color: var(--success); }
+  .v-req-path { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-top: 4px; word-break: break-all; }
+
+  .v-metrics { flex: 1; overflow-y: auto; padding: 6px 0; }
+  .v-metric-row {
+    display: flex; align-items: center; padding: 7px 14px; gap: 10px;
+    cursor: pointer; transition: background 0.1s;
+    border-left: 3px solid transparent;
+  }
+  .v-metric-row:hover { background: var(--primary-light); border-left-color: var(--primary); }
+  .v-metric-icon { font-size: 14px; width: 20px; text-align: center; }
+  .v-metric-label { font-size: 13px; color: var(--text-dim); flex: 1; }
+  .v-metric-value { font-family: var(--font-mono); font-size: 13px; font-weight: 500; }
+  .v-metric-value.warn { color: var(--warning); }
+  .v-metric-value.ok { color: var(--success); }
+
+  .v-sep { height: 1px; background: var(--divider); margin: 4px 14px; }
+
+  .v-actions {
+    border-top: 1px solid var(--divider);
+    padding: 8px 10px; display: flex; gap: 4px; flex-shrink: 0;
+  }
+  .v-action {
+    flex: 1; padding: 7px; background: none; border: 1px solid var(--divider);
+    border-radius: 8px; color: var(--text-dim); font-size: 11px;
+    font-family: var(--font-ui); font-weight: 500; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    transition: all 0.15s;
+  }
+  .v-action:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+  /* Resize handle for side mode */
+  .tb-resize {
+    position: absolute; top: 0; bottom: 0; width: 6px; cursor: col-resize; z-index: 2;
+  }
+  .toolbar.mode-right .tb-resize { left: -3px; }
+  .toolbar.mode-left .tb-resize { right: -3px; }
+  .toolbar.mode-bottom .tb-resize { display: none; }
+  .tb-resize:hover { background: rgba(37,99,235,0.1); }
+
+  /* Panel placeholder */
+  .panel-area {
+    height: 0; overflow: hidden;
+    transition: height 0.3s cubic-bezier(0.4,0,0.2,1);
+    border-top: 1px solid var(--divider);
+  }
+  .panel-area.open { height: 250px; }
+  .panel-placeholder {
+    height: 100%; display: flex; align-items: center; justify-content: center;
+    color: var(--text-faint); font-size: 14px;
+    flex-direction: column; gap: 8px;
+  }
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+
+<!-- Position switch -->
+<div class="pos-switch">
+  <button class="pos-btn active" onclick="setMode('bottom')">↓ Bottom</button>
+  <button class="pos-btn" onclick="setMode('right')">→ Right</button>
+  <button class="pos-btn" onclick="setMode('left')">← Left</button>
+</div>
+
+<div class="description">
+  <h1>Variant 18 — Adaptive Morphing Bar</h1>
+  <h2>Smooth morphing between bottom bar and side rail</h2>
+  <div>
+    <span class="tag">HYBRID</span>
+    <span class="tag">V1+V3</span>
+    <span class="tag">MORPHING</span>
+  </div>
+  <br>
+  <p>The same toolbar morphs between bottom bar (V1 style) and side rail (V3 style) with a single smooth CSS transition. Layout, metrics, and interactions adapt automatically.</p>
+  <ul>
+    <li>Bottom mode: horizontal chips, slide-up animation from V1</li>
+    <li>Side mode: vertical rows with labels, like V3</li>
+    <li>0.45s spring transition between modes — everything morphs</li>
+    <li>Collapsed pill repositions to match current mode</li>
+    <li>Side mode has resize handle on the edge</li>
+    <li>Panel area slides up (bottom) or doesn't appear (side — uses full height)</li>
+    <li>Toggle with buttons or could be user preference</li>
+  </ul>
+  <br>
+  <p><strong>Interaction:</strong> Click pill to expand → use position buttons (top-right) to switch modes → smooth morph animation → click 🦆 to collapse.</p>
+</div>
+
+<!-- Collapsed pill -->
+<div class="pill pos-bottom" id="pill" onclick="openToolbar()">
+  <span class="duck">🦆</span>
+  <span class="status">200</span>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar mode-bottom" id="toolbar">
+  <div class="tb-resize" id="tbResize"></div>
+
+  <!-- HORIZONTAL BAR (bottom mode) -->
+  <div class="tb-bar">
+    <button class="tb-icon-btn" onclick="closeToolbar()" title="Collapse">🦆</button>
+    <div class="tb-divider-h"></div>
+    <div class="chip success">GET /api/users <strong>200</strong></div>
+    <div class="chip">⏱ 45ms</div>
+    <div class="chip">💾 2.4MB</div>
+    <div class="chip">🗄 DB 12</div>
+    <div class="chip">🌐 HTTP 3</div>
+    <div class="chip">📋 Logs 7</div>
+    <div class="chip">⚡ Events 15</div>
+    <div class="chip warn">⚠ Depr 2</div>
+    <div class="tb-spacer"></div>
+    <div class="tb-divider-h"></div>
+    <button class="tb-icon-btn" onclick="togglePanel()" title="Panel">📐</button>
+    <button class="tb-icon-btn" title="History">📋</button>
+    <button class="tb-icon-btn" title="New window">↗️</button>
+  </div>
+
+  <!-- VERTICAL LAYOUT (side mode) -->
+  <div class="tb-vertical">
+    <div class="v-header">
+      <span class="duck">🦆</span>
+      <span class="title">Debug</span>
+      <button class="tb-icon-btn" onclick="closeToolbar()" title="Collapse" style="font-size:14px">✕</button>
+    </div>
+    <div class="v-request">
+      <div class="v-req-line">GET <span class="v-req-status">200</span></div>
+      <div class="v-req-path">/api/users?page=1&limit=20</div>
+    </div>
+    <div class="v-metrics">
+      <div class="v-metric-row"><span class="v-metric-icon">⏱</span><span class="v-metric-label">Response time</span><span class="v-metric-value">45ms</span></div>
+      <div class="v-metric-row"><span class="v-metric-icon">💾</span><span class="v-metric-label">Peak memory</span><span class="v-metric-value">2.4 MB</span></div>
+      <div class="v-sep"></div>
+      <div class="v-metric-row"><span class="v-metric-icon">🗄</span><span class="v-metric-label">DB queries</span><span class="v-metric-value">12</span></div>
+      <div class="v-metric-row"><span class="v-metric-icon">🌐</span><span class="v-metric-label">HTTP requests</span><span class="v-metric-value">3</span></div>
+      <div class="v-sep"></div>
+      <div class="v-metric-row"><span class="v-metric-icon">📋</span><span class="v-metric-label">Log entries</span><span class="v-metric-value">7</span></div>
+      <div class="v-metric-row"><span class="v-metric-icon">⚡</span><span class="v-metric-label">Events fired</span><span class="v-metric-value">15</span></div>
+      <div class="v-sep"></div>
+      <div class="v-metric-row"><span class="v-metric-icon">⚠️</span><span class="v-metric-label">Deprecations</span><span class="v-metric-value warn">2</span></div>
+      <div class="v-metric-row"><span class="v-metric-icon">✅</span><span class="v-metric-label">Validation</span><span class="v-metric-value ok">OK</span></div>
+      <div class="v-metric-row"><span class="v-metric-icon">🔀</span><span class="v-metric-label">Route</span><span class="v-metric-value">api.users.index</span></div>
+    </div>
+    <div class="v-actions">
+      <button class="v-action">📐 Panel</button>
+      <button class="v-action">📋 History</button>
+      <button class="v-action">↗️ Window</button>
+    </div>
+  </div>
+
+  <!-- Panel area (bottom mode only) -->
+  <div class="panel-area" id="panelArea">
+    <div class="panel-placeholder">
+      <div style="font-size:32px">📊</div>
+      <div>Debug Panel (iframe)</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const toolbar = document.getElementById('toolbar');
+  const pill = document.getElementById('pill');
+  let currentMode = 'bottom';
+  let isOpen = false;
+
+  function setMode(mode) {
+    currentMode = mode;
+    // Update buttons
+    document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    // Remove old mode classes
+    toolbar.classList.remove('mode-bottom', 'mode-right', 'mode-left');
+    toolbar.classList.add('mode-' + mode);
+
+    // Update pill position
+    pill.classList.remove('pos-bottom', 'pos-right', 'pos-left');
+    pill.classList.add('pos-' + mode);
+
+    // Close panel if switching to side
+    if (mode !== 'bottom') {
+      document.getElementById('panelArea').classList.remove('open');
+    }
+  }
+
+  function openToolbar() {
+    isOpen = true;
+    pill.classList.add('hidden');
+    toolbar.classList.add('visible');
+  }
+
+  function closeToolbar() {
+    isOpen = false;
+    toolbar.classList.remove('visible');
+    document.getElementById('panelArea').classList.remove('open');
+    setTimeout(() => pill.classList.remove('hidden'), 300);
+  }
+
+  function togglePanel() {
+    if (currentMode === 'bottom') {
+      document.getElementById('panelArea').classList.toggle('open');
+    }
+  }
+
+  // Resize for side mode
+  let isResizing = false, resizeStartX, startWidth;
+  const resizeHandle = document.getElementById('tbResize');
+
+  resizeHandle.addEventListener('mousedown', e => {
+    if (currentMode === 'bottom') return;
+    isResizing = true;
+    resizeStartX = e.clientX;
+    startWidth = toolbar.offsetWidth;
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!isResizing) return;
+    const dx = e.clientX - resizeStartX;
+    const newW = currentMode === 'right'
+      ? Math.max(200, Math.min(500, startWidth - dx))
+      : Math.max(200, Math.min(500, startWidth + dx));
+    toolbar.style.width = newW + 'px';
+  });
+
+  document.addEventListener('mouseup', () => { isResizing = false; });
+
+  function toggleTheme() {
+    const btn = document.querySelector('.theme-toggle');
+    if (document.documentElement.dataset.theme === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+      btn.textContent = '🌙 Dark';
+    } else {
+      document.documentElement.dataset.theme = 'dark';
+      btn.textContent = '☀️ Light';
+    }
+  }
+</script>
+</body>
+</html>

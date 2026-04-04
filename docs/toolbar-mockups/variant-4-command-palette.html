@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbar Variant 4 — Command Palette</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #F3F4F6;
+    --bg-paper: #FFFFFF;
+    --bg-overlay: rgba(0,0,0,0.4);
+    --text-primary: #1A1A1A;
+    --text-secondary: #666666;
+    --text-disabled: #999999;
+    --divider: #E5E5E5;
+    --primary: #2563EB;
+    --primary-light: #EFF6FF;
+    --success: #16A34A;
+    --success-light: #DCFCE7;
+    --warning: #D97706;
+    --warning-light: #FEF3C7;
+    --error: #DC2626;
+    --error-light: #FEE2E2;
+    --shadow-lg: 0 25px 50px -12px rgba(0,0,0,0.25);
+    --font-ui: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  [data-theme="dark"] {
+    --bg-page: #0F172A;
+    --bg-paper: #1E293B;
+    --bg-overlay: rgba(0,0,0,0.6);
+    --text-primary: #F1F5F9;
+    --text-secondary: #94A3B8;
+    --text-disabled: #64748B;
+    --divider: #334155;
+    --primary: #60A5FA;
+    --primary-light: #1E3A5F;
+    --success: #4ADE80;
+    --success-light: #14532D;
+    --warning: #FBBF24;
+    --warning-light: #713F12;
+    --error: #F87171;
+    --error-light: #7F1D1D;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg-page);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .description {
+    max-width: 800px; margin: 40px auto; padding: 0 24px 80px;
+  }
+  .description h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  .description h2 { font-size: 16px; font-weight: 500; color: var(--text-secondary); margin-bottom: 16px; }
+  .description p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 8px; }
+  .description ul { font-size: 14px; color: var(--text-secondary); line-height: 1.8; padding-left: 20px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--primary-light); color: var(--primary); margin-right: 6px; }
+
+  .theme-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 9999;
+    background: var(--bg-paper); border: 1px solid var(--divider); border-radius: 20px;
+    padding: 6px 14px; cursor: pointer; font-size: 13px; color: var(--text-secondary);
+    font-family: var(--font-ui);
+  }
+  .theme-toggle:hover { color: var(--text-primary); }
+
+  /* ===== TRIGGER — minimal bottom-right pill ===== */
+  .trigger {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 1300;
+    background: var(--bg-paper);
+    border: 1px solid var(--divider);
+    border-radius: 20px;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .trigger:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); transform: scale(1.05); }
+  .trigger .duck { font-size: 20px; }
+  .trigger .shortcut {
+    font-size: 11px; font-weight: 600; color: var(--text-disabled);
+    background: var(--bg-page); border-radius: 4px; padding: 2px 6px;
+    font-family: var(--font-mono);
+  }
+  .trigger.hidden { display: none; }
+
+  /* ===== OVERLAY ===== */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 15vh;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+
+  /* ===== PALETTE ===== */
+  .palette {
+    width: min(600px, 90vw);
+    background: var(--bg-paper);
+    border: 1px solid var(--divider);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    transform: scale(0.95) translateY(-10px);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .overlay.open .palette {
+    transform: scale(1) translateY(0);
+  }
+
+  /* Search bar */
+  .palette-search {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 10px;
+    border-bottom: 1px solid var(--divider);
+  }
+  .palette-search .search-icon { font-size: 18px; color: var(--text-disabled); }
+  .palette-search input {
+    flex: 1;
+    border: none; outline: none;
+    font-size: 15px; font-family: var(--font-ui);
+    color: var(--text-primary);
+    background: transparent;
+  }
+  .palette-search input::placeholder { color: var(--text-disabled); }
+  .palette-search .esc-key {
+    font-size: 11px; font-weight: 600; color: var(--text-disabled);
+    background: var(--bg-page); border-radius: 4px; padding: 2px 6px;
+    font-family: var(--font-mono);
+  }
+
+  /* Request summary bar */
+  .palette-summary {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    gap: 12px;
+    background: var(--primary-light);
+    font-size: 13px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .palette-summary::-webkit-scrollbar { display: none; }
+  .summary-method {
+    font-family: var(--font-mono); font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .summary-status {
+    font-family: var(--font-mono); font-weight: 600; color: var(--success);
+  }
+  .summary-path {
+    font-family: var(--font-mono); color: var(--text-secondary); font-size: 12px;
+  }
+  .summary-time { color: var(--text-secondary); margin-left: auto; white-space: nowrap; }
+
+  /* Results list */
+  .palette-results {
+    max-height: 340px;
+    overflow-y: auto;
+  }
+  .palette-section-title {
+    padding: 8px 16px 4px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--text-disabled);
+  }
+  .palette-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border-left: 3px solid transparent;
+  }
+  .palette-item:hover, .palette-item.selected {
+    background: var(--primary-light);
+    border-left-color: var(--primary);
+  }
+  .palette-item .item-icon { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
+  .palette-item .item-label { flex: 1; font-size: 14px; }
+  .palette-item .item-value {
+    font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary);
+  }
+  .palette-item .item-value.success { color: var(--success); }
+  .palette-item .item-value.warning { color: var(--warning); }
+  .palette-item .item-value.error { color: var(--error); }
+  .palette-item .item-shortcut {
+    font-size: 11px; font-weight: 500; color: var(--text-disabled);
+    font-family: var(--font-mono);
+  }
+
+  /* Footer */
+  .palette-footer {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 16px;
+    border-top: 1px solid var(--divider);
+    font-size: 11px; color: var(--text-disabled);
+  }
+  .palette-footer kbd {
+    font-family: var(--font-mono);
+    background: var(--bg-page);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 11px;
+  }
+
+  /* Mini status bar at bottom (always visible) */
+  .mini-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 24px;
+    background: var(--bg-paper);
+    border-top: 1px solid var(--divider);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 12px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-disabled);
+    z-index: 1200;
+  }
+  .mini-bar .mini-status { color: var(--success); font-weight: 600; }
+  .mini-bar .mini-item { cursor: pointer; }
+  .mini-bar .mini-item:hover { color: var(--text-primary); }
+  .mini-bar .mini-spacer { flex: 1; }
+  .mini-bar .mini-duck { cursor: pointer; font-size: 14px; }
+  .mini-bar .mini-duck:hover { transform: scale(1.2); display: inline-block; }
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+
+<div class="description">
+  <h1>Variant 4 — Command Palette</h1>
+  <h2>Spotlight / ⌘K style debug toolbar</h2>
+  <div>
+    <span class="tag">RADICAL</span>
+    <span class="tag">KEYBOARD-FIRST</span>
+    <span class="tag">NON-INTRUSIVE</span>
+  </div>
+  <br>
+  <p>
+    Completely different approach: the toolbar is not always visible. Instead, there's a tiny status bar
+    at the bottom (like VS Code) and a keyboard shortcut triggers a command palette overlay.
+  </p>
+  <ul>
+    <li>VS Code-like mini status bar at the very bottom (24px) — shows key metrics inline</li>
+    <li>⌘D / Ctrl+D opens a full command palette overlay</li>
+    <li>Searchable — type to filter metrics and actions</li>
+    <li>Keyboard navigation (↑↓ arrows, Enter to select)</li>
+    <li>Request summary prominently displayed at top of palette</li>
+    <li>Zero visual overhead when not actively debugging</li>
+    <li>Combines toolbar + entry selector + panel launcher in one UI</li>
+  </ul>
+  <br>
+  <p><strong>Interaction:</strong> Press <kbd>Ctrl+D</kbd> or click the 🦆 in the status bar → palette opens → type to search → navigate with arrows → Esc to close.</p>
+</div>
+
+<!-- Mini status bar (VS Code style) -->
+<div class="mini-bar">
+  <span class="mini-duck" onclick="openPalette()" title="Open debug palette (Ctrl+D)">🦆</span>
+  <span class="mini-status">200</span>
+  <span class="mini-item" onclick="openPalette()">GET /api/users</span>
+  <span class="mini-item" onclick="openPalette()">45ms</span>
+  <span class="mini-item" onclick="openPalette()">2.4MB</span>
+  <span class="mini-item" onclick="openPalette()">DB:12</span>
+  <span class="mini-spacer"></span>
+  <span class="mini-item" onclick="openPalette()">⌘D Debug</span>
+</div>
+
+<!-- Trigger pill (alternative) -->
+<div class="trigger hidden" id="trigger" onclick="openPalette()">
+  <span class="duck">🦆</span>
+  <span class="shortcut">⌘D</span>
+</div>
+
+<!-- Command palette overlay -->
+<div class="overlay" id="overlay" onclick="closePaletteFromOverlay(event)">
+  <div class="palette" onclick="event.stopPropagation()">
+    <div class="palette-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search debug data, metrics, actions..." id="paletteInput" oninput="filterItems(this.value)">
+      <span class="esc-key">ESC</span>
+    </div>
+
+    <div class="palette-summary">
+      <span class="summary-method">GET</span>
+      <span class="summary-status">200</span>
+      <span class="summary-path">/api/users?page=1&limit=20</span>
+      <span class="summary-time">45ms · 2.4MB · 14:23:07</span>
+    </div>
+
+    <div class="palette-results" id="paletteResults">
+      <div class="palette-section-title">Performance</div>
+      <div class="palette-item selected" data-search="response time performance">
+        <span class="item-icon">⏱</span>
+        <span class="item-label">Response time</span>
+        <span class="item-value">45ms</span>
+      </div>
+      <div class="palette-item" data-search="memory usage">
+        <span class="item-icon">💾</span>
+        <span class="item-label">Peak memory</span>
+        <span class="item-value">2.4 MB</span>
+      </div>
+
+      <div class="palette-section-title">Data</div>
+      <div class="palette-item" data-search="database queries sql">
+        <span class="item-icon">🗄</span>
+        <span class="item-label">Database queries</span>
+        <span class="item-value">12</span>
+        <span class="item-shortcut">→</span>
+      </div>
+      <div class="palette-item" data-search="http requests external api">
+        <span class="item-icon">🌐</span>
+        <span class="item-label">HTTP client requests</span>
+        <span class="item-value">3</span>
+        <span class="item-shortcut">→</span>
+      </div>
+
+      <div class="palette-section-title">Diagnostics</div>
+      <div class="palette-item" data-search="logs logging">
+        <span class="item-icon">📋</span>
+        <span class="item-label">Log entries</span>
+        <span class="item-value">7</span>
+        <span class="item-shortcut">→</span>
+      </div>
+      <div class="palette-item" data-search="events listeners dispatcher">
+        <span class="item-icon">⚡</span>
+        <span class="item-label">Events fired</span>
+        <span class="item-value">15</span>
+        <span class="item-shortcut">→</span>
+      </div>
+      <div class="palette-item" data-search="deprecations deprecated">
+        <span class="item-icon">⚠️</span>
+        <span class="item-label">Deprecations</span>
+        <span class="item-value warning">2</span>
+        <span class="item-shortcut">→</span>
+      </div>
+      <div class="palette-item" data-search="validation validator">
+        <span class="item-icon">✅</span>
+        <span class="item-label">Validation</span>
+        <span class="item-value success">OK</span>
+      </div>
+
+      <div class="palette-section-title">Actions</div>
+      <div class="palette-item" data-search="open panel debug">
+        <span class="item-icon">📐</span>
+        <span class="item-label">Open debug panel</span>
+        <span class="item-shortcut">⌘⇧D</span>
+      </div>
+      <div class="palette-item" data-search="new window tab">
+        <span class="item-icon">↗️</span>
+        <span class="item-label">Open in new window</span>
+        <span class="item-shortcut">⌘⇧N</span>
+      </div>
+      <div class="palette-item" data-search="history entries list requests">
+        <span class="item-icon">📋</span>
+        <span class="item-label">Browse debug entries</span>
+        <span class="item-shortcut">⌘⇧H</span>
+      </div>
+    </div>
+
+    <div class="palette-footer">
+      <span><kbd>↑↓</kbd> Navigate</span>
+      <span><kbd>↵</kbd> Open</span>
+      <span><kbd>→</kbd> Drill in</span>
+      <span><kbd>ESC</kbd> Close</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selectedIdx = 0;
+
+  function openPalette() {
+    document.getElementById('overlay').classList.add('open');
+    setTimeout(() => document.getElementById('paletteInput').focus(), 100);
+  }
+  function closePalette() {
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('paletteInput').value = '';
+    filterItems('');
+  }
+  function closePaletteFromOverlay(e) {
+    if (e.target === e.currentTarget) closePalette();
+  }
+
+  function filterItems(query) {
+    const items = document.querySelectorAll('.palette-item');
+    const sections = document.querySelectorAll('.palette-section-title');
+    const q = query.toLowerCase();
+
+    items.forEach(item => {
+      const search = (item.dataset.search || '') + ' ' + item.textContent;
+      item.style.display = search.toLowerCase().includes(q) ? '' : 'none';
+    });
+
+    // Hide empty sections
+    sections.forEach(section => {
+      let next = section.nextElementSibling;
+      let hasVisible = false;
+      while (next && !next.classList.contains('palette-section-title')) {
+        if (next.style.display !== 'none') hasVisible = true;
+        next = next.nextElementSibling;
+      }
+      section.style.display = hasVisible ? '' : 'none';
+    });
+
+    // Update selected
+    const visibleItems = [...document.querySelectorAll('.palette-item')].filter(i => i.style.display !== 'none');
+    document.querySelectorAll('.palette-item').forEach(i => i.classList.remove('selected'));
+    if (visibleItems.length > 0) {
+      selectedIdx = 0;
+      visibleItems[0].classList.add('selected');
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+      e.preventDefault();
+      const overlay = document.getElementById('overlay');
+      if (overlay.classList.contains('open')) {
+        closePalette();
+      } else {
+        openPalette();
+      }
+    }
+    if (e.key === 'Escape') closePalette();
+
+    // Arrow navigation
+    if (document.getElementById('overlay').classList.contains('open')) {
+      const visibleItems = [...document.querySelectorAll('.palette-item')].filter(i => i.style.display !== 'none');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIdx = Math.min(selectedIdx + 1, visibleItems.length - 1);
+        visibleItems.forEach((item, i) => item.classList.toggle('selected', i === selectedIdx));
+        visibleItems[selectedIdx]?.scrollIntoView({block: 'nearest'});
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIdx = Math.max(selectedIdx - 1, 0);
+        visibleItems.forEach((item, i) => item.classList.toggle('selected', i === selectedIdx));
+        visibleItems[selectedIdx]?.scrollIntoView({block: 'nearest'});
+      }
+    }
+  });
+
+  function toggleTheme() {
+    const btn = document.querySelector('.theme-toggle');
+    if (document.documentElement.dataset.theme === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+      btn.textContent = '🌙 Dark';
+    } else {
+      document.documentElement.dataset.theme = 'dark';
+      btn.textContent = '☀️ Light';
+    }
+  }
+</script>
+</body>
+</html>

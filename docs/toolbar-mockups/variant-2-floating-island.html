@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbar Variant 2 — Floating Island</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #F3F4F6;
+    --bg-paper: #FFFFFF;
+    --bg-island: #1A1A1A;
+    --text-island: #F1F5F9;
+    --text-island-dim: #94A3B8;
+    --text-primary: #1A1A1A;
+    --text-secondary: #666666;
+    --divider: #334155;
+    --primary: #60A5FA;
+    --primary-glow: rgba(96, 165, 250, 0.15);
+    --success: #4ADE80;
+    --success-bg: rgba(74, 222, 128, 0.12);
+    --warning: #FBBF24;
+    --warning-bg: rgba(251, 191, 36, 0.12);
+    --error: #F87171;
+    --error-bg: rgba(248, 113, 113, 0.12);
+    --shadow: 0 8px 32px rgba(0,0,0,0.24), 0 2px 8px rgba(0,0,0,0.12);
+    --font-ui: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg-page);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  .description {
+    max-width: 800px; margin: 40px auto 200px; padding: 0 24px;
+  }
+  .description h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  .description h2 { font-size: 16px; font-weight: 500; color: var(--text-secondary); margin-bottom: 16px; }
+  .description p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 8px; }
+  .description ul { font-size: 14px; color: var(--text-secondary); line-height: 1.8; padding-left: 20px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #EFF6FF; color: #2563EB; margin-right: 6px; }
+
+  /* ===== FLOATING ISLAND ===== */
+  .island {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1300;
+    background: var(--bg-island);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    transition: all 0.45s cubic-bezier(0.4, 0, 0.1, 1);
+    user-select: none;
+  }
+
+  /* Collapsed — small pill */
+  .island.collapsed {
+    padding: 8px 16px;
+    gap: 8px;
+    cursor: pointer;
+    min-width: 80px;
+    max-width: 160px;
+  }
+  .island.collapsed:hover {
+    transform: translateX(-50%) scale(1.08);
+    box-shadow: var(--shadow), 0 0 0 1px rgba(96,165,250,0.3);
+  }
+  .island.collapsed .duck { font-size: 22px; }
+  .island.collapsed .pill-status {
+    font-size: 13px; font-weight: 600; color: var(--success);
+    font-family: var(--font-mono);
+  }
+  .island.collapsed .expanded-content { display: none; }
+
+  /* Expanded — wide bar */
+  .island.expanded {
+    padding: 6px 10px;
+    gap: 6px;
+    min-width: 700px;
+    max-width: 95vw;
+  }
+  .island.expanded .pill-status { display: none; }
+  .island.expanded .expanded-content { display: contents; }
+
+  /* Island inner elements */
+  .island-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-island-dim); padding: 6px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.15s, background 0.15s;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .island-btn:hover { color: var(--text-island); background: rgba(255,255,255,0.08); }
+
+  .island-divider {
+    width: 1px; height: 22px; background: var(--divider); flex-shrink: 0;
+  }
+
+  .island-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    height: 28px; padding: 0 10px;
+    border-radius: 14px;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+    color: var(--text-island);
+    background: rgba(255,255,255,0.06);
+    cursor: pointer; white-space: nowrap;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .island-chip:hover { background: var(--primary-glow); }
+  .island-chip.success { background: var(--success-bg); color: var(--success); }
+  .island-chip.warning { background: var(--warning-bg); color: var(--warning); }
+  .island-chip.error { background: var(--error-bg); color: var(--error); }
+
+  .island-metrics {
+    display: flex; align-items: center; gap: 4px;
+    overflow-x: auto; flex: 1;
+    scrollbar-width: none;
+  }
+  .island-metrics::-webkit-scrollbar { display: none; }
+
+  .island-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+
+  /* Status dot pulse */
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--success);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Panel (slides up from island) */
+  .island-panel {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.95);
+    width: min(90vw, 900px);
+    height: 0;
+    background: var(--bg-island);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    z-index: 1299;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.1, 1);
+  }
+  .island-panel.open {
+    height: 350px;
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  .island-panel-content {
+    padding: 24px;
+    color: var(--text-island-dim);
+    font-size: 14px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Tooltip on hover */
+  .island-chip[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-island);
+    color: var(--text-island);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    margin-bottom: 6px;
+  }
+  .island-chip { position: relative; }
+</style>
+</head>
+<body>
+
+<div class="description">
+  <h1>Variant 2 — Floating Island</h1>
+  <h2>Inspired by macOS Dynamic Island / Apple HIG</h2>
+  <div>
+    <span class="tag">MODERN</span>
+    <span class="tag">PREMIUM</span>
+    <span class="tag">DARK-NATIVE</span>
+  </div>
+  <br>
+  <p>A dark floating capsule anchored to the bottom center, inspired by Apple's Dynamic Island. The toolbar morphs from a compact pill to a wide bar with smooth spring animation.</p>
+  <ul>
+    <li>Always dark regardless of page theme — stands out as an overlay tool</li>
+    <li>Pill-shaped chips with subtle glow effects on hover</li>
+    <li>Spring-like expand/collapse animation (cubic-bezier 0.4, 0, 0.1, 1)</li>
+    <li>Panel floats above the island as a separate card, not full-width</li>
+    <li>Horizontal scroll for overflow metrics (no wrapping)</li>
+    <li>Live status dot with pulse animation</li>
+  </ul>
+  <br>
+  <p><strong>Interaction:</strong> Click the dark pill (bottom-center) to expand → click metrics → click 📐 to toggle floating panel → click 🦆 to collapse.</p>
+</div>
+
+<!-- Collapsed Island -->
+<div class="island collapsed" id="island" onclick="handleIslandClick(event)">
+  <span class="duck">🦆</span>
+  <div class="status-dot"></div>
+  <span class="pill-status">200</span>
+
+  <!-- Expanded content (hidden when collapsed) -->
+  <div class="expanded-content">
+    <button class="island-btn" onclick="collapseIsland(event)" title="Collapse">🦆</button>
+    <div class="island-divider"></div>
+
+    <div class="island-metrics">
+      <div class="island-chip success">GET /api/users 200</div>
+      <div class="island-chip">⏱ 45ms</div>
+      <div class="island-chip">💾 2.4MB</div>
+      <div class="island-chip">DB 12</div>
+      <div class="island-chip">HTTP 3</div>
+      <div class="island-chip">Logs 7</div>
+      <div class="island-chip">Events 15</div>
+      <div class="island-chip warning">Depr 2</div>
+    </div>
+
+    <div class="island-divider"></div>
+
+    <div class="island-actions">
+      <button class="island-btn" onclick="toggleIslandPanel(event)" title="Toggle panel">📐</button>
+      <button class="island-btn" title="Entries">📋</button>
+      <button class="island-btn" title="New window">↗️</button>
+    </div>
+  </div>
+</div>
+
+<!-- Panel -->
+<div class="island-panel" id="islandPanel">
+  <div class="island-panel-content">
+    <div style="font-size: 32px">📊</div>
+    <div>Debug Panel (floating card)</div>
+    <div style="font-size: 12px; opacity: 0.6">Appears as a separate floating element above the island</div>
+  </div>
+</div>
+
+<script>
+  const island = document.getElementById('island');
+  let isExpanded = false;
+  let isPanelOpen = false;
+
+  function handleIslandClick(e) {
+    if (!isExpanded) {
+      expandIsland();
+    }
+  }
+  function expandIsland() {
+    isExpanded = true;
+    island.classList.remove('collapsed');
+    island.classList.add('expanded');
+    island.onclick = null;
+  }
+  function collapseIsland(e) {
+    e.stopPropagation();
+    isExpanded = false;
+    if (isPanelOpen) toggleIslandPanel(e);
+    island.classList.remove('expanded');
+    island.classList.add('collapsed');
+    island.onclick = handleIslandClick;
+  }
+  function toggleIslandPanel(e) {
+    e.stopPropagation();
+    isPanelOpen = !isPanelOpen;
+    document.getElementById('islandPanel').classList.toggle('open', isPanelOpen);
+  }
+</script>
+</body>
+</html>
