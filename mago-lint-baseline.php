@@ -7,6 +7,24 @@ message = "Class has high complexity."
 count = 1
 
 [[issues]]
+file = "libs/API/src/Debug/LiveEventStreamFactory.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Debug/LiveEventStreamFactory.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 1
+
+[[issues]]
+file = "libs/API/src/Debug/LiveEventStreamFactory.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 2
+
+[[issues]]
 file = "libs/API/src/Ingestion/Controller/OtlpController.php"
 code = "no-redundant-nullsafe"
 message = "The nullsafe operator (`?->`) is redundant when used with `??`."
@@ -404,6 +422,18 @@ count = 2
 
 [[issues]]
 file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "no-redundant-use"
+message = "Unused import: `Broadcaster`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
+code = "no-redundant-use"
+message = "Unused import: `Connection`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php"
 code = "prefer-static-closure"
 message = "This arrow function does not use `$this` and should be declared static."
 count = 4
@@ -412,6 +442,12 @@ count = 4
 file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Laravel/src/Middleware/DebugMiddleware.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
 count = 1
 
 [[issues]]
@@ -441,7 +477,13 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Symfony/src/DependencyInjection/CollectorProxyCompilerPass.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.1)."
+message = "Class has a high kan defect score (3.0200000000000005)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/DependencyInjection/CollectorProxyCompilerPass.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -463,10 +505,58 @@ message = "Class has high complexity."
 count = 1
 
 [[issues]]
+file = "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriber.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Proxy/DoctrineDbalConnection.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Proxy/DoctrineDbalDriver.php"
+code = "no-redundant-use"
+message = "Unused import: `StaticServerVersionProvider`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Proxy/DoctrineDbalStatement.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Proxy/MessengerCollectorMiddleware.php"
+code = "no-redundant-use"
+message = "Unused import: `TransportMessageIdStamp`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Proxy/TwigEnvironmentProxy.php"
+code = "no-redundant-use"
+message = "Unused import: `Markup`."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Symfony/src/Proxy/TwigEnvironmentProxy.php"
+code = "no-redundant-use"
+message = "Unused import: `Template`."
+count = 1
+
+[[issues]]
 file = "libs/Adapter/Symfony/tests/Unit/DependencyInjection/CollectorProxyCompilerPassTest.php"
 code = "strict-behavior"
 message = "Call to `array_search` must enforce strict comparison."
 count = 2
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Collector/BroadcastingLogTarget.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Controller/DebugSummaryController.php"
@@ -556,7 +646,7 @@ count = 1
 file = "libs/Adapter/Yii2/src/Module.php"
 code = "no-empty-catch-clause"
 message = "Do not use empty `catch` blocks."
-count = 1
+count = 2
 
 [[issues]]
 file = "libs/Adapter/Yii2/src/Module.php"
@@ -568,6 +658,12 @@ count = 1
 file = "libs/Adapter/Yii2/src/Module.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Yii2/src/Module.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
 count = 1
 
 [[issues]]
@@ -994,19 +1090,31 @@ count = 1
 file = "libs/Kernel/src/DebugServer/Broadcaster.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 1
+count = 6
 
 [[issues]]
 file = "libs/Kernel/src/DebugServer/Connection.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 2
+count = 6
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/Connection.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
 
 [[issues]]
 file = "libs/Kernel/src/DebugServer/SocketReader.php"
-code = "no-error-control-operator"
-message = "Unsafe use of error control operator `@`."
-count = 2
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/DebugServer/SocketReader.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
@@ -1015,9 +1123,21 @@ message = "Unsafe use of error control operator `@`."
 count = 1
 
 [[issues]]
+file = "libs/Kernel/src/Storage/BroadcastingStorage.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
 file = "libs/Kernel/src/Storage/FileStorage.php"
 code = "kan-defect"
 message = "Class has a high kan defect score (1.77)."
+count = 1
+
+[[issues]]
+file = "libs/Kernel/src/Storage/SqliteStorage.php"
+code = "too-many-methods"
+message = "Class has too many methods."
 count = 1
 
 [[issues]]
@@ -1102,13 +1222,19 @@ count = 16
 file = "libs/Kernel/tests/Unit/DebugServer/BroadcasterTest.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 2
+count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/DebugServer/BroadcasterTest.php"
 code = "readable-literal"
 message = "Numeric literal could use underscore separators for readability."
 count = 2
+
+[[issues]]
+file = "libs/Kernel/tests/Unit/DebugServer/ConnectionTest.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
 
 [[issues]]
 file = "libs/Kernel/tests/Unit/DumpContextTest.php"

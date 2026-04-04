@@ -67,7 +67,7 @@ use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
@@ -81,6 +81,7 @@ use Psr\Http\Message\UriFactoryInterface;
 
 // Configuration from environment
 $storagePath = getenv('ADP_STORAGE_PATH') ?: sys_get_temp_dir() . '/adp';
+$storageDriver = getenv('ADP_STORAGE_DRIVER') ?: 'file';
 $rootPath = getenv('ADP_ROOT_PATH') ?: getcwd();
 $runtimePath = getenv('ADP_RUNTIME_PATH') ?: $storagePath;
 $frontendPath = getenv('ADP_FRONTEND_PATH') ?: null;
@@ -123,7 +124,7 @@ if (!str_starts_with($requestPath, '/debug/api') && !str_starts_with($requestPat
 $httpFactory = new HttpFactory();
 $pathResolver = new PathResolver($rootPath, $runtimePath);
 $idGenerator = new DebuggerIdGenerator();
-$storage = new FileStorage($storagePath, $idGenerator, []);
+$storage = StorageFactory::create($storageDriver, $storagePath, $idGenerator, []);
 $jsonResponseFactory = new JsonResponseFactory($httpFactory, $httpFactory);
 $collectorRepository = new CollectorRepository($storage);
 $serviceRegistry = new FileServiceRegistry($storagePath . '/services');

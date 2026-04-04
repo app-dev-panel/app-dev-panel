@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
  *  1. Symfony boots with ADP bundle
  *  2. Console events are intercepted
  *  3. Debugger starts and stops
- *  4. Data is flushed to FileStorage as JSON
+ *  4. Data is flushed to SqliteStorage
  *
  * Requires: playground/symfony-app with `composer install` completed.
  */

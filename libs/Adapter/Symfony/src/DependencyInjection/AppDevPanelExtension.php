@@ -111,7 +111,7 @@ use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
@@ -140,6 +140,7 @@ final class AppDevPanelExtension extends Extension
 
         $container->setParameter('app_dev_panel.enabled', true);
         $container->setParameter('app_dev_panel.storage.path', $config['storage']['path']);
+        $container->setParameter('app_dev_panel.storage.driver', $config['storage']['driver']);
         $container->setParameter('app_dev_panel.storage.history_size', $config['storage']['history_size']);
         $container->setParameter('app_dev_panel.ignored_requests', $config['ignored_requests']);
         $container->setParameter('app_dev_panel.ignored_commands', $config['ignored_commands']);
@@ -158,8 +159,10 @@ final class AppDevPanelExtension extends Extension
         $container->register(DebuggerIdGenerator::class, DebuggerIdGenerator::class)->setPublic(false);
 
         $container
-            ->register('app_dev_panel.storage.file', FileStorage::class)
+            ->register('app_dev_panel.storage.file', StorageInterface::class)
+            ->setFactory([StorageFactory::class, 'create'])
             ->setArguments([
+                '%app_dev_panel.storage.driver%',
                 '%app_dev_panel.storage.path%',
                 new Reference(DebuggerIdGenerator::class),
                 '%app_dev_panel.dumper.excluded_classes%',
