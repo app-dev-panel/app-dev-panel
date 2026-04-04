@@ -381,10 +381,13 @@ final class LlmProviderService
         try {
             $response = $client->chat($command, $messages, $args, $env, $timeout, $customPrompt);
         } catch (\RuntimeException $e) {
-            return ['error' => 'ACP agent error: ' . $e->getMessage()];
+            return ['error' => 'ACP agent error: ' . $e->getMessage(), '_debug' => $client->getDebugLog()];
         }
 
-        return $response->toOpenAiFormat();
+        $result = $response->toOpenAiFormat();
+        $result['_debug'] = $client->getDebugLog();
+
+        return $result;
     }
 
     /**

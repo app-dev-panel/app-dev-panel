@@ -29,9 +29,22 @@ final class AcpClient
 
     private int $nextId = 1;
 
+    /** @var list<array<string, mixed>> Debug log of all raw messages received */
+    private array $debugLog = [];
+
     public function __construct(
         private readonly AcpTransportInterface $transport,
     ) {}
+
+    /**
+     * Get debug log of all raw messages received during the last chat.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function getDebugLog(): array
+    {
+        return $this->debugLog;
+    }
 
     /**
      * Spawn an ACP agent and perform the full chat lifecycle:
@@ -144,6 +157,8 @@ final class AcpClient
             if ($message === null) {
                 continue;
             }
+
+            $this->debugLog[] = $message;
 
             // Notification (no id) — session/update
             if (!isset($message['id'])) {
