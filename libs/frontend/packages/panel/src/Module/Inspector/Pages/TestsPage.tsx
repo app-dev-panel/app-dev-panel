@@ -6,13 +6,14 @@ import {
 import {CommandErrorAlert} from '@app-dev-panel/panel/Module/Inspector/Component/Command/CommandErrorAlert';
 import {extractCommandError} from '@app-dev-panel/panel/Module/Inspector/Component/Command/extractCommandError';
 import {ResultDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Command/ResultDialog';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Check, ContentCopy, Error} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import {Box, Button, CircularProgress, IconButton, styled, Tooltip, Typography} from '@mui/material';
+import {Box, Button, CircularProgress, IconButton, styled, Tooltip} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useEffect, useState} from 'react';
@@ -142,10 +143,11 @@ export const TestsPage = ({showHeader = true}: {showHeader?: boolean}) => {
         return (
             <>
                 {showHeader && <PageHeader title="Tests" icon="science" description="Run and inspect test results" />}
-                <Typography sx={{color: 'text.secondary', mt: 2}}>
-                    No test commands available. Install a test runner (PHPUnit, Codeception, Pest) to enable this
-                    feature.
-                </Typography>
+                <EmptyState
+                    icon="science"
+                    title="No test commands available"
+                    description="Install a test runner (PHPUnit, Codeception, Pest) to enable this feature."
+                />
             </>
         );
     }
