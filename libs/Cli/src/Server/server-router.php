@@ -81,7 +81,7 @@ use Psr\Http\Message\UriFactoryInterface;
 
 // Configuration from environment
 $storagePath = getenv('ADP_STORAGE_PATH') ?: sys_get_temp_dir() . '/adp';
-$storageDriver = getenv('ADP_STORAGE_DRIVER') ?: 'sqlite';
+$storageDriver = getenv('ADP_STORAGE_DRIVER') ?: 'file';
 $rootPath = getenv('ADP_ROOT_PATH') ?: getcwd();
 $runtimePath = getenv('ADP_RUNTIME_PATH') ?: $storagePath;
 $frontendPath = getenv('ADP_FRONTEND_PATH') ?: null;

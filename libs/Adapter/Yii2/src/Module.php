@@ -144,7 +144,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     /**
      * @var string Storage driver: 'sqlite', 'file', or FQCN of a StorageInterface implementation.
      */
-    public string $storageDriver = 'sqlite';
+    public string $storageDriver = 'file';
 
     /**
      * @var string Directory for debug data storage.

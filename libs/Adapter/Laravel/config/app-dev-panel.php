@@ -6,7 +6,7 @@ return [
     'enabled' => (bool) env('APP_DEV_PANEL_ENABLED', env('APP_DEBUG', true)),
 
     'storage' => [
-        'driver' => env('APP_DEV_PANEL_STORAGE_DRIVER', 'sqlite'),
+        'driver' => env('APP_DEV_PANEL_STORAGE_DRIVER', 'file'),
         'path' => storage_path('debug'),
         'history_size' => 50,
     ],

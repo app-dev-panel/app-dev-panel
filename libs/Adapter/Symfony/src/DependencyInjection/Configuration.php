@@ -24,7 +24,7 @@ final class Configuration implements ConfigurationInterface
             ->addDefaultsIfNotSet()
             ->children()
             ->scalarNode('driver')
-            ->defaultValue('sqlite')
+            ->defaultValue('file')
             ->info('Storage driver: "sqlite", "file", or a fully qualified class name implementing StorageInterface')
             ->end()
             ->scalarNode('path')

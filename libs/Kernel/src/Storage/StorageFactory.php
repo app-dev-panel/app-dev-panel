@@ -9,7 +9,7 @@ use AppDevPanel\Kernel\DebuggerIdGenerator;
 /**
  * Creates a StorageInterface instance from a driver name or class name.
  *
- * Built-in drivers: 'sqlite' (default), 'file'.
+ * Built-in drivers: 'file' (default), 'sqlite'.
  * Custom drivers: pass any class implementing StorageInterface.
  */
 final class StorageFactory

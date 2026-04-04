@@ -202,7 +202,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
         $this->app->singleton(StorageInterface::class, function () use ($config): BroadcastingStorage {
             $storage = StorageFactory::create(
-                $config->get('app-dev-panel.storage.driver', 'sqlite'),
+                $config->get('app-dev-panel.storage.driver', 'file'),
                 $config->get('app-dev-panel.storage.path'),
                 $this->app->make(DebuggerIdGenerator::class),
                 $config->get('app-dev-panel.dumper.excluded_classes', []),

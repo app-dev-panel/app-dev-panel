@@ -33,7 +33,7 @@ final class McpServeCommand extends Command
                 'd',
                 InputOption::VALUE_REQUIRED,
                 'Storage driver: "sqlite", "file", or FQCN',
-                'sqlite',
+                'file',
             )
             ->setHelp(<<<'HELP'
                 Start an MCP server over stdio that exposes ADP debug data to AI assistants.
