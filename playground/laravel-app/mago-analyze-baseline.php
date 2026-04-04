@@ -116,32 +116,32 @@ count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/AssetAction.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\AssetBundleCollector)`).'
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/AssetAction.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/AssetAction.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Http\JsonResponse` not found.'
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\http\controllers\testfixtures\assetaction::__invoke`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/AssetAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\AssetBundleCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Response`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/AssetAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+code = "non-existent-function"
+message = 'Could not find definition for function `App\Http\Controllers\TestFixtures\response` (also tried as `response` in a broader scope).'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/AssetAction.php"
+code = "non-existent-function"
+message = 'Could not find definition for function `App\Http\Controllers\TestFixtures\view` (also tried as `view` in a broader scope).'
 count = 1
 
 [[issues]]
@@ -633,8 +633,20 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\OpenTelemetryCollector)`).'
-count = 4
+message = 'Attempting to access a method on a non-object type (`unknown-ref(OpenTelemetry\SDK\Trace\TracerProviderInterface)`).'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 31
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
@@ -645,19 +657,7 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\SpanRecord` not found.'
-count = 4
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
-code = "non-existent-class"
 message = 'Class `Illuminate\Http\JsonResponse` not found.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\OpenTelemetryCollector`.'
 count = 1
 
 [[issues]]
@@ -665,6 +665,24 @@ file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `OpenTelemetry\SDK\Trace\TracerProviderInterface`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Class, interface, enum, or trait `OpenTelemetry\API\Trace\SpanKind` not found.'
+count = 4
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Class, interface, enum, or trait `OpenTelemetry\API\Trace\StatusCode` not found.'
+count = 4
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/QueueAction.php"

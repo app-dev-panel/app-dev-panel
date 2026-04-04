@@ -28,7 +28,7 @@ count = 1
 file = "app/Providers/AppServiceProvider.php"
 code = "no-empty-comment"
 message = "Empty comments are not allowed."
-count = 2
+count = 1
 
 [[issues]]
 file = "bootstrap/app.php"

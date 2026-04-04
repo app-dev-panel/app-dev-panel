@@ -4,96 +4,62 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
-use AppDevPanel\Kernel\Collector\SpanRecord;
 use Illuminate\Http\JsonResponse;
+use OpenTelemetry\API\Trace\SpanKind;
+use OpenTelemetry\API\Trace\StatusCode;
+use OpenTelemetry\SDK\Trace\TracerProviderInterface;
 
-final readonly class OpenTelemetryAction
+/**
+ * Creates real OTel spans via the Tracer API.
+ * The SpanProcessorInterfaceProxy intercepts onEnd() and feeds OpenTelemetryCollector.
+ */
+final class OpenTelemetryAction
 {
     public function __construct(
-        private OpenTelemetryCollector $collector,
+        private readonly TracerProviderInterface $tracerProvider,
     ) {}
 
     public function __invoke(): JsonResponse
     {
-        $traceId = bin2hex(random_bytes(16));
-        $rootSpanId = bin2hex(random_bytes(8));
-        $now = microtime(true);
+        $tracer = $this->tracerProvider->getTracer('adp-fixture', '1.0.0');
 
-        $this->collector->collect(new SpanRecord(
-            traceId: $traceId,
-            spanId: $rootSpanId,
-            parentSpanId: null,
-            operationName: 'POST /api/orders',
-            serviceName: 'order-service',
-            startTime: $now,
-            endTime: $now + 0.250,
-            duration: 250.0,
-            status: 'OK',
-            kind: 'SERVER',
-            attributes: ['http.method' => 'POST', 'http.url' => '/api/orders', 'http.status_code' => 201],
-            resourceAttributes: ['service.name' => 'order-service', 'service.version' => '1.2.0'],
-        ));
+        // Root span: POST /api/orders
+        $rootSpan = $tracer->spanBuilder('POST /api/orders')->setSpanKind(SpanKind::KIND_SERVER)->startSpan();
+        $rootScope = $rootSpan->activate();
 
-        $validateSpanId = bin2hex(random_bytes(8));
-        $this->collector->collect(new SpanRecord(
-            traceId: $traceId,
-            spanId: $validateSpanId,
-            parentSpanId: $rootSpanId,
-            operationName: 'validate-order',
-            serviceName: 'order-service',
-            startTime: $now + 0.005,
-            endTime: $now + 0.025,
-            duration: 20.0,
-            status: 'OK',
-            kind: 'INTERNAL',
-            attributes: ['order.items_count' => 3],
-        ));
+        $rootSpan->setAttribute('http.method', 'POST');
+        $rootSpan->setAttribute('http.url', '/api/orders');
+        $rootSpan->setAttribute('http.status_code', 201);
 
-        $dbSpanId = bin2hex(random_bytes(8));
-        $this->collector->collect(new SpanRecord(
-            traceId: $traceId,
-            spanId: $dbSpanId,
-            parentSpanId: $rootSpanId,
-            operationName: 'INSERT orders',
-            serviceName: 'order-service',
-            startTime: $now + 0.030,
-            endTime: $now + 0.080,
-            duration: 50.0,
-            status: 'OK',
-            kind: 'CLIENT',
-            attributes: [
-                'db.system' => 'postgresql',
-                'db.statement' => 'INSERT INTO orders (user_id, total) VALUES ($1, $2)',
-            ],
-        ));
+        // Child span: validate-order
+        $validateSpan = $tracer->spanBuilder('validate-order')->setSpanKind(SpanKind::KIND_INTERNAL)->startSpan();
+        $validateSpan->setAttribute('order.items_count', 3);
+        $validateSpan->setStatus(StatusCode::STATUS_OK);
+        $validateSpan->end();
 
-        $notifySpanId = bin2hex(random_bytes(8));
-        $this->collector->collect(new SpanRecord(
-            traceId: $traceId,
-            spanId: $notifySpanId,
-            parentSpanId: $rootSpanId,
-            operationName: 'send-notification',
-            serviceName: 'notification-service',
-            startTime: $now + 0.100,
-            endTime: $now + 0.230,
-            duration: 130.0,
-            status: 'ERROR',
-            statusMessage: 'SMTP connection timeout',
-            kind: 'CLIENT',
-            attributes: ['messaging.system' => 'smtp', 'messaging.destination' => 'orders@example.com'],
-            events: [
-                [
-                    'name' => 'exception',
-                    'timestamp' => $now + 0.228,
-                    'attributes' => [
-                        'exception.type' => 'SmtpException',
-                        'exception.message' => 'Connection timed out after 5s',
-                    ],
-                ],
-            ],
-        ));
+        // Child span: INSERT orders (database)
+        $dbSpan = $tracer->spanBuilder('INSERT orders')->setSpanKind(SpanKind::KIND_CLIENT)->startSpan();
+        $dbSpan->setAttribute('db.system', 'postgresql');
+        $dbSpan->setAttribute('db.statement', 'INSERT INTO orders (user_id, total) VALUES ($1, $2)');
+        $dbSpan->setStatus(StatusCode::STATUS_OK);
+        $dbSpan->end();
 
-        return new JsonResponse(['fixture' => 'opentelemetry', 'status' => 'ok', 'traceId' => $traceId]);
+        // Child span: send-notification (fails)
+        $notifySpan = $tracer->spanBuilder('send-notification')->setSpanKind(SpanKind::KIND_CLIENT)->startSpan();
+        $notifySpan->setAttribute('messaging.system', 'smtp');
+        $notifySpan->setAttribute('messaging.destination', 'orders@example.com');
+        $notifySpan->addEvent('exception', [
+            'exception.type' => 'SmtpException',
+            'exception.message' => 'Connection timed out after 5s',
+        ]);
+        $notifySpan->setStatus(StatusCode::STATUS_ERROR, 'SMTP connection timeout');
+        $notifySpan->end();
+
+        // End root span
+        $rootSpan->setStatus(StatusCode::STATUS_OK);
+        $rootSpan->end();
+        $rootScope->detach();
+
+        return new JsonResponse(['fixture' => 'opentelemetry', 'status' => 'ok']);
     }
 }
