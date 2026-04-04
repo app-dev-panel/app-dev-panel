@@ -4,37 +4,32 @@ declare(strict_types=1);
 
 namespace App\actions\testFixtures;
 
-use AppDevPanel\Kernel\Collector\DatabaseCollector;
-use AppDevPanel\Kernel\Collector\QueryRecord;
 use yii\base\Action;
 
 final class DatabaseAction extends Action
 {
     public function run(): array
     {
-        /** @var \AppDevPanel\Adapter\Yii2\Module $module */
-        $module = \Yii::$app->getModule('app-dev-panel');
+        $db = \Yii::$app->db;
 
-        /** @var DatabaseCollector|null $databaseCollector */
-        $databaseCollector = $module->getCollector(DatabaseCollector::class);
+        // Execute real SQL queries via Yii's DB connection — the DbProfilingTarget
+        // intercepts profiling messages from these calls and feeds query data
+        // to DatabaseCollector.
+        $db->createCommand(
+            'CREATE TABLE IF NOT EXISTS test_users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)',
+        )->execute();
 
-        if ($databaseCollector === null) {
-            return ['fixture' => 'database:basic', 'status' => 'error', 'message' => 'DatabaseCollector not found'];
-        }
+        $db
+            ->createCommand()
+            ->insert('test_users', [
+                'id' => 1,
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+            ])
+            ->execute();
 
-        // Simulate a database query by calling the collector directly.
-        // This tests the DatabaseCollector without requiring actual DB queries.
-        $start = microtime(true);
-        $databaseCollector->logQuery(new QueryRecord(
-            sql: 'SELECT * FROM test_users WHERE id = :id',
-            rawSql: 'SELECT * FROM test_users WHERE id = 1',
-            params: ['id' => 1],
-            line: __FILE__ . ':' . __LINE__,
-            startTime: $start,
-            endTime: microtime(true),
-            rowsNumber: 1,
-        ));
+        $result = $db->createCommand('SELECT * FROM test_users WHERE id = :id', ['id' => 1])->queryOne();
 
-        return ['fixture' => 'database:basic', 'status' => 'ok'];
+        return ['fixture' => 'database:basic', 'status' => 'ok', 'user' => $result];
     }
 }

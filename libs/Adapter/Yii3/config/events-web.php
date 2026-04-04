@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AppDevPanel\Adapter\Yii3\Collector\Router\RouterDataExtractor;
+use AppDevPanel\Adapter\Yii3\Collector\View\ViewEventListener;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -11,6 +12,7 @@ use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
 use Yiisoft\ErrorHandler\Event\ApplicationError;
 use Yiisoft\Profiler\ProfilerInterface;
+use Yiisoft\View\Event\WebView\AfterRender;
 use Yiisoft\Yii\Http\Event\AfterEmit;
 use Yiisoft\Yii\Http\Event\AfterRequest;
 use Yiisoft\Yii\Http\Event\ApplicationShutdown;
@@ -58,5 +60,8 @@ return [
         static fn(ApplicationError $event, ExceptionCollector $collector) => $collector->collect(
             $event->getThrowable(),
         ),
+    ],
+    AfterRender::class => [
+        [ViewEventListener::class, 'collect'],
     ],
 ];

@@ -19,4 +19,9 @@ final class User extends GenericUser
             'email' => $email,
         ]);
     }
+
+    public function getAuthIdentifierName(): string
+    {
+        return 'email';
+    }
 }

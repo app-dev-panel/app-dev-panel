@@ -4,38 +4,24 @@ declare(strict_types=1);
 
 namespace App\actions\testFixtures;
 
-use AppDevPanel\Kernel\Collector\MailerCollector;
 use yii\base\Action;
 
 final class MailerAction extends Action
 {
     public function run(): array
     {
-        /** @var \AppDevPanel\Adapter\Yii2\Module $module */
-        $module = \Yii::$app->getModule('app-dev-panel');
+        // Send a real email via Yii's mailer — the Module hooks into
+        // BaseMailer::EVENT_AFTER_SEND and feeds email metadata to MailerCollector.
+        $mailer = \Yii::$app->mailer;
+        $message = $mailer
+            ->compose()
+            ->setFrom('noreply@example.com')
+            ->setTo('user@example.com')
+            ->setSubject('ADP Test Fixture Email')
+            ->setTextBody('This is a test email from the ADP mailer fixture.')
+            ->setHtmlBody('<p>This is a test email from the ADP mailer fixture.</p>');
 
-        /** @var MailerCollector|null $mailerCollector */
-        $mailerCollector = $module->getCollector(MailerCollector::class);
-
-        if ($mailerCollector === null) {
-            return ['fixture' => 'mailer:basic', 'status' => 'error', 'message' => 'MailerCollector not found'];
-        }
-
-        // Simulate a sent email by calling the collector directly.
-        // This tests the MailerCollector without requiring a real mailer component.
-        $mailerCollector->collectMessage([
-            'from' => ['noreply@example.com' => 'ADP Test'],
-            'to' => ['user@example.com' => 'Test User'],
-            'cc' => [],
-            'bcc' => [],
-            'replyTo' => [],
-            'subject' => 'ADP Test Fixture Email',
-            'textBody' => 'This is a test email from the ADP mailer fixture.',
-            'htmlBody' => '<p>This is a test email from the ADP mailer fixture.</p>',
-            'raw' => '',
-            'charset' => 'utf-8',
-            'date' => date('r'),
-        ]);
+        $message->send();
 
         return ['fixture' => 'mailer:basic', 'status' => 'ok'];
     }

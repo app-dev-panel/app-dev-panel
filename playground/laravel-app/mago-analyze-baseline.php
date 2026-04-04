@@ -734,15 +734,9 @@ count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/RedisAction.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/RedisAction.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 7
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\RedisCollector)`).'
+count = 6
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/RedisAction.php"
@@ -753,19 +747,25 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/RedisAction.php"
 code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\RedisCommandRecord` not found.'
+count = 6
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/RedisAction.php"
+code = "non-existent-class"
 message = 'Class `Illuminate\Http\JsonResponse` not found.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/RedisAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\RedisCollector`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/RedisAction.php"
-code = "non-existent-method"
-message = 'Method `connection` does not exist on type `Illuminate\Support\Facades\Redis`.'
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
 
 [[issues]]
@@ -893,6 +893,18 @@ file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "non-existent-method"
+message = 'Method `check` does not exist on type `Illuminate\Support\Facades\Gate`.'
+count = 2
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "non-existent-method"
+message = 'Method `define` does not exist on type `Illuminate\Support\Facades\Gate`.'
+count = 2
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
@@ -1264,7 +1276,7 @@ count = 1
 file = "routes/web.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 1
+count = 2
 
 [[issues]]
 file = "routes/web.php"

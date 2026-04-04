@@ -1,6 +1,24 @@
 variant = "loose"
 
 [[issues]]
+file = "config/reference.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Config\Loader\ParamConfigurator`.'
+count = 2391
+
+[[issues]]
+file = "config/reference.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\DependencyInjection\Loader\Configurator\ReferenceConfigurator`.'
+count = 42
+
+[[issues]]
+file = "config/reference.php"
+code = "non-existent-method"
+message = 'Method `config` does not exist on type `Symfony\Component\DependencyInjection\Loader\Configurator\AppReference`.'
+count = 1
+
+[[issues]]
 file = "config/routes/app_dev_panel.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator)`).'
@@ -1035,7 +1053,7 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/SecurityAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface)`).'
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Bundle\SecurityBundle\Security)`).'
 count = 1
 
 [[issues]]
@@ -1048,13 +1066,7 @@ count = 2
 file = "src/Controller/TestFixtures/SecurityAction.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 4
-
-[[issues]]
-file = "src/Controller/TestFixtures/SecurityAction.php"
-code = "mixed-method-access"
-message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 1
+count = 2
 
 [[issues]]
 file = "src/Controller/TestFixtures/SecurityAction.php"
@@ -1077,13 +1089,13 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/SecurityAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Bundle\SecurityBundle\Security`.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/SecurityAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface`.'
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
 count = 1
 
 [[issues]]
@@ -1324,4 +1336,22 @@ count = 1
 file = "src/Kernel.php"
 code = "non-existent-class-like"
 message = 'Class `App\Kernel` cannot use unknown type `MicroKernelTrait`'
+count = 1
+
+[[issues]]
+file = "src/Security/InMemoryUser.php"
+code = "non-existent-class-like"
+message = 'Class `App\Security\InMemoryUser` cannot implement unknown type `UserInterface`'
+count = 1
+
+[[issues]]
+file = "src/Security/InMemoryUser.php"
+code = "unused-property"
+message = "Property `$identifier` is never used."
+count = 1
+
+[[issues]]
+file = "src/Security/InMemoryUser.php"
+code = "unused-property"
+message = "Property `$roles` is never used."
 count = 1

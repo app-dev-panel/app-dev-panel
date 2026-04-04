@@ -26,6 +26,9 @@ return [
             \AppDevPanel\Kernel\Collector\DatabaseCollector::class,
             \AppDevPanel\Kernel\Collector\MailerCollector::class,
             \AppDevPanel\Kernel\Collector\OpenTelemetryCollector::class,
+            \AppDevPanel\Kernel\Collector\ValidatorCollector::class,
+            \AppDevPanel\Kernel\Collector\TranslatorCollector::class,
+            \AppDevPanel\Kernel\Collector\TemplateCollector::class,
         ],
     ],
 

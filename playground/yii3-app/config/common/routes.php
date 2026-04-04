@@ -53,7 +53,7 @@ return [
             Route::get('/mailer')->action(Web\TestFixtures\MailerAction::class)->name('test-mailer'),
             Route::get('/queue')->action(Web\TestFixtures\QueueAction::class)->name('test-queue'),
             Route::get('/validator')->action(Web\TestFixtures\ValidatorAction::class)->name('test-validator'),
-            Route::get('/router')->action(Web\TestFixtures\RouterAction::class)->name('test-router'),
+            Route::get('/router')->action(Web\TestFixtures\RouterAction::class)->name('test_router'),
             Route::get('/cache')->action(Web\TestFixtures\CacheAction::class)->name('test-cache'),
             Route::get('/cache-heavy')->action(Web\TestFixtures\CacheHeavyAction::class)->name('test-cache-heavy'),
             Route::get('/opentelemetry')->action(Web\TestFixtures\OpenTelemetryAction::class)->name(
