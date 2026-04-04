@@ -9,6 +9,12 @@ use AppDevPanel\Kernel\Collector\RedisCommandRecord;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Redis fixture — calls the collector directly because there is no standard
+ * Symfony Redis client interface to proxy. The RedisCollector is designed to be
+ * fed by Redis client library plugins (e.g. Predis plugin, phpredis decorator).
+ * This fixture simulates that data path.
+ */
 #[Route('/test/fixtures/redis', name: 'test_redis', methods: ['GET'])]
 final readonly class RedisAction
 {
@@ -18,7 +24,6 @@ final readonly class RedisAction
 
     public function __invoke(): JsonResponse
     {
-        // 1. SET a key
         $this->redisCollector->logCommand(new RedisCommandRecord(
             connection: 'default',
             command: 'SET',
@@ -27,7 +32,6 @@ final readonly class RedisAction
             duration: 0.0012,
         ));
 
-        // 2. GET a key (hit)
         $this->redisCollector->logCommand(new RedisCommandRecord(
             connection: 'default',
             command: 'GET',
@@ -36,7 +40,6 @@ final readonly class RedisAction
             duration: 0.0005,
         ));
 
-        // 3. DEL a key
         $this->redisCollector->logCommand(new RedisCommandRecord(
             connection: 'default',
             command: 'DEL',
@@ -45,7 +48,6 @@ final readonly class RedisAction
             duration: 0.0003,
         ));
 
-        // 4. INCR a counter
         $this->redisCollector->logCommand(new RedisCommandRecord(
             connection: 'default',
             command: 'INCR',
@@ -54,7 +56,6 @@ final readonly class RedisAction
             duration: 0.0002,
         ));
 
-        // 5. LPUSH to a list on a different connection
         $this->redisCollector->logCommand(new RedisCommandRecord(
             connection: 'queue',
             command: 'LPUSH',
@@ -63,7 +64,6 @@ final readonly class RedisAction
             duration: 0.0008,
         ));
 
-        // 6. GET a key with error
         $this->redisCollector->logCommand(new RedisCommandRecord(
             connection: 'default',
             command: 'GET',

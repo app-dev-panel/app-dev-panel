@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider;
+use AppDevPanel\Adapter\Symfony\Proxy\DoctrineDbalMiddleware;
+use AppDevPanel\Adapter\Symfony\Proxy\SymfonyCacheProxy;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy;
+use AppDevPanel\Adapter\Symfony\Proxy\SymfonyValidatorProxy;
+use AppDevPanel\Adapter\Symfony\Proxy\TwigEnvironmentProxy;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Kernel\Collector\CacheCollector;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
@@ -16,7 +22,9 @@ use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TranslatorCollector;
+use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
@@ -48,6 +56,10 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
         $this->decorateHttpClient($container);
         $this->decorateTranslator($container);
         $this->decorateSpanProcessor($container);
+        $this->decorateTwig($container);
+        $this->decorateDoctrineDbal($container);
+        $this->decorateValidator($container);
+        $this->decorateCache($container);
         $this->upgradeSchemaProvider($container);
         $this->collectContainerParameters($container);
     }
@@ -191,6 +203,98 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
                 new Reference(SpanProcessorInterfaceProxy::class . '.inner'),
                 new Reference(OpenTelemetryCollector::class),
             ]);
+    }
+
+    private function decorateTwig(ContainerBuilder $container): void
+    {
+        if (!$container->has(TemplateCollector::class)) {
+            return;
+        }
+
+        if (!$container->has('twig')) {
+            return;
+        }
+
+        $container
+            ->register(TwigEnvironmentProxy::class, TwigEnvironmentProxy::class)
+            ->setDecoratedService('twig')
+            ->setArguments([
+                new Reference(TwigEnvironmentProxy::class . '.inner'),
+                new Reference(TemplateCollector::class),
+            ]);
+    }
+
+    private function decorateDoctrineDbal(ContainerBuilder $container): void
+    {
+        if (!$container->has(DatabaseCollector::class)) {
+            return;
+        }
+
+        if (!interface_exists(\Doctrine\DBAL\Driver\Middleware::class)) {
+            return;
+        }
+
+        if (!$container->has('doctrine.dbal.default_connection')) {
+            return;
+        }
+
+        // Register the middleware with the doctrine.middleware tag.
+        // DoctrineBundle's MiddlewaresPass picks up this tag and wires it
+        // into all (or specified) DBAL connections.
+        $container
+            ->register(DoctrineDbalMiddleware::class, DoctrineDbalMiddleware::class)
+            ->setArguments([new Reference(DatabaseCollector::class)])
+            ->addTag('doctrine.middleware')
+            ->setPublic(false);
+    }
+
+    private function decorateValidator(ContainerBuilder $container): void
+    {
+        if (!$container->has(ValidatorCollector::class)) {
+            return;
+        }
+
+        if (!interface_exists(\Symfony\Component\Validator\Validator\ValidatorInterface::class)) {
+            return;
+        }
+
+        $serviceId = match (true) {
+            $container->has('validator') => 'validator',
+            $container->has(\Symfony\Component\Validator\Validator\ValidatorInterface::class)
+                => \Symfony\Component\Validator\Validator\ValidatorInterface::class,
+            default => null,
+        };
+
+        if ($serviceId === null) {
+            return;
+        }
+
+        $container
+            ->register(SymfonyValidatorProxy::class, SymfonyValidatorProxy::class)
+            ->setDecoratedService($serviceId)
+            ->setArguments([
+                new Reference(SymfonyValidatorProxy::class . '.inner'),
+                new Reference(ValidatorCollector::class),
+            ]);
+    }
+
+    private function decorateCache(ContainerBuilder $container): void
+    {
+        if (!$container->has(CacheCollector::class)) {
+            return;
+        }
+
+        // Decorate the default cache pool ('cache.app' is Symfony's default app cache)
+        if ($container->has('cache.app')) {
+            $container
+                ->register('app_dev_panel.cache.app.proxy', SymfonyCacheProxy::class)
+                ->setDecoratedService('cache.app')
+                ->setArguments([
+                    new Reference('app_dev_panel.cache.app.proxy.inner'),
+                    new Reference(CacheCollector::class),
+                    'app',
+                ]);
+        }
     }
 
     /**

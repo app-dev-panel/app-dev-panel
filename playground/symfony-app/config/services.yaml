@@ -8,9 +8,25 @@ services:
         exclude:
             - '../src/Kernel.php'
             - '../src/Controller/TestFixtures/TestFixtureEvent.php'
+            - '../src/Controller/TestFixtures/TestMessage.php'
 
     App\Controller\:
         resource: '../src/Controller/'
         exclude:
             - '../src/Controller/TestFixtures/TestFixtureEvent.php'
+            - '../src/Controller/TestFixtures/TestMessage.php'
         tags: ['controller.service_arguments']
+
+    # OpenTelemetry services
+    OpenTelemetry\SDK\Trace\SpanExporter\InMemoryExporter:
+        class: OpenTelemetry\SDK\Trace\SpanExporter\InMemoryExporter
+
+    OpenTelemetry\SDK\Trace\SpanProcessorInterface:
+        class: OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor
+        arguments:
+            - '@OpenTelemetry\SDK\Trace\SpanExporter\InMemoryExporter'
+
+    OpenTelemetry\API\Trace\TracerProviderInterface:
+        class: OpenTelemetry\SDK\Trace\TracerProvider
+        arguments:
+            - '@OpenTelemetry\SDK\Trace\SpanProcessorInterface'

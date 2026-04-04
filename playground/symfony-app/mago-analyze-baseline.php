@@ -99,8 +99,20 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/CacheAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
-count = 4
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Cache\CacheItemPoolInterface)`).'
+count = 5
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 3
 
 [[issues]]
 file = "src/Controller/TestFixtures/CacheAction.php"
@@ -117,19 +129,13 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/CacheAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
-count = 4
-
-[[issues]]
-file = "src/Controller/TestFixtures/CacheAction.php"
-code = "non-existent-class"
 message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/CacheAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\CacheCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Psr\Cache\CacheItemPoolInterface`.'
 count = 1
 
 [[issues]]
@@ -141,7 +147,19 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/CacheHeavyAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Cache\CacheItemPoolInterface)`).'
+count = 5
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
 count = 1
 
 [[issues]]
@@ -159,19 +177,13 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/CacheHeavyAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
-count = 1
-
-[[issues]]
-file = "src/Controller/TestFixtures/CacheHeavyAction.php"
-code = "non-existent-class"
 message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/CacheHeavyAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\CacheCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Psr\Cache\CacheItemPoolInterface`.'
 count = 1
 
 [[issues]]
@@ -207,7 +219,13 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/DatabaseAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`).'
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Doctrine\DBAL\Connection)`).'
+count = 3
+
+[[issues]]
+file = "src/Controller/TestFixtures/DatabaseAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
 
 [[issues]]
@@ -225,19 +243,13 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/DatabaseAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\QueryRecord` not found.'
-count = 1
-
-[[issues]]
-file = "src/Controller/TestFixtures/DatabaseAction.php"
-code = "non-existent-class"
 message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/DatabaseAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\DatabaseCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Doctrine\DBAL\Connection`.'
 count = 1
 
 [[issues]]
@@ -615,8 +627,20 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/MailerAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\MailerCollector)`).'
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Mailer\MailerInterface)`).'
 count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/MailerAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/MailerAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 4
 
 [[issues]]
 file = "src/Controller/TestFixtures/MailerAction.php"
@@ -638,14 +662,20 @@ count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/MailerAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\MailerCollector`.'
+code = "non-existent-class"
+message = 'Class `Symfony\Component\Mime\Email` not found.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/MailerAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/MailerAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Mailer\MailerInterface`.'
 count = 1
 
 [[issues]]
@@ -699,8 +729,20 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\OpenTelemetryCollector)`).'
-count = 4
+message = 'Attempting to access a method on a non-object type (`unknown-ref(OpenTelemetry\API\Trace\TracerProviderInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 29
 
 [[issues]]
 file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
@@ -717,19 +759,13 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\SpanRecord` not found.'
-count = 4
-
-[[issues]]
-file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
-code = "non-existent-class"
 message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\OpenTelemetryCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `OpenTelemetry\API\Trace\TracerProviderInterface`.'
 count = 1
 
 [[issues]]
@@ -737,11 +773,23 @@ file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
 count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Class, interface, enum, or trait `OpenTelemetry\API\Trace\SpanKind` not found.'
+count = 4
+
+[[issues]]
+file = "src/Controller/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Class, interface, enum, or trait `OpenTelemetry\API\Trace\StatusCode` not found.'
+count = 2
 
 [[issues]]
 file = "src/Controller/TestFixtures/QueueAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\QueueCollector)`).'
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Messenger\MessageBusInterface)`).'
 count = 2
 
 [[issues]]
@@ -759,25 +807,19 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/QueueAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\MessageRecord` not found.'
-count = 2
-
-[[issues]]
-file = "src/Controller/TestFixtures/QueueAction.php"
-code = "non-existent-class"
 message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/QueueAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\QueueCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/QueueAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Messenger\MessageBusInterface`.'
 count = 1
 
 [[issues]]
@@ -939,7 +981,19 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/RouterAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\RouterCollector)`).'
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Routing\RouterInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/RouterAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "src/Controller/TestFixtures/RouterAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
 count = 2
 
 [[issues]]
@@ -963,20 +1017,44 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/RouterAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\RouterCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/RouterAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Routing\RouterInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/RouterAction.php"
+code = "unknown-iterator-type"
+message = "Cannot determine the type of the expression provided to `foreach`."
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/SecurityAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\AuthorizationCollector)`).'
-count = 9
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/SecurityAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface)`).'
+count = 2
+
+[[issues]]
+file = "src/Controller/TestFixtures/SecurityAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "src/Controller/TestFixtures/SecurityAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/SecurityAction.php"
@@ -999,20 +1077,26 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/SecurityAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\AuthorizationCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/SecurityAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/SecurityAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface`.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/TemplateAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\TemplateCollector)`).'
-count = 3
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Twig\Environment)`).'
+count = 2
 
 [[issues]]
 file = "src/Controller/TestFixtures/TemplateAction.php"
@@ -1035,13 +1119,13 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/TemplateAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\TemplateCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/TemplateAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+message = 'Cannot find class, interface, enum, or type alias `Twig\Environment`.'
 count = 1
 
 [[issues]]
@@ -1118,8 +1202,26 @@ count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\ValidatorCollector)`).'
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Validator\Validator\ValidatorInterface)`).'
+count = 2
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
 count = 2
 
 [[issues]]
@@ -1142,9 +1244,27 @@ count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/ValidatorAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\ValidatorCollector`.'
+code = "non-existent-class"
+message = 'Class `Symfony\Component\Validator\Constraints\Collection` not found.'
 count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\Validator\Constraints\Email` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\Validator\Constraints\Length` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\Validator\Constraints\NotBlank` not found.'
+count = 2
 
 [[issues]]
 file = "src/Controller/TestFixtures/ValidatorAction.php"
@@ -1153,9 +1273,15 @@ message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\
 count = 1
 
 [[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Validator\Validator\ValidatorInterface`.'
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/ViewAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\TemplateCollector)`).'
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Twig\Environment)`).'
 count = 3
 
 [[issues]]
@@ -1179,13 +1305,13 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/ViewAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\TemplateCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
 count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/ViewAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+message = 'Cannot find class, interface, enum, or type alias `Twig\Environment`.'
 count = 1
 
 [[issues]]

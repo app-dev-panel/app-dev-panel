@@ -1,0 +1,18 @@
+security:
+    providers:
+        in_memory:
+            memory:
+                users:
+                    admin@example.com:
+                        password: '$2y$13$dummy_hash_for_testing_only'
+                        roles: ['ROLE_ADMIN', 'ROLE_USER']
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            lazy: true
+            provider: in_memory
+    access_control: []
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_USER]
