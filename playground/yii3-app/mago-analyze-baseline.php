@@ -70,7 +70,7 @@ count = 6
 file = "config/common/routes.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 83
+count = 87
 
 [[issues]]
 file = "config/common/routes.php"
@@ -88,7 +88,7 @@ count = 36
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `methods` does not exist on type `Yiisoft\Router\Route`.'
-count = 3
+count = 5
 
 [[issues]]
 file = "config/web/di/application.php"
@@ -418,7 +418,7 @@ count = 1
 file = "src/Web/HomePage/template.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Router\UrlGeneratorInterface)`).'
-count = 4
+count = 6
 
 [[issues]]
 file = "src/Web/HomePage/template.php"
@@ -430,7 +430,7 @@ count = 1
 file = "src/Web/HomePage/template.php"
 code = "mixed-argument"
 message = "The first value for `echo` is too general."
-count = 4
+count = 6
 
 [[issues]]
 file = "src/Web/HomePage/template.php"
@@ -443,6 +443,84 @@ file = "src/Web/HomePage/template.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
 count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Http\Message\ServerRequestInterface)`).'
+count = 2
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\logdemopage\action::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ServerRequestInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Yii\View\Renderer\ViewRenderer`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/template.php"
+code = "mixed-argument"
+message = "The first value for `echo` is too general."
+count = 3
+
+[[issues]]
+file = "src/Web/LogDemoPage/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/template.php"
+code = "non-existent-method"
+message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
+count = 3
 
 [[issues]]
 file = "src/Web/NotFound/NotFoundHandler.php"
@@ -1132,4 +1210,70 @@ count = 1
 file = "src/Web/UsersPage/template.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Http\Message\ServerRequestInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\vardumperpage\action::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ServerRequestInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Yii\View\Renderer\ViewRenderer`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "non-existent-method"
+message = 'Method `dump` does not exist on type `Yiisoft\VarDumper\VarDumper`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/template.php"
+code = "mixed-argument"
+message = "The first value for `echo` is too general."
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/template.php"
+code = "non-existent-method"
+message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
 count = 1

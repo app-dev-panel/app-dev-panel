@@ -73,4 +73,67 @@ final class PageController
         $this->logger->warning('About to trigger a demo exception');
         throw new \RuntimeException('This is a demo exception triggered from the Error Demo page');
     }
+
+    public function logDemo(Request $request): \Illuminate\Contracts\View\View
+    {
+        $success = false;
+        $loggedLevel = '';
+        $loggedMessage = '';
+
+        if ($request->isMethod('POST')) {
+            $level = (string) $request->input('level', 'info');
+            $message = (string) $request->input('message', '');
+            $contextRaw = (string) $request->input('context', '{}');
+
+            $context = json_decode($contextRaw, true);
+            if (!is_array($context)) {
+                $context = [];
+            }
+
+            $this->logger->log($level, $message, $context);
+
+            $success = true;
+            $loggedLevel = $level;
+            $loggedMessage = $message;
+        }
+
+        return view('pages.log-demo', [
+            'success' => $success,
+            'loggedLevel' => $loggedLevel,
+            'loggedMessage' => $loggedMessage,
+        ]);
+    }
+
+    public function varDumper(Request $request): \Illuminate\Contracts\View\View
+    {
+        $success = false;
+
+        if ($request->isMethod('POST')) {
+            dump([
+                'string' => 'Hello from ADP Playground!',
+                'integer' => 42,
+                'float' => 3.14,
+                'boolean' => true,
+                'null_value' => null,
+                'array' => ['apples', 'oranges', 'bananas'],
+                'nested' => [
+                    'user' => [
+                        'id' => 1,
+                        'name' => 'Alice',
+                        'email' => 'alice@example.com',
+                        'roles' => ['admin', 'editor'],
+                    ],
+                    'metadata' => [
+                        'created_at' => '2026-04-04T12:00:00Z',
+                        'version' => '1.0.0',
+                    ],
+                ],
+            ]);
+            $success = true;
+        }
+
+        return view('pages.var-dumper', [
+            'success' => $success,
+        ]);
+    }
 }

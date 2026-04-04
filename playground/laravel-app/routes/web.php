@@ -43,6 +43,8 @@ Route::get('/users', [PageController::class, 'users']);
 Route::match(['GET', 'POST'], '/contact', [PageController::class, 'contact']);
 Route::get('/api-playground', [PageController::class, 'apiPlayground']);
 Route::get('/error', [PageController::class, 'errorDemo']);
+Route::match(['GET', 'POST'], '/log-demo', [PageController::class, 'logDemo']);
+Route::match(['GET', 'POST'], '/var-dumper', [PageController::class, 'varDumper']);
 
 // API
 Route::get('/api', [HomeController::class, 'index']);

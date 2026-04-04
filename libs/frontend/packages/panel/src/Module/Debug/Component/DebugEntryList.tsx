@@ -147,30 +147,13 @@ export const DebugEntryList = () => {
         [dispatch, navigate],
     );
 
+    const virtuosoRef = useRef<VirtuosoHandle>(null);
+
     const filtered = useMemo(() => {
         if (!entries) return [];
         if (!deferredFilter.trim()) return entries;
         return entries.filter((entry) => matchesFilter(entry, deferredFilter));
     }, [entries, deferredFilter]);
-
-    if (isLoading) {
-        return (
-            <Box sx={{display: 'flex', justifyContent: 'center', py: 6}}>
-                <CircularProgress size={32} />
-            </Box>
-        );
-    }
-
-    if (!entries || entries.length === 0) {
-        return (
-            <Alert severity="info">
-                <AlertTitle>No debug entries found</AlertTitle>
-                Make sure the debugger is enabled and your application has processed requests.
-            </Alert>
-        );
-    }
-
-    const virtuosoRef = useRef<VirtuosoHandle>(null);
 
     const renderEntry = useCallback(
         (_index: number, entry: DebugEntry) => {
@@ -316,6 +299,23 @@ export const DebugEntryList = () => {
     );
 
     const computeItemKey = useCallback((_index: number, entry: DebugEntry) => entry.id, []);
+
+    if (isLoading) {
+        return (
+            <Box sx={{display: 'flex', justifyContent: 'center', py: 6}}>
+                <CircularProgress size={32} />
+            </Box>
+        );
+    }
+
+    if (!entries || entries.length === 0) {
+        return (
+            <Alert severity="info">
+                <AlertTitle>No debug entries found</AlertTitle>
+                Make sure the debugger is enabled and your application has processed requests.
+            </Alert>
+        );
+    }
 
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', height: '100%'}}>

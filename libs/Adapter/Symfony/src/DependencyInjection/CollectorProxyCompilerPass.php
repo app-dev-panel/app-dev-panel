@@ -28,6 +28,7 @@ use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
+use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
@@ -107,11 +108,18 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
             return;
         }
 
+        // Wrap inner logger with LoggerDecorator for Live Feed broadcasting,
+        // then wrap that with LoggerInterfaceProxy for collector capture.
+        $container
+            ->register(LoggerDecorator::class, LoggerDecorator::class)
+            ->setArguments([new Reference(LoggerInterfaceProxy::class . '.inner')])
+            ->setPublic(false);
+
         $container
             ->register(LoggerInterfaceProxy::class, LoggerInterfaceProxy::class)
             ->setDecoratedService($serviceId)
             ->setArguments([
-                new Reference(LoggerInterfaceProxy::class . '.inner'),
+                new Reference(LoggerDecorator::class),
                 new Reference(LogCollector::class),
             ]);
     }

@@ -15,6 +15,7 @@ type ApplicationContext = {
     selectedService: string;
     themeMode: 'light' | 'dark' | 'system';
     showInactiveCollectors: boolean;
+    liveFeedOpen: boolean;
     editorConfig: EditorConfig;
 };
 export const ApplicationSlice = createSlice({
@@ -31,6 +32,7 @@ export const ApplicationSlice = createSlice({
         selectedService: 'local',
         themeMode: 'system',
         showInactiveCollectors: false,
+        liveFeedOpen: false,
         editorConfig: defaultEditorConfig,
     } as ApplicationContext,
     reducers: {
@@ -85,6 +87,9 @@ export const ApplicationSlice = createSlice({
         changeEditorPathMapping: (state, action: PayloadAction<Record<string, string>>) => {
             state.editorConfig = {...(state.editorConfig ?? defaultEditorConfig), pathMapping: action.payload};
         },
+        toggleLiveFeed: (state) => {
+            state.liveFeedOpen = !state.liveFeedOpen;
+        },
     },
 });
 
@@ -104,4 +109,5 @@ export const {
     changeEditorPreset,
     changeEditorCustomTemplate,
     changeEditorPathMapping,
+    toggleLiveFeed,
 } = ApplicationSlice.actions;
