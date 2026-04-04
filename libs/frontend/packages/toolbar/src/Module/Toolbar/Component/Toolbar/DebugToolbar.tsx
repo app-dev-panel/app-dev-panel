@@ -16,6 +16,11 @@ import {DatabaseItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Tool
 import {DeprecationItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/DeprecationItem';
 import {EventsItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/EventsItem';
 import {ExceptionItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/ExceptionItem';
+import {
+    FloatMetrics,
+    RequestHeroBar,
+    SideMetrics,
+} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/FloatMetrics';
 import {HttpClientItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/HttpClientItem';
 import {LogsItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/LogsItem';
 import {MemoryItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/MemoryItem';
@@ -150,31 +155,6 @@ const DebugIFrame = forwardRef(
 const MetricItems = ({entry, iframeRouteNavigate}: {entry: DebugEntry; iframeRouteNavigate: (url: string) => void}) => (
     <ErrorBoundary FallbackComponent={ToolbarErrorFallback} resetKeys={[entry.id]}>
         <Stack direction="row" alignItems="center" spacing={0.5} sx={{flexWrap: 'nowrap'}}>
-            {isDebugEntryAboutWeb(entry) && <RequestItem data={entry} />}
-            {isDebugEntryAboutConsole(entry) && <CommandItem data={entry} />}
-            <ExceptionItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
-            <RequestTimeItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
-            <MemoryItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
-            <DatabaseItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
-            <HttpClientItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
-            <LogsItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
-            <EventsItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
-            <ValidatorItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
-            <DeprecationItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
-        </Stack>
-    </ErrorBoundary>
-);
-
-/** Metric items rendered vertically for side rail */
-const MetricItemsVertical = ({
-    entry,
-    iframeRouteNavigate,
-}: {
-    entry: DebugEntry;
-    iframeRouteNavigate: (url: string) => void;
-}) => (
-    <ErrorBoundary FallbackComponent={ToolbarErrorFallback} resetKeys={[entry.id]}>
-        <Stack direction="column" spacing={0} sx={{flex: 1, overflowY: 'auto', py: 0.5}}>
             {isDebugEntryAboutWeb(entry) && <RequestItem data={entry} />}
             {isDebugEntryAboutConsole(entry) && <CommandItem data={entry} />}
             <ExceptionItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
@@ -361,13 +341,38 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                 >
                     <DuckIcon sx={{fontSize: 28}} />
                     {selectedEntry && (
-                        <Box component="span" sx={{fontSize: 12, fontWeight: 600, color: 'text.secondary', pr: 0.25}}>
-                            {isDebugEntryAboutWeb(selectedEntry)
-                                ? `${selectedEntry.response.statusCode}`
-                                : isDebugEntryAboutConsole(selectedEntry)
-                                  ? `exit ${selectedEntry.command?.exitCode}`
-                                  : ''}
-                        </Box>
+                        <>
+                            <Box
+                                component="span"
+                                sx={{
+                                    fontSize: 12,
+                                    fontWeight: 600,
+                                    color: 'text.secondary',
+                                    fontFamily: "'JetBrains Mono', monospace",
+                                }}
+                            >
+                                {isDebugEntryAboutWeb(selectedEntry)
+                                    ? `${selectedEntry.response?.statusCode}`
+                                    : isDebugEntryAboutConsole(selectedEntry)
+                                      ? `exit ${selectedEntry.command?.exitCode}`
+                                      : ''}
+                            </Box>
+                            {(selectedEntry.web || selectedEntry.console) && (
+                                <Box
+                                    component="span"
+                                    sx={{
+                                        fontSize: 12,
+                                        color: 'text.disabled',
+                                        fontFamily: "'JetBrains Mono', monospace",
+                                    }}
+                                >
+                                    {Math.round(
+                                        (selectedEntry.web || selectedEntry.console)!.request.processingTime * 1000,
+                                    )}
+                                    ms
+                                </Box>
+                            )}
+                        </>
                     )}
                 </Paper>
                 <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
@@ -477,7 +482,12 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                     )}
                 </Box>
                 <SnapZones activeZone={snapZone} />
-                <AiChatPopup open={chatOpen} onClose={() => setChatOpen(false)} entry={selectedEntry ?? null} />
+                <AiChatPopup
+                    open={chatOpen}
+                    onClose={() => setChatOpen(false)}
+                    entry={selectedEntry ?? null}
+                    toolbarPosition={position}
+                />
                 <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
             </Portal>
         );
@@ -528,14 +538,18 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                             </Box>
                         </IconButton>
                     </Box>
-                    {selectedEntry && (
-                        <MetricItemsVertical entry={selectedEntry} iframeRouteNavigate={iframeRouteNavigate} />
-                    )}
+                    {selectedEntry && <RequestHeroBar entry={selectedEntry} />}
+                    {selectedEntry && <SideMetrics entry={selectedEntry} />}
                     <Divider />
                     <Box sx={{p: 1, display: 'flex', gap: 0.5}}>{actionButtons}</Box>
                 </Paper>
                 <SnapZones activeZone={snapZone} />
-                <AiChatPopup open={chatOpen} onClose={() => setChatOpen(false)} entry={selectedEntry ?? null} />
+                <AiChatPopup
+                    open={chatOpen}
+                    onClose={() => setChatOpen(false)}
+                    entry={selectedEntry ?? null}
+                    toolbarPosition={position}
+                />
                 <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
             </Portal>
         );
@@ -589,32 +603,78 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                         <OpenInNewIcon sx={{fontSize: 16}} />
                     </IconButton>
                 </Box>
+                {selectedEntry && <RequestHeroBar entry={selectedEntry} />}
                 {selectedEntry && (
-                    <Box sx={{flex: 1, overflowY: 'auto', px: 0.5, py: 0.5}}>
-                        <MetricItems entry={selectedEntry} iframeRouteNavigate={iframeRouteNavigate} />
+                    <Box sx={{flex: 1, overflowY: 'auto', px: 1, py: 0.75}}>
+                        <FloatMetrics entry={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />
                     </Box>
                 )}
-                <Box sx={{display: 'flex', gap: 0.5, p: 0.75, borderTop: 1, borderColor: 'divider', flexShrink: 0}}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        gap: 0.5,
+                        px: 1,
+                        py: 0.5,
+                        borderTop: 1,
+                        borderColor: 'divider',
+                        flexShrink: 0,
+                    }}
+                >
                     {activeComponents.iframe && (
-                        <Tooltip title="Toggle panel" arrow>
-                            <IconButton onClick={toggleIframeHandler} size="small" sx={actionButtonSx}>
-                                {iframeEnabled ? (
-                                    <WebAssetOffIcon sx={{fontSize: 16}} />
-                                ) : (
-                                    <WebAssetIcon sx={{fontSize: 16}} />
-                                )}
-                            </IconButton>
-                        </Tooltip>
+                        <Box
+                            onClick={toggleIframeHandler}
+                            sx={{
+                                flex: 1,
+                                py: 0.5,
+                                border: 1,
+                                borderColor: 'divider',
+                                borderRadius: 1.5,
+                                fontSize: 11,
+                                color: 'text.secondary',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 0.5,
+                                cursor: 'pointer',
+                                '&:hover': {
+                                    borderColor: 'primary.main',
+                                    color: 'primary.main',
+                                    bgcolor: 'primary.light',
+                                },
+                            }}
+                        >
+                            <WebAssetIcon sx={{fontSize: 14}} /> Panel
+                        </Box>
                     )}
-                    <Tooltip title="Debug entries" arrow>
-                        <IconButton onClick={handleClickOpen} size="small" sx={actionButtonSx}>
-                            <FormatListBulletedIcon sx={{fontSize: 16}} />
-                        </IconButton>
-                    </Tooltip>
+                    <Box
+                        onClick={handleClickOpen}
+                        sx={{
+                            flex: 1,
+                            py: 0.5,
+                            border: 1,
+                            borderColor: 'divider',
+                            borderRadius: 1.5,
+                            fontSize: 11,
+                            color: 'text.secondary',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 0.5,
+                            cursor: 'pointer',
+                            '&:hover': {borderColor: 'primary.main', color: 'primary.main', bgcolor: 'primary.light'},
+                        }}
+                    >
+                        <FormatListBulletedIcon sx={{fontSize: 14}} /> History
+                    </Box>
                 </Box>
             </Paper>
             <SnapZones activeZone={snapZone} />
-            <AiChatPopup open={chatOpen} onClose={() => setChatOpen(false)} entry={selectedEntry ?? null} />
+            <AiChatPopup
+                open={chatOpen}
+                onClose={() => setChatOpen(false)}
+                entry={selectedEntry ?? null}
+                toolbarPosition={position}
+            />
             <DebugEntriesListModal open={open} onClick={onChangeHandler} onClose={handleClose} />
         </Portal>
     );

@@ -30,9 +30,14 @@ const formatSummary = (entry: DebugEntry): string => {
 
 const SUGGESTIONS = ['Show queries', 'Performance tips', 'Show logs', 'Explain route'];
 
-type AiChatPopupProps = {open: boolean; onClose: () => void; entry: DebugEntry | null};
+type AiChatPopupProps = {
+    open: boolean;
+    onClose: () => void;
+    entry: DebugEntry | null;
+    toolbarPosition?: 'float' | 'bottom' | 'right' | 'left';
+};
 
-export const AiChatPopup = ({open, onClose, entry}: AiChatPopupProps) => {
+export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: AiChatPopupProps) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -73,10 +78,12 @@ export const AiChatPopup = ({open, onClose, entry}: AiChatPopupProps) => {
                 elevation={6}
                 sx={{
                     position: 'fixed',
-                    bottom: 56,
-                    right: 12,
                     width: 320,
                     height: 420,
+                    ...(toolbarPosition === 'bottom' && {bottom: 56, right: 12}),
+                    ...(toolbarPosition === 'right' && {right: 272, top: 60}),
+                    ...(toolbarPosition === 'left' && {left: 272, top: 60}),
+                    ...(toolbarPosition === 'float' && {bottom: 56, right: 12}),
                     zIndex: 1400,
                     borderRadius: 3,
                     border: 1,
