@@ -26,12 +26,36 @@ interface LlmSettingsInterface
 
     public function setCustomPrompt(string $prompt): void;
 
+    public function getAcpCommand(): string;
+
+    public function setAcpCommand(string $command): void;
+
+    /**
+     * @return list<string>
+     */
+    public function getAcpArgs(): array;
+
+    /**
+     * @param list<string> $args
+     */
+    public function setAcpArgs(array $args): void;
+
+    /**
+     * @return array<string, string>
+     */
+    public function getAcpEnv(): array;
+
+    /**
+     * @param array<string, string> $env
+     */
+    public function setAcpEnv(array $env): void;
+
     public function isConnected(): bool;
 
     public function clear(): void;
 
     /**
-     * @return array{connected: bool, provider: string, model: string|null, timeout: int, customPrompt: string}
+     * @return array{connected: bool, provider: string, model: string|null, timeout: int, customPrompt: string, acpCommand: string, acpArgs: list<string>, acpEnv: array<string, string>}
      */
     public function toArray(): array;
 }

@@ -200,4 +200,45 @@ final class LlmProviderServiceTest extends TestCase
 
         $this->assertTrue(true);
     }
+
+    // --- ACP provider ---
+
+    public function testGetDefaultModelAcp(): void
+    {
+        $service = $this->createService('acp');
+        $this->assertSame('acp-agent', $service->getDefaultModel('acp'));
+    }
+
+    public function testListModelsAcp(): void
+    {
+        $service = $this->createService('acp');
+        $models = $service->listModels('acp');
+
+        $this->assertCount(1, $models);
+        $this->assertSame('acp-agent', $models[0]['id']);
+        $this->assertStringContainsString('ACP Agent', $models[0]['name']);
+    }
+
+    public function testSendChatAcpReturnsErrorWhenCommandNotFound(): void
+    {
+        $settings = $this->createMock(LlmSettingsInterface::class);
+        $settings->method('getAcpCommand')->willReturn('nonexistent-acp-agent-99999');
+        $settings->method('getAcpArgs')->willReturn([]);
+        $settings->method('getAcpEnv')->willReturn([]);
+        $settings->method('getTimeout')->willReturn(5);
+        $settings->method('getCustomPrompt')->willReturn('');
+
+        $httpFactory = new HttpFactory();
+        $service = new LlmProviderService(
+            $settings,
+            $this->mockHttpClient(new Response(200, [], '{}')),
+            $httpFactory,
+            $httpFactory,
+        );
+
+        $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertStringContainsString('ACP agent error', $result['error']);
+    }
 }

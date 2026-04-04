@@ -282,4 +282,113 @@ final class FileLlmSettingsTest extends TestCase
 
         $this->assertStringContainsString('English', $settings->getCustomPrompt());
     }
+
+    // --- ACP Settings ---
+
+    public function testAcpCommandDefaults(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+
+        $this->assertSame('claude', $settings->getAcpCommand());
+        $this->assertSame([], $settings->getAcpArgs());
+        $this->assertSame([], $settings->getAcpEnv());
+    }
+
+    public function testSetAndGetAcpCommand(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+        $settings->setAcpCommand('gemini');
+
+        $this->assertSame('gemini', $settings->getAcpCommand());
+    }
+
+    public function testSetAndGetAcpArgs(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+        $settings->setAcpArgs(['--model', 'opus']);
+
+        $this->assertSame(['--model', 'opus'], $settings->getAcpArgs());
+    }
+
+    public function testSetAndGetAcpEnv(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+        $settings->setAcpEnv(['ANTHROPIC_API_KEY' => 'sk-test']);
+
+        $this->assertSame(['ANTHROPIC_API_KEY' => 'sk-test'], $settings->getAcpEnv());
+    }
+
+    public function testAcpProviderIsConnectedWithoutApiKey(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+        $settings->setProvider('acp');
+
+        // ACP doesn't need API key — connected if command is set
+        $this->assertTrue($settings->isConnected());
+    }
+
+    public function testAcpProviderIsNotConnectedWithEmptyCommand(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+        $settings->setProvider('acp');
+        $settings->setAcpCommand('');
+
+        $this->assertFalse($settings->isConnected());
+    }
+
+    public function testAcpSettingsPersistToDisk(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+        $settings->setProvider('acp');
+        $settings->setAcpCommand('codex');
+        $settings->setAcpArgs(['--flag']);
+        $settings->setAcpEnv(['KEY' => 'val']);
+
+        $settings2 = new FileLlmSettings($this->tmpDir);
+        $this->assertSame('acp', $settings2->getProvider());
+        $this->assertSame('codex', $settings2->getAcpCommand());
+        $this->assertSame(['--flag'], $settings2->getAcpArgs());
+        $this->assertSame(['KEY' => 'val'], $settings2->getAcpEnv());
+    }
+
+    public function testClearResetsAcpSettings(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+        $settings->setAcpCommand('gemini');
+        $settings->setAcpArgs(['--arg']);
+        $settings->setAcpEnv(['K' => 'V']);
+        $settings->clear();
+
+        $this->assertSame('claude', $settings->getAcpCommand());
+        $this->assertSame([], $settings->getAcpArgs());
+        $this->assertSame([], $settings->getAcpEnv());
+    }
+
+    public function testToArrayIncludesAcpFields(): void
+    {
+        $settings = new FileLlmSettings($this->tmpDir);
+        $settings->setProvider('acp');
+        $settings->setAcpCommand('gemini');
+
+        $arr = $settings->toArray();
+
+        $this->assertSame('gemini', $arr['acpCommand']);
+        $this->assertSame([], $arr['acpArgs']);
+        $this->assertSame([], $arr['acpEnv']);
+    }
+
+    public function testLoadPartialFileWithoutAcpFields(): void
+    {
+        file_put_contents($this->tmpDir . '/.llm-settings.json', json_encode([
+            'apiKey' => 'sk-test',
+            'provider' => 'anthropic',
+        ]));
+
+        $settings = new FileLlmSettings($this->tmpDir);
+
+        // Missing ACP fields should use defaults
+        $this->assertSame('claude', $settings->getAcpCommand());
+        $this->assertSame([], $settings->getAcpArgs());
+        $this->assertSame([], $settings->getAcpEnv());
+    }
 }

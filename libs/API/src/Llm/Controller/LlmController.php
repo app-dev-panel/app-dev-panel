@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Llm\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Llm\Acp\AcpClient;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
@@ -39,7 +40,7 @@ final class LlmController
     }
 
     /**
-     * POST /debug/api/llm/connect — Connect with direct API key.
+     * POST /debug/api/llm/connect — Connect with direct API key or ACP agent.
      */
     public function connect(ServerRequestInterface $request): ResponseInterface
     {
@@ -47,11 +48,16 @@ final class LlmController
         $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
         $provider = $body['provider'] ?? null;
-        $apiKey = $body['apiKey'] ?? null;
 
         if (!is_string($provider) || $provider === '') {
             throw new InvalidArgumentException('Field "provider" is required and must be a non-empty string.');
         }
+
+        if ($provider === 'acp') {
+            return $this->connectAcp($body);
+        }
+
+        $apiKey = $body['apiKey'] ?? null;
         if (!is_string($apiKey) || $apiKey === '') {
             throw new InvalidArgumentException('Field "apiKey" is required and must be a non-empty string.');
         }
@@ -62,6 +68,40 @@ final class LlmController
         return $this->responseFactory->createJsonResponse([
             'connected' => true,
             'provider' => $provider,
+        ]);
+    }
+
+    /**
+     * Connect to an ACP agent (Claude Code, Gemini CLI, etc.).
+     *
+     * Verifies the agent command is available on the system.
+     */
+    private function connectAcp(array $body): ResponseInterface
+    {
+        $command = $body['acpCommand'] ?? 'claude';
+        if (!is_string($command) || $command === '') {
+            $command = 'claude';
+        }
+
+        $acpArgs = isset($body['acpArgs']) && is_array($body['acpArgs']) ? $body['acpArgs'] : [];
+        $acpEnv = isset($body['acpEnv']) && is_array($body['acpEnv']) ? $body['acpEnv'] : [];
+
+        if (!AcpClient::isCommandAvailable($command)) {
+            return $this->responseFactory->createJsonResponse([
+                'connected' => false,
+                'error' => sprintf('ACP agent command "%s" not found on system PATH.', $command),
+            ], 400);
+        }
+
+        $this->settings->setProvider('acp');
+        $this->settings->setAcpCommand($command);
+        $this->settings->setAcpArgs($acpArgs);
+        $this->settings->setAcpEnv($acpEnv);
+
+        return $this->responseFactory->createJsonResponse([
+            'connected' => true,
+            'provider' => 'acp',
+            'acpCommand' => $command,
         ]);
     }
 

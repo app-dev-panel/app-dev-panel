@@ -631,4 +631,86 @@ final class LlmControllerTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->makeController('openrouter', 'sk-test')->chat($this->post(['messages' => 'not-array']));
     }
+
+    // --- ACP Connect ---
+
+    public function testConnectAcpWithValidCommand(): void
+    {
+        $controller = $this->makeController();
+        // 'php' should be available in test environment
+        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'php']));
+        $data = $this->data($response);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($data['connected']);
+        $this->assertSame('acp', $data['provider']);
+        $this->assertSame('php', $data['acpCommand']);
+    }
+
+    public function testConnectAcpWithInvalidCommand(): void
+    {
+        $controller = $this->makeController();
+        $response = $controller->connect($this->post([
+            'provider' => 'acp',
+            'acpCommand' => 'nonexistent-acp-cmd-99999',
+        ]));
+        $data = $this->data($response);
+
+        $this->assertSame(400, $response->getStatusCode());
+        $this->assertFalse($data['connected']);
+        $this->assertStringContainsString('not found', $data['error']);
+    }
+
+    public function testConnectAcpDefaultCommand(): void
+    {
+        $controller = $this->makeController();
+        // Without acpCommand, defaults to 'claude'. Likely not on PATH in test env.
+        $response = $controller->connect($this->post(['provider' => 'acp']));
+        // Either 200 (claude found) or 400 (not found) — both are valid.
+        $this->assertContains($response->getStatusCode(), [200, 400]);
+    }
+
+    public function testConnectAcpDoesNotRequireApiKey(): void
+    {
+        $controller = $this->makeController();
+        // ACP provider should not throw about missing apiKey
+        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'php']));
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testConnectAcpWithArgsAndEnv(): void
+    {
+        $controller = $this->makeController();
+        $response = $controller->connect($this->post([
+            'provider' => 'acp',
+            'acpCommand' => 'php',
+            'acpArgs' => ['--version'],
+            'acpEnv' => ['MY_VAR' => 'value'],
+        ]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($this->data($response)['connected']);
+    }
+
+    public function testStatusAfterAcpConnect(): void
+    {
+        $controller = $this->makeController();
+        $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'php']));
+
+        $data = $this->data($controller->status(new ServerRequest('GET', '/')));
+        $this->assertTrue($data['connected']);
+        $this->assertSame('acp', $data['provider']);
+        $this->assertSame('php', $data['acpCommand']);
+    }
+
+    public function testModelsAcpConnected(): void
+    {
+        $controller = $this->makeController();
+        $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'php']));
+
+        $data = $this->data($controller->models(new ServerRequest('GET', '/')));
+        $this->assertArrayHasKey('models', $data);
+        $this->assertCount(1, $data['models']);
+        $this->assertSame('acp-agent', $data['models'][0]['id']);
+    }
 }

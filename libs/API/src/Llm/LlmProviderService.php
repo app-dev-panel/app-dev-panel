@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Llm;
 
+use AppDevPanel\Api\Llm\Acp\AcpClient;
+use AppDevPanel\Api\Llm\Acp\AcpTransport;
 use GuzzleHttp\Client;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -52,6 +54,7 @@ final class LlmProviderService
         return match ($provider) {
             'anthropic' => $this->sendAnthropicChat($messages, $model, $temperature),
             'openai' => $this->sendOpenAiChat($messages, $model, $temperature),
+            'acp' => $this->sendAcpChat($messages),
             default => $this->sendOpenRouterChat($messages, $model, $temperature),
         };
     }
@@ -66,6 +69,7 @@ final class LlmProviderService
         return match ($provider) {
             'anthropic' => $this->fetchAnthropicModels(),
             'openai' => $this->fetchOpenAiModels(),
+            'acp' => $this->fetchAcpModels(),
             default => $this->fetchOpenRouterModels(),
         };
     }
@@ -78,6 +82,7 @@ final class LlmProviderService
         return match ($provider) {
             'anthropic' => 'claude-sonnet-4-20250514',
             'openai' => 'gpt-4o',
+            'acp' => 'acp-agent',
             default => 'anthropic/claude-sonnet-4',
         };
     }
@@ -348,6 +353,52 @@ final class LlmProviderService
         }
 
         return $request->withHeader('x-api-key', $apiKey);
+    }
+
+    /**
+     * Send chat via ACP agent (Claude Code, Gemini CLI, etc.).
+     *
+     * Spawns the agent as a subprocess, performs ACP handshake,
+     * sends the prompt, and collects the streaming response.
+     *
+     * @param list<array{role: string, content: string}> $messages
+     * @return array<string, mixed>
+     */
+    private function sendAcpChat(array $messages): array
+    {
+        $command = $this->settings->getAcpCommand();
+        $args = $this->settings->getAcpArgs();
+        $env = $this->settings->getAcpEnv();
+        $timeout = (float) $this->settings->getTimeout();
+        $customPrompt = $this->settings->getCustomPrompt();
+
+        $transport = new AcpTransport();
+        $client = new AcpClient($transport);
+
+        try {
+            $response = $client->chat($command, $messages, $args, $env, $timeout, $customPrompt);
+        } catch (\RuntimeException $e) {
+            return ['error' => 'ACP agent error: ' . $e->getMessage()];
+        }
+
+        return $response->toOpenAiFormat();
+    }
+
+    /**
+     * ACP agents manage their own models — return a single placeholder entry.
+     *
+     * @return list<array{id: string, name: string, context_length: int, pricing: array}>
+     */
+    private function fetchAcpModels(): array
+    {
+        return [
+            [
+                'id' => 'acp-agent',
+                'name' => 'ACP Agent (model managed by agent)',
+                'context_length' => 0,
+                'pricing' => [],
+            ],
+        ];
     }
 
     /**
