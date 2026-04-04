@@ -141,7 +141,7 @@ function formatNumber(value: number): string {
 
 const MetricCard = ({
     title,
-    icon,
+    icon: _icon,
     metrics,
 }: {
     title: string;

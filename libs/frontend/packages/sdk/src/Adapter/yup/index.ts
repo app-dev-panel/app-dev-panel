@@ -2,7 +2,7 @@ import * as yup from 'yup';
 
 declare module 'yup' {
     /*eslint @typescript-eslint/consistent-type-definitions: "off"*/
-    interface MixedSchema<TType, TContext, TDefault, TFlags> {
+    interface MixedSchema<_TType, _TContext, _TDefault, _TFlags> {
         sequence(schemas: any[]): this;
     }
 }

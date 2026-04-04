@@ -4,7 +4,7 @@ import {Context} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
 import {Alert, AlertTitle, Box, Button, ButtonGroup} from '@mui/material';
 import {useContext} from 'react';
 
-export function ResultStep({generator, onComplete}: StepProps) {
+export function ResultStep({generator: _generator, onComplete}: StepProps) {
     const context = useContext(Context);
 
     const files = context.files;

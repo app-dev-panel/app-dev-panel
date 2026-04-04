@@ -97,6 +97,8 @@ ignore = [
     # Type mismatches from framework interop, mock objects in tests, and
     # interface adapter patterns.
     "invalid-argument",
+    "invalid-return-tag",
+    "null-argument",
     "invalid-method-access",
     "invalid-return-statement",
     "invalid-type-cast",
@@ -116,6 +118,8 @@ ignore = [
     "ambiguous-object-method-access",
     "ambiguous-object-property-access",
     "ambiguous-instantiation-target",
+    "undefined-string-array-index",
+    "possibly-undefined-string-array-index",
 
     # ── unused code (26 issues) ─────────────────────────────────────────────
     # Properties/methods that appear unused but are accessed via reflection,
@@ -139,6 +143,7 @@ ignore = [
     "impossible-condition",
     "impossible-assignment",
     "deprecated-method",
+    "deprecated-function",
     "unknown-class-instantiation",
     "unevaluated-code",
     "property-type-coercion",

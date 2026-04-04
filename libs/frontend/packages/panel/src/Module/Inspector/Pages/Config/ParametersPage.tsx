@@ -128,7 +128,7 @@ function groupParams(data: unknown): ParamGroup[] {
 // Sub-components
 // ---------------------------------------------------------------------------
 
-const ParamCard = ({group, filter, defaultExpanded}: {group: ParamGroup; filter: string; defaultExpanded: boolean}) => {
+const ParamCard = ({group, filter: _filter, defaultExpanded}: {group: ParamGroup; filter: string; defaultExpanded: boolean}) => {
     const [expanded, setExpanded] = useState(defaultExpanded);
     const displayName = group.name === '__general__' ? 'General' : group.name;
 

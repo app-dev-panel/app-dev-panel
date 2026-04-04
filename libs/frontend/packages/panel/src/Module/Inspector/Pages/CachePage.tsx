@@ -10,8 +10,6 @@ import {Button, CircularProgress, LinearProgress, Stack} from '@mui/material';
 import {useCallback} from 'react';
 import {useSearchParams} from 'react-router';
 
-type CacheViewProps = {data: any};
-
 export const CachePage = ({showHeader = true}: {showHeader?: boolean}) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const searchString = searchParams.get('filter') || '';

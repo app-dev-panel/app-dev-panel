@@ -10,7 +10,7 @@ import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
-import {useCallback, useContext, useMemo, useState} from 'react';
+import {useCallback, useContext, useMemo} from 'react';
 import {useSearchParams} from 'react-router';
 
 const TempComponent = (params: GridRenderCellParams) => {
@@ -43,15 +43,8 @@ const columns: GridColDef[] = [
 export const TranslationsPage = () => {
     const {data, isLoading} = useGetTranslationsQuery();
     const [putTranslationsMutation] = usePutTranslationsMutation();
-    // const [lazyLoadObject] = useLazyGetObjectQuery();
-    const [objects, setObject] = useState<Record<string, any>>({});
     const [searchParams, setSearchParams] = useSearchParams();
     const searchString = searchParams.get('filter') || '';
-
-    const handleLoadObject = async (id: string) => {
-        // const result = await lazyLoadObject(id);
-        // setObject((prev) => ({...prev, [id]: result.data}));
-    };
     const rows = useMemo(() => {
         const isArray = Array.isArray(data);
         const rows = Object.entries(data || ([] as any));

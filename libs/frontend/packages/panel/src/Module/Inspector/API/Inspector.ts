@@ -249,7 +249,7 @@ export const inspectorApi = createApi({
             transformResponse: (result: Response<ObjectType>) => result.data,
         }),
         getCommands: builder.query<CommandType[], void>({
-            query: (command) => 'command',
+            query: (_command) => 'command',
             transformResponse: (result: Response<CommandType[]>) => result.data || [],
         }),
         runCommand: builder.mutation<CommandResponseType, string>({

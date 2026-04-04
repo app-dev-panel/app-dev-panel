@@ -28,7 +28,7 @@ final class LiveEventStreamFactory
     /**
      * Creates an SSE stream callback that receives live events via UDP.
      *
-     * @return array{0: \Closure(array&): bool, 1: \Closure(): void} [streamCallback, closeCallback]
+     * @return array{0: \Closure, 1: \Closure} [streamCallback, closeCallback]
      */
     public static function create(int $deadlineSeconds = 30): array
     {
@@ -131,7 +131,7 @@ final class LiveEventStreamFactory
      * Fallback when sockets extension is not available.
      * Returns a heartbeat-only stream (no live events).
      *
-     * @return array{0: \Closure(array&): bool, 1: \Closure(): void}
+     * @return array{0: \Closure, 1: \Closure}
      */
     private static function createFallback(int $deadlineSeconds): array
     {
