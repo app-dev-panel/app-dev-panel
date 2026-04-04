@@ -449,12 +449,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                         }}
                     >
                         <Tooltip title="Collapse toolbar" arrow>
-                            <IconButton
-                                onClick={onToolbarClickHandler}
-                                size="small"
-                                sx={actionButtonSx}
-                                {...dragHandleProps}
-                            >
+                            <IconButton onClick={onToolbarClickHandler} size="small" sx={actionButtonSx}>
                                 <DuckIcon sx={{fontSize: 22}} />
                             </IconButton>
                         </Tooltip>
@@ -462,7 +457,10 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                         {selectedEntry && (
                             <MetricItems entry={selectedEntry} iframeRouteNavigate={iframeRouteNavigate} />
                         )}
-                        <Box sx={{flex: 1}} />
+                        <Box
+                            {...dragHandleProps}
+                            sx={{flex: 1, minHeight: 32, cursor: 'grab', '&:active': {cursor: 'grabbing'}}}
+                        />
                         <Divider orientation="vertical" flexItem sx={{mx: 0.25}} />
                         {actionButtons}
                     </Paper>

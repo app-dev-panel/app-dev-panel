@@ -1,9 +1,9 @@
 import {useCallback, useRef, useState} from 'react';
 
-type DragState = {isDragging: boolean; snapZone: 'bottom' | 'right' | 'left' | null};
+type SnapZone = 'bottom' | 'right' | 'left' | null;
 
 type UseDragOptions = {
-    onDragEnd: (snapZone: 'bottom' | 'right' | 'left' | null) => void;
+    onDragEnd: (snapZone: SnapZone) => void;
     onPositionChange: (x: number, y: number) => void;
     getWidgetRect: () => DOMRect | null;
 };
@@ -11,17 +11,24 @@ type UseDragOptions = {
 const SNAP_THRESHOLD = 40;
 
 export const useDrag = ({onDragEnd, onPositionChange, getWidgetRect}: UseDragOptions) => {
-    const [state, setState] = useState<DragState>({isDragging: false, snapZone: null});
+    const [isDragging, setIsDragging] = useState(false);
+    const [snapZone, setSnapZone] = useState<SnapZone>(null);
     const dragRef = useRef<{startX: number; startY: number; widgetStartX: number; widgetStartY: number} | null>(null);
+    const snapZoneRef = useRef<SnapZone>(null);
+    const onDragEndRef = useRef(onDragEnd);
+    onDragEndRef.current = onDragEnd;
 
     const onPointerDown = useCallback(
         (e: React.PointerEvent) => {
             const rect = getWidgetRect();
             if (!rect) return;
             e.preventDefault();
+            e.stopPropagation();
             (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
             dragRef.current = {startX: e.clientX, startY: e.clientY, widgetStartX: rect.left, widgetStartY: rect.top};
-            setState({isDragging: true, snapZone: null});
+            setIsDragging(true);
+            snapZoneRef.current = null;
+            setSnapZone(null);
         },
         [getWidgetRect],
     );
@@ -39,28 +46,30 @@ export const useDrag = ({onDragEnd, onPositionChange, getWidgetRect}: UseDragOpt
             const nearRight = window.innerWidth - x - 260 < SNAP_THRESHOLD;
             const nearLeft = x < SNAP_THRESHOLD;
 
-            const zone =
+            const zone: SnapZone =
                 nearBottom && !nearRight && !nearLeft ? 'bottom' : nearRight ? 'right' : nearLeft ? 'left' : null;
-            setState((prev) => (prev.snapZone !== zone ? {isDragging: true, snapZone: zone} : prev));
+            if (snapZoneRef.current !== zone) {
+                snapZoneRef.current = zone;
+                setSnapZone(zone);
+            }
         },
         [onPositionChange],
     );
 
-    const onPointerUp = useCallback(
-        (e: React.PointerEvent) => {
-            if (!dragRef.current) return;
-            (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-            const zone = state.snapZone;
-            dragRef.current = null;
-            setState({isDragging: false, snapZone: null});
-            onDragEnd(zone);
-        },
-        [onDragEnd, state.snapZone],
-    );
+    const onPointerUp = useCallback((e: React.PointerEvent) => {
+        if (!dragRef.current) return;
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+        const zone = snapZoneRef.current;
+        dragRef.current = null;
+        snapZoneRef.current = null;
+        setIsDragging(false);
+        setSnapZone(null);
+        onDragEndRef.current(zone);
+    }, []);
 
     return {
-        isDragging: state.isDragging,
-        snapZone: state.snapZone,
+        isDragging,
+        snapZone,
         dragHandleProps: {onPointerDown, onPointerMove, onPointerUp, style: {cursor: 'grab'} as const},
     };
 };
