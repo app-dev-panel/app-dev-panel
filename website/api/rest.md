@@ -107,7 +107,7 @@ Supported providers: `openrouter`, `anthropic`, `openai`.
 
 #### Connect with ACP
 
-The ACP provider uses the [Agent Client Protocol](https://agentclientprotocol.com/) to communicate with local AI agents over stdio. ADP acts as an ACP client, spawning the agent as a subprocess per request.
+The ACP provider uses the [Agent Client Protocol](https://agentclientprotocol.com/) to communicate with local AI agents over stdio. ADP acts as an ACP client, spawning an ACP adapter as a subprocess per request.
 
 ```
 POST /debug/api/llm/connect
@@ -115,19 +115,21 @@ Content-Type: application/json
 
 {
   "provider": "acp",
-  "acpCommand": "claude",
-  "acpArgs": ["--model", "opus"],
-  "acpEnv": {"ANTHROPIC_MODEL": "claude-sonnet-4-20250514"}
+  "acpCommand": "npx",
+  "acpArgs": ["@agentclientprotocol/claude-agent-acp"]
 }
 ```
 
-- `acpCommand` — Agent CLI binary (default: `claude`). Must be on system PATH.
-- `acpArgs` — Additional CLI arguments passed to the agent.
+- `acpCommand` — Executable to run (default: `npx`). Must be on system PATH.
+- `acpArgs` — Arguments passed to the command (default: `["@agentclientprotocol/claude-agent-acp"]`).
 - `acpEnv` — Environment variables merged into the agent's environment.
 
-**Protocol lifecycle per chat request:** `initialize` → `session/new` → `session/prompt` (with streaming `session/update` notifications) → close.
+ACP adapters bridge the protocol to specific agents. Known adapters:
+- `@agentclientprotocol/claude-agent-acp` — Claude Code (default)
+- `@anthropic-ai/gemini-agent-acp` — Gemini CLI
+- `@anthropic-ai/codex-agent-acp` — Codex CLI
 
-**Supported agents:** Claude Code, Gemini CLI, Codex CLI, or any agent implementing ACP v1.
+**Protocol lifecycle per chat request:** `initialize` → `session/new` → `session/prompt` (with streaming `session/update` notifications) → close.
 
 ### OAuth (OpenRouter)
 

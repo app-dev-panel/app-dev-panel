@@ -82,9 +82,14 @@ final class LlmController
         $command =
             isset($body['acpCommand']) && is_string($body['acpCommand']) && $body['acpCommand'] !== ''
                 ? $body['acpCommand']
-                : 'claude';
+                : 'npx';
 
-        $acpArgs = isset($body['acpArgs']) && is_array($body['acpArgs']) ? $body['acpArgs'] : [];
+        // Default args: use the official ACP adapter for Claude Code when using default command.
+        $defaultArgs =
+            $command === 'npx' && (!isset($body['acpArgs']) || $body['acpArgs'] === [])
+                ? ['@agentclientprotocol/claude-agent-acp']
+                : [];
+        $acpArgs = isset($body['acpArgs']) && is_array($body['acpArgs']) ? $body['acpArgs'] : $defaultArgs;
         $acpEnv = isset($body['acpEnv']) && is_array($body['acpEnv']) ? $body['acpEnv'] : [];
 
         if ($this->commandVerifier !== null && !$this->commandVerifier->isAvailable($command)) {

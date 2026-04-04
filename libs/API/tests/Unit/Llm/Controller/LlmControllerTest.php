@@ -676,13 +676,13 @@ final class LlmControllerTest extends TestCase
         $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
         $response = $controller->connect($this->post(['provider' => 'acp']));
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('claude', $this->data($response)['acpCommand']);
+        $this->assertSame('npx', $this->data($response)['acpCommand']);
     }
 
     public function testConnectAcpDoesNotRequireApiKey(): void
     {
         $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
-        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'claude']));
+        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'npx']));
         $this->assertSame(200, $response->getStatusCode());
     }
 

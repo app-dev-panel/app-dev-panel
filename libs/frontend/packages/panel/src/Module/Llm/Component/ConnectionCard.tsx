@@ -52,8 +52,8 @@ export const ConnectionCard = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedProvider, setSelectedProvider] = useState<LlmProvider>('openrouter');
     const [apiKey, setApiKey] = useState('');
-    const [acpCommand, setAcpCommand] = useState('claude');
-    const [acpArgs, setAcpArgs] = useState('');
+    const [acpCommand, setAcpCommand] = useState('npx');
+    const [acpArgs, setAcpArgs] = useState('@agentclientprotocol/claude-agent-acp');
     const [expanded, setExpanded] = useState(false);
     const [freeOnly, setFreeOnly] = useState(false);
     const [localPrompt, setLocalPrompt] = useState(status?.customPrompt ?? '');
@@ -371,28 +371,28 @@ export const ConnectionCard = () => {
             ) : selectedProvider === 'acp' ? (
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                     <Typography variant="body2" color="text.secondary">
-                        Connect to a local AI agent via Agent Client Protocol. The agent runs as a stdio subprocess
-                        (Claude Code, Gemini CLI, Codex CLI, or any ACP-compatible agent).
+                        Connect to a local AI agent via Agent Client Protocol. Uses an ACP adapter to communicate with
+                        Claude Code, Gemini CLI, Codex CLI, or any ACP-compatible agent.
                     </Typography>
                     <TextField
                         size="small"
                         fullWidth
-                        label="Agent command"
-                        placeholder="claude"
+                        label="Command"
+                        placeholder="npx"
                         value={acpCommand}
                         onChange={(e) => setAcpCommand(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleAcpConnect()}
-                        helperText="CLI binary name or path (must be on system PATH)"
+                        helperText="Executable to run (must be on system PATH)"
                     />
                     <TextField
                         size="small"
                         fullWidth
                         label="Arguments"
-                        placeholder="--model opus"
+                        placeholder="@agentclientprotocol/claude-agent-acp"
                         value={acpArgs}
                         onChange={(e) => setAcpArgs(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleAcpConnect()}
-                        helperText="Optional CLI arguments (space-separated)"
+                        helperText="ACP adapter package or CLI arguments (space-separated)"
                     />
                 </Box>
             ) : (
