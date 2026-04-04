@@ -27,8 +27,6 @@ if [[ "$FILE_PATH" == *.php ]]; then
     if [[ -n "$TEST_FILE" && -f "$TEST_FILE" ]]; then
         echo "Running: phpunit $TEST_FILE"
         cd "$ROOT_DIR" && php vendor/bin/phpunit "$TEST_FILE" --no-coverage 2>&1 | tail -15
-    else
-        echo "No matching test file found for $FILE_PATH"
     fi
     exit 0
 fi
@@ -55,8 +53,6 @@ if [[ "$FILE_PATH" == *.ts || "$FILE_PATH" == *.tsx || "$FILE_PATH" == *.js || "
         if [[ -n "$TEST_FILE" && -f "$TEST_FILE" ]]; then
             echo "Running: vitest $TEST_FILE"
             cd "$FRONTEND_DIR" && npx vitest run "$TEST_FILE" 2>&1 | tail -15
-        else
-            echo "No matching test file found for $FILE_PATH"
         fi
     fi
     exit 0
