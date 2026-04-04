@@ -69,6 +69,7 @@ use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
@@ -168,7 +169,10 @@ $services = [
     McpSettings::class => new McpSettings($storagePath),
     McpController::class => new McpController(
         $jsonResponseFactory,
-        new McpServer(McpToolRegistryFactory::create($storage)),
+        new McpServer(McpToolRegistryFactory::create(
+            $storage,
+            new InspectorClient(sprintf('http://127.0.0.1:%s', $_SERVER['SERVER_PORT'] ?? '8888')),
+        )),
         new McpSettings($storagePath),
     ),
     McpSettingsController::class => new McpSettingsController($jsonResponseFactory, new McpSettings($storagePath)),

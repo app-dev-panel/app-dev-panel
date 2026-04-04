@@ -38,16 +38,21 @@ if (!$autoloaded) {
 
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\McpServer\Transport\StdioTransport;
 
-// Parse --storage=PATH from argv
+// Parse --storage=PATH and --inspector-url=URL from argv
 $storagePath = getenv('ADP_STORAGE_PATH') ?: null;
+$inspectorUrl = getenv('ADP_INSPECTOR_URL') ?: null;
 
 foreach ($argv as $arg) {
     if (str_starts_with($arg, '--storage=')) {
         $storagePath = substr($arg, strlen('--storage='));
+    }
+    if (str_starts_with($arg, '--inspector-url=')) {
+        $inspectorUrl = substr($arg, strlen('--inspector-url='));
     }
 }
 
@@ -62,11 +67,18 @@ if (!is_dir($storagePath)) {
 
 // Bootstrap
 $storage = new FileStorage($storagePath, new DebuggerIdGenerator());
-$toolRegistry = McpToolRegistryFactory::create($storage);
+$inspectorClient = is_string($inspectorUrl) && $inspectorUrl !== ''
+    ? new InspectorClient($inspectorUrl)
+    : null;
+$toolRegistry = McpToolRegistryFactory::create($storage, $inspectorClient);
 
 $transport = new StdioTransport();
 $server = new McpServer($toolRegistry, $transport);
 
-fwrite(STDERR, sprintf("ADP MCP server started (storage: %s)\n", $storagePath));
+fwrite(STDERR, sprintf("ADP MCP server started (storage: %s", $storagePath));
+if ($inspectorClient !== null) {
+    fwrite(STDERR, sprintf(", inspector: %s", $inspectorUrl));
+}
+fwrite(STDERR, ")\n");
 
 $server->run();

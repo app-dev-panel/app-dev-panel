@@ -1,5 +1,7 @@
 # Design System Analysis
 
+Status: 2026-04-04. Initial audit complete. Critical issues (hardcoded colors) resolved. Remaining items are medium/low priority.
+
 Comprehensive audit of the ADP frontend design system across all three packages:
 `packages/sdk`, `packages/panel`, `packages/toolbar`.
 

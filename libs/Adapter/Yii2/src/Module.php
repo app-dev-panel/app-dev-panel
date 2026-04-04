@@ -112,6 +112,7 @@ use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
 use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
@@ -611,9 +612,19 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         \Yii::$container->setSingleton(McpSettings::class, static fn() => new McpSettings($storagePath));
 
+        \Yii::$container->setSingleton(InspectorClient::class, static function () {
+            $request = \Yii::$app->getRequest();
+            $url = $request instanceof \yii\web\Request ? $request->getHostInfo() : 'http://127.0.0.1:8080';
+
+            return new InspectorClient($url);
+        });
+
         \Yii::$container->setSingleton(
             McpServer::class,
-            static fn() => new McpServer(McpToolRegistryFactory::create(\Yii::$container->get(StorageInterface::class))),
+            static fn() => new McpServer(McpToolRegistryFactory::create(
+                \Yii::$container->get(StorageInterface::class),
+                \Yii::$container->get(InspectorClient::class),
+            )),
         );
 
         \Yii::$container->setSingleton(

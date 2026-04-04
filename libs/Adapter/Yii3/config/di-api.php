@@ -14,10 +14,6 @@ use AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
-use AppDevPanel\Api\Panel\PanelConfig;
-use AppDevPanel\Api\Panel\PanelController;
-use AppDevPanel\Api\Toolbar\ToolbarConfig;
-use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
@@ -26,20 +22,9 @@ use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Ingestion\Controller\OtlpController;
-use AppDevPanel\Api\Llm\Controller\LlmController;
-use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
-use AppDevPanel\Api\Llm\FileLlmSettings;
-use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
-use AppDevPanel\Api\Llm\LlmProviderService;
-use AppDevPanel\Api\Llm\LlmSettingsInterface;
-use AppDevPanel\Api\Mcp\Controller\McpController;
-use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
-use AppDevPanel\Api\Mcp\McpSettings;
-use AppDevPanel\McpServer\McpServer;
-use AppDevPanel\McpServer\McpToolRegistryFactory;
-use AppDevPanel\Api\NullPathMapper;
-use AppDevPanel\Api\PathMapper;
-use AppDevPanel\Api\PathMapperInterface;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
+use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
@@ -53,18 +38,34 @@ use AppDevPanel\Api\Inspector\Controller\RequestController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
-use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
-use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Llm\Controller\LlmController;
+use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
+use AppDevPanel\Api\Llm\FileLlmSettings;
+use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
+use AppDevPanel\Api\Llm\LlmProviderService;
+use AppDevPanel\Api\Llm\LlmSettingsInterface;
+use AppDevPanel\Api\Mcp\Controller\McpController;
+use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
+use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
+use AppDevPanel\Api\NullPathMapper;
+use AppDevPanel\Api\Panel\PanelConfig;
+use AppDevPanel\Api\Panel\PanelController;
+use AppDevPanel\Api\PathMapper;
+use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Toolbar\ToolbarConfig;
+use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use Psr\Container\ContainerInterface;
@@ -118,8 +119,7 @@ return [
 
     // Service registry
     ServiceRegistryInterface::class => static fn(ContainerInterface $container) => new FileServiceRegistry(
-        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug')
-            . '/services',
+        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug') . '/services',
     ),
 
     // Schema provider (database inspection)
@@ -206,10 +206,10 @@ return [
             staticUrl: $toolbarParams['staticUrl'] ?? '',
         );
     },
-    ToolbarInjector::class => static fn(
-        PanelConfig $panelConfig,
-        ToolbarConfig $toolbarConfig,
-    ) => new ToolbarInjector($panelConfig, $toolbarConfig),
+    ToolbarInjector::class => static fn(PanelConfig $panelConfig, ToolbarConfig $toolbarConfig) => new ToolbarInjector(
+        $panelConfig,
+        $toolbarConfig,
+    ),
     ToolbarMiddleware::class => static fn(
         ToolbarInjector $toolbarInjector,
         DebuggerIdGenerator $idGenerator,
@@ -297,13 +297,20 @@ return [
     ) => new RequestController($jsonResponseFactory, $collectorRepository),
 
     // MCP Server
-    McpSettings::class => static fn(ContainerInterface $container) => new McpSettings(
-        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug'),
-    ),
+    McpSettings::class =>
+        static fn(ContainerInterface $container) => new McpSettings($container->get(Aliases::class)->get(
+            $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
+        )),
 
-    McpServer::class => static fn(StorageInterface $storage) => new McpServer(
-        McpToolRegistryFactory::create($storage),
-    ),
+    InspectorClient::class => static fn(ContainerInterface $container) => new InspectorClient(rtrim(
+        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['inspectorUrl'] ?? 'http://127.0.0.1:8080'),
+        '/',
+    )),
+
+    McpServer::class => static fn(
+        StorageInterface $storage,
+        InspectorClient $inspectorClient,
+    ) => new McpServer(McpToolRegistryFactory::create($storage, $inspectorClient)),
 
     McpController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
@@ -317,14 +324,16 @@ return [
     ) => new McpSettingsController($jsonResponseFactory, $mcpSettings),
 
     // LLM settings
-    LlmSettingsInterface::class => static fn(ContainerInterface $container) => new FileLlmSettings(
-        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug'),
-    ),
+    LlmSettingsInterface::class =>
+        static fn(ContainerInterface $container) => new FileLlmSettings($container->get(Aliases::class)->get(
+            $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
+        )),
 
     // LLM history storage
-    LlmHistoryStorageInterface::class => static fn(ContainerInterface $container) => new FileLlmHistoryStorage(
-        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug'),
-    ),
+    LlmHistoryStorageInterface::class =>
+        static fn(ContainerInterface $container) => new FileLlmHistoryStorage($container->get(Aliases::class)->get(
+            $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
+        )),
 
     // LLM provider service
     LlmProviderService::class => static fn(
@@ -343,7 +352,15 @@ return [
         RequestFactoryInterface $requestFactory,
         StreamFactoryInterface $streamFactory,
         ClientInterface $httpClient,
-    ) => new LlmController($jsonResponseFactory, $llmSettings, $providerService, $historyStorage, $requestFactory, $streamFactory, $httpClient),
+    ) => new LlmController(
+        $jsonResponseFactory,
+        $llmSettings,
+        $providerService,
+        $historyStorage,
+        $requestFactory,
+        $streamFactory,
+        $httpClient,
+    ),
 
     // ApiApplication
     ApiApplication::class => static fn(
