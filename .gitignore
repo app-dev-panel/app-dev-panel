@@ -8,3 +8,4 @@ vendor/
 playground/*/var/
 playground/*/config/.merge-plan.php
 playground/*/config/reference.php
+screenshots/

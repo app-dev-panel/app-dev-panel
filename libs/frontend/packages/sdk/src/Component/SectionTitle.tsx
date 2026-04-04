@@ -1,10 +1,10 @@
-import {Box, Typography} from '@mui/material';
+import {Box} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import React from 'react';
 
 type SectionTitleProps = {children: React.ReactNode; action?: React.ReactNode};
 
-const StyledTitle = styled(Typography)(({theme}) => ({
+const StyledTitle = styled('div')(({theme}) => ({
     fontSize: theme.typography.overline.fontSize,
     fontWeight: theme.typography.overline.fontWeight,
     letterSpacing: '0.05em',
