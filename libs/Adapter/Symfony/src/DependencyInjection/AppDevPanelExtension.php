@@ -69,6 +69,8 @@ use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Cli\Command\DebugServerBroadcastCommand;
+use AppDevPanel\Cli\Command\DebugServerCommand;
 use AppDevPanel\Cli\Command\DebugSummaryCommand;
 use AppDevPanel\Cli\Command\DebugTailCommand;
 use AppDevPanel\Cli\Command\FrontendUpdateCommand;
@@ -108,6 +110,7 @@ use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
+use AppDevPanel\Kernel\Storage\BroadcastingStorage;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\McpServer;
@@ -155,12 +158,17 @@ final class AppDevPanelExtension extends Extension
         $container->register(DebuggerIdGenerator::class, DebuggerIdGenerator::class)->setPublic(false);
 
         $container
-            ->register(StorageInterface::class, FileStorage::class)
+            ->register('app_dev_panel.storage.file', FileStorage::class)
             ->setArguments([
                 '%app_dev_panel.storage.path%',
                 new Reference(DebuggerIdGenerator::class),
                 '%app_dev_panel.dumper.excluded_classes%',
             ])
+            ->setPublic(false);
+
+        $container
+            ->register(StorageInterface::class, BroadcastingStorage::class)
+            ->setArguments([new Reference('app_dev_panel.storage.file')])
             ->setPublic(false);
 
         $container
@@ -935,6 +943,16 @@ final class AppDevPanelExtension extends Extension
 
         $container
             ->register(FrontendUpdateCommand::class, FrontendUpdateCommand::class)
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container
+            ->register(DebugServerCommand::class, DebugServerCommand::class)
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container
+            ->register(DebugServerBroadcastCommand::class, DebugServerBroadcastCommand::class)
             ->addTag('console.command')
             ->setPublic(false);
     }

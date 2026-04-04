@@ -1,3 +1,4 @@
+import {LiveFeedPanel} from '@app-dev-panel/panel/Application/Component/LiveFeedPanel';
 import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/NotificationCenter';
 
 import {
@@ -11,6 +12,7 @@ import {
     changeEditorPreset,
     changeShowInactiveCollectors,
     changeThemeMode,
+    toggleLiveFeed,
 } from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, debugApi, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
@@ -137,12 +139,12 @@ const MainArea = styled(Box)(({theme}) => ({
     [theme.breakpoints.up('sm')]: {padding: componentTokens.mainGap, gap: componentTokens.mainGap},
 }));
 
-const MainInner = styled(Box)({
+const MainInner = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(({expanded}) => ({
     display: 'flex',
     width: '100%',
-    maxWidth: componentTokens.mainMaxWidth,
+    maxWidth: expanded ? 'none' : componentTokens.mainMaxWidth,
     gap: componentTokens.mainGap,
-});
+}));
 
 const ContentArea = styled(Box)(({theme}) => ({
     flex: 1,
@@ -180,6 +182,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const showInactiveCollectors = useSelector((state) => state.application.showInactiveCollectors);
     const editorConfig = useSelector((state) => state.application.editorConfig) ?? defaultEditorConfig;
     const notificationCount = useSelector(selectUnreadCount);
+    const liveFeedCount = useLiveCount();
+    const liveFeedOpen = useSelector((state) => state.application.liveFeedOpen ?? false);
 
     // MCP settings
     const {data: mcpSettings} = useGetMcpSettingsQuery();
@@ -231,9 +235,29 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     changeEntry(result.data[0]);
                 }
             } else if (data.type === EventTypesEnum.LiveLog) {
-                dispatch(addLiveLog(data.payload));
+                try {
+                    const payload = typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+                    if (payload && typeof payload === 'object') {
+                        dispatch(
+                            addLiveLog({
+                                level: String(payload.level ?? 'debug'),
+                                message: String(payload.message ?? ''),
+                                context: payload.context,
+                            }),
+                        );
+                    }
+                } catch {
+                    /* ignore malformed payloads */
+                }
             } else if (data.type === EventTypesEnum.LiveDump) {
-                dispatch(addLiveDump(data.payload));
+                try {
+                    const payload = typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+                    if (payload && typeof payload === 'object') {
+                        dispatch(addLiveDump({variable: payload, line: payload.$__line__$ ?? undefined}));
+                    }
+                } catch {
+                    /* ignore malformed payloads */
+                }
             }
         },
         [getDebugQuery, changeEntry, dispatch],
@@ -269,6 +293,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     }, [dispatch, currentMode]);
 
     // Command palette
+    const handleLiveFeedClick = useCallback(() => dispatch(toggleLiveFeed()), [dispatch]);
     const handleSearchClick = useCallback(() => dispatchUI({type: 'OPEN_PALETTE'}), []);
     const handleLogoClick = useCallback(() => navigate('/'), [navigate]);
     const handlePaletteClose = useCallback(() => dispatchUI({type: 'CLOSE_PALETTE'}), []);
@@ -346,11 +371,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     // Build sidebar sections
     const selectedCollector = searchParams.get('collector') || '';
 
-    const liveCount = useLiveCount();
     const debugChildren = useMemo(() => {
-        const liveItem = {key: '__live__', icon: 'stream', label: 'Live', badge: liveCount || undefined};
         const entriesList = [{key: '__entries__', icon: 'list', label: 'All Entries'}];
-        if (!debugEntry) return [liveItem, ...entriesList];
+        if (!debugEntry) return entriesList;
         const entryIsWeb = isDebugEntryAboutWeb(debugEntry);
         const hasRequestOrCommand = debugEntry.collectors.some((c) => {
             const id = typeof c === 'string' ? c : c.id;
@@ -375,8 +398,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 };
             })
             .filter((c) => showInactiveCollectors || c.badge == null || c.badge > 0);
-        return [...entryItem, ...collectors, liveItem, ...entriesList];
-    }, [debugEntry, showInactiveCollectors, liveCount]);
+        return [...entryItem, ...collectors, ...entriesList];
+    }, [debugEntry, showInactiveCollectors]);
 
     // Build extra items for CommandPalette from current debug entry's collectors
     const paletteCollectorItems = useMemo(() => {
@@ -411,9 +434,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
 
     // Determine active child key
     const activeChildKey = useMemo(() => {
-        if (location.pathname === '/debug/live') {
-            return '__live__';
-        }
         if (location.pathname === '/debug/list') {
             return '__entries__';
         }
@@ -450,10 +470,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             if (sectionKey === 'debug') {
                 if (childKey === '__entries__') {
                     navigate('/debug/list');
-                    return;
-                }
-                if (childKey === '__live__') {
-                    navigate('/debug/live');
                     return;
                 }
                 // Navigate to debug page with collector
@@ -511,7 +527,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onEditorPresetChange={handleEditorPresetChange}
                     onEditorCustomTemplateChange={handleEditorCustomTemplateChange}
                     notificationCount={notificationCount}
+                    liveFeedCount={liveFeedCount}
+                    liveFeedActive={liveFeedOpen}
                     onNotificationsClick={handleNotificationsClick}
+                    onLiveFeedClick={handleLiveFeedClick}
                     onLogoClick={handleLogoClick}
                 />
                 <EntrySelector
@@ -546,7 +565,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     </Drawer>
                 )}
                 <MainArea>
-                    <MainInner>
+                    <MainInner expanded={liveFeedOpen && !isMobile}>
                         {!isMobile && (
                             <UnifiedSidebar
                                 sections={sidebarSections}
@@ -561,6 +580,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                                 <Outlet />
                             </ErrorBoundary>
                         </ContentArea>
+                        {liveFeedOpen && !isMobile && <LiveFeedPanel onClose={handleLiveFeedClick} />}
                     </MainInner>
                 </MainArea>
             </Box>

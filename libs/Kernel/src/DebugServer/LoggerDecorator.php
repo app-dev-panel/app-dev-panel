@@ -24,6 +24,7 @@ final class LoggerDecorator implements LoggerInterface
     public function log($level, Stringable|string $message, array $context = []): void
     {
         $this->broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, VarDumper::create([
+            'level' => (string) $level,
             'message' => $message,
             'context' => $context,
         ])->asJson(false, 1));

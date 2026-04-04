@@ -300,7 +300,12 @@ final class FilesystemStreamCollectorTest extends AbstractCollectorTestCase
         $collector = new FilesystemStreamCollector();
         $collector->startup();
 
-        $tmpFile = __DIR__ . DIRECTORY_SEPARATOR . 'stub' . DIRECTORY_SEPARATOR . 'put-get-' . uniqid() . '.txt';
+        $stubDir = __DIR__ . DIRECTORY_SEPARATOR . 'stub';
+        if (!is_dir($stubDir)) {
+            mkdir($stubDir, 0o777, true);
+        }
+
+        $tmpFile = $stubDir . DIRECTORY_SEPARATOR . 'put-get-' . uniqid() . '.txt';
 
         try {
             (static function () use ($tmpFile): void {

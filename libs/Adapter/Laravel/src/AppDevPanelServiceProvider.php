@@ -77,6 +77,8 @@ use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Cli\Command\DebugServerBroadcastCommand;
+use AppDevPanel\Cli\Command\DebugServerCommand;
 use AppDevPanel\Cli\Command\DebugSummaryCommand;
 use AppDevPanel\Cli\Command\DebugTailCommand;
 use AppDevPanel\Cli\Command\FrontendUpdateCommand;
@@ -117,8 +119,12 @@ use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\Connection;
+use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
+use AppDevPanel\Kernel\Storage\BroadcastingStorage;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use AppDevPanel\McpServer\McpServer;
@@ -193,11 +199,13 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
         $this->app->singleton(DebuggerIdGenerator::class);
 
-        $this->app->singleton(StorageInterface::class, function () use ($config): FileStorage {
-            return new FileStorage(
-                $config->get('app-dev-panel.storage.path'),
-                $this->app->make(DebuggerIdGenerator::class),
-                $config->get('app-dev-panel.dumper.excluded_classes', []),
+        $this->app->singleton(StorageInterface::class, function () use ($config): BroadcastingStorage {
+            return new BroadcastingStorage(
+                new FileStorage(
+                    $config->get('app-dev-panel.storage.path'),
+                    $this->app->make(DebuggerIdGenerator::class),
+                    $config->get('app-dev-panel.dumper.excluded_classes', []),
+                ),
             );
         });
 
@@ -796,6 +804,8 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             DebugDumpCommand::class,
             DebugSummaryCommand::class,
             DebugTailCommand::class,
+            DebugServerCommand::class,
+            DebugServerBroadcastCommand::class,
             InspectDatabaseCommand::class,
             InspectRoutesCommand::class,
             InspectConfigCommand::class,
@@ -909,7 +919,8 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             if ($logger instanceof LoggerInterfaceProxy) {
                 return $logger;
             }
-            return new LoggerInterfaceProxy($logger, $this->app->make(LogCollector::class));
+            // Wrap with LoggerDecorator for Live Feed broadcasting, then LoggerInterfaceProxy for collection
+            return new LoggerInterfaceProxy(new LoggerDecorator($logger), $this->app->make(LogCollector::class));
         });
     }
 

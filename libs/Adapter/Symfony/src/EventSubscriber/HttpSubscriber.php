@@ -6,6 +6,8 @@ namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Debugger;
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\StartupContext;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -154,8 +156,10 @@ final class HttpSubscriber implements EventSubscriberInterface
         }
 
         $collector = $this->collectors->varDumper;
+        $broadcaster = new Broadcaster();
         $previousHandler = VarDumper::setHandler(static function (mixed $var, ?string $label = null) use (
             $collector,
+            $broadcaster,
         ): void {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
             $line = '';
@@ -169,6 +173,15 @@ final class HttpSubscriber implements EventSubscriberInterface
             }
 
             $collector->collect($var, $label ?? $line);
+
+            // Broadcast for Live Feed
+            try {
+                $broadcaster->broadcast(
+                    Connection::MESSAGE_TYPE_VAR_DUMPER,
+                    \Yiisoft\VarDumper\VarDumper::create($var)->asJson(false),
+                );
+            } catch (\Throwable) {
+            }
         });
 
         $this->varDumperHandlerRegistered = true;
