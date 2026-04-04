@@ -1,5 +1,7 @@
 # HTTP Mock Server
 
+Status: 2026-04-04. **IMPLEMENTED** — this file is now reference documentation.
+
 ## Overview
 
 Inspector page at `/inspector/http-mock` for mocking external HTTP services using
