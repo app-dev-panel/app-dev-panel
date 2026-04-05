@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Llm\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
@@ -28,6 +30,8 @@ final class LlmController
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory,
         private readonly ClientInterface $httpClient,
+        private readonly ?AcpCommandVerifierInterface $commandVerifier = null,
+        private readonly ?AcpDaemonManagerInterface $acpDaemonManager = null,
     ) {}
 
     /**
@@ -39,7 +43,7 @@ final class LlmController
     }
 
     /**
-     * POST /debug/api/llm/connect — Connect with direct API key.
+     * POST /debug/api/llm/connect — Connect with direct API key or ACP agent.
      */
     public function connect(ServerRequestInterface $request): ResponseInterface
     {
@@ -47,11 +51,16 @@ final class LlmController
         $body = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
         $provider = $body['provider'] ?? null;
-        $apiKey = $body['apiKey'] ?? null;
 
         if (!is_string($provider) || $provider === '') {
             throw new InvalidArgumentException('Field "provider" is required and must be a non-empty string.');
         }
+
+        if ($provider === 'acp') {
+            return $this->connectAcp($body, $request);
+        }
+
+        $apiKey = $body['apiKey'] ?? null;
         if (!is_string($apiKey) || $apiKey === '') {
             throw new InvalidArgumentException('Field "apiKey" is required and must be a non-empty string.');
         }
@@ -62,6 +71,87 @@ final class LlmController
         return $this->responseFactory->createJsonResponse([
             'connected' => true,
             'provider' => $provider,
+        ]);
+    }
+
+    /**
+     * Connect to an ACP agent (Claude Code, Gemini CLI, etc.).
+     *
+     * Two-step: start daemon (if needed) → start session for this browser.
+     */
+    private function connectAcp(array $body, ServerRequestInterface $request): ResponseInterface
+    {
+        $command =
+            isset($body['acpCommand']) && is_string($body['acpCommand']) && $body['acpCommand'] !== ''
+                ? $body['acpCommand']
+                : 'npx';
+
+        $defaultArgs =
+            $command === 'npx' && (!isset($body['acpArgs']) || $body['acpArgs'] === [])
+                ? ['@agentclientprotocol/claude-agent-acp']
+                : [];
+        $acpArgs = isset($body['acpArgs']) && is_array($body['acpArgs']) ? $body['acpArgs'] : $defaultArgs;
+        $acpEnv = isset($body['acpEnv']) && is_array($body['acpEnv']) ? $body['acpEnv'] : [];
+
+        if ($this->commandVerifier !== null && !$this->commandVerifier->isAvailable($command)) {
+            return $this->responseFactory->createJsonResponse([
+                'connected' => false,
+                'error' => sprintf('ACP agent command "%s" not found on system PATH.', $command),
+            ], 400);
+        }
+
+        $sessionId = $this->extractAcpSessionId($request);
+        if ($sessionId === null) {
+            return $this->responseFactory->createJsonResponse([
+                'connected' => false,
+                'error' => 'Missing X-Acp-Session header. Browser must provide a session ID.',
+            ], 400);
+        }
+
+        if ($this->acpDaemonManager === null) {
+            return $this->responseFactory->createJsonResponse([
+                'connected' => false,
+                'error' => 'ACP daemon manager is not configured.',
+            ], 500);
+        }
+
+        // Step 1: Start daemon (handles reuse if already running and compatible)
+        try {
+            $this->acpDaemonManager->start();
+        } catch (\RuntimeException $e) {
+            $this->settings->clear();
+
+            return $this->responseFactory->createJsonResponse([
+                'connected' => false,
+                'error' => 'Failed to start ACP daemon: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        // Step 2: Start agent session
+        try {
+            $agentInfo = $this->acpDaemonManager->startSession($sessionId, $command, $acpArgs, $acpEnv);
+        } catch (\RuntimeException $e) {
+            $this->settings->clear();
+
+            return $this->responseFactory->createJsonResponse([
+                'connected' => false,
+                'error' => 'Failed to start ACP session: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        // Save settings only after successful connection
+        $this->settings->setProvider('acp');
+        $this->settings->setAcpCommand($command);
+        $this->settings->setAcpArgs($acpArgs);
+        $this->settings->setAcpEnv($acpEnv);
+
+        return $this->responseFactory->createJsonResponse([
+            'connected' => true,
+            'provider' => 'acp',
+            'acpCommand' => $command,
+            'sessionId' => $sessionId,
+            'agentName' => $agentInfo['agentName'],
+            'agentVersion' => $agentInfo['agentVersion'],
         ]);
     }
 
@@ -149,10 +239,17 @@ final class LlmController
     }
 
     /**
-     * POST /debug/api/llm/disconnect — Remove stored API key.
+     * POST /debug/api/llm/disconnect — Remove stored API key / stop ACP session.
      */
     public function disconnect(ServerRequestInterface $request): ResponseInterface
     {
+        if ($this->acpDaemonManager !== null) {
+            $sessionId = $this->extractAcpSessionId($request);
+            if ($sessionId !== null) {
+                $this->acpDaemonManager->stopSession($sessionId);
+            }
+        }
+
         $this->settings->clear();
 
         return $this->responseFactory->createJsonResponse([
@@ -255,7 +352,8 @@ final class LlmController
 
         $messages = $this->prependCustomPrompt($messages, $provider);
 
-        $data = $this->providerService->sendChat($provider, $messages, $model, $temperature);
+        $acpSessionId = $this->extractAcpSessionId($request);
+        $data = $this->providerService->sendChat($provider, $messages, $model, $temperature, $acpSessionId);
 
         if (isset($data['error'])) {
             return $this->responseFactory->createJsonResponse(['error' => $data['error']], 502);
@@ -308,6 +406,7 @@ final class LlmController
         $contextJson = json_encode($context, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
         // Truncate context to avoid exceeding model context windows.
+        // JSON structure is ASCII; values may contain UTF-8 but truncation is for size limits, not display.
         $maxContextLength = 12000;
         if (strlen($contextJson) > $maxContextLength) {
             $contextJson = substr($contextJson, 0, $maxContextLength) . "\n... [truncated]";
@@ -323,7 +422,8 @@ final class LlmController
         $provider = $this->settings->getProvider();
         $model = $this->settings->getModel() ?? $this->providerService->getDefaultModel($provider);
 
-        $data = $this->providerService->sendChat($provider, $messages, $model, 0.3);
+        $acpSessionId = $this->extractAcpSessionId($request);
+        $data = $this->providerService->sendChat($provider, $messages, $model, 0.3, $acpSessionId);
 
         if (isset($data['error'])) {
             return $this->responseFactory->createJsonResponse([
@@ -421,6 +521,25 @@ final class LlmController
         }
 
         return $messages;
+    }
+
+    /**
+     * Extract ACP session ID from the X-Acp-Session header.
+     */
+    private function extractAcpSessionId(ServerRequestInterface $request): ?string
+    {
+        $header = $request->getHeaderLine('X-Acp-Session');
+
+        if ($header === '') {
+            return null;
+        }
+
+        // Validate UUID format to prevent injection via socket protocol
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $header)) {
+            return null;
+        }
+
+        return $header;
     }
 
     private function generateCodeVerifier(): string

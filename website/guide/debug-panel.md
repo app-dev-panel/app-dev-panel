@@ -193,7 +193,7 @@ The panel SPA includes the following modules:
 |--------|------|-------------|
 | Debug | `/debug` | View collected debug entries — logs, database queries, events, exceptions, timeline, HTTP requests, cache, mail, etc. |
 | Inspector | `/debug/inspector/*` | Live application state — routes, config, database schema, git, cache, files, translations, Composer packages |
-| LLM | `/debug/llm` | AI-powered chat and analysis of debug data |
+| LLM | `/debug/llm` | AI-powered chat and analysis of debug data. Supports OpenRouter, Anthropic, OpenAI, and ACP (local agents like Claude Code) |
 | MCP | `/debug/mcp` | MCP (Model Context Protocol) server configuration |
 | OpenAPI | `/debug/openapi` | Swagger UI for the ADP REST API |
 

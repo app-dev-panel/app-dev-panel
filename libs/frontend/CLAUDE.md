@@ -50,7 +50,10 @@ packages/
     │   │   ├── createBaseQuery.ts       # Dynamic base URL factory
     │   │   ├── errorNotificationMiddleware.ts
     │   │   ├── Debug/      # Debug API (debugApi, debugSlice)
-    │   │   └── Application/# Application state (ApplicationSlice)
+    │   │   ├── Application/# Application state (ApplicationSlice)
+    │   │   └── Llm/
+    │   │       ├── Llm.ts              # LLM API (llmApi) + llmBaseQuery with X-Acp-Session header
+    │   │       └── acpSession.ts       # ACP session ID management (sessionStorage, per-tab UUID)
     │   ├── Component/      # Reusable components
     │   │   ├── Theme/
     │   │   │   ├── tokens.ts              # Design tokens (primitives, semantic, dark)

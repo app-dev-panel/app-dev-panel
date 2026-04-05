@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Llm;
 
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
+use AppDevPanel\Api\Llm\Acp\AcpResponse;
 use GuzzleHttp\Client;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -12,7 +14,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 
 /**
- * Handles communication with LLM providers (OpenRouter, Anthropic, OpenAI).
+ * Handles communication with LLM providers (OpenRouter, Anthropic, OpenAI, ACP).
  *
  * Encapsulates provider-specific API differences: authentication, request format,
  * response normalization, and model listing.
@@ -34,6 +36,7 @@ final class LlmProviderService
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory,
+        private readonly ?AcpDaemonManagerInterface $acpDaemonManager = null,
     ) {}
 
     /**
@@ -47,11 +50,17 @@ final class LlmProviderService
      * @param list<array{role: string, content: string}> $messages
      * @return array<string, mixed>
      */
-    public function sendChat(string $provider, array $messages, string $model, float $temperature): array
-    {
+    public function sendChat(
+        string $provider,
+        array $messages,
+        string $model,
+        float $temperature,
+        ?string $acpSessionId = null,
+    ): array {
         return match ($provider) {
             'anthropic' => $this->sendAnthropicChat($messages, $model, $temperature),
             'openai' => $this->sendOpenAiChat($messages, $model, $temperature),
+            'acp' => $this->sendAcpChat($messages, $acpSessionId),
             default => $this->sendOpenRouterChat($messages, $model, $temperature),
         };
     }
@@ -66,6 +75,7 @@ final class LlmProviderService
         return match ($provider) {
             'anthropic' => $this->fetchAnthropicModels(),
             'openai' => $this->fetchOpenAiModels(),
+            'acp' => $this->fetchAcpModels(),
             default => $this->fetchOpenRouterModels(),
         };
     }
@@ -78,6 +88,7 @@ final class LlmProviderService
         return match ($provider) {
             'anthropic' => 'claude-sonnet-4-20250514',
             'openai' => 'gpt-4o',
+            'acp' => 'acp-agent',
             default => 'anthropic/claude-sonnet-4',
         };
     }
@@ -348,6 +359,74 @@ final class LlmProviderService
         }
 
         return $request->withHeader('x-api-key', $apiKey);
+    }
+
+    /**
+     * Send chat via ACP daemon (persistent agent process).
+     *
+     * Connects to the running ACP daemon via Unix socket,
+     * sends the prompt, and returns the collected response.
+     *
+     * @param list<array{role: string, content: string}> $messages
+     * @return array<string, mixed>
+     */
+    private function sendAcpChat(array $messages, ?string $sessionId): array
+    {
+        if ($this->acpDaemonManager === null) {
+            return ['error' => 'ACP provider is not configured (missing AcpDaemonManager).'];
+        }
+
+        if ($sessionId === null || $sessionId === '') {
+            return ['error' => 'Missing ACP session ID. Please reconnect.'];
+        }
+
+        if (!$this->acpDaemonManager->isRunning()) {
+            return ['error' => 'ACP daemon is not running. Please reconnect the ACP provider.'];
+        }
+
+        if (!$this->acpDaemonManager->isSessionActive($sessionId)) {
+            return ['error' => 'ACP session is not active. Please reconnect.'];
+        }
+
+        $timeout = (float) $this->settings->getTimeout();
+        $customPrompt = $this->settings->getCustomPrompt();
+
+        try {
+            $data = $this->acpDaemonManager->sendPrompt($sessionId, $messages, $customPrompt, $timeout);
+        } catch (\RuntimeException $e) {
+            return ['error' => 'ACP daemon error: ' . $e->getMessage()];
+        }
+
+        if (isset($data['error'])) {
+            return ['error' => $data['error']];
+        }
+
+        $response = new AcpResponse(
+            text: $data['text'] ?? '',
+            stopReason: $data['stopReason'] ?? 'end_turn',
+            agentName: $data['agentName'] ?? '',
+            agentVersion: $data['agentVersion'] ?? '',
+            toolCalls: $data['toolCalls'] ?? [],
+        );
+
+        return $response->toOpenAiFormat();
+    }
+
+    /**
+     * ACP agents manage their own models — return a single placeholder entry.
+     *
+     * @return list<array{id: string, name: string, context_length: int, pricing: array}>
+     */
+    private function fetchAcpModels(): array
+    {
+        return [
+            [
+                'id' => 'acp-agent',
+                'name' => 'ACP Agent (model managed by agent)',
+                'context_length' => 0,
+                'pricing' => [],
+            ],
+        ];
     }
 
     /**

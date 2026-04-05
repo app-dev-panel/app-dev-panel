@@ -23,7 +23,7 @@ final class CorsSubscriber implements EventSubscriberInterface
     private const CORS_HEADERS = [
         'Access-Control-Allow-Origin' => '*',
         'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-        'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Debug-Token, X-Requested-With',
+        'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Debug-Token, X-Requested-With, X-Acp-Session',
         'Access-Control-Max-Age' => '86400',
     ];
 

@@ -59,12 +59,21 @@ All LLM endpoints share the same settings stored in `.llm-settings.json`. Both t
 
 See the [AI Chat guide](/guide/ai-chat) for user-facing documentation.
 
+### LLM Providers
+
+| Provider | Auth | How it works |
+|----------|------|--------------|
+| `openrouter` | API key or OAuth | HTTP calls to OpenRouter API (default) |
+| `anthropic` | API key or OAuth token | HTTP calls to Anthropic Messages API |
+| `openai` | API key | HTTP calls to OpenAI Chat Completions API |
+| `acp` | None (local agent) | Spawns agent (e.g. Claude Code) as subprocess via Agent Client Protocol |
+
 ### Connection
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/debug/api/llm/status` | Connection status, provider, model, timeout, custom prompt |
-| POST | `/debug/api/llm/connect` | Connect with API key |
+| POST | `/debug/api/llm/connect` | Connect with API key or ACP agent |
 | POST | `/debug/api/llm/disconnect` | Clear stored credentials |
 
 #### Status
@@ -95,6 +104,71 @@ Content-Type: application/json
 ```
 
 Supported providers: `openrouter`, `anthropic`, `openai`.
+
+#### Connect with ACP
+
+The ACP provider uses the [Agent Client Protocol](https://agentclientprotocol.com/) to communicate with local AI agents over stdio. ADP runs a persistent daemon process that manages multiple agent subprocesses — one per browser tab (session).
+
+```
+POST /debug/api/llm/connect
+Content-Type: application/json
+X-Acp-Session: <uuid>
+
+{
+  "provider": "acp",
+  "acpCommand": "npx",
+  "acpArgs": ["@agentclientprotocol/claude-agent-acp"]
+}
+```
+
+- `acpCommand` — Executable to run (default: `npx`). Must be on system PATH.
+- `acpArgs` — Arguments passed to the command (default: `["@agentclientprotocol/claude-agent-acp"]`).
+- `acpEnv` — Environment variables merged into the agent's environment.
+
+**Required header:** `X-Acp-Session` — a UUID identifying the browser tab. Generated via `crypto.randomUUID()` and stored in `sessionStorage`. The frontend SDK injects this header automatically on all LLM API requests.
+
+**Connect flow:**
+
+1. Start daemon (if not running, or restart if protocol version mismatch)
+2. Start agent session for the given `X-Acp-Session` UUID
+3. Save settings only after both steps succeed
+
+**Response:**
+
+```json
+{
+  "data": {
+    "connected": true,
+    "provider": "acp",
+    "acpCommand": "npx",
+    "sessionId": "550e8400-e29b-41d4-a716-446655440000",
+    "agentName": "Claude",
+    "agentVersion": "1.0.0"
+  }
+}
+```
+
+ACP adapters bridge the protocol to specific agents. Known adapters:
+- `@agentclientprotocol/claude-agent-acp` — Claude Code (default)
+- `@anthropic-ai/gemini-agent-acp` — Gemini CLI
+- `@anthropic-ai/codex-agent-acp` — Codex CLI
+
+**Daemon architecture:**
+
+The daemon (`acp-daemon-runner.php`) is a standalone PHP process that listens on a Unix socket at `/tmp/adp-acp-{hash}.sock`. It manages agent subprocesses via an internal protocol:
+
+| Action | Description |
+|--------|-------------|
+| `ping` | Health check, returns `{ok, protocol, sessions}` |
+| `session-start` | Spawn agent subprocess, perform ACP `initialize` handshake |
+| `session-stop` | Terminate a specific agent |
+| `session-status` | Check if a session's agent is alive |
+| `prompt` | Route `session/new` + `session/prompt` to the correct agent |
+| `shutdown` | Stop all sessions and exit |
+
+Limits: max 10 concurrent sessions, 30-minute idle timeout per session.
+
+**Protocol lifecycle per chat request:** `initialize` (on session start) → `session/new` → `session/prompt` (with streaming `session/update` notifications) → response.
 
 ### OAuth (OpenRouter)
 

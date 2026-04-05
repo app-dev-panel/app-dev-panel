@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Llm;
 
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use GuzzleHttp\Psr7\HttpFactory;
@@ -199,5 +200,111 @@ final class LlmProviderServiceTest extends TestCase
         }
 
         $this->assertTrue(true);
+    }
+
+    // --- ACP provider ---
+
+    public function testGetDefaultModelAcp(): void
+    {
+        $service = $this->createService('acp');
+        $this->assertSame('acp-agent', $service->getDefaultModel('acp'));
+    }
+
+    public function testListModelsAcp(): void
+    {
+        $service = $this->createService('acp');
+        $models = $service->listModels('acp');
+
+        $this->assertCount(1, $models);
+        $this->assertSame('acp-agent', $models[0]['id']);
+        $this->assertStringContainsString('ACP Agent', $models[0]['name']);
+    }
+
+    public function testSendChatAcpReturnsErrorWhenNoDaemonManager(): void
+    {
+        $service = $this->createService('acp');
+
+        $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertStringContainsString('not configured', $result['error']);
+    }
+
+    public function testSendChatAcpReturnsErrorWhenNoSessionId(): void
+    {
+        $settings = $this->createMock(LlmSettingsInterface::class);
+
+        $daemonManager = $this->createMock(AcpDaemonManagerInterface::class);
+
+        $httpFactory = new HttpFactory();
+        $service = new LlmProviderService(
+            $settings,
+            $this->mockHttpClient(new Response(200, [], '{}')),
+            $httpFactory,
+            $httpFactory,
+            $daemonManager,
+        );
+
+        $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7, null);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertStringContainsString('session ID', $result['error']);
+    }
+
+    public function testSendChatAcpReturnsErrorWhenDaemonNotRunning(): void
+    {
+        $settings = $this->createMock(LlmSettingsInterface::class);
+
+        $daemonManager = $this->createMock(AcpDaemonManagerInterface::class);
+        $daemonManager->method('isRunning')->willReturn(false);
+
+        $httpFactory = new HttpFactory();
+        $service = new LlmProviderService(
+            $settings,
+            $this->mockHttpClient(new Response(200, [], '{}')),
+            $httpFactory,
+            $httpFactory,
+            $daemonManager,
+        );
+
+        $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7, 'test-session');
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertStringContainsString('not running', $result['error']);
+    }
+
+    public function testSendChatAcpDelegatesToDaemon(): void
+    {
+        $settings = $this->createMock(LlmSettingsInterface::class);
+        $settings->method('getTimeout')->willReturn(30);
+        $settings->method('getCustomPrompt')->willReturn('Be brief');
+
+        $daemonManager = $this->createMock(AcpDaemonManagerInterface::class);
+        $daemonManager->method('isRunning')->willReturn(true);
+        $daemonManager->method('isSessionActive')->willReturn(true);
+        $daemonManager
+            ->method('sendPrompt')
+            ->with('test-session', $this->anything(), $this->anything(), $this->anything())
+            ->willReturn([
+                'text' => 'Hello from ACP!',
+                'stopReason' => 'end_turn',
+                'agentName' => 'TestAgent',
+                'agentVersion' => '1.0',
+                'toolCalls' => [],
+            ]);
+
+        $httpFactory = new HttpFactory();
+        $service = new LlmProviderService(
+            $settings,
+            $this->mockHttpClient(new Response(200, [], '{}')),
+            $httpFactory,
+            $httpFactory,
+            $daemonManager,
+        );
+
+        $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7, 'test-session');
+
+        $this->assertSame('Hello from ACP!', $result['choices'][0]['message']['content']);
+        $this->assertSame('TestAgent', $result['acp']['agentName']);
     }
 }

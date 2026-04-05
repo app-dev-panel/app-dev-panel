@@ -1,6 +1,6 @@
 ---
 title: AI Chat
-description: "Connect an LLM provider to get AI-powered debug analysis, chat assistance, and insights directly in the debug panel and toolbar."
+description: "Connect an LLM provider (OpenRouter, Anthropic, OpenAI, or ACP local agents) for AI-powered debug analysis and chat in the debug panel and toolbar."
 ---
 
 # AI Chat
@@ -20,6 +20,7 @@ Navigate to **LLM** in the debug panel sidebar (`/debug/llm`). The connection ca
 | **OpenRouter** | OAuth (PKCE) | `anthropic/claude-sonnet-4` | Claude, GPT-4, Llama, Mistral, Gemini, and 200+ others |
 | **Anthropic** | API Key | `claude-sonnet-4-20250514` | Claude model family |
 | **OpenAI** | API Key | `gpt-4o` | GPT-4o, o1, ChatGPT models |
+| **ACP** | None (local) | Agent-managed | Claude Code, Gemini CLI, Codex CLI, or any ACP-compatible agent |
 
 ### Connect via OpenRouter (OAuth)
 
@@ -39,6 +40,42 @@ OpenRouter uses the OAuth PKCE flow — no API key needed. You get access to all
 4. The panel shows **Connected**
 
 API keys are stored server-side in `.llm-settings.json` inside the ADP storage directory. They are never sent to the frontend after the initial connection.
+
+### Connect via ACP (Local Agent)
+
+ACP (Agent Client Protocol) connects to a local AI agent running on your machine — no API keys or cloud services needed. The agent runs as a subprocess managed by ADP.
+
+1. Select **ACP** in the provider toggle
+2. Set the **Command** (default: `npx`) and **Arguments** (default: `@agentclientprotocol/claude-agent-acp`)
+3. Click **Connect Agent**
+4. ADP starts a background daemon and spawns an agent subprocess for your browser tab
+
+**How it works:**
+
+ADP runs a persistent daemon process that manages agent subprocesses via a Unix socket. Each browser tab gets its own isolated agent session — multiple users or tabs can connect simultaneously without interfering with each other.
+
+```
+Browser Tab 1 ──► ADP API ──► Daemon ──► Agent subprocess 1
+Browser Tab 2 ──► ADP API ──► Daemon ──► Agent subprocess 2
+```
+
+**Available ACP adapters:**
+
+| Adapter package | Agent |
+|----------------|-------|
+| `@agentclientprotocol/claude-agent-acp` | Claude Code (default) |
+| `@anthropic-ai/gemini-agent-acp` | Gemini CLI |
+| `@anthropic-ai/codex-agent-acp` | Codex CLI |
+
+The command must be available on the system PATH of the server running ADP. The agent process inherits the server's environment, so API keys for the agent (e.g. `ANTHROPIC_API_KEY`) should be set in the server's environment.
+
+**Session lifecycle:**
+
+- Sessions are scoped to browser tabs (using `sessionStorage`)
+- Idle sessions are automatically terminated after 30 minutes
+- Maximum 10 concurrent sessions per daemon
+- Disconnecting from the panel stops only your tab's agent session
+- The daemon auto-restarts if it detects a protocol version mismatch (e.g. after an ADP update)
 
 ### Selecting a Model
 
@@ -151,10 +188,13 @@ Contents:
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `apiKey` | string \| null | `null` | Provider API key or OAuth token |
-| `provider` | string | `"openrouter"` | Active provider: `openrouter`, `anthropic`, or `openai` |
+| `provider` | string | `"openrouter"` | Active provider: `openrouter`, `anthropic`, `openai`, or `acp` |
 | `model` | string \| null | `null` | Selected model ID (uses provider default if null) |
 | `timeout` | number | `30` | Request timeout in seconds (5–300) |
 | `customPrompt` | string | *(see above)* | System prompt prepended to all requests |
+| `acpCommand` | string | `""` | ACP agent command (e.g. `npx`) |
+| `acpArgs` | string[] | `[]` | Arguments for the ACP command |
+| `acpEnv` | object | `{}` | Environment variables for the agent process |
 
 Chat history is stored separately in `.llm-history.json` (max 100 entries, FIFO).
 
@@ -167,7 +207,7 @@ Chat history is stored separately in `.llm-history.json` (max 100 entries, FIFO)
 └──────┬──────┘    └──────┬──────┘
        │                  │
        │  RTK Query API   │  RTK Query API
-       │  (shared SDK)    │  (shared SDK)
+       │  + X-Acp-Session │  + X-Acp-Session
        │                  │
        ▼                  ▼
 ┌─────────────────────────────────┐
@@ -177,16 +217,19 @@ Chat history is stored separately in `.llm-history.json` (max 100 entries, FIFO)
 │     LlmProviderService          │
 │     ├─ OpenRouter (OAuth/key)   │
 │     ├─ Anthropic (API key)      │
-│     └─ OpenAI (API key)         │
-├─────────────────────────────────┤
-│     FileLlmSettings             │
-│     FileLlmHistoryStorage       │
-│     (.llm-settings.json)        │
-│     (.llm-history.json)         │
+│     ├─ OpenAI (API key)         │
+│     └─ ACP (local agent) ───────┼──► AcpDaemonManager
+├─────────────────────────────────┤     ├─ Unix socket IPC
+│     FileLlmSettings             │     └─ acp-daemon-runner.php
+│     FileLlmHistoryStorage       │         ├─ Session 1 → Agent 1
+│     (.llm-settings.json)        │         ├─ Session 2 → Agent 2
+│     (.llm-history.json)         │         └─ Session N → Agent N
 └─────────────────────────────────┘
 ```
 
 The frontend LLM API (`llmApi`) lives in the shared SDK package (`@app-dev-panel/sdk/API/Llm/Llm`), so both the panel and toolbar import from the same source. Both Redux stores include the LLM reducers and middlewares, sharing the same RTK Query cache behavior.
+
+For ACP, each browser tab generates a UUID stored in `sessionStorage` and sends it as `X-Acp-Session` header on every LLM API request. The daemon maps session IDs to agent subprocesses, ensuring tab-level isolation.
 
 ## REST API
 
