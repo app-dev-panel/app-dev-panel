@@ -3,12 +3,12 @@ import {useEffect, useRef, useState} from 'react';
 
 const HEAD_CX = 64;
 const HEAD_CY = 58;
-const MAX_TILT = 25;
+const MAX_TILT = 30;
 const EYE_EXTRA = 2.5;
 
 export const DuckIcon = (props: SvgIconProps) => {
     const svgRef = useRef<SVGSVGElement>(null);
-    const [look, setLook] = useState({angle: 180, dist: 0, ex: 0, ey: 0});
+    const [look, setLook] = useState({tilt: 0, ex: 0, ey: 0});
     const frameRef = useRef<number>();
 
     useEffect(() => {
@@ -24,13 +24,19 @@ export const DuckIcon = (props: SvgIconProps) => {
 
                 const dx = e.clientX - cx;
                 const dy = e.clientY - cy;
-                const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+                const rad = Math.atan2(dy, dx);
+                const angleDeg = (rad * 180) / Math.PI;
                 const dist = Math.min(Math.hypot(dx, dy) / 80, 1);
 
-                const rad = Math.atan2(dy, dx);
+                // Beak points left (180°). Calculate how much to rotate toward mouse.
+                let rotation = angleDeg - 180;
+                if (rotation > 180) rotation -= 360;
+                if (rotation < -180) rotation += 360;
+
+                const tilt = Math.max(-MAX_TILT, Math.min(MAX_TILT, rotation * dist));
+
                 setLook({
-                    angle,
-                    dist,
+                    tilt,
                     ex: Math.cos(rad) * EYE_EXTRA * dist,
                     ey: Math.sin(rad) * EYE_EXTRA * dist,
                 });
@@ -44,11 +50,9 @@ export const DuckIcon = (props: SvgIconProps) => {
         };
     }, []);
 
-    const tilt = (look.angle - 180) * (look.dist * MAX_TILT) / 180;
-
     return (
         <SvgIcon {...props} viewBox="0 0 128 128" ref={svgRef}>
-            <g transform={`rotate(${tilt}, ${HEAD_CX}, ${HEAD_CY})`}>
+            <g transform={`rotate(${look.tilt}, ${HEAD_CX}, ${HEAD_CY})`}>
                 {/* Head */}
                 <circle cx={HEAD_CX} cy={HEAD_CY} r="42" fill="#FCD34D" />
                 {/* Beak — points left, rotates with head */}
@@ -57,9 +61,7 @@ export const DuckIcon = (props: SvgIconProps) => {
                 <circle cx="34" cy="76" r="6" fill="#FB923C" opacity="0.2" />
                 {/* Eye white */}
                 <ellipse cx="44" cy="42" rx="10" ry="11" fill="white" />
-            </g>
-            {/* Pupil — rotates with head + extra offset for parallax */}
-            <g transform={`rotate(${tilt}, ${HEAD_CX}, ${HEAD_CY})`}>
+                {/* Pupil — extra offset for parallax */}
                 <circle cx={44 + look.ex} cy={42 + look.ey} r="6" fill="#292524" />
                 <circle cx={42.5 + look.ex} cy={40 + look.ey} r="2.2" fill="white" />
             </g>
