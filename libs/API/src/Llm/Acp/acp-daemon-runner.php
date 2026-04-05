@@ -490,6 +490,7 @@ function handlePrompt(
     // --- Collect streaming response ---
     $textParts = [];
     $toolCalls = [];
+    $rawMessages = [];
     $stopReason = 'end_turn';
     $totalTextSize = 0;
     $maxResponseSize = 10_000_000;
@@ -508,10 +509,15 @@ function handlePrompt(
         if ($message === null) {
             if (!isAgentAlive($process)) {
                 $stderrOutput = readStderr($stderr);
-                return ['error' => "ACP agent process terminated. stderr: {$stderrOutput}"];
+                return [
+                    'error' => "ACP agent process terminated. stderr: {$stderrOutput}",
+                    '_rawMessages' => $rawMessages,
+                ];
             }
             continue;
         }
+
+        $rawMessages[] = $message;
 
         // Notification (no id) — session/update
         if (!isset($message['id'])) {
@@ -578,5 +584,6 @@ function handlePrompt(
         'agentName' => $agentName,
         'agentVersion' => $agentVersion,
         'toolCalls' => $toolCalls,
+        '_rawMessages' => $rawMessages,
     ];
 }
