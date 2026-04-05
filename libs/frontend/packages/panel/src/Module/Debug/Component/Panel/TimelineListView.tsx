@@ -5,8 +5,8 @@ import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Collapse, Typography} from '@mui/material';
-import {styled, type Theme, useTheme} from '@mui/material/styles';
+import {Box, Collapse, Icon, IconButton, Typography} from '@mui/material';
+import {alpha, styled, type Theme, useTheme} from '@mui/material/styles';
 import {useCallback, useState} from 'react';
 
 type Item = [number, number, string] | [number, number, string, string];
@@ -51,21 +51,25 @@ const collectorColorKeyMap: Partial<Record<string, string>> = {
 // Styled components
 // ---------------------------------------------------------------------------
 
-const Row = styled(Box, {shouldForwardProp: (p) => p !== 'selected'})<{selected?: boolean}>(({theme, selected}) => ({
+const Row = styled(Box, {shouldForwardProp: (p) => p !== 'selected' && p !== 'accentColor'})<{
+    selected?: boolean;
+    accentColor?: string;
+}>(({theme, selected, accentColor}) => ({
     display: 'flex',
     alignItems: 'center',
     minHeight: 32,
-    padding: theme.spacing(0.5, 1.5),
+    padding: theme.spacing(0.75, 1.5),
     borderBottom: `1px solid ${theme.palette.divider}`,
+    borderLeft: `3px solid ${accentColor ?? 'transparent'}`,
     cursor: 'pointer',
-    transition: 'background 0.1s',
+    transition: 'background-color 0.1s ease',
     backgroundColor: selected ? theme.palette.action.selected : 'transparent',
     '&:hover': {backgroundColor: theme.palette.action.hover},
-    gap: theme.spacing(1.5),
+    gap: theme.spacing(1),
 }));
 
 const OffsetLabel = styled(Typography)(({theme}) => ({
-    width: 72,
+    width: 80,
     flexShrink: 0,
     fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
@@ -74,14 +78,24 @@ const OffsetLabel = styled(Typography)(({theme}) => ({
 }));
 
 const CollectorLabel = styled(Typography)({
-    width: 140,
     flexShrink: 0,
     fontSize: '12px',
     fontWeight: 600,
     whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    minWidth: 80,
 });
+
+const RefPill = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontSize: '10px',
+    color: theme.palette.text.disabled,
+    backgroundColor: theme.palette.action.selected,
+    padding: '1px 6px',
+    borderRadius: 4,
+    flexShrink: 0,
+    lineHeight: '16px',
+    whiteSpace: 'nowrap',
+}));
 
 const DetailText = styled(Typography)(({theme}) => ({
     flex: 1,
@@ -94,12 +108,16 @@ const DetailText = styled(Typography)(({theme}) => ({
     minWidth: 0,
 }));
 
-const DetailBox = styled(Box)(({theme}) => ({
-    padding: theme.spacing(1.5, 2, 1.5, 5),
-    backgroundColor: theme.palette.action.hover,
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    fontSize: '12px',
-}));
+const DetailBox = styled(Box, {shouldForwardProp: (p) => p !== 'accentColor'})<{accentColor?: string}>(
+    ({theme, accentColor}) => ({
+        padding: theme.spacing(1.5, 2),
+        marginLeft: 3,
+        borderLeft: `3px solid ${accentColor ?? 'transparent'}`,
+        backgroundColor: theme.palette.action.hover,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        fontSize: '12px',
+    }),
+);
 
 const ScaleBar = styled(Box)(({theme}) => ({
     display: 'flex',
@@ -218,38 +236,32 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                 const logLevel = logMatch?.[1] ?? null;
                 const detail = isException ? ref : logMatch ? logMatch[2] : rawDetail;
 
+                const levelColor = logLevel ? logLevelColor(logLevel, theme) : null;
+
                 return (
                     <Box key={index}>
-                        <Row selected={expanded} onClick={() => handleRowClick(index)}>
+                        <Row selected={expanded} accentColor={color.fg} onClick={() => handleRowClick(index)}>
                             <OffsetLabel>{offsetLabel}</OffsetLabel>
                             <CollectorLabel sx={{color: color.fg}}>
                                 {label !== 'Unknown' ? label : shortName}
-                                {ref && !isException && (
-                                    <Typography
-                                        component="span"
-                                        sx={{color: 'text.disabled', fontWeight: 400, fontSize: '11px', ml: 0.5}}
-                                    >
-                                        ({ref})
-                                    </Typography>
-                                )}
-                                {logLevel && (
-                                    <Typography
-                                        component="span"
-                                        sx={{
-                                            color: logLevelColor(logLevel, theme),
-                                            fontWeight: 400,
-                                            fontSize: '11px',
-                                            ml: 0.5,
-                                        }}
-                                    >
-                                        [{logLevel}]
-                                    </Typography>
-                                )}
                             </CollectorLabel>
+                            {ref && !isException && <RefPill>{ref}</RefPill>}
+                            {logLevel && (
+                                <RefPill
+                                    sx={{color: levelColor, backgroundColor: alpha(levelColor!, 0.12), fontWeight: 600}}
+                                >
+                                    {logLevel.toUpperCase()}
+                                </RefPill>
+                            )}
                             {detail && <DetailText title={detail}>{detail}</DetailText>}
+                            <IconButton size="small" sx={{flexShrink: 0, p: 0.25}}>
+                                <Icon sx={{fontSize: 16, color: 'text.disabled'}}>
+                                    {expanded ? 'expand_less' : 'expand_more'}
+                                </Icon>
+                            </IconButton>
                         </Row>
                         <Collapse in={expanded}>
-                            <DetailBox>
+                            <DetailBox accentColor={color.fg}>
                                 <Box sx={{display: 'flex', gap: 3, mb: 1, flexWrap: 'wrap'}}>
                                     <Typography variant="caption" sx={{color: 'text.disabled'}}>
                                         Time: {formatMicrotime(row[0])}
