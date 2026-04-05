@@ -58,7 +58,10 @@ function getEnrichedDetail(
         return String(row[1]);
     }
 
-    if (!data) return null;
+    // Ref fallback for all rows
+    const refStr = row[1] != null && row[1] !== '' ? String(row[1]) : null;
+
+    if (!data) return refStr;
 
     // LogCollector: data is an array of log entries
     if (collectorClass === CollectorsMap.LogCollector && Array.isArray(data) && data[currentIndex]) {
@@ -83,19 +86,12 @@ function getEnrichedDetail(
         const renders = data.renders ?? (Array.isArray(data) ? data : []);
         if (Array.isArray(renders) && renders[currentIndex]) {
             const template = renders[currentIndex].template || '';
-            // Show basename for file paths, full name for short names
             const name = template.includes('/') ? template.split('/').pop() : template;
-            return name || null;
+            return name || refStr;
         }
     }
 
-    // Fallback: show reference value for collectors without specific enrichment
-    const ref = row[1];
-    if (ref != null && ref !== 0 && ref !== '') {
-        return String(ref);
-    }
-
-    return null;
+    return refStr;
 }
 
 /**
