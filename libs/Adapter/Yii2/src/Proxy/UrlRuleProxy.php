@@ -25,6 +25,8 @@ final class UrlRuleProxy implements UrlRuleInterface
         $result = $this->inner->parseRequest($manager, $request);
         if ($result !== false) {
             $this->recorder->recordMatch($this->inner, $result);
+        } else {
+            $this->recorder->recordMiss($this->inner);
         }
         return $result;
     }

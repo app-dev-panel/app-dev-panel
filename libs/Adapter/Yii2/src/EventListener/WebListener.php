@@ -232,10 +232,32 @@ final class WebListener
     }
 
     /**
-     * Collect all registered URL rules from UrlManager for the route list.
+     * Collect route list for the Router panel.
+     *
+     * When proxy-recorded attempts are available, routes are listed in checking order
+     * with a `matched` flag showing which rules matched and which didn't.
+     * Falls back to the static route collection from UrlManager.
      */
     private function collectAllRoutes(\yii\web\Application $app): void
     {
+        $attempts = $this->matchRecorder?->getAttempts() ?? [];
+
+        if ($attempts !== []) {
+            $routes = [];
+            foreach ($attempts as $attempt) {
+                $rule = $attempt['rule'];
+                $routes[] = [
+                    'name' => $rule instanceof UrlRule ? $rule->name : $rule::class,
+                    'pattern' => $rule instanceof UrlRule ? $rule->name : $rule::class,
+                    'methods' => $rule instanceof UrlRule ? ($rule->verb ?? [] ?: ['ANY']) : ['ANY'],
+                    'host' => $rule instanceof UrlRule ? $rule->host : null,
+                    'matched' => $attempt['matched'],
+                ];
+            }
+            $this->routerCollector->collectRoutes($routes);
+            return;
+        }
+
         if (!$app->has('urlManager')) {
             return;
         }

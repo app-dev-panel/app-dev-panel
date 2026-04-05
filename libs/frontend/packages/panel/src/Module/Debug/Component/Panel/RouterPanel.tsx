@@ -20,7 +20,7 @@ type CurrentRoute = {
     action: any;
     middlewares: any[];
 };
-type Route = {name?: string; pattern?: string; methods?: string[]; host?: string};
+type Route = {name?: string; pattern?: string; methods?: string[]; host?: string; matched?: boolean};
 type RouterPanelProps = {
     data: {currentRoute: CurrentRoute | null; routesTree?: any; routes?: Route[]; routeTime?: number};
 };
@@ -232,7 +232,32 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
                     >{`${filteredRoutes.length} routes`}</SectionTitle>
 
                     {filteredRoutes.map((route, index) => (
-                        <RouteRow key={index}>
+                        <RouteRow
+                            key={index}
+                            sx={
+                                route.matched === true
+                                    ? {
+                                          backgroundColor:
+                                              theme.palette.mode === 'dark'
+                                                  ? 'rgba(76, 175, 80, 0.08)'
+                                                  : 'rgba(76, 175, 80, 0.06)',
+                                      }
+                                    : route.matched === false
+                                      ? {opacity: 0.5}
+                                      : undefined
+                            }
+                        >
+                            {route.matched !== undefined && (
+                                <Box
+                                    sx={{
+                                        width: 7,
+                                        height: 7,
+                                        borderRadius: '50%',
+                                        flexShrink: 0,
+                                        backgroundColor: route.matched ? 'success.main' : 'text.disabled',
+                                    }}
+                                />
+                            )}
                             <PatternCell>{route.pattern ?? '-'}</PatternCell>
                             {route.name && <NameCell>{route.name}</NameCell>}
                             {route.methods && route.methods.length > 0 && (
