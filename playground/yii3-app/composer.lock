@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7357a6e4c49db4054d8a729f87142f63",
+    "content-hash": "1d447b9f8aea111526777a31fef15307",
     "packages": [
         {
             "name": "alexkart/curl-builder",
@@ -55,7 +55,7 @@
         },
         {
             "name": "app-dev-panel/adapter-yii3",
-            "version": "dev-claude/audit-fixture-tours-K4DUa",
+            "version": "dev-claude/add-openapi-swagger-uhmpM",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Adapter/Yii3",
@@ -173,7 +173,7 @@
         },
         {
             "name": "app-dev-panel/api",
-            "version": "dev-claude/audit-fixture-tours-K4DUa",
+            "version": "dev-claude/add-openapi-swagger-uhmpM",
             "dist": {
                 "type": "path",
                 "url": "../../libs/API",
@@ -252,7 +252,7 @@
         },
         {
             "name": "app-dev-panel/cli",
-            "version": "dev-claude/audit-fixture-tours-K4DUa",
+            "version": "dev-claude/add-openapi-swagger-uhmpM",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Cli",
@@ -312,7 +312,7 @@
         },
         {
             "name": "app-dev-panel/kernel",
-            "version": "dev-claude/audit-fixture-tours-K4DUa",
+            "version": "dev-claude/add-openapi-swagger-uhmpM",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Kernel",
@@ -384,7 +384,7 @@
         },
         {
             "name": "app-dev-panel/mcp-server",
-            "version": "dev-claude/audit-fixture-tours-K4DUa",
+            "version": "dev-claude/add-openapi-swagger-uhmpM",
             "dist": {
                 "type": "path",
                 "url": "../../libs/McpServer",

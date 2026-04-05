@@ -66,7 +66,7 @@ export const Layout = () => {
                         <NoEntries />
                     ) : (
                         Object.entries(apiEntries).map(([name, url]) => (
-                            <TabPanel key={name} value={name} className={theme.palette.mode}>
+                            <TabPanel key={name} value={name} className={theme.palette.mode} sx={{p: 0}}>
                                 <SwaggerUI url={url} />
                             </TabPanel>
                         ))

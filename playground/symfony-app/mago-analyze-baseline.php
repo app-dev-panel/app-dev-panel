@@ -1,24 +1,6 @@
 variant = "loose"
 
 [[issues]]
-file = "config/reference.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Config\Loader\ParamConfigurator`.'
-count = 2391
-
-[[issues]]
-file = "config/reference.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\DependencyInjection\Loader\Configurator\ReferenceConfigurator`.'
-count = 42
-
-[[issues]]
-file = "config/reference.php"
-code = "non-existent-method"
-message = 'Method `config` does not exist on type `Symfony\Component\DependencyInjection\Loader\Configurator\AppReference`.'
-count = 1
-
-[[issues]]
 file = "config/routes/app_dev_panel.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator)`).'
@@ -68,8 +50,56 @@ count = 1
 
 [[issues]]
 file = "src/Controller/HomeController.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Info` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/HomeController.php"
 code = "non-existent-class-like"
 message = 'Class `App\Controller\HomeController` cannot extend unknown type `AbstractController`'
+count = 1
+
+[[issues]]
+file = "src/Controller/OpenApiController.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Controller/OpenApiController.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "src/Controller/OpenApiController.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Controller/OpenApiController.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Controller/OpenApiController.php"
+code = "non-existent-class"
+message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/OpenApiController.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/OpenApiController.php"
+code = "non-existent-method"
+message = 'Method `scan` does not exist on type `OpenApi\Generator`.'
 count = 1
 
 [[issues]]

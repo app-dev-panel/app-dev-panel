@@ -442,6 +442,7 @@
             'error' => 'Error Demo',
             'log-demo' => 'Log Demo',
             'var-dumper' => 'Var Dumper',
+            'api/openapi.json' => 'OpenAPI',
         ];
         foreach ($links as $url => $label): ?>
             <a href="/<?= $url ?>" class="<?= $path === $url ? 'active' : '' ?>"><?= $label ?></a>

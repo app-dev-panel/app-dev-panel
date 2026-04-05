@@ -136,7 +136,7 @@ count = 6
 file = "config/common/routes.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 87
+count = 89
 
 [[issues]]
 file = "config/common/routes.php"
@@ -148,7 +148,7 @@ count = 3
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Yiisoft\Router\Route`.'
-count = 36
+count = 37
 
 [[issues]]
 file = "config/common/routes.php"
@@ -266,6 +266,12 @@ count = 1
 
 [[issues]]
 file = "src/Web/Api/ErrorAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Get` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/ErrorAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
 count = 1
@@ -292,6 +298,18 @@ count = 1
 file = "src/Web/Api/IndexAction.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `app\web\api\indexaction::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Get` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Info` not found or could not be autoloaded.'
 count = 1
 
 [[issues]]
@@ -325,6 +343,54 @@ message = 'Cannot find class, interface, enum, or type alias `Yiisoft\DataRespon
 count = 1
 
 [[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\DataResponse\DataResponseFactoryInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `json_decode`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\api\openapiaction::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\DataResponse\DataResponseFactoryInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "non-existent-method"
+message = 'Method `scan` does not exist on type `OpenApi\Generator`.'
+count = 1
+
+[[issues]]
 file = "src/Web/Api/UsersAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
@@ -340,6 +406,12 @@ count = 1
 file = "src/Web/Api/UsersAction.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `app\web\api\usersaction::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/UsersAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Get` not found or could not be autoloaded.'
 count = 1
 
 [[issues]]

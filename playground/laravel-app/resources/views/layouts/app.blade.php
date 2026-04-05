@@ -436,6 +436,7 @@ textarea.form-control {
             <a href="/error" class="{{ request()->is('error') ? 'active' : '' }}">Error Demo</a>
             <a href="/log-demo" class="{{ request()->is('log-demo') ? 'active' : '' }}">Log Demo</a>
             <a href="/var-dumper" class="{{ request()->is('var-dumper') ? 'active' : '' }}">Var Dumper</a>
+            <a href="/api/openapi.json" class="{{ request()->is('api/openapi.json') ? 'active' : '' }}">OpenAPI</a>
         </nav>
     </header>
 

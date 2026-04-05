@@ -290,6 +290,7 @@ export default defineConfig({
                   link: "/guide/live-feed-internals",
                 },
                 { text: "Toolbar", link: "/guide/toolbar" },
+                { text: "OpenAPI Viewer", link: "/guide/openapi" },
                 { text: "Frontend Packages", link: "/guide/frontend-packages" },
               ],
             },
@@ -510,6 +511,7 @@ export default defineConfig({
                 { text: "Панель отладки", link: "/ru/guide/debug-panel" },
                 { text: "ИИ чат", link: "/ru/guide/ai-chat" },
                 { text: "Тулбар", link: "/ru/guide/toolbar" },
+                { text: "OpenAPI Viewer", link: "/guide/openapi" },
                 {
                   text: "Фронтенд-пакеты",
                   link: "/ru/guide/frontend-packages",

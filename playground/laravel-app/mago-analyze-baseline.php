@@ -20,6 +20,18 @@ count = 2
 
 [[issues]]
 file = "app/Http/Controllers/HomeController.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Get` not found or could not be autoloaded.'
+count = 3
+
+[[issues]]
+file = "app/Http/Controllers/HomeController.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Info` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/HomeController.php"
 code = "non-existent-class"
 message = 'Class `Illuminate\Http\JsonResponse` not found.'
 count = 2
@@ -40,6 +52,48 @@ count = 2
 file = "app/Http/Controllers/HomeController.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Http\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "non-existent-function"
+message = 'Could not find definition for function `App\Http\Controllers\app_path` (also tried as `app_path` in a broader scope).'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "non-existent-method"
+message = 'Method `scan` does not exist on type `OpenApi\Generator`.'
 count = 1
 
 [[issues]]
@@ -1282,7 +1336,7 @@ count = 2
 file = "routes/web.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Illuminate\Support\Facades\Route`.'
-count = 36
+count = 37
 
 [[issues]]
 file = "routes/web.php"

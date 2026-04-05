@@ -230,8 +230,20 @@ count = 1
 
 [[issues]]
 file = "src/controllers/ApiController.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Info` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/controllers/ApiController.php"
 code = "non-existent-class-like"
 message = 'Class `App\controllers\ApiController` cannot extend unknown type `Controller`'
+count = 1
+
+[[issues]]
+file = "src/controllers/OpenApiController.php"
+code = "non-existent-class-like"
+message = 'Class `App\controllers\OpenApiController` cannot extend unknown type `Controller`'
 count = 1
 
 [[issues]]
