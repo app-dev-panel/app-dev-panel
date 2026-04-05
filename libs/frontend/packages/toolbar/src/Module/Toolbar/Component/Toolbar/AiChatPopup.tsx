@@ -11,64 +11,17 @@ import {
     useChatMutation,
     useGetStatusQuery,
 } from '@app-dev-panel/sdk/API/Llm/Llm';
+import {MessageCopyButton} from '@app-dev-panel/sdk/Component/MessageCopyButton';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import CloseIcon from '@mui/icons-material/Close';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DoneIcon from '@mui/icons-material/Done';
 import SendIcon from '@mui/icons-material/Send';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import {
-    Box,
-    Chip,
-    CircularProgress,
-    IconButton,
-    Link,
-    Paper,
-    Portal,
-    TextField,
-    Tooltip,
-    Typography,
-} from '@mui/material';
+import {Box, Chip, CircularProgress, IconButton, Link, Paper, Portal, TextField, Typography} from '@mui/material';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
 type Message = {role: 'duck' | 'user'; content: string; status?: 'ok' | 'sending' | 'error'; error?: string};
-
-const MessageCopyButton = ({text}: {text: string}) => {
-    const [copied, setCopied] = useState(false);
-    const handleCopy = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        navigator.clipboard.writeText(text).then(() => {
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
-        });
-    };
-    return (
-        <Tooltip title={copied ? 'Copied!' : 'Copy'} placement="top">
-            <IconButton
-                size="small"
-                onClick={handleCopy}
-                sx={{
-                    position: 'absolute',
-                    top: 4,
-                    right: 4,
-                    width: 22,
-                    height: 22,
-                    opacity: 0,
-                    transition: 'opacity 0.15s',
-                    bgcolor: 'background.paper',
-                    border: 1,
-                    borderColor: 'divider',
-                    '.message-bubble:hover &': {opacity: 1},
-                    '&:hover': {bgcolor: 'action.hover'},
-                }}
-            >
-                {copied ? <DoneIcon sx={{fontSize: 12}} /> : <ContentCopyIcon sx={{fontSize: 12}} />}
-            </IconButton>
-        </Tooltip>
-    );
-};
 
 const buildContextPrompt = (entry: DebugEntry): string => {
     const parts: string[] = ['Analyze this debug entry:'];
@@ -431,10 +384,13 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                                 </Box>
                             ) : (
                                 <>
-                                    <Typography sx={{fontSize: 12, lineHeight: 1.5, whiteSpace: 'pre-wrap'}}>
+                                    <Typography sx={{fontSize: 12, lineHeight: 1.5, whiteSpace: 'pre-wrap', pr: 3}}>
                                         {msg.status === 'error' ? msg.error || msg.content : msg.content}
                                     </Typography>
-                                    <MessageCopyButton text={msg.content || msg.error || ''} />
+                                    <MessageCopyButton
+                                        text={msg.content || msg.error || ''}
+                                        variant={msg.role === 'user' || msg.status === 'error' ? 'dark' : 'light'}
+                                    />
                                 </>
                             )}
                         </Box>
@@ -484,13 +440,13 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                             }
                         }}
                         disabled={chatLoading}
-                        slotProps={{input: {sx: {fontSize: 12, py: 0.75, borderRadius: 2}}}}
+                        slotProps={{input: {sx: {fontSize: 12, py: '7px', borderRadius: 2}}}}
                     />
                     <IconButton
                         size="small"
                         onClick={() => sendMessage(input)}
                         disabled={!input.trim() || chatLoading}
-                        sx={{color: 'primary.main', width: 36, height: 36, flexShrink: 0}}
+                        sx={{color: 'primary.main', width: 34, height: 34, flexShrink: 0, mb: '1px'}}
                     >
                         {chatLoading ? <CircularProgress size={18} /> : <SendIcon sx={{fontSize: 18}} />}
                     </IconButton>

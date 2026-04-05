@@ -15,6 +15,7 @@ import {
     removeErrorMessages,
     updateLastSending,
 } from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
+import {MessageCopyButton} from '@app-dev-panel/sdk/Component/MessageCopyButton';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -33,7 +34,7 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
 type MessageStatus = 'ok' | 'error' | 'sending';
@@ -52,9 +53,21 @@ const paperSx = {
 } as const;
 const emptyMsgSx = {textAlign: 'center', mt: 4} as const;
 const userMsgSx = {alignSelf: 'flex-end', maxWidth: '80%'} as const;
-const assistantMsgSx = {alignSelf: 'flex-start', maxWidth: '80%'} as const;
-const userBubbleSx = {p: 1.5, borderRadius: 2, bgcolor: 'primary.main', color: 'primary.contrastText'} as const;
-const assistantBubbleSx = {p: 1.5, borderRadius: 2, bgcolor: 'background.default', color: 'text.primary'} as const;
+const assistantMsgSx = {alignSelf: 'flex-start', maxWidth: '80%', position: 'relative'} as const;
+const userBubbleSx = {
+    p: 1.5,
+    borderRadius: 2,
+    bgcolor: 'primary.main',
+    color: 'primary.contrastText',
+    position: 'relative',
+} as const;
+const assistantBubbleSx = {
+    p: 1.5,
+    borderRadius: 2,
+    bgcolor: 'background.default',
+    color: 'text.primary',
+    position: 'relative',
+} as const;
 const sendingOpacity = {opacity: 0.7} as const;
 const loadingSx = {display: 'flex', alignItems: 'center', gap: 1} as const;
 const inputRowSx = {display: 'flex', gap: 1} as const;
@@ -96,99 +109,29 @@ const formatTime = (ts: number): string => {
     return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
 };
 
-export const ChatPanel = () => {
-    const {data: status} = useGetStatusQuery();
-    const [chat, {isLoading}] = useChatMutation();
-    const {data: history = []} = useGetHistoryQuery();
-    const [addHistory] = useAddHistoryMutation();
-    const [deleteHistory] = useDeleteHistoryMutation();
-    const [clearHistory] = useClearHistoryMutation();
-    const messages = useSelector(
-        (state: {aiChat?: {messages: ChatBubble[]}}) => state.aiChat?.messages ?? [],
-    ) as Message[];
+type ChatInputProps = {
+    onSend: (text: string) => void;
+    disabled: boolean;
+    loading: boolean;
+    prefillMessage: string | null;
+    onClearPrefill: () => void;
+};
+
+const ChatInput = memo(({onSend, disabled, loading, prefillMessage, onClearPrefill}: ChatInputProps) => {
     const [input, setInput] = useState('');
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    const dispatch = useDispatch();
-    const prefillMessage = useSelector(
-        (state: {aiChat?: {prefillMessage: string | null}}) => state.aiChat?.prefillMessage,
-    );
 
     useEffect(() => {
         if (prefillMessage) {
             setInput(prefillMessage);
-            dispatch(clearPrefillMessage());
+            onClearPrefill();
         }
-    }, [prefillMessage, dispatch]);
+    }, [prefillMessage, onClearPrefill]);
 
-    const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
-    const scrollToBottom = useCallback(() => {
-        clearTimeout(scrollTimerRef.current);
-        scrollTimerRef.current = setTimeout(() => messagesEndRef.current?.scrollIntoView({behavior: 'smooth'}), 100);
-    }, []);
-
-    const sendMessages = useCallback(
-        async (outgoing: Message[], userText: string) => {
-            try {
-                const result = await chat({
-                    messages: outgoing
-                        .filter((m) => m.status !== 'error')
-                        .map((m) => ({role: m.role, content: m.content})),
-                }).unwrap();
-
-                const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
-                dispatch(updateLastSending({status: 'ok', content: assistantContent}));
-
-                addHistory({query: userText, response: assistantContent, timestamp: Math.floor(Date.now() / 1000)});
-            } catch (err: unknown) {
-                const errorMsg = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
-                dispatch(updateLastSending({status: 'error', content: errorMsg, error: errorMsg}));
-                addHistory({query: userText, response: '', timestamp: Math.floor(Date.now() / 1000), error: errorMsg});
-                setInput(userText);
-            }
-            scrollToBottom();
-        },
-        [chat, scrollToBottom, addHistory, dispatch],
-    );
-
-    const inputRef = useRef(input);
-    inputRef.current = input;
-    const messagesRef = useRef(messages);
-    messagesRef.current = messages;
-
-    const handleSend = useCallback(async () => {
-        if (!inputRef.current.trim() || isLoading) return;
-
-        const userText = inputRef.current.trim();
-        const userMessage: ChatBubble = {role: 'user', content: userText, status: 'ok'};
-        dispatch(removeErrorMessages());
-        dispatch(addMessage(userMessage));
-        dispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
+    const handleSend = useCallback(() => {
+        if (!input.trim() || disabled) return;
+        onSend(input.trim());
         setInput('');
-        scrollToBottom();
-
-        const newMessages = [...messagesRef.current.filter((m) => m.status !== 'error'), userMessage];
-        await sendMessages(newMessages, userText);
-    }, [isLoading, sendMessages, scrollToBottom, dispatch]);
-
-    const handleRetry = useCallback(
-        async (index: number) => {
-            const msg = messagesRef.current[index];
-            if (!msg || msg.status !== 'error') return;
-
-            const userText = msg.content;
-            const retryMessage: ChatBubble = {role: 'user', content: userText, status: 'ok'};
-            dispatch(removeErrorMessages());
-            dispatch(addMessage(retryMessage));
-            dispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
-            setInput('');
-            scrollToBottom();
-
-            const cleaned = messagesRef.current.filter((_, i) => i !== index);
-            const newMessages = [...cleaned, retryMessage];
-            await sendMessages(newMessages, userText);
-        },
-        [sendMessages, scrollToBottom, dispatch],
-    );
+    }, [input, disabled, onSend]);
 
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent) => {
@@ -201,6 +144,112 @@ export const ChatPanel = () => {
     );
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value), []);
+
+    return (
+        <Box sx={inputRowSx}>
+            <TextField
+                fullWidth
+                size="small"
+                placeholder="Ask about your application..."
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                multiline
+                maxRows={3}
+            />
+            <SendButton label="Send" onClick={handleSend} disabled={!input.trim()} loading={loading} />
+        </Box>
+    );
+});
+
+export const ChatPanel = () => {
+    const {data: status} = useGetStatusQuery();
+    const [chat, {isLoading}] = useChatMutation();
+    const {data: history = []} = useGetHistoryQuery();
+    const [addHistory] = useAddHistoryMutation();
+    const [deleteHistory] = useDeleteHistoryMutation();
+    const [clearHistory] = useClearHistoryMutation();
+    const messages = useSelector(
+        (state: {aiChat?: {messages: ChatBubble[]}}) => state.aiChat?.messages ?? [],
+    ) as Message[];
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const dispatch = useDispatch();
+    const prefillMessage = useSelector(
+        (state: {aiChat?: {prefillMessage: string | null}}) => state.aiChat?.prefillMessage,
+    );
+
+    const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+    const scrollToBottom = useCallback(() => {
+        clearTimeout(scrollTimerRef.current);
+        scrollTimerRef.current = setTimeout(() => messagesEndRef.current?.scrollIntoView({behavior: 'smooth'}), 100);
+    }, []);
+
+    const messagesRef = useRef(messages);
+    messagesRef.current = messages;
+
+    const handleSend = useCallback(
+        async (userText: string) => {
+            const userMessage: ChatBubble = {role: 'user', content: userText, status: 'ok'};
+            dispatch(removeErrorMessages());
+            dispatch(addMessage(userMessage));
+            dispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
+            scrollToBottom();
+
+            const outgoing = [...messagesRef.current.filter((m) => m.status !== 'error'), userMessage];
+            try {
+                const result = await chat({
+                    messages: outgoing
+                        .filter((m) => m.status !== 'error')
+                        .map((m) => ({role: m.role, content: m.content})),
+                }).unwrap();
+
+                const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
+                dispatch(updateLastSending({status: 'ok', content: assistantContent}));
+                addHistory({query: userText, response: assistantContent, timestamp: Math.floor(Date.now() / 1000)});
+            } catch (err: unknown) {
+                const errorMsg = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
+                dispatch(updateLastSending({status: 'error', content: errorMsg, error: errorMsg}));
+                addHistory({query: userText, response: '', timestamp: Math.floor(Date.now() / 1000), error: errorMsg});
+            }
+            scrollToBottom();
+        },
+        [chat, scrollToBottom, addHistory, dispatch],
+    );
+
+    const handleRetry = useCallback(
+        async (index: number) => {
+            const msg = messagesRef.current[index];
+            if (!msg || msg.status !== 'error') return;
+
+            const userText = msg.content;
+            const retryMessage: ChatBubble = {role: 'user', content: userText, status: 'ok'};
+            dispatch(removeErrorMessages());
+            dispatch(addMessage(retryMessage));
+            dispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
+            scrollToBottom();
+
+            const outgoing = [...messagesRef.current.filter((_, i) => i !== index), retryMessage];
+            try {
+                const result = await chat({
+                    messages: outgoing
+                        .filter((m) => m.status !== 'error')
+                        .map((m) => ({role: m.role, content: m.content})),
+                }).unwrap();
+
+                const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
+                dispatch(updateLastSending({status: 'ok', content: assistantContent}));
+                addHistory({query: userText, response: assistantContent, timestamp: Math.floor(Date.now() / 1000)});
+            } catch (err: unknown) {
+                const errorMsg = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
+                dispatch(updateLastSending({status: 'error', content: errorMsg, error: errorMsg}));
+                addHistory({query: userText, response: '', timestamp: Math.floor(Date.now() / 1000), error: errorMsg});
+            }
+            scrollToBottom();
+        },
+        [chat, scrollToBottom, addHistory, dispatch],
+    );
+
+    const handleClearPrefill = useCallback(() => dispatch(clearPrefillMessage()), [dispatch]);
 
     const handleClearHistory = useCallback(
         (e: React.MouseEvent) => {
@@ -261,6 +310,7 @@ export const ChatPanel = () => {
                             </>
                         ) : (
                             <Box
+                                className="message-bubble"
                                 sx={
                                     msg.role === 'user'
                                         ? bubbleSx.user
@@ -277,11 +327,17 @@ export const ChatPanel = () => {
                                         </Typography>
                                     </Box>
                                 ) : msg.role === 'assistant' ? (
-                                    <Markdown content={msg.content} />
+                                    <>
+                                        <Markdown content={msg.content} />
+                                        <MessageCopyButton text={msg.content} />
+                                    </>
                                 ) : (
-                                    <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
-                                        {msg.content}
-                                    </Typography>
+                                    <>
+                                        <Typography variant="body2" sx={{whiteSpace: 'pre-wrap', pr: 3}}>
+                                            {msg.content}
+                                        </Typography>
+                                        <MessageCopyButton text={msg.content} variant="dark" />
+                                    </>
                                 )}
                             </Box>
                         )}
@@ -289,19 +345,13 @@ export const ChatPanel = () => {
                 ))}
                 <div ref={messagesEndRef} />
             </Paper>
-            <Box sx={inputRowSx}>
-                <TextField
-                    fullWidth
-                    size="small"
-                    placeholder="Ask about your application..."
-                    value={input}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    multiline
-                    maxRows={3}
-                />
-                <SendButton label="Send" onClick={handleSend} disabled={!input.trim()} loading={isLoading} />
-            </Box>
+            <ChatInput
+                onSend={handleSend}
+                disabled={isLoading}
+                loading={isLoading}
+                prefillMessage={prefillMessage ?? null}
+                onClearPrefill={handleClearPrefill}
+            />
 
             {/* History */}
             {history.length > 0 && (
