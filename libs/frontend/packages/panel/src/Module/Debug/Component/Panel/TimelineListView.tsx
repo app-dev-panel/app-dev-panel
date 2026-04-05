@@ -11,7 +11,9 @@ import {useCallback, useState} from 'react';
 
 type Item = [number, number, string] | [number, number, string, string];
 
-type TimelineListViewProps = {data: Item[]; filtered: Item[]; enrichedDetails: (string | null)[]};
+import {type EnrichedDetail} from '@app-dev-panel/panel/Module/Debug/Component/Panel/useTimelineEnrichment';
+
+type TimelineListViewProps = {data: Item[]; filtered: Item[]; enrichedDetails: (EnrichedDetail | null)[]};
 
 // ---------------------------------------------------------------------------
 // Collector FQCN → color key mapping
@@ -227,14 +229,15 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                 const color = getColor(collectorClass);
                 const label = getCollectorLabel(collectorClass);
                 const ref = row[1] != null && row[1] !== '' ? String(row[1]) : null;
-                const rawDetail = enrichedDetails[index];
+                const enriched = enrichedDetails[index];
                 const expanded = expandedIndex === index;
                 const isException = collectorClass === CollectorsMap.ExceptionCollector;
 
                 // For LogCollector: extract level from "[level] message" format
-                const logMatch = rawDetail?.match(/^\[(\w+)] (.*)$/);
+                const logMatch = enriched?.preview.match(/^\[(\w+)] (.*)$/);
                 const logLevel = logMatch?.[1] ?? null;
-                const detail = isException ? ref : logMatch ? logMatch[2] : rawDetail;
+                const detail = isException ? ref : logMatch ? logMatch[2] : enriched?.preview ?? null;
+                const fullDetail = isException ? ref : logMatch ? enriched!.full.replace(/^\[\w+] /, '') : enriched?.full ?? null;
 
                 const levelColor = logLevel ? logLevelColor(logLevel, theme) : null;
 
@@ -294,6 +297,20 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                                         {collectorClass}
                                     </Typography>
                                 </FileLink>
+                                {fullDetail && (
+                                    <Typography
+                                        sx={(t) => ({
+                                            mt: 1,
+                                            fontFamily: t.adp.fontFamilyMono,
+                                            fontSize: '12px',
+                                            color: 'text.primary',
+                                            wordBreak: 'break-word',
+                                            whiteSpace: 'pre-wrap',
+                                        })}
+                                    >
+                                        {fullDetail}
+                                    </Typography>
+                                )}
                                 {Array.isArray(row[3]) && row[3].length > 0 && (
                                     <JsonRenderer
                                         value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]}

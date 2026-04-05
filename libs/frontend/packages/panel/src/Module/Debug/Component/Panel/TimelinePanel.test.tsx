@@ -154,7 +154,7 @@ describe('TimelinePanel', () => {
             ];
             renderWithProviders(<TimelinePanel data={data} />);
             // EventCollector row[3] is shown as short class name
-            expect(screen.getByText('BeforeRequest')).toBeInTheDocument();
+            expect(screen.getAllByText('BeforeRequest').length).toBeGreaterThanOrEqual(1);
         });
     });
 });

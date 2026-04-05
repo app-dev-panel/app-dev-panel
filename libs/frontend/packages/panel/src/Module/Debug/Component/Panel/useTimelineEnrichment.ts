@@ -15,11 +15,18 @@ const enrichableCollectors = new Set([
 
 type CollectorDataMap = Map<string, any>;
 
+export type EnrichedDetail = {
+    /** Truncated preview for inline display */
+    preview: string;
+    /** Full untruncated text for expanded view */
+    full: string;
+};
+
 function getEnrichedDetail(
     row: Item,
     collectorData: CollectorDataMap,
     collectorIndexes: Map<string, number>,
-): string | null {
+): EnrichedDetail | null {
     const collectorClass = row[2];
     const data = collectorData.get(collectorClass);
 
@@ -35,15 +42,18 @@ function getEnrichedDetail(
             const shortName = (entry.name || '').split('\\').pop() ?? '';
             // Show "ClassName (eventName)" when event field differs from class name
             if (entry.event && entry.event !== entry.name && entry.event !== shortName) {
-                return `${shortName} (${entry.event})`;
+                const text = `${shortName} (${entry.event})`;
+                return {preview: text, full: text};
             }
-            return shortName || entry.event || null;
+            const text = shortName || entry.event || null;
+            return text ? {preview: text, full: text} : null;
         }
         // Fallback: use row[3] if collector data not loaded yet
         if (row[3]) {
             const eventClass = typeof row[3] === 'string' ? row[3] : Array.isArray(row[3]) ? row[3][0] : null;
             if (eventClass && typeof eventClass === 'string') {
-                return eventClass.split('\\').pop() ?? eventClass;
+                const text = eventClass.split('\\').pop() ?? eventClass;
+                return {preview: text, full: text};
             }
         }
     }
@@ -54,8 +64,9 @@ function getEnrichedDetail(
     if (collectorClass === CollectorsMap.LogCollector && Array.isArray(data) && data[currentIndex]) {
         const entry = data[currentIndex];
         const message = typeof entry.message === 'string' ? entry.message : JSON.stringify(entry.message);
-        const truncated = message.length > 80 ? message.slice(0, 80) + '...' : message;
-        return `[${entry.level}] ${truncated}`;
+        const full = `[${entry.level}] ${message}`;
+        const preview = message.length > 80 ? `[${entry.level}] ${message.slice(0, 80)}...` : full;
+        return {preview, full};
     }
 
     // DatabaseCollector: data is {queries: [...], transactions: [...], duplicates: {...}}
@@ -63,8 +74,8 @@ function getEnrichedDetail(
         const queries = data.queries ?? (Array.isArray(data) ? data : []);
         if (Array.isArray(queries) && queries[currentIndex]) {
             const sql = queries[currentIndex].sql || queries[currentIndex].rawSql || '';
-            const truncated = sql.length > 80 ? sql.slice(0, 80) + '...' : sql;
-            return truncated;
+            const preview = sql.length > 80 ? sql.slice(0, 80) + '...' : sql;
+            return {preview, full: sql};
         }
     }
 
@@ -74,7 +85,7 @@ function getEnrichedDetail(
         if (Array.isArray(renders) && renders[currentIndex]) {
             const template = renders[currentIndex].template || '';
             const name = template.includes('/') ? template.split('/').pop() : template;
-            return name || null;
+            return name ? {preview: name, full: template} : null;
         }
     }
 
@@ -85,7 +96,7 @@ function getEnrichedDetail(
  * Hook that fetches collector data and computes enriched detail strings
  * for each timeline event by cross-referencing with source collector records.
  */
-export function useTimelineEnrichment(allData: Item[], filteredData: Item[]): (string | null)[] {
+export function useTimelineEnrichment(allData: Item[], filteredData: Item[]): (EnrichedDetail | null)[] {
     const debugEntry = useDebugEntry();
     const [fetchCollector] = useLazyGetCollectorInfoQuery();
     const [collectorData, setCollectorData] = useState<CollectorDataMap>(new Map());

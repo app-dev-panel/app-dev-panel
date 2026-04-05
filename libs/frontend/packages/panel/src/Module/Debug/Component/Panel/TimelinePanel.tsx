@@ -345,13 +345,14 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                         const relativeTime = row[0] - minTime;
                         const offset = (relativeTime / totalSpan) * 100;
                         const expanded = expandedIndex === index;
-                        const rawDetail = enrichedDetails[index];
+                        const enriched = enrichedDetails[index];
                         const color = getCollectorColor(collectorClass);
                         const label = getCollectorLabel(collectorClass);
 
                         // Strip [level] prefix from log details
-                        const logMatch = rawDetail?.match(/^\[(\w+)] (.*)$/);
-                        const detail = logMatch ? logMatch[2] : rawDetail;
+                        const logMatch = enriched?.preview.match(/^\[(\w+)] (.*)$/);
+                        const detail = logMatch ? logMatch[2] : enriched?.preview ?? null;
+                        const fullDetail = logMatch ? enriched!.full.replace(/^\[\w+] /, '') : enriched?.full ?? null;
 
                         // Format relative time offset
                         const offsetLabel =
@@ -414,6 +415,20 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                                 {row[2]}
                                             </Typography>
                                         </FileLink>
+                                        {fullDetail && (
+                                            <Typography
+                                                sx={(theme) => ({
+                                                    mt: 1,
+                                                    fontFamily: theme.adp.fontFamilyMono,
+                                                    fontSize: '12px',
+                                                    color: 'text.primary',
+                                                    wordBreak: 'break-word',
+                                                    whiteSpace: 'pre-wrap',
+                                                })}
+                                            >
+                                                {fullDetail}
+                                            </Typography>
+                                        )}
                                         {Array.isArray(row[3]) && row[3].length > 0 && (
                                             <JsonRenderer
                                                 value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]}
