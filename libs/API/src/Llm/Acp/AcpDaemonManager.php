@@ -7,10 +7,10 @@ namespace AppDevPanel\Api\Llm\Acp;
 use RuntimeException;
 
 /**
- * Manages the ACP daemon lifecycle: start, stop, status.
+ * Manages the ACP daemon lifecycle and session-scoped agent subprocesses.
  *
- * The daemon is a persistent background PHP process that maintains
- * an ACP agent subprocess and accepts prompt requests via Unix socket.
+ * The daemon starts "empty" (no agents). Agent subprocesses are spawned
+ * per session via startSession(), each identified by a client-generated UUID.
  */
 final class AcpDaemonManager implements AcpDaemonManagerInterface
 {
@@ -20,15 +20,7 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
         private readonly string $storagePath,
     ) {}
 
-    /**
-     * Start the ACP daemon as a background process.
-     *
-     * @param list<string> $args CLI arguments for the agent
-     * @param array<string, string> $env Environment variables for the agent
-     *
-     * @throws RuntimeException If the daemon fails to start
-     */
-    public function start(string $command, array $args = [], array $env = []): void
+    public function start(): void
     {
         if ($this->isRunning()) {
             return;
@@ -49,17 +41,19 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
             mkdir($dir, 0o755, true);
         }
 
+        $storageDir = $this->storagePath;
+        if (!is_dir($storageDir)) {
+            mkdir($storageDir, 0o755, true);
+        }
+
         $logFile = $this->getLogFilePath();
 
         $cmd = sprintf(
-            '%s %s --socket=%s --pid=%s --command=%s --args=%s --env=%s > /dev/null 2>%s &',
+            '%s %s --socket=%s --pid=%s > /dev/null 2>%s &',
             escapeshellarg(PHP_BINARY),
             escapeshellarg($daemonScript),
             escapeshellarg($socketPath),
             escapeshellarg($pidFile),
-            escapeshellarg($command),
-            escapeshellarg(json_encode($args, JSON_THROW_ON_ERROR)),
-            escapeshellarg(json_encode($env, JSON_THROW_ON_ERROR)),
             escapeshellarg($logFile),
         );
 
@@ -68,33 +62,25 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
         $this->waitForSocket(self::START_TIMEOUT);
     }
 
-    /**
-     * Stop the running ACP daemon.
-     */
     public function stop(): void
     {
         $socketPath = $this->getSocketPath();
 
-        // Try graceful shutdown via socket first
         if (file_exists($socketPath)) {
             try {
                 $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 3.0);
                 if ($socket !== false) {
                     fwrite($socket, json_encode(['action' => 'shutdown']) . "\n");
-                    // Wait briefly for acknowledgment
                     stream_set_timeout($socket, 2);
                     fgets($socket);
                     fclose($socket);
-
-                    // Give daemon time to clean up
                     usleep(500_000);
                 }
             } catch (\Throwable) {
-                // Ignore — fall through to PID-based kill
+                // Fall through to PID-based kill
             }
         }
 
-        // Force-kill via PID if still running
         $pidFile = $this->getPidFilePath();
         if (file_exists($pidFile)) {
             $pid = (int) file_get_contents($pidFile);
@@ -111,9 +97,6 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
         $this->cleanup();
     }
 
-    /**
-     * Check if the ACP daemon is running and responsive.
-     */
     public function isRunning(): bool
     {
         $socketPath = $this->getSocketPath();
@@ -122,7 +105,6 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
             return false;
         }
 
-        // Verify via ping
         try {
             $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 2.0);
             if ($socket === false) {
@@ -146,15 +128,109 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
         }
     }
 
-    /**
-     * Send a prompt to the running daemon and return the response.
-     *
-     * @param list<array{role: string, content: string}> $messages
-     * @return array<string, mixed>
-     *
-     * @throws RuntimeException If the daemon is not running or communication fails
-     */
-    public function sendPrompt(array $messages, string $customPrompt, float $timeout): array
+    public function startSession(string $sessionId, string $command, array $args = [], array $env = []): array
+    {
+        $socketPath = $this->getSocketPath();
+
+        $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 5.0);
+
+        if ($socket === false) {
+            throw new RuntimeException("Cannot connect to ACP daemon: {$errstr}");
+        }
+
+        $request = json_encode(
+            [
+                'action' => 'session-start',
+                'sessionId' => $sessionId,
+                'command' => $command,
+                'args' => $args,
+                'env' => $env,
+            ],
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
+        );
+
+        fwrite($socket, $request . "\n");
+
+        // Agent spawn + initialize can take a while
+        stream_set_timeout($socket, 60);
+        $responseLine = fgets($socket);
+        fclose($socket);
+
+        if ($responseLine === false) {
+            throw new RuntimeException('ACP daemon did not respond to session-start.');
+        }
+
+        $data = json_decode(trim($responseLine), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!is_array($data)) {
+            throw new RuntimeException('Invalid response from ACP daemon.');
+        }
+
+        if (isset($data['error'])) {
+            throw new RuntimeException($data['error']);
+        }
+
+        return [
+            'agentName' => $data['agentName'] ?? '',
+            'agentVersion' => $data['agentVersion'] ?? '',
+        ];
+    }
+
+    public function stopSession(string $sessionId): void
+    {
+        $socketPath = $this->getSocketPath();
+
+        try {
+            $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 3.0);
+            if ($socket === false) {
+                return;
+            }
+
+            fwrite($socket, json_encode([
+                'action' => 'session-stop',
+                'sessionId' => $sessionId,
+            ])
+                . "\n");
+            stream_set_timeout($socket, 5);
+            fgets($socket);
+            fclose($socket);
+        } catch (\Throwable) {
+            // Best effort
+        }
+    }
+
+    public function isSessionActive(string $sessionId): bool
+    {
+        $socketPath = $this->getSocketPath();
+
+        try {
+            $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 2.0);
+            if ($socket === false) {
+                return false;
+            }
+
+            fwrite($socket, json_encode([
+                'action' => 'session-status',
+                'sessionId' => $sessionId,
+            ])
+                . "\n");
+            stream_set_timeout($socket, 5);
+            $responseLine = fgets($socket);
+            fclose($socket);
+
+            if ($responseLine === false) {
+                return false;
+            }
+
+            $data = json_decode(trim($responseLine), true);
+
+            return is_array($data) && ($data['active'] ?? false) === true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    public function sendPrompt(string $sessionId, array $messages, string $customPrompt, float $timeout): array
     {
         $socketPath = $this->getSocketPath();
 
@@ -167,6 +243,7 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
         $request = json_encode(
             [
                 'action' => 'prompt',
+                'sessionId' => $sessionId,
                 'messages' => $messages,
                 'customPrompt' => $customPrompt,
                 'timeout' => $timeout,
@@ -176,7 +253,6 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
         fwrite($socket, $request . "\n");
 
-        // Read response with generous timeout (agent may take a while)
         stream_set_timeout($socket, (int) $timeout + 10);
         $responseLine = fgets($socket);
         fclose($socket);
@@ -212,23 +288,17 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
         return $this->storagePath . '/.acp-daemon.log';
     }
 
-    /**
-     * Wait for the daemon socket to become available.
-     */
     private function waitForSocket(float $timeout): void
     {
         $deadline = microtime(true) + $timeout;
         $socketPath = $this->getSocketPath();
 
         while (microtime(true) < $deadline) {
-            if (file_exists($socketPath)) {
-                // Verify it's responsive
-                if ($this->isRunning()) {
-                    return;
-                }
+            if (file_exists($socketPath) && $this->isRunning()) {
+                return;
             }
 
-            usleep(200_000); // 200ms
+            usleep(200_000);
         }
 
         $logTail = $this->readLogTail();

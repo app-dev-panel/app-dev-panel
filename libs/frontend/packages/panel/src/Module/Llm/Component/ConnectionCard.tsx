@@ -1,4 +1,5 @@
 import {
+    clearAcpSessionId,
     LlmModel,
     LlmProvider,
     useConnectMutation,
@@ -120,6 +121,7 @@ export const ConnectionCard = () => {
 
     const handleDisconnect = useCallback(async () => {
         await disconnect();
+        clearAcpSessionId();
         setExpanded(false);
     }, [disconnect]);
 

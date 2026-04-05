@@ -50,12 +50,17 @@ final class LlmProviderService
      * @param list<array{role: string, content: string}> $messages
      * @return array<string, mixed>
      */
-    public function sendChat(string $provider, array $messages, string $model, float $temperature): array
-    {
+    public function sendChat(
+        string $provider,
+        array $messages,
+        string $model,
+        float $temperature,
+        ?string $acpSessionId = null,
+    ): array {
         return match ($provider) {
             'anthropic' => $this->sendAnthropicChat($messages, $model, $temperature),
             'openai' => $this->sendOpenAiChat($messages, $model, $temperature),
-            'acp' => $this->sendAcpChat($messages),
+            'acp' => $this->sendAcpChat($messages, $acpSessionId),
             default => $this->sendOpenRouterChat($messages, $model, $temperature),
         };
     }
@@ -365,39 +370,29 @@ final class LlmProviderService
      * @param list<array{role: string, content: string}> $messages
      * @return array<string, mixed>
      */
-    private function sendAcpChat(array $messages): array
+    private function sendAcpChat(array $messages, ?string $sessionId): array
     {
         if ($this->acpDaemonManager === null) {
             return ['error' => 'ACP provider is not configured (missing AcpDaemonManager).'];
         }
 
-        if (!$this->acpDaemonManager->isRunning()) {
-            $socketPath = $this->acpDaemonManager->getSocketPath();
-            $socketExists = file_exists($socketPath);
-            $pidPath = $this->acpDaemonManager->getPidFilePath();
-            $pidExists = file_exists($pidPath);
-            $pid = $pidExists ? (int) file_get_contents($pidPath) : 0;
+        if ($sessionId === null || $sessionId === '') {
+            return ['error' => 'Missing ACP session ID. Please reconnect.'];
+        }
 
-            return [
-                'error' => 'ACP daemon is not running. Please reconnect the ACP provider.',
-                '_debug' => [
-                    'socketPath' => $socketPath,
-                    'socketExists' => $socketExists,
-                    'pidPath' => $pidPath,
-                    'pidExists' => $pidExists,
-                    'pid' => $pid,
-                    'logTail' => file_exists($this->acpDaemonManager->getLogFilePath())
-                        ? substr((string) file_get_contents($this->acpDaemonManager->getLogFilePath()), -2000)
-                        : 'no log file',
-                ],
-            ];
+        if (!$this->acpDaemonManager->isRunning()) {
+            return ['error' => 'ACP daemon is not running. Please reconnect the ACP provider.'];
+        }
+
+        if (!$this->acpDaemonManager->isSessionActive($sessionId)) {
+            return ['error' => 'ACP session is not active. Please reconnect.'];
         }
 
         $timeout = (float) $this->settings->getTimeout();
         $customPrompt = $this->settings->getCustomPrompt();
 
         try {
-            $data = $this->acpDaemonManager->sendPrompt($messages, $customPrompt, $timeout);
+            $data = $this->acpDaemonManager->sendPrompt($sessionId, $messages, $customPrompt, $timeout);
         } catch (\RuntimeException $e) {
             return ['error' => 'ACP daemon error: ' . $e->getMessage()];
         }
@@ -414,10 +409,7 @@ final class LlmProviderService
             toolCalls: $data['toolCalls'] ?? [],
         );
 
-        $result = $response->toOpenAiFormat();
-        $result['_debug'] = $data;
-
-        return $result;
+        return $response->toOpenAiFormat();
     }
 
     /**

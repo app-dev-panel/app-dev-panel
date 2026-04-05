@@ -230,11 +230,30 @@ final class LlmProviderServiceTest extends TestCase
         $this->assertStringContainsString('not configured', $result['error']);
     }
 
+    public function testSendChatAcpReturnsErrorWhenNoSessionId(): void
+    {
+        $settings = $this->createMock(LlmSettingsInterface::class);
+
+        $daemonManager = $this->createMock(AcpDaemonManagerInterface::class);
+
+        $httpFactory = new HttpFactory();
+        $service = new LlmProviderService(
+            $settings,
+            $this->mockHttpClient(new Response(200, [], '{}')),
+            $httpFactory,
+            $httpFactory,
+            $daemonManager,
+        );
+
+        $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7, null);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertStringContainsString('session ID', $result['error']);
+    }
+
     public function testSendChatAcpReturnsErrorWhenDaemonNotRunning(): void
     {
         $settings = $this->createMock(LlmSettingsInterface::class);
-        $settings->method('getTimeout')->willReturn(30);
-        $settings->method('getCustomPrompt')->willReturn('');
 
         $daemonManager = $this->createMock(AcpDaemonManagerInterface::class);
         $daemonManager->method('isRunning')->willReturn(false);
@@ -248,7 +267,7 @@ final class LlmProviderServiceTest extends TestCase
             $daemonManager,
         );
 
-        $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7);
+        $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7, 'test-session');
 
         $this->assertArrayHasKey('error', $result);
         $this->assertStringContainsString('not running', $result['error']);
@@ -262,8 +281,10 @@ final class LlmProviderServiceTest extends TestCase
 
         $daemonManager = $this->createMock(AcpDaemonManagerInterface::class);
         $daemonManager->method('isRunning')->willReturn(true);
+        $daemonManager->method('isSessionActive')->willReturn(true);
         $daemonManager
             ->method('sendPrompt')
+            ->with('test-session', $this->anything(), $this->anything(), $this->anything())
             ->willReturn([
                 'text' => 'Hello from ACP!',
                 'stopReason' => 'end_turn',
@@ -281,7 +302,7 @@ final class LlmProviderServiceTest extends TestCase
             $daemonManager,
         );
 
-        $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7);
+        $result = $service->sendChat('acp', [['role' => 'user', 'content' => 'hi']], 'acp-agent', 0.7, 'test-session');
 
         $this->assertSame('Hello from ACP!', $result['choices'][0]['message']['content']);
         $this->assertSame('TestAgent', $result['acp']['agentName']);

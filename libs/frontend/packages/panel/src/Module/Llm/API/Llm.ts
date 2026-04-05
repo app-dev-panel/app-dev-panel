@@ -1,3 +1,6 @@
+// Re-export session helpers
+export {clearAcpSessionId, getAcpSessionId} from '@app-dev-panel/sdk/API/Llm/acpSession';
+
 // Re-export everything from the shared SDK LLM API
 export {
     llmApi,

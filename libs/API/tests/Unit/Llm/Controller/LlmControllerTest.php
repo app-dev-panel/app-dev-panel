@@ -6,6 +6,7 @@ namespace AppDevPanel\Api\Tests\Unit\Llm\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -41,6 +42,7 @@ final class LlmControllerTest extends TestCase
         ?ClientInterface $httpClient = null,
         ?LlmProviderService $providerService = null,
         ?AcpCommandVerifierInterface $commandVerifier = null,
+        ?AcpDaemonManagerInterface $acpDaemonManager = null,
     ): LlmController {
         $settings = new FileLlmSettings($this->tmpDir);
         if ($apiKey !== null) {
@@ -51,7 +53,7 @@ final class LlmControllerTest extends TestCase
         $httpFactory = new HttpFactory();
         $client = $httpClient ?? $this->mockHttpClient(new Response(200, [], '{}'));
 
-        $providerService ??= new LlmProviderService($settings, $client, $httpFactory, $httpFactory);
+        $providerService ??= new LlmProviderService($settings, $client, $httpFactory, $httpFactory, $acpDaemonManager);
 
         return new LlmController(
             new JsonResponseFactory($httpFactory, $httpFactory),
@@ -62,6 +64,7 @@ final class LlmControllerTest extends TestCase
             $httpFactory,
             $client,
             $commandVerifier,
+            $acpDaemonManager,
         );
     }
 
@@ -72,9 +75,30 @@ final class LlmControllerTest extends TestCase
         return $client;
     }
 
-    private function post(array $body): ServerRequest
+    private function post(array $body, array $headers = []): ServerRequest
     {
-        return new ServerRequest('POST', '/test')->withBody(Stream::create(json_encode($body, JSON_THROW_ON_ERROR)));
+        $request = new ServerRequest('POST', '/test')->withBody(Stream::create(json_encode(
+            $body,
+            JSON_THROW_ON_ERROR,
+        )));
+        foreach ($headers as $name => $value) {
+            $request = $request->withHeader($name, $value);
+        }
+        return $request;
+    }
+
+    private function acpPost(array $body): ServerRequest
+    {
+        return $this->post($body, ['X-Acp-Session' => 'test-session-id']);
+    }
+
+    private function mockDaemonManager(): AcpDaemonManagerInterface
+    {
+        $mock = $this->createMock(AcpDaemonManagerInterface::class);
+        $mock->method('isRunning')->willReturn(true);
+        $mock->method('startSession')->willReturn(['agentName' => 'TestAgent', 'agentVersion' => '1.0']);
+        $mock->method('isSessionActive')->willReturn(true);
+        return $mock;
     }
 
     private function data(\Psr\Http\Message\ResponseInterface $response): array
@@ -647,8 +671,11 @@ final class LlmControllerTest extends TestCase
 
     public function testConnectAcpWithValidCommand(): void
     {
-        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
-        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'claude']));
+        $controller = $this->makeController(
+            commandVerifier: $this->mockVerifier(true),
+            acpDaemonManager: $this->mockDaemonManager(),
+        );
+        $response = $controller->connect($this->acpPost(['provider' => 'acp', 'acpCommand' => 'claude']));
         $data = $this->data($response);
 
         $this->assertSame(200, $response->getStatusCode());
@@ -673,23 +700,32 @@ final class LlmControllerTest extends TestCase
 
     public function testConnectAcpDefaultCommand(): void
     {
-        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
-        $response = $controller->connect($this->post(['provider' => 'acp']));
+        $controller = $this->makeController(
+            commandVerifier: $this->mockVerifier(true),
+            acpDaemonManager: $this->mockDaemonManager(),
+        );
+        $response = $controller->connect($this->acpPost(['provider' => 'acp']));
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('npx', $this->data($response)['acpCommand']);
     }
 
     public function testConnectAcpDoesNotRequireApiKey(): void
     {
-        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
-        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'npx']));
+        $controller = $this->makeController(
+            commandVerifier: $this->mockVerifier(true),
+            acpDaemonManager: $this->mockDaemonManager(),
+        );
+        $response = $controller->connect($this->acpPost(['provider' => 'acp', 'acpCommand' => 'npx']));
         $this->assertSame(200, $response->getStatusCode());
     }
 
     public function testConnectAcpWithArgsAndEnv(): void
     {
-        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
-        $response = $controller->connect($this->post([
+        $controller = $this->makeController(
+            commandVerifier: $this->mockVerifier(true),
+            acpDaemonManager: $this->mockDaemonManager(),
+        );
+        $response = $controller->connect($this->acpPost([
             'provider' => 'acp',
             'acpCommand' => 'claude',
             'acpArgs' => ['--version'],
@@ -702,8 +738,11 @@ final class LlmControllerTest extends TestCase
 
     public function testStatusAfterAcpConnect(): void
     {
-        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
-        $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'claude']));
+        $controller = $this->makeController(
+            commandVerifier: $this->mockVerifier(true),
+            acpDaemonManager: $this->mockDaemonManager(),
+        );
+        $controller->connect($this->acpPost(['provider' => 'acp', 'acpCommand' => 'claude']));
 
         $data = $this->data($controller->status(new ServerRequest('GET', '/')));
         $this->assertTrue($data['connected']);
@@ -713,8 +752,11 @@ final class LlmControllerTest extends TestCase
 
     public function testModelsAcpConnected(): void
     {
-        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
-        $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'claude']));
+        $controller = $this->makeController(
+            commandVerifier: $this->mockVerifier(true),
+            acpDaemonManager: $this->mockDaemonManager(),
+        );
+        $controller->connect($this->acpPost(['provider' => 'acp', 'acpCommand' => 'claude']));
 
         $data = $this->data($controller->models(new ServerRequest('GET', '/')));
         $this->assertArrayHasKey('models', $data);
@@ -724,11 +766,22 @@ final class LlmControllerTest extends TestCase
 
     public function testConnectAcpWithoutVerifierSkipsCheck(): void
     {
-        // Without a verifier injected, ACP connect should succeed regardless of command
-        $controller = $this->makeController();
-        $response = $controller->connect($this->post(['provider' => 'acp', 'acpCommand' => 'anything']));
+        $controller = $this->makeController(acpDaemonManager: $this->mockDaemonManager());
+        $response = $controller->connect($this->acpPost(['provider' => 'acp', 'acpCommand' => 'anything']));
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertTrue($this->data($response)['connected']);
+    }
+
+    public function testConnectAcpRequiresSessionHeader(): void
+    {
+        $controller = $this->makeController(
+            commandVerifier: $this->mockVerifier(true),
+            acpDaemonManager: $this->mockDaemonManager(),
+        );
+        $response = $controller->connect($this->post(['provider' => 'acp']));
+
+        $this->assertSame(400, $response->getStatusCode());
+        $this->assertStringContainsString('X-Acp-Session', $this->data($response)['error']);
     }
 }

@@ -2,28 +2,33 @@
 <?php
 
 /**
- * Self-contained ACP daemon — persistent ACP agent process with Unix socket server.
+ * Self-contained ACP daemon — manages multiple ACP agent subprocesses via Unix socket.
  *
- * Spawns an ACP agent subprocess once, performs the initialize handshake,
- * then listens on a Unix socket for prompt requests from PHP web processes.
+ * Starts "empty" (no agents). Agents are spawned per session via `session-start`.
+ * Each session has its own agent subprocess with independent ACP lifecycle.
  *
  * Protocol (over Unix socket, newline-delimited JSON):
- *   Request:  {"action": "prompt", "messages": [...], "customPrompt": "...", "timeout": 60}
- *   Response: {"text": "...", "stopReason": "...", "agentName": "...", "agentVersion": "...", "toolCalls": [...]}
  *
- *   Request:  {"action": "ping"}
- *   Response: {"ok": true}
+ *   {"action": "ping"}
+ *   → {"ok": true, "sessions": 2}
  *
- *   Request:  {"action": "shutdown"}
- *   Response: {"ok": true}  (then daemon exits)
+ *   {"action": "session-start", "sessionId": "uuid", "command": "npx", "args": [...], "env": {...}}
+ *   → {"ok": true, "agentName": "...", "agentVersion": "..."}
+ *
+ *   {"action": "session-stop", "sessionId": "uuid"}
+ *   → {"ok": true}
+ *
+ *   {"action": "session-status", "sessionId": "uuid"}
+ *   → {"ok": true, "active": true, "agentName": "...", "agentVersion": "...", "busy": false}
+ *
+ *   {"action": "prompt", "sessionId": "uuid", "messages": [...], "customPrompt": "...", "timeout": 60}
+ *   → {"text": "...", "stopReason": "...", "agentName": "...", "agentVersion": "...", "toolCalls": [...]}
+ *
+ *   {"action": "shutdown"}
+ *   → {"ok": true}
  *
  * Usage:
- *   php acp-daemon-runner.php \
- *     --socket=/path/to/.acp-daemon.sock \
- *     --pid=/path/to/.acp-daemon.pid \
- *     --command=npx \
- *     --args='["@agentclientprotocol/claude-agent-acp"]' \
- *     --env='{}'
+ *   php acp-daemon-runner.php --socket=/tmp/adp-acp-xxx.sock --pid=/path/to/.acp-daemon.pid
  *
  * No Composer autoloader needed — all logic is self-contained.
  */
@@ -34,19 +39,13 @@ declare(strict_types=1);
 // Parse CLI arguments
 // ---------------------------------------------------------------------------
 
-$options = getopt('', ['socket:', 'pid:', 'command:', 'args::', 'env::']);
+$options = getopt('', ['socket:', 'pid:']);
 
 $socketPath = $options['socket'] ?? '';
 $pidFile = $options['pid'] ?? '';
-$agentCommand = $options['command'] ?? '';
-$agentArgs = json_decode($options['args'] ?? '[]', true) ?: [];
-$agentEnv = json_decode($options['env'] ?? '{}', true) ?: [];
 
-if ($socketPath === '' || $pidFile === '' || $agentCommand === '') {
-    fwrite(
-        STDERR,
-        "Usage: php acp-daemon-runner.php --socket=PATH --pid=PATH --command=CMD [--args=JSON] [--env=JSON]\n",
-    );
+if ($socketPath === '' || $pidFile === '') {
+    fwrite(STDERR, "Usage: php acp-daemon-runner.php --socket=PATH --pid=PATH\n");
     exit(1);
 }
 
@@ -68,47 +67,29 @@ if (function_exists('pcntl_signal')) {
 }
 
 // ---------------------------------------------------------------------------
-// Spawn ACP agent subprocess
+// Session registry
 // ---------------------------------------------------------------------------
 
-$fullCommand = array_merge([$agentCommand], $agentArgs);
-$commandLine = implode(' ', array_map('escapeshellarg', $fullCommand));
+/**
+ * @var array<string, array{
+ *     process: resource,
+ *     stdin: resource,
+ *     stdout: resource,
+ *     stderr: resource,
+ *     nextId: int,
+ *     agentName: string,
+ *     agentVersion: string,
+ *     lastActivity: float,
+ *     busy: bool,
+ * }> $sessions
+ */
+$sessions = [];
 
-$descriptors = [
-    0 => ['pipe', 'r'], // stdin — we write
-    1 => ['pipe', 'w'], // stdout — we read
-    2 => ['pipe', 'w'], // stderr — diagnostics
-];
-
-$mergedEnv = array_merge(getenv() ?: [], $agentEnv);
-$cwd = getcwd() ?: sys_get_temp_dir();
-
-$process = proc_open($commandLine, $descriptors, $pipes, $cwd, $mergedEnv);
-
-if (!is_resource($process)) {
-    fwrite(STDERR, "Failed to spawn ACP agent: {$commandLine}\n");
-    @unlink($pidFile);
-    exit(1);
-}
-
-$stdin = $pipes[0] ?? null;
-$stdout = $pipes[1] ?? null;
-$stderr = $pipes[2] ?? null;
-
-if ($stdin === null || $stdout === null || $stderr === null) {
-    fwrite(STDERR, "Failed to open stdio pipes for ACP agent.\n");
-    proc_close($process);
-    @unlink($pidFile);
-    exit(1);
-}
-
-stream_set_blocking($stderr, false);
-
-// JSON-RPC request counter
-$nextId = 1;
+$maxSessions = 10;
+$idleTimeoutSeconds = 1800.0; // 30 minutes
 
 // ---------------------------------------------------------------------------
-// Helper: send JSON-RPC message to agent stdin
+// JSON-RPC helpers (same as before, but parameterized by session pipes)
 // ---------------------------------------------------------------------------
 
 function agentSend(mixed $stdin, array $message): void
@@ -117,10 +98,6 @@ function agentSend(mixed $stdin, array $message): void
     fwrite($stdin, $json . "\n");
     fflush($stdin);
 }
-
-// ---------------------------------------------------------------------------
-// Helper: receive JSON-RPC message from agent stdout (with timeout)
-// ---------------------------------------------------------------------------
 
 function agentReceive(mixed $stdout, float $timeoutSeconds): ?array
 {
@@ -161,10 +138,6 @@ function agentReceive(mixed $stdout, float $timeoutSeconds): ?array
     return null;
 }
 
-// ---------------------------------------------------------------------------
-// Helper: wait for a JSON-RPC response (skip notifications)
-// ---------------------------------------------------------------------------
-
 function waitForResponse(mixed $stdout, float $timeout, string $errorPrefix): array
 {
     $deadline = microtime(true) + $timeout;
@@ -176,7 +149,6 @@ function waitForResponse(mixed $stdout, float $timeout, string $errorPrefix): ar
             continue;
         }
 
-        // Skip notifications (no id)
         if (!isset($message['id'])) {
             continue;
         }
@@ -195,10 +167,6 @@ function waitForResponse(mixed $stdout, float $timeout, string $errorPrefix): ar
     throw new RuntimeException("Timeout waiting for ACP agent response ({$errorPrefix}).");
 }
 
-// ---------------------------------------------------------------------------
-// Helper: check if agent process is alive
-// ---------------------------------------------------------------------------
-
 function isAgentAlive(mixed $process): bool
 {
     if (!is_resource($process)) {
@@ -207,10 +175,6 @@ function isAgentAlive(mixed $process): bool
     $status = proc_get_status($process);
     return $status['running'] === true;
 }
-
-// ---------------------------------------------------------------------------
-// Helper: read stderr (non-blocking)
-// ---------------------------------------------------------------------------
 
 function readStderr(mixed $stderr): string
 {
@@ -222,205 +186,130 @@ function readStderr(mixed $stderr): string
 }
 
 // ---------------------------------------------------------------------------
-// Step 1: Initialize ACP handshake
+// Session management functions
 // ---------------------------------------------------------------------------
 
-fwrite(STDERR, "ACP daemon: initializing agent...\n");
+/**
+ * Spawn an ACP agent subprocess and perform the initialize handshake.
+ *
+ * @param list<string> $args
+ * @param array<string, string> $env
+ * @return array{process: resource, stdin: resource, stdout: resource, stderr: resource, nextId: int, agentName: string, agentVersion: string, lastActivity: float, busy: bool}
+ */
+function spawnAgent(string $command, array $args, array $env): array
+{
+    $fullCommand = array_merge([$command], $args);
+    $commandLine = implode(' ', array_map('escapeshellarg', $fullCommand));
 
-agentSend($stdin, [
-    'jsonrpc' => '2.0',
-    'id' => $nextId++,
-    'method' => 'initialize',
-    'params' => [
-        'protocolVersion' => 1,
-        'capabilities' => (object) [],
-        'clientInfo' => [
-            'name' => 'ADP',
-            'version' => '1.0.0',
+    $descriptors = [
+        0 => ['pipe', 'r'],
+        1 => ['pipe', 'w'],
+        2 => ['pipe', 'w'],
+    ];
+
+    $mergedEnv = array_merge(getenv() ?: [], $env);
+    $cwd = getcwd() ?: sys_get_temp_dir();
+
+    $process = proc_open($commandLine, $descriptors, $pipes, $cwd, $mergedEnv);
+
+    if (!is_resource($process)) {
+        throw new RuntimeException("Failed to spawn ACP agent: {$commandLine}");
+    }
+
+    $stdin = $pipes[0] ?? null;
+    $stdout = $pipes[1] ?? null;
+    $stderr = $pipes[2] ?? null;
+
+    if ($stdin === null || $stdout === null || $stderr === null) {
+        proc_close($process);
+        throw new RuntimeException('Failed to open stdio pipes for ACP agent.');
+    }
+
+    stream_set_blocking($stderr, false);
+
+    // Initialize handshake
+    $nextId = 1;
+
+    agentSend($stdin, [
+        'jsonrpc' => '2.0',
+        'id' => $nextId++,
+        'method' => 'initialize',
+        'params' => [
+            'protocolVersion' => 1,
+            'capabilities' => (object) [],
+            'clientInfo' => [
+                'name' => 'ADP',
+                'version' => '1.0.0',
+            ],
         ],
-    ],
-]);
+    ]);
 
-try {
-    $initResponse = waitForResponse($stdout, 30.0, 'ACP initialize failed');
-} catch (RuntimeException $e) {
-    fwrite(STDERR, "ACP daemon: {$e->getMessage()}\n");
-    proc_terminate($process);
-    proc_close($process);
-    @unlink($pidFile);
-    exit(1);
-}
-
-$agentName = $initResponse['result']['agentInfo']['name'] ?? '';
-$agentVersion = $initResponse['result']['agentInfo']['version'] ?? '';
-
-fwrite(STDERR, "ACP daemon: agent initialized — {$agentName} {$agentVersion}\n");
-
-// ---------------------------------------------------------------------------
-// Step 2: Create Unix socket server
-// ---------------------------------------------------------------------------
-
-// Clean up stale socket file
-if (file_exists($socketPath)) {
-    @unlink($socketPath);
-}
-
-$server = stream_socket_server("unix://{$socketPath}", $errno, $errstr);
-
-if ($server === false) {
-    fwrite(STDERR, "ACP daemon: failed to create socket: {$errstr}\n");
-    proc_terminate($process);
-    proc_close($process);
-    @unlink($pidFile);
-    exit(1);
-}
-
-// Make socket accessible
-chmod($socketPath, 0660);
-
-fwrite(STDERR, "ACP daemon: listening on {$socketPath}\n");
-
-// ---------------------------------------------------------------------------
-// Step 3: Main loop — accept connections, handle requests
-// ---------------------------------------------------------------------------
-
-while ($running) {
-    if (function_exists('pcntl_signal_dispatch')) {
-        pcntl_signal_dispatch();
-    }
-
-    if (!$running) {
-        break;
-    }
-
-    // Check agent health
-    if (!isAgentAlive($process)) {
-        $stderrOutput = readStderr($stderr);
-        fwrite(STDERR, "ACP daemon: agent process died unexpectedly. stderr: {$stderrOutput}\n");
-        break;
-    }
-
-    // Accept connection with timeout (1 second) to allow signal handling
-    $read = [$server];
-    $write = null;
-    $except = null;
-    $ready = @stream_select($read, $write, $except, 1, 0);
-
-    if ($ready === false || $ready === 0) {
-        continue;
-    }
-
-    $client = @stream_socket_accept($server, 1.0);
-
-    if ($client === false) {
-        continue;
-    }
-
-    // Read request (single JSON line)
-    $requestLine = fgets($client);
-
-    if ($requestLine === false) {
-        fclose($client);
-        continue;
-    }
-
-    $request = json_decode(trim($requestLine), true);
-
-    if (!is_array($request)) {
-        fwrite($client, json_encode(['error' => 'Invalid JSON request']) . "\n");
-        fclose($client);
-        continue;
-    }
-
-    $action = $request['action'] ?? '';
-
-    // --- Ping ---
-    if ($action === 'ping') {
-        fwrite($client, json_encode(['ok' => true, 'agentName' => $agentName, 'agentVersion' => $agentVersion]) . "\n");
-        fclose($client);
-        continue;
-    }
-
-    // --- Shutdown ---
-    if ($action === 'shutdown') {
-        fwrite($client, json_encode(['ok' => true]) . "\n");
-        fclose($client);
-        $running = false;
-        break;
-    }
-
-    // --- Prompt ---
-    if ($action === 'prompt') {
-        $response = handlePrompt(
-            $request,
-            $stdin,
-            $stdout,
-            $process,
-            $stderr,
-            $nextId,
-            $agentName,
-            $agentVersion,
-            $cwd,
-        );
-        fwrite($client, json_encode($response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n");
-        fclose($client);
-        continue;
-    }
-
-    fwrite($client, json_encode(['error' => "Unknown action: {$action}"]) . "\n");
-    fclose($client);
-}
-
-// ---------------------------------------------------------------------------
-// Cleanup
-// ---------------------------------------------------------------------------
-
-fwrite(STDERR, "ACP daemon: shutting down...\n");
-
-fclose($server);
-@unlink($socketPath);
-
-if (is_resource($stdin)) {
-    fclose($stdin);
-}
-if (is_resource($stdout)) {
-    fclose($stdout);
-}
-if (is_resource($stderr)) {
-    fclose($stderr);
-}
-
-if (is_resource($process)) {
-    if (isAgentAlive($process)) {
+    try {
+        $initResponse = waitForResponse($stdout, 30.0, 'ACP initialize failed');
+    } catch (RuntimeException $e) {
         proc_terminate($process);
+        proc_close($process);
+        throw $e;
     }
-    proc_close($process);
+
+    $agentName = $initResponse['result']['agentInfo']['name'] ?? '';
+    $agentVersion = $initResponse['result']['agentInfo']['version'] ?? '';
+
+    return [
+        'process' => $process,
+        'stdin' => $stdin,
+        'stdout' => $stdout,
+        'stderr' => $stderr,
+        'nextId' => $nextId,
+        'agentName' => $agentName,
+        'agentVersion' => $agentVersion,
+        'lastActivity' => microtime(true),
+        'busy' => false,
+    ];
 }
 
-@unlink($pidFile);
-fwrite(STDERR, "ACP daemon: stopped.\n");
-exit(0);
+/**
+ * Terminate an agent session and clean up resources.
+ */
+function terminateSession(array &$session): void
+{
+    if (is_resource($session['stdin'])) {
+        fclose($session['stdin']);
+    }
+    if (is_resource($session['stdout'])) {
+        fclose($session['stdout']);
+    }
+    if (is_resource($session['stderr'])) {
+        fclose($session['stderr']);
+    }
+    if (is_resource($session['process'])) {
+        if (isAgentAlive($session['process'])) {
+            proc_terminate($session['process']);
+        }
+        proc_close($session['process']);
+    }
+}
 
-// ===========================================================================
-// Prompt handler
-// ===========================================================================
+/**
+ * Handle a prompt request for a specific session.
+ */
+function handlePrompt(array $request, array &$session): array
+{
+    /** @var int $nextId */
+    $nextId = $session['nextId'];
 
-function handlePrompt(
-    array $request,
-    mixed $stdin,
-    mixed $stdout,
-    mixed $process,
-    mixed $stderr,
-    int &$nextId,
-    string $agentName,
-    string $agentVersion,
-    string $cwd,
-): array {
     $messages = $request['messages'] ?? [];
     $customPrompt = $request['customPrompt'] ?? '';
     $timeout = (float) ($request['timeout'] ?? 60);
 
-    // --- Create session ---
+    $stdin = $session['stdin'];
+    $stdout = $session['stdout'];
+    $process = $session['process'];
+    $stderr = $session['stderr'];
+
+    $cwd = getcwd() ?: sys_get_temp_dir();
+
+    // --- Create ACP session ---
     agentSend($stdin, [
         'jsonrpc' => '2.0',
         'id' => $nextId++,
@@ -437,9 +326,9 @@ function handlePrompt(
         return ['error' => $e->getMessage()];
     }
 
-    $sessionId = $sessionResponse['result']['sessionId'] ?? null;
+    $acpSessionId = $sessionResponse['result']['sessionId'] ?? null;
 
-    if (!is_string($sessionId) || $sessionId === '') {
+    if (!is_string($acpSessionId) || $acpSessionId === '') {
         return ['error' => 'ACP agent did not return a session ID.'];
     }
 
@@ -482,7 +371,7 @@ function handlePrompt(
         'id' => $promptRequestId,
         'method' => 'session/prompt',
         'params' => [
-            'sessionId' => $sessionId,
+            'sessionId' => $acpSessionId,
             'prompt' => $promptContent,
         ],
     ]);
@@ -490,7 +379,6 @@ function handlePrompt(
     // --- Collect streaming response ---
     $textParts = [];
     $toolCalls = [];
-    $rawMessages = [];
     $stopReason = 'end_turn';
     $totalTextSize = 0;
     $maxResponseSize = 10_000_000;
@@ -504,27 +392,22 @@ function handlePrompt(
             break;
         }
 
-        $message = agentReceive($stdout, min($remaining, 5.0));
+        $msg = agentReceive($stdout, min($remaining, 5.0));
 
-        if ($message === null) {
+        if ($msg === null) {
             if (!isAgentAlive($process)) {
                 $stderrOutput = readStderr($stderr);
-                return [
-                    'error' => "ACP agent process terminated. stderr: {$stderrOutput}",
-                    '_rawMessages' => $rawMessages,
-                ];
+                return ['error' => "ACP agent process terminated. stderr: {$stderrOutput}"];
             }
             continue;
         }
 
-        $rawMessages[] = $message;
-
         // Notification (no id) — session/update
-        if (!isset($message['id'])) {
-            $method = $message['method'] ?? '';
+        if (!isset($msg['id'])) {
+            $method = $msg['method'] ?? '';
 
             if ($method === 'session/update') {
-                $update = $message['params']['update'] ?? [];
+                $update = $msg['params']['update'] ?? [];
                 $type = $update['sessionUpdate'] ?? '';
 
                 if ($type === 'agent_message_chunk') {
@@ -551,23 +434,20 @@ function handlePrompt(
         }
 
         // Response to our prompt request
-        if ($message['id'] === $promptRequestId) {
-            if (isset($message['error'])) {
-                return ['error' => sprintf(
-                    'session/prompt failed: %s',
-                    $message['error']['message'] ?? 'Unknown error',
-                )];
+        if ($msg['id'] === $promptRequestId) {
+            if (isset($msg['error'])) {
+                return ['error' => sprintf('session/prompt failed: %s', $msg['error']['message'] ?? 'Unknown error')];
             }
 
-            $stopReason = $message['result']['stopReason'] ?? 'end_turn';
+            $stopReason = $msg['result']['stopReason'] ?? 'end_turn';
             break;
         }
 
         // Agent request to client — reject gracefully
-        if (isset($message['method'])) {
+        if (isset($msg['method'])) {
             agentSend($stdin, [
                 'jsonrpc' => '2.0',
-                'id' => $message['id'],
+                'id' => $msg['id'],
                 'error' => [
                     'code' => -32601,
                     'message' => 'Method not supported by ADP ACP daemon.',
@@ -576,12 +456,282 @@ function handlePrompt(
         }
     }
 
+    $session['nextId'] = $nextId;
+
     return [
         'text' => implode('', $textParts),
         'stopReason' => $stopReason,
-        'agentName' => $agentName,
-        'agentVersion' => $agentVersion,
+        'agentName' => $session['agentName'],
+        'agentVersion' => $session['agentVersion'],
         'toolCalls' => $toolCalls,
-        '_rawMessages' => $rawMessages,
     ];
 }
+
+// ---------------------------------------------------------------------------
+// Create Unix socket server
+// ---------------------------------------------------------------------------
+
+if (file_exists($socketPath)) {
+    @unlink($socketPath);
+}
+
+$server = stream_socket_server("unix://{$socketPath}", $errno, $errstr);
+
+if ($server === false) {
+    fwrite(STDERR, "ACP daemon: failed to create socket: {$errstr}\n");
+    @unlink($pidFile);
+    exit(1);
+}
+
+chmod($socketPath, 0660);
+
+fwrite(STDERR, "ACP daemon: listening on {$socketPath}\n");
+
+// ---------------------------------------------------------------------------
+// Main loop — accept connections, handle requests
+// ---------------------------------------------------------------------------
+
+$lastCleanup = microtime(true);
+
+while ($running) {
+    if (function_exists('pcntl_signal_dispatch')) {
+        pcntl_signal_dispatch();
+    }
+
+    if (!$running) {
+        break;
+    }
+
+    // Periodic idle session cleanup (every 60 seconds)
+    $now = microtime(true);
+    if (($now - $lastCleanup) > 60.0) {
+        $lastCleanup = $now;
+        foreach ($sessions as $sid => $sess) {
+            if (!$sess['busy'] && ($now - $sess['lastActivity']) > $idleTimeoutSeconds) {
+                fwrite(STDERR, "ACP daemon: session {$sid} idle timeout, terminating agent.\n");
+                terminateSession($sessions[$sid]);
+                unset($sessions[$sid]);
+            }
+            // Also clean up dead agents
+            if (!isAgentAlive($sess['process'])) {
+                fwrite(STDERR, "ACP daemon: session {$sid} agent died, cleaning up.\n");
+                terminateSession($sessions[$sid]);
+                unset($sessions[$sid]);
+            }
+        }
+    }
+
+    // Accept connection with timeout (1 second)
+    $read = [$server];
+    $write = null;
+    $except = null;
+    $ready = @stream_select($read, $write, $except, 1, 0);
+
+    if ($ready === false || $ready === 0) {
+        continue;
+    }
+
+    $client = @stream_socket_accept($server, 1.0);
+
+    if ($client === false) {
+        continue;
+    }
+
+    $requestLine = fgets($client);
+
+    if ($requestLine === false) {
+        fclose($client);
+        continue;
+    }
+
+    $request = json_decode(trim($requestLine), true);
+
+    if (!is_array($request)) {
+        fwrite($client, json_encode(['error' => 'Invalid JSON request']) . "\n");
+        fclose($client);
+        continue;
+    }
+
+    $action = $request['action'] ?? '';
+
+    // --- Ping ---
+    if ($action === 'ping') {
+        fwrite($client, json_encode(['ok' => true, 'sessions' => count($sessions)]) . "\n");
+        fclose($client);
+        continue;
+    }
+
+    // --- Shutdown ---
+    if ($action === 'shutdown') {
+        fwrite($client, json_encode(['ok' => true]) . "\n");
+        fclose($client);
+        $running = false;
+        break;
+    }
+
+    // --- Session Start ---
+    if ($action === 'session-start') {
+        $sessionId = $request['sessionId'] ?? '';
+        $command = $request['command'] ?? '';
+
+        if ($sessionId === '' || $command === '') {
+            fwrite($client, json_encode(['error' => 'sessionId and command are required.']) . "\n");
+            fclose($client);
+            continue;
+        }
+
+        // Reuse existing session
+        if (isset($sessions[$sessionId]) && isAgentAlive($sessions[$sessionId]['process'])) {
+            $sess = $sessions[$sessionId];
+            $sessions[$sessionId]['lastActivity'] = microtime(true);
+            fwrite($client, json_encode([
+                'ok' => true,
+                'agentName' => $sess['agentName'],
+                'agentVersion' => $sess['agentVersion'],
+                'reused' => true,
+            ])
+                . "\n");
+            fclose($client);
+            continue;
+        }
+
+        // Check session limit
+        if (count($sessions) >= $maxSessions) {
+            fwrite($client, json_encode([
+                'error' => "Maximum number of concurrent sessions ({$maxSessions}) reached.",
+            ])
+                . "\n");
+            fclose($client);
+            continue;
+        }
+
+        $args = $request['args'] ?? [];
+        $env = $request['env'] ?? [];
+
+        try {
+            fwrite(STDERR, "ACP daemon: starting session {$sessionId}...\n");
+            $session = spawnAgent($command, $args, $env);
+            $sessions[$sessionId] = $session;
+            fwrite(
+                STDERR,
+                "ACP daemon: session {$sessionId} started — {$session['agentName']} {$session['agentVersion']}\n",
+            );
+            fwrite($client, json_encode([
+                'ok' => true,
+                'agentName' => $session['agentName'],
+                'agentVersion' => $session['agentVersion'],
+            ])
+                . "\n");
+        } catch (RuntimeException $e) {
+            fwrite(STDERR, "ACP daemon: session {$sessionId} failed to start: {$e->getMessage()}\n");
+            fwrite($client, json_encode(['error' => $e->getMessage()]) . "\n");
+        }
+
+        fclose($client);
+        continue;
+    }
+
+    // --- Session Stop ---
+    if ($action === 'session-stop') {
+        $sessionId = $request['sessionId'] ?? '';
+
+        if ($sessionId !== '' && isset($sessions[$sessionId])) {
+            fwrite(STDERR, "ACP daemon: stopping session {$sessionId}.\n");
+            terminateSession($sessions[$sessionId]);
+            unset($sessions[$sessionId]);
+        }
+
+        fwrite($client, json_encode(['ok' => true]) . "\n");
+        fclose($client);
+        continue;
+    }
+
+    // --- Session Status ---
+    if ($action === 'session-status') {
+        $sessionId = $request['sessionId'] ?? '';
+
+        if ($sessionId === '' || !isset($sessions[$sessionId])) {
+            fwrite($client, json_encode(['ok' => true, 'active' => false]) . "\n");
+            fclose($client);
+            continue;
+        }
+
+        $sess = $sessions[$sessionId];
+        $alive = isAgentAlive($sess['process']);
+
+        if (!$alive) {
+            terminateSession($sessions[$sessionId]);
+            unset($sessions[$sessionId]);
+        }
+
+        fwrite($client, json_encode([
+            'ok' => true,
+            'active' => $alive,
+            'agentName' => $sess['agentName'],
+            'agentVersion' => $sess['agentVersion'],
+            'busy' => $sess['busy'],
+        ])
+            . "\n");
+        fclose($client);
+        continue;
+    }
+
+    // --- Prompt ---
+    if ($action === 'prompt') {
+        $sessionId = $request['sessionId'] ?? '';
+
+        if ($sessionId === '' || !isset($sessions[$sessionId])) {
+            fwrite($client, json_encode(['error' => 'Session not found. Please reconnect.']) . "\n");
+            fclose($client);
+            continue;
+        }
+
+        if (!isAgentAlive($sessions[$sessionId]['process'])) {
+            terminateSession($sessions[$sessionId]);
+            unset($sessions[$sessionId]);
+            fwrite($client, json_encode(['error' => 'Agent process died. Please reconnect.']) . "\n");
+            fclose($client);
+            continue;
+        }
+
+        if ($sessions[$sessionId]['busy']) {
+            fwrite($client, json_encode(['error' => 'Session is busy processing another prompt.']) . "\n");
+            fclose($client);
+            continue;
+        }
+
+        $sessions[$sessionId]['busy'] = true;
+        $sessions[$sessionId]['lastActivity'] = microtime(true);
+
+        $response = handlePrompt($request, $sessions[$sessionId]);
+
+        $sessions[$sessionId]['busy'] = false;
+        $sessions[$sessionId]['lastActivity'] = microtime(true);
+
+        fwrite($client, json_encode($response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n");
+        fclose($client);
+        continue;
+    }
+
+    fwrite($client, json_encode(['error' => "Unknown action: {$action}"]) . "\n");
+    fclose($client);
+}
+
+// ---------------------------------------------------------------------------
+// Cleanup — terminate all sessions
+// ---------------------------------------------------------------------------
+
+fwrite(STDERR, "ACP daemon: shutting down...\n");
+
+foreach ($sessions as $sid => $sess) {
+    fwrite(STDERR, "ACP daemon: terminating session {$sid}.\n");
+    terminateSession($sessions[$sid]);
+}
+$sessions = [];
+
+fclose($server);
+@unlink($socketPath);
+@unlink($pidFile);
+
+fwrite(STDERR, "ACP daemon: stopped.\n");
+exit(0);

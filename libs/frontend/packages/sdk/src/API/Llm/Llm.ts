@@ -1,4 +1,6 @@
 import {createBaseQuery} from '@app-dev-panel/sdk/API/createBaseQuery';
+import {getAcpSessionId} from '@app-dev-panel/sdk/API/Llm/acpSession';
+import {BaseQueryFn, FetchArgs, FetchBaseQueryError} from '@reduxjs/toolkit/query';
 import {createApi} from '@reduxjs/toolkit/query/react';
 
 export type LlmProvider = 'openrouter' | 'anthropic' | 'openai' | 'acp';
@@ -41,9 +43,22 @@ export type HistoryEntry = {query: string; response: string; timestamp: number; 
 
 type AddHistoryRequest = {query: string; response: string; timestamp: number; error?: string};
 
+/**
+ * Wraps the base query to inject X-Acp-Session header on every LLM request.
+ */
+const llmBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = (args, api, extraOptions) => {
+    const sessionId = getAcpSessionId();
+    if (typeof args === 'string') {
+        args = {url: args, headers: {'X-Acp-Session': sessionId}};
+    } else {
+        args = {...args, headers: {...(args.headers as Record<string, string>), 'X-Acp-Session': sessionId}};
+    }
+    return createBaseQuery('/debug/api/llm')(args, api, extraOptions);
+};
+
 export const llmApi = createApi({
     reducerPath: 'api.llm',
-    baseQuery: createBaseQuery('/debug/api/llm'),
+    baseQuery: llmBaseQuery,
     tagTypes: ['llm/status', 'llm/history'],
     endpoints: (builder) => ({
         getStatus: builder.query<LlmStatus, void>({

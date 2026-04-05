@@ -57,7 +57,7 @@ final class LlmController
         }
 
         if ($provider === 'acp') {
-            return $this->connectAcp($body);
+            return $this->connectAcp($body, $request);
         }
 
         $apiKey = $body['apiKey'] ?? null;
@@ -77,16 +77,15 @@ final class LlmController
     /**
      * Connect to an ACP agent (Claude Code, Gemini CLI, etc.).
      *
-     * Verifies the agent command is available on the system.
+     * Two-step: start daemon (if needed) → start session for this browser.
      */
-    private function connectAcp(array $body): ResponseInterface
+    private function connectAcp(array $body, ServerRequestInterface $request): ResponseInterface
     {
         $command =
             isset($body['acpCommand']) && is_string($body['acpCommand']) && $body['acpCommand'] !== ''
                 ? $body['acpCommand']
                 : 'npx';
 
-        // Default args: use the official ACP adapter for Claude Code when using default command.
         $defaultArgs =
             $command === 'npx' && (!isset($body['acpArgs']) || $body['acpArgs'] === [])
                 ? ['@agentclientprotocol/claude-agent-acp']
@@ -101,29 +100,57 @@ final class LlmController
             ], 400);
         }
 
+        $sessionId = $this->extractAcpSessionId($request);
+        if ($sessionId === null) {
+            return $this->responseFactory->createJsonResponse([
+                'connected' => false,
+                'error' => 'Missing X-Acp-Session header. Browser must provide a session ID.',
+            ], 400);
+        }
+
         $this->settings->setProvider('acp');
         $this->settings->setAcpCommand($command);
         $this->settings->setAcpArgs($acpArgs);
         $this->settings->setAcpEnv($acpEnv);
 
-        // Start persistent ACP daemon
-        if ($this->acpDaemonManager !== null && !$this->acpDaemonManager->isRunning()) {
+        if ($this->acpDaemonManager === null) {
+            return $this->responseFactory->createJsonResponse([
+                'connected' => false,
+                'error' => 'ACP daemon manager is not configured.',
+            ], 500);
+        }
+
+        // Step 1: Start daemon (if not already running)
+        if (!$this->acpDaemonManager->isRunning()) {
             try {
-                $this->acpDaemonManager->start($command, $acpArgs, $acpEnv);
+                $this->acpDaemonManager->start();
             } catch (\RuntimeException $e) {
                 $this->settings->clear();
 
                 return $this->responseFactory->createJsonResponse([
                     'connected' => false,
-                    'error' => $e->getMessage(),
+                    'error' => 'Failed to start ACP daemon: ' . $e->getMessage(),
                 ], 500);
             }
+        }
+
+        // Step 2: Start agent session
+        try {
+            $agentInfo = $this->acpDaemonManager->startSession($sessionId, $command, $acpArgs, $acpEnv);
+        } catch (\RuntimeException $e) {
+            return $this->responseFactory->createJsonResponse([
+                'connected' => false,
+                'error' => 'Failed to start ACP session: ' . $e->getMessage(),
+            ], 500);
         }
 
         return $this->responseFactory->createJsonResponse([
             'connected' => true,
             'provider' => 'acp',
             'acpCommand' => $command,
+            'sessionId' => $sessionId,
+            'agentName' => $agentInfo['agentName'],
+            'agentVersion' => $agentInfo['agentVersion'],
         ]);
     }
 
@@ -211,13 +238,15 @@ final class LlmController
     }
 
     /**
-     * POST /debug/api/llm/disconnect — Remove stored API key.
+     * POST /debug/api/llm/disconnect — Remove stored API key / stop ACP session.
      */
     public function disconnect(ServerRequestInterface $request): ResponseInterface
     {
-        // Stop ACP daemon if running
         if ($this->acpDaemonManager !== null) {
-            $this->acpDaemonManager->stop();
+            $sessionId = $this->extractAcpSessionId($request);
+            if ($sessionId !== null) {
+                $this->acpDaemonManager->stopSession($sessionId);
+            }
         }
 
         $this->settings->clear();
@@ -322,7 +351,8 @@ final class LlmController
 
         $messages = $this->prependCustomPrompt($messages, $provider);
 
-        $data = $this->providerService->sendChat($provider, $messages, $model, $temperature);
+        $acpSessionId = $this->extractAcpSessionId($request);
+        $data = $this->providerService->sendChat($provider, $messages, $model, $temperature, $acpSessionId);
 
         if (isset($data['error'])) {
             return $this->responseFactory->createJsonResponse(['error' => $data['error']], 502);
@@ -391,7 +421,8 @@ final class LlmController
         $provider = $this->settings->getProvider();
         $model = $this->settings->getModel() ?? $this->providerService->getDefaultModel($provider);
 
-        $data = $this->providerService->sendChat($provider, $messages, $model, 0.3);
+        $acpSessionId = $this->extractAcpSessionId($request);
+        $data = $this->providerService->sendChat($provider, $messages, $model, 0.3, $acpSessionId);
 
         if (isset($data['error'])) {
             return $this->responseFactory->createJsonResponse([
@@ -489,6 +520,16 @@ final class LlmController
         }
 
         return $messages;
+    }
+
+    /**
+     * Extract ACP session ID from the X-Acp-Session header.
+     */
+    private function extractAcpSessionId(ServerRequestInterface $request): ?string
+    {
+        $header = $request->getHeaderLine('X-Acp-Session');
+
+        return $header !== '' ? $header : null;
     }
 
     private function generateCodeVerifier(): string
