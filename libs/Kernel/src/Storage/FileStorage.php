@@ -57,7 +57,7 @@ final class FileStorage implements StorageInterface
 
         FileHelper::ensureDirectory($basePath);
 
-        $this->writeCompressed($basePath . self::TYPE_SUMMARY, Json::encode($summary));
+        $this->writeJson($basePath . self::TYPE_SUMMARY, Json::encode($summary));
         $this->writeCompressed($basePath . self::TYPE_DATA, Dumper::create($data)->asJson(30));
         $this->writeCompressed($basePath . self::TYPE_OBJECTS, Dumper::create($objects)->asJsonObjectsMap(30));
     }
@@ -74,7 +74,7 @@ final class FileStorage implements StorageInterface
             $this->writeCompressed($basePath . self::TYPE_OBJECTS, $dumper->asJsonObjectsMap(30));
 
             $summaryData = Dumper::create($this->collectSummaryData())->asJson();
-            $this->writeCompressed($basePath . self::TYPE_SUMMARY, $summaryData);
+            $this->writeJson($basePath . self::TYPE_SUMMARY, $summaryData);
         } finally {
             $this->collectors = [];
             new FileStorageGarbageCollector($this->path, $this->historySize)->run();
@@ -142,12 +142,10 @@ final class FileStorage implements StorageInterface
         $data = [];
 
         $gzFiles = glob(sprintf('%s/**/**/%s.json.gz', $this->path, $type), GLOB_NOSORT) ?: [];
-
-        // Only scan for legacy .json files if needed
         $jsonFiles = glob(sprintf('%s/**/**/%s.json', $this->path, $type), GLOB_NOSORT) ?: [];
 
         if ($jsonFiles !== []) {
-            // Index gz dirs to skip legacy duplicates
+            // Index gz dirs to skip duplicates where both formats exist
             $gzDirs = [];
             foreach ($gzFiles as $file) {
                 $gzDirs[dirname($file)] = true;
@@ -179,6 +177,7 @@ final class FileStorage implements StorageInterface
 
     /**
      * Reads a storage file, trying .json.gz first, then .json fallback.
+     * Summary files are plain .json; data/objects are .json.gz.
      */
     private function readFile(string $basePath): ?string
     {
@@ -193,6 +192,20 @@ final class FileStorage implements StorageInterface
         }
 
         return null;
+    }
+
+    /**
+     * Writes content as a plain .json file with an exclusive lock.
+     *
+     * @throws \RuntimeException if the file cannot be written.
+     */
+    private function writeJson(string $baseFilePath, string $content): void
+    {
+        $filePath = $baseFilePath . '.json';
+        $result = file_put_contents($filePath, $content, LOCK_EX);
+        if ($result === false) {
+            throw new \RuntimeException(sprintf('Failed to write file "%s".', $filePath));
+        }
     }
 
     /**

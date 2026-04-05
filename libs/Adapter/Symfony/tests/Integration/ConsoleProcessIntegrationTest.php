@@ -237,7 +237,7 @@ final class ConsoleProcessIntegrationTest extends TestCase
         foreach ($dateDirs as $dateDir) {
             $entryDirs = glob($dateDir . '/*', GLOB_ONLYDIR);
             foreach ($entryDirs as $entryDir) {
-                if (!file_exists($entryDir . '/summary.json.gz') && !file_exists($entryDir . '/summary.json')) {
+                if (!file_exists($entryDir . '/summary.json') && !file_exists($entryDir . '/summary.json.gz')) {
                     continue;
                 }
 
@@ -267,7 +267,11 @@ final class ConsoleProcessIntegrationTest extends TestCase
             return gzdecode(file_get_contents($basePath . '.json.gz'));
         }
 
-        return file_get_contents($basePath . '.json');
+        if (file_exists($basePath . '.json')) {
+            return file_get_contents($basePath . '.json');
+        }
+
+        throw new \RuntimeException(sprintf('Storage file not found: %s(.json|.json.gz)', $basePath));
     }
 
     private function clearDebugStorage(): void
