@@ -15,17 +15,17 @@
     <!-- Eye -->
     <circle cx="38" cy="38" r="3.5" fill="#292524"/>
     <circle cx="37" cy="37" r="1.2" fill="white"/>
-    <!-- Wing accent -->
-    <path d="M56 74C64 66 82 68 94 78" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" fill="none"/>
-    <!-- Wand stick -->
-    <line x1="95" y1="55" x2="120" y2="18" stroke="#A78BFA" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- Wing — raised, holding wand -->
+    <path d="M58 72 Q72 60 88 62" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <!-- Wand stick — starts from wing tip, goes up-right -->
+    <line x1="86" y1="63" x2="115" y2="24" stroke="#A78BFA" stroke-width="3.5" stroke-linecap="round"/>
     <!-- Wand star -->
-    <polygon points="120,8 122,15 130,15 124,20 126,27 120,23 114,27 116,20 110,15 118,15" fill="#FACC15"/>
-    <!-- Sparkles -->
-    <circle cx="108" cy="10" r="1.8" fill="#FDE68A"/>
-    <circle cx="130" cy="6" r="1.3" fill="#FDE68A"/>
-    <circle cx="126" cy="30" r="1.5" fill="#FDE68A"/>
-    <circle cx="112" cy="28" r="1" fill="#FDE68A"/>
+    <polygon points="115,14 117.5,21 125,21 119,26 121,33 115,29 109,33 111,26 105,21 112.5,21" fill="#FACC15"/>
+    <!-- Sparkles around star -->
+    <circle cx="103" cy="16" r="1.8" fill="#FDE68A"/>
+    <circle cx="127" cy="12" r="1.4" fill="#FDE68A"/>
+    <circle cx="124" cy="35" r="1.5" fill="#FDE68A"/>
+    <circle cx="100" cy="30" r="1.2" fill="#FDE68A"/>
   </g>
 
   <!-- Small 40px -->
@@ -36,8 +36,9 @@
     <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
     <circle cx="38" cy="38" r="3.5" fill="#292524"/>
     <circle cx="37" cy="37" r="1.2" fill="white"/>
-    <line x1="95" y1="55" x2="120" y2="18" stroke="#A78BFA" stroke-width="3.5" stroke-linecap="round"/>
-    <polygon points="120,8 122,15 130,15 124,20 126,27 120,23 114,27 116,20 110,15 118,15" fill="#FACC15"/>
+    <path d="M58 72 Q72 60 88 62" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <line x1="86" y1="63" x2="115" y2="24" stroke="#A78BFA" stroke-width="3.5" stroke-linecap="round"/>
+    <polygon points="115,14 117.5,21 125,21 119,26 121,33 115,29 109,33 111,26 105,21 112.5,21" fill="#FACC15"/>
   </g>
   <text x="108" y="264" font-size="11" fill="#64748B">40px</text>
 
@@ -48,8 +49,9 @@
     <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
     <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
     <circle cx="38" cy="38" r="3.5" fill="#292524"/>
-    <line x1="95" y1="55" x2="120" y2="18" stroke="#A78BFA" stroke-width="3.5" stroke-linecap="round"/>
-    <polygon points="120,8 122,15 130,15 124,20 126,27 120,23 114,27 116,20 110,15 118,15" fill="#FACC15"/>
+    <path d="M58 72 Q72 60 88 62" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <line x1="86" y1="63" x2="115" y2="24" stroke="#A78BFA" stroke-width="3.5" stroke-linecap="round"/>
+    <polygon points="115,14 117.5,21 125,21 119,26 121,33 115,29 109,33 111,26 105,21 112.5,21" fill="#FACC15"/>
   </g>
   <text x="192" y="264" font-size="11" fill="#64748B">28px</text>
 </svg>

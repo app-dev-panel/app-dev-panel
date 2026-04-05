@@ -1,22 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="300" viewBox="0 0 280 300">
   <style>text { font-family: 'Segoe UI', Arial, sans-serif; }</style>
   <rect width="280" height="300" fill="#F8FAFC" rx="12"/>
-  <text x="140" y="28" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">Duck Superhero (cape + mask)</text>
+  <text x="140" y="28" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">Outlined + Superhero</text>
 
   <!-- Large Fab 112px -->
-  <circle cx="140" cy="140" r="56" fill="#2563EB"/>
-  <g transform="translate(98, 100) scale(0.58)">
-    <!-- Cape — behind duck, peeking out at bottom-left and bottom-right -->
+  <circle cx="140" cy="140" r="56" fill="white"/>
+  <circle cx="140" cy="140" r="53.5" fill="none" stroke="#2563EB" stroke-width="3"/>
+  <g transform="translate(100, 102) scale(0.56)">
+    <!-- Cape — peeking behind at bottom -->
     <path d="M30 75 Q10 95 5 120 L35 110 Z" fill="#DC2626" opacity="0.9"/>
     <path d="M100 75 Q120 95 128 120 L95 110 Z" fill="#EF4444" opacity="0.9"/>
-    <path d="M30 75 L100 75 L95 110 L35 110 Z" fill="#DC2626" opacity="0.5"/>
     <!-- Body -->
     <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
     <!-- Head -->
     <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
     <!-- Beak -->
     <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
-    <!-- Mask — band across eyes -->
+    <!-- Mask -->
     <path d="M24 34 Q34 28 54 30 Q60 31 64 36 L62 42 Q54 37 44 37 Q34 37 26 42Z" fill="#1E293B"/>
     <!-- Eye hole -->
     <ellipse cx="38" cy="38" rx="5.5" ry="4.5" fill="#FCD34D"/>
@@ -30,8 +30,9 @@
   </g>
 
   <!-- Small 40px -->
-  <circle cx="80" cy="260" r="20" fill="#2563EB"/>
-  <g transform="translate(62, 242) scale(0.25)">
+  <circle cx="80" cy="260" r="20" fill="white"/>
+  <circle cx="80" cy="260" r="18" fill="none" stroke="#2563EB" stroke-width="2.5"/>
+  <g transform="translate(63, 243) scale(0.24)">
     <path d="M30 75 Q10 95 5 120 L35 110 Z" fill="#DC2626" opacity="0.9"/>
     <path d="M100 75 Q120 95 128 120 L95 110 Z" fill="#EF4444" opacity="0.9"/>
     <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
@@ -46,8 +47,9 @@
   <text x="108" y="264" font-size="11" fill="#64748B">40px</text>
 
   <!-- Small 28px -->
-  <circle cx="170" cy="260" r="14" fill="#2563EB"/>
-  <g transform="translate(156, 248) scale(0.18)">
+  <circle cx="170" cy="260" r="14" fill="white"/>
+  <circle cx="170" cy="260" r="12.5" fill="none" stroke="#2563EB" stroke-width="2"/>
+  <g transform="translate(157, 249) scale(0.17)">
     <path d="M30 75 Q10 95 5 120 L35 110 Z" fill="#DC2626" opacity="0.9"/>
     <path d="M100 75 Q120 95 128 120 L95 110 Z" fill="#EF4444" opacity="0.9"/>
     <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
