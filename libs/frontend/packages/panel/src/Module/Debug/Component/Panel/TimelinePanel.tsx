@@ -1,5 +1,6 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {TimelineListView} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineListView';
+import {useTimelineEnrichment} from '@app-dev-panel/panel/Module/Debug/Component/Panel/useTimelineEnrichment';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -82,6 +83,19 @@ const Duration = styled(Typography)(({theme}) => ({
     fontFamily: theme.adp.fontFamilyMono,
     fontSize: '11px',
     color: theme.palette.text.disabled,
+    paddingLeft: 8,
+    [theme.breakpoints.down('sm')]: {display: 'none'},
+}));
+
+const WaterfallDetail = styled(Typography)(({theme}) => ({
+    fontSize: '11px',
+    fontFamily: theme.adp.fontFamilyMono,
+    color: theme.palette.text.secondary,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    minWidth: 0,
+    flex: 1,
     paddingLeft: 8,
     [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
@@ -184,6 +198,9 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
         return result;
     }, [data, deferredFilter, activeFilters]);
 
+    // Shared enrichment hook — used by both views
+    const enrichedDetails = useTimelineEnrichment(data ?? [], filtered);
+
     if (!data || !Array.isArray(data) || data.length === 0) {
         return <EmptyState icon="timeline" title="No timeline items found" />;
     }
@@ -255,7 +272,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
             </Box>
 
             {viewMode === 'list' ? (
-                <TimelineListView data={data} filter={deferredFilter} activeFilters={activeFilters} />
+                <TimelineListView data={data} filtered={filtered} enrichedDetails={enrichedDetails} />
             ) : (
                 <>
                     <TimeAxis>
@@ -270,6 +287,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                         const offset = (relativeTime / totalSpan) * 100;
                         const colorIdx = uniqueLabels.indexOf(shortName);
                         const expanded = expandedIndex === index;
+                        const detail = enrichedDetails[index];
 
                         // Format relative time offset
                         const offsetLabel =
@@ -295,6 +313,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                             }}
                                         />
                                     </BarArea>
+                                    {detail && <WaterfallDetail title={detail}>{detail}</WaterfallDetail>}
                                     <Duration>{offsetLabel}</Duration>
                                 </Row>
                                 <Collapse in={expanded}>

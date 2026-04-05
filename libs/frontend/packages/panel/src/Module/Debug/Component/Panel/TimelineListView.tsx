@@ -1,6 +1,4 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
-import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
-import {useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
 import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
@@ -9,11 +7,11 @@ import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
 import {Box, Collapse, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useState} from 'react';
 
 type Item = [number, number, string] | [number, number, string, string];
 
-type TimelineListViewProps = {data: Item[]; filter: string; activeFilters: Set<string>};
+type TimelineListViewProps = {data: Item[]; filtered: Item[]; enrichedDetails: (string | null)[]};
 
 // ---------------------------------------------------------------------------
 // Collector FQCN → color key mapping
@@ -140,124 +138,13 @@ function formatOffset(relativeTime: number): string {
     return `+${relativeTime.toFixed(3)}s`;
 }
 
-// Collectors we can enrich with cross-referenced data
-const enrichableCollectors = new Set([
-    CollectorsMap.LogCollector,
-    CollectorsMap.EventCollector,
-    CollectorsMap.DatabaseCollector,
-]);
-
-type CollectorDataMap = Map<string, any[]>;
-
-function getEnrichedDetail(
-    row: Item,
-    collectorData: CollectorDataMap,
-    collectorIndexes: Map<string, number>,
-): string | null {
-    const collectorClass = row[2];
-    const data = collectorData.get(collectorClass);
-
-    // Track per-collector index
-    const currentIndex = collectorIndexes.get(collectorClass) ?? 0;
-    collectorIndexes.set(collectorClass, currentIndex + 1);
-
-    // EventCollector: row[3] already has event class name
-    if (collectorClass === CollectorsMap.EventCollector && row[3]) {
-        const eventClass = typeof row[3] === 'string' ? row[3] : Array.isArray(row[3]) ? row[3][0] : null;
-        if (eventClass && typeof eventClass === 'string') {
-            return eventClass.split('\\').pop() ?? eventClass;
-        }
-    }
-
-    // ExceptionCollector: row[1] is the exception class — no fetch needed
-    if (collectorClass === CollectorsMap.ExceptionCollector) {
-        return String(row[1]);
-    }
-
-    // RequestCollector / CommandCollector: row[1] is 'request'/'response' — no fetch needed
-    if (collectorClass === CollectorsMap.RequestCollector || collectorClass === CollectorsMap.CommandCollector) {
-        return String(row[1]);
-    }
-
-    if (!data) return null;
-
-    // LogCollector: data is an array of log entries
-    if (collectorClass === CollectorsMap.LogCollector && Array.isArray(data) && data[currentIndex]) {
-        const entry = data[currentIndex];
-        const message = typeof entry.message === 'string' ? entry.message : JSON.stringify(entry.message);
-        const truncated = message.length > 80 ? message.slice(0, 80) + '...' : message;
-        return `[${entry.level}] ${truncated}`;
-    }
-
-    // DatabaseCollector: data is {queries: [...], transactions: [...], duplicates: {...}}
-    if (collectorClass === CollectorsMap.DatabaseCollector) {
-        const queries = data.queries ?? (Array.isArray(data) ? data : []);
-        if (Array.isArray(queries) && queries[currentIndex]) {
-            const sql = queries[currentIndex].sql || queries[currentIndex].rawSql || '';
-            const truncated = sql.length > 80 ? sql.slice(0, 80) + '...' : sql;
-            return truncated;
-        }
-    }
-
-    return null;
-}
-
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export const TimelineListView = ({data, filter, activeFilters}: TimelineListViewProps) => {
+export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineListViewProps) => {
     const theme = useTheme();
-    const debugEntry = useDebugEntry();
-    const [fetchCollector] = useLazyGetCollectorInfoQuery();
-    const [collectorData, setCollectorData] = useState<CollectorDataMap>(new Map());
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-
-    // Identify which enrichable collectors are in the timeline
-    const collectorsToFetch = useMemo(() => {
-        if (!debugEntry) return [];
-        const entryCollectors = new Set(debugEntry.collectors.map((c: any) => (typeof c === 'string' ? c : c.id)));
-        const timelineCollectors = new Set(data.map((r) => r[2]));
-        return [...enrichableCollectors].filter((c) => timelineCollectors.has(c) && entryCollectors.has(c));
-    }, [data, debugEntry]);
-
-    // Fetch collector data for enrichment
-    useEffect(() => {
-        if (!debugEntry || collectorsToFetch.length === 0) return;
-
-        const newData = new Map(collectorData);
-        let changed = false;
-
-        for (const collector of collectorsToFetch) {
-            if (newData.has(collector)) continue;
-            changed = true;
-            fetchCollector({id: debugEntry.id, collector}).then(({data: result}) => {
-                setCollectorData((prev) => {
-                    const next = new Map(prev);
-                    next.set(collector, Array.isArray(result) ? result : result);
-                    return next;
-                });
-            });
-        }
-
-        if (!changed) return;
-    }, [debugEntry, collectorsToFetch, fetchCollector]);
-
-    // Filter data
-    const filtered = useMemo(() => {
-        let result = data;
-        if (activeFilters.size > 0) {
-            result = result.filter((r) => {
-                const shortName = r[2].split('\\').pop() ?? r[2];
-                return activeFilters.has(shortName);
-            });
-        }
-        if (filter) {
-            const lower = filter.toLowerCase();
-            result = result.filter((r) => r[2].toLowerCase().includes(lower));
-        }
-        return result;
-    }, [data, filter, activeFilters]);
 
     // Time calculations (use full data for consistent scale)
     const timestamps = data.map((r) => r[0]);
@@ -278,12 +165,6 @@ export const TimelineListView = ({data, filter, activeFilters}: TimelineListView
             ticks.push(`${t.toFixed(2)}s`);
         }
     }
-
-    // Build enriched details — track per-collector index for cross-referencing
-    const enrichedDetails = useMemo(() => {
-        const collectorIndexes = new Map<string, number>();
-        return filtered.map((row) => getEnrichedDetail(row, collectorData, collectorIndexes));
-    }, [filtered, collectorData]);
 
     const getColor = useCallback(
         (collectorClass: string) => {

@@ -1,0 +1,120 @@
+import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
+import {useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
+import {useEffect, useMemo, useState} from 'react';
+
+type Item = [number, number, string] | [number, number, string, string];
+
+// Collectors we fetch additional data for
+const enrichableCollectors = new Set([
+    CollectorsMap.LogCollector,
+    CollectorsMap.EventCollector,
+    CollectorsMap.DatabaseCollector,
+    CollectorsMap.TemplateCollector,
+]);
+
+type CollectorDataMap = Map<string, any>;
+
+function getEnrichedDetail(
+    row: Item,
+    collectorData: CollectorDataMap,
+    collectorIndexes: Map<string, number>,
+): string | null {
+    const collectorClass = row[2];
+    const data = collectorData.get(collectorClass);
+
+    // Track per-collector index
+    const currentIndex = collectorIndexes.get(collectorClass) ?? 0;
+    collectorIndexes.set(collectorClass, currentIndex + 1);
+
+    // EventCollector: row[3] already has event class name
+    if (collectorClass === CollectorsMap.EventCollector && row[3]) {
+        const eventClass = typeof row[3] === 'string' ? row[3] : Array.isArray(row[3]) ? row[3][0] : null;
+        if (eventClass && typeof eventClass === 'string') {
+            return eventClass.split('\\').pop() ?? eventClass;
+        }
+    }
+
+    // ExceptionCollector: row[1] is the exception class — no fetch needed
+    if (collectorClass === CollectorsMap.ExceptionCollector) {
+        return String(row[1]);
+    }
+
+    // RequestCollector / CommandCollector: row[1] is 'request'/'response' — no fetch needed
+    if (collectorClass === CollectorsMap.RequestCollector || collectorClass === CollectorsMap.CommandCollector) {
+        return String(row[1]);
+    }
+
+    if (!data) return null;
+
+    // LogCollector: data is an array of log entries
+    if (collectorClass === CollectorsMap.LogCollector && Array.isArray(data) && data[currentIndex]) {
+        const entry = data[currentIndex];
+        const message = typeof entry.message === 'string' ? entry.message : JSON.stringify(entry.message);
+        const truncated = message.length > 80 ? message.slice(0, 80) + '...' : message;
+        return `[${entry.level}] ${truncated}`;
+    }
+
+    // DatabaseCollector: data is {queries: [...], transactions: [...], duplicates: {...}}
+    if (collectorClass === CollectorsMap.DatabaseCollector) {
+        const queries = data.queries ?? (Array.isArray(data) ? data : []);
+        if (Array.isArray(queries) && queries[currentIndex]) {
+            const sql = queries[currentIndex].sql || queries[currentIndex].rawSql || '';
+            const truncated = sql.length > 80 ? sql.slice(0, 80) + '...' : sql;
+            return truncated;
+        }
+    }
+
+    // TemplateCollector: data is {renders: [...], totalTime, renderCount, duplicates}
+    if (collectorClass === CollectorsMap.TemplateCollector) {
+        const renders = data.renders ?? (Array.isArray(data) ? data : []);
+        if (Array.isArray(renders) && renders[currentIndex]) {
+            const template = renders[currentIndex].template || '';
+            // Show basename for file paths, full name for short names
+            const name = template.includes('/') ? template.split('/').pop() : template;
+            return name || null;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Hook that fetches collector data and computes enriched detail strings
+ * for each timeline event by cross-referencing with source collector records.
+ */
+export function useTimelineEnrichment(allData: Item[], filteredData: Item[]): (string | null)[] {
+    const debugEntry = useDebugEntry();
+    const [fetchCollector] = useLazyGetCollectorInfoQuery();
+    const [collectorData, setCollectorData] = useState<CollectorDataMap>(new Map());
+
+    // Identify which enrichable collectors are in the timeline
+    const collectorsToFetch = useMemo(() => {
+        if (!debugEntry) return [];
+        const entryCollectors = new Set(debugEntry.collectors.map((c: any) => (typeof c === 'string' ? c : c.id)));
+        const timelineCollectors = new Set(allData.map((r) => r[2]));
+        return [...enrichableCollectors].filter((c) => timelineCollectors.has(c) && entryCollectors.has(c));
+    }, [allData, debugEntry]);
+
+    // Fetch collector data for enrichment
+    useEffect(() => {
+        if (!debugEntry || collectorsToFetch.length === 0) return;
+
+        for (const collector of collectorsToFetch) {
+            if (collectorData.has(collector)) continue;
+            fetchCollector({id: debugEntry.id, collector}).then(({data: result}) => {
+                setCollectorData((prev) => {
+                    const next = new Map(prev);
+                    next.set(collector, result);
+                    return next;
+                });
+            });
+        }
+    }, [debugEntry, collectorsToFetch, fetchCollector]);
+
+    // Build enriched details — track per-collector index for cross-referencing
+    return useMemo(() => {
+        const collectorIndexes = new Map<string, number>();
+        return filteredData.map((row) => getEnrichedDetail(row, collectorData, collectorIndexes));
+    }, [filteredData, collectorData]);
+}
