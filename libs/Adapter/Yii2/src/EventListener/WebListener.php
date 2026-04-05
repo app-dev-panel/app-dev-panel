@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\EventListener;
 
+use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteCollection;
 use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -221,11 +222,39 @@ final class WebListener
         // Primary: use proxy-recorded match data (accurate pattern, name, timing)
         if ($this->matchRecorder !== null && $this->matchRecorder->getMatchedRule() !== null) {
             $this->extractFromRecorder($app, $uri);
+        } else {
+            // Fallback: extract from resolved controller/action (no match timing, no pattern)
+            $this->extractFromController($app, $uri);
+        }
+
+        // Collect all registered routes for the route list
+        $this->collectAllRoutes($app);
+    }
+
+    /**
+     * Collect all registered URL rules from UrlManager for the route list.
+     */
+    private function collectAllRoutes(\yii\web\Application $app): void
+    {
+        if (!$app->has('urlManager')) {
             return;
         }
 
-        // Fallback: extract from resolved controller/action (no match timing, no pattern)
-        $this->extractFromController($app, $uri);
+        $urlManager = $app->getUrlManager();
+        $collection = new Yii2RouteCollection($urlManager);
+
+        $routes = [];
+        foreach ($collection->getRoutes() as $adapter) {
+            $info = $adapter->__debugInfo();
+            $routes[] = [
+                'name' => $info['name'],
+                'pattern' => $info['pattern'],
+                'methods' => $info['methods'] ?: ['ANY'],
+                'host' => $info['hosts'][0] ?? null,
+            ];
+        }
+
+        $this->routerCollector->collectRoutes($routes);
     }
 
     /**
