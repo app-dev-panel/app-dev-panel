@@ -9,13 +9,61 @@ import {
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import CloseIcon from '@mui/icons-material/Close';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DoneIcon from '@mui/icons-material/Done';
 import SendIcon from '@mui/icons-material/Send';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import {Box, Chip, CircularProgress, IconButton, Link, Paper, Portal, TextField, Typography} from '@mui/material';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {
+    Box,
+    Chip,
+    CircularProgress,
+    IconButton,
+    Link,
+    Paper,
+    Portal,
+    TextField,
+    Tooltip,
+    Typography,
+} from '@mui/material';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
 type Message = {role: 'duck' | 'user'; content: string; status?: 'ok' | 'sending' | 'error'; error?: string};
+
+const MessageCopyButton = ({text}: {text: string}) => {
+    const [copied, setCopied] = useState(false);
+    const handleCopy = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(text).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        });
+    };
+    return (
+        <Tooltip title={copied ? 'Copied!' : 'Copy'} placement="top">
+            <IconButton
+                size="small"
+                onClick={handleCopy}
+                sx={{
+                    position: 'absolute',
+                    top: 4,
+                    right: 4,
+                    width: 22,
+                    height: 22,
+                    opacity: 0,
+                    transition: 'opacity 0.15s',
+                    bgcolor: 'background.paper',
+                    border: 1,
+                    borderColor: 'divider',
+                    '.message-bubble:hover &': {opacity: 1},
+                    '&:hover': {bgcolor: 'action.hover'},
+                }}
+            >
+                {copied ? <DoneIcon sx={{fontSize: 12}} /> : <ContentCopyIcon sx={{fontSize: 12}} />}
+            </IconButton>
+        </Tooltip>
+    );
+};
 
 const formatSummary = (entry: DebugEntry): string => {
     const parts: string[] = [];
@@ -32,7 +80,7 @@ const formatSummary = (entry: DebugEntry): string => {
         parts.push(`${ms}ms, ${mem}MB`);
     }
     if (entry.db) parts.push(`DB: ${entry.db.queries.total} queries`);
-    if (entry.exception) parts.push(`Exception: ${entry.exception.class}`);
+    if (entry.exception?.class) parts.push(`Exception: ${entry.exception.class}`);
     if (entry.deprecation?.total) parts.push(`${entry.deprecation.total} deprecations`);
     return parts.join(' | ');
 };
@@ -317,7 +365,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                     }}
                 >
                     <DuckIcon sx={{fontSize: 22}} />
-                    <Typography sx={{fontSize: 13, fontWeight: 600, flex: 1}}>Debug Duck</Typography>
+                    <Typography sx={{fontSize: 13, fontWeight: 600, flex: 1}}>ADP AI</Typography>
                     {connected && status?.model && (
                         <Typography sx={{fontSize: 10, color: 'text.disabled', maxWidth: 100}} noWrap>
                             {status.model}
@@ -369,7 +417,9 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                     {messages.map((msg, i) => (
                         <Box
                             key={i}
+                            className="message-bubble"
                             sx={{
+                                position: 'relative',
                                 maxWidth: '85%',
                                 alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
                                 px: 1.5,
@@ -397,9 +447,12 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                                     <Typography sx={{fontSize: 12, color: 'text.secondary'}}>Thinking...</Typography>
                                 </Box>
                             ) : (
-                                <Typography sx={{fontSize: 12, lineHeight: 1.5, whiteSpace: 'pre-wrap'}}>
-                                    {msg.content}
-                                </Typography>
+                                <>
+                                    <Typography sx={{fontSize: 12, lineHeight: 1.5, whiteSpace: 'pre-wrap'}}>
+                                        {msg.content}
+                                    </Typography>
+                                    <MessageCopyButton text={msg.content} />
+                                </>
                             )}
                         </Box>
                     ))}
@@ -448,7 +501,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                             }
                         }}
                         disabled={chatLoading}
-                        slotProps={{input: {sx: {fontSize: 12, py: 0.75, borderRadius: 4}}}}
+                        slotProps={{input: {sx: {fontSize: 12, py: 0.75, borderRadius: 2}}}}
                     />
                     <IconButton
                         size="small"
@@ -470,17 +523,18 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                         width: 18,
                         height: 18,
                         cursor: 'nw-resize',
+                        zIndex: 5,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        opacity: 0.3,
+                        opacity: 0.35,
                         '&:hover': {opacity: 0.7},
                     }}
                 >
                     <svg width="10" height="10" viewBox="0 0 10 10">
-                        <line x1="1" y1="9" x2="9" y2="1" stroke="currentColor" strokeWidth="1.2" />
-                        <line x1="1" y1="6" x2="6" y2="1" stroke="currentColor" strokeWidth="1.2" />
-                        <line x1="1" y1="3" x2="3" y2="1" stroke="currentColor" strokeWidth="1.2" />
+                        <line x1="1" y1="10" x2="10" y2="1" stroke="currentColor" strokeWidth="1.2" />
+                        <line x1="4" y1="10" x2="10" y2="4" stroke="currentColor" strokeWidth="1.2" />
+                        <line x1="7" y1="10" x2="10" y2="7" stroke="currentColor" strokeWidth="1.2" />
                     </svg>
                 </Box>
             </Paper>
