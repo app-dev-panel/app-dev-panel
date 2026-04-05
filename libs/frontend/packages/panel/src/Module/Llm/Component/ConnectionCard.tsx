@@ -331,20 +331,12 @@ export const ConnectionCard = () => {
                 onChange={(_, value) => value && setSelectedProvider(value)}
                 size="small"
                 fullWidth
-                sx={{flexWrap: 'wrap'}}
+                sx={{display: 'grid', gridTemplateColumns: {xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)'}}}
             >
-                <ToggleButton value="openrouter" sx={{flex: '1 1 auto', minWidth: 0}}>
-                    OpenRouter
-                </ToggleButton>
-                <ToggleButton value="anthropic" sx={{flex: '1 1 auto', minWidth: 0}}>
-                    Anthropic
-                </ToggleButton>
-                <ToggleButton value="openai" sx={{flex: '1 1 auto', minWidth: 0}}>
-                    OpenAI
-                </ToggleButton>
-                <ToggleButton value="acp" sx={{flex: '1 1 auto', minWidth: 0}}>
-                    ACP
-                </ToggleButton>
+                <ToggleButton value="openrouter">OpenRouter</ToggleButton>
+                <ToggleButton value="anthropic">Anthropic</ToggleButton>
+                <ToggleButton value="openai">OpenAI</ToggleButton>
+                <ToggleButton value="acp">ACP</ToggleButton>
             </ToggleButtonGroup>
 
             {selectedProvider === 'openrouter' ? (
