@@ -263,13 +263,12 @@ final class ConsoleProcessIntegrationTest extends TestCase
 
     private static function readStorageFile(string $basePath): string
     {
-        if (file_exists($basePath . '.json')) {
-            return file_get_contents($basePath . '.json');
-        }
-
-        // Legacy .json.gz fallback
         if (file_exists($basePath . '.json.gz')) {
             return gzdecode(file_get_contents($basePath . '.json.gz'));
+        }
+
+        if (file_exists($basePath . '.json')) {
+            return file_get_contents($basePath . '.json');
         }
 
         throw new \RuntimeException(sprintf('Storage file not found: %s(.json|.json.gz)', $basePath));

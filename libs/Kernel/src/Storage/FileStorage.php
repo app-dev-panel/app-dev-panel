@@ -14,6 +14,7 @@ use Yiisoft\Json\Json;
 final class FileStorage implements StorageInterface
 {
     public const int DEFAULT_HISTORY_SIZE = 50;
+    public const int DEFAULT_COMPRESSION_LEVEL = 1;
 
     /**
      * @var CollectorInterface[]
@@ -26,6 +27,7 @@ final class FileStorage implements StorageInterface
         private readonly string $path,
         private readonly DebuggerIdGenerator $idGenerator,
         private readonly array $excludedClasses = [],
+        private readonly int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL,
     ) {}
 
     public function addCollector(CollectorInterface $collector): void
@@ -56,8 +58,8 @@ final class FileStorage implements StorageInterface
         FileHelper::ensureDirectory($basePath);
 
         $this->writeJson($basePath . self::TYPE_SUMMARY, Json::encode($summary));
-        $this->writeJson($basePath . self::TYPE_DATA, Dumper::create($data)->asJson(30));
-        $this->writeJson($basePath . self::TYPE_OBJECTS, Dumper::create($objects)->asJsonObjectsMap(30));
+        $this->writeCompressed($basePath . self::TYPE_DATA, Dumper::create($data)->asJson(30));
+        $this->writeCompressed($basePath . self::TYPE_OBJECTS, Dumper::create($objects)->asJsonObjectsMap(30));
     }
 
     public function flush(): void
@@ -68,8 +70,8 @@ final class FileStorage implements StorageInterface
             FileHelper::ensureDirectory($basePath);
 
             $dumper = Dumper::create($this->getData(), $this->excludedClasses);
-            $this->writeJson($basePath . self::TYPE_DATA, $dumper->asJson(30));
-            $this->writeJson($basePath . self::TYPE_OBJECTS, $dumper->asJsonObjectsMap(30));
+            $this->writeCompressed($basePath . self::TYPE_DATA, $dumper->asJson(30));
+            $this->writeCompressed($basePath . self::TYPE_OBJECTS, $dumper->asJsonObjectsMap(30));
 
             $summaryData = Dumper::create($this->collectSummaryData())->asJson();
             $this->writeJson($basePath . self::TYPE_SUMMARY, $summaryData);
@@ -139,30 +141,28 @@ final class FileStorage implements StorageInterface
     {
         $data = [];
 
+        $gzFiles = glob(sprintf('%s/**/**/%s.json.gz', $this->path, $type), GLOB_NOSORT) ?: [];
         $jsonFiles = glob(sprintf('%s/**/**/%s.json', $this->path, $type), GLOB_NOSORT) ?: [];
 
-        // Also scan for legacy .json.gz files
-        $gzFiles = glob(sprintf('%s/**/**/%s.json.gz', $this->path, $type), GLOB_NOSORT) ?: [];
-
-        if ($gzFiles !== []) {
-            // Index json dirs to skip duplicates where both formats exist
-            $jsonDirs = [];
-            foreach ($jsonFiles as $file) {
-                $jsonDirs[dirname($file)] = true;
+        if ($jsonFiles !== []) {
+            // Index gz dirs to skip duplicates where both formats exist
+            $gzDirs = [];
+            foreach ($gzFiles as $file) {
+                $gzDirs[dirname($file)] = true;
             }
 
-            foreach ($gzFiles as $file) {
-                if (array_key_exists(dirname($file), $jsonDirs)) {
+            foreach ($jsonFiles as $file) {
+                if (array_key_exists(dirname($file), $gzDirs)) {
                     continue;
                 }
 
-                $jsonFiles[] = $file;
+                $gzFiles[] = $file;
             }
         }
 
-        uasort($jsonFiles, static fn($a, $b) => filemtime($a) <=> filemtime($b));
+        uasort($gzFiles, static fn($a, $b) => filemtime($a) <=> filemtime($b));
 
-        foreach ($jsonFiles as $file) {
+        foreach ($gzFiles as $file) {
             $dir = dirname($file);
             $entryId = substr($dir, strlen(dirname($file, 2)) + 1);
             $raw = file_get_contents($file);
@@ -176,19 +176,19 @@ final class FileStorage implements StorageInterface
     }
 
     /**
-     * Reads a storage file, trying .json first, then legacy .json.gz fallback.
+     * Reads a storage file, trying .json.gz first, then .json fallback.
+     * Summary files are plain .json; data/objects are .json.gz.
      */
     private function readFile(string $basePath): ?string
     {
-        $jsonPath = $basePath . '.json';
-        if (file_exists($jsonPath)) {
-            return file_get_contents($jsonPath);
-        }
-
-        // Legacy .json.gz fallback
         $gzPath = $basePath . '.json.gz';
         if (file_exists($gzPath)) {
             return gzdecode(file_get_contents($gzPath));
+        }
+
+        $jsonPath = $basePath . '.json';
+        if (file_exists($jsonPath)) {
+            return file_get_contents($jsonPath);
         }
 
         return null;
@@ -203,6 +203,21 @@ final class FileStorage implements StorageInterface
     {
         $filePath = $baseFilePath . '.json';
         $result = file_put_contents($filePath, $content, LOCK_EX);
+        if ($result === false) {
+            throw new \RuntimeException(sprintf('Failed to write file "%s".', $filePath));
+        }
+    }
+
+    /**
+     * Compresses content with gzip and writes to a .json.gz file with an exclusive lock.
+     *
+     * @throws \RuntimeException if the file cannot be written.
+     */
+    private function writeCompressed(string $baseFilePath, string $content): void
+    {
+        $filePath = $baseFilePath . '.json.gz';
+        $compressed = gzencode($content, $this->compressionLevel);
+        $result = file_put_contents($filePath, $compressed, LOCK_EX);
         if ($result === false) {
             throw new \RuntimeException(sprintf('Failed to write file "%s".', $filePath));
         }
