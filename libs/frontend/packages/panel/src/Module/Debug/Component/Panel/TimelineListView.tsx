@@ -244,15 +244,21 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                             <OffsetLabel>{offsetLabel}</OffsetLabel>
                             <CollectorLabel sx={{color: color.fg}}>
                                 {label !== 'Unknown' ? label : shortName}
+                                {ref && !isException && <RefPill component="span" sx={{ml: 0.5}}>{ref}</RefPill>}
+                                {logLevel && (
+                                    <RefPill
+                                        component="span"
+                                        sx={{
+                                            color: levelColor,
+                                            backgroundColor: alpha(levelColor!, 0.12),
+                                            fontWeight: 600,
+                                            ml: 0.5,
+                                        }}
+                                    >
+                                        {logLevel.toUpperCase()}
+                                    </RefPill>
+                                )}
                             </CollectorLabel>
-                            {ref && !isException && <RefPill>{ref}</RefPill>}
-                            {logLevel && (
-                                <RefPill
-                                    sx={{color: levelColor, backgroundColor: alpha(levelColor!, 0.12), fontWeight: 600}}
-                                >
-                                    {logLevel.toUpperCase()}
-                                </RefPill>
-                            )}
                             {detail && <DetailText title={detail}>{detail}</DetailText>}
                             <IconButton size="small" sx={{flexShrink: 0, p: 0.25}}>
                                 <Icon sx={{fontSize: 16, color: 'text.disabled'}}>
