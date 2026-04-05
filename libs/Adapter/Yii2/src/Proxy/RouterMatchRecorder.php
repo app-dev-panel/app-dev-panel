@@ -7,10 +7,11 @@ namespace AppDevPanel\Adapter\Yii2\Proxy;
 use yii\web\UrlRuleInterface;
 
 /**
- * Records the URL rule that matched the current request during UrlManager::parseRequest().
+ * Records route matching attempts during UrlManager::parseRequest().
  *
  * Populated by UrlRuleProxy wrappers, consumed by WebListener to feed RouterCollector
- * with accurate route metadata (pattern, name, match time, host).
+ * with accurate route metadata (pattern, name, match time, host) and the full
+ * sequence of attempted rules in checking order (matched and unmatched).
  *
  * Timing starts automatically on the first parseRequest() call and ends when a match is found.
  */
@@ -21,6 +22,9 @@ final class RouterMatchRecorder
     private float $startTime = 0;
     private float $matchTime = 0;
     private bool $started = false;
+
+    /** @var list<array{rule: UrlRuleInterface, matched: bool}> */
+    private array $attempts = [];
 
     /**
      * Called by UrlRuleProxy before delegating parseRequest().
@@ -35,6 +39,14 @@ final class RouterMatchRecorder
     }
 
     /**
+     * Called by UrlRuleProxy when a rule does not match.
+     */
+    public function recordMiss(UrlRuleInterface $rule): void
+    {
+        $this->attempts[] = ['rule' => $rule, 'matched' => false];
+    }
+
+    /**
      * Called by UrlRuleProxy when a rule matches.
      * Records the elapsed time from first parseRequest() to the match.
      */
@@ -43,6 +55,7 @@ final class RouterMatchRecorder
         $this->matchTime = (hrtime(true) - $this->startTime) / 1e6;
         $this->matchedRule = $rule;
         $this->matchResult = $result;
+        $this->attempts[] = ['rule' => $rule, 'matched' => true];
     }
 
     public function getMatchedRule(): ?UrlRuleInterface
@@ -60,6 +73,14 @@ final class RouterMatchRecorder
         return $this->matchTime;
     }
 
+    /**
+     * @return list<array{rule: UrlRuleInterface, matched: bool}>
+     */
+    public function getAttempts(): array
+    {
+        return $this->attempts;
+    }
+
     public function reset(): void
     {
         $this->matchedRule = null;
@@ -67,5 +88,6 @@ final class RouterMatchRecorder
         $this->startTime = 0;
         $this->matchTime = 0;
         $this->started = false;
+        $this->attempts = [];
     }
 }
