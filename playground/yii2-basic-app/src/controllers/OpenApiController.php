@@ -10,12 +10,12 @@ use yii\web\Response;
 
 final class OpenApiController extends Controller
 {
-    public function actionIndex(): string
+    public function actionIndex(): array
     {
         \Yii::$app->response->format = Response::FORMAT_JSON;
 
         $openapi = Generator::scan([dirname(__DIR__)]);
 
-        return $openapi->toJson();
+        return json_decode($openapi->toJson(), true, 512, JSON_THROW_ON_ERROR);
     }
 }

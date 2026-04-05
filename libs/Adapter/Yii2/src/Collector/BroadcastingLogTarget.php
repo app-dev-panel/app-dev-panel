@@ -38,7 +38,7 @@ final class BroadcastingLogTarget extends Target
             try {
                 $this->broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, VarDumper::create([
                     'level' => self::mapLevel($level),
-                    'message' => (string) $text,
+                    'message' => is_string($text) ? $text : VarDumper::create($text)->asString(),
                     'context' => ['category' => $category],
                 ])->asJson(false, 1));
             } catch (\Throwable) {
