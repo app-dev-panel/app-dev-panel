@@ -35,7 +35,7 @@ import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectors
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import {DuckIcon} from '@app-dev-panel/panel/Application/Component/DuckIcon';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Drawer from '@mui/material/Drawer';
@@ -605,7 +605,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 <Tooltip title="AI Chat" placement="left">
                     <Fab
                         size="medium"
-                        color="primary"
                         aria-label="AI Chat"
                         onClick={handleAiChatToggle}
                         sx={{
@@ -613,10 +612,16 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                             bottom: children ? 72 : 24,
                             right: 24,
                             zIndex: 1100,
-                            boxShadow: '0 4px 12px rgba(37,99,235,0.4)',
+                            bgcolor: 'common.white',
+                            border: '2.5px solid',
+                            borderColor: 'primary.main',
+                            boxShadow: '0 4px 12px rgba(37,99,235,0.2)',
+                            '&:hover': {
+                                bgcolor: 'primary.light',
+                            },
                         }}
                     >
-                        <AutoAwesomeIcon />
+                        <DuckIcon sx={{fontSize: 28}} />
                     </Fab>
                 </Tooltip>
             )}
