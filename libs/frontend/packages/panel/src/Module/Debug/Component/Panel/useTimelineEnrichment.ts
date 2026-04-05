@@ -89,6 +89,12 @@ function getEnrichedDetail(
         }
     }
 
+    // Fallback: show reference value for collectors without specific enrichment
+    const ref = row[1];
+    if (ref != null && ref !== 0 && ref !== '') {
+        return String(ref);
+    }
+
     return null;
 }
 
