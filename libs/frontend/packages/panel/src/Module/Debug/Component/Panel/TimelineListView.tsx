@@ -1,49 +1,13 @@
 import {TimelineDetailCard} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineDetailCard';
+import {type TimelineItem, getCollectorColor, parseLogLevel, stripLogLevelPrefix} from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
+import {type EnrichedDetail} from '@app-dev-panel/panel/Module/Debug/Component/Panel/useTimelineEnrichment';
 import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {Box, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {alpha, styled, type Theme, useTheme} from '@mui/material/styles';
 import {useCallback, useState} from 'react';
 
-type Item = [number, number, string] | [number, number, string, string];
-
-import {type EnrichedDetail} from '@app-dev-panel/panel/Module/Debug/Component/Panel/useTimelineEnrichment';
-
-type TimelineListViewProps = {data: Item[]; filtered: Item[]; enrichedDetails: (EnrichedDetail | null)[]};
-
-// ---------------------------------------------------------------------------
-// Collector FQCN → color key mapping
-// ---------------------------------------------------------------------------
-
-const collectorColorKeyMap: Partial<Record<string, string>> = {
-    [CollectorsMap.RequestCollector]: 'request',
-    [CollectorsMap.LogCollector]: 'log',
-    [CollectorsMap.EventCollector]: 'event',
-    [CollectorsMap.DatabaseCollector]: 'database',
-    [CollectorsMap.MiddlewareCollector]: 'middleware',
-    [CollectorsMap.ExceptionCollector]: 'exception',
-    [CollectorsMap.ServiceCollector]: 'service',
-    [CollectorsMap.TimelineCollector]: 'timeline',
-    [CollectorsMap.VarDumperCollector]: 'varDumper',
-    [CollectorsMap.MailerCollector]: 'mailer',
-    [CollectorsMap.FilesystemStreamCollector]: 'filesystem',
-    [CollectorsMap.HttpClientCollector]: 'filesystem',
-    [CollectorsMap.CacheCollector]: 'cache',
-    [CollectorsMap.TemplateCollector]: 'template',
-    [CollectorsMap.AuthorizationCollector]: 'authorization',
-    [CollectorsMap.DeprecationCollector]: 'deprecation',
-    [CollectorsMap.EnvironmentCollector]: 'environment',
-    [CollectorsMap.TranslatorCollector]: 'translator',
-    [CollectorsMap.WebAppInfoCollector]: 'environment',
-    [CollectorsMap.ConsoleAppInfoCollector]: 'environment',
-    [CollectorsMap.CommandCollector]: 'request',
-    [CollectorsMap.QueueCollector]: 'service',
-    [CollectorsMap.RouterCollector]: 'middleware',
-    [CollectorsMap.ValidatorCollector]: 'service',
-    [CollectorsMap.OpenTelemetryCollector]: 'timeline',
-    [CollectorsMap.ElasticsearchCollector]: 'database',
-    [CollectorsMap.RedisCollector]: 'cache',
-};
+type TimelineListViewProps = {data: TimelineItem[]; filtered: TimelineItem[]; enrichedDetails: (EnrichedDetail | null)[]};
 
 // ---------------------------------------------------------------------------
 // Styled components
@@ -190,11 +154,7 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
     }
 
     const getColor = useCallback(
-        (collectorClass: string) => {
-            const key = collectorColorKeyMap[collectorClass] ?? 'default';
-            const colors = theme.adp.collectorColors as any;
-            return colors[key] ?? colors.default;
-        },
+        (collectorClass: string) => getCollectorColor(theme, collectorClass),
         [theme],
     );
 
@@ -219,11 +179,10 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                 const expanded = expandedIndex === index;
                 const isException = collectorClass === CollectorsMap.ExceptionCollector;
 
-                // For LogCollector: extract level from "[level] message" format
-                const logMatch = enriched?.preview.match(/^\[(\w+)] (.*)$/);
-                const logLevel = logMatch?.[1] ?? null;
-                const detail = isException ? ref : logMatch ? logMatch[2] : enriched?.preview ?? null;
-                const fullDetail = isException ? ref : logMatch ? enriched!.full.replace(/^\[\w+] /, '') : enriched?.full ?? null;
+                const parsed = enriched ? parseLogLevel(enriched.preview) : null;
+                const logLevel = parsed?.level ?? null;
+                const detail = isException ? ref : parsed ? parsed.message : enriched?.preview ?? null;
+                const fullDetail = isException ? ref : parsed ? stripLogLevelPrefix(enriched!.full) : enriched?.full ?? null;
 
                 const levelColor = logLevel ? logLevelColor(logLevel, theme) : null;
 

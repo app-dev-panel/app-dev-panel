@@ -1,9 +1,8 @@
+import {type TimelineItem} from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {useEffect, useMemo, useState} from 'react';
-
-type Item = [number, number, string] | [number, number, string, string];
 
 // Collectors we fetch additional data for
 const enrichableCollectors = new Set([
@@ -23,7 +22,7 @@ export type EnrichedDetail = {
 };
 
 function getEnrichedDetail(
-    row: Item,
+    row: TimelineItem,
     collectorData: CollectorDataMap,
     collectorIndexes: Map<string, number>,
 ): EnrichedDetail | null {
@@ -96,7 +95,7 @@ function getEnrichedDetail(
  * Hook that fetches collector data and computes enriched detail strings
  * for each timeline event by cross-referencing with source collector records.
  */
-export function useTimelineEnrichment(allData: Item[], filteredData: Item[]): (EnrichedDetail | null)[] {
+export function useTimelineEnrichment(allData: TimelineItem[], filteredData: TimelineItem[]): (EnrichedDetail | null)[] {
     const debugEntry = useDebugEntry();
     const [fetchCollector] = useLazyGetCollectorInfoQuery();
     const [collectorData, setCollectorData] = useState<CollectorDataMap>(new Map());

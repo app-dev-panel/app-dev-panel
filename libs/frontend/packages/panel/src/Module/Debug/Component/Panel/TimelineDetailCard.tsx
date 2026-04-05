@@ -1,4 +1,5 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {type TimelineItem} from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {MessageCopyButton} from '@app-dev-panel/sdk/Component/MessageCopyButton';
 import {SqlHighlight} from '@app-dev-panel/sdk/Component/SqlHighlight';
@@ -6,13 +7,11 @@ import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Tooltip, Typography} from '@mui/material';
+import {Box, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 
-type Item = [number, number, string] | [number, number, string, string];
-
 type TimelineDetailCardProps = {
-    row: Item;
+    row: TimelineItem;
     fullDetail: string | null;
     logLevel: string | null;
     accentColor: string;
@@ -37,16 +36,6 @@ const Header = styled(Box)(({theme}) => ({
     borderBottom: `1px solid ${theme.palette.divider}`,
 }));
 
-const CollectorBadge = styled(Typography)(({theme}) => ({
-    fontFamily: theme.adp.fontFamilyMono,
-    fontSize: '11px',
-    fontWeight: 600,
-    padding: '2px 8px',
-    borderRadius: 4,
-    lineHeight: '16px',
-    whiteSpace: 'nowrap',
-}));
-
 const MetaLabel = styled(Typography)({
     fontSize: '11px',
 });
@@ -57,51 +46,39 @@ const ContentArea = styled(Box)(({theme}) => ({
     '&:hover .copy-btn': {opacity: 1},
 }));
 
-const CopyBtn = styled(MessageCopyButton)({});
-
 export const TimelineDetailCard = ({row, fullDetail, logLevel, accentColor, offsetLabel}: TimelineDetailCardProps) => {
     const collectorClass = row[2];
-    const shortName = collectorClass.split('\\').pop() ?? collectorClass;
     const isDatabaseLike =
         collectorClass === CollectorsMap.DatabaseCollector ||
         collectorClass === CollectorsMap.ElasticsearchCollector;
+    const isEvent = collectorClass === CollectorsMap.EventCollector;
+    const showDetail = fullDetail && !isEvent;
 
     return (
         <CardRoot accentColor={accentColor}>
-            {/* Header bar */}
             <Header>
-                <Tooltip title={collectorClass} placement="top">
-                    <CollectorBadge sx={{color: accentColor, backgroundColor: `${accentColor}18`}}>
-                        {shortName}
-                    </CollectorBadge>
-                </Tooltip>
                 <MetaLabel sx={{color: 'text.disabled'}}>{formatMicrotime(row[0])}</MetaLabel>
                 <MetaLabel sx={{color: 'text.disabled'}}>Offset: {offsetLabel}</MetaLabel>
                 {row[1] != null && (
                     <MetaLabel sx={{color: 'text.disabled'}}>Ref: {String(row[1])}</MetaLabel>
                 )}
-                <Box sx={{ml: 'auto'}}>
-                    <FileLink className={collectorClass}>
-                        <Tooltip title="Open in IDE" placement="top">
-                            <Typography
-                                component="span"
-                                sx={(t) => ({
-                                    fontFamily: t.adp.fontFamilyMono,
-                                    fontSize: '10px',
-                                    color: 'primary.main',
-                                    cursor: 'pointer',
-                                    '&:hover': {textDecoration: 'underline'},
-                                })}
-                            >
-                                Open
-                            </Typography>
-                        </Tooltip>
-                    </FileLink>
-                </Box>
+                <FileLink className={collectorClass}>
+                    <Typography
+                        component="span"
+                        sx={(t) => ({
+                            fontFamily: t.adp.fontFamilyMono,
+                            fontSize: '11px',
+                            color: 'primary.main',
+                            cursor: 'pointer',
+                            '&:hover': {textDecoration: 'underline'},
+                        })}
+                    >
+                        {collectorClass.split('\\').pop() ?? collectorClass}
+                    </Typography>
+                </FileLink>
             </Header>
 
-            {/* Content body */}
-            {fullDetail && (
+            {showDetail && (
                 <ContentArea className="message-bubble">
                     {isDatabaseLike ? (
                         <SqlHighlight sql={fullDetail} fontSize={12} />
@@ -130,11 +107,10 @@ export const TimelineDetailCard = ({row, fullDetail, logLevel, accentColor, offs
                             </Typography>
                         </Box>
                     )}
-                    {!isDatabaseLike && <CopyBtn text={fullDetail} className="copy-btn" />}
+                    {!isDatabaseLike && <MessageCopyButton text={fullDetail} className="copy-btn" />}
                 </ContentArea>
             )}
 
-            {/* Supplementary JSON data */}
             {Array.isArray(row[3]) && row[3].length > 0 && (
                 <Box sx={{px: 2, pb: 1.5}}>
                     <JsonRenderer value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]} />

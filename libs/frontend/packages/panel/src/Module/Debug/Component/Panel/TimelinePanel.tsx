@@ -1,56 +1,16 @@
 import {TimelineDetailCard} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineDetailCard';
 import {TimelineListView} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineListView';
+import {type TimelineItem, getCollectorColor as getCollectorColorFromTheme, parseLogLevel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
 import {useTimelineEnrichment} from '@app-dev-panel/panel/Module/Debug/Component/Panel/useTimelineEnrichment';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
-import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {Box, Chip, Collapse, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
-// ---------------------------------------------------------------------------
-// Collector FQCN → color key mapping (shared with TimelineListView)
-// ---------------------------------------------------------------------------
-
-const collectorColorKeyMap: Partial<Record<string, string>> = {
-    [CollectorsMap.RequestCollector]: 'request',
-    [CollectorsMap.LogCollector]: 'log',
-    [CollectorsMap.EventCollector]: 'event',
-    [CollectorsMap.DatabaseCollector]: 'database',
-    [CollectorsMap.MiddlewareCollector]: 'middleware',
-    [CollectorsMap.ExceptionCollector]: 'exception',
-    [CollectorsMap.ServiceCollector]: 'service',
-    [CollectorsMap.TimelineCollector]: 'timeline',
-    [CollectorsMap.VarDumperCollector]: 'varDumper',
-    [CollectorsMap.MailerCollector]: 'mailer',
-    [CollectorsMap.FilesystemStreamCollector]: 'filesystem',
-    [CollectorsMap.HttpClientCollector]: 'filesystem',
-    [CollectorsMap.CacheCollector]: 'cache',
-    [CollectorsMap.TemplateCollector]: 'template',
-    [CollectorsMap.AuthorizationCollector]: 'authorization',
-    [CollectorsMap.DeprecationCollector]: 'deprecation',
-    [CollectorsMap.EnvironmentCollector]: 'environment',
-    [CollectorsMap.TranslatorCollector]: 'translator',
-    [CollectorsMap.WebAppInfoCollector]: 'environment',
-    [CollectorsMap.ConsoleAppInfoCollector]: 'environment',
-    [CollectorsMap.CommandCollector]: 'request',
-    [CollectorsMap.QueueCollector]: 'service',
-    [CollectorsMap.RouterCollector]: 'middleware',
-    [CollectorsMap.ValidatorCollector]: 'service',
-    [CollectorsMap.OpenTelemetryCollector]: 'timeline',
-    [CollectorsMap.ElasticsearchCollector]: 'database',
-    [CollectorsMap.RedisCollector]: 'cache',
-};
-
-// Data format from PHP: [microtime, reference, collectorClass, additionalData?]
-// row[0] = microtime(true) — start timestamp
-// row[1] = reference — object ID or count (NOT a duration)
-// row[2] = collector class name
-// row[3] = additional data (optional)
-type Item = [number, number, string] | [number, number, string, string];
-type TimelinePanelProps = {data: Item[]};
+type TimelinePanelProps = {data: TimelineItem[]};
 
 type ViewMode = 'waterfall' | 'list';
 
@@ -189,11 +149,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
     const [viewMode, setViewMode] = useState<ViewMode>('list');
 
     const getCollectorColor = useCallback(
-        (collectorClass: string) => {
-            const key = collectorColorKeyMap[collectorClass] ?? 'default';
-            const colors = theme.adp.collectorColors as any;
-            return colors[key] ?? colors.default;
-        },
+        (collectorClass: string) => getCollectorColorFromTheme(theme, collectorClass),
         [theme],
     );
 
@@ -339,10 +295,9 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                         const color = getCollectorColor(collectorClass);
                         const label = getCollectorLabel(collectorClass);
 
-                        // Strip [level] prefix from log details
-                        const logMatch = enriched?.preview.match(/^\[(\w+)] (.*)$/);
-                        const detail = logMatch ? logMatch[2] : enriched?.preview ?? null;
-                        const fullDetail = logMatch ? enriched!.full.replace(/^\[\w+] /, '') : enriched?.full ?? null;
+                        const parsed = enriched ? parseLogLevel(enriched.preview) : null;
+                        const detail = parsed ? parsed.message : enriched?.preview ?? null;
+                        const fullDetail = parsed ? enriched!.full.replace(/^\[\w+] /, '') : enriched?.full ?? null;
 
                         // Format relative time offset
                         const offsetLabel =
@@ -381,7 +336,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                     <TimelineDetailCard
                                         row={row}
                                         fullDetail={fullDetail}
-                                        logLevel={logMatch?.[1] ?? null}
+                                        logLevel={parsed?.level ?? null}
                                         accentColor={color.fg}
                                         offsetLabel={`+${offsetLabel}`}
                                     />
