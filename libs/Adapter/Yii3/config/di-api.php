@@ -32,6 +32,7 @@ use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
+use AppDevPanel\Api\Inspector\Controller\HttpMockController;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Controller\OpcacheController;
 use AppDevPanel\Api\Inspector\Controller\RequestController;
@@ -40,6 +41,8 @@ use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
+use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
@@ -149,6 +152,15 @@ return [
         JsonResponseFactoryInterface $jsonResponseFactory,
         AuthorizationConfigProviderInterface $authorizationConfigProvider,
     ) => new AuthorizationController($jsonResponseFactory, $authorizationConfigProvider),
+
+    // HTTP mock provider
+    HttpMockProviderInterface::class => static fn() => new NullHttpMockProvider(),
+
+    // HTTP mock controller
+    HttpMockController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        HttpMockProviderInterface $httpMockProvider,
+    ) => new HttpMockController($jsonResponseFactory, $httpMockProvider),
 
     // Collector repository
     CollectorRepositoryInterface::class => static fn(StorageInterface $storage) => new CollectorRepository($storage),

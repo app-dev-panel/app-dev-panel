@@ -48,6 +48,7 @@ use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
+use AppDevPanel\Api\Inspector\Controller\HttpMockController;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Controller\OpcacheController;
 use AppDevPanel\Api\Inspector\Controller\RequestController;
@@ -55,6 +56,8 @@ use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
+use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
@@ -746,6 +749,15 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             fn() => new AuthorizationController(
                 $this->app->make(JsonResponseFactoryInterface::class),
                 $this->app->make(AuthorizationConfigProviderInterface::class),
+            ),
+        );
+
+        $this->app->singleton(HttpMockProviderInterface::class, fn() => new NullHttpMockProvider());
+        $this->app->singleton(
+            HttpMockController::class,
+            fn() => new HttpMockController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(HttpMockProviderInterface::class),
             ),
         );
 
