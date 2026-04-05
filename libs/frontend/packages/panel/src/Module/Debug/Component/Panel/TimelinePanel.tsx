@@ -1,13 +1,9 @@
-import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {TimelineDetailCard} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineDetailCard';
 import {TimelineListView} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineListView';
 import {useTimelineEnrichment} from '@app-dev-panel/panel/Module/Debug/Component/Panel/useTimelineEnrichment';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
-import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
-import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
 import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {Box, Chip, Collapse, IconButton, Tooltip, Typography} from '@mui/material';
@@ -136,12 +132,6 @@ const WaterfallDetail = styled(Typography)(({theme}) => ({
     [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
 
-const DetailBox = styled(Box)(({theme}) => ({
-    padding: theme.spacing(1.5, 2, 1.5, 23),
-    backgroundColor: theme.palette.action.hover,
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    fontSize: '12px',
-}));
 
 // ---------------------------------------------------------------------------
 // View toggle button
@@ -388,53 +378,13 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                     <Duration>{offsetLabel}</Duration>
                                 </Row>
                                 <Collapse in={expanded}>
-                                    <DetailBox>
-                                        <Box sx={{display: 'flex', gap: 3, mb: 1}}>
-                                            <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                                Time: {formatMicrotime(row[0])}
-                                            </Typography>
-                                            <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                                Offset: +{offsetLabel}
-                                            </Typography>
-                                            {row[1] != null && (
-                                                <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                                    Ref: {String(row[1])}
-                                                </Typography>
-                                            )}
-                                        </Box>
-                                        <FileLink className={row[2]}>
-                                            <Typography
-                                                variant="caption"
-                                                component="span"
-                                                sx={(theme) => ({
-                                                    fontFamily: theme.adp.fontFamilyMono,
-                                                    color: 'primary.main',
-                                                    '&:hover': {textDecoration: 'underline'},
-                                                })}
-                                            >
-                                                {row[2]}
-                                            </Typography>
-                                        </FileLink>
-                                        {fullDetail && (
-                                            <Typography
-                                                sx={(theme) => ({
-                                                    mt: 1,
-                                                    fontFamily: theme.adp.fontFamilyMono,
-                                                    fontSize: '12px',
-                                                    color: 'text.primary',
-                                                    wordBreak: 'break-word',
-                                                    whiteSpace: 'pre-wrap',
-                                                })}
-                                            >
-                                                {fullDetail}
-                                            </Typography>
-                                        )}
-                                        {Array.isArray(row[3]) && row[3].length > 0 && (
-                                            <JsonRenderer
-                                                value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]}
-                                            />
-                                        )}
-                                    </DetailBox>
+                                    <TimelineDetailCard
+                                        row={row}
+                                        fullDetail={fullDetail}
+                                        logLevel={logMatch?.[1] ?? null}
+                                        accentColor={color.fg}
+                                        offsetLabel={`+${offsetLabel}`}
+                                    />
                                 </Collapse>
                             </Box>
                         );

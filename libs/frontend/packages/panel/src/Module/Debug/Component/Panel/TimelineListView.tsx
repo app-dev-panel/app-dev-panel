@@ -1,10 +1,6 @@
-import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
-import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
+import {TimelineDetailCard} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineDetailCard';
 import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
-import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
-import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
 import {Box, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {alpha, styled, type Theme, useTheme} from '@mui/material/styles';
 import {useCallback, useState} from 'react';
@@ -110,16 +106,6 @@ const DetailText = styled(Typography)(({theme}) => ({
     minWidth: 0,
 }));
 
-const DetailBox = styled(Box, {shouldForwardProp: (p) => p !== 'accentColor'})<{accentColor?: string}>(
-    ({theme, accentColor}) => ({
-        padding: theme.spacing(1.5, 2),
-        marginLeft: 3,
-        borderLeft: `3px solid ${accentColor ?? 'transparent'}`,
-        backgroundColor: theme.palette.action.hover,
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        fontSize: '12px',
-    }),
-);
 
 const ScaleBar = styled(Box)(({theme}) => ({
     display: 'flex',
@@ -270,53 +256,13 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                             </IconButton>
                         </Row>
                         <Collapse in={expanded}>
-                            <DetailBox accentColor={color.fg}>
-                                <Box sx={{display: 'flex', gap: 3, mb: 1, flexWrap: 'wrap'}}>
-                                    <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                        Time: {formatMicrotime(row[0])}
-                                    </Typography>
-                                    <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                        Offset: {offsetLabel}
-                                    </Typography>
-                                    {row[1] != null && (
-                                        <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                            Ref: {String(row[1])}
-                                        </Typography>
-                                    )}
-                                </Box>
-                                <FileLink className={collectorClass}>
-                                    <Typography
-                                        variant="caption"
-                                        component="span"
-                                        sx={(t) => ({
-                                            fontFamily: t.adp.fontFamilyMono,
-                                            color: 'primary.main',
-                                            '&:hover': {textDecoration: 'underline'},
-                                        })}
-                                    >
-                                        {collectorClass}
-                                    </Typography>
-                                </FileLink>
-                                {fullDetail && (
-                                    <Typography
-                                        sx={(t) => ({
-                                            mt: 1,
-                                            fontFamily: t.adp.fontFamilyMono,
-                                            fontSize: '12px',
-                                            color: 'text.primary',
-                                            wordBreak: 'break-word',
-                                            whiteSpace: 'pre-wrap',
-                                        })}
-                                    >
-                                        {fullDetail}
-                                    </Typography>
-                                )}
-                                {Array.isArray(row[3]) && row[3].length > 0 && (
-                                    <JsonRenderer
-                                        value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]}
-                                    />
-                                )}
-                            </DetailBox>
+                            <TimelineDetailCard
+                                row={row}
+                                fullDetail={fullDetail}
+                                logLevel={logLevel}
+                                accentColor={color.fg}
+                                offsetLabel={offsetLabel}
+                            />
                         </Collapse>
                     </Box>
                 );
