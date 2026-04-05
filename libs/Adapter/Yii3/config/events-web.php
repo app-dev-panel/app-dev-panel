@@ -45,11 +45,11 @@ return [
         ),
     ],
     AfterRequest::class => [
-        static fn(AfterRequest $event, WebAppInfoCollector $collector) => $collector->markRequestFinished(),
         static fn(AfterRequest $event, RequestCollector $collector) => $event->getResponse() !== null
             ? $collector->collectResponse($event->getResponse())
             : null,
         static fn(AfterRequest $event, RouterDataExtractor $extractor) => $extractor->extract(),
+        static fn(AfterRequest $event, WebAppInfoCollector $collector) => $collector->markRequestFinished(),
     ],
     AfterEmit::class => [
         [ProfilerInterface::class, 'flush'],

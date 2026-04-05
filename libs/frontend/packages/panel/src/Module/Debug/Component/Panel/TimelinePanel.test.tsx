@@ -106,8 +106,8 @@ describe('TimelinePanel', () => {
             // Click on the row label (getAllByText since name appears in legend too)
             const elements = screen.getAllByText('AuthMiddleware');
             await user.click(elements[elements.length - 1]);
-            // Expanded detail shows full class name
-            expect(screen.getAllByText('App\\Middleware\\AuthMiddleware').length).toBeGreaterThanOrEqual(1);
+            // Expanded detail shows short class name in badge
+            expect(screen.getAllByText('AuthMiddleware').length).toBeGreaterThanOrEqual(2);
             // Shows reference value
             expect(screen.getByText(/Ref: 42/)).toBeInTheDocument();
         });
@@ -142,8 +142,8 @@ describe('TimelinePanel', () => {
             renderWithProviders(<TimelinePanel data={data} />);
             // Click on the row in list view
             await user.click(screen.getByText('+0µs'));
-            // Expanded detail shows full class name
-            expect(screen.getAllByText('App\\Middleware\\AuthMiddleware').length).toBeGreaterThanOrEqual(1);
+            // Expanded detail shows short class name in badge
+            expect(screen.getAllByText('AuthMiddleware').length).toBeGreaterThanOrEqual(2);
             // Shows reference value
             expect(screen.getByText(/Ref: 42/)).toBeInTheDocument();
         });
@@ -154,7 +154,7 @@ describe('TimelinePanel', () => {
             ];
             renderWithProviders(<TimelinePanel data={data} />);
             // EventCollector row[3] is shown as short class name
-            expect(screen.getByText('BeforeRequest')).toBeInTheDocument();
+            expect(screen.getAllByText('BeforeRequest').length).toBeGreaterThanOrEqual(1);
         });
     });
 });

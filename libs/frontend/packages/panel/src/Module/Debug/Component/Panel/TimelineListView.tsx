@@ -1,51 +1,13 @@
-import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
-import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
+import {TimelineDetailCard} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineDetailCard';
+import {type TimelineItem, getCollectorColor, parseLogLevel, stripLogLevelPrefix} from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
+import {type EnrichedDetail} from '@app-dev-panel/panel/Module/Debug/Component/Panel/useTimelineEnrichment';
 import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
-import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
-import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
 import {Box, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {alpha, styled, type Theme, useTheme} from '@mui/material/styles';
 import {useCallback, useState} from 'react';
 
-type Item = [number, number, string] | [number, number, string, string];
-
-type TimelineListViewProps = {data: Item[]; filtered: Item[]; enrichedDetails: (string | null)[]};
-
-// ---------------------------------------------------------------------------
-// Collector FQCN → color key mapping
-// ---------------------------------------------------------------------------
-
-const collectorColorKeyMap: Partial<Record<string, string>> = {
-    [CollectorsMap.RequestCollector]: 'request',
-    [CollectorsMap.LogCollector]: 'log',
-    [CollectorsMap.EventCollector]: 'event',
-    [CollectorsMap.DatabaseCollector]: 'database',
-    [CollectorsMap.MiddlewareCollector]: 'middleware',
-    [CollectorsMap.ExceptionCollector]: 'exception',
-    [CollectorsMap.ServiceCollector]: 'service',
-    [CollectorsMap.TimelineCollector]: 'timeline',
-    [CollectorsMap.VarDumperCollector]: 'varDumper',
-    [CollectorsMap.MailerCollector]: 'mailer',
-    [CollectorsMap.FilesystemStreamCollector]: 'filesystem',
-    [CollectorsMap.HttpClientCollector]: 'filesystem',
-    [CollectorsMap.CacheCollector]: 'cache',
-    [CollectorsMap.TemplateCollector]: 'template',
-    [CollectorsMap.AuthorizationCollector]: 'authorization',
-    [CollectorsMap.DeprecationCollector]: 'deprecation',
-    [CollectorsMap.EnvironmentCollector]: 'environment',
-    [CollectorsMap.TranslatorCollector]: 'translator',
-    [CollectorsMap.WebAppInfoCollector]: 'environment',
-    [CollectorsMap.ConsoleAppInfoCollector]: 'environment',
-    [CollectorsMap.CommandCollector]: 'request',
-    [CollectorsMap.QueueCollector]: 'service',
-    [CollectorsMap.RouterCollector]: 'middleware',
-    [CollectorsMap.ValidatorCollector]: 'service',
-    [CollectorsMap.OpenTelemetryCollector]: 'timeline',
-    [CollectorsMap.ElasticsearchCollector]: 'database',
-    [CollectorsMap.RedisCollector]: 'cache',
-};
+type TimelineListViewProps = {data: TimelineItem[]; filtered: TimelineItem[]; enrichedDetails: (EnrichedDetail | null)[]};
 
 // ---------------------------------------------------------------------------
 // Styled components
@@ -108,16 +70,6 @@ const DetailText = styled(Typography)(({theme}) => ({
     minWidth: 0,
 }));
 
-const DetailBox = styled(Box, {shouldForwardProp: (p) => p !== 'accentColor'})<{accentColor?: string}>(
-    ({theme, accentColor}) => ({
-        padding: theme.spacing(1.5, 2),
-        marginLeft: 3,
-        borderLeft: `3px solid ${accentColor ?? 'transparent'}`,
-        backgroundColor: theme.palette.action.hover,
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        fontSize: '12px',
-    }),
-);
 
 const ScaleBar = styled(Box)(({theme}) => ({
     display: 'flex',
@@ -202,11 +154,7 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
     }
 
     const getColor = useCallback(
-        (collectorClass: string) => {
-            const key = collectorColorKeyMap[collectorClass] ?? 'default';
-            const colors = theme.adp.collectorColors as any;
-            return colors[key] ?? colors.default;
-        },
+        (collectorClass: string) => getCollectorColor(theme, collectorClass),
         [theme],
     );
 
@@ -227,14 +175,14 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                 const color = getColor(collectorClass);
                 const label = getCollectorLabel(collectorClass);
                 const ref = row[1] != null && row[1] !== '' ? String(row[1]) : null;
-                const rawDetail = enrichedDetails[index];
+                const enriched = enrichedDetails[index];
                 const expanded = expandedIndex === index;
                 const isException = collectorClass === CollectorsMap.ExceptionCollector;
 
-                // For LogCollector: extract level from "[level] message" format
-                const logMatch = rawDetail?.match(/^\[(\w+)] (.*)$/);
-                const logLevel = logMatch?.[1] ?? null;
-                const detail = isException ? ref : logMatch ? logMatch[2] : rawDetail;
+                const parsed = enriched ? parseLogLevel(enriched.preview) : null;
+                const logLevel = parsed?.level ?? null;
+                const detail = isException ? ref : parsed ? parsed.message : enriched?.preview ?? null;
+                const fullDetail = isException ? ref : parsed ? stripLogLevelPrefix(enriched!.full) : enriched?.full ?? null;
 
                 const levelColor = logLevel ? logLevelColor(logLevel, theme) : null;
 
@@ -244,15 +192,21 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                             <OffsetLabel>{offsetLabel}</OffsetLabel>
                             <CollectorLabel sx={{color: color.fg}}>
                                 {label !== 'Unknown' ? label : shortName}
+                                {ref && !isException && <RefPill component="span" sx={{ml: 0.5}}>{ref}</RefPill>}
+                                {logLevel && (
+                                    <RefPill
+                                        component="span"
+                                        sx={{
+                                            color: levelColor,
+                                            backgroundColor: alpha(levelColor!, 0.12),
+                                            fontWeight: 600,
+                                            ml: 0.5,
+                                        }}
+                                    >
+                                        {logLevel.toUpperCase()}
+                                    </RefPill>
+                                )}
                             </CollectorLabel>
-                            {ref && !isException && <RefPill>{ref}</RefPill>}
-                            {logLevel && (
-                                <RefPill
-                                    sx={{color: levelColor, backgroundColor: alpha(levelColor!, 0.12), fontWeight: 600}}
-                                >
-                                    {logLevel.toUpperCase()}
-                                </RefPill>
-                            )}
                             {detail && <DetailText title={detail}>{detail}</DetailText>}
                             <IconButton size="small" sx={{flexShrink: 0, p: 0.25}}>
                                 <Icon sx={{fontSize: 16, color: 'text.disabled'}}>
@@ -261,39 +215,14 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                             </IconButton>
                         </Row>
                         <Collapse in={expanded}>
-                            <DetailBox accentColor={color.fg}>
-                                <Box sx={{display: 'flex', gap: 3, mb: 1, flexWrap: 'wrap'}}>
-                                    <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                        Time: {formatMicrotime(row[0])}
-                                    </Typography>
-                                    <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                        Offset: {offsetLabel}
-                                    </Typography>
-                                    {row[1] != null && (
-                                        <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                            Ref: {String(row[1])}
-                                        </Typography>
-                                    )}
-                                </Box>
-                                <FileLink className={collectorClass}>
-                                    <Typography
-                                        variant="caption"
-                                        component="span"
-                                        sx={(t) => ({
-                                            fontFamily: t.adp.fontFamilyMono,
-                                            color: 'primary.main',
-                                            '&:hover': {textDecoration: 'underline'},
-                                        })}
-                                    >
-                                        {collectorClass}
-                                    </Typography>
-                                </FileLink>
-                                {!!row[3] && (
-                                    <JsonRenderer
-                                        value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]}
-                                    />
-                                )}
-                            </DetailBox>
+                            <TimelineDetailCard
+                                row={row}
+                                fullDetail={fullDetail}
+                                logLevel={logLevel}
+                                accentColor={color.fg}
+                                offsetLabel={offsetLabel}
+                                rawValue={enriched?.rawValue}
+                            />
                         </Collapse>
                     </Box>
                 );
