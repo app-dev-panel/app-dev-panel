@@ -19,7 +19,18 @@ export const InfoBox = ({text, title, icon, severity}: InfoBoxProps) => {
                 <Typography component="h5" variant="h5" my={3}>
                     {title}
                 </Typography>
-                {text && <Alert severity={severity}>{text}</Alert>}
+                {text && (
+                    <Alert
+                        severity={severity}
+                        sx={{
+                            backgroundColor: `${severity}.light`,
+                            color: 'text.primary',
+                            '& .MuiAlert-icon': {color: `${severity}.main`},
+                        }}
+                    >
+                        {text}
+                    </Alert>
+                )}
             </>
         </Box>
     );
