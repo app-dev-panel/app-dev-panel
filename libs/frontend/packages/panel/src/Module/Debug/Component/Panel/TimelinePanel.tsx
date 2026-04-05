@@ -344,7 +344,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                                 {row[2]}
                                             </Typography>
                                         </FileLink>
-                                        {!!row[3] && (
+                                        {Array.isArray(row[3]) && row[3].length > 0 && (
                                             <JsonRenderer
                                                 value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]}
                                             />
