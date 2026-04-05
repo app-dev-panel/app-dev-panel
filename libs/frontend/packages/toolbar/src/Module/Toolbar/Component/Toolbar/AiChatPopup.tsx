@@ -11,7 +11,7 @@ import {
     useChatMutation,
     useGetStatusQuery,
 } from '@app-dev-panel/sdk/API/Llm/Llm';
-import {MessageCopyButton} from '@app-dev-panel/sdk/Component/MessageCopyButton';
+import {ChatMessageList} from '@app-dev-panel/sdk/Component/ChatMessageList';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import CloseIcon from '@mui/icons-material/Close';
@@ -20,8 +20,6 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import {Box, Chip, CircularProgress, IconButton, Link, Paper, Portal, TextField, Typography} from '@mui/material';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-
-type Message = {role: 'duck' | 'user'; content: string; status?: 'ok' | 'sending' | 'error'; error?: string};
 
 const buildContextPrompt = (entry: DebugEntry): string => {
     const parts: string[] = ['Analyze this debug entry:'];
@@ -93,13 +91,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
     const connected = status?.connected ?? false;
     const suggestions = connected ? SUGGESTIONS_CONNECTED : SUGGESTIONS_DISCONNECTED;
 
-    const reduxMessages = useSelector((state: {aiChat?: {messages: ChatBubble[]}}) => state.aiChat?.messages ?? []);
-    const messages: Message[] = reduxMessages.map((m) => ({
-        role: m.role === 'assistant' ? ('duck' as const) : ('user' as const),
-        content: m.content,
-        status: m.status,
-        error: m.error,
-    }));
+    const messages = useSelector((state: {aiChat?: {messages: ChatBubble[]}}) => state.aiChat?.messages ?? []);
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [pos, setPos] = useState(DEFAULT_POS);
@@ -350,52 +342,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                 <Box
                     sx={{flex: 1, overflowY: 'auto', px: 1.5, py: 1, display: 'flex', flexDirection: 'column', gap: 1}}
                 >
-                    {messages.map((msg, i) => (
-                        <Box
-                            key={i}
-                            className="message-bubble"
-                            sx={{
-                                position: 'relative',
-                                maxWidth: '85%',
-                                alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                                px: 1.5,
-                                py: 1,
-                                borderRadius: 2,
-                                borderBottomLeftRadius: msg.role === 'duck' ? 1 : undefined,
-                                borderBottomRightRadius: msg.role === 'user' ? 1 : undefined,
-                                bgcolor:
-                                    msg.status === 'error'
-                                        ? 'error.main'
-                                        : msg.role === 'duck'
-                                          ? 'action.hover'
-                                          : 'primary.main',
-                                color:
-                                    msg.status === 'error'
-                                        ? 'common.white'
-                                        : msg.role === 'user'
-                                          ? 'primary.contrastText'
-                                          : 'text.primary',
-                            }}
-                        >
-                            {msg.status === 'sending' ? (
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                    <CircularProgress size={12} />
-                                    <Typography sx={{fontSize: 12, color: 'text.secondary'}}>Thinking...</Typography>
-                                </Box>
-                            ) : (
-                                <>
-                                    <Typography sx={{fontSize: 12, lineHeight: 1.5, whiteSpace: 'pre-wrap', pr: 3}}>
-                                        {msg.status === 'error' ? msg.error || msg.content : msg.content}
-                                    </Typography>
-                                    <MessageCopyButton
-                                        text={msg.content || msg.error || ''}
-                                        variant={msg.role === 'user' || msg.status === 'error' ? 'dark' : 'light'}
-                                    />
-                                </>
-                            )}
-                        </Box>
-                    ))}
-                    <div ref={messagesEndRef} />
+                    <ChatMessageList messages={messages} variant="compact" scrollRef={messagesEndRef} />
                 </Box>
 
                 {/* Suggestions */}

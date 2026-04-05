@@ -1,5 +1,5 @@
 import {useAnalyzeMutation, useGetStatusQuery} from '@app-dev-panel/panel/Module/Llm/API/Llm';
-import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
+import {Markdown} from '@app-dev-panel/sdk/Component/Markdown';
 import {SendButton} from '@app-dev-panel/panel/Module/Llm/Component/SendButton';
 import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {HighlightedText, fuzzyMatch} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';

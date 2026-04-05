@@ -6,7 +6,6 @@ import {
     useGetHistoryQuery,
     useGetStatusQuery,
 } from '@app-dev-panel/panel/Module/Llm/API/Llm';
-import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
 import {SendButton} from '@app-dev-panel/panel/Module/Llm/Component/SendButton';
 import {
     type ChatBubble,
@@ -15,30 +14,26 @@ import {
     removeErrorMessages,
     updateLastSending,
 } from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
-import {MessageCopyButton} from '@app-dev-panel/sdk/Component/MessageCopyButton';
+import {ChatMessageList} from '@app-dev-panel/sdk/Component/ChatMessageList';
+import {Markdown} from '@app-dev-panel/sdk/Component/Markdown';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HistoryIcon from '@mui/icons-material/History';
-import ReplayIcon from '@mui/icons-material/Replay';
 import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
     Alert,
     Box,
-    CircularProgress,
     IconButton,
     Paper,
     TextField,
     Tooltip,
     Typography,
 } from '@mui/material';
-import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {memo, useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-
-type MessageStatus = 'ok' | 'error' | 'sending';
-type Message = {role: 'user' | 'assistant'; content: string; status: MessageStatus; error?: string};
 
 const containerSx = {display: 'flex', flexDirection: 'column', gap: 2, height: '100%'} as const;
 const paperSx = {
@@ -51,27 +46,7 @@ const paperSx = {
     flexDirection: 'column',
     gap: 1.5,
 } as const;
-const emptyMsgSx = {textAlign: 'center', mt: 4} as const;
-const userMsgSx = {alignSelf: 'flex-end', maxWidth: '80%'} as const;
-const assistantMsgSx = {alignSelf: 'flex-start', maxWidth: '80%', position: 'relative'} as const;
-const userBubbleSx = {
-    p: 1.5,
-    borderRadius: 2,
-    bgcolor: 'primary.main',
-    color: 'primary.contrastText',
-    position: 'relative',
-} as const;
-const assistantBubbleSx = {
-    p: 1.5,
-    borderRadius: 2,
-    bgcolor: 'background.default',
-    color: 'text.primary',
-    position: 'relative',
-} as const;
-const sendingOpacity = {opacity: 0.7} as const;
-const loadingSx = {display: 'flex', alignItems: 'center', gap: 1} as const;
 const inputRowSx = {display: 'flex', gap: 1} as const;
-const errorCaptionSx = {mt: 0.5, display: 'block'} as const;
 const replayIconSx = {fontSize: 16} as const;
 const historySx = {
     '&:before': {display: 'none'},
@@ -84,7 +59,12 @@ const historyHeaderSx = {display: 'flex', alignItems: 'center', gap: 1, flex: 1}
 const historyIconSx = {fontSize: 18, color: 'text.secondary'} as const;
 const clearBtnSx = {mr: 1} as const;
 const deleteIconSx = {fontSize: 14} as const;
-const historyItemSx = {'&:before': {display: 'none'}, boxShadow: 'none', borderTop: 1, borderColor: 'divider'} as const;
+const historyItemSx = {
+    '&:before': {display: 'none'},
+    boxShadow: 'none',
+    borderTop: 1,
+    borderColor: 'divider',
+} as const;
 const historyItemHeaderSx = {display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0} as const;
 const historyErrorIconSx = {fontSize: 14, color: 'error.main', flexShrink: 0} as const;
 const historyResponseSx = {bgcolor: 'background.default', borderRadius: 1, p: 1.5} as const;
@@ -171,7 +151,7 @@ export const ChatPanel = () => {
     const [clearHistory] = useClearHistoryMutation();
     const messages = useSelector(
         (state: {aiChat?: {messages: ChatBubble[]}}) => state.aiChat?.messages ?? [],
-    ) as Message[];
+    );
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const dispatch = useDispatch();
     const prefillMessage = useSelector(
@@ -259,16 +239,6 @@ export const ChatPanel = () => {
         [clearHistory],
     );
 
-    const bubbleSx = useMemo(
-        () => ({
-            user: userBubbleSx,
-            userSending: {...userBubbleSx, ...sendingOpacity},
-            assistant: assistantBubbleSx,
-            assistantSending: {...assistantBubbleSx, ...sendingOpacity},
-        }),
-        [],
-    );
-
     if (!status?.connected) {
         return <Alert severity="info">Connect an LLM provider first to use the chat feature.</Alert>;
     }
@@ -276,74 +246,12 @@ export const ChatPanel = () => {
     return (
         <Box sx={containerSx}>
             <Paper variant="outlined" sx={paperSx}>
-                {messages.length === 0 && (
-                    <Typography variant="body2" color="text.secondary" sx={emptyMsgSx}>
-                        Ask questions about your application, debug data, or get development advice.
-                    </Typography>
-                )}
-                {messages.map((msg, i) => (
-                    <Box key={i} sx={msg.role === 'user' ? userMsgSx : assistantMsgSx}>
-                        {msg.status === 'error' ? (
-                            <>
-                                <Alert
-                                    severity="error"
-                                    action={
-                                        <Tooltip title="Retry">
-                                            <IconButton
-                                                size="small"
-                                                color="error"
-                                                onClick={() => handleRetry(i)}
-                                                aria-label="Retry"
-                                            >
-                                                <ReplayIcon sx={replayIconSx} />
-                                            </IconButton>
-                                        </Tooltip>
-                                    }
-                                >
-                                    {msg.content}
-                                </Alert>
-                                {msg.error && (
-                                    <Typography variant="caption" color="text.secondary" sx={errorCaptionSx}>
-                                        {msg.error}
-                                    </Typography>
-                                )}
-                            </>
-                        ) : (
-                            <Box
-                                className="message-bubble"
-                                sx={
-                                    msg.role === 'user'
-                                        ? bubbleSx.user
-                                        : msg.status === 'sending'
-                                          ? bubbleSx.assistantSending
-                                          : bubbleSx.assistant
-                                }
-                            >
-                                {msg.status === 'sending' ? (
-                                    <Box sx={loadingSx}>
-                                        <CircularProgress size={16} />
-                                        <Typography variant="body2" color="text.secondary">
-                                            Thinking...
-                                        </Typography>
-                                    </Box>
-                                ) : msg.role === 'assistant' ? (
-                                    <>
-                                        <Markdown content={msg.content} />
-                                        <MessageCopyButton text={msg.content} />
-                                    </>
-                                ) : (
-                                    <>
-                                        <Typography variant="body2" sx={{whiteSpace: 'pre-wrap', pr: 3}}>
-                                            {msg.content}
-                                        </Typography>
-                                        <MessageCopyButton text={msg.content} variant="dark" />
-                                    </>
-                                )}
-                            </Box>
-                        )}
-                    </Box>
-                ))}
-                <div ref={messagesEndRef} />
+                <ChatMessageList
+                    messages={messages}
+                    variant="full"
+                    onRetry={handleRetry}
+                    scrollRef={messagesEndRef}
+                />
             </Paper>
             <ChatInput
                 onSend={handleSend}

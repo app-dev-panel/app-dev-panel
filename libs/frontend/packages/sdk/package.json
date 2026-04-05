@@ -60,11 +60,13 @@
     "react-dom": "^19.0.0",
     "react-error-boundary": "^6.1.1",
     "react-hook-form": "^7.51.2",
+    "react-markdown": "^10.1.0",
     "react-redux": "^9.2.0",
     "react-router": "^7.13.2",
     "react-syntax-highlighter": "^16.1.1",
     "redux-persist": "^6.0.0",
     "redux-state-sync": "^3.1.4",
+    "remark-gfm": "^4.0.1",
     "sql-formatter": "^15.7.2",
     "swagger-ui-react": "^5.17.14",
     "yup": "^1.2.0"
