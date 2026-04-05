@@ -6,7 +6,7 @@ import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
 import {Box, Collapse, Typography} from '@mui/material';
-import {styled, useTheme} from '@mui/material/styles';
+import {styled, type Theme, useTheme} from '@mui/material/styles';
 import {useCallback, useState} from 'react';
 
 type Item = [number, number, string] | [number, number, string, string];
@@ -126,6 +126,25 @@ const ScaleBar = styled(Box)(({theme}) => ({
 // Helpers
 // ---------------------------------------------------------------------------
 
+function logLevelColor(level: string, theme: Theme): string {
+    switch (level) {
+        case 'emergency':
+        case 'alert':
+        case 'critical':
+        case 'error':
+            return theme.palette.error.main;
+        case 'warning':
+            return theme.palette.warning.main;
+        case 'notice':
+            return theme.palette.primary.main;
+        case 'info':
+            return theme.palette.success.main;
+        case 'debug':
+        default:
+            return theme.palette.text.disabled;
+    }
+}
+
 function formatOffset(relativeTime: number): string {
     if (relativeTime < 0.001) {
         return `+${(relativeTime * 1000000).toFixed(0)}µs`;
@@ -216,7 +235,12 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                                 {logLevel && (
                                     <Typography
                                         component="span"
-                                        sx={{color: 'text.disabled', fontWeight: 400, fontSize: '11px', ml: 0.5}}
+                                        sx={{
+                                            color: logLevelColor(logLevel, theme),
+                                            fontWeight: 400,
+                                            fontSize: '11px',
+                                            ml: 0.5,
+                                        }}
                                     >
                                         [{logLevel}]
                                     </Typography>
