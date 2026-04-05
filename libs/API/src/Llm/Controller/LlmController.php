@@ -106,8 +106,9 @@ final class LlmController
         $this->settings->setAcpArgs($acpArgs);
         $this->settings->setAcpEnv($acpEnv);
 
-        // Try to start persistent ACP daemon automatically
+        // Start persistent ACP daemon
         $daemonRunning = false;
+        $daemonError = null;
         if ($this->acpDaemonManager !== null) {
             if ($this->acpDaemonManager->isRunning()) {
                 $daemonRunning = true;
@@ -115,8 +116,8 @@ final class LlmController
                 try {
                     $this->acpDaemonManager->start($command, $acpArgs, $acpEnv);
                     $daemonRunning = true;
-                } catch (\RuntimeException) {
-                    // Auto-start failed — user can start daemon manually
+                } catch (\RuntimeException $e) {
+                    $daemonError = $e->getMessage();
                 }
             }
         }
@@ -126,6 +127,12 @@ final class LlmController
             'provider' => 'acp',
             'acpCommand' => $command,
             'daemonRunning' => $daemonRunning,
+            'daemonError' => $daemonError,
+            '_debug' => [
+                'socketPath' => $this->acpDaemonManager?->getSocketPath(),
+                'pidPath' => $this->acpDaemonManager?->getPidFilePath(),
+                'logPath' => $this->acpDaemonManager?->getLogFilePath(),
+            ],
         ]);
     }
 
