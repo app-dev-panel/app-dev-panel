@@ -5,12 +5,11 @@ import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Settings} from '@mui/icons-material';
-import {TabContext} from '@mui/lab';
-import {IconButton, Stack, Tab, Tabs, Typography} from '@mui/material';
+import {TabContext, TabPanel} from '@mui/lab';
+import {IconButton, Stack, Tab, Tabs, Typography, useTheme} from '@mui/material';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-// import SwaggerUI from 'swagger-ui-react';
-// todo: move dependency to sdk package
+import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
 
 const NoEntries = React.memo(() => {
@@ -31,6 +30,7 @@ export const Layout = () => {
     const [tab, setTab] = useState<string>('');
     const [settingsPopupOpen, setSettingsPopupOpen] = useState<boolean>(false);
     const handleChange = (_event: React.SyntheticEvent, value: string) => setTab(value);
+    const theme = useTheme();
 
     const apiEntries = useOpenApiEntries();
 
@@ -62,18 +62,14 @@ export const Layout = () => {
                             <Settings />
                         </IconButton>
                     </Stack>
-                    {/*<TextField disabled value={apiEntries[tab]} />*/}
                     {Object.keys(apiEntries).length === 0 ? (
                         <NoEntries />
                     ) : (
-                        <>
-                            Temporary disabled
-                            {/*{Object.entries(apiEntries).map(([name, url], index) => (*/}
-                            {/*    <TabPanel key={index} value={name} className={theme.palette.mode}>*/}
-                            {/*<SwaggerUI url={url} />*/}
-                            {/*</TabPanel>*/}
-                            {/*))}*/}
-                        </>
+                        Object.entries(apiEntries).map(([name, url]) => (
+                            <TabPanel key={name} value={name} className={theme.palette.mode}>
+                                <SwaggerUI url={url} />
+                            </TabPanel>
+                        ))
                     )}
                 </Stack>
             </TabContext>
