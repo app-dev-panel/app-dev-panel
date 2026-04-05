@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="350" viewBox="0 0 900 350">
+  <style>
+    text { font-family: 'Segoe UI', Arial, sans-serif; }
+  </style>
+
+  <!-- Background -->
+  <rect width="900" height="350" fill="#F8FAFC" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#1E293B">Duck Icon — Floating Button Variants</text>
+
+  <!-- ===== Variant A: Minimal duck.svg ===== -->
+  <g transform="translate(50, 60)">
+    <text x="100" y="16" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">A — Minimal</text>
+
+    <!-- Fab circle preview -->
+    <circle cx="100" cy="145" r="56" fill="#2563EB" />
+    <g transform="translate(62, 107) scale(0.6)">
+      <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
+      <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
+      <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
+      <circle cx="38" cy="38" r="3.5" fill="#292524"/>
+      <circle cx="37" cy="37" r="1.2" fill="white"/>
+      <path d="M56 74C64 66 82 68 94 78" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <path d="M16 108C24 104 32 104 40 108C48 112 56 112 64 108C72 104 80 104 88 108C96 112 104 112 112 108" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    </g>
+
+    <!-- Small size preview -->
+    <circle cx="30" cy="260" r="20" fill="#2563EB"/>
+    <g transform="translate(14, 244) scale(0.25)">
+      <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
+      <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
+      <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
+      <circle cx="38" cy="38" r="3.5" fill="#292524"/>
+      <circle cx="37" cy="37" r="1.2" fill="white"/>
+      <path d="M56 74C64 66 82 68 94 78" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </g>
+    <text x="58" y="264" font-size="11" fill="#64748B">40px</text>
+
+    <circle cx="30" cy="300" r="14" fill="#2563EB"/>
+    <g transform="translate(18, 290) scale(0.18)">
+      <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
+      <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
+      <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
+      <circle cx="38" cy="38" r="3.5" fill="#292524"/>
+    </g>
+    <text x="52" y="304" font-size="11" fill="#64748B">28px</text>
+  </g>
+
+  <!-- ===== Variant B: Detailed duck-detailed.svg ===== -->
+  <g transform="translate(310, 60)">
+    <text x="100" y="16" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">B — Detailed (goggles + badge)</text>
+
+    <!-- Fab circle preview -->
+    <circle cx="100" cy="145" r="56" fill="#2563EB"/>
+    <g transform="translate(56, 95) scale(0.45)">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#FBBF24"/>
+          <stop offset="100%" style="stop-color:#F59E0B"/>
+        </linearGradient>
+        <linearGradient id="wg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#F59E0B"/>
+          <stop offset="100%" style="stop-color:#D97706"/>
+        </linearGradient>
+        <linearGradient id="bkg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#FB923C"/>
+          <stop offset="100%" style="stop-color:#EA580C"/>
+        </linearGradient>
+      </defs>
+      <ellipse cx="100" cy="130" rx="55" ry="42" fill="url(#bg)"/>
+      <path d="M 145 115 Q 165 100 160 85 Q 155 95 148 105 Q 155 90 150 78 Q 148 92 142 105" fill="url(#wg)"/>
+      <ellipse cx="115" cy="128" rx="30" ry="22" fill="url(#wg)" transform="rotate(-10, 115, 128)"/>
+      <ellipse cx="72" cy="105" rx="22" ry="30" fill="url(#bg)"/>
+      <circle cx="68" cy="72" r="26" fill="url(#bg)"/>
+      <ellipse cx="60" cy="67" rx="8" ry="9" fill="white"/>
+      <circle cx="58" cy="66" r="5" fill="#1A1A1A"/>
+      <circle cx="56" cy="64" r="2" fill="white"/>
+      <path d="M 42 72 Q 32 70 28 75 Q 32 80 42 78 Z" fill="url(#bkg)"/>
+      <path d="M 75 48 Q 80 35 72 30 Q 68 38 65 46" fill="#FBBF24"/>
+      <path d="M 70 50 Q 73 38 66 34 Q 63 42 62 49" fill="#F59E0B"/>
+      <circle cx="50" cy="78" r="5" fill="#FB923C" opacity="0.3"/>
+      <path d="M 48 63 Q 68 55 88 63" fill="none" stroke="#2563EB" stroke-width="2.5" opacity="0.8"/>
+      <circle cx="58" cy="66" r="11" fill="none" stroke="#2563EB" stroke-width="2" opacity="0.6"/>
+      <circle cx="58" cy="66" r="11" fill="#EFF6FF" opacity="0.15"/>
+      <rect x="82" y="120" rx="4" ry="4" width="28" height="16" fill="#2563EB" opacity="0.9"/>
+      <text x="96" y="132" font-family="monospace" font-size="9" fill="white" text-anchor="middle" font-weight="600">&lt;/&gt;</text>
+    </g>
+
+    <!-- Small size preview -->
+    <circle cx="30" cy="260" r="20" fill="#2563EB"/>
+    <g transform="translate(12, 240) scale(0.18)">
+      <ellipse cx="100" cy="130" rx="55" ry="42" fill="url(#bg)"/>
+      <ellipse cx="115" cy="128" rx="30" ry="22" fill="url(#wg)" transform="rotate(-10, 115, 128)"/>
+      <ellipse cx="72" cy="105" rx="22" ry="30" fill="url(#bg)"/>
+      <circle cx="68" cy="72" r="26" fill="url(#bg)"/>
+      <circle cx="58" cy="66" r="5" fill="#1A1A1A"/>
+      <circle cx="56" cy="64" r="2" fill="white"/>
+      <path d="M 42 72 Q 32 70 28 75 Q 32 80 42 78 Z" fill="url(#bkg)"/>
+      <path d="M 48 63 Q 68 55 88 63" fill="none" stroke="#2563EB" stroke-width="2.5" opacity="0.8"/>
+      <circle cx="58" cy="66" r="11" fill="none" stroke="#2563EB" stroke-width="2" opacity="0.6"/>
+    </g>
+    <text x="58" y="264" font-size="11" fill="#64748B">40px</text>
+  </g>
+
+  <!-- ===== Variant C: Head-only crop ===== -->
+  <g transform="translate(590, 60)">
+    <text x="100" y="16" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">C — Head Only</text>
+
+    <!-- Fab circle preview -->
+    <circle cx="100" cy="145" r="56" fill="#2563EB"/>
+    <g transform="translate(52, 97) scale(0.85)">
+      <!-- Head -->
+      <circle cx="56" cy="50" r="38" fill="#FCD34D"/>
+      <!-- Beak -->
+      <path d="M22 44L4 50L22 56Z" fill="#FB923C"/>
+      <!-- Eye -->
+      <circle cx="48" cy="42" r="5.5" fill="#292524"/>
+      <circle cx="46.5" cy="40.5" r="2" fill="white"/>
+      <!-- Cheek -->
+      <circle cx="36" cy="58" r="4" fill="#FB923C" opacity="0.25"/>
+    </g>
+
+    <!-- Small size preview -->
+    <circle cx="30" cy="260" r="20" fill="#2563EB"/>
+    <g transform="translate(10, 238) scale(0.4)">
+      <circle cx="56" cy="50" r="38" fill="#FCD34D"/>
+      <path d="M22 44L4 50L22 56Z" fill="#FB923C"/>
+      <circle cx="48" cy="42" r="5.5" fill="#292524"/>
+      <circle cx="46.5" cy="40.5" r="2" fill="white"/>
+    </g>
+    <text x="58" y="264" font-size="11" fill="#64748B">40px</text>
+
+    <circle cx="30" cy="300" r="14" fill="#2563EB"/>
+    <g transform="translate(16, 286) scale(0.28)">
+      <circle cx="56" cy="50" r="38" fill="#FCD34D"/>
+      <path d="M22 44L4 50L22 56Z" fill="#FB923C"/>
+      <circle cx="48" cy="42" r="5.5" fill="#292524"/>
+      <circle cx="46.5" cy="40.5" r="2" fill="white"/>
+    </g>
+    <text x="52" y="304" font-size="11" fill="#64748B">28px</text>
+  </g>
+
+  <!-- Labels -->
+  <text x="150" y="340" text-anchor="middle" font-size="11" fill="#94A3B8">Full duck, flat style</text>
+  <text x="410" y="340" text-anchor="middle" font-size="11" fill="#94A3B8">Full duck, gradients + details</text>
+  <text x="690" y="340" text-anchor="middle" font-size="11" fill="#94A3B8">Head crop, maximum clarity</text>
+</svg>
