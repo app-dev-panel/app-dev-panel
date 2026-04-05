@@ -41,6 +41,7 @@ return [
                 'GET /api' => 'api/index',
                 'GET /api/users' => 'api/users',
                 'GET /api/error' => 'api/error-demo',
+                'GET /api/openapi.json' => 'open-api/index',
                 'GET /test/fixtures/logs' => 'test-fixtures/logs',
                 'GET /test/fixtures/logs-context' => 'test-fixtures/logs-context',
                 'GET /test/fixtures/events' => 'test-fixtures/events',

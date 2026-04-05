@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OpenApiController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\TestFixtures\AssetAction;
 use App\Http\Controllers\TestFixtures\CacheAction;
@@ -50,6 +51,7 @@ Route::match(['GET', 'POST'], '/var-dumper', [PageController::class, 'varDumper'
 Route::get('/api', [HomeController::class, 'index']);
 Route::get('/api/users', [HomeController::class, 'users']);
 Route::get('/api/error', [HomeController::class, 'error']);
+Route::get('/api/openapi.json', OpenApiController::class);
 
 // Test fixtures
 Route::prefix('test/fixtures')->group(function (): void {

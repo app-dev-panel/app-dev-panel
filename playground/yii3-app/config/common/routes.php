@@ -28,6 +28,7 @@ return [
             Route::get('/')->action(Web\Api\IndexAction::class)->name('api-index'),
             Route::get('/users')->action(Web\Api\UsersAction::class)->name('api-users'),
             Route::get('/error')->action(Web\Api\ErrorAction::class)->name('api-error'),
+            Route::get('/openapi.json')->action(Web\Api\OpenApiAction::class)->name('api-openapi'),
         )
         ->prependMiddleware(FormatDataResponseAsJson::class),
     Group::create('/test/fixtures')
