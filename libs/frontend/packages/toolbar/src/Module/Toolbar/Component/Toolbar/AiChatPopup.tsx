@@ -118,7 +118,14 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
     // Drag state
     const dragRef = useRef<{startX: number; startY: number; startLeft: number; startTop: number} | null>(null);
     // Resize state
-    const resizeRef = useRef<{startX: number; startY: number; startW: number; startH: number} | null>(null);
+    const resizeRef = useRef<{
+        startX: number;
+        startY: number;
+        startW: number;
+        startH: number;
+        startLeft: number;
+        startTop: number;
+    } | null>(null);
 
     // Compute initial position based on toolbar position
     useEffect(() => {
@@ -161,9 +168,13 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
             }
             const resize = resizeRef.current;
             if (resize) {
-                const w = Math.max(280, resize.startW + (e.clientX - resize.startX));
-                const h = Math.max(320, resize.startH + (e.clientY - resize.startY));
-                setPos((p) => ({...p, w, h}));
+                const dx = resize.startX - e.clientX;
+                const dy = resize.startY - e.clientY;
+                const w = Math.max(280, resize.startW + dx);
+                const h = Math.max(320, resize.startH + dy);
+                const x = resize.startLeft - (w - resize.startW);
+                const y = resize.startTop - (h - resize.startH);
+                setPos({x, y, w, h});
             }
         };
         const onMouseUp = () => {
@@ -192,7 +203,14 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
         e.stopPropagation();
         const rect = chatRef.current?.getBoundingClientRect();
         if (!rect) return;
-        resizeRef.current = {startX: e.clientX, startY: e.clientY, startW: rect.width, startH: rect.height};
+        resizeRef.current = {
+            startX: e.clientX,
+            startY: e.clientY,
+            startW: rect.width,
+            startH: rect.height,
+            startLeft: rect.left,
+            startTop: rect.top,
+        };
     }, []);
 
     const sendMessage = useCallback(
@@ -404,10 +422,22 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                 </Box>
 
                 {/* Input */}
-                <Box sx={{display: 'flex', gap: 0.5, p: 1, borderTop: 1, borderColor: 'divider', flexShrink: 0}}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        gap: 0.5,
+                        p: 1,
+                        borderTop: 1,
+                        borderColor: 'divider',
+                        flexShrink: 0,
+                        alignItems: 'flex-end',
+                    }}
+                >
                     <TextField
                         size="small"
                         fullWidth
+                        multiline
+                        maxRows={6}
                         placeholder={connected ? 'Ask about this request...' : 'Ask the duck...'}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
@@ -424,22 +454,22 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                         size="small"
                         onClick={() => sendMessage(input)}
                         disabled={!input.trim() || chatLoading}
-                        sx={{color: 'primary.main'}}
+                        sx={{color: 'primary.main', width: 36, height: 36, flexShrink: 0}}
                     >
                         {chatLoading ? <CircularProgress size={18} /> : <SendIcon sx={{fontSize: 18}} />}
                     </IconButton>
                 </Box>
 
-                {/* Resize handle - bottom-right */}
+                {/* Resize handle - top-left */}
                 <Box
                     onMouseDown={onResizeMouseDown}
                     sx={{
                         position: 'absolute',
-                        bottom: 0,
-                        right: 0,
+                        top: 0,
+                        left: 0,
                         width: 18,
                         height: 18,
-                        cursor: 'se-resize',
+                        cursor: 'nw-resize',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -448,9 +478,9 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                     }}
                 >
                     <svg width="10" height="10" viewBox="0 0 10 10">
-                        <line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" strokeWidth="1.2" />
-                        <line x1="9" y1="4" x2="4" y2="9" stroke="currentColor" strokeWidth="1.2" />
-                        <line x1="9" y1="7" x2="7" y2="9" stroke="currentColor" strokeWidth="1.2" />
+                        <line x1="1" y1="9" x2="9" y2="1" stroke="currentColor" strokeWidth="1.2" />
+                        <line x1="1" y1="6" x2="6" y2="1" stroke="currentColor" strokeWidth="1.2" />
+                        <line x1="1" y1="3" x2="3" y2="1" stroke="currentColor" strokeWidth="1.2" />
                     </svg>
                 </Box>
             </Paper>

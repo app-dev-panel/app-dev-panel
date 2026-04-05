@@ -594,23 +594,25 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 </MainArea>
             </Box>
             {children}
-            <Tooltip title={aiChatOpen ? 'Close AI Chat' : 'AI Chat'} placement="left">
-                <Fab
-                    size="medium"
-                    color="primary"
-                    aria-label="AI Chat"
-                    onClick={handleAiChatToggle}
-                    sx={{
-                        position: 'fixed',
-                        bottom: children ? 72 : 24,
-                        right: 24,
-                        zIndex: 1100,
-                        boxShadow: '0 4px 12px rgba(37,99,235,0.4)',
-                    }}
-                >
-                    <AutoAwesomeIcon />
-                </Fab>
-            </Tooltip>
+            {!aiChatOpen && (
+                <Tooltip title="AI Chat" placement="left">
+                    <Fab
+                        size="medium"
+                        color="primary"
+                        aria-label="AI Chat"
+                        onClick={handleAiChatToggle}
+                        sx={{
+                            position: 'fixed',
+                            bottom: children ? 72 : 24,
+                            right: 24,
+                            zIndex: 1100,
+                            boxShadow: '0 4px 12px rgba(37,99,235,0.4)',
+                        }}
+                    >
+                        <AutoAwesomeIcon />
+                    </Fab>
+                </Tooltip>
+            )}
             <AiChatPopup open={aiChatOpen} onClose={handleAiChatClose} entry={debugEntry} />
             <ScrollTopButton bottomOffset={!!children} />
             <CommandPalette open={ui.paletteOpen} onClose={handlePaletteClose} extraItems={paletteCollectorItems} />
