@@ -8,6 +8,7 @@ import {
 } from '@app-dev-panel/panel/Module/Llm/API/Llm';
 import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
 import {SendButton} from '@app-dev-panel/panel/Module/Llm/Component/SendButton';
+import {clearPrefillMessage} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -26,7 +27,8 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import {useCallback, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 
 type MessageStatus = 'ok' | 'error' | 'sending';
 type Message = {role: 'user' | 'assistant'; content: string; status: MessageStatus; error?: string};
@@ -98,6 +100,17 @@ export const ChatPanel = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const dispatch = useDispatch();
+    const prefillMessage = useSelector(
+        (state: {aiChat?: {prefillMessage: string | null}}) => state.aiChat?.prefillMessage,
+    );
+
+    useEffect(() => {
+        if (prefillMessage) {
+            setInput(prefillMessage);
+            dispatch(clearPrefillMessage());
+        }
+    }, [prefillMessage, dispatch]);
 
     const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
     const scrollToBottom = useCallback(() => {

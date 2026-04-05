@@ -1,9 +1,11 @@
 import {changeEntryAction} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {setPrefillMessage} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {getEntrySearchText, isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate, formatTime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import {
     Alert,
     AlertTitle,
@@ -138,6 +140,33 @@ export const DebugEntryList = () => {
     const deferredFilter = useDeferredValue(filter);
     const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setFilter(e.target.value), []);
     const handleFilterClear = useCallback(() => setFilter(''), []);
+
+    const handleExplainWithAi = useCallback(() => {
+        if (!entries || entries.length === 0) return;
+        const visible = filtered.length > 0 ? filtered.slice(0, 20) : entries.slice(0, 20);
+        const summary = visible
+            .map((e) => {
+                if (isDebugEntryAboutWeb(e)) {
+                    const dur = e.web?.request?.processingTime
+                        ? `${(e.web.request.processingTime * 1000).toFixed(0)}ms`
+                        : '?';
+                    const mem = e.web?.memory?.peakUsage ? formatBytes(e.web.memory.peakUsage) : '?';
+                    const db = e.db?.queries?.total ?? 0;
+                    const n1 = hasN1Indicator(e) ? ' [N+1]' : '';
+                    const err = e.exception ? ` ERROR: ${e.exception.message}` : '';
+                    return `${e.request.method} ${e.request.path} → ${e.response.statusCode} (${dur}, ${mem}, ${db} queries${n1})${err}`;
+                }
+                if (isDebugEntryAboutConsole(e)) {
+                    return `CLI: ${e.command?.input ?? 'unknown'} → exit ${e.command?.exitCode}`;
+                }
+                return e.id;
+            })
+            .join('\n');
+
+        const prompt = `Analyze these debug entries from my application and explain what you see. Look for patterns, potential issues (slow requests, errors, N+1 queries, high memory usage), and suggest improvements.\n\nUse MCP tools to fetch detailed debug data for entries that look problematic.\n\n${summary}`;
+        dispatch(setPrefillMessage(prompt));
+        navigate('/llm');
+    }, [entries, filtered, dispatch, navigate]);
 
     const handleEntryClick = useCallback(
         (entry: DebugEntry) => {
@@ -361,6 +390,16 @@ export const DebugEntryList = () => {
                 <Tooltip title={isFetching ? 'Refreshing...' : 'Refresh'}>
                     <IconButton size="small" onClick={refetch} disabled={isFetching} aria-label="Refresh entries">
                         <Icon sx={{fontSize: 18}}>{isFetching ? 'hourglass_empty' : 'refresh'}</Icon>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Explain with AI">
+                    <IconButton
+                        size="small"
+                        onClick={handleExplainWithAi}
+                        aria-label="Explain with AI"
+                        sx={{color: 'primary.main'}}
+                    >
+                        <AutoAwesomeIcon sx={{fontSize: 18}} />
                     </IconButton>
                 </Tooltip>
             </Box>
