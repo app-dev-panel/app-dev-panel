@@ -99,7 +99,7 @@ export const ChatMessageList = memo(
                     // Full variant: errors shown as MUI Alert
                     if (isError && !isCompact) {
                         return (
-                            <Box key={i} sx={isUser ? styles.userMsg : styles.assistantMsg}>
+                            <Box key={msg.id} sx={isUser ? styles.userMsg : styles.assistantMsg}>
                                 <Alert
                                     severity="error"
                                     action={
@@ -117,9 +117,9 @@ export const ChatMessageList = memo(
                                         )
                                     }
                                 >
-                                    {msg.content}
+                                    {msg.error || msg.content}
                                 </Alert>
-                                {msg.error && (
+                                {msg.error && msg.content && msg.error !== msg.content && (
                                     <Typography variant="caption" color="text.secondary" sx={errorCaptionSx}>
                                         {msg.error}
                                     </Typography>
@@ -139,15 +139,14 @@ export const ChatMessageList = memo(
                     const isDarkBubble = isUser || isError;
 
                     return (
-                        <Box key={i} className="message-bubble" sx={isUser ? styles.userMsg : styles.assistantMsg}>
+                        <Box key={msg.id} className="message-bubble" sx={isUser ? styles.userMsg : styles.assistantMsg}>
                             <Box sx={bubbleSx}>
                                 {isSending ? (
                                     <Box sx={loadingSx}>
                                         <CircularProgress size={isCompact ? 12 : 16} />
                                         <Typography
-                                            variant={isCompact ? undefined : 'body2'}
-                                            sx={isCompact ? {fontSize: 12, color: 'text.secondary'} : undefined}
-                                            color={isCompact ? undefined : 'text.secondary'}
+                                            variant="body2"
+                                            sx={{...(isCompact && {fontSize: 12}), color: 'text.secondary'}}
                                         >
                                             Thinking...
                                         </Typography>
@@ -161,10 +160,30 @@ export const ChatMessageList = memo(
                                                 {displayContent}
                                             </Typography>
                                         )}
-                                        <MessageCopyButton
-                                            text={msg.content || msg.error || ''}
-                                            variant={isDarkBubble ? 'dark' : 'light'}
-                                        />
+                                        {isError && onRetry ? (
+                                            <Tooltip title="Retry">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => onRetry(i)}
+                                                    aria-label="Retry"
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        top: 4,
+                                                        right: 4,
+                                                        width: 22,
+                                                        height: 22,
+                                                        color: 'common.white',
+                                                    }}
+                                                >
+                                                    <ReplayIcon sx={{fontSize: 14}} />
+                                                </IconButton>
+                                            </Tooltip>
+                                        ) : (
+                                            <MessageCopyButton
+                                                text={msg.content || msg.error || ''}
+                                                variant={isDarkBubble ? 'dark' : 'light'}
+                                            />
+                                        )}
                                     </>
                                 )}
                             </Box>

@@ -3,6 +3,7 @@ import {
     type ChatBubble,
     addMessage,
     clearPrefillMessage,
+    removeErrorMessages,
     updateLastSending,
 } from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {
@@ -14,6 +15,7 @@ import {
 import {ChatMessageList} from '@app-dev-panel/sdk/Component/ChatMessageList';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {extractErrorMessage} from '@app-dev-panel/sdk/Helper/extractErrorMessage';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
@@ -56,21 +58,6 @@ const SUGGESTIONS_CONNECTED = ['Analyze request', 'Performance tips', 'Explain e
 const SUGGESTIONS_DISCONNECTED = ['Show queries', 'Performance tips', 'Show logs', 'Explain route'];
 
 const DEFAULT_POS = {x: -1, y: -1, w: 360, h: 480};
-
-const extractErrorMessage = (err: unknown): string | null => {
-    if (typeof err === 'object' && err !== null && 'data' in err) {
-        const data = (err as {data: unknown}).data;
-        if (typeof data === 'object' && data !== null) {
-            const obj = data as Record<string, unknown>;
-            if (typeof obj.error === 'string') return obj.error;
-            if (typeof obj.data === 'object' && obj.data !== null) {
-                const inner = obj.data as Record<string, unknown>;
-                if (typeof inner.error === 'string') return inner.error;
-            }
-        }
-    }
-    return null;
-};
 
 type AiChatPopupProps = {
     open: boolean;
@@ -138,7 +125,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
-    }, [messages]);
+    }, [messages.length]);
 
     // Global mouse listeners for drag + resize
     useEffect(() => {
@@ -195,6 +182,16 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
             startTop: rect.top,
         };
     }, []);
+
+    const handleRetry = useCallback(
+        (index: number) => {
+            const msg = messages[index];
+            if (!msg || msg.status !== 'error') return;
+            reduxDispatch(removeErrorMessages());
+            setInput(msg.error || msg.content);
+        },
+        [messages, reduxDispatch],
+    );
 
     const sendMessage = useCallback(
         async (text: string) => {
@@ -342,7 +339,12 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                 <Box
                     sx={{flex: 1, overflowY: 'auto', px: 1.5, py: 1, display: 'flex', flexDirection: 'column', gap: 1}}
                 >
-                    <ChatMessageList messages={messages} variant="compact" scrollRef={messagesEndRef} />
+                    <ChatMessageList
+                        messages={messages}
+                        variant="compact"
+                        onRetry={handleRetry}
+                        scrollRef={messagesEndRef}
+                    />
                 </Box>
 
                 {/* Suggestions */}
@@ -387,7 +389,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                             }
                         }}
                         disabled={chatLoading}
-                        slotProps={{input: {sx: {fontSize: 12, py: '7px', borderRadius: 2}}}}
+                        slotProps={{input: {sx: {fontSize: 12, py: 0.875, borderRadius: 2}}}}
                     />
                     <IconButton
                         size="small"

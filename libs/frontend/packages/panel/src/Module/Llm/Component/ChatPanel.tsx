@@ -16,6 +16,7 @@ import {
 } from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {ChatMessageList} from '@app-dev-panel/sdk/Component/ChatMessageList';
 import {Markdown} from '@app-dev-panel/sdk/Component/Markdown';
+import {extractErrorMessage} from '@app-dev-panel/sdk/Helper/extractErrorMessage';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -59,30 +60,10 @@ const historyHeaderSx = {display: 'flex', alignItems: 'center', gap: 1, flex: 1}
 const historyIconSx = {fontSize: 18, color: 'text.secondary'} as const;
 const clearBtnSx = {mr: 1} as const;
 const deleteIconSx = {fontSize: 14} as const;
-const historyItemSx = {
-    '&:before': {display: 'none'},
-    boxShadow: 'none',
-    borderTop: 1,
-    borderColor: 'divider',
-} as const;
+const historyItemSx = {'&:before': {display: 'none'}, boxShadow: 'none', borderTop: 1, borderColor: 'divider'} as const;
 const historyItemHeaderSx = {display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0} as const;
 const historyErrorIconSx = {fontSize: 14, color: 'error.main', flexShrink: 0} as const;
 const historyResponseSx = {bgcolor: 'background.default', borderRadius: 1, p: 1.5} as const;
-
-const extractErrorMessage = (err: unknown): string | null => {
-    if (typeof err === 'object' && err !== null && 'data' in err) {
-        const data = (err as {data: unknown}).data;
-        if (typeof data === 'object' && data !== null) {
-            const obj = data as Record<string, unknown>;
-            if (typeof obj.error === 'string') return obj.error;
-            if (typeof obj.data === 'object' && obj.data !== null) {
-                const inner = obj.data as Record<string, unknown>;
-                if (typeof inner.error === 'string') return inner.error;
-            }
-        }
-    }
-    return null;
-};
 
 const formatTime = (ts: number): string => {
     const d = new Date(ts * 1000);
@@ -149,9 +130,7 @@ export const ChatPanel = () => {
     const [addHistory] = useAddHistoryMutation();
     const [deleteHistory] = useDeleteHistoryMutation();
     const [clearHistory] = useClearHistoryMutation();
-    const messages = useSelector(
-        (state: {aiChat?: {messages: ChatBubble[]}}) => state.aiChat?.messages ?? [],
-    );
+    const messages = useSelector((state: {aiChat?: {messages: ChatBubble[]}}) => state.aiChat?.messages ?? []);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const dispatch = useDispatch();
     const prefillMessage = useSelector(
@@ -175,11 +154,14 @@ export const ChatPanel = () => {
             dispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
             scrollToBottom();
 
-            const outgoing = [...messagesRef.current.filter((m) => m.status !== 'error'), userMessage];
+            const outgoing = [
+                ...messagesRef.current.filter((m) => m.status !== 'error' && m.status !== 'sending'),
+                userMessage,
+            ];
             try {
                 const result = await chat({
                     messages: outgoing
-                        .filter((m) => m.status !== 'error')
+                        .filter((m) => m.status !== 'error' && m.status !== 'sending')
                         .map((m) => ({role: m.role, content: m.content})),
                 }).unwrap();
 
@@ -208,12 +190,15 @@ export const ChatPanel = () => {
             dispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
             scrollToBottom();
 
-            const outgoing = [...messagesRef.current.filter((_, i) => i !== index), retryMessage];
+            const outgoing = [
+                ...messagesRef.current.filter(
+                    (m, idx) => idx !== index && m.status !== 'error' && m.status !== 'sending',
+                ),
+                retryMessage,
+            ];
             try {
                 const result = await chat({
-                    messages: outgoing
-                        .filter((m) => m.status !== 'error')
-                        .map((m) => ({role: m.role, content: m.content})),
+                    messages: outgoing.map((m) => ({role: m.role, content: m.content})),
                 }).unwrap();
 
                 const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
@@ -246,12 +231,7 @@ export const ChatPanel = () => {
     return (
         <Box sx={containerSx}>
             <Paper variant="outlined" sx={paperSx}>
-                <ChatMessageList
-                    messages={messages}
-                    variant="full"
-                    onRetry={handleRetry}
-                    scrollRef={messagesEndRef}
-                />
+                <ChatMessageList messages={messages} variant="full" onRetry={handleRetry} scrollRef={messagesEndRef} />
             </Paper>
             <ChatInput
                 onSend={handleSend}

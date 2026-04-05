@@ -33,10 +33,10 @@ export const MessageCopyButton = memo(({text, variant = 'light'}: MessageCopyBut
                     height: 22,
                     opacity: 0,
                     transition: 'opacity 0.15s',
-                    bgcolor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)',
+                    bgcolor: isDark ? 'rgba(255,255,255,0.15)' : 'action.hover',
                     color: isDark ? 'common.white' : 'text.secondary',
                     '.message-bubble:hover &': {opacity: 1},
-                    '&:hover': {bgcolor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.12)'},
+                    '&:hover': {bgcolor: isDark ? 'rgba(255,255,255,0.25)' : 'action.selected'},
                 }}
             >
                 {copied ? <DoneIcon sx={{fontSize: 12}} /> : <ContentCopyIcon sx={{fontSize: 12}} />}

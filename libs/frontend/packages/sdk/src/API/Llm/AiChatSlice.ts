@@ -1,7 +1,13 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 type MessageStatus = 'ok' | 'error' | 'sending';
-export type ChatBubble = {role: 'user' | 'assistant'; content: string; status: MessageStatus; error?: string};
+export type ChatBubble = {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    status: MessageStatus;
+    error?: string;
+};
 
 type AiChatState = {prefillMessage: string | null; floatingOpen: boolean; messages: ChatBubble[]};
 
@@ -19,8 +25,11 @@ export const AiChatSlice = createSlice({
         clearPrefillMessage(state) {
             state.prefillMessage = null;
         },
-        addMessage(state, action: PayloadAction<ChatBubble>) {
-            state.messages.push(action.payload);
+        addMessage(state, action: PayloadAction<Omit<ChatBubble, 'id'>>) {
+            state.messages.push({
+                ...action.payload,
+                id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+            });
         },
         updateLastSending(state, action: PayloadAction<{status: MessageStatus; content?: string; error?: string}>) {
             const idx = state.messages.findLastIndex((m) => m.status === 'sending');
