@@ -107,18 +107,16 @@ final class LlmController
         $this->settings->setAcpEnv($acpEnv);
 
         // Start persistent ACP daemon
-        $daemonRunning = false;
-        $daemonError = null;
-        if ($this->acpDaemonManager !== null) {
-            if ($this->acpDaemonManager->isRunning()) {
-                $daemonRunning = true;
-            } else {
-                try {
-                    $this->acpDaemonManager->start($command, $acpArgs, $acpEnv);
-                    $daemonRunning = true;
-                } catch (\RuntimeException $e) {
-                    $daemonError = $e->getMessage();
-                }
+        if ($this->acpDaemonManager !== null && !$this->acpDaemonManager->isRunning()) {
+            try {
+                $this->acpDaemonManager->start($command, $acpArgs, $acpEnv);
+            } catch (\RuntimeException $e) {
+                $this->settings->clear();
+
+                return $this->responseFactory->createJsonResponse([
+                    'connected' => false,
+                    'error' => $e->getMessage(),
+                ], 500);
             }
         }
 
@@ -126,13 +124,6 @@ final class LlmController
             'connected' => true,
             'provider' => 'acp',
             'acpCommand' => $command,
-            'daemonRunning' => $daemonRunning,
-            'daemonError' => $daemonError,
-            '_debug' => [
-                'socketPath' => $this->acpDaemonManager?->getSocketPath(),
-                'pidPath' => $this->acpDaemonManager?->getPidFilePath(),
-                'logPath' => $this->acpDaemonManager?->getLogFilePath(),
-            ],
         ]);
     }
 
