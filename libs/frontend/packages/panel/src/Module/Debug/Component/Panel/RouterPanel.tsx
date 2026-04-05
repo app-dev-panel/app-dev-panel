@@ -155,27 +155,26 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
                     {currentRoute.arguments &&
                         typeof currentRoute.arguments === 'object' &&
                         !Array.isArray(currentRoute.arguments) &&
-                        Object.keys(currentRoute.arguments).length > 0 && (
-                            <Box sx={{mt: 1.5}}>
-                                <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
-                                    Arguments
-                                </Typography>
-                                {Object.entries(currentRoute.arguments).map(([key, val]) => (
-                                    <Box key={key} sx={{display: 'flex', gap: 1, ml: 1, mb: 0.25}}>
-                                        <Typography
-                                            sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'primary.main'}}
-                                        >
-                                            {key}:
-                                        </Typography>
-                                        <Typography
-                                            sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'text.secondary'}}
-                                        >
-                                            {val}
-                                        </Typography>
-                                    </Box>
-                                ))}
-                            </Box>
-                        )}
+                        Object.keys(currentRoute.arguments).length > 0 &&
+                        Object.entries(currentRoute.arguments).map(([key, val], i) => (
+                            <FieldRow key={key}>
+                                <FieldLabel>{i === 0 ? 'Arguments' : ''}</FieldLabel>
+                                <FieldValue sx={{fontFamily: monoFontFamily, display: 'flex', gap: 0.75}}>
+                                    <Typography
+                                        component="span"
+                                        sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'primary.main'}}
+                                    >
+                                        {key}:
+                                    </Typography>
+                                    <Typography
+                                        component="span"
+                                        sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'text.secondary'}}
+                                    >
+                                        {val || '\u2014'}
+                                    </Typography>
+                                </FieldValue>
+                            </FieldRow>
+                        ))}
 
                     {currentRoute.action && (
                         <FieldRow>
