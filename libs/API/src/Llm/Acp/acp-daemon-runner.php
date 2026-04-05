@@ -207,7 +207,19 @@ function spawnAgent(string $command, array $args, array $env): array
         2 => ['pipe', 'w'],
     ];
 
-    $mergedEnv = array_merge(getenv() ?: [], $env);
+    // Filter out dangerous environment variables that could enable code execution
+    $blockedEnvKeys = [
+        'PATH',
+        'HOME',
+        'USER',
+        'SHELL',
+        'LD_PRELOAD',
+        'LD_LIBRARY_PATH',
+        'DYLD_INSERT_LIBRARIES',
+        'DYLD_LIBRARY_PATH',
+    ];
+    $safeEnv = array_diff_key($env, array_flip($blockedEnvKeys));
+    $mergedEnv = array_merge(getenv() ?: [], $safeEnv);
     $cwd = getcwd() ?: sys_get_temp_dir();
 
     $process = proc_open($commandLine, $descriptors, $pipes, $cwd, $mergedEnv);
@@ -483,7 +495,7 @@ if ($server === false) {
     exit(1);
 }
 
-chmod($socketPath, 0660);
+chmod($socketPath, 0600);
 
 fwrite(STDERR, "ACP daemon: listening on {$socketPath}\n");
 

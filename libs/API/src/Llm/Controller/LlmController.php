@@ -530,7 +530,16 @@ final class LlmController
     {
         $header = $request->getHeaderLine('X-Acp-Session');
 
-        return $header !== '' ? $header : null;
+        if ($header === '') {
+            return null;
+        }
+
+        // Validate UUID format to prevent injection via socket protocol
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $header)) {
+            return null;
+        }
+
+        return $header;
     }
 
     private function generateCodeVerifier(): string

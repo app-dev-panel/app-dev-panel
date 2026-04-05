@@ -89,7 +89,7 @@ final class LlmControllerTest extends TestCase
 
     private function acpPost(array $body): ServerRequest
     {
-        return $this->post($body, ['X-Acp-Session' => 'test-session-id']);
+        return $this->post($body, ['X-Acp-Session' => '550e8400-e29b-41d4-a716-446655440000']);
     }
 
     private function mockDaemonManager(): AcpDaemonManagerInterface
@@ -780,6 +780,18 @@ final class LlmControllerTest extends TestCase
             acpDaemonManager: $this->mockDaemonManager(),
         );
         $response = $controller->connect($this->post(['provider' => 'acp']));
+
+        $this->assertSame(400, $response->getStatusCode());
+        $this->assertStringContainsString('X-Acp-Session', $this->data($response)['error']);
+    }
+
+    public function testConnectAcpRejectsInvalidSessionId(): void
+    {
+        $controller = $this->makeController(
+            commandVerifier: $this->mockVerifier(true),
+            acpDaemonManager: $this->mockDaemonManager(),
+        );
+        $response = $controller->connect($this->post(['provider' => 'acp'], ['X-Acp-Session' => 'not-a-valid-uuid']));
 
         $this->assertSame(400, $response->getStatusCode());
         $this->assertStringContainsString('X-Acp-Session', $this->data($response)['error']);

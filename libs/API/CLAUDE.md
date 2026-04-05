@@ -92,14 +92,12 @@ src/
 │   ├── Controller/
 │   │   └── LlmController.php           # LLM integration (connect, chat, analyze, history, OAuth)
 │   ├── Acp/
-│   │   ├── AcpClient.php               # ACP protocol client (JSON-RPC 2.0 over stdio)
-│   │   ├── AcpClientFactory.php         # Default factory: creates AcpClient + AcpTransport
-│   │   ├── AcpClientFactoryInterface.php # Factory interface for DI
+│   │   ├── AcpDaemonManager.php          # Daemon lifecycle: start/stop, session management, Unix socket IPC
+│   │   ├── AcpDaemonManagerInterface.php # Interface for daemon manager (start, startSession, sendPrompt, etc.)
+│   │   ├── acp-daemon-runner.php         # Standalone daemon process (multi-session, Unix socket server)
 │   │   ├── AcpCommandVerifier.php       # Checks if agent command exists on PATH
 │   │   ├── AcpCommandVerifierInterface.php # Interface for command verification
-│   │   ├── AcpResponse.php              # Value object for ACP agent response
-│   │   ├── AcpTransport.php             # Subprocess management (proc_open + stdio pipes)
-│   │   └── AcpTransportInterface.php    # Transport interface for testability
+│   │   └── AcpResponse.php              # Value object for ACP agent response
 │   ├── FileLlmHistoryStorage.php        # File-based chat history
 │   ├── FileLlmSettings.php              # File-based LLM settings
 │   ├── LlmHistoryStorageInterface.php

@@ -107,11 +107,12 @@ Supported providers: `openrouter`, `anthropic`, `openai`.
 
 #### Connect with ACP
 
-The ACP provider uses the [Agent Client Protocol](https://agentclientprotocol.com/) to communicate with local AI agents over stdio. ADP acts as an ACP client, spawning an ACP adapter as a subprocess per request.
+The ACP provider uses the [Agent Client Protocol](https://agentclientprotocol.com/) to communicate with local AI agents over stdio. ADP runs a persistent daemon process that manages multiple agent subprocesses — one per browser tab (session).
 
 ```
 POST /debug/api/llm/connect
 Content-Type: application/json
+X-Acp-Session: <uuid>
 
 {
   "provider": "acp",
@@ -124,12 +125,50 @@ Content-Type: application/json
 - `acpArgs` — Arguments passed to the command (default: `["@agentclientprotocol/claude-agent-acp"]`).
 - `acpEnv` — Environment variables merged into the agent's environment.
 
+**Required header:** `X-Acp-Session` — a UUID identifying the browser tab. Generated via `crypto.randomUUID()` and stored in `sessionStorage`. The frontend SDK injects this header automatically on all LLM API requests.
+
+**Connect flow:**
+
+1. Start daemon (if not running, or restart if protocol version mismatch)
+2. Start agent session for the given `X-Acp-Session` UUID
+3. Save settings only after both steps succeed
+
+**Response:**
+
+```json
+{
+  "data": {
+    "connected": true,
+    "provider": "acp",
+    "acpCommand": "npx",
+    "sessionId": "550e8400-e29b-41d4-a716-446655440000",
+    "agentName": "Claude",
+    "agentVersion": "1.0.0"
+  }
+}
+```
+
 ACP adapters bridge the protocol to specific agents. Known adapters:
 - `@agentclientprotocol/claude-agent-acp` — Claude Code (default)
 - `@anthropic-ai/gemini-agent-acp` — Gemini CLI
 - `@anthropic-ai/codex-agent-acp` — Codex CLI
 
-**Protocol lifecycle per chat request:** `initialize` → `session/new` → `session/prompt` (with streaming `session/update` notifications) → close.
+**Daemon architecture:**
+
+The daemon (`acp-daemon-runner.php`) is a standalone PHP process that listens on a Unix socket at `/tmp/adp-acp-{hash}.sock`. It manages agent subprocesses via an internal protocol:
+
+| Action | Description |
+|--------|-------------|
+| `ping` | Health check, returns `{ok, protocol, sessions}` |
+| `session-start` | Spawn agent subprocess, perform ACP `initialize` handshake |
+| `session-stop` | Terminate a specific agent |
+| `session-status` | Check if a session's agent is alive |
+| `prompt` | Route `session/new` + `session/prompt` to the correct agent |
+| `shutdown` | Stop all sessions and exit |
+
+Limits: max 10 concurrent sessions, 30-minute idle timeout per session.
+
+**Protocol lifecycle per chat request:** `initialize` (on session start) → `session/new` → `session/prompt` (with streaming `session/update` notifications) → response.
 
 ### OAuth (OpenRouter)
 
