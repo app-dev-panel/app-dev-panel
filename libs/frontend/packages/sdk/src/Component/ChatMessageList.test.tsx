@@ -36,17 +36,13 @@ describe('ChatMessageList', () => {
     });
 
     it('renders assistant message with Markdown in full variant', () => {
-        const messages: ChatBubble[] = [
-            makeMsg({id: 'a1', role: 'assistant', content: '**bold** text', status: 'ok'}),
-        ];
+        const messages: ChatBubble[] = [makeMsg({id: 'a1', role: 'assistant', content: '**bold** text', status: 'ok'})];
         renderWithProviders(<ChatMessageList messages={messages} variant="full" />);
         expect(screen.getByTestId('markdown')).toHaveTextContent('**bold** text');
     });
 
     it('renders assistant message as plain text in compact variant', () => {
-        const messages: ChatBubble[] = [
-            makeMsg({id: 'a1', role: 'assistant', content: 'plain reply', status: 'ok'}),
-        ];
+        const messages: ChatBubble[] = [makeMsg({id: 'a1', role: 'assistant', content: 'plain reply', status: 'ok'})];
         renderWithProviders(<ChatMessageList messages={messages} variant="compact" />);
         expect(screen.getByText('plain reply')).toBeInTheDocument();
         expect(screen.queryByTestId('markdown')).not.toBeInTheDocument();
@@ -58,14 +54,13 @@ describe('ChatMessageList', () => {
         expect(screen.getByText('Thinking...')).toBeInTheDocument();
     });
 
-    it('renders error as Alert in full variant', () => {
+    it('renders error as red bubble in full variant', () => {
         const messages: ChatBubble[] = [
             makeMsg({id: 'e1', role: 'assistant', content: 'request body', status: 'error', error: 'Server error'}),
         ];
         renderWithProviders(<ChatMessageList messages={messages} variant="full" />);
-        expect(screen.getByRole('alert')).toBeInTheDocument();
-        // "Server error" appears in both Alert body and caption (since error !== content)
-        expect(screen.getAllByText('Server error')).toHaveLength(2);
+        expect(screen.getByText('Server error')).toBeInTheDocument();
+        expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 
     it('renders error as red bubble in compact variant', () => {
@@ -77,7 +72,7 @@ describe('ChatMessageList', () => {
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 
-    it('shows retry button on error bubbles in compact variant when onRetry is provided', async () => {
+    it('shows both retry and copy buttons on error in compact variant when onRetry is provided', async () => {
         const onRetry = vi.fn();
         const messages: ChatBubble[] = [
             makeMsg({id: 'e1', role: 'assistant', content: 'fail', status: 'error', error: 'Oops'}),
@@ -85,14 +80,16 @@ describe('ChatMessageList', () => {
         renderWithProviders(<ChatMessageList messages={messages} variant="compact" onRetry={onRetry} />);
 
         const retryButton = screen.getByRole('button', {name: 'Retry'});
+        const copyButton = screen.getByTestId('copy-button');
         expect(retryButton).toBeInTheDocument();
+        expect(copyButton).toBeInTheDocument();
 
         const user = userEvent.setup();
         await user.click(retryButton);
         expect(onRetry).toHaveBeenCalledWith(0);
     });
 
-    it('shows retry button on error Alert in full variant when onRetry is provided', async () => {
+    it('shows both retry and copy buttons on error in full variant when onRetry is provided', async () => {
         const onRetry = vi.fn();
         const messages: ChatBubble[] = [
             makeMsg({id: 'e1', role: 'assistant', content: 'fail', status: 'error', error: 'Oops'}),
@@ -100,7 +97,9 @@ describe('ChatMessageList', () => {
         renderWithProviders(<ChatMessageList messages={messages} variant="full" onRetry={onRetry} />);
 
         const retryButton = screen.getByRole('button', {name: 'Retry'});
+        const copyButton = screen.getByTestId('copy-button');
         expect(retryButton).toBeInTheDocument();
+        expect(copyButton).toBeInTheDocument();
 
         const user = userEvent.setup();
         await user.click(retryButton);
@@ -126,7 +125,7 @@ describe('ChatMessageList', () => {
         expect(bubbles).toHaveLength(2);
     });
 
-    it('does NOT show duplicate error caption when content equals error', () => {
+    it('shows error text once when content equals error', () => {
         const messages: ChatBubble[] = [
             makeMsg({id: 'e1', role: 'assistant', content: 'Same text', status: 'error', error: 'Same text'}),
         ];
@@ -136,7 +135,7 @@ describe('ChatMessageList', () => {
         expect(matches).toHaveLength(1);
     });
 
-    it('shows error caption when content and error differ in full variant', () => {
+    it('displays error field as bubble content when error differs from content', () => {
         const messages: ChatBubble[] = [
             makeMsg({
                 id: 'e1',
@@ -148,10 +147,8 @@ describe('ChatMessageList', () => {
         ];
         renderWithProviders(<ChatMessageList messages={messages} variant="full" />);
 
-        // Alert body shows the error, caption also shows the error (since content !== error)
-        const errorTexts = screen.getAllByText('Something went wrong');
-        expect(errorTexts.length).toBe(2);
-        // One is inside Alert, one is the caption
-        expect(screen.getByRole('alert')).toBeInTheDocument();
+        // displayContent = msg.error || msg.content, so "Something went wrong" is shown
+        expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+        expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 });

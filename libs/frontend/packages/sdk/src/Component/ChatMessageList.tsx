@@ -2,7 +2,7 @@ import {type ChatBubble} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {Markdown} from '@app-dev-panel/sdk/Component/Markdown';
 import {MessageCopyButton} from '@app-dev-panel/sdk/Component/MessageCopyButton';
 import ReplayIcon from '@mui/icons-material/Replay';
-import {Alert, Box, CircularProgress, IconButton, Tooltip, Typography} from '@mui/material';
+import {Box, CircularProgress, IconButton, Tooltip, Typography} from '@mui/material';
 import {memo, useMemo} from 'react';
 
 type ChatMessageListProps = {
@@ -14,8 +14,6 @@ type ChatMessageListProps = {
 };
 
 const loadingSx = {display: 'flex', alignItems: 'center', gap: 1} as const;
-const errorCaptionSx = {mt: 0.5, display: 'block'} as const;
-const replayIconSx = {fontSize: 16} as const;
 
 export const ChatMessageList = memo(
     ({
@@ -96,38 +94,6 @@ export const ChatMessageList = memo(
                     const isSending = msg.status === 'sending';
                     const displayContent = isError ? msg.error || msg.content : msg.content;
 
-                    // Full variant: errors shown as MUI Alert
-                    if (isError && !isCompact) {
-                        return (
-                            <Box key={msg.id} sx={isUser ? styles.userMsg : styles.assistantMsg}>
-                                <Alert
-                                    severity="error"
-                                    action={
-                                        onRetry && (
-                                            <Tooltip title="Retry">
-                                                <IconButton
-                                                    size="small"
-                                                    color="error"
-                                                    onClick={() => onRetry(i)}
-                                                    aria-label="Retry"
-                                                >
-                                                    <ReplayIcon sx={replayIconSx} />
-                                                </IconButton>
-                                            </Tooltip>
-                                        )
-                                    }
-                                >
-                                    {msg.error || msg.content}
-                                </Alert>
-                                {msg.error && msg.content && msg.error !== msg.content && (
-                                    <Typography variant="caption" color="text.secondary" sx={errorCaptionSx}>
-                                        {msg.error}
-                                    </Typography>
-                                )}
-                            </Box>
-                        );
-                    }
-
                     const bubbleSx = isError
                         ? styles.errorBubble
                         : isUser
@@ -153,14 +119,14 @@ export const ChatMessageList = memo(
                                     </Box>
                                 ) : (
                                     <>
-                                        {!isCompact && !isUser ? (
+                                        {!isCompact && !isUser && !isError ? (
                                             <Markdown content={displayContent} />
                                         ) : (
                                             <Typography variant={isCompact ? undefined : 'body2'} sx={textSx}>
                                                 {displayContent}
                                             </Typography>
                                         )}
-                                        {isError && onRetry ? (
+                                        {isError && onRetry && (
                                             <Tooltip title="Retry">
                                                 <IconButton
                                                     size="small"
@@ -169,21 +135,23 @@ export const ChatMessageList = memo(
                                                     sx={{
                                                         position: 'absolute',
                                                         top: 4,
-                                                        right: 4,
+                                                        right: 28,
                                                         width: 22,
                                                         height: 22,
                                                         color: 'common.white',
+                                                        opacity: 0,
+                                                        transition: 'opacity 0.15s',
+                                                        '.message-bubble:hover &': {opacity: 1},
                                                     }}
                                                 >
                                                     <ReplayIcon sx={{fontSize: 14}} />
                                                 </IconButton>
                                             </Tooltip>
-                                        ) : (
-                                            <MessageCopyButton
-                                                text={msg.content || msg.error || ''}
-                                                variant={isDarkBubble ? 'dark' : 'light'}
-                                            />
                                         )}
+                                        <MessageCopyButton
+                                            text={msg.content || msg.error || ''}
+                                            variant={isDarkBubble ? 'dark' : 'light'}
+                                        />
                                     </>
                                 )}
                             </Box>

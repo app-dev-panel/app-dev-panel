@@ -43,10 +43,7 @@ describe('AiChatSlice', () => {
             state = reducer(state, addMessage({role: 'user', content: 'q', status: 'ok'}));
             state = reducer(state, addMessage({role: 'assistant', content: '', status: 'sending'}));
 
-            const next = reducer(
-                state,
-                updateLastSending({status: 'ok', content: 'answer', error: undefined}),
-            );
+            const next = reducer(state, updateLastSending({status: 'ok', content: 'answer', error: undefined}));
 
             expect(next.messages[1].status).toBe('ok');
             expect(next.messages[1].content).toBe('answer');

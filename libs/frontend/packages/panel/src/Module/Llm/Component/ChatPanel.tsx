@@ -148,7 +148,7 @@ export const ChatPanel = () => {
 
     const handleSend = useCallback(
         async (userText: string) => {
-            const userMessage: ChatBubble = {role: 'user', content: userText, status: 'ok'};
+            const userMessage: Omit<ChatBubble, 'id'> = {role: 'user', content: userText, status: 'ok'};
             dispatch(removeErrorMessages());
             dispatch(addMessage(userMessage));
             dispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
@@ -184,7 +184,7 @@ export const ChatPanel = () => {
             if (!msg || msg.status !== 'error') return;
 
             const userText = msg.content;
-            const retryMessage: ChatBubble = {role: 'user', content: userText, status: 'ok'};
+            const retryMessage: Omit<ChatBubble, 'id'> = {role: 'user', content: userText, status: 'ok'};
             dispatch(removeErrorMessages());
             dispatch(addMessage(retryMessage));
             dispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
