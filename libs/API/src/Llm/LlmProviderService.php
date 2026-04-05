@@ -396,7 +396,10 @@ final class LlmProviderService
             toolCalls: $data['toolCalls'] ?? [],
         );
 
-        return $response->toOpenAiFormat();
+        $result = $response->toOpenAiFormat();
+        $result['_debug'] = $data;
+
+        return $result;
     }
 
     /**
