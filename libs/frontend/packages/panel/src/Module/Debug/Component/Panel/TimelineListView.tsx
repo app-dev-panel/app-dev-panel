@@ -64,8 +64,6 @@ const Row = styled(Box, {shouldForwardProp: (p) => p !== 'selected'})<{selected?
     gap: theme.spacing(1.5),
 }));
 
-const Dot = styled(Box)({width: 8, height: 8, borderRadius: '50%', flexShrink: 0});
-
 const OffsetLabel = styled(Typography)(({theme}) => ({
     width: 72,
     flexShrink: 0,
@@ -197,7 +195,6 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                 return (
                     <Box key={index}>
                         <Row selected={expanded} onClick={() => handleRowClick(index)}>
-                            <Dot sx={{backgroundColor: color.fg}} />
                             <OffsetLabel>{offsetLabel}</OffsetLabel>
                             <CollectorLabel sx={{color: color.fg}}>
                                 {label !== 'Unknown' ? label : shortName}
