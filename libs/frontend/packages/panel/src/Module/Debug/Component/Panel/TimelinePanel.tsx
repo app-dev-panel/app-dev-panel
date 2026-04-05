@@ -1,4 +1,5 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {TimelineListView} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineListView';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -6,7 +7,7 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Chip, Collapse, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Collapse, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
@@ -17,6 +18,8 @@ import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 // row[3] = additional data (optional)
 type Item = [number, number, string] | [number, number, string, string];
 type TimelinePanelProps = {data: Item[]};
+
+type ViewMode = 'waterfall' | 'list';
 
 // ---------------------------------------------------------------------------
 // Styled components
@@ -90,6 +93,53 @@ const DetailBox = styled(Box)(({theme}) => ({
     fontSize: '12px',
 }));
 
+// ---------------------------------------------------------------------------
+// View toggle button
+// ---------------------------------------------------------------------------
+
+const ViewToggle = ({mode, onChange}: {mode: ViewMode; onChange: (mode: ViewMode) => void}) => {
+    return (
+        <Box sx={{display: 'flex', gap: 0.25}}>
+            <Tooltip title="Waterfall view">
+                <IconButton
+                    size="small"
+                    onClick={() => onChange('waterfall')}
+                    sx={{
+                        borderRadius: 1,
+                        color: mode === 'waterfall' ? 'primary.main' : 'text.disabled',
+                        backgroundColor: mode === 'waterfall' ? 'action.selected' : 'transparent',
+                        '&:hover': {backgroundColor: 'action.hover'},
+                        width: 28,
+                        height: 28,
+                    }}
+                >
+                    <span className="material-icons" style={{fontSize: 18}}>
+                        waterfall_chart
+                    </span>
+                </IconButton>
+            </Tooltip>
+            <Tooltip title="List view">
+                <IconButton
+                    size="small"
+                    onClick={() => onChange('list')}
+                    sx={{
+                        borderRadius: 1,
+                        color: mode === 'list' ? 'primary.main' : 'text.disabled',
+                        backgroundColor: mode === 'list' ? 'action.selected' : 'transparent',
+                        '&:hover': {backgroundColor: 'action.hover'},
+                        width: 28,
+                        height: 28,
+                    }}
+                >
+                    <span className="material-icons" style={{fontSize: 18}}>
+                        view_list
+                    </span>
+                </IconButton>
+            </Tooltip>
+        </Box>
+    );
+};
+
 export const TimelinePanel = ({data}: TimelinePanelProps) => {
     const theme = useTheme();
     const chartColors = theme.adp.chartColors;
@@ -98,6 +148,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
+    const [viewMode, setViewMode] = useState<ViewMode>('list');
 
     const toggleFilter = useCallback((name: string) => {
         setActiveFilters((prev) => {
@@ -161,7 +212,12 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
     return (
         <Box>
             <SectionTitle
-                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter timeline..." />}
+                action={
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5}}>
+                        <ViewToggle mode={viewMode} onChange={setViewMode} />
+                        <FilterInput value={filter} onChange={setFilter} placeholder="Filter timeline..." />
+                    </Box>
+                }
             >{`${filtered.length} timeline events`}</SectionTitle>
 
             <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
@@ -198,83 +254,89 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                 )}
             </Box>
 
-            <TimeAxis>
-                {ticks.map((tick, i) => (
-                    <span key={i}>{tick}</span>
-                ))}
-            </TimeAxis>
+            {viewMode === 'list' ? (
+                <TimelineListView data={data} filter={deferredFilter} activeFilters={activeFilters} />
+            ) : (
+                <>
+                    <TimeAxis>
+                        {ticks.map((tick, i) => (
+                            <span key={i}>{tick}</span>
+                        ))}
+                    </TimeAxis>
 
-            {filtered.map((row, index) => {
-                const shortName = row[2].split('\\').pop() ?? row[2];
-                const relativeTime = row[0] - minTime;
-                const offset = (relativeTime / totalSpan) * 100;
-                const colorIdx = uniqueLabels.indexOf(shortName);
-                const expanded = expandedIndex === index;
+                    {filtered.map((row, index) => {
+                        const shortName = row[2].split('\\').pop() ?? row[2];
+                        const relativeTime = row[0] - minTime;
+                        const offset = (relativeTime / totalSpan) * 100;
+                        const colorIdx = uniqueLabels.indexOf(shortName);
+                        const expanded = expandedIndex === index;
 
-                // Format relative time offset
-                const offsetLabel =
-                    relativeTime < 0.001
-                        ? `${(relativeTime * 1000000).toFixed(0)}µs`
-                        : relativeTime < 1
-                          ? `${(relativeTime * 1000).toFixed(1)}ms`
-                          : `${relativeTime.toFixed(3)}s`;
+                        // Format relative time offset
+                        const offsetLabel =
+                            relativeTime < 0.001
+                                ? `${(relativeTime * 1000000).toFixed(0)}µs`
+                                : relativeTime < 1
+                                  ? `${(relativeTime * 1000).toFixed(1)}ms`
+                                  : `${relativeTime.toFixed(3)}s`;
 
-                return (
-                    <Box key={index}>
-                        <Row selected={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
-                            <Tooltip title={row[2]} placement="left">
-                                <Label sx={{color: 'text.secondary'}}>{shortName}</Label>
-                            </Tooltip>
-                            <BarArea>
-                                <Bar
-                                    sx={{
-                                        left: `${offset}%`,
-                                        width: 6,
-                                        minWidth: 6,
-                                        backgroundColor: getBarColor(colorIdx),
-                                    }}
-                                />
-                            </BarArea>
-                            <Duration>{offsetLabel}</Duration>
-                        </Row>
-                        <Collapse in={expanded}>
-                            <DetailBox>
-                                <Box sx={{display: 'flex', gap: 3, mb: 1}}>
-                                    <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                        Time: {formatMicrotime(row[0])}
-                                    </Typography>
-                                    <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                        Offset: +{offsetLabel}
-                                    </Typography>
-                                    {row[1] != null && (
-                                        <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                            Ref: {String(row[1])}
-                                        </Typography>
-                                    )}
-                                </Box>
-                                <FileLink className={row[2]}>
-                                    <Typography
-                                        variant="caption"
-                                        component="span"
-                                        sx={(theme) => ({
-                                            fontFamily: theme.adp.fontFamilyMono,
-                                            color: 'primary.main',
-                                            '&:hover': {textDecoration: 'underline'},
-                                        })}
-                                    >
-                                        {row[2]}
-                                    </Typography>
-                                </FileLink>
-                                {!!row[3] && (
-                                    <JsonRenderer
-                                        value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]}
-                                    />
-                                )}
-                            </DetailBox>
-                        </Collapse>
-                    </Box>
-                );
-            })}
+                        return (
+                            <Box key={index}>
+                                <Row selected={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
+                                    <Tooltip title={row[2]} placement="left">
+                                        <Label sx={{color: 'text.secondary'}}>{shortName}</Label>
+                                    </Tooltip>
+                                    <BarArea>
+                                        <Bar
+                                            sx={{
+                                                left: `${offset}%`,
+                                                width: 6,
+                                                minWidth: 6,
+                                                backgroundColor: getBarColor(colorIdx),
+                                            }}
+                                        />
+                                    </BarArea>
+                                    <Duration>{offsetLabel}</Duration>
+                                </Row>
+                                <Collapse in={expanded}>
+                                    <DetailBox>
+                                        <Box sx={{display: 'flex', gap: 3, mb: 1}}>
+                                            <Typography variant="caption" sx={{color: 'text.disabled'}}>
+                                                Time: {formatMicrotime(row[0])}
+                                            </Typography>
+                                            <Typography variant="caption" sx={{color: 'text.disabled'}}>
+                                                Offset: +{offsetLabel}
+                                            </Typography>
+                                            {row[1] != null && (
+                                                <Typography variant="caption" sx={{color: 'text.disabled'}}>
+                                                    Ref: {String(row[1])}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                        <FileLink className={row[2]}>
+                                            <Typography
+                                                variant="caption"
+                                                component="span"
+                                                sx={(theme) => ({
+                                                    fontFamily: theme.adp.fontFamilyMono,
+                                                    color: 'primary.main',
+                                                    '&:hover': {textDecoration: 'underline'},
+                                                })}
+                                            >
+                                                {row[2]}
+                                            </Typography>
+                                        </FileLink>
+                                        {!!row[3] && (
+                                            <JsonRenderer
+                                                value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]}
+                                            />
+                                        )}
+                                    </DetailBox>
+                                </Collapse>
+                            </Box>
+                        );
+                    })}
+                </>
+            )}
         </Box>
     );
 };
