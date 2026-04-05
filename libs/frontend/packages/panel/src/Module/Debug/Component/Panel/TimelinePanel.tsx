@@ -8,9 +8,45 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
+import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
+import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {Box, Chip, Collapse, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
+
+// ---------------------------------------------------------------------------
+// Collector FQCN → color key mapping (shared with TimelineListView)
+// ---------------------------------------------------------------------------
+
+const collectorColorKeyMap: Partial<Record<string, string>> = {
+    [CollectorsMap.RequestCollector]: 'request',
+    [CollectorsMap.LogCollector]: 'log',
+    [CollectorsMap.EventCollector]: 'event',
+    [CollectorsMap.DatabaseCollector]: 'database',
+    [CollectorsMap.MiddlewareCollector]: 'middleware',
+    [CollectorsMap.ExceptionCollector]: 'exception',
+    [CollectorsMap.ServiceCollector]: 'service',
+    [CollectorsMap.TimelineCollector]: 'timeline',
+    [CollectorsMap.VarDumperCollector]: 'varDumper',
+    [CollectorsMap.MailerCollector]: 'mailer',
+    [CollectorsMap.FilesystemStreamCollector]: 'filesystem',
+    [CollectorsMap.HttpClientCollector]: 'filesystem',
+    [CollectorsMap.CacheCollector]: 'cache',
+    [CollectorsMap.TemplateCollector]: 'template',
+    [CollectorsMap.AuthorizationCollector]: 'authorization',
+    [CollectorsMap.DeprecationCollector]: 'deprecation',
+    [CollectorsMap.EnvironmentCollector]: 'environment',
+    [CollectorsMap.TranslatorCollector]: 'translator',
+    [CollectorsMap.WebAppInfoCollector]: 'environment',
+    [CollectorsMap.ConsoleAppInfoCollector]: 'environment',
+    [CollectorsMap.CommandCollector]: 'request',
+    [CollectorsMap.QueueCollector]: 'service',
+    [CollectorsMap.RouterCollector]: 'middleware',
+    [CollectorsMap.ValidatorCollector]: 'service',
+    [CollectorsMap.OpenTelemetryCollector]: 'timeline',
+    [CollectorsMap.ElasticsearchCollector]: 'database',
+    [CollectorsMap.RedisCollector]: 'cache',
+};
 
 // Data format from PHP: [microtime, reference, collectorClass, additionalData?]
 // row[0] = microtime(true) — start timestamp
@@ -156,13 +192,20 @@ const ViewToggle = ({mode, onChange}: {mode: ViewMode; onChange: (mode: ViewMode
 
 export const TimelinePanel = ({data}: TimelinePanelProps) => {
     const theme = useTheme();
-    const chartColors = theme.adp.chartColors;
-    const getBarColor = (index: number): string => chartColors[index % chartColors.length];
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
     const [viewMode, setViewMode] = useState<ViewMode>('list');
+
+    const getCollectorColor = useCallback(
+        (collectorClass: string) => {
+            const key = collectorColorKeyMap[collectorClass] ?? 'default';
+            const colors = theme.adp.collectorColors as any;
+            return colors[key] ?? colors.default;
+        },
+        [theme],
+    );
 
     const toggleFilter = useCallback((name: string) => {
         setActiveFilters((prev) => {
@@ -176,11 +219,26 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
         });
     }, []);
 
-    // Unique labels for legend
-    const uniqueLabels = useMemo(
-        () => (!data || data.length === 0 ? [] : [...new Set(data.map((r) => r[2].split('\\').pop() ?? r[2]))]),
-        [data],
-    );
+    // Unique collector classes for legend (stores FQCN for color lookup, short name for filtering)
+    const uniqueCollectors = useMemo(() => {
+        if (!data || data.length === 0) return [];
+        const seen = new Set<string>();
+        return data
+            .filter((r) => {
+                const cls = r[2];
+                if (seen.has(cls)) return false;
+                seen.add(cls);
+                return true;
+            })
+            .map((r) => ({
+                fqcn: r[2],
+                shortName: r[2].split('\\').pop() ?? r[2],
+                label: getCollectorLabel(r[2]),
+            }));
+    }, [data]);
+
+    // Keep uniqueLabels for backward compat with filtering
+    const uniqueLabels = useMemo(() => uniqueCollectors.map((c) => c.shortName), [uniqueCollectors]);
 
     const filtered = useMemo(() => {
         if (!data || !Array.isArray(data)) return [];
@@ -238,24 +296,24 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
             >{`${filtered.length} timeline events`}</SectionTitle>
 
             <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
-                {uniqueLabels.map((label, i) => {
-                    const isActive = activeFilters.has(label);
-                    const color = getBarColor(i);
+                {uniqueCollectors.map((col) => {
+                    const isActive = activeFilters.has(col.shortName);
+                    const color = getCollectorColor(col.fqcn);
                     return (
                         <Chip
-                            key={label}
-                            label={label}
+                            key={col.shortName}
+                            label={col.label !== 'Unknown' ? col.label : col.shortName}
                             size="small"
-                            onClick={() => uniqueLabels.length > 1 && toggleFilter(label)}
+                            onClick={() => uniqueCollectors.length > 1 && toggleFilter(col.shortName)}
                             sx={{
                                 fontSize: '11px',
                                 height: 24,
                                 borderRadius: 1,
                                 fontWeight: 600,
-                                cursor: uniqueLabels.length > 1 ? 'pointer' : 'default',
-                                backgroundColor: isActive ? color : 'transparent',
-                                color: isActive ? 'common.white' : color,
-                                border: `1px solid ${color}`,
+                                cursor: uniqueCollectors.length > 1 ? 'pointer' : 'default',
+                                backgroundColor: isActive ? color.fg : 'transparent',
+                                color: isActive ? 'common.white' : color.fg,
+                                border: `1px solid ${color.fg}`,
                             }}
                         />
                     );
@@ -282,12 +340,18 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                     </TimeAxis>
 
                     {filtered.map((row, index) => {
-                        const shortName = row[2].split('\\').pop() ?? row[2];
+                        const collectorClass = row[2];
+                        const shortName = collectorClass.split('\\').pop() ?? collectorClass;
                         const relativeTime = row[0] - minTime;
                         const offset = (relativeTime / totalSpan) * 100;
-                        const colorIdx = uniqueLabels.indexOf(shortName);
                         const expanded = expandedIndex === index;
-                        const detail = enrichedDetails[index];
+                        const rawDetail = enrichedDetails[index];
+                        const color = getCollectorColor(collectorClass);
+                        const label = getCollectorLabel(collectorClass);
+
+                        // Strip [level] prefix from log details
+                        const logMatch = rawDetail?.match(/^\[(\w+)] (.*)$/);
+                        const detail = logMatch ? logMatch[2] : rawDetail;
 
                         // Format relative time offset
                         const offsetLabel =
@@ -299,9 +363,15 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
 
                         return (
                             <Box key={index}>
-                                <Row selected={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
-                                    <Tooltip title={row[2]} placement="left">
-                                        <Label sx={{color: 'text.secondary'}}>{shortName}</Label>
+                                <Row
+                                    selected={expanded}
+                                    onClick={() => setExpandedIndex(expanded ? null : index)}
+                                    sx={{borderLeft: `3px solid ${color.fg}`}}
+                                >
+                                    <Tooltip title={collectorClass} placement="left">
+                                        <Label sx={{color: color.fg, fontWeight: 600}}>
+                                            {label !== 'Unknown' ? label : shortName}
+                                        </Label>
                                     </Tooltip>
                                     <BarArea>
                                         <Bar
@@ -309,7 +379,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                                 left: `${offset}%`,
                                                 width: 6,
                                                 minWidth: 6,
-                                                backgroundColor: getBarColor(colorIdx),
+                                                backgroundColor: color.fg,
                                             }}
                                         />
                                     </BarArea>
