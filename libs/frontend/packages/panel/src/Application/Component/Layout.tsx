@@ -602,9 +602,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             </Box>
             {children}
             {!aiChatOpen && (
-                <Tooltip title="AI Chat" placement="left">
+                <Tooltip title="Duck AI" placement="left">
                     <Fab
-                        aria-label="AI Chat"
+                        aria-label="Duck AI"
                         onClick={handleAiChatToggle}
                         sx={{
                             position: 'fixed',
