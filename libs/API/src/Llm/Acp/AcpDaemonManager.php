@@ -15,6 +15,7 @@ use RuntimeException;
 final class AcpDaemonManager implements AcpDaemonManagerInterface
 {
     private const float START_TIMEOUT = 15.0;
+    private const int PROTOCOL_VERSION = 2;
 
     public function __construct(
         private readonly string $storagePath,
@@ -23,7 +24,11 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
     public function start(): void
     {
         if ($this->isRunning()) {
-            return;
+            if ($this->isDaemonCompatible()) {
+                return;
+            }
+            // Old daemon with incompatible protocol — stop it first
+            $this->stop();
         }
 
         $this->cleanup();
@@ -286,6 +291,33 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
     public function getLogFilePath(): string
     {
         return $this->storagePath . '/.acp-daemon.log';
+    }
+
+    private function isDaemonCompatible(): bool
+    {
+        $socketPath = $this->getSocketPath();
+
+        try {
+            $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 2.0);
+            if ($socket === false) {
+                return false;
+            }
+
+            fwrite($socket, json_encode(['action' => 'ping']) . "\n");
+            stream_set_timeout($socket, 2);
+            $response = fgets($socket);
+            fclose($socket);
+
+            if ($response === false) {
+                return false;
+            }
+
+            $data = json_decode(trim($response), true);
+
+            return is_array($data) && ($data['protocol'] ?? 0) === self::PROTOCOL_VERSION;
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private function waitForSocket(float $timeout): void

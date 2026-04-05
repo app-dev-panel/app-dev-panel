@@ -556,7 +556,7 @@ while ($running) {
 
     // --- Ping ---
     if ($action === 'ping') {
-        fwrite($client, json_encode(['ok' => true, 'sessions' => count($sessions)]) . "\n");
+        fwrite($client, json_encode(['ok' => true, 'protocol' => 2, 'sessions' => count($sessions)]) . "\n");
         fclose($client);
         continue;
     }

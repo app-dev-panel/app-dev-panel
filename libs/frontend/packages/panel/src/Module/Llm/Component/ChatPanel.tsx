@@ -311,6 +311,7 @@ export const ChatPanel = () => {
                             <Box sx={{flex: 1}} />
                             <Tooltip title="Clear history">
                                 <IconButton
+                                    component="div"
                                     size="small"
                                     onClick={handleClearHistory}
                                     sx={clearBtnSx}
@@ -344,6 +345,7 @@ export const ChatPanel = () => {
                                         </Typography>
                                         <Tooltip title="Delete">
                                             <IconButton
+                                                component="div"
                                                 size="small"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
