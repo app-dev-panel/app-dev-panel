@@ -6,10 +6,9 @@
   <!-- Large Fab 112px -->
   <circle cx="140" cy="140" r="56" fill="#2563EB"/>
   <g transform="translate(98, 100) scale(0.58)">
-    <!-- Cape — behind duck, peeking out at bottom-left and bottom-right -->
-    <path d="M30 75 Q10 95 5 120 L35 110 Z" fill="#DC2626" opacity="0.9"/>
-    <path d="M100 75 Q120 95 128 120 L95 110 Z" fill="#EF4444" opacity="0.9"/>
-    <path d="M30 75 L100 75 L95 110 L35 110 Z" fill="#DC2626" opacity="0.5"/>
+    <!-- Cape — attached at neck/back, flowing down-right behind the duck -->
+    <path d="M62 52 Q80 48 95 55 Q110 70 118 100 Q115 115 108 125 Q95 120 85 108 Q78 95 70 72Z" fill="#DC2626"/>
+    <path d="M62 52 Q80 48 95 55 Q100 65 95 80 Q85 75 70 72Z" fill="#EF4444" opacity="0.5"/>
     <!-- Body -->
     <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
     <!-- Head -->
@@ -32,8 +31,7 @@
   <!-- Small 40px -->
   <circle cx="80" cy="260" r="20" fill="#2563EB"/>
   <g transform="translate(62, 242) scale(0.25)">
-    <path d="M30 75 Q10 95 5 120 L35 110 Z" fill="#DC2626" opacity="0.9"/>
-    <path d="M100 75 Q120 95 128 120 L95 110 Z" fill="#EF4444" opacity="0.9"/>
+    <path d="M62 52 Q80 48 95 55 Q110 70 118 100 Q115 115 108 125 Q95 120 85 108 Q78 95 70 72Z" fill="#DC2626"/>
     <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
     <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
     <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
@@ -48,8 +46,7 @@
   <!-- Small 28px -->
   <circle cx="170" cy="260" r="14" fill="#2563EB"/>
   <g transform="translate(156, 248) scale(0.18)">
-    <path d="M30 75 Q10 95 5 120 L35 110 Z" fill="#DC2626" opacity="0.9"/>
-    <path d="M100 75 Q120 95 128 120 L95 110 Z" fill="#EF4444" opacity="0.9"/>
+    <path d="M62 52 Q80 48 95 55 Q110 70 118 100 Q115 115 108 125 Q95 120 85 108 Q78 95 70 72Z" fill="#DC2626"/>
     <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
     <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
     <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>

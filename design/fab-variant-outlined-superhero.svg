@@ -7,9 +7,9 @@
   <circle cx="140" cy="140" r="56" fill="white"/>
   <circle cx="140" cy="140" r="53.5" fill="none" stroke="#2563EB" stroke-width="3"/>
   <g transform="translate(100, 102) scale(0.56)">
-    <!-- Cape — peeking behind at bottom -->
-    <path d="M30 75 Q10 95 5 120 L35 110 Z" fill="#DC2626" opacity="0.9"/>
-    <path d="M100 75 Q120 95 128 120 L95 110 Z" fill="#EF4444" opacity="0.9"/>
+    <!-- Cape — flows from neck/back down-right -->
+    <path d="M62 52 Q80 48 95 55 Q110 70 118 100 Q115 115 108 125 Q95 120 85 108 Q78 95 70 72Z" fill="#DC2626"/>
+    <path d="M62 52 Q80 48 95 55 Q100 65 95 80 Q85 75 70 72Z" fill="#EF4444" opacity="0.5"/>
     <!-- Body -->
     <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
     <!-- Head -->
@@ -33,8 +33,7 @@
   <circle cx="80" cy="260" r="20" fill="white"/>
   <circle cx="80" cy="260" r="18" fill="none" stroke="#2563EB" stroke-width="2.5"/>
   <g transform="translate(63, 243) scale(0.24)">
-    <path d="M30 75 Q10 95 5 120 L35 110 Z" fill="#DC2626" opacity="0.9"/>
-    <path d="M100 75 Q120 95 128 120 L95 110 Z" fill="#EF4444" opacity="0.9"/>
+    <path d="M62 52 Q80 48 95 55 Q110 70 118 100 Q115 115 108 125 Q95 120 85 108 Q78 95 70 72Z" fill="#DC2626"/>
     <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
     <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
     <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
@@ -50,8 +49,7 @@
   <circle cx="170" cy="260" r="14" fill="white"/>
   <circle cx="170" cy="260" r="12.5" fill="none" stroke="#2563EB" stroke-width="2"/>
   <g transform="translate(157, 249) scale(0.17)">
-    <path d="M30 75 Q10 95 5 120 L35 110 Z" fill="#DC2626" opacity="0.9"/>
-    <path d="M100 75 Q120 95 128 120 L95 110 Z" fill="#EF4444" opacity="0.9"/>
+    <path d="M62 52 Q80 48 95 55 Q110 70 118 100 Q115 115 108 125 Q95 120 85 108 Q78 95 70 72Z" fill="#DC2626"/>
     <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
     <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
     <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
