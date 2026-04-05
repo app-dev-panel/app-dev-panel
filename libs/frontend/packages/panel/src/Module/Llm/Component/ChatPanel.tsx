@@ -8,7 +8,13 @@ import {
 } from '@app-dev-panel/panel/Module/Llm/API/Llm';
 import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
 import {SendButton} from '@app-dev-panel/panel/Module/Llm/Component/SendButton';
-import {clearPrefillMessage} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
+import {
+    type ChatBubble,
+    addMessage,
+    clearPrefillMessage,
+    removeErrorMessages,
+    updateLastSending,
+} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -97,7 +103,9 @@ export const ChatPanel = () => {
     const [addHistory] = useAddHistoryMutation();
     const [deleteHistory] = useDeleteHistoryMutation();
     const [clearHistory] = useClearHistoryMutation();
-    const [messages, setMessages] = useState<Message[]>([]);
+    const messages = useSelector(
+        (state: {aiChat?: {messages: ChatBubble[]}}) => state.aiChat?.messages ?? [],
+    ) as Message[];
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const dispatch = useDispatch();
@@ -129,10 +137,8 @@ export const ChatPanel = () => {
                 }).unwrap();
 
                 const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
-                setMessages((prev) => {
-                    const updated = prev.map((m) => (m.status === 'sending' ? {...m, status: 'ok' as const} : m));
-                    return [...updated, {role: 'assistant', content: assistantContent, status: 'ok'}];
-                });
+                dispatch(updateLastSending({status: 'ok'}));
+                dispatch(addMessage({role: 'assistant', content: assistantContent, status: 'ok'}));
 
                 if (sendingMsg) {
                     addHistory({
@@ -143,9 +149,7 @@ export const ChatPanel = () => {
                 }
             } catch (err: unknown) {
                 const errorMsg = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
-                setMessages((prev) =>
-                    prev.map((m) => (m.status === 'sending' ? {...m, status: 'error' as const, error: errorMsg} : m)),
-                );
+                dispatch(updateLastSending({status: 'error', error: errorMsg}));
                 if (sendingMsg) {
                     addHistory({
                         query: sendingMsg.content,
@@ -158,7 +162,7 @@ export const ChatPanel = () => {
             }
             scrollToBottom();
         },
-        [chat, scrollToBottom, addHistory],
+        [chat, scrollToBottom, addHistory, dispatch],
     );
 
     const inputRef = useRef(input);
@@ -169,30 +173,32 @@ export const ChatPanel = () => {
     const handleSend = useCallback(async () => {
         if (!inputRef.current.trim() || isLoading) return;
 
-        const userMessage: Message = {role: 'user', content: inputRef.current.trim(), status: 'sending'};
-        const newMessages = [...messagesRef.current.filter((m) => m.status !== 'error'), userMessage];
-        setMessages(newMessages);
+        const userMessage: ChatBubble = {role: 'user', content: inputRef.current.trim(), status: 'sending'};
+        dispatch(removeErrorMessages());
+        dispatch(addMessage(userMessage));
         setInput('');
         scrollToBottom();
 
+        const newMessages = [...messagesRef.current.filter((m) => m.status !== 'error'), userMessage];
         await sendMessages(newMessages);
-    }, [isLoading, sendMessages, scrollToBottom]);
+    }, [isLoading, sendMessages, scrollToBottom, dispatch]);
 
     const handleRetry = useCallback(
         async (index: number) => {
             const msg = messagesRef.current[index];
             if (!msg || msg.status !== 'error') return;
 
-            const retryMessage: Message = {role: 'user', content: msg.content, status: 'sending'};
-            const cleaned = messagesRef.current.filter((_, i) => i !== index);
-            const newMessages = [...cleaned, retryMessage];
-            setMessages(newMessages);
+            const retryMessage: ChatBubble = {role: 'user', content: msg.content, status: 'sending'};
+            dispatch(removeErrorMessages());
+            dispatch(addMessage(retryMessage));
             setInput('');
             scrollToBottom();
 
+            const cleaned = messagesRef.current.filter((_, i) => i !== index);
+            const newMessages = [...cleaned, retryMessage];
             await sendMessages(newMessages);
         },
-        [sendMessages, scrollToBottom],
+        [sendMessages, scrollToBottom, dispatch],
     );
 
     const handleKeyDown = useCallback(

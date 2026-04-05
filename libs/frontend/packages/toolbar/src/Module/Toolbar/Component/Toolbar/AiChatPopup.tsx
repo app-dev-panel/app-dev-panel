@@ -1,5 +1,10 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
-import {clearPrefillMessage} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
+import {
+    type ChatBubble,
+    addMessage,
+    clearPrefillMessage,
+    updateLastSending,
+} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {
     type ChatMessage,
     useAddHistoryMutation,
@@ -63,26 +68,6 @@ const MessageCopyButton = ({text}: {text: string}) => {
             </IconButton>
         </Tooltip>
     );
-};
-
-const formatSummary = (entry: DebugEntry): string => {
-    const parts: string[] = [];
-    if (isDebugEntryAboutWeb(entry)) {
-        parts.push(`${entry.request?.method} ${entry.request?.path} \u2192 ${entry.response?.statusCode}`);
-    }
-    if (isDebugEntryAboutConsole(entry)) {
-        parts.push(`CLI: ${entry.command?.input} \u2192 exit ${entry.command?.exitCode}`);
-    }
-    const timing = entry.web || entry.console;
-    if (timing) {
-        const ms = (timing.request.processingTime * 1000).toFixed(0);
-        const mem = (timing.memory.peakUsage / (1024 * 1024)).toFixed(1);
-        parts.push(`${ms}ms, ${mem}MB`);
-    }
-    if (entry.db) parts.push(`DB: ${entry.db.queries.total} queries`);
-    if (entry.exception?.class) parts.push(`Exception: ${entry.exception.class}`);
-    if (entry.deprecation?.total) parts.push(`${entry.deprecation.total} deprecations`);
-    return parts.join(' | ');
 };
 
 const buildContextPrompt = (entry: DebugEntry): string => {
@@ -155,7 +140,13 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
     const connected = status?.connected ?? false;
     const suggestions = connected ? SUGGESTIONS_CONNECTED : SUGGESTIONS_DISCONNECTED;
 
-    const [messages, setMessages] = useState<Message[]>([]);
+    const reduxMessages = useSelector((state: {aiChat?: {messages: ChatBubble[]}}) => state.aiChat?.messages ?? []);
+    const messages: Message[] = reduxMessages.map((m) => ({
+        role: m.role === 'assistant' ? ('duck' as const) : ('user' as const),
+        content: m.content,
+        status: m.status,
+        error: m.error,
+    }));
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [pos, setPos] = useState(DEFAULT_POS);
@@ -189,7 +180,6 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
     useEffect(() => {
         if (entry && entry.id !== prevEntryId.current) {
             prevEntryId.current = entry.id;
-            setMessages([{role: 'duck', content: formatSummary(entry), status: 'ok'}]);
             setChatHistory([]);
         }
     }, [entry]);
@@ -266,19 +256,18 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
             if (!text.trim()) return;
             const userText = text.trim();
 
-            setMessages((prev) => [...prev, {role: 'user', content: userText, status: 'ok'}]);
+            reduxDispatch(addMessage({role: 'user', content: userText, status: 'ok'}));
             setInput('');
 
             if (!connected) {
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        role: 'duck',
+                reduxDispatch(
+                    addMessage({
+                        role: 'assistant',
                         content:
                             'AI is not connected. Configure your LLM provider in the main panel (LLM section) to enable AI chat.',
                         status: 'ok',
-                    },
-                ]);
+                    }),
+                );
                 return;
             }
 
@@ -296,7 +285,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                 : [...chatHistory, {role: 'user', content: userText}];
 
             // Add sending indicator
-            setMessages((prev) => [...prev, {role: 'duck', content: '', status: 'sending'}]);
+            reduxDispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
 
             try {
                 const result = await chat({messages: apiMessages}).unwrap();
@@ -306,21 +295,16 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                 const updatedHistory: ChatMessage[] = [...apiMessages, {role: 'assistant', content: assistantContent}];
                 setChatHistory(updatedHistory);
 
-                setMessages((prev) => {
-                    const filtered = prev.filter((m) => m.status !== 'sending');
-                    return [...filtered, {role: 'duck', content: assistantContent, status: 'ok'}];
-                });
+                reduxDispatch(updateLastSending({status: 'ok'}));
+                reduxDispatch(addMessage({role: 'assistant', content: assistantContent, status: 'ok'}));
 
                 addHistory({query: userText, response: assistantContent, timestamp: Math.floor(Date.now() / 1000)});
             } catch (err: unknown) {
                 const errorMsg = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
-                setMessages((prev) => {
-                    const filtered = prev.filter((m) => m.status !== 'sending');
-                    return [...filtered, {role: 'duck', content: errorMsg, status: 'error', error: errorMsg}];
-                });
+                reduxDispatch(updateLastSending({status: 'error', error: errorMsg}));
             }
         },
-        [connected, entry, chatHistory, chat, addHistory],
+        [connected, entry, chatHistory, chat, addHistory, reduxDispatch],
     );
 
     if (!open) return null;
@@ -429,13 +413,13 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                                 borderBottomRightRadius: msg.role === 'user' ? 1 : undefined,
                                 bgcolor:
                                     msg.status === 'error'
-                                        ? 'error.light'
+                                        ? 'error.main'
                                         : msg.role === 'duck'
                                           ? 'action.hover'
                                           : 'primary.main',
                                 color:
                                     msg.status === 'error'
-                                        ? 'error.contrastText'
+                                        ? 'common.white'
                                         : msg.role === 'user'
                                           ? 'primary.contrastText'
                                           : 'text.primary',
