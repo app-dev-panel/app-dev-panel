@@ -15,6 +15,11 @@ final class OpenApiController
     {
         $openapi = Generator::scan([dirname(__DIR__)]);
 
-        return new JsonResponse($openapi->toJson(), json: true);
+        $response = new JsonResponse($openapi->toJson(), json: true);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+
+        return $response;
     }
 }

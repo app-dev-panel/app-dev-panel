@@ -13,6 +13,9 @@ final class OpenApiController
     {
         $openapi = Generator::scan([app_path()]);
 
-        return new JsonResponse($openapi->toJson(), json: true);
+        return new JsonResponse($openapi->toJson(), json: true)
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+            ->header('Access-Control-Allow-Headers', 'Content-Type');
     }
 }

@@ -13,6 +13,9 @@ final class OpenApiController extends Controller
     public function actionIndex(): array
     {
         \Yii::$app->response->format = Response::FORMAT_JSON;
+        \Yii::$app->response->headers->set('Access-Control-Allow-Origin', '*');
+        \Yii::$app->response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        \Yii::$app->response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
 
         $openapi = Generator::scan([dirname(__DIR__)]);
 

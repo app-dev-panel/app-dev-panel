@@ -21,6 +21,10 @@ final readonly class OpenApiAction
         /** @var array<string, mixed> $spec */
         $spec = json_decode($openapi->toJson(), true, 512, JSON_THROW_ON_ERROR);
 
-        return $this->responseFactory->createResponse($spec);
+        return $this->responseFactory
+            ->createResponse($spec)
+            ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+            ->withHeader('Access-Control-Allow-Headers', 'Content-Type');
     }
 }
