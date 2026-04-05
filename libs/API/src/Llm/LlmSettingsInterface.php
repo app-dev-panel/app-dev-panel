@@ -55,6 +55,11 @@ interface LlmSettingsInterface
     public function clear(): void;
 
     /**
+     * Storage directory path (used for daemon socket/pid files).
+     */
+    public function getStoragePath(): string;
+
+    /**
      * @return array{connected: bool, provider: string, model: string|null, timeout: int, customPrompt: string, acpCommand: string, acpArgs: list<string>, acpEnv: array<string, string>}
      */
     public function toArray(): array;

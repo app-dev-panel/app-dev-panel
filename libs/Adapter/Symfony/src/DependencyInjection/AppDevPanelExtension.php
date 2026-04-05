@@ -47,10 +47,9 @@ use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
-use AppDevPanel\Api\Llm\Acp\AcpClientFactory;
-use AppDevPanel\Api\Llm\Acp\AcpClientFactoryInterface;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -771,9 +770,12 @@ final class AppDevPanelExtension extends Extension
             ->setArguments(['%app_dev_panel.storage.path%'])
             ->setPublic(true);
 
-        // ACP client factory and command verifier
-        $container->register(AcpClientFactoryInterface::class, AcpClientFactory::class)->setPublic(true);
+        // ACP daemon manager and command verifier
         $container->register(AcpCommandVerifierInterface::class, AcpCommandVerifier::class)->setPublic(true);
+        $container
+            ->register(AcpDaemonManager::class, AcpDaemonManager::class)
+            ->setArguments(['%app_dev_panel.storage.path%'])
+            ->setPublic(true);
 
         // LLM provider service
         $container
@@ -783,7 +785,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(ClientInterface::class),
                 new Reference(RequestFactoryInterface::class),
                 new Reference(StreamFactoryInterface::class),
-                new Reference(AcpClientFactoryInterface::class),
+                new Reference(AcpDaemonManager::class),
             ])
             ->setPublic(true);
 
@@ -799,6 +801,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(StreamFactoryInterface::class),
                 new Reference(ClientInterface::class),
                 new Reference(AcpCommandVerifierInterface::class),
+                new Reference(AcpDaemonManager::class),
             ])
             ->setPublic(true);
     }

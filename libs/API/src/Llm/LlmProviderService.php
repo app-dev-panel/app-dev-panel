@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Llm;
 
-use AppDevPanel\Api\Llm\Acp\AcpClientFactoryInterface;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
+use AppDevPanel\Api\Llm\Acp\AcpResponse;
 use GuzzleHttp\Client;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -35,7 +36,7 @@ final class LlmProviderService
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory,
-        private readonly ?AcpClientFactoryInterface $acpClientFactory = null,
+        private readonly ?AcpDaemonManager $acpDaemonManager = null,
     ) {}
 
     /**
@@ -356,38 +357,46 @@ final class LlmProviderService
     }
 
     /**
-     * Send chat via ACP agent (Claude Code, Gemini CLI, etc.).
+     * Send chat via ACP daemon (persistent agent process).
      *
-     * Spawns the agent as a subprocess, performs ACP handshake,
-     * sends the prompt, and collects the streaming response.
+     * Connects to the running ACP daemon via Unix socket,
+     * sends the prompt, and returns the collected response.
      *
      * @param list<array{role: string, content: string}> $messages
      * @return array<string, mixed>
      */
     private function sendAcpChat(array $messages): array
     {
-        if ($this->acpClientFactory === null) {
-            return ['error' => 'ACP provider is not configured (missing AcpClientFactory).'];
+        if ($this->acpDaemonManager === null) {
+            return ['error' => 'ACP provider is not configured (missing AcpDaemonManager).'];
         }
 
-        $command = $this->settings->getAcpCommand();
-        $args = $this->settings->getAcpArgs();
-        $env = $this->settings->getAcpEnv();
+        if (!$this->acpDaemonManager->isRunning()) {
+            return ['error' => 'ACP daemon is not running. Please reconnect the ACP provider.'];
+        }
+
         $timeout = (float) $this->settings->getTimeout();
         $customPrompt = $this->settings->getCustomPrompt();
 
-        $client = $this->acpClientFactory->create();
-
         try {
-            $response = $client->chat($command, $messages, $args, $env, $timeout, $customPrompt);
+            $data = $this->acpDaemonManager->sendPrompt($messages, $customPrompt, $timeout);
         } catch (\RuntimeException $e) {
-            return ['error' => 'ACP agent error: ' . $e->getMessage(), '_debug' => $client->getDebugLog()];
+            return ['error' => 'ACP daemon error: ' . $e->getMessage()];
         }
 
-        $result = $response->toOpenAiFormat();
-        $result['_debug'] = $client->getDebugLog();
+        if (isset($data['error'])) {
+            return ['error' => $data['error']];
+        }
 
-        return $result;
+        $response = new AcpResponse(
+            text: $data['text'] ?? '',
+            stopReason: $data['stopReason'] ?? 'end_turn',
+            agentName: $data['agentName'] ?? '',
+            agentVersion: $data['agentVersion'] ?? '',
+            toolCalls: $data['toolCalls'] ?? [],
+        );
+
+        return $response->toOpenAiFormat();
     }
 
     /**

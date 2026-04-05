@@ -56,10 +56,9 @@ use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
-use AppDevPanel\Api\Llm\Acp\AcpClientFactory;
-use AppDevPanel\Api\Llm\Acp\AcpClientFactoryInterface;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -681,8 +680,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             fn() => new FileLlmHistoryStorage($this->app->make('config')->get('app-dev-panel.storage.path')),
         );
 
-        $this->app->singleton(AcpClientFactoryInterface::class, fn() => new AcpClientFactory());
         $this->app->singleton(AcpCommandVerifierInterface::class, fn() => new AcpCommandVerifier());
+        $this->app->singleton(
+            AcpDaemonManager::class,
+            fn() => new AcpDaemonManager($this->app->make('config')->get('app-dev-panel.storage.path')),
+        );
 
         $this->app->singleton(
             LlmProviderService::class,
@@ -691,7 +693,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 $this->app->make(ClientInterface::class),
                 $this->app->make(RequestFactoryInterface::class),
                 $this->app->make(StreamFactoryInterface::class),
-                $this->app->make(AcpClientFactoryInterface::class),
+                $this->app->make(AcpDaemonManager::class),
             ),
         );
         $this->app->singleton(
@@ -705,6 +707,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 $this->app->make(StreamFactoryInterface::class),
                 $this->app->make(ClientInterface::class),
                 $this->app->make(AcpCommandVerifierInterface::class),
+                $this->app->make(AcpDaemonManager::class),
             ),
         );
     }

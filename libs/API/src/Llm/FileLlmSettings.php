@@ -149,6 +149,11 @@ final class FileLlmSettings implements LlmSettingsInterface
         return $this->apiKey !== null && $this->apiKey !== '';
     }
 
+    public function getStoragePath(): string
+    {
+        return $this->storagePath;
+    }
+
     public function clear(): void
     {
         $this->apiKey = null;
