@@ -1,5 +1,6 @@
 import {LiveFeedPanel} from '@app-dev-panel/panel/Application/Component/LiveFeedPanel';
 import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/NotificationCenter';
+import {AiChatPopup} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/AiChatPopup';
 
 import {
     useGetMcpSettingsQuery,
@@ -41,7 +42,7 @@ import Tooltip from '@mui/material/Tooltip';
 import {styled, useTheme as useMuiTheme} from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
-import {useCallback, useEffect, useMemo, useReducer} from 'react';
+import {useCallback, useEffect, useMemo, useReducer, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
 import {Outlet, useLocation, useNavigate, useSearchParams} from 'react-router';
@@ -188,6 +189,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const notificationCount = useSelector(selectUnreadCount);
     const liveFeedCount = useLiveCount();
     const liveFeedOpen = useSelector((state) => state.application.liveFeedOpen ?? false);
+    const [aiChatOpen, setAiChatOpen] = useState(false);
+    const handleAiChatToggle = useCallback(() => setAiChatOpen((v) => !v), []);
+    const handleAiChatClose = useCallback(() => setAiChatOpen(false), []);
 
     // MCP settings
     const {data: mcpSettings} = useGetMcpSettingsQuery();
@@ -589,12 +593,12 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 </MainArea>
             </Box>
             {children}
-            <Tooltip title="AI Chat" placement="left">
+            <Tooltip title={aiChatOpen ? 'Close AI Chat' : 'AI Chat'} placement="left">
                 <Fab
                     size="medium"
                     color="primary"
                     aria-label="AI Chat"
-                    onClick={() => navigate('/llm')}
+                    onClick={handleAiChatToggle}
                     sx={{
                         position: 'fixed',
                         bottom: children ? 72 : 24,
@@ -606,6 +610,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     <AutoAwesomeIcon />
                 </Fab>
             </Tooltip>
+            <AiChatPopup open={aiChatOpen} onClose={handleAiChatClose} entry={debugEntry} />
             <ScrollTopButton bottomOffset={!!children} />
             <CommandPalette open={ui.paletteOpen} onClose={handlePaletteClose} extraItems={paletteCollectorItems} />
         </>
