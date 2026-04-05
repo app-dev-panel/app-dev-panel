@@ -9,7 +9,6 @@ The ADP mascot is a **yellow rubber duck** — a reference to [rubber duck debug
 | File | Size | Format | Usage |
 |------|------|--------|-------|
 | `duck.svg` | 128×128 | SVG | Primary logo, scalable |
-| `duck-detailed.svg` | 200×200 | SVG | Detailed version with goggles and code badge |
 | `favicon.ico` | Multi | ICO | Browser favicon |
 | `favicon-16x16.png` | 16×16 | PNG | Small browser tab icon |
 | `favicon-32x32.png` | 32×32 | PNG | Standard favicon |

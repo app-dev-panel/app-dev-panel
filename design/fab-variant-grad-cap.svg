@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="300" viewBox="0 0 280 300">
+  <style>text { font-family: 'Segoe UI', Arial, sans-serif; }</style>
+  <rect width="280" height="300" fill="#F8FAFC" rx="12"/>
+  <text x="140" y="28" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">Duck Head + Grad Cap</text>
+
+  <!-- Large Fab 112px -->
+  <circle cx="140" cy="140" r="56" fill="#2563EB"/>
+  <g transform="translate(92, 94) scale(0.82)">
+    <!-- Head -->
+    <circle cx="56" cy="55" r="38" fill="#FCD34D"/>
+    <!-- Beak -->
+    <path d="M22 50L4 56L22 62Z" fill="#FB923C"/>
+    <!-- Eye -->
+    <circle cx="48" cy="47" r="5.5" fill="#292524"/>
+    <circle cx="46.5" cy="45.5" r="2" fill="white"/>
+    <!-- Cheek blush -->
+    <circle cx="36" cy="64" r="4" fill="#FB923C" opacity="0.25"/>
+    <!-- Graduation cap board -->
+    <polygon points="56,16 100,30 56,42 12,30" fill="#1E293B"/>
+    <!-- Cap top square -->
+    <rect x="42" y="28" width="28" height="4" rx="1" fill="#334155"/>
+    <!-- Tassel string -->
+    <line x1="56" y1="30" x2="90" y2="20" stroke="#FACC15" stroke-width="2" stroke-linecap="round"/>
+    <!-- Tassel end -->
+    <circle cx="90" cy="20" r="3" fill="#FACC15"/>
+    <line x1="88" y1="22" x2="88" y2="30" stroke="#FACC15" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="90" y1="22" x2="90" y2="32" stroke="#FACC15" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="92" y1="22" x2="92" y2="29" stroke="#FACC15" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Small 40px -->
+  <circle cx="80" cy="260" r="20" fill="#2563EB"/>
+  <g transform="translate(58, 236) scale(0.38)">
+    <circle cx="56" cy="55" r="38" fill="#FCD34D"/>
+    <path d="M22 50L4 56L22 62Z" fill="#FB923C"/>
+    <circle cx="48" cy="47" r="5.5" fill="#292524"/>
+    <circle cx="46.5" cy="45.5" r="2" fill="white"/>
+    <polygon points="56,16 100,30 56,42 12,30" fill="#1E293B"/>
+    <rect x="42" y="28" width="28" height="4" rx="1" fill="#334155"/>
+    <line x1="56" y1="30" x2="90" y2="20" stroke="#FACC15" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="90" cy="20" r="3" fill="#FACC15"/>
+  </g>
+  <text x="108" y="264" font-size="11" fill="#64748B">40px</text>
+
+  <!-- Small 28px -->
+  <circle cx="170" cy="260" r="14" fill="#2563EB"/>
+  <g transform="translate(155, 246) scale(0.26)">
+    <circle cx="56" cy="55" r="38" fill="#FCD34D"/>
+    <path d="M22 50L4 56L22 62Z" fill="#FB923C"/>
+    <circle cx="48" cy="47" r="5.5" fill="#292524"/>
+    <circle cx="46.5" cy="45.5" r="2" fill="white"/>
+    <polygon points="56,16 100,30 56,42 12,30" fill="#1E293B"/>
+    <rect x="42" y="28" width="28" height="4" rx="1" fill="#334155"/>
+  </g>
+  <text x="192" y="264" font-size="11" fill="#64748B">28px</text>
+</svg>

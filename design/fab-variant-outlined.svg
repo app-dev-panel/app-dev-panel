@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="300" viewBox="0 0 280 300">
+  <style>text { font-family: 'Segoe UI', Arial, sans-serif; }</style>
+  <rect width="280" height="300" fill="#F8FAFC" rx="12"/>
+  <text x="140" y="28" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">Duck — White + Blue Outline</text>
+
+  <!-- Large Fab 112px -->
+  <circle cx="140" cy="140" r="56" fill="white"/>
+  <circle cx="140" cy="140" r="53.5" fill="none" stroke="#2563EB" stroke-width="3"/>
+  <g transform="translate(102, 104) scale(0.55)">
+    <!-- Body -->
+    <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
+    <!-- Head -->
+    <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
+    <!-- Beak -->
+    <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
+    <!-- Eye -->
+    <circle cx="38" cy="38" r="3.5" fill="#292524"/>
+    <circle cx="37" cy="37" r="1.2" fill="white"/>
+    <!-- Wing accent -->
+    <path d="M56 74C64 66 82 68 94 78" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <!-- Water ripple -->
+    <path d="M16 108C24 104 32 104 40 108C48 112 56 112 64 108C72 104 80 104 88 108C96 112 104 112 112 108" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- Small 40px -->
+  <circle cx="80" cy="260" r="20" fill="white"/>
+  <circle cx="80" cy="260" r="18" fill="none" stroke="#2563EB" stroke-width="2.5"/>
+  <g transform="translate(64, 244) scale(0.24)">
+    <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
+    <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
+    <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
+    <circle cx="38" cy="38" r="3.5" fill="#292524"/>
+    <circle cx="37" cy="37" r="1.2" fill="white"/>
+    <path d="M56 74C64 66 82 68 94 78" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" fill="none"/>
+  </g>
+  <text x="108" y="264" font-size="11" fill="#64748B">40px</text>
+
+  <!-- Small 28px -->
+  <circle cx="170" cy="260" r="14" fill="white"/>
+  <circle cx="170" cy="260" r="12.5" fill="none" stroke="#2563EB" stroke-width="2"/>
+  <g transform="translate(158, 249) scale(0.17)">
+    <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
+    <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
+    <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
+    <circle cx="38" cy="38" r="3.5" fill="#292524"/>
+  </g>
+  <text x="192" y="264" font-size="11" fill="#64748B">28px</text>
+</svg>
