@@ -18,6 +18,7 @@ import {
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, debugApi, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {addLiveDump, addLiveLog, useLiveCount} from '@app-dev-panel/sdk/API/Debug/LiveContext';
+import {setFloatingOpen} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {CommandPalette} from '@app-dev-panel/sdk/Component/Layout/CommandPalette';
 import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
@@ -42,7 +43,7 @@ import Tooltip from '@mui/material/Tooltip';
 import {styled, useTheme as useMuiTheme} from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
-import {useCallback, useEffect, useMemo, useReducer, useState} from 'react';
+import {useCallback, useEffect, useMemo, useReducer} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
 import {Outlet, useLocation, useNavigate, useSearchParams} from 'react-router';
@@ -189,9 +190,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const notificationCount = useSelector(selectUnreadCount);
     const liveFeedCount = useLiveCount();
     const liveFeedOpen = useSelector((state) => state.application.liveFeedOpen ?? false);
-    const [aiChatOpen, setAiChatOpen] = useState(false);
-    const handleAiChatToggle = useCallback(() => setAiChatOpen((v) => !v), []);
-    const handleAiChatClose = useCallback(() => setAiChatOpen(false), []);
+    const aiChatOpen = useSelector((state) => state.aiChat?.floatingOpen ?? false);
+    const handleAiChatToggle = useCallback(() => dispatch(setFloatingOpen(!aiChatOpen)), [dispatch, aiChatOpen]);
+    const handleAiChatClose = useCallback(() => dispatch(setFloatingOpen(false)), [dispatch]);
 
     // MCP settings
     const {data: mcpSettings} = useGetMcpSettingsQuery();

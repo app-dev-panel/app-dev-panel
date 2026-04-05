@@ -27,7 +27,6 @@ import {styled, useTheme} from '@mui/material/styles';
 import {type GridColDef, type GridRenderCellParams} from '@mui/x-data-grid';
 import {useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
 import {useDispatch} from 'react-redux';
-import {useNavigate} from 'react-router';
 
 type QueryAction = {action: 'query.start' | 'query.end'; time: number};
 type Query = {
@@ -372,7 +371,6 @@ const QueryRowWithExplain = ({
     onExpand: () => void;
 }) => {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const [wasExpanded, setWasExpanded] = useState(false);
     useEffect(() => {
         if (expanded) setWasExpanded(true);
@@ -418,7 +416,6 @@ const QueryRowWithExplain = ({
                 `Explain this SQL query, check for performance issues and suggest improvements:\n\n${sql}${params}`,
             ),
         );
-        navigate('/llm');
     };
 
     return (

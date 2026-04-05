@@ -1,4 +1,5 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {clearPrefillMessage} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {
     type ChatMessage,
     useAddHistoryMutation,
@@ -12,6 +13,7 @@ import SendIcon from '@mui/icons-material/Send';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import {Box, Chip, CircularProgress, IconButton, Link, Paper, Portal, TextField, Typography} from '@mui/material';
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 
 type Message = {role: 'duck' | 'user'; content: string; status?: 'ok' | 'sending' | 'error'; error?: string};
 
@@ -97,6 +99,10 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
     const {data: status, isLoading: statusLoading} = useGetStatusQuery(undefined, {skip: !open});
     const [chat, {isLoading: chatLoading}] = useChatMutation();
     const [addHistory] = useAddHistoryMutation();
+    const reduxDispatch = useDispatch();
+    const prefillMessage = useSelector(
+        (state: {aiChat?: {prefillMessage: string | null}}) => state.aiChat?.prefillMessage,
+    );
 
     const connected = status?.connected ?? false;
     const suggestions = connected ? SUGGESTIONS_CONNECTED : SUGGESTIONS_DISCONNECTED;
@@ -132,6 +138,13 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
             setChatHistory([]);
         }
     }, [entry]);
+
+    useEffect(() => {
+        if (open && prefillMessage) {
+            setInput(prefillMessage);
+            reduxDispatch(clearPrefillMessage());
+        }
+    }, [open, prefillMessage, reduxDispatch]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
