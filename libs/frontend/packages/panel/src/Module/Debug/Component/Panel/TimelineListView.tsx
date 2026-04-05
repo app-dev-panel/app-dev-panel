@@ -190,8 +190,14 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                 const color = getColor(collectorClass);
                 const label = getCollectorLabel(collectorClass);
                 const ref = row[1] != null && row[1] !== '' ? String(row[1]) : null;
-                const detail = enrichedDetails[index];
+                const rawDetail = enrichedDetails[index];
                 const expanded = expandedIndex === index;
+                const isException = collectorClass === CollectorsMap.ExceptionCollector;
+
+                // For LogCollector: extract level from "[level] message" format
+                const logMatch = rawDetail?.match(/^\[(\w+)] (.*)$/);
+                const logLevel = logMatch?.[1] ?? null;
+                const detail = isException ? ref : logMatch ? logMatch[2] : rawDetail;
 
                 return (
                     <Box key={index}>
@@ -199,12 +205,20 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                             <OffsetLabel>{offsetLabel}</OffsetLabel>
                             <CollectorLabel sx={{color: color.fg}}>
                                 {label !== 'Unknown' ? label : shortName}
-                                {ref && (
+                                {ref && !isException && (
                                     <Typography
                                         component="span"
                                         sx={{color: 'text.disabled', fontWeight: 400, fontSize: '11px', ml: 0.5}}
                                     >
                                         ({ref})
+                                    </Typography>
+                                )}
+                                {logLevel && (
+                                    <Typography
+                                        component="span"
+                                        sx={{color: 'text.disabled', fontWeight: 400, fontSize: '11px', ml: 0.5}}
+                                    >
+                                        [{logLevel}]
                                     </Typography>
                                 )}
                             </CollectorLabel>
