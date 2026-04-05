@@ -1,5 +1,6 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {useExecuteQueryMutation, useExplainQueryMutation} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {setPrefillMessage} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {ExplainPlanVisualizer} from '@app-dev-panel/sdk/Component/ExplainPlanVisualizer';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -7,6 +8,7 @@ import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {SqlHighlight} from '@app-dev-panel/sdk/Component/SqlHighlight';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import {
     Box,
     Button,
@@ -24,6 +26,8 @@ import {
 import {styled, useTheme} from '@mui/material/styles';
 import {type GridColDef, type GridRenderCellParams} from '@mui/x-data-grid';
 import {useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
+import {useDispatch} from 'react-redux';
+import {useNavigate} from 'react-router';
 
 type QueryAction = {action: 'query.start' | 'query.end'; time: number};
 type Query = {
@@ -367,6 +371,8 @@ const QueryRowWithExplain = ({
     onToggle: () => void;
     onExpand: () => void;
 }) => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [wasExpanded, setWasExpanded] = useState(false);
     useEffect(() => {
         if (expanded) setWasExpanded(true);
@@ -402,6 +408,17 @@ const QueryRowWithExplain = ({
         if (!expanded) {
             onExpand();
         }
+    };
+
+    const handleAskAi = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const params = Object.keys(query.params).length > 0 ? `\nParameters: ${JSON.stringify(query.params)}` : '';
+        dispatch(
+            setPrefillMessage(
+                `Explain this SQL query, check for performance issues and suggest improvements:\n\n${sql}${params}`,
+            ),
+        );
+        navigate('/llm');
     };
 
     return (
@@ -440,6 +457,16 @@ const QueryRowWithExplain = ({
                         aria-label="Explain query"
                     >
                         {isLoading ? <CircularProgress size={14} /> : <Icon sx={{fontSize: 16}}>query_stats</Icon>}
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Ask AI" placement="top">
+                    <IconButton
+                        size="small"
+                        onClick={handleAskAi}
+                        sx={{flexShrink: 0, color: 'primary.main'}}
+                        aria-label="Ask AI about query"
+                    >
+                        <AutoAwesomeIcon sx={{fontSize: 16}} />
                     </IconButton>
                 </Tooltip>
                 <IconButton size="small" sx={{flexShrink: 0}}>
@@ -487,6 +514,7 @@ const QueryRowWithExplain = ({
                             onExplain={handleExplain}
                             onAnalyze={handleAnalyze}
                             onQuery={handleQuery}
+                            onAskAi={handleAskAi}
                         />
                     </DetailBox>
                 )}
@@ -535,6 +563,7 @@ const ExplainResult = ({
     onExplain,
     onAnalyze,
     onQuery,
+    onAskAi,
 }: {
     data: any[] | undefined;
     error: any;
@@ -548,6 +577,7 @@ const ExplainResult = ({
     onExplain: (e: React.MouseEvent) => void;
     onAnalyze: (e: React.MouseEvent) => void;
     onQuery: (e: React.MouseEvent) => void;
+    onAskAi: (e: React.MouseEvent) => void;
 }) => {
     const hasExplainResult = data !== undefined || error;
     const hasAnalyzeResult = analyzeData !== undefined || analyzeError;
@@ -590,6 +620,15 @@ const ExplainResult = ({
                     sx={actionButtonSx}
                 >
                     {hasAnalyzeResult ? 'Repeat Analyze' : 'EXPLAIN ANALYZE'}
+                </Button>
+                <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={onAskAi}
+                    startIcon={<AutoAwesomeIcon sx={{fontSize: 14}} />}
+                    sx={{...actionButtonSx, ml: 'auto', color: 'primary.main', borderColor: 'primary.light'}}
+                >
+                    ASK AI
                 </Button>
             </Box>
             {hasQueryResult && (
