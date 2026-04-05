@@ -1,8 +1,8 @@
 import {useAnalyzeMutation, useGetStatusQuery} from '@app-dev-panel/panel/Module/Llm/API/Llm';
-import {Markdown} from '@app-dev-panel/panel/Module/Llm/Component/Markdown';
 import {SendButton} from '@app-dev-panel/panel/Module/Llm/Component/SendButton';
 import {DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {HighlightedText, fuzzyMatch} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
+import {Markdown} from '@app-dev-panel/sdk/Component/Markdown';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';

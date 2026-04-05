@@ -1,39 +1,27 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {
+    type ChatBubble,
+    addMessage,
+    clearPrefillMessage,
+    removeErrorMessages,
+    updateLastSending,
+} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
+import {
     type ChatMessage,
     useAddHistoryMutation,
     useChatMutation,
     useGetStatusQuery,
 } from '@app-dev-panel/sdk/API/Llm/Llm';
+import {ChatMessageList} from '@app-dev-panel/sdk/Component/ChatMessageList';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {extractErrorMessage} from '@app-dev-panel/sdk/Helper/extractErrorMessage';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import {Box, Chip, CircularProgress, IconButton, Link, Paper, Portal, TextField, Typography} from '@mui/material';
-import {useCallback, useEffect, useRef, useState} from 'react';
-
-type Message = {role: 'duck' | 'user'; content: string; status?: 'ok' | 'sending' | 'error'; error?: string};
-
-const formatSummary = (entry: DebugEntry): string => {
-    const parts: string[] = [];
-    if (isDebugEntryAboutWeb(entry)) {
-        parts.push(`${entry.request?.method} ${entry.request?.path} \u2192 ${entry.response?.statusCode}`);
-    }
-    if (isDebugEntryAboutConsole(entry)) {
-        parts.push(`CLI: ${entry.command?.input} \u2192 exit ${entry.command?.exitCode}`);
-    }
-    const timing = entry.web || entry.console;
-    if (timing) {
-        const ms = (timing.request.processingTime * 1000).toFixed(0);
-        const mem = (timing.memory.peakUsage / (1024 * 1024)).toFixed(1);
-        parts.push(`${ms}ms, ${mem}MB`);
-    }
-    if (entry.db) parts.push(`DB: ${entry.db.queries.total} queries`);
-    if (entry.exception) parts.push(`Exception: ${entry.exception.class}`);
-    if (entry.deprecation?.total) parts.push(`${entry.deprecation.total} deprecations`);
-    return parts.join(' | ');
-};
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 
 const buildContextPrompt = (entry: DebugEntry): string => {
     const parts: string[] = ['Analyze this debug entry:'];
@@ -71,21 +59,6 @@ const SUGGESTIONS_DISCONNECTED = ['Show queries', 'Performance tips', 'Show logs
 
 const DEFAULT_POS = {x: -1, y: -1, w: 360, h: 480};
 
-const extractErrorMessage = (err: unknown): string | null => {
-    if (typeof err === 'object' && err !== null && 'data' in err) {
-        const data = (err as {data: unknown}).data;
-        if (typeof data === 'object' && data !== null) {
-            const obj = data as Record<string, unknown>;
-            if (typeof obj.error === 'string') return obj.error;
-            if (typeof obj.data === 'object' && obj.data !== null) {
-                const inner = obj.data as Record<string, unknown>;
-                if (typeof inner.error === 'string') return inner.error;
-            }
-        }
-    }
-    return null;
-};
-
 type AiChatPopupProps = {
     open: boolean;
     onClose: () => void;
@@ -97,11 +70,15 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
     const {data: status, isLoading: statusLoading} = useGetStatusQuery(undefined, {skip: !open});
     const [chat, {isLoading: chatLoading}] = useChatMutation();
     const [addHistory] = useAddHistoryMutation();
+    const reduxDispatch = useDispatch();
+    const prefillMessage = useSelector(
+        (state: {aiChat?: {prefillMessage: string | null}}) => state.aiChat?.prefillMessage,
+    );
 
     const connected = status?.connected ?? false;
     const suggestions = connected ? SUGGESTIONS_CONNECTED : SUGGESTIONS_DISCONNECTED;
 
-    const [messages, setMessages] = useState<Message[]>([]);
+    const messages = useSelector((state: {aiChat?: {messages: ChatBubble[]}}) => state.aiChat?.messages ?? []);
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [pos, setPos] = useState(DEFAULT_POS);
@@ -112,7 +89,14 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
     // Drag state
     const dragRef = useRef<{startX: number; startY: number; startLeft: number; startTop: number} | null>(null);
     // Resize state
-    const resizeRef = useRef<{startX: number; startY: number; startW: number; startH: number} | null>(null);
+    const resizeRef = useRef<{
+        startX: number;
+        startY: number;
+        startW: number;
+        startH: number;
+        startLeft: number;
+        startTop: number;
+    } | null>(null);
 
     // Compute initial position based on toolbar position
     useEffect(() => {
@@ -128,14 +112,20 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
     useEffect(() => {
         if (entry && entry.id !== prevEntryId.current) {
             prevEntryId.current = entry.id;
-            setMessages([{role: 'duck', content: formatSummary(entry), status: 'ok'}]);
             setChatHistory([]);
         }
     }, [entry]);
 
     useEffect(() => {
+        if (open && prefillMessage) {
+            setInput(prefillMessage);
+            reduxDispatch(clearPrefillMessage());
+        }
+    }, [open, prefillMessage, reduxDispatch]);
+
+    useEffect(() => {
         messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
-    }, [messages]);
+    }, [messages.length]);
 
     // Global mouse listeners for drag + resize
     useEffect(() => {
@@ -148,9 +138,13 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
             }
             const resize = resizeRef.current;
             if (resize) {
-                const w = Math.max(280, resize.startW + (e.clientX - resize.startX));
-                const h = Math.max(320, resize.startH + (e.clientY - resize.startY));
-                setPos((p) => ({...p, w, h}));
+                const dx = resize.startX - e.clientX;
+                const dy = resize.startY - e.clientY;
+                const w = Math.max(280, resize.startW + dx);
+                const h = Math.max(320, resize.startH + dy);
+                const x = resize.startLeft - (w - resize.startW);
+                const y = resize.startTop - (h - resize.startH);
+                setPos({x, y, w, h});
             }
         };
         const onMouseUp = () => {
@@ -179,27 +173,43 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
         e.stopPropagation();
         const rect = chatRef.current?.getBoundingClientRect();
         if (!rect) return;
-        resizeRef.current = {startX: e.clientX, startY: e.clientY, startW: rect.width, startH: rect.height};
+        resizeRef.current = {
+            startX: e.clientX,
+            startY: e.clientY,
+            startW: rect.width,
+            startH: rect.height,
+            startLeft: rect.left,
+            startTop: rect.top,
+        };
     }, []);
+
+    const handleRetry = useCallback(
+        (index: number) => {
+            const msg = messages[index];
+            if (!msg || msg.status !== 'error') return;
+            reduxDispatch(removeErrorMessages());
+            setInput(msg.error || msg.content);
+        },
+        [messages, reduxDispatch],
+    );
 
     const sendMessage = useCallback(
         async (text: string) => {
             if (!text.trim()) return;
             const userText = text.trim();
 
-            setMessages((prev) => [...prev, {role: 'user', content: userText, status: 'ok'}]);
+            reduxDispatch(addMessage({role: 'user', content: userText, status: 'ok'}));
             setInput('');
 
             if (!connected) {
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        role: 'duck',
+                reduxDispatch(
+                    addMessage({
+                        role: 'assistant',
                         content:
                             'AI is not connected. Configure your LLM provider in the main panel (LLM section) to enable AI chat.',
                         status: 'ok',
-                    },
-                ]);
+                    }),
+                );
                 return;
             }
 
@@ -217,7 +227,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                 : [...chatHistory, {role: 'user', content: userText}];
 
             // Add sending indicator
-            setMessages((prev) => [...prev, {role: 'duck', content: '', status: 'sending'}]);
+            reduxDispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
 
             try {
                 const result = await chat({messages: apiMessages}).unwrap();
@@ -227,21 +237,15 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                 const updatedHistory: ChatMessage[] = [...apiMessages, {role: 'assistant', content: assistantContent}];
                 setChatHistory(updatedHistory);
 
-                setMessages((prev) => {
-                    const filtered = prev.filter((m) => m.status !== 'sending');
-                    return [...filtered, {role: 'duck', content: assistantContent, status: 'ok'}];
-                });
+                reduxDispatch(updateLastSending({status: 'ok', content: assistantContent}));
 
                 addHistory({query: userText, response: assistantContent, timestamp: Math.floor(Date.now() / 1000)});
             } catch (err: unknown) {
                 const errorMsg = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
-                setMessages((prev) => {
-                    const filtered = prev.filter((m) => m.status !== 'sending');
-                    return [...filtered, {role: 'duck', content: errorMsg, status: 'error', error: errorMsg}];
-                });
+                reduxDispatch(updateLastSending({status: 'error', content: errorMsg, error: errorMsg}));
             }
         },
-        [connected, entry, chatHistory, chat, addHistory],
+        [connected, entry, chatHistory, chat, addHistory, reduxDispatch],
     );
 
     if (!open) return null;
@@ -286,7 +290,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                     }}
                 >
                     <DuckIcon sx={{fontSize: 22}} />
-                    <Typography sx={{fontSize: 13, fontWeight: 600, flex: 1}}>Debug Duck</Typography>
+                    <Typography sx={{fontSize: 13, fontWeight: 600, flex: 1}}>ADP Duck AI</Typography>
                     {connected && status?.model && (
                         <Typography sx={{fontSize: 10, color: 'text.disabled', maxWidth: 100}} noWrap>
                             {status.model}
@@ -335,44 +339,12 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                 <Box
                     sx={{flex: 1, overflowY: 'auto', px: 1.5, py: 1, display: 'flex', flexDirection: 'column', gap: 1}}
                 >
-                    {messages.map((msg, i) => (
-                        <Box
-                            key={i}
-                            sx={{
-                                maxWidth: '85%',
-                                alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                                px: 1.5,
-                                py: 1,
-                                borderRadius: 2,
-                                borderBottomLeftRadius: msg.role === 'duck' ? 1 : undefined,
-                                borderBottomRightRadius: msg.role === 'user' ? 1 : undefined,
-                                bgcolor:
-                                    msg.status === 'error'
-                                        ? 'error.light'
-                                        : msg.role === 'duck'
-                                          ? 'action.hover'
-                                          : 'primary.main',
-                                color:
-                                    msg.status === 'error'
-                                        ? 'error.contrastText'
-                                        : msg.role === 'user'
-                                          ? 'primary.contrastText'
-                                          : 'text.primary',
-                            }}
-                        >
-                            {msg.status === 'sending' ? (
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                    <CircularProgress size={12} />
-                                    <Typography sx={{fontSize: 12, color: 'text.secondary'}}>Thinking...</Typography>
-                                </Box>
-                            ) : (
-                                <Typography sx={{fontSize: 12, lineHeight: 1.5, whiteSpace: 'pre-wrap'}}>
-                                    {msg.content}
-                                </Typography>
-                            )}
-                        </Box>
-                    ))}
-                    <div ref={messagesEndRef} />
+                    <ChatMessageList
+                        messages={messages}
+                        variant="compact"
+                        onRetry={handleRetry}
+                        scrollRef={messagesEndRef}
+                    />
                 </Box>
 
                 {/* Suggestions */}
@@ -391,10 +363,22 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                 </Box>
 
                 {/* Input */}
-                <Box sx={{display: 'flex', gap: 0.5, p: 1, borderTop: 1, borderColor: 'divider', flexShrink: 0}}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        gap: 0.5,
+                        p: 1,
+                        borderTop: 1,
+                        borderColor: 'divider',
+                        flexShrink: 0,
+                        alignItems: 'flex-end',
+                    }}
+                >
                     <TextField
                         size="small"
                         fullWidth
+                        multiline
+                        maxRows={6}
                         placeholder={connected ? 'Ask about this request...' : 'Ask the duck...'}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
@@ -405,39 +389,40 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                             }
                         }}
                         disabled={chatLoading}
-                        slotProps={{input: {sx: {fontSize: 12, py: 0.75, borderRadius: 4}}}}
+                        slotProps={{input: {sx: {fontSize: 12, py: 0.875, borderRadius: 2}}}}
                     />
                     <IconButton
                         size="small"
                         onClick={() => sendMessage(input)}
                         disabled={!input.trim() || chatLoading}
-                        sx={{color: 'primary.main'}}
+                        sx={{color: 'primary.main', width: 34, height: 34, flexShrink: 0, mb: '1px'}}
                     >
                         {chatLoading ? <CircularProgress size={18} /> : <SendIcon sx={{fontSize: 18}} />}
                     </IconButton>
                 </Box>
 
-                {/* Resize handle - bottom-right */}
+                {/* Resize handle - top-left */}
                 <Box
                     onMouseDown={onResizeMouseDown}
                     sx={{
                         position: 'absolute',
-                        bottom: 0,
-                        right: 0,
+                        top: 0,
+                        left: 0,
                         width: 18,
                         height: 18,
-                        cursor: 'se-resize',
+                        cursor: 'nw-resize',
+                        zIndex: 5,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        opacity: 0.3,
+                        opacity: 0.35,
                         '&:hover': {opacity: 0.7},
                     }}
                 >
                     <svg width="10" height="10" viewBox="0 0 10 10">
-                        <line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" strokeWidth="1.2" />
-                        <line x1="9" y1="4" x2="4" y2="9" stroke="currentColor" strokeWidth="1.2" />
-                        <line x1="9" y1="7" x2="7" y2="9" stroke="currentColor" strokeWidth="1.2" />
+                        <line x1="1" y1="10" x2="10" y2="1" stroke="currentColor" strokeWidth="1.2" />
+                        <line x1="4" y1="10" x2="10" y2="4" stroke="currentColor" strokeWidth="1.2" />
+                        <line x1="7" y1="10" x2="10" y2="7" stroke="currentColor" strokeWidth="1.2" />
                     </svg>
                 </Box>
             </Paper>

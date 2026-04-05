@@ -1,5 +1,6 @@
 import {LiveFeedPanel} from '@app-dev-panel/panel/Application/Component/LiveFeedPanel';
 import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/NotificationCenter';
+import {AiChatPopup} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/AiChatPopup';
 
 import {
     useGetMcpSettingsQuery,
@@ -17,6 +18,7 @@ import {
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, debugApi, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {addLiveDump, addLiveLog, useLiveCount} from '@app-dev-panel/sdk/API/Debug/LiveContext';
+import {setFloatingOpen} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {CommandPalette} from '@app-dev-panel/sdk/Component/Layout/CommandPalette';
 import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
@@ -33,9 +35,12 @@ import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectors
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Drawer from '@mui/material/Drawer';
+import Fab from '@mui/material/Fab';
+import Tooltip from '@mui/material/Tooltip';
 import {styled, useTheme as useMuiTheme} from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
@@ -186,6 +191,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const notificationCount = useSelector(selectUnreadCount);
     const liveFeedCount = useLiveCount();
     const liveFeedOpen = useSelector((state) => state.application.liveFeedOpen ?? false);
+    const aiChatOpen = useSelector((state) => state.aiChat?.floatingOpen ?? false);
+    const handleAiChatToggle = useCallback(() => dispatch(setFloatingOpen(!aiChatOpen)), [dispatch, aiChatOpen]);
+    const handleAiChatClose = useCallback(() => dispatch(setFloatingOpen(false)), [dispatch]);
 
     // Copy as image
     const {copyToClipboard: copyAsImage, downloadAsPng, isCapturing, targetRef: contentRef} = useCopyAsImage();
@@ -593,6 +601,26 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 </MainArea>
             </Box>
             {children}
+            {!aiChatOpen && (
+                <Tooltip title="AI Chat" placement="left">
+                    <Fab
+                        size="medium"
+                        color="primary"
+                        aria-label="AI Chat"
+                        onClick={handleAiChatToggle}
+                        sx={{
+                            position: 'fixed',
+                            bottom: children ? 72 : 24,
+                            right: 24,
+                            zIndex: 1100,
+                            boxShadow: '0 4px 12px rgba(37,99,235,0.4)',
+                        }}
+                    >
+                        <AutoAwesomeIcon />
+                    </Fab>
+                </Tooltip>
+            )}
+            <AiChatPopup open={aiChatOpen} onClose={handleAiChatClose} entry={debugEntry} />
             <ScrollTopButton bottomOffset={!!children} />
             <CommandPalette open={ui.paletteOpen} onClose={handlePaletteClose} extraItems={paletteCollectorItems} />
         </>
