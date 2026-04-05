@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Llm;
 
-use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\Acp\AcpResponse;
 use GuzzleHttp\Client;
 use Psr\Http\Client\ClientInterface;
@@ -36,7 +36,7 @@ final class LlmProviderService
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory,
-        private readonly ?AcpDaemonManager $acpDaemonManager = null,
+        private readonly ?AcpDaemonManagerInterface $acpDaemonManager = null,
     ) {}
 
     /**

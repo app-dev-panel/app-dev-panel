@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Llm;
 
-use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use GuzzleHttp\Psr7\HttpFactory;
@@ -236,7 +236,7 @@ final class LlmProviderServiceTest extends TestCase
         $settings->method('getTimeout')->willReturn(30);
         $settings->method('getCustomPrompt')->willReturn('');
 
-        $daemonManager = $this->createMock(AcpDaemonManager::class);
+        $daemonManager = $this->createMock(AcpDaemonManagerInterface::class);
         $daemonManager->method('isRunning')->willReturn(false);
 
         $httpFactory = new HttpFactory();
@@ -260,7 +260,7 @@ final class LlmProviderServiceTest extends TestCase
         $settings->method('getTimeout')->willReturn(30);
         $settings->method('getCustomPrompt')->willReturn('Be brief');
 
-        $daemonManager = $this->createMock(AcpDaemonManager::class);
+        $daemonManager = $this->createMock(AcpDaemonManagerInterface::class);
         $daemonManager->method('isRunning')->willReturn(true);
         $daemonManager
             ->method('sendPrompt')

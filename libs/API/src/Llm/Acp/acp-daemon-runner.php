@@ -91,9 +91,16 @@ if (!is_resource($process)) {
     exit(1);
 }
 
-$stdin = $pipes[0];
-$stdout = $pipes[1];
-$stderr = $pipes[2];
+$stdin = $pipes[0] ?? null;
+$stdout = $pipes[1] ?? null;
+$stderr = $pipes[2] ?? null;
+
+if ($stdin === null || $stdout === null || $stderr === null) {
+    fwrite(STDERR, "Failed to open stdio pipes for ACP agent.\n");
+    proc_close($process);
+    @unlink($pidFile);
+    exit(1);
+}
 
 stream_set_blocking($stderr, false);
 
@@ -553,7 +560,7 @@ function handlePrompt(
         }
 
         // Agent request to client — reject gracefully
-        if (isset($message['method']) && isset($message['id'])) {
+        if (isset($message['method'])) {
             agentSend($stdin, [
                 'jsonrpc' => '2.0',
                 'id' => $message['id'],

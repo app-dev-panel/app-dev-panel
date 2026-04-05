@@ -6,7 +6,7 @@ namespace AppDevPanel\Api\Llm\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
-use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
@@ -31,7 +31,7 @@ final class LlmController
         private readonly StreamFactoryInterface $streamFactory,
         private readonly ClientInterface $httpClient,
         private readonly ?AcpCommandVerifierInterface $commandVerifier = null,
-        private readonly ?AcpDaemonManager $acpDaemonManager = null,
+        private readonly ?AcpDaemonManagerInterface $acpDaemonManager = null,
     ) {}
 
     /**

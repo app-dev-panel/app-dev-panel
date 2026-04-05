@@ -12,7 +12,7 @@ use RuntimeException;
  * The daemon is a persistent background PHP process that maintains
  * an ACP agent subprocess and accepts prompt requests via Unix socket.
  */
-final class AcpDaemonManager
+final class AcpDaemonManager implements AcpDaemonManagerInterface
 {
     private const float START_TIMEOUT = 15.0;
 

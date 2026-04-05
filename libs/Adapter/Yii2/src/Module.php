@@ -55,6 +55,7 @@ use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
 use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -660,7 +661,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         \Yii::$container->setSingleton(AcpCommandVerifierInterface::class, static fn() => new AcpCommandVerifier());
         \Yii::$container->setSingleton(
-            AcpDaemonManager::class,
+            AcpDaemonManagerInterface::class,
             static fn() => new AcpDaemonManager($resolvedStoragePath),
         );
         \Yii::$container->setSingleton(
@@ -670,7 +671,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 \Yii::$container->get(ClientInterface::class),
                 \Yii::$container->get(RequestFactoryInterface::class),
                 \Yii::$container->get(StreamFactoryInterface::class),
-                \Yii::$container->get(AcpDaemonManager::class),
+                \Yii::$container->get(AcpDaemonManagerInterface::class),
             ),
         );
         \Yii::$container->setSingleton(
@@ -684,7 +685,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 \Yii::$container->get(StreamFactoryInterface::class),
                 \Yii::$container->get(ClientInterface::class),
                 \Yii::$container->get(AcpCommandVerifierInterface::class),
-                \Yii::$container->get(AcpDaemonManager::class),
+                \Yii::$container->get(AcpDaemonManagerInterface::class),
             ),
         );
     }

@@ -50,6 +50,7 @@ use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
 use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -773,7 +774,7 @@ final class AppDevPanelExtension extends Extension
         // ACP daemon manager and command verifier
         $container->register(AcpCommandVerifierInterface::class, AcpCommandVerifier::class)->setPublic(true);
         $container
-            ->register(AcpDaemonManager::class, AcpDaemonManager::class)
+            ->register(AcpDaemonManagerInterface::class, AcpDaemonManager::class)
             ->setArguments(['%app_dev_panel.storage.path%'])
             ->setPublic(true);
 
@@ -785,7 +786,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(ClientInterface::class),
                 new Reference(RequestFactoryInterface::class),
                 new Reference(StreamFactoryInterface::class),
-                new Reference(AcpDaemonManager::class),
+                new Reference(AcpDaemonManagerInterface::class),
             ])
             ->setPublic(true);
 
@@ -801,7 +802,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(StreamFactoryInterface::class),
                 new Reference(ClientInterface::class),
                 new Reference(AcpCommandVerifierInterface::class),
-                new Reference(AcpDaemonManager::class),
+                new Reference(AcpDaemonManagerInterface::class),
             ])
             ->setPublic(true);
     }

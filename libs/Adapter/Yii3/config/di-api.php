@@ -44,6 +44,7 @@ use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
 use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -331,7 +332,7 @@ return [
 
     // ACP daemon manager and command verifier
     AcpCommandVerifierInterface::class => static fn() => new AcpCommandVerifier(),
-    AcpDaemonManager::class =>
+    AcpDaemonManagerInterface::class =>
         static fn(ContainerInterface $container) => new AcpDaemonManager($container->get(Aliases::class)->get(
             $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
         )),
@@ -342,7 +343,7 @@ return [
         ClientInterface $httpClient,
         RequestFactoryInterface $requestFactory,
         StreamFactoryInterface $streamFactory,
-        AcpDaemonManager $acpDaemonManager,
+        AcpDaemonManagerInterface $acpDaemonManager,
     ) => new LlmProviderService($llmSettings, $httpClient, $requestFactory, $streamFactory, $acpDaemonManager),
 
     // LLM controller
@@ -355,7 +356,7 @@ return [
         StreamFactoryInterface $streamFactory,
         ClientInterface $httpClient,
         AcpCommandVerifierInterface $commandVerifier,
-        AcpDaemonManager $acpDaemonManager,
+        AcpDaemonManagerInterface $acpDaemonManager,
     ) => new LlmController(
         $jsonResponseFactory,
         $llmSettings,
