@@ -196,7 +196,10 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
     public function getSocketPath(): string
     {
-        return $this->storagePath . '/.acp-daemon.sock';
+        // Unix sockets have a 103-byte path limit. Use /tmp with a hash to keep it short.
+        $hash = substr(md5($this->storagePath), 0, 12);
+
+        return sys_get_temp_dir() . "/adp-acp-{$hash}.sock";
     }
 
     public function getPidFilePath(): string
