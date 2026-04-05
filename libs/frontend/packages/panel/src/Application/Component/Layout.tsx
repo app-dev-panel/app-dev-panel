@@ -604,7 +604,6 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             {!aiChatOpen && (
                 <Tooltip title="AI Chat" placement="left">
                     <Fab
-                        size="medium"
                         aria-label="AI Chat"
                         onClick={handleAiChatToggle}
                         sx={{
@@ -612,6 +611,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                             bottom: children ? 72 : 24,
                             right: 24,
                             zIndex: 1100,
+                            width: 56,
+                            height: 56,
                             bgcolor: 'common.white',
                             border: '2.5px solid',
                             borderColor: 'primary.main',
@@ -621,7 +622,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                             },
                         }}
                     >
-                        <DuckIcon sx={{fontSize: 28}} />
+                        <DuckIcon sx={{fontSize: 36}} />
                     </Fab>
                 </Tooltip>
             )}
