@@ -17,6 +17,7 @@ import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {extractErrorMessage} from '@app-dev-panel/sdk/Helper/extractErrorMessage';
 import CloseIcon from '@mui/icons-material/Close';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import SendIcon from '@mui/icons-material/Send';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import {Box, Chip, CircularProgress, IconButton, Link, Paper, Portal, TextField, Typography} from '@mui/material';
@@ -297,6 +298,18 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                         </Typography>
                     )}
                     <Box sx={{width: 6, height: 6, borderRadius: '50%', bgcolor: statusDotColor}} />
+                    <IconButton
+                        size="small"
+                        onClick={() => {
+                            const panelUrl =
+                                (window as unknown as {__adp_panel_url?: string}).__adp_panel_url || '/debug';
+                            window.open(`${panelUrl.replace(/\/$/, '')}/llm`, '_blank');
+                        }}
+                        sx={{color: 'text.secondary'}}
+                        title="Open full chat panel"
+                    >
+                        <OpenInNewIcon sx={{fontSize: 16}} />
+                    </IconButton>
                     <IconButton size="small" onClick={onClose} sx={{color: 'text.secondary'}}>
                         <CloseIcon sx={{fontSize: 16}} />
                     </IconButton>
