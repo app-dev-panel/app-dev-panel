@@ -169,35 +169,34 @@ function getEnrichedDetail(
         }
     }
 
-    if (!data || !Array.isArray(data)) return null;
+    // ExceptionCollector: row[1] is the exception class — no fetch needed
+    if (collectorClass === CollectorsMap.ExceptionCollector) {
+        return String(row[1]);
+    }
 
-    // LogCollector: show level + message
-    if (collectorClass === CollectorsMap.LogCollector && data[currentIndex]) {
+    // RequestCollector / CommandCollector: row[1] is 'request'/'response' — no fetch needed
+    if (collectorClass === CollectorsMap.RequestCollector || collectorClass === CollectorsMap.CommandCollector) {
+        return String(row[1]);
+    }
+
+    if (!data) return null;
+
+    // LogCollector: data is an array of log entries
+    if (collectorClass === CollectorsMap.LogCollector && Array.isArray(data) && data[currentIndex]) {
         const entry = data[currentIndex];
         const message = typeof entry.message === 'string' ? entry.message : JSON.stringify(entry.message);
         const truncated = message.length > 80 ? message.slice(0, 80) + '...' : message;
         return `[${entry.level}] ${truncated}`;
     }
 
-    // DatabaseCollector: show SQL
+    // DatabaseCollector: data is {queries: [...], transactions: [...], duplicates: {...}}
     if (collectorClass === CollectorsMap.DatabaseCollector) {
-        const queries = data.queries ?? data;
-        const queryList = Array.isArray(queries) ? queries : [];
-        if (queryList[currentIndex]) {
-            const sql = queryList[currentIndex].sql || queryList[currentIndex].rawSql || '';
+        const queries = data.queries ?? (Array.isArray(data) ? data : []);
+        if (Array.isArray(queries) && queries[currentIndex]) {
+            const sql = queries[currentIndex].sql || queries[currentIndex].rawSql || '';
             const truncated = sql.length > 80 ? sql.slice(0, 80) + '...' : sql;
             return truncated;
         }
-    }
-
-    // ExceptionCollector: row[1] is the exception class
-    if (collectorClass === CollectorsMap.ExceptionCollector) {
-        return String(row[1]);
-    }
-
-    // RequestCollector: row[1] is 'request' or 'response'
-    if (collectorClass === CollectorsMap.RequestCollector || collectorClass === CollectorsMap.CommandCollector) {
-        return String(row[1]);
     }
 
     return null;
