@@ -49,8 +49,10 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
             mkdir($dir, 0o755, true);
         }
 
+        $logFile = $this->getLogFilePath();
+
         $cmd = sprintf(
-            '%s %s --socket=%s --pid=%s --command=%s --args=%s --env=%s > /dev/null 2>&1 &',
+            '%s %s --socket=%s --pid=%s --command=%s --args=%s --env=%s > /dev/null 2>%s &',
             escapeshellarg(PHP_BINARY),
             escapeshellarg($daemonScript),
             escapeshellarg($socketPath),
@@ -58,6 +60,7 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
             escapeshellarg($command),
             escapeshellarg(json_encode($args, JSON_THROW_ON_ERROR)),
             escapeshellarg(json_encode($env, JSON_THROW_ON_ERROR)),
+            escapeshellarg($logFile),
         );
 
         exec($cmd);
@@ -201,6 +204,11 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
         return $this->storagePath . '/.acp-daemon.pid';
     }
 
+    public function getLogFilePath(): string
+    {
+        return $this->storagePath . '/.acp-daemon.log';
+    }
+
     /**
      * Wait for the daemon socket to become available.
      */
@@ -220,13 +228,14 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
             usleep(200_000); // 200ms
         }
 
-        // Check if PID file exists to give a better error message
+        $logTail = $this->readLogTail();
         $pidFile = $this->getPidFilePath();
+
         if (!file_exists($pidFile)) {
-            throw new RuntimeException('ACP daemon failed to start (no PID file created).');
+            throw new RuntimeException('ACP daemon failed to start (no PID file created).' . $logTail);
         }
 
-        throw new RuntimeException('ACP daemon started but socket is not responding.');
+        throw new RuntimeException('ACP daemon started but socket is not responding.' . $logTail);
     }
 
     private function cleanup(): void
@@ -245,10 +254,28 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
     private function isProcessAlive(int $pid): bool
     {
         if (!function_exists('posix_kill')) {
-            // Fallback: check /proc on Linux
             return file_exists("/proc/{$pid}/status");
         }
 
         return posix_kill($pid, 0);
+    }
+
+    private function readLogTail(int $maxBytes = 2000): string
+    {
+        $logFile = $this->getLogFilePath();
+        if (!file_exists($logFile)) {
+            return '';
+        }
+
+        $content = file_get_contents($logFile);
+        if ($content === false || $content === '') {
+            return '';
+        }
+
+        if (strlen($content) > $maxBytes) {
+            $content = '...' . substr($content, -$maxBytes);
+        }
+
+        return "\nDaemon log:\n" . trim($content);
     }
 }
