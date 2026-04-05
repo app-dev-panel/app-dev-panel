@@ -141,6 +141,12 @@ export const DebugEntryList = () => {
     const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setFilter(e.target.value), []);
     const handleFilterClear = useCallback(() => setFilter(''), []);
 
+    const filtered = useMemo(() => {
+        if (!entries) return [];
+        if (!deferredFilter.trim()) return entries;
+        return entries.filter((entry) => matchesFilter(entry, deferredFilter));
+    }, [entries, deferredFilter]);
+
     const handleExplainWithAi = useCallback(() => {
         if (!entries || entries.length === 0) return;
         const visible = filtered.length > 0 ? filtered.slice(0, 20) : entries.slice(0, 20);
@@ -177,12 +183,6 @@ export const DebugEntryList = () => {
     );
 
     const virtuosoRef = useRef<VirtuosoHandle>(null);
-
-    const filtered = useMemo(() => {
-        if (!entries) return [];
-        if (!deferredFilter.trim()) return entries;
-        return entries.filter((entry) => matchesFilter(entry, deferredFilter));
-    }, [entries, deferredFilter]);
 
     const renderEntry = useCallback(
         (_index: number, entry: DebugEntry) => {

@@ -295,13 +295,12 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                 const updatedHistory: ChatMessage[] = [...apiMessages, {role: 'assistant', content: assistantContent}];
                 setChatHistory(updatedHistory);
 
-                reduxDispatch(updateLastSending({status: 'ok'}));
-                reduxDispatch(addMessage({role: 'assistant', content: assistantContent, status: 'ok'}));
+                reduxDispatch(updateLastSending({status: 'ok', content: assistantContent}));
 
                 addHistory({query: userText, response: assistantContent, timestamp: Math.floor(Date.now() / 1000)});
             } catch (err: unknown) {
                 const errorMsg = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
-                reduxDispatch(updateLastSending({status: 'error', error: errorMsg}));
+                reduxDispatch(updateLastSending({status: 'error', content: errorMsg, error: errorMsg}));
             }
         },
         [connected, entry, chatHistory, chat, addHistory, reduxDispatch],
@@ -349,7 +348,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                     }}
                 >
                     <DuckIcon sx={{fontSize: 22}} />
-                    <Typography sx={{fontSize: 13, fontWeight: 600, flex: 1}}>ADP AI</Typography>
+                    <Typography sx={{fontSize: 13, fontWeight: 600, flex: 1}}>ADP Duck AI</Typography>
                     {connected && status?.model && (
                         <Typography sx={{fontSize: 10, color: 'text.disabled', maxWidth: 100}} noWrap>
                             {status.model}
@@ -433,9 +432,9 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                             ) : (
                                 <>
                                     <Typography sx={{fontSize: 12, lineHeight: 1.5, whiteSpace: 'pre-wrap'}}>
-                                        {msg.content}
+                                        {msg.status === 'error' ? msg.error || msg.content : msg.content}
                                     </Typography>
-                                    <MessageCopyButton text={msg.content} />
+                                    <MessageCopyButton text={msg.content || msg.error || ''} />
                                 </>
                             )}
                         </Box>

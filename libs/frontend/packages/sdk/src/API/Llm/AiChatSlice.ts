@@ -22,10 +22,11 @@ export const AiChatSlice = createSlice({
         addMessage(state, action: PayloadAction<ChatBubble>) {
             state.messages.push(action.payload);
         },
-        updateLastSending(state, action: PayloadAction<{status: MessageStatus; error?: string}>) {
+        updateLastSending(state, action: PayloadAction<{status: MessageStatus; content?: string; error?: string}>) {
             const idx = state.messages.findLastIndex((m) => m.status === 'sending');
             if (idx !== -1) {
                 state.messages[idx].status = action.payload.status;
+                if (action.payload.content !== undefined) state.messages[idx].content = action.payload.content;
                 if (action.payload.error) state.messages[idx].error = action.payload.error;
             }
         },

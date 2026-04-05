@@ -127,8 +127,7 @@ export const ChatPanel = () => {
     }, []);
 
     const sendMessages = useCallback(
-        async (outgoing: Message[]) => {
-            const sendingMsg = outgoing.find((m) => m.status === 'sending');
+        async (outgoing: Message[], userText: string) => {
             try {
                 const result = await chat({
                     messages: outgoing
@@ -137,28 +136,14 @@ export const ChatPanel = () => {
                 }).unwrap();
 
                 const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
-                dispatch(updateLastSending({status: 'ok'}));
-                dispatch(addMessage({role: 'assistant', content: assistantContent, status: 'ok'}));
+                dispatch(updateLastSending({status: 'ok', content: assistantContent}));
 
-                if (sendingMsg) {
-                    addHistory({
-                        query: sendingMsg.content,
-                        response: assistantContent,
-                        timestamp: Math.floor(Date.now() / 1000),
-                    });
-                }
+                addHistory({query: userText, response: assistantContent, timestamp: Math.floor(Date.now() / 1000)});
             } catch (err: unknown) {
                 const errorMsg = extractErrorMessage(err) ?? 'Failed to get response from LLM.';
-                dispatch(updateLastSending({status: 'error', error: errorMsg}));
-                if (sendingMsg) {
-                    addHistory({
-                        query: sendingMsg.content,
-                        response: '',
-                        timestamp: Math.floor(Date.now() / 1000),
-                        error: errorMsg,
-                    });
-                    setInput(sendingMsg.content);
-                }
+                dispatch(updateLastSending({status: 'error', content: errorMsg, error: errorMsg}));
+                addHistory({query: userText, response: '', timestamp: Math.floor(Date.now() / 1000), error: errorMsg});
+                setInput(userText);
             }
             scrollToBottom();
         },
@@ -173,14 +158,16 @@ export const ChatPanel = () => {
     const handleSend = useCallback(async () => {
         if (!inputRef.current.trim() || isLoading) return;
 
-        const userMessage: ChatBubble = {role: 'user', content: inputRef.current.trim(), status: 'sending'};
+        const userText = inputRef.current.trim();
+        const userMessage: ChatBubble = {role: 'user', content: userText, status: 'ok'};
         dispatch(removeErrorMessages());
         dispatch(addMessage(userMessage));
+        dispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
         setInput('');
         scrollToBottom();
 
         const newMessages = [...messagesRef.current.filter((m) => m.status !== 'error'), userMessage];
-        await sendMessages(newMessages);
+        await sendMessages(newMessages, userText);
     }, [isLoading, sendMessages, scrollToBottom, dispatch]);
 
     const handleRetry = useCallback(
@@ -188,15 +175,17 @@ export const ChatPanel = () => {
             const msg = messagesRef.current[index];
             if (!msg || msg.status !== 'error') return;
 
-            const retryMessage: ChatBubble = {role: 'user', content: msg.content, status: 'sending'};
+            const userText = msg.content;
+            const retryMessage: ChatBubble = {role: 'user', content: userText, status: 'ok'};
             dispatch(removeErrorMessages());
             dispatch(addMessage(retryMessage));
+            dispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
             setInput('');
             scrollToBottom();
 
             const cleaned = messagesRef.current.filter((_, i) => i !== index);
             const newMessages = [...cleaned, retryMessage];
-            await sendMessages(newMessages);
+            await sendMessages(newMessages, userText);
         },
         [sendMessages, scrollToBottom, dispatch],
     );
@@ -274,15 +263,20 @@ export const ChatPanel = () => {
                             <Box
                                 sx={
                                     msg.role === 'user'
-                                        ? msg.status === 'sending'
-                                            ? bubbleSx.userSending
-                                            : bubbleSx.user
+                                        ? bubbleSx.user
                                         : msg.status === 'sending'
                                           ? bubbleSx.assistantSending
                                           : bubbleSx.assistant
                                 }
                             >
-                                {msg.role === 'assistant' ? (
+                                {msg.status === 'sending' ? (
+                                    <Box sx={loadingSx}>
+                                        <CircularProgress size={16} />
+                                        <Typography variant="body2" color="text.secondary">
+                                            Thinking...
+                                        </Typography>
+                                    </Box>
+                                ) : msg.role === 'assistant' ? (
                                     <Markdown content={msg.content} />
                                 ) : (
                                     <Typography variant="body2" sx={{whiteSpace: 'pre-wrap'}}>
@@ -293,14 +287,6 @@ export const ChatPanel = () => {
                         )}
                     </Box>
                 ))}
-                {isLoading && (
-                    <Box sx={loadingSx}>
-                        <CircularProgress size={16} />
-                        <Typography variant="body2" color="text.secondary">
-                            Thinking...
-                        </Typography>
-                    </Box>
-                )}
                 <div ref={messagesEndRef} />
             </Paper>
             <Box sx={inputRowSx}>
