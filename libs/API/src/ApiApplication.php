@@ -56,7 +56,7 @@ final class ApiApplication implements RequestHandlerInterface
                     ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
                     ->withHeader(
                         'Access-Control-Allow-Headers',
-                        'Content-Type, Authorization, X-Debug-Token, X-Requested-With',
+                        'Content-Type, Authorization, X-Debug-Token, X-Requested-With, X-Acp-Session',
                     )
                     ->withHeader('Access-Control-Max-Age', '86400');
             }

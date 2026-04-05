@@ -30,7 +30,10 @@ final class AdpApiController extends Controller
             ->getHeaders()
             ->set('Access-Control-Allow-Origin', '*')
             ->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
-            ->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Debug-Token, X-Requested-With')
+            ->set(
+                'Access-Control-Allow-Headers',
+                'Content-Type, Authorization, X-Debug-Token, X-Requested-With, X-Acp-Session',
+            )
             ->set('Access-Control-Max-Age', '86400');
 
         // Handle OPTIONS preflight
