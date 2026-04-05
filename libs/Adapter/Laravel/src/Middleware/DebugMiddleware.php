@@ -93,8 +93,6 @@ final class DebugMiddleware
 
     private function collectAfterResponse(Request $request, SymfonyResponse $response): void
     {
-        $this->collectors->webAppInfo?->markRequestFinished();
-
         if ($this->collectors->request !== null) {
             $psrResponse = $this->psr7Converter->convertResponse($response);
             $this->collectors->request->collectResponse($psrResponse);
@@ -103,6 +101,8 @@ final class DebugMiddleware
         $this->collectors->routerDataExtractor?->extract($request);
 
         $this->collectViteAssets();
+
+        $this->collectors->webAppInfo?->markRequestFinished();
     }
 
     private function injectToolbar(Request $request, SymfonyResponse $response): void

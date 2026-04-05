@@ -76,7 +76,13 @@ final class WebListener
             return;
         }
 
-        $this->webAppInfoCollector?->markRequestFinished();
+        // Force-flush Yii's Logger so buffered messages reach DebugLogTarget before storage flush.
+        // Yii's Logger has flushInterval=1000 by default, so with ~14 messages per request
+        // the buffer never auto-flushes. Without this, LogCollector gets 0 messages.
+        // Must happen BEFORE markRequestFinished/markApplicationFinished so that DB and log
+        // timeline events appear before the finish markers in the timeline.
+        \Yii::getLogger()->flush(true);
+
         $this->extractRouteData($app);
 
         if ($this->requestCollector !== null) {
@@ -89,12 +95,8 @@ final class WebListener
 
         $this->injectToolbar($app);
 
+        $this->webAppInfoCollector?->markRequestFinished();
         $this->webAppInfoCollector?->markApplicationFinished();
-
-        // Force-flush Yii's Logger so buffered messages reach DebugLogTarget before storage flush.
-        // Yii's Logger has flushInterval=1000 by default, so with ~14 messages per request
-        // the buffer never auto-flushes. Without this, LogCollector gets 0 messages.
-        \Yii::getLogger()->flush(true);
 
         $this->debugger->shutdown();
         $this->matchRecorder?->reset();
@@ -108,11 +110,10 @@ final class WebListener
      */
     public function onExceptionHandler(\yii\web\Application $app): void
     {
-        $this->webAppInfoCollector?->markRequestFinished();
-        $this->extractRouteData($app);
-        $this->webAppInfoCollector?->markApplicationFinished();
-
         \Yii::getLogger()->flush(true);
+        $this->extractRouteData($app);
+        $this->webAppInfoCollector?->markRequestFinished();
+        $this->webAppInfoCollector?->markApplicationFinished();
         $this->matchRecorder?->reset();
     }
 

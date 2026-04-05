@@ -85,8 +85,6 @@ final class HttpSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $this->collectors->webAppInfo?->markRequestFinished();
-
         if ($this->collectors->request !== null) {
             $psrResponse = $this->psr7Converter->convertResponse($event->getResponse());
             $this->collectors->request->collectResponse($psrResponse);
@@ -98,6 +96,8 @@ final class HttpSubscriber implements EventSubscriberInterface
         $event->getResponse()->headers->set('X-Debug-Id', $this->debugger->getId());
 
         $this->injectToolbar($event);
+
+        $this->collectors->webAppInfo?->markRequestFinished();
     }
 
     public function onKernelException(ExceptionEvent $event): void
