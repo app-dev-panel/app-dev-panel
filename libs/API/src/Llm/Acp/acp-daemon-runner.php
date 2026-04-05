@@ -525,19 +525,17 @@ function handlePrompt(
 
             if ($method === 'session/update') {
                 $update = $message['params']['update'] ?? [];
-                $type = $update['type'] ?? '';
+                $type = $update['sessionUpdate'] ?? '';
 
                 if ($type === 'agent_message_chunk') {
-                    $contentBlocks = $update['content'] ?? [];
-                    foreach ($contentBlocks as $block) {
-                        if (($block['type'] ?? '') === 'text' && isset($block['text'])) {
-                            $text = (string) $block['text'];
-                            $totalTextSize += strlen($text);
-                            if ($totalTextSize > $maxResponseSize) {
-                                return ['error' => 'ACP agent response exceeds maximum size limit.'];
-                            }
-                            $textParts[] = $text;
+                    $content = $update['content'] ?? [];
+                    if (($content['type'] ?? '') === 'text' && isset($content['text'])) {
+                        $text = (string) $content['text'];
+                        $totalTextSize += strlen($text);
+                        if ($totalTextSize > $maxResponseSize) {
+                            return ['error' => 'ACP agent response exceeds maximum size limit.'];
                         }
+                        $textParts[] = $text;
                     }
                 }
 
