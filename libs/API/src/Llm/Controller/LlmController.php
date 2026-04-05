@@ -108,11 +108,6 @@ final class LlmController
             ], 400);
         }
 
-        $this->settings->setProvider('acp');
-        $this->settings->setAcpCommand($command);
-        $this->settings->setAcpArgs($acpArgs);
-        $this->settings->setAcpEnv($acpEnv);
-
         if ($this->acpDaemonManager === null) {
             return $this->responseFactory->createJsonResponse([
                 'connected' => false,
@@ -120,29 +115,35 @@ final class LlmController
             ], 500);
         }
 
-        // Step 1: Start daemon (if not already running)
-        if (!$this->acpDaemonManager->isRunning()) {
-            try {
-                $this->acpDaemonManager->start();
-            } catch (\RuntimeException $e) {
-                $this->settings->clear();
+        // Step 1: Start daemon (handles reuse if already running and compatible)
+        try {
+            $this->acpDaemonManager->start();
+        } catch (\RuntimeException $e) {
+            $this->settings->clear();
 
-                return $this->responseFactory->createJsonResponse([
-                    'connected' => false,
-                    'error' => 'Failed to start ACP daemon: ' . $e->getMessage(),
-                ], 500);
-            }
+            return $this->responseFactory->createJsonResponse([
+                'connected' => false,
+                'error' => 'Failed to start ACP daemon: ' . $e->getMessage(),
+            ], 500);
         }
 
         // Step 2: Start agent session
         try {
             $agentInfo = $this->acpDaemonManager->startSession($sessionId, $command, $acpArgs, $acpEnv);
         } catch (\RuntimeException $e) {
+            $this->settings->clear();
+
             return $this->responseFactory->createJsonResponse([
                 'connected' => false,
                 'error' => 'Failed to start ACP session: ' . $e->getMessage(),
             ], 500);
         }
+
+        // Save settings only after successful connection
+        $this->settings->setProvider('acp');
+        $this->settings->setAcpCommand($command);
+        $this->settings->setAcpArgs($acpArgs);
+        $this->settings->setAcpEnv($acpEnv);
 
         return $this->responseFactory->createJsonResponse([
             'connected' => true,

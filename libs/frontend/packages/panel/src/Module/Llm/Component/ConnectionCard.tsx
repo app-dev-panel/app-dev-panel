@@ -114,8 +114,23 @@ export const ConnectionCard = () => {
             if (!result.connected) {
                 setError(result.error ?? 'Failed to connect ACP agent.');
             }
-        } catch {
-            setError('Failed to connect ACP agent.');
+        } catch (err: unknown) {
+            const serverError =
+                typeof err === 'object' && err !== null && 'data' in err
+                    ? (() => {
+                          const d = (err as {data: unknown}).data;
+                          if (typeof d === 'object' && d !== null) {
+                              const obj = d as Record<string, unknown>;
+                              if (typeof obj.error === 'string') return obj.error;
+                              if (typeof obj.data === 'object' && obj.data !== null) {
+                                  const inner = obj.data as Record<string, unknown>;
+                                  if (typeof inner.error === 'string') return inner.error;
+                              }
+                          }
+                          return null;
+                      })()
+                    : null;
+            setError(serverError ?? 'Failed to connect ACP agent.');
         }
     }, [connect, acpCommand, acpArgs]);
 
