@@ -40,4 +40,10 @@ interface AcpDaemonManagerInterface
      * @throws RuntimeException If the daemon is not running or communication fails
      */
     public function sendPrompt(array $messages, string $customPrompt, float $timeout): array;
+
+    public function getSocketPath(): string;
+
+    public function getPidFilePath(): string;
+
+    public function getLogFilePath(): string;
 }

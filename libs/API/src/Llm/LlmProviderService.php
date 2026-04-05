@@ -372,7 +372,25 @@ final class LlmProviderService
         }
 
         if (!$this->acpDaemonManager->isRunning()) {
-            return ['error' => 'ACP daemon is not running. Please reconnect the ACP provider.'];
+            $socketPath = $this->acpDaemonManager->getSocketPath();
+            $socketExists = file_exists($socketPath);
+            $pidPath = $this->acpDaemonManager->getPidFilePath();
+            $pidExists = file_exists($pidPath);
+            $pid = $pidExists ? (int) file_get_contents($pidPath) : 0;
+
+            return [
+                'error' => 'ACP daemon is not running. Please reconnect the ACP provider.',
+                '_debug' => [
+                    'socketPath' => $socketPath,
+                    'socketExists' => $socketExists,
+                    'pidPath' => $pidPath,
+                    'pidExists' => $pidExists,
+                    'pid' => $pid,
+                    'logTail' => file_exists($this->acpDaemonManager->getLogFilePath())
+                        ? substr((string) file_get_contents($this->acpDaemonManager->getLogFilePath()), -2000)
+                        : 'no log file',
+                ],
+            ];
         }
 
         $timeout = (float) $this->settings->getTimeout();
