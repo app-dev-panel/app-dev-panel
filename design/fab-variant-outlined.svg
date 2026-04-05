@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140">
+  <!-- Fab circle -->
+  <circle cx="70" cy="70" r="56" fill="white"/>
+  <circle cx="70" cy="70" r="53.5" fill="none" stroke="#2563EB" stroke-width="3"/>
+  <g transform="translate(32, 34) scale(0.55)">
+    <ellipse cx="70" cy="82" rx="42" ry="30" fill="#FCD34D"/>
+    <circle cx="44" cy="44" r="24" fill="#FCD34D"/>
+    <path d="M24 40L10 44L24 48Z" fill="#FB923C"/>
+    <circle cx="38" cy="38" r="3.5" fill="#292524"/>
+    <circle cx="37" cy="37" r="1.2" fill="white"/>
+    <path d="M56 74C64 66 82 68 94 78" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M16 108C24 104 32 104 40 108C48 112 56 112 64 108C72 104 80 104 88 108C96 112 104 112 112 108" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

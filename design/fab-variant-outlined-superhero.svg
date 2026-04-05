@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140">
+  <!-- Fab circle -->
+  <circle cx="70" cy="70" r="56" fill="white"/>
+  <circle cx="70" cy="70" r="53.5" fill="none" stroke="#2563EB" stroke-width="3"/>
+  <g transform="translate(26, 28) scale(0.56)">
+    <ellipse cx="65" cy="82" rx="42" ry="30" fill="#FCD34D"/>
+    <path d="M52 74C60 66 78 68 90 78" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M56 52 C65 48 80 48 88 55 Q100 70 108 95 Q112 110 106 128 Q95 135 78 130 Q65 125 60 115 Q65 100 68 85 Q66 68 56 52Z" fill="#DC2626"/>
+    <path d="M68 58 Q78 55 85 62 Q90 75 88 92 Q82 85 78 75 Q74 65 68 58Z" fill="#EF4444" opacity="0.5"/>
+    <circle cx="40" cy="44" r="24" fill="#FCD34D"/>
+    <path d="M20 40L6 44L20 48Z" fill="#FB923C"/>
+    <path d="M20 34 Q30 28 50 30 Q56 31 60 36 L58 42 Q50 37 40 37 Q30 37 22 42Z" fill="#1E293B"/>
+    <ellipse cx="34" cy="38" rx="5.5" ry="4.5" fill="#FCD34D"/>
+    <circle cx="34" cy="38" r="3.5" fill="#292524"/>
+    <circle cx="33" cy="37" r="1.2" fill="white"/>
+    <polygon points="50,70 57,70 53,78 61,78 49,92 52,82 45,82" fill="#FACC15"/>
+  </g>
+</svg>
