@@ -221,6 +221,7 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                                 logLevel={logLevel}
                                 accentColor={color.fg}
                                 offsetLabel={offsetLabel}
+                                rawValue={enriched?.rawValue}
                             />
                         </Collapse>
                     </Box>

@@ -339,6 +339,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                         logLevel={parsed?.level ?? null}
                                         accentColor={color.fg}
                                         offsetLabel={`+${offsetLabel}`}
+                                        rawValue={enriched?.rawValue}
                                     />
                                 </Collapse>
                             </Box>

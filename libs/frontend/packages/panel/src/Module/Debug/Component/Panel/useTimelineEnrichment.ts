@@ -19,6 +19,8 @@ export type EnrichedDetail = {
     preview: string;
     /** Full untruncated text for expanded view */
     full: string;
+    /** Raw value for rich rendering (e.g., object reference for events) */
+    rawValue?: unknown;
 };
 
 function getEnrichedDetail(
@@ -39,13 +41,13 @@ function getEnrichedDetail(
         if (Array.isArray(data) && data[currentIndex]) {
             const entry = data[currentIndex];
             const shortName = (entry.name || '').split('\\').pop() ?? '';
-            // Show "ClassName (eventName)" when event field differs from class name
+            const rawValue = entry.event ?? null;
             if (entry.event && entry.event !== entry.name && entry.event !== shortName) {
                 const text = `${shortName} (${entry.event})`;
-                return {preview: text, full: text};
+                return {preview: text, full: text, rawValue};
             }
             const text = shortName || entry.event || null;
-            return text ? {preview: text, full: text} : null;
+            return text ? {preview: text, full: text, rawValue} : null;
         }
         // Fallback: use row[3] if collector data not loaded yet
         if (row[3]) {

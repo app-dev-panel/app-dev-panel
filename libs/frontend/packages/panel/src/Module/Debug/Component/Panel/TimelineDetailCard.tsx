@@ -16,6 +16,7 @@ type TimelineDetailCardProps = {
     logLevel: string | null;
     accentColor: string;
     offsetLabel: string;
+    rawValue?: unknown;
 };
 
 const CardRoot = styled(Box, {shouldForwardProp: (p) => p !== 'accentColor'})<{accentColor?: string}>(
@@ -46,7 +47,7 @@ const ContentArea = styled(Box)(({theme}) => ({
     '&:hover .copy-btn': {opacity: 1},
 }));
 
-export const TimelineDetailCard = ({row, fullDetail, logLevel, accentColor, offsetLabel}: TimelineDetailCardProps) => {
+export const TimelineDetailCard = ({row, fullDetail, logLevel, accentColor, offsetLabel, rawValue}: TimelineDetailCardProps) => {
     const collectorClass = row[2];
     const isDatabaseLike =
         collectorClass === CollectorsMap.DatabaseCollector ||
@@ -111,11 +112,15 @@ export const TimelineDetailCard = ({row, fullDetail, logLevel, accentColor, offs
                 </ContentArea>
             )}
 
-            {Array.isArray(row[3]) && row[3].length > 0 && (
+            {isEvent && rawValue != null ? (
+                <Box sx={{px: 2, pb: 1.5}}>
+                    <JsonRenderer value={rawValue} />
+                </Box>
+            ) : Array.isArray(row[3]) && row[3].length > 0 ? (
                 <Box sx={{px: 2, pb: 1.5}}>
                     <JsonRenderer value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]} />
                 </Box>
-            )}
+            ) : null}
         </CardRoot>
     );
 };
