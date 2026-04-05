@@ -1,13 +1,12 @@
 import SvgIcon, {type SvgIconProps} from '@mui/material/SvgIcon';
 import {useEffect, useRef, useState} from 'react';
 
-const EYE_CX = 44;
-const EYE_CY = 42;
-const MAX_OFFSET = 3;
+const HEAD_OFFSET = 4;
+const EYE_EXTRA = 2;
 
 export const DuckIcon = (props: SvgIconProps) => {
     const svgRef = useRef<SVGSVGElement>(null);
-    const [pupil, setPupil] = useState({x: EYE_CX, y: EYE_CY});
+    const [offset, setOffset] = useState({x: 0, y: 0});
     const frameRef = useRef<number>();
 
     useEffect(() => {
@@ -26,9 +25,9 @@ export const DuckIcon = (props: SvgIconProps) => {
                 const angle = Math.atan2(dy, dx);
                 const dist = Math.min(Math.hypot(dx, dy) / 80, 1);
 
-                setPupil({
-                    x: EYE_CX + Math.cos(angle) * MAX_OFFSET * dist,
-                    y: EYE_CY + Math.sin(angle) * MAX_OFFSET * dist,
+                setOffset({
+                    x: Math.cos(angle) * dist,
+                    y: Math.sin(angle) * dist,
                 });
             });
         };
@@ -40,20 +39,25 @@ export const DuckIcon = (props: SvgIconProps) => {
         };
     }, []);
 
+    const hx = offset.x * HEAD_OFFSET;
+    const hy = offset.y * HEAD_OFFSET;
+    const ex = offset.x * (HEAD_OFFSET + EYE_EXTRA);
+    const ey = offset.y * (HEAD_OFFSET + EYE_EXTRA);
+
     return (
         <SvgIcon {...props} viewBox="0 0 128 128" ref={svgRef}>
-            {/* Head */}
-            <circle cx="64" cy="58" r="42" fill="#FCD34D" />
+            {/* Head — shifts toward mouse */}
+            <circle cx={64 + hx} cy={58 + hy} r="42" fill="#FCD34D" />
             {/* Beak */}
-            <path d="M24 56L6 64L24 72Z" fill="#FB923C" />
+            <path d={`M${24 + hx} ${56 + hy}L${6 + hx} ${64 + hy}L${24 + hx} ${72 + hy}Z`} fill="#FB923C" />
             {/* Cheek */}
-            <circle cx="34" cy="76" r="6" fill="#FB923C" opacity="0.2" />
+            <circle cx={34 + hx} cy={76 + hy} r="6" fill="#FB923C" opacity="0.2" />
             {/* Eye white */}
-            <ellipse cx={EYE_CX} cy={EYE_CY} rx="10" ry="11" fill="white" />
-            {/* Pupil — follows mouse */}
-            <circle cx={pupil.x} cy={pupil.y} r="6" fill="#292524" />
+            <ellipse cx={44 + hx} cy={42 + hy} rx="10" ry="11" fill="white" />
+            {/* Pupil — shifts even more than head */}
+            <circle cx={44 + ex} cy={42 + ey} r="6" fill="#292524" />
             {/* Eye highlight */}
-            <circle cx={pupil.x - 1.5} cy={pupil.y - 2} r="2.2" fill="white" />
+            <circle cx={42.5 + ex} cy={40 + ey} r="2.2" fill="white" />
         </SvgIcon>
     );
 };
