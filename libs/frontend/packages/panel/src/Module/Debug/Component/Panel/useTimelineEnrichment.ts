@@ -27,11 +27,24 @@ function getEnrichedDetail(
     const currentIndex = collectorIndexes.get(collectorClass) ?? 0;
     collectorIndexes.set(collectorClass, currentIndex + 1);
 
-    // EventCollector: row[3] already has event class name
-    if (collectorClass === CollectorsMap.EventCollector && row[3]) {
-        const eventClass = typeof row[3] === 'string' ? row[3] : Array.isArray(row[3]) ? row[3][0] : null;
-        if (eventClass && typeof eventClass === 'string') {
-            return eventClass.split('\\').pop() ?? eventClass;
+    // EventCollector: cross-reference with collector data for event name,
+    // fall back to row[3] (event class) if data not yet loaded
+    if (collectorClass === CollectorsMap.EventCollector) {
+        if (Array.isArray(data) && data[currentIndex]) {
+            const entry = data[currentIndex];
+            const shortName = (entry.name || '').split('\\').pop() ?? '';
+            // Show "ClassName (eventName)" when event field differs from class name
+            if (entry.event && entry.event !== entry.name && entry.event !== shortName) {
+                return `${shortName} (${entry.event})`;
+            }
+            return shortName || entry.event || null;
+        }
+        // Fallback: use row[3] if collector data not loaded yet
+        if (row[3]) {
+            const eventClass = typeof row[3] === 'string' ? row[3] : Array.isArray(row[3]) ? row[3][0] : null;
+            if (eventClass && typeof eventClass === 'string') {
+                return eventClass.split('\\').pop() ?? eventClass;
+            }
         }
     }
 
