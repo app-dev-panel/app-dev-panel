@@ -48,20 +48,7 @@ function getEnrichedDetail(
         }
     }
 
-    // ExceptionCollector: row[1] is the exception class — no fetch needed
-    if (collectorClass === CollectorsMap.ExceptionCollector) {
-        return String(row[1]);
-    }
-
-    // RequestCollector / CommandCollector: row[1] is 'request'/'response' — no fetch needed
-    if (collectorClass === CollectorsMap.RequestCollector || collectorClass === CollectorsMap.CommandCollector) {
-        return String(row[1]);
-    }
-
-    // Ref fallback for all rows
-    const refStr = row[1] != null && row[1] !== '' ? String(row[1]) : null;
-
-    if (!data) return refStr;
+    if (!data) return null;
 
     // LogCollector: data is an array of log entries
     if (collectorClass === CollectorsMap.LogCollector && Array.isArray(data) && data[currentIndex]) {
@@ -87,11 +74,11 @@ function getEnrichedDetail(
         if (Array.isArray(renders) && renders[currentIndex]) {
             const template = renders[currentIndex].template || '';
             const name = template.includes('/') ? template.split('/').pop() : template;
-            return name || refStr;
+            return name || null;
         }
     }
 
-    return refStr;
+    return null;
 }
 
 /**

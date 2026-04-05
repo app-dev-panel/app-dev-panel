@@ -189,6 +189,7 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                 const offsetLabel = formatOffset(relativeTime);
                 const color = getColor(collectorClass);
                 const label = getCollectorLabel(collectorClass);
+                const ref = row[1] != null && row[1] !== '' ? String(row[1]) : null;
                 const detail = enrichedDetails[index];
                 const expanded = expandedIndex === index;
 
@@ -198,6 +199,14 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                             <OffsetLabel>{offsetLabel}</OffsetLabel>
                             <CollectorLabel sx={{color: color.fg}}>
                                 {label !== 'Unknown' ? label : shortName}
+                                {ref && (
+                                    <Typography
+                                        component="span"
+                                        sx={{color: 'text.disabled', fontWeight: 400, fontSize: '11px', ml: 0.5}}
+                                    >
+                                        ({ref})
+                                    </Typography>
+                                )}
                             </CollectorLabel>
                             {detail && <DetailText title={detail}>{detail}</DetailText>}
                         </Row>
