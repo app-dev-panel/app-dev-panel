@@ -39,6 +39,7 @@ use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
+use AppDevPanel\Api\Inspector\Controller\HttpMockController;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Controller\OpcacheController;
 use AppDevPanel\Api\Inspector\Controller\RequestController;
@@ -46,6 +47,8 @@ use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
+use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
@@ -726,6 +729,19 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
                 new Reference(AuthorizationConfigProviderInterface::class),
+            ])
+            ->setPublic(true);
+
+        // HTTP mock inspector: register NullHttpMockProvider as default.
+        if (!$container->has(HttpMockProviderInterface::class)) {
+            $container->register(HttpMockProviderInterface::class, NullHttpMockProvider::class)->setPublic(false);
+        }
+
+        $container
+            ->register(HttpMockController::class, HttpMockController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(HttpMockProviderInterface::class),
             ])
             ->setPublic(true);
 
