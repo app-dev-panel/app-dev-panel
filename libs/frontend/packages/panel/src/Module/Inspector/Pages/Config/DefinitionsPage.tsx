@@ -4,6 +4,7 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {ContentCopy, DataObject, Download, ErrorOutline} from '@mui/icons-material';
@@ -149,7 +150,7 @@ const DefinitionValue = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: 
 // ---------------------------------------------------------------------------
 
 export const DefinitionsPage = () => {
-    const {data, isLoading} = useGetConfigurationQuery('di');
+    const {data, isLoading, isError, error, refetch} = useGetConfigurationQuery('di');
     const [lazyLoadObject] = useLazyGetObjectQuery();
     const [searchParams, setSearchParams] = useSearchParams();
     const searchString = searchParams.get('filter') || '';
@@ -202,6 +203,17 @@ export const DefinitionsPage = () => {
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
+    }
+
+    if (isError) {
+        return (
+            <QueryErrorState
+                error={error}
+                title="Failed to load definitions"
+                fallback="Failed to load DI definitions."
+                onRetry={refetch}
+            />
+        );
     }
 
     return (

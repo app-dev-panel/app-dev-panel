@@ -97,7 +97,10 @@ function getEnrichedDetail(
  * Hook that fetches collector data and computes enriched detail strings
  * for each timeline event by cross-referencing with source collector records.
  */
-export function useTimelineEnrichment(allData: TimelineItem[], filteredData: TimelineItem[]): (EnrichedDetail | null)[] {
+export function useTimelineEnrichment(
+    allData: TimelineItem[],
+    filteredData: TimelineItem[],
+): (EnrichedDetail | null)[] {
     const debugEntry = useDebugEntry();
     const [fetchCollector] = useLazyGetCollectorInfoQuery();
     const [collectorData, setCollectorData] = useState<CollectorDataMap>(new Map());

@@ -5,7 +5,9 @@ import {
 } from '@app-dev-panel/panel/Module/Inspector/API/GitApi';
 import {CheckoutDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Git/CheckoutDialog';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
+import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {GetApp, Refresh, Sync} from '@mui/icons-material';
 import {
     Box,
@@ -37,6 +39,24 @@ export const GitPage = ({showHeader = true}: {showHeader?: boolean}) => {
     const onPullHandler = useCallback(() => commandMutation({command: 'pull'}), []);
     const onFetchHandler = useCallback(() => commandMutation({command: 'fetch'}), []);
     const onRefreshHandler = () => getSummaryQuery.refetch();
+
+    if (getSummaryQuery.isLoading) {
+        return <FullScreenCircularProgress />;
+    }
+
+    if (getSummaryQuery.isError) {
+        return (
+            <>
+                {showHeader && <PageHeader title="Git" icon="code" description="Repository status and operations" />}
+                <QueryErrorState
+                    error={getSummaryQuery.error}
+                    title="Failed to load Git status"
+                    fallback="Failed to load Git repository status."
+                    onRetry={getSummaryQuery.refetch}
+                />
+            </>
+        );
+    }
 
     return (
         <>

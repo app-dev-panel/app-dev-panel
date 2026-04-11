@@ -3,6 +3,7 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
@@ -205,7 +206,7 @@ const ParamCard = ({
 // ---------------------------------------------------------------------------
 
 export const ParametersPage = () => {
-    const {data, isLoading} = useGetParametersQuery();
+    const {data, isLoading, isError, error, refetch} = useGetParametersQuery();
     const [searchParams, setSearchParams] = useSearchParams();
     const searchString = searchParams.get('filter') || '';
 
@@ -238,6 +239,17 @@ export const ParametersPage = () => {
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
+    }
+
+    if (isError) {
+        return (
+            <QueryErrorState
+                error={error}
+                title="Failed to load parameters"
+                fallback="Failed to load parameters."
+                onRetry={refetch}
+            />
+        );
     }
 
     return (

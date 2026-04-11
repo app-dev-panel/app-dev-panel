@@ -154,6 +154,14 @@ ignore = [
     # False positive: gitonomy/gitlib is an optional dependency not installed
     # in root composer, so Mago infers `never` for unresolved return types.
     "never-return",
+
+    # ── too-many-arguments (1 issue) ────────────────────────────────────────
+    # False positive: dynamic instantiation through `new $class(...)` where the
+    # class string is constrained to a `StorageInterface` implementation. The
+    # analyzer reports the interface as having no constructor and cannot see
+    # through the `is_subclass_of()` guard. The actual concrete implementations
+    # (FileStorage, SqliteStorage, custom) all accept these constructor args.
+    "too-many-arguments",
 ]
 
 [linter]
@@ -286,7 +294,16 @@ no-error-control-operator = { level = "warning" }
 no-empty = { level = "warning" }
 no-isset = { level = "warning" }
 no-empty-catch-clause = { level = "warning" }
-no-literal-password = { exclude = ["libs/Adapter/Symfony/tests"] }
+no-literal-password = { exclude = [
+    # Test files use literal API keys / passwords as fixture data — not a real secret
+    "libs/Adapter/Symfony/tests",
+    "libs/API/tests",
+    "libs/Kernel/tests",
+] }
+sensitive-parameter = { exclude = [
+    # Test helper signatures don't need #[SensitiveParameter] — they handle fixture data
+    "libs/API/tests",
+] }
 no-debug-symbols = { exclude = ["libs/API/src/Inspector/Controller/InspectController.php"] }
 require-preg-quote-delimiter = { level = "warning" }
 strict-behavior = { level = "warning" }

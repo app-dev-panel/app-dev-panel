@@ -5,6 +5,7 @@ import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import {Code, ContentCopy, FolderOpen, OpenInNew, SwapHoriz} from '@mui/icons-material';
@@ -194,7 +195,7 @@ const PackageItem = React.memo(({pkg, onSwitch}: PackageItemProps) => {
 
 export const ComposerPage = () => {
     const theme = useTheme();
-    const {data, isLoading} = useGetComposerQuery();
+    const {data, isLoading, isError, error, refetch} = useGetComposerQuery();
     const [tab, setTab] = useState(0);
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
@@ -320,6 +321,24 @@ export const ComposerPage = () => {
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
+    }
+
+    if (isError) {
+        return (
+            <>
+                <PageHeader
+                    title="Composer"
+                    icon="inventory_2"
+                    description="Manage project dependencies and packages"
+                />
+                <QueryErrorState
+                    error={error}
+                    title="Failed to load Composer data"
+                    fallback="Failed to load Composer data."
+                    onRetry={refetch}
+                />
+            </>
+        );
     }
 
     return (

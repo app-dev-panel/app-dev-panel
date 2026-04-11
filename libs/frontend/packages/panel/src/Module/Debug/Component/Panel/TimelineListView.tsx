@@ -1,5 +1,10 @@
 import {TimelineDetailCard} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineDetailCard';
-import {type TimelineItem, getCollectorColor, parseLogLevel, stripLogLevelPrefix} from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
+import {
+    getCollectorColor,
+    parseLogLevel,
+    stripLogLevelPrefix,
+    type TimelineItem,
+} from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
 import {type EnrichedDetail} from '@app-dev-panel/panel/Module/Debug/Component/Panel/useTimelineEnrichment';
 import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
@@ -7,7 +12,11 @@ import {Box, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {alpha, styled, type Theme, useTheme} from '@mui/material/styles';
 import {useCallback, useState} from 'react';
 
-type TimelineListViewProps = {data: TimelineItem[]; filtered: TimelineItem[]; enrichedDetails: (EnrichedDetail | null)[]};
+type TimelineListViewProps = {
+    data: TimelineItem[];
+    filtered: TimelineItem[];
+    enrichedDetails: (EnrichedDetail | null)[];
+};
 
 // ---------------------------------------------------------------------------
 // Styled components
@@ -69,7 +78,6 @@ const DetailText = styled(Typography)(({theme}) => ({
     textOverflow: 'ellipsis',
     minWidth: 0,
 }));
-
 
 const ScaleBar = styled(Box)(({theme}) => ({
     display: 'flex',
@@ -153,10 +161,7 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
         }
     }
 
-    const getColor = useCallback(
-        (collectorClass: string) => getCollectorColor(theme, collectorClass),
-        [theme],
-    );
+    const getColor = useCallback((collectorClass: string) => getCollectorColor(theme, collectorClass), [theme]);
 
     const handleRowClick = useCallback(
         (index: number) => {
@@ -181,8 +186,12 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
 
                 const parsed = enriched ? parseLogLevel(enriched.preview) : null;
                 const logLevel = parsed?.level ?? null;
-                const detail = isException ? ref : parsed ? parsed.message : enriched?.preview ?? null;
-                const fullDetail = isException ? ref : parsed ? stripLogLevelPrefix(enriched!.full) : enriched?.full ?? null;
+                const detail = isException ? ref : parsed ? parsed.message : (enriched?.preview ?? null);
+                const fullDetail = isException
+                    ? ref
+                    : parsed
+                      ? stripLogLevelPrefix(enriched!.full)
+                      : (enriched?.full ?? null);
 
                 const levelColor = logLevel ? logLevelColor(logLevel, theme) : null;
 
@@ -192,7 +201,11 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                             <OffsetLabel>{offsetLabel}</OffsetLabel>
                             <CollectorLabel sx={{color: color.fg}}>
                                 {label !== 'Unknown' ? label : shortName}
-                                {ref && !isException && <RefPill component="span" sx={{ml: 0.5}}>{ref}</RefPill>}
+                                {ref && !isException && (
+                                    <RefPill component="span" sx={{ml: 0.5}}>
+                                        {ref}
+                                    </RefPill>
+                                )}
                                 {logLevel && (
                                     <RefPill
                                         component="span"

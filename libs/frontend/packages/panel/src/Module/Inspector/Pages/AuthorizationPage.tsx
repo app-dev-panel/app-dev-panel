@@ -6,6 +6,7 @@ import {
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {Box, Chip, LinearProgress, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
@@ -145,18 +146,41 @@ const VotersTable = ({voters}: {voters: AuthorizationVoter[]}) => (
 );
 
 export const AuthorizationPage = () => {
-    const {data, isLoading, error} = useGetAuthorizationQuery();
+    const {data, isLoading, isError, error, refetch} = useGetAuthorizationQuery();
 
     if (isLoading) {
         return <LinearProgress />;
     }
 
-    if (error) {
-        return <EmptyState icon="error" title="Failed to load authorization data" />;
+    if (isError) {
+        return (
+            <Box>
+                <PageHeader
+                    title="Authorization"
+                    icon="shield"
+                    description="Security guards, roles, voters, and configuration"
+                />
+                <QueryErrorState
+                    error={error}
+                    title="Failed to load authorization data"
+                    fallback="Failed to load authorization data."
+                    onRetry={refetch}
+                />
+            </Box>
+        );
     }
 
     if (!data) {
-        return <EmptyState icon="shield" title="No authorization data available" />;
+        return (
+            <Box>
+                <PageHeader
+                    title="Authorization"
+                    icon="shield"
+                    description="Security guards, roles, voters, and configuration"
+                />
+                <EmptyState icon="shield" title="No authorization data available" />
+            </Box>
+        );
     }
 
     const hasGuards = data.guards.length > 0;

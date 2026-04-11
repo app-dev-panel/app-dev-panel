@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Llm;
 
+use SensitiveParameter;
+
 final class FileLlmSettings implements LlmSettingsInterface
 {
     private const int DEFAULT_TIMEOUT = 30;
@@ -33,7 +35,7 @@ final class FileLlmSettings implements LlmSettingsInterface
         return $this->apiKey;
     }
 
-    public function setApiKey(?string $apiKey): void
+    public function setApiKey(#[SensitiveParameter] ?string $apiKey): void
     {
         $this->load();
         $this->apiKey = $apiKey;

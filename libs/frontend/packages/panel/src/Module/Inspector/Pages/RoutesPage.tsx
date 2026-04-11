@@ -4,6 +4,7 @@ import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {concatClassMethod} from '@app-dev-panel/sdk/Helper/classMethodConcater';
@@ -402,7 +403,7 @@ const RouteChecker = () => {
 
 export const RoutesPage = () => {
     const theme = useTheme();
-    const {data, isLoading, isSuccess, isError, error} = useGetRoutesQuery();
+    const {data, isLoading, isSuccess, isError, error, refetch} = useGetRoutesQuery();
     const [routes, setRoutes] = useState<RouteType[]>([]);
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
@@ -461,30 +462,28 @@ export const RoutesPage = () => {
         return <FullScreenCircularProgress />;
     }
 
-    const errorMessage =
-        isError && error
-            ? 'status' in error && typeof (error as any).data === 'object' && (error as any).data?.data?.error
-                ? (error as any).data.data.error
-                : 'status' in error && (error as any).status === 'FETCH_ERROR'
-                  ? 'Unable to connect to the server. Make sure the application is running.'
-                  : 'Failed to load routes.'
-            : null;
+    if (isError) {
+        return (
+            <>
+                <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
+                <QueryErrorState
+                    error={error}
+                    title="Failed to load routes"
+                    fallback="Failed to load routes."
+                    onRetry={refetch}
+                />
+            </>
+        );
+    }
 
     return (
         <>
             <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
 
-            {isError && (
-                <Alert severity="error" sx={{mb: 2}}>
-                    <AlertTitle>Error loading routes</AlertTitle>
-                    {errorMessage}
-                </Alert>
-            )}
-
             <RouteChecker />
 
             {/* Routes list */}
-            {!isError && routes.length === 0 ? (
+            {routes.length === 0 ? (
                 <EmptyState icon="alt_route" title="No routes found" />
             ) : (
                 <Box>

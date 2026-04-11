@@ -2,6 +2,7 @@ import {useGetTableDataQuery} from '@app-dev-panel/panel/Module/Inspector/API/In
 import {setPreferredPageSize} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {DataGrid, GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {useCallback, useMemo, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
@@ -20,7 +21,7 @@ export const TablePage = () => {
     const [pageSize, setPageSize] = useState(preferredPageSize || rowsPerPageOptions[0]);
     const page = Number(searchParams.get('page') || '0');
 
-    const {data, isLoading, isFetching} = useGetTableDataQuery(
+    const {data, isLoading, isFetching, isError, error, refetch} = useGetTableDataQuery(
         {table: table!, limit: pageSize, offset: page * pageSize},
         {skip: !table},
     );
@@ -58,6 +59,20 @@ export const TablePage = () => {
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
+    }
+
+    if (isError) {
+        return (
+            <>
+                <PageHeader title="Tables" icon="table_chart" description="Database table viewer" />
+                <QueryErrorState
+                    error={error}
+                    title="Failed to load table data"
+                    fallback={`Failed to load data for table "${table}".`}
+                    onRetry={refetch}
+                />
+            </>
+        );
     }
 
     return (

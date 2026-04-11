@@ -11,6 +11,7 @@ import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
@@ -326,7 +327,7 @@ const EventListeners = React.memo(({entries}: EventListenersProps) => {
 type TabValue = 'common' | 'web' | 'console';
 
 export const EventsPage = () => {
-    const {data, isLoading} = useGetEventsQuery();
+    const {data, isLoading, isError, error, refetch} = useGetEventsQuery();
     const [tabValue, setTabValue] = useState<TabValue>('web');
     const [searchParams, setSearchParams] = useSearchParams();
     const filterValue = searchParams.get('filter') || '';
@@ -375,6 +376,20 @@ export const EventsPage = () => {
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
+    }
+
+    if (isError) {
+        return (
+            <>
+                <PageHeader title="Event Listeners" icon="bolt" description="View registered event listeners" />
+                <QueryErrorState
+                    error={error}
+                    title="Failed to load event listeners"
+                    fallback="Failed to load event listeners."
+                    onRetry={refetch}
+                />
+            </>
+        );
     }
 
     if (!data) {

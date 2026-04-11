@@ -1,5 +1,7 @@
 import {useCommandMutation, useGetLogQuery} from '@app-dev-panel/panel/Module/Inspector/API/GitApi';
+import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {GetApp, Refresh, Sync} from '@mui/icons-material';
 import {Box, Button, CircularProgress, Divider, List, ListItem, ListItemText, Typography} from '@mui/material';
 import {useCallback} from 'react';
@@ -11,6 +13,26 @@ export const GitLogPage = ({showHeader = true}: {showHeader?: boolean}) => {
     const onPullHandler = useCallback(() => commandMutation({command: 'pull'}), []);
     const onFetchHandler = useCallback(() => commandMutation({command: 'fetch'}), []);
     const onRefreshHandler = () => getLogQuery.refetch();
+
+    if (getLogQuery.isLoading) {
+        return <FullScreenCircularProgress />;
+    }
+
+    if (getLogQuery.isError) {
+        return (
+            <>
+                {showHeader && (
+                    <PageHeader title="Git Log" icon="history" description="Commit history and branch operations" />
+                )}
+                <QueryErrorState
+                    error={getLogQuery.error}
+                    title="Failed to load Git log"
+                    fallback="Failed to load Git commit history."
+                    onRetry={getLogQuery.refetch}
+                />
+            </>
+        );
+    }
 
     return (
         <>

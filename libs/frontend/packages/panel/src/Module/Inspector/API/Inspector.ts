@@ -490,6 +490,7 @@ export const {
     useLazyGetObjectQuery,
     useLazyGetFilesQuery,
     useLazyGetClassQuery,
+    useGetCommandsQuery,
     useLazyGetCommandsQuery,
     useRunCommandMutation,
     useGetTranslationsQuery,

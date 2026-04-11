@@ -18,18 +18,6 @@ Status: Active. Based on Yii2 playground screenshots with fixture data.
 - **Fix**: Auto-select the latest entry when navigating to `/debug` if no entry is selected.
   Read `debugEntry` from URL params and fetch it if not in Redux state.
 
-### 3. Inspector pages show infinite spinners
-- **Pages**: Routes, Events, Config, Translations, Storage, Environment
-- **Problem**: CircularProgress spins indefinitely when API calls fail or timeout.
-  No error boundary, no timeout, no retry button.
-- **Fix**: Add error state handling to RTK Query hooks. Show error message with retry button
-  after 10s timeout. Use consistent `EmptyState` component for connection errors.
-
-### 4. /gen-code shows 404 "Unknown page"
-- **Page**: `/gen-code`
-- **Problem**: Route is defined but the page component doesn't exist or fails to load.
-- **Fix**: Either implement the page or remove the route/sidebar entry until it's ready.
-
 ## Visual Consistency Issues
 
 ### 5. Inconsistent loading indicators
@@ -50,35 +38,13 @@ Status: Active. Based on Yii2 playground screenshots with fixture data.
 - **Problem**: Gray placeholder blocks without shimmer animation look like broken UI.
 - **Fix**: Add skeleton shimmer animation. Or show actual section titles with loading state.
 
-### 8. Inconsistent empty states
-- **Where**: Open API (duck icon), Debug Live (spinner icon), Commands (lightbulb),
-  Code Quality (plain text), LLM (alert box)
-- **Fix**: Use the existing `EmptyState` component consistently across all pages.
-  Standardize on: icon + title + description + optional action button.
-
-### 9. HTML nesting error in LivePage
-- **Page**: `/debug/live`
-- **Problem**: React warning: `<div> cannot be a descendant of <p>`. SectionTitle renders
-  a `<p>` (MuiTypography-body1) that contains a `<div>` child.
-- **Fix**: Change SectionTitle's Typography variant to use `component="div"` instead of `<p>`.
-
-### 10. LLM page has empty gray card
-- **Page**: `/llm`
-- **Problem**: Gray placeholder card at top with no content, followed by "Connect an LLM provider" alert.
-- **Fix**: Remove the empty placeholder. Show a proper setup wizard or configuration form.
-
 ## Implementation Plan
 
-### Phase 1: Fix Critical UX Blockers (Priority: High)
-1. Fix HTML nesting error in SectionTitle (5 min)
-2. Fix Home page rendering when baseUrl is configured (30 min)
-3. Auto-select latest entry on /debug load (30 min)
-4. Add error/timeout states to Inspector pages (1h)
-5. Remove or implement /gen-code route (15 min)
+### Phase 1: Remaining Critical UX Blockers
+1. Fix Home page rendering when baseUrl is configured (30 min)
+2. Auto-select latest entry on /debug load (30 min)
 
-### Phase 2: Visual Consistency (Priority: Medium)
-6. Standardize loading indicators across all pages (30 min)
-7. Standardize empty states using EmptyState component (1h)
-8. Fix Inspector Dashboard skeleton with shimmer (30 min)
-9. Clean up Debug entries list - hide zero counts (30 min)
-10. Fix LLM page placeholder card (15 min)
+### Phase 2: Remaining Visual Consistency
+3. Standardize loading indicators across all pages (30 min)
+4. Fix Inspector Dashboard skeleton with shimmer (30 min)
+5. Clean up Debug entries list - hide zero counts (30 min)

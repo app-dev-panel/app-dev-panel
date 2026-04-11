@@ -2,6 +2,7 @@ import {LiveFeedPanel} from '@app-dev-panel/panel/Application/Component/LiveFeed
 import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/NotificationCenter';
 import {AiChatPopup} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/AiChatPopup';
 
+import {DuckIcon} from '@app-dev-panel/panel/Application/Component/DuckIcon';
 import {
     useGetMcpSettingsQuery,
     useUpdateMcpSettingsMutation,
@@ -35,7 +36,6 @@ import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectors
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
-import {DuckIcon} from '@app-dev-panel/panel/Application/Component/DuckIcon';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Drawer from '@mui/material/Drawer';
@@ -617,9 +617,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                             border: '2.5px solid',
                             borderColor: 'primary.main',
                             boxShadow: '0 4px 12px rgba(37,99,235,0.2)',
-                            '&:hover': {
-                                bgcolor: 'primary.light',
-                            },
+                            '&:hover': {bgcolor: 'primary.light'},
                         }}
                     >
                         <DuckIcon sx={{fontSize: 36}} />
