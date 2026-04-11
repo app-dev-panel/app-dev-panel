@@ -21,12 +21,24 @@ shiki:
 layout: cover
 ---
 
+<div class="flex items-center gap-16">
+
+<div class="flex-1">
+
 # ADP
 
 **Application Development Panel**
 
 Как я устал дебажить вебхуки<br/>
 и сделал свою панель
+
+</div>
+
+<div class="flex-shrink-0">
+  <img src="/rubber-duck.svg" alt="Rubber duck mascot" class="mascot w-80" />
+</div>
+
+</div>
 
 <div class="absolute bottom-10 left-10 text-sm opacity-60">
 Подлодка PHP · 2026

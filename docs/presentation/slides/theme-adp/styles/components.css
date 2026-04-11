@@ -83,6 +83,18 @@
   background: var(--adp-bg-paper);
 }
 
+/*
+ * Mascot images (rubber duck on cover + final slide) must NOT get the card
+ * treatment - we want the duck to float transparently over the background,
+ * not sit inside a bordered white card. Opt out via the .mascot class.
+ */
+.slidev-layout img.mascot {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
 /* ------- Tables -------------------------------------------------- */
 
 .slidev-layout table {

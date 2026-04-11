@@ -7,7 +7,9 @@ class: text-center
 
 ## Но теперь у нас есть нормальный дебаггер
 
-<div class="mt-12 text-2xl opacity-80">
+<img src="/rubber-duck.svg" alt="" class="mascot mx-auto mt-8 w-40" />
+
+<div class="mt-6 text-2xl opacity-80">
 github.com/app-dev-panel/app-dev-panel
 </div>
 

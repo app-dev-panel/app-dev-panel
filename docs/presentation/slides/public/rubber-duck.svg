@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="Rubber duck mascot">
+  <!--
+    ADP rubber duck mascot.
+    Flat, 2D, no gradients, no shadows - matches the clean ADP card aesthetic.
+    Designed to read at any size from 32px to 500px.
+    Palette:
+      body    #FACC15 (Tailwind yellow-400)
+      shade   #EAB308 (Tailwind yellow-500) - subtle tonal separation
+      beak    #FB923C (Tailwind orange-400)
+      beak-sh #EA580C (Tailwind orange-600)
+      eye     #0F172A (slate-900)
+  -->
+
+  <!-- Body: a rounded oval that tapers back into a short tail. -->
+  <path d="
+      M 80 240
+      C 80 300, 160 340, 240 330
+      C 320 320, 360 270, 350 230
+      C 345 205, 325 185, 300 180
+      L 295 170
+      C 290 155, 275 145, 255 145
+      L 230 145
+      C 180 145, 130 170, 100 205
+      C 90 215, 82 225, 80 240
+      Z
+      M 350 238
+      L 385 220
+      L 378 255
+      L 355 250
+      Z"
+    fill="#FACC15"
+    fill-rule="evenodd"/>
+
+  <!-- Belly highlight: a subtle lighter oval to give the body some dimension without gradients. -->
+  <ellipse cx="205" cy="275" rx="90" ry="30" fill="#FEF08A" opacity="0.55"/>
+
+  <!-- Wing: a simple teardrop on the side of the body. -->
+  <path d="
+      M 180 225
+      C 160 230, 150 255, 170 275
+      C 195 290, 240 285, 255 265
+      C 245 235, 210 218, 180 225
+      Z"
+    fill="#EAB308"/>
+
+  <!-- Head: a near-circle sitting on the front of the body. -->
+  <circle cx="130" cy="135" r="72" fill="#FACC15"/>
+
+  <!-- Neck join: a small filled wedge so the head doesn't look pasted on. -->
+  <path d="
+      M 95 190
+      C 100 165, 120 155, 155 160
+      L 165 195
+      C 140 205, 110 205, 95 190
+      Z"
+    fill="#FACC15"/>
+
+  <!-- Beak: a simple triangle-ish shape with a small lower jaw split. -->
+  <path d="
+      M 58 135
+      L 10 120
+      C 0 130, 0 150, 12 158
+      L 58 155
+      Z"
+    fill="#FB923C"/>
+  <path d="
+      M 58 155
+      L 15 158
+      C 28 170, 48 172, 60 165
+      Z"
+    fill="#EA580C"/>
+
+  <!-- Eye: black pupil with a tiny white catchlight. -->
+  <circle cx="118" cy="115" r="9" fill="#0F172A"/>
+  <circle cx="121" cy="112" r="2.5" fill="#FFFFFF"/>
+</svg>
