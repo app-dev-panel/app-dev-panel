@@ -18,22 +18,19 @@ fonts:
     weights: '300,400,500,600,700'
 shiki:
     theme: vitesse-light
+layout: cover
 ---
 
-<!--
-Главный файл Slidev. Каждый слайд подтянут из отдельного .md в папке pages/.
-Запускать из этой папки:
+# ADP
 
-    npx slidev
+**Application Development Panel**
 
-Экспорт в PDF:
+Как я устал дебажить вебхуки<br/>
+и сделал свою панель
 
-    npx slidev export
--->
-
----
-src: ./pages/01-title.md
----
+<div class="absolute bottom-10 left-10 text-sm opacity-60">
+Подлодка PHP · 2026
+</div>
 
 ---
 src: ./pages/02-webhook-pain.md
