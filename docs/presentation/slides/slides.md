@@ -35,7 +35,7 @@ layout: cover
 </div>
 
 <div class="flex-shrink-0">
-  <img src="/rubber-duck.svg" alt="Rubber duck mascot" class="mascot w-80" />
+  <img src="/duck.svg" alt="Rubber duck mascot" class="mascot w-80" />
 </div>
 
 </div>
