@@ -65,4 +65,20 @@ describe('formatQueryError', () => {
     it('uses default fallback when none provided', () => {
         expect(formatQueryError(null)).toBe('Failed to load data.');
     });
+
+    it('returns SerializedError message when present', () => {
+        expect(formatQueryError({name: 'TypeError', message: 'Cannot read property of undefined'})).toBe(
+            'Cannot read property of undefined',
+        );
+    });
+
+    it('returns SerializedError name when message is empty', () => {
+        expect(formatQueryError({name: 'AbortError', message: ''}, 'Failed to fetch.')).toBe('AbortError');
+    });
+
+    it('prefers transport status over SerializedError shape', () => {
+        expect(formatQueryError({status: 'FETCH_ERROR', message: 'irrelevant'})).toBe(
+            'Unable to connect to the server. Make sure the application is running.',
+        );
+    });
 });

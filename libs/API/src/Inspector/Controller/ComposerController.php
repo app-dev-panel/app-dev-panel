@@ -49,10 +49,25 @@ final class ComposerController
         return $this->responseFactory->createJsonResponse([
             'status' => $result->getStatus(),
             'result' => $result->getStatus() === CommandResponse::STATUS_OK
-                ? json_decode($result->getResult(), true, 512, JSON_THROW_ON_ERROR)
+                ? json_decode(self::extractJsonObject($result->getResult()), true, 512, JSON_THROW_ON_ERROR)
                 : null,
             'errors' => $result->getErrors(),
         ]);
+    }
+
+    /**
+     * Extracts the first JSON object from a `composer` command output, stripping any
+     * leading or trailing notices that composer prints to stderr (e.g. "Do not run
+     * Composer as root" warnings) which `BashCommand` concatenates with stdout.
+     */
+    private static function extractJsonObject(string $output): string
+    {
+        $start = strpos($output, '{');
+        $end = strrpos($output, '}');
+        if ($start === false || $end === false || $end < $start) {
+            return $output;
+        }
+        return substr($output, $start, $end - $start + 1);
     }
 
     public function require(ServerRequestInterface $request): ResponseInterface

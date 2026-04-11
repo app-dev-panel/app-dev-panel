@@ -644,7 +644,9 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->app->singleton(McpSettings::class, fn() => new McpSettings($config->get('app-dev-panel.storage.path')));
 
         $this->app->singleton(InspectorClient::class, function () {
-            $url = $this->app['request']->getSchemeAndHttpHost();
+            /** @var \Illuminate\Http\Request $request */
+            $request = $this->app->make('request');
+            $url = $request->getSchemeAndHttpHost();
 
             return new InspectorClient($url);
         });

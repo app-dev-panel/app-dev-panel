@@ -87,23 +87,27 @@ final class FileStorageTest extends AbstractStorageTestCase
         $storage->flush();
 
         // Summary is plain .json
-        $summaryFiles = glob($this->path . '/**/**/summary.json');
+        $summaryFiles = glob($this->path . '/**/**/summary.json') ?: [];
         $this->assertCount(1, $summaryFiles, 'Expected 1 summary.json file');
-        $this->assertJson(file_get_contents($summaryFiles[0]));
+        $summaryContent = file_get_contents($summaryFiles[0]);
+        $this->assertNotFalse($summaryContent);
+        $this->assertJson($summaryContent);
 
-        $summaryGzFiles = glob($this->path . '/**/**/summary.json.gz');
+        $summaryGzFiles = glob($this->path . '/**/**/summary.json.gz') ?: [];
         $this->assertCount(0, $summaryGzFiles, 'No summary.json.gz should exist');
 
         // Data and objects are .json.gz
-        $dataGzFiles = glob($this->path . '/**/**/data.json.gz');
+        $dataGzFiles = glob($this->path . '/**/**/data.json.gz') ?: [];
         $this->assertCount(1, $dataGzFiles, 'Expected 1 data.json.gz file');
 
-        $objectsGzFiles = glob($this->path . '/**/**/objects.json.gz');
+        $objectsGzFiles = glob($this->path . '/**/**/objects.json.gz') ?: [];
         $this->assertCount(1, $objectsGzFiles, 'Expected 1 objects.json.gz file');
 
         // Verify gzip files are valid
         foreach ([...$dataGzFiles, ...$objectsGzFiles] as $file) {
-            $decoded = gzdecode(file_get_contents($file));
+            $contents = file_get_contents($file);
+            $this->assertNotFalse($contents);
+            $decoded = gzdecode($contents);
             $this->assertNotFalse($decoded);
             $this->assertJson($decoded);
         }

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Llm;
 
+use SensitiveParameter;
+
 interface LlmSettingsInterface
 {
     public function getApiKey(): ?string;
 
-    public function setApiKey(?string $apiKey): void;
+    public function setApiKey(#[SensitiveParameter] ?string $apiKey): void;
 
     public function getProvider(): string;
 

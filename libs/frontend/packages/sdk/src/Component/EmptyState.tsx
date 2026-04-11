@@ -2,7 +2,7 @@ import {Box, Icon, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import type {ReactNode} from 'react';
 
-type EmptyStateProps = {
+export type EmptyStateProps = {
     icon?: string;
     title: string;
     description?: ReactNode;
@@ -20,14 +20,17 @@ const Root = styled(Box)(({theme}) => ({
 }));
 
 export const EmptyState = ({icon = 'inbox', title, description, action, severity = 'default'}: EmptyStateProps) => {
-    const iconColor = severity === 'error' ? 'error.main' : 'text.disabled';
-    const titleColor = severity === 'error' ? 'error.main' : 'text.secondary';
+    const isError = severity === 'error';
+    const iconColor = isError ? 'error.main' : 'text.disabled';
+    const titleColor = isError ? 'error.main' : 'text.secondary';
     return (
-        <Root>
+        <Root role={isError ? 'alert' : undefined} aria-live={isError ? 'polite' : undefined}>
             <Icon sx={{fontSize: 48, color: iconColor, mb: 2}}>{icon}</Icon>
             <Typography sx={{fontSize: '14px', fontWeight: 600, color: titleColor, mb: 0.5}}>{title}</Typography>
             {description && (
-                <Typography sx={{fontSize: '13px', color: 'text.disabled', maxWidth: 360}}>{description}</Typography>
+                <Typography component="div" sx={{fontSize: '13px', color: 'text.disabled', maxWidth: 360}}>
+                    {description}
+                </Typography>
             )}
             {action && <Box sx={{mt: 2}}>{action}</Box>}
         </Root>

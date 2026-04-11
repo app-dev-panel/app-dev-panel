@@ -35,6 +35,9 @@ final class StorageFactory
         };
     }
 
+    /**
+     * @param class-string $class
+     */
     private static function createCustom(
         string $class,
         string $path,
@@ -56,6 +59,7 @@ final class StorageFactory
             ));
         }
 
+        /** @var StorageInterface */
         return new $class($path, $idGenerator, $excludedClasses);
     }
 }

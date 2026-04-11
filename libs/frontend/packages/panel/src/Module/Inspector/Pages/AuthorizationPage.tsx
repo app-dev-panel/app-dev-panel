@@ -154,17 +154,33 @@ export const AuthorizationPage = () => {
 
     if (isError) {
         return (
-            <QueryErrorState
-                error={error}
-                title="Failed to load authorization data"
-                fallback="Failed to load authorization data."
-                onRetry={refetch}
-            />
+            <Box>
+                <PageHeader
+                    title="Authorization"
+                    icon="shield"
+                    description="Security guards, roles, voters, and configuration"
+                />
+                <QueryErrorState
+                    error={error}
+                    title="Failed to load authorization data"
+                    fallback="Failed to load authorization data."
+                    onRetry={refetch}
+                />
+            </Box>
         );
     }
 
     if (!data) {
-        return <EmptyState icon="shield" title="No authorization data available" />;
+        return (
+            <Box>
+                <PageHeader
+                    title="Authorization"
+                    icon="shield"
+                    description="Security guards, roles, voters, and configuration"
+                />
+                <EmptyState icon="shield" title="No authorization data available" />
+            </Box>
+        );
     }
 
     const hasGuards = data.guards.length > 0;
