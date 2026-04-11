@@ -37,9 +37,7 @@ const Header = styled(Box)(({theme}) => ({
     borderBottom: `1px solid ${theme.palette.divider}`,
 }));
 
-const MetaLabel = styled(Typography)({
-    fontSize: '11px',
-});
+const MetaLabel = styled(Typography)({fontSize: '11px'});
 
 const ContentArea = styled(Box)(({theme}) => ({
     position: 'relative',
@@ -47,11 +45,17 @@ const ContentArea = styled(Box)(({theme}) => ({
     '&:hover .copy-btn': {opacity: 1},
 }));
 
-export const TimelineDetailCard = ({row, fullDetail, logLevel, accentColor, offsetLabel, rawValue}: TimelineDetailCardProps) => {
+export const TimelineDetailCard = ({
+    row,
+    fullDetail,
+    logLevel,
+    accentColor,
+    offsetLabel,
+    rawValue,
+}: TimelineDetailCardProps) => {
     const collectorClass = row[2];
     const isDatabaseLike =
-        collectorClass === CollectorsMap.DatabaseCollector ||
-        collectorClass === CollectorsMap.ElasticsearchCollector;
+        collectorClass === CollectorsMap.DatabaseCollector || collectorClass === CollectorsMap.ElasticsearchCollector;
     const isEvent = collectorClass === CollectorsMap.EventCollector;
     const showDetail = fullDetail && !isEvent;
 
@@ -60,9 +64,7 @@ export const TimelineDetailCard = ({row, fullDetail, logLevel, accentColor, offs
             <Header>
                 <MetaLabel sx={{color: 'text.disabled'}}>{formatMicrotime(row[0])}</MetaLabel>
                 <MetaLabel sx={{color: 'text.disabled'}}>Offset: {offsetLabel}</MetaLabel>
-                {row[1] != null && (
-                    <MetaLabel sx={{color: 'text.disabled'}}>Ref: {String(row[1])}</MetaLabel>
-                )}
+                {row[1] != null && <MetaLabel sx={{color: 'text.disabled'}}>Ref: {String(row[1])}</MetaLabel>}
                 <FileLink className={collectorClass}>
                     <Typography
                         component="span"
@@ -84,10 +86,27 @@ export const TimelineDetailCard = ({row, fullDetail, logLevel, accentColor, offs
                     {isDatabaseLike ? (
                         <SqlHighlight sql={fullDetail} fontSize={12} />
                     ) : (
-                        <Box sx={{display: 'flex', gap: 1, alignItems: 'flex-start', backgroundColor: 'background.paper', borderRadius: 1, padding: '8px 12px'}}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                gap: 1,
+                                alignItems: 'flex-start',
+                                backgroundColor: 'background.paper',
+                                borderRadius: 1,
+                                padding: '8px 12px',
+                            }}
+                        >
                             {logLevel && (
                                 <Typography
-                                    sx={{fontSize: '10px', fontWeight: 700, color: 'text.disabled', userSelect: 'none', flexShrink: 0, lineHeight: 1.7, mt: '1px'}}
+                                    sx={{
+                                        fontSize: '10px',
+                                        fontWeight: 700,
+                                        color: 'text.disabled',
+                                        userSelect: 'none',
+                                        flexShrink: 0,
+                                        lineHeight: 1.7,
+                                        mt: '1px',
+                                    }}
                                 >
                                     {logLevel.toUpperCase()}
                                 </Typography>

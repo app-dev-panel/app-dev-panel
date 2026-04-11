@@ -1,6 +1,10 @@
 import {TimelineDetailCard} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineDetailCard';
 import {TimelineListView} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineListView';
-import {type TimelineItem, getCollectorColor as getCollectorColorFromTheme, parseLogLevel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
+import {
+    type TimelineItem,
+    getCollectorColor as getCollectorColorFromTheme,
+    parseLogLevel,
+} from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
 import {useTimelineEnrichment} from '@app-dev-panel/panel/Module/Debug/Component/Panel/useTimelineEnrichment';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -92,7 +96,6 @@ const WaterfallDetail = styled(Typography)(({theme}) => ({
     [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
 
-
 // ---------------------------------------------------------------------------
 // View toggle button
 // ---------------------------------------------------------------------------
@@ -176,11 +179,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                 seen.add(cls);
                 return true;
             })
-            .map((r) => ({
-                fqcn: r[2],
-                shortName: r[2].split('\\').pop() ?? r[2],
-                label: getCollectorLabel(r[2]),
-            }));
+            .map((r) => ({fqcn: r[2], shortName: r[2].split('\\').pop() ?? r[2], label: getCollectorLabel(r[2])}));
     }, [data]);
 
     // Keep uniqueLabels for backward compat with filtering
@@ -296,8 +295,8 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                         const label = getCollectorLabel(collectorClass);
 
                         const parsed = enriched ? parseLogLevel(enriched.preview) : null;
-                        const detail = parsed ? parsed.message : enriched?.preview ?? null;
-                        const fullDetail = parsed ? enriched!.full.replace(/^\[\w+] /, '') : enriched?.full ?? null;
+                        const detail = parsed ? parsed.message : (enriched?.preview ?? null);
+                        const fullDetail = parsed ? enriched!.full.replace(/^\[\w+] /, '') : (enriched?.full ?? null);
 
                         // Format relative time offset
                         const offsetLabel =
@@ -321,12 +320,7 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                                     </Tooltip>
                                     <BarArea>
                                         <Bar
-                                            sx={{
-                                                left: `${offset}%`,
-                                                width: 6,
-                                                minWidth: 6,
-                                                backgroundColor: color.fg,
-                                            }}
+                                            sx={{left: `${offset}%`, width: 6, minWidth: 6, backgroundColor: color.fg}}
                                         />
                                     </BarArea>
                                     {detail && <WaterfallDetail title={detail}>{detail}</WaterfallDetail>}

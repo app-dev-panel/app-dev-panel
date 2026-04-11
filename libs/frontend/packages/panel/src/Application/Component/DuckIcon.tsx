@@ -35,11 +35,7 @@ export const DuckIcon = (props: SvgIconProps) => {
 
                 const tilt = Math.max(-MAX_TILT, Math.min(MAX_TILT, rotation * dist));
 
-                setLook({
-                    tilt,
-                    ex: Math.cos(rad) * EYE_EXTRA * dist,
-                    ey: Math.sin(rad) * EYE_EXTRA * dist,
-                });
+                setLook({tilt, ex: Math.cos(rad) * EYE_EXTRA * dist, ey: Math.sin(rad) * EYE_EXTRA * dist});
             });
         };
 
