@@ -7,7 +7,7 @@ class: text-center
 
 ## Но теперь у нас есть нормальный дебаггер
 
-<div class="mt-16 text-2xl opacity-80">
+<div class="mt-12 text-2xl opacity-80">
 github.com/app-dev-panel/app-dev-panel
 </div>
 
@@ -17,5 +17,6 @@ github.com/app-dev-panel/app-dev-panel
 
 <!--
 Speaker notes:
-Финал без пафоса. Оставить слайд на экране во время Q&A.
+Финал без пафоса. Оставляем слайд на экране во время
+Q&A — там и ссылка, и инвайт «ломайте адаптеры».
 -->

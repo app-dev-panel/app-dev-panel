@@ -40,7 +40,7 @@ body,
   background: var(--adp-bg-default);
   color: var(--adp-text-primary);
   font-family: var(--adp-font-sans);
-  font-size: 1.1rem;           /* ~17.6px baseline body */
+  font-size: 1.1rem; /* ~17.6px baseline body */
   line-height: 1.55;
   font-weight: 400;
   overflow: hidden;
@@ -325,4 +325,41 @@ body,
 .slidev-layout.end {
   background: var(--adp-bg-default);
   color: var(--adp-text-primary);
+}
+
+/* ---- Slidev bottom nav chrome ----------------------------------------
+   Slidev wraps its nav controls (prev/next, overview, pen, camera, …)
+   in a fade wrapper that sits at opacity: 0 and transitions to 1 on
+   hover. On a light page that partial-opacity state makes every icon
+   almost invisible against the background. Force the wrapper fully
+   visible and paint buttons in ADP's secondary text colour so they
+   read cleanly without the fade. */
+.slidev-slide-container > .absolute.bottom-0.left-0,
+.absolute.bottom-0.left-0.transition.duration-300 {
+  opacity: 1 !important;
+}
+
+.slidev-icon-btn {
+  opacity: 1 !important;
+  color: var(--adp-text-secondary);
+}
+
+.slidev-icon-btn:hover {
+  color: var(--adp-primary);
+  background: var(--adp-primary-light);
+}
+
+.slidev-icon-btn svg {
+  color: inherit;
+  fill: currentColor;
+}
+
+/* The toolbar container itself (flex-wrap-reverse with bg-main). Pin its
+   surface to paper + divider so it reads as an ADP card, not as an
+   untouched transparent strip. */
+.flex.flex-wrap-reverse.rounded-md.bg-main.shadow,
+.flex.flex-wrap.rounded-md.bg-main.shadow {
+  background: var(--adp-bg-paper) !important;
+  border: 1px solid var(--adp-divider);
+  box-shadow: var(--adp-shadow-sm) !important;
 }
