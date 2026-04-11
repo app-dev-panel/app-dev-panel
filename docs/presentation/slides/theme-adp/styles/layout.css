@@ -1,74 +1,25 @@
 /*
- * Layout & typography for the ADP-themed Slidev deck.
+ * ADP layout: global typography, headings, lists, links, blockquotes.
  *
- * We do NOT override any Slidev layouts. Instead we style the DOM that the
- * built-in `default`, `cover`, and `center` layouts already render. This keeps
- * every existing slide file working while making them look like the ADP UI.
- *
- * All colors come from --adp-* variables declared in vars.css.
+ * Everything is scoped under .slidev-layout so presenter UI chrome is
+ * untouched. Slide padding is kept close to Slidev defaults but a touch
+ * more generous on the horizontal to match the ADP content panel feel.
  */
 
-/* ---------- Global surface ---------- */
-
-html,
-body,
-#app,
 .slidev-layout {
-  background-color: var(--adp-bg-default);
+  padding: 3rem 4rem;
+  background: var(--adp-bg-default);
   color: var(--adp-text-primary);
   font-family: var(--adp-font-sans);
-  font-feature-settings: "cv11", "ss01", "ss03";
+  font-size: 1.375rem; /* ~22px baseline body */
+  line-height: 1.6;
+  font-weight: 400;
+  font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-.slidev-layout {
-  /* Slidev's default layout has generous padding — keep it but make sure
-     our background color wins against any theme defaults. */
-  background-color: var(--adp-bg-default);
-  color: var(--adp-text-primary);
-  padding: 3rem 4rem;
-}
-
-/* Cover slides get a subtle radial accent so they read as "hero" like the
-   ADP dashboard header. */
-.slidev-layout.cover,
-.slidev-layout.intro {
-  background:
-    radial-gradient(
-      circle at 18% 22%,
-      rgba(96, 165, 250, 0.12),
-      transparent 55%
-    ),
-    radial-gradient(
-      circle at 82% 85%,
-      rgba(96, 165, 250, 0.08),
-      transparent 60%
-    ),
-    var(--adp-bg-default);
-}
-
-.slidev-layout.cover h1,
-.slidev-layout.intro h1 {
-  font-size: 5rem;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  background: linear-gradient(
-    135deg,
-    var(--adp-text-primary) 0%,
-    var(--adp-primary) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  margin-bottom: 1.5rem;
-}
-
-.slidev-layout.center {
-  background-color: var(--adp-bg-default);
-}
-
-/* ---------- Headings ---------- */
+/* ------- Headings ------------------------------------------------ */
 
 .slidev-layout h1,
 .slidev-layout h2,
@@ -80,66 +31,118 @@ body,
   font-family: var(--adp-font-sans);
   font-weight: 600;
   letter-spacing: -0.01em;
+  margin: 0 0 0.75rem 0;
 }
 
 .slidev-layout h1 {
-  font-size: 2.6rem;
+  font-size: 2.75rem; /* ~44px */
   line-height: 1.15;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
   position: relative;
+  padding-bottom: 0.6rem;
 }
 
-/* ADP-style accent bar under the slide title, mirroring the 3px active nav
-   indicator in componentTokens.navItem. */
-.slidev-layout:not(.cover):not(.center):not(.intro) h1::after {
+/* ADP's signature 3px primary accent bar under the slide title,
+   mirroring componentTokens.navItem.activeBarWidth used in the real UI. */
+.slidev-layout h1::after {
   content: "";
   display: block;
+  position: absolute;
+  left: 0;
+  bottom: 0;
   width: 3rem;
-  height: 3px;
-  margin-top: 0.75rem;
+  height: var(--adp-accent-bar-width);
   background: var(--adp-primary);
   border-radius: 2px;
 }
 
 .slidev-layout h2 {
-  font-size: 1.75rem;
+  font-size: 2rem; /* ~32px */
   line-height: 1.25;
-  margin-top: 1.25rem;
-  margin-bottom: 0.75rem;
   color: var(--adp-text-primary);
+  margin-top: 1.5rem;
 }
 
 .slidev-layout h3 {
-  font-size: 1.25rem;
+  font-size: 1.625rem; /* ~26px */
   line-height: 1.3;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  color: var(--adp-primary);
-  text-transform: none;
+  color: var(--adp-text-primary);
+  margin-top: 1.25rem;
 }
 
-.slidev-layout h4,
+.slidev-layout h4 {
+  font-size: 1.375rem; /* ~22px */
+  line-height: 1.35;
+  color: var(--adp-text-secondary);
+}
+
 .slidev-layout h5,
 .slidev-layout h6 {
   font-size: 1rem;
   color: var(--adp-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
-/* ---------- Body copy ---------- */
-
-.slidev-layout p,
-.slidev-layout li {
-  color: var(--adp-text-primary);
-  line-height: 1.55;
-  font-size: 1.05rem;
+/* Slidev base sets h6 opacity-40 by default - undo it. */
+.slidev-layout h6:not(.opacity-100) {
+  opacity: 1;
 }
+
+/* ------- Paragraphs / lists ------------------------------------- */
 
 .slidev-layout p {
-  margin: 0.6rem 0;
+  margin: 0.85rem 0;
+  line-height: 1.6;
+  color: var(--adp-text-primary);
 }
+
+.slidev-layout p + p {
+  margin-top: 1rem;
+}
+
+.slidev-layout ul,
+.slidev-layout ol {
+  margin: 0.75rem 0;
+  padding-left: 1.25rem;
+}
+
+.slidev-layout ul {
+  list-style: none;
+}
+
+.slidev-layout ol {
+  list-style: decimal;
+}
+
+.slidev-layout li {
+  margin: 0.4rem 0;
+  line-height: 1.6;
+  color: var(--adp-text-primary);
+  position: relative;
+}
+
+/* Replace square bullets with a tiny blue dot that matches ADP's accent. */
+.slidev-layout ul > li::before {
+  content: "";
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--adp-primary);
+  position: absolute;
+  left: -1rem;
+  top: 0.7rem;
+}
+
+.slidev-layout ul ul > li::before,
+.slidev-layout ol ul > li::before {
+  background: var(--adp-text-secondary);
+}
+
+/* ------- Emphasis ------------------------------------------------ */
 
 .slidev-layout strong,
 .slidev-layout b {
@@ -150,179 +153,147 @@ body,
 .slidev-layout em,
 .slidev-layout i {
   color: var(--adp-text-primary);
+  font-style: italic;
 }
 
-/* ---------- Lists ---------- */
-
-.slidev-layout ul,
-.slidev-layout ol {
-  padding-left: 1.4rem;
-  margin: 0.75rem 0;
-}
-
-.slidev-layout ul li {
-  list-style: none;
-  position: relative;
-  padding-left: 1.1rem;
-}
-
-.slidev-layout ul li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.65em;
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 50%;
-  background: var(--adp-primary);
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
-}
-
-.slidev-layout ol li {
-  padding-left: 0.4rem;
-}
-
-.slidev-layout ol li::marker {
-  color: var(--adp-primary);
-  font-weight: 600;
-}
-
-/* ---------- Links ---------- */
-
+/* Hyperlinks: inherit the dashed underline Slidev default but paint them
+   in ADP primary on hover. */
 .slidev-layout a {
   color: var(--adp-primary);
   text-decoration: none;
-  border-bottom: 1px solid rgba(96, 165, 250, 0.35);
+  border-bottom: 1px dashed currentColor;
   transition:
-    color 0.15s ease,
-    border-color 0.15s ease;
+    border-color 120ms ease,
+    color 120ms ease;
 }
 
 .slidev-layout a:hover {
-  color: var(--adp-text-primary);
-  border-bottom-color: var(--adp-primary);
+  color: var(--adp-primary-dark);
+  border-bottom-style: solid;
 }
 
-/* ---------- Blockquotes ---------- */
+/* ------- Blockquotes -------------------------------------------- */
 
 .slidev-layout blockquote {
+  background: var(--adp-primary-light);
+  color: var(--adp-text-primary);
+  border: 1px solid var(--adp-divider);
   border-left: 3px solid var(--adp-primary);
-  background: var(--adp-bg-paper);
-  padding: 0.75rem 1.1rem;
-  margin: 1rem 0;
-  color: var(--adp-text-secondary);
-  border-radius: 0 var(--adp-radius) var(--adp-radius) 0;
+  border-radius: var(--adp-radius);
+  box-shadow: var(--adp-shadow-sm);
+  padding: 0.85rem 1.1rem;
+  margin: 1.1rem 0;
+  font-size: 1.05em;
   font-style: normal;
 }
 
-.slidev-layout blockquote p {
-  margin: 0.25rem 0;
-  color: var(--adp-text-secondary);
+.slidev-layout blockquote > * {
+  margin: 0;
 }
 
-.slidev-layout blockquote strong,
-.slidev-layout blockquote b {
-  color: var(--adp-text-primary);
+.slidev-layout blockquote p + p {
+  margin-top: 0.5rem;
 }
 
-/* ---------- Horizontal rule ---------- */
+/* ------- Horizontal rule ---------------------------------------- */
 
 .slidev-layout hr {
   border: none;
-  height: 1px;
-  background: var(--adp-divider);
+  border-top: 1px solid var(--adp-divider);
   margin: 1.5rem 0;
 }
 
-/* ---------- Tables ---------- */
+/* ------- Cover layout ------------------------------------------- */
 
-.slidev-layout table {
-  border-collapse: collapse;
-  background: var(--adp-bg-paper);
-  border-radius: var(--adp-radius);
-  overflow: hidden;
-  box-shadow: var(--adp-shadow-sm);
-  margin: 1rem 0;
-}
-
-.slidev-layout th,
-.slidev-layout td {
-  padding: 0.6rem 0.9rem;
-  text-align: left;
-  border-bottom: 1px solid var(--adp-divider);
+/*
+ * Cover slide. pages/01-title.md ships with class: text-white + background:
+ * '#0F172A' in its frontmatter. The background key is ignored by default
+ * cover.vue, but text-white IS applied to the slide wrapper and would make
+ * the title invisible on our light card.
+ *
+ * Strategy: force light ADP styling on the cover with enough selector weight
+ * to beat utility classes, and paint the title in ADP primary so it pops.
+ */
+.slidev-layout.cover {
+  background: var(--adp-bg-default);
   color: var(--adp-text-primary);
-  font-size: 0.95rem;
+  display: grid;
+  place-content: center;
+  padding: 4rem 5rem;
+  text-align: left;
 }
 
-.slidev-layout th {
-  background: var(--adp-bg-elevated);
-  color: var(--adp-text-secondary);
+.slidev-layout.cover,
+.slidev-layout.cover * {
+  color: var(--adp-text-primary) !important;
+}
+
+.slidev-layout.cover h1 {
+  font-size: 5.5rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--adp-primary) !important;
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.slidev-layout.cover h1::after {
+  width: 5rem;
+  height: 4px;
+}
+
+.slidev-layout.cover p {
+  font-size: 1.5rem;
+  line-height: 1.5;
+  color: var(--adp-text-secondary) !important;
+  max-width: 42rem;
+}
+
+.slidev-layout.cover strong,
+.slidev-layout.cover b {
+  color: var(--adp-text-primary) !important;
   font-weight: 600;
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
-.slidev-layout tr:last-child td {
-  border-bottom: none;
-}
-
-/* ---------- Images ---------- */
-
-.slidev-layout img {
-  border-radius: var(--adp-radius);
-  box-shadow: var(--adp-shadow-md);
-  border: 1px solid var(--adp-divider);
-}
-
-/* ---------- Two-column grids used in comparison slides ----------
-   Page 10d-inspector-vs-debugger.md wraps each column in a `<div>` inside a
-   `grid grid-cols-2`. Without styling, the columns read as plain text blocks;
-   we turn them into card-style panels like ADP's dashboard cards. */
-
-.slidev-layout .grid.grid-cols-2 > div {
-  background: var(--adp-bg-paper);
-  border: 1px solid var(--adp-divider);
-  border-radius: var(--adp-radius-lg);
-  padding: 1.25rem 1.5rem;
-  box-shadow: var(--adp-shadow-sm);
-}
-
-.slidev-layout .grid.grid-cols-2 > div h3 {
-  margin-top: 0;
-  color: var(--adp-primary);
-}
-
-.slidev-layout .grid.grid-cols-2 > div blockquote {
-  background: var(--adp-bg-elevated);
-}
-
-/* ---------- Utility: muted/opacity helpers already used in slides ----------
-   Slides lean on `opacity-60`, `opacity-70`, `opacity-80` from UnoCSS. Those
-   still work on their own; we only make sure the underlying color isn't pure
-   white so the result reads as "ADP secondary text" rather than gray. */
-
-.slidev-layout .opacity-60,
-.slidev-layout .opacity-70,
-.slidev-layout .opacity-80,
-.slidev-layout .opacity-90 {
-  color: var(--adp-text-secondary);
-}
-
-/* Cover / center slides want white muted text on the gradient background. */
 .slidev-layout.cover .opacity-60,
 .slidev-layout.cover .opacity-70,
 .slidev-layout.cover .opacity-80,
-.slidev-layout.center .opacity-60,
-.slidev-layout.center .opacity-70,
-.slidev-layout.center .opacity-80,
-.slidev-layout.center .opacity-90 {
-  color: var(--adp-text-secondary);
+.slidev-layout.cover .opacity-90 {
+  color: var(--adp-text-secondary) !important;
 }
 
-/* ---------- Footer / slide number ---------- */
+/* ------- Center layout ------------------------------------------ */
 
-.slidev-page-number,
-.slidev-controls {
+.slidev-layout.center {
+  background: var(--adp-bg-default);
+  text-align: center;
+}
+
+.slidev-layout.center h1 {
+  font-size: 3rem;
+  line-height: 1.15;
+  color: var(--adp-text-primary);
+}
+
+/* Center layouts use grid place-content-center - the h1 accent bar looks
+   weird when the heading is centred, so drop it back to a centred version. */
+.slidev-layout.center h1::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.slidev-layout.center h2 {
   color: var(--adp-text-secondary);
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+/* ------- Statement / fact / end --------------------------------- */
+
+.slidev-layout.statement,
+.slidev-layout.fact,
+.slidev-layout.end {
+  background: var(--adp-bg-default);
+  color: var(--adp-text-primary);
 }

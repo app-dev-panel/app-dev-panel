@@ -1,0 +1,45 @@
+/*
+ * Slide container backgrounds.
+ *
+ * Why this file exists:
+ *   Slidev's SlideContainer renders TWO nested wrappers around each slide:
+ *     - .slidev-slide-container  (letterbox; black by default)
+ *     - .slidev-slide-content    (16:9 box; bg-main = bg-white | dark:#121212)
+ *   Plus the outer <html>, <body>, #app layers. On wide viewports you can
+ *   see all of them - any one that's not painted in the ADP bg creates a
+ *   visual seam (the classic black letterbox defect).
+ *
+ *   We force every layer to the ADP background so the deck reads as a
+ *   single clean surface.
+ */
+
+html,
+body,
+#app {
+  background: var(--adp-bg-default);
+  color: var(--adp-text-primary);
+  font-family: var(--adp-font-sans);
+}
+
+/* The letterbox. Default Slidev var is literally 'black'. */
+.slidev-slide-container {
+  background: var(--adp-bg-default) !important;
+}
+
+/*
+ * The 16:9 slide content box.
+ * bg-main resolves to bg-white in light mode, so in principle this is fine -
+ * but we hard-pin it anyway so the deck doesn't depend on html.dark being
+ * absent. ADP's "page" feels like bg-default (gray50), not pure paper, so
+ * that's what we use here.
+ */
+.slidev-slide-content {
+  background: var(--adp-bg-default) !important;
+}
+
+/* Presenter mode + overview + print wrappers */
+.slidev-presenter,
+.slidev-overview,
+.slidev-overview .slidev-page {
+  background: var(--adp-bg-default);
+}

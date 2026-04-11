@@ -1,46 +1,43 @@
 /*
- * ADP design tokens → Slidev CSS variables.
+ * ADP design tokens -> CSS custom properties + Slidev theme variables (LIGHT).
  *
  * Source of truth: libs/frontend/packages/sdk/src/Component/Theme/tokens.ts
+ *   - primitives
+ *   - semanticTokens (light palette)
+ *   - componentTokens
  *
- * We copy the raw hex values instead of importing so the theme stays
- * self-contained and does not depend on the frontend build.
- *
- * If the frontend tokens change, update BOTH files.
+ * We copy raw hex values so this theme stays self-contained. If the frontend
+ * tokens change, update THIS file alongside the source.
  */
 
 :root {
-  /* ---- ADP primitives (dark-first, matches darkSemanticTokens) ---- */
+  /* ---- ADP surfaces (light palette.background.*) ------------------- */
+  --adp-bg-default: #f3f4f6; /* gray50 */
+  --adp-bg-paper: #ffffff; /* white */
+  --adp-bg-subtle: #f5f5f5; /* gray100 - faint lift */
 
-  /* Backgrounds */
-  --adp-bg-default: #0f172a; /* background.default */
-  --adp-bg-paper: #1e293b; /* background.paper */
-  --adp-bg-elevated: #253449; /* slight lift above paper */
+  /* ---- ADP text (light palette.text.*) ----------------------------- */
+  --adp-text-primary: #1a1a1a; /* gray900 */
+  --adp-text-secondary: #666666; /* gray600 */
+  --adp-text-disabled: #999999; /* gray400 */
 
-  /* Text */
-  --adp-text-primary: #f1f5f9;
-  --adp-text-secondary: #94a3b8;
-  --adp-text-disabled: #64748b;
+  /* ---- ADP primary accent (palette.primary.*) ---------------------- */
+  --adp-primary: #2563eb; /* blue500 */
+  --adp-primary-dark: #1d4ed8; /* blue700 */
+  --adp-primary-light: #eff6ff; /* blue50 */
 
-  /* Accents */
-  --adp-primary: #60a5fa; /* primary.main (dark) */
-  --adp-primary-dark: #3b82f6;
-  --adp-primary-light: #1e3a5f;
+  /* ---- ADP status --------------------------------------------------- */
+  --adp-success: #16a34a;
+  --adp-warning: #d97706;
+  --adp-error: #dc2626;
+  --adp-error-light: #fee2e2;
 
-  --adp-success: #4ade80;
-  --adp-warning: #fbbf24;
-  --adp-error: #f87171;
-  --adp-info: #60a5fa;
+  /* ---- ADP structure ------------------------------------------------ */
+  --adp-divider: #e5e5e5; /* gray200 */
+  --adp-radius: 8px; /* primitives.radiusBase */
+  --adp-radius-lg: 16px; /* componentTokens.sidebar.borderRadius = radiusBase*2 */
 
-  /* Structure */
-  --adp-divider: #334155;
-  --adp-radius: 8px;
-  --adp-radius-lg: 16px;
-
-  /* Highlight (row hover / search match) */
-  --adp-highlight: #5c2020;
-
-  /* Typography */
+  /* ---- Typography --------------------------------------------------- */
   --adp-font-sans:
     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
@@ -48,51 +45,35 @@
     "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
     "Liberation Mono", monospace;
 
-  /* Shadows */
-  --adp-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --adp-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --adp-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35);
+  /* ---- Shadows (semanticTokens.shadows) ----------------------------- */
+  --adp-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --adp-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --adp-shadow-lg:
+    0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+
+  /* ---- Nav accent bar (componentTokens.navItem.activeBarWidth) ------ */
+  --adp-accent-bar-width: 3px;
 }
 
 /*
- * Slidev built-in CSS variables. These are the ones the default theme
- * reads; overriding them here propagates to every slide without any
- * per-layout work.
- *
- * See: https://sli.dev/themes/write-a-theme.html#css-variables
+ * Slidev's own CSS variables. Overriding these here propagates to every
+ * slide without per-layout work.
+ * See: node_modules/@slidev/client/styles/vars.css
  */
 :root {
-  /* Body / background */
-  --slidev-theme-background: var(--adp-bg-default);
-  --slidev-theme-foreground: var(--adp-text-primary);
+  /* Letterbox around the 16:9 slide (default: black) */
+  --slidev-slide-container-background: var(--adp-bg-default);
 
-  /* Primary accent (links, active states) */
+  /* Theme accent (default: #3ab9d5 cyan) */
   --slidev-theme-primary: var(--adp-primary);
-  --slidev-theme-secondary: var(--adp-text-secondary);
-  --slidev-theme-accent: var(--adp-primary);
 
-  /* Code blocks */
+  /* Code-block chrome (card surface) */
   --slidev-code-background: var(--adp-bg-paper);
   --slidev-code-foreground: var(--adp-text-primary);
   --slidev-code-radius: var(--adp-radius);
   --slidev-code-font-family: var(--adp-font-mono);
-  --slidev-code-padding: 16px 20px;
+  --slidev-code-font-size: 1rem;
   --slidev-code-line-height: 1.55;
-
-  /* Fonts */
-  --slidev-font-sans: var(--adp-font-sans);
-  --slidev-font-mono: var(--adp-font-mono);
-}
-
-/*
- * UnoCSS preset-theme hooks used by the default Slidev layouts.
- * These keep Tailwind/Uno utilities (text-gray-400, etc.) pointing
- * at ADP's palette rather than the seriph defaults.
- */
-html,
-body,
-#app {
-  background-color: var(--adp-bg-default);
-  color: var(--adp-text-primary);
-  font-family: var(--adp-font-sans);
+  --slidev-code-padding: 1.25rem 1.5rem;
+  --slidev-code-margin: 1.25rem 0;
 }

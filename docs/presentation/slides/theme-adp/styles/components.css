@@ -1,0 +1,154 @@
+/*
+ * ADP-style components that live inside slides: cards, tables, two-column
+ * grids (used on pages/10d-inspector-vs-debugger.md), images with card
+ * treatment, and kbd chips.
+ *
+ * All of these inherit the ADP card surface recipe:
+ *   - bg-paper (white)
+ *   - 1px divider border
+ *   - 8px radius
+ *   - shadow-sm
+ */
+
+/* ------- Cards from grid children ------------------------------- */
+
+/*
+ * Two-column comparison on slide 10d renders as:
+ *   <div class="grid grid-cols-2 gap-10 mt-8">
+ *     <div> ... </div>
+ *     <div> ... </div>
+ *   </div>
+ *
+ * We want each immediate child div to look like a real ADP card.
+ * Scoped under .slidev-layout so it only applies inside slides.
+ */
+.slidev-layout .grid[class*="grid-cols-"] > div {
+  background: var(--adp-bg-paper);
+  border: 1px solid var(--adp-divider);
+  border-radius: var(--adp-radius-lg);
+  box-shadow: var(--adp-shadow-sm);
+  padding: 1.5rem 1.75rem;
+}
+
+/* The text below the grid on slide 10d is NOT a card. */
+.slidev-layout .grid[class*="grid-cols-"] + * {
+  /* passthrough - no card treatment on the conclusion line */
+}
+
+/* Headings inside cards: dial the accent bar down (smaller than slide h1). */
+.slidev-layout .grid[class*="grid-cols-"] > div h1,
+.slidev-layout .grid[class*="grid-cols-"] > div h2,
+.slidev-layout .grid[class*="grid-cols-"] > div h3 {
+  margin-top: 0;
+}
+
+.slidev-layout .grid[class*="grid-cols-"] > div h3 {
+  font-size: 1.5rem;
+  color: var(--adp-primary-dark);
+  padding-bottom: 0.4rem;
+  position: relative;
+}
+
+.slidev-layout .grid[class*="grid-cols-"] > div h3::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 2rem;
+  height: 3px;
+  background: var(--adp-primary);
+  border-radius: 2px;
+}
+
+.slidev-layout .grid[class*="grid-cols-"] > div p,
+.slidev-layout .grid[class*="grid-cols-"] > div li {
+  color: var(--adp-text-primary);
+}
+
+/* ------- Images -------------------------------------------------- */
+
+/*
+ * Slide 13b (pages/13b-laravel-debugbar.md) embeds:
+ *   <img src="/laravel-debugbar.png" class="w-full mt-4 rounded shadow-lg" />
+ * Utility classes already supply rounded + shadow, but we want the ADP
+ * card treatment regardless, so we restate on every slide img.
+ */
+.slidev-layout img {
+  display: block;
+  max-width: 100%;
+  border: 1px solid var(--adp-divider);
+  border-radius: var(--adp-radius);
+  box-shadow: var(--adp-shadow-md);
+  background: var(--adp-bg-paper);
+}
+
+/* ------- Tables -------------------------------------------------- */
+
+.slidev-layout table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--adp-bg-paper);
+  border: 1px solid var(--adp-divider);
+  border-radius: var(--adp-radius);
+  overflow: hidden;
+  box-shadow: var(--adp-shadow-sm);
+  margin: 1.1rem 0;
+  font-size: 1.05rem;
+}
+
+.slidev-layout thead {
+  background: var(--adp-bg-subtle);
+}
+
+.slidev-layout th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--adp-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.85em;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--adp-divider);
+}
+
+.slidev-layout td {
+  padding: 0.75rem 1rem;
+  color: var(--adp-text-primary);
+  border-bottom: 1px solid var(--adp-divider);
+}
+
+.slidev-layout tr:last-child td {
+  border-bottom: none;
+}
+
+.slidev-layout tr:hover td {
+  background: var(--adp-primary-light);
+}
+
+/* ------- Kbd chips ---------------------------------------------- */
+
+.slidev-layout kbd {
+  font-family: var(--adp-font-mono);
+  font-size: 0.85em;
+  background: var(--adp-bg-subtle);
+  color: var(--adp-text-primary);
+  border: 1px solid var(--adp-divider);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+}
+
+/* ------- Speaker-note markers ----------------------------------- */
+
+/* The SlideBottom/SlideTop global layers render tiny click indicators; let
+   them sit undisturbed. */
+
+/* ------- v-click dim fallback ----------------------------------- */
+
+/* Slidev handles click reveal via its own classes; we just make sure dim
+   state is subtle and still legible. */
+.slidev-vclick-hidden {
+  opacity: 0;
+}

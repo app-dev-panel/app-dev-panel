@@ -1,15 +1,16 @@
 {
   "name": "slidev-theme-adp",
-  "version": "0.0.0",
-  "description": "Slidev theme matching the ADP (Application Development Panel) visual language.",
+  "version": "0.0.1",
+  "description": "Slidev theme matching the ADP (Application Development Panel) visual language - light mode, Inter typography, white paper cards, blue accent bar.",
   "private": true,
   "keywords": ["slidev-theme", "slidev", "adp"],
   "slidev": {
-    "colorSchema": "dark",
+    "colorSchema": "light",
     "highlighter": "shiki",
     "defaults": {
       "highlighter": "shiki",
-      "lineNumbers": false
+      "lineNumbers": false,
+      "aspectRatio": "16/9"
     }
   }
 }

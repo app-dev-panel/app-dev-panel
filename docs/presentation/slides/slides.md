@@ -5,7 +5,7 @@ info: |
     Как я устал дебажить вебхуки и сделал свою панель.
     Доклад на Подлодка PHP.
 author: ADP team
-colorSchema: dark
+colorSchema: light
 highlighter: shiki
 lineNumbers: false
 drawings:
@@ -17,7 +17,7 @@ fonts:
     mono: JetBrains Mono
     weights: '300,400,500,600,700'
 shiki:
-    theme: vitesse-dark
+    theme: vitesse-light
 ---
 
 <!--
