@@ -121,6 +121,10 @@ src: ./pages/17-how-ai-helped.md
 ---
 
 ---
+src: ./pages/17b-architecture-once.md
+---
+
+---
 src: ./pages/18-mcp.md
 ---
 
