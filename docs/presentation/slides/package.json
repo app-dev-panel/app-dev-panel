@@ -8,8 +8,7 @@
     "export": "slidev export slides.md"
   },
   "devDependencies": {
-    "@slidev/cli": "^0.49.0",
-    "@slidev/theme-default": "^0.25.0",
+    "@slidev/cli": "^52.0.0",
     "slidev-theme-adp": "file:./theme-adp"
   }
 }
