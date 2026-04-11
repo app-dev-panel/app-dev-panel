@@ -1,0 +1,15 @@
+{
+  "name": "adp-presentation",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "slidev slides.md --open",
+    "build": "slidev build slides.md",
+    "export": "slidev export slides.md"
+  },
+  "devDependencies": {
+    "@slidev/cli": "^0.49.0",
+    "@slidev/theme-default": "^0.25.0",
+    "slidev-theme-adp": "file:./theme-adp"
+  }
+}

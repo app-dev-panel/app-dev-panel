@@ -1,16 +1,23 @@
 ---
-theme: seriph
+theme: ./theme-adp
 title: ADP — Application Development Panel
 info: |
     Как я устал дебажить вебхуки и сделал свою панель.
     Доклад на Подлодка PHP.
 author: ADP team
+colorSchema: dark
 highlighter: shiki
 lineNumbers: false
 drawings:
     persist: false
 transition: slide-left
 mdc: true
+fonts:
+    sans: Inter
+    mono: JetBrains Mono
+    weights: '300,400,500,600,700'
+shiki:
+    theme: vitesse-dark
 ---
 
 <!--

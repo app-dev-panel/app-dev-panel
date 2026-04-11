@@ -1,0 +1,15 @@
+{
+  "name": "slidev-theme-adp",
+  "version": "0.0.0",
+  "description": "Slidev theme matching the ADP (Application Development Panel) visual language.",
+  "private": true,
+  "keywords": ["slidev-theme", "slidev", "adp"],
+  "slidev": {
+    "colorSchema": "dark",
+    "highlighter": "shiki",
+    "defaults": {
+      "highlighter": "shiki",
+      "lineNumbers": false
+    }
+  }
+}

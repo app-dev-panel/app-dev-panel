@@ -1,0 +1,110 @@
+/*
+ * Code-block styling for the ADP-themed Slidev deck.
+ *
+ * Shiki renders each code block as `<pre class="shiki ..."><code>...</code></pre>`.
+ * We do NOT override shiki's inline token colors — those come from the shiki
+ * theme chosen in slides.md frontmatter (we default to `vitesse-dark`). We only
+ * touch the wrapper chrome: background, border, padding, radius, and the
+ * highlighted-line treatment.
+ */
+
+/* ---------- Inline code ---------- */
+
+.slidev-layout :not(pre) > code {
+  font-family: var(--adp-font-mono);
+  font-size: 0.92em;
+  background: var(--adp-bg-paper);
+  color: var(--adp-text-primary);
+  padding: 0.12em 0.4em;
+  border-radius: 4px;
+  border: 1px solid var(--adp-divider);
+}
+
+/* ---------- Code-block wrapper ---------- */
+
+.slidev-layout pre,
+.slidev-layout .shiki,
+.slidev-layout div[class*="language-"] pre {
+  font-family: var(--adp-font-mono) !important;
+  background: var(--adp-bg-paper) !important;
+  color: var(--adp-text-primary) !important;
+  border: 1px solid var(--adp-divider);
+  border-radius: var(--adp-radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--adp-shadow-md);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  overflow-x: auto;
+}
+
+/* Slidev wraps the shiki output in its own `.slidev-code` element. */
+.slidev-layout .slidev-code {
+  font-family: var(--adp-font-mono) !important;
+  background: var(--adp-bg-paper) !important;
+  border-radius: var(--adp-radius);
+  border: 1px solid var(--adp-divider);
+  box-shadow: var(--adp-shadow-md);
+}
+
+.slidev-layout pre code,
+.slidev-layout .shiki code {
+  font-family: var(--adp-font-mono) !important;
+  background: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  font-size: inherit;
+}
+
+/* ---------- Shiki line highlights ----------
+   Slidev's `{1-4|6-14|10|12|all}` step syntax toggles the `.slidev-code-line`
+   (or `.line`) `dim`/`highlighted` classes. We want dim lines to fade and
+   highlighted lines to glow with the ADP primary color rather than plain
+   white. */
+
+.slidev-layout .shiki .line,
+.slidev-layout .slidev-code .line {
+  transition:
+    opacity 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.slidev-layout .shiki .line.dim,
+.slidev-layout .slidev-code .line.dim,
+.slidev-layout .shiki .line.has-dim,
+.slidev-layout .slidev-code .line.has-dim {
+  opacity: 0.35;
+}
+
+.slidev-layout .shiki .line.highlighted,
+.slidev-layout .slidev-code .line.highlighted,
+.slidev-layout .shiki .line.has-highlight,
+.slidev-layout .slidev-code .line.has-highlight {
+  background-color: rgba(96, 165, 250, 0.12);
+  box-shadow: inset 3px 0 0 var(--adp-primary);
+}
+
+/* ---------- Language label (top-right of code block) ---------- */
+
+.slidev-layout pre[class*="language-"]::before,
+.slidev-layout .shiki[class*="language-"]::before {
+  display: none;
+}
+
+/* ---------- Scrollbar for horizontal code overflow ---------- */
+
+.slidev-layout pre::-webkit-scrollbar,
+.slidev-layout .shiki::-webkit-scrollbar {
+  height: 8px;
+  background: transparent;
+}
+
+.slidev-layout pre::-webkit-scrollbar-thumb,
+.slidev-layout .shiki::-webkit-scrollbar-thumb {
+  background: var(--adp-divider);
+  border-radius: 4px;
+}
+
+.slidev-layout pre::-webkit-scrollbar-thumb:hover,
+.slidev-layout .shiki::-webkit-scrollbar-thumb:hover {
+  background: var(--adp-text-disabled);
+}
