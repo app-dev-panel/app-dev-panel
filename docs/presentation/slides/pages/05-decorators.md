@@ -4,7 +4,7 @@
 
 Интерфейс в коде очень легко накрыть прокси-адаптером:
 
-```php {all|1-3|5-15|8|9|all}
+```php {1-4|6-14|10|12|all}
 interface LoggerInterface
 {
     public function log($level, string $message, array $context = []): void;
@@ -21,7 +21,11 @@ final class LoggerInterfaceProxy implements LoggerInterface
 }
 ```
 
+<v-click>
+
 Сначала пишем в коллектор. Потом передаём вызов дальше. Или наоборот.
+
+</v-click>
 
 <!--
 Speaker notes:

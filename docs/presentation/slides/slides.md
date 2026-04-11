@@ -49,6 +49,10 @@ src: ./pages/06-decorators-metrics.md
 ---
 
 ---
+src: ./pages/06b-decorators-applies-to.md
+---
+
+---
 src: ./pages/07-listeners.md
 ---
 
