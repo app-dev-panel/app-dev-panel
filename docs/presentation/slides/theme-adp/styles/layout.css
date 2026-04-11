@@ -1,20 +1,49 @@
 /*
- * ADP layout: global typography, headings, lists, links, blockquotes.
+ * ADP layout — global typography + container backgrounds.
  *
- * Everything is scoped under .slidev-layout so presenter UI chrome is
- * untouched. Slide padding is kept close to Slidev defaults but a touch
- * more generous on the horizontal to match the ADP content panel feel.
+ * Keep it narrow and boring: only touch what needs to match ADP's visual
+ * language. Everything else uses Slidev defaults.
  */
 
-.slidev-layout {
-  padding: 3rem 4rem;
+/* ---- Global surfaces (was container.css) ----------------------------- */
+
+html,
+body,
+#app {
   background: var(--adp-bg-default);
   color: var(--adp-text-primary);
   font-family: var(--adp-font-sans);
-  font-size: 1.375rem; /* ~22px baseline body */
-  line-height: 1.6;
+}
+
+/* Slidev paints .slidev-slide-container literally black as its letterbox
+   default. Repaint it and its inner content box with ADP's light gray so
+   the deck looks like one clean surface regardless of viewport aspect. */
+.slidev-slide-container,
+.slidev-slide-content {
+  background: var(--adp-bg-default) !important;
+}
+
+/* ---- Slidev goto-slide drawer ----------------------------------------
+   Navigating directly to /N in the dev server leaves Slidev's built-in
+   goto-slide autocomplete drawer stuck visible on the right edge (it's a
+   known Slidev quirk — also reproduces on theme: default). Hide it here;
+   users can still use arrow keys / space / click to navigate. */
+.fixed.right-5 .autocomplete-list,
+.fixed.right-5.-top-20 {
+  display: none !important;
+}
+
+/* ---- Slide body ------------------------------------------------------- */
+
+.slidev-layout {
+  padding: 2rem 3rem;
+  background: var(--adp-bg-default);
+  color: var(--adp-text-primary);
+  font-family: var(--adp-font-sans);
+  font-size: 1.1rem;           /* ~17.6px baseline body */
+  line-height: 1.55;
   font-weight: 400;
-  font-feature-settings: "cv11", "ss01";
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -35,13 +64,13 @@
 }
 
 .slidev-layout h1 {
-  font-size: 2.75rem; /* ~44px */
+  font-size: 2.25rem; /* ~36px */
   line-height: 1.15;
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   position: relative;
-  padding-bottom: 0.6rem;
+  padding-bottom: 0.5rem;
 }
 
 /* ADP's signature 3px primary accent bar under the slide title,
@@ -59,21 +88,21 @@
 }
 
 .slidev-layout h2 {
-  font-size: 2rem; /* ~32px */
+  font-size: 1.65rem; /* ~26px */
   line-height: 1.25;
-  color: var(--adp-text-primary);
-  margin-top: 1.5rem;
-}
-
-.slidev-layout h3 {
-  font-size: 1.625rem; /* ~26px */
-  line-height: 1.3;
   color: var(--adp-text-primary);
   margin-top: 1.25rem;
 }
 
+.slidev-layout h3 {
+  font-size: 1.35rem; /* ~22px */
+  line-height: 1.3;
+  color: var(--adp-text-primary);
+  margin-top: 1rem;
+}
+
 .slidev-layout h4 {
-  font-size: 1.375rem; /* ~22px */
+  font-size: 1.15rem; /* ~18px */
   line-height: 1.35;
   color: var(--adp-text-secondary);
 }
@@ -94,13 +123,13 @@
 /* ------- Paragraphs / lists ------------------------------------- */
 
 .slidev-layout p {
-  margin: 0.85rem 0;
-  line-height: 1.6;
+  margin: 0.6rem 0;
+  line-height: 1.55;
   color: var(--adp-text-primary);
 }
 
 .slidev-layout p + p {
-  margin-top: 1rem;
+  margin-top: 0.6rem;
 }
 
 .slidev-layout ul,

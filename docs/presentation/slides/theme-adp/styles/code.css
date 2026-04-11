@@ -15,11 +15,13 @@
   border: 1px solid var(--adp-divider);
   border-radius: var(--adp-radius);
   box-shadow: var(--adp-shadow-sm);
-  padding: 1.1rem 1.35rem;
-  margin: 1.1rem 0;
+  padding: 0.85rem 1.1rem;
+  margin: 0.8rem 0;
   font-family: var(--adp-font-mono);
-  font-size: 1rem;
-  line-height: 1.55;
+  font-size: 0.72rem;    /* small enough so 14-line code blocks fit on 16:9 */
+  line-height: 1.45;
+  max-width: 100%;
+  box-sizing: border-box;
   overflow-x: auto;
   overflow-y: hidden;
   font-variant-ligatures: none;
