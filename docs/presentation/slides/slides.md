@@ -97,6 +97,10 @@ src: ./pages/13-only-yii3.md
 ---
 
 ---
+src: ./pages/13b-laravel-debugbar.md
+---
+
+---
 src: ./pages/14-ai-arrived.md
 ---
 
