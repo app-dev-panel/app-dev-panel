@@ -65,7 +65,23 @@ src: ./pages/09-universal-collector.md
 ---
 
 ---
-src: ./pages/10-inspector-why.md
+src: ./pages/09b-hijack-handler.md
+---
+
+---
+src: ./pages/10-debugger-state.md
+---
+
+---
+src: ./pages/10b-runtime-question.md
+---
+
+---
+src: ./pages/10c-meet-inspector.md
+---
+
+---
+src: ./pages/10d-inspector-vs-debugger.md
 ---
 
 ---
