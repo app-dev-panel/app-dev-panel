@@ -1,6 +1,6 @@
 # У Laravel формально есть Debugbar
 
-<img src="/laravel-debugbar.png" class="w-full mt-4 rounded shadow-lg" />
+<div><img src="/laravel-debugbar.png" class="w-full mt-4 rounded shadow-lg" /></div>
 
 <!--
 Speaker notes:

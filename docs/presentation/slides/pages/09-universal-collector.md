@@ -1,9 +1,12 @@
 # Коллектор с ручным API — это просто дампер
 
 ```php
-public function show(int $id): Response
-{
-    $user   = $this->users->find($id);
+public function show(
+    int $id,
+    UserRepository $users,
+    Collector $collector,
+): Response {
+    $user   = $users->find($id);
     $collector->dump($user);                  // объект
 
     $orders = $this->orders->forUser($user);

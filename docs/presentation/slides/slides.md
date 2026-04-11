@@ -141,6 +141,10 @@ src: ./pages/17b-architecture-once.md
 ---
 
 ---
+src: ./pages/17c-ai-but-no-bridge.md
+---
+
+---
 src: ./pages/18-mcp.md
 ---
 
