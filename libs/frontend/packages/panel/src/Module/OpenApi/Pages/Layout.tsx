@@ -1,31 +1,23 @@
 import {SettingsDialog} from '@app-dev-panel/panel/Module/OpenApi/Component/SettingsDialog';
 import {useOpenApiEntries} from '@app-dev-panel/panel/Module/OpenApi/Context/Context';
 import '@app-dev-panel/panel/Module/OpenApi/Pages/dark.css';
-import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
-import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Settings} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
-import {IconButton, Stack, Tab, Tabs, Typography, useTheme} from '@mui/material';
+import {IconButton, Stack, Tab, Tabs, useTheme} from '@mui/material';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
 
-const NoEntries = React.memo(() => {
-    return (
-        <InfoBox
-            title="No Open API entries found"
-            text={
-                <>
-                    <Typography>Click on settings button and add new Open API entry.</Typography>
-                </>
-            }
-            severity="info"
-            icon={<DuckIcon />}
-        />
-    );
-});
+const NoEntries = React.memo(() => (
+    <EmptyState
+        icon="data_object"
+        title="No Open API entries found"
+        description="Click the settings button to add a new Open API entry."
+    />
+));
 export const Layout = () => {
     const [tab, setTab] = useState<string>('');
     const [settingsPopupOpen, setSettingsPopupOpen] = useState<boolean>(false);

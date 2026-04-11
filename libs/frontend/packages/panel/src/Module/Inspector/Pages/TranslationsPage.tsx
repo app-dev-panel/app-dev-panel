@@ -7,6 +7,7 @@ import {FilterInput} from '@app-dev-panel/sdk/Component/Form/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
@@ -41,7 +42,7 @@ const columns: GridColDef[] = [
 ];
 
 export const TranslationsPage = () => {
-    const {data, isLoading} = useGetTranslationsQuery();
+    const {data, isLoading, isError, error, refetch} = useGetTranslationsQuery();
     const [putTranslationsMutation] = usePutTranslationsMutation();
     const [searchParams, setSearchParams] = useSearchParams();
     const searchString = searchParams.get('filter') || '';
@@ -70,6 +71,17 @@ export const TranslationsPage = () => {
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
+    }
+
+    if (isError) {
+        return (
+            <QueryErrorState
+                error={error}
+                title="Failed to load translations"
+                fallback="Failed to load translations."
+                onRetry={refetch}
+            />
+        );
     }
 
     return (

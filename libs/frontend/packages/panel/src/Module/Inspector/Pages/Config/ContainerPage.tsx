@@ -4,6 +4,7 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {ContentCopy, Download, ErrorOutline, OpenInNew} from '@mui/icons-material';
@@ -132,7 +133,7 @@ const ContainerValue = ({entry, onLoad}: {entry: ContainerEntry; onLoad: (id: st
 // ---------------------------------------------------------------------------
 
 export const ContainerPage = () => {
-    const {data, isLoading} = useGetClassesQuery('');
+    const {data, isLoading, isError, error, refetch} = useGetClassesQuery('');
     const [lazyLoadObject] = useLazyGetObjectQuery();
     const [searchParams, setSearchParams] = useSearchParams();
     const searchString = searchParams.get('filter') || '';
@@ -182,6 +183,17 @@ export const ContainerPage = () => {
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
+    }
+
+    if (isError) {
+        return (
+            <QueryErrorState
+                error={error}
+                title="Failed to load container entries"
+                fallback="Failed to load container entries."
+                onRetry={refetch}
+            />
+        );
     }
 
     return (

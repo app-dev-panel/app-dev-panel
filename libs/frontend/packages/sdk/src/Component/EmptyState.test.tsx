@@ -23,4 +23,15 @@ describe('EmptyState', () => {
         renderWithProviders(<EmptyState title="Empty" />);
         expect(screen.queryByText('Try adjusting your filters')).not.toBeInTheDocument();
     });
+
+    it('renders the action element when provided', () => {
+        renderWithProviders(<EmptyState title="Empty" action={<button>Retry</button>} />);
+        expect(screen.getByRole('button', {name: 'Retry'})).toBeInTheDocument();
+    });
+
+    it('uses error icon color when severity is error', () => {
+        renderWithProviders(<EmptyState title="Failed to load" icon="error_outline" severity="error" />);
+        expect(screen.getByText('error_outline')).toBeInTheDocument();
+        expect(screen.getByText('Failed to load')).toBeInTheDocument();
+    });
 });

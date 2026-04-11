@@ -6,9 +6,8 @@ import {
 import {CommandErrorAlert} from '@app-dev-panel/panel/Module/Inspector/Component/Command/CommandErrorAlert';
 import {extractCommandError} from '@app-dev-panel/panel/Module/Inspector/Component/Command/extractCommandError';
 import {ResultDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Command/ResultDialog';
-import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
-import {EmojiObjects} from '@mui/icons-material';
 import {Box, Button, CircularProgress, Link, Typography} from '@mui/material';
 import {useEffect, useState} from 'react';
 
@@ -67,30 +66,25 @@ export const CommandsPage = () => {
 
     if (commandEntries.length === 0) {
         return (
-            <InfoBox
-                title="No commands found"
-                text={
-                    <>
-                        <Typography>
-                            Add a command to the "app-dev-panel/api" section into "params.php" on the backend to be able
-                            to run the command from ADP.
-                        </Typography>
-                        <Typography>
-                            You may inspect the section with{' '}
-                            <Link href="/inspector/config/parameters?filter=app-dev-panel/api">Inspector</Link>.
-                        </Typography>
-                        <Typography>
-                            See more information on the link{' '}
-                            <Link href="https://github.com/app-dev-panel/app-dev-panel">
-                                https://github.com/app-dev-panel/app-dev-panel
+            <>
+                <PageHeader title="Commands" icon="terminal" description="Run application commands" />
+                <EmptyState
+                    icon="terminal"
+                    title="No commands found"
+                    description={
+                        <>
+                            Add a command to the <code>app-dev-panel/api</code> section in <code>params.php</code> on
+                            the backend to run it from ADP. You may inspect the section with the{' '}
+                            <Link href="/inspector/config/parameters?filter=app-dev-panel/api">Inspector</Link>. See
+                            more information at{' '}
+                            <Link href="https://github.com/app-dev-panel/app-dev-panel" target="_blank" rel="noopener">
+                                github.com/app-dev-panel/app-dev-panel
                             </Link>
                             .
-                        </Typography>
-                    </>
-                }
-                severity="info"
-                icon={<EmojiObjects />}
-            />
+                        </>
+                    }
+                />
+            </>
         );
     }
 
