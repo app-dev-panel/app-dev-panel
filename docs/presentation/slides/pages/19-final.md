@@ -7,15 +7,17 @@ class: text-center
 
 ## Но теперь у нас есть нормальный дебаггер
 
-<img src="/duck.svg" alt="" class="mascot mx-auto mt-8 w-40" />
+<img src="/duck.svg" alt="" class="mascot mx-auto mt-6 w-32" />
 
-<div class="mt-6 text-2xl opacity-80">
+<div class="mt-6 text-3xl font-semibold">
 github.com/app-dev-panel/app-dev-panel
 </div>
 
-<div class="mt-4 opacity-60">
+<div class="mt-2 opacity-60 text-lg">
 Приходите ломать. Особенно адаптеры.
 </div>
+
+<!-- TODO: добавить QR-код рядом со ссылкой перед выступлением -->
 
 <!--
 Speaker notes:

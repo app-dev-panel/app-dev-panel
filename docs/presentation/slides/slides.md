@@ -133,6 +133,14 @@ src: ./pages/16-what-is-adp.md
 ---
 
 ---
+src: ./pages/16b-install.md
+---
+
+---
+src: ./pages/16c-demo.md
+---
+
+---
 src: ./pages/17-how-ai-helped.md
 ---
 
@@ -142,6 +150,10 @@ src: ./pages/17b-architecture-once.md
 
 ---
 src: ./pages/17c-ai-but-no-bridge.md
+---
+
+---
+src: ./pages/17d-mcp-solution.md
 ---
 
 ---

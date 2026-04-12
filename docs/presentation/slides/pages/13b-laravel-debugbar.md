@@ -2,6 +2,8 @@
 
 <div><img src="/laravel-debugbar.png" class="w-full mt-4 rounded shadow-lg" /></div>
 
+_«оно как бы есть — и как бы нет»_
+
 <!--
 Speaker notes:
 Сразу дисклеймер: не со зла. Ребята из Debugbar молодцы,
