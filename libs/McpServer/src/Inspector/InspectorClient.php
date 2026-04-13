@@ -6,10 +6,7 @@ namespace AppDevPanel\McpServer\Inspector;
 
 /**
  * HTTP client for ADP Inspector API.
- *
- * Makes GET/POST requests to the Inspector endpoints using file_get_contents
- * with stream context (no external dependencies). Used by MCP Inspector tools
- * to query live application state (routes, config, DB schema).
+ * Uses file_get_contents with stream context to avoid requiring a PSR-18 client dependency.
  */
 class InspectorClient implements InspectorInterface
 {
@@ -20,7 +17,7 @@ class InspectorClient implements InspectorInterface
 
     public static function fromOptionalUrl(?string $url): ?self
     {
-        return is_string($url) && $url !== '' ? new self($url) : null;
+        return $url !== null && $url !== '' ? new self($url) : null;
     }
 
     public function getBaseUrl(): string

@@ -15,6 +15,7 @@ final class McpConfig
      *                                                  null  = all inspector tools (default)
      *                                                  []    = none
      *                                                  ['inspect_routes'] = specific tools only
+     *                                                  Use McpToolRegistryFactory::TOOL_INSPECT_* constants for values.
      */
     public function __construct(
         public readonly ?array $allowedInspectorTools = null,
