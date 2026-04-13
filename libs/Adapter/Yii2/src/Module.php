@@ -637,15 +637,12 @@ class Module extends \yii\base\Module implements BootstrapInterface
         \Yii::$container->setSingleton(McpSettings::class, static fn() => new McpSettings($storagePath));
 
         $mcpInspectorUrl = $this->mcpInspectorUrl;
-        $mcpInspector = is_string($mcpInspectorUrl) && $mcpInspectorUrl !== ''
-            ? new InspectorClient($mcpInspectorUrl)
-            : null;
 
         \Yii::$container->setSingleton(
             McpServer::class,
             static fn() => new McpServer(McpToolRegistryFactory::create(
                 \Yii::$container->get(StorageInterface::class),
-                $mcpInspector,
+                InspectorClient::fromOptionalUrl($mcpInspectorUrl),
             )),
         );
 

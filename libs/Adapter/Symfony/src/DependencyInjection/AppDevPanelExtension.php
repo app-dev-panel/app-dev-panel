@@ -634,18 +634,16 @@ final class AppDevPanelExtension extends Extension
                 ->register(InspectorClient::class, InspectorClient::class)
                 ->setArguments([$inspectorUrl])
                 ->setPublic(false);
-            $container
-                ->register(ToolRegistry::class, ToolRegistry::class)
-                ->setFactory([McpToolRegistryFactory::class, 'create'])
-                ->setArguments([new Reference(StorageInterface::class), new Reference(InspectorClient::class)])
-                ->setPublic(false);
-        } else {
-            $container
-                ->register(ToolRegistry::class, ToolRegistry::class)
-                ->setFactory([McpToolRegistryFactory::class, 'create'])
-                ->setArguments([new Reference(StorageInterface::class)])
-                ->setPublic(false);
         }
+
+        $container
+            ->register(ToolRegistry::class, ToolRegistry::class)
+            ->setFactory([McpToolRegistryFactory::class, 'create'])
+            ->setArguments([
+                new Reference(StorageInterface::class),
+                new Reference(InspectorClient::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(false);
 
         $container
             ->register(McpSettings::class, McpSettings::class)

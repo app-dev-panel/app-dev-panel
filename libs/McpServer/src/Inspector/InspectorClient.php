@@ -18,6 +18,11 @@ class InspectorClient implements InspectorInterface
         private readonly int $timeoutSeconds = 10,
     ) {}
 
+    public static function fromOptionalUrl(?string $url): ?self
+    {
+        return is_string($url) && $url !== '' ? new self($url) : null;
+    }
+
     public function getBaseUrl(): string
     {
         return $this->baseUrl;
@@ -86,13 +91,21 @@ class InspectorClient implements InspectorInterface
         try {
             $response = @file_get_contents($url, false, $context);
         } catch (\Throwable $e) {
-            return ['success' => false, 'data' => null, 'error' => sprintf('Failed to connect to %s: %s', $url, $e->getMessage())];
+            return [
+                'success' => false,
+                'data' => null,
+                'error' => sprintf('Failed to connect to %s: %s', $url, $e->getMessage()),
+            ];
         }
 
         if ($response === false) {
             $lastError = error_get_last();
             $detail = $lastError !== null ? $lastError['message'] : 'unknown error';
-            return ['success' => false, 'data' => null, 'error' => sprintf('Failed to connect to %s: %s', $url, $detail)];
+            return [
+                'success' => false,
+                'data' => null,
+                'error' => sprintf('Failed to connect to %s: %s', $url, $detail),
+            ];
         }
 
         try {

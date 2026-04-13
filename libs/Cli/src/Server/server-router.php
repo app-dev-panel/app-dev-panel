@@ -171,9 +171,7 @@ $services = [
         $jsonResponseFactory,
         new McpServer(McpToolRegistryFactory::create(
             $storage,
-            ($inspectorUrlEnv = getenv('ADP_INSPECTOR_URL')) !== false && $inspectorUrlEnv !== ''
-                ? new InspectorClient($inspectorUrlEnv)
-                : null,
+            InspectorClient::fromOptionalUrl(($v = getenv('ADP_INSPECTOR_URL')) !== false ? $v : null),
         )),
         new McpSettings($storagePath),
     ),

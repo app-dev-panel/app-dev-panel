@@ -52,17 +52,15 @@ final class McpToolRegistryFactory
         // Inspector tools (query live app via HTTP) — only registered when a client is provided
         if ($inspectorClient !== null) {
             $allowed = $config?->allowedInspectorTools;
-
-            if ($allowed === null || in_array(self::TOOL_INSPECT_CONFIG, $allowed, true)) {
-                $registry->register(new InspectConfigTool($inspectorClient));
-            }
-
-            if ($allowed === null || in_array(self::TOOL_INSPECT_ROUTES, $allowed, true)) {
-                $registry->register(new InspectRoutesTool($inspectorClient));
-            }
-
-            if ($allowed === null || in_array(self::TOOL_INSPECT_SCHEMA, $allowed, true)) {
-                $registry->register(new InspectDatabaseSchemaTool($inspectorClient));
+            $inspectorTools = [
+                self::TOOL_INSPECT_CONFIG => new InspectConfigTool($inspectorClient),
+                self::TOOL_INSPECT_ROUTES => new InspectRoutesTool($inspectorClient),
+                self::TOOL_INSPECT_SCHEMA => new InspectDatabaseSchemaTool($inspectorClient),
+            ];
+            foreach ($inspectorTools as $name => $tool) {
+                if ($allowed === null || in_array($name, $allowed, true)) {
+                    $registry->register($tool);
+                }
             }
         }
 

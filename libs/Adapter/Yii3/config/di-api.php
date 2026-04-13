@@ -319,12 +319,10 @@ return [
             $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
         )),
 
-    McpServer::class => static function (StorageInterface $storage) use ($inspectorUrl): McpServer {
-        $inspector = (is_string($inspectorUrl) && $inspectorUrl !== '')
-            ? new InspectorClient($inspectorUrl)
-            : null;
-        return new McpServer(McpToolRegistryFactory::create($storage, $inspector));
-    },
+    McpServer::class => static fn(StorageInterface $storage): McpServer => new McpServer(McpToolRegistryFactory::create(
+        $storage,
+        InspectorClient::fromOptionalUrl($inspectorUrl),
+    )),
 
     McpController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
