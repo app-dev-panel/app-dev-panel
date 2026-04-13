@@ -70,6 +70,7 @@ use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
@@ -97,6 +98,7 @@ if (!($apiConfig['enabled'] ?? true)) {
 
 $allowedIps = $apiConfig['allowedIps'] ?? ['127.0.0.1', '::1'];
 $authToken = $apiConfig['authToken'] ?? '';
+$inspectorUrl = $apiConfig['inspectorUrl'] ?? null;
 
 return [
     // PSR-17 factories
@@ -317,7 +319,12 @@ return [
             $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
         )),
 
-    McpServer::class => static fn(StorageInterface $storage) => new McpServer(McpToolRegistryFactory::create($storage)),
+    McpServer::class => static function (StorageInterface $storage) use ($inspectorUrl): McpServer {
+        $inspector = (is_string($inspectorUrl) && $inspectorUrl !== '')
+            ? new InspectorClient($inspectorUrl)
+            : null;
+        return new McpServer(McpToolRegistryFactory::create($storage, $inspector));
+    },
 
     McpController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\McpServer\Tests\Unit\Tool\Inspector;
 
-use AppDevPanel\McpServer\Inspector\InspectorClient;
+use AppDevPanel\McpServer\Inspector\InspectorInterface;
 use AppDevPanel\McpServer\Tool\Inspector\InspectDatabaseSchemaTool;
 use PHPUnit\Framework\TestCase;
 
@@ -12,7 +12,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 {
     public function testGetName(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $tool = new InspectDatabaseSchemaTool($client);
 
         $this->assertSame('inspect_database_schema', $tool->getName());
@@ -20,7 +20,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 
     public function testGetDescription(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $tool = new InspectDatabaseSchemaTool($client);
 
         $this->assertNotEmpty($tool->getDescription());
@@ -28,7 +28,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 
     public function testGetInputSchema(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $tool = new InspectDatabaseSchemaTool($client);
 
         $schema = $tool->getInputSchema();
@@ -40,7 +40,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 
     public function testListTablesSuccess(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->with('/table', [])
@@ -66,7 +66,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 
     public function testListTablesWithFilter(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->willReturn([
@@ -91,7 +91,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 
     public function testListTablesEmpty(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client->method('get')->willReturn(['success' => true, 'data' => [], 'error' => null]);
 
         $tool = new InspectDatabaseSchemaTool($client);
@@ -102,7 +102,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 
     public function testViewTableDetail(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->with('/table/users', ['limit' => '0'])
@@ -156,7 +156,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 
     public function testViewTableNotFound(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client->method('get')->willReturn(['success' => false, 'data' => null, 'error' => 'Table not found']);
 
         $tool = new InspectDatabaseSchemaTool($client);
@@ -167,7 +167,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 
     public function testConnectionError(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client->method('get')->willReturn(['success' => false, 'data' => null, 'error' => 'Connection refused']);
 
         $tool = new InspectDatabaseSchemaTool($client);
@@ -179,7 +179,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 
     public function testViewTableWithIndexes(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->willReturn([
@@ -217,7 +217,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 
     public function testServiceParameter(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->expects($this->once())
             ->method('get')
@@ -230,7 +230,7 @@ final class InspectDatabaseSchemaToolTest extends TestCase
 
     public function testFilterNoMatches(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->willReturn([

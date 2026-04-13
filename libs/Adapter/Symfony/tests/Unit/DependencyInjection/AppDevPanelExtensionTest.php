@@ -34,6 +34,8 @@ use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
+use AppDevPanel\McpServer\Tool\ToolRegistry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -276,5 +278,36 @@ final class AppDevPanelExtensionTest extends TestCase
         // API services should not be registered
         $this->assertFalse($container->hasDefinition(SymfonyConfigProvider::class));
         $this->assertFalse($container->hasDefinition(RoutingController::class));
+    }
+
+    public function testToolRegistryRegisteredWithoutInspectorClientByDefault(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new AppDevPanelExtension();
+
+        $extension->load([['enabled' => true]], $container);
+
+        // ToolRegistry should be registered without InspectorClient (no inspector_url configured)
+        $this->assertTrue($container->hasDefinition(ToolRegistry::class));
+        $this->assertFalse($container->hasDefinition(InspectorClient::class));
+    }
+
+    public function testToolRegistryRegisteredWithInspectorClientWhenUrlConfigured(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new AppDevPanelExtension();
+
+        $extension->load([
+            [
+                'enabled' => true,
+                'api' => ['inspector_url' => 'http://localhost:8080'],
+            ],
+        ], $container);
+
+        $this->assertTrue($container->hasDefinition(ToolRegistry::class));
+        $this->assertTrue($container->hasDefinition(InspectorClient::class));
+
+        $definition = $container->getDefinition(InspectorClient::class);
+        $this->assertSame('http://localhost:8080', $definition->getArgument(0));
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\McpServer\Tests\Unit\Tool\Inspector;
 
-use AppDevPanel\McpServer\Inspector\InspectorClient;
+use AppDevPanel\McpServer\Inspector\InspectorInterface;
 use AppDevPanel\McpServer\Tool\Inspector\InspectConfigTool;
 use PHPUnit\Framework\TestCase;
 
@@ -12,7 +12,7 @@ final class InspectConfigToolTest extends TestCase
 {
     public function testGetName(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $tool = new InspectConfigTool($client);
 
         $this->assertSame('inspect_config', $tool->getName());
@@ -20,7 +20,7 @@ final class InspectConfigToolTest extends TestCase
 
     public function testGetDescription(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $tool = new InspectConfigTool($client);
 
         $this->assertNotEmpty($tool->getDescription());
@@ -28,7 +28,7 @@ final class InspectConfigToolTest extends TestCase
 
     public function testGetInputSchema(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $tool = new InspectConfigTool($client);
 
         $schema = $tool->getInputSchema();
@@ -40,7 +40,7 @@ final class InspectConfigToolTest extends TestCase
 
     public function testFetchParamsSuccess(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->with('/params', [])
@@ -61,7 +61,7 @@ final class InspectConfigToolTest extends TestCase
 
     public function testFetchConfigWithGroup(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->with('/config', ['group' => 'services'])
@@ -83,7 +83,7 @@ final class InspectConfigToolTest extends TestCase
 
     public function testFetchEventsSuccess(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->with('/events', [])
@@ -104,7 +104,7 @@ final class InspectConfigToolTest extends TestCase
 
     public function testConnectionError(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->willReturn([
@@ -122,7 +122,7 @@ final class InspectConfigToolTest extends TestCase
 
     public function testEmptyData(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client->method('get')->willReturn(['success' => true, 'data' => [], 'error' => null]);
 
         $tool = new InspectConfigTool($client);
@@ -133,7 +133,7 @@ final class InspectConfigToolTest extends TestCase
 
     public function testFilterResults(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->willReturn([
@@ -152,7 +152,7 @@ final class InspectConfigToolTest extends TestCase
 
     public function testServiceParameter(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->expects($this->once())
             ->method('get')

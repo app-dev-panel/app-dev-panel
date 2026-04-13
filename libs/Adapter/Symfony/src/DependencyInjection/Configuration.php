@@ -201,6 +201,12 @@ final class Configuration implements ConfigurationInterface
             ->defaultValue('')
             ->info('Authentication token for API access (empty = no auth)')
             ->end()
+            ->scalarNode('inspector_url')
+            ->defaultNull()
+            ->info(
+                'Base URL of the application for MCP inspector tools (e.g. http://localhost:8080). If null, inspector tools are disabled in the HTTP MCP endpoint.',
+            )
+            ->end()
             ->end()
             ->end()
             ->end();

@@ -628,16 +628,24 @@ final class AppDevPanelExtension extends Extension
             ])
             ->setPublic(true);
 
-        $container
-            ->register(InspectorClient::class, InspectorClient::class)
-            ->setArguments(['http://127.0.0.1:8080'])
-            ->setPublic(false);
-
-        $container
-            ->register(ToolRegistry::class, ToolRegistry::class)
-            ->setFactory([McpToolRegistryFactory::class, 'create'])
-            ->setArguments([new Reference(StorageInterface::class), new Reference(InspectorClient::class)])
-            ->setPublic(false);
+        $inspectorUrl = $config['api']['inspector_url'] ?? null;
+        if (is_string($inspectorUrl) && $inspectorUrl !== '') {
+            $container
+                ->register(InspectorClient::class, InspectorClient::class)
+                ->setArguments([$inspectorUrl])
+                ->setPublic(false);
+            $container
+                ->register(ToolRegistry::class, ToolRegistry::class)
+                ->setFactory([McpToolRegistryFactory::class, 'create'])
+                ->setArguments([new Reference(StorageInterface::class), new Reference(InspectorClient::class)])
+                ->setPublic(false);
+        } else {
+            $container
+                ->register(ToolRegistry::class, ToolRegistry::class)
+                ->setFactory([McpToolRegistryFactory::class, 'create'])
+                ->setArguments([new Reference(StorageInterface::class)])
+                ->setPublic(false);
+        }
 
         $container
             ->register(McpSettings::class, McpSettings::class)

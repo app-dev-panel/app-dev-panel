@@ -11,12 +11,11 @@ namespace AppDevPanel\McpServer\Inspector;
  * with stream context (no external dependencies). Used by MCP Inspector tools
  * to query live application state (routes, config, DB schema).
  */
-class InspectorClient
+class InspectorClient implements InspectorInterface
 {
-    private const int TIMEOUT_SECONDS = 10;
-
     public function __construct(
         private readonly string $baseUrl,
+        private readonly int $timeoutSeconds = 10,
     ) {}
 
     public function getBaseUrl(): string
@@ -69,7 +68,7 @@ class InspectorClient
         $options = [
             'http' => [
                 'method' => $method,
-                'timeout' => self::TIMEOUT_SECONDS,
+                'timeout' => $this->timeoutSeconds,
                 'ignore_errors' => true,
                 'header' => "Accept: application/json\r\n",
             ],
@@ -86,12 +85,14 @@ class InspectorClient
 
         try {
             $response = @file_get_contents($url, false, $context);
-        } catch (\Throwable) {
-            return ['success' => false, 'data' => null, 'error' => sprintf('Failed to connect to %s', $url)];
+        } catch (\Throwable $e) {
+            return ['success' => false, 'data' => null, 'error' => sprintf('Failed to connect to %s: %s', $url, $e->getMessage())];
         }
 
         if ($response === false) {
-            return ['success' => false, 'data' => null, 'error' => sprintf('Failed to connect to %s', $url)];
+            $lastError = error_get_last();
+            $detail = $lastError !== null ? $lastError['message'] : 'unknown error';
+            return ['success' => false, 'data' => null, 'error' => sprintf('Failed to connect to %s: %s', $url, $detail)];
         }
 
         try {

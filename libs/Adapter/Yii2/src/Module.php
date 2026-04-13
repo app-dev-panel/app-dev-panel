@@ -244,6 +244,13 @@ class Module extends \yii\base\Module implements BootstrapInterface
      */
     public string $toolbarStaticUrl = '';
 
+    /**
+     * @var string|null Base URL of the running application for MCP inspector tools (e.g. http://localhost:8080).
+     *                  When null (default), inspector tools are disabled in the HTTP MCP endpoint.
+     *                  Set this only if you need MCP inspector tools and accept the HTTP round-trip overhead.
+     */
+    public ?string $mcpInspectorUrl = null;
+
     public $controllerNamespace = 'AppDevPanel\\Adapter\\Yii2\\Controller';
 
     private ?Debugger $debugger = null;
@@ -629,18 +636,16 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         \Yii::$container->setSingleton(McpSettings::class, static fn() => new McpSettings($storagePath));
 
-        \Yii::$container->setSingleton(InspectorClient::class, static function () {
-            $request = \Yii::$app->getRequest();
-            $url = $request instanceof \yii\web\Request ? $request->getHostInfo() : 'http://127.0.0.1:8080';
-
-            return new InspectorClient($url);
-        });
+        $mcpInspectorUrl = $this->mcpInspectorUrl;
+        $mcpInspector = is_string($mcpInspectorUrl) && $mcpInspectorUrl !== ''
+            ? new InspectorClient($mcpInspectorUrl)
+            : null;
 
         \Yii::$container->setSingleton(
             McpServer::class,
             static fn() => new McpServer(McpToolRegistryFactory::create(
                 \Yii::$container->get(StorageInterface::class),
-                \Yii::$container->get(InspectorClient::class),
+                $mcpInspector,
             )),
         );
 

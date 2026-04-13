@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\McpServer;
 
 use AppDevPanel\Kernel\Storage\StorageInterface;
-use AppDevPanel\McpServer\Inspector\InspectorClient;
+use AppDevPanel\McpServer\Inspector\InspectorInterface;
 use AppDevPanel\McpServer\Tool\Debug\AnalyzeExceptionTool;
 use AppDevPanel\McpServer\Tool\Debug\ListEntriesTool;
 use AppDevPanel\McpServer\Tool\Debug\SearchLogsTool;
@@ -23,8 +23,22 @@ use AppDevPanel\McpServer\Tool\ToolRegistry;
  */
 final class McpToolRegistryFactory
 {
-    public static function create(StorageInterface $storage, ?InspectorClient $inspectorClient = null): ToolRegistry
-    {
+    public const string TOOL_INSPECT_CONFIG = 'inspect_config';
+    public const string TOOL_INSPECT_ROUTES = 'inspect_routes';
+    public const string TOOL_INSPECT_SCHEMA = 'inspect_database_schema';
+
+    /**
+     * Build a ToolRegistry populated with debug tools and, optionally, inspector tools.
+     *
+     * @param InspectorInterface|null $inspectorClient When provided, inspector tools are registered.
+     * @param McpConfig|null          $config          Controls which inspector tools to include.
+     *                                                 null = use defaults (all inspector tools when client is set).
+     */
+    public static function create(
+        StorageInterface $storage,
+        ?InspectorInterface $inspectorClient = null,
+        ?McpConfig $config = null,
+    ): ToolRegistry {
         $registry = new ToolRegistry();
 
         // Debug tools (read from storage)
@@ -35,11 +49,21 @@ final class McpToolRegistryFactory
         $registry->register(new ViewDatabaseQueriesTool($storage));
         $registry->register(new ViewTimelineTool($storage));
 
-        // Inspector tools (query live app via HTTP)
+        // Inspector tools (query live app via HTTP) — only registered when a client is provided
         if ($inspectorClient !== null) {
-            $registry->register(new InspectConfigTool($inspectorClient));
-            $registry->register(new InspectRoutesTool($inspectorClient));
-            $registry->register(new InspectDatabaseSchemaTool($inspectorClient));
+            $allowed = $config?->allowedInspectorTools;
+
+            if ($allowed === null || in_array(self::TOOL_INSPECT_CONFIG, $allowed, true)) {
+                $registry->register(new InspectConfigTool($inspectorClient));
+            }
+
+            if ($allowed === null || in_array(self::TOOL_INSPECT_ROUTES, $allowed, true)) {
+                $registry->register(new InspectRoutesTool($inspectorClient));
+            }
+
+            if ($allowed === null || in_array(self::TOOL_INSPECT_SCHEMA, $allowed, true)) {
+                $registry->register(new InspectDatabaseSchemaTool($inspectorClient));
+            }
         }
 
         return $registry;

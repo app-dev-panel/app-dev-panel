@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\McpServer\Tests\Unit\Tool\Inspector;
 
-use AppDevPanel\McpServer\Inspector\InspectorClient;
+use AppDevPanel\McpServer\Inspector\InspectorInterface;
 use AppDevPanel\McpServer\Tool\Inspector\InspectRoutesTool;
 use PHPUnit\Framework\TestCase;
 
@@ -12,7 +12,7 @@ final class InspectRoutesToolTest extends TestCase
 {
     public function testGetName(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $tool = new InspectRoutesTool($client);
 
         $this->assertSame('inspect_routes', $tool->getName());
@@ -20,7 +20,7 @@ final class InspectRoutesToolTest extends TestCase
 
     public function testGetDescription(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $tool = new InspectRoutesTool($client);
 
         $this->assertNotEmpty($tool->getDescription());
@@ -28,7 +28,7 @@ final class InspectRoutesToolTest extends TestCase
 
     public function testGetInputSchema(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $tool = new InspectRoutesTool($client);
 
         $schema = $tool->getInputSchema();
@@ -41,7 +41,7 @@ final class InspectRoutesToolTest extends TestCase
 
     public function testListRoutesSuccess(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->with('/routes', [])
@@ -67,7 +67,7 @@ final class InspectRoutesToolTest extends TestCase
 
     public function testListRoutesWithFilter(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->willReturn([
@@ -90,7 +90,7 @@ final class InspectRoutesToolTest extends TestCase
 
     public function testListRoutesEmpty(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client->method('get')->willReturn(['success' => true, 'data' => [], 'error' => null]);
 
         $tool = new InspectRoutesTool($client);
@@ -101,7 +101,7 @@ final class InspectRoutesToolTest extends TestCase
 
     public function testCheckRouteMatch(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->with('/route/check', ['route' => 'GET /api/users'])
@@ -121,7 +121,7 @@ final class InspectRoutesToolTest extends TestCase
 
     public function testCheckRouteNoMatch(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->willReturn([
@@ -138,7 +138,7 @@ final class InspectRoutesToolTest extends TestCase
 
     public function testCheckRouteMissingPath(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $tool = new InspectRoutesTool($client);
 
         $result = $tool->execute(['action' => 'check']);
@@ -149,7 +149,7 @@ final class InspectRoutesToolTest extends TestCase
 
     public function testConnectionError(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client->method('get')->willReturn(['success' => false, 'data' => null, 'error' => 'Connection refused']);
 
         $tool = new InspectRoutesTool($client);
@@ -161,7 +161,7 @@ final class InspectRoutesToolTest extends TestCase
 
     public function testFilterNoMatches(): void
     {
-        $client = $this->createMock(InspectorClient::class);
+        $client = $this->createMock(InspectorInterface::class);
         $client
             ->method('get')
             ->willReturn([
