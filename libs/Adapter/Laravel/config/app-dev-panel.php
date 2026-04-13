@@ -79,5 +79,6 @@ return [
         'enabled' => true,
         'allowed_ips' => ['127.0.0.1', '::1'],
         'auth_token' => env('APP_DEV_PANEL_TOKEN', ''),
+        'inspector_url' => env('APP_DEV_PANEL_INSPECTOR_URL'),
     ],
 ];

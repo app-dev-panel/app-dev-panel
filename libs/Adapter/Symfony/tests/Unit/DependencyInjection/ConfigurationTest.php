@@ -159,6 +159,7 @@ final class ConfigurationTest extends TestCase
         $this->assertTrue($config['api']['enabled']);
         $this->assertSame(['127.0.0.1', '::1'], $config['api']['allowed_ips']);
         $this->assertSame('', $config['api']['auth_token']);
+        $this->assertNull($config['api']['inspector_url']);
     }
 
     public function testApiCustomConfiguration(): void
@@ -176,6 +177,19 @@ final class ConfigurationTest extends TestCase
         $this->assertFalse($config['api']['enabled']);
         $this->assertSame(['10.0.0.1', '192.168.1.0'], $config['api']['allowed_ips']);
         $this->assertSame('secret-token', $config['api']['auth_token']);
+    }
+
+    public function testApiInspectorUrl(): void
+    {
+        $config = $this->processConfiguration([
+            [
+                'api' => [
+                    'inspector_url' => 'http://localhost:8080',
+                ],
+            ],
+        ]);
+
+        $this->assertSame('http://localhost:8080', $config['api']['inspector_url']);
     }
 
     public function testPathMappingDefaults(): void
@@ -369,6 +383,7 @@ final class ConfigurationTest extends TestCase
                     'enabled' => false,
                     'allowed_ips' => ['10.0.0.0'],
                     'auth_token' => 'my-token',
+                    'inspector_url' => 'http://myapp.example.com',
                 ],
             ],
         ]);
@@ -389,6 +404,7 @@ final class ConfigurationTest extends TestCase
         $this->assertFalse($config['api']['enabled']);
         $this->assertSame(['10.0.0.0'], $config['api']['allowed_ips']);
         $this->assertSame('my-token', $config['api']['auth_token']);
+        $this->assertSame('http://myapp.example.com', $config['api']['inspector_url']);
     }
 
     private function processConfiguration(array $configs): array

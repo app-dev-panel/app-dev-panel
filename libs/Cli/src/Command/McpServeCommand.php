@@ -77,7 +77,7 @@ final class McpServeCommand extends Command
         }
 
         $inspectorUrl = $input->getOption('inspector-url');
-        $inspectorClient = is_string($inspectorUrl) && $inspectorUrl !== '' ? new InspectorClient($inspectorUrl) : null;
+        $inspectorClient = InspectorClient::fromOptionalUrl(is_string($inspectorUrl) ? $inspectorUrl : null);
 
         $driver = (string) $input->getOption('storage-driver');
         $storage = StorageFactory::create($driver, $storagePath, new DebuggerIdGenerator());

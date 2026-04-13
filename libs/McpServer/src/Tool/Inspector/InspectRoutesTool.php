@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\McpServer\Tool\Inspector;
 
-use AppDevPanel\McpServer\Inspector\InspectorClient;
+use AppDevPanel\McpServer\Inspector\InspectorInterface;
 use AppDevPanel\McpServer\Tool\ToolInterface;
 use AppDevPanel\McpServer\Tool\ToolResultTrait;
 
@@ -17,7 +17,7 @@ final class InspectRoutesTool implements ToolInterface
     use ToolResultTrait;
 
     public function __construct(
-        private readonly InspectorClient $client,
+        private readonly InspectorInterface $client,
     ) {}
 
     public function getName(): string
