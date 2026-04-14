@@ -12,6 +12,10 @@ use Yiisoft\Yii\View\Renderer\CsrfViewInjection;
 
 return [
     'app-dev-panel/yii3' => [
+        'toolbar' => [
+            'enabled' => true,
+            'staticUrl' => '/',
+        ],
         'collectors' => [
             \AppDevPanel\Kernel\Collector\EnvironmentCollector::class,
             \AppDevPanel\Kernel\Collector\LogCollector::class,

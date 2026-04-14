@@ -142,15 +142,18 @@ final class WebListener
             return;
         }
 
-        $content = $response->content;
-        if ($content === null || $content === '') {
+        // Yii 2 stores the action return value in $response->data; $response->content
+        // is only populated later during Response::prepare() inside send().
+        // At EVENT_AFTER_REQUEST time, we must read from data.
+        $content = $response->data;
+        if (!is_string($content) || $content === '') {
             return;
         }
 
         $request = $app->getRequest();
         $backendUrl = $request->getHostInfo();
 
-        $response->content = $this->toolbarInjector->inject($content, $backendUrl, $this->debugger->getId());
+        $response->data = $this->toolbarInjector->inject($content, $backendUrl, $this->debugger->getId());
     }
 
     private function getPsr17Factory(): Psr17Factory
