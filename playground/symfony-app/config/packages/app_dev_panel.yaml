@@ -29,9 +29,6 @@ app_dev_panel:
         - '/_profiler/**'
         - '/debug/**'
         - '/inspect/**'
-    toolbar:
-        enabled: true
-        static_url: '/'
     ignored_commands:
         - 'completion'
         - 'help'

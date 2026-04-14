@@ -47,15 +47,13 @@ const loadComponent = (scope: string, module: string) => async () => {
      */
     // @ts-expect-error -- webpack module federation runtime globals
     await __webpack_init_sharing__('default');
-    // @ts-expect-error -- dynamic scope from window
-    const container = window[scope];
+    const container = (window as any)[scope];
     /**
      * Initialize the container, it may provide shared modules
      */
     // @ts-expect-error -- webpack module federation runtime globals
     await container.init(__webpack_share_scopes__.default);
-    // @ts-expect-error -- dynamic scope from window
-    const factory = await window[scope].get(module);
+    const factory = await (window as any)[scope].get(module);
     const Module = factory();
     return Module;
 };

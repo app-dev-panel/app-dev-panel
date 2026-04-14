@@ -10,7 +10,7 @@ import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {Box, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {alpha, styled, type Theme, useTheme} from '@mui/material/styles';
-import {useCallback, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 
 type TimelineListViewProps = {
     data: TimelineItem[];
@@ -56,7 +56,7 @@ const CollectorLabel = styled(Typography)({
     minWidth: 80,
 });
 
-const RefPill = styled(Typography)(({theme}) => ({
+const RefPill = styled(Typography)<{component?: React.ElementType}>(({theme}) => ({
     fontFamily: theme.adp.fontFamilyMono,
     fontSize: '10px',
     color: theme.palette.text.disabled,
@@ -179,7 +179,8 @@ export const TimelineListView = ({data, filtered, enrichedDetails}: TimelineList
                 const offsetLabel = formatOffset(relativeTime);
                 const color = getColor(collectorClass);
                 const label = getCollectorLabel(collectorClass);
-                const ref = row[1] != null && row[1] !== '' ? String(row[1]) : null;
+                const rawRef = row[1] as number | string | null | undefined;
+                const ref = rawRef != null && rawRef !== '' ? String(rawRef) : null;
                 const enriched = enrichedDetails[index];
                 const expanded = expandedIndex === index;
                 const isException = collectorClass === CollectorsMap.ExceptionCollector;

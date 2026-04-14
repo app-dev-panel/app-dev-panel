@@ -10,5 +10,4 @@ playground/*/config/.merge-plan.php
 playground/*/config/reference.php
 screenshots/
 .local
-playground/shared-assets/toolbar/
-playground/*/public/toolbar
+playground/*/public/app-dev-panel

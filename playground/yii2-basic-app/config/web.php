@@ -98,7 +98,6 @@ return [
     'modules' => [
         'app-dev-panel' => [
             'class' => \AppDevPanel\Adapter\Yii2\Module::class,
-            'toolbarStaticUrl' => '/',
             'storagePath' => '@runtime/debug',
             'historySize' => 50,
             'collectors' => [

@@ -127,7 +127,7 @@ export const TimelineDetailCard = ({
                             </Typography>
                         </Box>
                     )}
-                    {!isDatabaseLike && <MessageCopyButton text={fullDetail} className="copy-btn" />}
+                    {!isDatabaseLike && <MessageCopyButton text={fullDetail} />}
                 </ContentArea>
             )}
 

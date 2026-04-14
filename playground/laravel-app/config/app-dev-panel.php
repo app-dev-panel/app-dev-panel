@@ -44,11 +44,6 @@ return [
         'cache:*',
     ],
 
-    'toolbar' => [
-        'enabled' => true,
-        'static_url' => '/',
-    ],
-
     'dumper' => [
         'excluded_classes' => [],
     ],
