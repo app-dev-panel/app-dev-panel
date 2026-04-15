@@ -350,6 +350,83 @@ final class LlmControllerTest extends TestCase
         $this->assertTrue(true);
     }
 
+    public function testChatWithBrowserContextDoesNotCrash(): void
+    {
+        $controller = $this->makeController('openrouter', 'sk-test');
+        try {
+            $controller->chat($this->post([
+                'messages' => [['role' => 'user', 'content' => 'hi']],
+                'context' => [
+                    'url' => 'http://localhost:5173/debug?collector=request&debugEntry=abc123',
+                    'userAgent' => 'Mozilla/5.0',
+                    'language' => 'en-US',
+                    'timezone' => 'UTC',
+                    'viewport' => ['width' => 1920, 'height' => 1080],
+                    'screen' => ['width' => 2560, 'height' => 1440, 'devicePixelRatio' => 2],
+                    'theme' => 'dark',
+                    'title' => 'ADP',
+                ],
+            ]));
+        } catch (\Throwable) {
+            // Expected — outbound HTTP call fails.
+        }
+        $this->assertTrue(true);
+    }
+
+    public function testPrependBrowserContextAddsSystemMessageForAnthropic(): void
+    {
+        $controller = $this->makeController('anthropic', 'sk-ant-test');
+        $reflection = new \ReflectionMethod($controller, 'prependBrowserContext');
+
+        $messages = [['role' => 'user', 'content' => 'hi']];
+        $context = [
+            'url' => 'http://localhost/debug?collector=log&debugEntry=xyz',
+            'userAgent' => 'TestUA/1.0',
+        ];
+
+        $result = $reflection->invoke($controller, $messages, 'anthropic', $context);
+
+        $this->assertCount(2, $result);
+        $this->assertSame('system', $result[0]['role']);
+        $this->assertStringContainsString(
+            'URL: http://localhost/debug?collector=log&debugEntry=xyz',
+            $result[0]['content'],
+        );
+        $this->assertStringContainsString('Debug entry ID: xyz', $result[0]['content']);
+        $this->assertStringContainsString('Selected collector: log', $result[0]['content']);
+        $this->assertStringContainsString('User agent: TestUA/1.0', $result[0]['content']);
+        $this->assertSame('user', $result[1]['role']);
+        $this->assertSame('hi', $result[1]['content']);
+    }
+
+    public function testPrependBrowserContextMergesIntoUserForOtherProviders(): void
+    {
+        $controller = $this->makeController('openrouter', 'sk-test');
+        $reflection = new \ReflectionMethod($controller, 'prependBrowserContext');
+
+        $messages = [['role' => 'user', 'content' => 'hi']];
+        $context = ['url' => 'http://localhost/debug?debugEntry=abc'];
+
+        $result = $reflection->invoke($controller, $messages, 'openrouter', $context);
+
+        $this->assertCount(1, $result);
+        $this->assertSame('user', $result[0]['role']);
+        $this->assertStringContainsString('Debug entry ID: abc', $result[0]['content']);
+        $this->assertStringEndsWith('hi', $result[0]['content']);
+    }
+
+    public function testPrependBrowserContextNoOpForEmptyContext(): void
+    {
+        $controller = $this->makeController('anthropic', 'sk-ant-test');
+        $reflection = new \ReflectionMethod($controller, 'prependBrowserContext');
+
+        $messages = [['role' => 'user', 'content' => 'hi']];
+
+        $this->assertSame($messages, $reflection->invoke($controller, $messages, 'anthropic', null));
+        $this->assertSame($messages, $reflection->invoke($controller, $messages, 'anthropic', []));
+        $this->assertSame($messages, $reflection->invoke($controller, $messages, 'anthropic', ['url' => '']));
+    }
+
     public function testChatWithCustomPromptMergedIntoUser(): void
     {
         $settings = new FileLlmSettings($this->tmpDir);

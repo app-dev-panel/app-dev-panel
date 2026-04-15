@@ -16,6 +16,7 @@ import {
 } from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {ChatMessageList} from '@app-dev-panel/sdk/Component/ChatMessageList';
 import {Markdown} from '@app-dev-panel/sdk/Component/Markdown';
+import {collectChatContext} from '@app-dev-panel/sdk/Helper/collectChatContext';
 import {extractErrorMessage} from '@app-dev-panel/sdk/Helper/extractErrorMessage';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
@@ -163,6 +164,7 @@ export const ChatPanel = () => {
                     messages: outgoing
                         .filter((m) => m.status !== 'error' && m.status !== 'sending')
                         .map((m) => ({role: m.role, content: m.content})),
+                    context: collectChatContext(),
                 }).unwrap();
 
                 const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
@@ -199,6 +201,7 @@ export const ChatPanel = () => {
             try {
                 const result = await chat({
                     messages: outgoing.map((m) => ({role: m.role, content: m.content})),
+                    context: collectChatContext(),
                 }).unwrap();
 
                 const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';

@@ -14,6 +14,7 @@ import {
 } from '@app-dev-panel/sdk/API/Llm/Llm';
 import {ChatMessageList} from '@app-dev-panel/sdk/Component/ChatMessageList';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
+import {collectChatContext} from '@app-dev-panel/sdk/Helper/collectChatContext';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {extractErrorMessage} from '@app-dev-panel/sdk/Helper/extractErrorMessage';
 import CloseIcon from '@mui/icons-material/Close';
@@ -231,7 +232,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
             reduxDispatch(addMessage({role: 'assistant', content: '', status: 'sending'}));
 
             try {
-                const result = await chat({messages: apiMessages}).unwrap();
+                const result = await chat({messages: apiMessages, context: collectChatContext()}).unwrap();
                 const assistantContent = result.choices?.[0]?.message?.content ?? 'No response.';
 
                 // Update chat history for multi-turn

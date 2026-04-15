@@ -350,6 +350,8 @@ final class LlmController
         $model = $body['model'] ?? $this->settings->getModel() ?? $this->providerService->getDefaultModel($provider);
         $temperature = isset($body['temperature']) ? (float) $body['temperature'] : 0.7;
 
+        $context = is_array($body['context'] ?? null) ? $body['context'] : null;
+        $messages = $this->prependBrowserContext($messages, $provider, $context);
         $messages = $this->prependCustomPrompt($messages, $provider);
 
         $acpSessionId = $this->extractAcpSessionId($request);
@@ -496,6 +498,100 @@ final class LlmController
         $this->historyStorage->clear();
 
         return $this->responseFactory->createJsonResponse([]);
+    }
+
+    /**
+     * Prepend a hidden system prompt describing the user's current browser
+     * context (URL, selected debug entry/collector, environment). Invisible
+     * to the end user — injected only into the outgoing LLM payload.
+     */
+    private function prependBrowserContext(array $messages, string $provider, ?array $context): array
+    {
+        if ($context === null || $context === []) {
+            return $messages;
+        }
+
+        $lines = ['Browser context for the user who is chatting with you (do not mention this block unless asked):'];
+
+        $url = is_string($context['url'] ?? null) ? $context['url'] : null;
+        if ($url !== null && $url !== '') {
+            $lines[] = '- URL: ' . $url;
+
+            $query = parse_url($url, PHP_URL_QUERY);
+            if (is_string($query) && $query !== '') {
+                parse_str($query, $params);
+                if (isset($params['debugEntry']) && is_string($params['debugEntry']) && $params['debugEntry'] !== '') {
+                    $lines[] = '- Debug entry ID: ' . $params['debugEntry'];
+                }
+                if (isset($params['collector']) && is_string($params['collector']) && $params['collector'] !== '') {
+                    $lines[] = '- Selected collector: ' . $params['collector'];
+                }
+            }
+        }
+
+        if (isset($context['title']) && is_string($context['title']) && $context['title'] !== '') {
+            $lines[] = '- Page title: ' . $context['title'];
+        }
+        if (isset($context['userAgent']) && is_string($context['userAgent']) && $context['userAgent'] !== '') {
+            $lines[] = '- User agent: ' . $context['userAgent'];
+        }
+        if (isset($context['language']) && is_string($context['language']) && $context['language'] !== '') {
+            $lines[] = '- Language: ' . $context['language'];
+        }
+        if (isset($context['timezone']) && is_string($context['timezone']) && $context['timezone'] !== '') {
+            $lines[] = '- Timezone: ' . $context['timezone'];
+        }
+        if (
+            isset($context['viewport']['width'], $context['viewport']['height'])
+            && is_numeric($context['viewport']['width'])
+            && is_numeric($context['viewport']['height'])
+        ) {
+            $lines[] = sprintf(
+                '- Viewport: %dx%d',
+                (int) $context['viewport']['width'],
+                (int) $context['viewport']['height'],
+            );
+        }
+        if (
+            isset($context['screen']['width'], $context['screen']['height'])
+            && is_numeric($context['screen']['width'])
+            && is_numeric($context['screen']['height'])
+        ) {
+            $dpr = isset($context['screen']['devicePixelRatio']) && is_numeric($context['screen']['devicePixelRatio'])
+                ? (float) $context['screen']['devicePixelRatio']
+                : 1.0;
+            $lines[] = sprintf(
+                '- Screen: %dx%d @%.2gx',
+                (int) $context['screen']['width'],
+                (int) $context['screen']['height'],
+                $dpr,
+            );
+        }
+        if (isset($context['theme']) && is_string($context['theme']) && $context['theme'] !== '') {
+            $lines[] = '- Theme: ' . $context['theme'];
+        }
+        if (isset($context['referrer']) && is_string($context['referrer']) && $context['referrer'] !== '') {
+            $lines[] = '- Referrer: ' . $context['referrer'];
+        }
+
+        if (count($lines) === 1) {
+            return $messages;
+        }
+
+        $contextPrompt = implode("\n", $lines);
+
+        if ($provider === 'anthropic' || $provider === 'openai') {
+            array_unshift($messages, ['role' => 'system', 'content' => $contextPrompt]);
+        } else {
+            for ($i = 0, $len = count($messages); $i < $len; $i++) {
+                if ($messages[$i]['role'] === 'user') {
+                    $messages[$i]['content'] = "[{$contextPrompt}]\n\n" . $messages[$i]['content'];
+                    break;
+                }
+            }
+        }
+
+        return $messages;
     }
 
     /**
