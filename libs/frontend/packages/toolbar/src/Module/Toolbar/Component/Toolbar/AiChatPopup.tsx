@@ -40,7 +40,7 @@ const buildContextPrompt = (entry: DebugEntry): string => {
     if (entry.db) {
         parts.push(`Database: ${entry.db.queries.total} queries`);
         if (entry.db.queries.total > 0) {
-            const slowest = entry.db.queries.items
+            const slowest = (entry.db.queries as {items?: Array<{sql?: string; duration?: number}>}).items
                 ?.slice(0, 5)
                 .map((q: {sql?: string; duration?: number}) => `  - ${q.sql ?? '?'} (${q.duration ?? '?'}ms)`)
                 .join('\n');

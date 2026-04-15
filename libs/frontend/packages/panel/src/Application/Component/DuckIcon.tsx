@@ -9,7 +9,7 @@ const EYE_EXTRA = 2.5;
 export const DuckIcon = (props: SvgIconProps) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const [look, setLook] = useState({tilt: 0, ex: 0, ey: 0});
-    const frameRef = useRef<number>();
+    const frameRef = useRef<number | undefined>(undefined);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {

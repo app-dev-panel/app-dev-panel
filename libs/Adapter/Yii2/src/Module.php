@@ -478,16 +478,19 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         $panelStaticUrl = $this->panelStaticUrl;
         if ($panelStaticUrl === '') {
-            // Auto-detect: if built assets exist in adapter package, publish them
-            $adapterDist = \dirname(__DIR__) . '/resources/dist/bundle.js';
-            if (file_exists($adapterDist)) {
-                $webroot = \Yii::getAlias('@webroot');
-                $targetDir = $webroot . '/app-dev-panel';
-                if (!is_dir($targetDir)) {
-                    @symlink(\dirname($adapterDist), $targetDir);
-                }
-                if (is_dir($targetDir)) {
-                    $panelStaticUrl = '/app-dev-panel';
+            // Auto-detect: if built assets exist in adapter package, publish them.
+            // Either the panel bundle or the toolbar subdir is enough to trigger publishing.
+            $distDir = \dirname(__DIR__) . '/resources/dist';
+            if (file_exists($distDir . '/bundle.js') || is_dir($distDir . '/toolbar')) {
+                $webroot = \Yii::getAlias('@webroot', false);
+                if (is_string($webroot)) {
+                    $targetDir = $webroot . '/app-dev-panel';
+                    if (!is_dir($targetDir)) {
+                        @symlink($distDir, $targetDir);
+                    }
+                    if (is_dir($targetDir)) {
+                        $panelStaticUrl = '/app-dev-panel';
+                    }
                 }
             }
         }

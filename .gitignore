@@ -10,3 +10,4 @@ playground/*/config/.merge-plan.php
 playground/*/config/reference.php
 screenshots/
 .local
+playground/*/public/app-dev-panel
