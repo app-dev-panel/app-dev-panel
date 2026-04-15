@@ -6,6 +6,8 @@ namespace AppDevPanel\Adapter\Yii2\Tests\Unit\Controller;
 
 use AppDevPanel\Adapter\Yii2\Controller\DebugTailController;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use yii\console\Application;
 use yii\console\ExitCode;
@@ -17,10 +19,8 @@ use yii\console\ExitCode;
  * (getEntryIds, renderEntry) via reflection to verify rendering logic,
  * and test actionIndex() by breaking the loop with an exception from the repository.
  */
-/**
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
- */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
 final class DebugTailControllerTest extends TestCase
 {
     private string $basePath;
@@ -432,9 +432,13 @@ final class DebugTailControllerTest extends TestCase
                         'request' => ['method' => 'POST', 'url' => '/api/data', 'responseStatusCode' => '201'],
                     ];
                 }
-                return match ($callCount) {
-                    1 => [], // initial: empty
-                    2 => [['id' => 'json-entry-1']], // new entry
+                // `match(true)` avoids a static-analyzer false positive: with
+                // `match($callCount)` the analyzer treats the first increment
+                // as the only possible value (1) and flags arms 2/default as
+                // unreachable, even though the callback runs multiple times.
+                return match (true) {
+                    $callCount === 1 => [], // initial: empty
+                    $callCount === 2 => [['id' => 'json-entry-1']], // new entry
                     default => throw new \RuntimeException('Break loop'),
                 };
             });

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\Tests\Unit\Controller;
 
 use AppDevPanel\Adapter\Yii2\Controller\AdpApiController;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use yii\web\Application;
@@ -13,10 +15,8 @@ use yii\web\Application;
  * Tests for AdpApiController — verifying PSR-7 request conversion
  * preserves the original query string and is not polluted by Yii 2 URL rule parameters.
  */
-/**
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
- */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
 final class AdpApiControllerTest extends TestCase
 {
     private string $basePath;

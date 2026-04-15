@@ -6,14 +6,14 @@ namespace AppDevPanel\Adapter\Yii2\Tests\Unit\Inspector;
 
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2UrlMatcherAdapter;
 use GuzzleHttp\Psr7\ServerRequest;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use yii\web\Application;
 use yii\web\UrlManager;
 
-/**
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
- */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
 final class Yii2UrlMatcherAdapterTest extends TestCase
 {
     private ?Application $originalApp = null;

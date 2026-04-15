@@ -8,14 +8,14 @@ use AppDevPanel\Adapter\Yii2\Controller\DebugResetController;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use yii\console\Application;
 use yii\console\ExitCode;
 
-/**
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
- */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
 final class DebugResetControllerTest extends TestCase
 {
     private string $basePath;

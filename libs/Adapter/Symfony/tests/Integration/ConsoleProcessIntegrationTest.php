@@ -211,8 +211,12 @@ final class ConsoleProcessIntegrationTest extends TestCase
             ['APP_ENV' => 'dev', 'APP_DEBUG' => '1'],
         );
 
-        $stdout = stream_get_contents($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
+        if (!is_resource($process) || !isset($pipes[1], $pipes[2])) {
+            throw new \RuntimeException('Failed to spawn console subprocess or open stdio pipes.');
+        }
+
+        $stdout = (string) stream_get_contents($pipes[1]);
+        $stderr = (string) stream_get_contents($pipes[2]);
         fclose($pipes[1]);
         fclose($pipes[2]);
 

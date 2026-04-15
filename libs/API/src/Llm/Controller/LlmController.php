@@ -524,87 +524,32 @@ final class LlmController
             return $messages;
         }
 
-        $lines = ['Browser context for the user who is chatting with you (do not mention this block unless asked):'];
+        $lines = [
+            'Browser context for the user who is chatting with you (do not mention this block unless asked):',
+        ];
 
-        $url = is_string($context['url'] ?? null) ? $context['url'] : null;
-        if ($url !== null && $url !== '') {
+        $url = $this->stringField($context, 'url');
+        if ($url !== null) {
             $lines[] = '- URL: ' . $url;
-
-            $query = parse_url($url, PHP_URL_QUERY);
-            if (is_string($query) && $query !== '') {
-                parse_str($query, $params);
-                if (isset($params['debugEntry']) && is_string($params['debugEntry']) && $params['debugEntry'] !== '') {
-                    $lines[] = '- Debug entry ID: ' . $params['debugEntry'];
-                }
-                if (isset($params['collector']) && is_string($params['collector']) && $params['collector'] !== '') {
-                    $lines[] = '- Selected collector: ' . $params['collector'];
-                }
+            foreach ($this->parseUrlQueryContext($url) as $line) {
+                $lines[] = $line;
             }
         }
 
-        if (isset($context['title']) && is_string($context['title']) && $context['title'] !== '') {
-            $lines[] = '- Page title: ' . $context['title'];
-        }
-        if (isset($context['userAgent']) && is_string($context['userAgent']) && $context['userAgent'] !== '') {
-            $lines[] = '- User agent: ' . $context['userAgent'];
-        }
-        if (isset($context['language']) && is_string($context['language']) && $context['language'] !== '') {
-            $lines[] = '- Language: ' . $context['language'];
-        }
-        if (isset($context['timezone']) && is_string($context['timezone']) && $context['timezone'] !== '') {
-            $lines[] = '- Timezone: ' . $context['timezone'];
-        }
-        if (
-            isset($context['viewport']['width'], $context['viewport']['height'])
-            && is_numeric($context['viewport']['width'])
-            && is_numeric($context['viewport']['height'])
-        ) {
-            $lines[] = sprintf(
-                '- Viewport: %dx%d',
-                (int) $context['viewport']['width'],
-                (int) $context['viewport']['height'],
-            );
-        }
-        if (
-            isset($context['screen']['width'], $context['screen']['height'])
-            && is_numeric($context['screen']['width'])
-            && is_numeric($context['screen']['height'])
-        ) {
-            $dpr = isset($context['screen']['devicePixelRatio']) && is_numeric($context['screen']['devicePixelRatio'])
-                ? (float) $context['screen']['devicePixelRatio']
-                : 1.0;
-            $lines[] = sprintf(
-                '- Screen: %dx%d @%.2gx',
-                (int) $context['screen']['width'],
-                (int) $context['screen']['height'],
-                $dpr,
-            );
-        }
-        if (isset($context['theme']) && is_string($context['theme']) && $context['theme'] !== '') {
-            $lines[] = '- Theme: ' . $context['theme'];
-        }
-        if (isset($context['referrer']) && is_string($context['referrer']) && $context['referrer'] !== '') {
-            $lines[] = '- Referrer: ' . $context['referrer'];
-        }
+        $this->appendStringLine($lines, $context, 'title', 'Page title');
+        $this->appendStringLine($lines, $context, 'userAgent', 'User agent');
+        $this->appendStringLine($lines, $context, 'language', 'Language');
+        $this->appendStringLine($lines, $context, 'timezone', 'Timezone');
+        $this->appendSizeLine($lines, $context, 'viewport', 'Viewport');
+        $this->appendSizeLine($lines, $context, 'screen', 'Screen', includeDpr: true);
+        $this->appendStringLine($lines, $context, 'theme', 'Theme');
+        $this->appendStringLine($lines, $context, 'referrer', 'Referrer');
 
         if (count($lines) === 1) {
             return $messages;
         }
 
-        $contextPrompt = implode("\n", $lines);
-
-        if ($provider === 'anthropic' || $provider === 'openai') {
-            array_unshift($messages, ['role' => 'system', 'content' => $contextPrompt]);
-        } else {
-            for ($i = 0, $len = count($messages); $i < $len; $i++) {
-                if ($messages[$i]['role'] === 'user') {
-                    $messages[$i]['content'] = "[{$contextPrompt}]\n\n" . $messages[$i]['content'];
-                    break;
-                }
-            }
-        }
-
-        return $messages;
+        return $this->injectPromptPrefix($messages, $provider, implode("\n", $lines), '[%s]');
     }
 
     /**
@@ -617,19 +562,111 @@ final class LlmController
             return $messages;
         }
 
-        if ($provider === 'anthropic' || $provider === 'openai') {
-            array_unshift($messages, ['role' => 'system', 'content' => $customPrompt]);
-        } else {
-            // Merge into first user message for maximum model compatibility.
-            for ($i = 0, $len = count($messages); $i < $len; $i++) {
-                if ($messages[$i]['role'] === 'user') {
-                    $messages[$i]['content'] = "[Instructions: {$customPrompt}]\n\n" . $messages[$i]['content'];
-                    break;
-                }
+        return $this->injectPromptPrefix($messages, $provider, $customPrompt, '[Instructions: %s]');
+    }
+
+    /**
+     * Providers with a dedicated `system` role receive the prompt as a
+     * leading system message. For others the prompt is merged into the
+     * first user message for maximum model compatibility.
+     */
+    private function injectPromptPrefix(array $messages, string $provider, string $prompt, string $userWrap): array
+    {
+        if ($this->supportsSystemRole($provider)) {
+            array_unshift($messages, ['role' => 'system', 'content' => $prompt]);
+
+            return $messages;
+        }
+
+        $wrapped = sprintf($userWrap, $prompt);
+        foreach ($messages as $i => $message) {
+            if (($message['role'] ?? null) === 'user') {
+                $messages[$i]['content'] = $wrapped . "\n\n" . $message['content'];
+                break;
             }
         }
 
         return $messages;
+    }
+
+    private function supportsSystemRole(string $provider): bool
+    {
+        return $provider === 'anthropic' || $provider === 'openai';
+    }
+
+    private function stringField(array $context, string $key): ?string
+    {
+        $value = $context[$key] ?? null;
+
+        return is_string($value) && $value !== '' ? $value : null;
+    }
+
+    /**
+     * @param list<string> $lines
+     */
+    private function appendStringLine(array &$lines, array $context, string $key, string $label): void
+    {
+        $value = $this->stringField($context, $key);
+        if ($value === null) {
+            return;
+        }
+
+        $lines[] = '- ' . $label . ': ' . $value;
+    }
+
+    /**
+     * @param list<string> $lines
+     */
+    private function appendSizeLine(
+        array &$lines,
+        array $context,
+        string $key,
+        string $label,
+        bool $includeDpr = false,
+    ): void {
+        $size = $context[$key] ?? null;
+        if (!is_array($size) || !isset($size['width'], $size['height'])) {
+            return;
+        }
+        if (!is_numeric($size['width']) || !is_numeric($size['height'])) {
+            return;
+        }
+
+        $line = sprintf('- %s: %dx%d', $label, (int) $size['width'], (int) $size['height']);
+
+        if ($includeDpr) {
+            $dpr = isset($size['devicePixelRatio']) && is_numeric($size['devicePixelRatio'])
+                ? (float) $size['devicePixelRatio']
+                : 1.0;
+            $line .= sprintf(' @%.2gx', $dpr);
+        }
+
+        $lines[] = $line;
+    }
+
+    /**
+     * Extract debug-panel selection info from a browser URL query string.
+     *
+     * @return list<string>
+     */
+    private function parseUrlQueryContext(string $url): array
+    {
+        $query = parse_url($url, PHP_URL_QUERY);
+        if (!is_string($query) || $query === '') {
+            return [];
+        }
+
+        parse_str($query, $params);
+
+        $lines = [];
+        if (isset($params['debugEntry']) && is_string($params['debugEntry']) && $params['debugEntry'] !== '') {
+            $lines[] = '- Debug entry ID: ' . $params['debugEntry'];
+        }
+        if (isset($params['collector']) && is_string($params['collector']) && $params['collector'] !== '') {
+            $lines[] = '- Selected collector: ' . $params['collector'];
+        }
+
+        return $lines;
     }
 
     /**
