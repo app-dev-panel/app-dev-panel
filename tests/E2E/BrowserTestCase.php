@@ -40,10 +40,18 @@ abstract class BrowserTestCase extends TestCase
         self::$baseUrl = rtrim(getenv('FRONTEND_URL') ?: 'http://localhost:3000', '/');
         self::$chromeDriverPort = (int) (getenv('CHROMEDRIVER_PORT') ?: 9516);
 
-        if (!self::isChromeDriverRunning()) {
-            self::startChromeDriver();
+        // If Chrome or ChromeDriver aren't available on this machine, leave
+        // `self::$driver` null so each test skips cleanly via setUp(). This
+        // lets the E2E suite coexist with CI matrices (and plain `phpunit`
+        // runs) that don't install Chrome.
+        try {
+            if (!self::isChromeDriverRunning()) {
+                self::startChromeDriver();
+            }
+            self::$driver = self::createDriver();
+        } catch (RuntimeException) {
+            self::$driver = null;
         }
-        self::$driver = self::createDriver();
     }
 
     public static function tearDownAfterClass(): void
@@ -84,11 +92,7 @@ abstract class BrowserTestCase extends TestCase
     protected function waitForElement(string $cssSelector, int $timeoutSeconds = 10): void
     {
         $wait = new WebDriverWait(self::$driver, $timeoutSeconds);
-        $wait->until(
-            WebDriverExpectedCondition::presenceOfElementLocated(
-                WebDriverBy::cssSelector($cssSelector),
-            ),
-        );
+        $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::cssSelector($cssSelector)));
     }
 
     /**
@@ -97,11 +101,7 @@ abstract class BrowserTestCase extends TestCase
     protected function waitForVisible(string $cssSelector, int $timeoutSeconds = 10): void
     {
         $wait = new WebDriverWait(self::$driver, $timeoutSeconds);
-        $wait->until(
-            WebDriverExpectedCondition::visibilityOfElementLocated(
-                WebDriverBy::cssSelector($cssSelector),
-            ),
-        );
+        $wait->until(WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::cssSelector($cssSelector)));
     }
 
     /**
@@ -110,9 +110,10 @@ abstract class BrowserTestCase extends TestCase
     protected function waitForText(string $text, int $timeoutSeconds = 10): void
     {
         $wait = new WebDriverWait(self::$driver, $timeoutSeconds);
-        $wait->until(
-            static fn() => str_contains(self::$driver->findElement(WebDriverBy::tagName('body'))->getText(), $text),
-        );
+        $wait->until(static fn() => str_contains(
+            self::$driver->findElement(WebDriverBy::tagName('body'))->getText(),
+            $text,
+        ));
     }
 
     /**
@@ -120,9 +121,7 @@ abstract class BrowserTestCase extends TestCase
      */
     protected function clickButton(string $text): void
     {
-        $button = self::$driver->findElement(
-            WebDriverBy::xpath("//button[contains(., '{$text}')]"),
-        );
+        $button = self::$driver->findElement(WebDriverBy::xpath("//button[contains(., '{$text}')]"));
         $button->click();
     }
 
@@ -131,9 +130,7 @@ abstract class BrowserTestCase extends TestCase
      */
     protected function clickLink(string $text): void
     {
-        $link = self::$driver->findElement(
-            WebDriverBy::xpath("//a[contains(., '{$text}')]"),
-        );
+        $link = self::$driver->findElement(WebDriverBy::xpath("//a[contains(., '{$text}')]"));
         $link->click();
     }
 
@@ -200,19 +197,17 @@ abstract class BrowserTestCase extends TestCase
     {
         $wait = new WebDriverWait(self::$driver, $timeoutSeconds);
         // Wait for React to actually render content inside #root
-        $wait->until(
-            static function () {
-                $roots = self::$driver->findElements(WebDriverBy::id('root'));
-                if (count($roots) === 0) {
-                    return false;
-                }
-                $root = $roots[0];
-                // Check if React has rendered child elements (not just empty div)
-                $children = $root->findElements(WebDriverBy::xpath('./*'));
+        $wait->until(static function () {
+            $roots = self::$driver->findElements(WebDriverBy::id('root'));
+            if (count($roots) === 0) {
+                return false;
+            }
+            $root = $roots[0];
+            // Check if React has rendered child elements (not just empty div)
+            $children = $root->findElements(WebDriverBy::xpath('./*'));
 
-                return count($children) > 0;
-            },
-        );
+            return count($children) > 0;
+        });
         // Give React a moment to finish rendering
         usleep(500_000);
     }
@@ -273,9 +268,7 @@ abstract class BrowserTestCase extends TestCase
             }
         }
 
-        throw new RuntimeException(
-            'Chrome/Chromium binary not found. Set CHROME_BINARY env variable.',
-        );
+        throw new RuntimeException('Chrome/Chromium binary not found. Set CHROME_BINARY env variable.');
     }
 
     private static function findChromeDriverBinary(): string
@@ -290,9 +283,7 @@ abstract class BrowserTestCase extends TestCase
             return $path;
         }
 
-        throw new RuntimeException(
-            'ChromeDriver binary not found. Set CHROMEDRIVER_PATH env variable.',
-        );
+        throw new RuntimeException('ChromeDriver binary not found. Set CHROMEDRIVER_PATH env variable.');
     }
 
     private static function isChromeDriverRunning(): bool
@@ -313,11 +304,7 @@ abstract class BrowserTestCase extends TestCase
         $chromeDriverBin = self::findChromeDriverBinary();
         $port = self::$chromeDriverPort;
 
-        $command = sprintf(
-            '%s --port=%d --silent 2>/dev/null & echo $!',
-            escapeshellarg($chromeDriverBin),
-            $port,
-        );
+        $command = sprintf('%s --port=%d --silent 2>/dev/null & echo $!', escapeshellarg($chromeDriverBin), $port);
         $pid = (int) trim(shell_exec($command));
         if ($pid <= 0) {
             throw new RuntimeException('Failed to start ChromeDriver.');
@@ -374,9 +361,6 @@ abstract class BrowserTestCase extends TestCase
         $capabilities = DesiredCapabilities::chrome();
         $capabilities->setCapability(ChromeOptions::CAPABILITY_W3C, $options);
 
-        return RemoteWebDriver::create(
-            "http://localhost:{$port}",
-            $capabilities,
-        );
+        return RemoteWebDriver::create("http://localhost:{$port}", $capabilities);
     }
 }

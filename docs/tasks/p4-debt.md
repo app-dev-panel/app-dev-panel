@@ -4,9 +4,9 @@ Lower priority cleanups.
 
 ## Tasks
 
-### [ ] Regenerate mago lint baseline
-- After P2 fixes, run `composer lint:baseline` to drop stale suppressions.
-- Verify: `diff` on `mago-lint-baseline.php` shows only removed entries (no additions).
+### [~] Regenerate mago lint baseline — SKIPPED
+- Tried `composer lint:baseline` after P2 fixes; the command generates a *fresh* baseline from every currently-known issue, so the file grew by ~1380 entries (the pre-existing baseline was curated).
+- Action needed instead: go file-by-file, fix the underlying lint issues, then regenerate. Not batched here — track separately.
 
 ### [ ] Raise `libs/Cli` coverage above 60%
 - Current: 41.1% (30/73 lines). Lowest in the repo.
@@ -21,9 +21,10 @@ Lower priority cleanups.
   - `yiisoft/files` → check actual callsites.
   - `yiisoft/var-dumper` — heavier; probably keep, but move the "why" section into a README inside `libs/Kernel/src/DebugServer/`.
 
-### [ ] E2E browser tests skip-gracefully
-- Running bare `phpunit` surfaces 15 errors because `tests/E2E/BrowserTestCase.php:276` throws `RuntimeException` when Chrome is missing.
-- Fix: `markTestSkipped(...)` instead of throwing when `CHROME_BINARY` is not detected, so raw phpunit runs cleanly in CI without Chrome.
+### [x] E2E browser tests skip-gracefully
+- Running bare `phpunit` surfaced 15 errors because `tests/E2E/BrowserTestCase.php:276` throws `RuntimeException` when Chrome is missing.
+- Fix applied in `tests/E2E/BrowserTestCase.php:setUpBeforeClass()`: wrap ChromeDriver startup + driver creation in a `try { ... } catch (RuntimeException) { self::$driver = null; }`. The per-test `setUp()` already calls `markTestSkipped('WebDriver not available.')` when `$driver` is null.
+- Verified: `phpunit --testsuite E2E` without Chrome prints 54 skipped / 0 errors.
 
 ## Acceptance
 - Per-task acceptance inside the items.
