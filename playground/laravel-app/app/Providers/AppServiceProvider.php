@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Auth\ArrayUserProvider;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
 use OpenTelemetry\SDK\Trace\SpanProcessorInterface;
@@ -33,6 +35,14 @@ final class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //
+        // Register a no-DB user provider so Auth::login() works with GenericUser-based fixtures.
+        Auth::provider('array', static fn() => new ArrayUserProvider());
+
+        // Ensure SQLite file exists (fixtures expect to be able to run DB queries on demand).
+        $sqlitePath = database_path('database.sqlite');
+        if (!file_exists($sqlitePath)) {
+            @mkdir(dirname($sqlitePath), 0755, true);
+            @touch($sqlitePath);
+        }
     }
 }

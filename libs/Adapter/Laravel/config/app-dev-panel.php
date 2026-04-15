@@ -36,6 +36,7 @@ return [
         'security' => true,
         'assets' => true,
         'template' => true,
+        'elasticsearch' => true,
         'code_coverage' => false,
     ],
 

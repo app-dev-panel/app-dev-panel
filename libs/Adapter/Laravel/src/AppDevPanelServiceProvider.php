@@ -101,6 +101,7 @@ use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\DeprecationCollector;
+use AppDevPanel\Kernel\Collector\ElasticsearchCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -195,6 +196,33 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->decoratePsrServices();
         $this->decorateBladeEngine();
         $this->decorateSpanProcessor();
+        $this->registerExceptionReporter();
+    }
+
+    private function registerExceptionReporter(): void
+    {
+        $collectors = $this->app->make('config')->get('app-dev-panel.collectors', []);
+        if (!($collectors['exception'] ?? true)) {
+            return;
+        }
+        if (!$this->app->bound(\Illuminate\Contracts\Debug\ExceptionHandler::class)) {
+            return;
+        }
+
+        $handler = $this->app->make(\Illuminate\Contracts\Debug\ExceptionHandler::class);
+        if (!method_exists($handler, 'reportable')) {
+            return;
+        }
+
+        $app = $this->app;
+        $handler->reportable(static function (\Throwable $e) use ($app): void {
+            if (!$app->bound(ExceptionCollector::class)) {
+                return;
+            }
+            /** @var ExceptionCollector $collector */
+            $collector = $app->make(ExceptionCollector::class);
+            $collector->collect($e);
+        });
     }
 
     private function isEnabled(): bool
@@ -282,6 +310,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'assets' => AssetBundleCollector::class,
             'template' => TemplateCollector::class,
             'redis' => RedisCollector::class,
+            'elasticsearch' => ElasticsearchCollector::class,
         ];
 
         foreach ($timelineCollectors as $key => $class) {
