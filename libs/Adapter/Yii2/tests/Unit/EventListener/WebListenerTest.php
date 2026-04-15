@@ -243,6 +243,69 @@ final class WebListenerTest extends TestCase
         $this->assertSame('/nonexistent', $route['uri']);
     }
 
+    public function testOnExceptionRenderedCapturesResponseStatusCode(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $requestCollector = new RequestCollector($timeline);
+
+        $debugger = new Debugger($idGenerator, $storage, [$timeline, $requestCollector]);
+        $listener = new WebListener($debugger, $requestCollector);
+
+        $app = $this->createWebAppWithStatus('/nonexistent', 404);
+
+        // Simulate: onBeforeRequest fires, exception occurs, Yii renders 404
+        $event = new Event(['sender' => $app]);
+        $listener->onBeforeRequest($event);
+
+        // Sanity: default status before the exception path is 200
+        $collectedBefore = $requestCollector->getCollected();
+        $this->assertSame(200, $collectedBefore['responseStatusCode'] ?? null);
+
+        // Exception path: onExceptionRendered feeds the final response
+        $listener->onExceptionRendered($app);
+
+        $collectedAfter = $requestCollector->getCollected();
+        $this->assertSame(404, $collectedAfter['responseStatusCode']);
+    }
+
+    public function testOnExceptionRenderedCapturesServerErrorStatus(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $requestCollector = new RequestCollector($timeline);
+
+        $debugger = new Debugger($idGenerator, $storage, [$timeline, $requestCollector]);
+        $listener = new WebListener($debugger, $requestCollector);
+
+        $app = $this->createWebAppWithStatus('/boom', 500);
+
+        $event = new Event(['sender' => $app]);
+        $listener->onBeforeRequest($event);
+        $listener->onExceptionRendered($app);
+
+        $collected = $requestCollector->getCollected();
+        $this->assertSame(500, $collected['responseStatusCode']);
+    }
+
+    public function testOnExceptionRenderedIsNoOpWhenRequestCollectorMissing(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+
+        $debugger = new Debugger($idGenerator, $storage, [$timeline]);
+        $listener = new WebListener($debugger);
+
+        $app = $this->createWebAppWithStatus('/nonexistent', 404);
+
+        // Should not throw
+        $listener->onExceptionRendered($app);
+        $this->assertTrue(true);
+    }
+
     public function testOnExceptionHandlerExtractsRouteData(): void
     {
         $routerCollector = new RouterCollector();
@@ -343,6 +406,11 @@ final class WebListenerTest extends TestCase
 
     private function createWebApp(string $url): Application
     {
+        return $this->createWebAppWithStatus($url, 200);
+    }
+
+    private function createWebAppWithStatus(string $url, int $statusCode): Application
+    {
         $request = $this->createMock(Request::class);
         $request->method('getUrl')->willReturn($url);
         $request->method('getAbsoluteUrl')->willReturn('http://localhost' . $url);
@@ -354,7 +422,7 @@ final class WebListenerTest extends TestCase
         $responseHeaders = new HeaderCollection();
         $response = $this->createMock(Response::class);
         $response->method('getHeaders')->willReturn($responseHeaders);
-        $response->method('getStatusCode')->willReturn(200);
+        $response->method('getStatusCode')->willReturn($statusCode);
         $response->content = '';
 
         $app = $this->createMock(Application::class);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\Collector;
 
 use AppDevPanel\Kernel\Collector\LogCollector;
+use yii\helpers\VarDumper;
 use yii\log\Logger;
 use yii\log\Target;
 
@@ -43,8 +44,48 @@ final class DebugLogTarget extends Target
 
             $levelName = self::mapLevel($level);
 
-            $this->logCollector->collect($levelName, $text, ['category' => $category], ''); // line - Yii2 doesn't provide caller file:line per message
+            [$normalizedMessage, $extraContext] = self::normalizeMessage($text);
+            $context = ['category' => $category] + $extraContext;
+
+            $this->logCollector->collect($levelName, $normalizedMessage, $context, ''); // line - Yii2 doesn't provide caller file:line per message
         }
+    }
+
+    /**
+     * Normalize the Yii 2 log `$text` value into a string `$message` + extra context.
+     *
+     * Yii's logger accepts arbitrary values (e.g., UrlManager::parseRequest passes an
+     * associative array). Downstream consumers (SearchLogsTool) concatenate the message
+     * with `. ' ' . json_encode(...)`, which fatally throws "Array to string conversion"
+     * when the message is an array. Normalize at the producer side.
+     *
+     * @return array{0: string, 1: array<string, mixed>}
+     */
+    private static function normalizeMessage(mixed $text): array
+    {
+        if ($text instanceof \Throwable) {
+            return [
+                $text->getMessage(),
+                [
+                    'exception' => $text->getMessage(),
+                    'class' => $text::class,
+                    'trace' => $text->getTraceAsString(),
+                ],
+            ];
+        }
+
+        if ($text === null || is_scalar($text)) {
+            return [(string) $text, []];
+        }
+
+        if ($text instanceof \Stringable) {
+            return [(string) $text, []];
+        }
+
+        // Array or object: dump for readability, preserve original in raw_message
+        $dumped = VarDumper::dumpAsString($text, 10, false);
+
+        return [$dumped, ['raw_message' => $text]];
     }
 
     private static function mapLevel(int $level): string
