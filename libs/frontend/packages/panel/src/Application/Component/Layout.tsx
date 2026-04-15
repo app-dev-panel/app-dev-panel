@@ -11,6 +11,7 @@ import {useSelector} from '@app-dev-panel/panel/store';
 import {
     changeAutoLatest,
     changeEditorCustomTemplate,
+    changeEditorPathMapping,
     changeEditorPreset,
     changeShowInactiveCollectors,
     changeThemeMode,
@@ -372,6 +373,13 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         [dispatch],
     );
 
+    const handleEditorPathMappingChange = useCallback(
+        (mapping: Record<string, string>) => {
+            dispatch(changeEditorPathMapping(mapping));
+        },
+        [dispatch],
+    );
+
     const handleMcpEnabledChange = useCallback(
         (value: boolean) => {
             updateMcpSettings({enabled: value});
@@ -560,8 +568,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onMcpEnabledChange={handleMcpEnabledChange}
                     editorPreset={editorConfig.editor}
                     editorCustomTemplate={editorConfig.customUrlTemplate}
+                    editorPathMapping={editorConfig.pathMapping}
                     onEditorPresetChange={handleEditorPresetChange}
                     onEditorCustomTemplateChange={handleEditorCustomTemplateChange}
+                    onEditorPathMappingChange={handleEditorPathMappingChange}
                     notificationCount={notificationCount}
                     liveFeedCount={liveFeedCount}
                     liveFeedActive={liveFeedOpen}

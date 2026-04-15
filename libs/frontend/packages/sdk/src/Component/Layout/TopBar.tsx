@@ -1,3 +1,4 @@
+import {EditorPathMappingEditor} from '@app-dev-panel/sdk/Component/Layout/EditorPathMappingEditor';
 import {RequestPill} from '@app-dev-panel/sdk/Component/Layout/RequestPill';
 import {SearchTrigger} from '@app-dev-panel/sdk/Component/Layout/SearchTrigger';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
@@ -58,6 +59,7 @@ type TopBarProps = {
     liveFeedActive?: boolean;
     editorPreset?: EditorPreset;
     editorCustomTemplate?: string;
+    editorPathMapping?: Record<string, string>;
     onMenuClick?: () => void;
     onPrevEntry?: () => void;
     onNextEntry?: () => void;
@@ -70,6 +72,7 @@ type TopBarProps = {
     onMcpEnabledChange?: (value: boolean) => void;
     onEditorPresetChange?: (preset: EditorPreset) => void;
     onEditorCustomTemplateChange?: (template: string) => void;
+    onEditorPathMappingChange?: (mapping: Record<string, string>) => void;
     onNotificationsClick?: (e: React.MouseEvent<HTMLElement>) => void;
     onLiveFeedClick?: () => void;
     onLogoClick?: () => void;
@@ -143,8 +146,10 @@ export const TopBar = React.memo(
         onMcpEnabledChange,
         editorPreset,
         editorCustomTemplate,
+        editorPathMapping,
         onEditorPresetChange,
         onEditorCustomTemplateChange,
+        onEditorPathMappingChange,
         notificationCount,
         liveFeedCount,
         liveFeedActive,
@@ -467,6 +472,13 @@ export const TopBar = React.memo(
                                     value={editorCustomTemplate ?? ''}
                                     onChange={(e) => onEditorCustomTemplateChange?.(e.target.value)}
                                     helperText="Use {file} and {line} placeholders"
+                                    sx={{mb: 1.5}}
+                                />
+                            )}
+                            {editorPreset && editorPreset !== 'none' && (
+                                <EditorPathMappingEditor
+                                    mapping={editorPathMapping ?? {}}
+                                    onChange={onEditorPathMappingChange}
                                 />
                             )}
                         </Box>

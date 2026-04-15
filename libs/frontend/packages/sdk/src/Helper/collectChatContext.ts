@@ -18,11 +18,7 @@ export const collectChatContext = (): ChatContext => {
         userAgent: window.navigator.userAgent,
         language: window.navigator.language,
         viewport: {width: window.innerWidth, height: window.innerHeight},
-        screen: {
-            width: window.screen.width,
-            height: window.screen.height,
-            devicePixelRatio: window.devicePixelRatio,
-        },
+        screen: {width: window.screen.width, height: window.screen.height, devicePixelRatio: window.devicePixelRatio},
         theme: window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
         title: document.title,
     };

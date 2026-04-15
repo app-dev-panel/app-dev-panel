@@ -121,6 +121,21 @@ describe('buildEditorUrl', () => {
             'phpstorm://open?file=%2Flocal%2Fapp%2Fvendor%2Flib.php&line=1',
         );
     });
+
+    it('handles missing pathMapping on legacy persisted state', () => {
+        // Legacy persist state may lack pathMapping — applyPathMapping must pass path through.
+        const config = {editor: 'vscode', customUrlTemplate: ''} as unknown as EditorConfig;
+        expect(buildEditorUrl(config, '/src/app.php', 1)).toBe('vscode://file/%2Fsrc%2Fapp.php:1');
+    });
+
+    it('skips empty remote keys in path mapping', () => {
+        const config: EditorConfig = {
+            editor: 'vscode',
+            customUrlTemplate: '',
+            pathMapping: {'': '/ignored', '/app': '/local'},
+        };
+        expect(buildEditorUrl(config, '/app/file.php', 1)).toBe('vscode://file/%2Flocal%2Ffile.php:1');
+    });
 });
 
 describe('defaultEditorConfig', () => {
