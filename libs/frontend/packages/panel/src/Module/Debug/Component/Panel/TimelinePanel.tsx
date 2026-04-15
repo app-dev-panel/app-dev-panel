@@ -182,9 +182,6 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
             .map((r) => ({fqcn: r[2], shortName: r[2].split('\\').pop() ?? r[2], label: getCollectorLabel(r[2])}));
     }, [data]);
 
-    // Keep uniqueLabels for backward compat with filtering
-    const uniqueLabels = useMemo(() => uniqueCollectors.map((c) => c.shortName), [uniqueCollectors]);
-
     const filtered = useMemo(() => {
         if (!data || !Array.isArray(data)) return [];
         let result = data;
