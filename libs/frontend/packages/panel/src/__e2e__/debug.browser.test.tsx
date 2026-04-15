@@ -6,7 +6,7 @@ import './setup';
 describe('Debug Page', () => {
     it('renders debug page with sidebar', async () => {
         renderApp('/debug');
-        await expect.element(page.getByText('Debug')).toBeVisible();
+        await expect.element(page.getByText('Debug').first()).toBeVisible();
     });
 
     it('renders top bar', async () => {
@@ -16,12 +16,12 @@ describe('Debug Page', () => {
 
     it('shows inspector in sidebar', async () => {
         renderApp('/debug');
-        await expect.element(page.getByText('Inspector')).toBeVisible();
+        await expect.element(page.getByText('Inspector').first()).toBeVisible();
     });
 
     it('loads debug entries from mock API', async () => {
         renderApp('/debug');
-        await expect.element(page.getByText('Debug')).toBeVisible();
+        await expect.element(page.getByText('Debug').first()).toBeVisible();
         // Give RTK Query time to fetch
         await new Promise((r) => setTimeout(r, 1000));
         // Collector names should appear in the sidebar
@@ -31,7 +31,7 @@ describe('Debug Page', () => {
 
     it('renders collector sidebar with names', async () => {
         renderApp('/debug');
-        await expect.element(page.getByText('Debug')).toBeVisible();
+        await expect.element(page.getByText('Debug').first()).toBeVisible();
         await new Promise((r) => setTimeout(r, 1000));
         // Collector names from mock: Web, Log, Database, Event
         const bodyText = document.body.textContent || '';
@@ -41,7 +41,7 @@ describe('Debug Page', () => {
 
     it('renders debug list page', async () => {
         renderApp('/debug/list');
-        await expect.element(page.getByText('Debug')).toBeVisible();
+        await expect.element(page.getByText('Debug').first()).toBeVisible();
     });
 
     it('renders debug object page without crashing', async () => {

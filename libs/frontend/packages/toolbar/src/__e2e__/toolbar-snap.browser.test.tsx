@@ -42,18 +42,15 @@ const _simulateMouseDrag = (element: HTMLElement, startX: number, startY: number
 describe('Toolbar Snap Modes', () => {
     it('collapsed pill shows status code and response time', async () => {
         renderToolbar();
+        // Wait for the pill AND for the mock entry data to populate its contents.
         await waitFor(
             () => {
-                expect(screen.getByLabelText('Open debug toolbar')).toBeInTheDocument();
+                const pill = screen.getByLabelText('Open debug toolbar');
+                expect(pill.textContent).toContain('200');
+                expect(pill.textContent).toContain('ms');
             },
             {timeout: 5000},
         );
-
-        const pill = screen.getByLabelText('Open debug toolbar');
-        // Should show status code
-        expect(pill.textContent).toContain('200');
-        // Should show response time (42ms from mock data)
-        expect(pill.textContent).toContain('ms');
     });
 
     it('bottom mode shows single-row bar with metric items', async () => {
@@ -63,8 +60,8 @@ describe('Toolbar Snap Modes', () => {
         // Should have collapse button and metrics in a row
         expect(screen.getByLabelText('Collapse toolbar')).toBeInTheDocument();
         // Action buttons should be present
-        expect(screen.getByLabelText('List debug entries')).toBeInTheDocument();
-        expect(screen.getByLabelText('Open debug panel')).toBeInTheDocument();
+        expect(screen.getByLabelText('Debug entries')).toBeInTheDocument();
+        expect(screen.getByLabelText(/Open panel|Close panel/)).toBeInTheDocument();
     });
 
     it('can open AI chat popup', async () => {
@@ -76,7 +73,7 @@ describe('Toolbar Snap Modes', () => {
         fireEvent.click(chatBtn);
 
         await waitFor(() => {
-            expect(screen.getByText('Debug Duck')).toBeInTheDocument();
+            expect(screen.getByText('ADP Duck AI')).toBeInTheDocument();
         });
 
         // Chat should have input and send button
@@ -89,13 +86,13 @@ describe('Toolbar Snap Modes', () => {
 
         fireEvent.click(screen.getByLabelText('AI Chat'));
         await waitFor(() => {
-            expect(screen.getByText('Debug Duck')).toBeInTheDocument();
+            expect(screen.getByText('ADP Duck AI')).toBeInTheDocument();
         });
 
         // Close chat
         fireEvent.click(screen.getByLabelText('AI Chat'));
         await waitFor(() => {
-            expect(screen.queryByText('Debug Duck')).toBeNull();
+            expect(screen.queryByText('ADP Duck AI')).toBeNull();
         });
     });
 
@@ -103,7 +100,7 @@ describe('Toolbar Snap Modes', () => {
         renderToolbar();
         await expandToolbar();
 
-        fireEvent.click(screen.getByLabelText('List debug entries'));
+        fireEvent.click(screen.getByLabelText('Debug entries'));
 
         await waitFor(() => {
             expect(screen.getByText('Debug Entries')).toBeInTheDocument();
@@ -117,7 +114,7 @@ describe('Toolbar Snap Modes', () => {
         renderToolbar();
         await expandToolbar();
 
-        fireEvent.click(screen.getByLabelText('List debug entries'));
+        fireEvent.click(screen.getByLabelText('Debug entries'));
 
         await waitFor(() => {
             expect(screen.getByText('/api/test')).toBeInTheDocument();
@@ -150,7 +147,7 @@ describe('Toolbar Snap Modes', () => {
 
         fireEvent.click(screen.getByLabelText('AI Chat'));
         await waitFor(() => {
-            expect(screen.getByText('Debug Duck')).toBeInTheDocument();
+            expect(screen.getByText('ADP Duck AI')).toBeInTheDocument();
         });
 
         // Should show request summary from the mock entry

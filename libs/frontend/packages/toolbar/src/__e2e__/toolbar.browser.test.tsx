@@ -35,8 +35,8 @@ describe('Toolbar', () => {
             },
             {timeout: 5000},
         );
-        expect(screen.getByLabelText('List debug entries')).toBeInTheDocument();
-        expect(screen.getByLabelText('Open debug panel')).toBeInTheDocument();
+        expect(screen.getByLabelText('Debug entries')).toBeInTheDocument();
+        expect(screen.getByLabelText(/Open panel|Close panel/)).toBeInTheDocument();
     });
 
     it('can collapse toolbar', async () => {
