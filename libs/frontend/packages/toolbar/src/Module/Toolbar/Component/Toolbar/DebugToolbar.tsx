@@ -135,6 +135,16 @@ const serviceWorker = navigator?.serviceWorker;
 
 type DebugIFrameProps = {baseUrlState: string; iframeEnabled: boolean; iframeSrc: string | null};
 
+/**
+ * Resolve the path under `baseUrl` where the panel SPA is mounted.
+ * Set by `ToolbarInjector` (PHP) from `PanelConfig::viewerBasePath`.
+ * Defaults to `/debug` to match the default adapter setup.
+ */
+const getPanelMountPath = (): string => {
+    const value = (window as unknown as {__adp_panel_url?: string}).__adp_panel_url;
+    return value && value.length > 0 ? value : '/debug';
+};
+
 const DebugIFrame = forwardRef(
     ({baseUrlState, iframeEnabled, iframeSrc}: DebugIFrameProps, ref: ForwardedRef<HTMLIFrameElement>) => {
         // Lock the src at mount time. Subsequent navigations are routed through
@@ -143,9 +153,13 @@ const DebugIFrame = forwardRef(
         // and re-fetch every API resource on every chip click.
         const srcRef = useRef<string | undefined>(undefined);
         if (srcRef.current === undefined) {
+            // The chip URL (e.g. `/debug?collector=Log&debugEntry=ABC`) is the
+            // panel-internal route path; the panel's React Router uses `panelMount`
+            // as basename, so the browser URL must include both: baseUrl + mount + path.
+            const panelMount = getPanelMountPath();
             srcRef.current = iframeSrc
-                ? baseUrlState + iframeSrc + (iframeSrc.includes('?') ? '&' : '?') + 'toolbar=0'
-                : baseUrlState + '/debug?toolbar=0';
+                ? baseUrlState + panelMount + iframeSrc + (iframeSrc.includes('?') ? '&' : '?') + 'toolbar=0'
+                : baseUrlState + panelMount + '?toolbar=0';
         }
         return (
             <iframe
@@ -241,8 +255,9 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const [open, setOpen] = useState(false);
     const handleDebugWindowOpen = useCallback(() => {
-        window.open(debugEntry ? baseUrlState + '/debug?debugEntry=' + debugEntry.id : baseUrlState + '/debug');
-    }, [debugEntry]);
+        const mount = getPanelMountPath();
+        window.open(debugEntry ? baseUrlState + mount + '?debugEntry=' + debugEntry.id : baseUrlState + mount);
+    }, [debugEntry, baseUrlState]);
 
     const handleClickOpen = useCallback(() => setOpen(true), []);
     const handleClose = useCallback(() => setOpen(false), []);
