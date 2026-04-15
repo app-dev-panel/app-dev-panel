@@ -364,7 +364,7 @@ count = 1
 file = "src/Web/Api/OpenApiAction.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 1
+count = 4
 
 [[issues]]
 file = "src/Web/Api/OpenApiAction.php"

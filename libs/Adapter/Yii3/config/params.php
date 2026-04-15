@@ -28,6 +28,7 @@ use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\DeprecationCollector;
+use AppDevPanel\Kernel\Collector\ElasticsearchCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
@@ -38,6 +39,8 @@ use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
+use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RedisCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
@@ -93,6 +96,10 @@ return [
             DatabaseCollector::class,
             MailerCollector::class,
             TemplateCollector::class,
+            CacheCollector::class,
+            QueueCollector::class,
+            RedisCollector::class,
+            ElasticsearchCollector::class,
         ],
         'collectors.web' => [
             WebAppInfoCollector::class,

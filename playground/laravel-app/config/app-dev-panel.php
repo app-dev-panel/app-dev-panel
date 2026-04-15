@@ -29,6 +29,7 @@ return [
         'queue' => true,
         'validator' => true,
         'router' => true,
+        'code_coverage' => true,
     ],
 
     'ignored_requests' => [

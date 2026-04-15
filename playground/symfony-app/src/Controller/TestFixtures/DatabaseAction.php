@@ -19,6 +19,10 @@ final readonly class DatabaseAction
     {
         // Execute real SQL queries via Doctrine DBAL — the DoctrineDbalMiddleware
         // intercepts these calls and feeds query data to DatabaseCollector.
+        // Drop any pre-existing table so the schema stays consistent across runs
+        // (other fixtures/collectors may create a stricter schema).
+        $this->connection->executeStatement('DROP TABLE IF EXISTS test_users');
+
         $this->connection->executeStatement(
             'CREATE TABLE IF NOT EXISTS test_users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)',
         );
