@@ -201,6 +201,10 @@
     "app-dev-panel/adapter-cycle": "self.version",
     "app-dev-panel/adapter-yii3": "self.version"
   },
+  "bin": [
+    "libs/Cli/bin/adp",
+    "libs/McpServer/bin/adp-mcp"
+  ],
   "extra": {
     "branch-alias": {
       "dev-master": "1.x-dev",

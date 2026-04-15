@@ -391,19 +391,19 @@ serve: ## Start all playground servers in background
 
 fixtures-yii3: ## Run test fixtures against Yii 3 playground
 	@echo "$(CYAN)[Scenarios: Yii3] Running test fixtures on port $(YII3_PORT)...$(RESET)"
-	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(YII3_PORT)
+	php libs/Cli/bin/adp debug:fixtures http://127.0.0.1:$(YII3_PORT)
 
 fixtures-symfony: ## Run test fixtures against Symfony playground
 	@echo "$(CYAN)[Scenarios: Symfony] Running test fixtures on port $(SYMFONY_PORT)...$(RESET)"
-	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(SYMFONY_PORT)
+	php libs/Cli/bin/adp debug:fixtures http://127.0.0.1:$(SYMFONY_PORT)
 
 fixtures-yii2: ## Run test fixtures against Yii2 playground
 	@echo "$(CYAN)[Scenarios: Yii2] Running test fixtures on port $(YII2_PORT)...$(RESET)"
-	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(YII2_PORT)
+	php libs/Cli/bin/adp debug:fixtures http://127.0.0.1:$(YII2_PORT)
 
 fixtures-laravel: ## Run test fixtures against Laravel playground
 	@echo "$(CYAN)[Scenarios: Laravel] Running test fixtures on port $(LARAVEL_PORT)...$(RESET)"
-	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(LARAVEL_PORT)
+	php libs/Cli/bin/adp debug:fixtures http://127.0.0.1:$(LARAVEL_PORT)
 
 fixtures: ## Run test fixtures against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running test fixtures against all playgrounds...$(RESET)"
