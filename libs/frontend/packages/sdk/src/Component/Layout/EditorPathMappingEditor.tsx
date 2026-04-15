@@ -1,5 +1,5 @@
 import {Box, Icon, IconButton, TextField, Typography} from '@mui/material';
-import React, {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 
 type PathMappingRow = {remote: string; local: string};
 
@@ -29,11 +29,12 @@ function mappingsEqual(a: Record<string, string>, b: Record<string, string>): bo
     return true;
 }
 
-export const EditorPathMappingEditor = React.memo(({mapping, onChange}: Props) => {
+export const EditorPathMappingEditor = ({mapping, onChange}: Props) => {
+    // Local state, not controlled, because rows can hold transient values that
+    // the persisted mapping does not: empty "Add mapping" rows and half-typed
+    // remote keys (committed only on blur).
     const [rows, setRows] = useState<PathMappingRow[]>(() => mappingToRows(mapping));
 
-    // Sync local rows when the external mapping changes (e.g. cleared from another tab).
-    // Intentionally omits `rows` from deps — local edits should not re-trigger this effect.
     useEffect(() => {
         setRows((prev) => (mappingsEqual(rowsToMapping(prev), mapping) ? prev : mappingToRows(mapping)));
     }, [mapping]);
@@ -76,13 +77,14 @@ export const EditorPathMappingEditor = React.memo(({mapping, onChange}: Props) =
         setRows((prev) => [...prev, {remote: '', local: ''}]);
     }, []);
 
-    // Detect duplicate remote keys (for warning highlight). Empty rows are ignored.
-    const remoteCounts = new Map<string, number>();
-    for (const {remote} of rows) {
-        const trimmed = remote.trim();
-        if (trimmed === '') continue;
-        remoteCounts.set(trimmed, (remoteCounts.get(trimmed) ?? 0) + 1);
-    }
+    // For each duplicate remote key, the LAST row wins (matches rowsToMapping).
+    // Earlier rows with the same key get an "overridden" warning.
+    const winnerIndexByRemote = new Map<string, number>();
+    rows.forEach((row, index) => {
+        const trimmed = row.remote.trim();
+        if (trimmed === '') return;
+        winnerIndexByRemote.set(trimmed, index);
+    });
 
     return (
         <Box>
@@ -94,7 +96,8 @@ export const EditorPathMappingEditor = React.memo(({mapping, onChange}: Props) =
             </Typography>
             {rows.map((row, index) => {
                 const trimmed = row.remote.trim();
-                const isDuplicate = trimmed !== '' && (remoteCounts.get(trimmed) ?? 0) > 1;
+                const winnerIndex = trimmed === '' ? undefined : winnerIndexByRemote.get(trimmed);
+                const isOverridden = winnerIndex !== undefined && winnerIndex !== index;
                 return (
                     <Box key={index} sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 1}}>
                         <TextField
@@ -105,8 +108,8 @@ export const EditorPathMappingEditor = React.memo(({mapping, onChange}: Props) =
                             value={row.remote}
                             onChange={(e) => handleChange(index, 'remote', e.target.value)}
                             onBlur={handleBlur}
-                            error={isDuplicate}
-                            helperText={isDuplicate ? 'Duplicate — last wins' : undefined}
+                            error={isOverridden}
+                            helperText={isOverridden ? `Overridden by row ${(winnerIndex ?? 0) + 1}` : undefined}
                             inputProps={{'aria-label': `Remote path ${index + 1}`}}
                         />
                         <Icon sx={{color: 'text.secondary', flexShrink: 0}}>arrow_forward</Icon>
@@ -136,6 +139,4 @@ export const EditorPathMappingEditor = React.memo(({mapping, onChange}: Props) =
             </IconButton>
         </Box>
     );
-});
-
-EditorPathMappingEditor.displayName = 'EditorPathMappingEditor';
+};

@@ -58,13 +58,14 @@ describe('EditorPathMappingEditor', () => {
         expect(onChange).toHaveBeenLastCalledWith({});
     });
 
-    it('flags duplicate remote keys with an error helper', async () => {
+    it('flags overridden duplicate remote keys, naming the winning row', async () => {
         const user = userEvent.setup();
         renderWithProviders(<EditorPathMappingEditor mapping={{'/app': '/local/a'}} />);
         await user.click(screen.getByLabelText('Add mapping'));
         await user.type(screen.getByLabelText('Remote path 2'), '/app');
-        // Both rows share the duplicate key, both helpers appear.
-        expect(screen.getAllByText('Duplicate — last wins')).toHaveLength(2);
+        // Row 1 is overridden by row 2 (last wins). Only the loser is flagged.
+        expect(screen.getByText('Overridden by row 2')).toBeInTheDocument();
+        expect(screen.queryByText('Overridden by row 1')).not.toBeInTheDocument();
     });
 
     it('does not commit when mapping prop updates externally', () => {

@@ -10,11 +10,9 @@ import {
 import {useSelector} from '@app-dev-panel/panel/store';
 import {
     changeAutoLatest,
-    changeEditorCustomTemplate,
-    changeEditorPathMapping,
-    changeEditorPreset,
     changeShowInactiveCollectors,
     changeThemeMode,
+    setEditorConfig,
     toggleLiveFeed,
 } from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
@@ -35,7 +33,7 @@ import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
-import {type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
+import {type EditorConfig, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -359,23 +357,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         [dispatch],
     );
 
-    const handleEditorPresetChange = useCallback(
-        (preset: EditorPreset) => {
-            dispatch(changeEditorPreset(preset));
-        },
-        [dispatch],
-    );
-
-    const handleEditorCustomTemplateChange = useCallback(
-        (template: string) => {
-            dispatch(changeEditorCustomTemplate(template));
-        },
-        [dispatch],
-    );
-
-    const handleEditorPathMappingChange = useCallback(
-        (mapping: Record<string, string>) => {
-            dispatch(changeEditorPathMapping(mapping));
+    const handleEditorConfigChange = useCallback(
+        (config: EditorConfig) => {
+            dispatch(setEditorConfig(config));
         },
         [dispatch],
     );
@@ -566,12 +550,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onShowInactiveCollectorsChange={handleShowInactiveCollectorsChange}
                     mcpEnabled={mcpSettings?.enabled}
                     onMcpEnabledChange={handleMcpEnabledChange}
-                    editorPreset={editorConfig.editor}
-                    editorCustomTemplate={editorConfig.customUrlTemplate}
-                    editorPathMapping={editorConfig.pathMapping}
-                    onEditorPresetChange={handleEditorPresetChange}
-                    onEditorCustomTemplateChange={handleEditorCustomTemplateChange}
-                    onEditorPathMappingChange={handleEditorPathMappingChange}
+                    editorConfig={editorConfig}
+                    onEditorConfigChange={handleEditorConfigChange}
                     notificationCount={notificationCount}
                     liveFeedCount={liveFeedCount}
                     liveFeedActive={liveFeedOpen}
