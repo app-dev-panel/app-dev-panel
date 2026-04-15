@@ -38,6 +38,11 @@
         }
     },
     "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi || true",
+            "@php artisan vendor:publish --tag=app-dev-panel-assets --force --ansi || true"
+        ],
         "serve": [
             "Composer\\Config::disableProcessTimeout",
             "bash ../../bin/serve.sh 8104"
