@@ -8,6 +8,7 @@ import {
 import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
+import {dispatchWindowEvent} from '@app-dev-panel/sdk/Helper/dispatchWindowEvent';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {DebugEntriesListModal} from '@app-dev-panel/toolbar/Module/Toolbar/Component/DebugEntriesListModal';
 import {AiChatPopup} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/AiChatPopup';
@@ -136,13 +137,20 @@ type DebugIFrameProps = {baseUrlState: string; iframeEnabled: boolean; iframeSrc
 
 const DebugIFrame = forwardRef(
     ({baseUrlState, iframeEnabled, iframeSrc}: DebugIFrameProps, ref: ForwardedRef<HTMLIFrameElement>) => {
-        const src = iframeSrc
-            ? baseUrlState + iframeSrc + (iframeSrc.includes('?') ? '&' : '?') + 'toolbar=0'
-            : baseUrlState + '/debug?toolbar=0';
+        // Lock the src at mount time. Subsequent navigations are routed through
+        // postMessage (router.navigate) so the iframe never fully reloads —
+        // changing the src attribute would discard panel state, scroll, filters,
+        // and re-fetch every API resource on every chip click.
+        const srcRef = useRef<string | undefined>(undefined);
+        if (srcRef.current === undefined) {
+            srcRef.current = iframeSrc
+                ? baseUrlState + iframeSrc + (iframeSrc.includes('?') ? '&' : '?') + 'toolbar=0'
+                : baseUrlState + '/debug?toolbar=0';
+        }
         return (
             <iframe
                 ref={ref}
-                src={src}
+                src={srcRef.current}
                 style={{height: '100%', width: '100%', border: 'none'}}
                 hidden={!iframeEnabled}
                 loading="lazy"
@@ -207,6 +215,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const [iframeEnabled, setIframeEnabled] = useState(false);
     const [iframeSrc, setIframeSrc] = useState<string | null>(null);
+    const [iframeReady, setIframeReady] = useState(false);
     const [chatOpen, setChatOpen] = useState(false);
     const [position, setPosition] = useState<ToolbarPosition>(toolbarPosition);
     const [floatPos, setFloatPos] = useState(savedFloatRect ?? {x: 0, y: 0, width: 320, height: 360});
@@ -240,18 +249,43 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const iframeRef = useRef<HTMLIFrameElement | undefined>(undefined);
 
+    // Track when the embedded panel finishes booting so we can switch from
+    // src-based loading (cold start) to postMessage-based navigation.
+    useEffect(() => {
+        const listener = (event: MessageEvent) => {
+            const data = event.data;
+            if (data && typeof data === 'object' && data.event === 'panel.loaded') {
+                setIframeReady(true);
+            }
+        };
+        window.addEventListener('message', listener);
+        return () => window.removeEventListener('message', listener);
+    }, []);
+
     const iframeRouteNavigate = useCallback(
         (url: string) => {
             if (!activeComponents.iframe) return;
             setIframeSrc(url);
+            // If the panel is already mounted and booted, navigate via postMessage
+            // to preserve panel state and avoid a full iframe reload.
+            if (iframeEnabled && iframeReady && iframeRef.current?.contentWindow) {
+                dispatchWindowEvent(iframeRef.current.contentWindow, 'router.navigate', url);
+                return;
+            }
+            // Cold start: enable the iframe; the URL we just stored becomes the
+            // initial src that DebugIFrame locks in at mount.
             if (!iframeEnabled) setIframeEnabled(true);
         },
-        [iframeEnabled, activeComponents],
+        [iframeEnabled, iframeReady, activeComponents],
     );
 
     const toggleIframeHandler = useCallback(() => {
         if (!activeComponents.iframe) return;
-        setIframeEnabled((v) => !v);
+        setIframeEnabled((v) => {
+            // Closing unmounts the iframe; on next open we cold-start again.
+            if (v) setIframeReady(false);
+            return !v;
+        });
     }, [activeComponents]);
 
     const {
