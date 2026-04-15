@@ -189,4 +189,143 @@ final class MimeParserTest extends TestCase
         $this->assertSame('lf', $result['subject']);
         $this->assertSame('body', $result['textBody']);
     }
+
+    public function testParsesNestedMultipart(): void
+    {
+        $outer = 'outer-bnd';
+        $inner = 'inner-bnd';
+        $raw =
+            "Subject: Nested\r\n"
+            . "Content-Type: multipart/mixed; boundary=\"{$outer}\"\r\n"
+            . "\r\n"
+            . "--{$outer}\r\n"
+            . "Content-Type: multipart/alternative; boundary=\"{$inner}\"\r\n"
+            . "\r\n"
+            . "--{$inner}\r\n"
+            . "Content-Type: text/plain\r\n"
+            . "\r\n"
+            . "Plain inner\r\n"
+            . "--{$inner}\r\n"
+            . "Content-Type: text/html\r\n"
+            . "\r\n"
+            . "<p>Html inner</p>\r\n"
+            . "--{$inner}--\r\n"
+            . "--{$outer}\r\n"
+            . "Content-Type: application/pdf\r\n"
+            . "Content-Disposition: attachment; filename=\"a.pdf\"\r\n"
+            . "\r\n"
+            . "binary\r\n"
+            . "--{$outer}--\r\n";
+
+        $result = new MimeParser()->parse($raw);
+        $this->assertSame('Plain inner', $result['textBody']);
+        $this->assertSame('<p>Html inner</p>', $result['htmlBody']);
+        $this->assertCount(1, $result['attachments']);
+        $this->assertSame('a.pdf', $result['attachments'][0]['filename']);
+    }
+
+    public function testInvalidBase64DecodesToEmptyString(): void
+    {
+        $raw =
+            "Subject: bad\r\n"
+            . "Content-Type: text/plain\r\n"
+            . "Content-Transfer-Encoding: base64\r\n"
+            . "\r\n"
+            . '!!!not-base64!!!';
+
+        $result = new MimeParser()->parse($raw);
+        $this->assertSame('', $result['textBody']);
+    }
+
+    public function testContentTypeParameterWithoutEqualsIsIgnored(): void
+    {
+        $raw = "Subject: weird\r\n" . "Content-Type: text/plain; charset=utf-8; orphan\r\n" . "\r\n" . 'body';
+
+        $result = new MimeParser()->parse($raw);
+        $this->assertSame('utf-8', $result['charset']);
+        $this->assertSame('body', $result['textBody']);
+    }
+
+    public function testDispositionWithoutFilenameFallsBackToCtName(): void
+    {
+        $boundary = 'b';
+        $raw =
+            "Subject: att\r\n"
+            . "Content-Type: multipart/mixed; boundary=\"{$boundary}\"\r\n"
+            . "\r\n"
+            . "--{$boundary}\r\n"
+            . "Content-Type: text/plain; name=\"fallback.txt\"\r\n"
+            . "Content-Disposition: attachment\r\n"
+            . "\r\n"
+            . "data\r\n"
+            . "--{$boundary}--\r\n";
+
+        $result = new MimeParser()->parse($raw);
+        $this->assertCount(1, $result['attachments']);
+        $this->assertSame('fallback.txt', $result['attachments'][0]['filename']);
+    }
+
+    public function testInlineDispositionTreatedAsAttachment(): void
+    {
+        $boundary = 'ib';
+        $raw =
+            "Subject: inl\r\n"
+            . "Content-Type: multipart/related; boundary=\"{$boundary}\"\r\n"
+            . "\r\n"
+            . "--{$boundary}\r\n"
+            . "Content-Type: image/png\r\n"
+            . "Content-Disposition: inline; filename=\"pic.png\"\r\n"
+            . "Content-ID: <logo@mail>\r\n"
+            . "\r\n"
+            . "bytes\r\n"
+            . "--{$boundary}--\r\n";
+
+        $result = new MimeParser()->parse($raw);
+        $this->assertCount(1, $result['attachments']);
+        $this->assertSame('logo@mail', $result['attachments'][0]['contentId']);
+        $this->assertSame('image/png', $result['attachments'][0]['mime']);
+    }
+
+    public function testReplyToAndCcParsed(): void
+    {
+        $raw =
+            "Subject: r\r\n"
+            . "Reply-To: reply@x\r\n"
+            . "Cc: cc1@x, cc2@y\r\n"
+            . "Bcc: hidden@z\r\n"
+            . "Content-Type: text/plain\r\n"
+            . "\r\n"
+            . 'b';
+
+        $result = new MimeParser()->parse($raw);
+        $this->assertArrayHasKey('reply@x', $result['replyTo']);
+        $this->assertArrayHasKey('cc1@x', $result['cc']);
+        $this->assertArrayHasKey('cc2@y', $result['cc']);
+        $this->assertArrayHasKey('hidden@z', $result['bcc']);
+    }
+
+    public function testEmptyRawStringProducesEmptyResult(): void
+    {
+        $result = new MimeParser()->parse('');
+        $this->assertSame('', $result['subject']);
+        $this->assertSame([], $result['from']);
+        $this->assertSame([], $result['to']);
+        $this->assertNull($result['messageId']);
+        $this->assertNull($result['sessionId']);
+    }
+
+    public function testHeadersWithoutColonSkipped(): void
+    {
+        $raw = "Subject: s\r\ngarbage-no-colon\r\nContent-Type: text/plain\r\n\r\nbody";
+        $result = new MimeParser()->parse($raw);
+        $this->assertSame('s', $result['subject']);
+        $this->assertSame('body', $result['textBody']);
+    }
+
+    public function testBareAddressWithoutAngleBrackets(): void
+    {
+        $raw = "Subject: s\r\nTo: plain@example.com\r\nContent-Type: text/plain\r\n\r\nb";
+        $result = new MimeParser()->parse($raw);
+        $this->assertSame(['plain@example.com' => ''], $result['to']);
+    }
 }

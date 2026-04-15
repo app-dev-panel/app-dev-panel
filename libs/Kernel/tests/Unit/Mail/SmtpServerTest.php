@@ -8,6 +8,23 @@ use AppDevPanel\Kernel\Mail\MimeParser;
 use AppDevPanel\Kernel\Mail\SmtpServer;
 use AppDevPanel\Kernel\Mail\StandaloneMailerIngestion;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\AbstractLogger;
+use Stringable;
+
+final class RecordingLogger extends AbstractLogger
+{
+    /** @var list<string> */
+    public array $messages = [];
+
+    /** @var list<string> */
+    public array $levels = [];
+
+    public function log(mixed $level, string|Stringable $message, array $context = []): void
+    {
+        $this->levels[] = (string) $level;
+        $this->messages[] = (string) $message;
+    }
+}
 
 final class SmtpServerTest extends TestCase
 {
@@ -86,6 +103,76 @@ final class SmtpServerTest extends TestCase
         $server = new SmtpServer('127.0.0.1', 0, new StandaloneMailerIngestion(new RecordingStorage()));
         $this->expectException(\LogicException::class);
         $server->tick();
+    }
+
+    public function testStopIsSafeWithoutStart(): void
+    {
+        $server = new SmtpServer('127.0.0.1', 0, new StandaloneMailerIngestion(new RecordingStorage()));
+        $server->stop();
+        $this->addToAssertionCount(1);
+    }
+
+    public function testRequestStopFlipsShouldStop(): void
+    {
+        $server = new SmtpServer('127.0.0.1', 0, new StandaloneMailerIngestion(new RecordingStorage()));
+        $this->assertFalse($server->shouldStop());
+        $server->requestStop();
+        $this->assertTrue($server->shouldStop());
+    }
+
+    public function testPortReturnsConfiguredValueBeforeStart(): void
+    {
+        $server = new SmtpServer('127.0.0.1', 2525, new StandaloneMailerIngestion(new RecordingStorage()));
+        $this->assertSame(2525, $server->port());
+    }
+
+    public function testLoggerReceivesStartAndStopMessages(): void
+    {
+        $logger = new RecordingLogger();
+        $server = new SmtpServer(
+            host: '127.0.0.1',
+            port: 0,
+            ingestion: new StandaloneMailerIngestion(new RecordingStorage()),
+            logger: $logger,
+        );
+        $server->start();
+        $server->stop();
+
+        $this->assertGreaterThanOrEqual(2, count($logger->messages));
+        $this->assertStringContainsString('listener started', $logger->messages[0]);
+        $this->assertStringContainsString('listener stopped', $logger->messages[count($logger->messages) - 1]);
+    }
+
+    public function testTickTimeoutWithoutActivityIsSafe(): void
+    {
+        $server = new SmtpServer('127.0.0.1', 0, new StandaloneMailerIngestion(new RecordingStorage()));
+        $server->start();
+        try {
+            // No clients connected — stream_select should time out and return.
+            $server->tick(0.01);
+            $this->addToAssertionCount(1);
+        } finally {
+            $server->stop();
+        }
+    }
+
+    public function testClientThatDisconnectsImmediatelyIsCleanedUp(): void
+    {
+        $server = new SmtpServer('127.0.0.1', 0, new StandaloneMailerIngestion(new RecordingStorage()));
+        $server->start();
+        try {
+            $port = $server->port();
+            $client = stream_socket_client("tcp://127.0.0.1:{$port}", $errno, $errstr, 2.0);
+            $this->assertNotFalse($client);
+            fclose($client);
+            // Drive a few ticks so the server sees EOF and reaps the connection.
+            for ($i = 0; $i < 5; $i++) {
+                $server->tick(0.02);
+            }
+            $this->addToAssertionCount(1);
+        } finally {
+            $server->stop();
+        }
     }
 
     private function drive(SmtpServer $server, float $seconds): void

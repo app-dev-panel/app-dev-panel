@@ -243,4 +243,122 @@ final class SmtpSessionTest extends TestCase
         $response = $session->feed(str_repeat('A', 200));
         $this->assertStringContainsString('552', $response);
     }
+
+    public function testEmptyCommandLineReturns500(): void
+    {
+        $session = new SmtpSession();
+        $session->greeting();
+        $this->assertStringStartsWith('500', $session->feed("\r\n"));
+    }
+
+    public function testHeloHappyPath(): void
+    {
+        $session = new SmtpSession('srv');
+        $session->greeting();
+        $response = $session->feed("HELO client\r\n");
+        $this->assertSame("250 srv\r\n", $response);
+        // After HELO, MAIL FROM must succeed.
+        $this->assertStringStartsWith('250', $session->feed("MAIL FROM:<a@b>\r\n"));
+    }
+
+    public function testEhloWithoutDomainReturns501(): void
+    {
+        $session = new SmtpSession();
+        $session->greeting();
+        $this->assertStringStartsWith('501', $session->feed("EHLO\r\n"));
+    }
+
+    public function testRcptBeforeMailReturns503(): void
+    {
+        $session = new SmtpSession();
+        $session->greeting();
+        $session->feed("EHLO x\r\n");
+        $this->assertStringStartsWith('503', $session->feed("RCPT TO:<a@b>\r\n"));
+    }
+
+    public function testMalformedRcptReturns501(): void
+    {
+        $session = new SmtpSession();
+        $session->greeting();
+        $session->feed("EHLO x\r\n");
+        $session->feed("MAIL FROM:<a@b>\r\n");
+        $this->assertStringStartsWith('501', $session->feed("RCPT blah\r\n"));
+    }
+
+    public function testDataBeforeRcptReturns503(): void
+    {
+        $session = new SmtpSession();
+        $session->greeting();
+        $session->feed("EHLO x\r\n");
+        $session->feed("MAIL FROM:<a@b>\r\n");
+        $this->assertStringStartsWith('503', $session->feed("DATA\r\n"));
+    }
+
+    public function testAuthUnknownMechanismReturns504(): void
+    {
+        $session = new SmtpSession();
+        $session->greeting();
+        $session->feed("EHLO x\r\n");
+        $this->assertStringStartsWith('504', $session->feed("AUTH CRAM-MD5\r\n"));
+    }
+
+    public function testVrfyReturns502(): void
+    {
+        $session = new SmtpSession();
+        $session->greeting();
+        $this->assertStringStartsWith('502', $session->feed("VRFY foo\r\n"));
+    }
+
+    public function testExpnReturns502(): void
+    {
+        $session = new SmtpSession();
+        $session->greeting();
+        $this->assertStringStartsWith('502', $session->feed("EXPN list\r\n"));
+    }
+
+    public function testHelpReturns214(): void
+    {
+        $session = new SmtpSession();
+        $session->greeting();
+        $this->assertStringStartsWith('214', $session->feed("HELP\r\n"));
+    }
+
+    public function testCloseMarksSessionClosed(): void
+    {
+        $session = new SmtpSession();
+        $session->greeting();
+        $session->close();
+        $this->assertTrue($session->isClosed());
+    }
+
+    public function testTakeCompletedMessageReturnsNullWhenEmpty(): void
+    {
+        $session = new SmtpSession();
+        $this->assertFalse($session->hasCompletedMessage());
+        $this->assertNull($session->takeCompletedMessage());
+    }
+
+    public function testMultipleEnvelopesInOneSession(): void
+    {
+        $session = new SmtpSession();
+        $session->greeting();
+        $session->feed("EHLO x\r\n");
+
+        // First envelope
+        $session->feed("MAIL FROM:<a@b>\r\n");
+        $session->feed("RCPT TO:<c@d>\r\n");
+        $session->feed("DATA\r\nFirst\r\n.\r\n");
+
+        // Second envelope (after auto-reset)
+        $session->feed("MAIL FROM:<e@f>\r\n");
+        $session->feed("RCPT TO:<g@h>\r\n");
+        $session->feed("DATA\r\nSecond\r\n.\r\n");
+
+        $first = $session->takeCompletedMessage();
+        $second = $session->takeCompletedMessage();
+        $this->assertNotNull($first);
+        $this->assertNotNull($second);
+        $this->assertSame('a@b', $first['from']);
+        $this->assertSame('e@f', $second['from']);
+    }
 }

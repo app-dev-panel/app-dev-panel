@@ -66,6 +66,126 @@ final class SmtpListenCommandTest extends TestCase
         }
     }
 
+    public function testBindFailureReturnsFailure(): void
+    {
+        // Occupy a port first, then ask the command to bind on the same one.
+        $occupier = stream_socket_server('tcp://127.0.0.1:0', $errno, $errstr);
+        $this->assertNotFalse($occupier);
+        $address = stream_socket_get_name($occupier, false);
+        $this->assertNotFalse($address);
+        $port = (int) substr((string) $address, (int) strrpos((string) $address, ':') + 1);
+
+        $command = new SmtpListenCommand();
+        $tester = new CommandTester($command);
+        $exitCode = $tester->execute([
+            '--host' => '127.0.0.1',
+            '--port' => (string) $port,
+            '--storage-path' => sys_get_temp_dir() . '/adp-smtp-bind-' . uniqid(),
+        ]);
+
+        fclose($occupier);
+        $this->assertSame(1, $exitCode);
+        $this->assertStringContainsString('Failed to bind', $tester->getDisplay());
+    }
+
+    public function testLocalhostHostIsAllowed(): void
+    {
+        $storageDir = sys_get_temp_dir() . '/adp-smtp-local-' . uniqid();
+        $iterations = 0;
+        $stop = static function () use (&$iterations): bool {
+            $iterations++;
+            return $iterations >= 1;
+        };
+
+        $command = new SmtpListenCommand($stop);
+        $tester = new CommandTester($command);
+        $exitCode = $tester->execute([
+            '--host' => 'localhost',
+            '--port' => '0',
+            '--storage-path' => $storageDir,
+        ]);
+
+        $this->assertSame(0, $exitCode);
+        $this->assertStringContainsString('Listening on localhost', $tester->getDisplay());
+        $this->removeDir($storageDir);
+    }
+
+    public function testExternalHostWithExplicitFlagIsAllowed(): void
+    {
+        $storageDir = sys_get_temp_dir() . '/adp-smtp-ext-' . uniqid();
+        $stop = static fn(): bool => true;
+
+        $command = new SmtpListenCommand($stop);
+        $tester = new CommandTester($command);
+        $exitCode = $tester->execute([
+            '--host' => '127.0.0.1',
+            '--port' => '0',
+            '--allow-external' => true,
+            '--storage-path' => $storageDir,
+        ]);
+
+        $this->assertSame(0, $exitCode);
+        $this->removeDir($storageDir);
+    }
+
+    public function testPassesHostnameAndMaxSizeIntoOutput(): void
+    {
+        $storageDir = sys_get_temp_dir() . '/adp-smtp-opts-' . uniqid();
+        $stop = static fn(): bool => true;
+
+        $command = new SmtpListenCommand($stop);
+        $tester = new CommandTester($command);
+        $tester->execute([
+            '--host' => '127.0.0.1',
+            '--port' => '0',
+            '--hostname' => 'my.example',
+            '--max-size' => '5242880',
+            '--storage-path' => $storageDir,
+        ]);
+
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString('my.example', $display);
+        $this->assertStringContainsString('5242880', $display);
+        $this->removeDir($storageDir);
+    }
+
+    public function testCreatesStorageDirectoryIfMissing(): void
+    {
+        $storageDir = sys_get_temp_dir() . '/adp-smtp-mkdir-' . uniqid();
+        $this->assertDirectoryDoesNotExist($storageDir);
+
+        $stop = static fn(): bool => true;
+        $command = new SmtpListenCommand($stop);
+        $tester = new CommandTester($command);
+        $tester->execute([
+            '--host' => '127.0.0.1',
+            '--port' => '0',
+            '--storage-path' => $storageDir,
+        ]);
+
+        $this->assertDirectoryExists($storageDir);
+        $this->removeDir($storageDir);
+    }
+
+    public function testMaxSizeBelowMinimumIsClamped(): void
+    {
+        $storageDir = sys_get_temp_dir() . '/adp-smtp-clamp-' . uniqid();
+        $stop = static fn(): bool => true;
+
+        $command = new SmtpListenCommand($stop);
+        $tester = new CommandTester($command);
+        $tester->execute([
+            '--host' => '127.0.0.1',
+            '--port' => '0',
+            '--max-size' => '10',
+            '--storage-path' => $storageDir,
+        ]);
+
+        // Minimum is 1024 bytes regardless of input.
+        $this->assertStringContainsString('1024 bytes', $tester->getDisplay());
+        $this->removeDir($storageDir);
+    }
+
     private function removeDir(string $path): void
     {
         if (!is_dir($path)) {

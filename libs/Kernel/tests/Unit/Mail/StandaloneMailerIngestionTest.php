@@ -82,6 +82,67 @@ final class StandaloneMailerIngestionTest extends TestCase
 
         $this->assertSame('127.0.0.1:55000', $storage->entries[0]['summary']['context']['smtp']['peer']);
     }
+
+    public function testEmptyEnvelopeAndHeadersProducesEmptyAddresses(): void
+    {
+        $storage = new RecordingStorage();
+        $ingestion = new StandaloneMailerIngestion($storage);
+
+        $ingestion->ingest(['from' => null, 'rcpt' => [], 'raw' => "Subject: s\r\n\r\nx"]);
+
+        $message = $storage->entries[0]['data']['mailer']['messages'][0];
+        $this->assertSame([], $message['from']);
+        $this->assertSame([], $message['to']);
+    }
+
+    public function testEmptyFromStringInEnvelopeNotUsedAsFallback(): void
+    {
+        // A blank sender ("<>" on the wire) must not produce a bogus empty-key recipient entry.
+        $storage = new RecordingStorage();
+        $ingestion = new StandaloneMailerIngestion($storage);
+
+        $ingestion->ingest(['from' => '', 'rcpt' => ['c@d'], 'raw' => "Subject: s\r\n\r\nx"]);
+
+        $message = $storage->entries[0]['data']['mailer']['messages'][0];
+        $this->assertSame([], $message['from']);
+    }
+
+    public function testUniqueIdsAcrossIngestions(): void
+    {
+        $storage = new RecordingStorage();
+        $ingestion = new StandaloneMailerIngestion($storage);
+
+        $id1 = $ingestion->ingest(['from' => 'a@b', 'rcpt' => ['c@d'], 'raw' => "Subject: a\r\n\r\nx"]);
+        $id2 = $ingestion->ingest(['from' => 'a@b', 'rcpt' => ['c@d'], 'raw' => "Subject: b\r\n\r\ny"]);
+
+        $this->assertNotSame($id1, $id2);
+        $this->assertStringStartsWith('smtp-', $id1);
+        $this->assertStringStartsWith('smtp-', $id2);
+    }
+
+    public function testMessageIdIsExtractedIntoContext(): void
+    {
+        $storage = new RecordingStorage();
+        $ingestion = new StandaloneMailerIngestion($storage);
+
+        $raw = "Message-ID: <unique-123@host>\r\nSubject: s\r\nContent-Type: text/plain\r\n\r\nx";
+        $ingestion->ingest(['from' => 'a@b', 'rcpt' => ['c@d'], 'raw' => $raw]);
+
+        $this->assertSame('unique-123@host', $storage->entries[0]['summary']['context']['messageId']);
+    }
+
+    public function testCollectorsListContainsMailer(): void
+    {
+        $storage = new RecordingStorage();
+        $ingestion = new StandaloneMailerIngestion($storage);
+
+        $ingestion->ingest(['from' => 'a@b', 'rcpt' => ['c@d'], 'raw' => "Subject: s\r\n\r\nx"]);
+
+        $collectors = $storage->entries[0]['summary']['collectors'];
+        $this->assertCount(1, $collectors);
+        $this->assertSame('mailer', $collectors[0]['id']);
+        $this->assertSame('mailer', $collectors[0]['name']);
+    }
 }
 
 final class RecordingStorage implements StorageInterface
