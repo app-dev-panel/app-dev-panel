@@ -215,14 +215,28 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         getDebugQuery();
     }, [getDebugQuery, backendUrl, dispatch]);
 
-    // Auto-select first entry when data loads
+    // Auto-select entry: honor ?debugEntry= URL param first (used by the embedded
+    // toolbar's iframe so the panel renders the same entry the toolbar is showing),
+    // otherwise fall back to the latest entry.
     useEffect(() => {
-        if (getDebugQueryInfo.isSuccess && getDebugQueryInfo.data && getDebugQueryInfo.data.length) {
-            if (!debugEntry) {
-                dispatch(changeEntryAction(getDebugQueryInfo.data[0]));
+        if (!getDebugQueryInfo.isSuccess || !getDebugQueryInfo.data?.length) {
+            return;
+        }
+        const requestedId = searchParams.get('debugEntry');
+        if (requestedId) {
+            if (debugEntry?.id === requestedId) {
+                return;
+            }
+            const requested = getDebugQueryInfo.data.find((e) => e.id === requestedId);
+            if (requested) {
+                dispatch(changeEntryAction(requested));
+                return;
             }
         }
-    }, [getDebugQueryInfo.isSuccess, getDebugQueryInfo.data, dispatch, debugEntry]);
+        if (!debugEntry) {
+            dispatch(changeEntryAction(getDebugQueryInfo.data[0]));
+        }
+    }, [getDebugQueryInfo.isSuccess, getDebugQueryInfo.data, dispatch, debugEntry, searchParams]);
 
     // SSE for auto-refresh
     const changeEntry = useCallback(
