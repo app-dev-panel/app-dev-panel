@@ -1,7 +1,5 @@
 # McpServer — MCP Protocol Server for ADP
 
-## Overview
-
 MCP (Model Context Protocol) server that exposes ADP debug data and live application state to AI assistants.
 Supports two transports: **stdio** (JSON-RPC over stdin/stdout) and **HTTP** (JSON-RPC over POST).
 Two tool categories: **Debug** (read stored debug entries) and **Inspector** (query live app via HTTP).

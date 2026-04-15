@@ -16,7 +16,9 @@ Bridges ADP Kernel and API into Laravel. Uses Laravel's event system, middleware
 src/
 ├── AppDevPanelServiceProvider.php              # Service provider: registers all services, collectors, API
 ├── Middleware/
-│   └── DebugMiddleware.php                     # HTTP lifecycle: startup/shutdown, request/response capture
+│   ├── DebugMiddleware.php                     # HTTP lifecycle: startup/shutdown, request/response capture
+│   ├── DebugCollectors.php                     # Groups optional collector dependencies injected into DebugMiddleware
+│   └── Psr7Converter.php                       # Laravel/HttpFoundation Request+Response → PSR-7
 ├── EventListener/
 │   ├── DatabaseListener.php                    # QueryExecuted → DatabaseCollector
 │   ├── CacheListener.php                       # CacheHit/CacheMissed/KeyWritten/KeyForgotten → CacheCollector
@@ -24,6 +26,9 @@ src/
 │   ├── QueueListener.php                       # JobProcessing/JobProcessed/JobFailed → QueueCollector
 │   ├── HttpClientListener.php                  # RequestSending/ResponseReceived/ConnectionFailed → HttpClientCollector
 │   ├── AuthorizationListener.php               # Authenticated/Login/Logout/Failed → AuthorizationCollector
+│   ├── GateListener.php                        # Gate evaluation events → AuthorizationCollector (granted/denied access decisions)
+│   ├── RedisListener.php                       # Illuminate\Redis\Events\CommandExecuted → RedisCollector
+│   ├── ValidatorListener.php                   # Validator factory resolver() → ValidatorCollector (pass/fail, errors)
 │   ├── ViteAssetListener.php                   # Vite preloadedAssets() → AssetBundleCollector
 │   └── ConsoleListener.php                     # CommandStarting/CommandFinished → Debugger lifecycle
 ├── Proxy/

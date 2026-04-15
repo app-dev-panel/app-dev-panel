@@ -40,6 +40,9 @@ only depend on `yiisoft/var-dumper` (core infra).
 | `Dumper` | Serializes PHP objects with depth control and circular ref detection |
 | `StorageInterface` | Abstraction for persisting debug data |
 | `FileStorage` | JSON file-based storage with garbage collection |
+| `SqliteStorage` | SQLite-backed storage with WAL journaling and prepared statements |
+| `BroadcastingStorage` | Decorator that broadcasts entry-created UDP notifications via `Broadcaster` |
+| `StorageFactory` | Resolves a driver name (`file`, `sqlite`) or class name into a `StorageInterface` instance |
 | `MemoryStorage` | In-memory storage for testing |
 | `CollectorInterface` | Interface all collectors must implement |
 | `ServiceRegistryInterface` | Registry for external app service descriptors |
@@ -119,7 +122,10 @@ src/
 │   └── FileServiceRegistry.php
 ├── Storage/
 │   ├── StorageInterface.php
-│   ├── FileStorage.php
+│   ├── StorageFactory.php               # Resolves driver name ('file' | 'sqlite') or class name
+│   ├── FileStorage.php                  # JSON file-based (default)
+│   ├── SqliteStorage.php                # SQLite (WAL + prepared statements)
+│   ├── BroadcastingStorage.php          # Decorator: broadcasts ENTRY_CREATED via UDP
 │   ├── FileStorageGarbageCollector.php  # Automatic cleanup of old entries
 │   ├── GarbageCollector.php             # GC interface
 │   └── MemoryStorage.php
@@ -201,6 +207,16 @@ Tracks external application instances that register with ADP for multi-app inspe
 | `TYPE_SUMMARY` | Summary metadata | Timestamp, URL, status, collector names |
 | `TYPE_DATA` | Full data | Complete collector payloads |
 | `TYPE_OBJECTS` | Object dumps | Serialized objects for deep inspection |
+
+### Drivers and Decorators
+
+| Implementation | Use case |
+|----------------|----------|
+| `FileStorage` | Default. One JSON file per entry under the storage path; per-entry GC. |
+| `SqliteStorage` | Single `.db` file with `entries` table (WAL journaling, `PRAGMA synchronous=NORMAL`, indexed `created_at`). Prepared statements only; unknown storage types throw `InvalidArgumentException` instead of falling through into SQL. |
+| `BroadcastingStorage` | Decorator around any concrete storage. Emits `MESSAGE_TYPE_ENTRY_CREATED` over UDP via `Broadcaster` so SSE listeners and CLI tail react in real time. |
+| `MemoryStorage` | Unit-test helper. |
+| `StorageFactory` | `create(string $driver, array $config, DebuggerIdGenerator $idGenerator)` — `file` / `sqlite` / any FQCN implementing `StorageInterface`. |
 
 ### Write Sources
 
