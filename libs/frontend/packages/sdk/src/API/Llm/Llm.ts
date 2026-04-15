@@ -31,7 +31,19 @@ type ModelsResponse = {models: LlmModel[]};
 
 export type ChatMessage = {role: 'system' | 'user' | 'assistant'; content: string};
 
-export type ChatRequest = {messages: ChatMessage[]; model?: string; temperature?: number};
+export type ChatContext = {
+    url?: string;
+    userAgent?: string;
+    language?: string;
+    timezone?: string;
+    viewport?: {width: number; height: number};
+    screen?: {width: number; height: number; devicePixelRatio: number};
+    theme?: 'light' | 'dark';
+    title?: string;
+    referrer?: string;
+};
+
+export type ChatRequest = {messages: ChatMessage[]; model?: string; temperature?: number; context?: ChatContext};
 
 export type ChatResponse = {choices?: Array<{message?: {content?: string}}>; error?: unknown};
 
