@@ -159,18 +159,18 @@ const buildIframeSrc = (baseUrl: string, panelMount: string, internalPath: strin
 
 const DebugIFrame = forwardRef(
     ({baseUrlState, iframeEnabled, iframeSrc}: DebugIFrameProps, ref: ForwardedRef<HTMLIFrameElement>) => {
-        // Lock the src at mount time. Subsequent navigations are routed through
-        // postMessage (router.navigate) so the iframe never fully reloads —
-        // changing the src attribute would discard panel state, scroll, filters,
-        // and re-fetch every API resource on every chip click.
-        const srcRef = useRef<string | undefined>(undefined);
-        if (srcRef.current === undefined) {
-            srcRef.current = buildIframeSrc(baseUrlState, getPanelMountPath(), iframeSrc);
-        }
+        // Lock the src at mount time via `useState` with a lazy initializer:
+        // computed once on first render and never recomputed on subsequent
+        // renders, even when `iframeSrc` / `baseUrlState` props change.
+        // Subsequent navigations are routed through postMessage
+        // (router.navigate) so the iframe never fully reloads — changing the
+        // src attribute would discard panel state, scroll, filters, and
+        // re-fetch every API resource on every chip click.
+        const [src] = useState(() => buildIframeSrc(baseUrlState, getPanelMountPath(), iframeSrc));
         return (
             <iframe
                 ref={ref}
-                src={srcRef.current}
+                src={src}
                 style={{height: '100%', width: '100%', border: 'none'}}
                 hidden={!iframeEnabled}
                 loading="lazy"
