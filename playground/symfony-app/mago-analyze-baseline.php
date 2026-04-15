@@ -1,6 +1,24 @@
 variant = "loose"
 
 [[issues]]
+file = "config/reference.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\Config\Loader\ParamConfigurator`.'
+count = 2397
+
+[[issues]]
+file = "config/reference.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\DependencyInjection\Loader\Configurator\ReferenceConfigurator`.'
+count = 42
+
+[[issues]]
+file = "config/reference.php"
+code = "non-existent-method"
+message = 'Method `config` does not exist on type `Symfony\Component\DependencyInjection\Loader\Configurator\AppReference`.'
+count = 1
+
+[[issues]]
 file = "config/routes/app_dev_panel.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator)`).'
@@ -59,6 +77,24 @@ file = "src/Controller/HomeController.php"
 code = "non-existent-class-like"
 message = 'Class `App\Controller\HomeController` cannot extend unknown type `AbstractController`'
 count = 1
+
+[[issues]]
+file = "src/Controller/OpenApiController.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 1
+
+[[issues]]
+file = "src/Controller/OpenApiController.php"
+code = "invalid-property-access"
+message = "Attempting to access a property on a non-object type (`never`)."
+count = 1
+
+[[issues]]
+file = "src/Controller/OpenApiController.php"
+code = "method-access-on-null"
+message = "Attempting to call a method on `null`."
+count = 3
 
 [[issues]]
 file = "src/Controller/OpenApiController.php"
@@ -268,7 +304,7 @@ count = 1
 file = "src/Controller/TestFixtures/DatabaseAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Doctrine\DBAL\Connection)`).'
-count = 3
+count = 4
 
 [[issues]]
 file = "src/Controller/TestFixtures/DatabaseAction.php"

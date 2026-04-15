@@ -932,13 +932,15 @@ class Module extends \yii\base\Module implements BootstrapInterface
         // Used to avoid double-capture between the exception-handler closure and the
         // shutdown-function fallback (the latter runs only when Yii calls exit()
         // and control never returns from $previousHandler).
-        $responseCaptured = new \ArrayObject(['done' => false]);
+        $responseCaptured = new class {
+            public bool $done = false;
+        };
 
         // Register shutdown fallback: when Yii's ErrorHandler ends via exit(), control
         // won't return from $previousHandler($exception), so we capture response state
         // here from the final Yii response object. Safe to run multiple times.
         register_shutdown_function(static function () use ($app, $listener, $responseCaptured): void {
-            if ($responseCaptured['done']) {
+            if ($responseCaptured->done) {
                 return;
             }
             if (!$app->has('response')) {
@@ -946,7 +948,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             }
             try {
                 $listener->onExceptionRendered($app);
-                $responseCaptured['done'] = true;
+                $responseCaptured->done = true;
             } catch (\Throwable) {
                 // Shutdown functions must never throw
             }
@@ -982,7 +984,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             // Capture the rendered response (status code set by Yii's ErrorHandler) so
             // RequestCollector doesn't keep its default 200.
             $listener->onExceptionRendered($app);
-            $responseCaptured['done'] = true;
+            $responseCaptured->done = true;
         });
     }
 
