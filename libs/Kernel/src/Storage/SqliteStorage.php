@@ -8,7 +8,7 @@ use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Dumper;
-use Yiisoft\Json\Json;
+use AppDevPanel\Kernel\Helper\Json;
 
 final class SqliteStorage implements StorageInterface
 {

@@ -35,10 +35,10 @@ CLAUDE.md files drifted from actual code.
 - `libs/McpServer/CLAUDE.md:3`: `## Overview` is filler per review-docs skill policy (LLM-optimized docs, no boilerplate headings).
 - Fix: delete the `## Overview` heading, keep the prose.
 
-### [~] E2 — Endpoints table vs ApiRoutes.php audit — PARTIAL
-- `libs/API/CLAUDE.md` endpoint tables vs `libs/API/src/ApiRoutes.php` — 46 `Route(...)` registrations, docs have 80+ rows.
-- Done as part of B3: HttpMock endpoints (7 rows) added.
-- Still open: run the full diff, remove/adjust any stale rows, cross-check LLM/MCP/Services tables.
+### [x] E2 — Endpoints table vs ApiRoutes.php audit
+- Full diff performed: 87 `Route(...)` registrations in `libs/API/src/ApiRoutes.php` extracted via PHP regex and cross-checked against `libs/API/CLAUDE.md`.
+- Verdict: all routes are documented. Docs use the pattern "section prefix (`### X API (/debug/api/foo)`) + relative path (`/bar`)" — the three initially-suspected holes (`/ingest/batch`, `/ingest/log`, `/composer/inspect`) are in fact present as `/batch`, `/log`, `/inspect` under their respective section prefixes.
+- HttpMock section (added in B3) closed the only genuine gap.
 
 ## Acceptance
 - `git grep -c "HttpMock" libs/API/CLAUDE.md` ≥ 1.

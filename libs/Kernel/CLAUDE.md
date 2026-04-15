@@ -7,17 +7,19 @@ data collectors, storage, PSR proxy system, and object serialization.
 
 Kernel depends on PSR interfaces and these core infrastructure helpers:
 
-- `yiisoft/strings` — String manipulation utilities (core infra, framework-agnostic)
-- `yiisoft/json` — JSON encode/decode with error handling (core infra, framework-agnostic)
-- `yiisoft/var-dumper` — Variable dumping/serialization (core infra, framework-agnostic)
+- `yiisoft/strings` — `CombinedRegexp` (hot path in stream proxies), `WildcardPattern` for ignore globs
+- `yiisoft/files` — `FileHelper::ensureDirectory` / `removeDirectory` / `isEmptyDirectory` for `FileStorage` + GC
+- `yiisoft/var-dumper` — `ClosureExporter` + `VarDumper::create()` at the core of the object dumper
 - `symfony/console` — Console event types for `CommandCollector`
 - `symfony/var-dumper` — Variable dumper integration
 - `guzzlehttp/psr7` — PSR-7 HTTP message implementation
 
-**Core infra policy**: `yiisoft/var-dumper`, `yiisoft/strings`, and `yiisoft/json` are pure
-utility libraries with no framework coupling. They are considered core infrastructure and
-may be used freely in Kernel and any module. Despite the `yiisoft/` vendor prefix, these
-are not Yii framework dependencies.
+**Core infra policy**: the remaining `yiisoft/*` packages are pure utility libraries with no
+framework coupling. Despite the `yiisoft/` vendor prefix, they are not Yii framework
+dependencies. Each kept dep carries real logic (regex compilation, recursive directory
+cleanup, closure export, pretty dumping) that would cost more to re-implement than it
+saves. `yiisoft/json` was dropped in favour of an internal `AppDevPanel\Kernel\Helper\Json`
+wrapping native `json_encode/decode` with `JSON_THROW_ON_ERROR`.
 
 Note: `yiisoft/proxy` was removed from Kernel. Container proxying (`ContainerInterfaceProxy`,
 `ServiceProxy`, `ServiceMethodProxy`, `ContainerProxyConfig`, `ProxyLogTrait`) and

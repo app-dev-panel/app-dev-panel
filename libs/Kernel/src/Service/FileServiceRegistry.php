@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Service;
 
-use Yiisoft\Json\Json;
+use AppDevPanel\Kernel\Helper\Json;
 
 final class FileServiceRegistry implements ServiceRegistryInterface
 {
