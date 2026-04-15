@@ -8,6 +8,7 @@ use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Llm\Acp\AcpCommandAllowlist;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
 use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
+use AppDevPanel\Api\Llm\LlmContextBuilder;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
 use AppDevPanel\Api\Llm\LlmProviderService;
 use AppDevPanel\Api\Llm\LlmSettingsInterface;
@@ -34,6 +35,7 @@ final class LlmController
         private readonly ?AcpCommandVerifierInterface $commandVerifier = null,
         private readonly ?AcpDaemonManagerInterface $acpDaemonManager = null,
         private readonly AcpCommandAllowlist $acpAllowlist = new AcpCommandAllowlist(),
+        private readonly LlmContextBuilder $contextBuilder = new LlmContextBuilder(),
     ) {}
 
     /**
@@ -364,8 +366,12 @@ final class LlmController
         $temperature = isset($body['temperature']) ? (float) $body['temperature'] : 0.7;
 
         $context = is_array($body['context'] ?? null) ? $body['context'] : null;
-        $messages = $this->prependBrowserContext($messages, $provider, $context);
-        $messages = $this->prependCustomPrompt($messages, $provider);
+        $messages = $this->contextBuilder->prependBrowserContext($messages, $provider, $context);
+        $messages = $this->contextBuilder->prependCustomPrompt(
+            $messages,
+            $provider,
+            $this->settings->getCustomPrompt(),
+        );
 
         $acpSessionId = $this->extractAcpSessionId($request);
         $data = $this->providerService->sendChat($provider, $messages, $model, $temperature, $acpSessionId);
@@ -511,162 +517,6 @@ final class LlmController
         $this->historyStorage->clear();
 
         return $this->responseFactory->createJsonResponse([]);
-    }
-
-    /**
-     * Prepend a hidden system prompt describing the user's current browser
-     * context (URL, selected debug entry/collector, environment). Invisible
-     * to the end user — injected only into the outgoing LLM payload.
-     */
-    private function prependBrowserContext(array $messages, string $provider, ?array $context): array
-    {
-        if ($context === null || $context === []) {
-            return $messages;
-        }
-
-        $lines = [
-            'Browser context for the user who is chatting with you (do not mention this block unless asked):',
-        ];
-
-        $url = $this->stringField($context, 'url');
-        if ($url !== null) {
-            $lines[] = '- URL: ' . $url;
-            foreach ($this->parseUrlQueryContext($url) as $line) {
-                $lines[] = $line;
-            }
-        }
-
-        $this->appendStringLine($lines, $context, 'title', 'Page title');
-        $this->appendStringLine($lines, $context, 'userAgent', 'User agent');
-        $this->appendStringLine($lines, $context, 'language', 'Language');
-        $this->appendStringLine($lines, $context, 'timezone', 'Timezone');
-        $this->appendSizeLine($lines, $context, 'viewport', 'Viewport');
-        $this->appendSizeLine($lines, $context, 'screen', 'Screen', includeDpr: true);
-        $this->appendStringLine($lines, $context, 'theme', 'Theme');
-        $this->appendStringLine($lines, $context, 'referrer', 'Referrer');
-
-        if (count($lines) === 1) {
-            return $messages;
-        }
-
-        return $this->injectPromptPrefix($messages, $provider, implode("\n", $lines), '[%s]');
-    }
-
-    /**
-     * Prepend custom prompt to messages based on provider capabilities.
-     */
-    private function prependCustomPrompt(array $messages, string $provider): array
-    {
-        $customPrompt = $this->settings->getCustomPrompt();
-        if ($customPrompt === '') {
-            return $messages;
-        }
-
-        return $this->injectPromptPrefix($messages, $provider, $customPrompt, '[Instructions: %s]');
-    }
-
-    /**
-     * Providers with a dedicated `system` role receive the prompt as a
-     * leading system message. For others the prompt is merged into the
-     * first user message for maximum model compatibility.
-     */
-    private function injectPromptPrefix(array $messages, string $provider, string $prompt, string $userWrap): array
-    {
-        if ($this->supportsSystemRole($provider)) {
-            array_unshift($messages, ['role' => 'system', 'content' => $prompt]);
-
-            return $messages;
-        }
-
-        $wrapped = sprintf($userWrap, $prompt);
-        foreach ($messages as $i => $message) {
-            if (($message['role'] ?? null) === 'user') {
-                $messages[$i]['content'] = $wrapped . "\n\n" . $message['content'];
-                break;
-            }
-        }
-
-        return $messages;
-    }
-
-    private function supportsSystemRole(string $provider): bool
-    {
-        return $provider === 'anthropic' || $provider === 'openai';
-    }
-
-    private function stringField(array $context, string $key): ?string
-    {
-        $value = $context[$key] ?? null;
-
-        return is_string($value) && $value !== '' ? $value : null;
-    }
-
-    /**
-     * @param list<string> $lines
-     */
-    private function appendStringLine(array &$lines, array $context, string $key, string $label): void
-    {
-        $value = $this->stringField($context, $key);
-        if ($value === null) {
-            return;
-        }
-
-        $lines[] = '- ' . $label . ': ' . $value;
-    }
-
-    /**
-     * @param list<string> $lines
-     */
-    private function appendSizeLine(
-        array &$lines,
-        array $context,
-        string $key,
-        string $label,
-        bool $includeDpr = false,
-    ): void {
-        $size = $context[$key] ?? null;
-        if (!is_array($size) || !isset($size['width'], $size['height'])) {
-            return;
-        }
-        if (!is_numeric($size['width']) || !is_numeric($size['height'])) {
-            return;
-        }
-
-        $line = sprintf('- %s: %dx%d', $label, (int) $size['width'], (int) $size['height']);
-
-        if ($includeDpr) {
-            $dpr = isset($size['devicePixelRatio']) && is_numeric($size['devicePixelRatio'])
-                ? (float) $size['devicePixelRatio']
-                : 1.0;
-            $line .= sprintf(' @%.2gx', $dpr);
-        }
-
-        $lines[] = $line;
-    }
-
-    /**
-     * Extract debug-panel selection info from a browser URL query string.
-     *
-     * @return list<string>
-     */
-    private function parseUrlQueryContext(string $url): array
-    {
-        $query = parse_url($url, PHP_URL_QUERY);
-        if (!is_string($query) || $query === '') {
-            return [];
-        }
-
-        parse_str($query, $params);
-
-        $lines = [];
-        if (isset($params['debugEntry']) && is_string($params['debugEntry']) && $params['debugEntry'] !== '') {
-            $lines[] = '- Debug entry ID: ' . $params['debugEntry'];
-        }
-        if (isset($params['collector']) && is_string($params['collector']) && $params['collector'] !== '') {
-            $lines[] = '- Selected collector: ' . $params['collector'];
-        }
-
-        return $lines;
     }
 
     /**

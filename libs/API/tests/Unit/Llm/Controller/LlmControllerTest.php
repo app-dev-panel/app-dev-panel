@@ -375,8 +375,7 @@ final class LlmControllerTest extends TestCase
 
     public function testPrependBrowserContextAddsSystemMessageForAnthropic(): void
     {
-        $controller = $this->makeController('anthropic', 'sk-ant-test');
-        $reflection = new \ReflectionMethod($controller, 'prependBrowserContext');
+        $builder = new \AppDevPanel\Api\Llm\LlmContextBuilder();
 
         $messages = [['role' => 'user', 'content' => 'hi']];
         $context = [
@@ -384,7 +383,7 @@ final class LlmControllerTest extends TestCase
             'userAgent' => 'TestUA/1.0',
         ];
 
-        $result = $reflection->invoke($controller, $messages, 'anthropic', $context);
+        $result = $builder->prependBrowserContext($messages, 'anthropic', $context);
 
         $this->assertCount(2, $result);
         $this->assertSame('system', $result[0]['role']);
@@ -401,13 +400,12 @@ final class LlmControllerTest extends TestCase
 
     public function testPrependBrowserContextMergesIntoUserForOtherProviders(): void
     {
-        $controller = $this->makeController('openrouter', 'sk-test');
-        $reflection = new \ReflectionMethod($controller, 'prependBrowserContext');
+        $builder = new \AppDevPanel\Api\Llm\LlmContextBuilder();
 
         $messages = [['role' => 'user', 'content' => 'hi']];
         $context = ['url' => 'http://localhost/debug?debugEntry=abc'];
 
-        $result = $reflection->invoke($controller, $messages, 'openrouter', $context);
+        $result = $builder->prependBrowserContext($messages, 'openrouter', $context);
 
         $this->assertCount(1, $result);
         $this->assertSame('user', $result[0]['role']);
@@ -417,14 +415,13 @@ final class LlmControllerTest extends TestCase
 
     public function testPrependBrowserContextNoOpForEmptyContext(): void
     {
-        $controller = $this->makeController('anthropic', 'sk-ant-test');
-        $reflection = new \ReflectionMethod($controller, 'prependBrowserContext');
+        $builder = new \AppDevPanel\Api\Llm\LlmContextBuilder();
 
         $messages = [['role' => 'user', 'content' => 'hi']];
 
-        $this->assertSame($messages, $reflection->invoke($controller, $messages, 'anthropic', null));
-        $this->assertSame($messages, $reflection->invoke($controller, $messages, 'anthropic', []));
-        $this->assertSame($messages, $reflection->invoke($controller, $messages, 'anthropic', ['url' => '']));
+        $this->assertSame($messages, $builder->prependBrowserContext($messages, 'anthropic', null));
+        $this->assertSame($messages, $builder->prependBrowserContext($messages, 'anthropic', []));
+        $this->assertSame($messages, $builder->prependBrowserContext($messages, 'anthropic', ['url' => '']));
     }
 
     public function testChatWithCustomPromptMergedIntoUser(): void

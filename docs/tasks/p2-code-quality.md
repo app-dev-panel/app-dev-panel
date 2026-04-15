@@ -16,9 +16,13 @@ Refactor recent additions and clear mago / phpunit warnings.
   - `private function supportsSystemRole(string $provider): bool` (returns true for `anthropic`, `openai`, anything else that gets added).
   - `private function injectPromptPrefix(array $messages, string $provider, string $prompt, string $userWrap = '[{}]'): array`.
 
-### [~] D3 — Split `LlmController` (650 LOC, 10+ actions) — DEFERRED
-- File: `libs/API/src/Llm/Controller/LlmController.php`
-- Status: deferred. After D1+D2 the controller is down to ~660 LOC with no duplicated logic. Splitting requires touching DI configs in all four adapters (Yii3/Symfony/Laravel/Yii2), which is a cross-cutting risk not worth batching with the rest of P2. Re-open as its own task when we do the next adapter pass.
+### [x] D3 — Extract `LlmContextBuilder` from `LlmController`
+- File: `libs/API/src/Llm/Controller/LlmController.php` → `libs/API/src/Llm/LlmContextBuilder.php`
+- Full "split into three controllers" turned out to be the wrong hammer: it would force DI-config changes in all four adapters (Yii3/Symfony/Laravel/Yii2/Cycle) for zero architectural win.
+- Better fix applied: extract `LlmContextBuilder` — `prependBrowserContext`, `prependCustomPrompt`, `injectPromptPrefix`, `supportsSystemRole`, `stringField`, `appendStringLine`, `appendSizeLine`, `parseUrlQueryContext`. 179 LOC moved out, controller down from 660 → 550 LOC.
+- New arg on `LlmController::__construct` has a default (`new LlmContextBuilder()`) so every adapter's DI wiring keeps working untouched.
+- `LlmContextBuilder` now has a dedicated test file (`libs/API/tests/Unit/Llm/LlmContextBuilderTest.php`, 10 tests).
+- Existing `LlmControllerTest` cases that used reflection on `prependBrowserContext` were rewritten to target the builder directly.
 
 ### [x] D4 — Fix unreachable match arms in `DebugTailControllerTest`
 - File: `libs/Adapter/Yii2/tests/Unit/Controller/DebugTailControllerTest.php:435-438`
