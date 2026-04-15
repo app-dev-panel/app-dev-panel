@@ -24,6 +24,7 @@ app_dev_panel:
         queue: true
         validator: true
         router: true
+        code_coverage: true
     ignored_requests:
         - '/_wdt/**'
         - '/_profiler/**'
