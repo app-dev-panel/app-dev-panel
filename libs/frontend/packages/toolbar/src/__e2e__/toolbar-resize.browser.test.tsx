@@ -25,7 +25,7 @@ const expandToolbar = async () => {
 };
 
 const openIframePanel = async () => {
-    const toggleBtn = screen.getByLabelText('Toggle debug panel');
+    const toggleBtn = screen.getByLabelText(/Open panel|Close panel/);
     fireEvent.click(toggleBtn);
     await waitFor(
         () => {
@@ -232,7 +232,7 @@ describe('Toolbar Resize', () => {
         });
 
         // Close the panel
-        const toggleBtn = screen.getByLabelText('Toggle debug panel');
+        const toggleBtn = screen.getByLabelText(/Open panel|Close panel/);
         fireEvent.click(toggleBtn);
 
         await waitFor(() => {

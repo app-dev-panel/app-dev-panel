@@ -53,8 +53,10 @@ export const editorPresetLabels: Record<EditorPreset, string> = {
     custom: 'Custom URL template',
 };
 
-function applyPathMapping(filePath: string, mapping: Record<string, string>): string {
+function applyPathMapping(filePath: string, mapping: Record<string, string> | undefined): string {
+    if (!mapping) return filePath;
     for (const [remote, local] of Object.entries(mapping)) {
+        if (remote === '') continue;
         if (filePath.startsWith(remote)) {
             return local + filePath.slice(remote.length);
         }

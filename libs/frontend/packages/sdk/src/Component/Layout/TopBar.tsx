@@ -1,8 +1,14 @@
+import {EditorPathMappingEditor} from '@app-dev-panel/sdk/Component/Layout/EditorPathMappingEditor';
 import {RequestPill} from '@app-dev-panel/sdk/Component/Layout/RequestPill';
 import {SearchTrigger} from '@app-dev-panel/sdk/Component/Layout/SearchTrigger';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {editorPresetLabels, type EditorPreset} from '@app-dev-panel/sdk/Helper/editorUrl';
+import {
+    defaultEditorConfig,
+    editorPresetLabels,
+    type EditorConfig,
+    type EditorPreset,
+} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {
     Autocomplete,
     Badge,
@@ -56,8 +62,7 @@ type TopBarProps = {
     notificationCount?: number;
     liveFeedCount?: number;
     liveFeedActive?: boolean;
-    editorPreset?: EditorPreset;
-    editorCustomTemplate?: string;
+    editorConfig?: EditorConfig;
     onMenuClick?: () => void;
     onPrevEntry?: () => void;
     onNextEntry?: () => void;
@@ -68,8 +73,7 @@ type TopBarProps = {
     onRefresh?: () => void;
     onShowInactiveCollectorsChange?: (value: boolean) => void;
     onMcpEnabledChange?: (value: boolean) => void;
-    onEditorPresetChange?: (preset: EditorPreset) => void;
-    onEditorCustomTemplateChange?: (template: string) => void;
+    onEditorConfigChange?: (config: EditorConfig) => void;
     onNotificationsClick?: (e: React.MouseEvent<HTMLElement>) => void;
     onLiveFeedClick?: () => void;
     onLogoClick?: () => void;
@@ -141,10 +145,8 @@ export const TopBar = React.memo(
         onRefresh,
         onShowInactiveCollectorsChange,
         onMcpEnabledChange,
-        editorPreset,
-        editorCustomTemplate,
-        onEditorPresetChange,
-        onEditorCustomTemplateChange,
+        editorConfig,
+        onEditorConfigChange,
         notificationCount,
         liveFeedCount,
         liveFeedActive,
@@ -172,6 +174,12 @@ export const TopBar = React.memo(
             setSettingsOpen(true);
         }, []);
         const handleSettingsClose = useCallback(() => setSettingsOpen(false), []);
+
+        const resolvedEditorConfig = editorConfig ?? defaultEditorConfig;
+        const updateEditorConfig = useCallback(
+            (patch: Partial<EditorConfig>) => onEditorConfigChange?.({...resolvedEditorConfig, ...patch}),
+            [onEditorConfigChange, resolvedEditorConfig],
+        );
 
         // Bell animation on count change
         const [bellAnimating, setBellAnimating] = useState(false);
@@ -452,21 +460,28 @@ export const TopBar = React.memo(
                                 size="small"
                                 options={Object.keys(editorPresetLabels) as EditorPreset[]}
                                 getOptionLabel={(option) => editorPresetLabels[option] ?? option}
-                                value={editorPreset ?? 'none'}
-                                onChange={(_, value) => onEditorPresetChange?.(value ?? 'none')}
+                                value={resolvedEditorConfig.editor}
+                                onChange={(_, value) => updateEditorConfig({editor: value ?? 'none'})}
                                 disableClearable
                                 renderInput={(params) => <TextField {...params} label="Editor" />}
                                 sx={{mb: 1.5}}
                             />
-                            {editorPreset === 'custom' && (
+                            {resolvedEditorConfig.editor === 'custom' && (
                                 <TextField
                                     fullWidth
                                     size="small"
                                     label="Custom URL template"
                                     placeholder="myeditor://open?file={file}&line={line}"
-                                    value={editorCustomTemplate ?? ''}
-                                    onChange={(e) => onEditorCustomTemplateChange?.(e.target.value)}
+                                    value={resolvedEditorConfig.customUrlTemplate}
+                                    onChange={(e) => updateEditorConfig({customUrlTemplate: e.target.value})}
                                     helperText="Use {file} and {line} placeholders"
+                                    sx={{mb: 1.5}}
+                                />
+                            )}
+                            {resolvedEditorConfig.editor !== 'none' && (
+                                <EditorPathMappingEditor
+                                    mapping={resolvedEditorConfig.pathMapping}
+                                    onChange={(pathMapping) => updateEditorConfig({pathMapping})}
                                 />
                             )}
                         </Box>

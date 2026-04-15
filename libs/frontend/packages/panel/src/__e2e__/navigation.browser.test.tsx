@@ -23,17 +23,17 @@ describe('Navigation', () => {
 
     it('navigates to debug page', async () => {
         renderApp('/debug');
-        await expect.element(page.getByText('Debug')).toBeVisible();
+        await expect.element(page.getByText('Debug').first()).toBeVisible();
     });
 
     it('navigates to inspector config page', async () => {
         renderApp('/inspector/config');
-        await expect.element(page.getByText('Configuration')).toBeVisible();
+        await expect.element(page.getByText('Configuration').first()).toBeVisible();
     });
 
     it('navigates to inspector routes page', async () => {
         renderApp('/inspector/routes');
-        await expect.element(page.getByText('Inspector')).toBeVisible();
+        await expect.element(page.getByText('Inspector').first()).toBeVisible();
         expect(window.location.pathname).toBe('/inspector/routes');
     });
 

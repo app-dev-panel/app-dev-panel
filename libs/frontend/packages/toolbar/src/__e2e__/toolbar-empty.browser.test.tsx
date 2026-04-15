@@ -24,8 +24,8 @@ describe('Toolbar - Empty State', () => {
         fireEvent.click(screen.getByLabelText('Open debug toolbar'));
 
         await waitFor(() => {
-            expect(screen.getByLabelText('List debug entries')).toBeInTheDocument();
-            expect(screen.getByLabelText('Open debug panel')).toBeInTheDocument();
+            expect(screen.getByLabelText('Debug entries')).toBeInTheDocument();
+            expect(screen.getByLabelText(/Open panel|Close panel/)).toBeInTheDocument();
         });
     });
 });

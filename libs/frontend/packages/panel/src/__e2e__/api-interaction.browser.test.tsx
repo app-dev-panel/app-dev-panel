@@ -11,7 +11,7 @@ describe('API Interaction', () => {
 
     it('debug page triggers API call and shows data', async () => {
         renderApp('/debug');
-        await expect.element(page.getByText('Debug')).toBeVisible();
+        await expect.element(page.getByText('Debug').first()).toBeVisible();
         // RTK Query should fetch debug entries from mock
         await new Promise((r) => setTimeout(r, 1500));
         const bodyText = document.body.textContent || '';
@@ -22,7 +22,7 @@ describe('API Interaction', () => {
 
     it('inspector config page loads data from API', async () => {
         renderApp('/inspector/config');
-        await expect.element(page.getByText('Configuration')).toBeVisible();
+        await expect.element(page.getByText('Configuration').first()).toBeVisible();
         await new Promise((r) => setTimeout(r, 1000));
         const bodyText = document.body.textContent || '';
         // Should show configuration groups or data from mock
@@ -42,12 +42,12 @@ describe('API Interaction', () => {
     it('handles API errors gracefully on debug page', async () => {
         renderApp('/debug');
         // Even with mock API, the app should render without crashing
-        await expect.element(page.getByText('Debug')).toBeVisible();
+        await expect.element(page.getByText('Debug').first()).toBeVisible();
     });
 
     it('handles API errors gracefully on inspector pages', async () => {
         renderApp('/inspector/database');
         // Even if API returns unexpected data, app should not crash
-        await expect.element(page.getByText('Database')).toBeVisible();
+        await expect.element(page.getByText('Storage').first()).toBeVisible();
     });
 });

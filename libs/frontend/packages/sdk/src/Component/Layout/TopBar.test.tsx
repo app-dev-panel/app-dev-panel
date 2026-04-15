@@ -56,7 +56,7 @@ describe('TopBar', () => {
 
     it('shows editor integration section in settings dialog', async () => {
         const user = userEvent.setup();
-        renderWithProviders(<TopBar editorPreset="none" />);
+        renderWithProviders(<TopBar editorConfig={{editor: 'none', customUrlTemplate: '', pathMapping: {}}} />);
 
         // Open more menu
         const moreButton = screen.getAllByRole('button').find((b) => b.textContent?.includes('more_vert'));
@@ -74,7 +74,11 @@ describe('TopBar', () => {
     });
 
     it('shows custom template field when editor is custom', async () => {
-        renderWithProviders(<TopBar editorPreset="custom" editorCustomTemplate="myeditor://{file}:{line}" />);
+        renderWithProviders(
+            <TopBar
+                editorConfig={{editor: 'custom', customUrlTemplate: 'myeditor://{file}:{line}', pathMapping: {}}}
+            />,
+        );
 
         const user = userEvent.setup();
         const moreButton = screen.getAllByRole('button').find((b) => b.textContent?.includes('more_vert'));
@@ -86,7 +90,7 @@ describe('TopBar', () => {
     });
 
     it('hides custom template field when editor is not custom', async () => {
-        renderWithProviders(<TopBar editorPreset="phpstorm" />);
+        renderWithProviders(<TopBar editorConfig={{editor: 'phpstorm', customUrlTemplate: '', pathMapping: {}}} />);
 
         const user = userEvent.setup();
         const moreButton = screen.getAllByRole('button').find((b) => b.textContent?.includes('more_vert'));
@@ -96,11 +100,14 @@ describe('TopBar', () => {
         expect(screen.queryByLabelText('Custom URL template')).not.toBeInTheDocument();
     });
 
-    it('calls onEditorCustomTemplateChange when template is edited', async () => {
+    it('calls onEditorConfigChange with patched template when edited', async () => {
         const user = userEvent.setup();
         const onChange = vi.fn();
         renderWithProviders(
-            <TopBar editorPreset="custom" editorCustomTemplate="" onEditorCustomTemplateChange={onChange} />,
+            <TopBar
+                editorConfig={{editor: 'custom', customUrlTemplate: '', pathMapping: {}}}
+                onEditorConfigChange={onChange}
+            />,
         );
 
         const moreButton = screen.getAllByRole('button').find((b) => b.textContent?.includes('more_vert'));
@@ -109,6 +116,6 @@ describe('TopBar', () => {
 
         const input = screen.getByLabelText('Custom URL template');
         await user.type(input, 'x');
-        expect(onChange).toHaveBeenCalled();
+        expect(onChange).toHaveBeenCalledWith({editor: 'custom', customUrlTemplate: 'x', pathMapping: {}});
     });
 });

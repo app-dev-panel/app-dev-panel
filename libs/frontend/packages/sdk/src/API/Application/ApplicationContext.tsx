@@ -1,4 +1,4 @@
-import {type EditorConfig, type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
+import {type EditorConfig, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 export type ToolbarPosition = 'float' | 'bottom' | 'right' | 'left';
@@ -78,14 +78,8 @@ export const ApplicationSlice = createSlice({
         changeShowInactiveCollectors: (state, action: PayloadAction<boolean>) => {
             state.showInactiveCollectors = action.payload;
         },
-        changeEditorPreset: (state, action: PayloadAction<EditorPreset>) => {
-            state.editorConfig = {...(state.editorConfig ?? defaultEditorConfig), editor: action.payload};
-        },
-        changeEditorCustomTemplate: (state, action: PayloadAction<string>) => {
-            state.editorConfig = {...(state.editorConfig ?? defaultEditorConfig), customUrlTemplate: action.payload};
-        },
-        changeEditorPathMapping: (state, action: PayloadAction<Record<string, string>>) => {
-            state.editorConfig = {...(state.editorConfig ?? defaultEditorConfig), pathMapping: action.payload};
+        setEditorConfig: (state, action: PayloadAction<EditorConfig>) => {
+            state.editorConfig = action.payload;
         },
         toggleLiveFeed: (state) => {
             state.liveFeedOpen = !state.liveFeedOpen;
@@ -106,8 +100,6 @@ export const {
     changeSelectedService,
     changeThemeMode,
     changeShowInactiveCollectors,
-    changeEditorPreset,
-    changeEditorCustomTemplate,
-    changeEditorPathMapping,
+    setEditorConfig,
     toggleLiveFeed,
 } = ApplicationSlice.actions;
