@@ -137,6 +137,11 @@ src/
 ├── Helper/                       # Utilities
 │   ├── BacktraceIgnoreMatcher.php
 │   └── StreamWrapper/
+├── Mail/                         # SMTP listener for standalone mail capture
+│   ├── SmtpSession.php           # Transport-agnostic SMTP state machine (RFC 5321 subset)
+│   ├── SmtpServer.php            # Single-threaded event loop (stream_socket_server + stream_select)
+│   ├── MimeParser.php            # RFC 5322 + MIME parser (multipart, base64, quoted-printable, RFC 2047)
+│   └── StandaloneMailerIngestion.php  # Writes parsed mails as standalone debug entries via StorageInterface
 └── DebugServer/                  # UDP socket server for real-time streaming
     ├── Broadcaster.php
     ├── Connection.php
@@ -222,8 +227,26 @@ Tracks external application instances that register with ADP for multi-app inspe
 
 ### Write Sources
 
-Storage receives data from two sources:
+Storage receives data from three sources:
 1. **Debugger flush** — PHP collectors write via `StorageInterface` after request/command completion
 2. **Ingestion API** — `IngestionController` writes directly to FileStorage for external (non-PHP) apps
+3. **SMTP listener** — `Mail\StandaloneMailerIngestion` writes captured emails as synthetic `smtp-*` entries
 
 FileStorage uses `LOCK_EX` for atomic writes and `flock` for GC mutual exclusion.
+
+## SMTP Listener (`Mail/`)
+
+Standalone SMTP server that captures outgoing mail into the debug panel. Intended for dev
+use only — bind only on loopback; never deliver messages.
+
+| Class | Purpose |
+|-------|---------|
+| `SmtpSession` | Transport-agnostic state machine. `feed(string)` consumes bytes, returns response bytes. Pop parsed envelopes via `takeCompletedMessage()`. Supports HELO/EHLO, MAIL FROM, RCPT TO, DATA (with dot-unstuffing), RSET, NOOP, QUIT, AUTH PLAIN/LOGIN (no credential validation). Rejects STARTTLS (`502`) and VRFY/EXPN (`502`). Enforces 1000-octet line limit and configurable max message size. |
+| `SmtpServer` | Non-blocking event loop built on `stream_socket_server` + `stream_select`. Handles multiple concurrent sessions, 5-minute idle timeout. No ext/pcntl or ext/sockets required. |
+| `MimeParser` | Parses raw RFC 5322 bytes: unfolds headers, splits multipart, decodes base64/quoted-printable/RFC 2047, produces the same message shape that `MailerCollector` consumes. Attachments: metadata only (filename, mime, size, contentId). |
+| `StandaloneMailerIngestion` | Writes parsed envelopes as new debug entries with `id = smtp-*`, `context.type = 'smtp'`. The `mailer` collector payload mirrors the frontend's existing shape so `MailerPanel` renders without changes. |
+
+Session correlation via `X-ADP-Session-Id` header: if present in the captured message, the
+ingestion records it in `context.sessionId` for cross-linking with a request entry.
+
+Driven by `adp mail:listen` in `libs/Cli/src/Command/SmtpListenCommand.php`.

@@ -22,6 +22,7 @@ src/
 │   ├── DebugDumpCommand.php            # View dumped objects (debug:dump)
 │   ├── DebugTailCommand.php            # Watch entries in real-time (debug:tail)
 │   ├── ServeCommand.php                # Start HTTP debug server (serve)
+│   ├── SmtpListenCommand.php           # Start SMTP listener that captures mail (mail:listen)
 │   ├── McpServeCommand.php             # Start MCP server for AI integration (mcp:serve)
 │   ├── FrontendUpdateCommand.php       # Download latest frontend build (frontend:update)
 │   ├── InspectConfigCommand.php        # Inspect application config (inspect:config)
@@ -44,7 +45,8 @@ tests/
         ├── InspectRoutesCommandTest.php
         ├── McpServeCommandTest.php
         ├── ResetCommandTest.php
-        └── ServeCommandTest.php
+        ├── ServeCommandTest.php
+        └── SmtpListenCommandTest.php
 ```
 
 ## Commands
@@ -110,6 +112,29 @@ serve --host=0.0.0.0 --port=9000                   # Custom host/port
 serve --storage-path=/path/to/debug/data           # Custom storage
 serve --frontend-path=/path/to/built/assets        # Serve frontend
 ```
+
+### `mail:listen` — SMTP Listener
+
+Starts a standalone SMTP server that captures all received messages into the debug panel.
+Captured entries appear with `id = smtp-*` and `context.type = 'smtp'`. Messages are NEVER
+delivered to real recipients.
+
+```bash
+mail:listen                                  # Default: 127.0.0.1:1025, storage at /tmp/adp
+mail:listen --port=2525                      # Custom port
+mail:listen --storage-path=/path/to/debug    # Custom storage
+mail:listen --max-size=5242880               # Limit message size (bytes)
+mail:listen --host=0.0.0.0 --allow-external  # Bind publicly (explicit opt-in only)
+```
+
+Point your application's SMTP transport at this listener:
+- Symfony: `MAILER_DSN=smtp://127.0.0.1:1025`
+- Laravel: `MAIL_HOST=127.0.0.1 MAIL_PORT=1025 MAIL_ENCRYPTION=null`
+- PHPMailer / Symfony Mailer: disable TLS verification on localhost.
+
+For PHP's built-in `mail()` function on Linux, a `sendmail_path` shim is still required
+separately — `mail()` does not use SMTP on Unix. The SMTP listener alone catches framework
+mailers and raw SMTP clients.
 
 ### `mcp:serve` — MCP Server
 
