@@ -335,10 +335,9 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                                 href="#"
                                 onClick={(e: React.MouseEvent) => {
                                     e.preventDefault();
-                                    window.open(
-                                        (window as unknown as {__adp_panel_url?: string}).__adp_panel_url || '/debug',
-                                        '_blank',
-                                    );
+                                    const panelUrl =
+                                        (window as unknown as {__adp_panel_url?: string}).__adp_panel_url || '/debug';
+                                    window.open(`${panelUrl.replace(/\/$/, '')}/llm`, '_blank');
                                 }}
                                 sx={{fontSize: 11, fontWeight: 600, color: 'warning.dark'}}
                             >
