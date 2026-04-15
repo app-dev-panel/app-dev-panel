@@ -8,8 +8,8 @@ import {
 import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
-import {dispatchWindowEvent} from '@app-dev-panel/sdk/Helper/dispatchWindowEvent';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {dispatchWindowEvent} from '@app-dev-panel/sdk/Helper/dispatchWindowEvent';
 import {DebugEntriesListModal} from '@app-dev-panel/toolbar/Module/Toolbar/Component/DebugEntriesListModal';
 import {AiChatPopup} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/AiChatPopup';
 import {CommandItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Console/CommandItem';
@@ -141,8 +141,20 @@ type DebugIFrameProps = {baseUrlState: string; iframeEnabled: boolean; iframeSrc
  * Defaults to `/debug` to match the default adapter setup.
  */
 const getPanelMountPath = (): string => {
-    const value = (window as unknown as {__adp_panel_url?: string}).__adp_panel_url;
+    const value = window.__adp_panel_url;
     return value && value.length > 0 ? value : '/debug';
+};
+
+/**
+ * Build the initial iframe URL combining origin + panel mount + panel-internal
+ * route + a forced `toolbar=0` flag. Uses the URL API so trailing/leading
+ * slashes and existing query strings are handled safely.
+ */
+const buildIframeSrc = (baseUrl: string, panelMount: string, internalPath: string | null): string => {
+    const path = panelMount + (internalPath ?? '');
+    const url = new URL(path, baseUrl);
+    url.searchParams.set('toolbar', '0');
+    return url.toString();
 };
 
 const DebugIFrame = forwardRef(
@@ -153,13 +165,7 @@ const DebugIFrame = forwardRef(
         // and re-fetch every API resource on every chip click.
         const srcRef = useRef<string | undefined>(undefined);
         if (srcRef.current === undefined) {
-            // The chip URL (e.g. `/debug?collector=Log&debugEntry=ABC`) is the
-            // panel-internal route path; the panel's React Router uses `panelMount`
-            // as basename, so the browser URL must include both: baseUrl + mount + path.
-            const panelMount = getPanelMountPath();
-            srcRef.current = iframeSrc
-                ? baseUrlState + panelMount + iframeSrc + (iframeSrc.includes('?') ? '&' : '?') + 'toolbar=0'
-                : baseUrlState + panelMount + '?toolbar=0';
+            srcRef.current = buildIframeSrc(baseUrlState, getPanelMountPath(), iframeSrc);
         }
         return (
             <iframe
@@ -239,37 +245,55 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     useEffect(() => setIsToolbarOpened(toolbarOpenState), [toolbarOpenState]);
     useEffect(() => setPosition(toolbarPosition), [toolbarPosition]);
 
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+
+    // Unmounting the iframe must always clear `iframeReady` so the next open
+    // triggers a proper cold start (src-based load) instead of posting messages
+    // to a stale or not-yet-booted contentWindow.
+    const closeIframe = useCallback(() => {
+        setIframeEnabled(false);
+        setIframeReady(false);
+    }, []);
+
     const onToolbarClickHandler = useCallback(() => {
         const next = !isToolbarOpened;
         setIsToolbarOpened(next);
         dispatch(setToolbarOpen(next));
-        if (!next && iframeEnabled) setIframeEnabled(false);
-    }, [isToolbarOpened, iframeEnabled]);
+        if (!next && iframeEnabled) closeIframe();
+    }, [isToolbarOpened, iframeEnabled, closeIframe, dispatch]);
 
-    const onChangeHandler = useCallback((entry: DebugEntry) => {
-        setSelectedEntry(entry);
-        setIsToolbarOpened(true);
-        dispatch(setToolbarOpen(true));
-        dispatch(changeEntryAction(entry));
-    }, []);
+    const onChangeHandler = useCallback(
+        (entry: DebugEntry) => {
+            setSelectedEntry(entry);
+            setIsToolbarOpened(true);
+            dispatch(setToolbarOpen(true));
+            dispatch(changeEntryAction(entry));
+        },
+        [dispatch],
+    );
 
     const [open, setOpen] = useState(false);
     const handleDebugWindowOpen = useCallback(() => {
-        const mount = getPanelMountPath();
-        window.open(debugEntry ? baseUrlState + mount + '?debugEntry=' + debugEntry.id : baseUrlState + mount);
+        const url = new URL(getPanelMountPath(), baseUrlState);
+        if (debugEntry) {
+            url.searchParams.set('debugEntry', debugEntry.id);
+        }
+        window.open(url.toString());
     }, [debugEntry, baseUrlState]);
 
     const handleClickOpen = useCallback(() => setOpen(true), []);
     const handleClose = useCallback(() => setOpen(false), []);
 
-    const iframeRef = useRef<HTMLIFrameElement | undefined>(undefined);
-
     // Track when the embedded panel finishes booting so we can switch from
     // src-based loading (cold start) to postMessage-based navigation.
+    // Validate the source — any frame on the page can postMessage, but only
+    // our own iframe's contentWindow should flip the ready flag.
     useEffect(() => {
         const listener = (event: MessageEvent) => {
+            if (event.source !== iframeRef.current?.contentWindow) return;
             const data = event.data;
-            if (data && typeof data === 'object' && data.event === 'panel.loaded') {
+            if (typeof data !== 'object' || data === null || !('event' in data)) return;
+            if ((data as {event: unknown}).event === 'panel.loaded') {
                 setIframeReady(true);
             }
         };
@@ -277,18 +301,31 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         return () => window.removeEventListener('message', listener);
     }, []);
 
+    // Flush the latest requested URL once the panel is ready. Covers two races:
+    // 1) The user clicks a chip after cold-start but before `panel.loaded` arrives;
+    //    the click lands in `iframeSrc` state but `srcRef` already locked in the
+    //    original URL. Sending it as postMessage once ready reconciles the state.
+    // 2) Close → reopen → immediate chip click with the same semantics.
+    useEffect(() => {
+        if (!iframeReady || !iframeSrc) return;
+        const contentWindow = iframeRef.current?.contentWindow;
+        if (!contentWindow) return;
+        dispatchWindowEvent(contentWindow, 'router.navigate', iframeSrc);
+    }, [iframeReady, iframeSrc]);
+
     const iframeRouteNavigate = useCallback(
         (url: string) => {
             if (!activeComponents.iframe) return;
             setIframeSrc(url);
-            // If the panel is already mounted and booted, navigate via postMessage
-            // to preserve panel state and avoid a full iframe reload.
+            // Hot path: panel already mounted and booted — navigate via postMessage
+            // to preserve panel state and avoid a full iframe reload. The flush
+            // effect above covers the "enabled but not ready yet" race.
             if (iframeEnabled && iframeReady && iframeRef.current?.contentWindow) {
                 dispatchWindowEvent(iframeRef.current.contentWindow, 'router.navigate', url);
                 return;
             }
-            // Cold start: enable the iframe; the URL we just stored becomes the
-            // initial src that DebugIFrame locks in at mount.
+            // Cold start: mount the iframe. The URL we just stored in `iframeSrc`
+            // becomes the initial src that `DebugIFrame` locks in at mount.
             if (!iframeEnabled) setIframeEnabled(true);
         },
         [iframeEnabled, iframeReady, activeComponents],
@@ -296,12 +333,12 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const toggleIframeHandler = useCallback(() => {
         if (!activeComponents.iframe) return;
-        setIframeEnabled((v) => {
-            // Closing unmounts the iframe; on next open we cold-start again.
-            if (v) setIframeReady(false);
-            return !v;
-        });
-    }, [activeComponents]);
+        if (iframeEnabled) {
+            closeIframe();
+        } else {
+            setIframeEnabled(true);
+        }
+    }, [activeComponents, iframeEnabled, closeIframe]);
 
     const {
         height: panelHeight,

@@ -301,9 +301,8 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                     <IconButton
                         size="small"
                         onClick={() => {
-                            const panelUrl =
-                                (window as unknown as {__adp_panel_url?: string}).__adp_panel_url || '/debug';
-                            window.open(`${panelUrl.replace(/\/$/, '')}/llm`, '_blank');
+                            const panelUrl = (window.__adp_panel_url || '/debug').replace(/\/$/, '');
+                            window.open(`${panelUrl}/llm`, '_blank');
                         }}
                         sx={{color: 'text.secondary'}}
                         title="Open full chat panel"
@@ -332,12 +331,11 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                         <Typography sx={{fontSize: 11, color: 'warning.dark'}}>
                             AI not connected.{' '}
                             <Link
-                                href="#"
-                                onClick={(e: React.MouseEvent) => {
-                                    e.preventDefault();
-                                    const panelUrl =
-                                        (window as unknown as {__adp_panel_url?: string}).__adp_panel_url || '/debug';
-                                    window.open(`${panelUrl.replace(/\/$/, '')}/llm`, '_blank');
+                                component="button"
+                                type="button"
+                                onClick={() => {
+                                    const panelUrl = (window.__adp_panel_url || '/debug').replace(/\/$/, '');
+                                    window.open(`${panelUrl}/llm`, '_blank');
                                 }}
                                 sx={{fontSize: 11, fontWeight: 600, color: 'warning.dark'}}
                             >

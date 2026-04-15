@@ -44,7 +44,7 @@ import Tooltip from '@mui/material/Tooltip';
 import {styled, useTheme as useMuiTheme} from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
-import {useCallback, useEffect, useMemo, useReducer} from 'react';
+import {useCallback, useEffect, useMemo, useReducer, useRef} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
 import {Outlet, useLocation, useNavigate, useSearchParams} from 'react-router';
@@ -215,24 +215,31 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         getDebugQuery();
     }, [getDebugQuery, backendUrl, dispatch]);
 
-    // Auto-select entry: honor ?debugEntry= URL param first (used by the embedded
-    // toolbar's iframe so the panel renders the same entry the toolbar is showing),
-    // otherwise fall back to the latest entry.
+    // Entry selection rules:
+    // - Honor `?debugEntry=<id>` from the URL on first load and when the URL
+    //   genuinely changes (the embedded toolbar's iframe navigates via
+    //   postMessage which rewrites the query string — we want to follow it).
+    // - Don't re-apply the URL when only the entries list refreshes (SSE),
+    //   otherwise the user's manual prev/next-arrow navigation (which updates
+    //   Redux but not the URL) would be overwritten every second.
+    // - If the URL has no `debugEntry` and nothing is selected yet, fall back
+    //   to the latest entry.
+    const lastSyncedUrlEntryIdRef = useRef<string | null>(null);
     useEffect(() => {
-        if (!getDebugQueryInfo.isSuccess || !getDebugQueryInfo.data?.length) {
-            return;
-        }
+        if (!getDebugQueryInfo.isSuccess || !getDebugQueryInfo.data?.length) return;
+
         const requestedId = searchParams.get('debugEntry');
-        if (requestedId) {
-            if (debugEntry?.id === requestedId) {
-                return;
-            }
+        if (requestedId && requestedId !== lastSyncedUrlEntryIdRef.current) {
             const requested = getDebugQueryInfo.data.find((e) => e.id === requestedId);
             if (requested) {
-                dispatch(changeEntryAction(requested));
+                lastSyncedUrlEntryIdRef.current = requestedId;
+                if (debugEntry?.id !== requestedId) {
+                    dispatch(changeEntryAction(requested));
+                }
                 return;
             }
         }
+
         if (!debugEntry) {
             dispatch(changeEntryAction(getDebugQueryInfo.data[0]));
         }
