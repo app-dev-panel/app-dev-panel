@@ -222,6 +222,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     // - Don't re-apply the URL when only the entries list refreshes (SSE),
     //   otherwise the user's manual prev/next-arrow navigation (which updates
     //   Redux but not the URL) would be overwritten every second.
+    // - If the URL pins an entry that hasn't arrived in the list yet, wait for
+    //   SSE to bring it in; don't flash the latest entry in the meantime.
     // - If the URL has no `debugEntry` and nothing is selected yet, fall back
     //   to the latest entry.
     const lastSyncedUrlEntryIdRef = useRef<string | null>(null);
@@ -229,15 +231,15 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         if (!getDebugQueryInfo.isSuccess || !getDebugQueryInfo.data?.length) return;
 
         const requestedId = searchParams.get('debugEntry');
-        if (requestedId && requestedId !== lastSyncedUrlEntryIdRef.current) {
+        if (requestedId) {
+            if (requestedId === lastSyncedUrlEntryIdRef.current) return;
             const requested = getDebugQueryInfo.data.find((e) => e.id === requestedId);
-            if (requested) {
-                lastSyncedUrlEntryIdRef.current = requestedId;
-                if (debugEntry?.id !== requestedId) {
-                    dispatch(changeEntryAction(requested));
-                }
-                return;
+            if (!requested) return; // pinned but not loaded yet — wait for SSE
+            lastSyncedUrlEntryIdRef.current = requestedId;
+            if (debugEntry?.id !== requestedId) {
+                dispatch(changeEntryAction(requested));
             }
+            return;
         }
 
         if (!debugEntry) {

@@ -305,6 +305,7 @@ export const AiChatPopup = ({open, onClose, entry, toolbarPosition = 'bottom'}: 
                             window.open(`${panelUrl}/llm`, '_blank');
                         }}
                         sx={{color: 'text.secondary'}}
+                        aria-label="Open full chat panel"
                         title="Open full chat panel"
                     >
                         <OpenInNewIcon sx={{fontSize: 16}} />
