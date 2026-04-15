@@ -60,11 +60,13 @@ final class ToolbarInjector
         $escapedStaticUrl = htmlspecialchars($staticUrl, ENT_QUOTES, 'UTF-8');
         $jsBackendUrl = addslashes($backendUrl);
         $jsDebugId = addslashes($debugId);
+        $jsPanelPath = addslashes(rtrim($this->panelConfig->viewerBasePath, '/'));
 
         return <<<HTML
             <div id="app-dev-toolbar" style="flex: 1"></div>
             <link rel="stylesheet" href="{$escapedStaticUrl}/toolbar/bundle.css" />
             <script>
+                window['__adp_panel_url'] = '{$jsPanelPath}';
                 window['AppDevPanelToolbarWidget'] = {
                     config: {
                         containerId: 'app-dev-toolbar',
@@ -76,6 +78,7 @@ final class ToolbarInjector
                                 usePreferredUrl: true,
                                 debugId: '{$jsDebugId}',
                             },
+                            panelPath: '{$jsPanelPath}',
                         },
                     },
                 };

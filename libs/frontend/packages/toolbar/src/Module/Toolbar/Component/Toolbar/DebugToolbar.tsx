@@ -9,6 +9,7 @@ import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@app-de
 import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {dispatchWindowEvent} from '@app-dev-panel/sdk/Helper/dispatchWindowEvent';
 import {DebugEntriesListModal} from '@app-dev-panel/toolbar/Module/Toolbar/Component/DebugEntriesListModal';
 import {AiChatPopup} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/AiChatPopup';
 import {CommandItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Console/CommandItem';
@@ -134,11 +135,42 @@ const serviceWorker = navigator?.serviceWorker;
 
 type DebugIFrameProps = {baseUrlState: string; iframeEnabled: boolean; iframeSrc: string | null};
 
+/**
+ * Resolve the path under `baseUrl` where the panel SPA is mounted.
+ * Set by `ToolbarInjector` (PHP) from `PanelConfig::viewerBasePath`.
+ * Defaults to `/debug` to match the default adapter setup. Trailing slashes
+ * are stripped so `panelMount + '/...'` never produces a `//...` sequence
+ * which `new URL()` would parse as a protocol-relative authority.
+ */
+const getPanelMountPath = (): string => {
+    const raw = window.__adp_panel_url;
+    if (!raw) return '/debug';
+    const trimmed = raw.replace(/\/+$/, '');
+    return trimmed.length > 0 ? trimmed : '';
+};
+
+/**
+ * Build the initial iframe URL combining origin + panel mount + panel-internal
+ * route + a forced `toolbar=0` flag. Uses the URL API so trailing/leading
+ * slashes and existing query strings are handled safely.
+ */
+const buildIframeSrc = (baseUrl: string, panelMount: string, internalPath: string | null): string => {
+    const path = panelMount + (internalPath ?? '');
+    const url = new URL(path, baseUrl);
+    url.searchParams.set('toolbar', '0');
+    return url.toString();
+};
+
 const DebugIFrame = forwardRef(
     ({baseUrlState, iframeEnabled, iframeSrc}: DebugIFrameProps, ref: ForwardedRef<HTMLIFrameElement>) => {
-        const src = iframeSrc
-            ? baseUrlState + iframeSrc + (iframeSrc.includes('?') ? '&' : '?') + 'toolbar=0'
-            : baseUrlState + '/debug?toolbar=0';
+        // Lock the src at mount time via `useState` with a lazy initializer:
+        // computed once on first render and never recomputed on subsequent
+        // renders, even when `iframeSrc` / `baseUrlState` props change.
+        // Subsequent navigations are routed through postMessage
+        // (router.navigate) so the iframe never fully reloads — changing the
+        // src attribute would discard panel state, scroll, filters, and
+        // re-fetch every API resource on every chip click.
+        const [src] = useState(() => buildIframeSrc(baseUrlState, getPanelMountPath(), iframeSrc));
         return (
             <iframe
                 ref={ref}
@@ -207,6 +239,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const [iframeEnabled, setIframeEnabled] = useState(false);
     const [iframeSrc, setIframeSrc] = useState<string | null>(null);
+    const [iframeReady, setIframeReady] = useState(false);
     const [chatOpen, setChatOpen] = useState(false);
     const [position, setPosition] = useState<ToolbarPosition>(toolbarPosition);
     const [floatPos, setFloatPos] = useState(savedFloatRect ?? {x: 0, y: 0, width: 320, height: 360});
@@ -216,43 +249,115 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     useEffect(() => setIsToolbarOpened(toolbarOpenState), [toolbarOpenState]);
     useEffect(() => setPosition(toolbarPosition), [toolbarPosition]);
 
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+
+    // Queue for navigation requests that arrive before the panel has booted.
+    // Set inside event handlers (pre-flush) and consumed by the ready-flush
+    // effect; never read or written during render.
+    const pendingNavUrlRef = useRef<string | null>(null);
+
+    // Unmounting the iframe must always clear `iframeReady` so the next open
+    // triggers a proper cold start (src-based load) instead of posting messages
+    // to a stale or not-yet-booted contentWindow. Drop any pending navigation
+    // too — it was targeted at the now-destroyed panel instance.
+    const closeIframe = useCallback(() => {
+        setIframeEnabled(false);
+        setIframeReady(false);
+        pendingNavUrlRef.current = null;
+    }, []);
+
     const onToolbarClickHandler = useCallback(() => {
         const next = !isToolbarOpened;
         setIsToolbarOpened(next);
         dispatch(setToolbarOpen(next));
-        if (!next && iframeEnabled) setIframeEnabled(false);
-    }, [isToolbarOpened, iframeEnabled]);
+        if (!next && iframeEnabled) closeIframe();
+    }, [isToolbarOpened, iframeEnabled, closeIframe, dispatch]);
 
-    const onChangeHandler = useCallback((entry: DebugEntry) => {
-        setSelectedEntry(entry);
-        setIsToolbarOpened(true);
-        dispatch(setToolbarOpen(true));
-        dispatch(changeEntryAction(entry));
-    }, []);
+    const onChangeHandler = useCallback(
+        (entry: DebugEntry) => {
+            setSelectedEntry(entry);
+            setIsToolbarOpened(true);
+            dispatch(setToolbarOpen(true));
+            dispatch(changeEntryAction(entry));
+        },
+        [dispatch],
+    );
 
     const [open, setOpen] = useState(false);
     const handleDebugWindowOpen = useCallback(() => {
-        window.open(debugEntry ? baseUrlState + '/debug?debugEntry=' + debugEntry.id : baseUrlState + '/debug');
-    }, [debugEntry]);
+        const url = new URL(getPanelMountPath(), baseUrlState);
+        if (debugEntry) {
+            url.searchParams.set('debugEntry', debugEntry.id);
+        }
+        window.open(url.toString());
+    }, [debugEntry, baseUrlState]);
 
     const handleClickOpen = useCallback(() => setOpen(true), []);
     const handleClose = useCallback(() => setOpen(false), []);
 
-    const iframeRef = useRef<HTMLIFrameElement | undefined>(undefined);
+    // Track when the embedded panel finishes booting so we can switch from
+    // src-based loading (cold start) to postMessage-based navigation.
+    // Validate the source — any frame on the page can postMessage, but only
+    // our own iframe's contentWindow should flip the ready flag.
+    useEffect(() => {
+        const isPanelLoaded = (data: unknown): data is {event: 'panel.loaded'} =>
+            typeof data === 'object' && data !== null && 'event' in data && data.event === 'panel.loaded';
+
+        const listener = (event: MessageEvent) => {
+            if (event.source !== iframeRef.current?.contentWindow) return;
+            if (isPanelLoaded(event.data)) setIframeReady(true);
+        };
+        window.addEventListener('message', listener);
+        return () => window.removeEventListener('message', listener);
+    }, []);
+
+    // Flush a single pending navigation on the `iframeReady` false→true edge.
+    // Deps intentionally exclude `iframeSrc` — that would re-dispatch
+    // `router.navigate` on every hot-path click (since the hot path already
+    // calls `dispatchWindowEvent` synchronously and also `setIframeSrc`),
+    // causing duplicate postMessages.
+    useEffect(() => {
+        if (!iframeReady) return;
+        const pending = pendingNavUrlRef.current;
+        if (!pending) return;
+        const contentWindow = iframeRef.current?.contentWindow;
+        if (!contentWindow) return;
+        dispatchWindowEvent(contentWindow, 'router.navigate', pending);
+        pendingNavUrlRef.current = null;
+    }, [iframeReady]);
 
     const iframeRouteNavigate = useCallback(
         (url: string) => {
             if (!activeComponents.iframe) return;
             setIframeSrc(url);
-            if (!iframeEnabled) setIframeEnabled(true);
+            // Hot path: panel already mounted and booted — navigate via postMessage
+            // to preserve panel state and avoid a full iframe reload.
+            if (iframeEnabled && iframeReady && iframeRef.current?.contentWindow) {
+                dispatchWindowEvent(iframeRef.current.contentWindow, 'router.navigate', url);
+                return;
+            }
+            // Already mounted but still booting: queue so the ready-flush
+            // effect can dispatch the latest requested URL via postMessage.
+            if (iframeEnabled) {
+                pendingNavUrlRef.current = url;
+                return;
+            }
+            // Cold start: mount the iframe. `iframeSrc` (just set above)
+            // becomes the initial src that `DebugIFrame` locks in — no need
+            // to queue, the browser load carries the URL to the panel.
+            setIframeEnabled(true);
         },
-        [iframeEnabled, activeComponents],
+        [iframeEnabled, iframeReady, activeComponents],
     );
 
     const toggleIframeHandler = useCallback(() => {
         if (!activeComponents.iframe) return;
-        setIframeEnabled((v) => !v);
-    }, [activeComponents]);
+        if (iframeEnabled) {
+            closeIframe();
+        } else {
+            setIframeEnabled(true);
+        }
+    }, [activeComponents, iframeEnabled, closeIframe]);
 
     const {
         height: panelHeight,

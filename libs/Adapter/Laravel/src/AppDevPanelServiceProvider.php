@@ -185,7 +185,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         if (is_dir($assetSource) && file_exists($assetSource . '/bundle.js')) {
             $this->publishes([
                 $assetSource => $this->app->publicPath('vendor/app-dev-panel'),
-            ], 'app-dev-panel-assets');
+            ], ['app-dev-panel-assets', 'laravel-assets']);
         }
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/adp.php');

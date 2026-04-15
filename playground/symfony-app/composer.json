@@ -63,8 +63,14 @@
         }
     },
     "scripts": {
-        "post-install-cmd": ["php bin/console cache:clear --no-warmup || true"],
-        "post-update-cmd": ["php bin/console cache:clear --no-warmup || true"],
+        "post-install-cmd": [
+            "php bin/console cache:clear --no-warmup || true",
+            "php bin/console assets:install public --symlink --relative || true"
+        ],
+        "post-update-cmd": [
+            "php bin/console cache:clear --no-warmup || true",
+            "php bin/console assets:install public --symlink --relative || true"
+        ],
         "serve": [
             "Composer\\Config::disableProcessTimeout",
             "bash ../../bin/serve.sh 8102"
