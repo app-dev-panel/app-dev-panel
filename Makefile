@@ -180,7 +180,8 @@ build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 
 install-panel: ## Publish built panel assets into playground applications
 	@echo "$(CYAN)Publishing panel assets to playgrounds...$(RESET)"
-	cd $(PLAYGROUND_DIR)/symfony-app && rm -rf public/bundles/appdevpanel && php bin/console assets:install public --symlink
+	cd $(PLAYGROUND_DIR)/symfony-app && rm -rf public/bundles/appdevpanel && php bin/console assets:install public --symlink --relative
+	cd $(PLAYGROUND_DIR)/laravel-app && rm -rf public/vendor/app-dev-panel && php artisan vendor:publish --tag=app-dev-panel-assets --force --ansi
 	@echo "$(GREEN)Done. Panel available at /debug on each playground.$(RESET)"
 
 build-install-panel: build-panel install-panel ## Build panel + publish to all playgrounds
