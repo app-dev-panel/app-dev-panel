@@ -1,6 +1,12 @@
 variant = "loose"
 
 [[issues]]
+file = "app/Auth/ArrayUserProvider.php"
+code = "non-existent-class-like"
+message = 'Class `App\Auth\ArrayUserProvider` cannot implement unknown type `UserProvider`'
+count = 1
+
+[[issues]]
 file = "app/Http/Controllers/HomeController.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Translation\Translator)`).'
@@ -64,12 +70,12 @@ count = 1
 file = "app/Http/Controllers/OpenApiController.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 1
+count = 3
 
 [[issues]]
 file = "app/Http/Controllers/OpenApiController.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\http\controllers\openapicontroller::__invoke`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
@@ -314,6 +320,18 @@ count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
 code = "never-return"
 message = "Cannot return value with type 'never' from this function."
 count = 1
@@ -334,6 +352,18 @@ count = 1
 file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
 code = "non-existent-method"
 message = 'Method `select` does not exist on type `Illuminate\Support\Facades\DB`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
+code = "non-existent-method"
+message = 'Method `statement` does not exist on type `Illuminate\Support\Facades\DB`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
+code = "non-existent-method"
+message = 'Method `table` does not exist on type `Illuminate\Support\Facades\DB`.'
 count = 1
 
 [[issues]]

@@ -155,6 +155,35 @@ final class LoggerDecoratorTest extends TestCase
     }
 
     #[Test]
+    public function unknownMethodCallsAreForwardedToDecoratedLogger(): void
+    {
+        // Simulates frameworks (e.g., Laravel's LogManager) that expose non-PSR
+        // methods such as channel(), stack(), driver() on the logger service.
+        // The proxy must forward these to the real logger via ProxyDecoratedCalls.
+        $decorated = new class() implements LoggerInterface {
+            use \Psr\Log\LoggerTrait;
+
+            public ?string $lastChannel = null;
+
+            public function channel(string $name): self
+            {
+                $this->lastChannel = $name;
+                return $this;
+            }
+
+            public function log($level, \Stringable|string $message, array $context = []): void {}
+        };
+
+        $decorator = new LoggerDecorator($decorated);
+
+        /** @psalm-suppress UndefinedMagicMethod */
+        $result = $decorator->channel('single');
+
+        $this->assertSame($decorated, $result);
+        $this->assertSame('single', $decorated->lastChannel);
+    }
+
+    #[Test]
     public function broadcasterCanBeReplacedBeforeLog(): void
     {
         $decorated = $this->createMock(LoggerInterface::class);

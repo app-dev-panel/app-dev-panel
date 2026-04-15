@@ -68,7 +68,7 @@ final class DebugLogTargetTest extends TestCase
         $this->assertSame('debug', $collected[4]['level']);
     }
 
-    public function testNonStringMessageIsPassedAsIs(): void
+    public function testArrayMessageIsDumpedAndPreservedInContext(): void
     {
         $timeline = new TimelineCollector();
         $timeline->startup();
@@ -85,7 +85,87 @@ final class DebugLogTargetTest extends TestCase
 
         $collected = $logCollector->getCollected();
         $this->assertCount(1, $collected);
-        $this->assertSame(['key' => 'value'], $collected[0]['message']);
+
+        // Message must be a string so downstream tooling can concat safely
+        $this->assertIsString($collected[0]['message']);
+        $this->assertStringContainsString('key', $collected[0]['message']);
+        $this->assertStringContainsString('value', $collected[0]['message']);
+
+        // Original data preserved in context
+        $this->assertSame(['key' => 'value'], $collected[0]['context']['raw_message']);
+        $this->assertSame('test', $collected[0]['context']['category']);
+    }
+
+    public function testThrowableMessageIsNormalized(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $logCollector = new LogCollector($timeline);
+        $logCollector->startup();
+
+        $target = new DebugLogTarget($logCollector);
+
+        $exception = new \RuntimeException('Boom');
+
+        $target->messages = [
+            [$exception, Logger::LEVEL_ERROR, 'app', microtime(true)],
+        ];
+
+        $target->export();
+
+        $collected = $logCollector->getCollected();
+        $this->assertCount(1, $collected);
+        $this->assertSame('Boom', $collected[0]['message']);
+        $this->assertSame('Boom', $collected[0]['context']['exception']);
+        $this->assertSame(\RuntimeException::class, $collected[0]['context']['class']);
+        $this->assertIsString($collected[0]['context']['trace']);
+    }
+
+    public function testStringableMessageIsCastToString(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $logCollector = new LogCollector($timeline);
+        $logCollector->startup();
+
+        $target = new DebugLogTarget($logCollector);
+
+        $stringable = new class implements \Stringable {
+            public function __toString(): string
+            {
+                return 'stringable-value';
+            }
+        };
+
+        $target->messages = [
+            [$stringable, Logger::LEVEL_INFO, 'app', microtime(true)],
+        ];
+
+        $target->export();
+
+        $collected = $logCollector->getCollected();
+        $this->assertSame('stringable-value', $collected[0]['message']);
+        $this->assertArrayNotHasKey('raw_message', $collected[0]['context']);
+    }
+
+    public function testPlainStringMessageIsPreserved(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $logCollector = new LogCollector($timeline);
+        $logCollector->startup();
+
+        $target = new DebugLogTarget($logCollector);
+
+        $target->messages = [
+            ['plain string', Logger::LEVEL_INFO, 'app', microtime(true)],
+        ];
+
+        $target->export();
+
+        $collected = $logCollector->getCollected();
+        $this->assertSame('plain string', $collected[0]['message']);
+        $this->assertArrayNotHasKey('raw_message', $collected[0]['context']);
     }
 
     public function testExportIntervalIsOne(): void

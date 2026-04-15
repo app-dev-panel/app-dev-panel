@@ -119,6 +119,33 @@ final class WebListener
     }
 
     /**
+     * Called after Yii 2's error handler has prepared the error response.
+     *
+     * On the exception path EVENT_AFTER_REQUEST never fires, so RequestCollector
+     * retains its default status code (200). This hook captures the actually
+     * rendered response (e.g. 404, 500) via PSR-7 conversion and feeds it to
+     * RequestCollector so the stored debug entry reflects the real status.
+     *
+     * Safe to call multiple times — RequestCollector overwrites.
+     */
+    public function onExceptionRendered(\yii\web\Application $app): void
+    {
+        if ($this->requestCollector === null) {
+            return;
+        }
+
+        try {
+            $psrResponse = $this->convertYiiResponseToPsr7($app->getResponse());
+        } catch (\Throwable) {
+            // If response conversion fails (e.g., response component unavailable),
+            // don't block further error handling.
+            return;
+        }
+
+        $this->requestCollector->collectResponse($psrResponse);
+    }
+
+    /**
      * Called after each action — captures unhandled exceptions that Yii's error handler caught.
      */
     public function onAfterAction(): void

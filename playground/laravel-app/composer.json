@@ -38,7 +38,15 @@
         }
     },
     "scripts": {
+        "adp-ensure-dirs": [
+            "@php -r \"foreach (['storage/framework/views','storage/framework/cache','storage/framework/cache/data','storage/framework/sessions','bootstrap/cache'] as \\$d) { if (!is_dir(\\$d)) { mkdir(\\$d, 0755, true); } }\"",
+            "@php -r \"if (!file_exists('database/database.sqlite')) { @mkdir('database', 0755, true); touch('database/database.sqlite'); }\""
+        ],
+        "post-install-cmd": [
+            "@adp-ensure-dirs"
+        ],
         "post-autoload-dump": [
+            "@adp-ensure-dirs",
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi || true",
             "@php artisan vendor:publish --tag=app-dev-panel-assets --force --ansi || true"

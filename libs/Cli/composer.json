@@ -61,5 +61,8 @@
     },
     "scripts": {
         "test": "phpunit --testdox --no-interaction"
-    }
+    },
+    "bin": [
+        "bin/adp"
+    ]
 }
