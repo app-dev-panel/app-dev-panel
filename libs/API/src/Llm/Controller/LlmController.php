@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Llm\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Llm\Acp\AcpCommandAllowlist;
 use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
 use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\LlmHistoryStorageInterface;
@@ -32,6 +33,7 @@ final class LlmController
         private readonly ClientInterface $httpClient,
         private readonly ?AcpCommandVerifierInterface $commandVerifier = null,
         private readonly ?AcpDaemonManagerInterface $acpDaemonManager = null,
+        private readonly AcpCommandAllowlist $acpAllowlist = new AcpCommandAllowlist(),
     ) {}
 
     /**
@@ -92,6 +94,17 @@ final class LlmController
                 : [];
         $acpArgs = isset($body['acpArgs']) && is_array($body['acpArgs']) ? $body['acpArgs'] : $defaultArgs;
         $acpEnv = isset($body['acpEnv']) && is_array($body['acpEnv']) ? $body['acpEnv'] : [];
+
+        if (!$this->acpAllowlist->isAllowed($command)) {
+            return $this->responseFactory->createJsonResponse([
+                'connected' => false,
+                'error' => sprintf(
+                    'ACP agent command "%s" is not in the allowlist. Allowed commands: %s.',
+                    $command,
+                    implode(', ', $this->acpAllowlist->getCommands()),
+                ),
+            ], 400);
+        }
 
         if ($this->commandVerifier !== null && !$this->commandVerifier->isAvailable($command)) {
             return $this->responseFactory->createJsonResponse([

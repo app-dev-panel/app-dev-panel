@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Controller;
 
+use AppDevPanel\Api\ApiSecurityConfig;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\PathResolverInterface;
 use Exception;
@@ -43,13 +44,17 @@ final class ComposerControllerTest extends ControllerTestCase
         rmdir($dir);
     }
 
-    private function createController(): ComposerController
+    private function createController(bool $allowDestructive = true): ComposerController
     {
         $pathResolver = $this->createMock(PathResolverInterface::class);
         $pathResolver->method('getRootPath')->willReturn($this->fixtureDir);
         $pathResolver->method('getRuntimePath')->willReturn($this->fixtureDir . '/runtime');
 
-        return new ComposerController($this->createResponseFactory(), $pathResolver);
+        return new ComposerController(
+            $this->createResponseFactory(),
+            $pathResolver,
+            new ApiSecurityConfig(allowDestructiveOperations: $allowDestructive),
+        );
     }
 
     public function testIndexWithJsonAndLock(): void
@@ -185,7 +190,11 @@ final class ComposerControllerTest extends ControllerTestCase
         $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
         $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
 
-        $controller = new ComposerController($this->createResponseFactory(), $pathResolver);
+        $controller = new ComposerController(
+            $this->createResponseFactory(),
+            $pathResolver,
+            new ApiSecurityConfig(allowDestructiveOperations: true),
+        );
         $response = $controller->inspect($this->get(['package' => 'phpunit/phpunit']));
 
         $this->assertSame(200, $response->getStatusCode());
@@ -201,7 +210,11 @@ final class ComposerControllerTest extends ControllerTestCase
         $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
         $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
 
-        $controller = new ComposerController($this->createResponseFactory(), $pathResolver);
+        $controller = new ComposerController(
+            $this->createResponseFactory(),
+            $pathResolver,
+            new ApiSecurityConfig(allowDestructiveOperations: true),
+        );
         $response = $controller->inspect($this->get(['package' => 'nonexistent/pkg-zzz-999']));
 
         $this->assertSame(200, $response->getStatusCode());
@@ -248,7 +261,11 @@ final class ComposerControllerTest extends ControllerTestCase
         $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
         $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
 
-        $controller = new ComposerController($this->createResponseFactory(), $pathResolver);
+        $controller = new ComposerController(
+            $this->createResponseFactory(),
+            $pathResolver,
+            new ApiSecurityConfig(allowDestructiveOperations: true),
+        );
 
         // Dry-run: require a non-existent package — will error but exercises the method
         $response = $controller->require($this->post([
@@ -264,13 +281,33 @@ final class ComposerControllerTest extends ControllerTestCase
         $this->assertArrayHasKey('errors', $data);
     }
 
+    public function testRequireReturns403WhenDestructiveOperationsDisabled(): void
+    {
+        $controller = $this->createController(allowDestructive: false);
+
+        $response = $controller->require($this->post([
+            'package' => 'vendor/something',
+            'version' => '1.0.0',
+        ]));
+
+        $this->assertSame(403, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertSame('error', $data['status']);
+        $this->assertNotEmpty($data['errors']);
+        $this->assertStringContainsString('allowDestructiveOperations', $data['errors'][0]);
+    }
+
     public function testRequireWithDevFlag(): void
     {
         $pathResolver = $this->createMock(PathResolverInterface::class);
         $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
         $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
 
-        $controller = new ComposerController($this->createResponseFactory(), $pathResolver);
+        $controller = new ComposerController(
+            $this->createResponseFactory(),
+            $pathResolver,
+            new ApiSecurityConfig(allowDestructiveOperations: true),
+        );
 
         $response = $controller->require($this->post([
             'package' => 'nonexistent/package-zzz-999',

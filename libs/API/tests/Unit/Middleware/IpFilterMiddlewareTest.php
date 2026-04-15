@@ -75,6 +75,67 @@ final class IpFilterMiddlewareTest extends TestCase
         $this->assertSame(403, $response->getStatusCode());
     }
 
+    public function testStrictModeRejectsWhenAllowedIpsEmpty(): void
+    {
+        $middleware = new IpFilterMiddleware(new HttpFactory(), new HttpFactory(), [], [], true);
+        $handler = $this->createHandler();
+
+        $request = new ServerRequest('GET', '/test', [], null, '1.1', ['REMOTE_ADDR' => '127.0.0.1']);
+
+        $response = $middleware->process($request, $handler);
+
+        $this->assertSame(403, $response->getStatusCode());
+    }
+
+    public function testClientIpResolvedFromXForwardedForWhenProxyTrusted(): void
+    {
+        $middleware = new IpFilterMiddleware(new HttpFactory(), new HttpFactory(), ['203.0.113.42'], ['10.0.0.1']);
+        $handler = $this->createHandler();
+
+        $request = new ServerRequest('GET', '/test', [], null, '1.1', [
+            'REMOTE_ADDR' => '10.0.0.1',
+        ])->withHeader('X-Forwarded-For', '203.0.113.42');
+
+        $response = $middleware->process($request, $handler);
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testXForwardedForIgnoredWhenProxyNotTrusted(): void
+    {
+        $middleware = new IpFilterMiddleware(new HttpFactory(), new HttpFactory(), ['203.0.113.42'], []); // no trusted proxies
+        $handler = $this->createHandler();
+
+        // Attacker spoofs XFF from a non-trusted connection: must be ignored,
+        // actual REMOTE_ADDR (10.0.0.1) is used and rejected.
+        $request = new ServerRequest('GET', '/test', [], null, '1.1', [
+            'REMOTE_ADDR' => '10.0.0.1',
+        ])->withHeader('X-Forwarded-For', '203.0.113.42');
+
+        $response = $middleware->process($request, $handler);
+
+        $this->assertSame(403, $response->getStatusCode());
+    }
+
+    public function testXForwardedForWalksChainSkippingTrustedProxies(): void
+    {
+        $middleware = new IpFilterMiddleware(
+            new HttpFactory(),
+            new HttpFactory(),
+            ['198.51.100.5'],
+            ['10.0.0.1', '10.0.0.2'],
+        );
+        $handler = $this->createHandler();
+
+        $request = new ServerRequest('GET', '/test', [], null, '1.1', [
+            'REMOTE_ADDR' => '10.0.0.1',
+        ])->withHeader('X-Forwarded-For', '198.51.100.5, 10.0.0.2');
+
+        $response = $middleware->process($request, $handler);
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
     private function createHandler(): RequestHandlerInterface
     {
         return new class() implements RequestHandlerInterface {

@@ -761,12 +761,26 @@ final class LlmControllerTest extends TestCase
         $this->assertSame('claude', $data['acpCommand']);
     }
 
-    public function testConnectAcpWithInvalidCommand(): void
+    public function testConnectAcpRejectsCommandNotOnAllowlist(): void
+    {
+        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
+        $response = $controller->connect($this->post([
+            'provider' => 'acp',
+            'acpCommand' => 'curl',
+        ]));
+        $data = $this->data($response);
+
+        $this->assertSame(400, $response->getStatusCode());
+        $this->assertFalse($data['connected']);
+        $this->assertStringContainsString('allowlist', $data['error']);
+    }
+
+    public function testConnectAcpReturnsNotFoundWhenAllowedButMissingOnPath(): void
     {
         $controller = $this->makeController(commandVerifier: $this->mockVerifier(false));
         $response = $controller->connect($this->post([
             'provider' => 'acp',
-            'acpCommand' => 'nonexistent-acp-cmd-99999',
+            'acpCommand' => 'claude',
         ]));
         $data = $this->data($response);
 
@@ -841,10 +855,10 @@ final class LlmControllerTest extends TestCase
         $this->assertSame('acp-agent', $data['models'][0]['id']);
     }
 
-    public function testConnectAcpWithoutVerifierSkipsCheck(): void
+    public function testConnectAcpWithoutVerifierSkipsAvailabilityCheck(): void
     {
         $controller = $this->makeController(acpDaemonManager: $this->mockDaemonManager());
-        $response = $controller->connect($this->acpPost(['provider' => 'acp', 'acpCommand' => 'anything']));
+        $response = $controller->connect($this->acpPost(['provider' => 'acp', 'acpCommand' => 'claude']));
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertTrue($this->data($response)['connected']);

@@ -126,12 +126,7 @@ final class SqliteStorage implements StorageInterface
 
     private function readEntry(string $type, string $id): array
     {
-        $column = match ($type) {
-            self::TYPE_SUMMARY => 'summary',
-            self::TYPE_DATA => 'data',
-            self::TYPE_OBJECTS => 'objects',
-            default => $type,
-        };
+        $column = $this->resolveColumn($type);
 
         $stmt = $this->pdo->prepare("SELECT {$column} FROM entries WHERE id = :id");
         $stmt->execute([':id' => $id]);
@@ -146,12 +141,7 @@ final class SqliteStorage implements StorageInterface
 
     private function readAll(string $type): array
     {
-        $column = match ($type) {
-            self::TYPE_SUMMARY => 'summary',
-            self::TYPE_DATA => 'data',
-            self::TYPE_OBJECTS => 'objects',
-            default => $type,
-        };
+        $column = $this->resolveColumn($type);
 
         $stmt = $this->pdo->query("SELECT id, {$column} FROM entries ORDER BY created_at ASC");
         $data = [];
@@ -161,6 +151,21 @@ final class SqliteStorage implements StorageInterface
         }
 
         return $data;
+    }
+
+    /**
+     * Map the public storage type to an actual SQL column. Only the known
+     * type constants are accepted — unknown input is rejected to prevent
+     * column-name SQL injection through the `{$column}` interpolation below.
+     */
+    private function resolveColumn(string $type): string
+    {
+        return match ($type) {
+            self::TYPE_SUMMARY => 'summary',
+            self::TYPE_DATA => 'data',
+            self::TYPE_OBJECTS => 'objects',
+            default => throw new \InvalidArgumentException(sprintf('Unknown storage type "%s".', $type)),
+        };
     }
 
     private function garbageCollect(): void

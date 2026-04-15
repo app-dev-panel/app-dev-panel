@@ -98,8 +98,12 @@ final class ApiApplication implements RequestHandlerInterface
         $path = $request->getUri()->getPath();
         $isMcp = $path === '/inspect/api/mcp';
 
-        // CORS
-        $middlewares[] = new CorsMiddleware($this->responseFactory);
+        // CORS — let the container provide a pre-configured instance when
+        // available; otherwise fall back to the permissive default so existing
+        // installs keep working.
+        $middlewares[] = $this->container->has(CorsMiddleware::class)
+            ? $this->container->get(CorsMiddleware::class)
+            : new CorsMiddleware($this->responseFactory);
 
         // Panel routes only need CORS and IP filter — no JSON wrapping, no token auth
         if ($isPanel) {
