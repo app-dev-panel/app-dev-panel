@@ -32,9 +32,17 @@ src/
 tests/
 └── Unit/
     └── Command/
+        ├── DebugDumpCommandTest.php
         ├── DebugQueryCommandTest.php
         ├── DebugServerBroadcastCommandTest.php
         ├── DebugServerCommandTest.php
+        ├── DebugSummaryCommandTest.php
+        ├── DebugTailCommandTest.php
+        ├── FrontendUpdateCommandTest.php
+        ├── InspectConfigCommandTest.php
+        ├── InspectDatabaseCommandTest.php
+        ├── InspectRoutesCommandTest.php
+        ├── McpServeCommandTest.php
         ├── ResetCommandTest.php
         └── ServeCommandTest.php
 ```

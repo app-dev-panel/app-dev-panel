@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\Tests\Unit\Controller;
 
 use AppDevPanel\Adapter\Yii2\Controller\InspectRoutesController;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use yii\console\Application;
 use yii\console\ExitCode;
 
-/**
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
- */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
 final class InspectRoutesControllerTest extends TestCase
 {
     private string $basePath;

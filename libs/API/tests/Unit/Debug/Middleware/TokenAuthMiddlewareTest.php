@@ -11,6 +11,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
 
 final class TokenAuthMiddlewareTest extends TestCase
 {
@@ -156,6 +157,30 @@ final class TokenAuthMiddlewareTest extends TestCase
         $this->assertArrayHasKey('success', $decoded);
         $this->assertIsString($decoded['error']);
         $this->assertFalse($decoded['success']);
+    }
+
+    public function testEmptyTokenLogsInsecureWarningOnce(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())->method('warning')->with($this->stringContains('empty token'));
+
+        $middleware = new TokenAuthMiddleware(new HttpFactory(), new HttpFactory(), '', $logger);
+        $handler = $this->createPassthroughHandler();
+
+        $middleware->process(new ServerRequest('GET', '/first'), $handler);
+        $middleware->process(new ServerRequest('GET', '/second'), $handler);
+    }
+
+    public function testNonEmptyTokenDoesNotLogInsecureWarning(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->never())->method('warning');
+
+        $middleware = new TokenAuthMiddleware(new HttpFactory(), new HttpFactory(), 'secret', $logger);
+        $handler = $this->createPassthroughHandler();
+
+        $request = new ServerRequest('GET', '/test')->withHeader('X-Debug-Token', 'secret');
+        $middleware->process($request, $handler);
     }
 
     private function createPassthroughHandler(): RequestHandlerInterface

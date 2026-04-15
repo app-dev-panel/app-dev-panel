@@ -8,8 +8,8 @@ use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Dumper;
+use AppDevPanel\Kernel\Helper\Json;
 use Yiisoft\Files\FileHelper;
-use Yiisoft\Json\Json;
 
 final class FileStorage implements StorageInterface
 {

@@ -375,8 +375,7 @@ final class LlmControllerTest extends TestCase
 
     public function testPrependBrowserContextAddsSystemMessageForAnthropic(): void
     {
-        $controller = $this->makeController('anthropic', 'sk-ant-test');
-        $reflection = new \ReflectionMethod($controller, 'prependBrowserContext');
+        $builder = new \AppDevPanel\Api\Llm\LlmContextBuilder();
 
         $messages = [['role' => 'user', 'content' => 'hi']];
         $context = [
@@ -384,7 +383,7 @@ final class LlmControllerTest extends TestCase
             'userAgent' => 'TestUA/1.0',
         ];
 
-        $result = $reflection->invoke($controller, $messages, 'anthropic', $context);
+        $result = $builder->prependBrowserContext($messages, 'anthropic', $context);
 
         $this->assertCount(2, $result);
         $this->assertSame('system', $result[0]['role']);
@@ -401,13 +400,12 @@ final class LlmControllerTest extends TestCase
 
     public function testPrependBrowserContextMergesIntoUserForOtherProviders(): void
     {
-        $controller = $this->makeController('openrouter', 'sk-test');
-        $reflection = new \ReflectionMethod($controller, 'prependBrowserContext');
+        $builder = new \AppDevPanel\Api\Llm\LlmContextBuilder();
 
         $messages = [['role' => 'user', 'content' => 'hi']];
         $context = ['url' => 'http://localhost/debug?debugEntry=abc'];
 
-        $result = $reflection->invoke($controller, $messages, 'openrouter', $context);
+        $result = $builder->prependBrowserContext($messages, 'openrouter', $context);
 
         $this->assertCount(1, $result);
         $this->assertSame('user', $result[0]['role']);
@@ -417,14 +415,13 @@ final class LlmControllerTest extends TestCase
 
     public function testPrependBrowserContextNoOpForEmptyContext(): void
     {
-        $controller = $this->makeController('anthropic', 'sk-ant-test');
-        $reflection = new \ReflectionMethod($controller, 'prependBrowserContext');
+        $builder = new \AppDevPanel\Api\Llm\LlmContextBuilder();
 
         $messages = [['role' => 'user', 'content' => 'hi']];
 
-        $this->assertSame($messages, $reflection->invoke($controller, $messages, 'anthropic', null));
-        $this->assertSame($messages, $reflection->invoke($controller, $messages, 'anthropic', []));
-        $this->assertSame($messages, $reflection->invoke($controller, $messages, 'anthropic', ['url' => '']));
+        $this->assertSame($messages, $builder->prependBrowserContext($messages, 'anthropic', null));
+        $this->assertSame($messages, $builder->prependBrowserContext($messages, 'anthropic', []));
+        $this->assertSame($messages, $builder->prependBrowserContext($messages, 'anthropic', ['url' => '']));
     }
 
     public function testChatWithCustomPromptMergedIntoUser(): void
@@ -761,12 +758,26 @@ final class LlmControllerTest extends TestCase
         $this->assertSame('claude', $data['acpCommand']);
     }
 
-    public function testConnectAcpWithInvalidCommand(): void
+    public function testConnectAcpRejectsCommandNotOnAllowlist(): void
+    {
+        $controller = $this->makeController(commandVerifier: $this->mockVerifier(true));
+        $response = $controller->connect($this->post([
+            'provider' => 'acp',
+            'acpCommand' => 'curl',
+        ]));
+        $data = $this->data($response);
+
+        $this->assertSame(400, $response->getStatusCode());
+        $this->assertFalse($data['connected']);
+        $this->assertStringContainsString('allowlist', $data['error']);
+    }
+
+    public function testConnectAcpReturnsNotFoundWhenAllowedButMissingOnPath(): void
     {
         $controller = $this->makeController(commandVerifier: $this->mockVerifier(false));
         $response = $controller->connect($this->post([
             'provider' => 'acp',
-            'acpCommand' => 'nonexistent-acp-cmd-99999',
+            'acpCommand' => 'claude',
         ]));
         $data = $this->data($response);
 
@@ -841,10 +852,10 @@ final class LlmControllerTest extends TestCase
         $this->assertSame('acp-agent', $data['models'][0]['id']);
     }
 
-    public function testConnectAcpWithoutVerifierSkipsCheck(): void
+    public function testConnectAcpWithoutVerifierSkipsAvailabilityCheck(): void
     {
         $controller = $this->makeController(acpDaemonManager: $this->mockDaemonManager());
-        $response = $controller->connect($this->acpPost(['provider' => 'acp', 'acpCommand' => 'anything']));
+        $response = $controller->connect($this->acpPost(['provider' => 'acp', 'acpCommand' => 'claude']));
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertTrue($this->data($response)['connected']);

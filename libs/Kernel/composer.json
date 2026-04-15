@@ -29,7 +29,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "ext-mbstring": "*",
         "guzzlehttp/psr7": "^2.4",
         "psr/container": "^2.0",
@@ -40,7 +40,6 @@
         "symfony/console": "^6.0|^7.0|^8.0",
         "symfony/var-dumper": "^6.4|^7.0|^8.0",
         "yiisoft/files": "^2.0",
-        "yiisoft/json": "^1.0",
         "yiisoft/strings": "^2.2",
         "yiisoft/var-dumper": "^1.7"
     },

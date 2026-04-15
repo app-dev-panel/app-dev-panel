@@ -100,7 +100,7 @@ final class DebugDumpController extends Controller
         ];
 
         if (!$json) {
-            Console::stdout(Console::ansiFormat(sprintf("Object: %s\n", (string) $data[0]), [Console::BOLD]));
+            Console::stdout(Console::ansiFormat(sprintf("Object: %s\n", $data[0]), [Console::BOLD]));
             Console::stdout(str_repeat('=', 60) . "\n");
         }
 

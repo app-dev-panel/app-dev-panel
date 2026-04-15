@@ -56,6 +56,7 @@ src/
 │   │   ├── ElasticsearchController.php  # Elasticsearch cluster health, indices, search, raw query
 │   │   ├── RedisController.php          # Redis inspection (ping, info, keys, get, delete, flush)
 │   │   ├── CodeCoverageController.php   # Code coverage (pcov/xdebug)
+│   │   ├── HttpMockController.php       # HTTP mock expectations, verify, history, reset (Phiremock)
 │   │   └── ServiceController.php        # Service registration (register, heartbeat, list, deregister)
 │   ├── Middleware/
 │   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services
@@ -68,6 +69,10 @@ src/
 │   ├── Elasticsearch/
 │   │   ├── ElasticsearchProviderInterface.php  # Interface for ES cluster inspection
 │   │   └── NullElasticsearchProvider.php       # Default no-op fallback
+│   ├── HttpMock/
+│   │   ├── HttpMockProviderInterface.php       # HTTP mock backend (expectations, history, verify)
+│   │   ├── NullHttpMockProvider.php            # Default no-op fallback
+│   │   └── PhiremockProvider.php               # Backend implementation via Phiremock HTTP API
 │   ├── Command/
 │   │   ├── CommandInterface.php
 │   │   ├── CommandResponse.php
@@ -241,6 +246,20 @@ Requires `\Redis` (phpredis extension) in the DI container.
 |--------|------|-------------|
 | GET | `/` | Collect and return PHP code coverage data (requires pcov or xdebug) |
 | GET | `/file` | Read a source file (`?path=`) |
+
+### HTTP Mock API (`/inspect/api/http-mock`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/status` | Backend availability (enabled, provider name, reachable URL) |
+| GET | `/expectations` | List registered expectations |
+| POST | `/expectations` | Register a new expectation (mock rule) |
+| DELETE | `/expectations` | Clear all expectations |
+| GET | `/verify` | Verify executed requests against expectations |
+| GET | `/history` | Request history captured by the mock backend |
+| POST | `/reset` | Reset expectations + history |
+
+Backed by `HttpMockProviderInterface`. Default `NullHttpMockProvider` returns "disabled". `PhiremockProvider` proxies to a running Phiremock server.
 
 ### MCP API (`/inspect/api/mcp`)
 

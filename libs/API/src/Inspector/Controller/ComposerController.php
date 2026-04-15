@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\ApiSecurityConfig;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Command\BashCommand;
 use AppDevPanel\Api\Inspector\CommandResponse;
@@ -18,6 +19,7 @@ final class ComposerController
     public function __construct(
         private readonly JsonResponseFactoryInterface $responseFactory,
         private readonly PathResolverInterface $pathResolver,
+        private readonly ApiSecurityConfig $securityConfig = new ApiSecurityConfig(),
     ) {}
 
     public function index(ServerRequestInterface $request): ResponseInterface
@@ -72,6 +74,15 @@ final class ComposerController
 
     public function require(ServerRequestInterface $request): ResponseInterface
     {
+        if (!$this->securityConfig->allowDestructiveOperations) {
+            return $this->responseFactory->createJsonResponse([
+                'status' => CommandResponse::STATUS_ERROR,
+                'errors' => [
+                    'Composer require is disabled because allowDestructiveOperations is false. Composer package installation can execute arbitrary code via post-install scripts — enable it only on a trusted, authenticated deployment.',
+                ],
+            ], 403);
+        }
+
         $parsedBody = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $package = $parsedBody['package'] ?? null;
         $version = $parsedBody['version'] ?? null;

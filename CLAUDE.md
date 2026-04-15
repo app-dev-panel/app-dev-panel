@@ -270,7 +270,7 @@ GitHub Actions runs on every push and PR:
 | Adapter-Laravel | `libs/Adapter/Laravel` | 86 | 0 | 0.1s | — |
 | Adapter-Yii2 | `libs/Adapter/Yii2` | 95 | 0 | 0.1s | **57.3%** (373/651) |
 | Adapter-Cycle | `libs/Adapter/Cycle` | 10 | 0 | 0.02s | — |
-| Cli | `libs/Cli` | 6 | 0 | 0.02s | **41.1%** (30/73) |
+| Cli | `libs/Cli` | 198 | 0 | ~14s | — |
 | McpServer | `libs/McpServer` | 48 | 0 | 0.02s | — |
 | McpServer (API) | `libs/API` (Mcp controller) | 6 | 0 | 0.02s | — |
 | **Total** | **all libs** | **755** | **16** | **~1m 22s** | — |

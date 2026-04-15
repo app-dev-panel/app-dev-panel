@@ -260,6 +260,25 @@ final class SqliteStorageTest extends AbstractStorageTestCase
         $this->assertSame(2, $summary['entry-1']['v']);
     }
 
+    public function testReadRejectsUnknownType(): void
+    {
+        $storage = $this->getStorage(new DebuggerIdGenerator());
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown storage type "summary; DROP TABLE entries".');
+
+        $storage->read('summary; DROP TABLE entries', 'any');
+    }
+
+    public function testReadAllRejectsUnknownType(): void
+    {
+        $storage = $this->getStorage(new DebuggerIdGenerator());
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $storage->read('not-a-real-column');
+    }
+
     public function getStorage(DebuggerIdGenerator $idGenerator): SqliteStorage
     {
         return new SqliteStorage($this->path, $idGenerator);
