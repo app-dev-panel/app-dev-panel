@@ -66,6 +66,13 @@ describe('ServerSentEventsObserver', () => {
         observer.close();
     });
 
+    it('strips trailing slash from backend URL to avoid double slashes', () => {
+        const observer = createServerSentEventsObserver('http://localhost:8080/');
+        observer.subscribe(vi.fn());
+        expect(MockEventSource.instances[0].url).toBe('http://localhost:8080/debug/api/event-stream');
+        observer.close();
+    });
+
     it('subscribes and receives messages', () => {
         const observer = createServerSentEventsObserver('http://localhost');
         const handler = vi.fn();
