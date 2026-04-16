@@ -9,6 +9,7 @@ import {
     type EditorConfig,
     type EditorPreset,
 } from '@app-dev-panel/sdk/Helper/editorUrl';
+import GitHubIcon from '@mui/icons-material/GitHub';
 import {
     Autocomplete,
     Badge,
@@ -415,6 +416,43 @@ export const TopBar = React.memo(
                             <Icon sx={{fontSize: 20}}>settings</Icon>
                         </ListItemIcon>
                         <ListItemText>Settings</ListItemText>
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem
+                        component="a"
+                        href="https://app-dev-panel.github.io/app-dev-panel/sponsor"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleMenuClose}
+                    >
+                        <ListItemIcon>
+                            <Icon sx={{fontSize: 20}}>favorite</Icon>
+                        </ListItemIcon>
+                        <ListItemText>Donate</ListItemText>
+                    </MenuItem>
+                    <MenuItem
+                        component="a"
+                        href="https://app-dev-panel.github.io/app-dev-panel/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleMenuClose}
+                    >
+                        <ListItemIcon>
+                            <Icon sx={{fontSize: 20}}>public</Icon>
+                        </ListItemIcon>
+                        <ListItemText>Website</ListItemText>
+                    </MenuItem>
+                    <MenuItem
+                        component="a"
+                        href="https://github.com/app-dev-panel/app-dev-panel"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleMenuClose}
+                    >
+                        <ListItemIcon>
+                            <GitHubIcon sx={{fontSize: 20}} />
+                        </ListItemIcon>
+                        <ListItemText>GitHub</ListItemText>
                     </MenuItem>
                 </Menu>
 

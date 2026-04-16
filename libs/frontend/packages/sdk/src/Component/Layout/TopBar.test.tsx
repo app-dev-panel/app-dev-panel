@@ -100,6 +100,27 @@ describe('TopBar', () => {
         expect(screen.queryByLabelText('Custom URL template')).not.toBeInTheDocument();
     });
 
+    it('renders external links to donate, website and github in more menu', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<TopBar />);
+
+        const moreButton = screen.getAllByRole('button').find((b) => b.textContent?.includes('more_vert'));
+        await user.click(moreButton!);
+
+        const donate = screen.getByRole('menuitem', {name: /Donate/});
+        expect(donate).toHaveAttribute('href', 'https://app-dev-panel.github.io/app-dev-panel/sponsor');
+        expect(donate).toHaveAttribute('target', '_blank');
+        expect(donate).toHaveAttribute('rel', 'noopener noreferrer');
+
+        const website = screen.getByRole('menuitem', {name: /Website/});
+        expect(website).toHaveAttribute('href', 'https://app-dev-panel.github.io/app-dev-panel/');
+        expect(website).toHaveAttribute('target', '_blank');
+
+        const github = screen.getByRole('menuitem', {name: /GitHub/});
+        expect(github).toHaveAttribute('href', 'https://github.com/app-dev-panel/app-dev-panel');
+        expect(github).toHaveAttribute('target', '_blank');
+    });
+
     it('calls onEditorConfigChange with patched template when edited', async () => {
         const user = userEvent.setup();
         const onChange = vi.fn();
