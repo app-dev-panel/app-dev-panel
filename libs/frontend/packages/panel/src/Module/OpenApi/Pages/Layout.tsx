@@ -8,6 +8,7 @@ import {TabContext, TabPanel} from '@mui/lab';
 import {IconButton, Stack, Tab, Tabs, useTheme} from '@mui/material';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
+import {useSearchParams} from 'react-router';
 import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
 
@@ -19,18 +20,27 @@ const NoEntries = React.memo(() => (
     />
 ));
 export const Layout = () => {
-    const [tab, setTab] = useState<string>('');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const requestedTab = searchParams.get('tab') ?? '';
+    const [tab, setTab] = useState<string>(requestedTab);
     const [settingsPopupOpen, setSettingsPopupOpen] = useState<boolean>(false);
-    const handleChange = (_event: React.SyntheticEvent, value: string) => setTab(value);
+    const handleChange = (_event: React.SyntheticEvent, value: string) => {
+        setTab(value);
+        setSearchParams({tab: value});
+    };
     const theme = useTheme();
 
     const apiEntries = useOpenApiEntries();
 
     useEffect(() => {
-        if (apiEntries && Object.keys(apiEntries).length) {
-            setTab(Object.keys(apiEntries)[0]);
+        const entryKeys = apiEntries ? Object.keys(apiEntries) : [];
+        if (!entryKeys.length) return;
+        if (requestedTab && entryKeys.includes(requestedTab)) {
+            setTab(requestedTab);
+        } else if (!tab || !entryKeys.includes(tab)) {
+            setTab(entryKeys[0]);
         }
-    }, [apiEntries]);
+    }, [apiEntries, requestedTab, tab]);
 
     return (
         <>

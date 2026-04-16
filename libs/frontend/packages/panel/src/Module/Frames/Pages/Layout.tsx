@@ -8,6 +8,7 @@ import {TabContext, TabPanel} from '@mui/lab';
 import {IconButton, Link, Stack, Tab, Tabs, Typography, useTheme} from '@mui/material';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
+import {useSearchParams} from 'react-router';
 
 const PoliciesList = () => {
     return (
@@ -77,18 +78,27 @@ const NoEntries = React.memo(() => {
     );
 });
 export const Layout = () => {
-    const [tab, setTab] = useState<string>('');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const requestedTab = searchParams.get('tab') ?? '';
+    const [tab, setTab] = useState<string>(requestedTab);
     const [settingsPopupOpen, setSettingsPopupOpen] = useState<boolean>(false);
-    const handleChange = (_event: React.SyntheticEvent, value: string) => setTab(value);
+    const handleChange = (_event: React.SyntheticEvent, value: string) => {
+        setTab(value);
+        setSearchParams({tab: value});
+    };
     const theme = useTheme();
 
     const frames = useFramesEntries();
 
     useEffect(() => {
-        if (frames && Object.keys(frames).length) {
-            setTab(Object.keys(frames)[0]);
+        const frameKeys = frames ? Object.keys(frames) : [];
+        if (!frameKeys.length) return;
+        if (requestedTab && frameKeys.includes(requestedTab)) {
+            setTab(requestedTab);
+        } else if (!tab || !frameKeys.includes(tab)) {
+            setTab(frameKeys[0]);
         }
-    }, [frames]);
+    }, [frames, requestedTab, tab]);
 
     return (
         <>
