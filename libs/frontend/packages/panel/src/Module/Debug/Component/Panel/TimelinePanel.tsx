@@ -7,10 +7,11 @@ import {
 } from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
 import {useTimelineEnrichment} from '@app-dev-panel/panel/Module/Debug/Component/Panel/useTimelineEnrichment';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
-import {Box, Chip, Collapse, IconButton, Tooltip, Typography} from '@mui/material';
+import {Box, Collapse, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
@@ -241,34 +242,18 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
                 {uniqueCollectors.map((col) => {
                     const isActive = activeFilters.has(col.shortName);
                     const color = getCollectorColor(col.fqcn);
+                    const clickable = uniqueCollectors.length > 1;
                     return (
-                        <Chip
+                        <FilterChip
                             key={col.shortName}
                             label={col.label !== 'Unknown' ? col.label : col.shortName}
-                            size="small"
-                            onClick={() => uniqueCollectors.length > 1 && toggleFilter(col.shortName)}
-                            sx={{
-                                fontSize: '11px',
-                                height: 24,
-                                borderRadius: 1,
-                                fontWeight: 600,
-                                cursor: uniqueCollectors.length > 1 ? 'pointer' : 'default',
-                                backgroundColor: isActive ? color.fg : 'transparent',
-                                color: isActive ? 'common.white' : color.fg,
-                                border: `1px solid ${color.fg}`,
-                            }}
+                            color={color.fg}
+                            active={isActive}
+                            onClick={clickable ? () => toggleFilter(col.shortName) : undefined}
                         />
                     );
                 })}
-                {activeFilters.size > 0 && (
-                    <Chip
-                        label="Clear"
-                        size="small"
-                        onClick={() => setActiveFilters(new Set())}
-                        variant="outlined"
-                        sx={{fontSize: '11px', height: 24, borderRadius: 1}}
-                    />
-                )}
+                {activeFilters.size > 0 && <FilterChip label="Clear" onClick={() => setActiveFilters(new Set())} />}
             </Box>
 
             {viewMode === 'list' ? (

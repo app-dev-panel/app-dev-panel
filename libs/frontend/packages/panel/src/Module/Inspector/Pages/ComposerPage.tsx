@@ -1,6 +1,7 @@
 import {useGetComposerQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {SwitchDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Composer/SwitchDialog';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
@@ -360,36 +361,18 @@ export const ComposerPage = () => {
 
                 {badgeCounts.length > 1 && (
                     <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
-                        {badgeCounts.map(([key, count]) => {
-                            const isActive = activeFilters.has(key);
-                            const color = badgeColor(key);
-                            return (
-                                <Chip
-                                    key={key}
-                                    label={`${badgeLabel(key)} (${count})`}
-                                    size="small"
-                                    onClick={() => toggleFilter(key)}
-                                    sx={{
-                                        fontSize: '11px',
-                                        height: 24,
-                                        borderRadius: 1,
-                                        fontWeight: 600,
-                                        cursor: 'pointer',
-                                        backgroundColor: isActive ? color : 'transparent',
-                                        color: isActive ? 'common.white' : color,
-                                        border: `1px solid ${color}`,
-                                    }}
-                                />
-                            );
-                        })}
-                        {activeFilters.size > 0 && (
-                            <Chip
-                                label="Clear"
-                                size="small"
-                                onClick={() => setActiveFilters(new Set())}
-                                variant="outlined"
-                                sx={{fontSize: '11px', height: 24, borderRadius: 1}}
+                        {badgeCounts.map(([key, count]) => (
+                            <FilterChip
+                                key={key}
+                                label={badgeLabel(key)}
+                                count={count}
+                                color={badgeColor(key)}
+                                active={activeFilters.has(key)}
+                                onClick={() => toggleFilter(key)}
                             />
+                        ))}
+                        {activeFilters.size > 0 && (
+                            <FilterChip label="Clear" onClick={() => setActiveFilters(new Set())} />
                         )}
                     </Box>
                 )}

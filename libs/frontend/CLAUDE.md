@@ -73,6 +73,7 @@ packages/
     │   │   ├── EmptyState.tsx              # Generic empty state (icon + title + desc)
     │   │   ├── SectionTitle.tsx            # Section heading component
     │   │   ├── SqlHighlight.tsx            # SQL syntax highlighting (Prism, inline/formatted modes)
+    │   │   ├── FilterChip.tsx              # Unified colored filter/tag badge (fixes gray-on-hover bug)
     │   │   ├── FilterInput.tsx             # Reusable filter text input with debounce
     │   │   ├── BodyPreview.tsx             # HTTP body preview (JSON, HTML, text)
     │   │   ├── ExplainPlanVisualizer.tsx   # SQL EXPLAIN plan tree visualizer
