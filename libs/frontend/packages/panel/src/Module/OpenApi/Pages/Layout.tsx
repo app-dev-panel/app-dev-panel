@@ -5,9 +5,10 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Settings} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
-import {IconButton, Stack, Tab, Tabs, useTheme} from '@mui/material';
+import {Box, IconButton, Stack, Tab, Tabs, useTheme} from '@mui/material';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
+import {useSearchParams} from 'react-router';
 import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
 
@@ -19,18 +20,34 @@ const NoEntries = React.memo(() => (
     />
 ));
 export const Layout = () => {
+    const [searchParams] = useSearchParams();
+    const requestedTab = searchParams.get('tab') ?? '';
     const [tab, setTab] = useState<string>('');
     const [settingsPopupOpen, setSettingsPopupOpen] = useState<boolean>(false);
     const handleChange = (_event: React.SyntheticEvent, value: string) => setTab(value);
     const theme = useTheme();
 
     const apiEntries = useOpenApiEntries();
+    const focusedEntry = requestedTab && apiEntries[requestedTab] ? requestedTab : null;
 
     useEffect(() => {
-        if (apiEntries && Object.keys(apiEntries).length) {
-            setTab(Object.keys(apiEntries)[0]);
+        if (focusedEntry) return;
+        const entryKeys = apiEntries ? Object.keys(apiEntries) : [];
+        if (!entryKeys.length) return;
+        if (!tab || !entryKeys.includes(tab)) {
+            setTab(entryKeys[0]);
         }
-    }, [apiEntries]);
+    }, [apiEntries, focusedEntry, tab]);
+
+    // Focused mode: a single entry is opened directly from the sidebar submenu.
+    // Render only the content, filling the whole container.
+    if (focusedEntry) {
+        return (
+            <Box className={theme.palette.mode} sx={{width: '100%', height: '100%'}}>
+                <SwaggerUI url={apiEntries[focusedEntry]} />
+            </Box>
+        );
+    }
 
     return (
         <>

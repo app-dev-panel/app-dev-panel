@@ -3,10 +3,12 @@ import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/Not
 import {AiChatPopup} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/AiChatPopup';
 
 import {DuckIcon} from '@app-dev-panel/panel/Application/Component/DuckIcon';
+import {useFramesEntries} from '@app-dev-panel/panel/Module/Frames/Context/Context';
 import {
     useGetMcpSettingsQuery,
     useUpdateMcpSettingsMutation,
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {useOpenApiEntries} from '@app-dev-panel/panel/Module/OpenApi/Context/Context';
 import {useSelector} from '@app-dev-panel/panel/store';
 import {
     changeAutoLatest,
@@ -113,6 +115,19 @@ const hiddenCollectors = new Set<string>([
     CollectorsMap.RequestCollector,
     CollectorsMap.CommandCollector,
 ]);
+
+// ---------------------------------------------------------------------------
+// Derive a short label for an Open API / Frames entry URL
+// ---------------------------------------------------------------------------
+const labelFromUrl = (url: string): string => {
+    try {
+        const parsed = new URL(url);
+        const segments = parsed.pathname.split('/').filter(Boolean);
+        return segments[segments.length - 1] || parsed.host;
+    } catch {
+        return url;
+    }
+};
 
 // ---------------------------------------------------------------------------
 // Static inspector sub-items
@@ -398,6 +413,18 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
 
     // Build sidebar sections
     const selectedCollector = searchParams.get('collector') || '';
+    const openApiEntries = useOpenApiEntries();
+    const framesEntries = useFramesEntries();
+
+    const openApiChildren = useMemo(
+        () => Object.keys(openApiEntries).map((name) => ({key: name, icon: 'description', label: labelFromUrl(name)})),
+        [openApiEntries],
+    );
+
+    const framesChildren = useMemo(
+        () => Object.keys(framesEntries).map((name) => ({key: name, icon: 'web_asset', label: labelFromUrl(name)})),
+        [framesEntries],
+    );
 
     const debugChildren = useMemo(() => {
         const entriesList = [{key: '__entries__', icon: 'list', label: 'All Entries'}];
@@ -454,10 +481,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 href: '/llm',
                 children: [{key: '/llm/mcp', icon: 'hub', label: 'MCP'}],
             },
-            {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api'},
-            {key: 'frames', icon: 'web', label: 'Frames', href: '/frames'},
+            {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api', children: openApiChildren},
+            {key: 'frames', icon: 'web', label: 'Frames', href: '/frames', children: framesChildren},
         ],
-        [debugChildren],
+        [debugChildren, openApiChildren, framesChildren],
     );
 
     // Determine active child key
@@ -483,8 +510,11 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         if (location.pathname.startsWith('/llm/mcp')) {
             return '/llm/mcp';
         }
+        if (location.pathname.startsWith('/open-api') || location.pathname.startsWith('/frames')) {
+            return searchParams.get('tab') || undefined;
+        }
         return undefined;
-    }, [location.pathname, selectedCollector]);
+    }, [location.pathname, selectedCollector, searchParams]);
 
     const handleNavigate = useCallback(
         (href: string) => {
@@ -506,6 +536,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 }
             } else if (sectionKey === 'inspector' || sectionKey === 'llm') {
                 navigate(childKey);
+            } else if (sectionKey === 'open-api') {
+                navigate(`/open-api?tab=${encodeURIComponent(childKey)}`);
+            } else if (sectionKey === 'frames') {
+                navigate(`/frames?tab=${encodeURIComponent(childKey)}`);
             }
         },
         [navigate, debugEntry],

@@ -5,9 +5,10 @@ import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Settings} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
-import {IconButton, Link, Stack, Tab, Tabs, Typography, useTheme} from '@mui/material';
+import {Box, IconButton, Link, Stack, Tab, Tabs, Typography, useTheme} from '@mui/material';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
+import {useSearchParams} from 'react-router';
 
 const PoliciesList = () => {
     return (
@@ -77,18 +78,37 @@ const NoEntries = React.memo(() => {
     );
 });
 export const Layout = () => {
+    const [searchParams] = useSearchParams();
+    const requestedTab = searchParams.get('tab') ?? '';
     const [tab, setTab] = useState<string>('');
     const [settingsPopupOpen, setSettingsPopupOpen] = useState<boolean>(false);
     const handleChange = (_event: React.SyntheticEvent, value: string) => setTab(value);
     const theme = useTheme();
 
     const frames = useFramesEntries();
+    const focusedFrame = requestedTab && frames[requestedTab] ? requestedTab : null;
 
     useEffect(() => {
-        if (frames && Object.keys(frames).length) {
-            setTab(Object.keys(frames)[0]);
+        if (focusedFrame) return;
+        const frameKeys = frames ? Object.keys(frames) : [];
+        if (!frameKeys.length) return;
+        if (!tab || !frameKeys.includes(tab)) {
+            setTab(frameKeys[0]);
         }
-    }, [frames]);
+    }, [frames, focusedFrame, tab]);
+
+    // Focused mode: a single frame is opened directly from the sidebar submenu.
+    // Render only the embedded content, filling the whole container.
+    if (focusedFrame) {
+        const url = frames[focusedFrame];
+        return (
+            <Box className={theme.palette.mode} sx={{width: '100%', height: 'calc(100vh - 140px)', display: 'flex'}}>
+                <object data={url} width="100%" height="100%" type="text/html" style={{flex: 1}}>
+                    <ErrorResolutionBox url={url} />
+                </object>
+            </Box>
+        );
+    }
 
     return (
         <>
