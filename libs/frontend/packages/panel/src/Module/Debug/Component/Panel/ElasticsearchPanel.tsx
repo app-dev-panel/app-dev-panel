@@ -1,5 +1,6 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
@@ -317,58 +318,29 @@ export const ElasticsearchPanel = ({data}: ElasticsearchPanelProps) => {
             {(methodBadgeCounts.length > 1 || statusBadgeCounts.length > 1) && (
                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
                     {statusBadgeCounts.map(([label, count]) => {
-                        const isActive = activeFilters.has(label);
                         const color = label === 'error' ? theme.palette.error.main : theme.palette.success.main;
                         return (
-                            <Chip
+                            <FilterChip
                                 key={label}
-                                label={`${label} (${count})`}
-                                size="small"
+                                label={label}
+                                count={count}
+                                color={color}
+                                active={activeFilters.has(label)}
                                 onClick={() => toggleFilter(label)}
-                                sx={{
-                                    fontSize: '11px',
-                                    height: 24,
-                                    borderRadius: 1,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    backgroundColor: isActive ? color : 'transparent',
-                                    color: isActive ? 'common.white' : color,
-                                    border: `1px solid ${color}`,
-                                }}
                             />
                         );
                     })}
-                    {methodBadgeCounts.map(([method, count]) => {
-                        const isActive = activeFilters.has(method);
-                        const color = methodColor(method, theme);
-                        return (
-                            <Chip
-                                key={method}
-                                label={`${method} (${count})`}
-                                size="small"
-                                onClick={() => toggleFilter(method)}
-                                sx={{
-                                    fontSize: '11px',
-                                    height: 24,
-                                    borderRadius: 1,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    backgroundColor: isActive ? color : 'transparent',
-                                    color: isActive ? 'common.white' : color,
-                                    border: `1px solid ${color}`,
-                                }}
-                            />
-                        );
-                    })}
-                    {activeFilters.size > 0 && (
-                        <Chip
-                            label="Clear"
-                            size="small"
-                            onClick={() => setActiveFilters(new Set())}
-                            variant="outlined"
-                            sx={{fontSize: '11px', height: 24, borderRadius: 1}}
+                    {methodBadgeCounts.map(([method, count]) => (
+                        <FilterChip
+                            key={method}
+                            label={method}
+                            count={count}
+                            color={methodColor(method, theme)}
+                            active={activeFilters.has(method)}
+                            onClick={() => toggleFilter(method)}
                         />
-                    )}
+                    ))}
+                    {activeFilters.size > 0 && <FilterChip label="Clear" onClick={() => setActiveFilters(new Set())} />}
                 </Box>
             )}
 
