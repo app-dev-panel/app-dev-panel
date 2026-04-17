@@ -1,3 +1,5 @@
+import {joinUrl} from '@app-dev-panel/sdk/Helper/joinUrl';
+
 class ServerSentEvents {
     private eventSource: EventSource | null = null;
     private listeners: ((event: MessageEvent) => void)[] = [];
@@ -74,4 +76,4 @@ class ServerSentEvents {
 }
 
 export const createServerSentEventsObserver = (backendUrl: string) =>
-    new ServerSentEvents(backendUrl.replace(/\/$/, '') + '/debug/api/event-stream');
+    new ServerSentEvents(joinUrl(backendUrl, '/debug/api/event-stream'));

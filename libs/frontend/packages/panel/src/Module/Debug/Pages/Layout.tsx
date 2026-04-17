@@ -32,6 +32,7 @@ import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {joinUrl} from '@app-dev-panel/sdk/Helper/joinUrl';
 import {Alert, AlertTitle, Box, LinearProgress} from '@mui/material';
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
@@ -164,7 +165,7 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
                 return (
                     <React.Suspense fallback={`Loading`}>
                         <ModuleLoader
-                            url={baseUrl + data.url}
+                            url={joinUrl(baseUrl, data.url)}
                             module={data.module}
                             scope={data.scope}
                             props={{data: data.data}}

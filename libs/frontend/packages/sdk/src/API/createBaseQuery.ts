@@ -1,3 +1,4 @@
+import {joinUrl} from '@app-dev-panel/sdk/Helper/joinUrl';
 import {BaseQueryFn, FetchArgs, FetchBaseQueryError, retry} from '@reduxjs/toolkit/query';
 import {fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 
@@ -15,7 +16,7 @@ export const createBaseQuery = (
             const selectedService = state.application?.selectedService ?? 'local';
 
             const rawBaseQuery = fetchBaseQuery({
-                baseUrl: baseUrl.replace(/\/$/, '') + baseUrlAdditional,
+                baseUrl: joinUrl(baseUrl, baseUrlAdditional),
                 referrerPolicy: 'no-referrer',
                 headers: {Accept: 'application/json', 'Content-Type': 'application/json'},
             });

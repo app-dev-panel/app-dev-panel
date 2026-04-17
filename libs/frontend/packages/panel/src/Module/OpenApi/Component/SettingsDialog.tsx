@@ -1,5 +1,6 @@
 import {addApiEntry, deleteApiEntry, useOpenApiEntries} from '@app-dev-panel/panel/Module/OpenApi/Context/Context';
 import {useSelector} from '@app-dev-panel/panel/store';
+import {joinUrl} from '@app-dev-panel/sdk/Helper/joinUrl';
 import {Close, Remove} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import {
@@ -24,7 +25,7 @@ import {useDispatch} from 'react-redux';
 type SettingsDialogProps = {onClose: () => void};
 export const SettingsDialog = (props: SettingsDialogProps) => {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
-    const [selectedEntry, setSelectedEntry] = React.useState(baseUrl + '/docs/openapi.json');
+    const [selectedEntry, setSelectedEntry] = React.useState(joinUrl(baseUrl, '/docs/openapi.json'));
     const dispatch = useDispatch();
 
     const apiEntries = useOpenApiEntries();
