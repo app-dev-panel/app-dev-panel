@@ -29,7 +29,7 @@ final class LoggerDecorator implements LoggerInterface
             'level' => (string) $level,
             'message' => $message,
             'context' => $context,
-        ])->asJson(false, 1));
+        ])->asJson(false, 5));
         $this->decorated->log($level, $message, $context);
     }
 }
