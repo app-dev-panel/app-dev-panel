@@ -22,12 +22,16 @@ final class FixtureRunner
         private readonly string $baseUrl,
         int $retryDelayMs = 200,
         int $maxRetries = 10,
-        int $timeoutSeconds = 30,
+        int $timeoutSeconds = 10,
     ) {
+        // Hard cap: never raise. If a test needs more, the test is broken.
+        $timeoutSeconds = max(1, min($timeoutSeconds, 15));
         $this->client = new Client([
             'base_uri' => rtrim($this->baseUrl, '/'),
             'http_errors' => false,
             'timeout' => $timeoutSeconds,
+            'connect_timeout' => min(5, $timeoutSeconds),
+            'read_timeout' => $timeoutSeconds,
         ]);
         $this->evaluator = new ExpectationEvaluator();
         $this->collectorResolver = new CollectorDataResolver();

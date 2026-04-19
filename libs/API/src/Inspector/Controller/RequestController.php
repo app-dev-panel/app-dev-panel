@@ -40,7 +40,7 @@ final class RequestController
 
         $this->validateHost($parsedRequest->getUri()->getHost());
 
-        $client = new Client();
+        $client = new Client(['timeout' => 15, 'connect_timeout' => 5]);
         $response = $client->send($parsedRequest);
 
         $result = VarDumper::create($response)->asPrimitives();

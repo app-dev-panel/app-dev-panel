@@ -16,6 +16,9 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 {
     private const float START_TIMEOUT = 15.0;
     private const int PROTOCOL_VERSION = 2;
+    // Hard caps — never raise. If an agent needs longer, the agent is the problem.
+    private const int SESSION_START_TIMEOUT = 30;
+    private const int MAX_PROMPT_TIMEOUT = 30;
 
     public function __construct(
         private readonly string $storagePath,
@@ -156,8 +159,8 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
         fwrite($socket, $request . "\n");
 
-        // Agent spawn + initialize can take a while
-        stream_set_timeout($socket, 60);
+        // Agent spawn + initialize can take a while, capped at 50s.
+        stream_set_timeout($socket, self::SESSION_START_TIMEOUT);
         $responseLine = fgets($socket);
         fclose($socket);
 
@@ -258,7 +261,7 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
         fwrite($socket, $request . "\n");
 
-        stream_set_timeout($socket, (int) $timeout + 10);
+        stream_set_timeout($socket, min((int) $timeout + 10, self::MAX_PROMPT_TIMEOUT));
         $responseLine = fgets($socket);
         fclose($socket);
 

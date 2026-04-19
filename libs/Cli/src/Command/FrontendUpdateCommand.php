@@ -159,6 +159,7 @@ final class FrontendUpdateCommand extends Command
                 'User-Agent' => 'ADP-CLI',
             ],
             RequestOptions::TIMEOUT => 10,
+            RequestOptions::CONNECT_TIMEOUT => 5,
         ]);
 
         return json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
@@ -186,7 +187,8 @@ final class FrontendUpdateCommand extends Command
                     'Accept' => 'application/octet-stream',
                     'User-Agent' => 'ADP-CLI',
                 ],
-                RequestOptions::TIMEOUT => 120,
+                RequestOptions::TIMEOUT => 30,
+                RequestOptions::CONNECT_TIMEOUT => 5,
             ]);
 
             if (!is_dir($path)) {
