@@ -10,19 +10,43 @@ final class MailerAction extends Action
 {
     public function run(): array
     {
-        // Send a real email via Yii's mailer — the Module hooks into
-        // BaseMailer::EVENT_AFTER_SEND and feeds email metadata to MailerCollector.
         $mailer = \Yii::$app->mailer;
-        $message = $mailer
+
+        $plain = $mailer
             ->compose()
             ->setFrom('noreply@example.com')
             ->setTo('user@example.com')
-            ->setSubject('ADP Test Fixture Email')
-            ->setTextBody('This is a test email from the ADP mailer fixture.')
-            ->setHtmlBody('<p>This is a test email from the ADP mailer fixture.</p>');
+            ->setSubject('ADP fixture — plain text')
+            ->setTextBody("Hello!\n\nThis is a plain-text email sent from the ADP Yii 2 fixture.\n\nCheers,\nADP");
 
-        $message->send();
+        $table = $mailer
+            ->compose()
+            ->setFrom('noreply@example.com')
+            ->setTo('user@example.com')
+            ->setSubject('ADP fixture — HTML table report')
+            ->setTextBody("Weekly report:\n- Requests: 1240\n- Errors: 12\n- Avg response: 84ms")
+            ->setHtmlBody(MailerFixtureContent::tableHtml());
 
-        return ['fixture' => 'mailer:basic', 'status' => 'ok'];
+        $rich = $mailer
+            ->compose()
+            ->setFrom('noreply@example.com')
+            ->setTo('user@example.com')
+            ->setSubject('ADP fixture — newsletter with attachments')
+            ->setTextBody('Please see the attached TXT and PDF files.')
+            ->setHtmlBody(MailerFixtureContent::newsletterHtml())
+            ->attachContent(
+                MailerFixtureContent::textAttachment(),
+                ['fileName' => 'release-notes.txt', 'contentType' => 'text/plain'],
+            )
+            ->attachContent(
+                MailerFixtureContent::pdfAttachment(),
+                ['fileName' => 'adp-fixture.pdf', 'contentType' => 'application/pdf'],
+            );
+
+        $plain->send();
+        $table->send();
+        $rich->send();
+
+        return ['fixture' => 'mailer:basic', 'status' => 'ok', 'sent' => 3];
     }
 }
