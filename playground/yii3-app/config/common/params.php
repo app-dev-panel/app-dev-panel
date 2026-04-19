@@ -34,6 +34,13 @@ return [
 
     'application' => require __DIR__ . '/application.php',
 
+    'locale' => [
+        'locales' => [
+            'en' => 'en-US',
+            'de' => 'de-DE',
+        ],
+    ],
+
     'yiisoft/aliases' => [
         'aliases' => require __DIR__ . '/aliases.php',
     ],

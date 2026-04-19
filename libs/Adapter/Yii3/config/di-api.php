@@ -81,6 +81,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
+use Psr\Log\LoggerInterface;
 use Yiisoft\Aliases\Aliases;
 
 /** @var array $params */
@@ -292,8 +293,9 @@ return [
 
     TranslationController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
+        LoggerInterface $logger,
         ContainerInterface $container,
-    ) => new TranslationController($jsonResponseFactory, null, $container),
+    ) => new TranslationController($jsonResponseFactory, $logger, $container, $params),
 
     CommandController::class => static function (
         JsonResponseFactoryInterface $jsonResponseFactory,
