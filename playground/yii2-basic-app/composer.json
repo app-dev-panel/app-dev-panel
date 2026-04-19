@@ -8,7 +8,9 @@
         "app-dev-panel/adapter-yii2": "*",
         "nyholm/psr7": "^1.8",
         "nyholm/psr7-server": "^1.1",
-        "yiisoft/yii2": "^2.0.50",
+        "yidas/yii2-composer-bower-skip": "^2.0",
+        "yiisoft/yii2": "~2.0.54",
+        "yiisoft/yii2-queue": "~2.3.8",
         "yiisoft/yii2-symfonymailer": "^4.0",
         "zircote/swagger-php": "^4.0"
     },

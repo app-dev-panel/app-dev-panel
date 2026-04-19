@@ -9,7 +9,7 @@ return [
     'name' => 'ADP Yii 2 Playground',
     'basePath' => dirname(__DIR__) . '/src',
     'runtimePath' => dirname(__DIR__) . '/runtime',
-    'bootstrap' => ['app-dev-panel', 'log', \App\bootstrap\DatabaseBootstrap::class],
+    'bootstrap' => ['app-dev-panel', 'log', 'queue', \App\bootstrap\DatabaseBootstrap::class],
     'controllerNamespace' => 'App\\controllers',
     'params' => $params,
 
@@ -92,6 +92,14 @@ return [
             'class' => \yii\symfonymailer\Mailer::class,
             'useFileTransport' => true,
             'fileTransportPath' => '@runtime/mail',
+        ],
+        'cache' => [
+            'class' => \yii\caching\FileCache::class,
+            'cachePath' => '@runtime/cache',
+        ],
+        'queue' => [
+            'class' => \yii\queue\sync\Queue::class,
+            'handle' => true,
         ],
     ],
 

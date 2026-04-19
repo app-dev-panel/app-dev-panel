@@ -21,6 +21,7 @@
         "symfony/console": "^7.4.0",
         "yiisoft/aliases": "^3.1.1",
         "yiisoft/assets": "^5.1.2",
+        "yiisoft/cache": "^3.2",
         "yiisoft/config": "^1.6.2",
         "yiisoft/csrf": "^2.2.3",
         "yiisoft/data-response": "^2.2.0",

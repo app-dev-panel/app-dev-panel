@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1d447b9f8aea111526777a31fef15307",
+    "content-hash": "12071717bd44a67607e83d6821c8b72b",
     "packages": [
         {
             "name": "alexkart/curl-builder",
@@ -55,7 +55,7 @@
         },
         {
             "name": "app-dev-panel/adapter-yii3",
-            "version": "dev-claude/add-openapi-swagger-uhmpM",
+            "version": "dev-claude/add-elasticsearch-redis-623Nx",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Adapter/Yii3",
@@ -173,7 +173,7 @@
         },
         {
             "name": "app-dev-panel/api",
-            "version": "dev-claude/add-openapi-swagger-uhmpM",
+            "version": "dev-claude/add-elasticsearch-redis-623Nx",
             "dist": {
                 "type": "path",
                 "url": "../../libs/API",
@@ -252,11 +252,11 @@
         },
         {
             "name": "app-dev-panel/cli",
-            "version": "dev-claude/add-openapi-swagger-uhmpM",
+            "version": "dev-claude/add-elasticsearch-redis-623Nx",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Cli",
-                "reference": "cf351e47fd7e13960c0ec31290a44c6018a895d1"
+                "reference": "726d3259f708ad0cc9c689edd069a599eb01e115"
             },
             "require": {
                 "app-dev-panel/api": "*",
@@ -269,6 +269,9 @@
                 "symfony/console": "^6.4|^7.0|^8.0",
                 "symfony/process": "^6.4|^7.0|^8.0"
             },
+            "bin": [
+                "bin/adp"
+            ],
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -312,25 +315,25 @@
         },
         {
             "name": "app-dev-panel/kernel",
-            "version": "dev-claude/add-openapi-swagger-uhmpM",
+            "version": "dev-claude/add-elasticsearch-redis-623Nx",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Kernel",
-                "reference": "5ba6139a3914137d63ccac12dbc9935b1b791262"
+                "reference": "76f3e8de024b4ec8478dfa2202d8b402c1e69406"
             },
             "require": {
                 "ext-mbstring": "*",
                 "guzzlehttp/psr7": "^2.4",
-                "php": "^8.2",
+                "php": "^8.4",
                 "psr/container": "^2.0",
                 "psr/event-dispatcher": "^1.0",
                 "psr/http-client": "^1.0",
                 "psr/http-message": "^1.0|^2.0",
                 "psr/log": "^1.0|^2.0|^3.0",
+                "psr/simple-cache": "^3.0",
                 "symfony/console": "^6.0|^7.0|^8.0",
                 "symfony/var-dumper": "^6.4|^7.0|^8.0",
                 "yiisoft/files": "^2.0",
-                "yiisoft/json": "^1.0",
                 "yiisoft/strings": "^2.2",
                 "yiisoft/var-dumper": "^1.7"
             },
@@ -384,7 +387,7 @@
         },
         {
             "name": "app-dev-panel/mcp-server",
-            "version": "dev-claude/add-openapi-swagger-uhmpM",
+            "version": "dev-claude/add-elasticsearch-redis-623Nx",
             "dist": {
                 "type": "path",
                 "url": "../../libs/McpServer",
