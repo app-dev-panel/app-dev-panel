@@ -51,7 +51,8 @@ src/
 │   └── View/
 │       └── ViewEventListener.php
 ├── Inspector/
-│   └── DbSchemaProvider.php             # Database schema via Yiisoft DB
+│   ├── DbSchemaProvider.php             # Database schema via Yiisoft DB
+│   └── Yii3AuthorizationConfigProvider.php  # Live auth config via RBAC/User/Auth (all optional)
 ├── Proxy/
 │   ├── ContainerInterfaceProxy.php      # PSR-11 container proxy
 │   ├── ContainerProxyConfig.php
@@ -129,6 +130,19 @@ DebugHeaders → ToolbarMiddleware → ErrorCatcher → YiiApiMiddleware → Ses
 ```
 
 `DebugHeaders` must be outermost (before `ErrorCatcher`) to attach the debug ID even on error responses. `ToolbarMiddleware` must be after `DebugHeaders` (needs the debug ID) and before `ErrorCatcher` so the toolbar appears even on error pages. `YiiApiMiddleware` must be before `Router` to intercept API requests early.
+
+## Inspector
+
+`GET /inspect/api/authorization` is served by `Yii3AuthorizationConfigProvider`, wired in `config/di-api.php`. It introspects the DI container for optional Yii packages — if a package is absent, its section is empty rather than producing an error.
+
+| Section | Source |
+|---------|--------|
+| `guards` | `Yiisoft\Auth\AuthenticationMethodInterface` + concrete `HttpBasic`/`HttpBearer`/`HttpHeader`/`QueryParam`/`Composite` (yiisoft/auth). Deduplicated across the interface id and concrete class. |
+| `roleHierarchy` | `Yiisoft\Rbac\ItemsStorageInterface::getAll()` / `getChildren()` (yiisoft/rbac) — map `role name → list of child role names`. |
+| `voters` | `Yiisoft\Access\AccessCheckerInterface` (yiisoft/access) entry plus every rule returned by `Yiisoft\Rbac\RulesStorageInterface::getAll()`. |
+| `config` | `user`, `rbac`, `auth` subtrees of `app-dev-panel/yii3` params; plus live `CurrentUser` snapshot (`isGuest`, `id`) when `Yiisoft\User\CurrentUser` is in the container. |
+
+All four packages (`yiisoft/rbac`, `yiisoft/user`, `yiisoft/auth`, `yiisoft/access`) are declared in `composer.json` `suggest` — the adapter works without them, the inspector just renders an empty section.
 
 ## Configuration (`params.php`)
 
