@@ -70,6 +70,12 @@
         "yiisoft/yii-console": "^2.0",
         "yiisoft/yii-http": "^1.0"
     },
+    "suggest": {
+        "yiisoft/rbac": "Required for role/permission hierarchy in the Authorization inspector",
+        "yiisoft/user": "Required to show current identity and guest state in the Authorization inspector",
+        "yiisoft/auth": "Required to list configured authentication methods (guards) in the Authorization inspector",
+        "yiisoft/access": "Required to list the active access checker in the Authorization inspector"
+    },
     "repositories": [
         {
             "type": "path",

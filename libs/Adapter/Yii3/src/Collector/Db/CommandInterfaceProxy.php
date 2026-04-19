@@ -8,9 +8,10 @@ use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use Closure;
 use Throwable;
 use Yiisoft\Db\Command\CommandInterface;
-use Yiisoft\Db\Query\Data\DataReaderInterface;
+use Yiisoft\Db\Expression\ExpressionInterface;
+use Yiisoft\Db\Query\DataReaderInterface;
 use Yiisoft\Db\Query\QueryInterface;
-use Yiisoft\Db\Schema\Builder\ColumnInterface;
+use Yiisoft\Db\Schema\Column\ColumnInterface;
 
 final class CommandInterfaceProxy implements CommandInterface
 {
@@ -24,7 +25,7 @@ final class CommandInterfaceProxy implements CommandInterface
         return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
     }
 
-    public function addColumn(string $table, string $column, string $type): static
+    public function addColumn(string $table, string $column, ColumnInterface|string $type): static
     {
         return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
     }
@@ -71,7 +72,7 @@ final class CommandInterfaceProxy implements CommandInterface
         return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
     }
 
-    public function batchInsert(string $table, array $columns, iterable $rows): static
+    public function insertBatch(string $table, iterable $rows, array $columns = []): static
     {
         return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
     }
@@ -171,7 +172,7 @@ final class CommandInterfaceProxy implements CommandInterface
         return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
     }
 
-    public function dropTable(string $table): static
+    public function dropTable(string $table, bool $ifExists = false, bool $cascade = false): static
     {
         return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
     }
@@ -222,7 +223,7 @@ final class CommandInterfaceProxy implements CommandInterface
         return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
     }
 
-    public function insertWithReturningPks(string $table, array $columns): bool|array
+    public function insertReturningPks(string $table, array|QueryInterface $columns): array
     {
         return $this->decorated->{__FUNCTION__}(...func_get_args());
     }
@@ -348,17 +349,53 @@ final class CommandInterfaceProxy implements CommandInterface
         return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
     }
 
-    public function update(string $table, array $columns, array|string $condition = '', array $params = []): static
-    {
+    public function update(
+        string $table,
+        array $columns,
+        array|ExpressionInterface|string $condition = '',
+        array|ExpressionInterface|string|null $from = null,
+        array $params = [],
+    ): static {
         return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
     }
 
     public function upsert(
         string $table,
-        QueryInterface|array $insertColumns,
-        bool|array $updateColumns = true,
-        array $params = [],
+        array|QueryInterface $insertColumns,
+        array|bool $updateColumns = true,
     ): static {
+        return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
+    }
+
+    public function upsertReturning(
+        string $table,
+        array|QueryInterface $insertColumns,
+        array|bool $updateColumns = true,
+        ?array $returnColumns = null,
+    ): array {
+        return $this->decorated->{__FUNCTION__}(...func_get_args());
+    }
+
+    public function upsertReturningPks(
+        string $table,
+        array|QueryInterface $insertColumns,
+        array|bool $updateColumns = true,
+    ): array {
+        return $this->decorated->{__FUNCTION__}(...func_get_args());
+    }
+
+    public function withDbTypecasting(bool $dbTypecasting = true): static
+    {
+        return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
+    }
+
+    public function withPhpTypecasting(bool $phpTypecasting = true): static
+    {
+        return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
+    }
+
+    public function withTypecasting(bool $typecasting = true): static
+    {
         return new self($this->decorated->{__FUNCTION__}(...func_get_args()), $this->collector);
     }
 

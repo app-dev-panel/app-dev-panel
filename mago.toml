@@ -219,6 +219,8 @@ too-many-methods = { level = "warning", exclude = [
     "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php",
     "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php",
     "libs/Adapter/Yii2/src/Module.php",
+    # Config providers — method count from introspecting framework internals
+    "libs/Adapter/Yii3/src/Inspector/Yii3AuthorizationConfigProvider.php",
     # Config value object — getters and withers for each config property
     "libs/Adapter/Yii3/src/Proxy/ContainerProxyConfig.php",
     # Recursive tree-walking dumper — method count inherent to object/array/resource type dispatch
@@ -263,6 +265,7 @@ cyclomatic-complexity = { level = "warning", threshold = 15, exclude = [
     "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php",
     "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php",
     "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php",
+    "libs/Adapter/Yii3/src/Inspector/Yii3AuthorizationConfigProvider.php",
     # CLI commands — complexity from multiple subcommands and output formatting
     "libs/Cli/src/Command/DebugQueryCommand.php",
     "libs/Adapter/Yii2/src/Controller/DebugQueryController.php",
@@ -288,6 +291,7 @@ kan-defect = { level = "warning", exclude = [
     "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php",
     "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php",
     "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php",
+    "libs/Adapter/Yii3/src/Inspector/Yii3AuthorizationConfigProvider.php",
     # CLI commands — high defect score from multiple subcommands
     "libs/Cli/src/Command/DebugQueryCommand.php",
     "libs/Adapter/Yii2/src/Controller/DebugQueryController.php",

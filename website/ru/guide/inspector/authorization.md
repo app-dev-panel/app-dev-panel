@@ -28,8 +28,16 @@ title: Инспектор авторизации
 | Адаптер | Провайдер |
 |---------|-----------|
 | Symfony | <class>AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider</class> (читает конфигурацию `security.yaml`) |
+| Yii 3 | <class>AppDevPanel\Adapter\Yii3\Inspector\Yii3AuthorizationConfigProvider</class> (читает сервисы RBAC / User / Auth / Access) |
 | Другие | <class>AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider</class> (возвращает пустое значение) |
 
 ::: info
-Инспекция авторизации требует интеграции, специфичной для фреймворка. В настоящее время только адаптер Symfony предоставляет полную интроспекцию конфигурации безопасности.
+Инспекция авторизации требует интеграции, специфичной для фреймворка. Провайдер для Yii 3 устанавливается автоматически вместе с `app-dev-panel/adapter-yii3`. Каждый раздел заполняется только при наличии соответствующего пакета Yii в контейнере (все опциональны и перечислены в `suggest` в `composer.json` адаптера):
+
+| Раздел | Необходимый пакет |
+|--------|-------------------|
+| Guards | `yiisoft/auth` |
+| Иерархия ролей | `yiisoft/rbac` |
+| Voters | `yiisoft/access` и/или `yiisoft/rbac` |
+| Конфигурация безопасности / текущий пользователь | `yiisoft/user` |
 :::

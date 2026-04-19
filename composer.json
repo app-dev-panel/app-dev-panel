@@ -97,7 +97,7 @@
     "yiisoft/assets": "^4.0",
     "yiisoft/cache": "^3.2",
     "yiisoft/config": "^1.3",
-    "yiisoft/db-sqlite": "^1.2",
+    "yiisoft/db-sqlite": "^2.0",
     "yiisoft/di": "^1.0",
     "yiisoft/error-handler": "^4.3",
     "yiisoft/event-dispatcher": "^1.1",

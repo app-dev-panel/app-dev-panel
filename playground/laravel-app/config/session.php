@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 return [
-    'driver' => 'array',
+    'driver' => 'file',
     'lifetime' => 120,
     'expire_on_close' => false,
     'encrypt' => false,

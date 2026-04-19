@@ -160,10 +160,10 @@ php yii dev:broadcast -m "Test message"
 Manages the SSE connection lifecycle. Creates an `EventSource` to `/debug/api/event-stream` and dispatches incoming events to the callback.
 
 ```typescript
-useServerSentEvents(backendUrl, onUpdatesHandler, autoLatest);
+useServerSentEvents(backendUrl, onUpdatesHandler);
 ```
 
-The hook reconnects automatically when `backendUrl` changes. The `subscribe` flag (controlled by the `autoLatest` toggle) controls whether the connection is active.
+The hook reconnects automatically when `backendUrl` changes. The connection is always active so the Live Feed receives events independently of the `autoLatest` entry-list toggle.
 
 ### SSE Event Types
 

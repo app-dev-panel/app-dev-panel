@@ -10,7 +10,7 @@ use AppDevPanel\Kernel\Collector\TimelineCollector;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Yiisoft\Db\Command\CommandInterface;
-use Yiisoft\Db\Query\Data\DataReaderInterface;
+use Yiisoft\Db\Query\DataReaderInterface;
 
 final class CommandInterfaceProxyTest extends TestCase
 {
