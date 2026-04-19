@@ -359,6 +359,7 @@ final class FixtureRegistry
             new Fixture(name: 'coverage:basic', endpoint: '/test/fixtures/coverage', expectations: [
                 'coverage' => [
                     Expectation::exists(),
+                    Expectation::summaryHasKey('codeCoverage'),
                 ],
             ]),
 
