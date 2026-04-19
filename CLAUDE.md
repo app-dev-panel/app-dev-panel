@@ -1,5 +1,36 @@
 # ADP — Application Development Panel
 
+## Zero Tolerance — Skipped, Risky, Deprecated, Warning Tests Are FAILURES
+
+A passing `.` is the only acceptable result. **Every** other PHPUnit marker — `S` (skipped),
+`I` (incomplete), `R` (risky), `D` (deprecation), `N` (notice), `W` (warning) — is a FAIL.
+All `phpunit.xml.dist` files set these attributes to `true` and they **must never be flipped off**:
+
+```
+failOnRisky, failOnWarning, failOnNotice, failOnDeprecation,
+failOnPhpunitDeprecation, failOnPhpunitWarning,
+failOnIncomplete, failOnSkipped, failOnEmptyTestSuite,
+beStrictAboutOutputDuringTests,
+beStrictAboutTestsThatDoNotTestAnything,
+beStrictAboutChangesToGlobalState
+```
+
+Rules:
+- **Never** call `markTestSkipped()`, `markTestIncomplete()`, or `$this->expectDeprecation*()` as a
+  way to make a red test green. If the dependency/extension/environment is missing, either (a) mock
+  it, (b) make it a required dev-dep, or (c) delete the test. Skipping is not an option.
+- **Never** downgrade the fail flags above in any `phpunit.xml*` file. Not even temporarily.
+- **Never** write tests that depend on ambient state (network, env vars, filesystem) without a mock.
+  Ambient-state tests are the reason we used to see `S` markers — they are banned.
+- **Any** PHP warning, notice, or deprecation raised during a test must fail the test. The listed
+  attributes enforce this for the PHPUnit process. For HTTP E2E tests against playground servers,
+  the playground entry points install a strict error handler that converts warnings/notices into
+  `ErrorException`, turning them into HTTP 500s that fail the fixture assertion.
+- CI runs the suite **once**, with coverage on the primary matrix cell (ubuntu-latest / PHP 8.4)
+  and without coverage on the rest. Never add a second "run tests without coverage" step.
+
+If you see yourself reaching for `markTestSkipped`, stop and ask for help writing a proper mock.
+
 ## Hard Timeouts — NEVER RAISE
 
 The test infrastructure is aggressively time-boxed so that nothing — PHPUnit, Vitest, fixtures,
