@@ -29,8 +29,16 @@ Inspect the security and authorization configuration of your application.
 | Adapter | Provider |
 |---------|----------|
 | Symfony | <class>AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider</class> (reads `security.yaml` config) |
+| Yii 3 | <class>AppDevPanel\Adapter\Yii3\Inspector\Yii3AuthorizationConfigProvider</class> (reads RBAC / User / Auth / Access services) |
 | Others | <class>AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider</class> (returns empty) |
 
 ::: info
-Authorization inspection requires framework-specific integration. Currently, only the Symfony adapter provides full security config introspection.
+Authorization inspection requires framework-specific integration. The Yii 3 provider is installed automatically with `app-dev-panel/adapter-yii3`. Each section is filled in only when the corresponding Yii package is present in the container (all optional, listed under `suggest` in the adapter's `composer.json`):
+
+| Section | Required package |
+|---------|------------------|
+| Guards | `yiisoft/auth` |
+| Role hierarchy | `yiisoft/rbac` |
+| Voters | `yiisoft/access` and/or `yiisoft/rbac` |
+| Security config / current user | `yiisoft/user` |
 :::

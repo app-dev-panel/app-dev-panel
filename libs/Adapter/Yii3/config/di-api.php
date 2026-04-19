@@ -11,6 +11,7 @@ use AppDevPanel\Adapter\Yii3\Api\AliasPathResolver;
 use AppDevPanel\Adapter\Yii3\Api\ToolbarMiddleware;
 use AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware;
 use AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider;
+use AppDevPanel\Adapter\Yii3\Inspector\Yii3AuthorizationConfigProvider;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
@@ -23,7 +24,6 @@ use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Ingestion\Controller\OtlpController;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
@@ -81,6 +81,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
+use Psr\Log\LoggerInterface;
 use Yiisoft\Aliases\Aliases;
 
 /** @var array $params */
@@ -101,6 +102,11 @@ $authToken = $apiConfig['authToken'] ?? '';
 $inspectorUrl = $apiConfig['inspectorUrl'] ?? null;
 
 return [
+    // Alias so framework-agnostic inspector controllers can fetch the merged config
+    // via $container->has('config') / get('config'). Yii 3 registers the merged
+    // configuration under ConfigInterface::class; expose the same object under 'config'.
+    'config' => static fn(\Yiisoft\Config\ConfigInterface $config) => $config,
+
     // PSR-17 factories
     RequestFactoryInterface::class => static fn() => new HttpFactory(),
     ResponseFactoryInterface::class => static fn() => new HttpFactory(),
@@ -146,8 +152,16 @@ return [
         SchemaProviderInterface $schemaProvider,
     ) => new DatabaseController($jsonResponseFactory, $schemaProvider),
 
-    // Authorization provider
-    AuthorizationConfigProviderInterface::class => static fn() => new NullAuthorizationConfigProvider(),
+    // Authorization provider — wires Yii's RBAC/User/Auth services when available,
+    // falls back to the no-op provider when the whole `app-dev-panel/yii3` params subtree
+    // and none of the optional packages (yiisoft/rbac, yiisoft/user, yiisoft/auth,
+    // yiisoft/access) are present.
+    AuthorizationConfigProviderInterface::class => static function (ContainerInterface $container) use (
+        $params,
+    ): AuthorizationConfigProviderInterface {
+        $yii3Params = $params['app-dev-panel/yii3'] ?? [];
+        return new Yii3AuthorizationConfigProvider($container, is_array($yii3Params) ? $yii3Params : []);
+    },
 
     // Authorization controller
     AuthorizationController::class => static fn(
@@ -292,8 +306,9 @@ return [
 
     TranslationController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
+        LoggerInterface $logger,
         ContainerInterface $container,
-    ) => new TranslationController($jsonResponseFactory, null, $container),
+    ) => new TranslationController($jsonResponseFactory, $logger, $container, $params),
 
     CommandController::class => static function (
         JsonResponseFactoryInterface $jsonResponseFactory,
@@ -304,9 +319,19 @@ return [
         return new CommandController($jsonResponseFactory, $pathResolver, $container, $commandMap);
     },
 
-    RoutingController::class => static fn(JsonResponseFactoryInterface $jsonResponseFactory) => new RoutingController(
-        $jsonResponseFactory,
-    ),
+    RoutingController::class => static function (
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        ContainerInterface $container,
+    ): RoutingController {
+        $routeCollection = $container->has(\Yiisoft\Router\RouteCollectionInterface::class)
+            ? $container->get(\Yiisoft\Router\RouteCollectionInterface::class)
+            : null;
+        $urlMatcher = $container->has(\Yiisoft\Router\UrlMatcherInterface::class)
+            ? $container->get(\Yiisoft\Router\UrlMatcherInterface::class)
+            : null;
+
+        return new RoutingController($jsonResponseFactory, $routeCollection, $urlMatcher);
+    },
 
     RequestController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
