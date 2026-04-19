@@ -4,59 +4,42 @@ declare(strict_types=1);
 
 namespace App\Web\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\CacheCollector;
-use AppDevPanel\Kernel\Collector\CacheOperationRecord;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\SimpleCache\CacheInterface;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
 
+/**
+ * Exercises the PSR-16 cache. The injected CacheInterface is transparently
+ * decorated by Psr16CacheProxy (Yii3 adapter) — every operation feeds the
+ * CacheCollector without touching collector APIs here.
+ */
 final readonly class CacheAction implements RequestHandlerInterface
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-        private CacheCollector $cacheCollector,
+        private CacheInterface $cache,
     ) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        // Simulate cache operations by calling the collector directly.
-        // This tests the CacheCollector without requiring a real PSR-16 cache backend.
+        $payload = ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'];
 
-        // 1. SET a key with value
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'set',
-            key: 'user:42',
-            duration: 0.001,
-            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
-        ));
+        // 1. SET a key with value.
+        $this->cache->set('user:42', $payload);
 
-        // 2. GET a key (cache hit) — returns value
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'get',
-            key: 'user:42',
-            hit: true,
-            duration: 0.0005,
-            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
-        ));
+        // 2. GET an existing key (cache hit).
+        $this->cache->get('user:42');
 
-        // 3. GET a key (cache miss) — no value
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'get',
-            key: 'user:99',
-            duration: 0.0003,
-        ));
+        // 3. GET a missing key (cache miss).
+        $this->cache->get('user:99');
 
-        // 4. DELETE a key
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'delete',
-            key: 'user:42',
-            duration: 0.0002,
-        ));
+        // 4. HAS check.
+        $this->cache->has('user:42');
+
+        // 5. DELETE the key.
+        $this->cache->delete('user:42');
 
         return $this->responseFactory->createResponse(['fixture' => 'cache:basic', 'status' => 'ok']);
     }

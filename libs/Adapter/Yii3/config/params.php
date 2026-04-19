@@ -52,10 +52,12 @@ use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
+use AppDevPanel\Kernel\Proxy\Psr16CacheProxy;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\CacheInterface as Psr16CacheInterface;
 use Yiisoft\Assets\AssetLoaderInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Injector\Injector;
@@ -122,6 +124,10 @@ return [
             AssetLoaderInterface::class => [AssetLoaderInterfaceProxy::class, AssetBundleCollector::class],
             ConnectionInterface::class => [ConnectionInterfaceProxy::class, DatabaseCollector::class],
             YiisoftMailerInterface::class => [MailerInterfaceProxy::class, MailerCollector::class],
+            // PSR-16 SimpleCache decorator — framework-neutral. Intercepts any
+            // Psr\SimpleCache\CacheInterface binding (e.g. yiisoft/cache ArrayCache)
+            // and feeds CacheCollector. No pool argument: the default 'default' applies.
+            Psr16CacheInterface::class => [Psr16CacheProxy::class, CacheCollector::class],
         ],
         'dumper.excludedClasses' => [
             'PhpParser\\Parser\\Php7',

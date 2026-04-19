@@ -4,55 +4,49 @@ declare(strict_types=1);
 
 namespace App\Web\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\CacheCollector;
-use AppDevPanel\Kernel\Collector\CacheOperationRecord;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\SimpleCache\CacheInterface;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
 
+/**
+ * Stress fixture: runs 100 real PSR-16 operations through the decorated cache.
+ */
 final readonly class CacheHeavyAction implements RequestHandlerInterface
 {
     public function __construct(
         private DataResponseFactoryInterface $responseFactory,
-        private CacheCollector $cacheCollector,
+        private CacheInterface $cache,
     ) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $pools = ['default', 'sessions', 'metadata'];
         $operations = ['set', 'get', 'get', 'get', 'delete', 'has'];
 
         for ($i = 0; $i < 100; $i++) {
-            $pool = $pools[$i % count($pools)];
             $operation = $operations[$i % count($operations)];
-            $key = sprintf('app:%s:item:%d', $pool, $i);
-            $hit = $operation === 'get' && ($i % 3) !== 0;
+            $key = sprintf('app:item:%d', $i);
 
-            $value = null;
-            if ($operation === 'set') {
-                $value = [
-                    'id' => $i,
-                    'title' => sprintf('Item #%d', $i),
-                    'tags' => ['tag-' . ($i % 5), 'tag-' . ($i % 7)],
-                    'metadata' => ['created_at' => '2026-01-15T10:00:00Z', 'ttl' => 3600],
-                ];
-            } elseif ($operation === 'get' && $hit) {
-                $value = [
-                    'id' => $i,
-                    'title' => sprintf('Item #%d', $i),
-                    'cached' => true,
-                ];
+            switch ($operation) {
+                case 'set':
+                    $this->cache->set($key, [
+                        'id' => $i,
+                        'title' => sprintf('Item #%d', $i),
+                        'tags' => ['tag-' . ($i % 5), 'tag-' . ($i % 7)],
+                        'metadata' => ['created_at' => '2026-01-15T10:00:00Z', 'ttl' => 3600],
+                    ]);
+                    break;
+                case 'get':
+                    $this->cache->get($key);
+                    break;
+                case 'delete':
+                    $this->cache->delete($key);
+                    break;
+                case 'has':
+                    $this->cache->has($key);
+                    break;
             }
-
-            $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-                pool: $pool,
-                operation: $operation,
-                key: $key,
-                hit: $hit,
-                duration: rand(100, 5_000) / 1_000_000,
-                value: $value,
-            ));
         }
 
         return $this->responseFactory->createResponse(['fixture' => 'cache:heavy', 'status' => 'ok']);
