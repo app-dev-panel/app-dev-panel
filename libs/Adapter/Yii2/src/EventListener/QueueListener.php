@@ -114,7 +114,7 @@ final class QueueListener
         }
 
         $id = spl_object_id($job);
-        if (!isset($timers[$id])) {
+        if (!array_key_exists($id, $timers)) {
             return 0.0;
         }
 

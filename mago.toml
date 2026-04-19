@@ -155,6 +155,13 @@ ignore = [
     # in root composer, so Mago infers `never` for unresolved return types.
     "never-return",
 
+    # ── missing-template-parameter (yii2 controllers) ──────────────────────
+    # yii\web\Controller and yii\console\Controller declare `@template T` in Yii
+    # 2.0.54+ but our controllers extend them without supplying the argument.
+    # Adding the argument is not meaningful for DebugXxxController (they never
+    # use the templated model class). Framework-internal typing quirk.
+    "missing-template-parameter",
+
     # ── too-many-arguments (1 issue) ────────────────────────────────────────
     # False positive: dynamic instantiation through `new $class(...)` where the
     # class string is constrained to a `StorageInterface` implementation. The
@@ -202,6 +209,10 @@ too-many-methods = { level = "warning", exclude = [
     "libs/Adapter/Yii3/src/Collector/Db/CommandInterfaceProxy.php",
     "libs/Adapter/Yii3/src/Collector/Db/ConnectionInterfaceProxy.php",
     "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php",
+    # Yii 2 cache proxy — method count dictated by yii\caching\CacheInterface contract
+    "libs/Adapter/Yii2/src/Proxy/CacheProxy.php",
+    # Yii 2 queue listener — one handler per queue event (before/after push/exec/error + helpers)
+    "libs/Adapter/Yii2/src/EventListener/QueueListener.php",
     # Trait centralizes passthrough methods from stream wrapper protocol
     "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php",
     # DI registration / service provider classes — method count driven by number of services to register

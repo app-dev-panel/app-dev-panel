@@ -76,11 +76,11 @@ final class CacheProxy extends Cache
             pool: $this->poolName,
             operation: 'exists',
             key: self::stringifyKey($key),
-            hit: (bool) $result,
+            hit: $result,
             duration: $duration,
         ));
 
-        return (bool) $result;
+        return $result;
     }
 
     public function multiGet($keys): array
@@ -121,7 +121,7 @@ final class CacheProxy extends Cache
             value: $value,
         ));
 
-        return (bool) $result;
+        return $result;
     }
 
     public function multiSet($items, $duration = null, $dependency = null): array
@@ -160,7 +160,7 @@ final class CacheProxy extends Cache
             value: $value,
         ));
 
-        return (bool) $result;
+        return $result;
     }
 
     public function multiAdd($items, $duration = 0, $dependency = null): array
@@ -198,7 +198,7 @@ final class CacheProxy extends Cache
             duration: $elapsed,
         ));
 
-        return (bool) $result;
+        return $result;
     }
 
     public function flush(): bool
@@ -214,13 +214,21 @@ final class CacheProxy extends Cache
             duration: $elapsed,
         ));
 
-        return (bool) $result;
+        return $result;
     }
 
+    /**
+     * @template TResult
+     *
+     * @param callable(self): TResult $callable
+     *
+     * @return TResult
+     */
     public function getOrSet($key, $callable, $duration = null, $dependency = null): mixed
     {
         $value = $this->get($key);
         if ($value !== false) {
+            /** @var TResult */
             return $value;
         }
 
@@ -229,6 +237,7 @@ final class CacheProxy extends Cache
             $this->set($key, $value, $duration, $dependency);
         }
 
+        /** @var TResult */
         return $value;
     }
 
