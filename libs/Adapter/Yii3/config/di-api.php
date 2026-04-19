@@ -12,6 +12,7 @@ use AppDevPanel\Adapter\Yii3\Api\ToolbarMiddleware;
 use AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware;
 use AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider;
 use AppDevPanel\Adapter\Yii3\Inspector\Yii3AuthorizationConfigProvider;
+use AppDevPanel\Adapter\Yii3\Inspector\Yii3ConfigProvider;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
@@ -104,8 +105,10 @@ $inspectorUrl = $apiConfig['inspectorUrl'] ?? null;
 return [
     // Alias so framework-agnostic inspector controllers can fetch the merged config
     // via $container->has('config') / get('config'). Yii 3 registers the merged
-    // configuration under ConfigInterface::class; expose the same object under 'config'.
-    'config' => static fn(\Yiisoft\Config\ConfigInterface $config) => $config,
+    // configuration under ConfigInterface::class; wrap it in Yii3ConfigProvider so
+    // event listener callables (closures, [class, method] tuples) are serialised
+    // into the structured shape the inspector frontend expects.
+    'config' => static fn(\Yiisoft\Config\ConfigInterface $config) => new Yii3ConfigProvider($config),
 
     // PSR-17 factories
     RequestFactoryInterface::class => static fn() => new HttpFactory(),

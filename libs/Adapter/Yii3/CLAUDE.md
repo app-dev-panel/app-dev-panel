@@ -52,7 +52,8 @@ src/
 │       └── ViewEventListener.php
 ├── Inspector/
 │   ├── DbSchemaProvider.php             # Database schema via Yiisoft DB
-│   └── Yii3AuthorizationConfigProvider.php  # Live auth config via RBAC/User/Auth (all optional)
+│   ├── Yii3AuthorizationConfigProvider.php  # Live auth config via RBAC/User/Auth (all optional)
+│   └── Yii3ConfigProvider.php           # Wraps ConfigInterface; normalises events-web listeners for the inspector
 ├── Proxy/
 │   ├── ContainerInterfaceProxy.php      # PSR-11 container proxy
 │   ├── ContainerProxyConfig.php
@@ -132,6 +133,8 @@ DebugHeaders → ToolbarMiddleware → ErrorCatcher → YiiApiMiddleware → Ses
 `DebugHeaders` must be outermost (before `ErrorCatcher`) to attach the debug ID even on error responses. `ToolbarMiddleware` must be after `DebugHeaders` (needs the debug ID) and before `ErrorCatcher` so the toolbar appears even on error pages. `YiiApiMiddleware` must be before `Router` to intercept API requests early.
 
 ## Inspector
+
+`GET /inspect/api/events` is served by `Yii3ConfigProvider`, registered as the `config` alias in `config/di-api.php`. It wraps `Yiisoft\Config\ConfigInterface` and normalises each listener returned by `$config->get('events')` / `$config->get('events-web')` into the shape expected by the frontend Events page: `{name, class, listeners}` where each listener is a `Class::method` string, a `[class, method]` tuple, or a `ClosureDescriptor` array (`{__closure: true, source, file, startLine, endLine}`) so that closures/arrow functions render as syntax-highlighted code blocks. Non-event groups (`params`, `di`, etc.) are delegated to the underlying `ConfigInterface`.
 
 `GET /inspect/api/authorization` is served by `Yii3AuthorizationConfigProvider`, wired in `config/di-api.php`. It introspects the DI container for optional Yii packages — if a package is absent, its section is empty rather than producing an error.
 
