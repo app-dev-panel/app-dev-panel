@@ -23,6 +23,8 @@ export default defineConfig({
             instances: [{browser: 'chromium'}],
         },
         globals: true,
-        testTimeout: 15000,
+        testTimeout: 15_000,
+        hookTimeout: 15_000,
+        teardownTimeout: 5_000,
     },
 });

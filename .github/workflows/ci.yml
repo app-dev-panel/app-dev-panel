@@ -54,13 +54,18 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Run tests
-        run: php vendor/bin/phpunit --testsuite Kernel,API,Cli,McpServer,Adapter-Symfony,Adapter-Yii3,Adapter-Laravel,Adapter-Yii2,Adapter-Cycle --enforce-time-limit --default-time-limit=30
+      # Primary test job.
+      # - On ubuntu-latest / PHP 8.4: run with coverage (single pass, Clover report for PR comment).
+      # - On every other matrix cell: run without coverage.
+      # We never run the suite twice in the same job.
+      - name: Run tests (with coverage on primary matrix cell)
+        run: |
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ] && [ "${{ matrix.php }}" = "8.4" ]; then
+            composer test:coverage
+          else
+            composer test:unit
+          fi
         timeout-minutes: 10
-
-      - name: Run tests with coverage
-        if: matrix.os == 'ubuntu-latest' && matrix.php == '8.4'
-        run: composer test:coverage
 
       - name: Upload coverage artifact
         if: matrix.os == 'ubuntu-latest' && matrix.php == '8.4'
