@@ -186,6 +186,7 @@ export const AnalysePage = ({showHeader = true}: {showHeader?: boolean}) => {
                 {availableCommands.map((command) => (
                     <Box key={command.name} display="flex" alignItems="center">
                         <Button
+                            variant="outlined"
                             onClick={() => runCommand(command)}
                             color={
                                 activeCommand?.name === command.name && commandResponse !== null
