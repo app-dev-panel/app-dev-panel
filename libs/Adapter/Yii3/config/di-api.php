@@ -11,6 +11,7 @@ use AppDevPanel\Adapter\Yii3\Api\AliasPathResolver;
 use AppDevPanel\Adapter\Yii3\Api\ToolbarMiddleware;
 use AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware;
 use AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider;
+use AppDevPanel\Adapter\Yii3\Inspector\Yii3AuthorizationConfigProvider;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
@@ -23,7 +24,6 @@ use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Ingestion\Controller\OtlpController;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
@@ -146,8 +146,16 @@ return [
         SchemaProviderInterface $schemaProvider,
     ) => new DatabaseController($jsonResponseFactory, $schemaProvider),
 
-    // Authorization provider
-    AuthorizationConfigProviderInterface::class => static fn() => new NullAuthorizationConfigProvider(),
+    // Authorization provider — wires Yii's RBAC/User/Auth services when available,
+    // falls back to the no-op provider when the whole `app-dev-panel/yii3` params subtree
+    // and none of the optional packages (yiisoft/rbac, yiisoft/user, yiisoft/auth,
+    // yiisoft/access) are present.
+    AuthorizationConfigProviderInterface::class => static function (ContainerInterface $container) use (
+        $params,
+    ): AuthorizationConfigProviderInterface {
+        $yii3Params = $params['app-dev-panel/yii3'] ?? [];
+        return new Yii3AuthorizationConfigProvider($container, is_array($yii3Params) ? $yii3Params : []);
+    },
 
     // Authorization controller
     AuthorizationController::class => static fn(
