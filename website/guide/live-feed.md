@@ -39,7 +39,7 @@ Variable dumps are broadcast via the `VarDumperHandler` whenever your applicatio
 
 ## How It Works
 
-The Live Feed uses the same SSE connection as the auto-refresh feature. When the `autoLatest` toggle is enabled in the top bar, the panel connects to `/debug/api/event-stream` and listens for:
+The panel always connects to `/debug/api/event-stream` and listens for:
 
 | SSE Event Type | Source | Description |
 |----------------|--------|-------------|
@@ -66,5 +66,4 @@ Click the **trash icon** in the drawer header to clear all accumulated events. T
 ## Requirements
 
 - The **sockets** PHP extension must be installed for live event streaming
-- The `autoLatest` toggle must be enabled (the sync icon in the top bar should be green)
 - Your application must use the `LoggerDecorator` and/or `VarDumperHandler` proxies (automatically configured by adapters)

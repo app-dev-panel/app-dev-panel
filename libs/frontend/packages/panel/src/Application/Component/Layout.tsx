@@ -312,7 +312,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         },
         [getDebugQuery, changeEntry, dispatch],
     );
-    useServerSentEvents(backendUrl, onUpdatesHandler, autoLatest);
+    // Always subscribe so the Live Feed receives logs/dumps independently of autoLatest.
+    // autoLatest only controls whether the entry list jumps to newest entry on entry-created.
+    useServerSentEvents(backendUrl, onUpdatesHandler);
 
     // Entry navigation
     const entries = getDebugQueryInfo.data ?? [];
