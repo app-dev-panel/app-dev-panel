@@ -111,7 +111,9 @@
     "yiisoft/view": "^11.0",
     "yiisoft/yii-console": "^2.4",
     "yiisoft/yii-http": "^1.1",
+    "yidas/yii2-composer-bower-skip": "^2.0",
     "yiisoft/yii2": "^2.0.50",
+    "yiisoft/yii2-queue": "^2.3",
     "zircote/swagger-php": "^4.0"
   },
   "scripts-aliases": {

@@ -18,12 +18,14 @@ use AppDevPanel\Adapter\Yii2\Controller\InspectConfigController;
 use AppDevPanel\Adapter\Yii2\Controller\InspectDatabaseController;
 use AppDevPanel\Adapter\Yii2\Controller\InspectRoutesController;
 use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
+use AppDevPanel\Adapter\Yii2\EventListener\QueueListener;
 use AppDevPanel\Adapter\Yii2\EventListener\WebListener;
 use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2DbSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteCollection;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2UrlMatcherAdapter;
+use AppDevPanel\Adapter\Yii2\Proxy\CacheProxy;
 use AppDevPanel\Adapter\Yii2\Proxy\I18NProxy;
 use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
 use AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy;
@@ -882,6 +884,18 @@ class Module extends \yii\base\Module implements BootstrapInterface
         if ($templateCollector instanceof TemplateCollector) {
             $this->registerTemplateProfiling($templateCollector);
         }
+
+        // Register cache proxy if CacheCollector is active
+        $cacheCollector = $this->getCollector(CacheCollector::class);
+        if ($cacheCollector instanceof CacheCollector) {
+            $this->registerCacheProfiling($app, $cacheCollector);
+        }
+
+        // Register queue profiling if QueueCollector is active
+        $queueCollector = $this->getCollector(QueueCollector::class);
+        if ($queueCollector instanceof QueueCollector) {
+            $this->registerQueueProfiling($queueCollector);
+        }
     }
 
     private function registerAuthorizationListeners(Application $app): void
@@ -1337,6 +1351,47 @@ class Module extends \yii\base\Module implements BootstrapInterface
             ],
             false,
         );
+    }
+
+    /**
+     * Replace the `cache` component with a {@see CacheProxy} wrapping the configured inner cache.
+     *
+     * Yii 2 lets us swap any component at bootstrap — existing injections that keep a
+     * reference to `Yii::$app->cache` will pick up the proxy transparently.
+     */
+    private function registerCacheProfiling(Application $app, CacheCollector $cacheCollector): void
+    {
+        if (!$app->has('cache')) {
+            return;
+        }
+
+        try {
+            $inner = $app->get('cache');
+        } catch (\Throwable) {
+            return;
+        }
+
+        if (!$inner instanceof \yii\caching\CacheInterface) {
+            return;
+        }
+
+        if ($inner instanceof CacheProxy) {
+            return;
+        }
+
+        $app->set('cache', new CacheProxy($inner, $cacheCollector));
+    }
+
+    /**
+     * Hook into `yii2-queue` events to feed {@see QueueCollector}.
+     *
+     * Delegates to {@see QueueListener} which listens on the abstract
+     * `yii\queue\Queue` class and handles all five push/exec/error events. When
+     * the `yiisoft/yii2-queue` package is not installed the listener becomes a no-op.
+     */
+    private function registerQueueProfiling(QueueCollector $queueCollector): void
+    {
+        new QueueListener($queueCollector)->register();
     }
 
     private function createToolbarInjector(): ?ToolbarInjector
