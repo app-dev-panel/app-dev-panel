@@ -957,7 +957,17 @@ class Module extends \yii\base\Module implements BootstrapInterface
             if ($responseCaptured->done) {
                 return;
             }
-            if (!$app->has('response')) {
+            // Skip when this $app is no longer the current Yii application (e.g. between
+            // integration test cases that null \Yii::$app in tearDown). Calling getResponse()
+            // after teardown lazy-creates a Response whose init() reads \Yii::$app->charset,
+            // triggering "Attempt to read property \"charset\" on null".
+            if (\Yii::$app !== $app) {
+                return;
+            }
+            // Only capture if the Response component was actually instantiated during the
+            // request — the second argument to has() checks for an initialized instance,
+            // not just a registered definition.
+            if (!$app->has('response', true)) {
                 return;
             }
             try {

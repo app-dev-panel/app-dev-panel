@@ -10,10 +10,17 @@ namespace AppDevPanel\McpServer\Inspector;
  */
 class InspectorClient implements InspectorInterface
 {
+    /** Hard cap on Inspector API HTTP timeout. Never raise. */
+    private const int MAX_TIMEOUT_SECONDS = 15;
+
+    private readonly int $timeoutSeconds;
+
     public function __construct(
         private readonly string $baseUrl,
-        private readonly int $timeoutSeconds = 10,
-    ) {}
+        int $timeoutSeconds = 10,
+    ) {
+        $this->timeoutSeconds = max(1, min($timeoutSeconds, self::MAX_TIMEOUT_SECONDS));
+    }
 
     public static function fromOptionalUrl(?string $url): ?self
     {

@@ -8,6 +8,12 @@ use GuzzleHttp\Client;
 
 final class DebugDataFetcher
 {
+    /**
+     * Overall deadline for retry loops in seconds. Hard cap — never raise.
+     * A debug entry that does not appear in 15s is a real bug, not a timing issue.
+     */
+    private const RETRY_DEADLINE_SECONDS = 15;
+
     public function __construct(
         private readonly Client $client,
         private readonly int $retryDelayMs,
@@ -16,7 +22,13 @@ final class DebugDataFetcher
 
     public function findLatestDebugId(): ?string
     {
+        $deadline = microtime(true) + self::RETRY_DEADLINE_SECONDS;
+
         for ($i = 0; $i < $this->maxRetries; $i++) {
+            if (microtime(true) >= $deadline) {
+                return null;
+            }
+
             $response = $this->client->get('/debug/api/');
             /** @var array<string, mixed> $body */
             $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
@@ -40,7 +52,13 @@ final class DebugDataFetcher
      */
     public function fetchDebugData(string $debugId): ?array
     {
+        $deadline = microtime(true) + self::RETRY_DEADLINE_SECONDS;
+
         for ($i = 0; $i < $this->maxRetries; $i++) {
+            if (microtime(true) >= $deadline) {
+                return null;
+            }
+
             $response = $this->client->get(sprintf('/debug/api/view/%s', $debugId));
 
             if ($response->getStatusCode() === 200) {
