@@ -102,6 +102,11 @@ $authToken = $apiConfig['authToken'] ?? '';
 $inspectorUrl = $apiConfig['inspectorUrl'] ?? null;
 
 return [
+    // Alias so framework-agnostic inspector controllers can fetch the merged config
+    // via $container->has('config') / get('config'). Yii 3 registers the merged
+    // configuration under ConfigInterface::class; expose the same object under 'config'.
+    'config' => static fn(\Yiisoft\Config\ConfigInterface $config) => $config,
+
     // PSR-17 factories
     RequestFactoryInterface::class => static fn() => new HttpFactory(),
     ResponseFactoryInterface::class => static fn() => new HttpFactory(),
@@ -314,9 +319,19 @@ return [
         return new CommandController($jsonResponseFactory, $pathResolver, $container, $commandMap);
     },
 
-    RoutingController::class => static fn(JsonResponseFactoryInterface $jsonResponseFactory) => new RoutingController(
-        $jsonResponseFactory,
-    ),
+    RoutingController::class => static function (
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        ContainerInterface $container,
+    ): RoutingController {
+        $routeCollection = $container->has(\Yiisoft\Router\RouteCollectionInterface::class)
+            ? $container->get(\Yiisoft\Router\RouteCollectionInterface::class)
+            : null;
+        $urlMatcher = $container->has(\Yiisoft\Router\UrlMatcherInterface::class)
+            ? $container->get(\Yiisoft\Router\UrlMatcherInterface::class)
+            : null;
+
+        return new RoutingController($jsonResponseFactory, $routeCollection, $urlMatcher);
+    },
 
     RequestController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,

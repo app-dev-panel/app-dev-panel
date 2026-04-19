@@ -8,9 +8,12 @@ use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use Closure;
 use Yiisoft\Db\Command\CommandInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Connection\ServerInfoInterface;
+use Yiisoft\Db\Expression\ExpressionInterface;
 use Yiisoft\Db\Query\BatchQueryResultInterface;
 use Yiisoft\Db\Query\QueryInterface;
 use Yiisoft\Db\QueryBuilder\QueryBuilderInterface;
+use Yiisoft\Db\Schema\Column\ColumnFactoryInterface;
 use Yiisoft\Db\Schema\QuoterInterface;
 use Yiisoft\Db\Schema\SchemaInterface;
 use Yiisoft\Db\Schema\TableSchemaInterface;
@@ -33,14 +36,19 @@ final class ConnectionInterfaceProxy implements ConnectionInterface
         return new TransactionInterfaceDecorator($result, $this->collector);
     }
 
-    public function createBatchQueryResult(QueryInterface $query, bool $each = false): BatchQueryResultInterface
+    public function createBatchQueryResult(QueryInterface $query): BatchQueryResultInterface
     {
-        return $this->connection->createBatchQueryResult($query, $each);
+        return $this->connection->createBatchQueryResult($query);
     }
 
     public function createCommand(?string $sql = null, array $params = []): CommandInterface
     {
         return new CommandInterfaceProxy($this->connection->createCommand($sql, $params), $this->collector);
+    }
+
+    public function createQuery(): QueryInterface
+    {
+        return $this->connection->createQuery();
     }
 
     public function createTransaction(): TransactionInterface
@@ -53,9 +61,19 @@ final class ConnectionInterfaceProxy implements ConnectionInterface
         $this->connection->close();
     }
 
-    public function getLastInsertID(?string $sequenceName = null): string
+    public function getColumnBuilderClass(): string
     {
-        return $this->connection->getLastInsertID($sequenceName);
+        return $this->connection->getColumnBuilderClass();
+    }
+
+    public function getColumnFactory(): ColumnFactoryInterface
+    {
+        return $this->connection->getColumnFactory();
+    }
+
+    public function getLastInsertId(?string $sequenceName = null): string
+    {
+        return $this->connection->getLastInsertId($sequenceName);
     }
 
     public function getQueryBuilder(): QueryBuilderInterface
@@ -73,9 +91,9 @@ final class ConnectionInterfaceProxy implements ConnectionInterface
         return $this->connection->getSchema();
     }
 
-    public function getServerVersion(): string
+    public function getServerInfo(): ServerInfoInterface
     {
-        return $this->connection->getServerVersion();
+        return $this->connection->getServerInfo();
     }
 
     public function getTablePrefix(): string
@@ -113,6 +131,13 @@ final class ConnectionInterfaceProxy implements ConnectionInterface
     public function quoteValue(mixed $value): mixed
     {
         return $this->connection->quoteValue($value);
+    }
+
+    public function select(
+        array|bool|float|int|string|ExpressionInterface $columns = [],
+        ?string $option = null,
+    ): QueryInterface {
+        return $this->connection->select($columns, $option);
     }
 
     public function setEnableSavepoint(bool $value): void
