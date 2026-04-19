@@ -11,9 +11,16 @@
          failOnWarning="true"
          stopOnFailure="false"
          colors="true"
+         enforceTimeLimit="true"
+         defaultTimeLimit="10"
+         timeoutForSmallTests="2"
+         timeoutForMediumTests="5"
+         timeoutForLargeTests="10"
 >
     <php>
         <ini name="error_reporting" value="-1"/>
+        <ini name="default_socket_timeout" value="10"/>
+        <ini name="max_execution_time" value="15"/>
     </php>
 
     <testsuites>

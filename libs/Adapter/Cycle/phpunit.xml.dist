@@ -6,7 +6,16 @@
          failOnRisky="true"
          failOnWarning="true"
          executionOrder="random"
-         cacheDirectory=".phpunit.cache">
+         cacheDirectory=".phpunit.cache"
+         enforceTimeLimit="true"
+         defaultTimeLimit="10"
+         timeoutForSmallTests="2"
+         timeoutForMediumTests="5"
+         timeoutForLargeTests="10">
+    <php>
+        <ini name="default_socket_timeout" value="10"/>
+        <ini name="max_execution_time" value="15"/>
+    </php>
     <testsuites>
         <testsuite name="Adapter-Cycle">
             <directory>tests</directory>

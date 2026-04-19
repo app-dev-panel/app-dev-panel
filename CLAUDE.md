@@ -1,5 +1,38 @@
 # ADP — Application Development Panel
 
+## Hard Timeouts — NEVER RAISE
+
+The test infrastructure is aggressively time-boxed so that nothing — PHPUnit, Vitest, fixtures,
+network calls, socket reads — can hang a Claude Code hook or a CI run. These limits are the
+**ceiling, not a target**. You are **forbidden** from raising any of them. If a test or command
+breaches a limit, fix the slow code (mock I/O, reduce fixture data, split the test, skip a broken
+service) — do not edit the ceiling.
+
+| Scope | Limit | Where |
+|-------|------:|-------|
+| Full test suite (PHPUnit / Vitest) | `180s` | `Makefile` — `TEST_TIMEOUT` |
+| Single playground fixture / scenario run | `120s` | `Makefile` — `FIXTURE_TIMEOUT` |
+| Helper poll / daemon ping | `15s` | `Makefile` — `HELPER_TIMEOUT` |
+| PHPUnit — small / medium / large / default test | `2s / 5s / 10s / 10s` | all `phpunit.xml.dist` |
+| PHPUnit — PHP `max_execution_time` / `default_socket_timeout` | `15s / 10s` | all `phpunit.xml.dist` `<ini>` |
+| Vitest — `testTimeout` / `hookTimeout` (jsdom) | `10s / 10s` | `libs/frontend/vitest.config.ts` |
+| Vitest — `testTimeout` / `hookTimeout` (browser) | `15s / 15s` | `libs/frontend/vitest.browser.config.ts` |
+| `FixtureRunner` HTTP timeout | `15s` hard cap | `libs/Testing/src/Runner/FixtureRunner.php` |
+| `DebugDataFetcher` retry deadline | `15s` | `libs/Testing/src/Runner/DebugDataFetcher.php` |
+| `InspectorClient` HTTP timeout | `15s` hard cap | `libs/McpServer/src/Inspector/InspectorClient.php` |
+| `AcpDaemonManager` session-start / prompt | `30s / 30s` hard cap | `libs/API/src/Llm/Acp/AcpDaemonManager.php` |
+| `RequestController::request` re-execute client | `15s` (connect 5s) | `libs/API/src/Inspector/Controller/RequestController.php` |
+| `FrontendUpdateCommand` GitHub release check | `10s` (connect 5s) | `libs/Cli/src/Command/FrontendUpdateCommand.php` |
+| `FrontendUpdateCommand` ZIP download | `30s` (connect 5s) | `libs/Cli/src/Command/FrontendUpdateCommand.php` |
+
+Rules:
+- **Never** bump a number in the table above to make something pass. Fix the underlying code.
+- **Never** add a new network/socket/subprocess call without an explicit timeout ≤ the matching limit.
+- New tests must finish well under `defaultTimeLimit` (10s). If a test legitimately takes longer,
+  it belongs in `@group e2e` or `@group playground`, which are excluded from the default suite.
+- The `timeout` wrapper in the Makefile (`$(call with_timeout,…)`) is mandatory for any Make target
+  that invokes PHPUnit, Vitest, or a playground fixture run.
+
 ## Project Overview
 
 ADP (Application Development Panel) is a **framework-agnostic, language-agnostic** debugging and development panel.
