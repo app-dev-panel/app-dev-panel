@@ -9,6 +9,7 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
     use CollectorTrait;
 
     private ?string $driver = null;
+    private bool $collected = false;
 
     /** @var array<string, array{coveredLines: int, executableLines: int, percentage: float}> */
     private array $files = [];
@@ -25,6 +26,10 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
     public function startup(): void
     {
         $this->isActive = true;
+        $this->collected = false;
+        $this->files = [];
+        $this->coveredLines = 0;
+        $this->executableLines = 0;
 
         $this->driver = CodeCoverageHelper::detectDriver();
         if ($this->driver === null) {
@@ -36,15 +41,14 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
 
     public function shutdown(): void
     {
-        if ($this->driver !== null) {
-            $this->stopCoverage();
-        }
-
+        $this->collectIfNeeded();
         $this->isActive = false;
     }
 
     public function getCollected(): array
     {
+        $this->collectIfNeeded();
+
         if ($this->driver === null) {
             return [
                 'driver' => null,
@@ -63,6 +67,8 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
+        $this->collectIfNeeded();
+
         if ($this->driver === null) {
             return [];
         }
@@ -71,6 +77,16 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
         $summary['driver'] = $this->driver;
 
         return ['codeCoverage' => $summary];
+    }
+
+    private function collectIfNeeded(): void
+    {
+        if ($this->collected || $this->driver === null) {
+            return;
+        }
+
+        $this->collected = true;
+        $this->stopCoverage();
     }
 
     private function reset(): void
@@ -112,10 +128,13 @@ final class CodeCoverageCollector implements SummaryCollectorInterface
     {
         \pcov\stop();
 
-        $filter = $this->includePaths !== [] ? $this->includePaths : ['.'];
+        if ($this->includePaths === []) {
+            /** @var array<string, array<int, int>> */
+            return \pcov\collect(\pcov\all);
+        }
 
         /** @var array<string, array<int, int>> */
-        return \pcov\collect(\pcov\inclusive, $filter);
+        return \pcov\collect(\pcov\inclusive, $this->includePaths);
     }
 
     /**
