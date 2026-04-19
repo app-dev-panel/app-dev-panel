@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
+use Yiisoft\Mailer\File;
 use Yiisoft\Mailer\MailerInterface;
 use Yiisoft\Mailer\Message;
 
@@ -20,17 +21,34 @@ final readonly class MailerAction implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        // Send a real email via yiisoft/mailer — the MailerInterfaceProxy intercepts
-        // send() calls and feeds email metadata to MailerCollector.
-        $message = new Message()
+        $plain = new Message()
             ->withFrom('noreply@example.com')
             ->withTo('user@example.com')
-            ->withSubject('ADP Test Fixture Email')
-            ->withTextBody('This is a test email from the ADP mailer fixture.')
-            ->withHtmlBody('<p>This is a test email from the ADP mailer fixture.</p>');
+            ->withSubject('ADP fixture — plain text')
+            ->withTextBody("Hello!\n\nThis is a plain-text email sent from the ADP Yii 3 fixture.\n\nCheers,\nADP");
 
-        $this->mailer->send($message);
+        $table = new Message()
+            ->withFrom('noreply@example.com')
+            ->withTo('user@example.com')
+            ->withSubject('ADP fixture — HTML table report')
+            ->withTextBody("Weekly report:\n- Requests: 1240\n- Errors: 12\n- Avg response: 84ms")
+            ->withHtmlBody(MailerFixtureContent::tableHtml());
 
-        return $this->responseFactory->createResponse(['fixture' => 'mailer:basic', 'status' => 'ok']);
+        $rich = new Message()
+            ->withFrom('noreply@example.com')
+            ->withTo('user@example.com')
+            ->withSubject('ADP fixture — newsletter with attachments')
+            ->withTextBody('Please see the attached TXT and PDF files.')
+            ->withHtmlBody(MailerFixtureContent::newsletterHtml())
+            ->withAttachments(
+                File::fromContent(MailerFixtureContent::textAttachment(), 'release-notes.txt', 'text/plain'),
+                File::fromContent(MailerFixtureContent::pdfAttachment(), 'adp-fixture.pdf', 'application/pdf'),
+            );
+
+        $this->mailer->send($plain);
+        $this->mailer->send($table);
+        $this->mailer->send($rich);
+
+        return $this->responseFactory->createResponse(['fixture' => 'mailer:basic', 'status' => 'ok', 'sent' => 3]);
     }
 }

@@ -18,22 +18,37 @@ final readonly class MailerAction
 
     public function __invoke(): JsonResponse
     {
-        // Send a real email via Symfony Mailer — the MailerSubscriber listens to
-        // MessageEvent and feeds email metadata to MailerCollector.
-        $email = new Email()
+        $plain = new Email()
             ->from('noreply@example.com')
             ->to('user@example.com')
-            ->subject('ADP Test Fixture Email')
-            ->text('This is a test email from the ADP mailer fixture.')
-            ->html('<p>This is a test email from the ADP mailer fixture.</p>');
+            ->subject('ADP fixture — plain text')
+            ->text("Hello!\n\nThis is a plain-text email sent from the ADP Symfony fixture.\n\nCheers,\nADP");
 
-        try {
-            $this->mailer->send($email);
-            $sent = true;
-        } catch (\Throwable) {
-            // Mailer may fail without a configured transport — that's OK for fixtures.
-            // The MailerSubscriber captures the email before the transport sends it.
-            $sent = false;
+        $table = new Email()
+            ->from('noreply@example.com')
+            ->to('user@example.com')
+            ->subject('ADP fixture — HTML table report')
+            ->text("Weekly report:\n- Requests: 1240\n- Errors: 12\n- Avg response: 84ms")
+            ->html(MailerFixtureContent::tableHtml());
+
+        $rich = new Email()
+            ->from('noreply@example.com')
+            ->to('user@example.com')
+            ->subject('ADP fixture — newsletter with attachments')
+            ->text('Please see the attached TXT and PDF files.')
+            ->html(MailerFixtureContent::newsletterHtml())
+            ->attach(MailerFixtureContent::textAttachment(), 'release-notes.txt', 'text/plain')
+            ->attach(MailerFixtureContent::pdfAttachment(), 'adp-fixture.pdf', 'application/pdf');
+
+        $sent = 0;
+        foreach ([$plain, $table, $rich] as $email) {
+            try {
+                $this->mailer->send($email);
+                $sent++;
+            } catch (\Throwable) {
+                // Mailer may fail without a configured transport — that's OK for fixtures.
+                // The MailerSubscriber captures the email before the transport sends it.
+            }
         }
 
         return new JsonResponse(['fixture' => 'mailer:basic', 'status' => 'ok', 'sent' => $sent]);
