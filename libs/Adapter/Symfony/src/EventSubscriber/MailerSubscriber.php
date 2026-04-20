@@ -9,13 +9,14 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Mailer\Event\MessageEvent;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Part\DataPart;
 
 /**
  * Listens to Symfony Mailer events and feeds MailerCollector.
  *
- * Captures email metadata (from, to, subject, body) when Symfony Mailer sends a message.
- * Requires symfony/mailer. When not installed, the subscriber is not registered
- * (guarded by class_exists check in AppDevPanelExtension).
+ * Captures email metadata (from, to, subject, body, attachments, headers) when
+ * Symfony Mailer sends a message. Requires symfony/mailer. When not installed,
+ * the subscriber is not registered (guarded by class_exists check in AppDevPanelExtension).
  */
 final class MailerSubscriber implements EventSubscriberInterface
 {
@@ -38,6 +39,20 @@ final class MailerSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $raw = $message->toString();
+        $headers = [];
+        foreach ($message->getHeaders()->all() as $header) {
+            $headers[$header->getName()] = $header->getBodyAsString();
+        }
+
+        $attachments = [];
+        foreach ($message->getAttachments() as $part) {
+            $attachments[] = $this->normalizePart($part);
+        }
+
+        $messageIdHeader = $message->getHeaders()->get('Message-ID');
+        $messageId = $messageIdHeader !== null ? $messageIdHeader->getBodyAsString() : null;
+
         $this->collector->collectMessage([
             'from' => $this->formatAddresses($message->getFrom()),
             'to' => $this->formatAddresses($message->getTo()),
@@ -47,9 +62,13 @@ final class MailerSubscriber implements EventSubscriberInterface
             'subject' => $message->getSubject() ?? '',
             'textBody' => $message->getTextBody(),
             'htmlBody' => $message->getHtmlBody(),
-            'raw' => '',
+            'raw' => $raw,
             'charset' => $message->getTextCharset() ?? 'utf-8',
             'date' => $message->getDate()?->format('r'),
+            'messageId' => $messageId,
+            'headers' => $headers,
+            'size' => \strlen($raw),
+            'attachments' => $attachments,
         ]);
     }
 
@@ -65,5 +84,33 @@ final class MailerSubscriber implements EventSubscriberInterface
         }
 
         return $result;
+    }
+
+    /**
+     * @return array{
+     *     filename: string,
+     *     contentType: string,
+     *     size: int,
+     *     contentId: ?string,
+     *     inline: bool,
+     *     contentBase64: string,
+     * }
+     */
+    private function normalizePart(DataPart $part): array
+    {
+        $body = $part->getBody();
+        $contentType = $part->getMediaType() . '/' . $part->getMediaSubtype();
+        $inline = $part->hasContentId() || $part->getDisposition() === 'inline';
+
+        return [
+            'filename' => $part->getFilename() ?? 'attachment',
+            'contentType' => $contentType,
+            'size' => \strlen($body),
+            // `embed()` lazily generates the content id on first access — calling
+            // getContentId() is the idiomatic way to read it for inline parts.
+            'contentId' => $inline ? $part->getContentId() : null,
+            'inline' => $inline,
+            'contentBase64' => base64_encode($body),
+        ];
     }
 }
