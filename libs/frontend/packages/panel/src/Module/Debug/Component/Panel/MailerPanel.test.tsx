@@ -98,7 +98,22 @@ describe('MailerPanel — detail view', () => {
         renderWithProviders(<MailerPanel data={{messages: [makeMessage({subject: 'Click me'})]}} />);
         await user.click(screen.getByText('Click me'));
         expect(screen.getByText(/Message 1 of 1/)).toBeInTheDocument();
-        expect(screen.getByText('Recipients')).toBeInTheDocument();
+        // Recipients block shows a "From" label row
+        expect(screen.getByText('From')).toBeInTheDocument();
+    });
+
+    it('pre-selects message from ?message query param (simulates page refresh)', () => {
+        renderWithProviders(
+            <MailerPanel data={{messages: [makeMessage({subject: 'Second'}), makeMessage({subject: 'Third'})]}} />,
+            {route: '/?message=1'},
+        );
+        expect(screen.getByText(/Message 2 of 2/)).toBeInTheDocument();
+        expect(screen.getByText('Third')).toBeInTheDocument();
+    });
+
+    it('ignores out-of-range ?message values and falls back to list', () => {
+        renderWithProviders(<MailerPanel data={{messages: [makeMessage()]}} />, {route: '/?message=99'});
+        expect(screen.getByText('1 message')).toBeInTheDocument();
     });
 
     it('returns to the list when Back is clicked', async () => {
@@ -138,13 +153,14 @@ describe('MailerPanel — detail view', () => {
         expect(screen.getByText(/RAW-MESSAGE-CONTENT-Z/)).toBeInTheDocument();
     });
 
-    it('renders From, To and Charset fields in the recipients and info sections', async () => {
+    it('renders From/To rows only for populated address maps', async () => {
         const user = userEvent.setup();
         renderWithProviders(<MailerPanel data={{messages: [makeMessage()]}} />);
         await user.click(screen.getByText('Test Email Subject'));
         expect(screen.getByText('From')).toBeInTheDocument();
-        expect(screen.getByText('Charset')).toBeInTheDocument();
-        expect(screen.getByText('utf-8')).toBeInTheDocument();
+        expect(screen.getByText('To')).toBeInTheDocument();
+        expect(screen.queryByText('CC')).not.toBeInTheDocument();
+        expect(screen.queryByText('BCC')).not.toBeInTheDocument();
     });
 
     it('shows CC row only when CC is populated', async () => {
@@ -155,7 +171,7 @@ describe('MailerPanel — detail view', () => {
         expect(screen.getByText('CC')).toBeInTheDocument();
     });
 
-    it('renders attachments with download buttons', async () => {
+    it('renders attachments with download links', async () => {
         const user = userEvent.setup();
         const message = makeMessage({
             attachments: [
@@ -171,10 +187,9 @@ describe('MailerPanel — detail view', () => {
         });
         renderWithProviders(<MailerPanel data={{messages: [message]}} />);
         await user.click(screen.getByText('Test Email Subject'));
-        expect(screen.getByText('release.txt')).toBeInTheDocument();
-        const downloadButton = screen.getByRole('link', {name: /Download release\.txt/i});
-        expect(downloadButton).toHaveAttribute('href', 'data:text/plain;base64,aGVsbG8=');
-        expect(downloadButton).toHaveAttribute('download', 'release.txt');
+        const downloadLink = screen.getByRole('link', {name: /Download release\.txt/i});
+        expect(downloadLink).toHaveAttribute('href', 'data:text/plain;base64,aGVsbG8=');
+        expect(downloadLink).toHaveAttribute('download', 'release.txt');
     });
 
     it('extracts links from the HTML body', async () => {
@@ -184,20 +199,55 @@ describe('MailerPanel — detail view', () => {
         });
         renderWithProviders(<MailerPanel data={{messages: [message]}} />);
         await user.click(screen.getByText('Test Email Subject'));
-        const linksHeading = screen.getByText(/^Links · 2$/);
-        expect(linksHeading).toBeInTheDocument();
-        const section = linksHeading.parentElement!.parentElement!;
-        expect(within(section).getByText('https://example.com/a')).toBeInTheDocument();
-        expect(within(section).getByText('https://example.com/b')).toBeInTheDocument();
+        expect(screen.getByText('Links: 2')).toBeInTheDocument();
+        expect(screen.getByText('https://example.com/a')).toBeInTheDocument();
+        expect(screen.getByText('https://example.com/b')).toBeInTheDocument();
     });
 
-    it('renders Message-ID and headers only when present', async () => {
+    it('headers chip expands a collapsible headers block', async () => {
         const user = userEvent.setup();
         const message = makeMessage({messageId: '<abc@example.com>', headers: {'X-Custom': 'yes'}});
         renderWithProviders(<MailerPanel data={{messages: [message]}} />);
         await user.click(screen.getByText('Test Email Subject'));
-        expect(screen.getByText('<abc@example.com>')).toBeInTheDocument();
+        const headersChip = screen.getByText(/^Headers · 1$/);
+        expect(headersChip).toBeInTheDocument();
+        // Initially collapsed
+        expect(screen.queryByText('X-Custom')).not.toBeInTheDocument();
+        await user.click(headersChip);
         expect(screen.getByText('X-Custom')).toBeInTheDocument();
         expect(screen.getByText('yes')).toBeInTheDocument();
+    });
+
+    it('opens a fullscreen preview dialog when the fullscreen button is clicked', async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<MailerPanel data={{messages: [makeMessage()]}} />);
+        await user.click(screen.getByText('Test Email Subject'));
+        const fullscreenButton = screen.getByRole('button', {name: /open preview fullscreen/i});
+        await user.click(fullscreenButton);
+        const dialog = await screen.findByRole('dialog');
+        expect(within(dialog).getByRole('button', {name: /close fullscreen preview/i})).toBeInTheDocument();
+    });
+
+    it('does not crash when optional fields are missing (legacy payloads)', async () => {
+        const user = userEvent.setup();
+        const minimal = {
+            from: {'a@a.com': ''},
+            to: {'b@b.com': ''},
+            subject: 'Legacy',
+            textBody: 'plain',
+            htmlBody: null,
+            raw: 'legacy raw',
+            charset: 'utf-8',
+            replyTo: {},
+            cc: {},
+            bcc: {},
+            date: null,
+            // deliberately no messageId/headers/size/attachments — simulates old entries on disk
+        } as unknown as Message;
+        renderWithProviders(<MailerPanel data={{messages: [minimal]}} />);
+        await user.click(screen.getByText('Legacy'));
+        expect(screen.getByText(/Message 1 of 1/)).toBeInTheDocument();
+        // Headers chip should not appear
+        expect(screen.queryByText(/^Headers · /)).not.toBeInTheDocument();
     });
 });

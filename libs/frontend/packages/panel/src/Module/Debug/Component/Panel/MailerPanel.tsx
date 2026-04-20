@@ -4,7 +4,6 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {
     attachmentDataUrl,
-    countImages,
     extractLinks,
     type MailAttachment,
     rewriteCidReferences,
@@ -13,6 +12,8 @@ import {
     Box,
     Button,
     Chip,
+    Dialog,
+    DialogContent,
     Icon,
     IconButton,
     Link,
@@ -20,29 +21,31 @@ import {
     Tabs,
     ToggleButton,
     ToggleButtonGroup,
+    Tooltip,
     Typography,
 } from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {type SyntheticEvent, useCallback, useMemo, useState} from 'react';
+import {useSearchParams} from 'react-router';
 
 type AddressMap = Record<string, string>;
 
 type MailMessage = {
-    from: AddressMap;
-    to: AddressMap;
-    cc: AddressMap;
-    bcc: AddressMap;
-    replyTo: AddressMap;
-    subject: string;
-    textBody: string | null;
-    htmlBody: string | null;
-    raw: string;
-    charset: string;
-    date: string | null;
-    messageId: string | null;
-    headers: Record<string, string>;
-    size: number;
-    attachments: MailAttachment[];
+    from?: AddressMap;
+    to?: AddressMap;
+    cc?: AddressMap;
+    bcc?: AddressMap;
+    replyTo?: AddressMap;
+    subject?: string;
+    textBody?: string | null;
+    htmlBody?: string | null;
+    raw?: string;
+    charset?: string;
+    date?: string | null;
+    messageId?: string | null;
+    headers?: Record<string, string>;
+    size?: number;
+    attachments?: MailAttachment[];
 };
 
 type MailerPanelProps = {data: {messages: MailMessage[]}};
@@ -52,12 +55,15 @@ type Viewport = 'desktop' | 'tablet' | 'mobile';
 
 const VIEWPORT_WIDTHS: Record<Viewport, number | '100%'> = {desktop: '100%', tablet: 768, mobile: 375};
 
-const serializeAddresses = (addresses: AddressMap): string =>
-    Object.entries(addresses)
+const serializeAddresses = (addresses: AddressMap | undefined): string =>
+    Object.entries(addresses ?? {})
         .map(([email, name]) => (name && name !== email ? `${name} <${email}>` : email))
         .join(', ');
 
-const formatSummaryRecipients = (addresses: AddressMap): string => Object.keys(addresses).join(', ') || '—';
+const hasAddresses = (addresses: AddressMap | undefined): boolean => !!addresses && Object.keys(addresses).length > 0;
+
+const formatSummaryRecipients = (addresses: AddressMap | undefined): string =>
+    Object.keys(addresses ?? {}).join(', ') || '—';
 
 const attachmentIconName = (contentType: string): string => {
     if (contentType.startsWith('image/')) return 'image';
@@ -136,31 +142,10 @@ const MetaLabel = styled(Typography)(({theme}) => ({
     color: theme.palette.text.disabled,
 }));
 
-const FieldRow = styled(Box)(({theme}) => ({
-    display: 'flex',
-    gap: theme.spacing(1),
-    padding: theme.spacing(0.75, 0),
-    fontSize: '12px',
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    '&:last-of-type': {borderBottom: 'none'},
-}));
-
-const FieldKey = styled(Typography)(({theme}) => ({
-    fontSize: '11px',
-    fontWeight: 600,
-    color: theme.palette.text.disabled,
-    width: 80,
-    flexShrink: 0,
-    textTransform: 'uppercase',
-    letterSpacing: '0.04em',
-}));
-
-const FieldValue = styled(Typography)({fontSize: '12px', wordBreak: 'break-word', flex: 1});
-
 const MessageListThumbnail = ({message}: {message: MailMessage}) => {
     const srcDoc = useMemo(() => {
         if (!message.htmlBody) return '';
-        return rewriteCidReferences(message.htmlBody, message.attachments);
+        return rewriteCidReferences(message.htmlBody, message.attachments ?? []);
     }, [message.htmlBody, message.attachments]);
 
     if (message.htmlBody) {
@@ -170,8 +155,10 @@ const MessageListThumbnail = ({message}: {message: MailMessage}) => {
             </ThumbFrame>
         );
     }
-    const snippet = (message.textBody ?? '').slice(0, 240);
-    return <TextThumb>{snippet || '(no body)'}</TextThumb>;
+    if (message.textBody) {
+        return <TextThumb>{message.textBody.slice(0, 240)}</TextThumb>;
+    }
+    return null;
 };
 
 const ListView = ({messages, onSelect}: {messages: MailMessage[]; onSelect: (index: number) => void}) => (
@@ -180,7 +167,7 @@ const ListView = ({messages, onSelect}: {messages: MailMessage[]; onSelect: (ind
             <SectionTitle>{`${messages.length} message${messages.length !== 1 ? 's' : ''}`}</SectionTitle>
         </Box>
         {messages.map((message, index) => {
-            const attachments = message.attachments.filter((a) => !a.inline);
+            const attachments = (message.attachments ?? []).filter((a) => !a.inline);
             return (
                 <ListRow
                     key={index}
@@ -193,9 +180,11 @@ const ListView = ({messages, onSelect}: {messages: MailMessage[]; onSelect: (ind
                         <Typography sx={{fontSize: '13px', fontWeight: 500}}>
                             {message.subject || '(no subject)'}
                         </Typography>
-                        <Typography sx={{fontSize: '11px', color: 'text.disabled'}}>
-                            To: {formatSummaryRecipients(message.to)}
-                        </Typography>
+                        {hasAddresses(message.to) && (
+                            <Typography sx={{fontSize: '11px', color: 'text.disabled'}}>
+                                To: {formatSummaryRecipients(message.to)}
+                            </Typography>
+                        )}
                         <Box sx={{display: 'flex', gap: 0.75, mt: 0.5, flexWrap: 'wrap'}}>
                             {attachments.length > 0 && (
                                 <Chip
@@ -214,7 +203,7 @@ const ListView = ({messages, onSelect}: {messages: MailMessage[]; onSelect: (ind
                                     sx={{fontSize: '11px', height: 22}}
                                 />
                             )}
-                            {message.size > 0 && (
+                            {typeof message.size === 'number' && message.size > 0 && (
                                 <Chip
                                     size="small"
                                     variant="outlined"
@@ -226,7 +215,9 @@ const ListView = ({messages, onSelect}: {messages: MailMessage[]; onSelect: (ind
                     </Box>
                     <MessageListThumbnail message={message} />
                     <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0}}>
-                        <Typography sx={{fontSize: '11px', color: 'text.disabled'}}>{message.date ?? ''}</Typography>
+                        {message.date && (
+                            <Typography sx={{fontSize: '11px', color: 'text.disabled'}}>{message.date}</Typography>
+                        )}
                         <Icon sx={{fontSize: 16, color: 'text.disabled', mt: 'auto'}}>chevron_right</Icon>
                     </Box>
                 </ListRow>
@@ -237,166 +228,178 @@ const ListView = ({messages, onSelect}: {messages: MailMessage[]; onSelect: (ind
 
 type DetailProps = {message: MailMessage; index: number; total: number; onBack: () => void};
 
-const LeftColumn = ({message}: {message: MailMessage}) => {
-    const attachments = message.attachments.filter((a) => !a.inline);
-    const inlineAttachments = message.attachments.filter((a) => a.inline);
+// ---------------------------------------------------------------------------
+// Meta sections — displayed ABOVE the full-width preview.
+// Each section is shown only when it has content.
+// ---------------------------------------------------------------------------
+
+const AddressLine = ({label, addresses}: {label: string; addresses: AddressMap | undefined}) => {
+    if (!hasAddresses(addresses)) return null;
+    return (
+        <Box sx={{display: 'flex', gap: 1, fontSize: '12px', lineHeight: 1.5}}>
+            <Box
+                sx={{
+                    width: 64,
+                    flexShrink: 0,
+                    color: 'text.disabled',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    fontSize: '11px',
+                }}
+            >
+                {label}
+            </Box>
+            <Box sx={{flex: 1, wordBreak: 'break-word'}}>{serializeAddresses(addresses)}</Box>
+        </Box>
+    );
+};
+
+const AttachmentChip = ({attachment}: {attachment: MailAttachment}) => (
+    <Box
+        component="a"
+        href={attachmentDataUrl(attachment)}
+        download={attachment.filename}
+        aria-label={`Download ${attachment.filename}`}
+        sx={(theme) => ({
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 1,
+            padding: theme.spacing(0.5, 1),
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 1,
+            textDecoration: 'none',
+            color: theme.palette.text.primary,
+            fontSize: '12px',
+            maxWidth: 280,
+            transition: 'background-color 0.1s ease',
+            '&:hover': {backgroundColor: theme.palette.action.hover},
+        })}
+    >
+        <Icon sx={{fontSize: 16, color: 'text.disabled', flexShrink: 0}}>
+            {attachmentIconName(attachment.contentType)}
+        </Icon>
+        <Box sx={{minWidth: 0, display: 'flex', flexDirection: 'column'}}>
+            <Box sx={{fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                {attachment.filename}
+            </Box>
+            <Box sx={{fontSize: '10px', color: 'text.disabled'}}>
+                {formatBytes(attachment.size)} · {attachment.contentType}
+            </Box>
+        </Box>
+        <Icon sx={{fontSize: 16, color: 'text.disabled', ml: 'auto', flexShrink: 0}}>download</Icon>
+    </Box>
+);
+
+const MetaHeader = ({message}: {message: MailMessage}) => {
+    const allAttachments = message.attachments ?? [];
+    const attachments = allAttachments.filter((a) => !a.inline);
+    const inlineAttachments = allAttachments.filter((a) => a.inline);
     const links = useMemo(() => extractLinks(message.htmlBody ?? ''), [message.htmlBody]);
-    const headerEntries = Object.entries(message.headers);
+    const headerEntries = Object.entries(message.headers ?? {});
+    const [headersOpen, setHeadersOpen] = useState(false);
 
     return (
-        <Box sx={{width: {xs: '100%', md: 340}, flexShrink: 0, display: 'flex', flexDirection: 'column'}}>
-            <SectionTitle>Recipients</SectionTitle>
-            <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                <FieldRow>
-                    <FieldKey>From</FieldKey>
-                    <FieldValue>{serializeAddresses(message.from) || '—'}</FieldValue>
-                </FieldRow>
-                <FieldRow>
-                    <FieldKey>To</FieldKey>
-                    <FieldValue>{serializeAddresses(message.to) || '—'}</FieldValue>
-                </FieldRow>
-                {Object.keys(message.cc).length > 0 && (
-                    <FieldRow>
-                        <FieldKey>CC</FieldKey>
-                        <FieldValue>{serializeAddresses(message.cc)}</FieldValue>
-                    </FieldRow>
-                )}
-                {Object.keys(message.bcc).length > 0 && (
-                    <FieldRow>
-                        <FieldKey>BCC</FieldKey>
-                        <FieldValue>{serializeAddresses(message.bcc)}</FieldValue>
-                    </FieldRow>
-                )}
-                {Object.keys(message.replyTo).length > 0 && (
-                    <FieldRow>
-                        <FieldKey>Reply-To</FieldKey>
-                        <FieldValue>{serializeAddresses(message.replyTo)}</FieldValue>
-                    </FieldRow>
-                )}
+        <Box sx={{display: 'flex', flexDirection: 'column', gap: 1.25, mb: 2}}>
+            {/* Recipients block */}
+            <Box sx={{display: 'flex', flexDirection: 'column', gap: 0.5}}>
+                <AddressLine label="From" addresses={message.from} />
+                <AddressLine label="To" addresses={message.to} />
+                <AddressLine label="CC" addresses={message.cc} />
+                <AddressLine label="BCC" addresses={message.bcc} />
+                <AddressLine label="Reply-To" addresses={message.replyTo} />
             </Box>
 
-            <SectionTitle>Message info</SectionTitle>
-            <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                {message.messageId && (
-                    <FieldRow>
-                        <FieldKey>Message-ID</FieldKey>
-                        <FieldValue sx={{fontFamily: 'monospace'}}>{message.messageId}</FieldValue>
-                    </FieldRow>
-                )}
-                {message.date && (
-                    <FieldRow>
-                        <FieldKey>Date</FieldKey>
-                        <FieldValue>{message.date}</FieldValue>
-                    </FieldRow>
-                )}
-                <FieldRow>
-                    <FieldKey>Charset</FieldKey>
-                    <FieldValue>{message.charset}</FieldValue>
-                </FieldRow>
-                <FieldRow>
-                    <FieldKey>Size</FieldKey>
-                    <FieldValue>{formatBytes(message.size)}</FieldValue>
-                </FieldRow>
-            </Box>
-
+            {/* Attachments strip — filename chips with download */}
             {attachments.length > 0 && (
-                <>
-                    <SectionTitle>Attachments · {attachments.length}</SectionTitle>
-                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 0.5}}>
-                        {attachments.map((attachment, idx) => (
-                            <Box
-                                key={`${attachment.filename}-${idx}`}
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                    padding: 1,
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    borderRadius: 1,
-                                }}
-                            >
-                                <Icon sx={{fontSize: 20, color: 'text.disabled'}}>
-                                    {attachmentIconName(attachment.contentType)}
-                                </Icon>
-                                <Box sx={{flex: 1, minWidth: 0}}>
-                                    <Typography sx={{fontSize: '12px', fontWeight: 500, wordBreak: 'break-all'}}>
-                                        {attachment.filename}
-                                    </Typography>
-                                    <Typography sx={{fontSize: '11px', color: 'text.disabled'}}>
-                                        {formatBytes(attachment.size)} · {attachment.contentType}
-                                    </Typography>
-                                </Box>
-                                <IconButton
-                                    size="small"
-                                    component="a"
-                                    href={attachmentDataUrl(attachment)}
-                                    download={attachment.filename}
-                                    aria-label={`Download ${attachment.filename}`}
-                                >
-                                    <Icon sx={{fontSize: 18}}>download</Icon>
-                                </IconButton>
-                            </Box>
-                        ))}
-                    </Box>
-                </>
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75}}>
+                    {attachments.map((attachment, idx) => (
+                        <AttachmentChip key={`${attachment.filename}-${idx}`} attachment={attachment} />
+                    ))}
+                </Box>
             )}
 
-            {inlineAttachments.length > 0 && (
-                <>
-                    <SectionTitle>Inline images · {inlineAttachments.length}</SectionTitle>
-                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1}}>
-                        {inlineAttachments.map((attachment, idx) => (
-                            <Chip
-                                key={`${attachment.filename}-${idx}`}
-                                size="small"
-                                variant="outlined"
-                                icon={<Icon sx={{fontSize: '14px !important'}}>image</Icon>}
-                                label={`${attachment.filename} · ${formatBytes(attachment.size)}`}
-                                sx={{fontSize: '11px', height: 22}}
-                            />
-                        ))}
-                    </Box>
-                </>
-            )}
+            {/* Compact meta row — inline stats, links, inline-images, headers toggle */}
+            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1.25, alignItems: 'center', rowGap: 0.5}}>
+                {message.messageId && (
+                    <Tooltip title={message.messageId} placement="top">
+                        <Chip
+                            size="small"
+                            variant="outlined"
+                            label={`ID: ${message.messageId.replace(/^<|>$/g, '').slice(0, 32)}${message.messageId.length > 34 ? '…' : ''}`}
+                            sx={{fontSize: '11px', height: 22, fontFamily: 'monospace'}}
+                        />
+                    </Tooltip>
+                )}
+                {typeof message.size === 'number' && message.size > 0 && (
+                    <MetaLabel>Size: {formatBytes(message.size)}</MetaLabel>
+                )}
+                {message.charset && <MetaLabel>Charset: {message.charset}</MetaLabel>}
+                {links.length > 0 && <MetaLabel>Links: {links.length}</MetaLabel>}
+                {inlineAttachments.length > 0 && <MetaLabel>Inline images: {inlineAttachments.length}</MetaLabel>}
+                {headerEntries.length > 0 && (
+                    <Chip
+                        size="small"
+                        clickable
+                        variant={headersOpen ? 'filled' : 'outlined'}
+                        label={`Headers · ${headerEntries.length}`}
+                        onClick={() => setHeadersOpen((v) => !v)}
+                        sx={{fontSize: '11px', height: 22}}
+                    />
+                )}
+            </Box>
 
+            {/* Links list — only when there are links */}
             {links.length > 0 && (
-                <>
-                    <SectionTitle>Links · {links.length}</SectionTitle>
-                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 0.5}}>
-                        {links.map((href) => (
-                            <Link
-                                key={href}
-                                href={href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                sx={{fontSize: '12px', wordBreak: 'break-all'}}
-                            >
-                                {href}
-                            </Link>
-                        ))}
-                    </Box>
-                </>
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, rowGap: 0.25}}>
+                    {links.map((href) => (
+                        <Link
+                            key={href}
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{fontSize: '11px', wordBreak: 'break-all'}}
+                        >
+                            {href}
+                        </Link>
+                    ))}
+                </Box>
             )}
 
-            {headerEntries.length > 0 && (
-                <>
-                    <SectionTitle>Headers · {headerEntries.length}</SectionTitle>
-                    <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                        {headerEntries.map(([name, value]) => (
-                            <FieldRow key={name}>
-                                <FieldKey>{name}</FieldKey>
-                                <FieldValue sx={{fontFamily: 'monospace', fontSize: '11px'}}>{value}</FieldValue>
-                            </FieldRow>
-                        ))}
-                    </Box>
-                </>
+            {/* Headers — collapsible */}
+            {headersOpen && headerEntries.length > 0 && (
+                <Box
+                    sx={(theme) => ({
+                        border: `1px solid ${theme.palette.divider}`,
+                        borderRadius: 1,
+                        padding: theme.spacing(1, 1.5),
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 0.25,
+                        maxHeight: 220,
+                        overflow: 'auto',
+                    })}
+                >
+                    {headerEntries.map(([name, value]) => (
+                        <Box key={name} sx={{display: 'flex', gap: 1, fontSize: '11px', fontFamily: 'monospace'}}>
+                            <Box sx={{minWidth: 140, color: 'text.disabled'}}>{name}</Box>
+                            <Box sx={{flex: 1, wordBreak: 'break-word'}}>{value}</Box>
+                        </Box>
+                    ))}
+                </Box>
             )}
         </Box>
     );
 };
 
-const PreviewPane = ({message}: {message: MailMessage}) => {
+// ---------------------------------------------------------------------------
+// Preview pane — tabs + viewport toggle. Used both inline and inside the
+// fullscreen Dialog.
+// ---------------------------------------------------------------------------
+
+type PreviewPaneProps = {message: MailMessage; onFullscreen?: () => void; onExitFullscreen?: () => void};
+
+const PreviewPane = ({message, onFullscreen, onExitFullscreen}: PreviewPaneProps) => {
     const [tab, setTab] = useState<PreviewTab>(message.htmlBody ? 'html' : message.textBody ? 'text' : 'raw');
     const [viewport, setViewport] = useState<Viewport>('desktop');
 
@@ -406,14 +409,26 @@ const PreviewPane = ({message}: {message: MailMessage}) => {
     }, []);
 
     const htmlSrcDoc = useMemo(
-        () => rewriteCidReferences(message.htmlBody ?? '', message.attachments),
+        () => rewriteCidReferences(message.htmlBody ?? '', message.attachments ?? []),
         [message.htmlBody, message.attachments],
     );
 
     const viewportWidth = VIEWPORT_WIDTHS[viewport];
+    const fullscreen = Boolean(onExitFullscreen);
 
     return (
-        <Box sx={{flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column'}}>
+        <Box
+            sx={(theme) => ({
+                flex: 1,
+                minWidth: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                border: fullscreen ? 'none' : `1px solid ${theme.palette.divider}`,
+                borderRadius: fullscreen ? 0 : 1,
+                overflow: 'hidden',
+                backgroundColor: theme.palette.background.paper,
+            })}
+        >
             <Box
                 sx={{
                     display: 'flex',
@@ -422,6 +437,7 @@ const PreviewPane = ({message}: {message: MailMessage}) => {
                     borderBottom: '1px solid',
                     borderColor: 'divider',
                     gap: 2,
+                    px: 1,
                     flexWrap: 'wrap',
                 }}
             >
@@ -433,39 +449,63 @@ const PreviewPane = ({message}: {message: MailMessage}) => {
                     <Tab value="html" label="HTML Preview" disabled={!message.htmlBody} />
                     <Tab value="text" label="Text" disabled={!message.textBody} />
                     <Tab value="source" label="HTML Source" disabled={!message.htmlBody} />
-                    <Tab value="raw" label="Raw" />
+                    <Tab value="raw" label="Raw" disabled={!message.raw} />
                 </Tabs>
-                {tab === 'html' && (
-                    <ToggleButtonGroup
-                        value={viewport}
-                        exclusive
-                        size="small"
-                        onChange={handleViewport}
-                        sx={{'& .MuiToggleButton-root': {padding: '4px 10px', fontSize: '11px'}}}
-                    >
-                        <ToggleButton value="desktop" aria-label="Desktop">
-                            <Icon sx={{fontSize: 16, mr: 0.5}}>desktop_windows</Icon>
-                            Desktop
-                        </ToggleButton>
-                        <ToggleButton value="tablet" aria-label="Tablet">
-                            <Icon sx={{fontSize: 16, mr: 0.5}}>tablet_mac</Icon>
-                            Tablet
-                        </ToggleButton>
-                        <ToggleButton value="mobile" aria-label="Mobile">
-                            <Icon sx={{fontSize: 16, mr: 0.5}}>smartphone</Icon>
-                            Mobile
-                        </ToggleButton>
-                    </ToggleButtonGroup>
-                )}
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mr: 0.5}}>
+                    {tab === 'html' && message.htmlBody && (
+                        <ToggleButtonGroup
+                            value={viewport}
+                            exclusive
+                            size="small"
+                            onChange={handleViewport}
+                            sx={{'& .MuiToggleButton-root': {padding: '4px 10px', fontSize: '11px'}}}
+                        >
+                            <ToggleButton value="desktop" aria-label="Desktop">
+                                <Icon sx={{fontSize: 16, mr: 0.5}}>desktop_windows</Icon>
+                                Desktop
+                            </ToggleButton>
+                            <ToggleButton value="tablet" aria-label="Tablet">
+                                <Icon sx={{fontSize: 16, mr: 0.5}}>tablet_mac</Icon>
+                                Tablet
+                            </ToggleButton>
+                            <ToggleButton value="mobile" aria-label="Mobile">
+                                <Icon sx={{fontSize: 16, mr: 0.5}}>smartphone</Icon>
+                                Mobile
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+                    )}
+                    {onFullscreen && (
+                        <Tooltip title="Open fullscreen" placement="top">
+                            <IconButton size="small" onClick={onFullscreen} aria-label="Open preview fullscreen">
+                                <Icon sx={{fontSize: 18}}>fullscreen</Icon>
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                    {onExitFullscreen && (
+                        <Tooltip title="Exit fullscreen" placement="top">
+                            <IconButton size="small" onClick={onExitFullscreen} aria-label="Close fullscreen preview">
+                                <Icon sx={{fontSize: 18}}>close</Icon>
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                </Box>
             </Box>
 
-            <Box sx={{p: 2, flex: 1, minHeight: 320, overflow: 'auto', backgroundColor: 'background.default'}}>
+            <Box
+                sx={{
+                    p: 2,
+                    flex: 1,
+                    minHeight: fullscreen ? 0 : 480,
+                    overflow: 'auto',
+                    backgroundColor: 'background.default',
+                }}
+            >
                 {tab === 'html' && message.htmlBody && (
                     <Box sx={{display: 'flex', justifyContent: 'center'}}>
                         <Box
                             sx={{
                                 width: viewportWidth,
-                                minHeight: 480,
+                                minHeight: fullscreen ? '80vh' : 560,
                                 backgroundColor: 'common.white',
                                 border: '1px solid',
                                 borderColor: 'divider',
@@ -477,7 +517,12 @@ const PreviewPane = ({message}: {message: MailMessage}) => {
                                 title="html-preview"
                                 sandbox=""
                                 srcDoc={htmlSrcDoc}
-                                style={{width: '100%', height: 600, border: 0, display: 'block'}}
+                                style={{
+                                    width: '100%',
+                                    height: fullscreen ? 'calc(100vh - 120px)' : 680,
+                                    border: 0,
+                                    display: 'block',
+                                }}
                             />
                         </Box>
                     </Box>
@@ -508,7 +553,7 @@ const PreviewPane = ({message}: {message: MailMessage}) => {
                             wordBreak: 'break-word',
                         })}
                     >
-                        {message.raw}
+                        {message.raw ?? ''}
                     </Box>
                 )}
             </Box>
@@ -517,15 +562,12 @@ const PreviewPane = ({message}: {message: MailMessage}) => {
 };
 
 const DetailView = ({message, index, total, onBack}: DetailProps) => {
-    const attachments = message.attachments.filter((a) => !a.inline);
-    const images = useMemo(() => countImages(message.htmlBody ?? ''), [message.htmlBody]);
-    const links = useMemo(() => extractLinks(message.htmlBody ?? ''), [message.htmlBody]);
-    const contentType =
-        message.htmlBody && message.textBody ? 'multipart/alternative' : message.htmlBody ? 'text/html' : 'text/plain';
+    const attachments = (message.attachments ?? []).filter((a) => !a.inline);
+    const [fullscreen, setFullscreen] = useState(false);
 
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, flexWrap: 'wrap'}}>
+            <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, flexWrap: 'wrap'}}>
                 <Button
                     onClick={onBack}
                     size="small"
@@ -538,7 +580,7 @@ const DetailView = ({message, index, total, onBack}: DetailProps) => {
                     Message {index + 1} of {total}
                 </Typography>
                 <Box sx={{flex: 1}} />
-                {message.htmlBody && (
+                {message.htmlBody && message.textBody && (
                     <Chip size="small" variant="outlined" label="multipart" sx={{fontSize: '11px', height: 22}} />
                 )}
                 {attachments.length > 0 && (
@@ -555,42 +597,55 @@ const DetailView = ({message, index, total, onBack}: DetailProps) => {
             <Typography sx={{fontSize: '18px', fontWeight: 600, mb: 0.5}}>
                 {message.subject || '(no subject)'}
             </Typography>
-            <Typography sx={{fontSize: '12px', color: 'text.disabled', mb: 1.5}}>
-                {serializeAddresses(message.from) || '—'}
-                {' → '}
-                {serializeAddresses(message.to) || '—'}
-                {message.date ? ` · ${message.date}` : ''}
-            </Typography>
+            {message.date && (
+                <Typography sx={{fontSize: '12px', color: 'text.disabled', mb: 1.5}}>{message.date}</Typography>
+            )}
 
-            <Box
-                sx={{
-                    display: 'flex',
-                    gap: 2,
-                    mb: 2,
-                    flexWrap: 'wrap',
-                    pb: 1.5,
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
-                }}
+            <MetaHeader message={message} />
+
+            <PreviewPane message={message} onFullscreen={() => setFullscreen(true)} />
+
+            <Dialog
+                fullScreen
+                open={fullscreen}
+                onClose={() => setFullscreen(false)}
+                aria-label="Fullscreen email preview"
             >
-                <MetaLabel>Size: {formatBytes(message.size)}</MetaLabel>
-                <MetaLabel>Links: {links.length}</MetaLabel>
-                <MetaLabel>Images: {images}</MetaLabel>
-                <MetaLabel>Type: {contentType}</MetaLabel>
-                <MetaLabel>Charset: {message.charset}</MetaLabel>
-            </Box>
-
-            <Box sx={{display: 'flex', gap: 3, alignItems: 'flex-start', flexDirection: {xs: 'column', md: 'row'}}}>
-                <LeftColumn message={message} />
-                <PreviewPane message={message} />
-            </Box>
+                <DialogContent sx={{padding: 0, display: 'flex', flexDirection: 'column', height: '100%'}}>
+                    <PreviewPane message={message} onExitFullscreen={() => setFullscreen(false)} />
+                </DialogContent>
+            </Dialog>
         </Box>
     );
 };
 
+const MESSAGE_QUERY_PARAM = 'message';
+
 export const MailerPanel = ({data}: MailerPanelProps) => {
     const messages = data?.messages ?? [];
-    const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const selectedIndex = useMemo(() => {
+        const raw = searchParams.get(MESSAGE_QUERY_PARAM);
+        if (raw === null) return null;
+        const idx = Number.parseInt(raw, 10);
+        return Number.isInteger(idx) && idx >= 0 && idx < messages.length ? idx : null;
+    }, [searchParams, messages.length]);
+
+    const selectMessage = useCallback(
+        (index: number | null) => {
+            setSearchParams(
+                (prev) => {
+                    const next = new URLSearchParams(prev);
+                    if (index === null) next.delete(MESSAGE_QUERY_PARAM);
+                    else next.set(MESSAGE_QUERY_PARAM, String(index));
+                    return next;
+                },
+                {replace: false},
+            );
+        },
+        [setSearchParams],
+    );
 
     if (messages.length === 0) {
         return <EmptyState icon="mail" title="No dumped mails found" />;
@@ -602,10 +657,10 @@ export const MailerPanel = ({data}: MailerPanelProps) => {
                 message={messages[selectedIndex]}
                 index={selectedIndex}
                 total={messages.length}
-                onBack={() => setSelectedIndex(null)}
+                onBack={() => selectMessage(null)}
             />
         );
     }
 
-    return <ListView messages={messages} onSelect={setSelectedIndex} />;
+    return <ListView messages={messages} onSelect={selectMessage} />;
 };
