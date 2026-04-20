@@ -280,6 +280,9 @@ cyclomatic-complexity = { level = "warning", threshold = 15, exclude = [
     "libs/Kernel/src/Storage/FileStorage.php",
     # Stream proxy — complexity from HTTP context extraction
     "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php",
+    # Mailer — complexity from normalizing heterogeneous message + attachment payloads
+    "libs/Kernel/src/Collector/MailerCollector.php",
+    "libs/Adapter/Yii3/src/Collector/Mailer/MailerInterfaceProxy.php",
 ] }
 kan-defect = { level = "warning", exclude = [
     "libs/Testing/tests",

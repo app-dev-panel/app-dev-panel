@@ -107,6 +107,54 @@ final class MailerInterfaceProxyTest extends TestCase
         $this->assertSame('<p>Hello World</p>', $collected['messages'][0]['htmlBody']);
     }
 
+    public function testSendNormalizesAttachmentsAndEmbeddings(): void
+    {
+        $attachment = \Yiisoft\Mailer\File::fromContent('release-notes', 'release.txt', 'text/plain');
+        $embedding = \Yiisoft\Mailer\File::fromContent('logo-bytes', 'logo.png', 'image/png');
+
+        $message = $this->createMessageMock();
+        // Attach both files via real Message methods on the mock's __call - use actual Message instead.
+        $realMessage = new \Yiisoft\Mailer\Message()
+            ->withFrom('sender@example.com')
+            ->withTo('recipient@example.com')
+            ->withSubject('With attachments')
+            ->withAttachments($attachment)
+            ->withEmbeddings($embedding);
+
+        $mailer = $this->createMock(\Yiisoft\Mailer\MailerInterface::class);
+        $mailer->expects($this->once())->method('send')->with($realMessage);
+
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $collector = new MailerCollector($timeline);
+        $collector->startup();
+
+        $proxy = new MailerInterfaceProxy($mailer, $collector);
+        $proxy->send($realMessage);
+
+        $collected = $collector->getCollected();
+        $this->assertCount(1, $collected['messages']);
+
+        $attachments = $collected['messages'][0]['attachments'];
+        $this->assertCount(2, $attachments);
+
+        $regular = $attachments[0];
+        $this->assertSame('release.txt', $regular['filename']);
+        $this->assertSame('text/plain', $regular['contentType']);
+        $this->assertFalse($regular['inline']);
+        $this->assertNull($regular['contentId']);
+        $this->assertSame('release-notes', base64_decode($regular['contentBase64'], true));
+
+        $inline = $attachments[1];
+        $this->assertSame('logo.png', $inline['filename']);
+        $this->assertTrue($inline['inline']);
+        $this->assertNotNull($inline['contentId']);
+        $this->assertSame('logo-bytes', base64_decode($inline['contentBase64'], true));
+
+        $this->assertIsInt($collected['messages'][0]['size']);
+        unset($message);
+    }
+
     public function testSendUpdatesSummary(): void
     {
         $message = $this->createMessageMock();

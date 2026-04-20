@@ -46,6 +46,11 @@ final class MailerCollectorTest extends AbstractCollectorTestCase
         $this->assertSame('Hello World', $msg['textBody']);
         $this->assertSame('<p>Hello World</p>', $msg['htmlBody']);
         $this->assertSame('utf-8', $msg['charset']);
+        // New fields default to empty when adapter omits them.
+        $this->assertNull($msg['messageId']);
+        $this->assertSame([], $msg['headers']);
+        $this->assertSame([], $msg['attachments']);
+        $this->assertIsInt($msg['size']);
     }
 
     protected function checkSummaryData(array $data): void
@@ -79,6 +84,59 @@ final class MailerCollectorTest extends AbstractCollectorTestCase
 
         $this->assertSame([], $collector->getCollected());
         $this->assertSame([], $collector->getSummary());
+    }
+
+    public function testCollectMessageNormalizesAttachmentsAndSize(): void
+    {
+        $collector = new MailerCollector(new TimelineCollector());
+        $collector->startup();
+
+        $content = 'hello';
+        $contentBase64 = base64_encode($content);
+
+        $collector->collectMessage([
+            'from' => ['sender@example.com' => 'Sender'],
+            'to' => ['recipient@example.com' => 'Recipient'],
+            'subject' => 'With attachment',
+            'raw' => 'RAW',
+            'messageId' => '<abc@example.com>',
+            'headers' => ['X-Custom' => 'yes'],
+            'attachments' => [
+                [
+                    'filename' => 'release-notes.txt',
+                    'contentType' => 'text/plain',
+                    'size' => \strlen($content),
+                    'contentId' => null,
+                    'inline' => false,
+                    'contentBase64' => $contentBase64,
+                ],
+                [
+                    'filename' => 'logo.png',
+                    'contentType' => 'image/png',
+                    'contentId' => 'cid-123',
+                    'inline' => true,
+                    'contentBase64' => $contentBase64,
+                ],
+            ],
+        ]);
+
+        $data = $collector->getCollected();
+        $msg = $data['messages'][0];
+
+        $this->assertSame('<abc@example.com>', $msg['messageId']);
+        $this->assertSame(['X-Custom' => 'yes'], $msg['headers']);
+        $this->assertSame(3, $msg['size']); // strlen('RAW')
+        $this->assertCount(2, $msg['attachments']);
+
+        $this->assertSame('release-notes.txt', $msg['attachments'][0]['filename']);
+        $this->assertFalse($msg['attachments'][0]['inline']);
+        $this->assertNull($msg['attachments'][0]['contentId']);
+        $this->assertSame(\strlen($content), $msg['attachments'][0]['size']);
+
+        $this->assertTrue($msg['attachments'][1]['inline']);
+        $this->assertSame('cid-123', $msg['attachments'][1]['contentId']);
+        // Size computed from base64 when not provided.
+        $this->assertSame(\strlen($content), $msg['attachments'][1]['size']);
     }
 
     public function testResetClearsData(): void
