@@ -1,13 +1,12 @@
 import {Icon, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import {createContext, useContext, useEffect} from 'react';
-import {createPortal} from 'react-dom';
+import {createContext, useContext} from 'react';
 
-type PageHeaderVariant = 'block' | 'chip' | 'hidden';
+type PageHeaderVariant = 'block' | 'hidden';
 
-export type PageHeaderContextValue = {variant: PageHeaderVariant; slot: HTMLElement | null};
+export type PageHeaderContextValue = {variant: PageHeaderVariant};
 
-const PageHeaderContext = createContext<PageHeaderContextValue>({variant: 'block', slot: null});
+const PageHeaderContext = createContext<PageHeaderContextValue>({variant: 'block'});
 
 export const PageHeaderProvider = PageHeaderContext.Provider;
 export const usePageHeaderContext = () => useContext(PageHeaderContext);
@@ -26,53 +25,10 @@ const Description = styled(Typography)(({theme}) => ({
     marginTop: theme.spacing(0.5),
 }));
 
-const ChipBody = styled('span')(({theme}) => ({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: theme.spacing(1),
-    padding: theme.spacing(0.875, 1.75),
-    borderRadius: 999,
-    border: `1px solid ${theme.palette.divider}`,
-    backgroundColor: theme.palette.background.paper,
-    color: theme.palette.text.primary,
-    fontWeight: 600,
-    fontSize: '14px',
-    lineHeight: 1.2,
-    whiteSpace: 'nowrap',
-    pointerEvents: 'auto',
-}));
-
-// Tracks the number of chip PageHeaders currently mounted in the single shared
-// slot. Only used for a dev-mode guard against duplicate headers on one page.
-let chipOccupants = 0;
-
 export const PageHeader = ({title, icon, description}: PageHeaderProps) => {
-    const {variant, slot} = usePageHeaderContext();
-
-    useEffect(() => {
-        if (!import.meta.env.DEV || variant !== 'chip' || !slot) return;
-        chipOccupants += 1;
-        if (chipOccupants > 1) {
-            console.warn(
-                '[PageHeader] Multiple chip PageHeaders are mounted at once — only one should be active per page.',
-            );
-        }
-        return () => {
-            chipOccupants -= 1;
-        };
-    }, [variant, slot]);
+    const {variant} = usePageHeaderContext();
 
     if (variant === 'hidden') return null;
-
-    if (variant === 'chip' && slot) {
-        return createPortal(
-            <ChipBody>
-                {icon && <Icon sx={{fontSize: 18, color: 'primary.main'}}>{icon}</Icon>}
-                <span>{title}</span>
-            </ChipBody>,
-            slot,
-        );
-    }
 
     return (
         <Root>
