@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Inspector\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Kernel\Inspector\Primitives;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\VarDumper\VarDumper;
 
 final class RoutingController
 {
@@ -40,7 +40,7 @@ final class RoutingController
                 'middlewares' => $data['middlewares'] ?? $data['middlewareDefinitions'] ?? [],
             ];
         }
-        $response = VarDumper::create($routes)->asPrimitives(5);
+        $response = Primitives::dump($routes, 5);
 
         return $this->responseFactory->createJsonResponse($response);
     }

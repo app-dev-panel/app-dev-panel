@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Inspector\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Kernel\Inspector\Primitives;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -12,7 +13,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Throwable;
-use Yiisoft\VarDumper\VarDumper;
 
 final class TranslationController
 {
@@ -33,7 +33,7 @@ final class TranslationController
         $locales = $this->resolveLocales();
         $messages = $this->collectMessages($categorySources, $locales);
 
-        $response = VarDumper::create($messages)->asPrimitives(255);
+        $response = Primitives::dump($messages, 255);
         return $this->responseFactory->createJsonResponse($response);
     }
 
@@ -57,7 +57,7 @@ final class TranslationController
         $categorySource->write($locale, $messages);
 
         $result = [$locale => $messages];
-        $response = VarDumper::create($result)->asPrimitives(255);
+        $response = Primitives::dump($result, 255);
         return $this->responseFactory->createJsonResponse($response);
     }
 

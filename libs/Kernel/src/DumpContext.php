@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace AppDevPanel\Kernel;
 
 use __PHP_Incomplete_Class;
+use AppDevPanel\Kernel\Inspector\ClosureDescriptor;
 use Closure;
-use ReflectionException;
-use Yiisoft\VarDumper\ClosureExporter;
 
 use function array_key_exists;
 use function is_array;
@@ -15,8 +14,6 @@ use function is_object;
 
 final class DumpContext
 {
-    private static ?ClosureExporter $closureExporter = null;
-
     public function __construct(
         public array $objects,
         private readonly array $excludedClasses,
@@ -117,8 +114,8 @@ final class DumpContext
         $objectDescription = $this->getObjectDescription($variable);
 
         if ($variable instanceof Closure) {
-            $exported = $this->exportClosure($variable);
-            return $inlineObject ? $exported : [$objectDescription => $exported];
+            $descriptor = ClosureDescriptor::describe($variable);
+            return $inlineObject ? $descriptor : [$objectDescription => $descriptor];
         }
 
         if ($objectCollapseLevel < $level && array_key_exists($objectDescription, $this->objects)) {
@@ -195,13 +192,5 @@ final class DumpContext
         }
 
         return '{resource}';
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    private function exportClosure(Closure $closure): string
-    {
-        return (self::$closureExporter ??= new ClosureExporter())->export($closure);
     }
 }

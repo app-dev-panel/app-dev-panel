@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Inspector\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Kernel\Inspector\Primitives;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\SimpleCache\CacheInterface;
 use RuntimeException;
-use Yiisoft\VarDumper\VarDumper;
 
 class CacheController
 {
@@ -37,7 +37,7 @@ class CacheController
         }
 
         $result = $cache->get($key);
-        $response = VarDumper::create($result)->asPrimitives(255);
+        $response = Primitives::dump($result, 255);
 
         return $this->responseFactory->createJsonResponse($response);
     }

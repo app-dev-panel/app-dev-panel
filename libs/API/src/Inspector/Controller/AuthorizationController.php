@@ -6,9 +6,9 @@ namespace AppDevPanel\Api\Inspector\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Kernel\Inspector\Primitives;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\VarDumper\VarDumper;
 
 /**
  * Inspector controller for live authorization configuration inspection.
@@ -35,7 +35,7 @@ final class AuthorizationController
             'config' => $this->configProvider->getSecurityConfig(),
         ];
 
-        $response = VarDumper::create($data)->asPrimitives(5);
+        $response = Primitives::dump($data, 5);
 
         return $this->responseFactory->createJsonResponse($response);
     }
