@@ -300,7 +300,7 @@ return [
     InspectController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         ContainerInterface $container,
-    ) => new InspectController($jsonResponseFactory, $container),
+    ) => new InspectController($jsonResponseFactory, $container, $params),
 
     CacheController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
