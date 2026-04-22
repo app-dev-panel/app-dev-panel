@@ -4,6 +4,7 @@ import {
     useGetAuthorizationQuery,
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
@@ -38,6 +39,34 @@ const TableHeader = styled(TableRow)(({theme}) => ({
 
 const MonoText = styled(Typography)(({theme}) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '12px'}));
 
+const linkSx = (theme: import('@mui/material/styles').Theme) =>
+    ({
+        fontFamily: theme.adp.fontFamilyMono,
+        fontSize: '12px',
+        color: 'primary.main',
+        wordBreak: 'break-all',
+        '&:hover': {textDecoration: 'underline'},
+    }) as const;
+
+const isFqcn = (value: string): boolean => value.includes('\\');
+
+const ClassName = ({value, bold = false}: {value: string; bold?: boolean}) => {
+    if (!isFqcn(value)) {
+        return (
+            <MonoText component="span" sx={{fontWeight: bold ? 600 : 400}}>
+                {value}
+            </MonoText>
+        );
+    }
+    return (
+        <FileLink className={value} sx={{minWidth: 0}}>
+            <Typography component="span" sx={(theme) => ({...linkSx(theme), fontWeight: bold ? 600 : 400})}>
+                {value}
+            </Typography>
+        </FileLink>
+    );
+};
+
 const HierarchyRow = styled(Box)(({theme}) => ({
     display: 'flex',
     alignItems: 'center',
@@ -56,8 +85,12 @@ const GuardsTable = ({guards}: {guards: AuthorizationGuard[]}) => (
         </TableHeader>
         {guards.map((guard) => (
             <TableRow key={guard.name}>
-                <MonoText sx={{flex: 1, fontWeight: 600}}>{guard.name}</MonoText>
-                <MonoText sx={{flex: 1, color: 'text.secondary'}}>{guard.provider}</MonoText>
+                <Box sx={{flex: 1}}>
+                    <ClassName value={guard.name} bold />
+                </Box>
+                <Box sx={{flex: 1, color: 'text.secondary'}}>
+                    <ClassName value={guard.provider} />
+                </Box>
                 <Box sx={{flex: 2}}>
                     {Object.entries(guard.config).map(([key, value]) => (
                         <Chip
@@ -128,7 +161,9 @@ const VotersTable = ({voters}: {voters: AuthorizationVoter[]}) => (
         </TableHeader>
         {voters.map((voter, index) => (
             <TableRow key={index}>
-                <MonoText sx={{flex: 2, fontWeight: 500}}>{voter.name}</MonoText>
+                <Box sx={{flex: 2}}>
+                    <ClassName value={voter.name} bold />
+                </Box>
                 <Box sx={{flex: 1}}>
                     <Chip
                         label={voter.type}
