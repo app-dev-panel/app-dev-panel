@@ -7,6 +7,7 @@ import {
 } from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {DockBottomIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DockBottomIcon';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {dispatchWindowEvent} from '@app-dev-panel/sdk/Helper/dispatchWindowEvent';
@@ -36,7 +37,6 @@ import DragHandleIcon from '@mui/icons-material/DragHandle';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
 import WebAssetIcon from '@mui/icons-material/WebAsset';
 import WebAssetOffIcon from '@mui/icons-material/WebAssetOff';
 import {Box, Chip, Divider, IconButton, Paper, Portal, Stack, Tooltip, useTheme} from '@mui/material';
@@ -706,7 +706,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                     <Box sx={{fontSize: 12, fontWeight: 600, flex: 1}}>Debug</Box>
                     <Tooltip title="Dock to bottom" arrow>
                         <IconButton onClick={() => snapTo('bottom')} size="small" sx={actionButtonSx}>
-                            <VerticalAlignBottomIcon sx={{fontSize: 16}} />
+                            <DockBottomIcon sx={{fontSize: 16}} />
                         </IconButton>
                     </Tooltip>
                     <IconButton onClick={() => setChatOpen((v) => !v)} size="small" sx={actionButtonSx}>
