@@ -388,6 +388,13 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         [updateMcpSettings],
     );
 
+    const handleOpenWebsite = useCallback(() => {
+        if (!backendUrl) {
+            return;
+        }
+        window.open(backendUrl, '_blank', 'noopener,noreferrer');
+    }, [backendUrl]);
+
     // TopBar debug info — support both web requests and console commands
     const isWeb = debugEntry ? isDebugEntryAboutWeb(debugEntry) : false;
     const isConsole = debugEntry ? isDebugEntryAboutConsole(debugEntry) : false;
@@ -597,6 +604,8 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onCopyAsImage={copyAsImage}
                     onDownloadAsImage={downloadAsPng}
                     isCopyingAsImage={isCapturing}
+                    websiteUrl={backendUrl}
+                    onOpenWebsite={handleOpenWebsite}
                 />
                 <EntrySelector
                     anchorEl={ui.entrySelectorAnchor}
