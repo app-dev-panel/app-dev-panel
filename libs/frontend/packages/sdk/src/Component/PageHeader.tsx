@@ -29,20 +29,20 @@ const Description = styled(Typography)(({theme}) => ({
 const ChipBody = styled('span')(({theme}) => ({
     display: 'inline-flex',
     alignItems: 'center',
-    gap: theme.spacing(0.75),
-    padding: theme.spacing(0.5, 1.25),
+    gap: theme.spacing(1),
+    padding: theme.spacing(0.875, 1.75),
     borderRadius: 999,
     border: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
     fontWeight: 600,
-    fontSize: '13px',
+    fontSize: '14px',
     lineHeight: 1.2,
     whiteSpace: 'nowrap',
     pointerEvents: 'auto',
 }));
 
-const ChipInfoIcon = styled(Icon)(({theme}) => ({fontSize: 14, color: theme.palette.text.secondary, cursor: 'help'}));
+const ChipInfoIcon = styled(Icon)(({theme}) => ({fontSize: 16, color: theme.palette.text.secondary, cursor: 'help'}));
 
 // Tracks the number of chip PageHeaders currently mounted in the single shared
 // slot. Only used for a dev-mode guard against duplicate headers on one page.
@@ -67,7 +67,7 @@ export const PageHeader = ({title, icon, description}: PageHeaderProps) => {
     if (variant === 'chip' && slot) {
         return createPortal(
             <ChipBody>
-                {icon && <Icon sx={{fontSize: 16, color: 'primary.main'}}>{icon}</Icon>}
+                {icon && <Icon sx={{fontSize: 18, color: 'primary.main'}}>{icon}</Icon>}
                 <span>{title}</span>
                 {description && (
                     <Tooltip title={description} placement="bottom-start" arrow>
