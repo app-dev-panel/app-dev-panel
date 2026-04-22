@@ -111,6 +111,10 @@ final class DebugMiddleware
             return;
         }
 
+        if ($this->toolbarInjector->isPanelRequest($request->getPathInfo())) {
+            return;
+        }
+
         $contentType = $response->headers->get('Content-Type', '');
         if (!$this->toolbarInjector->isHtmlResponse($contentType)) {
             return;

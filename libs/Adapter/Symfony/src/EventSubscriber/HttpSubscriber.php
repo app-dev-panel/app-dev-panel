@@ -125,6 +125,12 @@ final class HttpSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $request = $event->getRequest();
+
+        if ($this->toolbarInjector->isPanelRequest($request->getPathInfo())) {
+            return;
+        }
+
         $response = $event->getResponse();
         $contentType = $response->headers->get('Content-Type', '');
 
@@ -137,7 +143,6 @@ final class HttpSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $request = $event->getRequest();
         $backendUrl = $request->getSchemeAndHttpHost();
 
         $injected = $this->toolbarInjector->inject($content, $backendUrl, $this->debugger->getId());

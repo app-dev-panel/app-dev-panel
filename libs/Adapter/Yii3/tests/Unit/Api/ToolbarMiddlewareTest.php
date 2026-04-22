@@ -56,6 +56,24 @@ final class ToolbarMiddlewareTest extends TestCase
         $this->assertSame('{"ok":true}', (string) $response->getBody());
     }
 
+    public function testSkipsInjectionForPanelRequest(): void
+    {
+        $middleware = $this->createMiddleware();
+        $handler = $this->createHandler(
+            '<html><body><div id="root"></div></body></html>',
+            'text/html',
+        );
+
+        $response = $middleware->process(
+            new ServerRequest('GET', 'http://localhost:8101/debug?toolbar=0'),
+            $handler,
+        );
+
+        $body = (string) $response->getBody();
+        $this->assertStringNotContainsString('app-dev-toolbar', $body);
+        $this->assertStringContainsString('<div id="root"></div>', $body);
+    }
+
     public function testSkipsInjectionForEmptyBody(): void
     {
         $middleware = $this->createMiddleware();
