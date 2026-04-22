@@ -162,6 +162,12 @@ final class WebListener
             return;
         }
 
+        $request = $app->getRequest();
+        $path = parse_url($request->getUrl(), PHP_URL_PATH);
+        if (is_string($path) && $this->toolbarInjector->isPanelRequest($path)) {
+            return;
+        }
+
         $response = $app->getResponse();
 
         // Only inject into HTML format responses
@@ -177,7 +183,6 @@ final class WebListener
             return;
         }
 
-        $request = $app->getRequest();
         $backendUrl = $request->getHostInfo();
 
         $response->data = $this->toolbarInjector->inject($content, $backendUrl, $this->debugger->getId());

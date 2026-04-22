@@ -527,6 +527,32 @@ final class HttpSubscriberTest extends TestCase
         $this->assertStringNotContainsString('app-dev-toolbar', $response->getContent());
     }
 
+    public function testToolbarNotInjectedForPanelRequest(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $debugger = new Debugger($idGenerator, $storage, []);
+
+        $toolbarInjector = new ToolbarInjector(
+            new PanelConfig(staticUrl: '/assets', viewerBasePath: '/debug'),
+            new ToolbarConfig(enabled: true),
+        );
+
+        $subscriber = new HttpSubscriber($debugger, toolbarInjector: $toolbarInjector);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+
+        $request = Request::create('/debug');
+        $subscriber->onKernelRequest(new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST));
+
+        $html = '<html><body><div id="root"></div></body></html>';
+        $response = new Response($html, 200, ['Content-Type' => 'text/html']);
+        $subscriber->onKernelResponse(
+            new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response),
+        );
+
+        $this->assertSame($html, $response->getContent());
+    }
+
     public function testToolbarNotInjectedForNonHtmlResponse(): void
     {
         $idGenerator = new DebuggerIdGenerator();
