@@ -34,6 +34,10 @@ final class ToolbarMiddleware implements MiddlewareInterface
             return $response;
         }
 
+        if ($this->toolbarInjector->isPanelRequest($request->getUri()->getPath())) {
+            return $response;
+        }
+
         $contentType = '';
         foreach ($response->getHeader('Content-Type') as $value) {
             $contentType .= $value;
