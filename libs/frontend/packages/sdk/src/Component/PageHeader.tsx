@@ -1,12 +1,15 @@
 import {Icon, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import {createContext, useContext} from 'react';
+import {createContext, useContext, useLayoutEffect, useState} from 'react';
+import {createPortal} from 'react-dom';
 
 type PageHeaderVariant = 'block' | 'chip';
 
 const PageHeaderVariantContext = createContext<PageHeaderVariant>('block');
+const PageHeaderSlotContext = createContext<HTMLElement | null>(null);
 
 export const PageHeaderVariantProvider = PageHeaderVariantContext.Provider;
+export const PageHeaderSlotProvider = PageHeaderSlotContext.Provider;
 
 type PageHeaderProps = {title: string; icon?: string; description?: string};
 
@@ -22,11 +25,7 @@ const Description = styled(Typography)(({theme}) => ({
     marginTop: theme.spacing(0.5),
 }));
 
-const Chip = styled('div')(({theme}) => ({
-    position: 'absolute',
-    top: 0,
-    left: theme.spacing(2.5),
-    transform: 'translateY(-50%)',
+const ChipBody = styled('span')(({theme}) => ({
     display: 'inline-flex',
     alignItems: 'center',
     gap: theme.spacing(0.75),
@@ -39,26 +38,37 @@ const Chip = styled('div')(({theme}) => ({
     fontSize: '13px',
     lineHeight: 1.2,
     whiteSpace: 'nowrap',
-    zIndex: 1,
+    pointerEvents: 'auto',
 }));
 
 export const PageHeader = ({title, icon, description}: PageHeaderProps) => {
     const variant = useContext(PageHeaderVariantContext);
+    const slot = useContext(PageHeaderSlotContext);
 
-    if (variant === 'chip') {
+    // Re-render once the slot DOM node is attached so the portal target
+    // is available on the first client render after layout mounts.
+    const [slotReady, setSlotReady] = useState(false);
+    useLayoutEffect(() => {
+        setSlotReady(Boolean(slot));
+    }, [slot]);
+
+    if (variant === 'chip' && slot && slotReady) {
         const chip = (
-            <Chip>
+            <ChipBody>
                 {icon && <Icon sx={{fontSize: 16, color: 'primary.main'}}>{icon}</Icon>}
                 <span>{title}</span>
-            </Chip>
+            </ChipBody>
         );
 
-        return description ? (
-            <Tooltip title={description} placement="bottom-start" arrow>
-                {chip}
-            </Tooltip>
-        ) : (
-            chip
+        return createPortal(
+            description ? (
+                <Tooltip title={description} placement="bottom-start" arrow>
+                    {chip}
+                </Tooltip>
+            ) : (
+                chip
+            ),
+            slot,
         );
     }
 

@@ -27,6 +27,7 @@ import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
 import {TopBar} from '@app-dev-panel/sdk/Component/Layout/TopBar';
 import {UnifiedSidebar} from '@app-dev-panel/sdk/Component/Layout/UnifiedSidebar';
 import {selectUnreadCount} from '@app-dev-panel/sdk/Component/Notifications';
+import {PageHeaderSlotProvider} from '@app-dev-panel/sdk/Component/PageHeader';
 import {ScrollTopButton} from '@app-dev-panel/sdk/Component/ScrollTop';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {useCopyAsImage} from '@app-dev-panel/sdk/Component/useCopyAsImage';
@@ -45,7 +46,7 @@ import Tooltip from '@mui/material/Tooltip';
 import {styled, useTheme as useMuiTheme} from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
-import {useCallback, useEffect, useMemo, useReducer, useRef} from 'react';
+import {useCallback, useEffect, useMemo, useReducer, useRef, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
 import {Outlet, useLocation, useNavigate, useSearchParams} from 'react-router';
@@ -167,6 +168,26 @@ const MainInner = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{exp
     gap: componentTokens.mainGap,
 }));
 
+const ContentStack = styled(Box)({
+    position: 'relative',
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+});
+
+// Positioned over ContentArea's top border. Pages that opt into the chip
+// PageHeader variant portal their title into this slot.
+const ContentHeaderSlot = styled('div')(({theme}) => ({
+    position: 'absolute',
+    top: 0,
+    left: theme.spacing(3),
+    transform: 'translateY(-50%)',
+    zIndex: 2,
+    pointerEvents: 'none',
+    [theme.breakpoints.up('sm')]: {left: theme.spacing(4)},
+}));
+
 const ContentArea = styled(Box)(({theme}) => ({
     flex: 1,
     minWidth: 0,
@@ -211,6 +232,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
 
     // Copy as image
     const {copyToClipboard: copyAsImage, downloadAsPng, isCapturing, targetRef: contentRef} = useCopyAsImage();
+
+    // Slot for pages that portal a compact chip header onto ContentArea's border.
+    const [headerSlotEl, setHeaderSlotEl] = useState<HTMLElement | null>(null);
 
     // MCP settings
     const {data: mcpSettings} = useGetMcpSettingsQuery();
@@ -649,11 +673,16 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                                 onChildClick={handleChildClick}
                             />
                         )}
-                        <ContentArea ref={contentRef}>
-                            <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[location.pathname]}>
-                                <Outlet />
-                            </ErrorBoundary>
-                        </ContentArea>
+                        <ContentStack>
+                            <ContentHeaderSlot ref={setHeaderSlotEl} />
+                            <ContentArea ref={contentRef}>
+                                <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[location.pathname]}>
+                                    <PageHeaderSlotProvider value={headerSlotEl}>
+                                        <Outlet />
+                                    </PageHeaderSlotProvider>
+                                </ErrorBoundary>
+                            </ContentArea>
+                        </ContentStack>
                         {liveFeedOpen && !isMobile && <LiveFeedPanel onClose={handleLiveFeedClick} />}
                     </MainInner>
                 </MainArea>
