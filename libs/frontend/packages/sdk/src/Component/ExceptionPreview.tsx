@@ -1,11 +1,12 @@
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {StackTrace} from '@app-dev-panel/sdk/Component/StackTrace';
+import type {EditorPreset} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {parseFilePath, parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
+import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import BugReportIcon from '@mui/icons-material/BugReport';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FmdGoodIcon from '@mui/icons-material/FmdGood';
-import {Accordion, AccordionDetails, AccordionSummary, Box, Button, Divider, Stack, Typography} from '@mui/material';
+import {Box, Button, Divider, Stack, Typography} from '@mui/material';
 import {useEffect, useState} from 'react';
 
 export type ExceptionFileContent = {content: string; extension: string};
@@ -25,18 +26,24 @@ export type ExceptionPreviewProps = {
      * (e.g. the embeddable toolbar) can omit this prop to skip code preview.
      */
     fetchFileContent?: (path: string) => Promise<ExceptionFileContent | null>;
+    /**
+     * Fallback editor preset used when `application.editorConfig.editor`
+     * is still `'none'`. Typically set by the toolbar so "Source" opens
+     * an IDE out of the box.
+     */
+    defaultEditorPreset?: EditorPreset;
 };
 
 export const ExceptionPreview = (props: ExceptionPreviewProps) => {
     const [file, setFile] = useState<ExceptionFileContent | null>(null);
     const {fetchFileContent} = props;
-    const getEditorUrl = useEditorUrl();
+    const getEditorUrl = useEditorUrl(props.defaultEditorPreset);
     const cleanFile = parseFilePath(props.file);
     const lineNumber = +props.line;
     const cleanClass = parseFilePath(props.class);
     const sourceEditorUrl = getEditorUrl(cleanFile, lineNumber);
-    const sourceFallbackUrl = `/inspector/files?path=${encodeURIComponent(cleanFile)}#L${props.line}`;
-    const classExplorerUrl = `/inspector/files?class=${encodeURIComponent(cleanClass)}`;
+    const sourceFallbackUrl = panelPagePath(`/inspector/files?path=${encodeURIComponent(cleanFile)}#L${props.line}`);
+    const classExplorerUrl = panelPagePath(`/inspector/files?class=${encodeURIComponent(cleanClass)}`);
     const hasCode = props.code != null && String(props.code) !== '' && String(props.code) !== '0';
 
     useEffect(() => {
@@ -125,19 +132,15 @@ export const ExceptionPreview = (props: ExceptionPreviewProps) => {
                 </Box>
             )}
             {props.traceAsString && (
-                <>
-                    <Divider sx={{mt: 2}} />
-                    <Accordion disableGutters elevation={0} square sx={{background: 'transparent'}}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{px: 0, minHeight: 40}}>
-                            <Typography variant="body2" sx={{fontWeight: 600, color: 'text.secondary'}}>
-                                Stack trace
-                            </Typography>
-                        </AccordionSummary>
-                        <AccordionDetails sx={{px: 0, pt: 0}}>
-                            <StackTrace trace={props.traceAsString} fontSize={10} />
-                        </AccordionDetails>
-                    </Accordion>
-                </>
+                <Box sx={{mt: 2}}>
+                    <Divider sx={{mb: 1}} />
+                    <Typography variant="body2" sx={{fontWeight: 600, color: 'text.secondary', mb: 1}}>
+                        Stack trace
+                    </Typography>
+                    <Box sx={{maxHeight: 320, overflow: 'auto', border: 1, borderColor: 'divider', borderRadius: 1}}>
+                        <StackTrace trace={props.traceAsString} fontSize={10} />
+                    </Box>
+                </Box>
             )}
         </Box>
     );

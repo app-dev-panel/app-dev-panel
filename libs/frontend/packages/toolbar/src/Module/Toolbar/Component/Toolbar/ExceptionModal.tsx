@@ -85,6 +85,7 @@ export const ExceptionModal = ({open, onClose, debugEntryId, summary}: Exception
                                 code={String(exception.code)}
                                 trace={exception.trace ?? []}
                                 traceAsString={exception.traceAsString ?? ''}
+                                defaultEditorPreset="phpstorm"
                             />
                         </Box>
                     ))

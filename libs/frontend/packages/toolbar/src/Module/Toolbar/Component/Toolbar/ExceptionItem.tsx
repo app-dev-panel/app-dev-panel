@@ -1,5 +1,6 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {parseFilePath, parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
+import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import CodeIcon from '@mui/icons-material/Code';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -16,7 +17,10 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const open = Boolean(anchorEl);
-    const getEditorUrl = useEditorUrl();
+    // Toolbar is embedded into a user app, so it rarely has a configured editor
+    // in its own Redux state. Fall back to `phpstorm://` as a sensible default;
+    // users can override by picking another editor in the panel settings.
+    const getEditorUrl = useEditorUrl('phpstorm');
 
     if (!data.exception?.class) {
         return null;
@@ -28,8 +32,12 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
     const cleanFile = parseFilePath(exception.file);
     const lineNumber = +exception.line;
     const sourceEditorUrl = getEditorUrl(cleanFile, lineNumber);
-    const sourceFallbackUrl = `/inspector/files?path=${encodeURIComponent(cleanFile)}#L${exception.line}`;
-    const classExplorerUrl = `/inspector/files?class=${encodeURIComponent(parseFilePath(exception.class))}`;
+    const sourceFallbackUrl = panelPagePath(
+        `/inspector/files?path=${encodeURIComponent(cleanFile)}#L${exception.line}`,
+    );
+    const classExplorerUrl = panelPagePath(
+        `/inspector/files?class=${encodeURIComponent(parseFilePath(exception.class))}`,
+    );
 
     const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
         event.stopPropagation();
@@ -71,7 +79,7 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
                         onMouseDown: stopDrag,
                         onPointerDown: stopDrag,
                         onClick: (e: React.MouseEvent) => e.stopPropagation(),
-                        sx: {maxWidth: 560, minWidth: 320},
+                        sx: {minWidth: 320},
                     },
                 }}
             >
