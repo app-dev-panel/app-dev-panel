@@ -73,6 +73,17 @@ describe('ResultDialog', () => {
         expect(screen.getByText('No output')).toBeInTheDocument();
     });
 
+    it('shows descriptive fallback when a failed command has no content and no errors', () => {
+        renderWithProviders(<ResultDialog {...defaultProps} status="fail" content={null} />);
+        expect(screen.getByText('Command failed without output')).toBeInTheDocument();
+        expect(screen.queryByText('No output')).not.toBeInTheDocument();
+    });
+
+    it('shows descriptive fallback when an errored command has no content and empty errors', () => {
+        renderWithProviders(<ResultDialog {...defaultProps} status="error" content="" errors={[]} />);
+        expect(screen.getByText('Command errored without output')).toBeInTheDocument();
+    });
+
     it('calls onRerun when Rerun button is clicked', async () => {
         const user = userEvent.setup();
         const onRerun = vi.fn();

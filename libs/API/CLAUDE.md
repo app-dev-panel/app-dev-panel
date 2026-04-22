@@ -77,12 +77,15 @@ src/
 │   │   ├── CommandInterface.php
 │   │   ├── CommandResponse.php
 │   │   ├── BashCommand.php
-│   │   ├── PHPUnitCommand.php
-│   │   ├── CodeceptionCommand.php
+│   │   ├── PHPUnitCommand.php           # JSON-report variant (uses PHPUnitJSONReporter)
+│   │   ├── PHPUnitRawCommand.php        # raw stdout/stderr variant
+│   │   ├── CodeceptionCommand.php       # JSON-report variant (uses CodeceptionJSONReporter)
+│   │   ├── CodeceptionRawCommand.php    # raw stdout/stderr variant
 │   │   └── PsalmCommand.php
 │   ├── Test/
-│   │   ├── CodeceptionJSONReporter.php
-│   │   └── PHPUnitJSONReporter.php
+│   │   ├── PHPUnitJSONReporter.php        # PHPUnit 10+ Extension, writes phpunit-report.json
+│   │   ├── PHPUnitReportCollector.php     # In-memory collector used by PHPUnitJSONReporter
+│   │   └── CodeceptionJSONReporter.php    # Codeception 5+ Extension, writes codeception-report.json
 │   └── ApplicationState.php
 ├── Ingestion/
 │   └── Controller/

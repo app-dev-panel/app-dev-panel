@@ -263,7 +263,7 @@ final class CommandControllerTest extends ControllerTestCase
         $data = $this->responseData($response);
         $this->assertSame(CommandResponse::STATUS_ERROR, $data['status']);
         $this->assertSame('error-output', $data['result']);
-        $this->assertSame(['some error'], $data['error']);
+        $this->assertSame(['some error'], $data['errors']);
     }
 
     public function testRunCommandWithFailResult(): void
@@ -284,7 +284,7 @@ final class CommandControllerTest extends ControllerTestCase
         $data = $this->responseData($response);
         $this->assertSame(CommandResponse::STATUS_FAIL, $data['status']);
         $this->assertNull($data['result']);
-        $this->assertSame(['fatal error'], $data['error']);
+        $this->assertSame(['fatal error'], $data['errors']);
     }
 
     public function testIndexComposerScriptHasDescription(): void
@@ -320,7 +320,7 @@ final class CommandControllerTest extends ControllerTestCase
         $data = $this->responseData($response);
         $this->assertArrayHasKey('status', $data);
         $this->assertArrayHasKey('result', $data);
-        $this->assertArrayHasKey('error', $data);
+        $this->assertArrayHasKey('errors', $data);
     }
 
     public function testIndexWithNoComposerJson(): void
@@ -434,7 +434,7 @@ final class CommandControllerTest extends ControllerTestCase
             // The response structure should be correct regardless of success/failure
             $this->assertArrayHasKey('status', $data);
             $this->assertArrayHasKey('result', $data);
-            $this->assertArrayHasKey('error', $data);
+            $this->assertArrayHasKey('errors', $data);
         } finally {
             @unlink($tmpDir . '/composer.json');
             @rmdir($tmpDir);
@@ -463,7 +463,7 @@ final class CommandControllerTest extends ControllerTestCase
         // It should return a valid response structure even if the bash command fails
         $this->assertArrayHasKey('status', $data);
         $this->assertArrayHasKey('result', $data);
-        $this->assertArrayHasKey('error', $data);
+        $this->assertArrayHasKey('errors', $data);
     }
 
     public function testRunBuiltInCommandFromContainerCallsRun(): void
@@ -623,7 +623,7 @@ final class CommandControllerTest extends ControllerTestCase
 
             $this->assertArrayHasKey('status', $data);
             $this->assertArrayHasKey('result', $data);
-            $this->assertArrayHasKey('error', $data);
+            $this->assertArrayHasKey('errors', $data);
         } finally {
             @unlink($tmpDir . '/composer.json');
             @rmdir($tmpDir);

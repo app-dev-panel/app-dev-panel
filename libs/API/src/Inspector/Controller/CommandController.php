@@ -7,10 +7,12 @@ namespace AppDevPanel\Api\Inspector\Controller;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Command\BashCommand;
 use AppDevPanel\Api\Inspector\Command\CodeceptionCommand;
+use AppDevPanel\Api\Inspector\Command\CodeceptionRawCommand;
 use AppDevPanel\Api\Inspector\Command\MagoCommand;
 use AppDevPanel\Api\Inspector\Command\PestCommand;
 use AppDevPanel\Api\Inspector\Command\PHPStanCommand;
 use AppDevPanel\Api\Inspector\Command\PHPUnitCommand;
+use AppDevPanel\Api\Inspector\Command\PHPUnitRawCommand;
 use AppDevPanel\Api\Inspector\Command\PsalmCommand;
 use AppDevPanel\Api\Inspector\Command\TestoCommand;
 use AppDevPanel\Api\Inspector\CommandInterface;
@@ -39,7 +41,9 @@ class CommandController
         ],
         'test' => [
             PHPUnitCommand::COMMAND_NAME => PHPUnitCommand::class,
+            PHPUnitRawCommand::COMMAND_NAME => PHPUnitRawCommand::class,
             CodeceptionCommand::COMMAND_NAME => CodeceptionCommand::class,
+            CodeceptionRawCommand::COMMAND_NAME => CodeceptionRawCommand::class,
             PestCommand::COMMAND_NAME => PestCommand::class,
             TestoCommand::COMMAND_NAME => TestoCommand::class,
         ],
@@ -86,7 +90,7 @@ class CommandController
         return $this->responseFactory->createJsonResponse([
             'status' => $result->getStatus(),
             'result' => $result->getResult(),
-            'error' => $result->getErrors(),
+            'errors' => $result->getErrors(),
         ]);
     }
 
