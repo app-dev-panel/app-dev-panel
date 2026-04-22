@@ -81,14 +81,12 @@ describe('DefinitionsPage', () => {
 
     it('displays total definition count', () => {
         renderPage();
-        expect(screen.getByText('5 definitions')).toBeInTheDocument();
+        expect(screen.getAllByText('5 definitions').length).toBeGreaterThanOrEqual(1);
     });
 
-    it('shows column headers', () => {
+    it('groups definitions without a namespace under Services', () => {
         renderPage();
-        expect(screen.getByText('Name')).toBeInTheDocument();
-        expect(screen.getByText('Value')).toBeInTheDocument();
-        expect(screen.getByText('Actions')).toBeInTheDocument();
+        expect(screen.getByText('Services')).toBeInTheDocument();
     });
 
     it('filters definitions by name', async () => {

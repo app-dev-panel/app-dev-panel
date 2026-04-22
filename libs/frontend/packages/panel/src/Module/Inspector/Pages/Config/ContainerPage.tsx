@@ -1,5 +1,7 @@
 import {useGetClassesQuery, useLazyGetObjectQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {DataContext} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
+import {GroupCard} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/GroupCard';
+import {groupByNamespace, stripNamespace} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/grouping';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
@@ -8,7 +10,7 @@ import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {ContentCopy, Download, ErrorOutline, OpenInNew} from '@mui/icons-material';
-import {Box, CircularProgress, IconButton, TablePagination, Tooltip, Typography} from '@mui/material';
+import {Box, CircularProgress, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
@@ -36,14 +38,13 @@ const EntryRow = styled(Box)(({theme}) => ({
     alignItems: 'flex-start',
     gap: theme.spacing(2),
     padding: theme.spacing(1, 2),
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    '&:last-child': {borderBottom: 'none'},
+    borderTop: `1px solid ${theme.palette.divider}`,
     '&:hover': {backgroundColor: theme.palette.action.hover},
     [theme.breakpoints.down('sm')]: {flexDirection: 'column', gap: theme.spacing(0.5), padding: theme.spacing(1, 1.5)},
 }));
 
 const NameCell = styled(Box)(({theme}) => ({
-    width: 280,
+    width: 240,
     flexShrink: 0,
     display: 'flex',
     alignItems: 'flex-start',
@@ -64,29 +65,6 @@ const NameText = styled(Typography)(({theme}) => ({
 const ValueCell = styled(Box)({flex: 1, minWidth: 0, overflow: 'hidden', paddingTop: 4});
 
 const ActionsCell = styled(Box)({display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0, paddingTop: 2});
-
-const ListContainer = styled(Box)(({theme}) => ({
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
-    overflow: 'hidden',
-}));
-
-const ListHeader = styled(Box)(({theme}) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(2),
-    padding: theme.spacing(1, 2),
-    backgroundColor: theme.palette.action.hover,
-    borderBottom: `1px solid ${theme.palette.divider}`,
-}));
-
-const HeaderLabel = styled(Typography)(({theme}) => ({
-    fontSize: '11px',
-    fontWeight: 600,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    color: theme.palette.text.disabled,
-}));
 
 // ---------------------------------------------------------------------------
 // Sub-components
@@ -140,9 +118,6 @@ export const ContainerPage = () => {
 
     const {objects, setObjects, insertObject} = useContext(DataContext);
 
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(50);
-
     const handleLoadObject = useCallback(
         async (id: string): Promise<string | null> => {
             const result = await lazyLoadObject(id);
@@ -168,15 +143,11 @@ export const ContainerPage = () => {
         return objects.filter((object) => patterns.some((re) => re.test(object.id)));
     }, [objects, searchString]);
 
-    const paginatedRows = useMemo(() => {
-        const start = page * rowsPerPage;
-        return filteredRows.slice(start, start + rowsPerPage);
-    }, [filteredRows, page, rowsPerPage]);
+    const groups = useMemo(() => groupByNamespace(filteredRows), [filteredRows]);
 
     const onChangeHandler = useCallback(
         (value: string) => {
             setSearchParams({filter: value});
-            setPage(0);
         },
         [setSearchParams],
     );
@@ -210,30 +181,49 @@ export const ContainerPage = () => {
             </SearchRow>
 
             <Box sx={{px: 2, pb: 2}}>
-                {filteredRows.length === 0 ? (
+                {filteredRows.length === 0 && (
                     <EmptyState
                         icon="widgets"
                         title="No container entries found"
                         description={searchString ? `No entries match "${searchString}"` : undefined}
                     />
-                ) : (
-                    <ListContainer>
-                        <ListHeader>
-                            <HeaderLabel sx={{width: 280, flexShrink: 0}}>Class</HeaderLabel>
-                            <HeaderLabel sx={{flex: 1}}>Value</HeaderLabel>
-                            <HeaderLabel sx={{width: 68, flexShrink: 0, textAlign: 'right'}}>Actions</HeaderLabel>
-                        </ListHeader>
-                        {paginatedRows.map((entry) => (
+                )}
+                {groups.map((group) => (
+                    <GroupCard
+                        key={group.name || '__services__'}
+                        name={group.displayName}
+                        count={group.entries.length}
+                        countLabel={group.entries.length === 1 ? 'entry' : 'entries'}
+                        defaultExpanded={filteredRows.length <= 10 || groups.length === 1 || !!searchString}
+                        preview={
+                            <>
+                                {group.entries.slice(0, 4).map((entry, i) => (
+                                    <span key={entry.id}>
+                                        {i > 0 && <span style={{opacity: 0.4}}>{' · '}</span>}
+                                        {stripNamespace(entry.id, group.name)}
+                                    </span>
+                                ))}
+                                {group.entries.length > 4 && <span style={{opacity: 0.4}}> …</span>}
+                            </>
+                        }
+                    >
+                        {group.entries.map((entry) => (
                             <EntryRow key={entry.id}>
                                 <NameCell>
-                                    <NameText>{entry.id}</NameText>
+                                    <Tooltip title={entry.id} placement="top-start">
+                                        <NameText>{stripNamespace(entry.id, group.name)}</NameText>
+                                    </Tooltip>
                                 </NameCell>
                                 <ValueCell>
                                     <ContainerValue entry={entry} onLoad={handleLoadObject} />
                                 </ValueCell>
                                 <ActionsCell>
                                     <Tooltip title="Copy class name">
-                                        <IconButton size="small" onClick={() => clipboardCopy(entry.id)}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => clipboardCopy(entry.id)}
+                                            aria-label="Copy class name"
+                                        >
                                             <ContentCopy sx={{fontSize: 14}} />
                                         </IconButton>
                                     </Tooltip>
@@ -242,6 +232,7 @@ export const ContainerPage = () => {
                                             size="small"
                                             component={RouterLink}
                                             to={'/inspector/container/view?class=' + entry.id}
+                                            aria-label="Examine as container entry"
                                         >
                                             <OpenInNew sx={{fontSize: 14}} />
                                         </IconButton>
@@ -249,23 +240,8 @@ export const ContainerPage = () => {
                                 </ActionsCell>
                             </EntryRow>
                         ))}
-                        {filteredRows.length > 20 && (
-                            <TablePagination
-                                component="div"
-                                count={filteredRows.length}
-                                page={page}
-                                onPageChange={(_, p) => setPage(p)}
-                                rowsPerPage={rowsPerPage}
-                                onRowsPerPageChange={(e) => {
-                                    setRowsPerPage(parseInt(e.target.value, 10));
-                                    setPage(0);
-                                }}
-                                rowsPerPageOptions={[20, 50, 100]}
-                                sx={{borderTop: 1, borderColor: 'divider'}}
-                            />
-                        )}
-                    </ListContainer>
-                )}
+                    </GroupCard>
+                ))}
             </Box>
         </Box>
     );

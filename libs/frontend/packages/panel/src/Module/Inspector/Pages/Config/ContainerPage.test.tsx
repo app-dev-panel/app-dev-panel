@@ -64,9 +64,9 @@ function renderPage(route = '/inspector/config/container') {
 describe('ContainerPage', () => {
     it('renders container entries after loading', () => {
         renderPage();
-        expect(screen.getByText('App\\Controller\\HomeController')).toBeInTheDocument();
-        expect(screen.getByText('App\\Service\\UserService')).toBeInTheDocument();
-        expect(screen.getByText('Psr\\Log\\LoggerInterface')).toBeInTheDocument();
+        expect(screen.getByText('HomeController')).toBeInTheDocument();
+        expect(screen.getByText('UserService')).toBeInTheDocument();
+        expect(screen.getByText('LoggerInterface')).toBeInTheDocument();
     });
 
     it('displays total entry count', () => {
@@ -74,11 +74,12 @@ describe('ContainerPage', () => {
         expect(screen.getByText('5 entries')).toBeInTheDocument();
     });
 
-    it('shows column headers', () => {
+    it('groups entries by vendor namespace', () => {
         renderPage();
-        expect(screen.getByText('Class')).toBeInTheDocument();
-        expect(screen.getByText('Value')).toBeInTheDocument();
-        expect(screen.getByText('Actions')).toBeInTheDocument();
+        expect(screen.getByText('App\\Controller')).toBeInTheDocument();
+        expect(screen.getByText('App\\Service')).toBeInTheDocument();
+        expect(screen.getByText('App\\Repository')).toBeInTheDocument();
+        expect(screen.getByText('Psr\\Log')).toBeInTheDocument();
     });
 
     it('filters entries by class name', async () => {
@@ -88,9 +89,9 @@ describe('ContainerPage', () => {
         const input = screen.getByPlaceholderText('Search container entries...');
         await user.type(input, 'UserService');
 
-        expect(screen.getByText('App\\Service\\UserService')).toBeInTheDocument();
-        expect(screen.queryByText('App\\Controller\\HomeController')).not.toBeInTheDocument();
-        expect(screen.queryByText('Psr\\Log\\LoggerInterface')).not.toBeInTheDocument();
+        expect(screen.getByText('UserService')).toBeInTheDocument();
+        expect(screen.queryByText('HomeController')).not.toBeInTheDocument();
+        expect(screen.queryByText('LoggerInterface')).not.toBeInTheDocument();
     });
 
     it('shows filtered count', async () => {

@@ -1,5 +1,7 @@
 import {useGetConfigurationQuery, useLazyGetObjectQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {DataContext} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
+import {GroupCard} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/GroupCard';
+import {groupByNamespace, stripNamespace} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/grouping';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
@@ -10,7 +12,7 @@ import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {ChevronRight, Code, ContentCopy, DataObject, Download, ErrorOutline} from '@mui/icons-material';
-import {Box, CircularProgress, Collapse, IconButton, TablePagination, Tooltip, Typography} from '@mui/material';
+import {Box, CircularProgress, Collapse, IconButton, Tooltip, Typography} from '@mui/material';
 import {alpha, styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
@@ -107,32 +109,8 @@ const SearchRow = styled(Box)(({theme}) => ({
     padding: theme.spacing(2),
 }));
 
-const ListContainer = styled(Box)(({theme}) => ({
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
-    overflow: 'hidden',
-}));
-
-const ListHeader = styled(Box)(({theme}) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(2),
-    padding: theme.spacing(1, 2),
-    backgroundColor: theme.palette.action.hover,
-    borderBottom: `1px solid ${theme.palette.divider}`,
-}));
-
-const HeaderLabel = styled(Typography)(({theme}) => ({
-    fontSize: '11px',
-    fontWeight: 600,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    color: theme.palette.text.disabled,
-}));
-
 const Row = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(({theme, expanded}) => ({
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    '&:last-child': {borderBottom: 'none'},
+    borderTop: `1px solid ${theme.palette.divider}`,
     backgroundColor: expanded ? theme.palette.action.hover : 'transparent',
     transition: 'background-color 120ms',
 }));
@@ -154,7 +132,7 @@ const RowHead = styled(Box, {shouldForwardProp: (p) => p !== 'clickable'})<{clic
 );
 
 const NameCell = styled(Box)(({theme}) => ({
-    width: 240,
+    width: 220,
     flexShrink: 0,
     display: 'flex',
     alignItems: 'flex-start',
@@ -459,7 +437,15 @@ const resolveTargetClass = (kind: DefinitionKind, value: unknown, id: string): s
     return null;
 };
 
-const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: string) => Promise<string | null>}) => {
+const DefinitionRow = ({
+    entry,
+    displayName,
+    onLoad,
+}: {
+    entry: DefinitionEntry;
+    displayName: string;
+    onLoad: (id: string) => Promise<string | null>;
+}) => {
     const kind = useMemo(() => detectKind(entry.value), [entry.value]);
     const [expanded, setExpanded] = useState(false);
     const expandable = kind === 'factory' || kind === 'object';
@@ -485,7 +471,9 @@ const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: st
                     <ChevronRight sx={{fontSize: 14}} />
                 </ExpandIndicator>
                 <NameCell>
-                    <NameText>{entry.id}</NameText>
+                    <Tooltip title={entry.id} placement="top-start">
+                        <NameText>{displayName}</NameText>
+                    </Tooltip>
                 </NameCell>
                 <ValueCell>
                     <KindBadge kind={kind}>{KIND_LABEL[kind]}</KindBadge>
@@ -612,9 +600,6 @@ export const DefinitionsPage = () => {
 
     const {objects, setObjects, insertObject} = useContext(DataContext);
 
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(50);
-
     const handleLoadObject = useCallback(
         async (id: string): Promise<string | null> => {
             const result = await lazyLoadObject(id);
@@ -642,15 +627,11 @@ export const DefinitionsPage = () => {
         return objects.filter((object) => patterns.some((re) => re.test(object.id)));
     }, [objects, searchString]);
 
-    const paginatedRows = useMemo(() => {
-        const start = page * rowsPerPage;
-        return filteredRows.slice(start, start + rowsPerPage);
-    }, [filteredRows, page, rowsPerPage]);
+    const groups = useMemo(() => groupByNamespace(filteredRows), [filteredRows]);
 
     const onChangeHandler = useCallback(
         (value: string) => {
             setSearchParams({filter: value});
-            setPage(0);
         },
         [setSearchParams],
     );
@@ -682,40 +663,42 @@ export const DefinitionsPage = () => {
             </SearchRow>
 
             <Box sx={{px: 2, pb: 2}}>
-                {filteredRows.length === 0 ? (
+                {filteredRows.length === 0 && (
                     <EmptyState
                         icon="account_tree"
                         title="No definitions found"
                         description={searchString ? `No definitions match "${searchString}"` : undefined}
                     />
-                ) : (
-                    <ListContainer>
-                        <ListHeader>
-                            <Box sx={{width: 16, flexShrink: 0}} />
-                            <HeaderLabel sx={{width: 240, flexShrink: 0}}>Name</HeaderLabel>
-                            <HeaderLabel sx={{flex: 1}}>Value</HeaderLabel>
-                            <HeaderLabel sx={{width: 92, flexShrink: 0, textAlign: 'right'}}>Actions</HeaderLabel>
-                        </ListHeader>
-                        {paginatedRows.map((entry) => (
-                            <DefinitionRow key={entry.id} entry={entry} onLoad={handleLoadObject} />
-                        ))}
-                        {filteredRows.length > 20 && (
-                            <TablePagination
-                                component="div"
-                                count={filteredRows.length}
-                                page={page}
-                                onPageChange={(_, p) => setPage(p)}
-                                rowsPerPage={rowsPerPage}
-                                onRowsPerPageChange={(e) => {
-                                    setRowsPerPage(parseInt(e.target.value, 10));
-                                    setPage(0);
-                                }}
-                                rowsPerPageOptions={[20, 50, 100]}
-                                sx={{borderTop: 1, borderColor: 'divider'}}
-                            />
-                        )}
-                    </ListContainer>
                 )}
+                {groups.map((group) => (
+                    <GroupCard
+                        key={group.name || '__services__'}
+                        name={group.displayName}
+                        count={group.entries.length}
+                        countLabel={group.entries.length === 1 ? 'definition' : 'definitions'}
+                        defaultExpanded={filteredRows.length <= 10 || groups.length === 1 || !!searchString}
+                        preview={
+                            <>
+                                {group.entries.slice(0, 4).map((entry, i) => (
+                                    <span key={entry.id}>
+                                        {i > 0 && <span style={{opacity: 0.4}}>{' · '}</span>}
+                                        {stripNamespace(entry.id, group.name)}
+                                    </span>
+                                ))}
+                                {group.entries.length > 4 && <span style={{opacity: 0.4}}> …</span>}
+                            </>
+                        }
+                    >
+                        {group.entries.map((entry) => (
+                            <DefinitionRow
+                                key={entry.id}
+                                entry={entry}
+                                displayName={stripNamespace(entry.id, group.name)}
+                                onLoad={handleLoadObject}
+                            />
+                        ))}
+                    </GroupCard>
+                ))}
             </Box>
         </Box>
     );

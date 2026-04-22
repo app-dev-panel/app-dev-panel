@@ -1,6 +1,7 @@
 import {DataContextProvider} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
 import * as Pages from '@app-dev-panel/panel/Module/Inspector/Pages';
 import {ContainerPage} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/ContainerPage';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
 import {Box, Tab} from '@mui/material';
@@ -19,6 +20,11 @@ export const ConfigurationPage = () => {
 
     return (
         <>
+            <PageHeader
+                title="Configuration"
+                icon="settings"
+                description="Application parameters, DI definitions and resolved container entries"
+            />
             <TabContext value={tabValue}>
                 <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
                     <TabList onChange={handleChange}>
