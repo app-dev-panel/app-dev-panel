@@ -2,6 +2,7 @@ import {useGetConfigurationQuery, useLazyGetObjectQuery} from '@app-dev-panel/pa
 import {DataContext} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
@@ -50,15 +51,23 @@ const summarizeFactory = (source: string): string => {
     return 'closure';
 };
 
-const summarizeObject = (value: unknown): string => {
-    if (Array.isArray(value)) return `[${value.length} items]`;
-    if (value && typeof value === 'object') {
-        const keys = Object.keys(value);
-        if (keys.length === 0) return '{}';
-        if (keys.length === 1) return `{${keys[0]}}`;
-        return `{${keys.slice(0, 3).join(', ')}${keys.length > 3 ? ', …' : ''}}`;
+type ObjectConfig = {explicitClass: string | null; calls: string[]; properties: string[]; other: string[]};
+
+const parseObjectConfig = (value: unknown): ObjectConfig => {
+    const config: ObjectConfig = {explicitClass: null, calls: [], properties: [], other: []};
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return config;
+    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+        if (key === 'class' && typeof val === 'string') {
+            config.explicitClass = val;
+        } else if (key.endsWith('()')) {
+            config.calls.push(key);
+        } else if (key.startsWith('$')) {
+            config.properties.push(key);
+        } else {
+            config.other.push(key);
+        }
     }
-    return String(value);
+    return config;
 };
 
 const countLines = (source: string): number => source.split('\n').length;
@@ -111,7 +120,6 @@ const RowHead = styled(Box, {shouldForwardProp: (p) => p !== 'clickable'})<{clic
         gap: theme.spacing(2),
         padding: theme.spacing(1, 2),
         cursor: clickable ? 'pointer' : 'default',
-        userSelect: clickable ? 'none' : 'auto',
         '&:hover': clickable ? {backgroundColor: theme.palette.action.hover} : undefined,
         [theme.breakpoints.down('sm')]: {
             flexDirection: 'column',
@@ -165,26 +173,49 @@ const Summary = styled(Box)(({theme}) => ({
     fontSize: '12px',
     color: theme.palette.text.secondary,
     display: 'flex',
-    alignItems: 'baseline',
-    gap: theme.spacing(0.75),
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    columnGap: theme.spacing(0.75),
+    rowGap: theme.spacing(0.25),
     flex: 1,
     minWidth: 0,
+    wordBreak: 'break-word',
 }));
 
 const SummaryTarget = styled('span')(({theme}) => ({
     color: theme.palette.text.primary,
     fontWeight: 500,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    wordBreak: 'break-all',
+    userSelect: 'text',
 }));
 
 const SummaryMeta = styled('span')(({theme}) => ({
     color: theme.palette.text.disabled,
     fontSize: '11px',
     flexShrink: 0,
+}));
+
+const ConfigPill = styled('span')(({theme}) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    height: 18,
+    padding: theme.spacing(0, 0.625),
+    borderRadius: 4,
+    fontSize: '10px',
+    fontWeight: 600,
+    letterSpacing: '0.04em',
+    textTransform: 'uppercase',
+    color: theme.palette.text.secondary,
+    backgroundColor: theme.palette.action.hover,
+    border: `1px solid ${theme.palette.divider}`,
+    flexShrink: 0,
+}));
+
+const CallList = styled('span')(({theme}) => ({
+    color: theme.palette.text.secondary,
+    userSelect: 'text',
+    fontSize: '11px',
+    '& code': {fontFamily: theme.adp.fontFamilyMono},
 }));
 
 const KindBadge = styled(Box, {shouldForwardProp: (p) => p !== 'kind'})<{kind: DefinitionKind}>(({theme, kind}) => {
@@ -269,6 +300,24 @@ const KIND_LABEL: Record<DefinitionKind, string> = {
 // Sub-components
 // ---------------------------------------------------------------------------
 
+const ClassNameLink = ({className}: {className: string}) => (
+    <Box
+        component="span"
+        sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            minWidth: 0,
+            '& a': {color: 'primary.main', wordBreak: 'break-all'},
+            '& a:hover': {textDecoration: 'underline'},
+        }}
+        onClick={(e) => e.stopPropagation()}
+    >
+        <FileLink className={className}>
+            <ClassValueText component="span">{className}</ClassValueText>
+        </FileLink>
+    </Box>
+);
+
 const InlineClassValue = ({
     id,
     value,
@@ -294,8 +343,8 @@ const InlineClassValue = ({
     );
 
     return (
-        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0}}>
-            <ClassValueText>{value}</ClassValueText>
+        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0, flexWrap: 'wrap'}}>
+            <ClassNameLink className={value} />
             <Tooltip title={error ? 'Retry loading' : 'Load object state'}>
                 <IconButton
                     size="small"
@@ -318,13 +367,80 @@ const InlineClassValue = ({
     );
 };
 
+const FactorySummary = ({source}: {source: string}) => {
+    const target = useMemo(() => summarizeFactory(source), [source]);
+    // Extract a bare class name from the target when it's in `new X\Y` shape
+    const classMatch = target.match(/^new\s+\\?([\w\\]+)$/);
+    return (
+        <Summary>
+            <Box component="span" sx={{color: 'text.disabled'}}>
+                returns
+            </Box>
+            {classMatch ? (
+                <>
+                    <Box component="span" sx={{color: 'text.disabled'}}>
+                        new
+                    </Box>
+                    <SummaryTarget onClick={(e) => e.stopPropagation()}>
+                        <FileLink className={classMatch[1]}>{classMatch[1]}</FileLink>
+                    </SummaryTarget>
+                </>
+            ) : (
+                <SummaryTarget>{target}</SummaryTarget>
+            )}
+            <SummaryMeta>· {countLines(source)} lines</SummaryMeta>
+        </Summary>
+    );
+};
+
+const ObjectSummary = ({id, value}: {id: string; value: unknown}) => {
+    const cfg = useMemo(() => parseObjectConfig(value), [value]);
+    const resolvedClass = cfg.explicitClass ?? id;
+    const hooks = [...cfg.calls, ...cfg.properties];
+    const shownHooks = hooks.slice(0, 3);
+    const extraHooks = hooks.length - shownHooks.length;
+
+    const isSelf = !cfg.explicitClass;
+    const hookLabel = hooks.length === 1 ? '1 call' : `${hooks.length} calls`;
+
+    return (
+        <Summary>
+            <SummaryTarget onClick={(e) => e.stopPropagation()}>
+                <FileLink className={resolvedClass}>{resolvedClass}</FileLink>
+            </SummaryTarget>
+            {isSelf && <ConfigPill>self</ConfigPill>}
+            {hooks.length > 0 ? (
+                <>
+                    <SummaryMeta>·</SummaryMeta>
+                    <CallList>
+                        {shownHooks.map((h, i) => (
+                            <Box component="span" key={h}>
+                                {i > 0 && ', '}
+                                <code>{h}</code>
+                            </Box>
+                        ))}
+                        {extraHooks > 0 && <SummaryMeta> +{extraHooks}</SummaryMeta>}
+                    </CallList>
+                </>
+            ) : (
+                <SummaryMeta>· {hookLabel}</SummaryMeta>
+            )}
+            {cfg.other.length > 0 && <SummaryMeta>· +{cfg.other.length} raw</SummaryMeta>}
+        </Summary>
+    );
+};
+
 const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: string) => Promise<string | null>}) => {
     const kind = useMemo(() => detectKind(entry.value), [entry.value]);
     const [expanded, setExpanded] = useState(false);
     const expandable = kind === 'factory' || kind === 'object';
 
     const toggle = useCallback(() => {
-        if (expandable) setExpanded((v) => !v);
+        if (!expandable) return;
+        // Don't toggle while user is selecting text
+        const selection = typeof window !== 'undefined' ? window.getSelection()?.toString() : '';
+        if (selection && selection.length > 0) return;
+        setExpanded((v) => !v);
     }, [expandable]);
 
     const stopProp = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
@@ -344,21 +460,9 @@ const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: st
                         <InlineClassValue id={entry.id} value={entry.value as string} onLoad={onLoad} />
                     )}
 
-                    {kind === 'factory' && (
-                        <Summary>
-                            <Box component="span" sx={{color: 'text.disabled', flexShrink: 0}}>
-                                returns
-                            </Box>
-                            <SummaryTarget>{summarizeFactory(source)}</SummaryTarget>
-                            <SummaryMeta>· {countLines(source)} lines</SummaryMeta>
-                        </Summary>
-                    )}
+                    {kind === 'factory' && <FactorySummary source={source} />}
 
-                    {kind === 'object' && (
-                        <Summary>
-                            <SummaryTarget>{summarizeObject(entry.value)}</SummaryTarget>
-                        </Summary>
-                    )}
+                    {kind === 'object' && <ObjectSummary id={entry.id} value={entry.value} />}
 
                     {kind === 'primitive' && (
                         <Box sx={{flex: 1, minWidth: 0, overflow: 'hidden'}}>
