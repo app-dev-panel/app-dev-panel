@@ -131,6 +131,43 @@ final class ToolbarInjectorTest extends TestCase
         $this->assertStringContainsString('<div id="app-dev-toolbar"', $result);
     }
 
+    public function testIsPanelRequestMatchesViewerBasePath(): void
+    {
+        $injector = new ToolbarInjector(new PanelConfig(viewerBasePath: '/debug'));
+
+        $this->assertTrue($injector->isPanelRequest('/debug'));
+        $this->assertTrue($injector->isPanelRequest('/debug/'));
+        $this->assertTrue($injector->isPanelRequest('/debug/inspector/routes'));
+        $this->assertTrue($injector->isPanelRequest('/debug/api/summary/1'));
+    }
+
+    public function testIsPanelRequestRejectsUnrelatedPaths(): void
+    {
+        $injector = new ToolbarInjector(new PanelConfig(viewerBasePath: '/debug'));
+
+        $this->assertFalse($injector->isPanelRequest('/'));
+        $this->assertFalse($injector->isPanelRequest('/debugger'));
+        $this->assertFalse($injector->isPanelRequest('/users/debug'));
+        $this->assertFalse($injector->isPanelRequest('/api/debug'));
+    }
+
+    public function testIsPanelRequestHonoursCustomViewerBasePath(): void
+    {
+        $injector = new ToolbarInjector(new PanelConfig(viewerBasePath: '/_adp/'));
+
+        $this->assertTrue($injector->isPanelRequest('/_adp'));
+        $this->assertTrue($injector->isPanelRequest('/_adp/inspector'));
+        $this->assertFalse($injector->isPanelRequest('/debug'));
+    }
+
+    public function testIsPanelRequestReturnsFalseForEmptyBasePath(): void
+    {
+        $injector = new ToolbarInjector(new PanelConfig(viewerBasePath: ''));
+
+        $this->assertFalse($injector->isPanelRequest('/'));
+        $this->assertFalse($injector->isPanelRequest('/debug'));
+    }
+
     public function testInjectTrailingSlashHandling(): void
     {
         $injector = new ToolbarInjector(new PanelConfig(staticUrl: '/assets/'));

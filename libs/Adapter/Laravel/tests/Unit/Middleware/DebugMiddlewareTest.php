@@ -159,6 +159,28 @@ final class DebugMiddlewareTest extends TestCase
         $this->assertStringNotContainsString('app-dev-toolbar', $response->getContent());
     }
 
+    public function testToolbarNotInjectedForPanelRequest(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $debugger = new Debugger($idGenerator, $storage, []);
+
+        $toolbarInjector = new ToolbarInjector(
+            new PanelConfig(staticUrl: '/assets', viewerBasePath: '/debug'),
+            new ToolbarConfig(enabled: true),
+        );
+
+        $middleware = new DebugMiddleware(debugger: $debugger, toolbarInjector: $toolbarInjector);
+
+        $request = Request::create('/debug');
+        $html = '<html><body><div id="root"></div></body></html>';
+        $response = $middleware->handle($request, static fn() => new Response($html, 200, [
+            'Content-Type' => 'text/html',
+        ]));
+
+        $this->assertSame($html, $response->getContent());
+    }
+
     public function testToolbarNotInjectedForNonHtmlResponse(): void
     {
         $idGenerator = new DebuggerIdGenerator();

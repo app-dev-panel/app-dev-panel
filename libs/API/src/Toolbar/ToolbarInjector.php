@@ -34,6 +34,23 @@ final class ToolbarInjector
     }
 
     /**
+     * Check if a request path targets the embedded panel SPA.
+     *
+     * When the toolbar opens the panel in an iframe, the iframe loads an HTML page
+     * served from the panel's base path. Re-injecting the toolbar into that HTML
+     * stacks a second toolbar inside the panel itself.
+     */
+    public function isPanelRequest(string $path): bool
+    {
+        $panelPath = rtrim($this->panelConfig->viewerBasePath, '/');
+        if ($panelPath === '') {
+            return false;
+        }
+
+        return $path === $panelPath || str_starts_with($path, $panelPath . '/');
+    }
+
+    /**
      * Inject toolbar HTML into response body.
      *
      * Inserts the toolbar widget before </body>. If no </body> tag is found,
