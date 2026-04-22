@@ -9,7 +9,7 @@ import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
-import {ChevronRight, ContentCopy, DataObject, Download, ErrorOutline} from '@mui/icons-material';
+import {ChevronRight, Code, ContentCopy, DataObject, Download, ErrorOutline} from '@mui/icons-material';
 import {Box, CircularProgress, Collapse, IconButton, TablePagination, Tooltip, Typography} from '@mui/material';
 import {alpha, styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
@@ -268,9 +268,21 @@ const KindBadge = styled(Box, {shouldForwardProp: (p) => p !== 'kind'})<{kind: D
 
 const ActionsCell = styled(Box)({display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0, paddingTop: 2});
 
-const ChevronButton = styled(IconButton, {shouldForwardProp: (p) => p !== 'open'})<{open?: boolean}>(({open}) => ({
-    transition: 'transform 150ms',
+const ExpandIndicator = styled(Box, {shouldForwardProp: (p) => p !== 'open' && p !== 'visible'})<{
+    open?: boolean;
+    visible?: boolean;
+}>(({theme, open, visible}) => ({
+    width: 16,
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    paddingTop: 6,
+    color: theme.palette.text.disabled,
+    visibility: visible ? 'visible' : 'hidden',
+    transition: 'transform 150ms, color 150ms',
     transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+    [theme.breakpoints.down('sm')]: {alignSelf: 'flex-start'},
 }));
 
 const ExpandedPanel = styled(Box)(({theme}) => ({
@@ -324,24 +336,6 @@ const KIND_LABEL: Record<DefinitionKind, string> = {
 // Sub-components
 // ---------------------------------------------------------------------------
 
-const ClassNameLink = ({className}: {className: string}) => (
-    <Box
-        component="span"
-        sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            minWidth: 0,
-            '& a': {color: 'primary.main', wordBreak: 'break-all'},
-            '& a:hover': {textDecoration: 'underline'},
-        }}
-        onClick={(e) => e.stopPropagation()}
-    >
-        <FileLink className={className}>
-            <ClassValueText>{className}</ClassValueText>
-        </FileLink>
-    </Box>
-);
-
 const InlineClassValue = ({
     id,
     value,
@@ -368,7 +362,7 @@ const InlineClassValue = ({
 
     return (
         <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0, flexWrap: 'wrap'}}>
-            <ClassNameLink className={value} />
+            <ClassValueText>{value}</ClassValueText>
             <Tooltip title={error ? 'Retry loading' : 'Load object state'}>
                 <IconButton
                     size="small"
@@ -405,9 +399,7 @@ const FactorySummary = ({source}: {source: string}) => {
                     <Box component="span" sx={{color: 'text.disabled'}}>
                         new
                     </Box>
-                    <SummaryTarget onClick={(e) => e.stopPropagation()}>
-                        <FileLink className={classMatch[1]}>{classMatch[1]}</FileLink>
-                    </SummaryTarget>
+                    <SummaryTarget>{classMatch[1]}</SummaryTarget>
                 </>
             ) : (
                 <SummaryTarget>{target}</SummaryTarget>
@@ -429,9 +421,7 @@ const ObjectSummary = ({id, value}: {id: string; value: unknown}) => {
 
     return (
         <Summary>
-            <SummaryTarget onClick={(e) => e.stopPropagation()}>
-                <FileLink className={resolvedClass}>{resolvedClass}</FileLink>
-            </SummaryTarget>
+            <SummaryTarget>{resolvedClass}</SummaryTarget>
             {isSelf && <ConfigPill>self</ConfigPill>}
             {hooks.length > 0 ? (
                 <>
@@ -454,6 +444,21 @@ const ObjectSummary = ({id, value}: {id: string; value: unknown}) => {
     );
 };
 
+const resolveTargetClass = (kind: DefinitionKind, value: unknown, id: string): string | null => {
+    if (kind === 'class' && typeof value === 'string') return value;
+    if (kind === 'object') {
+        const cfg = parseObjectConfig(value);
+        return cfg.explicitClass ?? id;
+    }
+    if (kind === 'factory') {
+        const meta = getFactoryMeta(value);
+        const summary = summarizeFactory(meta.source);
+        const m = summary.match(/^new\s+\\?([\w\\]+)$/);
+        return m ? m[1] : null;
+    }
+    return null;
+};
+
 const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: string) => Promise<string | null>}) => {
     const kind = useMemo(() => detectKind(entry.value), [entry.value]);
     const [expanded, setExpanded] = useState(false);
@@ -471,9 +476,14 @@ const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: st
 
     const factoryMeta = useMemo(() => (kind === 'factory' ? getFactoryMeta(entry.value) : null), [kind, entry.value]);
 
+    const targetClass = useMemo(() => resolveTargetClass(kind, entry.value, entry.id), [kind, entry.value, entry.id]);
+
     return (
         <Row expanded={expanded}>
             <RowHead clickable={expandable} onClick={toggle}>
+                <ExpandIndicator open={expanded} visible={expandable}>
+                    <ChevronRight sx={{fontSize: 14}} />
+                </ExpandIndicator>
                 <NameCell>
                     <NameText>{entry.id}</NameText>
                 </NameCell>
@@ -495,15 +505,17 @@ const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: st
                     )}
                 </ValueCell>
                 <ActionsCell onClick={stopProp}>
-                    {expandable && (
-                        <ChevronButton
-                            size="small"
-                            open={expanded}
-                            onClick={toggle}
-                            aria-label={expanded ? 'Collapse' : 'Expand'}
-                        >
-                            <ChevronRight sx={{fontSize: 16}} />
-                        </ChevronButton>
+                    {targetClass && (
+                        <Tooltip title="Open class source">
+                            <IconButton
+                                size="small"
+                                component={RouterLink}
+                                to={`/inspector/files?class=${encodeURIComponent(targetClass)}`}
+                                aria-label="Open class source"
+                            >
+                                <Code sx={{fontSize: 14}} />
+                            </IconButton>
+                        </Tooltip>
                     )}
                     <Tooltip title="Copy name">
                         <IconButton size="small" onClick={() => clipboardCopy(entry.id)} aria-label="Copy name">
@@ -679,6 +691,7 @@ export const DefinitionsPage = () => {
                 ) : (
                     <ListContainer>
                         <ListHeader>
+                            <Box sx={{width: 16, flexShrink: 0}} />
                             <HeaderLabel sx={{width: 240, flexShrink: 0}}>Name</HeaderLabel>
                             <HeaderLabel sx={{flex: 1}}>Value</HeaderLabel>
                             <HeaderLabel sx={{width: 92, flexShrink: 0, textAlign: 'right'}}>Actions</HeaderLabel>
