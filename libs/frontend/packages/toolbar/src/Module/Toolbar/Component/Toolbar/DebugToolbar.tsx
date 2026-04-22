@@ -525,7 +525,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     if (isBottom) {
         return (
             <Portal>
-                <Box sx={{position: 'sticky', bottom: 0, zIndex: 1300}}>
+                <Box sx={{position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1300}}>
                     {iframeEnabled && (
                         <Box
                             {...separatorProps}
