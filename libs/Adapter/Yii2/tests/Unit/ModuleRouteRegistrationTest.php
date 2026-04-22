@@ -82,7 +82,6 @@ final class ModuleRouteRegistrationTest extends TestCase
         // Call registerRoutes directly via reflection (bootstrap() also calls
         // registerEventListeners which requires real Yii DB classes)
         $method = new \ReflectionMethod($module, 'registerRoutes');
-        $method->setAccessible(true);
         $method->invoke($module, $app);
     }
 

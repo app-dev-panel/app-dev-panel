@@ -172,7 +172,6 @@ final class AdpApiControllerTest extends TestCase
         $controller = new AdpApiController('adp-api', $app);
 
         $method = new \ReflectionMethod($controller, 'convertYiiRequestToPsr7');
-        $method->setAccessible(true);
 
         return $method->invoke($controller, $app->getRequest());
     }
