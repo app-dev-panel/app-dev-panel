@@ -7,9 +7,11 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
+import {isLogLevel} from '@app-dev-panel/sdk/Types/LogLevel';
 import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
+import {useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -194,11 +196,19 @@ function buildUnifiedEntries(
 export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProps) => {
     const theme = useTheme();
     const pathMapper = usePathMapper();
+    const [searchParams] = useSearchParams();
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-    const [activeKinds, setActiveKinds] = useState<Set<EntryKind>>(new Set());
-    const [activeLevels, setActiveLevels] = useState<Set<Level>>(new Set());
+
+    const [activeLevels, setActiveLevels] = useState<Set<Level>>(() => {
+        const raw = searchParams.get('level');
+        if (!raw) return new Set();
+        return new Set(raw.split(',').filter(isLogLevel) as Level[]);
+    });
+    const [activeKinds, setActiveKinds] = useState<Set<EntryKind>>(() =>
+        searchParams.get('level') ? new Set<EntryKind>(['log']) : new Set(),
+    );
     const [activeCategories, setActiveCategories] = useState<Set<DeprecationCategory>>(new Set());
 
     // Build unified entry list
