@@ -33,6 +33,7 @@ import {useDrag} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/u
 import {ValidatorItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/ValidatorItem';
 import {RequestItem} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/Web/RequestItem';
 import {useSelector} from '@app-dev-panel/toolbar/store';
+import CloseIcon from '@mui/icons-material/Close';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -715,6 +716,11 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                     <IconButton onClick={handleDebugWindowOpen} size="small" sx={actionButtonSx}>
                         <OpenInNewIcon sx={{fontSize: 16}} />
                     </IconButton>
+                    <Tooltip title="Close" arrow>
+                        <IconButton onClick={onToolbarClickHandler} size="small" sx={actionButtonSx}>
+                            <CloseIcon sx={{fontSize: 16}} />
+                        </IconButton>
+                    </Tooltip>
                 </Box>
                 {selectedEntry && <RequestHeroBar entry={selectedEntry} />}
                 {selectedEntry && (
