@@ -183,7 +183,7 @@ const ValueCell = styled(Box)(({theme}) => ({
     [theme.breakpoints.down('sm')]: {width: '100%'},
 }));
 
-const ClassValueText = styled(Typography)(({theme}) => ({
+const ClassValueText = styled('span')(({theme}) => ({
     fontFamily: theme.adp.fontFamilyMono,
     fontSize: '12px',
     color: theme.palette.text.secondary,
@@ -337,7 +337,7 @@ const ClassNameLink = ({className}: {className: string}) => (
         onClick={(e) => e.stopPropagation()}
     >
         <FileLink className={className}>
-            <ClassValueText component="span">{className}</ClassValueText>
+            <ClassValueText>{className}</ClassValueText>
         </FileLink>
     </Box>
 );
