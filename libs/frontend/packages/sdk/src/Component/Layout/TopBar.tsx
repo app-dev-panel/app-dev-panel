@@ -228,6 +228,21 @@ export const TopBar = React.memo(
                     <span className="logo-text">App Dev Panel</span>
                 </Logo>
                 <CenterGroup>
+                    {onOpenWebsite && (
+                        <Tooltip title={openWebsiteLabel} arrow enterDelay={tooltipEnterDelay}>
+                            <span style={{display: 'inline-flex'}}>
+                                <IconButton
+                                    size="small"
+                                    onClick={onOpenWebsite}
+                                    disabled={!websiteUrl}
+                                    aria-label={openWebsiteLabel}
+                                    sx={{display: {xs: 'none', md: 'inline-flex'}}}
+                                >
+                                    <Icon sx={{fontSize: 18}}>open_in_new</Icon>
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    )}
                     <Tooltip title="Previous entry" arrow enterDelay={tooltipEnterDelay}>
                         <span style={{display: 'inline-flex'}}>
                             <IconButton
@@ -254,19 +269,6 @@ export const TopBar = React.memo(
                             </IconButton>
                         </span>
                     </Tooltip>
-                    <PillContainer>
-                        {method && path != null && status != null ? (
-                            <RequestPill
-                                method={method}
-                                path={path}
-                                status={status}
-                                duration={duration ?? ''}
-                                onClick={onEntryClick}
-                            />
-                        ) : (
-                            <Box sx={{height: 32}} />
-                        )}
-                    </PillContainer>
                     <Tooltip
                         title={isRefreshing ? 'Refreshing…' : 'Refresh entries'}
                         arrow
@@ -283,6 +285,19 @@ export const TopBar = React.memo(
                             </IconButton>
                         </span>
                     </Tooltip>
+                    <PillContainer>
+                        {method && path != null && status != null ? (
+                            <RequestPill
+                                method={method}
+                                path={path}
+                                status={status}
+                                duration={duration ?? ''}
+                                onClick={onEntryClick}
+                            />
+                        ) : (
+                            <Box sx={{height: 32}} />
+                        )}
+                    </PillContainer>
                     <Tooltip title={autoLatestLabel} arrow enterDelay={tooltipEnterDelay}>
                         <IconButton size="small" onClick={onAutoRefreshToggle} aria-label={autoLatestLabel}>
                             <Icon sx={{fontSize: 18, color: autoRefresh ? 'success.main' : undefined}}>
@@ -331,20 +346,6 @@ export const TopBar = React.memo(
                             </IconButton>
                         </Tooltip>
                     </>
-                )}
-                {onOpenWebsite && (
-                    <Tooltip title={openWebsiteLabel} arrow enterDelay={tooltipEnterDelay}>
-                        <span style={{display: 'inline-flex'}}>
-                            <IconButton
-                                size="small"
-                                onClick={onOpenWebsite}
-                                disabled={!websiteUrl}
-                                aria-label={openWebsiteLabel}
-                            >
-                                <Icon sx={{fontSize: 18}}>open_in_new</Icon>
-                            </IconButton>
-                        </span>
-                    </Tooltip>
                 )}
                 <Tooltip title={liveFeedLabel} arrow enterDelay={tooltipEnterDelay}>
                     <IconButton
@@ -431,6 +432,20 @@ export const TopBar = React.memo(
                                 </Badge>
                             </ListItemIcon>
                             <ListItemText>Notifications</ListItemText>
+                        </MenuItem>
+                    )}
+                    {compact && onOpenWebsite && (
+                        <MenuItem
+                            disabled={!websiteUrl}
+                            onClick={() => {
+                                handleMenuClose();
+                                onOpenWebsite();
+                            }}
+                        >
+                            <ListItemIcon>
+                                <Icon sx={{fontSize: 20}}>open_in_new</Icon>
+                            </ListItemIcon>
+                            <ListItemText>Open website</ListItemText>
                         </MenuItem>
                     )}
                     {compact && <Divider />}
