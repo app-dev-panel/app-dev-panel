@@ -7,7 +7,7 @@ const Frame = styled('div')(({theme}) => ({
     marginTop: theme.spacing(1.5),
     padding: theme.spacing(3.5, 2.5, 2.5),
     border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius * 1.5,
+    borderRadius: Number(theme.shape.borderRadius) * 1.5,
     backgroundColor: theme.palette.background.paper,
     [theme.breakpoints.up('sm')]: {padding: theme.spacing(4, 3, 3)},
 }));
