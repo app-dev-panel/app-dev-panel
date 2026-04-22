@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Variant 5 — Accent stripe label</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --surface: #ffffff;
+        --border: #e5e7eb;
+        --text: #111827;
+        --muted: #6b7280;
+        --accent: #2563eb;
+        --accent-tint: #eff6ff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 32px;
+        background: var(--bg);
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: var(--text);
+      }
+      .container {
+        max-width: 980px;
+        margin: 0 auto;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      /* === Variant 5: Accent stripe label === */
+      /* A minimal colored strip on the very top of the content marks "which page".
+         The title is small-caps, the description lives in an expandable detail row.
+         Vertical space ~32px (or ~56px when expanded). */
+      .header {
+        position: relative;
+        padding: 8px 20px 8px 28px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .header::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--accent);
+      }
+      .title {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .title svg {
+        width: 14px;
+        height: 14px;
+        color: var(--accent);
+      }
+      .count {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: var(--accent-tint);
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 600;
+      }
+      details {
+        margin-left: auto;
+      }
+      details > summary {
+        list-style: none;
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      details > summary::-webkit-details-marker {
+        display: none;
+      }
+      details[open] > summary {
+        color: var(--accent);
+      }
+      .desc {
+        padding: 8px 20px 10px 28px;
+        color: var(--muted);
+        font-size: 13px;
+        background: #fafafa;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .content {
+        padding: 20px;
+      }
+      .stub {
+        height: 48px;
+        background: #f9fafb;
+        border: 1px dashed var(--border);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <span class="title">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="6" cy="19" r="2" />
+            <circle cx="18" cy="5" r="2" />
+            <path d="M8 19h8a4 4 0 0 0 4-4V9" />
+            <path d="M16 5H8a4 4 0 0 0-4 4v6" />
+          </svg>
+          Routes
+        </span>
+        <span class="count">47</span>
+
+        <details>
+          <summary>About this page</summary>
+        </details>
+      </header>
+
+      <!-- The description row only appears when the user opens the <details>
+           above. Kept here always-visible in the mockup to illustrate. -->
+      <div class="desc">View and check application routes.</div>
+
+      <main class="content">
+        <div class="stub">check route input</div>
+        <div class="stub">method filters</div>
+        <div class="stub">route list</div>
+        <div class="stub">route list</div>
+        <div class="stub">route list</div>
+      </main>
+    </div>
+  </body>
+</html>

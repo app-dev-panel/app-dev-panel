@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Variant 1 — Inline subtitle</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --surface: #ffffff;
+        --border: #e5e7eb;
+        --text: #111827;
+        --muted: #6b7280;
+        --accent: #2563eb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 32px;
+        background: var(--bg);
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: var(--text);
+      }
+      .container {
+        max-width: 980px;
+        margin: 0 auto;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      /* === Variant 1: Inline subtitle === */
+      /* Title and description sit on one line, separated by a dot divider.
+         Total vertical space ~44px vs ~88px in the original. */
+      .header {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--border);
+      }
+      .header .icon {
+        align-self: center;
+        display: inline-flex;
+        width: 20px;
+        height: 20px;
+        color: var(--accent);
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .header .dot {
+        color: var(--border);
+      }
+      .header .subtitle {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .content {
+        padding: 20px;
+      }
+      .stub {
+        height: 48px;
+        background: #f9fafb;
+        border: 1px dashed var(--border);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="6" cy="19" r="2" />
+          <circle cx="18" cy="5" r="2" />
+          <path d="M8 19h8a4 4 0 0 0 4-4V9" />
+          <path d="M16 5H8a4 4 0 0 0-4 4v6" />
+        </svg>
+        <h1>Routes</h1>
+        <span class="dot">·</span>
+        <span class="subtitle">View and check application routes</span>
+      </header>
+
+      <main class="content">
+        <div class="stub">check route input</div>
+        <div class="stub">method filters</div>
+        <div class="stub">route list</div>
+        <div class="stub">route list</div>
+        <div class="stub">route list</div>
+      </main>
+    </div>
+  </body>
+</html>
