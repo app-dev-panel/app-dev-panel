@@ -1,3 +1,4 @@
+import {InspectorPageLayout} from '@app-dev-panel/panel/Module/Inspector/Component/InspectorPageLayout';
 import {Navigate, RouteObject} from 'react-router';
 
 const lazy = (importer: () => Promise<{[key: string]: React.ComponentType}>, name: string) => ({
@@ -10,6 +11,7 @@ const lazy = (importer: () => Promise<{[key: string]: React.ComponentType}>, nam
 export const routes = [
     {
         path: 'inspector',
+        element: <InspectorPageLayout />,
         children: [
             {
                 index: true,
