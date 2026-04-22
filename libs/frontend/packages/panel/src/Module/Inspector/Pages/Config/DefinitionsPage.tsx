@@ -1,5 +1,6 @@
 import {useGetConfigurationQuery, useLazyGetObjectQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {DataContext} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
+import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
@@ -7,9 +8,9 @@ import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
-import {ContentCopy, DataObject, Download, ErrorOutline} from '@mui/icons-material';
-import {Box, CircularProgress, IconButton, TablePagination, Tooltip, Typography} from '@mui/material';
-import {styled} from '@mui/material/styles';
+import {ChevronRight, ContentCopy, DataObject, Download, ErrorOutline} from '@mui/icons-material';
+import {Box, CircularProgress, Collapse, IconButton, TablePagination, Tooltip, Typography} from '@mui/material';
+import {alpha, styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
 import {Link as RouterLink, useSearchParams} from 'react-router';
@@ -19,6 +20,48 @@ import {Link as RouterLink, useSearchParams} from 'react-router';
 // ---------------------------------------------------------------------------
 
 type DefinitionEntry = {id: string; value: unknown};
+
+type DefinitionKind = 'class' | 'factory' | 'object' | 'primitive';
+
+// ---------------------------------------------------------------------------
+// Classifiers
+// ---------------------------------------------------------------------------
+
+const REGEXP_PHP_FUNCTION = /(static )?(function |fn )\(.*\).*((\{.*})|(=>.*))/s;
+const REGEXP_CLASS_NAME = /^[\w\\]+$/i;
+
+const detectKind = (value: unknown): DefinitionKind => {
+    if (typeof value === 'string') {
+        if (REGEXP_PHP_FUNCTION.test(value)) return 'factory';
+        if (REGEXP_CLASS_NAME.test(value)) return 'class';
+        return 'primitive';
+    }
+    if (value && typeof value === 'object') return 'object';
+    return 'primitive';
+};
+
+const summarizeFactory = (source: string): string => {
+    const returnNew = source.match(/return\s+new\s+(\\?[\w\\]+)/);
+    if (returnNew) return `new ${returnNew[1]}`;
+    const arrowNew = source.match(/=>\s*new\s+(\\?[\w\\]+)/);
+    if (arrowNew) return `new ${arrowNew[1]}`;
+    const staticCall = source.match(/return\s+(\\?[\w\\]+)::(\w+)\(/);
+    if (staticCall) return `${staticCall[1]}::${staticCall[2]}()`;
+    return 'closure';
+};
+
+const summarizeObject = (value: unknown): string => {
+    if (Array.isArray(value)) return `[${value.length} items]`;
+    if (value && typeof value === 'object') {
+        const keys = Object.keys(value);
+        if (keys.length === 0) return '{}';
+        if (keys.length === 1) return `{${keys[0]}}`;
+        return `{${keys.slice(0, 3).join(', ')}${keys.length > 3 ? ', …' : ''}}`;
+    }
+    return String(value);
+};
+
+const countLines = (source: string): number => source.split('\n').length;
 
 // ---------------------------------------------------------------------------
 // Styled components
@@ -30,48 +73,6 @@ const SearchRow = styled(Box)(({theme}) => ({
     gap: theme.spacing(1.5),
     padding: theme.spacing(2),
 }));
-
-const DefinitionRow = styled(Box)(({theme}) => ({
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: theme.spacing(2),
-    padding: theme.spacing(1, 2),
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    '&:last-child': {borderBottom: 'none'},
-    '&:hover': {backgroundColor: theme.palette.action.hover},
-    [theme.breakpoints.down('sm')]: {flexDirection: 'column', gap: theme.spacing(0.5), padding: theme.spacing(1, 1.5)},
-}));
-
-const NameCell = styled(Box)(({theme}) => ({
-    width: 240,
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: 4,
-    paddingTop: 4,
-    [theme.breakpoints.down('sm')]: {width: '100%'},
-}));
-
-const NameText = styled(Typography)(({theme}) => ({
-    fontFamily: theme.adp.fontFamilyMono,
-    fontSize: '12px',
-    fontWeight: 600,
-    wordBreak: 'break-word',
-    flex: 1,
-    paddingTop: 2,
-}));
-
-const ValueCell = styled(Box)({flex: 1, minWidth: 0, overflow: 'hidden'});
-
-const ClassValue = styled(Typography)(({theme}) => ({
-    fontFamily: theme.adp.fontFamilyMono,
-    fontSize: '12px',
-    color: theme.palette.text.secondary,
-    wordBreak: 'break-word',
-    paddingTop: 4,
-}));
-
-const ActionsCell = styled(Box)({display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0, paddingTop: 2});
 
 const ListContainer = styled(Box)(({theme}) => ({
     border: `1px solid ${theme.palette.divider}`,
@@ -96,53 +97,336 @@ const HeaderLabel = styled(Typography)(({theme}) => ({
     color: theme.palette.text.disabled,
 }));
 
+const Row = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(({theme, expanded}) => ({
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    '&:last-child': {borderBottom: 'none'},
+    backgroundColor: expanded ? theme.palette.action.hover : 'transparent',
+    transition: 'background-color 120ms',
+}));
+
+const RowHead = styled(Box, {shouldForwardProp: (p) => p !== 'clickable'})<{clickable?: boolean}>(
+    ({theme, clickable}) => ({
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: theme.spacing(2),
+        padding: theme.spacing(1, 2),
+        cursor: clickable ? 'pointer' : 'default',
+        userSelect: clickable ? 'none' : 'auto',
+        '&:hover': clickable ? {backgroundColor: theme.palette.action.hover} : undefined,
+        [theme.breakpoints.down('sm')]: {
+            flexDirection: 'column',
+            gap: theme.spacing(0.5),
+            padding: theme.spacing(1, 1.5),
+        },
+    }),
+);
+
+const NameCell = styled(Box)(({theme}) => ({
+    width: 240,
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 4,
+    paddingTop: 4,
+    [theme.breakpoints.down('sm')]: {width: '100%'},
+}));
+
+const NameText = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontSize: '12px',
+    fontWeight: 600,
+    wordBreak: 'break-word',
+    flex: 1,
+    paddingTop: 2,
+}));
+
+const ValueCell = styled(Box)(({theme}) => ({
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+    paddingTop: 2,
+    [theme.breakpoints.down('sm')]: {width: '100%'},
+}));
+
+const ClassValueText = styled(Typography)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontSize: '12px',
+    color: theme.palette.text.secondary,
+    wordBreak: 'break-word',
+    flex: 1,
+    minWidth: 0,
+}));
+
+const Summary = styled(Box)(({theme}) => ({
+    fontFamily: theme.adp.fontFamilyMono,
+    fontSize: '12px',
+    color: theme.palette.text.secondary,
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: theme.spacing(0.75),
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    flex: 1,
+    minWidth: 0,
+}));
+
+const SummaryTarget = styled('span')(({theme}) => ({
+    color: theme.palette.text.primary,
+    fontWeight: 500,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+}));
+
+const SummaryMeta = styled('span')(({theme}) => ({
+    color: theme.palette.text.disabled,
+    fontSize: '11px',
+    flexShrink: 0,
+}));
+
+const KindBadge = styled(Box, {shouldForwardProp: (p) => p !== 'kind'})<{kind: DefinitionKind}>(({theme, kind}) => {
+    const palette = {
+        factory: theme.palette.primary.main,
+        class: theme.palette.success.main,
+        object: theme.palette.warning.main,
+        primitive: theme.palette.text.secondary,
+    }[kind];
+    const isMuted = kind === 'primitive';
+    return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        height: 20,
+        padding: theme.spacing(0, 0.75),
+        borderRadius: 4,
+        fontSize: '10px',
+        fontWeight: 600,
+        letterSpacing: '0.04em',
+        textTransform: 'uppercase',
+        flexShrink: 0,
+        color: isMuted ? theme.palette.text.secondary : palette,
+        backgroundColor: isMuted ? theme.palette.action.hover : alpha(palette, 0.12),
+    };
+});
+
+const ActionsCell = styled(Box)({display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0, paddingTop: 2});
+
+const ChevronButton = styled(IconButton, {shouldForwardProp: (p) => p !== 'open'})<{open?: boolean}>(({open}) => ({
+    transition: 'transform 150ms',
+    transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+}));
+
+const ExpandedPanel = styled(Box)(({theme}) => ({
+    padding: theme.spacing(0, 2, 2, 2),
+    [theme.breakpoints.down('sm')]: {padding: theme.spacing(0, 1.5, 1.5, 1.5)},
+}));
+
+const CodeContainer = styled(Box)(({theme}) => ({
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: theme.shape.borderRadius,
+    overflow: 'hidden',
+    backgroundColor: theme.palette.mode === 'dark' ? alpha('#000', 0.25) : theme.palette.background.default,
+}));
+
+const CodeToolbar = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: theme.spacing(1),
+    padding: theme.spacing(0.5, 1),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.action.hover,
+}));
+
+const CodeToolbarLabel = styled(Typography)(({theme}) => ({
+    fontSize: '10px',
+    fontWeight: 600,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    color: theme.palette.text.disabled,
+}));
+
+const CodeBody = styled(Box)({
+    overflow: 'auto',
+    maxHeight: 520,
+    '& pre': {margin: '0 !important', background: 'transparent !important'},
+});
+
+// ---------------------------------------------------------------------------
+// Kind metadata
+// ---------------------------------------------------------------------------
+
+const KIND_LABEL: Record<DefinitionKind, string> = {
+    factory: 'Factory',
+    class: 'Class',
+    object: 'Object',
+    primitive: 'Value',
+};
+
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
 
-const DefinitionValue = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: string) => Promise<string | null>}) => {
+const InlineClassValue = ({
+    id,
+    value,
+    onLoad,
+}: {
+    id: string;
+    value: string;
+    onLoad: (id: string) => Promise<string | null>;
+}) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const isClassName = typeof entry.value === 'string' && /^[\w\\]+$/i.test(entry.value);
+    const handleLoad = useCallback(
+        async (e: React.MouseEvent) => {
+            e.stopPropagation();
+            setLoading(true);
+            setError(null);
+            const errorMessage = await onLoad(id);
+            setLoading(false);
+            if (errorMessage) setError(errorMessage);
+        },
+        [id, onLoad],
+    );
 
-    const handleLoad = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        const errorMessage = await onLoad(entry.id);
-        setLoading(false);
-        if (errorMessage) {
-            setError(errorMessage);
-        }
-    }, [entry.id, onLoad]);
+    return (
+        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0}}>
+            <ClassValueText>{value}</ClassValueText>
+            <Tooltip title={error ? 'Retry loading' : 'Load object state'}>
+                <IconButton
+                    size="small"
+                    onClick={handleLoad}
+                    disabled={loading}
+                    aria-label={error ? 'Retry loading' : 'Load object state'}
+                    sx={{flexShrink: 0}}
+                >
+                    {loading ? (
+                        <CircularProgress size={14} />
+                    ) : error ? (
+                        <ErrorOutline sx={{fontSize: 14, color: 'error.main'}} />
+                    ) : (
+                        <Download sx={{fontSize: 14}} />
+                    )}
+                </IconButton>
+            </Tooltip>
+            {error && <Typography sx={{fontSize: '11px', color: 'error.main', flexShrink: 0}}>{error}</Typography>}
+        </Box>
+    );
+};
 
-    if (typeof entry.value === 'string' && isClassName) {
-        return (
-            <Box>
-                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                    <ClassValue>{entry.value}</ClassValue>
-                    <Tooltip title={error ? 'Retry loading' : 'Load object state'}>
-                        <IconButton size="small" onClick={handleLoad} disabled={loading} sx={{flexShrink: 0}}>
-                            {loading ? (
-                                <CircularProgress size={14} />
-                            ) : error ? (
-                                <ErrorOutline sx={{fontSize: 14, color: 'error.main'}} />
-                            ) : (
-                                <Download sx={{fontSize: 14}} />
-                            )}
+const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: string) => Promise<string | null>}) => {
+    const kind = useMemo(() => detectKind(entry.value), [entry.value]);
+    const [expanded, setExpanded] = useState(false);
+    const expandable = kind === 'factory' || kind === 'object';
+
+    const toggle = useCallback(() => {
+        if (expandable) setExpanded((v) => !v);
+    }, [expandable]);
+
+    const stopProp = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
+
+    const source = typeof entry.value === 'string' ? entry.value : '';
+
+    return (
+        <Row expanded={expanded}>
+            <RowHead clickable={expandable} onClick={toggle}>
+                <NameCell>
+                    <NameText>{entry.id}</NameText>
+                </NameCell>
+                <ValueCell>
+                    <KindBadge kind={kind}>{KIND_LABEL[kind]}</KindBadge>
+
+                    {kind === 'class' && (
+                        <InlineClassValue id={entry.id} value={entry.value as string} onLoad={onLoad} />
+                    )}
+
+                    {kind === 'factory' && (
+                        <Summary>
+                            <Box component="span" sx={{color: 'text.disabled', flexShrink: 0}}>
+                                returns
+                            </Box>
+                            <SummaryTarget>{summarizeFactory(source)}</SummaryTarget>
+                            <SummaryMeta>· {countLines(source)} lines</SummaryMeta>
+                        </Summary>
+                    )}
+
+                    {kind === 'object' && (
+                        <Summary>
+                            <SummaryTarget>{summarizeObject(entry.value)}</SummaryTarget>
+                        </Summary>
+                    )}
+
+                    {kind === 'primitive' && (
+                        <Box sx={{flex: 1, minWidth: 0, overflow: 'hidden'}}>
+                            <JsonRenderer value={entry.value} />
+                        </Box>
+                    )}
+                </ValueCell>
+                <ActionsCell onClick={stopProp}>
+                    {expandable && (
+                        <ChevronButton
+                            size="small"
+                            open={expanded}
+                            onClick={toggle}
+                            aria-label={expanded ? 'Collapse' : 'Expand'}
+                        >
+                            <ChevronRight sx={{fontSize: 16}} />
+                        </ChevronButton>
+                    )}
+                    <Tooltip title="Copy name">
+                        <IconButton size="small" onClick={() => clipboardCopy(entry.id)} aria-label="Copy name">
+                            <ContentCopy sx={{fontSize: 14}} />
                         </IconButton>
                     </Tooltip>
-                </Box>
-                {error && <Typography sx={{fontSize: '11px', color: 'error.main', mt: 0.5}}>{error}</Typography>}
-            </Box>
-        );
-    }
+                    <Tooltip title="Examine in container">
+                        <IconButton
+                            size="small"
+                            component={RouterLink}
+                            to={'/inspector/container/view?class=' + entry.id}
+                            aria-label="Examine in container"
+                        >
+                            <DataObject sx={{fontSize: 14}} />
+                        </IconButton>
+                    </Tooltip>
+                </ActionsCell>
+            </RowHead>
 
-    if (typeof entry.value !== 'string') {
-        return <JsonRenderer value={entry.value} depth={2} />;
-    }
-
-    return <JsonRenderer value={entry.value} />;
+            {expandable && (
+                <Collapse in={expanded} unmountOnExit>
+                    <ExpandedPanel>
+                        {kind === 'factory' && (
+                            <CodeContainer>
+                                <CodeToolbar>
+                                    <CodeToolbarLabel>PHP · {countLines(source)} lines</CodeToolbarLabel>
+                                    <Tooltip title="Copy source">
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => clipboardCopy(source)}
+                                            aria-label="Copy source"
+                                        >
+                                            <ContentCopy sx={{fontSize: 14}} />
+                                        </IconButton>
+                                    </Tooltip>
+                                </CodeToolbar>
+                                <CodeBody>
+                                    <CodeHighlight language="php" code={source} fontSize={10} showLineNumbers />
+                                </CodeBody>
+                            </CodeContainer>
+                        )}
+                        {kind === 'object' && (
+                            <Box sx={{pt: 0.5}}>
+                                <JsonRenderer value={entry.value} depth={2} />
+                            </Box>
+                        )}
+                    </ExpandedPanel>
+                </Collapse>
+            )}
+        </Row>
+    );
 };
 
 // ---------------------------------------------------------------------------
@@ -157,7 +441,6 @@ export const DefinitionsPage = () => {
 
     const {objects, setObjects, insertObject} = useContext(DataContext);
 
-    // Pagination state
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(50);
 
@@ -239,33 +522,10 @@ export const DefinitionsPage = () => {
                         <ListHeader>
                             <HeaderLabel sx={{width: 240, flexShrink: 0}}>Name</HeaderLabel>
                             <HeaderLabel sx={{flex: 1}}>Value</HeaderLabel>
-                            <HeaderLabel sx={{width: 68, flexShrink: 0, textAlign: 'right'}}>Actions</HeaderLabel>
+                            <HeaderLabel sx={{width: 92, flexShrink: 0, textAlign: 'right'}}>Actions</HeaderLabel>
                         </ListHeader>
                         {paginatedRows.map((entry) => (
-                            <DefinitionRow key={entry.id}>
-                                <NameCell>
-                                    <NameText>{entry.id}</NameText>
-                                </NameCell>
-                                <ValueCell>
-                                    <DefinitionValue entry={entry} onLoad={handleLoadObject} />
-                                </ValueCell>
-                                <ActionsCell>
-                                    <Tooltip title="Copy name">
-                                        <IconButton size="small" onClick={() => clipboardCopy(entry.id)}>
-                                            <ContentCopy sx={{fontSize: 14}} />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Examine in container">
-                                        <IconButton
-                                            size="small"
-                                            component={RouterLink}
-                                            to={'/inspector/container/view?class=' + entry.id}
-                                        >
-                                            <DataObject sx={{fontSize: 14}} />
-                                        </IconButton>
-                                    </Tooltip>
-                                </ActionsCell>
-                            </DefinitionRow>
+                            <DefinitionRow key={entry.id} entry={entry} onLoad={handleLoadObject} />
                         ))}
                         {filteredRows.length > 20 && (
                             <TablePagination
