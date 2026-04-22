@@ -77,4 +77,13 @@ final class ExceptionCollectorTest extends AbstractCollectorTestCase
 
         $this->assertEquals([], $collector->getCollected());
     }
+
+    public function testSummaryIsEmptyWhenNoExceptionCollected(): void
+    {
+        $collector = new ExceptionCollector(new TimelineCollector());
+
+        $collector->startup();
+
+        $this->assertEquals([], $collector->getSummary());
+    }
 }
