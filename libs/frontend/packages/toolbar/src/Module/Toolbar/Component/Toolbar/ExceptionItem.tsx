@@ -35,6 +35,9 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
         handleClose();
         setModalOpen(true);
     };
+    const stopDrag = (event: React.MouseEvent | React.PointerEvent) => {
+        event.stopPropagation();
+    };
 
     return (
         <>
@@ -46,6 +49,8 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
                     color="error"
                     variant="filled"
                     onClick={handleOpen}
+                    onMouseDown={stopDrag}
+                    onPointerDown={stopDrag}
                     sx={{height: 32, borderRadius: 1, fontSize: 12, cursor: 'pointer'}}
                 />
             </Tooltip>
@@ -55,7 +60,14 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
                 onClose={handleClose}
                 anchorOrigin={{vertical: 'top', horizontal: 'left'}}
                 transformOrigin={{vertical: 'bottom', horizontal: 'left'}}
-                slotProps={{paper: {sx: {maxWidth: 560, minWidth: 320}}}}
+                slotProps={{
+                    paper: {
+                        onMouseDown: stopDrag,
+                        onPointerDown: stopDrag,
+                        onClick: (e: React.MouseEvent) => e.stopPropagation(),
+                        sx: {maxWidth: 560, minWidth: 320},
+                    },
+                }}
             >
                 <Box sx={{px: 2, py: 1.25}}>
                     <Typography
@@ -108,7 +120,7 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
                         <FileLink path={exception.file} line={+exception.line} />
                     </Box>
                 </MenuItem>
-                {exception.code && String(exception.code) !== '0' && (
+                {exception.code != null && String(exception.code) !== '' && String(exception.code) !== '0' && (
                     <MenuItem disableRipple sx={{cursor: 'default', '&:hover': {backgroundColor: 'transparent'}}}>
                         <ListItemIcon>
                             <NumbersIcon fontSize="small" />
