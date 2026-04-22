@@ -1,15 +1,15 @@
 import {useGetClassesQuery, useLazyGetObjectQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {DataContext} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
-import {GroupCard} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/GroupCard';
 import {groupByNamespace, stripNamespace} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/grouping';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
+import {GroupCard} from '@app-dev-panel/sdk/Component/GroupCard';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
-import {ContentCopy, Download, ErrorOutline, OpenInNew} from '@mui/icons-material';
+import {Code, ContentCopy, DataObject, Download, ErrorOutline} from '@mui/icons-material';
 import {Box, CircularProgress, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
@@ -218,6 +218,16 @@ export const ContainerPage = () => {
                                     <ContainerValue entry={entry} onLoad={handleLoadObject} />
                                 </ValueCell>
                                 <ActionsCell>
+                                    <Tooltip title="Open class source">
+                                        <IconButton
+                                            size="small"
+                                            component={RouterLink}
+                                            to={`/inspector/files?class=${encodeURIComponent(entry.id)}`}
+                                            aria-label="Open class source"
+                                        >
+                                            <Code sx={{fontSize: 14}} />
+                                        </IconButton>
+                                    </Tooltip>
                                     <Tooltip title="Copy class name">
                                         <IconButton
                                             size="small"
@@ -234,7 +244,7 @@ export const ContainerPage = () => {
                                             to={'/inspector/container/view?class=' + entry.id}
                                             aria-label="Examine as container entry"
                                         >
-                                            <OpenInNew sx={{fontSize: 14}} />
+                                            <DataObject sx={{fontSize: 14}} />
                                         </IconButton>
                                     </Tooltip>
                                 </ActionsCell>

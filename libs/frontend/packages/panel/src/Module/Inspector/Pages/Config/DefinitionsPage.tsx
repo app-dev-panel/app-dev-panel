@@ -1,12 +1,12 @@
 import {useGetConfigurationQuery, useLazyGetObjectQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {DataContext} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
-import {GroupCard} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/GroupCard';
 import {groupByNamespace, stripNamespace} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/grouping';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
+import {GroupCard} from '@app-dev-panel/sdk/Component/GroupCard';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';

@@ -10,25 +10,16 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
+import {GroupCard} from '@app-dev-panel/sdk/Component/GroupCard';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
-import {ContentCopy, Description, ExpandMore} from '@mui/icons-material';
+import {ContentCopy, Description} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
-    Box,
-    Chip,
-    IconButton,
-    Tab,
-    Tooltip,
-    Typography,
-} from '@mui/material';
+import {Box, IconButton, Tab, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import React, {SyntheticEvent, useCallback, useMemo, useState} from 'react';
@@ -94,29 +85,6 @@ const ListenerRow = styled(Box)(({theme}) => ({
     '&:hover': {backgroundColor: theme.palette.action.hover},
     '& .copy-btn': {opacity: 0, transition: 'opacity 0.15s'},
     '&:hover .copy-btn': {opacity: 1},
-}));
-
-const StyledAccordion = styled(Accordion)(({theme}) => ({
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: `${theme.shape.borderRadius}px !important`,
-    '&:before': {display: 'none'},
-    '&:not(:last-child)': {marginBottom: theme.spacing(1)},
-    '&.Mui-expanded': {margin: 0, '&:not(:last-child)': {marginBottom: theme.spacing(1)}},
-}));
-
-const StyledAccordionSummary = styled(AccordionSummary)(({theme}) => ({
-    minHeight: 40,
-    padding: theme.spacing(0, 2),
-    '&.Mui-expanded': {minHeight: 40},
-    '& .MuiAccordionSummary-content': {
-        margin: theme.spacing(0.75, 0),
-        alignItems: 'center',
-        gap: theme.spacing(1),
-        overflow: 'hidden',
-    },
-    '& .MuiAccordionSummary-content.Mui-expanded': {margin: theme.spacing(0.75, 0)},
-    '& .header-actions': {opacity: 0, transition: 'opacity 0.15s'},
-    '&:hover .header-actions': {opacity: 1},
 }));
 
 // ---------------------------------------------------------------------------
@@ -267,54 +235,28 @@ const EventListeners = React.memo(({entries}: EventListenersProps) => {
     return (
         <>
             {entries.map((entry) => (
-                <StyledAccordion
+                <GroupCard
                     key={entry.name}
-                    disableGutters
-                    elevation={0}
-                    slotProps={{transition: {unmountOnExit: true}}}
-                >
-                    <StyledAccordionSummary expandIcon={<ExpandMore />}>
-                        <Box sx={{flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 1}}>
-                            <EventName name={entry.name} eventClass={entry.class} />
-                        </Box>
-                        <Box className="header-actions" sx={{display: 'flex', alignItems: 'center', flexShrink: 0}}>
+                    name={<EventName name={entry.name} eventClass={entry.class} />}
+                    count={entry.listeners.length}
+                    defaultExpanded={entries.length === 1}
+                    actions={
+                        <>
                             <Tooltip title="Copy event name">
-                                <IconButton
-                                    size="small"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        clipboardCopy(entry.name);
-                                    }}
-                                    sx={{p: 0.25}}
-                                >
+                                <IconButton size="small" onClick={() => clipboardCopy(entry.name)} sx={{p: 0.25}}>
                                     <ContentCopy sx={{fontSize: 14}} />
                                 </IconButton>
                             </Tooltip>
-                        </Box>
-                        {entry.class && (
-                            <Box className="header-actions" sx={{flexShrink: 0}} onClick={(e) => e.stopPropagation()}>
-                                <FileLink className={entry.class} />
-                            </Box>
-                        )}
-                        <Chip
-                            label={entry.listeners.length}
-                            size="small"
-                            sx={{
-                                fontSize: '10px',
-                                height: 20,
-                                minWidth: 24,
-                                borderRadius: 1,
-                                backgroundColor: 'action.selected',
-                                flexShrink: 0,
-                            }}
-                        />
-                    </StyledAccordionSummary>
-                    <AccordionDetails sx={{p: 0, borderTop: 1, borderColor: 'divider'}}>
+                            {entry.class && <FileLink className={entry.class} />}
+                        </>
+                    }
+                >
+                    <Box sx={{borderTop: 1, borderColor: 'divider'}}>
                         {entry.listeners.map((listener, i) => (
                             <ListenerItem key={i} listener={listener} />
                         ))}
-                    </AccordionDetails>
-                </StyledAccordion>
+                    </Box>
+                </GroupCard>
             ))}
         </>
     );

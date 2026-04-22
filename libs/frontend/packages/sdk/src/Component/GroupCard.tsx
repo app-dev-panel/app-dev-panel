@@ -1,13 +1,14 @@
-import {Box, Chip, Collapse, Icon, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {ReactNode, useState} from 'react';
 
 type GroupCardProps = {
-    name: string;
+    name: ReactNode;
     count: number;
-    countLabel: string;
+    countLabel?: string;
     defaultExpanded: boolean;
-    preview: ReactNode;
+    preview?: ReactNode;
+    actions?: ReactNode;
     children: ReactNode;
 };
 
@@ -26,7 +27,20 @@ const Header = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expand
     cursor: 'pointer',
     backgroundColor: expanded ? theme.palette.action.hover : 'transparent',
     '&:hover': {backgroundColor: theme.palette.action.hover},
+    '& .group-card-actions': {opacity: 0, transition: 'opacity 0.15s'},
+    '&:hover .group-card-actions': {opacity: 1},
 }));
+
+const NameBox = styled(Box)({
+    fontWeight: 600,
+    fontSize: '13px',
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    fontFamily: 'monospace',
+});
 
 const PreviewRow = styled(Box)(({theme}) => ({
     padding: theme.spacing(0, 2, 1.5, 4.5),
@@ -38,24 +52,38 @@ const PreviewRow = styled(Box)(({theme}) => ({
     whiteSpace: 'nowrap',
 }));
 
-export const GroupCard = ({name, count, countLabel, defaultExpanded, preview, children}: GroupCardProps) => {
+export const GroupCard = ({name, count, countLabel, defaultExpanded, preview, actions, children}: GroupCardProps) => {
     const [expanded, setExpanded] = useState(defaultExpanded);
 
     return (
         <Card>
             <Header expanded={expanded} onClick={() => setExpanded(!expanded)}>
                 <Icon sx={{fontSize: 16, color: 'text.disabled'}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
-                <Typography sx={{fontWeight: 600, fontSize: '13px', flex: 1, fontFamily: 'monospace'}}>
-                    {name}
-                </Typography>
+                <NameBox>{name}</NameBox>
+                {actions && (
+                    <Box
+                        className="group-card-actions"
+                        sx={{display: 'flex', alignItems: 'center', flexShrink: 0}}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {actions}
+                    </Box>
+                )}
                 <Chip
-                    label={`${count} ${countLabel}`}
+                    label={countLabel ? `${count} ${countLabel}` : String(count)}
                     size="small"
-                    sx={{fontSize: '10px', height: 20, borderRadius: 1, backgroundColor: 'action.selected'}}
+                    sx={{
+                        fontSize: '10px',
+                        height: 20,
+                        minWidth: 24,
+                        borderRadius: 1,
+                        backgroundColor: 'action.selected',
+                        flexShrink: 0,
+                    }}
                 />
             </Header>
 
-            {!expanded && <PreviewRow>{preview}</PreviewRow>}
+            {!expanded && preview && <PreviewRow>{preview}</PreviewRow>}
 
             <Collapse in={expanded} unmountOnExit>
                 {children}
