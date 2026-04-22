@@ -6,7 +6,9 @@ namespace AppDevPanel\Kernel\Tests\Unit;
 
 use AppDevPanel\Kernel as D;
 use AppDevPanel\Kernel\Dumper;
+use AppDevPanel\Kernel\Inspector\ClosureDescriptor;
 use AppDevPanel\Kernel\Tests\Support\Stub\ThreeProperties;
+use Closure;
 use DateTimeZone;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -240,6 +242,14 @@ final class DumperTest extends TestCase
         ];
     }
 
+    private static function closureJson(Closure $closure): string
+    {
+        return json_encode(
+            ClosureDescriptor::describe($closure),
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE,
+        );
+    }
+
     private static function getNested(int $depth, mixed $data): array
     {
         $objectIds = [];
@@ -393,12 +403,20 @@ final class DumperTest extends TestCase
         $closureObjectId = spl_object_id($closureObject);
         $closureInsideObject->closure = $closureObject;
         $closureInsideObjectId = spl_object_id($closureInsideObject);
+        $closureObjectJson = self::closureJson($closureObject);
 
         yield 'closure inside std class' => [
             $closureInsideObject,
-            <<<S
-                {"stdClass#{$closureInsideObjectId}":{"public \$closure":"static fn() => true"},"Closure#{$closureObjectId}":"static fn() => true"}
-                S,
+            '{"stdClass#'
+                . $closureInsideObjectId
+                . '":{"public $closure":'
+                . $closureObjectJson
+                . '}'
+                . ',"Closure#'
+                . $closureObjectId
+                . '":'
+                . $closureObjectJson
+                . '}',
         ];
     }
 
@@ -589,9 +607,7 @@ final class DumperTest extends TestCase
 
         yield 'short function' => [
             $shortFunctionObject,
-            <<<S
-                {"Closure#{$shortFunctionObjectId}":"static fn() => 1"}
-                S,
+            '{"Closure#' . $shortFunctionObjectId . '":' . self::closureJson($shortFunctionObject) . '}',
         ];
 
         // @formatter:off
@@ -601,9 +617,7 @@ final class DumperTest extends TestCase
 
         yield 'short static function' => [
             $staticShortFunctionObject,
-            <<<S
-                {"Closure#{$staticShortFunctionObjectId}":"static fn() => 1"}
-                S,
+            '{"Closure#' . $staticShortFunctionObjectId . '":' . self::closureJson($staticShortFunctionObject) . '}',
         ];
 
         // @formatter:off
@@ -615,9 +629,7 @@ final class DumperTest extends TestCase
 
         yield 'function' => [
             $functionObject,
-            <<<S
-                {"Closure#{$functionObjectId}":"static function () {\\n    return 1;\\n}"}
-                S,
+            '{"Closure#' . $functionObjectId . '":' . self::closureJson($functionObject) . '}',
         ];
 
         // @formatter:off
@@ -629,9 +641,7 @@ final class DumperTest extends TestCase
 
         yield 'static function' => [
             $staticFunctionObject,
-            <<<S
-                {"Closure#{$staticFunctionObjectId}":"static function () {\\n    return 1;\\n}"}
-                S,
+            '{"Closure#' . $staticFunctionObjectId . '":' . self::closureJson($staticFunctionObject) . '}',
         ];
         yield 'string' => [
             'Hello, Yii!',
@@ -691,9 +701,7 @@ final class DumperTest extends TestCase
             // @formatter:off
             [$closureInArrayObject],
             // @formatter:on
-            <<<S
-                [{"Closure#{$closureInArrayObjectId}":"static fn() => new \\\DateTimeZone('')"}]
-                S,
+            '[{"Closure#' . $closureInArrayObjectId . '":' . self::closureJson($closureInArrayObject) . '}]',
         ];
 
         // @formatter:off
@@ -703,9 +711,11 @@ final class DumperTest extends TestCase
 
         yield 'original class name' => [
             $closureWithUsualClassNameObject,
-            <<<S
-                {"Closure#{$closureWithUsualClassNameObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
-                S,
+            '{"Closure#'
+                . $closureWithUsualClassNameObjectId
+                . '":'
+                . self::closureJson($closureWithUsualClassNameObject)
+                . '}',
         ];
 
         // @formatter:off
@@ -715,9 +725,11 @@ final class DumperTest extends TestCase
 
         yield 'class alias' => [
             $closureWithAliasedClassNameObject,
-            <<<S
-                {"Closure#{$closureWithAliasedClassNameObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
-                S,
+            '{"Closure#'
+                . $closureWithAliasedClassNameObjectId
+                . '":'
+                . self::closureJson($closureWithAliasedClassNameObject)
+                . '}',
         ];
 
         // @formatter:off
@@ -727,9 +739,11 @@ final class DumperTest extends TestCase
 
         yield 'namespace alias' => [
             $closureWithAliasedNamespaceObject,
-            <<<S
-                {"Closure#{$closureWithAliasedNamespaceObjectId}":"static fn(\\\AppDevPanel\\\Kernel\\\Dumper \$date) => new \\\DateTimeZone('')"}
-                S,
+            '{"Closure#'
+                . $closureWithAliasedNamespaceObjectId
+                . '":'
+                . self::closureJson($closureWithAliasedNamespaceObject)
+                . '}',
         ];
         // @formatter:off
         $closureWithNullCollisionOperatorObject = static fn() => $_ENV['var'] ?? null;
@@ -738,9 +752,11 @@ final class DumperTest extends TestCase
 
         yield 'closure with null-collision operator' => [
             $closureWithNullCollisionOperatorObject,
-            <<<S
-                {"Closure#{$closureWithNullCollisionOperatorObjectId}":"static fn() => \$_ENV['var'] ?? null"}
-                S,
+            '{"Closure#'
+                . $closureWithNullCollisionOperatorObjectId
+                . '":'
+                . self::closureJson($closureWithNullCollisionOperatorObject)
+                . '}',
         ];
         yield 'utf8 supported' => [
             '🤣',
@@ -756,9 +772,14 @@ final class DumperTest extends TestCase
 
         yield 'closure in property supported' => [
             $objectWithClosureInProperty,
-            <<<S
-                {"stdClass#{$objectWithClosureInPropertyId}":{"public \$a":{"Closure#{$objectWithClosureInPropertyClosureId}":"static fn() => 1"}}}
-                S,
+            '{"stdClass#'
+                . $objectWithClosureInPropertyId
+                . '":{"public $a":'
+                . '{"Closure#'
+                . $objectWithClosureInPropertyClosureId
+                . '":'
+                . self::closureJson($objectWithClosureInProperty->a)
+                . '}}}',
         ];
         yield 'binary string' => [
             pack('H*', md5('binary string')),

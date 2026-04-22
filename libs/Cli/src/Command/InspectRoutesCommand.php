@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Cli\Command;
 
+use AppDevPanel\Kernel\Inspector\Primitives;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -11,7 +12,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Yiisoft\VarDumper\VarDumper;
 
 #[AsCommand(name: 'inspect:routes', description: 'Inspect application routes: list all routes, check route matching')]
 final class InspectRoutesCommand extends Command
@@ -79,7 +79,7 @@ final class InspectRoutesCommand extends Command
             ];
         }
 
-        $result = VarDumper::create($routes)->asPrimitives(5);
+        $result = Primitives::dump($routes, 5);
 
         if ($json) {
             $output->writeln(json_encode($result, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));

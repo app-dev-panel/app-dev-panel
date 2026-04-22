@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel;
 
+use AppDevPanel\Kernel\Inspector\ClosureDescriptor;
+
 final class Dumper
 {
     private readonly DumpContext $context;
@@ -100,7 +102,7 @@ final class Dumper
         }
 
         if ($value instanceof \Closure) {
-            return '(closure)';
+            return ClosureDescriptor::describe($value);
         }
 
         if (is_object($value)) {

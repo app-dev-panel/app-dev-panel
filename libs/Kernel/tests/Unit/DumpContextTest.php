@@ -188,7 +188,10 @@ final class DumpContextTest extends TestCase
 
         $result = $context->dumpNestedInternal($closure, 3, 0, 0, true);
 
-        $this->assertIsString($result);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['__closure']);
+        $this->assertIsString($result['source']);
+        $this->assertStringContainsString('fn', $result['source']);
     }
 
     public function testDumpObjectCollapsedBeyondLevel(): void
@@ -237,6 +240,26 @@ final class DumpContextTest extends TestCase
         $this->assertIsArray($result);
         $keys = array_keys($result);
         $this->assertStringContainsString('Closure', $keys[0]);
+        $descriptor = $result[$keys[0]];
+        $this->assertIsArray($descriptor);
+        $this->assertTrue($descriptor['__closure']);
+        $this->assertIsString($descriptor['source']);
+    }
+
+    public function testDumpClosureInsideArray(): void
+    {
+        $closure = static fn(int $x): int => $x * 2;
+        $context = new DumpContext(objects: [], excludedClasses: []);
+
+        $result = $context->dumpNestedInternal(['definition' => $closure], 3, 0, 0, true);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('definition', $result);
+        $this->assertIsArray($result['definition']);
+        $this->assertTrue($result['definition']['__closure']);
+        $this->assertIsString($result['definition']['source']);
+        $this->assertIsString($result['definition']['file']);
+        $this->assertIsInt($result['definition']['startLine']);
     }
 
     public function testDumpObjectWithDebugInfo(): void

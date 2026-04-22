@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Inspector\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Kernel\Inspector\Primitives;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
 use Throwable;
-use Yiisoft\VarDumper\VarDumper;
 
 final class InspectController
 {
@@ -36,7 +36,7 @@ final class InspectController
         $data = $config->get($group);
         ksort($data);
 
-        $response = VarDumper::create($data)->asPrimitives(255);
+        $response = Primitives::dump($data, 255);
 
         return $this->responseFactory->createJsonResponse($response);
     }
@@ -67,7 +67,7 @@ final class InspectController
         $reflection = $this->validateClassName($className);
 
         $variable = $this->container->get($className);
-        $result = VarDumper::create($variable)->asPrimitives(3);
+        $result = Primitives::dump($variable, 3);
 
         return $this->responseFactory->createJsonResponse([
             'object' => $result,
@@ -95,9 +95,9 @@ final class InspectController
         $config = $this->container->get('config');
 
         return $this->responseFactory->createJsonResponse([
-            'common' => VarDumper::create($config->get('events'))->asPrimitives(),
+            'common' => Primitives::dump($config->get('events')),
             'console' => [],
-            'web' => VarDumper::create($config->get('events-web'))->asPrimitives(),
+            'web' => Primitives::dump($config->get('events-web')),
         ]);
     }
 

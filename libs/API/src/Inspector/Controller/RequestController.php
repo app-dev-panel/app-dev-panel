@@ -7,13 +7,13 @@ namespace AppDevPanel\Api\Inspector\Controller;
 use Alexkart\CurlBuilder\Command;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Kernel\Inspector\Primitives;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
-use Yiisoft\VarDumper\VarDumper;
 
 final class RequestController
 {
@@ -43,7 +43,7 @@ final class RequestController
         $client = new Client(['timeout' => 15, 'connect_timeout' => 5]);
         $response = $client->send($parsedRequest);
 
-        $result = VarDumper::create($response)->asPrimitives();
+        $result = Primitives::dump($response);
 
         return $this->responseFactory->createJsonResponse($result);
     }
