@@ -4,13 +4,14 @@ import {
     useGetAuthorizationQuery,
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {Box, Chip, LinearProgress, Typography} from '@mui/material';
+import {FolderOpen} from '@mui/icons-material';
+import {Box, Chip, IconButton, LinearProgress, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
+import {Link as RouterLink} from 'react-router';
 
 const TableContainer = styled(Box)(({theme}) => ({
     border: `1px solid ${theme.palette.divider}`,
@@ -39,33 +40,32 @@ const TableHeader = styled(TableRow)(({theme}) => ({
 
 const MonoText = styled(Typography)(({theme}) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '12px'}));
 
-const linkSx = (theme: import('@mui/material/styles').Theme) =>
-    ({
-        fontFamily: theme.adp.fontFamilyMono,
-        fontSize: '12px',
-        color: 'primary.main',
-        wordBreak: 'break-all',
-        '&:hover': {textDecoration: 'underline'},
-    }) as const;
-
 const isFqcn = (value: string): boolean => value.includes('\\');
 
-const ClassName = ({value, bold = false}: {value: string; bold?: boolean}) => {
-    if (!isFqcn(value)) {
-        return (
-            <MonoText component="span" sx={{fontWeight: bold ? 600 : 400}}>
-                {value}
-            </MonoText>
-        );
-    }
-    return (
-        <FileLink className={value} sx={{minWidth: 0}}>
-            <Typography component="span" sx={(theme) => ({...linkSx(theme), fontWeight: bold ? 600 : 400})}>
-                {value}
-            </Typography>
-        </FileLink>
-    );
-};
+const ClassName = ({value, bold = false, muted = false}: {value: string; bold?: boolean; muted?: boolean}) => (
+    <Box sx={{display: 'inline-flex', alignItems: 'center', gap: 0.25, minWidth: 0}}>
+        <MonoText
+            component="span"
+            sx={{fontWeight: bold ? 600 : 400, color: muted ? 'text.secondary' : 'text.primary'}}
+        >
+            {value}
+        </MonoText>
+        {isFqcn(value) && (
+            <Tooltip title="Open in File Explorer">
+                <IconButton
+                    size="small"
+                    component={RouterLink}
+                    to={`/inspector/files?class=${encodeURIComponent(value)}`}
+                    aria-label="Open in File Explorer"
+                    onClick={(e) => e.stopPropagation()}
+                    sx={{p: 0.25}}
+                >
+                    <FolderOpen sx={{fontSize: 14}} />
+                </IconButton>
+            </Tooltip>
+        )}
+    </Box>
+);
 
 const HierarchyRow = styled(Box)(({theme}) => ({
     display: 'flex',
@@ -88,8 +88,8 @@ const GuardsTable = ({guards}: {guards: AuthorizationGuard[]}) => (
                 <Box sx={{flex: 1}}>
                     <ClassName value={guard.name} bold />
                 </Box>
-                <Box sx={{flex: 1, color: 'text.secondary'}}>
-                    <ClassName value={guard.provider} />
+                <Box sx={{flex: 1}}>
+                    <ClassName value={guard.provider} muted />
                 </Box>
                 <Box sx={{flex: 2}}>
                     {Object.entries(guard.config).map(([key, value]) => (
