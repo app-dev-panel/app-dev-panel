@@ -7,6 +7,7 @@ import {
 } from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {addCurrentPageRequestId, changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {debugApi, DebugEntry, useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {DockBottomIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DockBottomIcon';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {dispatchWindowEvent} from '@app-dev-panel/sdk/Helper/dispatchWindowEvent';
@@ -703,6 +704,11 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                 >
                     <DuckIcon sx={{fontSize: 20}} />
                     <Box sx={{fontSize: 12, fontWeight: 600, flex: 1}}>Debug</Box>
+                    <Tooltip title="Dock to bottom" arrow>
+                        <IconButton onClick={() => snapTo('bottom')} size="small" sx={actionButtonSx}>
+                            <DockBottomIcon sx={{fontSize: 16}} />
+                        </IconButton>
+                    </Tooltip>
                     <IconButton onClick={() => setChatOpen((v) => !v)} size="small" sx={actionButtonSx}>
                         <SmartToyIcon sx={{fontSize: 16}} />
                     </IconButton>

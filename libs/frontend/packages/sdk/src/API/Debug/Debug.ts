@@ -1,4 +1,5 @@
 import {createBaseQuery} from '@app-dev-panel/sdk/API/createBaseQuery';
+import {LogLevel} from '@app-dev-panel/sdk/Types/LogLevel';
 import {createApi} from '@reduxjs/toolkit/query/react';
 
 type Response<T = any> = {data: T};
@@ -10,7 +11,7 @@ export type CollectorInfo = {id: string; name: string};
 export type DebugEntry = {
     id: string;
     collectors: CollectorInfo[];
-    logger?: {total: number};
+    logger?: {total: number; byLevel?: Partial<Record<LogLevel, number>>};
     event?: {total: number};
     service?: {total: number};
     mailer?: {total: number};
