@@ -236,7 +236,7 @@ export const ParametersPage = () => {
     }
 
     return (
-        <Box sx={{px: 2, pb: 2}}>
+        <Box sx={{pb: 2}}>
             {filtered.length === 0 && (
                 <EmptyState
                     icon="tune"

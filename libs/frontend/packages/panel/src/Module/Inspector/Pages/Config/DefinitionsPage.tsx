@@ -637,7 +637,7 @@ export const DefinitionsPage = () => {
     }
 
     return (
-        <Box sx={{px: 2, pb: 2}}>
+        <Box sx={{pb: 2}}>
             {filteredRows.length === 0 && (
                 <EmptyState
                     icon="account_tree"

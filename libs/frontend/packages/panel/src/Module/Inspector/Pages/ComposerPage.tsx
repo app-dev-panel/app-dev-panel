@@ -194,7 +194,7 @@ const PackageItem = React.memo(({pkg, onSwitch}: PackageItemProps) => {
 // Main component
 // ---------------------------------------------------------------------------
 
-export const ComposerPage = () => {
+export const ComposerPage = ({showHeader = true}: {showHeader?: boolean}) => {
     const theme = useTheme();
     const {data, isLoading, isError, error, refetch} = useGetComposerQuery();
     const [tab, setTab] = useState(0);
@@ -327,11 +327,13 @@ export const ComposerPage = () => {
     if (isError) {
         return (
             <>
-                <PageHeader
-                    title="Composer"
-                    icon="inventory_2"
-                    description="Manage project dependencies and packages"
-                />
+                {showHeader && (
+                    <PageHeader
+                        title="Composer"
+                        icon="inventory_2"
+                        description="Manage project dependencies and packages"
+                    />
+                )}
                 <QueryErrorState
                     error={error}
                     title="Failed to load Composer data"
@@ -344,7 +346,13 @@ export const ComposerPage = () => {
 
     return (
         <>
-            <PageHeader title="Composer" icon="inventory_2" description="Manage project dependencies and packages" />
+            {showHeader && (
+                <PageHeader
+                    title="Composer"
+                    icon="inventory_2"
+                    description="Manage project dependencies and packages"
+                />
+            )}
 
             <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
                 <Tabs value={tab} onChange={(_: SyntheticEvent, v: number) => setTab(v)}>

@@ -292,7 +292,7 @@ const EventListeners = React.memo(({entries}: EventListenersProps) => {
     }
 
     return (
-        <Box sx={{px: 2, pb: 2}}>
+        <Box sx={{pb: 2}}>
             {groups.map((group) => (
                 <GroupCard
                     key={group.name || '__events__'}

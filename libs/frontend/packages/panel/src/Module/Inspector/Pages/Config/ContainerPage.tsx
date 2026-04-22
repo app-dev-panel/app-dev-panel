@@ -153,7 +153,7 @@ export const ContainerPage = () => {
     }
 
     return (
-        <Box sx={{px: 2, pb: 2}}>
+        <Box sx={{pb: 2}}>
             {filteredRows.length === 0 && (
                 <EmptyState
                     icon="widgets"
