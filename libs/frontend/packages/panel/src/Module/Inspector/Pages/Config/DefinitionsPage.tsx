@@ -28,10 +28,34 @@ type DefinitionKind = 'class' | 'factory' | 'object' | 'primitive';
 // Classifiers
 // ---------------------------------------------------------------------------
 
-const REGEXP_PHP_FUNCTION = /(static )?(function |fn )\(.*\).*((\{.*})|(=>.*))/s;
+const REGEXP_PHP_FUNCTION = /(static\s+)?(function|fn)\s*\(.*\).*((\{.*})|(=>.*))/s;
 const REGEXP_CLASS_NAME = /^[\w\\]+$/i;
 
+type ClosureDescriptor = {
+    __closure: true;
+    source: string;
+    file: string | null;
+    startLine: number | null;
+    endLine: number | null;
+};
+
+const isClosureDescriptor = (v: unknown): v is ClosureDescriptor =>
+    typeof v === 'object' &&
+    v !== null &&
+    (v as Record<string, unknown>).__closure === true &&
+    typeof (v as Record<string, unknown>).source === 'string';
+
+type FactoryMeta = {source: string; file: string | null; startLine: number | null; endLine: number | null};
+
+const getFactoryMeta = (value: unknown): FactoryMeta => {
+    if (isClosureDescriptor(value)) {
+        return {source: value.source, file: value.file, startLine: value.startLine, endLine: value.endLine};
+    }
+    return {source: typeof value === 'string' ? value : '', file: null, startLine: null, endLine: null};
+};
+
 const detectKind = (value: unknown): DefinitionKind => {
+    if (isClosureDescriptor(value)) return 'factory';
     if (typeof value === 'string') {
         if (REGEXP_PHP_FUNCTION.test(value)) return 'factory';
         if (REGEXP_CLASS_NAME.test(value)) return 'class';
@@ -445,7 +469,7 @@ const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: st
 
     const stopProp = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
 
-    const source = typeof entry.value === 'string' ? entry.value : '';
+    const factoryMeta = useMemo(() => (kind === 'factory' ? getFactoryMeta(entry.value) : null), [kind, entry.value]);
 
     return (
         <Row expanded={expanded}>
@@ -460,7 +484,7 @@ const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: st
                         <InlineClassValue id={entry.id} value={entry.value as string} onLoad={onLoad} />
                     )}
 
-                    {kind === 'factory' && <FactorySummary source={source} />}
+                    {kind === 'factory' && factoryMeta && <FactorySummary source={factoryMeta.source} />}
 
                     {kind === 'object' && <ObjectSummary id={entry.id} value={entry.value} />}
 
@@ -502,14 +526,40 @@ const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: st
             {expandable && (
                 <Collapse in={expanded} unmountOnExit>
                     <ExpandedPanel>
-                        {kind === 'factory' && (
+                        {kind === 'factory' && factoryMeta && (
                             <CodeContainer>
                                 <CodeToolbar>
-                                    <CodeToolbarLabel>PHP · {countLines(source)} lines</CodeToolbarLabel>
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1, minWidth: 0}}>
+                                        <CodeToolbarLabel>
+                                            PHP · {countLines(factoryMeta.source)} lines
+                                        </CodeToolbarLabel>
+                                        {factoryMeta.file && (
+                                            <Box
+                                                sx={{
+                                                    fontSize: '10px',
+                                                    color: 'text.secondary',
+                                                    fontFamily: 'monospace',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    minWidth: 0,
+                                                }}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <FileLink
+                                                    path={factoryMeta.file}
+                                                    line={factoryMeta.startLine ?? undefined}
+                                                >
+                                                    {factoryMeta.file}
+                                                    {factoryMeta.startLine !== null && `:${factoryMeta.startLine}`}
+                                                </FileLink>
+                                            </Box>
+                                        )}
+                                    </Box>
                                     <Tooltip title="Copy source">
                                         <IconButton
                                             size="small"
-                                            onClick={() => clipboardCopy(source)}
+                                            onClick={() => clipboardCopy(factoryMeta.source)}
                                             aria-label="Copy source"
                                         >
                                             <ContentCopy sx={{fontSize: 14}} />
@@ -517,7 +567,12 @@ const DefinitionRow = ({entry, onLoad}: {entry: DefinitionEntry; onLoad: (id: st
                                     </Tooltip>
                                 </CodeToolbar>
                                 <CodeBody>
-                                    <CodeHighlight language="php" code={source} fontSize={10} showLineNumbers />
+                                    <CodeHighlight
+                                        language="php"
+                                        code={factoryMeta.source}
+                                        fontSize={10}
+                                        showLineNumbers
+                                    />
                                 </CodeBody>
                             </CodeContainer>
                         )}
