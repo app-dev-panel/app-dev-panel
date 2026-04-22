@@ -27,7 +27,7 @@ import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
 import {TopBar} from '@app-dev-panel/sdk/Component/Layout/TopBar';
 import {UnifiedSidebar} from '@app-dev-panel/sdk/Component/Layout/UnifiedSidebar';
 import {selectUnreadCount} from '@app-dev-panel/sdk/Component/Notifications';
-import {PageHeaderSlotProvider} from '@app-dev-panel/sdk/Component/PageHeader';
+import {PageHeaderProvider} from '@app-dev-panel/sdk/Component/PageHeader';
 import {ScrollTopButton} from '@app-dev-panel/sdk/Component/ScrollTop';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {useCopyAsImage} from '@app-dev-panel/sdk/Component/useCopyAsImage';
@@ -235,6 +235,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
 
     // Slot for pages that portal a compact chip header onto ContentArea's border.
     const [headerSlotEl, setHeaderSlotEl] = useState<HTMLElement | null>(null);
+    const pageHeaderContextValue = useMemo(() => ({variant: 'block' as const, slot: headerSlotEl}), [headerSlotEl]);
 
     // MCP settings
     const {data: mcpSettings} = useGetMcpSettingsQuery();
@@ -676,11 +677,11 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                         <ContentStack>
                             <ContentHeaderSlot ref={setHeaderSlotEl} />
                             <ContentArea ref={contentRef}>
-                                <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[location.pathname]}>
-                                    <PageHeaderSlotProvider value={headerSlotEl}>
+                                <PageHeaderProvider value={pageHeaderContextValue}>
+                                    <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[location.pathname]}>
                                         <Outlet />
-                                    </PageHeaderSlotProvider>
-                                </ErrorBoundary>
+                                    </ErrorBoundary>
+                                </PageHeaderProvider>
                             </ContentArea>
                         </ContentStack>
                         {liveFeedOpen && !isMobile && <LiveFeedPanel onClose={handleLiveFeedClick} />}

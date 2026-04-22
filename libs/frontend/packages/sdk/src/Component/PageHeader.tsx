@@ -1,15 +1,16 @@
 import {Icon, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import {createContext, useContext, useLayoutEffect, useState} from 'react';
+import {createContext, useContext, useEffect} from 'react';
 import {createPortal} from 'react-dom';
 
 type PageHeaderVariant = 'block' | 'chip';
 
-const PageHeaderVariantContext = createContext<PageHeaderVariant>('block');
-const PageHeaderSlotContext = createContext<HTMLElement | null>(null);
+export type PageHeaderContextValue = {variant: PageHeaderVariant; slot: HTMLElement | null};
 
-export const PageHeaderVariantProvider = PageHeaderVariantContext.Provider;
-export const PageHeaderSlotProvider = PageHeaderSlotContext.Provider;
+const PageHeaderContext = createContext<PageHeaderContextValue>({variant: 'block', slot: null});
+
+export const PageHeaderProvider = PageHeaderContext.Provider;
+export const usePageHeaderContext = () => useContext(PageHeaderContext);
 
 type PageHeaderProps = {title: string; icon?: string; description?: string};
 
@@ -41,33 +42,39 @@ const ChipBody = styled('span')(({theme}) => ({
     pointerEvents: 'auto',
 }));
 
+const ChipInfoIcon = styled(Icon)(({theme}) => ({fontSize: 14, color: theme.palette.text.secondary, cursor: 'help'}));
+
+// Tracks the number of chip PageHeaders currently mounted in the single shared
+// slot. Only used for a dev-mode guard against duplicate headers on one page.
+let chipOccupants = 0;
+
 export const PageHeader = ({title, icon, description}: PageHeaderProps) => {
-    const variant = useContext(PageHeaderVariantContext);
-    const slot = useContext(PageHeaderSlotContext);
+    const {variant, slot} = usePageHeaderContext();
 
-    // Re-render once the slot DOM node is attached so the portal target
-    // is available on the first client render after layout mounts.
-    const [slotReady, setSlotReady] = useState(false);
-    useLayoutEffect(() => {
-        setSlotReady(Boolean(slot));
-    }, [slot]);
+    useEffect(() => {
+        if (!import.meta.env.DEV || variant !== 'chip' || !slot) return;
+        chipOccupants += 1;
+        if (chipOccupants > 1) {
+            console.warn(
+                '[PageHeader] Multiple chip PageHeaders are mounted at once — only one should be active per page.',
+            );
+        }
+        return () => {
+            chipOccupants -= 1;
+        };
+    }, [variant, slot]);
 
-    if (variant === 'chip' && slot && slotReady) {
-        const chip = (
+    if (variant === 'chip' && slot) {
+        return createPortal(
             <ChipBody>
                 {icon && <Icon sx={{fontSize: 16, color: 'primary.main'}}>{icon}</Icon>}
                 <span>{title}</span>
-            </ChipBody>
-        );
-
-        return createPortal(
-            description ? (
-                <Tooltip title={description} placement="bottom-start" arrow>
-                    {chip}
-                </Tooltip>
-            ) : (
-                chip
-            ),
+                {description && (
+                    <Tooltip title={description} placement="bottom-start" arrow>
+                        <ChipInfoIcon>info_outline</ChipInfoIcon>
+                    </Tooltip>
+                )}
+            </ChipBody>,
             slot,
         );
     }
