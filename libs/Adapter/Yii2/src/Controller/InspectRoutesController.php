@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Controller;
 
+use AppDevPanel\Kernel\Inspector\Primitives;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use yii\helpers\Console;
-use Yiisoft\VarDumper\VarDumper;
 
 /**
  * Inspect application routes.
@@ -51,7 +51,7 @@ final class InspectRoutesController extends Controller
             ];
         }
 
-        $result = VarDumper::create($routes)->asPrimitives(5);
+        $result = Primitives::dump($routes, 5);
 
         if ($json) {
             Console::stdout(

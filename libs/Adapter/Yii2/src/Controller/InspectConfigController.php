@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\Controller;
 
+use AppDevPanel\Kernel\Inspector\Primitives;
 use Psr\Container\ContainerInterface;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use yii\helpers\Console;
-use Yiisoft\VarDumper\VarDumper;
 
 /**
  * Inspect application configuration.
@@ -48,7 +48,7 @@ final class InspectConfigController extends Controller
         $data = $config->get($group);
         ksort($data);
 
-        $result = VarDumper::create($data)->asPrimitives(255);
+        $result = Primitives::dump($data, 255);
 
         if (!$json) {
             Console::stdout(Console::ansiFormat(sprintf("DI Configuration: %s\n", $group), [Console::BOLD]));
@@ -149,9 +149,9 @@ final class InspectConfigController extends Controller
 
         $config = $this->container->get('config');
         $data = [
-            'common' => VarDumper::create($config->get('events'))->asPrimitives(),
+            'common' => Primitives::dump($config->get('events')),
             'console' => [],
-            'web' => VarDumper::create($config->get('events-web'))->asPrimitives(),
+            'web' => Primitives::dump($config->get('events-web')),
         ];
 
         if (!$json) {

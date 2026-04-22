@@ -27,6 +27,7 @@ const PanelRoot = styled(Box)(({theme}) => ({
     backgroundColor: theme.palette.background.paper,
     border: `1px solid ${theme.palette.divider}`,
     overflow: 'hidden',
+    [theme.breakpoints.down('md')]: {width: '100%', height: '100%', borderRadius: 0, border: 'none'},
 }));
 
 const PanelHeader = styled(Box)(({theme}) => ({

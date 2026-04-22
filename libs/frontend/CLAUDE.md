@@ -87,7 +87,7 @@ packages/
     │   │   ├── ServiceSelector.tsx        # Multi-app service selector
     │   │   ├── ServerSentEventsObserver.ts  # SSE connection manager
     │   │   ├── useServerSentEvents.ts       # SSE React hook
-    │   │   ├── JsonRenderer.tsx             # JSON display component
+    │   │   ├── JsonRenderer.tsx             # JSON display; renders `ClosureDescriptor` markers and `fn(...)=>…` strings as PHP code
     │   │   ├── CodeHighlight.tsx            # Syntax highlighting
     │   │   ├── Form/
     │   │   │   └── FilterInput.tsx          # Form-integrated filter input

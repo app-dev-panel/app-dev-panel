@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Inspector\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Kernel\Inspector\Primitives;
 use Gitonomy\Git\Commit;
 use Gitonomy\Git\Reference\Branch;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\VarDumper\VarDumper;
 
 final class GitController
 {
@@ -40,7 +40,7 @@ final class GitController
             'lastCommit' => $this->serializeCommit($branch->getCommit()),
             'status' => explode("\n", $git->run('status')),
         ];
-        $response = VarDumper::create($result)->asPrimitives(255);
+        $response = Primitives::dump($result, 255);
         return $this->responseFactory->createJsonResponse($response);
     }
 
@@ -56,7 +56,7 @@ final class GitController
             'sha' => $branch->getCommitHash(),
             'commits' => array_map($this->serializeCommit(...), $git->getLog(limit: 20)->getCommits()),
         ];
-        $response = VarDumper::create($result)->asPrimitives(255);
+        $response = Primitives::dump($result, 255);
         return $this->responseFactory->createJsonResponse($response);
     }
 

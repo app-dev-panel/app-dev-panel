@@ -50,16 +50,17 @@ final class ExceptionCollector implements SummaryCollectorInterface
         if (!$this->isActive()) {
             return [];
         }
+        if ($this->exception === null) {
+            return [];
+        }
         return [
-            'exception' => $this->exception === null
-                ? []
-                : [
-                    'class' => $this->exception::class,
-                    'message' => $this->exception->getMessage(),
-                    'file' => $this->exception->getFile(),
-                    'line' => $this->exception->getLine(),
-                    'code' => $this->exception->getCode(),
-                ],
+            'exception' => [
+                'class' => $this->exception::class,
+                'message' => $this->exception->getMessage(),
+                'file' => $this->exception->getFile(),
+                'line' => $this->exception->getLine(),
+                'code' => $this->exception->getCode(),
+            ],
         ];
     }
 

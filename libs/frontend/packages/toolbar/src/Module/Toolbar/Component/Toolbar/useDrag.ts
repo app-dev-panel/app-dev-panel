@@ -69,7 +69,28 @@ export const useDrag = ({onDragEnd, onPositionChange, getWidgetRect, floatSize}:
 
     const onMouseDown = useCallback(
         (e: React.MouseEvent) => {
-            if ((e.target as HTMLElement).closest('button, [role="button"]')) return;
+            const target = e.target as HTMLElement;
+            // Never start a drag when the click originates from an interactive
+            // control or any overlay that lives in a portal (MUI Menu, Popover,
+            // Dialog, Tooltip, Drawer). Without this guard, mousedown on an open
+            // Menu/Dialog would reach the toolbar's drag handler even though the
+            // overlay visually covers it.
+            if (
+                target.closest(
+                    'button, [role="button"], input, textarea, select, a, ' +
+                        '.MuiModal-root, .MuiMenu-root, .MuiPopover-root, ' +
+                        '.MuiDialog-root, .MuiTooltip-tooltip, .MuiDrawer-root',
+                )
+            ) {
+                return;
+            }
+            // Overlay is open elsewhere on the page (e.g. our dropdown is open
+            // and the user is clicking in empty space next to it). Clicking on
+            // the toolbar header at that moment must close the overlay, not
+            // kick off a drag that undocks the toolbar into a floating widget.
+            if (document.querySelector('.MuiModal-root')) {
+                return;
+            }
             const rect = getWidgetRect();
             if (!rect) return;
             e.preventDefault();

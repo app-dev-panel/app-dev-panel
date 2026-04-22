@@ -364,6 +364,17 @@ All API responses are wrapped:
 }
 ```
 
+## Serialization
+
+Inspector controllers (`InspectController`, `AuthorizationController`, `CacheController`,
+`GitController`, `RoutingController`, `RequestController`, `TranslationController`) serialise
+their responses through `AppDevPanel\Kernel\Inspector\Primitives::dump($value, $depth)` — **not**
+`VarDumper::create(...)->asPrimitives(...)` directly. `Primitives::dump()` recursively walks
+arrays and replaces every `Closure` with a `ClosureDescriptor` marker so the frontend can render
+it as a syntax-highlighted PHP block. Use this helper for any new inspector endpoint that might
+surface framework-level data with closures (DI definitions, event listeners, route handlers,
+translator fallbacks, etc.).
+
 ## SSE (Server-Sent Events)
 
 The `/debug/api/event-stream` endpoint polls storage every second, computing an MD5 hash
