@@ -36,6 +36,7 @@ use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Controller\ElasticsearchController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
@@ -47,6 +48,8 @@ use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\NullElasticsearchProvider;
 use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
 use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
@@ -748,6 +751,21 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
                 new Reference(HttpMockProviderInterface::class),
+            ])
+            ->setPublic(true);
+
+        // Elasticsearch inspector: register NullElasticsearchProvider as default.
+        if (!$container->has(ElasticsearchProviderInterface::class)) {
+            $container
+                ->register(ElasticsearchProviderInterface::class, NullElasticsearchProvider::class)
+                ->setPublic(false);
+        }
+
+        $container
+            ->register(ElasticsearchController::class, ElasticsearchController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(ElasticsearchProviderInterface::class),
             ])
             ->setPublic(true);
 
