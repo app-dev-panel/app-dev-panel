@@ -4,7 +4,6 @@ import {groupByNamespace, stripNamespace} from '@app-dev-panel/panel/Module/Insp
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
-import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {GroupCard} from '@app-dev-panel/sdk/Component/GroupCard';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
@@ -101,13 +100,6 @@ const countLines = (source: string): number => source.split('\n').length;
 // ---------------------------------------------------------------------------
 // Styled components
 // ---------------------------------------------------------------------------
-
-const SearchRow = styled(Box)(({theme}) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(1.5),
-    padding: theme.spacing(2),
-}));
 
 const Row = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(({theme, expanded}) => ({
     borderTop: `1px solid ${theme.palette.divider}`,
@@ -595,7 +587,7 @@ const DefinitionRow = ({
 export const DefinitionsPage = () => {
     const {data, isLoading, isError, error, refetch} = useGetConfigurationQuery('di');
     const [lazyLoadObject] = useLazyGetObjectQuery();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const searchString = searchParams.get('filter') || '';
 
     const {objects, setObjects, insertObject} = useContext(DataContext);
@@ -629,13 +621,6 @@ export const DefinitionsPage = () => {
 
     const groups = useMemo(() => groupByNamespace(filteredRows), [filteredRows]);
 
-    const onChangeHandler = useCallback(
-        (value: string) => {
-            setSearchParams({filter: value});
-        },
-        [setSearchParams],
-    );
-
     if (isLoading) {
         return <FullScreenCircularProgress />;
     }
@@ -652,54 +637,43 @@ export const DefinitionsPage = () => {
     }
 
     return (
-        <Box>
-            <SearchRow>
-                <FilterInput value={searchString} onChange={onChangeHandler} placeholder="Search definitions..." />
-                <Typography sx={{fontSize: '12px', color: 'text.disabled', whiteSpace: 'nowrap'}}>
-                    {searchString
-                        ? `${filteredRows.length} of ${objects.length} definitions`
-                        : `${objects.length} definitions`}
-                </Typography>
-            </SearchRow>
-
-            <Box sx={{px: 2, pb: 2}}>
-                {filteredRows.length === 0 && (
-                    <EmptyState
-                        icon="account_tree"
-                        title="No definitions found"
-                        description={searchString ? `No definitions match "${searchString}"` : undefined}
-                    />
-                )}
-                {groups.map((group) => (
-                    <GroupCard
-                        key={group.name || '__services__'}
-                        name={group.displayName}
-                        count={group.entries.length}
-                        countLabel={group.entries.length === 1 ? 'definition' : 'definitions'}
-                        defaultExpanded={filteredRows.length <= 10 || groups.length === 1 || !!searchString}
-                        preview={
-                            <>
-                                {group.entries.slice(0, 4).map((entry, i) => (
-                                    <span key={entry.id}>
-                                        {i > 0 && <span style={{opacity: 0.4}}>{' · '}</span>}
-                                        {stripNamespace(entry.id, group.name)}
-                                    </span>
-                                ))}
-                                {group.entries.length > 4 && <span style={{opacity: 0.4}}> …</span>}
-                            </>
-                        }
-                    >
-                        {group.entries.map((entry) => (
-                            <DefinitionRow
-                                key={entry.id}
-                                entry={entry}
-                                displayName={stripNamespace(entry.id, group.name)}
-                                onLoad={handleLoadObject}
-                            />
-                        ))}
-                    </GroupCard>
-                ))}
-            </Box>
+        <Box sx={{px: 2, pb: 2}}>
+            {filteredRows.length === 0 && (
+                <EmptyState
+                    icon="account_tree"
+                    title="No definitions found"
+                    description={searchString ? `No definitions match "${searchString}"` : undefined}
+                />
+            )}
+            {groups.map((group) => (
+                <GroupCard
+                    key={group.name || '__services__'}
+                    name={group.displayName}
+                    count={group.entries.length}
+                    countLabel={group.entries.length === 1 ? 'definition' : 'definitions'}
+                    defaultExpanded={filteredRows.length <= 10 || groups.length === 1 || !!searchString}
+                    preview={
+                        <>
+                            {group.entries.slice(0, 4).map((entry, i) => (
+                                <span key={entry.id}>
+                                    {i > 0 && <span style={{opacity: 0.4}}>{' · '}</span>}
+                                    {stripNamespace(entry.id, group.name)}
+                                </span>
+                            ))}
+                            {group.entries.length > 4 && <span style={{opacity: 0.4}}> …</span>}
+                        </>
+                    }
+                >
+                    {group.entries.map((entry) => (
+                        <DefinitionRow
+                            key={entry.id}
+                            entry={entry}
+                            displayName={stripNamespace(entry.id, group.name)}
+                            onLoad={handleLoadObject}
+                        />
+                    ))}
+                </GroupCard>
+            ))}
         </Box>
     );
 };

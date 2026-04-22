@@ -69,11 +69,6 @@ describe('ContainerPage', () => {
         expect(screen.getByText('LoggerInterface')).toBeInTheDocument();
     });
 
-    it('displays total entry count', () => {
-        renderPage();
-        expect(screen.getByText('5 entries')).toBeInTheDocument();
-    });
-
     it('groups entries by vendor namespace', () => {
         renderPage();
         expect(screen.getByText('App\\Controller')).toBeInTheDocument();
@@ -82,35 +77,16 @@ describe('ContainerPage', () => {
         expect(screen.getByText('Psr\\Log')).toBeInTheDocument();
     });
 
-    it('filters entries by class name', async () => {
-        const user = userEvent.setup();
-        renderPage();
-
-        const input = screen.getByPlaceholderText('Search container entries...');
-        await user.type(input, 'UserService');
+    it('filters entries by URL query param', () => {
+        renderPage('/inspector/config/container?filter=UserService');
 
         expect(screen.getByText('UserService')).toBeInTheDocument();
         expect(screen.queryByText('HomeController')).not.toBeInTheDocument();
         expect(screen.queryByText('LoggerInterface')).not.toBeInTheDocument();
     });
 
-    it('shows filtered count', async () => {
-        const user = userEvent.setup();
-        renderPage();
-
-        const input = screen.getByPlaceholderText('Search container entries...');
-        await user.type(input, 'Psr');
-
-        expect(screen.getByText('2 of 5 entries')).toBeInTheDocument();
-    });
-
-    it('shows empty state when filter matches nothing', async () => {
-        const user = userEvent.setup();
-        renderPage();
-
-        const input = screen.getByPlaceholderText('Search container entries...');
-        await user.type(input, 'zzzzzzzzz');
-
+    it('shows empty state when filter matches nothing', () => {
+        renderPage('/inspector/config/container?filter=zzzzzzzzz');
         expect(screen.getByText('No container entries found')).toBeInTheDocument();
     });
 

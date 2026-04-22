@@ -2,7 +2,6 @@ import {useGetClassesQuery, useLazyGetObjectQuery} from '@app-dev-panel/panel/Mo
 import {DataContext} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
 import {groupByNamespace, stripNamespace} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/grouping';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {GroupCard} from '@app-dev-panel/sdk/Component/GroupCard';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
@@ -25,13 +24,6 @@ type ContainerEntry = {id: string; value: unknown};
 // ---------------------------------------------------------------------------
 // Styled components
 // ---------------------------------------------------------------------------
-
-const SearchRow = styled(Box)(({theme}) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(1.5),
-    padding: theme.spacing(2),
-}));
 
 const EntryRow = styled(Box)(({theme}) => ({
     display: 'flex',
@@ -113,7 +105,7 @@ const ContainerValue = ({entry, onLoad}: {entry: ContainerEntry; onLoad: (id: st
 export const ContainerPage = () => {
     const {data, isLoading, isError, error, refetch} = useGetClassesQuery('');
     const [lazyLoadObject] = useLazyGetObjectQuery();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const searchString = searchParams.get('filter') || '';
 
     const {objects, setObjects, insertObject} = useContext(DataContext);
@@ -145,13 +137,6 @@ export const ContainerPage = () => {
 
     const groups = useMemo(() => groupByNamespace(filteredRows), [filteredRows]);
 
-    const onChangeHandler = useCallback(
-        (value: string) => {
-            setSearchParams({filter: value});
-        },
-        [setSearchParams],
-    );
-
     if (isLoading) {
         return <FullScreenCircularProgress />;
     }
@@ -168,91 +153,78 @@ export const ContainerPage = () => {
     }
 
     return (
-        <Box>
-            <SearchRow>
-                <FilterInput
-                    value={searchString}
-                    onChange={onChangeHandler}
-                    placeholder="Search container entries..."
+        <Box sx={{px: 2, pb: 2}}>
+            {filteredRows.length === 0 && (
+                <EmptyState
+                    icon="widgets"
+                    title="No container entries found"
+                    description={searchString ? `No entries match "${searchString}"` : undefined}
                 />
-                <Typography sx={{fontSize: '12px', color: 'text.disabled', whiteSpace: 'nowrap'}}>
-                    {searchString ? `${filteredRows.length} of ${objects.length} entries` : `${objects.length} entries`}
-                </Typography>
-            </SearchRow>
-
-            <Box sx={{px: 2, pb: 2}}>
-                {filteredRows.length === 0 && (
-                    <EmptyState
-                        icon="widgets"
-                        title="No container entries found"
-                        description={searchString ? `No entries match "${searchString}"` : undefined}
-                    />
-                )}
-                {groups.map((group) => (
-                    <GroupCard
-                        key={group.name || '__services__'}
-                        name={group.displayName}
-                        count={group.entries.length}
-                        countLabel={group.entries.length === 1 ? 'entry' : 'entries'}
-                        defaultExpanded={filteredRows.length <= 10 || groups.length === 1 || !!searchString}
-                        preview={
-                            <>
-                                {group.entries.slice(0, 4).map((entry, i) => (
-                                    <span key={entry.id}>
-                                        {i > 0 && <span style={{opacity: 0.4}}>{' · '}</span>}
-                                        {stripNamespace(entry.id, group.name)}
-                                    </span>
-                                ))}
-                                {group.entries.length > 4 && <span style={{opacity: 0.4}}> …</span>}
-                            </>
-                        }
-                    >
-                        {group.entries.map((entry) => (
-                            <EntryRow key={entry.id}>
-                                <NameCell>
-                                    <Tooltip title={entry.id} placement="top-start">
-                                        <NameText>{stripNamespace(entry.id, group.name)}</NameText>
-                                    </Tooltip>
-                                </NameCell>
-                                <ValueCell>
-                                    <ContainerValue entry={entry} onLoad={handleLoadObject} />
-                                </ValueCell>
-                                <ActionsCell>
-                                    <Tooltip title="Open class source">
-                                        <IconButton
-                                            size="small"
-                                            component={RouterLink}
-                                            to={`/inspector/files?class=${encodeURIComponent(entry.id)}`}
-                                            aria-label="Open class source"
-                                        >
-                                            <Code sx={{fontSize: 14}} />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Copy class name">
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => clipboardCopy(entry.id)}
-                                            aria-label="Copy class name"
-                                        >
-                                            <ContentCopy sx={{fontSize: 14}} />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Examine as container entry">
-                                        <IconButton
-                                            size="small"
-                                            component={RouterLink}
-                                            to={'/inspector/container/view?class=' + entry.id}
-                                            aria-label="Examine as container entry"
-                                        >
-                                            <DataObject sx={{fontSize: 14}} />
-                                        </IconButton>
-                                    </Tooltip>
-                                </ActionsCell>
-                            </EntryRow>
-                        ))}
-                    </GroupCard>
-                ))}
-            </Box>
+            )}
+            {groups.map((group) => (
+                <GroupCard
+                    key={group.name || '__services__'}
+                    name={group.displayName}
+                    count={group.entries.length}
+                    countLabel={group.entries.length === 1 ? 'entry' : 'entries'}
+                    defaultExpanded={filteredRows.length <= 10 || groups.length === 1 || !!searchString}
+                    preview={
+                        <>
+                            {group.entries.slice(0, 4).map((entry, i) => (
+                                <span key={entry.id}>
+                                    {i > 0 && <span style={{opacity: 0.4}}>{' · '}</span>}
+                                    {stripNamespace(entry.id, group.name)}
+                                </span>
+                            ))}
+                            {group.entries.length > 4 && <span style={{opacity: 0.4}}> …</span>}
+                        </>
+                    }
+                >
+                    {group.entries.map((entry) => (
+                        <EntryRow key={entry.id}>
+                            <NameCell>
+                                <Tooltip title={entry.id} placement="top-start">
+                                    <NameText>{stripNamespace(entry.id, group.name)}</NameText>
+                                </Tooltip>
+                            </NameCell>
+                            <ValueCell>
+                                <ContainerValue entry={entry} onLoad={handleLoadObject} />
+                            </ValueCell>
+                            <ActionsCell>
+                                <Tooltip title="Open class source">
+                                    <IconButton
+                                        size="small"
+                                        component={RouterLink}
+                                        to={`/inspector/files?class=${encodeURIComponent(entry.id)}`}
+                                        aria-label="Open class source"
+                                    >
+                                        <Code sx={{fontSize: 14}} />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Copy class name">
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => clipboardCopy(entry.id)}
+                                        aria-label="Copy class name"
+                                    >
+                                        <ContentCopy sx={{fontSize: 14}} />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Examine as container entry">
+                                    <IconButton
+                                        size="small"
+                                        component={RouterLink}
+                                        to={'/inspector/container/view?class=' + entry.id}
+                                        aria-label="Examine as container entry"
+                                    >
+                                        <DataObject sx={{fontSize: 14}} />
+                                    </IconButton>
+                                </Tooltip>
+                            </ActionsCell>
+                        </EntryRow>
+                    ))}
+                </GroupCard>
+            ))}
         </Box>
     );
 };

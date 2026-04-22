@@ -9,6 +9,9 @@ import {MemoryRouter} from 'react-router';
 import {describe, expect, it, vi} from 'vitest';
 import {DefinitionsPage} from './DefinitionsPage';
 
+// Note: filter UI is rendered by the parent `ConfigurationPage`. Subpage tests
+// simulate filter changes by passing it as a URL query param via MemoryRouter.
+
 // ---------------------------------------------------------------------------
 // Mock Inspector API
 // ---------------------------------------------------------------------------
@@ -79,45 +82,21 @@ describe('DefinitionsPage', () => {
         expect(screen.getByText('yii\\db\\Connection')).toBeInTheDocument();
     });
 
-    it('displays total definition count', () => {
-        renderPage();
-        expect(screen.getAllByText('5 definitions').length).toBeGreaterThanOrEqual(1);
-    });
-
     it('groups definitions without a namespace under Services', () => {
         renderPage();
         expect(screen.getByText('Services')).toBeInTheDocument();
     });
 
-    it('filters definitions by name', async () => {
-        const user = userEvent.setup();
-        renderPage();
-
-        const input = screen.getByPlaceholderText('Search definitions...');
-        await user.type(input, 'db');
+    it('filters definitions by URL query param', async () => {
+        renderPage('/inspector/config/definitions?filter=db');
 
         expect(screen.getByText('db')).toBeInTheDocument();
         expect(screen.queryByText('assetManager')).not.toBeInTheDocument();
         expect(screen.queryByText('session')).not.toBeInTheDocument();
     });
 
-    it('shows filtered count', async () => {
-        const user = userEvent.setup();
-        renderPage();
-
-        const input = screen.getByPlaceholderText('Search definitions...');
-        await user.type(input, 'error');
-
-        expect(screen.getByText('1 of 5 definitions')).toBeInTheDocument();
-    });
-
-    it('shows empty state when filter matches nothing', async () => {
-        const user = userEvent.setup();
-        renderPage();
-
-        const input = screen.getByPlaceholderText('Search definitions...');
-        await user.type(input, 'zzzzzzzzz');
-
+    it('shows empty state when filter matches nothing', () => {
+        renderPage('/inspector/config/definitions?filter=zzzzzzzzz');
         expect(screen.getByText('No definitions found')).toBeInTheDocument();
     });
 
