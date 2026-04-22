@@ -22,6 +22,7 @@ return [
         Route::methods(['GET', 'POST'], '/var-dumper')
             ->action(Web\VarDumperPage\Action::class)
             ->name('var-dumper'),
+        Route::get('/authorization')->action(Web\AuthorizationPage\Action::class)->name('authorization'),
     ),
     Group::create('/api')
         ->routes(

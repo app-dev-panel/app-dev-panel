@@ -124,6 +124,46 @@ final class Yii3AuthorizationConfigProviderTest extends TestCase
         );
     }
 
+    public function testGetRoleHierarchyUsesGetDirectChildrenForRbacV2(): void
+    {
+        $admin = $this->namedItem('admin');
+        $editor = $this->namedItem('editor');
+
+        $itemsStorage = new class($admin, $editor) {
+            /**
+             * @var list<object>
+             */
+            private array $all;
+
+            /**
+             * @var array<string, list<object>>
+             */
+            private array $children;
+
+            public function __construct(object $admin, object $editor)
+            {
+                $this->all = [$admin, $editor];
+                $this->children = ['admin' => [$editor], 'editor' => []];
+            }
+
+            public function getAll(): array
+            {
+                return $this->all;
+            }
+
+            public function getDirectChildren(string $name): array
+            {
+                return $this->children[$name] ?? [];
+            }
+        };
+
+        $provider = new Yii3AuthorizationConfigProvider($this->containerWith([
+            'Yiisoft\\Rbac\\ItemsStorageInterface' => $itemsStorage,
+        ]));
+
+        $this->assertSame(['admin' => ['editor'], 'editor' => []], $provider->getRoleHierarchy());
+    }
+
     public function testGetGuardsListsAuthenticationMethodsWithoutDuplicates(): void
     {
         $bearer = new class {

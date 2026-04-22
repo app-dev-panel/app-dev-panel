@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider;
+use AppDevPanel\Adapter\Symfony\Inspector\SymfonyAuthorizationConfigProvider;
 use AppDevPanel\Adapter\Symfony\Proxy\DoctrineDbalMiddleware;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyCacheProxy;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyValidatorProxy;
 use AppDevPanel\Adapter\Symfony\Proxy\TwigEnvironmentProxy;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -32,6 +34,7 @@ use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -63,6 +66,7 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
         $this->decorateCache($container);
         $this->upgradeSchemaProvider($container);
         $this->collectContainerParameters($container);
+        $this->upgradeAuthorizationProvider($container);
     }
 
     private function registerDebugger(ContainerBuilder $container): void
@@ -324,6 +328,30 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
         $container
             ->register(SchemaProviderInterface::class, DoctrineSchemaProvider::class)
             ->setArguments([new Reference('doctrine.dbal.default_connection')])
+            ->setPublic(false);
+    }
+
+    /**
+     * Upgrades NullAuthorizationConfigProvider to SymfonyAuthorizationConfigProvider
+     * when symfony/security-bundle is installed (detected via the `security.firewalls`
+     * parameter that SecurityBundle's extension writes into the container).
+     */
+    private function upgradeAuthorizationProvider(ContainerBuilder $container): void
+    {
+        if (!$container->hasParameter('security.firewalls')) {
+            return;
+        }
+
+        $params = $container->hasParameter('app_dev_panel.container_parameters')
+            ? $container->getParameter('app_dev_panel.container_parameters')
+            : [];
+
+        $container
+            ->register(AuthorizationConfigProviderInterface::class, SymfonyAuthorizationConfigProvider::class)
+            ->setArguments([
+                is_array($params) ? $params : [],
+                new TaggedIteratorArgument('security.voter'),
+            ])
             ->setPublic(false);
     }
 

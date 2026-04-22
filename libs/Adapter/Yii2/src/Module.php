@@ -21,6 +21,7 @@ use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
 use AppDevPanel\Adapter\Yii2\EventListener\QueueListener;
 use AppDevPanel\Adapter\Yii2\EventListener\WebListener;
 use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
+use AppDevPanel\Adapter\Yii2\Inspector\Yii2AuthorizationConfigProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2DbSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteCollection;
@@ -37,7 +38,6 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
@@ -402,7 +402,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         // Authorization provider
         \Yii::$container->setSingleton(
             AuthorizationConfigProviderInterface::class,
-            NullAuthorizationConfigProvider::class,
+            static fn() => new Yii2AuthorizationConfigProvider(\Yii::$app),
         );
         \Yii::$container->setSingleton(
             AuthorizationController::class,

@@ -18,6 +18,7 @@ use AppDevPanel\Adapter\Laravel\EventListener\QueueListener;
 use AppDevPanel\Adapter\Laravel\EventListener\RedisListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ValidatorListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ViteAssetListener;
+use AppDevPanel\Adapter\Laravel\Inspector\LaravelAuthorizationConfigProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelConfigProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider;
@@ -38,7 +39,6 @@ use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
@@ -776,7 +776,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
         $this->app->singleton(
             AuthorizationConfigProviderInterface::class,
-            fn() => new NullAuthorizationConfigProvider(),
+            fn() => new LaravelAuthorizationConfigProvider($this->app),
         );
         $this->app->singleton(
             AuthorizationController::class,

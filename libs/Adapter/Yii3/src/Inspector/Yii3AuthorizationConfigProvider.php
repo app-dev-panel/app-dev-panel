@@ -183,13 +183,19 @@ final class Yii3AuthorizationConfigProvider implements AuthorizationConfigProvid
      */
     private function collectChildNames(object $itemsStorage, string $parentName): array
     {
-        if (!method_exists($itemsStorage, 'getChildren')) {
+        // `getDirectChildren()` is the `yiisoft/rbac` v2 API; `getChildren()` is the v1 API.
+        $method = match (true) {
+            method_exists($itemsStorage, 'getDirectChildren') => 'getDirectChildren',
+            method_exists($itemsStorage, 'getChildren') => 'getChildren',
+            default => null,
+        };
+        if ($method === null) {
             return [];
         }
 
         try {
             /** @var iterable<object>|array<string, object> $children */
-            $children = $itemsStorage->getChildren($parentName);
+            $children = $itemsStorage->{$method}($parentName);
         } catch (Throwable) {
             return [];
         }

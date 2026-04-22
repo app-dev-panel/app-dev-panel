@@ -141,7 +141,7 @@ DebugHeaders → ToolbarMiddleware → ErrorCatcher → YiiApiMiddleware → Ses
 | Section | Source |
 |---------|--------|
 | `guards` | `Yiisoft\Auth\AuthenticationMethodInterface` + concrete `HttpBasic`/`HttpBearer`/`HttpHeader`/`QueryParam`/`Composite` (yiisoft/auth). Deduplicated across the interface id and concrete class. |
-| `roleHierarchy` | `Yiisoft\Rbac\ItemsStorageInterface::getAll()` / `getChildren()` (yiisoft/rbac) — map `role name → list of child role names`. |
+| `roleHierarchy` | `Yiisoft\Rbac\ItemsStorageInterface::getAll()` + `getDirectChildren()` (yiisoft/rbac v2) or `getChildren()` (v1) — map `role name → list of child role names`. |
 | `voters` | `Yiisoft\Access\AccessCheckerInterface` (yiisoft/access) entry plus every rule returned by `Yiisoft\Rbac\RulesStorageInterface::getAll()`. |
 | `config` | `user`, `rbac`, `auth` subtrees of `app-dev-panel/yii3` params; plus live `CurrentUser` snapshot (`isGuest`, `id`) when `Yiisoft\User\CurrentUser` is in the container. |
 
