@@ -189,7 +189,7 @@ const MetricItems = ({entry, iframeRouteNavigate}: {entry: DebugEntry; iframeRou
         <Stack direction="row" alignItems="center" spacing={0.5} sx={{flexWrap: 'nowrap'}}>
             {isDebugEntryAboutWeb(entry) && <RequestItem data={entry} />}
             {isDebugEntryAboutConsole(entry) && <CommandItem data={entry} />}
-            <ExceptionItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
+            <ExceptionItem data={entry} />
             <RequestTimeItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
             <MemoryItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
             <DatabaseItem data={entry} iframeUrlHandler={iframeRouteNavigate} />
