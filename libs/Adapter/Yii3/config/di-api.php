@@ -30,6 +30,7 @@ use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Controller\ElasticsearchController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
@@ -42,6 +43,8 @@ use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\NullElasticsearchProvider;
 use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
 use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
@@ -180,6 +183,15 @@ return [
         JsonResponseFactoryInterface $jsonResponseFactory,
         HttpMockProviderInterface $httpMockProvider,
     ) => new HttpMockController($jsonResponseFactory, $httpMockProvider),
+
+    // Elasticsearch provider
+    ElasticsearchProviderInterface::class => static fn() => new NullElasticsearchProvider(),
+
+    // Elasticsearch controller
+    ElasticsearchController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        ElasticsearchProviderInterface $elasticsearchProvider,
+    ) => new ElasticsearchController($jsonResponseFactory, $elasticsearchProvider),
 
     // Collector repository
     CollectorRepositoryInterface::class => static fn(StorageInterface $storage) => new CollectorRepository($storage),

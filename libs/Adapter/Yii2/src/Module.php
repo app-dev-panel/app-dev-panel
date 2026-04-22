@@ -43,6 +43,7 @@ use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Controller\ElasticsearchController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
@@ -54,6 +55,8 @@ use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\NullElasticsearchProvider;
 use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
 use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
@@ -416,6 +419,16 @@ class Module extends \yii\base\Module implements BootstrapInterface
             static fn() => new HttpMockController(
                 \Yii::$container->get(JsonResponseFactoryInterface::class),
                 \Yii::$container->get(HttpMockProviderInterface::class),
+            ),
+        );
+
+        // Elasticsearch provider
+        \Yii::$container->setSingleton(ElasticsearchProviderInterface::class, NullElasticsearchProvider::class);
+        \Yii::$container->setSingleton(
+            ElasticsearchController::class,
+            static fn() => new ElasticsearchController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(ElasticsearchProviderInterface::class),
             ),
         );
 

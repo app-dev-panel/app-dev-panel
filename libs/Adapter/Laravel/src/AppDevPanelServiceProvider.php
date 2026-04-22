@@ -45,6 +45,7 @@ use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Controller\ElasticsearchController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
@@ -56,6 +57,8 @@ use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\NullElasticsearchProvider;
 use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
 use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
@@ -789,6 +792,15 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             fn() => new HttpMockController(
                 $this->app->make(JsonResponseFactoryInterface::class),
                 $this->app->make(HttpMockProviderInterface::class),
+            ),
+        );
+
+        $this->app->singleton(ElasticsearchProviderInterface::class, fn() => new NullElasticsearchProvider());
+        $this->app->singleton(
+            ElasticsearchController::class,
+            fn() => new ElasticsearchController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(ElasticsearchProviderInterface::class),
             ),
         );
 
