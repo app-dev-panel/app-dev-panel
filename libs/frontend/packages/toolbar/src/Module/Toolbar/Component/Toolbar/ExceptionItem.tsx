@@ -1,6 +1,6 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {parseFilePath, parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
+import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import CodeIcon from '@mui/icons-material/Code';
 import ErrorIcon from '@mui/icons-material/Error';
 import FmdGoodIcon from '@mui/icons-material/FmdGood';
@@ -16,6 +16,7 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const open = Boolean(anchorEl);
+    const getEditorUrl = useEditorUrl();
 
     if (!data.exception?.class) {
         return null;
@@ -24,6 +25,11 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
     const exception = data.exception;
     const shortClass = exception.class.split('\\').pop() || exception.class;
     const tooltip = exception.message ? `${exception.class}: ${exception.message}` : exception.class;
+    const cleanFile = parseFilePath(exception.file);
+    const lineNumber = +exception.line;
+    const sourceEditorUrl = getEditorUrl(cleanFile, lineNumber);
+    const sourceFallbackUrl = `/inspector/files?path=${encodeURIComponent(cleanFile)}#L${exception.line}`;
+    const classExplorerUrl = `/inspector/files?class=${encodeURIComponent(parseFilePath(exception.class))}`;
 
     const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
         event.stopPropagation();
@@ -76,20 +82,18 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
                     >
                         EXCEPTION
                     </Typography>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5}}>
-                        <Typography
-                            sx={{
-                                fontFamily: "'JetBrains Mono', monospace",
-                                fontSize: 12,
-                                fontWeight: 600,
-                                color: 'error.main',
-                                wordBreak: 'break-all',
-                            }}
-                        >
-                            {exception.class}
-                        </Typography>
-                        <FileLink className={parseFilePath(exception.class)} />
-                    </Box>
+                    <Typography
+                        sx={{
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: 'error.main',
+                            wordBreak: 'break-all',
+                            mt: 0.5,
+                        }}
+                    >
+                        {exception.class}
+                    </Typography>
                     {exception.message && (
                         <Typography
                             sx={{
@@ -105,20 +109,22 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
                     )}
                 </Box>
                 <Divider />
-                <MenuItem disableRipple sx={{cursor: 'default', '&:hover': {backgroundColor: 'transparent'}}}>
+                <MenuItem
+                    component="a"
+                    href={sourceEditorUrl ?? sourceFallbackUrl}
+                    target={sourceEditorUrl ? undefined : '_top'}
+                    onClick={handleClose}
+                >
                     <ListItemIcon>
                         <FmdGoodIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText primary="Location" />
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, ml: 2}}>
-                        <Typography
-                            variant="body2"
-                            sx={{color: 'text.secondary', fontFamily: "'JetBrains Mono', monospace", fontSize: 11}}
-                        >
-                            {parseFilename(exception.file)}:{exception.line}
-                        </Typography>
-                        <FileLink path={exception.file} line={+exception.line} />
-                    </Box>
+                    <ListItemText primary="Source" />
+                    <Typography
+                        variant="body2"
+                        sx={{color: 'text.secondary', ml: 2, fontFamily: "'JetBrains Mono', monospace", fontSize: 11}}
+                    >
+                        {parseFilename(cleanFile)}:{exception.line}
+                    </Typography>
                 </MenuItem>
                 {exception.code != null && String(exception.code) !== '' && String(exception.code) !== '0' && (
                     <MenuItem disableRipple sx={{cursor: 'default', '&:hover': {backgroundColor: 'transparent'}}}>
@@ -137,12 +143,7 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
                     </ListItemIcon>
                     <ListItemText primary="Show full details" />
                 </MenuItem>
-                <MenuItem
-                    component="a"
-                    href={`/inspector/files?class=${encodeURIComponent(parseFilePath(exception.class))}`}
-                    target="_top"
-                    onClick={handleClose}
-                >
+                <MenuItem component="a" href={classExplorerUrl} target="_top" onClick={handleClose}>
                     <ListItemIcon>
                         <CodeIcon fontSize="small" />
                     </ListItemIcon>
