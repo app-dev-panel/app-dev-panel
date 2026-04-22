@@ -118,26 +118,28 @@ const hiddenCollectors = new Set<string>([
 ]);
 
 /**
- * Build colored segments for the Log sidebar badge: errors / warnings+deprecations / info+debug+dumps.
- * Falls back to a single info segment when byLevel is not provided.
+ * Build colored segments for the Log sidebar badge: log info / warnings / errors / deprecations / dumps.
+ * Each source keeps its own position; only non-zero segments are rendered by NavBadge.
  */
 const buildLogBadgeSegments = (
     entry: DebugEntry,
-): {count: number; variant: 'default' | 'error' | 'warning'}[] | undefined => {
+): {count: number; variant: 'default' | 'error' | 'warning' | 'info'}[] | undefined => {
     const byLevel = entry.logger?.byLevel;
     const loggerTotal = Number(entry.logger?.total || 0);
-    const deprecationTotal = Number(entry.deprecation?.total || 0);
-    const dumpTotal = Number(entry['var-dumper']?.total || 0);
+    const deprecations = Number(entry.deprecation?.total || 0);
+    const dumps = Number(entry['var-dumper']?.total || 0);
 
     const errors = byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS.errors) : 0;
-    const warnings = (byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS.warnings) : 0) + deprecationTotal;
-    const info = (byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS.info) : loggerTotal) + dumpTotal;
+    const warnings = byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS.warnings) : 0;
+    const info = byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS.info) : loggerTotal;
 
-    if (errors + warnings + info === 0) return undefined;
+    if (errors + warnings + info + deprecations + dumps === 0) return undefined;
     return [
         {count: info, variant: 'default'},
         {count: warnings, variant: 'warning'},
         {count: errors, variant: 'error'},
+        {count: deprecations, variant: 'warning'},
+        {count: dumps, variant: 'info'},
     ];
 };
 

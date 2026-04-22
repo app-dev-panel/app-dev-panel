@@ -1,6 +1,6 @@
 import {styled} from '@mui/material/styles';
 
-export type NavBadgeVariant = 'default' | 'error' | 'warning';
+export type NavBadgeVariant = 'default' | 'error' | 'warning' | 'info';
 
 export type NavBadgeSegment = {count: number; variant: NavBadgeVariant};
 
@@ -22,7 +22,9 @@ const BadgeRoot = styled('span', {shouldForwardProp: (prop) => prop !== 'variant
             ? {backgroundColor: theme.palette.error.light, color: theme.palette.error.main}
             : variant === 'warning'
               ? {backgroundColor: theme.palette.warning.light, color: theme.palette.warning.main}
-              : {backgroundColor: theme.palette.action.selected, color: theme.palette.text.secondary}),
+              : variant === 'info'
+                ? {backgroundColor: theme.palette.info.light, color: theme.palette.info.main}
+                : {backgroundColor: theme.palette.action.selected, color: theme.palette.text.secondary}),
     }),
 );
 
@@ -46,7 +48,9 @@ const SegmentValue = styled('span', {shouldForwardProp: (prop) => prop !== 'vari
                 ? theme.palette.error.main
                 : variant === 'warning'
                   ? theme.palette.warning.main
-                  : theme.palette.text.secondary,
+                  : variant === 'info'
+                    ? theme.palette.info.main
+                    : theme.palette.text.secondary,
         fontWeight: variant === 'error' ? 700 : 600,
     }),
 );
