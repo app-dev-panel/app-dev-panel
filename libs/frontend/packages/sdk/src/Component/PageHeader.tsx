@@ -1,9 +1,9 @@
-import {Icon, Tooltip, Typography} from '@mui/material';
+import {Icon, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {createContext, useContext, useEffect} from 'react';
 import {createPortal} from 'react-dom';
 
-type PageHeaderVariant = 'block' | 'chip';
+type PageHeaderVariant = 'block' | 'chip' | 'hidden';
 
 export type PageHeaderContextValue = {variant: PageHeaderVariant; slot: HTMLElement | null};
 
@@ -42,8 +42,6 @@ const ChipBody = styled('span')(({theme}) => ({
     pointerEvents: 'auto',
 }));
 
-const ChipInfoIcon = styled(Icon)(({theme}) => ({fontSize: 16, color: theme.palette.text.secondary, cursor: 'help'}));
-
 // Tracks the number of chip PageHeaders currently mounted in the single shared
 // slot. Only used for a dev-mode guard against duplicate headers on one page.
 let chipOccupants = 0;
@@ -64,16 +62,13 @@ export const PageHeader = ({title, icon, description}: PageHeaderProps) => {
         };
     }, [variant, slot]);
 
+    if (variant === 'hidden') return null;
+
     if (variant === 'chip' && slot) {
         return createPortal(
             <ChipBody>
                 {icon && <Icon sx={{fontSize: 18, color: 'primary.main'}}>{icon}</Icon>}
                 <span>{title}</span>
-                {description && (
-                    <Tooltip title={description} placement="bottom-start" arrow>
-                        <ChipInfoIcon>info_outline</ChipInfoIcon>
-                    </Tooltip>
-                )}
             </ChipBody>,
             slot,
         );
