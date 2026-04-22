@@ -1,7 +1,9 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {parseFilePath, parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
+import {formatFqcn} from '@app-dev-panel/sdk/Helper/phpClassName';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
+import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
 import CodeIcon from '@mui/icons-material/Code';
 import ErrorIcon from '@mui/icons-material/Error';
 import FmdGoodIcon from '@mui/icons-material/FmdGood';
@@ -21,6 +23,7 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
     // in its own Redux state. Fall back to `phpstorm://` as a sensible default;
     // users can override by picking another editor in the panel settings.
     const getEditorUrl = useEditorUrl('phpstorm');
+    const pathMapper = usePathMapper();
 
     if (!data.exception?.class) {
         return null;
@@ -28,10 +31,12 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
 
     const exception = data.exception;
     const shortClass = exception.class.split('\\').pop() || exception.class;
-    const tooltip = exception.message ? `${exception.class}: ${exception.message}` : exception.class;
+    const fullClass = formatFqcn(exception.class);
+    const tooltip = exception.message ? `${fullClass}: ${exception.message}` : fullClass;
     const cleanFile = parseFilePath(exception.file);
+    const localFile = pathMapper.toLocal(cleanFile);
     const lineNumber = +exception.line;
-    const sourceEditorUrl = getEditorUrl(cleanFile, lineNumber);
+    const sourceEditorUrl = getEditorUrl(localFile, lineNumber);
     const sourceFallbackUrl = panelPagePath(
         `/inspector/files?path=${encodeURIComponent(cleanFile)}#L${exception.line}`,
     );
@@ -100,7 +105,7 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
                             mt: 0.5,
                         }}
                     >
-                        {exception.class}
+                        {fullClass}
                     </Typography>
                     {exception.message && (
                         <Typography
@@ -127,12 +132,19 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
                         <FmdGoodIcon fontSize="small" />
                     </ListItemIcon>
                     <ListItemText primary="Source" />
-                    <Typography
-                        variant="body2"
-                        sx={{color: 'text.secondary', ml: 2, fontFamily: "'JetBrains Mono', monospace", fontSize: 11}}
-                    >
-                        {parseFilename(cleanFile)}:{exception.line}
-                    </Typography>
+                    <Tooltip title={`${localFile}:${exception.line}`} arrow placement="top">
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                color: 'text.secondary',
+                                ml: 2,
+                                fontFamily: "'JetBrains Mono', monospace",
+                                fontSize: 11,
+                            }}
+                        >
+                            {parseFilename(localFile)}:{exception.line}
+                        </Typography>
+                    </Tooltip>
                 </MenuItem>
                 {exception.code != null && String(exception.code) !== '' && String(exception.code) !== '0' && (
                     <MenuItem disableRipple sx={{cursor: 'default', '&:hover': {backgroundColor: 'transparent'}}}>

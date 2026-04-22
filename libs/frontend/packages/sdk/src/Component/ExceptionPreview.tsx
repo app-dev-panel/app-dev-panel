@@ -3,10 +3,12 @@ import {StackTrace} from '@app-dev-panel/sdk/Component/StackTrace';
 import type {EditorPreset} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {parseFilePath, parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
+import {formatFqcn} from '@app-dev-panel/sdk/Helper/phpClassName';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
+import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import FmdGoodIcon from '@mui/icons-material/FmdGood';
-import {Box, Button, Divider, Stack, Typography} from '@mui/material';
+import {Box, Button, Divider, Stack, Tooltip, Typography} from '@mui/material';
 import {useEffect, useState} from 'react';
 
 export type ExceptionFileContent = {content: string; extension: string};
@@ -38,10 +40,13 @@ export const ExceptionPreview = (props: ExceptionPreviewProps) => {
     const [file, setFile] = useState<ExceptionFileContent | null>(null);
     const {fetchFileContent} = props;
     const getEditorUrl = useEditorUrl(props.defaultEditorPreset);
+    const pathMapper = usePathMapper();
     const cleanFile = parseFilePath(props.file);
+    const localFile = pathMapper.toLocal(cleanFile);
     const lineNumber = +props.line;
     const cleanClass = parseFilePath(props.class);
-    const sourceEditorUrl = getEditorUrl(cleanFile, lineNumber);
+    const fullClass = formatFqcn(props.class);
+    const sourceEditorUrl = getEditorUrl(localFile, lineNumber);
     const sourceFallbackUrl = panelPagePath(`/inspector/files?path=${encodeURIComponent(cleanFile)}#L${props.line}`);
     const classExplorerUrl = panelPagePath(`/inspector/files?class=${encodeURIComponent(cleanClass)}`);
     const hasCode = props.code != null && String(props.code) !== '' && String(props.code) !== '0';
@@ -74,7 +79,7 @@ export const ExceptionPreview = (props: ExceptionPreviewProps) => {
                         wordBreak: 'break-all',
                     }}
                 >
-                    {props.class}
+                    {fullClass}
                 </Typography>
                 {hasCode && (
                     <Typography variant="caption" sx={{color: 'text.disabled'}}>
@@ -82,9 +87,11 @@ export const ExceptionPreview = (props: ExceptionPreviewProps) => {
                     </Typography>
                 )}
                 <Box sx={{flexGrow: 1}} />
-                <Typography sx={{fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'text.secondary'}}>
-                    {parseFilename(cleanFile)}:{props.line}
-                </Typography>
+                <Tooltip title={`${localFile}:${props.line}`} arrow placement="top">
+                    <Typography sx={{fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'text.secondary'}}>
+                        {parseFilename(localFile)}:{props.line}
+                    </Typography>
+                </Tooltip>
             </Stack>
             <Typography
                 sx={{
