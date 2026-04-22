@@ -6,6 +6,7 @@ import {
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {TreeView} from '@app-dev-panel/panel/Module/Inspector/Component/TreeView/TreeView';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {SearchFilter, type SearchMatch} from '@app-dev-panel/sdk/Component/SearchFilter';
 import {parseFilePath, parsePathLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
@@ -272,6 +273,11 @@ export const FileExplorerPage = () => {
 
     return (
         <>
+            <PageHeader
+                title="File Explorer"
+                icon="folder_open"
+                description="Browse application files and source code"
+            />
             {error && (
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>

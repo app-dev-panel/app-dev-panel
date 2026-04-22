@@ -7,6 +7,7 @@ import {FilterInput} from '@app-dev-panel/sdk/Component/Form/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
@@ -75,17 +76,21 @@ export const TranslationsPage = () => {
 
     if (isError) {
         return (
-            <QueryErrorState
-                error={error}
-                title="Failed to load translations"
-                fallback="Failed to load translations."
-                onRetry={refetch}
-            />
+            <>
+                <PageHeader title="Translations" icon="translate" description="Application translations and messages" />
+                <QueryErrorState
+                    error={error}
+                    title="Failed to load translations"
+                    fallback="Failed to load translations."
+                    onRetry={refetch}
+                />
+            </>
         );
     }
 
     return (
         <>
+            <PageHeader title="Translations" icon="translate" description="Application translations and messages" />
             <FilterInput value={searchString} onChange={onChangeHandler} />
             <TranslationUpdaterContextProvider updater={updateTranslationHandler}>
                 <DataTable rows={filteredRows as GridValidRowModel[]} getRowId={(row) => row[0]} columns={columns} />

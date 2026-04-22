@@ -5,34 +5,26 @@ import {
     EventListenersType,
     useGetEventsQuery,
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {groupByNamespace, stripNamespace} from '@app-dev-panel/panel/Module/Inspector/Pages/Config/grouping';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
+import {GroupCard} from '@app-dev-panel/sdk/Component/GroupCard';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
-import {ContentCopy, Description, ExpandMore} from '@mui/icons-material';
+import {ChevronRight, Code, ContentCopy, Description} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
-import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
-    Box,
-    Chip,
-    IconButton,
-    Tab,
-    Tooltip,
-    Typography,
-} from '@mui/material';
+import {Box, Chip, Collapse, IconButton, Tab, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import React, {SyntheticEvent, useCallback, useMemo, useState} from 'react';
-import {useSearchParams} from 'react-router';
+import {Link as RouterLink, useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -68,19 +60,6 @@ function isClassName(value: string): boolean {
     return value.includes('\\') && !value.includes(' ');
 }
 
-function parseEventName(name: string): {className: string; member: string} | {className: string} | null {
-    if (name.includes('::')) {
-        const [className, member] = name.split('::', 2);
-        if (className && member && isClassName(className)) {
-            return {className, member};
-        }
-    }
-    if (isClassName(name)) {
-        return {className: name};
-    }
-    return null;
-}
-
 // ---------------------------------------------------------------------------
 // Styled components
 // ---------------------------------------------------------------------------
@@ -96,28 +75,37 @@ const ListenerRow = styled(Box)(({theme}) => ({
     '&:hover .copy-btn': {opacity: 1},
 }));
 
-const StyledAccordion = styled(Accordion)(({theme}) => ({
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: `${theme.shape.borderRadius}px !important`,
-    '&:before': {display: 'none'},
-    '&:not(:last-child)': {marginBottom: theme.spacing(1)},
-    '&.Mui-expanded': {margin: 0, '&:not(:last-child)': {marginBottom: theme.spacing(1)}},
+const EventRowBox = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
+    ({theme, expanded}) => ({
+        borderTop: `1px solid ${theme.palette.divider}`,
+        backgroundColor: expanded ? theme.palette.action.hover : 'transparent',
+        transition: 'background-color 120ms',
+        '& .event-row-actions': {opacity: 0, transition: 'opacity 0.15s'},
+        '&:hover .event-row-actions': {opacity: 1},
+    }),
+);
+
+const EventRowHead = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(2),
+    padding: theme.spacing(1, 2),
+    cursor: 'pointer',
+    '&:hover': {backgroundColor: theme.palette.action.hover},
 }));
 
-const StyledAccordionSummary = styled(AccordionSummary)(({theme}) => ({
-    minHeight: 40,
-    padding: theme.spacing(0, 2),
-    '&.Mui-expanded': {minHeight: 40},
-    '& .MuiAccordionSummary-content': {
-        margin: theme.spacing(0.75, 0),
+const EventExpandIndicator = styled(Box, {shouldForwardProp: (p) => p !== 'open'})<{open?: boolean}>(
+    ({theme, open}) => ({
+        width: 16,
+        flexShrink: 0,
+        display: 'flex',
         alignItems: 'center',
-        gap: theme.spacing(1),
-        overflow: 'hidden',
-    },
-    '& .MuiAccordionSummary-content.Mui-expanded': {margin: theme.spacing(0.75, 0)},
-    '& .header-actions': {opacity: 0, transition: 'opacity 0.15s'},
-    '&:hover .header-actions': {opacity: 1},
-}));
+        justifyContent: 'center',
+        color: theme.palette.text.disabled,
+        transition: 'transform 150ms',
+        transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+    }),
+);
 
 // ---------------------------------------------------------------------------
 // Shared sx constants
@@ -131,55 +119,6 @@ const monoLinkSx = (theme: import('@mui/material/styles').Theme) =>
         wordBreak: 'break-all',
         '&:hover': {textDecoration: 'underline'},
     }) as const;
-
-// ---------------------------------------------------------------------------
-// Event name rendering
-// ---------------------------------------------------------------------------
-
-const EventName = React.memo(({name, eventClass}: {name: string; eventClass: string | null}) => {
-    const parsed = parseEventName(name);
-
-    if (parsed) {
-        const methodName = 'member' in parsed ? parsed.member : undefined;
-        return (
-            <FileLink className={parsed.className} methodName={methodName} sx={{minWidth: 0}}>
-                <Typography
-                    component="span"
-                    sx={(theme) => ({...monoLinkSx(theme), fontWeight: 600, fontSize: '13px'})}
-                >
-                    {name}
-                </Typography>
-            </FileLink>
-        );
-    }
-
-    if (eventClass && eventClass !== name) {
-        return (
-            <Box sx={{display: 'flex', alignItems: 'baseline', gap: 0.5, minWidth: 0}}>
-                <FileLink className={eventClass} sx={{flexShrink: 0}}>
-                    <Typography
-                        component="span"
-                        sx={{
-                            fontWeight: 600,
-                            fontSize: '13px',
-                            color: 'primary.main',
-                            '&:hover': {textDecoration: 'underline'},
-                        }}
-                    >
-                        {eventClass.split('\\').pop()}
-                    </Typography>
-                </FileLink>
-                <Typography component="span" sx={{fontSize: '12px', color: 'text.secondary', wordBreak: 'break-all'}}>
-                    ({name})
-                </Typography>
-            </Box>
-        );
-    }
-
-    return (
-        <Typography sx={{fontWeight: 600, fontSize: '13px', wordBreak: 'break-all', minWidth: 0}}>{name}</Typography>
-    );
-});
 
 // ---------------------------------------------------------------------------
 // Listener rendering
@@ -254,69 +193,131 @@ const ListenerItem = React.memo(({listener}: {listener: EventListener}) => {
 });
 
 // ---------------------------------------------------------------------------
-// Event accordion
+// Event row (inside a namespace group)
+// ---------------------------------------------------------------------------
+
+const EventRow = React.memo(({entry, displayName}: {entry: EventEntry; displayName: string}) => {
+    const [expanded, setExpanded] = useState(false);
+    const targetClass = entry.class || (isClassName(entry.name) ? entry.name : null);
+    const toggle = useCallback(() => {
+        const selection = typeof window !== 'undefined' ? window.getSelection()?.toString() : '';
+        if (selection && selection.length > 0) return;
+        setExpanded((v) => !v);
+    }, []);
+    const stopProp = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
+
+    return (
+        <EventRowBox expanded={expanded}>
+            <EventRowHead onClick={toggle}>
+                <EventExpandIndicator open={expanded}>
+                    <ChevronRight sx={{fontSize: 14}} />
+                </EventExpandIndicator>
+                <Tooltip title={entry.name} placement="top-start">
+                    <Typography
+                        sx={(theme) => ({
+                            fontFamily: theme.adp.fontFamilyMono,
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            wordBreak: 'break-all',
+                            flex: 1,
+                            minWidth: 0,
+                        })}
+                    >
+                        {displayName}
+                    </Typography>
+                </Tooltip>
+                <Chip
+                    label={`${entry.listeners.length} ${entry.listeners.length === 1 ? 'listener' : 'listeners'}`}
+                    size="small"
+                    sx={{
+                        fontSize: '10px',
+                        height: 20,
+                        borderRadius: 1,
+                        backgroundColor: 'action.selected',
+                        flexShrink: 0,
+                    }}
+                />
+                <Box
+                    className="event-row-actions"
+                    sx={{display: 'flex', alignItems: 'center', gap: 0.25, flexShrink: 0}}
+                    onClick={stopProp}
+                >
+                    {targetClass && (
+                        <Tooltip title="Open class source">
+                            <IconButton
+                                size="small"
+                                component={RouterLink}
+                                to={`/inspector/files?class=${encodeURIComponent(targetClass)}`}
+                                aria-label="Open class source"
+                                sx={{p: 0.25}}
+                            >
+                                <Code sx={{fontSize: 14}} />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                    <Tooltip title="Copy event name">
+                        <IconButton
+                            size="small"
+                            onClick={() => clipboardCopy(entry.name)}
+                            aria-label="Copy event name"
+                            sx={{p: 0.25}}
+                        >
+                            <ContentCopy sx={{fontSize: 14}} />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            </EventRowHead>
+            <Collapse in={expanded} unmountOnExit>
+                <Box sx={{borderTop: 1, borderColor: 'divider'}}>
+                    {entry.listeners.map((listener, i) => (
+                        <ListenerItem key={i} listener={listener} />
+                    ))}
+                </Box>
+            </Collapse>
+        </EventRowBox>
+    );
+});
+
+// ---------------------------------------------------------------------------
+// Event listeners list (groups of events by namespace)
 // ---------------------------------------------------------------------------
 
 type EventListenersProps = {entries: EventEntry[]};
 
 const EventListeners = React.memo(({entries}: EventListenersProps) => {
+    const groups = useMemo(() => groupByNamespace(entries.map((e) => ({...e, id: e.name}))), [entries]);
+
     if (entries.length === 0) {
         return <EmptyState icon="bolt" title="No event listeners found" />;
     }
 
     return (
-        <>
-            {entries.map((entry) => (
-                <StyledAccordion
-                    key={entry.name}
-                    disableGutters
-                    elevation={0}
-                    slotProps={{transition: {unmountOnExit: true}}}
+        <Box sx={{pb: 2}}>
+            {groups.map((group) => (
+                <GroupCard
+                    key={group.name || '__events__'}
+                    name={group.displayName}
+                    count={group.entries.length}
+                    countLabel={group.entries.length === 1 ? 'event' : 'events'}
+                    defaultExpanded={entries.length <= 10 || groups.length === 1}
+                    preview={
+                        <>
+                            {group.entries.slice(0, 4).map((entry, i) => (
+                                <span key={entry.name}>
+                                    {i > 0 && <span style={{opacity: 0.4}}>{' · '}</span>}
+                                    {stripNamespace(entry.name, group.name)}
+                                </span>
+                            ))}
+                            {group.entries.length > 4 && <span style={{opacity: 0.4}}> …</span>}
+                        </>
+                    }
                 >
-                    <StyledAccordionSummary expandIcon={<ExpandMore />}>
-                        <Box sx={{flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 1}}>
-                            <EventName name={entry.name} eventClass={entry.class} />
-                        </Box>
-                        <Box className="header-actions" sx={{display: 'flex', alignItems: 'center', flexShrink: 0}}>
-                            <Tooltip title="Copy event name">
-                                <IconButton
-                                    size="small"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        clipboardCopy(entry.name);
-                                    }}
-                                    sx={{p: 0.25}}
-                                >
-                                    <ContentCopy sx={{fontSize: 14}} />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                        {entry.class && (
-                            <Box className="header-actions" sx={{flexShrink: 0}} onClick={(e) => e.stopPropagation()}>
-                                <FileLink className={entry.class} />
-                            </Box>
-                        )}
-                        <Chip
-                            label={entry.listeners.length}
-                            size="small"
-                            sx={{
-                                fontSize: '10px',
-                                height: 20,
-                                minWidth: 24,
-                                borderRadius: 1,
-                                backgroundColor: 'action.selected',
-                                flexShrink: 0,
-                            }}
-                        />
-                    </StyledAccordionSummary>
-                    <AccordionDetails sx={{p: 0, borderTop: 1, borderColor: 'divider'}}>
-                        {entry.listeners.map((listener, i) => (
-                            <ListenerItem key={i} listener={listener} />
-                        ))}
-                    </AccordionDetails>
-                </StyledAccordion>
+                    {group.entries.map((entry) => (
+                        <EventRow key={entry.name} entry={entry} displayName={stripNamespace(entry.name, group.name)} />
+                    ))}
+                </GroupCard>
             ))}
-        </>
+        </Box>
     );
 });
 

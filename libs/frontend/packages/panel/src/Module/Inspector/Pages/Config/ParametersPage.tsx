@@ -1,6 +1,5 @@
 import {useGetParametersQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
@@ -9,7 +8,7 @@ import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
-import {useCallback, useMemo, useState} from 'react';
+import {useMemo, useState} from 'react';
 import {useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
@@ -21,13 +20,6 @@ type ParamGroup = {name: string; params: Array<{key: string; value: unknown}>};
 // ---------------------------------------------------------------------------
 // Styled components
 // ---------------------------------------------------------------------------
-
-const SearchRow = styled(Box)(({theme}) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(1.5),
-    padding: theme.spacing(2),
-}));
 
 const Card = styled(Box)(({theme}) => ({
     border: `1px solid ${theme.palette.divider}`,
@@ -207,7 +199,7 @@ const ParamCard = ({
 
 export const ParametersPage = () => {
     const {data, isLoading, isError, error, refetch} = useGetParametersQuery();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const searchString = searchParams.get('filter') || '';
 
     const groups = useMemo(() => groupParams(data), [data]);
@@ -228,15 +220,6 @@ export const ParametersPage = () => {
             .filter(Boolean) as ParamGroup[];
     }, [groups, searchString]);
 
-    const totalParams = groups.reduce((acc, g) => acc + g.params.length, 0);
-
-    const onChangeHandler = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            setSearchParams({filter: e.target.value});
-        },
-        [setSearchParams],
-    );
-
     if (isLoading) {
         return <FullScreenCircularProgress />;
     }
@@ -253,35 +236,22 @@ export const ParametersPage = () => {
     }
 
     return (
-        <Box>
-            <SearchRow>
-                <FilterInput
-                    value={searchString}
-                    onChange={(v) => onChangeHandler({target: {value: v}} as React.ChangeEvent<HTMLInputElement>)}
-                    placeholder="Search configuration..."
+        <Box sx={{pb: 2}}>
+            {filtered.length === 0 && (
+                <EmptyState
+                    icon="tune"
+                    title="No parameters found"
+                    description={searchString ? `No parameters match "${searchString}"` : undefined}
                 />
-                <Typography sx={{fontSize: '12px', color: 'text.disabled', whiteSpace: 'nowrap'}}>
-                    {searchString ? `${filtered.length} groups` : `${totalParams} params`}
-                </Typography>
-            </SearchRow>
-
-            <Box sx={{px: 2, pb: 2}}>
-                {filtered.length === 0 && (
-                    <EmptyState
-                        icon="tune"
-                        title="No parameters found"
-                        description={searchString ? `No parameters match "${searchString}"` : undefined}
-                    />
-                )}
-                {filtered.map((group) => (
-                    <ParamCard
-                        key={group.name}
-                        group={group}
-                        filter={searchString}
-                        defaultExpanded={filtered.length === 1 || !!searchString}
-                    />
-                ))}
-            </Box>
+            )}
+            {filtered.map((group) => (
+                <ParamCard
+                    key={group.name}
+                    group={group}
+                    filter={searchString}
+                    defaultExpanded={filtered.length === 1 || !!searchString}
+                />
+            ))}
         </Box>
     );
 };
