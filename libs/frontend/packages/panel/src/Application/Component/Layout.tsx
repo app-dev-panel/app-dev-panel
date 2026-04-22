@@ -648,9 +648,22 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                         {liveFeedOpen && !isMobile && <LiveFeedPanel onClose={handleLiveFeedClick} />}
                     </MainInner>
                 </MainArea>
+                {isMobile && (
+                    <Drawer
+                        anchor="bottom"
+                        open={liveFeedOpen}
+                        onClose={handleLiveFeedClick}
+                        ModalProps={{keepMounted: true}}
+                        PaperProps={{
+                            sx: {height: '85vh', borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: 'hidden'},
+                        }}
+                    >
+                        <LiveFeedPanel onClose={handleLiveFeedClick} />
+                    </Drawer>
+                )}
             </Box>
             {children}
-            {!aiChatOpen && (
+            {!aiChatOpen && !(isMobile && liveFeedOpen) && (
                 <Tooltip title="Duck AI" placement="left">
                     <Fab
                         aria-label="Duck AI"
