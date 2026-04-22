@@ -86,7 +86,7 @@ class CommandController
         return $this->responseFactory->createJsonResponse([
             'status' => $result->getStatus(),
             'result' => $result->getResult(),
-            'error' => $result->getErrors(),
+            'errors' => $result->getErrors(),
         ]);
     }
 

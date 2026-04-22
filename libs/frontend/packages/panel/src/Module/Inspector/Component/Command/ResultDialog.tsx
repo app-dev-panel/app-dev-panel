@@ -101,11 +101,11 @@ export const ResultDialog = ({
                     </Box>
                 )}
                 {!isLoading && !hasContent(content) && isError && !(errors && errors.length > 0) && (
-                    <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4}}>
-                        <Typography variant="body2" color="text.secondary">
-                            No output
-                        </Typography>
-                    </Box>
+                    <Alert severity="error" sx={{mb: 0}}>
+                        <AlertTitle>Command {status === 'fail' ? 'failed' : 'errored'} without output</AlertTitle>
+                        The command produced no stdout, stderr, or error details. Try rerunning it from a terminal to
+                        see what went wrong.
+                    </Alert>
                 )}
             </DialogContent>
             <DialogActions sx={{px: 3, py: 1.5}}>

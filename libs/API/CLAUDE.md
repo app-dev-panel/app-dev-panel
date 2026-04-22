@@ -80,9 +80,6 @@ src/
 │   │   ├── PHPUnitCommand.php
 │   │   ├── CodeceptionCommand.php
 │   │   └── PsalmCommand.php
-│   ├── Test/
-│   │   ├── CodeceptionJSONReporter.php
-│   │   └── PHPUnitJSONReporter.php
 │   └── ApplicationState.php
 ├── Ingestion/
 │   └── Controller/
