@@ -39,6 +39,7 @@ src/
 │   └── TemplateCollectorCompilerEngine.php     # Wraps Blade CompilerEngine → TemplateCollector
 ├── Inspector/
 │   ├── LaravelConfigProvider.php               # Config, services, event listeners, providers
+│   ├── LaravelAuthorizationConfigProvider.php  # Live auth config: guards, abilities, policies, (optional) Spatie roles
 │   ├── LaravelSchemaProvider.php               # Database schema via Illuminate\Database\Connection
 │   ├── NullSchemaProvider.php                  # Fallback when no database configured
 │   ├── LaravelRouteCollectionAdapter.php       # Route inspection adapter
@@ -131,6 +132,7 @@ Wires in `boot()`:
 | Service | Class | Data |
 |---------|-------|------|
 | Config provider | `LaravelConfigProvider` | Services (bindings), config params, event listeners, service providers |
+| Authorization provider | `LaravelAuthorizationConfigProvider` | Guards from `config('auth.guards')`, abilities + policies from `Gate` (reflection on private `$abilities`/`$policies`), role hierarchy from Spatie Permission when installed |
 | Database schema | `LaravelSchemaProvider` | Tables, columns, records via `Illuminate\Database\Connection` |
 | Route collection | `LaravelRouteCollectionAdapter` | All registered routes |
 | URL matcher | `LaravelUrlMatcherAdapter` | Route matching test |

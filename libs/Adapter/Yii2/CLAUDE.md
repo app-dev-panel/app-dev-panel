@@ -32,6 +32,7 @@ src/
 │   └── UrlRuleProxy.php                       # Wraps UrlRule for route profiling
 ├── Inspector/
 │   ├── Yii2ConfigProvider.php                 # Components, params, modules, events for inspector
+│   ├── Yii2AuthorizationConfigProvider.php    # Live auth config: user component + (optional) authManager RBAC
 │   ├── Yii2DbSchemaProvider.php               # Database schema via yii\db\Schema
 │   ├── Yii2RouteCollection.php                # Wraps UrlManager rules for route inspector
 │   ├── Yii2RouteAdapter.php                   # Wraps single UrlRule with __debugInfo()
@@ -202,6 +203,17 @@ This follows the same pattern as Yii3 and Symfony adapters (no auto-wiring for c
 Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: name, pattern, methods, defaults, route.
 
 **`Yii2DbSchemaProvider`** uses `yii\db\Schema` for database inspection.
+
+**`Yii2AuthorizationConfigProvider`** implements `AuthorizationConfigProviderInterface` for `/inspect/api/authorization`. Registered in `Module::registerCoreServices()`. Safe to register unconditionally — missing components yield empty sections.
+
+| Section | Source |
+|---------|--------|
+| `guards` | Single `user` guard: `provider = identityClass`, `config = {loginUrl, enableSession, authTimeout, absoluteAuthTimeout, enableAutoLogin}` |
+| `roleHierarchy` | `Yii::$app->authManager->getRoles()` + `getChildren($role)` — empty when `authManager` is not configured |
+| `voters` | `authManager` roles (`type: role`) + permissions (`type: permission`) + rules (`type: rule`, `name` is rule class FQCN) |
+| `config` | `user` snapshot (`identityClass`, `isGuest`, `id`) + `authManager` class + `defaultRoles` |
+
+All `authManager` calls are wrapped in `try/catch` so `DbManager` failures (e.g., missing RBAC tables) degrade to empty sections instead of throwing.
 
 ## Collectors
 
