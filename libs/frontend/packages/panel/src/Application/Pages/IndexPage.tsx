@@ -5,7 +5,7 @@ import {addFavoriteUrl, changeBaseUrl, removeFavoriteUrl} from '@app-dev-panel/s
 import {useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {StatusCard} from '@app-dev-panel/sdk/Component/StatusCard';
-import {Chip, Icon, IconButton, InputBase, Typography} from '@mui/material';
+import {Chip, Icon, IconButton, InputBase, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
@@ -39,6 +39,12 @@ const FavoritesRow = styled('div')(({theme}) => ({
     flexWrap: 'wrap',
     gap: theme.spacing(0.75),
     marginBottom: theme.spacing(3),
+}));
+
+const FavoriteItem = styled('div')(({theme}) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.25),
 }));
 
 const CurrentUrl = styled('div')(({theme}) => ({
@@ -115,6 +121,13 @@ export function IndexPage() {
         handleChangeUrl(url);
     };
 
+    const openInNewTab = (target: string) => {
+        if (!target) {
+            return;
+        }
+        window.open(target, '_blank', 'noopener,noreferrer');
+    };
+
     useEffect(() => {
         checkStatus();
     }, [baseUrl]);
@@ -130,15 +143,30 @@ export function IndexPage() {
             <CurrentUrl>
                 <Icon sx={{fontSize: 18, color: 'text.disabled'}}>link</Icon>
                 <span style={{flex: 1}}>{baseUrl}</span>
-                <IconButton
-                    size="small"
-                    onClick={() => {
-                        checkStatus();
-                        debugRefetch();
-                    }}
-                >
-                    <Icon sx={{fontSize: 16}}>refresh</Icon>
-                </IconButton>
+                <Tooltip title={baseUrl ? `Open ${baseUrl} in a new tab` : 'No backend URL set'} arrow enterDelay={400}>
+                    <span style={{display: 'inline-flex'}}>
+                        <IconButton
+                            size="small"
+                            disabled={!baseUrl}
+                            onClick={() => openInNewTab(baseUrl ?? '')}
+                            aria-label="Open backend URL in a new tab"
+                        >
+                            <Icon sx={{fontSize: 16}}>open_in_new</Icon>
+                        </IconButton>
+                    </span>
+                </Tooltip>
+                <Tooltip title="Refresh status" arrow enterDelay={400}>
+                    <IconButton
+                        size="small"
+                        aria-label="Refresh status"
+                        onClick={() => {
+                            checkStatus();
+                            debugRefetch();
+                        }}
+                    >
+                        <Icon sx={{fontSize: 16}}>refresh</Icon>
+                    </IconButton>
+                </Tooltip>
             </CurrentUrl>
 
             <SectionLabel>API Status</SectionLabel>
@@ -174,28 +202,42 @@ export function IndexPage() {
                     <SectionLabel>Favorites</SectionLabel>
                     <FavoritesRow>
                         {favoriteUrls.map((favUrl) => (
-                            <Chip
-                                key={favUrl}
-                                icon={<Icon sx={{fontSize: '14px !important', color: 'warning.main'}}>star</Icon>}
-                                label={favUrl}
-                                size="small"
-                                variant={favUrl === baseUrl ? 'filled' : 'outlined'}
-                                onClick={() => handleChangeUrl(favUrl)}
-                                onDelete={() => dispatch(removeFavoriteUrl(favUrl))}
-                                deleteIcon={<Icon sx={{fontSize: '14px !important'}}>close</Icon>}
-                                sx={(theme) => ({
-                                    fontFamily: theme.adp.fontFamilyMono,
-                                    fontSize: '12px',
-                                    height: 28,
-                                    borderRadius: 1,
-                                    ...(favUrl === baseUrl && {
-                                        backgroundColor: 'primary.light',
-                                        borderColor: 'primary.main',
-                                        color: 'primary.main',
-                                        fontWeight: 600,
-                                    }),
-                                })}
-                            />
+                            <FavoriteItem key={favUrl}>
+                                <Chip
+                                    icon={<Icon sx={{fontSize: '14px !important', color: 'warning.main'}}>star</Icon>}
+                                    label={favUrl}
+                                    size="small"
+                                    variant={favUrl === baseUrl ? 'filled' : 'outlined'}
+                                    onClick={() => handleChangeUrl(favUrl)}
+                                    onDelete={() => dispatch(removeFavoriteUrl(favUrl))}
+                                    deleteIcon={<Icon sx={{fontSize: '14px !important'}}>close</Icon>}
+                                    sx={(theme) => ({
+                                        fontFamily: theme.adp.fontFamilyMono,
+                                        fontSize: '12px',
+                                        height: 28,
+                                        borderRadius: 1,
+                                        ...(favUrl === baseUrl && {
+                                            backgroundColor: 'primary.light',
+                                            borderColor: 'primary.main',
+                                            color: 'primary.main',
+                                            fontWeight: 600,
+                                        }),
+                                    })}
+                                />
+                                <Tooltip title={`Open ${favUrl} in a new tab`} arrow enterDelay={400}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            openInNewTab(favUrl);
+                                        }}
+                                        aria-label={`Open ${favUrl} in a new tab`}
+                                        sx={{padding: 0.25}}
+                                    >
+                                        <Icon sx={{fontSize: 14}}>open_in_new</Icon>
+                                    </IconButton>
+                                </Tooltip>
+                            </FavoriteItem>
                         ))}
                     </FavoritesRow>
                 </>

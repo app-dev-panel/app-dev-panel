@@ -1,4 +1,4 @@
-import {Icon, IconButton} from '@mui/material';
+import {Icon, IconButton, Tooltip} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -34,17 +34,21 @@ export const SearchTrigger = ({onClick}: SearchTriggerProps) => {
 
     if (compact) {
         return (
-            <IconButton size="small" onClick={onClick} aria-label="Search">
-                <Icon sx={{fontSize: 18}}>search</Icon>
-            </IconButton>
+            <Tooltip title="Search (Ctrl+K)" arrow enterDelay={400}>
+                <IconButton size="small" onClick={onClick} aria-label="Search (Ctrl+K)">
+                    <Icon sx={{fontSize: 18}}>search</Icon>
+                </IconButton>
+            </Tooltip>
         );
     }
 
     return (
-        <TriggerRoot onClick={onClick} aria-label="Search">
-            <Icon sx={{fontSize: 16}}>search</Icon>
-            Search...
-            <Kbd>Ctrl+K</Kbd>
-        </TriggerRoot>
+        <Tooltip title="Search (Ctrl+K)" arrow enterDelay={400}>
+            <TriggerRoot onClick={onClick} aria-label="Search (Ctrl+K)">
+                <Icon sx={{fontSize: 16}}>search</Icon>
+                Search...
+                <Kbd>Ctrl+K</Kbd>
+            </TriggerRoot>
+        </Tooltip>
     );
 };
