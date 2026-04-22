@@ -60,6 +60,13 @@ $this->setTitle('ADP Yii 3 Playground');
         </div>
     </a>
 
+    <a href="<?= $urlGenerator->generate('authorization') ?>" class="feature-card">
+        <div>
+            <h3>Authorization</h3>
+            <p>Switch users via token and probe RBAC roles and permissions.</p>
+        </div>
+    </a>
+
     <a href="/debug/" class="feature-card">
         <div>
             <h3>Debug Panel</h3>

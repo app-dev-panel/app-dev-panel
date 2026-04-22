@@ -12,6 +12,21 @@ use Yiisoft\Yii\View\Renderer\CsrfViewInjection;
 
 return [
     'app-dev-panel/yii3' => [
+        'user' => [
+            'guestId' => null,
+            'authTimeout' => 3600,
+            'absoluteAuthTimeout' => 86_400,
+        ],
+        'rbac' => [
+            'storage' => 'php',
+            'itemsFile' => '@runtime/rbac/items.php',
+            'assignmentsFile' => '@runtime/rbac/assignments.php',
+        ],
+        'auth' => [
+            'methods' => ['bearer', 'basic', 'query_param'],
+            'bearerRealm' => 'playground',
+            'queryParam' => 'access-token',
+        ],
         'collectors' => [
             \AppDevPanel\Kernel\Collector\EnvironmentCollector::class,
             \AppDevPanel\Kernel\Collector\LogCollector::class,

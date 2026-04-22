@@ -34,6 +34,17 @@ Inspect the security and authorization configuration of your application.
 | Yii 2 | <class>AppDevPanel\Adapter\Yii2\Inspector\Yii2AuthorizationConfigProvider</class> | Reads the `user` component (identity class, login/session settings) and, when configured, `authManager` roles/permissions/rules |
 | Cycle | <class>AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider</class> | ORM-only adapter — returns an empty configuration |
 
+## Live Demo
+
+The Yii 3 playground (`playground/yii3-app`) ships a full authorization showcase:
+
+- three users (`alice` / `bob` / `carol`) backed by an in-memory identity repository
+- RBAC hierarchy seeded on first boot: `admin → editor → reader → view-dashboard`, plus the `edit-post` and `delete-post` permissions
+- Bearer / Basic / query-parameter guards registered as a `Composite`
+- a `/authorization` page that switches users via `?token=alice-demo-token` and probes permissions live
+
+Start the playground and visit **`http://127.0.0.1:8101/authorization`** to try it; the ADP **Authorization Inspector** (`/inspect/#/authorization`) shows the same data pulled from the running container.
+
 ### Yii 3 — per-section requirements
 
 Each section of the Yii 3 response is populated only when the relevant package is in the container (listed under `suggest` in the adapter's `composer.json`):
