@@ -39,8 +39,9 @@ describe('Toolbar Badge Navigation', () => {
         await expandToolbar();
         await waitForBadges();
 
-        // Verify the Logs badge is visible (mock data has logger.total: 5)
-        const logsBadge = screen.getByText('Logs 5');
+        // LogsItem now renders its label as split spans ("Logs" + segmented counts), so the
+        // text isn't a single "Logs 5" node — use the aria-label that the tooltip injects.
+        const logsBadge = screen.getByLabelText('5 log entries');
         expect(logsBadge).toBeInTheDocument();
 
         // No iframe before clicking
@@ -104,7 +105,7 @@ describe('Toolbar Badge Navigation', () => {
             {timeout: 3000},
         );
 
-        const logsBadge = screen.getByText('Logs 5');
+        const logsBadge = screen.getByLabelText('5 log entries');
         fireEvent.click(logsBadge);
 
         await waitFor(

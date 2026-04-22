@@ -35,9 +35,9 @@ import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
-import {LOG_LEVEL_GROUPS, sumLevels} from '@app-dev-panel/sdk/Types/LogLevel';
 import {type EditorConfig, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
+import {LOG_LEVEL_GROUPS, sumLevels} from '@app-dev-panel/sdk/Types/LogLevel';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Drawer from '@mui/material/Drawer';

@@ -64,7 +64,10 @@ export const NavBadge = ({count, variant = 'default', segments}: NavBadgeProps) 
         return (
             <SegmentedRoot>
                 {visible.map((segment, i) => (
-                    <span key={`${segment.variant}-${i}`} style={{display: 'inline-flex', alignItems: 'center', gap: 3}}>
+                    <span
+                        key={`${segment.variant}-${i}`}
+                        style={{display: 'inline-flex', alignItems: 'center', gap: 3}}
+                    >
                         {i > 0 && <SegmentSeparator>/</SegmentSeparator>}
                         <SegmentValue variant={segment.variant}>{segment.count}</SegmentValue>
                     </span>
