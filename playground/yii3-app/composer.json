@@ -6,9 +6,7 @@
         "serve": [
             "Composer\\Config::disableProcessTimeout",
             "@php ./yii serve -p 8101"
-        ],
-        "yii-about": "@php ./yii about",
-        "yii-help": "@php ./yii help"
+        ]
     },
     "require": {
         "php": "^8.2",
