@@ -44,12 +44,17 @@ const isFqcn = (value: string): boolean => value.includes('\\');
 
 const ClassName = ({value, bold = false, muted = false}: {value: string; bold?: boolean; muted?: boolean}) => (
     <Box sx={{display: 'inline-flex', alignItems: 'center', gap: 0.25, minWidth: 0}}>
-        <MonoText
+        <Typography
             component="span"
-            sx={{fontWeight: bold ? 600 : 400, color: muted ? 'text.secondary' : 'text.primary'}}
+            sx={(theme) => ({
+                fontFamily: theme.adp.fontFamilyMono,
+                fontSize: '12px',
+                fontWeight: bold ? 600 : 400,
+                color: muted ? 'text.secondary' : 'text.primary',
+            })}
         >
             {value}
-        </MonoText>
+        </Typography>
         {isFqcn(value) && (
             <Tooltip title="Open in File Explorer">
                 <IconButton
