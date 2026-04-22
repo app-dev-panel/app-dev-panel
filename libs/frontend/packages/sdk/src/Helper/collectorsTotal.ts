@@ -15,7 +15,11 @@ export const getCollectedCountByCollector = (collector: CollectorsMap, data: Deb
         case CollectorsMap.EventCollector:
             return Number(data.event?.total);
         case CollectorsMap.LogCollector:
-            return Number(data.logger?.total);
+            return (
+                Number(data.logger?.total || 0) +
+                Number(data.deprecation?.total || 0) +
+                Number(data['var-dumper']?.total || 0)
+            );
         case CollectorsMap.ServiceCollector:
             return Number(data.service?.total);
         case CollectorsMap.VarDumperCollector:

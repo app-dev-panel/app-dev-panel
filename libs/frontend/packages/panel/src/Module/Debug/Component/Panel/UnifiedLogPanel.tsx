@@ -433,78 +433,68 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
                 </Box>
             )}
 
-            {/* Log level sub-filters */}
-            {showLogSubFilters && (
+            {/* Log level + deprecation category sub-filters (combined in one row) */}
+            {(showLogSubFilters || showDeprecationSubFilters) && (
                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5, pl: 1}}>
-                    {presentLevels.map((level) => {
-                        const color = levelColor(level, theme);
-                        const isActive = activeLevels.has(level);
-                        return (
-                            <Chip
-                                key={level}
-                                label={`${level.toUpperCase()} (${levelCounts.get(level)})`}
-                                size="small"
-                                onClick={() => toggleLevel(level)}
-                                variant={isActive ? 'filled' : 'outlined'}
-                                sx={{
-                                    fontSize: '10px',
-                                    height: 22,
-                                    borderRadius: 0.75,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    borderColor: color,
-                                    ...(isActive
-                                        ? {backgroundColor: color, color: theme.palette.common.white}
-                                        : {color}),
-                                }}
-                            />
-                        );
-                    })}
-                    {activeLevels.size > 0 && (
+                    {showLogSubFilters &&
+                        presentLevels.map((level) => {
+                            const color = levelColor(level, theme);
+                            const isActive = activeLevels.has(level);
+                            return (
+                                <Chip
+                                    key={`level-${level}`}
+                                    label={`${level.toUpperCase()} (${levelCounts.get(level)})`}
+                                    size="small"
+                                    onClick={() => toggleLevel(level)}
+                                    variant={isActive ? 'filled' : 'outlined'}
+                                    sx={{
+                                        fontSize: '10px',
+                                        height: 22,
+                                        borderRadius: 0.75,
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        borderColor: color,
+                                        ...(isActive
+                                            ? {backgroundColor: color, color: theme.palette.common.white}
+                                            : {color}),
+                                    }}
+                                />
+                            );
+                        })}
+                    {showDeprecationSubFilters &&
+                        presentCategories.map((category) => {
+                            const color = categoryColor(category, theme);
+                            const isActive = activeCategories.has(category);
+                            const label = category === 'php' ? 'DEPR PHP' : 'DEPR USER';
+                            return (
+                                <Chip
+                                    key={`category-${category}`}
+                                    label={`${label} (${categoryCounts.get(category)})`}
+                                    size="small"
+                                    onClick={() => toggleCategory(category)}
+                                    variant={isActive ? 'filled' : 'outlined'}
+                                    sx={{
+                                        fontSize: '10px',
+                                        height: 22,
+                                        borderRadius: 0.75,
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        borderColor: color,
+                                        ...(isActive
+                                            ? {backgroundColor: color, color: theme.palette.common.white}
+                                            : {color}),
+                                    }}
+                                />
+                            );
+                        })}
+                    {(activeLevels.size > 0 || activeCategories.size > 0) && (
                         <Chip
                             label="Clear"
                             size="small"
-                            onClick={() => setActiveLevels(new Set())}
-                            variant="outlined"
-                            sx={{fontSize: '10px', height: 22, borderRadius: 0.75}}
-                        />
-                    )}
-                </Box>
-            )}
-
-            {/* Deprecation category sub-filters */}
-            {showDeprecationSubFilters && (
-                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5, pl: 1}}>
-                    {presentCategories.map((category) => {
-                        const color = categoryColor(category, theme);
-                        const isActive = activeCategories.has(category);
-                        const label = category === 'php' ? 'PHP' : 'USER';
-                        return (
-                            <Chip
-                                key={category}
-                                label={`${label} (${categoryCounts.get(category)})`}
-                                size="small"
-                                onClick={() => toggleCategory(category)}
-                                variant={isActive ? 'filled' : 'outlined'}
-                                sx={{
-                                    fontSize: '10px',
-                                    height: 22,
-                                    borderRadius: 0.75,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    borderColor: color,
-                                    ...(isActive
-                                        ? {backgroundColor: color, color: theme.palette.common.white}
-                                        : {color}),
-                                }}
-                            />
-                        );
-                    })}
-                    {activeCategories.size > 0 && (
-                        <Chip
-                            label="Clear"
-                            size="small"
-                            onClick={() => setActiveCategories(new Set())}
+                            onClick={() => {
+                                setActiveLevels(new Set());
+                                setActiveCategories(new Set());
+                            }}
                             variant="outlined"
                             sx={{fontSize: '10px', height: 22, borderRadius: 0.75}}
                         />

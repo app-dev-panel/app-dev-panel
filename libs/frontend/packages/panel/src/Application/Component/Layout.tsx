@@ -35,6 +35,7 @@ import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {LOG_LEVEL_GROUPS, sumLevels} from '@app-dev-panel/sdk/Types/LogLevel';
 import {type EditorConfig, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import Box from '@mui/material/Box';
@@ -115,6 +116,30 @@ const hiddenCollectors = new Set<string>([
     CollectorsMap.RequestCollector,
     CollectorsMap.CommandCollector,
 ]);
+
+/**
+ * Build colored segments for the Log sidebar badge: errors / warnings+deprecations / info+debug+dumps.
+ * Falls back to a single info segment when byLevel is not provided.
+ */
+const buildLogBadgeSegments = (
+    entry: DebugEntry,
+): {count: number; variant: 'default' | 'error' | 'warning'}[] | undefined => {
+    const byLevel = entry.logger?.byLevel;
+    const loggerTotal = Number(entry.logger?.total || 0);
+    const deprecationTotal = Number(entry.deprecation?.total || 0);
+    const dumpTotal = Number(entry['var-dumper']?.total || 0);
+
+    const errors = byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS.errors) : 0;
+    const warnings = (byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS.warnings) : 0) + deprecationTotal;
+    const info = (byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS.info) : loggerTotal) + dumpTotal;
+
+    if (errors + warnings + info === 0) return undefined;
+    return [
+        {count: info, variant: 'default'},
+        {count: warnings, variant: 'warning'},
+        {count: errors, variant: 'error'},
+    ];
+};
 
 // ---------------------------------------------------------------------------
 // Derive a short label for an Open API / Frames entry URL
@@ -453,12 +478,15 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             .map((collector) => {
                 const count = getCollectedCountByCollector(collector as CollectorsMap, debugEntry);
                 const isException = collector === CollectorsMap.ExceptionCollector && !!count && count > 0;
+                const badgeSegments =
+                    collector === CollectorsMap.LogCollector ? buildLogBadgeSegments(debugEntry) : undefined;
                 return {
                     key: collector,
                     icon: getCollectorIcon(collector),
                     label: getCollectorLabel(collector),
                     badge: count,
                     badgeVariant: (isException ? 'error' : 'default') as 'error' | 'default',
+                    badgeSegments,
                 };
             })
             .filter((c) => showInactiveCollectors || c.badge == null || c.badge > 0);
