@@ -1,5 +1,15 @@
 import {Icon, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
+import {createContext, useContext} from 'react';
+
+type PageHeaderVariant = 'block' | 'hidden';
+
+export type PageHeaderContextValue = {variant: PageHeaderVariant};
+
+const PageHeaderContext = createContext<PageHeaderContextValue>({variant: 'block'});
+
+export const PageHeaderProvider = PageHeaderContext.Provider;
+export const usePageHeaderContext = () => useContext(PageHeaderContext);
 
 type PageHeaderProps = {title: string; icon?: string; description?: string};
 
@@ -16,6 +26,10 @@ const Description = styled(Typography)(({theme}) => ({
 }));
 
 export const PageHeader = ({title, icon, description}: PageHeaderProps) => {
+    const {variant} = usePageHeaderContext();
+
+    if (variant === 'hidden') return null;
+
     return (
         <Root>
             <TitleRow>
