@@ -23,7 +23,7 @@ const GROUP_COLOR: Record<LogLevelGroup, string> = {
 const buildUrl = (entryId: string, levels?: LogLevel[]) => {
     const query = `collector=${encodeURIComponent(CollectorsMap.LogCollector)}&debugEntry=${entryId}`;
     const withLevels = levels && levels.length > 0 ? `${query}&level=${levels.join(',')}` : query;
-    return panelPagePath(`/?${withLevels}`);
+    return panelPagePath(`?${withLevels}`);
 };
 
 export const LogsItem = ({data, iframeUrlHandler}: LogsItemProps) => {

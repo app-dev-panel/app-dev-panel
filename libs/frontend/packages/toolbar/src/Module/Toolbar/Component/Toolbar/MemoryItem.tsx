@@ -23,7 +23,7 @@ export const MemoryItem = ({data, iframeUrlHandler}: MemoryItemProps) => {
                 size="small"
                 variant="outlined"
                 onClick={(e) => {
-                    const url = panelPagePath(`/?collector=${encodeURIComponent(collector)}&debugEntry=${data.id}`);
+                    const url = panelPagePath(`?collector=${encodeURIComponent(collector)}&debugEntry=${data.id}`);
                     if (openInNewTabOnModifier(e, url)) return;
                     iframeUrlHandler(url);
                     e.stopPropagation();
