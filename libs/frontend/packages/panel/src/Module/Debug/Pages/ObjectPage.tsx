@@ -39,7 +39,7 @@ export const ObjectPage = () => {
 
     return (
         <Box>
-            <Typography variant="h6" my={1} component="div">
+            <Typography variant="h6" my={1}>
                 <ClassName value={data.class}>
                     <span>
                         {data.class}#{objectId}
