@@ -11,3 +11,4 @@ playground/*/config/reference.php
 screenshots/
 .local
 playground/*/public/app-dev-panel
+.DS_STORE
