@@ -246,7 +246,16 @@ const DuplicateQueryGroup = ({
                         mt: '2px',
                     }}
                 />
-                <Box sx={{flex: 1, wordBreak: 'break-word', lineHeight: 1.6, color: 'text.primary'}}>
+                <Box
+                    sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
+                        lineHeight: 1.6,
+                        color: 'text.primary',
+                    }}
+                >
                     <SqlHighlight sql={sqlPreview} inline />
                 </Box>
                 <Chip
@@ -436,7 +445,7 @@ const QueryRowWithExplain = ({
                         mt: '2px',
                     }}
                 />
-                <Box sx={{flex: 1, wordBreak: 'break-word', lineHeight: 1.6}}>
+                <Box sx={{flex: 1, minWidth: 0, overflow: 'hidden', wordBreak: 'break-word', lineHeight: 1.6}}>
                     <SqlHighlight sql={query.sql} inline />
                 </Box>
                 {query.rowsNumber != null && (
