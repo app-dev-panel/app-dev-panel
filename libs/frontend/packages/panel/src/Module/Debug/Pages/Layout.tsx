@@ -35,6 +35,8 @@ import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {extractErrorMessage} from '@app-dev-panel/sdk/Helper/extractErrorMessage';
 import {Alert, AlertTitle, Box, Button, LinearProgress} from '@mui/material';
+import type {SerializedError} from '@reduxjs/toolkit';
+import type {FetchBaseQueryError} from '@reduxjs/toolkit/query';
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
@@ -256,25 +258,11 @@ export const EvictedEntryState = ({
             description={
                 <>
                     {description}
-                    <Box
-                        component="span"
-                        sx={{
-                            display: 'block',
-                            mt: 1,
-                            fontSize: '12px',
-                            color: 'text.disabled',
-                            fontFamily: 'monospace',
-                        }}
-                    >
+                    <Box sx={{mt: 1, fontSize: '12px', color: 'text.disabled', fontFamily: 'monospace'}}>
                         ID: {entryId}
                     </Box>
                     {serverMessage && (
-                        <Box
-                            component="span"
-                            sx={{display: 'block', mt: 0.5, fontSize: '12px', color: 'text.disabled'}}
-                        >
-                            {serverMessage}
-                        </Box>
+                        <Box sx={{mt: 0.5, fontSize: '12px', color: 'text.disabled'}}>{serverMessage}</Box>
                     )}
                 </>
             }
@@ -298,14 +286,20 @@ export const EvictedEntryState = ({
 // Debug Layout — collector data resolver (shell provided by main Layout)
 // ---------------------------------------------------------------------------
 
+type CollectorError = FetchBaseQueryError | SerializedError;
+
+const isHttpStatus404 = (error: CollectorError | null): boolean =>
+    error !== null && 'status' in error && error.status === 404;
+
 const Layout = () => {
     const debugEntry = useDebugEntry();
-    const [searchParams] = useSearchParams();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const {data: entriesList} = useGetDebugQuery();
     const [selectedCollector, setSelectedCollector] = useState<string>(() => searchParams.get('collector') || '');
     const [collectorData, setCollectorData] = useState<any>(undefined);
-    const [entryMissingError, setEntryMissingError] = useState<unknown>(null);
+    const [entryMissingError, setEntryMissingError] = useState<CollectorError | null>(null);
     const [collectorInfo, collectorQueryInfo] = useLazyGetCollectorInfoQuery();
 
     const clearCollectorAndData = useCallback(() => {
@@ -336,32 +330,34 @@ const Layout = () => {
                 return;
             }
         }
-        collectorInfo({id: debugEntry.id, collector: resolvedCollector})
-            .then(({error, data, isError}) => {
-                if (isError) {
-                    // 404 means the entry (or at least this collector for it) has been
-                    // dropped from the FIFO storage — show an actionable eviction state
-                    // instead of silently blanking the panel. Any other error falls
-                    // through to the generic HttpRequestError path.
-                    if ((error as {status?: unknown} | undefined)?.status === 404) {
-                        setEntryMissingError(error);
-                        return;
-                    }
-                    clearCollectorAndData();
-                    setEntryMissingError(null);
+        // The lazy trigger returns a promise that always resolves with {error, data, isError};
+        // rejection is not possible, so there is no need for a .catch branch. The cancelled
+        // flag prevents an in-flight fetch from overwriting state after a newer one started.
+        let cancelled = false;
+        collectorInfo({id: debugEntry.id, collector: resolvedCollector}).then(({error, data, isError}) => {
+            if (cancelled) return;
+            if (isError) {
+                // 404 means the entry (or at least this collector for it) has been
+                // dropped from the FIFO storage — show an actionable eviction state
+                // instead of silently blanking the panel. Any other error falls
+                // through to the generic HttpRequestError path.
+                const err = (error ?? null) as CollectorError | null;
+                if (isHttpStatus404(err)) {
+                    setEntryMissingError(err);
                     return;
                 }
-                setSelectedCollector(resolvedCollector);
-                setCollectorData(data);
-                setEntryMissingError(null);
-            })
-            .catch(() => {
                 clearCollectorAndData();
                 setEntryMissingError(null);
-            });
+                return;
+            }
+            setSelectedCollector(resolvedCollector);
+            setCollectorData(data);
+            setEntryMissingError(null);
+        });
+        return () => {
+            cancelled = true;
+        };
     }, [searchParams, debugEntry, collectorInfo, clearCollectorAndData]);
-
-    const dispatch = useDispatch();
 
     const latestEntry = useMemo(() => {
         if (!entriesList || entriesList.length === 0) return undefined;
