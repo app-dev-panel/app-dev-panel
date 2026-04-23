@@ -23,7 +23,7 @@ export const MemoryItem = ({data, iframeUrlHandler}: MemoryItemProps) => {
                 onClick={(e) => {
                     const url = `/debug?collector=${collector}&debugEntry=${data.id}`;
                     if (e.ctrlKey || e.metaKey) {
-                        window.open(url, '_blank', 'noopener');
+                        window.open(url, '_blank', 'noopener,noreferrer');
                     } else {
                         iframeUrlHandler(url);
                     }

@@ -48,7 +48,7 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
         event.stopPropagation();
         event.preventDefault();
         if (event.ctrlKey || event.metaKey) {
-            window.open(classExplorerUrl, '_blank', 'noopener');
+            window.open(classExplorerUrl, '_blank', 'noopener,noreferrer');
             return;
         }
         setAnchorEl(event.currentTarget);

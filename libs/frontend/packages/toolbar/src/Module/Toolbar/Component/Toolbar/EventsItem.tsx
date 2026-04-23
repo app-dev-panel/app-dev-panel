@@ -21,7 +21,7 @@ export const EventsItem = ({data, iframeUrlHandler}: EventsItemProps) => {
                 onClick={(e) => {
                     const url = `/debug?collector=${CollectorsMap.EventCollector}&debugEntry=${data.id}`;
                     if (e.ctrlKey || e.metaKey) {
-                        window.open(url, '_blank', 'noopener');
+                        window.open(url, '_blank', 'noopener,noreferrer');
                     } else {
                         iframeUrlHandler(url);
                     }

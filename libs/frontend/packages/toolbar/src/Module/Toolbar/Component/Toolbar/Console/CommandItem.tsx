@@ -19,7 +19,7 @@ export const CommandItem = ({data}: CommandItemProps) => {
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         if (event.ctrlKey || event.metaKey) {
-            window.open(panelPagePath(`/?debugEntry=${data.id}`), '_blank', 'noopener');
+            window.open(panelPagePath(`/?debugEntry=${data.id}`), '_blank', 'noopener,noreferrer');
             event.stopPropagation();
             event.preventDefault();
             return;

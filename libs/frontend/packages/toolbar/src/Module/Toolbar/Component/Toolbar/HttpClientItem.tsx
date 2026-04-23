@@ -23,7 +23,7 @@ export const HttpClientItem = ({data, iframeUrlHandler}: HttpClientItemProps) =>
                 onClick={(e) => {
                     const url = `/debug?collector=${CollectorsMap.HttpClientCollector}&debugEntry=${data.id}`;
                     if (e.ctrlKey || e.metaKey) {
-                        window.open(url, '_blank', 'noopener');
+                        window.open(url, '_blank', 'noopener,noreferrer');
                     } else {
                         iframeUrlHandler(url);
                     }
