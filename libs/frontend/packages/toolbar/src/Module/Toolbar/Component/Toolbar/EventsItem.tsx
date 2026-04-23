@@ -22,7 +22,7 @@ export const EventsItem = ({data, iframeUrlHandler}: EventsItemProps) => {
                 variant="outlined"
                 onClick={(e) => {
                     const url = panelPagePath(
-                        `/?collector=${encodeURIComponent(CollectorsMap.EventCollector)}&debugEntry=${data.id}`,
+                        `/debug?collector=${encodeURIComponent(CollectorsMap.EventCollector)}&debugEntry=${data.id}`,
                     );
                     if (openInNewTabOnModifier(e, url)) return;
                     iframeUrlHandler(url);

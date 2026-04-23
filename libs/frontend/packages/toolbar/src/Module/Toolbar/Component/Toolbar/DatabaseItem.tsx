@@ -32,7 +32,7 @@ export const DatabaseItem = ({data, iframeUrlHandler}: DatabaseItemProps) => {
                 variant={hasErrors ? 'filled' : 'outlined'}
                 onClick={(e) => {
                     const url = panelPagePath(
-                        `/?collector=${encodeURIComponent(CollectorsMap.DatabaseCollector)}&debugEntry=${data.id}`,
+                        `/debug?collector=${encodeURIComponent(CollectorsMap.DatabaseCollector)}&debugEntry=${data.id}`,
                     );
                     if (openInNewTabOnModifier(e, url)) return;
                     iframeUrlHandler(url);

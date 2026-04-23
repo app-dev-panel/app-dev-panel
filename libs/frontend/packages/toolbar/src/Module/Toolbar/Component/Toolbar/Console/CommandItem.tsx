@@ -19,7 +19,7 @@ export const CommandItem = ({data}: CommandItemProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        if (openInNewTabOnModifier(event, panelPagePath(`?debugEntry=${data.id}`))) return;
+        if (openInNewTabOnModifier(event, panelPagePath(`/debug?debugEntry=${data.id}`))) return;
         setAnchorEl(event.currentTarget);
     };
     const handleClose = () => setAnchorEl(null);

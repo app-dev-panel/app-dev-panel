@@ -24,7 +24,7 @@ export const HttpClientItem = ({data, iframeUrlHandler}: HttpClientItemProps) =>
                 variant="outlined"
                 onClick={(e) => {
                     const url = panelPagePath(
-                        `/?collector=${encodeURIComponent(CollectorsMap.HttpClientCollector)}&debugEntry=${data.id}`,
+                        `/debug?collector=${encodeURIComponent(CollectorsMap.HttpClientCollector)}&debugEntry=${data.id}`,
                     );
                     if (openInNewTabOnModifier(e, url)) return;
                     iframeUrlHandler(url);

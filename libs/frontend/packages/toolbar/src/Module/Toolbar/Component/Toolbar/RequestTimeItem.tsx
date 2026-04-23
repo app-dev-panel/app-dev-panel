@@ -19,7 +19,7 @@ export const RequestTimeItem = ({data, iframeUrlHandler}: RequestTimeItemProps) 
                 variant="outlined"
                 onClick={(e) => {
                     const url = panelPagePath(
-                        `/?collector=${encodeURIComponent(CollectorsMap.TimelineCollector)}&debugEntry=${data.id}`,
+                        `/debug?collector=${encodeURIComponent(CollectorsMap.TimelineCollector)}&debugEntry=${data.id}`,
                     );
                     if (openInNewTabOnModifier(e, url)) return;
                     iframeUrlHandler(url);

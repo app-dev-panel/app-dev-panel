@@ -22,7 +22,7 @@ export const DeprecationItem = ({data, iframeUrlHandler}: DeprecationItemProps) 
                 variant="filled"
                 onClick={(e) => {
                     const url = panelPagePath(
-                        `/?collector=${encodeURIComponent(CollectorsMap.DeprecationCollector)}&debugEntry=${data.id}`,
+                        `/debug?collector=${encodeURIComponent(CollectorsMap.DeprecationCollector)}&debugEntry=${data.id}`,
                     );
                     if (openInNewTabOnModifier(e, url)) return;
                     iframeUrlHandler(url);

@@ -31,7 +31,7 @@ export const ValidatorItem = ({data, iframeUrlHandler}: ValidatorItemProps) => {
                 variant={hasErrors ? 'filled' : 'outlined'}
                 onClick={(e) => {
                     const url = panelPagePath(
-                        `/?collector=${encodeURIComponent(CollectorsMap.ValidatorCollector)}&debugEntry=${data.id}`,
+                        `/debug?collector=${encodeURIComponent(CollectorsMap.ValidatorCollector)}&debugEntry=${data.id}`,
                     );
                     if (openInNewTabOnModifier(e, url)) return;
                     iframeUrlHandler(url);
