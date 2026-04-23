@@ -47,7 +47,7 @@ return [
                 'GET /test/fixtures/events' => 'test-fixtures/events',
                 'GET /test/fixtures/dump' => 'test-fixtures/dump',
                 'GET /test/fixtures/timeline' => 'test-fixtures/timeline',
-                'GET /test/fixtures/request-info' => 'test-fixtures/request-info',
+                'GET,POST,PUT,PATCH,DELETE,OPTIONS /test/fixtures/request-info' => 'test-fixtures/request-info',
                 'GET /test/fixtures/exception' => 'test-fixtures/exception',
                 'GET /test/fixtures/exception-chained' => 'test-fixtures/exception-chained',
                 'GET /test/fixtures/multi' => 'test-fixtures/multi',
