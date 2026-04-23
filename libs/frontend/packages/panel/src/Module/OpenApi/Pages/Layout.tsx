@@ -16,7 +16,7 @@ type NoEntriesProps = {onAdd: () => void};
 const NoEntries = React.memo(({onAdd}: NoEntriesProps) => (
     <EmptyState
         icon={<DuckIcon />}
-        iconSize={104}
+        iconSize={150}
         title="No Open API entries yet"
         description="Add an Open API specification URL to browse and explore your endpoints in Swagger UI."
         action={

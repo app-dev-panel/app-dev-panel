@@ -99,7 +99,7 @@ const NoEntries = React.memo(({onAdd}: NoEntriesProps) => {
     return (
         <EmptyState
             icon={<DuckIcon />}
-            iconSize={104}
+            iconSize={150}
             title="No frames yet"
             description={
                 <>
