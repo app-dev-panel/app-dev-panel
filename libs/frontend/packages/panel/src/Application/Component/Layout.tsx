@@ -26,7 +26,7 @@ import {CommandPalette} from '@app-dev-panel/sdk/Component/Layout/CommandPalette
 import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
 import {TopBar} from '@app-dev-panel/sdk/Component/Layout/TopBar';
 import {UnifiedSidebar} from '@app-dev-panel/sdk/Component/Layout/UnifiedSidebar';
-import {selectUnreadCount} from '@app-dev-panel/sdk/Component/Notifications';
+import {addNotification, selectUnreadCount} from '@app-dev-panel/sdk/Component/Notifications';
 import {ScrollTopButton} from '@app-dev-panel/sdk/Component/ScrollTop';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {useCopyAsImage} from '@app-dev-panel/sdk/Component/useCopyAsImage';
@@ -204,7 +204,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const muiTheme = useMuiTheme();
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
     const [ui, dispatchUI] = useReducer(uiReducer, initialUIState);
@@ -254,30 +254,59 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     // - Don't re-apply the URL when only the entries list refreshes (SSE),
     //   otherwise the user's manual prev/next-arrow navigation (which updates
     //   Redux but not the URL) would be overwritten every second.
-    // - If the URL pins an entry that hasn't arrived in the list yet, wait for
-    //   SSE to bring it in; don't flash the latest entry in the meantime.
+    // - If the URL pins an entry that is absent from a non-empty loaded list,
+    //   treat it as evicted from the FIFO storage: strip the pin, notify once,
+    //   and fall back to the latest entry. The empty-list case is left alone
+    //   so the initial "no entries yet" state is not misreported as eviction.
     // - If the URL has no `debugEntry` and nothing is selected yet, fall back
     //   to the latest entry.
     const lastSyncedUrlEntryIdRef = useRef<string | null>(null);
+    const evictedNotifiedIdsRef = useRef<Set<string>>(new Set());
     useEffect(() => {
-        if (!getDebugQueryInfo.isSuccess || !getDebugQueryInfo.data?.length) return;
+        if (!getDebugQueryInfo.isSuccess || !getDebugQueryInfo.data) return;
 
         const requestedId = searchParams.get('debugEntry');
         if (requestedId) {
             if (requestedId === lastSyncedUrlEntryIdRef.current) return;
             const requested = getDebugQueryInfo.data.find((e) => e.id === requestedId);
-            if (!requested) return; // pinned but not loaded yet — wait for SSE
-            lastSyncedUrlEntryIdRef.current = requestedId;
-            if (debugEntry?.id !== requestedId) {
-                dispatch(changeEntryAction(requested));
+            if (requested) {
+                lastSyncedUrlEntryIdRef.current = requestedId;
+                if (debugEntry?.id !== requestedId) {
+                    dispatch(changeEntryAction(requested));
+                }
+                return;
+            }
+            if (getDebugQueryInfo.data.length === 0) return; // list empty — nothing to compare against
+            // Pinned id is absent from a non-empty list → entry has been evicted.
+            if (!evictedNotifiedIdsRef.current.has(requestedId)) {
+                evictedNotifiedIdsRef.current.add(requestedId);
+                dispatch(
+                    addNotification({
+                        title: 'Debug entry unavailable',
+                        text: `Entry ${requestedId.slice(0, 12)}… is no longer in storage. Opened the latest entry instead.`,
+                        color: 'info',
+                    }),
+                );
+            }
+            lastSyncedUrlEntryIdRef.current = null;
+            setSearchParams(
+                (prev) => {
+                    const next = new URLSearchParams(prev);
+                    next.delete('debugEntry');
+                    return next;
+                },
+                {replace: true},
+            );
+            if (debugEntry?.id === requestedId || !debugEntry) {
+                dispatch(changeEntryAction(getDebugQueryInfo.data[0]));
             }
             return;
         }
 
-        if (!debugEntry) {
+        if (!debugEntry && getDebugQueryInfo.data.length > 0) {
             dispatch(changeEntryAction(getDebugQueryInfo.data[0]));
         }
-    }, [getDebugQueryInfo.isSuccess, getDebugQueryInfo.data, dispatch, debugEntry, searchParams]);
+    }, [getDebugQueryInfo.isSuccess, getDebugQueryInfo.data, dispatch, debugEntry, searchParams, setSearchParams]);
 
     // SSE for auto-refresh
     const changeEntry = useCallback(

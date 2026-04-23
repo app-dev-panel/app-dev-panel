@@ -660,10 +660,7 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
                                                     <TraceRow key={i}>
                                                         {frame.file && `${frame.file}:${frame.line} `}
                                                         {frame.class ? (
-                                                            <ClassName
-                                                                value={frame.class}
-                                                                methodName={frame.function}
-                                                            >
+                                                            <ClassName value={frame.class} methodName={frame.function}>
                                                                 {`${frame.class}::${frame.function}()`}
                                                             </ClassName>
                                                         ) : (
