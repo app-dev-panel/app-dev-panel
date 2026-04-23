@@ -65,4 +65,15 @@ describe('JsonRenderer', () => {
         renderWithProviders(<JsonRenderer value={42} />);
         expect(screen.getByText('42')).toBeInTheDocument();
     });
+
+    it('renders @-prefixed string as an inline alias chip', () => {
+        const {container} = renderWithProviders(<JsonRenderer value="@root/src" />);
+
+        expect(screen.getByText('alias')).toBeInTheDocument();
+        expect(screen.getByText('@root/src')).toBeInTheDocument();
+
+        const chip = container.querySelector('span.MuiBox-root');
+        expect(chip).not.toBeNull();
+        expect(window.getComputedStyle(chip as HTMLElement).display).toBe('inline-flex');
+    });
 });
