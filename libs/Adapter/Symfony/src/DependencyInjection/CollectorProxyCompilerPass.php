@@ -6,7 +6,6 @@ namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyAuthorizationConfigProvider;
-use AppDevPanel\Adapter\Symfony\Proxy\DoctrineDbalMiddleware;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyCacheProxy;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy;
@@ -16,7 +15,6 @@ use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Kernel\Collector\CacheCollector;
-use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
@@ -61,7 +59,6 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
         $this->decorateTranslator($container);
         $this->decorateSpanProcessor($container);
         $this->decorateTwig($container);
-        $this->decorateDoctrineDbal($container);
         $this->decorateValidator($container);
         $this->decorateCache($container);
         $this->upgradeSchemaProvider($container);
@@ -234,30 +231,6 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
                 new Reference(TwigEnvironmentProxy::class . '.inner'),
                 new Reference(TemplateCollector::class),
             ]);
-    }
-
-    private function decorateDoctrineDbal(ContainerBuilder $container): void
-    {
-        if (!$container->has(DatabaseCollector::class)) {
-            return;
-        }
-
-        if (!interface_exists(\Doctrine\DBAL\Driver\Middleware::class)) {
-            return;
-        }
-
-        if (!$container->has('doctrine.dbal.default_connection')) {
-            return;
-        }
-
-        // Register the middleware with the doctrine.middleware tag.
-        // DoctrineBundle's MiddlewaresPass picks up this tag and wires it
-        // into all (or specified) DBAL connections.
-        $container
-            ->register(DoctrineDbalMiddleware::class, DoctrineDbalMiddleware::class)
-            ->setArguments([new Reference(DatabaseCollector::class)])
-            ->addTag('doctrine.middleware')
-            ->setPublic(false);
     }
 
     private function decorateValidator(ContainerBuilder $container): void
