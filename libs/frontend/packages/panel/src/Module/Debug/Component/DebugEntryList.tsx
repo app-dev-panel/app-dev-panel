@@ -5,6 +5,13 @@ import {getEntrySearchText, isDebugEntryAboutConsole, isDebugEntryAboutWeb} from
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate, formatTime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
+import {
+    LOG_LEVEL_GROUP_ORDER,
+    LOG_LEVEL_GROUPS,
+    LogLevel,
+    LogLevelGroup,
+    sumLevels,
+} from '@app-dev-panel/sdk/Types/LogLevel';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import {
     Alert,
@@ -78,6 +85,38 @@ const StatCell = styled(Box)(({theme}) => ({
 }));
 
 const StatLabel = styled(Typography)(({theme}) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '10px'}));
+
+const LOG_GROUP_COLOR: Record<LogLevelGroup, string> = {
+    errors: 'error.main',
+    warnings: 'warning.main',
+    info: 'text.disabled',
+};
+
+type LogSummary = {total?: number; byLevel?: Partial<Record<LogLevel, number>>};
+
+const LogStat = ({logger}: {logger?: LogSummary}) => {
+    const total = logger?.total ?? 0;
+    if (total === 0) return null;
+    const byLevel = logger?.byLevel;
+    const segments = LOG_LEVEL_GROUP_ORDER.map((group) => ({
+        group,
+        count: byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS[group]) : group === 'info' ? total : 0,
+    })).filter(({count}) => count > 0);
+    const visible = segments.length > 0 ? segments : [{group: 'info' as LogLevelGroup, count: total}];
+    return (
+        <StatCell>
+            <Icon sx={{fontSize: 13, color: 'text.disabled'}}>description</Icon>
+            {visible.map(({group, count}, i) => (
+                <React.Fragment key={group}>
+                    {i > 0 && <StatLabel sx={{color: 'text.disabled'}}>/</StatLabel>}
+                    <StatLabel sx={{color: LOG_GROUP_COLOR[group], fontWeight: group === 'errors' ? 700 : 400}}>
+                        {count}
+                    </StatLabel>
+                </React.Fragment>
+            ))}
+        </StatCell>
+    );
+};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -199,12 +238,7 @@ export const DebugEntryList = () => {
                             <MetaLabel sx={{color: 'primary.main'}}>{(duration * 1000).toFixed(0)}ms</MetaLabel>
                         )}
                         {memory != null && <MetaLabel sx={{color: 'success.main'}}>{formatBytes(memory)}</MetaLabel>}
-                        {entry.logger?.total != null && entry.logger.total > 0 && (
-                            <StatCell>
-                                <Icon sx={{fontSize: 13, color: 'text.disabled'}}>description</Icon>
-                                <StatLabel sx={{color: 'text.disabled'}}>{entry.logger.total}</StatLabel>
-                            </StatCell>
-                        )}
+                        <LogStat logger={entry.logger} />
                         {entry.db?.queries?.total != null && entry.db.queries.total > 0 && (
                             <StatCell>
                                 <Icon
@@ -279,12 +313,7 @@ export const DebugEntryList = () => {
                             <MetaLabel sx={{color: 'primary.main'}}>{(duration * 1000).toFixed(0)}ms</MetaLabel>
                         )}
                         {memory != null && <MetaLabel sx={{color: 'success.main'}}>{formatBytes(memory)}</MetaLabel>}
-                        {entry.logger?.total != null && entry.logger.total > 0 && (
-                            <StatCell>
-                                <Icon sx={{fontSize: 13, color: 'text.disabled'}}>description</Icon>
-                                <StatLabel sx={{color: 'text.disabled'}}>{entry.logger.total}</StatLabel>
-                            </StatCell>
-                        )}
+                        <LogStat logger={entry.logger} />
                         {hasN1Indicator(entry) && (
                             <Tooltip title="Duplicate operations detected (N+1)">
                                 <Chip
