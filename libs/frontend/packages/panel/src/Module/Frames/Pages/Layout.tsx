@@ -123,7 +123,7 @@ export const Layout = () => {
             {hasFrames ? (
                 <TabContext value={tab}>
                     <Stack>
-                        <Stack direction="row" justifyContent="space-between" sx={{px: 1, pt: 1}}>
+                        <Stack direction="row" justifyContent="space-between" sx={{px: 2, pt: 2}}>
                             <Tabs
                                 value={tab}
                                 onChange={handleChange}
