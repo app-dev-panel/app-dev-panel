@@ -463,30 +463,6 @@ message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found
 count = 1
 
 [[issues]]
-file = "src/Controller/TestFixtures/FileStreamAction.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 1
-
-[[issues]]
-file = "src/Controller/TestFixtures/FileStreamAction.php"
-code = "non-existent-attribute-class"
-message = 'Attribute class `Symfony\Component\Routing\Attribute\Route` not found or could not be autoloaded.'
-count = 1
-
-[[issues]]
-file = "src/Controller/TestFixtures/FileStreamAction.php"
-code = "non-existent-class"
-message = 'Class `Symfony\Component\HttpFoundation\JsonResponse` not found.'
-count = 1
-
-[[issues]]
-file = "src/Controller/TestFixtures/FileStreamAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Symfony\Component\HttpFoundation\JsonResponse`.'
-count = 1
-
-[[issues]]
 file = "src/Controller/TestFixtures/FilesystemAction.php"
 code = "never-return"
 message = "Cannot return value with type 'never' from this function."

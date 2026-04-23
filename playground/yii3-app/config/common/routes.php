@@ -48,9 +48,6 @@ return [
             Route::get('/logs-heavy')->action(Web\TestFixtures\LogsHeavyAction::class)->name('test-logs-heavy'),
             Route::get('/http-client')->action(Web\TestFixtures\HttpClientAction::class)->name('test-http-client'),
             Route::get('/filesystem')->action(Web\TestFixtures\FilesystemAction::class)->name('test-filesystem'),
-            Route::get('/filesystem-streams')->action(Web\TestFixtures\FileStreamAction::class)->name(
-                'test-filesystem-streams',
-            ),
             Route::get('/database')->action(Web\TestFixtures\DatabaseAction::class)->name('test-database'),
             Route::get('/mailer')->action(Web\TestFixtures\MailerAction::class)->name('test-mailer'),
             Route::get('/queue')->action(Web\TestFixtures\QueueAction::class)->name('test-queue'),

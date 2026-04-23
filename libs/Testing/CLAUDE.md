@@ -84,7 +84,6 @@ All playgrounds must implement these endpoints under `/test/fixtures/`:
 | `/test/fixtures/logs-heavy` | logs:heavy | LogCollector |
 | `/test/fixtures/http-client` | http-client:basic | HttpClientCollector |
 | `/test/fixtures/filesystem` | filesystem:basic | FilesystemStreamCollector |
-| `/test/fixtures/filesystem-streams` | filesystem:streams | FilesystemStreamCollector |
 | `/test/fixtures/database` | database:basic | DatabaseCollector |
 | `/test/fixtures/mailer` | mailer:basic | MailerCollector |
 | `/test/fixtures/queue` | queue:basic | QueueCollector |
