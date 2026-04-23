@@ -34,6 +34,42 @@ const PoliciesList = () => {
         </ul>
     );
 };
+
+const InlinePoliciesLinks = () => (
+    <Stack
+        direction="row"
+        spacing={1.5}
+        useFlexGap
+        flexWrap="wrap"
+        justifyContent="center"
+        sx={{mt: 1.5, fontSize: '12px', color: 'text.disabled'}}
+    >
+        <Link
+            href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options"
+            target="_blank"
+            rel="noopener"
+            sx={{fontSize: '12px'}}
+        >
+            X-Frame-Options
+        </Link>
+        <Link
+            href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS"
+            target="_blank"
+            rel="noopener"
+            sx={{fontSize: '12px'}}
+        >
+            CORS
+        </Link>
+        <Link
+            href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/Sources"
+            target="_blank"
+            rel="noopener"
+            sx={{fontSize: '12px'}}
+        >
+            Content-Security-Policy
+        </Link>
+    </Stack>
+);
 type ErrorResolutionBoxProps = {url: string};
 const ErrorResolutionBox = ({url}: ErrorResolutionBoxProps) => {
     return (
@@ -62,24 +98,23 @@ type NoEntriesProps = {onAdd: () => void};
 const NoEntries = React.memo(({onAdd}: NoEntriesProps) => {
     return (
         <EmptyState
-            icon="web"
-            title="No frames found"
+            icon={<DuckIcon />}
+            iconSize={104}
+            title="No frames yet"
             description={
                 <>
                     <Typography variant="inherit">
-                        You can add any external resources as an embed and manage them here.
+                        Embed any external resource as a frame and manage them all from here.
                     </Typography>
-                    <Typography variant="inherit" sx={{mt: 1}}>
-                        Due to multiple privacy policies some frames cannot be opened:
-                    </Typography>
-                    <PoliciesList />
+                    <InlinePoliciesLinks />
                 </>
             }
             action={
-                <Button variant="contained" startIcon={<Settings />} onClick={onAdd}>
+                <Button variant="contained" size="large" startIcon={<Settings />} onClick={onAdd}>
                     Add frame
                 </Button>
             }
+            fillHeight
         />
     );
 });

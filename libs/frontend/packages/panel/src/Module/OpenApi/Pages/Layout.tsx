@@ -1,6 +1,7 @@
 import {SettingsDialog} from '@app-dev-panel/panel/Module/OpenApi/Component/SettingsDialog';
 import {useOpenApiEntries} from '@app-dev-panel/panel/Module/OpenApi/Context/Context';
 import '@app-dev-panel/panel/Module/OpenApi/Pages/dark.css';
+import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {Settings} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
@@ -14,13 +15,16 @@ import 'swagger-ui-react/swagger-ui.css';
 type NoEntriesProps = {onAdd: () => void};
 const NoEntries = React.memo(({onAdd}: NoEntriesProps) => (
     <EmptyState
-        icon="data_object"
-        title="No Open API entries found"
+        icon={<DuckIcon />}
+        iconSize={104}
+        title="No Open API entries yet"
+        description="Add an Open API specification URL to browse and explore your endpoints in Swagger UI."
         action={
-            <Button variant="contained" startIcon={<Settings />} onClick={onAdd}>
+            <Button variant="contained" size="large" startIcon={<Settings />} onClick={onAdd}>
                 Add entry
             </Button>
         }
+        fillHeight
     />
 ));
 export const Layout = () => {
