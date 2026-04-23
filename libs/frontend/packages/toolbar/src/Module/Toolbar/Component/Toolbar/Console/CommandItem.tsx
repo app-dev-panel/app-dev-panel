@@ -1,5 +1,6 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {MuiColor} from '@app-dev-panel/sdk/Adapter/mui/types';
+import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
 import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import {DataObject, Input, Repeat, Terminal} from '@mui/icons-material';
 import {Chip, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography} from '@mui/material';
@@ -18,12 +19,7 @@ export const CommandItem = ({data}: CommandItemProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        if (event.ctrlKey || event.metaKey) {
-            window.open(panelPagePath(`/?debugEntry=${data.id}`), '_blank', 'noopener,noreferrer');
-            event.stopPropagation();
-            event.preventDefault();
-            return;
-        }
+        if (openInNewTabOnModifier(event, panelPagePath(`/?debugEntry=${data.id}`))) return;
         setAnchorEl(event.currentTarget);
     };
     const handleClose = () => setAnchorEl(null);

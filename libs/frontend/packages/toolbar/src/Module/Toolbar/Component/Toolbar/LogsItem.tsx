@@ -1,5 +1,6 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
+import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
 import {
     LOG_LEVEL_GROUP_ORDER,
     LOG_LEVEL_GROUPS,
@@ -67,11 +68,8 @@ export const LogsItem = ({data, iframeUrlHandler}: LogsItemProps) => {
                                     component="span"
                                     onClick={(e) => {
                                         const url = buildUrl(data.id, LOG_LEVEL_GROUPS[group]);
-                                        if (e.ctrlKey || e.metaKey) {
-                                            window.open(url, '_blank', 'noopener,noreferrer');
-                                        } else {
-                                            iframeUrlHandler(url);
-                                        }
+                                        if (openInNewTabOnModifier(e, url)) return;
+                                        iframeUrlHandler(url);
                                         e.stopPropagation();
                                         e.preventDefault();
                                     }}
@@ -94,11 +92,8 @@ export const LogsItem = ({data, iframeUrlHandler}: LogsItemProps) => {
                 variant="outlined"
                 onClick={(e) => {
                     const url = buildUrl(data.id);
-                    if (e.ctrlKey || e.metaKey) {
-                        window.open(url, '_blank', 'noopener,noreferrer');
-                    } else {
-                        iframeUrlHandler(url);
-                    }
+                    if (openInNewTabOnModifier(e, url)) return;
+                    iframeUrlHandler(url);
                     e.stopPropagation();
                     e.preventDefault();
                 }}

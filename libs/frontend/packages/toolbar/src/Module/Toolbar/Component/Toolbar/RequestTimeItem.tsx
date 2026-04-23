@@ -1,5 +1,6 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
+import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import {Chip, Tooltip} from '@mui/material';
 
@@ -17,11 +18,8 @@ export const RequestTimeItem = ({data, iframeUrlHandler}: RequestTimeItemProps) 
                 variant="outlined"
                 onClick={(e) => {
                     const url = `/debug?collector=${CollectorsMap.TimelineCollector}&debugEntry=${data.id}`;
-                    if (e.ctrlKey || e.metaKey) {
-                        window.open(url, '_blank', 'noopener,noreferrer');
-                    } else {
-                        iframeUrlHandler(url);
-                    }
+                    if (openInNewTabOnModifier(e, url)) return;
+                    iframeUrlHandler(url);
                     e.stopPropagation();
                     e.preventDefault();
                 }}

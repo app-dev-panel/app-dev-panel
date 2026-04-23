@@ -1,6 +1,7 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {buttonColorHttp} from '@app-dev-panel/sdk/Helper/buttonColor';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
+import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
 import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import {usePostCurlBuildMutation} from '@app-dev-panel/toolbar/Module/Toolbar/API/inspector';
 import {ContentCopy, DataObject, DynamicFeed, Repeat, Route} from '@mui/icons-material';
@@ -24,12 +25,7 @@ export const RequestItem = ({data}: RequestItemProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        if (event.ctrlKey || event.metaKey) {
-            window.open(panelPagePath(`/?debugEntry=${data.id}`), '_blank', 'noopener,noreferrer');
-            event.stopPropagation();
-            event.preventDefault();
-            return;
-        }
+        if (openInNewTabOnModifier(event, panelPagePath(`/?debugEntry=${data.id}`))) return;
         setAnchorEl(event.currentTarget);
     };
     const handleClose = () => setAnchorEl(null);

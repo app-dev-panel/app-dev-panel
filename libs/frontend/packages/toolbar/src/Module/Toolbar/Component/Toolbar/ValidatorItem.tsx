@@ -1,5 +1,6 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
+import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import {Chip, Tooltip} from '@mui/material';
@@ -29,11 +30,8 @@ export const ValidatorItem = ({data, iframeUrlHandler}: ValidatorItemProps) => {
                 variant={hasErrors ? 'filled' : 'outlined'}
                 onClick={(e) => {
                     const url = `/debug?collector=${CollectorsMap.ValidatorCollector}&debugEntry=${data.id}`;
-                    if (e.ctrlKey || e.metaKey) {
-                        window.open(url, '_blank', 'noopener,noreferrer');
-                    } else {
-                        iframeUrlHandler(url);
-                    }
+                    if (openInNewTabOnModifier(e, url)) return;
+                    iframeUrlHandler(url);
                     e.stopPropagation();
                     e.preventDefault();
                 }}

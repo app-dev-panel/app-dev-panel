@@ -2,6 +2,7 @@ import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
+import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
 import MemoryIcon from '@mui/icons-material/Memory';
 import {Chip, Tooltip} from '@mui/material';
 
@@ -22,11 +23,8 @@ export const MemoryItem = ({data, iframeUrlHandler}: MemoryItemProps) => {
                 variant="outlined"
                 onClick={(e) => {
                     const url = `/debug?collector=${collector}&debugEntry=${data.id}`;
-                    if (e.ctrlKey || e.metaKey) {
-                        window.open(url, '_blank', 'noopener,noreferrer');
-                    } else {
-                        iframeUrlHandler(url);
-                    }
+                    if (openInNewTabOnModifier(e, url)) return;
+                    iframeUrlHandler(url);
                     e.stopPropagation();
                     e.preventDefault();
                 }}
