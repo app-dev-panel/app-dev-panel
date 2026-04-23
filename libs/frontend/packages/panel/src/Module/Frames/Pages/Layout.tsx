@@ -1,10 +1,11 @@
 import {SettingsDialog} from '@app-dev-panel/panel/Module/Frames/Component/SettingsDialog';
 import {useFramesEntries} from '@app-dev-panel/panel/Module/Frames/Context/Context';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {Settings} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
-import {Box, IconButton, Link, Stack, Tab, Tabs, Typography, useTheme} from '@mui/material';
+import {Box, Button, IconButton, Link, Stack, Tab, Tabs, Typography, useTheme} from '@mui/material';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router';
@@ -33,6 +34,42 @@ const PoliciesList = () => {
         </ul>
     );
 };
+
+const InlinePoliciesLinks = () => (
+    <Stack
+        direction="row"
+        spacing={1.5}
+        useFlexGap
+        flexWrap="wrap"
+        justifyContent="center"
+        sx={{mt: 1.5, fontSize: '12px', color: 'text.disabled'}}
+    >
+        <Link
+            href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options"
+            target="_blank"
+            rel="noopener"
+            sx={{fontSize: '12px'}}
+        >
+            X-Frame-Options
+        </Link>
+        <Link
+            href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS"
+            target="_blank"
+            rel="noopener"
+            sx={{fontSize: '12px'}}
+        >
+            CORS
+        </Link>
+        <Link
+            href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/Sources"
+            target="_blank"
+            rel="noopener"
+            sx={{fontSize: '12px'}}
+        >
+            Content-Security-Policy
+        </Link>
+    </Stack>
+);
 type ErrorResolutionBoxProps = {url: string};
 const ErrorResolutionBox = ({url}: ErrorResolutionBoxProps) => {
     return (
@@ -57,22 +94,27 @@ const ErrorResolutionBox = ({url}: ErrorResolutionBoxProps) => {
     );
 };
 
-const NoEntries = React.memo(() => {
+type NoEntriesProps = {onAdd: () => void};
+const NoEntries = React.memo(({onAdd}: NoEntriesProps) => {
     return (
-        <InfoBox
-            title="No frames found"
-            text={
+        <EmptyState
+            icon={<DuckIcon />}
+            iconSize={150}
+            title="No frames yet"
+            description={
                 <>
-                    <Typography>You can add any external resources as a embed and manage them there.</Typography>
-                    <Typography>
-                        Due to multiple privacy policies some of frames cannot be opened. Read more about the policies:
-                        <PoliciesList />
+                    <Typography variant="inherit">
+                        Embed any external resource as a frame and manage them all from here.
                     </Typography>
-                    <Typography>Click on settings button and add a frame.</Typography>
+                    <InlinePoliciesLinks />
                 </>
             }
-            severity="info"
-            icon={<DuckIcon />}
+            action={
+                <Button variant="contained" size="large" startIcon={<Settings />} onClick={onAdd}>
+                    Add frame
+                </Button>
+            }
+            fillHeight
         />
     );
 });
@@ -86,6 +128,8 @@ export const Layout = () => {
 
     const frames = useFramesEntries();
     const focusedFrame = requestedTab && frames[requestedTab] ? requestedTab : null;
+    const hasFrames = Object.keys(frames).length > 0;
+    const openSettings = () => setSettingsPopupOpen(true);
 
     useEffect(() => {
         if (focusedFrame) return;
@@ -111,41 +155,38 @@ export const Layout = () => {
 
     return (
         <>
-            <TabContext value={tab}>
-                <Stack>
-                    <Stack direction="row" justifyContent="space-between">
-                        <Tabs
-                            value={tab}
-                            onChange={handleChange}
-                            scrollButtons="auto"
-                            variant="scrollable"
-                            allowScrollButtonsMobile
-                            sx={{maxWidth: '100%'}}
-                        >
-                            {Object.keys(frames).map((name) => (
-                                <Tab key={name} label={name} value={name} wrapped />
-                            ))}
-                        </Tabs>
-                        <IconButton onClick={() => setSettingsPopupOpen(true)} aria-label="Frames settings">
-                            <Settings />
-                        </IconButton>
+            {hasFrames ? (
+                <TabContext value={tab}>
+                    <Stack>
+                        <Stack direction="row" justifyContent="space-between" sx={{px: 2, pt: 2}}>
+                            <Tabs
+                                value={tab}
+                                onChange={handleChange}
+                                scrollButtons="auto"
+                                variant="scrollable"
+                                allowScrollButtonsMobile
+                                sx={{maxWidth: '100%'}}
+                            >
+                                {Object.keys(frames).map((name) => (
+                                    <Tab key={name} label={name} value={name} wrapped />
+                                ))}
+                            </Tabs>
+                            <IconButton onClick={openSettings} aria-label="Frames settings">
+                                <Settings />
+                            </IconButton>
+                        </Stack>
+                        {Object.entries(frames).map(([name, url]) => (
+                            <TabPanel key={name} value={name} className={theme.palette.mode}>
+                                <object data={url} width="100%" height="1000px" type="text/html">
+                                    <ErrorResolutionBox url={url} />
+                                </object>
+                            </TabPanel>
+                        ))}
                     </Stack>
-                    {Object.keys(frames).length === 0 ? (
-                        <NoEntries />
-                    ) : (
-                        <>
-                            {Object.entries(frames).map(([name, url]) => (
-                                <TabPanel key={name} value={name} className={theme.palette.mode}>
-                                    {/*<iframe src={url} width="100%" height="1000px" />*/}
-                                    <object data={url} width="100%" height="1000px" type="text/html">
-                                        <ErrorResolutionBox url={url} />
-                                    </object>
-                                </TabPanel>
-                            ))}
-                        </>
-                    )}
-                </Stack>
-            </TabContext>
+                </TabContext>
+            ) : (
+                <NoEntries onAdd={openSettings} />
+            )}
             {settingsPopupOpen && (
                 <SettingsDialog
                     onClose={() => {
