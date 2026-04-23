@@ -1,6 +1,7 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
+import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import BoltIcon from '@mui/icons-material/Bolt';
 import {Chip, Tooltip} from '@mui/material';
 
@@ -20,7 +21,9 @@ export const EventsItem = ({data, iframeUrlHandler}: EventsItemProps) => {
                 size="small"
                 variant="outlined"
                 onClick={(e) => {
-                    const url = `/debug?collector=${CollectorsMap.EventCollector}&debugEntry=${data.id}`;
+                    const url = panelPagePath(
+                        `/?collector=${encodeURIComponent(CollectorsMap.EventCollector)}&debugEntry=${data.id}`,
+                    );
                     if (openInNewTabOnModifier(e, url)) return;
                     iframeUrlHandler(url);
                     e.stopPropagation();

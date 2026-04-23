@@ -55,7 +55,7 @@ describe('LogsItem', () => {
 
         fireEvent.click(screen.getByText('1'));
         const errClickUrl = handler.mock.calls[handler.mock.calls.length - 1][0] as string;
-        expect(errClickUrl).toContain('collector=AppDevPanel\\Kernel\\Collector\\LogCollector');
+        expect(errClickUrl).toContain('collector=AppDevPanel%5CKernel%5CCollector%5CLogCollector');
         expect(errClickUrl).toContain('debugEntry=entry-123');
         expect(errClickUrl).toContain('&level=emergency,alert,critical,error');
 

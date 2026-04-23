@@ -1,6 +1,7 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
+import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import HttpIcon from '@mui/icons-material/Http';
 import {Chip, Tooltip} from '@mui/material';
 
@@ -22,7 +23,9 @@ export const HttpClientItem = ({data, iframeUrlHandler}: HttpClientItemProps) =>
                 size="small"
                 variant="outlined"
                 onClick={(e) => {
-                    const url = `/debug?collector=${CollectorsMap.HttpClientCollector}&debugEntry=${data.id}`;
+                    const url = panelPagePath(
+                        `/?collector=${encodeURIComponent(CollectorsMap.HttpClientCollector)}&debugEntry=${data.id}`,
+                    );
                     if (openInNewTabOnModifier(e, url)) return;
                     iframeUrlHandler(url);
                     e.stopPropagation();
