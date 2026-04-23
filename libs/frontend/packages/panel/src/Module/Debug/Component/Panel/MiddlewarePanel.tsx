@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
@@ -122,9 +123,11 @@ export const MiddlewarePanel = (props: MiddlewarePanelProps) => {
                                 }}
                             />
                             <NameCell>
-                                <Tooltip title={row.name}>
-                                    <span>{shortName}</span>
-                                </Tooltip>
+                                <ClassName value={row.name}>
+                                    <Tooltip title={row.name}>
+                                        <span>{shortName}</span>
+                                    </Tooltip>
+                                </ClassName>
                             </NameCell>
                             {row.memory > 0 && (
                                 <Typography sx={{fontSize: '11px', color: 'text.disabled', flexShrink: 0}}>
@@ -137,17 +140,17 @@ export const MiddlewarePanel = (props: MiddlewarePanelProps) => {
                         </MiddlewareRow>
                         <Collapse in={expanded}>
                             <DetailBox>
-                                <Typography
-                                    variant="caption"
+                                <Box
                                     sx={(theme) => ({
                                         fontFamily: theme.adp.fontFamilyMono,
+                                        fontSize: theme.typography.caption.fontSize,
                                         color: 'text.secondary',
                                         display: 'block',
                                         mb: 1,
                                     })}
                                 >
-                                    {row.name}
-                                </Typography>
+                                    <ClassName value={row.name} />
+                                </Box>
 
                                 {objectId && debugEntry && (
                                     <Box sx={{mb: 1}}>

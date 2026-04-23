@@ -68,9 +68,12 @@ describe('ExceptionPanel', () => {
     });
 
     it('always shows exception detail (no expand needed)', () => {
-        renderWithProviders(<ExceptionPanel exceptions={[makeException()]} />);
-        // Detail is always visible — chips should be immediately present
-        expect(screen.getByLabelText('Open Exception Class')).toBeInTheDocument();
+        renderWithProviders(
+            <ExceptionPanel exceptions={[makeException({class: 'App\\Exception\\RuntimeException'})]} />,
+        );
+        // Detail is always visible — exception class is rendered via ClassName in the row header
+        // (its file-explorer button appears only for FQCNs), source-location button is in the detail body
+        expect(screen.getAllByLabelText('Open in File Explorer').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByLabelText('Open Source Location')).toBeInTheDocument();
     });
 

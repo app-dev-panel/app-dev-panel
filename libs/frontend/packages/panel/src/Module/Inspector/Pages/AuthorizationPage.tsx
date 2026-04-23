@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {
     AuthorizationGuard,
     AuthorizationVoter,
@@ -8,10 +9,8 @@ import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {FolderOpen} from '@mui/icons-material';
-import {Box, Chip, IconButton, LinearProgress, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, LinearProgress, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import {Link as RouterLink} from 'react-router';
 
 const TableContainer = styled(Box)(({theme}) => ({
     border: `1px solid ${theme.palette.divider}`,
@@ -40,10 +39,8 @@ const TableHeader = styled(TableRow)(({theme}) => ({
 
 const MonoText = styled(Typography)(({theme}) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '12px'}));
 
-const isFqcn = (value: string): boolean => value.includes('\\');
-
-const ClassName = ({value, bold = false, muted = false}: {value: string; bold?: boolean; muted?: boolean}) => (
-    <Box sx={{display: 'inline-flex', alignItems: 'center', gap: 0.25, minWidth: 0}}>
+const ClassNameText = ({value, bold = false, muted = false}: {value: string; bold?: boolean; muted?: boolean}) => (
+    <ClassName value={value}>
         <Typography
             component="span"
             sx={(theme) => ({
@@ -55,21 +52,7 @@ const ClassName = ({value, bold = false, muted = false}: {value: string; bold?: 
         >
             {value}
         </Typography>
-        {isFqcn(value) && (
-            <Tooltip title="Open in File Explorer">
-                <IconButton
-                    size="small"
-                    component={RouterLink}
-                    to={`/inspector/files?class=${encodeURIComponent(value)}`}
-                    aria-label="Open in File Explorer"
-                    onClick={(e) => e.stopPropagation()}
-                    sx={{p: 0.25}}
-                >
-                    <FolderOpen sx={{fontSize: 14}} />
-                </IconButton>
-            </Tooltip>
-        )}
-    </Box>
+    </ClassName>
 );
 
 const HierarchyRow = styled(Box)(({theme}) => ({
@@ -91,10 +74,10 @@ const GuardsTable = ({guards}: {guards: AuthorizationGuard[]}) => (
         {guards.map((guard) => (
             <TableRow key={guard.name}>
                 <Box sx={{flex: 1}}>
-                    <ClassName value={guard.name} bold />
+                    <ClassNameText value={guard.name} bold />
                 </Box>
                 <Box sx={{flex: 1}}>
-                    <ClassName value={guard.provider} muted />
+                    <ClassNameText value={guard.provider} muted />
                 </Box>
                 <Box sx={{flex: 2}}>
                     {Object.entries(guard.config).map(([key, value]) => (
@@ -167,7 +150,7 @@ const VotersTable = ({voters}: {voters: AuthorizationVoter[]}) => (
         {voters.map((voter, index) => (
             <TableRow key={index}>
                 <Box sx={{flex: 2}}>
-                    <ClassName value={voter.name} bold />
+                    <ClassNameText value={voter.name} bold />
                 </Box>
                 <Box sx={{flex: 1}}>
                     <Chip

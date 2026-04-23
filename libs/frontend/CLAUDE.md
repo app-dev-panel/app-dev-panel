@@ -77,7 +77,7 @@ packages/
     │   │   ├── FilterInput.tsx             # Reusable filter text input with debounce
     │   │   ├── BodyPreview.tsx             # HTTP body preview (JSON, HTML, text)
     │   │   ├── ExplainPlanVisualizer.tsx   # SQL EXPLAIN plan tree visualizer
-    │   │   ├── FileLink.tsx               # Clickable file path link (IDE integration)
+    │   │   ├── FileLink.tsx               # Clickable file *path* link (File Explorer + Open in Editor). For class names use `panel/Application/Component/ClassName` instead.
     │   │   ├── StackTrace.tsx             # Exception stack trace renderer
     │   │   ├── KeyValueTable.tsx          # Key-value pair table display
     │   │   ├── StatusCard.tsx             # Status indicator card
@@ -264,6 +264,37 @@ Key features:
 - Endpoint: `/debug/api/event-stream`
 - Hook: `useServerSentEvents(baseUrl, onMessage, subscribe)`
 - Used for real-time debug entry notifications
+
+## Rendering Rules
+
+### Class names (PHP FQCN) — always use `ClassName`
+
+Any place that renders a PHP class name (fully-qualified or short) **must** use
+`packages/panel/src/Application/Component/ClassName.tsx`. It provides the two
+required affordances: a link to the internal File Explorer
+(`/inspector/files?class=…`) **and** an "Open in Editor" button that resolves
+the source path via the inspector API and opens the user's configured IDE.
+
+```tsx
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
+
+// Full FQCN, default rendering
+<ClassName value={message.messageClass} />
+
+// Short label in a list row, full FQCN drives the links
+<ClassName value={fqcn}>{shortClassName(fqcn)}</ClassName>
+
+// Callable — method name is included in both explorer and editor URLs
+<ClassName value={action.className} methodName={action.methodName} />
+```
+
+Do **not** render class names as plain `Typography`, `styled(Typography)`, or
+`<FileLink className=…>`. `FileLink` is for file *paths* only — it has no
+`className` prop anymore.
+
+Non-FQCN values (short names without a `\`) render as plain inline text
+without buttons, so the component is safe to use for both short and
+fully-qualified identifiers.
 
 ## Code Quality
 

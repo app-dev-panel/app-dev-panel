@@ -7,14 +7,10 @@ import {Link as RouterLink} from 'react-router';
 
 type FileLinkProps = {
     /** File path, optionally with :line suffix (e.g. "/app/src/Foo.php:42") */
-    path?: string;
-    /** Class name for class-based resolution */
-    className?: string;
-    /** Method name (used with className) */
-    methodName?: string;
+    path: string;
     /** Explicit line number (overrides line parsed from path) */
     line?: number;
-    /** Content to render as the link text. If not provided, uses path or className. */
+    /** Content to render as the link text. If not provided, no text is rendered. */
     children?: ReactNode;
     /** Custom sx for the wrapper */
     sx?: Record<string, unknown>;
@@ -26,31 +22,27 @@ function extractLineFromPath(path: string): number | undefined {
 }
 
 /**
- * Renders a link to the internal File Explorer with an optional "Open in Editor" button.
- * The editor button appears only when an editor is configured in settings.
+ * Renders a link to the internal File Explorer for a given file path, with an
+ * optional "Open in Editor" button. The editor button appears only when an
+ * editor is configured in settings.
+ *
+ * For PHP class names (FQCN) use `ClassName` instead — it resolves the source
+ * location via the inspector API and adds a dedicated File Explorer button.
  *
  * Uses React Router Link directly (not MUI Link) to ensure SPA navigation
  * even when rendered inside components that override the MUI theme (e.g. JsonViewer).
  */
-export const FileLink = ({path, className, methodName, line, children, sx}: FileLinkProps) => {
+export const FileLink = ({path, line, children, sx}: FileLinkProps) => {
     const getEditorUrl = useEditorUrl();
 
-    // Build the internal file explorer href
-    let explorerHref: string;
-    if (className) {
-        const params = new URLSearchParams({class: className});
-        if (methodName) params.set('method', methodName);
-        explorerHref = `/inspector/files?${params.toString()}`;
-    } else if (path) {
-        explorerHref = `/inspector/files?path=${parseFilePathWithLineAnchor(path)}`;
-    } else {
+    if (!path) {
         return null;
     }
 
-    // Build editor URL
-    const cleanPath = path ? parseFilePath(path) : undefined;
-    const resolvedLine = line ?? (path ? extractLineFromPath(path) : undefined);
-    const editorUrl = cleanPath ? getEditorUrl(cleanPath, resolvedLine) : null;
+    const explorerHref = `/inspector/files?path=${parseFilePathWithLineAnchor(path)}`;
+    const cleanPath = parseFilePath(path);
+    const resolvedLine = line ?? extractLineFromPath(path);
+    const editorUrl = getEditorUrl(cleanPath, resolvedLine);
 
     return (
         <span style={{display: 'inline-flex', alignItems: 'center', gap: 2, ...sx}}>
