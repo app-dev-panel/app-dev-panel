@@ -15,7 +15,7 @@ hero:
     - theme: alt
       text: Live Demo
       link: /demo/
-      rel: external
+      target: _self
     - theme: alt
       text: GitHub
       link: https://github.com/app-dev-panel/app-dev-panel
