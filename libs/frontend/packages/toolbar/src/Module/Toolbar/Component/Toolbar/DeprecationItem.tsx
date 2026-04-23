@@ -19,7 +19,12 @@ export const DeprecationItem = ({data, iframeUrlHandler}: DeprecationItemProps) 
                 color="warning"
                 variant="filled"
                 onClick={(e) => {
-                    iframeUrlHandler(`/debug?collector=${CollectorsMap.DeprecationCollector}&debugEntry=${data.id}`);
+                    const url = `/debug?collector=${CollectorsMap.DeprecationCollector}&debugEntry=${data.id}`;
+                    if (e.ctrlKey || e.metaKey) {
+                        window.open(url, '_blank', 'noopener');
+                    } else {
+                        iframeUrlHandler(url);
+                    }
                     e.stopPropagation();
                     e.preventDefault();
                 }}

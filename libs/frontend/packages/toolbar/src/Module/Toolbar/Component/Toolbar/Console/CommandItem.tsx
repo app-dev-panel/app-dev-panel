@@ -1,5 +1,6 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {MuiColor} from '@app-dev-panel/sdk/Adapter/mui/types';
+import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import {DataObject, Input, Repeat, Terminal} from '@mui/icons-material';
 import {Chip, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography} from '@mui/material';
 import React, {useState} from 'react';
@@ -16,7 +17,15 @@ export const CommandItem = ({data}: CommandItemProps) => {
     }
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+        if (event.ctrlKey || event.metaKey) {
+            window.open(panelPagePath(`/?debugEntry=${data.id}`), '_blank', 'noopener');
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
+        setAnchorEl(event.currentTarget);
+    };
     const handleClose = () => setAnchorEl(null);
 
     return (

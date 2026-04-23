@@ -16,7 +16,12 @@ export const RequestTimeItem = ({data, iframeUrlHandler}: RequestTimeItemProps) 
                 size="small"
                 variant="outlined"
                 onClick={(e) => {
-                    iframeUrlHandler(`/debug?collector=${CollectorsMap.TimelineCollector}&debugEntry=${data.id}`);
+                    const url = `/debug?collector=${CollectorsMap.TimelineCollector}&debugEntry=${data.id}`;
+                    if (e.ctrlKey || e.metaKey) {
+                        window.open(url, '_blank', 'noopener');
+                    } else {
+                        iframeUrlHandler(url);
+                    }
                     e.stopPropagation();
                     e.preventDefault();
                 }}

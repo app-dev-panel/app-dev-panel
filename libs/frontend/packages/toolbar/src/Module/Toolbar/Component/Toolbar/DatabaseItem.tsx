@@ -29,7 +29,12 @@ export const DatabaseItem = ({data, iframeUrlHandler}: DatabaseItemProps) => {
                 color={hasErrors ? 'error' : 'default'}
                 variant={hasErrors ? 'filled' : 'outlined'}
                 onClick={(e) => {
-                    iframeUrlHandler(`/debug?collector=${CollectorsMap.DatabaseCollector}&debugEntry=${data.id}`);
+                    const url = `/debug?collector=${CollectorsMap.DatabaseCollector}&debugEntry=${data.id}`;
+                    if (e.ctrlKey || e.metaKey) {
+                        window.open(url, '_blank', 'noopener');
+                    } else {
+                        iframeUrlHandler(url);
+                    }
                     e.stopPropagation();
                     e.preventDefault();
                 }}

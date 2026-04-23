@@ -139,6 +139,7 @@ $this->beginPage() ?>
         <a href="/log-demo"<?= $currentPath === '/log-demo' ? ' class="active"' : '' ?>>Log Demo</a>
         <a href="/var-dumper"<?= $currentPath === '/var-dumper' ? ' class="active"' : '' ?>>Var Dumper</a>
         <a href="/api/openapi.json"<?= $currentPath === '/api/openapi.json' ? ' class="active"' : '' ?>>OpenAPI</a>
+        <a href="/debug" target="_blank" rel="noopener">Debug Panel</a>
     </nav>
 </div>
 

@@ -66,7 +66,12 @@ export const LogsItem = ({data, iframeUrlHandler}: LogsItemProps) => {
                                 <Box
                                     component="span"
                                     onClick={(e) => {
-                                        iframeUrlHandler(buildUrl(data.id, LOG_LEVEL_GROUPS[group]));
+                                        const url = buildUrl(data.id, LOG_LEVEL_GROUPS[group]);
+                                        if (e.ctrlKey || e.metaKey) {
+                                            window.open(url, '_blank', 'noopener');
+                                        } else {
+                                            iframeUrlHandler(url);
+                                        }
                                         e.stopPropagation();
                                         e.preventDefault();
                                     }}
@@ -88,7 +93,12 @@ export const LogsItem = ({data, iframeUrlHandler}: LogsItemProps) => {
                 size="small"
                 variant="outlined"
                 onClick={(e) => {
-                    iframeUrlHandler(buildUrl(data.id));
+                    const url = buildUrl(data.id);
+                    if (e.ctrlKey || e.metaKey) {
+                        window.open(url, '_blank', 'noopener');
+                    } else {
+                        iframeUrlHandler(url);
+                    }
                     e.stopPropagation();
                     e.preventDefault();
                 }}

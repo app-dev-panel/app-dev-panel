@@ -21,7 +21,12 @@ export const MemoryItem = ({data, iframeUrlHandler}: MemoryItemProps) => {
                 size="small"
                 variant="outlined"
                 onClick={(e) => {
-                    iframeUrlHandler(`/debug?collector=${collector}&debugEntry=${data.id}`);
+                    const url = `/debug?collector=${collector}&debugEntry=${data.id}`;
+                    if (e.ctrlKey || e.metaKey) {
+                        window.open(url, '_blank', 'noopener');
+                    } else {
+                        iframeUrlHandler(url);
+                    }
                     e.stopPropagation();
                     e.preventDefault();
                 }}

@@ -47,6 +47,10 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
     const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
         event.stopPropagation();
         event.preventDefault();
+        if (event.ctrlKey || event.metaKey) {
+            window.open(classExplorerUrl, '_blank', 'noopener');
+            return;
+        }
         setAnchorEl(event.currentTarget);
     };
     const handleClose = () => setAnchorEl(null);
