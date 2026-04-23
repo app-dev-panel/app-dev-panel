@@ -2,7 +2,6 @@ import {SettingsDialog} from '@app-dev-panel/panel/Module/Frames/Component/Setti
 import {useFramesEntries} from '@app-dev-panel/panel/Module/Frames/Context/Context';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
-import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {Settings} from '@mui/icons-material';
 import {TabContext, TabPanel} from '@mui/lab';
 import {Box, IconButton, Link, Stack, Tab, Tabs, Typography, useTheme} from '@mui/material';
@@ -112,7 +111,6 @@ export const Layout = () => {
 
     return (
         <>
-            <PageHeader title="Frames" icon="web" description="Embedded external resources" />
             <TabContext value={tab}>
                 <Stack>
                     <Stack direction="row" justifyContent="space-between">

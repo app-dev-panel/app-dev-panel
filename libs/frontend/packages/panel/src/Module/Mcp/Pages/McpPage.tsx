@@ -1,6 +1,5 @@
 import {useSelector} from '@app-dev-panel/panel/store';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
-import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import {
     Box,
@@ -90,89 +89,86 @@ export const McpPage = () => {
     }, [config]);
 
     return (
-        <>
-            <PageHeader title="MCP Server" icon="hub" description="Connect AI assistants to your debug data" />
-            <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
-                <Paper variant="outlined" sx={{p: 2, display: 'flex', flexDirection: 'column', gap: 2}}>
-                    <Box>
-                        <Typography variant="body2" color="text.secondary" sx={{mb: 0.5}}>
-                            Endpoint
-                        </Typography>
-                        <Typography
-                            variant="body2"
-                            sx={(theme) => ({fontFamily: theme.adp.fontFamilyMono, wordBreak: 'break-all'})}
-                        >
-                            {mcpUrl}
-                        </Typography>
-                    </Box>
-
-                    <ToggleButtonGroup
-                        value={tab}
-                        exclusive
-                        onChange={(_, value) => value && setTab(value)}
-                        size="small"
-                        fullWidth
+        <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+            <Paper variant="outlined" sx={{p: 2, display: 'flex', flexDirection: 'column', gap: 2}}>
+                <Box>
+                    <Typography variant="body2" color="text.secondary" sx={{mb: 0.5}}>
+                        Endpoint
+                    </Typography>
+                    <Typography
+                        variant="body2"
+                        sx={(theme) => ({fontFamily: theme.adp.fontFamilyMono, wordBreak: 'break-all'})}
                     >
-                        <ToggleButton value="url">Direct URL</ToggleButton>
-                        <ToggleButton value="stdio">stdio</ToggleButton>
-                        <ToggleButton value="cli">CLI</ToggleButton>
-                    </ToggleButtonGroup>
-
-                    <Box sx={{position: 'relative'}}>
-                        <CodeHighlight language="json" code={config} showLineNumbers={false} fontSize={10} />
-                        <Tooltip title={copied ? 'Copied' : 'Copy'}>
-                            <IconButton
-                                size="small"
-                                onClick={handleCopy}
-                                sx={{position: 'absolute', top: 4, right: 4, bgcolor: 'background.paper'}}
-                            >
-                                <ContentCopyIcon sx={{fontSize: 16}} />
-                            </IconButton>
-                        </Tooltip>
-                    </Box>
-
-                    <Typography variant="body2" color="text.secondary">
-                        Add this to your AI assistant's MCP configuration file (e.g., claude_desktop_config.json,
-                        .cursor/mcp.json, or .claude/settings.json).
+                        {mcpUrl}
                     </Typography>
-                </Paper>
+                </Box>
 
-                <Paper variant="outlined" sx={{overflow: 'hidden'}}>
-                    <Typography variant="body1" fontWeight={600} sx={{px: 2, pt: 2, pb: 1}}>
-                        Available tools
-                    </Typography>
-                    <TableContainer>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell sx={{fontWeight: 600}}>Tool</TableCell>
-                                    <TableCell sx={{fontWeight: 600}}>Description</TableCell>
+                <ToggleButtonGroup
+                    value={tab}
+                    exclusive
+                    onChange={(_, value) => value && setTab(value)}
+                    size="small"
+                    fullWidth
+                >
+                    <ToggleButton value="url">Direct URL</ToggleButton>
+                    <ToggleButton value="stdio">stdio</ToggleButton>
+                    <ToggleButton value="cli">CLI</ToggleButton>
+                </ToggleButtonGroup>
+
+                <Box sx={{position: 'relative'}}>
+                    <CodeHighlight language="json" code={config} showLineNumbers={false} fontSize={10} />
+                    <Tooltip title={copied ? 'Copied' : 'Copy'}>
+                        <IconButton
+                            size="small"
+                            onClick={handleCopy}
+                            sx={{position: 'absolute', top: 4, right: 4, bgcolor: 'background.paper'}}
+                        >
+                            <ContentCopyIcon sx={{fontSize: 16}} />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+
+                <Typography variant="body2" color="text.secondary">
+                    Add this to your AI assistant's MCP configuration file (e.g., claude_desktop_config.json,
+                    .cursor/mcp.json, or .claude/settings.json).
+                </Typography>
+            </Paper>
+
+            <Paper variant="outlined" sx={{overflow: 'hidden'}}>
+                <Typography variant="body1" fontWeight={600} sx={{px: 2, pt: 2, pb: 1}}>
+                    Available tools
+                </Typography>
+                <TableContainer>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{fontWeight: 600}}>Tool</TableCell>
+                                <TableCell sx={{fontWeight: 600}}>Description</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {mcpTools.map((tool) => (
+                                <TableRow key={tool.name}>
+                                    <TableCell
+                                        sx={(theme) => ({
+                                            fontFamily: theme.adp.fontFamilyMono,
+                                            fontSize: '12px',
+                                            whiteSpace: 'nowrap',
+                                        })}
+                                    >
+                                        {tool.name}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {tool.description}
+                                        </Typography>
+                                    </TableCell>
                                 </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {mcpTools.map((tool) => (
-                                    <TableRow key={tool.name}>
-                                        <TableCell
-                                            sx={(theme) => ({
-                                                fontFamily: theme.adp.fontFamilyMono,
-                                                fontSize: '12px',
-                                                whiteSpace: 'nowrap',
-                                            })}
-                                        >
-                                            {tool.name}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {tool.description}
-                                            </Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Paper>
-            </Box>
-        </>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Paper>
+        </Box>
     );
 };
