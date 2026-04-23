@@ -25,18 +25,21 @@ import {UnifiedLogPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel
 import {ValidatorPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ValidatorPanel';
 import {DumpPage} from '@app-dev-panel/panel/Module/Debug/Pages/DumpPage';
 import {useSelector} from '@app-dev-panel/panel/store';
-import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
-import {useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
+import {useGetDebugQuery, useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
-import {Alert, AlertTitle, Box, LinearProgress} from '@mui/material';
+import {extractErrorMessage} from '@app-dev-panel/sdk/Helper/extractErrorMessage';
+import {Alert, AlertTitle, Box, Button, LinearProgress} from '@mui/material';
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
-import {Outlet, useSearchParams} from 'react-router';
+import {useDispatch} from 'react-redux';
+import {Outlet, useNavigate, useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Collector data renderer
@@ -220,14 +223,89 @@ const EmptyCollectorsInfoBox = React.memo(() => (
 ));
 
 // ---------------------------------------------------------------------------
+// EvictedEntryState — shown when a collector fetch returns 404 because the
+// debug entry has been evicted from the FIFO storage. Offers recovery actions
+// (jump to the latest known entry or go to the full entry list).
+// ---------------------------------------------------------------------------
+
+export type EvictedEntryStateProps = {
+    entryId: string;
+    error: unknown;
+    latestEntryId?: string;
+    onOpenLatest: () => void;
+    onViewAllEntries: () => void;
+};
+
+export const EvictedEntryState = ({
+    entryId,
+    error,
+    latestEntryId,
+    onOpenLatest,
+    onViewAllEntries,
+}: EvictedEntryStateProps) => {
+    const hasLatest = Boolean(latestEntryId) && latestEntryId !== entryId;
+    const serverMessage = extractErrorMessage(error);
+    const description = hasLatest
+        ? 'This debug entry was evicted from storage when newer requests arrived. Open a different entry to continue.'
+        : 'This debug entry was evicted from storage and no other entries are available yet.';
+    return (
+        <EmptyState
+            icon="archive"
+            title="Debug entry is no longer available"
+            severity="error"
+            description={
+                <>
+                    {description}
+                    <Box
+                        component="span"
+                        sx={{
+                            display: 'block',
+                            mt: 1,
+                            fontSize: '12px',
+                            color: 'text.disabled',
+                            fontFamily: 'monospace',
+                        }}
+                    >
+                        ID: {entryId}
+                    </Box>
+                    {serverMessage && (
+                        <Box
+                            component="span"
+                            sx={{display: 'block', mt: 0.5, fontSize: '12px', color: 'text.disabled'}}
+                        >
+                            {serverMessage}
+                        </Box>
+                    )}
+                </>
+            }
+            action={
+                <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center'}}>
+                    {hasLatest && (
+                        <Button variant="contained" size="small" onClick={onOpenLatest}>
+                            Open latest entry
+                        </Button>
+                    )}
+                    <Button variant="outlined" size="small" onClick={onViewAllEntries}>
+                        View all entries
+                    </Button>
+                </Box>
+            }
+        />
+    );
+};
+
+// ---------------------------------------------------------------------------
 // Debug Layout — collector data resolver (shell provided by main Layout)
 // ---------------------------------------------------------------------------
 
 const Layout = () => {
     const debugEntry = useDebugEntry();
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const {data: entriesList} = useGetDebugQuery();
     const [selectedCollector, setSelectedCollector] = useState<string>(() => searchParams.get('collector') || '');
     const [collectorData, setCollectorData] = useState<any>(undefined);
+    const [entryMissingError, setEntryMissingError] = useState<unknown>(null);
     const [collectorInfo, collectorQueryInfo] = useLazyGetCollectorInfoQuery();
 
     const clearCollectorAndData = useCallback(() => {
@@ -239,6 +317,7 @@ const Layout = () => {
         const collector = searchParams.get('collector') || '';
         if (collector.trim() === '') {
             clearCollectorAndData();
+            setEntryMissingError(null);
             return;
         }
         if (!debugEntry) {
@@ -253,23 +332,72 @@ const Layout = () => {
                 resolvedCollector = CollectorsMap.CommandCollector;
             } else {
                 clearCollectorAndData();
+                setEntryMissingError(null);
                 return;
             }
         }
         collectorInfo({id: debugEntry.id, collector: resolvedCollector})
-            .then(({data, isError}) => {
+            .then(({error, data, isError}) => {
                 if (isError) {
+                    // 404 means the entry (or at least this collector for it) has been
+                    // dropped from the FIFO storage — show an actionable eviction state
+                    // instead of silently blanking the panel. Any other error falls
+                    // through to the generic HttpRequestError path.
+                    if ((error as {status?: unknown} | undefined)?.status === 404) {
+                        setEntryMissingError(error);
+                        return;
+                    }
                     clearCollectorAndData();
+                    setEntryMissingError(null);
                     return;
                 }
                 setSelectedCollector(resolvedCollector);
                 setCollectorData(data);
+                setEntryMissingError(null);
             })
-            .catch(clearCollectorAndData);
+            .catch(() => {
+                clearCollectorAndData();
+                setEntryMissingError(null);
+            });
     }, [searchParams, debugEntry, collectorInfo, clearCollectorAndData]);
+
+    const dispatch = useDispatch();
+
+    const latestEntry = useMemo(() => {
+        if (!entriesList || entriesList.length === 0) return undefined;
+        return entriesList[0];
+    }, [entriesList]);
+
+    const handleOpenLatest = useCallback(() => {
+        if (!latestEntry) return;
+        // Update Redux and URL in the same tick so Debug Layout's next effect
+        // fires against the new id instead of the evicted one (avoids a
+        // redundant 404 round-trip during the transition).
+        dispatch(changeEntryAction(latestEntry));
+        setEntryMissingError(null);
+        const next = new URLSearchParams(searchParams);
+        next.set('debugEntry', latestEntry.id);
+        navigate({pathname: '/debug', search: next.toString()}, {replace: true});
+    }, [dispatch, latestEntry, navigate, searchParams]);
+
+    const handleAllEntries = useCallback(() => {
+        navigate('/debug/list');
+    }, [navigate]);
 
     if (!debugEntry) {
         return <Outlet />;
+    }
+
+    if (entryMissingError) {
+        return (
+            <EvictedEntryState
+                entryId={debugEntry.id}
+                error={entryMissingError}
+                latestEntryId={latestEntry?.id}
+                onOpenLatest={handleOpenLatest}
+                onViewAllEntries={handleAllEntries}
+            />
+        );
     }
 
     if (debugEntry.collectors.length === 0) {
