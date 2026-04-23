@@ -72,11 +72,6 @@ describe('FilesystemPanel', () => {
         expect(screen.getByText(/No readdir operations found/)).toBeInTheDocument();
     });
 
-    it('renders section title', () => {
-        renderWithProviders(<FilesystemPanel data={makeData() as any} />);
-        expect(screen.getByText('Operations')).toBeInTheDocument();
-    });
-
     it('renders filter input', () => {
         renderWithProviders(<FilesystemPanel data={makeData() as any} />);
         expect(screen.getByPlaceholderText('Filter by path...')).toBeInTheDocument();

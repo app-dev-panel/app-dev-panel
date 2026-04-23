@@ -2,7 +2,6 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
 import {Box, Chip, Icon, IconButton, Tab, Tooltip, Typography} from '@mui/material';
@@ -190,13 +189,9 @@ export const FilesystemPanel = ({data}: FilesystemPanelProps) => {
 
     return (
         <Box>
-            <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter by path..." />}>
-                Operations
-            </SectionTitle>
-
             <TabContext value={value}>
-                <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
-                    <StyledTabList onChange={handleChange}>
+                <Box sx={{borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2}}>
+                    <StyledTabList onChange={handleChange} sx={{flex: 1, minWidth: 0}}>
                         {tabs.map((tab) => {
                             const count = (data as any)[tab]?.length ?? 0;
                             const meta = operationMeta(tab);
@@ -231,6 +226,9 @@ export const FilesystemPanel = ({data}: FilesystemPanelProps) => {
                             );
                         })}
                     </StyledTabList>
+                    <Box sx={{flexShrink: 0, pr: 2}}>
+                        <FilterInput value={filter} onChange={setFilter} placeholder="Filter by path..." />
+                    </Box>
                 </Box>
                 {tabs.map((tab) => (
                     <TabPanel value={tab} key={tab} sx={{padding: 0}}>
