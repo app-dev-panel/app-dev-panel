@@ -72,11 +72,6 @@ describe('FilesystemPanel', () => {
         expect(screen.getByText(/No readdir operations found/)).toBeInTheDocument();
     });
 
-    it('renders summary cards with total operations', () => {
-        renderWithProviders(<FilesystemPanel data={makeData() as any} />);
-        expect(screen.getByText('Total Operations')).toBeInTheDocument();
-    });
-
     it('renders section title', () => {
         renderWithProviders(<FilesystemPanel data={makeData() as any} />);
         expect(screen.getByText('Operations')).toBeInTheDocument();

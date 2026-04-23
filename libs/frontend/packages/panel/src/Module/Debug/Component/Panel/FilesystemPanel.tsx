@@ -17,37 +17,6 @@ type FilesystemPanelProps = {data: {[key in Operation]: Information}[]};
 // Styled components
 // ---------------------------------------------------------------------------
 
-const SummaryGrid = styled(Box)(({theme}) => ({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
-    gap: theme.spacing(1.5),
-    padding: theme.spacing(2),
-}));
-
-const SummaryCard = styled(Box)(({theme}) => ({
-    padding: theme.spacing(1.5, 2),
-    borderRadius: Number(theme.shape.borderRadius) * 1.5,
-    border: `1px solid ${theme.palette.divider}`,
-    backgroundColor: theme.palette.background.paper,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(0.5),
-}));
-
-const SummaryLabel = styled(Typography)(({theme}) => ({
-    fontSize: '11px',
-    fontWeight: 600,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.5px',
-    color: theme.palette.text.disabled,
-}));
-
-const SummaryValue = styled(Typography)(({theme}) => ({
-    fontFamily: theme.adp.fontFamilyMono,
-    fontWeight: 700,
-    fontSize: '20px',
-}));
-
 const FileRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
     ({theme, expanded}) => ({
         display: 'flex',
@@ -219,34 +188,8 @@ export const FilesystemPanel = ({data}: FilesystemPanelProps) => {
         return <EmptyState icon="folder_open" title="No filesystem operations found" />;
     }
 
-    const totalOps = tabs.reduce((sum, tab) => sum + ((data as any)[tab]?.length ?? 0), 0);
-
     return (
         <Box>
-            <SummaryGrid>
-                <SummaryCard>
-                    <SummaryLabel>Total Operations</SummaryLabel>
-                    <SummaryValue>{totalOps}</SummaryValue>
-                </SummaryCard>
-                {tabs.map((tab) => {
-                    const count = (data as any)[tab]?.length ?? 0;
-                    const meta = operationMeta(tab);
-                    return (
-                        <SummaryCard key={tab}>
-                            <SummaryLabel>
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                    <Icon sx={{fontSize: 14, color: `${meta.color}.main`}}>{meta.icon}</Icon>
-                                    {tab}
-                                </Box>
-                            </SummaryLabel>
-                            <SummaryValue sx={{color: count > 0 ? 'text.primary' : 'text.disabled'}}>
-                                {count}
-                            </SummaryValue>
-                        </SummaryCard>
-                    );
-                })}
-            </SummaryGrid>
-
             <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter by path..." />}>
                 Operations
             </SectionTitle>
