@@ -1,6 +1,12 @@
+import {useSelector} from '@app-dev-panel/panel/store';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, useLazyGetCollectorInfoQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
-import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
+import {
+    compareCollectorWeight,
+    getCollectorIcon,
+    getCollectorLabel,
+    hiddenOverviewCollectors,
+} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
@@ -10,15 +16,6 @@ import {Box, Icon, LinearProgress, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router';
-
-// Collectors hidden from the card grid (data shown elsewhere in overview)
-const hiddenCollectors = new Set<string>([
-    CollectorsMap.WebAppInfoCollector,
-    CollectorsMap.ConsoleAppInfoCollector,
-    CollectorsMap.EnvironmentCollector,
-    CollectorsMap.RequestCollector,
-    CollectorsMap.CommandCollector,
-]);
 
 // ---------------------------------------------------------------------------
 // Card icon background/foreground colors per collector (from theme tokens)
@@ -380,7 +377,7 @@ function buildCollectorCards(
 ): CollectorCardData[] {
     return [...entry.collectors]
         .map((c) => (typeof c === 'string' ? c : c.id))
-        .filter((c) => !hiddenCollectors.has(c))
+        .filter((c) => !hiddenOverviewCollectors.has(c))
         .sort(compareCollectorWeight)
         .map((collector) => {
             const count = getCollectedCountByCollector(collector as CollectorsMap, entry);
@@ -421,6 +418,7 @@ export const IndexPage = () => {
     const [getCollectorInfo] = useLazyGetCollectorInfoQuery();
     const [webAppInfo, setWebAppInfo] = useState<WebAppInfoData | null>(null);
     const [loadingPerf, setLoadingPerf] = useState(false);
+    const showInactiveCollectors = useSelector((state) => state.application.showInactiveCollectors);
 
     useEffect(() => {
         if (!entry) return;
@@ -446,7 +444,9 @@ export const IndexPage = () => {
 
     const cards = buildCollectorCards(entry, theme.adp.collectorColors);
     const activeCards = cards.filter((c) => c.badge != null && c.badge > 0);
-    const emptyCards = cards.filter((c) => c.badge == null || c.badge === 0);
+    // Mirrors sidebar: always show badge-less collectors (Router, Authorization);
+    // include zero-count ones only when the user opted in via the inactive-collectors toggle.
+    const emptyCards = cards.filter((c) => c.badge == null || (showInactiveCollectors && c.badge === 0));
 
     const handleCardClick = (collectorKey: string) => {
         setSearchParams((params) => {
