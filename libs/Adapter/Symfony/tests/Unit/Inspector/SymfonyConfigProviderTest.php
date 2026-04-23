@@ -338,7 +338,6 @@ final class SymfonyConfigProviderTest extends TestCase
         $provider = new SymfonyConfigProvider($container);
 
         $reflection = new \ReflectionMethod($provider, 'describeListener');
-        $reflection->setAccessible(true);
 
         // Pass an integer — exercises the get_debug_type fallback
         $result = $reflection->invoke($provider, 42);

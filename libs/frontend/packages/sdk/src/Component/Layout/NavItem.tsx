@@ -1,4 +1,4 @@
-import {NavBadge} from '@app-dev-panel/sdk/Component/Layout/NavBadge';
+import {NavBadge, NavBadgeSegment, NavBadgeVariant} from '@app-dev-panel/sdk/Component/Layout/NavBadge';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Icon} from '@mui/material';
 import {styled} from '@mui/material/styles';
@@ -8,7 +8,8 @@ type NavItemProps = {
     icon: string;
     label: string;
     badge?: number | string;
-    badgeVariant?: 'default' | 'error';
+    badgeVariant?: NavBadgeVariant;
+    badgeSegments?: NavBadgeSegment[];
     active?: boolean;
     onClick?: () => void;
     href?: string;
@@ -52,16 +53,20 @@ const NavLabel = styled('span')(({theme}) => ({fontSize: theme.typography.body2.
 
 const BadgeSlot = styled('span')({marginLeft: 'auto'});
 
-export const NavItem = React.memo(({icon, label, badge, badgeVariant, active = false, onClick}: NavItemProps) => {
-    return (
-        <NavItemRoot active={active} onClick={onClick}>
-            <Icon sx={{fontSize: 19, flexShrink: 0}}>{icon}</Icon>
-            <NavLabel>{label}</NavLabel>
-            {badge !== undefined && badge !== 0 && (
-                <BadgeSlot>
-                    <NavBadge count={badge} variant={badgeVariant} />
-                </BadgeSlot>
-            )}
-        </NavItemRoot>
-    );
-});
+export const NavItem = React.memo(
+    ({icon, label, badge, badgeVariant, badgeSegments, active = false, onClick}: NavItemProps) => {
+        const hasSegments = badgeSegments && badgeSegments.some((s) => s.count > 0);
+        const hasBadge = hasSegments || (badge !== undefined && badge !== 0);
+        return (
+            <NavItemRoot active={active} onClick={onClick}>
+                <Icon sx={{fontSize: 19, flexShrink: 0}}>{icon}</Icon>
+                <NavLabel>{label}</NavLabel>
+                {hasBadge && (
+                    <BadgeSlot>
+                        <NavBadge count={badge} variant={badgeVariant} segments={badgeSegments} />
+                    </BadgeSlot>
+                )}
+            </NavItemRoot>
+        );
+    },
+);

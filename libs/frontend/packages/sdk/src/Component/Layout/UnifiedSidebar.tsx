@@ -1,3 +1,4 @@
+import {NavBadgeSegment, NavBadgeVariant} from '@app-dev-panel/sdk/Component/Layout/NavBadge';
 import {NavItem} from '@app-dev-panel/sdk/Component/Layout/NavItem';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {Collapse, Divider, Icon, Paper, Typography} from '@mui/material';
@@ -8,7 +9,14 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 // Types
 // ---------------------------------------------------------------------------
 
-type NavChild = {key: string; icon: string; label: string; badge?: number | string; badgeVariant?: 'default' | 'error'};
+type NavChild = {
+    key: string;
+    icon: string;
+    label: string;
+    badge?: number | string;
+    badgeVariant?: NavBadgeVariant;
+    badgeSegments?: NavBadgeSegment[];
+};
 
 type NavSection = {key: string; icon: string; label: string; href: string; children?: NavChild[]};
 
@@ -176,6 +184,7 @@ const SidebarSection = React.memo(
                                 label={child.label}
                                 badge={child.badge}
                                 badgeVariant={child.badgeVariant}
+                                badgeSegments={child.badgeSegments}
                                 active={activeChildKey === child.key}
                                 onClick={childClickHandlers[child.key]}
                             />

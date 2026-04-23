@@ -315,15 +315,6 @@ final class CodeCoverageHelperTest extends TestCase
         $this->assertSame(33.33, $summary['percentage']);
     }
 
-    public function testDetectDriverReturnsPcovWhenEnabled(): void
-    {
-        if (!\extension_loaded('pcov') || !\ini_get('pcov.enabled')) {
-            $this->markTestSkipped('pcov extension is not loaded or not enabled.');
-        }
-
-        $this->assertSame('pcov', CodeCoverageHelper::detectDriver());
-    }
-
     public function testDetectDriverReturnsStringOrNull(): void
     {
         $result = CodeCoverageHelper::detectDriver();

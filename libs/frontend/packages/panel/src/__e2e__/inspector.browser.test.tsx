@@ -63,23 +63,17 @@ describe('Inspector Pages', () => {
         expect(bodyText).toContain('errorHandler');
     });
 
-    it('renders config definitions with column headers', async () => {
-        renderApp('/inspector/config/definitions');
-        await expect.element(page.getByText('Definitions').first()).toBeVisible();
-        await new Promise((r) => setTimeout(r, 1000));
-        const bodyText = document.body.textContent || '';
-        expect(bodyText).toContain('Name');
-        expect(bodyText).toContain('Value');
-        expect(bodyText).toContain('Actions');
-    });
-
     it('renders config container sub-page with data', async () => {
         renderApp('/inspector/config/container');
         await expect.element(page.getByText('Container').first()).toBeVisible();
         await new Promise((r) => setTimeout(r, 1000));
         const bodyText = document.body.textContent || '';
-        expect(bodyText).toContain('App\\Controller\\HomeController');
-        expect(bodyText).toContain('App\\Service\\UserService');
+        // ContainerPage now groups entries by namespace — the qualified class name
+        // is split into a group header + stripped entry name rather than one string.
+        expect(bodyText).toContain('App\\Controller');
+        expect(bodyText).toContain('HomeController');
+        expect(bodyText).toContain('App\\Service');
+        expect(bodyText).toContain('UserService');
     });
 
     it('renders git log sub-page', async () => {

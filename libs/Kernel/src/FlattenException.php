@@ -155,7 +155,10 @@ final class FlattenException implements Stringable
 
     private function getClassNameFromIncomplete(__PHP_Incomplete_Class $value): string
     {
-        $array = new ArrayObject($value);
+        // Casting __PHP_Incomplete_Class to array exposes its properties directly.
+        // Previously we wrapped it in ArrayObject, but PHP 8.5 deprecates using an
+        // object as ArrayObject's backing array.
+        $array = (array) $value;
 
         return $array['__PHP_Incomplete_Class_Name'];
     }
