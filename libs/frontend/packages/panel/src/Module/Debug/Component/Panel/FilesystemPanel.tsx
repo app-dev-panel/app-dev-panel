@@ -110,15 +110,17 @@ const OperationView = ({items, operation, filter}: {items: Information[]; operat
     const visible = filtered.slice(0, visibleCount);
     const hasMore = visibleCount < filtered.length;
 
+    const isFiltered = filtered.length !== items.length;
+
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, py: 1, px: 2}}>
-                <Typography variant="body2" sx={{color: 'text.disabled'}}>
-                    {filtered.length === items.length
-                        ? `${items.length} operation${items.length !== 1 ? 's' : ''}`
-                        : `${filtered.length} of ${items.length} operations`}
-                </Typography>
-            </Box>
+            {isFiltered && (
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 1, py: 1, px: 2}}>
+                    <Typography variant="body2" sx={{color: 'text.disabled'}}>
+                        {`${filtered.length} of ${items.length} operations`}
+                    </Typography>
+                </Box>
+            )}
             {visible.map((item, index) => {
                 const expanded = expandedIndex === index;
                 const hasArgs = Object.keys(item.args).length > 0;
@@ -191,7 +193,13 @@ export const FilesystemPanel = ({data}: FilesystemPanelProps) => {
         <Box>
             <TabContext value={value}>
                 <Box sx={{borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2}}>
-                    <StyledTabList onChange={handleChange} sx={{flex: 1, minWidth: 0}}>
+                    <StyledTabList
+                        onChange={handleChange}
+                        variant="scrollable"
+                        scrollButtons="auto"
+                        allowScrollButtonsMobile
+                        sx={{flex: 1, minWidth: 0}}
+                    >
                         {tabs.map((tab) => {
                             const count = (data as any)[tab]?.length ?? 0;
                             const meta = operationMeta(tab);
