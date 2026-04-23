@@ -410,7 +410,11 @@ const Layout = () => {
                 {collectorQueryInfo.isFetching && <LinearProgress />}
                 {collectorQueryInfo.isError && (
                     <HttpRequestError
-                        error={(collectorQueryInfo.error as any)?.error || (collectorQueryInfo.error as any)}
+                        error={
+                            (collectorQueryInfo.error as any)?.data?.error ||
+                            (collectorQueryInfo.error as any)?.error ||
+                            (collectorQueryInfo.error as any)
+                        }
                     />
                 )}
                 {collectorQueryInfo.isSuccess && (
