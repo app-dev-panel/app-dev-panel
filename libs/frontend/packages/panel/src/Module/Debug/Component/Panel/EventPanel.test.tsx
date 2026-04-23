@@ -78,7 +78,8 @@ describe('EventPanel', () => {
         renderWithProviders(<EventPanel events={[makeEvent({name: 'App\\Event\\Click'})]} />, {preloadedState});
         const elements = screen.getAllByText('Click');
         await user.click(elements[0]);
-        expect(screen.getByLabelText('Open File')).toBeInTheDocument();
+        // Expanded detail exposes the ClassName widget for the event class
+        expect(screen.getByLabelText('Open in File Explorer')).toBeInTheDocument();
         // Full class name may appear in both detail and tooltip
         expect(screen.getAllByText('App\\Event\\Click').length).toBeGreaterThanOrEqual(1);
     });

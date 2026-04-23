@@ -1,6 +1,6 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {type TimelineItem} from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {MessageCopyButton} from '@app-dev-panel/sdk/Component/MessageCopyButton';
 import {SqlHighlight} from '@app-dev-panel/sdk/Component/SqlHighlight';
 import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
@@ -65,20 +65,14 @@ export const TimelineDetailCard = ({
                 <MetaLabel sx={{color: 'text.disabled'}}>{formatMicrotime(row[0])}</MetaLabel>
                 <MetaLabel sx={{color: 'text.disabled'}}>Offset: {offsetLabel}</MetaLabel>
                 {row[1] != null && <MetaLabel sx={{color: 'text.disabled'}}>Ref: {String(row[1])}</MetaLabel>}
-                <FileLink className={collectorClass}>
+                <ClassName value={collectorClass}>
                     <Typography
                         component="span"
-                        sx={(t) => ({
-                            fontFamily: t.adp.fontFamilyMono,
-                            fontSize: '11px',
-                            color: 'primary.main',
-                            cursor: 'pointer',
-                            '&:hover': {textDecoration: 'underline'},
-                        })}
+                        sx={(t) => ({fontFamily: t.adp.fontFamilyMono, fontSize: '11px', color: 'primary.main'})}
                     >
                         {collectorClass.split('\\').pop() ?? collectorClass}
                     </Typography>
-                </FileLink>
+                </ClassName>
             </Header>
 
             {showDetail && (

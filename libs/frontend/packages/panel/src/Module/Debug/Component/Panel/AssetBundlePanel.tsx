@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -131,7 +132,9 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
                 return (
                     <Box key={key}>
                         <BundleRow expanded={expanded} onClick={() => setExpandedKey(expanded ? null : key)}>
-                            <ClassCell>{shortClassName(bundle.class)}</ClassCell>
+                            <ClassCell>
+                                <ClassName value={bundle.class}>{shortClassName(bundle.class)}</ClassName>
+                            </ClassCell>
                             {bundle.css.length > 0 && (
                                 <Chip
                                     label={`${bundle.css.length} CSS`}
@@ -178,7 +181,7 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
                             <DetailBox>
                                 <Box sx={{mb: 1.5}}>
                                     <FieldLabel>Full Class Name</FieldLabel>
-                                    <Typography
+                                    <Box
                                         sx={(theme) => ({
                                             fontFamily: theme.adp.fontFamilyMono,
                                             fontSize: '12px',
@@ -186,8 +189,8 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
                                             wordBreak: 'break-all',
                                         })}
                                     >
-                                        {bundle.class}
-                                    </Typography>
+                                        <ClassName value={bundle.class} />
+                                    </Box>
                                 </Box>
                                 {bundle.sourcePath && (
                                     <Box sx={{mb: 1.5}}>

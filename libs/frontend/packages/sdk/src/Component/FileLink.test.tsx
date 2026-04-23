@@ -4,8 +4,8 @@ import {renderWithProviders} from '../test-utils';
 import {FileLink} from './FileLink';
 
 describe('FileLink', () => {
-    it('returns null when neither path nor className provided', () => {
-        const {container} = renderWithProviders(<FileLink />);
+    it('returns null when path is empty', () => {
+        const {container} = renderWithProviders(<FileLink path="" />);
         expect(container.innerHTML).toBe('');
     });
 
@@ -20,28 +20,6 @@ describe('FileLink', () => {
         renderWithProviders(<FileLink path="/src/app.php">app.php</FileLink>);
         const link = screen.getByText('app.php');
         expect(link.closest('a')).toHaveAttribute('href', '/inspector/files?path=/src/app.php');
-    });
-
-    it('renders explorer link for className', () => {
-        renderWithProviders(<FileLink className={'App\\Controller\\HomeController'}>HomeController</FileLink>);
-        const link = screen.getByText('HomeController');
-        const href = link.closest('a')?.getAttribute('href') ?? '';
-        expect(href).toMatch(/^\/inspector\/files\?class=/);
-        expect(href).toContain('class=App');
-        expect(href).toContain('Controller');
-    });
-
-    it('renders explorer link for className with methodName', () => {
-        renderWithProviders(
-            <FileLink className={'App\\Controller'} methodName="index">
-                Controller::index
-            </FileLink>,
-        );
-        const link = screen.getByText('Controller::index');
-        const href = link.closest('a')?.getAttribute('href') ?? '';
-        expect(href).toContain('/inspector/files?');
-        expect(href).toContain('method=index');
-        expect(href).toContain('class=App');
     });
 
     it('does not render editor button when editor is none (default)', () => {
@@ -102,16 +80,6 @@ describe('FileLink', () => {
         );
         const editButton = screen.getByLabelText('Open in Editor');
         expect(editButton).toHaveAttribute('href', 'vscode://file/%2Fsrc%2Fapp.php:5');
-    });
-
-    it('does not render editor button for className-only link (no path)', () => {
-        renderWithProviders(<FileLink className="App\\Controller">Controller</FileLink>, {
-            preloadedState: {
-                application: {baseUrl: '', editorConfig: {editor: 'phpstorm', customUrlTemplate: '', pathMapping: {}}},
-            },
-        });
-        // No path means no editor URL can be generated
-        expect(screen.queryByLabelText('Open in Editor')).not.toBeInTheDocument();
     });
 
     it('renders without children (editor-only mode)', () => {

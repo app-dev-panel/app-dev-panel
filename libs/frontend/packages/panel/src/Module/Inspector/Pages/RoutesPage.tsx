@@ -1,6 +1,6 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {useGetRoutesQuery, useLazyGetCheckRouteQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
@@ -186,7 +186,7 @@ const MiddlewareItem = ({mw}: {mw: any}) => {
     const parsed = parseCallable(mw);
     if (parsed) {
         return (
-            <FileLink className={parsed.className} methodName={parsed.methodName}>
+            <ClassName value={parsed.className} methodName={parsed.methodName}>
                 <Typography
                     component="span"
                     sx={(theme) => ({
@@ -194,19 +194,17 @@ const MiddlewareItem = ({mw}: {mw: any}) => {
                         fontFamily: theme.adp.fontFamilyMono,
                         fontSize: '12px',
                         color: 'primary.main',
-                        textDecoration: 'none',
                         py: 0.25,
-                        '&:hover': {textDecoration: 'underline'},
                     })}
                 >
                     {concatClassMethod(parsed.className, parsed.methodName)}
                 </Typography>
-            </FileLink>
+            </ClassName>
         );
     }
     if (typeof mw === 'string' && isClassName(mw)) {
         return (
-            <FileLink className={mw}>
+            <ClassName value={mw}>
                 <Typography
                     component="span"
                     sx={(theme) => ({
@@ -214,14 +212,12 @@ const MiddlewareItem = ({mw}: {mw: any}) => {
                         fontFamily: theme.adp.fontFamilyMono,
                         fontSize: '12px',
                         color: 'primary.main',
-                        textDecoration: 'none',
                         py: 0.25,
-                        '&:hover': {textDecoration: 'underline'},
                     })}
                 >
                     {mw}
                 </Typography>
-            </FileLink>
+            </ClassName>
         );
     }
     return (
@@ -253,7 +249,7 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                         Action
                     </Typography>
                     <Box sx={{mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5}}>
-                        <FileLink className={action.className} methodName={action.methodName}>
+                        <ClassName value={action.className} methodName={action.methodName}>
                             <Typography
                                 component="span"
                                 sx={(theme) => ({
@@ -261,13 +257,11 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                                     fontSize: '12px',
                                     wordBreak: 'break-all',
                                     color: 'primary.main',
-                                    textDecoration: 'none',
-                                    '&:hover': {textDecoration: 'underline'},
                                 })}
                             >
                                 {actionFull}
                             </Typography>
-                        </FileLink>
+                        </ClassName>
                         <Tooltip title="Copy">
                             <IconButton
                                 size="small"
@@ -370,20 +364,18 @@ const RouteChecker = () => {
                                 const parsed = parseCallable(checkRouteQueryInfo.data.action);
                                 if (parsed) {
                                     return (
-                                        <FileLink className={parsed.className} methodName={parsed.methodName}>
+                                        <ClassName value={parsed.className} methodName={parsed.methodName}>
                                             <Typography
                                                 component="span"
                                                 sx={(theme) => ({
                                                     fontFamily: theme.adp.fontFamilyMono,
                                                     fontSize: '13px',
                                                     color: 'primary.main',
-                                                    textDecoration: 'none',
-                                                    '&:hover': {textDecoration: 'underline'},
                                                 })}
                                             >
                                                 {parsed.className + '::' + parsed.methodName}
                                             </Typography>
-                                        </FileLink>
+                                        </ClassName>
                                     );
                                 }
                                 return serializeCallable(checkRouteQueryInfo.data.action);
@@ -549,17 +541,14 @@ export const RoutesPage = () => {
                                     />
                                     <PatternCell>{route.pattern}</PatternCell>
                                     {actionShort && route.action && (
-                                        <FileLink
-                                            className={route.action.className}
-                                            methodName={route.action.methodName}
-                                        >
+                                        <ClassName value={route.action.className} methodName={route.action.methodName}>
                                             <ActionInlineLink as="span">{actionShort}</ActionInlineLink>
-                                        </FileLink>
+                                        </ClassName>
                                     )}
-                                    {firstClassMwShort && (
-                                        <FileLink className={firstClassMw}>
+                                    {firstClassMwShort && typeof firstClassMw === 'string' && (
+                                        <ClassName value={firstClassMw}>
                                             <ActionInlineLink as="span">{firstClassMwShort}</ActionInlineLink>
-                                        </FileLink>
+                                        </ClassName>
                                     )}
                                     {route.name && <NameCell>{route.name}</NameCell>}
                                     {hasDetails && (

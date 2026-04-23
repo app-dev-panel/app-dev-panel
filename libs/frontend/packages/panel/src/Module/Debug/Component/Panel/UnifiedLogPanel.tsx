@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {VarDumpValue} from '@app-dev-panel/panel/Module/Debug/Component/VarDumpValue';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
@@ -658,9 +659,16 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
                                                 {dep.trace.map((frame, i) => (
                                                     <TraceRow key={i}>
                                                         {frame.file && `${frame.file}:${frame.line} `}
-                                                        {frame.class
-                                                            ? `${frame.class}::${frame.function}()`
-                                                            : `${frame.function}()`}
+                                                        {frame.class ? (
+                                                            <ClassName
+                                                                value={frame.class}
+                                                                methodName={frame.function}
+                                                            >
+                                                                {`${frame.class}::${frame.function}()`}
+                                                            </ClassName>
+                                                        ) : (
+                                                            `${frame.function}()`
+                                                        )}
                                                     </TraceRow>
                                                 ))}
                                             </Box>
