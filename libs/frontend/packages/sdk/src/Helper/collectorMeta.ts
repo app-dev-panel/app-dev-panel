@@ -41,6 +41,28 @@ const collectorMetaMap: Record<string, CollectorMeta> = {
 
 const defaultMeta: CollectorMeta = {label: 'Unknown', icon: 'extension', weight: 99};
 
+// Collectors never listed in the sidebar or as an overview card.
+// - VarDumper / Deprecation entries are rendered inside the unified Log panel
+// - HttpClient / HttpStream entries are rendered inside the unified I/O panel
+// - WebAppInfo / ConsoleAppInfo feeds the performance strip, not a panel
+// - Request / Command is reached via the virtual EntryCollector summary bar
+export const hiddenSidebarCollectors: ReadonlySet<string> = new Set<string>([
+    CollectorsMap.WebAppInfoCollector,
+    CollectorsMap.ConsoleAppInfoCollector,
+    CollectorsMap.HttpStreamCollector,
+    CollectorsMap.DeprecationCollector,
+    CollectorsMap.VarDumperCollector,
+    CollectorsMap.HttpClientCollector,
+    CollectorsMap.RequestCollector,
+    CollectorsMap.CommandCollector,
+]);
+
+// Overview cards additionally hide Environment (it already has a dedicated strip).
+export const hiddenOverviewCollectors: ReadonlySet<string> = new Set<string>([
+    ...hiddenSidebarCollectors,
+    CollectorsMap.EnvironmentCollector,
+]);
+
 /**
  * Returns display metadata for a collector class name.
  * Falls back to parsing the short class name if no explicit mapping exists.

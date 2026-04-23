@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
@@ -22,9 +23,11 @@ export const TimelineContentWrapper = React.memo((props: PropsWithChildren<Timel
     return (
         <TimelineContent sx={{py: '12px', px: 2, display: 'flex', flexDirection: 'column'}}>
             <Box sx={{wordBreak: 'break-word'}}>
-                <Tooltip title={name}>
-                    <Typography component="span">{shortName}</Typography>
-                </Tooltip>
+                <ClassName value={name}>
+                    <Tooltip title={name}>
+                        <Typography component="span">{shortName}</Typography>
+                    </Tooltip>
+                </ClassName>
                 {debugEntry && (
                     <Tooltip title="Examine an object">
                         <IconButton

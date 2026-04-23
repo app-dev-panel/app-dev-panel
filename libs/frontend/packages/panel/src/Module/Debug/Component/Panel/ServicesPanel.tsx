@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -88,7 +89,11 @@ const SummaryView = ({summaryRows}: {summaryRows: Record<string, SummaryItemType
                 return (
                     <Box key={index}>
                         <ServiceRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
-                            <MethodCell>{concatClassMethod(row.class, row.method)}</MethodCell>
+                            <MethodCell>
+                                <ClassName value={row.class} methodName={row.method}>
+                                    {concatClassMethod(row.class, row.method)}
+                                </ClassName>
+                            </MethodCell>
                             <Chip
                                 label={`${row.count} call${row.count !== 1 ? 's' : ''}`}
                                 size="small"
@@ -179,7 +184,11 @@ const AllView = ({rows}: {rows: AllRow[]}) => {
                 return (
                     <Box key={index}>
                         <ServiceRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
-                            <MethodCell>{concatClassMethod(row.class, row.method)}</MethodCell>
+                            <MethodCell>
+                                <ClassName value={row.class} methodName={row.method}>
+                                    {concatClassMethod(row.class, row.method)}
+                                </ClassName>
+                            </MethodCell>
                             <Chip
                                 label={isError ? 'ERROR' : 'OK'}
                                 size="small"

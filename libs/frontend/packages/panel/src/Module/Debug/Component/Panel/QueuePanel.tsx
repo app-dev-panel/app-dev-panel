@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -162,7 +163,9 @@ const MessageItem = ({message, expanded, onToggle}: {message: Message; expanded:
     return (
         <Box>
             <ItemRow expanded={expanded} onClick={onToggle}>
-                <MessageClassCell>{shortClassName(message.messageClass)}</MessageClassCell>
+                <MessageClassCell>
+                    <ClassName value={message.messageClass}>{shortClassName(message.messageClass)}</ClassName>
+                </MessageClassCell>
                 <Chip
                     label={message.bus}
                     size="small"
@@ -246,7 +249,7 @@ const MessageItem = ({message, expanded, onToggle}: {message: Message; expanded:
                         <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
                             Full Class Name
                         </Typography>
-                        <Typography
+                        <Box
                             sx={(theme) => ({
                                 fontFamily: theme.adp.fontFamilyMono,
                                 fontSize: '12px',
@@ -254,8 +257,8 @@ const MessageItem = ({message, expanded, onToggle}: {message: Message; expanded:
                                 wordBreak: 'break-all',
                             })}
                         >
-                            {message.messageClass}
-                        </Typography>
+                            <ClassName value={message.messageClass} />
+                        </Box>
                         {message.message != null && (
                             <Box sx={{mt: 1.5}}>
                                 <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>

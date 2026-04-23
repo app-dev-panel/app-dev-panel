@@ -12,10 +12,26 @@ final class FilesystemAction
 {
     public function __invoke(): JsonResponse
     {
-        $tmpFile = sys_get_temp_dir() . '/adp-test-scenario-' . uniqid() . '.txt';
-        file_put_contents($tmpFile, 'ADP filesystem test scenario');
-        file_get_contents($tmpFile);
-        unlink($tmpFile);
+        $tmpDir = sys_get_temp_dir() . '/adp-test-fs-' . uniqid();
+        $highLevelFile = $tmpDir . '/high-level.txt';
+        $streamFile = $tmpDir . '/stream-test.txt';
+        $renamedFile = $tmpDir . '/stream-test-renamed.txt';
+
+        mkdir($tmpDir, 0o777, true);
+
+        file_put_contents($highLevelFile, 'ADP filesystem high-level test');
+        file_get_contents($highLevelFile);
+
+        $stream = fopen($streamFile, 'w+');
+        fwrite($stream, 'ADP file stream test');
+        fseek($stream, 0);
+        fread($stream, 20);
+        fclose($stream);
+
+        rename($streamFile, $renamedFile);
+        unlink($highLevelFile);
+        unlink($renamedFile);
+        rmdir($tmpDir);
 
         return new JsonResponse(['fixture' => 'filesystem:basic', 'status' => 'ok']);
     }

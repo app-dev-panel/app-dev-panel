@@ -1,6 +1,6 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
@@ -181,19 +181,14 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
                             <FieldLabel>Action</FieldLabel>
                             <FieldValue sx={{fontFamily: monoFontFamily}}>
                                 {typeof currentRoute.action === 'string' ? (
-                                    <FileLink className={currentRoute.action}>
+                                    <ClassName value={currentRoute.action}>
                                         <Typography
                                             component="span"
-                                            sx={{
-                                                fontFamily: monoFontFamily,
-                                                fontSize: '12px',
-                                                color: 'primary.main',
-                                                '&:hover': {textDecoration: 'underline'},
-                                            }}
+                                            sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'primary.main'}}
                                         >
                                             {currentRoute.action}
                                         </Typography>
-                                    </FileLink>
+                                    </ClassName>
                                 ) : (
                                     <JsonRenderer value={currentRoute.action} />
                                 )}

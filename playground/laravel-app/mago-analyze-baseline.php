@@ -457,24 +457,6 @@ message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Js
 count = 1
 
 [[issues]]
-file = "app/Http/Controllers/TestFixtures/FileStreamAction.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/FileStreamAction.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Http\JsonResponse` not found.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/FileStreamAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
-count = 1
-
-[[issues]]
 file = "app/Http/Controllers/TestFixtures/FilesystemAction.php"
 code = "never-return"
 message = "Cannot return value with type 'never' from this function."

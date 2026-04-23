@@ -91,12 +91,6 @@ message = 'Class `App\actions\testFixtures\ExceptionChainedAction` cannot extend
 count = 1
 
 [[issues]]
-file = "src/actions/testFixtures/FileStreamAction.php"
-code = "non-existent-class-like"
-message = 'Class `App\actions\testFixtures\FileStreamAction` cannot extend unknown type `Action`'
-count = 1
-
-[[issues]]
 file = "src/actions/testFixtures/FilesystemAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\FilesystemAction` cannot extend unknown type `Action`'

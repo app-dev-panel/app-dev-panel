@@ -201,19 +201,11 @@ final class FixtureRegistry
                 ],
             ]),
 
-            // === Filesystem stream (file_put_contents, file_get_contents, unlink) ===
+            // === Filesystem stream — high-level file_* + low-level fopen/fwrite/fread + mkdir/rename/rmdir ===
             new Fixture(name: 'filesystem:basic', endpoint: '/test/fixtures/filesystem', expectations: [
                 'fs_stream' => [
                     Expectation::notEmpty(),
-                    Expectation::countGte(2),
-                ],
-            ]),
-
-            // === Filesystem stream — fopen/fwrite/fread + mkdir/rename/rmdir ===
-            new Fixture(name: 'filesystem:streams', endpoint: '/test/fixtures/filesystem-streams', expectations: [
-                'fs_stream' => [
-                    Expectation::notEmpty(),
-                    Expectation::countGte(4),
+                    Expectation::countGte(6),
                 ],
             ]),
 

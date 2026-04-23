@@ -31,7 +31,12 @@ import {ScrollTopButton} from '@app-dev-panel/sdk/Component/ScrollTop';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {useCopyAsImage} from '@app-dev-panel/sdk/Component/useCopyAsImage';
 import {EventTypesEnum, useServerSentEvents} from '@app-dev-panel/sdk/Component/useServerSentEvents';
-import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
+import {
+    compareCollectorWeight,
+    getCollectorIcon,
+    getCollectorLabel,
+    hiddenSidebarCollectors,
+} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
@@ -102,20 +107,6 @@ function uiReducer(state: UIState, action: UIAction): UIState {
             return {...state, paletteOpen: false};
     }
 }
-
-// ---------------------------------------------------------------------------
-// Collectors hidden from sidebar (shown in overview instead)
-// ---------------------------------------------------------------------------
-const hiddenCollectors = new Set<string>([
-    CollectorsMap.WebAppInfoCollector,
-    CollectorsMap.ConsoleAppInfoCollector,
-    CollectorsMap.HttpStreamCollector,
-    CollectorsMap.DeprecationCollector,
-    CollectorsMap.VarDumperCollector,
-    CollectorsMap.HttpClientCollector,
-    CollectorsMap.RequestCollector,
-    CollectorsMap.CommandCollector,
-]);
 
 /**
  * Build colored segments for the Log sidebar badge: log info / warnings / errors / deprecations / dumps.
@@ -504,7 +495,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             : [];
         const collectors = [...debugEntry.collectors]
             .map((c) => (typeof c === 'string' ? c : c.id))
-            .filter((c) => !hiddenCollectors.has(c))
+            .filter((c) => !hiddenSidebarCollectors.has(c))
             .sort(compareCollectorWeight)
             .map((collector) => {
                 const count = getCollectedCountByCollector(collector as CollectorsMap, debugEntry);

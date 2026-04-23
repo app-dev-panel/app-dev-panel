@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {
     ClosureDescriptor,
     EventEntry,
@@ -162,11 +163,11 @@ const ListenerItem = React.memo(({listener}: {listener: EventListener}) => {
     if (parsed) {
         return (
             <ListenerRow>
-                <FileLink className={parsed.className} methodName={parsed.methodName} sx={{flex: 1, minWidth: 0}}>
+                <ClassName value={parsed.className} methodName={parsed.methodName} sx={{flex: 1, minWidth: 0}}>
                     <Typography component="span" sx={monoLinkSx}>
                         {serializeCallable(listener)}
                     </Typography>
-                </FileLink>
+                </ClassName>
             </ListenerRow>
         );
     }
@@ -174,11 +175,11 @@ const ListenerItem = React.memo(({listener}: {listener: EventListener}) => {
     if (typeof listener === 'string' && isClassName(listener)) {
         return (
             <ListenerRow>
-                <FileLink className={listener} sx={{flex: 1, minWidth: 0}}>
+                <ClassName value={listener} sx={{flex: 1, minWidth: 0}}>
                     <Typography component="span" sx={monoLinkSx}>
                         {listener}
                     </Typography>
-                </FileLink>
+                </ClassName>
             </ListenerRow>
         );
     }

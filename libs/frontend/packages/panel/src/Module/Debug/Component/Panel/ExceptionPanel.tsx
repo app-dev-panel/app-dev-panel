@@ -1,3 +1,4 @@
+import {ClassName as ClassNameLink} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {InspectorFileContent, useLazyGetFilesQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
@@ -7,8 +8,8 @@ import {StackTrace} from '@app-dev-panel/sdk/Component/StackTrace';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {parseFilename, parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
-import {BugReport, FmdGood} from '@mui/icons-material';
-import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
+import {FmdGood} from '@mui/icons-material';
+import {Box, Chip, Collapse, Icon, IconButton, type Theme, Tooltip, Typography} from '@mui/material';
 import {alpha, styled, useTheme} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
 
@@ -52,13 +53,13 @@ const IndexBadge = styled(Box)(({theme}) => ({
     marginTop: 2,
 }));
 
-const ClassName = styled(Typography)(({theme}) => ({
+const classNameSx = (theme: Theme) => ({
     fontFamily: theme.adp.fontFamilyMono,
     fontSize: '13px',
     fontWeight: 600,
     color: theme.palette.error.main,
     wordBreak: 'break-word',
-}));
+});
 
 const Message = styled(Typography)(({theme}) => ({
     fontSize: '13px',
@@ -117,13 +118,6 @@ const ExceptionDetail = ({exception}: {exception: ExceptionData}) => {
             <Typography sx={{fontSize: '13px', mb: 2, color: 'text.primary'}}>{exception.message}</Typography>
 
             <Box sx={{display: 'flex', gap: 0.5, mb: 2}}>
-                <FileLink className={parseFilePath(exception.class)}>
-                    <Tooltip title="Open Exception Class">
-                        <IconButton size="small" component="span" aria-label="Open Exception Class" sx={{p: 0.5}}>
-                            <BugReport sx={{fontSize: 16}} />
-                        </IconButton>
-                    </Tooltip>
-                </FileLink>
                 <FileLink path={localFile} line={+exception.line}>
                     <Tooltip title="Open Source Location">
                         <IconButton size="small" component="span" aria-label="Open Source Location" sx={{p: 0.5}}>
@@ -203,7 +197,9 @@ export const ExceptionPanel = ({exceptions}: ExceptionPanelProps) => {
                         <ExceptionRow expanded={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
                             <IndexBadge>{index + 1}</IndexBadge>
                             <Box sx={{flex: 1, minWidth: 0}}>
-                                <ClassName>{exception.class}</ClassName>
+                                <Box sx={classNameSx}>
+                                    <ClassNameLink value={exception.class} />
+                                </Box>
                                 <Message>{exception.message}</Message>
                             </Box>
                             <FileLink path={pathMapper.toLocal(exception.file)} line={+exception.line}>
