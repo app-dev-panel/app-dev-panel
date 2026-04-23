@@ -74,11 +74,7 @@ export const EmptyState = ({
                             // `&&` doubles the wrapper class specificity so we override
                             // the default 1.5rem font-size that MUI SvgIcon applies via
                             // its own MuiSvgIcon-fontSize* class.
-                            '&& > *': {
-                                fontSize: resolvedIconSize,
-                                width: resolvedIconSize,
-                                height: resolvedIconSize,
-                            },
+                            '&& > *': {fontSize: resolvedIconSize, width: resolvedIconSize, height: resolvedIconSize},
                         }}
                     >
                         {icon}
